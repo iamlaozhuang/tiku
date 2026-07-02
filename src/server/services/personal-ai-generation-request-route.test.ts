@@ -10,6 +10,7 @@ import type {
   PersonalAiGenerationRequestPersistenceResult,
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
+import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import type { SessionService } from "./session-service";
 
@@ -205,6 +206,54 @@ function createRequestRepository(
           },
         }
       );
+    },
+  };
+}
+
+function createResultRepository(): Pick<
+  PersonalAiGenerationResultRepository,
+  "createOrReuseDraftResult"
+> & {
+  createCalls: Parameters<
+    PersonalAiGenerationResultRepository["createOrReuseDraftResult"]
+  >[0][];
+} {
+  const createCalls: Parameters<
+    PersonalAiGenerationResultRepository["createOrReuseDraftResult"]
+  >[0][] = [];
+
+  return {
+    createCalls,
+    async createOrReuseDraftResult(input) {
+      createCalls.push(input);
+
+      return {
+        persistenceStatus: "created",
+        result: {
+          resultPublicId: input.resultPublicId,
+          taskPublicId: input.taskPublicId,
+          requestPublicId: "personal_ai_request_public_route_123",
+          taskType: input.taskType,
+          status: "draft",
+          persistedAt: input.createdAt.toISOString(),
+          contentReference: {
+            contentDigest: input.contentDigest,
+            contentPreviewMasked: input.contentPreviewMasked,
+            contentVisibility: "redacted_snapshot",
+            redactionStatus: "redacted",
+          },
+          evidenceReference: {
+            evidenceStatus: input.evidenceStatus,
+            citationCount: input.citationCount,
+            aiCallLogPublicId: input.aiCallLogPublicId,
+            redactionStatus: "redacted",
+          },
+          formalAdoption: {
+            isBlocked: true,
+            status: "blocked",
+          },
+        },
+      };
     },
   };
 }
@@ -1006,6 +1055,122 @@ describe("personal AI generation request route handlers", () => {
     expect(
       payload.data.runtimeBridge.providerExecutionSummary,
     ).not.toHaveProperty("visibleGeneratedContent");
+  });
+
+  it("closes provider success into current visible content and a redacted draft result", async () => {
+    const resultRepository = createResultRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        createResultPublicId: () => "personal_ai_result_public_visible_route",
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: {
+                inputTokens: 18,
+                outputTokens: 9,
+                totalTokens: 27,
+              },
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: JSON.stringify({
+                  questions: Array.from({ length: 10 }, (_, index) => ({
+                    stem: `redacted stem ${index + 1}`,
+                    options: ["A", "B", "C", "D"],
+                    answer: "A",
+                  })),
+                }),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        resultState: {
+          status: "succeeded",
+          resultPublicId: "personal_ai_result_public_visible_route",
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
+        runtimeBridge: {
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              actualQuestionCount: 10,
+            },
+          },
+          resultMaterializationSummary: {
+            materializationStatus: "created",
+            resultPublicId: "personal_ai_result_public_visible_route",
+            contentVisibility: "redacted_snapshot",
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+            formalAdoptionStatus: "blocked",
+          },
+        },
+      },
+    });
+    expect(resultRepository.createCalls).toHaveLength(1);
+    expect(resultRepository.createCalls[0]).toMatchObject({
+      ownerType: "organization",
+      ownerPublicId: employeeUserContext.organizationPublicId,
+      taskPublicId: "ai_generation_task_public_route_123",
+      taskType: "ai_question_generation",
+      resultPublicId: "personal_ai_result_public_visible_route",
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+    });
+    expect(resultRepository.createCalls[0]?.contentPreviewMasked).toContain(
+      "题目 10/10",
+    );
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("raw prompt");
   });
 
   it("materializes only redacted result references from server-side route dependencies", async () => {

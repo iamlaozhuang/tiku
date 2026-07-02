@@ -15,6 +15,7 @@ import {
   buildPersonalAiGenerationRuntimeBridgeReadModelForRoute,
   type PersonalAiGenerationRuntimeBridgeOptions,
 } from "./personal-ai-generation-runtime-bridge-service";
+import type { PersonalAiGenerationRuntimeBridgeDto } from "../contracts/personal-ai-generation-runtime-bridge-contract";
 import { buildPersonalAiGenerationRequestFlowReadModel } from "./personal-ai-generation-request-flow-service";
 
 function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
@@ -69,6 +70,64 @@ function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
   };
 }
 
+function resolveRouteResultState(
+  localBrowserExperience: PersonalAiGenerationLocalBrowserExperienceDto,
+  runtimeBridge: PersonalAiGenerationRuntimeBridgeDto,
+): PersonalAiGenerationLocalBrowserExperienceDto["resultState"] {
+  const materializationSummary = runtimeBridge.resultMaterializationSummary;
+
+  if (
+    materializationSummary.materializationStatus === "created" ||
+    materializationSummary.materializationStatus === "reused"
+  ) {
+    return {
+      ...localBrowserExperience.resultState,
+      status: "succeeded",
+      resultPublicId: materializationSummary.resultPublicId,
+      evidenceStatus: materializationSummary.evidenceStatus,
+      citationCount: materializationSummary.citationCount,
+      redactionStatus: materializationSummary.redactionStatus,
+    };
+  }
+
+  if (runtimeBridge.providerExecutionSummary.resultStatus === "fail") {
+    return {
+      ...localBrowserExperience.resultState,
+      status: "failed",
+    };
+  }
+
+  if (
+    runtimeBridge.providerExecutionSummary.resultStatus === "blocked" &&
+    runtimeBridge.providerExecutionSummary.failureCategory !==
+      "provider_call_blocked"
+  ) {
+    return {
+      ...localBrowserExperience.resultState,
+      status: "failed",
+    };
+  }
+
+  if (
+    runtimeBridge.providerCallExecuted &&
+    runtimeBridge.providerExecutionSummary.resultStatus === "pass" &&
+    runtimeBridge.visibleGeneratedContent !== null
+  ) {
+    return {
+      ...localBrowserExperience.resultState,
+      status: "failed",
+      evidenceStatus:
+        runtimeBridge.visibleGeneratedContent.groundingSummary
+          ?.evidenceStatus ?? localBrowserExperience.resultState.evidenceStatus,
+      citationCount:
+        runtimeBridge.visibleGeneratedContent.groundingSummary?.citationCount ??
+        localBrowserExperience.resultState.citationCount,
+    };
+  }
+
+  return localBrowserExperience.resultState;
+}
+
 async function mapPersonalAiGenerationRequestFlowToRouteLocalBrowserExperience(
   requestFlow: PersonalAiGenerationRequestFlowDto,
   options: PersonalAiGenerationRuntimeBridgeOptions,
@@ -79,13 +138,16 @@ async function mapPersonalAiGenerationRequestFlowToRouteLocalBrowserExperience(
       options,
     );
 
+  const runtimeBridge =
+    await buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
+      requestFlow,
+      options,
+    );
+
   return {
     ...localBrowserExperience,
-    runtimeBridge:
-      await buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
-        requestFlow,
-        options,
-      ),
+    resultState: resolveRouteResultState(localBrowserExperience, runtimeBridge),
+    runtimeBridge,
   };
 }
 

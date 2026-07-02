@@ -19,6 +19,13 @@ export type PersonalAiGenerationRuntimeBridgeControl = {
   explicitLocalSwitchPresent: true;
   providerExecution?: PersonalAiGenerationRouteIntegratedProviderExecutionControl;
   resultMaterialization?: PersonalAiGenerationRouteIntegratedResultMaterializationControl;
+  createResultMaterialization?: (input: {
+    executionOutcome: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome;
+    requestFlow: PersonalAiGenerationRequestFlowDto;
+  }) =>
+    | PersonalAiGenerationRouteIntegratedResultMaterializationControl
+    | null
+    | Promise<PersonalAiGenerationRouteIntegratedResultMaterializationControl | null>;
 };
 
 export type PersonalAiGenerationRuntimeBridgeOptions = {
@@ -131,13 +138,16 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     options.runtimeBridgeControl.explicitLocalSwitchPresent;
   const providerExecutionControl =
     options.runtimeBridgeControl?.providerExecution;
-  const resultMaterializationControl =
+  const staticResultMaterializationControl =
     options.runtimeBridgeControl?.resultMaterialization;
+  const createResultMaterializationControl =
+    options.runtimeBridgeControl?.createResultMaterialization;
 
   if (
     !isControlledRunnerEnabled ||
     (providerExecutionControl === undefined &&
-      resultMaterializationControl === undefined)
+      staticResultMaterializationControl === undefined &&
+      createResultMaterializationControl === undefined)
   ) {
     return buildPersonalAiGenerationRuntimeBridgeReadModel(
       requestFlow,
@@ -147,7 +157,7 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
 
   if (
     providerExecutionControl === undefined &&
-    resultMaterializationControl !== undefined
+    staticResultMaterializationControl !== undefined
   ) {
     const bridge = buildPersonalAiGenerationRuntimeBridgeReadModel(
       requestFlow,
@@ -159,7 +169,7 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
       resultMaterializationSummary:
         await materializeRouteIntegratedRedactedResult(
           requestFlow,
-          resultMaterializationControl,
+          staticResultMaterializationControl,
         ),
     };
   }
@@ -176,8 +186,16 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
       requestFlow,
       providerExecutionControl,
     );
+  const resultMaterializationControl =
+    staticResultMaterializationControl ??
+    (createResultMaterializationControl === undefined
+      ? null
+      : await createResultMaterializationControl({
+          executionOutcome,
+          requestFlow,
+        }));
   const resultMaterializationSummary =
-    resultMaterializationControl !== undefined &&
+    resultMaterializationControl !== null &&
     executionOutcome.providerCallExecuted &&
     executionOutcome.executionSummary.resultStatus === "pass"
       ? await materializeRouteIntegratedRedactedResult(

@@ -1,6 +1,9 @@
+import { createHash } from "node:crypto";
+
 import {
   createErrorResponse,
   createPaginatedResponse,
+  createSuccessResponse,
   type ApiPagination,
   type ApiResponse,
 } from "../contracts/api-response";
@@ -11,6 +14,8 @@ import type {
   PersonalAiGenerationRequestOwnerType,
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
+import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
 import {
   createRouteHandlerWithErrorEnvelope,
@@ -18,6 +23,7 @@ import {
 } from "./route-error-response";
 import { buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute } from "./personal-ai-generation-local-browser-experience-service";
 import type { PersonalAiGenerationRuntimeBridgeControl } from "./personal-ai-generation-runtime-bridge-service";
+import { isRouteIntegratedVisibleGeneratedContentAcceptableForDraft } from "./route-integrated-provider-execution-service";
 import type { SessionService } from "./session-service";
 
 export type PersonalAiGenerationRequestUserContext = {
@@ -46,8 +52,19 @@ type PersonalAiGenerationRequestOwnerScope = {
   ownerPublicId: string;
 };
 
+type PersonalAiGenerationResultPublicIdInput = {
+  taskPublicId: string;
+};
+
 export type PersonalAiGenerationRequestRouteDependencies = {
   requestRepository?: PersonalAiGenerationRequestRouteRepository;
+  resultRepository?: Pick<
+    PersonalAiGenerationResultRepository,
+    "createOrReuseDraftResult"
+  >;
+  createResultPublicId?: (
+    input: PersonalAiGenerationResultPublicIdInput,
+  ) => string;
   runtimeBridgeControl?: PersonalAiGenerationRuntimeBridgeControl;
   now?: () => Date;
 };
@@ -61,11 +78,25 @@ const PERSONAL_AI_GENERATION_HISTORY_MAX_PAGE_SIZE = 50;
 const REQUEST_PERSISTENCE_UNAVAILABLE_CODE = 500018;
 const REQUEST_PERSISTENCE_UNAVAILABLE_MESSAGE =
   "Personal AI generation request could not be persisted.";
+const RESULT_MATERIALIZATION_UNAVAILABLE_CODE = 500019;
+const RESULT_MATERIALIZATION_UNAVAILABLE_MESSAGE =
+  "Personal AI generation result could not be materialized.";
 const emptyRequestRepository: PersonalAiGenerationRequestRouteRepository = {
   async listRequestHistory() {
     return [];
   },
 };
+
+function createDefaultResultPublicId(
+  input: PersonalAiGenerationResultPublicIdInput,
+): string {
+  const scopeSegment = createHash("sha256")
+    .update(input.taskPublicId)
+    .digest("hex")
+    .slice(0, 32);
+
+  return `personal_ai_generation_result_${scopeSegment}`;
+}
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -425,6 +456,126 @@ function createPersistentRequestInput(
   };
 }
 
+function createVisibleContentDigest(
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent,
+): string {
+  return `sha256:${createHash("sha256")
+    .update(
+      JSON.stringify({
+        content: visibleGeneratedContent.content,
+        structuredPreview: visibleGeneratedContent.structuredPreview ?? null,
+      }),
+    )
+    .digest("hex")}`;
+}
+
+function createVisibleContentPreviewMasked(
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent,
+): string {
+  const structuredPreview = visibleGeneratedContent.structuredPreview;
+
+  if (structuredPreview?.kind === "question_set") {
+    return structuredPreview.parseStatus === "parsed"
+      ? `生成草稿已创建：题目 ${structuredPreview.actualQuestionCount}/${structuredPreview.requestedQuestionCount}，待训练页查看`
+      : "生成草稿已创建：题目结构待重新解析，待训练页查看";
+  }
+
+  if (structuredPreview?.kind === "paper_draft") {
+    return structuredPreview.parseStatus === "parsed"
+      ? `生成草稿已创建：大题 ${structuredPreview.paperSectionCount}，题量 ${structuredPreview.questionCount ?? "未识别"}，待训练页查看`
+      : "生成草稿已创建：试卷结构待重新解析，待训练页查看";
+  }
+
+  return "生成草稿已创建，待训练页查看";
+}
+
+function resolveExpectedStructuredPreviewKind(
+  taskType: CreatePersonalAiGenerationRequestInput["taskType"],
+): "question_set" | "paper_draft" {
+  return taskType === "ai_question_generation" ? "question_set" : "paper_draft";
+}
+
+function createRuntimeBridgeControlWithResultMaterialization(input: {
+  createResultPublicId: (
+    publicIdInput: PersonalAiGenerationResultPublicIdInput,
+  ) => string;
+  resultRepository:
+    | Pick<PersonalAiGenerationResultRepository, "createOrReuseDraftResult">
+    | undefined;
+  runtimeBridgeControl: PersonalAiGenerationRuntimeBridgeControl | undefined;
+}): PersonalAiGenerationRuntimeBridgeControl | undefined {
+  const resultRepository = input.resultRepository;
+
+  if (
+    input.runtimeBridgeControl === undefined ||
+    resultRepository === undefined
+  ) {
+    return input.runtimeBridgeControl;
+  }
+
+  return {
+    ...input.runtimeBridgeControl,
+    createResultMaterialization: ({ executionOutcome, requestFlow }) => {
+      const visibleGeneratedContent = executionOutcome.visibleGeneratedContent;
+
+      if (
+        !executionOutcome.providerCallExecuted ||
+        executionOutcome.executionSummary.resultStatus !== "pass" ||
+        visibleGeneratedContent === null
+      ) {
+        return null;
+      }
+
+      if (
+        !isRouteIntegratedVisibleGeneratedContentAcceptableForDraft(
+          visibleGeneratedContent,
+          resolveExpectedStructuredPreviewKind(
+            requestFlow.resultReference.taskType,
+          ),
+        )
+      ) {
+        return null;
+      }
+
+      const existingResultPublicId =
+        requestFlow.resultReference.resultReference.resultPublicId;
+      const resultPublicId =
+        existingResultPublicId ??
+        input.createResultPublicId({
+          taskPublicId: requestFlow.resultReference.taskPublicId,
+        });
+      const groundingSummary = visibleGeneratedContent.groundingSummary;
+
+      return {
+        materializationMode: "fake_sanitized_in_memory_output",
+        resultPublicId,
+        contentDigest: createVisibleContentDigest(visibleGeneratedContent),
+        contentPreviewMasked: createVisibleContentPreviewMasked(
+          visibleGeneratedContent,
+        ),
+        evidenceStatus:
+          groundingSummary?.evidenceStatus ??
+          requestFlow.resultReference.resultReference.evidenceStatus,
+        citationCount:
+          groundingSummary?.citationCount ??
+          requestFlow.resultReference.resultReference.citationCount,
+        persistDraftResult: async (resultInput) => {
+          try {
+            return createSuccessResponse(
+              await resultRepository.createOrReuseDraftResult(resultInput),
+            );
+          } catch {
+            return createErrorResponse(
+              RESULT_MATERIALIZATION_UNAVAILABLE_CODE,
+              RESULT_MATERIALIZATION_UNAVAILABLE_MESSAGE,
+            );
+          }
+        },
+      };
+    },
+  };
+}
+
 async function createRequestInputWithPersistentRequestMetadata(
   input: Record<string, unknown>,
   requestRepository: PersonalAiGenerationRequestRouteRepository,
@@ -510,7 +661,13 @@ export function createPersonalAiGenerationRequestRouteHandlers(
 ) {
   const requestRepository =
     dependencies.requestRepository ?? emptyRequestRepository;
-  const runtimeBridgeControl = dependencies.runtimeBridgeControl;
+  const runtimeBridgeControl =
+    createRuntimeBridgeControlWithResultMaterialization({
+      createResultPublicId:
+        dependencies.createResultPublicId ?? createDefaultResultPublicId,
+      resultRepository: dependencies.resultRepository,
+      runtimeBridgeControl: dependencies.runtimeBridgeControl,
+    });
   const now = dependencies.now ?? (() => new Date());
 
   return createRouteHandlersWithErrorEnvelope({
