@@ -50,8 +50,8 @@ function createOutputContractInstruction(
   requestedQuestionCount: number,
 ): string {
   if (taskType === "ai_question_generation") {
-    return `输出 JSON；questions 数组必须正好包含 ${requestedQuestionCount} 条结构化草稿摘要；每条只保留 questionType、difficulty、knowledgeNodeLabels 和 redactedDraftSummary。`;
+    return `输出 JSON；仅输出一个 JSON 对象，不要输出 Markdown 代码块、解释文字、编号列表或表格；顶层必须只使用 questions 字段；questions 数组必须正好包含 ${requestedQuestionCount} 条结构化草稿摘要；每条只保留 questionType、difficulty、knowledgeNodeLabels 和 redactedDraftSummary。`;
   }
 
-  return `输出 JSON；必须包含 paperSections、questionTypeDistribution、knowledgeCoverage 和 totalQuestionCount；totalQuestionCount 必须等于 ${requestedQuestionCount}。`;
+  return `输出 JSON；仅输出一个 JSON 对象，不要输出 Markdown 代码块、解释文字、编号列表或表格；必须包含 paperSections、questionTypeDistribution、knowledgeCoverage 和 totalQuestionCount；totalQuestionCount 必须等于 ${requestedQuestionCount}。`;
 }

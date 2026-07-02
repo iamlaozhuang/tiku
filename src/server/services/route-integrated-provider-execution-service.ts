@@ -47,6 +47,30 @@ const forbiddenProviderExecutionEvidenceKeys = [
 ] as const;
 
 const visibleGeneratedContentMaxLength = 2000;
+const questionDraftArrayKeys = [
+  "questions",
+  "questionDrafts",
+  "question_drafts",
+  "questionItems",
+  "question_items",
+  "questionList",
+  "question_list",
+  "drafts",
+  "items",
+] as const;
+const questionDraftContainerKeys = [
+  "questionSet",
+  "question_set",
+  "result",
+  "data",
+  "output",
+  "payload",
+] as const;
+
+type ParsedRouteIntegratedProviderContent =
+  | Record<string, unknown>
+  | unknown[]
+  | null;
 
 export function createBlockedRouteIntegratedProviderExecutionSummary(
   failureCategory: Exclude<
@@ -265,7 +289,7 @@ function createRouteIntegratedStructuredPreview(
   content: string,
   options: AiGenerationRouteIntegratedStructuredPreviewOptions,
 ): AiGenerationRouteIntegratedStructuredPreview {
-  const parsedContent = parseJsonObjectFromProviderText(content);
+  const parsedContent = parseJsonValueFromProviderText(content);
 
   if (options.kind === "question_set") {
     return createQuestionSetStructuredPreview(parsedContent, options);
@@ -275,7 +299,7 @@ function createRouteIntegratedStructuredPreview(
 }
 
 function createQuestionSetStructuredPreview(
-  parsedContent: Record<string, unknown> | null,
+  parsedContent: ParsedRouteIntegratedProviderContent,
   options: Extract<
     AiGenerationRouteIntegratedStructuredPreviewOptions,
     { kind: "question_set" }
@@ -293,11 +317,7 @@ function createQuestionSetStructuredPreview(
     };
   }
 
-  const questions = readArrayProperty(parsedContent, [
-    "questions",
-    "questionDrafts",
-    "question_drafts",
-  ]);
+  const questions = readQuestionDraftArray(parsedContent);
 
   if (questions === null) {
     return {
@@ -353,13 +373,13 @@ function createQuestionSetStructuredPreview(
 }
 
 function createPaperDraftStructuredPreview(
-  parsedContent: Record<string, unknown> | null,
+  parsedContent: ParsedRouteIntegratedProviderContent,
   options: Extract<
     AiGenerationRouteIntegratedStructuredPreviewOptions,
     { kind: "paper_draft" }
   >,
 ): AiGenerationRouteIntegratedStructuredPreview {
-  if (parsedContent === null) {
+  if (parsedContent === null || Array.isArray(parsedContent)) {
     return {
       kind: "paper_draft",
       parseStatus: "failed",
@@ -449,30 +469,81 @@ function createPaperDraftStructuredPreview(
   };
 }
 
-function parseJsonObjectFromProviderText(
+function parseJsonValueFromProviderText(
   content: string,
-): Record<string, unknown> | null {
+): ParsedRouteIntegratedProviderContent {
   const normalizedContent = content.trim();
   const fencedJsonMatch = normalizedContent.match(
     /```(?:json)?\s*([\s\S]*?)```/i,
   );
   const candidateContent = fencedJsonMatch?.[1]?.trim() ?? normalizedContent;
-  const firstBraceIndex = candidateContent.indexOf("{");
-  const lastBraceIndex = candidateContent.lastIndexOf("}");
+  const directParsedContent = parseJsonCandidate(candidateContent);
 
-  if (firstBraceIndex < 0 || lastBraceIndex <= firstBraceIndex) {
+  if (directParsedContent !== null) {
+    return directParsedContent;
+  }
+
+  return (
+    parseJsonCandidate(extractJsonSlice(candidateContent, "{", "}")) ??
+    parseJsonCandidate(extractJsonSlice(candidateContent, "[", "]"))
+  );
+}
+
+function parseJsonCandidate(
+  candidateContent: string | null,
+): ParsedRouteIntegratedProviderContent {
+  if (candidateContent === null) {
     return null;
   }
 
   try {
-    const parsedContent = JSON.parse(
-      candidateContent.slice(firstBraceIndex, lastBraceIndex + 1),
-    );
+    const parsedContent = JSON.parse(candidateContent);
 
-    return isRecord(parsedContent) ? parsedContent : null;
+    return isRecord(parsedContent) || Array.isArray(parsedContent)
+      ? parsedContent
+      : null;
   } catch {
     return null;
   }
+}
+
+function extractJsonSlice(
+  content: string,
+  openingDelimiter: "{" | "[",
+  closingDelimiter: "}" | "]",
+): string | null {
+  const firstDelimiterIndex = content.indexOf(openingDelimiter);
+  const lastDelimiterIndex = content.lastIndexOf(closingDelimiter);
+
+  return firstDelimiterIndex >= 0 && lastDelimiterIndex > firstDelimiterIndex
+    ? content.slice(firstDelimiterIndex, lastDelimiterIndex + 1)
+    : null;
+}
+
+function readQuestionDraftArray(source: unknown, depth = 0): unknown[] | null {
+  if (Array.isArray(source)) {
+    return source;
+  }
+
+  if (!isRecord(source) || depth > 2) {
+    return null;
+  }
+
+  const directQuestions = readArrayProperty(source, questionDraftArrayKeys);
+
+  if (directQuestions !== null) {
+    return directQuestions;
+  }
+
+  for (const key of questionDraftContainerKeys) {
+    const nestedQuestions = readQuestionDraftArray(source[key], depth + 1);
+
+    if (nestedQuestions !== null) {
+      return nestedQuestions;
+    }
+  }
+
+  return null;
 }
 
 function readArrayProperty(

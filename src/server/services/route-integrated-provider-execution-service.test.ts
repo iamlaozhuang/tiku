@@ -224,9 +224,97 @@ describe("shared route-integrated Provider execution primitives", () => {
     },
   );
 
+  it.each([
+    [
+      "root array",
+      Array.from({ length: 3 }, () => ({
+        questionType: "single_choice",
+      })),
+    ],
+    [
+      "items array",
+      {
+        items: Array.from({ length: 3 }, () => ({
+          questionType: "single_choice",
+        })),
+      },
+    ],
+    [
+      "nested data questionList",
+      {
+        data: {
+          questionList: Array.from({ length: 3 }, () => ({
+            questionType: "single_choice",
+          })),
+        },
+      },
+    ],
+    [
+      "question_set question_items",
+      {
+        question_set: {
+          question_items: Array.from({ length: 3 }, () => ({
+            questionType: "single_choice",
+          })),
+        },
+      },
+    ],
+  ] as const)(
+    "builds a parsed question-set structured preview from compatible %s",
+    (_label, contentObject) => {
+      expect(
+        createRouteIntegratedVisibleGeneratedContent(
+          JSON.stringify(contentObject),
+          {
+            structuredPreview: {
+              kind: "question_set",
+              requestedQuestionCount: 3,
+            },
+          },
+        ),
+      ).toMatchObject({
+        structuredPreview: {
+          kind: "question_set",
+          parseStatus: "parsed",
+          requestedQuestionCount: 3,
+          actualQuestionCount: 3,
+          draftCount: 3,
+        },
+      });
+    },
+  );
+
+  it("keeps exact-count enforcement for compatible question roots", () => {
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          data: {
+            items: Array.from({ length: 2 }, () => ({
+              questionType: "single_choice",
+            })),
+          },
+        }),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 3,
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        requestedQuestionCount: 3,
+        actualQuestionCount: 2,
+        failureCategory: "question_count_mismatch",
+      },
+    });
+  });
+
   it("reports a safe missing-questions failure for unsupported question roots", () => {
     const content = JSON.stringify({
-      items: Array.from({ length: 3 }, () => ({
+      choices: Array.from({ length: 3 }, () => ({
         questionType: "single_choice",
       })),
     });

@@ -49,6 +49,15 @@ describe("route-integrated Provider instruction service", () => {
       expect(instruction).toContain("内容草稿评审 AI出题");
       expect(readOutputContractLine(instruction)).toContain("questions");
       expect(readOutputContractLine(instruction)).toContain(
+        "仅输出一个 JSON 对象",
+      );
+      expect(readOutputContractLine(instruction)).toContain(
+        "顶层必须只使用 questions 字段",
+      );
+      expect(readOutputContractLine(instruction)).toContain(
+        "不要输出 Markdown",
+      );
+      expect(readOutputContractLine(instruction)).toContain(
         `${questionCount} 条`,
       );
       expect(instruction).toContain("仅依据下列资料片段生成");
