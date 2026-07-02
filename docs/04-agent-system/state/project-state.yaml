@@ -1,8 +1,99 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-application-closure-and-mixed-state-repair-2026-07-02
-updatedAt: "2026-07-01T20:35:00-07:00"
+currentPhase: ai-generation-post-application-closure-rerun-2026-07-02
+updatedAt: "2026-07-01T20:50:00-07:00"
+aiGenerationPostApplicationClosureRerun20260702:
+  taskId: ai-generation-post-application-closure-rerun-2026-07-02
+  phase: ai-generation-post-application-closure-rerun-2026-07-02
+  status: closed
+  result: pass_post_application_closure_rerun_with_provider_sample_deferred
+  priority: p1
+  taskKind: local_owner_preview_rerun
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-application-closure-and-mixed-state-repair-2026-07-02
+  sourceStory: current_goal_after_application_closure_and_mixed_state_repair_2026_07_02
+  targetClosureItem: rerun localhost owner-preview AI 出题 / AI组卷 after application closure and learner mixed-state repair
+  behaviorBoundary: local_dev_server_browser_role_matrix_docs_state_only_no_source_dependency_schema_env_deploy
+  evidenceMode: role_route_status_count_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
+  branch: codex/ai-generation-post-application-closure-rerun
+  claimedAt: "2026-07-01T20:50:00-07:00"
+  plannedAt: "2026-07-01T20:50:00-07:00"
+  walkedThroughAt: "2026-07-01T21:05:00-07:00"
+  reviewedAt: "2026-07-01T21:05:00-07:00"
+  closedAt: "2026-07-01T21:05:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-application-closure-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-application-closure-rerun.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-application-closure-rerun.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-application-closure-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-application-closure-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-application-closure-rerun.md
+  readOnlyOrRuntimeAllowed:
+    - http://localhost:3000/**
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    - src/app/**/ai-generation*/**
+    - src/features/**/ai-generation*/**
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: blocked
+    focusedUnitTest: not_applicable
+    staticSourceScan: approved
+    localDevServer: approved
+    localhostBrowser: approved
+    providerCall: blocked_unless_existing_history_missing_and_fresh_task_note_added
+    credentialReadForLocalhostLogin: approved_no_evidence
+    envSecretAccess: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    e2eRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationSummary:
+    status: pass
+    result: pass_post_application_closure_rerun_with_provider_sample_deferred
+    localhostServer: pass_http_200
+    sampledRoleSurfaces: pass_content_admin_question_paper_org_advanced_admin_question_paper_personal_advanced_student_ai_generation_org_advanced_employee_ai_generation
+    organizationApplicationClosure: pass_next_step_visible_on_org_admin_question_and_paper
+    learnerPracticeClosure: pass_initial_history_state_no_false_start_practice_partial_current_insufficient_state_covered_by_source_test
+    ordinaryUiTechnicalWording: pass_sampled_surfaces_zero_count
+    prettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    sourceOrTestChanged: false
+    providerCallExecuted: false
+    envFileReadOrModified: false
+    databaseConnectionOrMutationExecuted: false
+    schemaMigrationSeedExecuted: false
+    dependencyPackageLockfileChanged: false
+    costCalibrationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 aiGenerationApplicationClosureAndMixedStateRepair20260702:
   taskId: ai-generation-application-closure-and-mixed-state-repair-2026-07-02
   phase: ai-generation-application-closure-and-mixed-state-repair-2026-07-02
@@ -12774,13 +12865,13 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b686303037095a53dbbea8ad7966cf2245074b62
-  lastKnownOriginMasterSha: b686303037095a53dbbea8ad7966cf2245074b62
+  lastKnownMasterSha: bae9667b5a69b186b5f3812d3348c6861481b243
+  lastKnownOriginMasterSha: bae9667b5a69b186b5f3812d3348c6861481b243
 currentTask:
-  id: ai-generation-application-closure-and-mixed-state-repair-2026-07-02
+  id: ai-generation-post-application-closure-rerun-2026-07-02
   status: closed
-  result: pass_application_closure_and_mixed_state_repair
-  taskKind: source_test_repair
+  result: pass_post_application_closure_rerun_with_provider_sample_deferred
+  taskKind: local_owner_preview_rerun
   moduleRunVersion: 2
   priority: p1
   branch: codex/ai-generation-post-adoption-closure-rerun
