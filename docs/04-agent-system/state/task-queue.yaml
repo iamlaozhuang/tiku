@@ -358,6 +358,142 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+    title: Queue and execution log archive dry-run inventory
+    phase: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+    sourceStory: current_user_approved_next_step_queue_and_execution_log_archive_dry_run_inventory_2026_07_02
+    humanApprovalBoundary: current_user_approved_next_step_queue_and_execution_log_archive_dry_run_inventory_2026_07_02
+    targetClosureItem: List exact task queue and execution-log archive candidates, index requirements, and dependency safety without moving files.
+    behaviorBoundary: docs_dry_run_inventory_only_no_archive_movement_no_index_mutation_no_product_source_test_script_runtime_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_archive_dry_run_inventory
+    moduleRunVersion: 2
+    status: closed
+    result: completed_archive_dry_run_inventory_no_movement
+    priority: p1
+    claimedAt: "2026-07-02T13:00:00-07:00"
+    plannedAt: "2026-07-02T13:00:00-07:00"
+    implementedAt: "2026-07-02T13:00:00-07:00"
+    validatedAt: "2026-07-02T13:00:00-07:00"
+    reviewedAt: "2026-07-02T13:00:00-07:00"
+    closedAt: "2026-07-02T13:00:00-07:00"
+    dependsOn:
+      - recent-thread-governance-and-doc-slimming-2026-07-02
+    branch: codex/queue-and-execution-log-archive-dry-run-inventory
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+    allowedFiles:
+      - docs/04-agent-system/state/archive-dry-run-inventory-2026-07-02.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+      - docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/recent-thread-governance-baseline.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/execution-log-index.yaml
+      - docs/04-agent-system/sop/active-queue-slimming-plan.md
+      - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+      - docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - docs/04-agent-system/state/archive/**
+      - docs/05-execution-logs/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/execution-log-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      dryRunInventoryUpdate: approved
+      actualQueueArchiveMovement: blocked
+      executionLogArchiveMovement: blocked
+      archiveFileCreation: blocked
+      indexMutation: blocked
+      scriptBehaviorChange: blocked
+      localSourceChange: blocked
+      focusedUnitTest: blocked_docs_only
+      localhostBrowserE2E: blocked
+      localDevServer: blocked
+      providerCall: blocked
+      directDatabaseConnection: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Exact first-batch task queue archive candidates are listed without moving any task blocks.
+      - Exact execution-log candidate files and future archive target patterns are listed without moving any files.
+      - Candidate plan/evidence/audit existence and non-terminal dependency safety are recorded.
+      - Required task-history and execution-log index entries are identified as mandatory for a later actual archive task.
+      - No product source, test, script behavior, Provider, browser, DB, env, dependency, schema, deploy, release readiness, final Pass, production usability, Cost Calibration, archive movement, archive creation, or index mutation is introduced.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/archive-dry-run-inventory-2026-07-02.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/archive-dry-run-inventory-2026-07-02.yaml docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId queue-and-execution-log-archive-dry-run-inventory-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_next_step_queue_and_execution_log_archive_dry_run_inventory_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_next_step_queue_and_execution_log_archive_dry_run_inventory_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_next_step_queue_and_execution_log_archive_dry_run_inventory_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      dryRunInventoryOnly: true
+      candidateTaskCount: 10
+      candidateExecutionLogFileCount: 30
+      candidatePlanEvidenceAuditExist: true
+      candidateReferencesFromNonTerminalTasks: 0
+      requiredTaskHistoryIndexEntriesForFutureMovement: 10
+      requiredExecutionLogIndexEntriesForFutureMovement: 30
+      actualQueueArchiveMovementExecuted: false
+      executionLogArchiveMovementExecuted: false
+      archiveFilesCreated: false
+      indexEntriesCreated: false
+      sourceFilesChanged: false
+      testsChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDbAccessExecuted: false
+      dependencyChanged: false
+      schemaMigrationChanged: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
   - id: recent-thread-governance-and-doc-slimming-2026-07-02
     title: Recent thread governance and doc slimming
     phase: recent-thread-governance-and-doc-slimming-2026-07-02
