@@ -328,7 +328,7 @@ function createAdminRouteIntegratedInstruction(
         ];
 
   return [
-    "为题库系统本地 owner preview 生成简短中文体验内容。",
+    "为题库系统生成简短中文草稿内容。",
     `场景：${workspaceLabel} ${generationLabel}。`,
     ...groundingLines,
     outputContract,

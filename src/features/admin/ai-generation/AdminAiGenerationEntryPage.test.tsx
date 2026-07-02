@@ -321,6 +321,9 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(await screen.findByText("内容 AI组卷")).toBeInTheDocument();
     expect(screen.getByText("按大题模块组织")).toBeInTheDocument();
     expect(screen.getByText("生成记录")).toBeInTheDocument();
+    expect(screen.queryByText(/本地 owner preview/u)).not.toBeInTheDocument();
+    expect(screen.queryByText(/本地生成/u)).not.toBeInTheDocument();
+    expect(screen.queryByText(/本地预览/u)).not.toBeInTheDocument();
     expect(screen.queryByText(/paper_section/u)).not.toBeInTheDocument();
     expect(screen.queryByText("元数据历史")).not.toBeInTheDocument();
   });

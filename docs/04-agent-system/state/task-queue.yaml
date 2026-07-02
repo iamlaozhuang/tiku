@@ -948,9 +948,15 @@ tasks:
     evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
     taskKind: source_test_repair
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: completed_ordinary_ai_ui_internal_wording_repair
     priority: p1
+    claimedAt: "2026-07-01T19:05:00-07:00"
+    plannedAt: "2026-07-01T19:05:00-07:00"
+    implementedAt: "2026-07-01T19:20:00-07:00"
+    validatedAt: "2026-07-01T19:20:00-07:00"
+    reviewedAt: "2026-07-01T19:20:00-07:00"
+    closedAt: "2026-07-01T19:20:00-07:00"
     dependsOn:
       - ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
     branch: codex/ai-generation-ordinary-ui-internal-wording-repair
@@ -1044,7 +1050,27 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-ordinary-ui-internal-wording-repair-2026-07-01 -SkipRemoteAheadCheck
     validationSummary:
-      status: pending
+      status: pass
+      redTestsAddedAndObservedFailing: true
+      focusedUnitTests: pass_4_files_40_tests
+      productionSourceScan: pass_no_local_preview_owner_preview_hits_in_scoped_source
+      prettierCheck: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileContentReadOrWritten: false
+      databaseMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+    nextRecommendedTask: ai-generation-resource-grounding-enforcement-repair-2026-07-01
   - id: ai-generation-resource-grounding-enforcement-repair-2026-07-01
     title: AI generation resource grounding enforcement repair
     phase: ai-generation-resource-grounding-enforcement-repair-2026-07-01

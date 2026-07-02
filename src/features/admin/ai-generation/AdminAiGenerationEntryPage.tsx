@@ -159,7 +159,7 @@ function getPageCopy(
       eyebrow: "内容 AI 草稿/评审",
       title: isQuestionGeneration ? "内容 AI出题" : "内容 AI组卷",
       description:
-        "本地 owner preview 可展示本次生成草稿；正式题目或试卷写入仍需评审、编辑、校验和审计日志。",
+        "展示本次生成草稿；正式题目或试卷写入仍需评审、编辑、校验和审计日志。",
       actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
       boundaryLabel: "不直接写入正式题目或试卷",
     };
@@ -168,8 +168,7 @@ function getPageCopy(
   return {
     eyebrow: "组织高级 AI 草稿",
     title: isQuestionGeneration ? "组织 AI出题" : "组织 AI组卷",
-    description:
-      "本地 owner preview 可展示本次组织生成草稿，正式采用仍保留在组织内容草稿池。",
+    description: "展示本次组织生成草稿，正式采用仍保留在组织内容草稿池。",
     actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
     boundaryLabel: "仅创建组织草稿",
   };
@@ -689,8 +688,8 @@ function AdminAiGenerationDetailControls({
       </div>
 
       <p className="text-text-secondary mt-3 text-xs leading-5">
-        当前准备本地生成条件和{draftBoundaryLabel}
-        入口；只生成本地预览草稿，不触发正式题库写入。
+        当前准备生成条件和{draftBoundaryLabel}
+        入口；只生成待评审草稿，不触发正式题库写入。
       </p>
     </section>
   );

@@ -302,7 +302,7 @@ function createPersonalRouteIntegratedInstruction(
         ];
 
   return [
-    "为题库系统本地 owner preview 生成简短中文体验内容。",
+    "为题库系统生成简短中文训练草稿。",
     `场景：${taskLabel}。`,
     ...groundingLines,
     outputContract,

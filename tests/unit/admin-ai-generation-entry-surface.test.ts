@@ -320,8 +320,26 @@ describe("admin AI generation entry surfaces", () => {
     expect(paperRouteSource).toContain('generationKind="paper"');
     expect(sharedSurfaceSource).toContain("内容 AI 草稿/评审");
     expect(sharedSurfaceSource).toContain("正式题目或试卷写入仍需评审");
+    expect(sharedSurfaceSource).not.toContain("本地 owner preview");
+    expect(sharedSurfaceSource).not.toContain("本地生成");
+    expect(sharedSurfaceSource).not.toContain("本地预览");
     expect(sharedSurfaceSource).not.toContain("modelProvider");
     expect(sharedSurfaceSource).not.toContain("providerPayload");
+  });
+
+  it("keeps visible generation instruction sources free of local preview wording", () => {
+    const adminRuntimeBridgeSource = readExpectedSource(
+      "src/server/services/admin-ai-generation-runtime-bridge-service.ts",
+    );
+    const personalProviderSource = readExpectedSource(
+      "src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts",
+    );
+
+    for (const source of [adminRuntimeBridgeSource, personalProviderSource]) {
+      expect(source).not.toContain("本地 owner preview");
+      expect(source).not.toMatch(/owner preview/iu);
+      expect(source).not.toContain("本地预览");
+    }
   });
 
   it("wires organization AI routes to organization-owned advanced-only surfaces", () => {
