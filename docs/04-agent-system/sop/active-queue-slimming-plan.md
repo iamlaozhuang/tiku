@@ -23,6 +23,18 @@ The active queue should contain only:
 
 Terminal historical tasks should move to archive only through a separately approved archival task.
 
+## Current Size Signal
+
+The 2026-07-02 recent-thread governance review measured the current files as approximately:
+
+- `project-state.yaml`: over 42,000 lines.
+- `task-queue.yaml`: over 10,000 lines.
+
+This is enough to recommend a future archival dry run, but it does not authorize immediate movement or deletion. The
+first response should be a compact recovery baseline that points to the current task, latest closeout records, and
+current supersession rules. Archive movement should remain a later task with exact ids, exact paths, index entries, and
+dependency-resolution checks.
+
 ## Archive Eligibility
 
 A task is eligible for future archive when all are true:

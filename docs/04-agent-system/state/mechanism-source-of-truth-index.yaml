@@ -19,6 +19,9 @@ canonicalStateFiles:
   - id: task-history-index
     path: docs/04-agent-system/state/task-history-index.yaml
     role: lookup index for archived task queue entries
+  - id: recent-thread-governance-baseline
+    path: docs/04-agent-system/state/recent-thread-governance-baseline.yaml
+    role: compact navigation baseline for the latest five-thread governance and doc-slimming lessons; this reduces default recovery reading surface but does not replace project-state, task-queue, evidence, audit reviews, SOPs, or requirement SSOT
   - id: blocked-gates
     path: docs/04-agent-system/state/blocked-gates.yaml
     role: long-lived blocked gate registry
@@ -112,6 +115,11 @@ factOwnership:
     derivedSummaries:
       - scripts/agent-system/Get-TikuNextAction.ps1
     rule: the register suppresses repeated missing-historical-evidence noise only; it does not prove task completion or satisfy dependency evidence checks.
+  - fact: latest recent-thread governance lessons and recommended read-surface order
+    sourcePath: docs/04-agent-system/state/recent-thread-governance-baseline.yaml
+    derivedSummaries:
+      - docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
+    rule: this baseline is a navigation aid for current recovery and mechanism slimming; it must not override task status, evidence, audit reviews, active queue dependencies, or requirement SSOT.
   - fact: transient owner, active run, recoverable run, cleanup-ready run, no-write terminal envelope
     sourcePath: local run registry, lease, and redacted handoff files under the configured Codex automation roots
     derivedSummaries:

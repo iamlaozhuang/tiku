@@ -1,0 +1,75 @@
+schemaVersion: 1
+generatedByTask: recent-thread-governance-and-doc-slimming-2026-07-02
+generatedAt: "2026-07-02T12:00:00-07:00"
+purpose: Compact recovery baseline for the latest governance and doc-slimming direction. This file is a navigation aid and does not replace project-state, task-queue, evidence, audit reviews, SOPs, or requirement SSOT.
+status: active_navigation_baseline
+reviewWindow:
+  basis: latest_five_master_commits_before_this_task
+  commits:
+    - sha: 6cac32c8b
+      taskId: phase4-requirements-agent-baseline-alignment-2026-07-02
+      result: completed_phase4_ai_generation_baseline_recovery_guard
+      lesson: old_ai_generation_residuals_must_not_be_reopened_without_fresh_current_baseline_evidence
+    - sha: 84931124e
+      taskId: session-cookie-contract-login-and-e2e-alignment-2026-07-02
+      result: completed_cookie_backed_session_acceptance_baseline
+      lesson: local_e2e_session_contract_must_be_current_before_role_or_ai_acceptance_is_trusted
+    - sha: f116306d1
+      taskId: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+      result: blocked_evidence_valid_but_superseded_for_session_contract_by_followup
+      lesson: blocked_walkthrough_evidence_can_be_valid_history_without_remaining_the_active_starting_point
+    - sha: 4de8569e0
+      taskId: requirements-code-implementation-alignment-audit-2026-07-02
+      result: completed_static_requirement_to_code_alignment_audit
+      lesson: current_static_reuse_and_runtime_gaps_must_be_separated_from_older_role_matrix_wording
+    - sha: 7e4c62746
+      taskId: requirements-ssot-cross-doc-alignment-audit-2026-07-02
+      result: completed_cross_doc_requirement_ssot_alignment_audit
+      lesson: authority_order_and_conflict_register_prevent_old_gap_rows_from_becoming_default_blockers
+sizeSignals:
+  measuredAt: "2026-07-02T12:00:00-07:00"
+  projectStateLines: 42259
+  taskQueueLines: 10720
+  interpretation: archive_dry_run_recommended_but_immediate_history_movement_not_approved_by_this_baseline
+currentRecoveryOrder:
+  - docs/04-agent-system/state/project-state.yaml
+  - docs/04-agent-system/state/task-queue.yaml
+  - docs/04-agent-system/state/recent-thread-governance-baseline.yaml
+  - docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+  - latest task plan, evidence, and audit named by project-state/task-queue
+  - task-history-index or execution-log-index only when an active dependency points to archived history
+qualityPreservationRules:
+  - mechanism_slimming_reduces_default_read_surface_only
+  - summaries_are_navigation_aids_not_evidence_replacements
+  - module_run_v2_gates_remain_required
+  - evidence_and_audit_remain_required_for_closeout
+  - no_history_delete_or_semantic_rewrite_without_explicit_archive_task
+  - no_active_dependency_may_be_orphaned
+  - no_sensitive_evidence_may_be_recorded_or_moved_silently
+  - product_completion_or_release_readiness_must_not_be_inferred_from_mechanism_slimming
+blockedCapabilities:
+  - product_source_repair
+  - test_repair
+  - actual_queue_archive_movement
+  - execution_log_archive_movement
+  - script_behavior_change
+  - provider_call
+  - browser_runtime
+  - direct_database_access
+  - env_secret_access
+  - dependency_change
+  - schema_migration
+  - staging_prod_deploy
+  - release_readiness
+  - final_pass
+  - production_usability
+  - cost_calibration
+recommendedNextMechanismTask:
+  id: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+  scope: docs_only_dry_run_inventory
+  acceptance:
+    - list_exact_closed_task_ids_that_are_archive_eligible
+    - list_exact_execution_log_files_that_are_archive_eligible
+    - prove_index_entries_before_movement
+    - prove_active_dependencies_remain_resolvable
+    - ask_for_explicit_archive_movement_approval_before_moving_files

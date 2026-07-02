@@ -103,6 +103,39 @@ relax safety gates.
    `Get-ModuleRunV2QueueSlimmingSelfRepair.ps1` reports active queue terminal archive candidates, safe metadata repair
    candidates, and high-risk blocked repair candidates; it does not mutate queue state.
 
+## Fourth-Round Recent Thread Governance And Doc Slimming Direction
+
+The fourth-round direction is based on the five latest closeout threads on 2026-07-02:
+
+- `phase4-requirements-agent-baseline-alignment-2026-07-02`
+- `session-cookie-contract-login-and-e2e-alignment-2026-07-02`
+- `role-workflow-experience-walkthrough-from-code-baseline-2026-07-02`
+- `requirements-code-implementation-alignment-audit-2026-07-02`
+- `requirements-ssot-cross-doc-alignment-audit-2026-07-02`
+
+The observed mechanism problem is not weak validation. The problem is an oversized recovery surface that makes older
+blocked or residual wording easy to read out of order. As of this review, `project-state.yaml` is over 42,000 lines and
+`task-queue.yaml` is over 10,000 lines. This creates token cost, reading latency, and false-start risk.
+
+The response is conservative read-surface slimming:
+
+1. **Compact current baseline first**: add a small current recovery baseline that points to the latest active
+   evidence/audit and recent-thread lessons before scanning historical logs.
+2. **No semantic compression of evidence**: summaries are navigation aids only; original task plans, evidence, audit
+   reviews, and archived task bodies remain authoritative.
+3. **No destructive archive in the first pass**: before moving task blocks or execution logs, use exact candidates,
+   index paths, dependency checks, and validation commands in a separate archive task.
+4. **Quality gates stay hard**: mechanism slimming must not remove Module Run v2 gates, Prettier, diff checks,
+   evidence/audit requirements, closeout policy materialization, or sensitive-evidence scans.
+5. **Avoid unreasonable断点**: future archive batches must preserve the current recovery pointer, recent closeout window,
+   active dependencies, and index lookup path so a resumed thread does not need human reconstruction.
+6. **Stop on ambiguity**: if a historical task has missing evidence, ambiguous dependency ownership, or sensitive-data
+   concern, keep it active or register it as explicit historical evidence debt instead of moving it silently.
+
+The recommended next mechanism step is a dry-run inventory task, not an immediate archive movement task. That dry run
+should list exact task ids and execution-log files that would be moved, prove their index entries, and only then ask for
+approval to perform the actual archive batch.
+
 ## Standard Profiles Under Consideration
 
 | Profile                  | Intended scope                                                   | Default evidence | Key blocked gates                                          |
