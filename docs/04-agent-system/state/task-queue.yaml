@@ -358,6 +358,154 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    title: AI generation monopoly question structured acceptance diagnosis
+    phase: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    sourceStory: seeded_by_monopoly_ai_question_residual_after_ocr_and_structured_parser_repair_2026_07_02
+    humanApprovalBoundary: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    targetClosureItem: Diagnose and repair shared AI出题 structured-preview acceptance for non-JSON numbered Provider draft output while preserving exact-count gates
+    behaviorBoundary: local_source_test_shared_parser_instruction_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: completed_shared_ai_question_plaintext_structured_acceptance_repair
+    priority: p1
+    claimedAt: "2026-07-02T05:19:35-07:00"
+    plannedAt: "2026-07-02T05:19:35-07:00"
+    implementedAt: "2026-07-02T05:25:00-07:00"
+    validatedAt: "2026-07-02T05:25:00-07:00"
+    reviewedAt: "2026-07-02T05:25:00-07:00"
+    closedAt: "2026-07-02T05:25:00-07:00"
+    dependsOn:
+      - ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+      - monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
+    branch: codex/ai-generation-monopoly-question-structured-acceptance-diagnosis
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/route-integrated-provider-instruction-service.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - src/server/contracts/ai-generation-task-spec-contract.ts
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - AI出题 structured preview accepts common numbered text or Markdown question-list output only when marker count equals requested questionCount.
+      - Wrong count, missing markers, and unrelated prose still fail safely.
+      - Parser fallback produces redacted draft summaries only and does not persist raw generated content.
+      - AI组卷 structured parser behavior is unchanged.
+      - No Provider call, browser runtime, DB action, private OCR/material action, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is executed.
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    validationSummary:
+      status: passed
+      sourceOrTestChanged: true
+      plaintextFallbackExactNumberedDrafts: passed_3_of_3
+      plaintextFallbackChineseMarkers: passed_3_of_3
+      plaintextFallbackCountMismatch: safe_failed_question_count_mismatch_2_of_3
+      plaintextFallbackArbitraryProse: safe_failed_invalid_json
+      aiPaperParserChanged: false
+      focusedUnitTests: 7_files_111_tests_passed
+      lint: passed
+      typecheck: passed
+      prettierWrite: passed
+      prettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      privateOcrOrMaterialActionExecuted: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      rawEvidenceRecorded: false
+      providerPayloadPromptRawAiOutputRecorded: false
+      credentialSessionTokenCookieRecorded: false
+      nextRecommendedTaskId: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
   - id: ai-generation-shared-structured-contract-goal-plan-2026-07-02
     title: AI generation shared structured contract goal plan
     phase: ai-generation-shared-structured-contract-goal-plan-2026-07-02

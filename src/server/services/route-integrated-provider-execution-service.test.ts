@@ -312,6 +312,135 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
+  it("builds a parsed question-set structured preview from exact numbered plaintext drafts", () => {
+    const visibleGeneratedContent =
+      createRouteIntegratedVisibleGeneratedContent(
+        [
+          "1. redacted draft marker",
+          "2. redacted draft marker",
+          "3. redacted draft marker",
+        ].join("\n"),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 3,
+          },
+        },
+      );
+
+    expect(visibleGeneratedContent?.structuredPreview).toMatchObject({
+      kind: "question_set",
+      parseStatus: "parsed",
+      requestedQuestionCount: 3,
+      actualQuestionCount: 3,
+      draftCount: 3,
+    });
+
+    if (
+      visibleGeneratedContent?.structuredPreview?.kind === "question_set" &&
+      visibleGeneratedContent.structuredPreview.parseStatus === "parsed"
+    ) {
+      expect(visibleGeneratedContent.structuredPreview.draftSummaries).toEqual([
+        {
+          draftNumber: 1,
+          questionType: null,
+          difficulty: null,
+          knowledgeNodeCount: null,
+          reviewStatus: "draft_review_required",
+        },
+        {
+          draftNumber: 2,
+          questionType: null,
+          difficulty: null,
+          knowledgeNodeCount: null,
+          reviewStatus: "draft_review_required",
+        },
+        {
+          draftNumber: 3,
+          questionType: null,
+          difficulty: null,
+          knowledgeNodeCount: null,
+          reviewStatus: "draft_review_required",
+        },
+      ]);
+      expect(
+        visibleGeneratedContent.structuredPreview.draftSummaries.some(
+          (summary) => Object.values(summary).includes("redacted draft marker"),
+        ),
+      ).toBe(false);
+    }
+  });
+
+  it("builds a parsed question-set structured preview from common Chinese numbered draft markers", () => {
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        ["第1题：redacted", "题目2：redacted", "3、redacted"].join("\n"),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 3,
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "parsed",
+        requestedQuestionCount: 3,
+        actualQuestionCount: 3,
+        draftCount: 3,
+      },
+    });
+  });
+
+  it("reports a structured parse failure when numbered plaintext count mismatches the requested quantity", () => {
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        ["1. redacted", "2. redacted"].join("\n"),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 3,
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        requestedQuestionCount: 3,
+        actualQuestionCount: 2,
+        failureCategory: "question_count_mismatch",
+        draftCount: 0,
+        draftSummaries: [],
+      },
+    });
+  });
+
+  it("does not accept arbitrary non-JSON prose as a question-set structured preview", () => {
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        "本次生成内容包含多个草稿，但没有稳定编号标记。",
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 3,
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        requestedQuestionCount: 3,
+        actualQuestionCount: null,
+        failureCategory: "invalid_json",
+        draftCount: 0,
+        draftSummaries: [],
+      },
+    });
+  });
+
   it("reports a safe missing-questions failure for unsupported question roots", () => {
     const content = JSON.stringify({
       choices: Array.from({ length: 3 }, () => ({

@@ -66,11 +66,17 @@ const questionDraftContainerKeys = [
   "output",
   "payload",
 ] as const;
+const plainTextQuestionDraftMarkerPattern =
+  /^(?:\s*>?\s*)?(?:[-*]\s*)?(?:#{1,6}\s*)?(?:(\d{1,3})[.)、）]\s*|题目\s*(\d{1,3})\s*[:：]|第\s*(\d{1,3})\s*题\s*[:：]?)/gim;
 
 type ParsedRouteIntegratedProviderContent =
   | Record<string, unknown>
   | unknown[]
   | null;
+type PlainTextQuestionDraftMarkerSummary = {
+  actualQuestionCount: number;
+  isExactRequestedCount: boolean;
+};
 
 export function createBlockedRouteIntegratedProviderExecutionSummary(
   failureCategory: Exclude<
@@ -292,7 +298,7 @@ function createRouteIntegratedStructuredPreview(
   const parsedContent = parseJsonValueFromProviderText(content);
 
   if (options.kind === "question_set") {
-    return createQuestionSetStructuredPreview(parsedContent, options);
+    return createQuestionSetStructuredPreview(parsedContent, options, content);
   }
 
   return createPaperDraftStructuredPreview(parsedContent, options);
@@ -304,8 +310,16 @@ function createQuestionSetStructuredPreview(
     AiGenerationRouteIntegratedStructuredPreviewOptions,
     { kind: "question_set" }
   >,
+  content: string,
 ): AiGenerationRouteIntegratedStructuredPreview {
   if (parsedContent === null) {
+    const plainTextStructuredPreview =
+      createPlainTextQuestionSetStructuredPreview(content, options);
+
+    if (plainTextStructuredPreview !== null) {
+      return plainTextStructuredPreview;
+    }
+
     return {
       kind: "question_set",
       parseStatus: "failed",
@@ -369,6 +383,53 @@ function createQuestionSetStructuredPreview(
         reviewStatus: "draft_review_required",
       };
     }),
+  };
+}
+
+function createPlainTextQuestionSetStructuredPreview(
+  content: string,
+  options: Extract<
+    AiGenerationRouteIntegratedStructuredPreviewOptions,
+    { kind: "question_set" }
+  >,
+): AiGenerationRouteIntegratedStructuredPreview | null {
+  const markerSummary = readPlainTextQuestionDraftMarkerSummary(
+    content,
+    options.requestedQuestionCount,
+  );
+
+  if (markerSummary === null) {
+    return null;
+  }
+
+  if (!markerSummary.isExactRequestedCount) {
+    return {
+      kind: "question_set",
+      parseStatus: "failed",
+      requestedQuestionCount: options.requestedQuestionCount,
+      actualQuestionCount: markerSummary.actualQuestionCount,
+      failureCategory: "question_count_mismatch",
+      draftCount: 0,
+      draftSummaries: [],
+    };
+  }
+
+  return {
+    kind: "question_set",
+    parseStatus: "parsed",
+    requestedQuestionCount: options.requestedQuestionCount,
+    actualQuestionCount: markerSummary.actualQuestionCount,
+    draftCount: markerSummary.actualQuestionCount,
+    draftSummaries: Array.from(
+      { length: markerSummary.actualQuestionCount },
+      (_, index) => ({
+        draftNumber: index + 1,
+        questionType: null,
+        difficulty: null,
+        knowledgeNodeCount: null,
+        reviewStatus: "draft_review_required",
+      }),
+    ),
   };
 }
 
@@ -544,6 +605,53 @@ function readQuestionDraftArray(source: unknown, depth = 0): unknown[] | null {
   }
 
   return null;
+}
+
+function readPlainTextQuestionDraftMarkerSummary(
+  content: string,
+  requestedQuestionCount: number,
+): PlainTextQuestionDraftMarkerSummary | null {
+  const markerNumbers: number[] = [];
+
+  for (const match of content.matchAll(plainTextQuestionDraftMarkerPattern)) {
+    const markerNumber = Number.parseInt(
+      match[1] ?? match[2] ?? match[3] ?? "",
+      10,
+    );
+
+    if (!Number.isInteger(markerNumber) || markerNumber <= 0) {
+      continue;
+    }
+
+    markerNumbers.push(markerNumber);
+  }
+
+  if (markerNumbers.length === 0) {
+    return null;
+  }
+
+  const seenMarkerNumbers = new Set<number>();
+  let hasDuplicateMarker = false;
+
+  for (const markerNumber of markerNumbers) {
+    if (seenMarkerNumbers.has(markerNumber)) {
+      hasDuplicateMarker = true;
+    }
+
+    seenMarkerNumbers.add(markerNumber);
+  }
+
+  const isExactRequestedCount =
+    !hasDuplicateMarker &&
+    markerNumbers.length === requestedQuestionCount &&
+    Array.from({ length: requestedQuestionCount }, (_, index) =>
+      seenMarkerNumbers.has(index + 1),
+    ).every(Boolean);
+
+  return {
+    actualQuestionCount: markerNumbers.length,
+    isExactRequestedCount,
+  };
 }
 
 function readArrayProperty(
