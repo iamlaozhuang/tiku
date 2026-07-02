@@ -1,8 +1,121 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-provider-instruction-unification-2026-07-02
-updatedAt: "2026-07-02T03:36:09-07:00"
+currentPhase: ai-generation-route-contract-alignment-2026-07-02
+updatedAt: "2026-07-02T03:47:52-07:00"
+aiGenerationRouteContractAlignment20260702:
+  taskId: ai-generation-route-contract-alignment-2026-07-02
+  phase: ai-generation-route-contract-alignment-2026-07-02
+  status: closed
+  result: completed_route_contract_alignment
+  priority: p1
+  taskKind: implementation
+  moduleRunVersion: 2
+  dependsOn:
+    - ai-generation-provider-instruction-unification-2026-07-02
+  sourceStory: seeded_by_ai_generation_shared_structured_contract_goal_plan_2026_07_02
+  targetClosureItem: Align content admin, organization admin, and student route outcomes for AI出题 and AI组卷
+  behaviorBoundary: local_source_test_route_contract_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: task_id_file_path_status_category_count_validation_result_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
+  branch: codex/ai-generation-route-contract-alignment
+  claimedAt: "2026-07-02T03:42:13-07:00"
+  plannedAt: "2026-07-02T03:42:13-07:00"
+  implementedAt: "2026-07-02T03:47:52-07:00"
+  validatedAt: "2026-07-02T03:47:52-07:00"
+  reviewedAt: "2026-07-02T03:47:52-07:00"
+  closedAt: "2026-07-02T03:47:52-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    - src/server/services/admin-ai-generation-local-contract-route.ts
+    - src/server/services/admin-ai-generation-local-contract-route.test.ts
+    - src/server/services/personal-ai-generation-request-route.ts
+    - src/server/services/personal-ai-generation-request-route.test.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+  blockedFiles:
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+  capabilities:
+    localSourceChange: approved
+    focusedUnitTest: approved
+    providerCall: blocked
+    databaseConnection: blocked
+    browserRuntime: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationCommands:
+    - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-route-contract-alignment-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-route-contract-alignment-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+  validationSummary:
+    status: passed
+    sourceOrTestChanged: true
+    focusedUnitTests: 2_files_53_tests_passed
+    lint: passed
+    typecheck: passed
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed_files_scanned_7
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    databaseConnectionOrMutationExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    nextRecommendedTaskId: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
 aiGenerationProviderInstructionUnification20260702:
   taskId: ai-generation-provider-instruction-unification-2026-07-02
   phase: ai-generation-provider-instruction-unification-2026-07-02
@@ -14947,43 +15060,43 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a818f387a9767d949999314b5438948a6755cbce
-  lastKnownOriginMasterSha: a818f387a9767d949999314b5438948a6755cbce
+  lastKnownMasterSha: 5c77d912b402576600aa94975f5157d7ecc2c12e
+  lastKnownOriginMasterSha: 5c77d912b402576600aa94975f5157d7ecc2c12e
 currentTask:
-  id: ai-generation-provider-instruction-unification-2026-07-02
+  id: ai-generation-route-contract-alignment-2026-07-02
   status: closed
-  result: completed_provider_instruction_unification
+  result: completed_route_contract_alignment
   taskKind: implementation
   validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2
   moduleRunVersion: 2
   priority: p1
-  branch: codex/ai-generation-provider-instruction-unification
+  branch: codex/ai-generation-route-contract-alignment
   humanApproval: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
-  claimedAt: "2026-07-02T03:25:38-07:00"
-  plannedAt: "2026-07-02T03:25:38-07:00"
-  implementedAt: "2026-07-02T03:36:09-07:00"
-  validatedAt: "2026-07-02T03:36:09-07:00"
-  reviewedAt: "2026-07-02T03:36:09-07:00"
-  closedAt: "2026-07-02T03:36:09-07:00"
+  claimedAt: "2026-07-02T03:42:13-07:00"
+  plannedAt: "2026-07-02T03:42:13-07:00"
+  implementedAt: "2026-07-02T03:47:52-07:00"
+  validatedAt: "2026-07-02T03:47:52-07:00"
+  reviewedAt: "2026-07-02T03:47:52-07:00"
+  closedAt: "2026-07-02T03:47:52-07:00"
   dependsOn:
-    - ai-generation-structured-preview-parser-hardening-2026-07-02
+    - ai-generation-provider-instruction-unification-2026-07-02
   sourceStory: seeded_by_ai_generation_shared_structured_contract_goal_plan_2026_07_02
-  targetClosureItem: Unify admin and personal Provider instruction construction while keeping role-specific scene labels
-  behaviorBoundary: local_source_test_instruction_reuse_no_provider_browser_db_dependency_schema_deploy_release_claim
+  targetClosureItem: Align content admin, organization admin, and student route outcomes for AI出题 and AI组卷
+  behaviorBoundary: local_source_test_route_contract_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
   evidenceMode: task_id_file_path_status_category_count_validation_result_only_no_credentials_no_env_no_raw_db_rows_no_provider_payloads_no_prompt_no_ai_output_no_full_question_paper_material_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
-    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
-    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
-    - src/server/services/route-integrated-provider-instruction-service.ts
-    - src/server/services/route-integrated-provider-instruction-service.test.ts
-    - src/server/services/admin-ai-generation-runtime-bridge-service.ts
-    - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    - src/server/services/admin-ai-generation-local-contract-route.ts
+    - src/server/services/admin-ai-generation-local-contract-route.test.ts
+    - src/server/services/personal-ai-generation-request-route.ts
+    - src/server/services/personal-ai-generation-request-route.test.ts
     - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
   blockedFiles:
     - .env*
@@ -15017,13 +15130,13 @@ currentTask:
   validationSummary:
     status: passed
     sourceOrTestChanged: true
-    focusedUnitTests: 3_files_20_tests_passed
+    focusedUnitTests: 2_files_53_tests_passed
     lint: passed
     typecheck: passed
     scopedPrettierWrite: passed
     scopedPrettierCheck: passed
     gitDiffCheck: passed
-    moduleRunV2PreCommit: passed_files_scanned_10
+    moduleRunV2PreCommit: passed_files_scanned_7
     moduleRunV2PrePush: passed_skip_remote_ahead_check
     providerCallExecuted: false
     browserRuntimeExecuted: false
@@ -15033,7 +15146,7 @@ currentTask:
     stagingProdDeployExecuted: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
-    nextRecommendedTaskId: ai-generation-route-contract-alignment-2026-07-02
+    nextRecommendedTaskId: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
 previousCurrentTaskBeforeAiGenerationSharedTaskSpecContract20260702:
   id: ai-generation-shared-structured-contract-goal-plan-2026-07-02
   status: closed

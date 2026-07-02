@@ -50,6 +50,13 @@ const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
       },
     ],
   };
+const insufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    ...sufficientGroundingContext,
+    evidenceStatus: "none",
+    citationCount: 0,
+    citations: [],
+  };
 
 function createBaseBody() {
   const omittedTextA = ["OMITTED", "A"].join("-");
@@ -1168,6 +1175,301 @@ describe("personal AI generation request route handlers", () => {
     expect(resultRepository.createCalls[0]?.contentPreviewMasked).toContain(
       "题目 10/10",
     );
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("raw prompt");
+  });
+
+  it("closes provider paper success into a parsed paper draft result", async () => {
+    const resultRepository = createResultRepository();
+    const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
+      ...sufficientGroundingContext,
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        questionCount: 50,
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        createResultPublicId: () => "personal_ai_result_public_paper_route",
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => paperGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: {
+                inputTokens: 18,
+                outputTokens: 9,
+                totalTokens: 27,
+              },
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: JSON.stringify({
+                  totalQuestionCount: 50,
+                  paperSections: [
+                    {
+                      paperSectionType: "single_choice",
+                      questionCount: 50,
+                    },
+                  ],
+                  questionTypeDistribution: {
+                    single_choice: 50,
+                  },
+                  knowledgeCoverage: ["redacted_knowledge_node"],
+                }),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        taskType: "ai_paper_generation",
+        generationParameters: paperGroundingContext.generationParameters,
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        resultState: {
+          status: "succeeded",
+          resultPublicId: "personal_ai_result_public_paper_route",
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
+        runtimeBridge: {
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 1,
+              questionCount: 50,
+            },
+          },
+          resultMaterializationSummary: {
+            materializationStatus: "created",
+            resultPublicId: "personal_ai_result_public_paper_route",
+            contentVisibility: "redacted_snapshot",
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+            formalAdoptionStatus: "blocked",
+          },
+        },
+      },
+    });
+    expect(resultRepository.createCalls).toHaveLength(1);
+    expect(resultRepository.createCalls[0]).toMatchObject({
+      ownerType: "organization",
+      ownerPublicId: employeeUserContext.organizationPublicId,
+      taskPublicId: "ai_generation_task_public_route_123",
+      taskType: "ai_paper_generation",
+      resultPublicId: "personal_ai_result_public_paper_route",
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+    });
+    expect(resultRepository.createCalls[0]?.contentPreviewMasked).toContain(
+      "题量 50",
+    );
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("raw prompt");
+  });
+
+  it("marks malformed personal Provider output failed without materializing a draft result", async () => {
+    const resultRepository = createResultRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        createResultPublicId: () => "personal_ai_result_public_malformed_route",
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: JSON.stringify({
+                  questions: [{ questionType: "single_choice" }],
+                }),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        resultState: {
+          status: "failed",
+          resultPublicId: null,
+        },
+        runtimeBridge: {
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "failed",
+            },
+          },
+          resultMaterializationSummary: {
+            materializationStatus: "not_requested",
+          },
+        },
+      },
+    });
+    expect(resultRepository.createCalls).toHaveLength(0);
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("raw prompt");
+  });
+
+  it("blocks personal Provider execution before request when grounding evidence is insufficient", async () => {
+    const resultRepository = createResultRepository();
+    let providerExecuted = false;
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => insufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => {
+              providerExecuted = true;
+
+              return {
+                requestCount: 1,
+                resultStatus: "pass",
+                failureCategory: null,
+                durationMs: 42,
+                usageSummary: null,
+                providerErrorSummary: null,
+                visibleGeneratedContent: null,
+              };
+            },
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        resultState: {
+          status: "failed",
+          resultPublicId: null,
+        },
+        runtimeBridge: {
+          providerCallExecuted: false,
+          providerExecutionSummary: {
+            resultStatus: "blocked",
+            failureCategory: "insufficient_grounding_evidence",
+          },
+          resultMaterializationSummary: {
+            materializationStatus: "not_requested",
+          },
+        },
+      },
+    });
+    expect(providerExecuted).toBe(false);
+    expect(resultRepository.createCalls).toHaveLength(0);
     expect(serializedPayload).not.toContain("synthetic-test-credential");
     expect(serializedPayload).not.toContain("provider payload");
     expect(serializedPayload).not.toContain("raw prompt");

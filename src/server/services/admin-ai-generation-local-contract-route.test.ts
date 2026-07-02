@@ -92,14 +92,15 @@ function createStructuredAdminProviderContent(
   }
 
   return JSON.stringify({
+    totalQuestionCount: 50,
     paperSections: [
       {
         paperSectionType: "single_choice",
-        questionCount: 10,
+        questionCount: 50,
       },
     ],
     questionTypeDistribution: {
-      single_choice: 10,
+      single_choice: 50,
     },
     knowledgeCoverage: ["redacted_knowledge_node"],
   });

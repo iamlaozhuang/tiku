@@ -867,11 +867,21 @@ tasks:
     behaviorBoundary: local_source_test_route_contract_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
     taskKind: implementation
     moduleRunVersion: 2
-    status: pending
+    status: closed
     priority: p1
+    claimedAt: "2026-07-02T03:42:13-07:00"
+    plannedAt: "2026-07-02T03:42:13-07:00"
+    implementedAt: "2026-07-02T03:47:52-07:00"
+    validatedAt: "2026-07-02T03:47:52-07:00"
+    reviewedAt: "2026-07-02T03:47:52-07:00"
+    closedAt: "2026-07-02T03:47:52-07:00"
+    result: completed_route_contract_alignment
     dependsOn:
       - ai-generation-provider-instruction-unification-2026-07-02
     branch: codex/ai-generation-route-contract-alignment
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -909,11 +919,64 @@ tasks:
       forcePush: blocked
       pr: blocked
       costCalibrationGate: blocked
+    evidenceMode:
+      allowed: task_id_file_path_status_category_count_validation_result_only
+      forbidden:
+        - credentials_cookies_tokens_sessions_auth_headers
+        - env_values_connection_strings
+        - raw_db_rows_internal_ids_pii_plaintext_redeem_code
+        - provider_payload_prompt_raw_ai_input_output
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshot_trace_localStorage
     acceptanceStandards:
       - Mocked Provider success creates acceptable `question_set` and `paper_draft` results.
       - Mocked malformed JSON returns safe failure and does not persist a draft.
       - Mocked insufficient RAG returns safe insufficient-evidence without Provider execution.
       - Admin and personal routes return standard `{ code, message, data }`.
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-route-contract-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-route-contract-alignment-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    validationSummary:
+      status: passed
+      sourceOrTestChanged: true
+      focusedUnitTests: 2_files_53_tests_passed
+      lint: passed
+      typecheck: passed
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed_files_scanned_7
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      nextRecommendedTaskId: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
   - id: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
     title: AI generation cross-surface UI regression matrix
     phase: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
