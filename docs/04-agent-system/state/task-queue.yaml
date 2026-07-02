@@ -81,6 +81,7 @@ standingApprovals:
       - ai-generation-bounded-provider-closure-rerun-2026-07-02
       - ai-generation-learner-retry-terminal-state-repair-2026-07-02
       - ai-generation-post-retry-repair-rerun-2026-07-02
+      - ai-generation-owner-preview-closeout-audit-2026-07-02
     executionRule: >-
       This central approval does not permit unbounded execution. Each covered task must first create a short branch,
       materialize exact allowedFiles, blockedFiles, DB boundary, Provider boundary, browser boundary, credential
@@ -356,6 +357,85 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-owner-preview-closeout-audit-2026-07-02
+    title: AI generation owner preview closeout audit
+    phase: ai-generation-owner-preview-closeout-audit-2026-07-02
+    sourceStory: current_user_asked_remaining_task_estimate_for_ai_generation_owner_preview_goal_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: audit remaining AI出题 / AI组卷 owner-preview task count and unclosed finding classes
+    behaviorBoundary: docs_state_only_no_runtime_source_db_provider_env_dependency_schema_e2e_deploy
+    taskKind: docs_state_closeout_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_owner_preview_closeout_audit_no_known_unclosed_repair_task
+    priority: p1
+    claimedAt: "2026-07-01T22:50:00-07:00"
+    plannedAt: "2026-07-01T22:50:00-07:00"
+    reviewedAt: "2026-07-01T23:00:00-07:00"
+    closedAt: "2026-07-01T23:00:00-07:00"
+    dependsOn:
+      - ai-generation-post-retry-repair-rerun-2026-07-02
+    branch: codex/ai-generation-owner-preview-closeout-audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-owner-preview-closeout-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-owner-preview-closeout-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-owner-preview-closeout-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-owner-preview-closeout-audit-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_owner_preview_closeout_audit_no_known_unclosed_repair_task
+      mandatoryRemainingCurrentScopeTasks: 0
+      conditionalKnownRepairTasks: 0
+      optionalBroaderAcceptanceTasks: full_logistics_resource_coverage_or_all_role_real_provider_acceptance_if_owner_expands_scope
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
   - id: ai-generation-post-retry-repair-rerun-2026-07-02
     title: AI generation post retry repair rerun
     phase: ai-generation-post-retry-repair-rerun-2026-07-02
