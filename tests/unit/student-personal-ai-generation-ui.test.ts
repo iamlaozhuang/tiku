@@ -1792,6 +1792,75 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("renders transient AI paper draft preview counts from the learner paper action", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const paperVisibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          resultReference: {
+            ...localExperienceResponse.data.requestFlow.resultReference,
+            taskType: "ai_paper_generation",
+          },
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "本次自测试卷草稿摘要",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 2,
+              questionCount: 50,
+              questionTypeDistributionCount: 3,
+              knowledgeCoverageCount: 4,
+              reviewStatus: "draft_review_required",
+            },
+          },
+        },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      createPersonalAiGenerationFetchMockWithHistorySequence(
+        [emptyServerHistoryResponse, emptyServerHistoryResponse],
+        paperVisibleResponse,
+      ),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "student-visible-generated-content",
+    );
+
+    expect(visibleGeneratedContent).toHaveTextContent("本次自测试卷草稿摘要");
+    expect(visibleGeneratedContent).toHaveTextContent("结构化预览");
+    expect(visibleGeneratedContent).toHaveTextContent("大题模块 2");
+    expect(visibleGeneratedContent).toHaveTextContent("题量 50");
+    expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("Authorization");
+    expect(document.body.textContent).not.toContain("localStorage");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
   it("renders redacted recent request history rows from camelCase read-model fields", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const redactedReferenceResponse = {

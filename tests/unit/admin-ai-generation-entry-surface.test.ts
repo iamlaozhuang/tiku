@@ -604,6 +604,107 @@ describe("admin AI generation entry surfaces", () => {
     ]);
   });
 
+  it.each([
+    {
+      actionLabel: "AI出题",
+      adminRoles: ["content_admin"] satisfies AdminRole[],
+      generationKind: "question" as const,
+      historyPath:
+        "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
+      title: "内容 AI出题",
+      workspace: "content" as const,
+    },
+    {
+      actionLabel: "AI组卷",
+      adminRoles: ["content_admin"] satisfies AdminRole[],
+      generationKind: "paper" as const,
+      historyPath:
+        "/api/v1/content-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
+      title: "内容 AI组卷",
+      workspace: "content" as const,
+    },
+    {
+      actionLabel: "AI出题",
+      adminRoles: ["org_advanced_admin"] satisfies AdminRole[],
+      generationKind: "question" as const,
+      historyPath:
+        "/api/v1/organization-ai-generation-requests?generationKind=question&page=1&pageSize=10",
+      title: "组织 AI出题",
+      workspace: "organization" as const,
+    },
+    {
+      actionLabel: "AI组卷",
+      adminRoles: ["org_advanced_admin"] satisfies AdminRole[],
+      generationKind: "paper" as const,
+      historyPath:
+        "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
+      title: "组织 AI组卷",
+      workspace: "organization" as const,
+    },
+  ])(
+    "renders ordinary admin UI matrix row for $workspace $generationKind",
+    async ({
+      actionLabel,
+      adminRoles,
+      generationKind,
+      historyPath,
+      title,
+      workspace,
+    }) => {
+      globalThis.localStorage?.setItem(
+        "tiku.localSessionToken",
+        "unit-test-admin-token",
+      );
+      const fetchMock = vi.fn(async (url: string | URL) => {
+        if (String(url) === "/api/v1/sessions") {
+          return Response.json(
+            createSessionResponse({
+              adminRoles,
+              organizationPublicId:
+                workspace === "organization" ? "organization_public_123" : null,
+            }),
+          );
+        }
+
+        if (String(url) === historyPath) {
+          return Response.json(createEmptyTaskHistoryResponse(workspace));
+        }
+
+        throw new Error(`Unexpected fetch: ${String(url)}`);
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(
+        createElement(AdminAiGenerationEntryPage, {
+          workspace,
+          generationKind,
+        }),
+      );
+
+      expect(
+        await screen.findByRole("heading", { name: title }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("admin-ai-generation-submit"),
+      ).toHaveTextContent(actionLabel);
+      expect(
+        screen.getByTestId("admin-ai-generation-detail-controls"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("admin-ai-generation-task-history"),
+      ).toBeInTheDocument();
+      expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+        "/api/v1/sessions",
+        historyPath,
+      ]);
+      expect(document.body.textContent).not.toContain("unit-test-admin-token");
+      expect(document.body.textContent).not.toContain("providerPayload");
+      expect(document.body.textContent).not.toContain("rawPrompt");
+      expect(document.body.textContent).not.toContain("Authorization");
+      expect(document.body.textContent).not.toContain("localStorage");
+    },
+  );
+
   it("submits content admin local contract requests and renders a redacted summary", async () => {
     globalThis.localStorage?.setItem(
       "tiku.localSessionToken",
