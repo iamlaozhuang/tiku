@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 generatedFrom:
   activeRoot: docs/05-execution-logs
   generatedByTask: phase-61-execution-log-archive-first-batch
@@ -2267,5 +2267,455 @@ entries:
     date: "2026-05-24"
     tags:
       - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    kind: task_plan
+    taskId: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    phase: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    kind: evidence
+    taskId: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    phase: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    kind: audit_review
+    taskId: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    phase: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    kind: task_plan
+    taskId: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    phase: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    kind: evidence
+    taskId: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    phase: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    kind: audit_review
+    taskId: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    phase: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    kind: task_plan
+    taskId: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    phase: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    kind: evidence
+    taskId: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    phase: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    kind: audit_review
+    taskId: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    phase: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
+    kind: task_plan
+    taskId: ai-generation-shared-task-spec-contract-2026-07-02
+    phase: ai-generation-shared-task-spec-contract-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+    kind: evidence
+    taskId: ai-generation-shared-task-spec-contract-2026-07-02
+    phase: ai-generation-shared-task-spec-contract-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+    kind: audit_review
+    taskId: ai-generation-shared-task-spec-contract-2026-07-02
+    phase: ai-generation-shared-task-spec-contract-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-shared-task-spec-contract.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    kind: task_plan
+    taskId: ai-generation-structured-preview-parser-hardening-2026-07-02
+    phase: ai-generation-structured-preview-parser-hardening-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    kind: evidence
+    taskId: ai-generation-structured-preview-parser-hardening-2026-07-02
+    phase: ai-generation-structured-preview-parser-hardening-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    kind: audit_review
+    taskId: ai-generation-structured-preview-parser-hardening-2026-07-02
+    phase: ai-generation-structured-preview-parser-hardening-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
+    kind: task_plan
+    taskId: ai-generation-provider-instruction-unification-2026-07-02
+    phase: ai-generation-provider-instruction-unification-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    kind: evidence
+    taskId: ai-generation-provider-instruction-unification-2026-07-02
+    phase: ai-generation-provider-instruction-unification-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+    kind: audit_review
+    taskId: ai-generation-provider-instruction-unification-2026-07-02
+    phase: ai-generation-provider-instruction-unification-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-provider-instruction-unification.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    kind: task_plan
+    taskId: ai-generation-route-contract-alignment-2026-07-02
+    phase: ai-generation-route-contract-alignment-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    kind: evidence
+    taskId: ai-generation-route-contract-alignment-2026-07-02
+    phase: ai-generation-route-contract-alignment-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    kind: audit_review
+    taskId: ai-generation-route-contract-alignment-2026-07-02
+    phase: ai-generation-route-contract-alignment-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-route-contract-alignment.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    kind: task_plan
+    taskId: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    phase: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    kind: evidence
+    taskId: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    phase: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    kind: audit_review
+    taskId: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    phase: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    kind: task_plan
+    taskId: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    phase: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    kind: evidence
+    taskId: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    phase: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    kind: audit_review
+    taskId: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    phase: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    kind: task_plan
+    taskId: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    phase: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    kind: evidence
+    taskId: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    phase: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    kind: audit_review
+    taskId: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    phase: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    status: archived
+    evidencePath: docs/05-execution-logs/archive/2026-07/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    auditReviewPath: docs/05-execution-logs/archive/2026-07/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    taskPlanPath: docs/05-execution-logs/archive/2026-07/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    commitSha: null
+    date: "2026-07-02"
+    tags:
+      - ai_generation
       - execution_log_archive
       - docs_only

@@ -1,8 +1,153 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
-updatedAt: "2026-07-02T13:00:00-07:00"
+currentPhase: queue-and-execution-log-archive-first-batch-2026-07-02
+updatedAt: "2026-07-02T14:00:00-07:00"
+queueAndExecutionLogArchiveFirstBatch20260702:
+  taskId: queue-and-execution-log-archive-first-batch-2026-07-02
+  phase: queue-and-execution-log-archive-first-batch-2026-07-02
+  status: closed
+  result: completed_first_batch_archive_and_index_movement
+  priority: p1
+  taskKind: docs_archive_index_movement
+  moduleRunVersion: 2
+  dependsOn:
+    - queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+  sourceStory: current_user_approved_execute_first_batch_archive_after_dry_run_2026_07_02
+  targetClosureItem: Move the exact first July archive batch from active queue and execution-log directories to archive paths with lookup indexes.
+  behaviorBoundary: docs_only_actual_archive_and_index_movement_no_product_source_test_script_runtime_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: redacted_counts_paths_status_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_provider_payload_no_prompt_no_ai_output_no_full_content
+  branch: codex/queue-and-execution-log-archive-first-batch-2026-07
+  claimedAt: "2026-07-02T14:00:00-07:00"
+  plannedAt: "2026-07-02T14:00:00-07:00"
+  implementedAt: "2026-07-02T14:00:00-07:00"
+  validatedAt: "2026-07-02T14:00:00-07:00"
+  reviewedAt: "2026-07-02T14:00:00-07:00"
+  closedAt: "2026-07-02T14:00:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-first-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-first-batch.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-first-batch.md
+  taskQueueArchivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+  taskHistoryIndexPath: docs/04-agent-system/state/task-history-index.yaml
+  executionLogArchiveRoot: docs/05-execution-logs/archive/2026-07
+  executionLogIndexPath: docs/05-execution-logs/execution-log-index.yaml
+  archiveBatch:
+    candidateTaskCount: 10
+    candidateExecutionLogFileCount: 30
+    sourceInventoryPath: docs/04-agent-system/state/archive-dry-run-inventory-2026-07-02.yaml
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    - docs/04-agent-system/state/task-history-index.yaml
+    - docs/05-execution-logs/execution-log-index.yaml
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+    - docs/05-execution-logs/archive/2026-07/**
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/archive-dry-run-inventory-2026-07-02.yaml
+    - docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+    - docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - scripts/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    actualQueueArchiveMovement: approved
+    executionLogArchiveMovement: approved
+    archiveFileCreation: approved
+    indexMutation: approved
+    scriptBehaviorChange: blocked
+    localSourceChange: blocked
+    focusedUnitTest: blocked_docs_only
+    localhostBrowserE2E: blocked
+    localDevServer: blocked
+    providerCall: blocked
+    directDatabaseConnection: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Exact 10 candidate task blocks are removed from active task-queue and preserved in the 2026-07 task queue archive.
+    - Exact 10 task-history index entries point to the task queue archive.
+    - Exact 30 execution-log files are moved to the 2026-07 execution-log archive directories.
+    - Exact 30 execution-log index entries point to existing archive paths.
+    - No active non-terminal task depends on an archived candidate without index resolution.
+    - Active recovery still retains current task state, evidence, audit review, and recent governance baseline context.
+    - No product source, test, script behavior, Provider, browser, DB, env, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is introduced.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/execution-log-index.yaml docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-first-batch.md docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-first-batch.md docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-first-batch.md docs/05-execution-logs/archive/2026-07/**/*.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/execution-log-index.yaml docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-first-batch.md docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-first-batch.md docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-first-batch.md docs/05-execution-logs/archive/2026-07/**/*.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId queue-and-execution-log-archive-first-batch-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId queue-and-execution-log-archive-first-batch-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId queue-and-execution-log-archive-first-batch-2026-07-02 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_execute_first_batch_archive_after_dry_run_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_execute_first_batch_archive_after_dry_run_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_execute_first_batch_archive_after_dry_run_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+  validationSummary:
+    actualQueueArchiveMovementExecuted: true
+    executionLogArchiveMovementExecuted: true
+    candidateTaskBlocksMoved: 10
+    taskHistoryIndexEntriesAdded: 10
+    executionLogFilesMoved: 30
+    executionLogIndexEntriesAdded: 30
+    candidateReferencesFromNonTerminalTasks: 0
+    sourceFilesChanged: false
+    testFilesChanged: false
+    scriptBehaviorChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
+    prettierWriteScoped: pass
+    prettierArchiveCheck: pass
+    prettierScoped: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
 queueAndExecutionLogArchiveDryRunInventory20260702:
   taskId: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
   phase: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
@@ -17514,8 +17659,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 4de8569e0940c6ceaa6279dedc81acaa5e833ae0
-  lastKnownOriginMasterSha: 4de8569e0940c6ceaa6279dedc81acaa5e833ae0
+  lastKnownMasterSha: e9c78280494078b6115496962d6b5e39156503b6
+  lastKnownOriginMasterSha: e9c78280494078b6115496962d6b5e39156503b6
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -17655,6 +17800,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: queue-and-execution-log-archive-first-batch-2026-07-02
+  status: closed
+  result: completed_first_batch_archive_and_index_movement
+  taskKind: docs_archive_index_movement
+  moduleRunVersion: 2
+  branch: codex/queue-and-execution-log-archive-first-batch-2026-07
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-queue-and-execution-log-archive-first-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-first-batch.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-first-batch.md
+previousCurrentTaskBeforeQueueAndExecutionLogArchiveFirstBatch20260702:
   id: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
   status: closed
   result: completed_archive_dry_run_inventory_no_movement

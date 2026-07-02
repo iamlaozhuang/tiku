@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
@@ -8,6 +8,7 @@ generatedFrom:
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    - docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
 entries:
   - id: phase-0-adr-runtime-architecture
     phase: phase-0-architecture-freeze
@@ -16740,3 +16741,93 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-30T09:58:00-07:00"
+  - id: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    phase: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    status: closed
+    taskKind: bounded_provider_acceptance_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    phase: ai-generation-monopoly-question-structured-acceptance-diagnosis-2026-07-02
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    phase: ai-generation-shared-structured-contract-goal-plan-2026-07-02
+    status: closed
+    taskKind: docs_state_goal_plan_and_queue_materialization
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-shared-task-spec-contract-2026-07-02
+    phase: ai-generation-shared-task-spec-contract-2026-07-02
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-shared-task-spec-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-shared-task-spec-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-structured-preview-parser-hardening-2026-07-02
+    phase: ai-generation-structured-preview-parser-hardening-2026-07-02
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-structured-preview-parser-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-provider-instruction-unification-2026-07-02
+    phase: ai-generation-provider-instruction-unification-2026-07-02
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-provider-instruction-unification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-provider-instruction-unification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-route-contract-alignment-2026-07-02
+    phase: ai-generation-route-contract-alignment-2026-07-02
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-route-contract-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-route-contract-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    phase: ai-generation-cross-surface-ui-regression-matrix-2026-07-02
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-cross-surface-ui-regression-matrix.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    phase: ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    status: closed
+    taskKind: docs_state_rollup
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
+  - id: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    phase: ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    status: closed
+    taskKind: bounded_provider_acceptance_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-02"
