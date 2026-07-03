@@ -1,8 +1,155 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: employee-training-answer-result-source-landing-2026-07-03
-updatedAt: "2026-07-03T09:26:35-07:00"
+currentPhase: content-ai-draft-adoption-source-landing-2026-07-03
+updatedAt: "2026-07-03T09:51:45-07:00"
+contentAiDraftAdoptionSourceLanding20260703:
+  taskId: content-ai-draft-adoption-source-landing-2026-07-03
+  phase: content-ai-draft-adoption-source-landing-2026-07-03
+  status: closed
+  result: content_ai_draft_adoption_source_landed_with_weak_confirmation_none_block_adoption_and_no_direct_publish_boundary
+  priority: p1
+  taskKind: source_ui_service_contract_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - employee-training-answer-result-source-landing-2026-07-03
+  sourceStory: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+  targetClosureItem: Land content AI draft review/adoption source contract with attribution, weak/none evidence gates, editable formal draft boundary, and no direct publish.
+  behaviorBoundary: content_ai_draft_adoption_source_ui_service_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_content_no_raw_dom_no_full_question_paper_material_content
+  branch: codex/content-ai-draft-adoption-source-landing-2026-07-03
+  claimedAt: "2026-07-03T09:42:23-07:00"
+  plannedAt: "2026-07-03T09:42:23-07:00"
+  implementedAt: "2026-07-03T09:51:45-07:00"
+  validatedAt: "2026-07-03T09:51:45-07:00"
+  reviewedAt: "2026-07-03T09:51:45-07:00"
+  closedAt: "2026-07-03T09:51:45-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-content-ai-draft-adoption-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-content-ai-draft-adoption-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-content-ai-draft-adoption-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+    - docs/05-execution-logs/task-plans/2026-07-03-content-ai-draft-adoption-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-content-ai-draft-adoption-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-content-ai-draft-adoption-source-landing.md
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - src/server/models/admin-ai-generation-formal-adoption.ts
+    - src/server/validators/admin-ai-generation-formal-adoption.ts
+    - src/server/repositories/admin-ai-generation-formal-adoption-repository.ts
+    - tests/unit/admin-ai-generation-entry-surface.test.ts
+    - src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+    - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+    - docs/01-requirements/modules/06-admin-ops.md
+    - docs/01-requirements/stories/epic-06-admin-ops.md
+    - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+    - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    providerCall: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Content AI generated results remain in draft/review and never expose direct publish or direct formal write wording.
+    - Content review UI shows source traceability, reviewer action, audit boundary, and formal publish remains separate.
+    - Evidence status none blocks content formal adoption.
+    - Evidence status weak requires explicit weak-evidence confirmation before content formal adoption request.
+    - Sufficient evidence adoption request remains redacted and does not fabricate raw reviewed draft payload in the UI.
+    - Existing formal draft adapter/repository attribution and draft-created metadata boundaries remain covered without schema or Provider expansion.
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/server/services/admin-ai-generation-review-result-diff-service.test.ts src/server/services/admin-ai-generation-adoption-history-read-model-service.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-draft-adoption-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-ai-draft-adoption-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-draft-adoption-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+  validationSummary:
+    redTddFocusedUnit: pass_failed_before_implementation_missing_content_weak_confirmation_and_repository_evidence_gates
+    focusedUnitTests: pass_6_files_51_tests
+    typecheck: pass
+    lint: pass
+    formatCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceOrTestChanged: true
+    schemaMigrationOrDependencyChanged: false
+    providerCallOrConfigurationExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    browserRuntimeExecuted: false
+    rawPromptOrProviderPayloadRecordedInEvidence: false
+    rawGeneratedContentRecordedInEvidence: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 employeeTrainingAnswerResultSourceLanding20260703:
   taskId: employee-training-answer-result-source-landing-2026-07-03
   phase: employee-training-answer-result-source-landing-2026-07-03
@@ -21635,6 +21782,20 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: content-ai-draft-adoption-source-landing-2026-07-03
+  status: closed
+  result: content_ai_draft_adoption_source_landed_with_weak_confirmation_none_block_adoption_and_no_direct_publish_boundary
+  taskKind: source_ui_service_contract_landing
+  moduleRunVersion: 2
+  branch: codex/content-ai-draft-adoption-source-landing-2026-07-03
+  implementedAt: "2026-07-03T09:51:45-07:00"
+  validatedAt: "2026-07-03T09:51:45-07:00"
+  reviewedAt: "2026-07-03T09:51:45-07:00"
+  closedAt: "2026-07-03T09:51:45-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-content-ai-draft-adoption-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-content-ai-draft-adoption-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-content-ai-draft-adoption-source-landing.md
+previousCurrentTaskBeforeContentAiDraftAdoptionSourceLanding20260703:
   id: employee-training-answer-result-source-landing-2026-07-03
   status: closed
   result: employee_training_answer_result_source_landed_with_question_answer_ui_submit_confirmation_and_own_result_review

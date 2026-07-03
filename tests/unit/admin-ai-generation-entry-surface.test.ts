@@ -1436,6 +1436,95 @@ describe("admin AI generation entry surfaces", () => {
     ]);
   });
 
+  it("requires explicit weak-evidence confirmation before content admin adoption request", async () => {
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_weak_hidden_456";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for weak evidence review",
+              evidenceStatus: "weak",
+              citationCount: 1,
+            },
+          }),
+        );
+      }
+
+      if (String(url) === adoptionUrl && init?.method === "POST") {
+        const adoptionRequestBody = JSON.parse(String(init.body));
+
+        expect(adoptionRequestBody).toMatchObject({
+          reviewDecision: "approved",
+          reviewerConfirmed: true,
+          targetType: "question",
+          weakEvidenceConfirmed: true,
+        });
+        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              redactionStatus: "redacted",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const traceabilityPanel = await screen.findByTestId(
+      "content-admin-review-traceability",
+    );
+    const adoptAction = await screen.findByTestId(
+      "content-admin-review-adopt-action",
+    );
+
+    expect(traceabilityPanel).toHaveTextContent("资料较少");
+    expect(traceabilityPanel).toHaveTextContent("需人工确认");
+    expect(adoptAction).toBeEnabled();
+    expect(adoptAction).toHaveTextContent("确认资料较少并采用草稿");
+
+    fireEvent.click(adoptAction);
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        adoptionUrl,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+  });
+
   it("converts persisted diagnostic generated result summaries for organization advanced admin history", async () => {
     const taskPublicId =
       "admin_ai_generation_task_organization_paper_history_hidden_789";

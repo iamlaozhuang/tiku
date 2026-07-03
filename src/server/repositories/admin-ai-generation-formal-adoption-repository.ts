@@ -136,6 +136,34 @@ function assertSourceResultEligibleForPlatformFormalAdoption(
   ) {
     throw new Error("admin AI generation result target type mismatch");
   }
+
+  assertSourceResultEvidenceAllowsAdoption(sourceResult, input);
+}
+
+function assertSourceResultEvidenceAllowsAdoption(
+  sourceResult: Pick<
+    AdminAiGenerationFormalAdoptionSourceResult,
+    "evidenceStatus"
+  >,
+  input: Pick<
+    CreateAdminAiGenerationFormalAdoptionInput,
+    "reviewDecision" | "weakEvidenceConfirmed"
+  >,
+): void {
+  if (input.reviewDecision !== "approved") {
+    return;
+  }
+
+  if (sourceResult.evidenceStatus === "none") {
+    throw new Error("evidence status none blocks formal adoption");
+  }
+
+  if (
+    sourceResult.evidenceStatus === "weak" &&
+    input.weakEvidenceConfirmed !== true
+  ) {
+    throw new Error("weak evidence confirmation is required");
+  }
 }
 
 function createAdoptionLookupQuery(

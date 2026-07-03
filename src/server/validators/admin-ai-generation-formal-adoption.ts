@@ -144,6 +144,9 @@ export function normalizeAdminAiGenerationFormalAdoptionInput(
       targetType,
       reviewDecision,
       reviewerConfirmed: true,
+      ...(input.weakEvidenceConfirmed === true
+        ? { weakEvidenceConfirmed: true }
+        : {}),
       reviewedAt,
     },
   };

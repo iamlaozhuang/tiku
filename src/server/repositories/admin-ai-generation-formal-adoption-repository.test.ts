@@ -131,6 +131,7 @@ function createBaseInput() {
     targetType: "question" as const,
     reviewDecision: "approved" as const,
     reviewerConfirmed: true as const,
+    weakEvidenceConfirmed: true,
     reviewedAt: new Date("2026-06-26T23:40:00.000Z"),
     protectedGeneratedText,
     protectedProviderArtifact,
@@ -138,6 +139,39 @@ function createBaseInput() {
 }
 
 describe("admin AI generation formal adoption repository", () => {
+  it("blocks platform formal adoption when the content AI result has no evidence", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult({
+        evidenceStatus: "none",
+        citationCount: 0,
+      }),
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption(createBaseInput()),
+    ).rejects.toThrow("evidence status none blocks formal adoption");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
+  it("requires explicit weak evidence confirmation before adopting weak content AI results", async () => {
+    const { gateway, insertAdoptionRecord } = createGateway({
+      sourceResult: createSourceResult({
+        evidenceStatus: "weak",
+        citationCount: 1,
+      }),
+    });
+    const repository = createAdminAiGenerationFormalAdoptionRepository(gateway);
+
+    await expect(
+      repository.createOrReuseFormalAdoption({
+        ...createBaseInput(),
+        weakEvidenceConfirmed: undefined,
+      }),
+    ).rejects.toThrow("weak evidence confirmation is required");
+    expect(insertAdoptionRecord).not.toHaveBeenCalled();
+  });
+
   it("creates a redacted platform formal adoption plan for a reviewed content generated question result", async () => {
     const { gateway, findSourceResultForAdoption, insertAdoptionRecord } =
       createGateway({

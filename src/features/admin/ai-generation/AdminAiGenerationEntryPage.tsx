@@ -84,6 +84,7 @@ type ContentAdminReviewActionInput = {
   generationKind: AdminAiGenerationKind;
   resultPublicId: string;
   reviewDecision: ContentAdminReviewDecision;
+  weakEvidenceConfirmed?: boolean;
 };
 type OrganizationAiTrainingDraftCopyState =
   | "idle"
@@ -304,6 +305,20 @@ function getOrganizationAiTrainingCopyReadiness(
   }
 
   return "blocked";
+}
+
+function getContentAdminReviewReadiness(
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto,
+): "ready" | "weak_confirmation_required" | "blocked" {
+  if (generatedResult.evidenceStatus === "weak") {
+    return "weak_confirmation_required";
+  }
+
+  if (generatedResult.evidenceStatus === "none") {
+    return "blocked";
+  }
+
+  return "ready";
 }
 
 function createOrganizationAiTrainingDraftTitle(input: {
@@ -1312,11 +1327,28 @@ function ContentAdminReviewTraceabilityPanel({
     actionState === "adopting" || actionState === "rejecting";
   const isCompleted = actionState === "adopted" || actionState === "rejected";
   const actionMessage = resolveContentAdminReviewActionMessage(actionState);
-  const isGeneratedResultGrounded =
-    isAdminGeneratedResultGrounded(generatedResult);
+  const reviewReadiness = getContentAdminReviewReadiness(generatedResult);
   const isAdoptActionDisabled =
-    isSubmitting || isCompleted || !isGeneratedResultGrounded;
+    isSubmitting || isCompleted || reviewReadiness === "blocked";
   const isRejectActionDisabled = isSubmitting || isCompleted;
+  const evidenceLabel =
+    reviewReadiness === "ready"
+      ? "资料充足"
+      : reviewReadiness === "weak_confirmation_required"
+        ? "资料较少"
+        : "资料不足";
+  const adoptionRequirementLabel =
+    reviewReadiness === "ready"
+      ? "可提交采用"
+      : reviewReadiness === "weak_confirmation_required"
+        ? "需人工确认"
+        : "不可采用";
+  const adoptActionLabel =
+    actionState === "adopted"
+      ? "已提交采用"
+      : reviewReadiness === "weak_confirmation_required"
+        ? "确认资料较少并采用草稿"
+        : "采用草稿";
 
   return (
     <section
@@ -1346,13 +1378,11 @@ function ContentAdminReviewTraceabilityPanel({
         </div>
         <div>
           <dt className="text-text-secondary">资料依据</dt>
-          <dd className="text-text-primary mt-1">
-            {isGeneratedResultGrounded ? "资料充足" : "资料不足"}
-          </dd>
+          <dd className="text-text-primary mt-1">{evidenceLabel}</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">正式写入</dt>
-          <dd className="text-text-primary mt-1">未执行</dd>
+          <dt className="text-text-secondary">采用要求</dt>
+          <dd className="text-text-primary mt-1">{adoptionRequirementLabel}</dd>
         </div>
       </dl>
 
@@ -1414,10 +1444,14 @@ function ContentAdminReviewTraceabilityPanel({
               generationKind,
               resultPublicId,
               reviewDecision: "approved",
+              weakEvidenceConfirmed:
+                reviewReadiness === "weak_confirmation_required"
+                  ? true
+                  : undefined,
             })
           }
         >
-          {actionState === "adopted" ? "已提交采用" : "采用草稿"}
+          {adoptActionLabel}
         </button>
         <button
           className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
@@ -1769,6 +1803,7 @@ export function AdminAiGenerationEntryPage({
               reviewDecision: input.reviewDecision,
               reviewerConfirmed: true,
               targetType: input.generationKind,
+              weakEvidenceConfirmed: input.weakEvidenceConfirmed,
             }),
             headers: {
               "content-type": "application/json",

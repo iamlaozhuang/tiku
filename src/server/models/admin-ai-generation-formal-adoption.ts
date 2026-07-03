@@ -72,6 +72,7 @@ export type AdminAiGenerationFormalAdoptionCommandInput = {
   targetType: AdminAiGenerationFormalAdoptionTargetType;
   reviewDecision: AdminAiGenerationFormalAdoptionReviewDecision;
   reviewerConfirmed: boolean;
+  weakEvidenceConfirmed?: boolean;
   reviewedAt: Date;
 };
 
