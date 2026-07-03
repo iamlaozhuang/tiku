@@ -358,6 +358,126 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: current-thread-decision-package-closeout-2026-07-02
+    title: Current thread decision package closeout
+    phase: current-thread-decision-package-closeout-2026-07-02
+    sourceStory: current_user_approved_current_thread_decision_package_commit_merge_push_cleanup_2026_07_02
+    humanApprovalBoundary: current_user_fresh_approved_commit_merge_push_cleanup_and_next_stage_plan_2026_07_02
+    targetClosureItem: Commit, fast-forward merge, push, and clean the current-thread requirements decision package after bounded multi-pass recheck.
+    behaviorBoundary: docs_requirement_decision_alignment_and_closeout_only_no_product_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_decision_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: completed_current_thread_decision_package_multi_pass_recheck_ready_for_git_closeout
+    priority: p1
+    branch: codex/current-thread-decision-recheck-2026-07-02
+    dependsOn:
+      - redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-current-thread-decision-package-closure-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-current-thread-decision-package-closure-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-current-thread-decision-package-closure-recheck.md
+    allowedFiles:
+      - docs/01-requirements/**
+      - docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-current-thread-decision-package-*.md
+      - docs/05-execution-logs/evidence/2026-07-02-current-thread-decision-package-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-current-thread-decision-package-*.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - src/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_requirement_decision_only
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Current-thread decisions and recheck corrections are represented in durable requirement and traceability docs.
+      - Reconciliation ledger contains contiguous CT-REQ rows with no duplicates or missing ids.
+      - Known high-risk stale wording searches have no exact residual matches.
+      - Historical evidence remains preserved while current supersession notes define the active requirement boundary.
+      - No product source, tests, runtime, Provider, browser, DB, env, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is introduced.
+    validationCommands:
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -Command "Select-String -Path docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md -Pattern '\| `CT-REQ-[0-9]{3}` \|'"
+      - rg -n -e '运营手动触发重建' -e '需运营手动触发重建' -e '作为\*\*运营管理员，\*\*我想要\*\*手动触发向量重建' docs/01-requirements/modules docs/01-requirements/stories docs/01-requirements/traceability
+    validationSummary:
+      status: passed
+      prettierCheckPassed: true
+      gitDiffCheckPassed: true
+      ledgerIntegrityPassed: true
+      exactResidualSearchPassed: true
+      sourceOrTestChanged: false
+      productSourceChanged: false
+      providerCallExecuted: false
+      providerConfigurationRead: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_current_thread_decision_package_closeout_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_current_thread_decision_package_closeout_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_current_thread_decision_package_closeout_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_current_thread_decision_package_closeout_2026_07_02
+
   - id: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
     title: Redeem code edition and plaintext operations decision doc update
     phase: redeem-code-edition-plaintext-decision-doc-update-2026-07-02

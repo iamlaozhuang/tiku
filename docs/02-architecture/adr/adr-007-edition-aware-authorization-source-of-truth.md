@@ -70,9 +70,22 @@ The system must not automatically switch authorization contexts solely to obtain
 - Backward compatibility is straightforward because unversioned historical authorization is standard by default.
 - Payment, pricing, provider, quota defaults, staging/prod deployment, and migration execution remain separately gated.
 
+## Later Clarification
+
+The 2026-07-02 `redeem_code` decision creates a narrow product-UI exception for offline distribution: eligible
+`ops_admin` and `super_admin` users may view/copy plaintext `redeem_code` values in the generation distribution window
+and in ordinary operations list/detail pages. This exception supersedes the older blanket wording below only for that
+specific product UI surface.
+
+The exception does not permit plaintext `redeem_code` values in evidence, committed documents, runtime logs, error logs,
+screenshots, exports, non-distribution audit summaries, or non-eligible role views. Audit rows may record view/copy
+metadata, but not plaintext card values or card hashes.
+
 ## Non-Goals
 
 - No online payment, refund, invoice, settlement, or external purchase confirmation.
 - No provider call, model request, env/secret change, dependency change, schema migration, deployment, PR, or force-push approval.
 - No Cost Calibration Gate execution or production quota default decision.
-- No permission to expose secret material, provider payloads, raw prompts, raw generated AI content, raw employee answer text, full paper content, internal database rows, or plaintext `redeem_code` values.
+- No permission to expose secret material, provider payloads, raw prompts, raw generated AI content, raw employee answer
+  text, full paper content, internal database rows, or plaintext `redeem_code` values outside the narrow 2026-07-02
+  eligible-operations product UI exception described above.

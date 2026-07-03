@@ -10,6 +10,11 @@ This document is a read-only static mapping from the current requirement SSOT ba
 surfaces. It does not claim runtime pass, release readiness, final Pass, production usability, Cost Calibration,
 deployment, Provider success, browser acceptance, or DB-backed acceptance.
 
+2026-07-02 current-thread supersession note: any static observation in this audit that `ops_admin` can reach resource
+surfaces is an implementation posture, not active product ownership. The later current-thread decision ledger rows
+`CT-REQ-045` and `CT-REQ-057` move resource-management write ownership to the content workspace and require the old
+operations entry to be removed, redirected, or explicitly narrowed to future approved read-only support.
+
 ## Scope
 
 - Allowed evidence: file paths, counts, static mapping status, failure category summaries, and follow-up candidates.
@@ -116,7 +121,9 @@ Acceptance criteria for the next stage should include:
 - Content backend: content_admin can discover AI出题 / AI组卷 and cannot perform ops-only governance actions.
 - Organization backend: org_advanced_admin can discover organization AI and enterprise training/analytics; org_standard_admin is denied or standard-unavailable for advanced-only flows.
 - Learner: personal_advanced_student and org_advanced_employee can discover AI训练; standard roles see denied/upgrade/unavailable states.
-- Ops: ops_admin can reach users, organizations, redeem_code, org_auth, resources, and redacted logs; ops_admin cannot author content or create content drafts.
+- Ops: ops_admin can reach users, organizations, redeem_code, org_auth, and redacted logs; resource reachability in this
+  audit is superseded by `CT-REQ-045` / `CT-REQ-057` and must be treated as a follow-up implementation gap, not current
+  product ownership.
 - Student learning: practice, mock_exam, exam_report, and mistake_book entry points are visible and session-backed.
 - Evidence: only redacted status, counts, routes, and failure categories; no credentials, raw DOM, raw DB rows, Provider payloads, prompts, or raw AI I/O.
 

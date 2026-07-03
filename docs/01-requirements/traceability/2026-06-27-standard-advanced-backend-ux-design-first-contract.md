@@ -34,46 +34,52 @@ Cost Calibration Gate remains blocked pending fresh explicit approval.
 2. Authorization is enforced below the UI. `effectiveEdition` is service-computed from valid source authorization, original `edition`, `auth_upgrade`, expiry, revocation, and scope. Menu visibility is only a hint.
 3. Organization administration is first-class and `organization`-scoped. It is not a system operations surface with an organization filter.
 4. Content administration owns formal `question`, `material`, `paper`, `paper_section`, `paper_asset`, publish, unpublish, and draft/review work. It does not own global user, `redeem_code`, or `org_auth` governance.
-5. Operations administration owns `user`, `organization`, `employee`, `redeem_code`, `authorization`, `personal_auth`, `org_auth`, contact configuration, resources, `knowledge_base`, `audit_log`, and `ai_call_log` summaries. It does not author formal content.
+5. Operations administration owns `user`, `organization`, `employee`, `redeem_code`, `authorization`, `personal_auth`,
+   `org_auth`, contact configuration, `audit_log`, and `ai_call_log` summaries. Resource and `knowledge_base` write
+   ownership has moved to the content workspace by the 2026-07-02 decision package. Operations does not author formal
+   content.
 6. Advanced entries must be discoverable for eligible roles; URL-only access fails future acceptance.
 7. Standard roles need explicit denied or unavailable states for advanced-only surfaces. Silent hiding alone is insufficient because direct route access must also be handled.
 8. AI generated content and organization training content remain isolated from formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book`.
-9. Evidence, logs, and UI summaries must be redacted. Plaintext `redeem_code`, prompt, Provider payload, raw AI output, raw employee answer text, and full paper/question content must not appear in ordinary views or evidence.
+9. Evidence, logs, and UI summaries must be redacted. Plaintext `redeem_code`, prompt, Provider payload, raw AI output,
+   raw employee answer text, and full paper/question content must not appear in ordinary views or evidence, except for
+   the later 2026-07-02 eligible operations product UI exception that allows `ops_admin` / `super_admin` plaintext
+   `redeem_code` list/detail/distribution access while evidence and logs stay redacted.
 
 ## Workspace Information Architecture
 
-| Workspace                       | Primary audience                             | Primary purpose                                                                                                       | Explicit non-goals                                                                                               |
-| ------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Operations workspace            | `ops_admin`, `super_admin` where allowed     | Govern `user`, `organization`, `employee`, `redeem_code`, `authorization`, `org_auth`, resources, logs, and summaries | Formal content authoring, organization training authoring, organization AI output editing, raw sensitive viewers |
-| Content workspace               | `content_admin`, `super_admin` where allowed | Maintain formal `question`, `material`, `paper`, publish lifecycle, and isolated content AI draft/review entries      | Global user management, `redeem_code`, `org_auth`, employee import, organization analytics                       |
-| Standard organization workspace | `org_standard_admin`                         | View organization status, employees, inherited authorization scope, quota/status summaries, and support contacts      | `AI出题`, `AI组卷`, `企业训练`, raw employee answers, global operations                                          |
-| Advanced organization workspace | `org_advanced_admin`                         | Manage organization employees, training, summary analytics, and organization-owned AI question/AI `paper` entries     | Platform formal content adoption, payment, Provider configuration, raw employee learner AI output                |
+| Workspace                       | Primary audience                             | Primary purpose                                                                                                                               | Explicit non-goals                                                                                                                         |
+| ------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Operations workspace            | `ops_admin`, `super_admin` where allowed     | Govern `user`, `organization`, `employee`, `redeem_code`, `authorization`, `org_auth`, logs, and summaries                                    | Formal content authoring, resource write ownership, organization training authoring, organization AI output editing, raw sensitive viewers |
+| Content workspace               | `content_admin`, `super_admin` where allowed | Maintain formal `question`, `material`, `paper`, resources, `knowledge_base`, publish lifecycle, and isolated content AI draft/review entries | Global user management, `redeem_code`, `org_auth`, employee import, organization analytics                                                 |
+| Standard organization workspace | `org_standard_admin`                         | View organization status, employees, inherited authorization scope, quota/status summaries, and support contacts                              | `AI出题`, `AI组卷`, `企业训练`, raw employee answers, global operations                                                                    |
+| Advanced organization workspace | `org_advanced_admin`                         | View organization employees/status, manage training, summary analytics, and organization-owned AI question/AI `paper` entries                 | Employee write operations, platform formal content adoption, payment, Provider configuration, raw employee learner AI output               |
 
 ## Conceptual Route Map
 
 Routes below are target product concepts for future implementation tasks. They are not runtime evidence, and they do not expose internal numeric ids.
 
-| Route concept                      | Owner workspace       | Expected role and edition behavior                                                                                                     |
-| ---------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `/admin/ops`                       | Operations            | `ops_admin` allowed; `content_admin` and organization admins denied or redirected to their own workspace.                              |
-| `/admin/ops/users`                 | Operations            | Manage `user` status and reset password flow; organization admins cannot access global user list.                                      |
-| `/admin/ops/organizations`         | Operations            | Manage `organization`, tree, employee binding, and platform-maintained organization data.                                              |
-| `/admin/ops/redeem-codes`          | Operations            | Govern `redeem_code`; ordinary list and evidence must not expose plaintext values.                                                     |
-| `/admin/ops/org-auths`             | Operations            | Govern `org_auth`, `edition`, upgrade state, atomic-scope summaries, conflict warnings, and quota owner summaries.                     |
-| `/admin/ops/audit-logs`            | Operations            | Read redacted `audit_log` summaries.                                                                                                   |
-| `/admin/ops/ai-call-logs`          | Operations            | Read redacted `ai_call_log` summaries only; no prompt, Provider payload, or raw output.                                                |
-| `/admin/content`                   | Content               | `content_admin` allowed; `ops_admin` and organization admins denied from content authoring.                                            |
-| `/admin/content/questions`         | Content               | Formal `question`, `material`, `question_group`, `question_option`, `scoring_point`, `analysis`, and `standard_answer` lifecycle.      |
-| `/admin/content/papers`            | Content               | Formal `paper`, `paper_section`, `paper_asset`, publish/unpublish, snapshot lifecycle.                                                 |
-| `/admin/content/ai-questions`      | Content               | Discoverable content AI `AI出题` draft/review entry; Provider execution and formal adoption remain separate gates.                     |
-| `/admin/content/ai-papers`         | Content               | Discoverable content AI `AI组卷` draft/review entry; generated content remains isolated until approved adoption.                       |
-| `/admin/organization`              | Organization          | Organization admin landing; role and `effectiveEdition` decide standard or advanced workspace state.                                   |
-| `/admin/organization/employees`    | Organization          | Organization-scoped employee status and import guidance; import fields bind to `organization` only.                                    |
-| `/admin/organization/auth-status`  | Organization          | Show source `edition`, computed `effectiveEdition`, `upgradeStatus`, expiry, authorized scopes, and quota owner summaries.             |
-| `/admin/organization/training`     | Organization advanced | `org_advanced_admin` allowed; `org_standard_admin` receives standard-unavailable state; direct route access must not grant capability. |
-| `/admin/organization/analytics`    | Organization advanced | Summary counts, completion, score, and quota views only; export and raw employee subjective answer text remain out of scope.           |
-| `/admin/organization/ai-questions` | Organization advanced | Organization-owned `AI出题` entry for valid advanced `org_auth`; output stays organization-owned and separate from formal `question`.  |
-| `/admin/organization/ai-papers`    | Organization advanced | Organization-owned `AI组卷` entry for valid advanced `org_auth`; output stays organization-owned and separate from formal `paper`.     |
+| Route concept                      | Owner workspace       | Expected role and edition behavior                                                                                                                                                   |
+| ---------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/admin/ops`                       | Operations            | `ops_admin` allowed; `content_admin` and organization admins denied or redirected to their own workspace.                                                                            |
+| `/admin/ops/users`                 | Operations            | Manage `user` status and reset password flow; organization admins cannot access global user list.                                                                                    |
+| `/admin/ops/organizations`         | Operations            | Manage `organization`, tree, employee binding, and platform-maintained organization data.                                                                                            |
+| `/admin/ops/redeem-codes`          | Operations            | Govern `redeem_code`; after the 2026-07-02 decision, eligible `ops_admin` / `super_admin` list/detail/distribution UI may show/copy plaintext while evidence and logs stay redacted. |
+| `/admin/ops/org-auths`             | Operations            | Govern `org_auth`, `edition`, upgrade state, atomic-scope summaries, conflict warnings, and quota owner summaries.                                                                   |
+| `/admin/ops/audit-logs`            | Operations            | Read redacted `audit_log` summaries.                                                                                                                                                 |
+| `/admin/ops/ai-call-logs`          | Operations            | Read redacted `ai_call_log` summaries only; no prompt, Provider payload, or raw output.                                                                                              |
+| `/admin/content`                   | Content               | `content_admin` allowed; `ops_admin` and organization admins denied from content authoring.                                                                                          |
+| `/admin/content/questions`         | Content               | Formal `question`, `material`, `question_group`, `question_option`, `scoring_point`, `analysis`, and `standard_answer` lifecycle.                                                    |
+| `/admin/content/papers`            | Content               | Formal `paper`, `paper_section`, `paper_asset`, publish/unpublish, snapshot lifecycle.                                                                                               |
+| `/admin/content/ai-questions`      | Content               | Discoverable content AI `AI出题` draft/review entry; Provider execution and formal adoption remain separate gates.                                                                   |
+| `/admin/content/ai-papers`         | Content               | Discoverable content AI `AI组卷` draft/review entry; generated content remains isolated until approved adoption.                                                                     |
+| `/admin/organization`              | Organization          | Organization admin landing; role and `effectiveEdition` decide standard or advanced workspace state.                                                                                 |
+| `/admin/organization/employees`    | Organization          | Organization-scoped employee status and import guidance; import fields bind to `organization` only.                                                                                  |
+| `/admin/organization/auth-status`  | Organization          | Show source `edition`, computed `effectiveEdition`, `upgradeStatus`, expiry, authorized scopes, and quota owner summaries.                                                           |
+| `/admin/organization/training`     | Organization advanced | `org_advanced_admin` allowed; `org_standard_admin` receives standard-unavailable state; direct route access must not grant capability.                                               |
+| `/admin/organization/analytics`    | Organization advanced | Summary counts, completion, score, and quota views only; export and raw employee subjective answer text remain out of scope.                                                         |
+| `/admin/organization/ai-questions` | Organization advanced | Organization-owned `AI出题` entry for valid advanced `org_auth`; output stays organization-owned and separate from formal `question`.                                                |
+| `/admin/organization/ai-papers`    | Organization advanced | Organization-owned `AI组卷` entry for valid advanced `org_auth`; output stays organization-owned and separate from formal `paper`.                                                   |
 
 ## Role And Edition Matrix
 
@@ -132,7 +138,9 @@ Component names are contract names for future implementation planning. Actual so
 
 - Use public ids in UI-visible routes and links. External URLs must not expose auto-increment primary keys.
 - Show source `edition`, computed `effectiveEdition`, `upgradeStatus`, expiry, scope, and quota owner as summaries.
-- Do not show plaintext `redeem_code` in ordinary lists, evidence, audit summaries, or screenshots. Any future reveal/copy workflow requires a separate scoped approval.
+- Do not show plaintext `redeem_code` in evidence, audit summaries, logs, screenshots, exports, or non-eligible role
+  views. The later 2026-07-02 decision approves a narrow eligible operations product UI reveal/copy workflow for
+  `ops_admin` / `super_admin` distribution, list, and detail surfaces.
 - Organization admins must not inspect raw employee subjective answer text, personal learner AI outputs, prompt, raw AI input/output, Provider payload, or generated task raw content.
 - `audit_log` and `ai_call_log` views are redacted summaries only.
 - Export, OCR, payment, external-service integration, and raw sensitive viewers remain future scope.

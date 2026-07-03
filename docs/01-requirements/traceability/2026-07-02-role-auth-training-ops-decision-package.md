@@ -196,7 +196,8 @@ Each discussed item is classified before becoming follow-up work:
 - Card lists and other backend lists must support pagination with page-size options `20`, `50`, and `100`, and should
   preserve filters in URL query state.
 - `super_admin` manages backend roles. `ops_admin` may create and maintain organization admin accounts only when that is
-  explicitly scoped. Phone uniqueness is global across admin and learner/employee account domains.
+  explicitly scoped. Phone uniqueness is enforced across admin and learner/employee account domains, while learner
+  accounts may still be bound as employees inside the learner/employee domain.
 
 ### D11 Content AI, Organization AI, Model, Prompt, And Logs
 
@@ -274,7 +275,7 @@ Each discussed item is classified before becoming follow-up work:
 
 ### D16 Organization Training Management Detail
 
-- Organization admin training management starts from a list and a primary "新建企业训练" action.
+- `org_advanced_admin` training management starts from a list and a primary "新建企业训练" action.
 - The four-step wizard source chooser must be searchable/filterable and must not require raw public id entry.
 - Platform paper import shows full stem, options, `standard_answer`, and `analysis`; edits apply only to the copied
   training snapshot.
@@ -303,26 +304,196 @@ Each discussed item is classified before becoming follow-up work:
 - Future discussion packets must not ask the owner to reconfirm already locked decisions. They should cite the
   requirement source and `CT-REQ-*` row, then raise only actual conflicts, implementation gaps, or missing decisions.
 
+## Adversarial Recheck Corrections
+
+### D19 ADR-007 Plaintext Exception Supersession
+
+- ADR-007 originally used blanket wording that could be read as forbidding any plaintext `redeem_code` exposure.
+- The 2026-07-02 current decision supersedes that wording only for the eligible operations product UI:
+  `ops_admin` and `super_admin` may view/copy plaintext in the generation distribution window and in ordinary
+  operations list/detail pages.
+- The old prohibition remains fully active for evidence, committed docs, logs, screenshots, exports,
+  non-distribution audit summaries, non-eligible roles, and audit payload contents.
+
+### D20 Operations Resource Entry Correction
+
+- The owner described the old resource management entry as being under the system/admin backend; earlier docs also
+  placed resource and Markdown/RAG management under operations.
+- Current decision is that resource management belongs to the content workspace. `super_admin` may still access it
+  through the content workspace, but the system operations main navigation must not remain the resource write entry.
+- Operations resource upload, publish, enable/disable, and vector rebuild bullets are historical/migrated behavior unless
+  a future scoped read-only support task explicitly authorizes an operations view.
+
+### D21 User Management Detail Correction
+
+- User management must visibly distinguish registered-but-unauthorized personal users, standard personal users,
+  advanced personal users, organization employees, disabled users, and backend admins.
+- Backend admin account management for `ops_admin`, `content_admin`, and organization admins belongs to `super_admin`.
+  `ops_admin` may maintain organization admin accounts only when explicitly scoped.
+- No physical deletion and no phone modification are introduced in the first release; reset uses generated one-time
+  password distribution and session revocation where applicable.
+- Admin account domains, including organization admins, are separate from learner/employee accounts and cannot reuse the
+  same phone. This does not remove the existing learner-to-employee binding model inside the learner/employee account
+  domain.
+
+### D22 Organization Analytics Formal-Learning Correction
+
+- Enterprise-training analytics and formal `practice` / `mock_exam` aggregate signals are both useful, but they must be
+  separate sections.
+- Formal learning signals must not be mixed into enterprise-training completion, score, deadline, or version metrics.
+- Knowledge weak-point summaries may include formal learning aggregate signals only when privacy-preserving and scoped to
+  the organization authorization context.
+
+### D23 Organization AI To Training Draft Contract Detail
+
+The confirmed organization AI handoff contract must preserve these details:
+
+1. Entry is from an organization AI result, not from `mock_exam`.
+2. Source result must belong to the same allowed `organization` scope.
+3. Copying creates or updates an organization training draft, never formal platform `question` or `paper`.
+4. Generated stem, options, `standard_answer`, and `analysis` are copied into the draft snapshot.
+5. Copied fields are editable before publish.
+6. Source attribution to the AI task/result remains visible in draft history.
+7. `evidence_status = none` blocks publish.
+8. `evidence_status = weak` requires explicit confirmation before publish.
+9. Copying to a training draft does not consume additional enterprise AI quota.
+10. Draft publish still goes through the four-step training wizard and preview.
+11. Published versions remain immutable; later changes copy to a new draft/version.
+12. Employee answering and analytics remain enterprise-training surfaces, not formal `mock_exam`, `exam_report`, or
+    `mistake_book`.
+
+### D24 AI Call Log Detail Redaction Correction
+
+- Older admin requirements wording that mentioned complete input/output summaries is superseded by the current log
+  governance boundary.
+- `ai_call_log` detail may show redacted input/output summaries, status, duration, cost/quota metadata, object type,
+  object id, model/provider metadata, and failure category.
+- It must not show raw Prompt, Provider payload, raw AI input/output, full `question`/`paper`/`material` content, or raw
+  employee answers. Object-level summaries and failure diagnostics follow the same redaction rule.
+
+### D25 Organization Backend And Account-Domain Correction
+
+- Older user-auth wording said the enterprise backend was not open in the first release. That is superseded by the
+  confirmed role-separated organization workspaces.
+- First release organization backend access is bounded: `org_standard_admin` gets scoped read-only organization,
+  employee roster/status, and authorization/status views; `org_advanced_admin` additionally gets enterprise training,
+  organization analytics, and organization AI.
+- Platform operations still owns organization tree mutation, employee import/mutation, and `org_auth` configuration.
+  Enterprise self-service for those operations remains future work.
+
+### D26 Employee Create/Import Field Correction
+
+- Employee single-create and batch-import flows both require operations to explicitly select the target `organization`
+  node before creating or importing employees.
+- Import rows contain phone and name, plus optional initial password. Single-create also accepts optional initial
+  password. If omitted, the system generates a password and shows it only in a one-time distribution window.
+- Import templates must not contain `profession`, `level`, `edition`, `orgAuthScopePublicId`, or employee-level
+  authorization whitelist fields. Employee access is inherited from valid `org_auth` on the selected organization node.
+
+### D27 Card Redemption Story Backfill
+
+- User stories must carry the same personal `redeem_code_type` behavior as module requirements and ADR-007.
+- `personal_standard_activation` creates or grants standard personal authorization; `personal_advanced_activation`
+  creates or grants advanced personal authorization.
+- `edition_upgrade` requires a matching valid standard personal authorization and explicit target selection if multiple
+  matches exist. Plaintext list/detail access remains limited to `ops_admin` and `super_admin`.
+
+### D28 Organization AI Generated-Output Visibility Correction
+
+- Eligible `org_advanced_admin` users need organization-scoped AI task status/history and generated output visibility to
+  review results and copy generated stem, options, `standard_answer`, and `analysis` into an organization training draft.
+- This visibility is not permission to inspect raw Prompt, Provider payload, raw AI IO, global AI logs, out-of-scope raw
+  task payloads, raw employee learner AI outputs, or unredacted evidence/audit content.
+
+### D29 Organization-Admin Employee Write Wording Correction
+
+- Older backend UX and role-separated docs used "manage employees" for organization admins. The current first-release
+  decision narrows that wording to scoped employee roster/status and authorization/status visibility.
+- Employee import, profile mutation, transfer, disable/unbind, password reset, and organization-tree mutation remain
+  platform `ops_admin` / `super_admin` operations unless a later task explicitly delegates a write flow.
+
+### D30 Generic Organization-Admin Advanced Capability Wording Correction
+
+- Generic "organization admin" wording for enterprise training and organization AI must be read as eligible
+  `org_advanced_admin` only unless a sentence explicitly discusses both standard and advanced roles.
+- `org_standard_admin` remains denied, hidden, unavailable, or upgrade-guided for enterprise training and organization
+  AI routes.
+
+### D31 Future-Extension And Account-Domain Wording Cleanup
+
+- Future extension wording should refer to enterprise self-service delegation, such as organization-tree maintenance,
+  employee import/mutation, and authorization configuration, rather than implying all organization admin workspaces are
+  future-only.
+- Phone-domain wording should remain precise: admin and organization-admin accounts cannot reuse learner/employee
+  account phones, while an existing learner account may still be bound as an employee inside the learner/employee account
+  domain.
+
+### D32 Older Role-Matrix Resource Ownership Cleanup
+
+- Older role-experience and backend UX matrix rows that list resources under `ops_admin` are superseded by the current
+  resource ownership decision.
+- Resource write ownership belongs to the content workspace for `content_admin` and `super_admin`. Operations read-only
+  support requires a later explicit task.
+
+### D33 Second-Pass Residual Wording Cleanup
+
+- Final validation found additional stale wording in advanced module/story text, source indexes, capability matrices, and
+  requirement fulfillment rows. These are not new product decisions; they are clarifications under D30, D32, CT-REQ-044,
+  and CT-REQ-057.
+- Future work must not use old cleartext-prohibition rows to block the eligible operations product UI exception, old
+  `ops_admin` resource rows to preserve resource write ownership, or generic "organization admin" wording to grant
+  advanced-only capabilities to `org_standard_admin`.
+- Requirement fulfillment rows for employee import must also follow the platform-owned employee write boundary:
+  `ops_admin` / `super_admin` perform import, while organization admins view roster/status in the first release.
+
+### D34 Closure Recheck Ops Resource Checklist Cleanup
+
+- Historical owner-facing `ops_admin.resource_knowledge_and_logs` wording is superseded wherever it could imply active
+  resource write ownership.
+- `ops_admin` scope is accounts, organizations, employees, authorization, `redeem_code`, imports, and redacted
+  log-summary governance.
+- Resource/`knowledge_base` management, `knowledge_node` maintenance, Markdown publish, upload, and vector rebuild stay
+  in the content workspace for `content_admin` / `super_admin`.
+
 ## Implementation Gap Register
 
-| Id    | Source inspection summary                                                                                                                               | Requirement impact                                                                                             | Later task direction                                        |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `G01` | `redeem_code_type` enum exists in schema, but admin list/detail currently expose `canViewPlainText: false`.                                             | Confirmed plaintext list/detail behavior for eligible operators is not implemented.                            | Scoped `redeem_code` UI/API/service task.                   |
-| `G02` | Redemption and generation runtime are not fully proven for all three personal `redeem_code_type` values.                                                | Standard activation, advanced activation, and upgrade behavior needs focused implementation validation.        | Scoped personal authorization and redemption task.          |
-| `G03` | Current employee import UI/source references `initialPassword`; optional random one-time generation is gap.                                             | Confirmed import fields and one-time password window need implementation.                                      | Scoped employee import/password task.                       |
-| `G04` | Employee transfer UI still displays `approval_required` wording in inspected source.                                                                    | Confirmed transfer should block on insufficient target quota and close with explicit transaction/session UX.   | Scoped employee transfer source task.                       |
-| `G05` | Organization training surfaces exist, but four-step wizard, source copy rules, deadline/reminder policy, and discard/takedown semantics need alignment. | Confirmed training workflow is broader than current generic surface.                                           | Organization training UX/source task after design.          |
-| `G06` | Organization analytics summary exists, but knowledge weak-point summaries and no-enterprise-AI-quota-summary rule need alignment.                       | Confirmed analytics scope differs from current summary fields.                                                 | Organization analytics source task after design.            |
-| `G07` | Organization AI generation route/surface exists, but copy-to-training-draft flow is not fully specified in source.                                      | Confirmed organization AI follow-up action is training draft creation, not formal platform adoption.           | Organization AI to training draft contract task.            |
-| `G08` | Model configuration management exists, but no confirmed connection-test action was found.                                                               | Confirmed `model_config_health_check` action needs design/source implementation.                               | Super-admin model config health-check task.                 |
-| `G09` | Atomic multi-scope `org_auth` remains a product direction and not a fully implemented scope table contract.                                             | Multi-profession/multi-level package needs schema/API/UI contract before source changes.                       | Docs-only atomic scope contract before implementation.      |
-| `G10` | Organization admin role boundaries are partially represented, but first-release read/write split must be proven in runtime.                             | `org_standard_admin` employee operations remain platform-owned; org admins need scoped read-only/status UX.    | Role/workspace runtime validation and targeted source task. |
-| `G11` | Resource management has both operations and content-adjacent surfaces in current source.                                                                | Confirmed ownership moves to content workspace and ops main resource entry should not remain the primary path. | Content resource IA/source task after UX contract.          |
-| `G12` | Registration route creates the user but the inspected service does not set a login session.                                                             | Confirmed registration success must leave the learner authenticated and route to `/redeem-code`.               | Scoped registration/session/redeem task.                    |
-| `G13` | Learner AI authorization context selection and quota-owner confirmation are not fully represented in inspected learner surfaces.                        | Confirmed AI quota owner must be explicit before organization quota use.                                       | Learner AI context source task after UX contract.           |
-| `G14` | Employee training UI still exposes numeric answer/score-oriented fields and old `组织培训` wording in places.                                           | Confirmed employee-facing `企业训练` requires real question-answer UI and post-submit feedback.                | Employee training source task after UX contract.            |
-| `G15` | Model/Prompt UI includes editable Prompt-style controls and masked prompt preview behavior.                                                             | Confirmed first release is read-only Prompt registry with super-admin full-text view only.                     | Prompt registry source task after security/design review.   |
-| `G16` | Organization analytics source includes formal learning and quota concepts, but UI boundaries need alignment.                                            | Confirmed formal learning must be separated and enterprise AI quota summary hidden from org admins.            | Organization analytics boundary task.                       |
+| Id    | Source inspection summary                                                                                                                                         | Requirement impact                                                                                                                    | Later task direction                                                                                  |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `G01` | `redeem_code_type` enum exists in schema, but admin list/detail currently expose `canViewPlainText: false`.                                                       | Confirmed plaintext list/detail behavior for eligible operators is not implemented.                                                   | Scoped `redeem_code` UI/API/service task.                                                             |
+| `G02` | Redemption and generation runtime are not fully proven for all three personal `redeem_code_type` values.                                                          | Standard activation, advanced activation, and upgrade behavior needs focused implementation validation.                               | Scoped personal authorization and redemption task.                                                    |
+| `G03` | Current employee import UI/source references `initialPassword`; optional random one-time generation is gap.                                                       | Confirmed import fields and one-time password window need implementation.                                                             | Scoped employee import/password task.                                                                 |
+| `G04` | Employee transfer UI still displays `approval_required` wording in inspected source.                                                                              | Confirmed transfer should block on insufficient target quota and close with explicit transaction/session UX.                          | Scoped employee transfer source task.                                                                 |
+| `G05` | Organization training surfaces exist, but four-step wizard, source copy rules, deadline/reminder policy, and discard/takedown semantics need alignment.           | Confirmed training workflow is broader than current generic surface.                                                                  | Organization training UX/source task after design.                                                    |
+| `G06` | Organization analytics summary exists, but knowledge weak-point summaries and no-enterprise-AI-quota-summary rule need alignment.                                 | Confirmed analytics scope differs from current summary fields.                                                                        | Organization analytics source task after design.                                                      |
+| `G07` | Organization AI generation route/surface exists, but copy-to-training-draft flow is not fully specified in source.                                                | Confirmed organization AI follow-up action is training draft creation, not formal platform adoption.                                  | Organization AI to training draft contract task.                                                      |
+| `G08` | Model configuration management exists, but no confirmed connection-test action was found.                                                                         | Confirmed `model_config_health_check` action needs design/source implementation.                                                      | Super-admin model config health-check task.                                                           |
+| `G09` | Atomic multi-scope `org_auth` remains a product direction and not a fully implemented scope table contract.                                                       | Multi-profession/multi-level package needs schema/API/UI contract before source changes.                                              | Docs-only atomic scope contract before implementation.                                                |
+| `G10` | Organization admin role boundaries are partially represented, but first-release read/write split must be proven in runtime.                                       | `org_standard_admin` employee operations remain platform-owned; org admins need scoped read-only/status UX.                           | Role/workspace runtime validation and targeted source task.                                           |
+| `G11` | Resource management has both operations and content-adjacent surfaces in current source.                                                                          | Confirmed ownership moves to content workspace and ops main resource entry should not remain the primary path.                        | Content resource IA/source task after UX contract.                                                    |
+| `G12` | Registration route creates the user but the inspected service does not set a login session.                                                                       | Confirmed registration success must leave the learner authenticated and route to `/redeem-code`.                                      | Scoped registration/session/redeem task.                                                              |
+| `G13` | Learner AI authorization context selection and quota-owner confirmation are not fully represented in inspected learner surfaces.                                  | Confirmed AI quota owner must be explicit before organization quota use.                                                              | Learner AI context source task after UX contract.                                                     |
+| `G14` | Employee training UI still exposes numeric answer/score-oriented fields and old `组织培训` wording in places.                                                     | Confirmed employee-facing `企业训练` requires real question-answer UI and post-submit feedback.                                       | Employee training source task after UX contract.                                                      |
+| `G15` | Model/Prompt UI includes editable Prompt-style controls and masked prompt preview behavior.                                                                       | Confirmed first release is read-only Prompt registry with super-admin full-text view only.                                            | Prompt registry source task after security/design review.                                             |
+| `G16` | Organization analytics source includes formal learning and quota concepts, but UI boundaries need alignment.                                                      | Confirmed formal learning must be separated and enterprise AI quota summary hidden from org admins.                                   | Organization analytics boundary task.                                                                 |
+| `G17` | ADR-007 and operations resource/user-management stable docs had older or under-detailed wording after the first package.                                          | Later work could incorrectly hide plaintext from eligible ops UI, leave resource write entry in ops, or miss user-management filters. | Recheck patch updates ADR/stable docs and ledger rows.                                                |
+| `G18` | Stable admin log wording used a broad complete input/output summary phrase.                                                                                       | Later work could expose raw Prompt, Provider payload, AI IO, full content, or employee answers in `ai_call_log` detail.               | Recheck patch limits log details to redacted summaries.                                               |
+| `G19` | Stable user-auth text still said enterprise backend was not open and used broad phone-domain wording.                                                             | Later work could remove confirmed organization-admin workspaces or block learner-to-employee binding incorrectly.                     | Recheck patch clarifies organization backend scope.                                                   |
+| `G20` | Stable user-auth employee create/import text still implied manual single-create password entry and omitted explicit target-node selection.                        | Later work could miss one-time generated password distribution or include auth fields in import templates.                            | Recheck patch clarifies employee create/import fields.                                                |
+| `G21` | User-auth stories carried generation type rows but not equivalent redemption semantics or eligible-role plaintext list wording.                                   | Later work could implement story ACs as generic card generation/list without upgrade target selection or role-limited plaintext.      | Recheck patch aligns story ACs with module requirements.                                              |
+| `G22` | Organization AI module wording could deny generated-output/task-summary visibility entirely.                                                                      | Later work could make organization AI unusable for training-draft copy even though the owner confirmed that handoff.                  | Recheck patch separates reviewable output from raw AI logs.                                           |
+| `G23` | Advanced organization training docs, older backend UX, and older role traceability still used broad "manage employees" wording for organization admins.           | Later work could accidentally delegate employee mutation to organization admins despite the confirmed platform-owned boundary.        | Second-pass patch narrows this to scoped read-only status.                                            |
+| `G24` | Advanced index, organization modules, and older traceability matrices used generic "organization admin" wording for advanced-only training and AI capabilities.   | Later work could grant `org_standard_admin` enterprise training or organization AI by interpreting broad wording literally.           | Second-pass patch names `org_advanced_admin` explicitly.                                              |
+| `G25` | Stable future-extension and phone-domain wording remained easy to misread after organization workspace and learner-to-employee binding decisions.                 | Later work could treat current organization workspaces as future-only or block learner-to-employee binding incorrectly.               | Second-pass patch clarifies extension and phone domains.                                              |
+| `G26` | Older role-experience and backend UX matrices still listed resources in `ops_admin` allowed behavior.                                                             | Later work could preserve operations resource write ownership despite the confirmed content-workspace migration.                      | Second-pass patch removes resource write from ops matrices.                                           |
+| `G27` | Advanced modules/stories still had residual generic "organization admin" wording for organization training, organization AI, analytics, and learner-AI summaries. | Later work could expose advanced-only training/analytics/AI usage surfaces to `org_standard_admin`.                                   | Final recheck patch narrows those rows to eligible `org_advanced_admin` where needed.                 |
+| `G28` | Older backend UX/source/capability matrices still had blanket cleartext or ordinary-list prohibitions for `redeem_code`.                                          | Later work could override the confirmed eligible `ops_admin` / `super_admin` plaintext list/detail/distribution UI exception.         | Final recheck patch adds eligible-operations exception wording while keeping evidence/log redaction.  |
+| `G29` | Requirement fulfillment matrix still mapped resource management to `ops_admin` management.                                                                        | Later work could treat resource write migration as optional instead of required.                                                      | Final recheck patch changes the row to content workspace ownership and old-route cleanup.             |
+| `G30` | Requirement fulfillment rows still allowed employee import for "organization admins where allowed".                                                               | Later work could accidentally delegate first-release employee import/write operations to organization admins.                         | Final recheck patch narrows employee import rows to `ops_admin` / `super_admin`.                      |
+| `G31` | Active use-case/capability catalogs still used generic `org_admin` for advanced-only organization AI/training/analytics and broad organization portal rows.       | Later work could grant `org_standard_admin` advanced-only surfaces or miss first-release read-only standard admin boundaries.         | Fourth-pass patch resolves actors to `org_standard_admin` versus `org_advanced_admin`.                |
+| `G32` | Root/story account wording still said phone was simply unique, without the confirmed account-domain distinction.                                                  | Later work could accidentally block learner-to-employee binding or allow admin/learner phone reuse inconsistently.                    | Fourth-pass patch clarifies learner/employee-domain uniqueness plus cross-domain non-reuse.           |
+| `G33` | Active catalog rows still contained blanket cleartext/card wording and organization analytics quota-summary wording.                                              | Later work could deny eligible operations plaintext UI or reintroduce enterprise AI quota consumption summaries for org admins.       | Fourth-pass patch preserves eligible ops UI exception and removes org-admin AI quota summary wording. |
+| `G34` | Stable RAG module/story still placed manual vector rebuild under operations after resource management moved to content.                                           | Later work could preserve a hidden operations resource write action through vector rebuild even after content-workspace migration.    | Closure recheck patch moves vector rebuild actor wording to `content_admin` / `super_admin`.          |
+| `G35` | Owner-facing `ops_admin` checklist still listed resource/knowledge management and vector rebuild as active operations scope.                                      | Later walkthrough or source tasks could reuse historical checklist wording as an active `ops_admin` resource-write grant.             | Closure recheck patch supersedes the row and narrows `ops_admin` to operations plus redacted logs.    |
 
 ## Completeness Checklist
 
@@ -338,11 +509,18 @@ Each discussed item is classified before becoming follow-up work:
 - Organization analytics levels, date ranges, no export, small sample warning, weak-point summary, and no enterprise AI
   quota summary recorded.
 - Organization workspace menu boundaries recorded.
+- Organization-admin employee write boundary and advanced-only capability naming recorded.
 - Operations workspace guided flows, timelines, pagination, and backend role management boundaries recorded.
 - Content AI, organization AI, model connection test, Prompt registry, logs, and contact configuration recorded.
 - Content resource ownership migration, learner auth/redeem/profile, learner practice/mock/report/mistake, employee
   training answer/result, system-admin account management, organization analytics separation, Prompt full-text registry,
   and no-repeat discussion process recorded.
+- Second-pass residual wording cleanup for advanced-only organization admin capabilities, eligible plaintext UI
+  exception, content-owned resource management, and platform-owned employee import recorded.
+- Fourth-pass active-catalog cleanup for generic `org_admin`, account-domain phone uniqueness, eligible plaintext UI
+  exception, and organization analytics no-AI-quota-summary wording recorded.
+- Closure recheck cleanup for resource/vector rebuild actor ownership and owner-facing `ops_admin` checklist
+  supersession recorded.
 
 ## Non-Claims
 

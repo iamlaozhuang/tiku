@@ -5,6 +5,11 @@
 - Status: partial
 - Date: `2026-06-29`
 
+2026-07-02 supersession note: historical `ops_admin.resource_knowledge_and_logs` wording in this workflow is not an
+active permission grant for resource management. Resource/`knowledge_base` write actions and vector rebuild belong to
+the content workspace for `content_admin` / `super_admin`; `ops_admin` retains explicitly scoped operations and redacted
+log-summary responsibilities.
+
 ## Objective
 
 Execute localhost-only owner-facing acceptance for `ops_admin` against the mandatory role checklist. Evidence is limited
@@ -19,7 +24,7 @@ Source: `docs/01-requirements/traceability/2026-06-28-owner-facing-role-gap-capt
 - `ops_admin.enterprise_authorization_and_atomic_scope`
 - `ops_admin.employee_import`
 - `ops_admin.redeem_code`
-- `ops_admin.resource_knowledge_and_logs`
+- `ops_admin.resource_knowledge_and_logs` (historical row name; resource-write scope superseded)
 - `ops_admin.prompt_governance_denial_or_safe_summary`
 
 ## Scope
@@ -46,15 +51,15 @@ the mandatory checklist has redacted pass evidence or an approved blocked-gate r
 
 ## Row Results
 
-| Checklist row                                         | Status  | Evidence summary                                                                                 |
-| ----------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `ops_admin.workspace_and_denials`                     | pass    | Operations routes reachable; forbidden content/org/provider/cost/deploy routes denied.           |
-| `ops_admin.user_organization_employee_operations`     | pass    | User and organization operation surfaces produced redacted route/control counts.                 |
-| `ops_admin.enterprise_authorization_and_atomic_scope` | pass    | Authorization and scope labels/counts visible on operations routes.                              |
-| `ops_admin.employee_import`                           | partial | Import entry present, but action stayed disabled; upload/status workflow unproven.               |
-| `ops_admin.redeem_code`                               | pass    | Generate control enabled after valid form state; plaintext redeem-code patterns 0.               |
-| `ops_admin.resource_knowledge_and_logs`               | pass    | Resource/log routes reachable; raw payload/secret-value pattern counts 0.                        |
-| `ops_admin.prompt_governance_denial_or_safe_summary`  | pass    | Provider/prompt edit surfaces denied/unavailable; AI audit route limited to safe summary counts. |
+| Checklist row                                         | Status  | Evidence summary                                                                                           |
+| ----------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| `ops_admin.workspace_and_denials`                     | pass    | Operations routes reachable; forbidden content/org/provider/cost/deploy routes denied.                     |
+| `ops_admin.user_organization_employee_operations`     | pass    | User and organization operation surfaces produced redacted route/control counts.                           |
+| `ops_admin.enterprise_authorization_and_atomic_scope` | pass    | Authorization and scope labels/counts visible on operations routes.                                        |
+| `ops_admin.employee_import`                           | partial | Import entry present, but action stayed disabled; upload/status workflow unproven.                         |
+| `ops_admin.redeem_code`                               | pass    | Generate control enabled after valid form state; plaintext redeem-code patterns 0.                         |
+| `ops_admin.resource_knowledge_and_logs`               | pass    | Historical redaction check only; resource write ownership is superseded by the content-workspace decision. |
+| `ops_admin.prompt_governance_denial_or_safe_summary`  | pass    | Provider/prompt edit surfaces denied/unavailable; AI audit route limited to safe summary counts.           |
 
 ## Follow-Up
 

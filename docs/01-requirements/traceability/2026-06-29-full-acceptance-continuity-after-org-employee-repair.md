@@ -5,6 +5,11 @@
 - Status: implemented
 - Date: `2026-06-29`
 
+2026-07-02 supersession note: historical `ops_admin` resource/knowledge checklist wording is not an active permission
+grant for resource management. Resource/`knowledge_base` write actions and vector rebuild belong to the content
+workspace for `content_admin` / `super_admin`; `ops_admin` retains explicitly scoped operations and redacted log-summary
+responsibilities.
+
 ## Objective
 
 Restore queue continuity after the scoped `org_advanced_employee` AI detail-control repair. The durable goal remains
@@ -32,12 +37,12 @@ concrete role acceptance task.
 
 ## Remaining Coverage Classes
 
-| Role                        | Remaining class                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ops_admin`                 | Operations workspace, authorization, employee import, `redeem_code`, resource/knowledge/log redaction |
-| `content_admin`             | Formal content lifecycle mutation/review and AI draft review/adoption boundary                        |
-| `personal_standard_student` | Standard learner practice/mock/mistake workflow and advanced AI denial                                |
-| `personal_advanced_student` | Learner AI detail controls, generated-content practice, feedback, retry/quota/unavailable states      |
+| Role                        | Remaining class                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `ops_admin`                 | Operations workspace, authorization, employee import, `redeem_code`, redacted logs; historical resource/knowledge wording superseded |
+| `content_admin`             | Formal content lifecycle mutation/review and AI draft review/adoption boundary                                                       |
+| `personal_standard_student` | Standard learner practice/mock/mistake workflow and advanced AI denial                                                               |
+| `personal_advanced_student` | Learner AI detail controls, generated-content practice, feedback, retry/quota/unavailable states                                     |
 
 ## Seeded Next Task
 

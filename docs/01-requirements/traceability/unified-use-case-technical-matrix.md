@@ -70,7 +70,8 @@ Candidate file/module paths are planning targets only. They are not evidence tha
   `src/server/validators/authorization/**`, `src/server/mappers/authorization/**`,
   `src/db/schema/*authorization*`, `src/db/schema/*redeem-code*`, `src/app/(admin)/**`, `src/app/(student)/**`
 - `implementationEligible`: `blocked_until_gate_approved`
-- `blockedGates`: cleartext `redeem_code`, payment, provider measurement, env/secret, schema, and Cost Calibration
+- `blockedGates`: cleartext `redeem_code` outside the 2026-07-02 eligible operations UI exception, payment, provider
+  measurement, env/secret, schema, and Cost Calibration
   gates remain blocked.
 - `conflictRefs`: `CFX-PROVIDER-001`
 - `auditUseOnly`: `false`

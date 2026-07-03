@@ -226,8 +226,8 @@ without leaking content to organization admins or formal content records?
 - Generated output stays in the learner AI content domain owned by the employee/user in the organization context.
 - It must not write formal `question`, formal `paper`, formal `practice`, formal `mock_exam`, formal `exam_report`, or
   formal `mistake_book` records by itself.
-- Organization admins may see redacted usage and quota summaries only; they must not see raw generated content, prompts,
-  raw AI input/output, or task details.
+- Organization admins may see redacted organization usage/status summaries where approved, but not enterprise AI quota
+  consumption summaries; they must not see raw generated content, prompts, raw AI input/output, or task details.
 
 #### Employee `AI组卷`
 
@@ -245,16 +245,17 @@ without leaking content to organization admins or formal content records?
 
 ## Role Checklist: `ops_admin`
 
-Primary question: can platform operations safely govern accounts, organizations, authorization, import, resources, and
-logs without becoming a content authoring or Prompt-editing superuser?
+Primary question: can platform operations safely govern accounts, organizations, authorization, employee import,
+`redeem_code`, and redacted logs without becoming a content authoring, resource-management, or Prompt-editing superuser?
 
 ### Workspace And Denials
 
 - Starts in the operations workspace.
 - Can access `user`, `organization`, `employee`, `redeem_code`, `authorization`, `personal_auth`, `org_auth`,
-  resources, `knowledge_base`, `audit_log`, and `ai_call_log` summary surfaces.
+  `audit_log`, and `ai_call_log` summary surfaces.
 - Cannot access content authoring routes for formal `question`, `material`, `paper`, or content AI draft creation.
-- Cannot access organization training management, organization analytics, organization AI generation, Provider config,
+- Cannot access resource upload, Markdown publish, `knowledge_base` management, `knowledge_node` maintenance, vector
+  rebuild trigger, organization training management, organization analytics, organization AI generation, Provider config,
   Cost Calibration, payment, staging/prod, deploy, OCR/export, or external-service execution.
 
 ### User, Organization, And Employee Operations
@@ -307,10 +308,12 @@ logs without becoming a content authoring or Prompt-editing superuser?
 - Any reveal/copy flow for distribution is separately permissioned and remains excluded from evidence unless later
   approved.
 
-### Resource, Knowledge, And Logs
+### Logs And Resource Boundary
 
-- Resource and `knowledge_base` management can cover upload, Markdown publish, `knowledge_node`, vector rebuild trigger,
-  and status handling where already implemented or later approved.
+- Resource and `knowledge_base` management, including upload, Markdown publish, `knowledge_node` maintenance, vector
+  rebuild trigger, and status handling, belongs to the content workspace for `content_admin` / `super_admin`.
+- `ops_admin` must not regain a resource write entry through historical `ops_admin.resource_knowledge_and_logs`
+  checklist wording.
 - Must not execute OCR/export or external services under this scope.
 - `audit_log` and `ai_call_log` views show redacted summaries only.
 - Ordinary log details must not show prompt text, Provider payload, raw AI output, secret, token, API key, plaintext

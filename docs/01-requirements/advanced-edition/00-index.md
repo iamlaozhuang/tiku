@@ -88,8 +88,8 @@ Implementation planning references:
 Advanced edition MVP focuses on:
 
 - personal advanced learner and organization advanced employee AI question generation and AI `paper` generation;
-- organization admin AI question generation and AI `paper` generation for organization-owned content;
-- organization admin creates organization training;
+- `org_advanced_admin` AI question generation and AI `paper` generation for organization-owned content;
+- `org_advanced_admin` creates organization training;
 - employee answer statistics;
 - platform operations governance for `authorization`, `redeem_code`, quota, `audit_log`, and `ai_call_log`.
 
@@ -125,7 +125,8 @@ Advanced edition MVP focuses on:
 ## Cross-Cutting Boundaries
 
 - AI generated learning content must not automatically write to formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
-- Advanced learner, organization admin, and content admin AI generation entries must be discoverable; URL-only access fails acceptance.
+- Advanced learner, `org_advanced_admin`, and content admin AI generation entries must be discoverable; URL-only access
+  fails acceptance.
 - Organization-owned AI generated content must remain separate from the platform formal question bank and paper library unless a later governed adoption path is explicitly approved.
 - Content admin AI generated content must remain in an isolated review surface until governed formal adoption is complete.
 - Organization training answer statistics must not be mixed into formal `exam_report` or formal `mistake_book`.

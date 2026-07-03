@@ -2,7 +2,7 @@
 
 ## Actor
 
-Organization admin with valid `org_auth`.
+`org_advanced_admin` with valid advanced `org_auth`.
 
 ## Goal
 
@@ -10,7 +10,7 @@ Create organization training for employees inside the authorized organization sc
 
 ## Acceptance Scenario
 
-1. Organization admin enters the organization training management surface.
+1. `org_advanced_admin` enters the organization training management surface.
 2. The system checks organization scope and effective `authorization`.
 3. The admin creates organization training content.
 4. Employees in scope can answer the assigned training.
@@ -19,7 +19,8 @@ Create organization training for employees inside the authorized organization sc
 7. `org_standard_admin` cannot manage organization training by menu visibility or direct URL entry.
 8. `org_advanced_employee` can discover assigned `企业训练` after login.
 9. `org_standard_employee` cannot discover or answer `企业训练`.
-10. Organization admin creates training through a four-step wizard: source, configuration, publish settings, preview/publish.
+10. `org_advanced_admin` creates training through a four-step wizard: source, configuration, publish settings,
+    preview/publish.
 11. Source options are platform paper snapshot, organization AI result, and organization-private manual grouping/manual questions.
 12. `mock_exam` is not offered as a training source.
 13. Publish scope supports current organization node only or current plus descendant nodes.

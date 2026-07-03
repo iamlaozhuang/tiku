@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define how organization admins create organization training and how employees answer it.
+Define how eligible advanced organization admins create organization training and how employees answer it.
 
 ## Source Documents
 
@@ -11,19 +11,21 @@ Define how organization admins create organization training and how employees an
 
 ## Scope
 
-- Organization admin creates organization training inside valid `org_auth` and organization scope.
+- `org_advanced_admin` creates organization training inside valid advanced `org_auth` and organization scope.
 - Employees answer organization training assigned to their organization context.
 - Organization training content remains separate from formal `paper` and formal `mock_exam` flows.
 - Organization training operations produce governed summaries and may write `audit_log` where required.
 - `org_standard_employee` must not see `企业训练`.
 - `org_advanced_employee` must see assigned `企业训练` when valid advanced `org_auth` covers the employee's `organization`.
-- `org_standard_admin` can manage employees and view organization authorization/status only; it cannot manage organization training.
+- `org_standard_admin` can view scoped employee roster/status and organization authorization/status only; platform
+  operations owns employee import and mutation in the first release. `org_standard_admin` cannot manage organization
+  training.
 - `org_advanced_admin` can manage organization training inside its scoped `organization`.
 - Organization admin surfaces are first-class organization workspaces, not system operations workspaces with an organization filter bolted on.
 
 ## Acceptance Boundaries
 
-- Organization admins can manage training for their organization scope.
+- `org_advanced_admin` can manage training for its organization scope.
 - Employees can answer assigned training.
 - Standard organization employees and standard organization admins cannot access training through menu visibility or manual URL entry.
 - Advanced organization training entry must be discoverable for eligible admins and employees; URL-only access fails acceptance.
@@ -45,7 +47,7 @@ Define how organization admins create organization training and how employees an
   - organization-private manual grouping/manual questions.
 - `mock_exam` is not a source entry for organization training.
 - Publish scope supports current organization node only or current plus descendant nodes.
-- Platform paper import lets organization admin view the full copied stem, options, `standard_answer`, and `analysis`.
+- Platform paper import lets `org_advanced_admin` view the full copied stem, options, `standard_answer`, and `analysis`.
   Edits apply only to the copied snapshot and never write back to the platform paper.
 - Organization AI output can be copied into a training draft. Generated stem, options, `standard_answer`, and `analysis`
   are editable in that draft.

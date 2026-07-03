@@ -8,6 +8,11 @@
 - Runtime claim: pending local browser execution.
 - Implementation claim: none.
 
+2026-07-02 supersession note: any historical `ops_admin.resource_knowledge_and_logs` wording in this material is not an
+active permission grant for resource management. Resource/`knowledge_base` write actions and vector rebuild belong to
+the content workspace for `content_admin` / `super_admin`; `ops_admin` retains only explicitly scoped operations and
+redacted log-summary responsibilities.
+
 ## Mandatory Checklist Gate
 
 This task is governed by:
@@ -21,7 +26,7 @@ Relevant checklist rows:
 - `ops_admin.enterprise_authorization_and_atomic_scope`
 - `ops_admin.employee_import`
 - `ops_admin.redeem_code`
-- `ops_admin.resource_knowledge_and_logs`
+- `ops_admin.resource_knowledge_and_logs` (historical row name; resource-write scope superseded)
 
 This task can only close the current-session `ops_admin` coverage gap left by
 `full-acceptance-option-a-session-coverage-2026-06-28`. It cannot claim final Pass, release readiness, or full durable

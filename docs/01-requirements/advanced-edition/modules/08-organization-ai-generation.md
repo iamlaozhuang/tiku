@@ -13,9 +13,11 @@ Define how advanced organization admins use AI question generation and AI `paper
 
 ## Scope
 
-- Organization admins request AI question generation and AI `paper` generation inside valid advanced `org_auth` and organization scope.
-- The generated output belongs to the `organization` and is managed by organization admins.
-- Generated output may support organization-managed training or internal learning use after organization admin confirmation.
+- `org_advanced_admin` requests AI question generation and AI `paper` generation inside valid advanced `org_auth` and
+  organization scope.
+- The generated output belongs to the `organization` and is managed by eligible `org_advanced_admin` users.
+- Generated output may support organization-managed training or internal learning use after `org_advanced_admin`
+  confirmation.
 - Generated output must remain separate from platform formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book` records.
 - The organization backend must expose a discoverable entry; requiring manual URL input is not acceptable.
 - The approved role-separated MVP entry labels are `AI出题` and `AI组卷` inside the organization advanced backend.
@@ -35,13 +37,13 @@ Define how advanced organization admins use AI question generation and AI `paper
 
 ## Acceptance Boundaries
 
-- Organization admins can find an organization AI generation entry from the organization backend.
+- Eligible `org_advanced_admin` users can find an organization AI generation entry from the organization backend.
 - The system checks effective advanced organization authorization before allowing generation.
 - The organization backend landing and navigation must prove a separated organization admin workspace, not a redirect into system operations pages.
 - Organization standard admin access to organization AI generation must fail with a clear denied/unavailable state.
 - AI question generation and AI `paper` generation create trackable tasks and redacted operational evidence.
 - Organization-owned AI output is not written into the platform formal question bank or paper library.
-- Employee-visible training or paper-like assignments require explicit organization admin confirmation.
+- Employee-visible training or paper-like assignments require explicit `org_advanced_admin` confirmation.
 - Organization-owned AI output may be copied into an organization training draft, where generated stem, options,
   `standard_answer`, and `analysis` can be edited before publish.
 - `evidence_status = none` blocks training draft publish or formal content adoption. `evidence_status = weak` requires
@@ -52,8 +54,13 @@ Define how advanced organization admins use AI question generation and AI `paper
 
 ## Confirmed Boundaries
 
-- Organization admins cannot inspect raw employee learner AI outputs, prompt, raw AI input/output, generated content summaries, single-task details, or task-list summaries.
-- Organization admins can inspect organization-scoped usage summaries, training statistics, and redacted audit summaries.
+- Organization admins cannot inspect raw employee learner AI outputs, Prompt text, raw AI input/output, Provider payload,
+  global AI logs, or raw task payloads outside their scoped `organization`.
+- Eligible `org_advanced_admin` users can inspect their own organization AI task status/history and generated output
+  needed to review or copy into an organization training draft. Evidence and audit summaries for this activity remain
+  redacted.
+- `org_standard_admin` visibility is limited to authorization/status, scoped roster/status, and support surfaces.
+  Organization AI usage summaries and training statistics require eligible `org_advanced_admin` scope.
 - Organization admins do not see enterprise AI quota consumption summaries in the first release.
 - Organization training unpublished drafts follow the first-release draft retention policy.
 - Published organization training/content follows the approved long-term published retention policy.

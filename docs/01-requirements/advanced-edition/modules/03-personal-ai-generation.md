@@ -42,7 +42,11 @@ Define the learner-facing experience for AI question generation and AI `paper` g
 - Standard learners and standard organization employees must receive clear unavailable/denied states for direct advanced AI route access.
 - Personal AI generated content is visible to the owning user.
 - Organization employee AI generated content is visible to the owning employee/user by default.
-- Organization admins can see redacted employee AI usage, quota, and audit summaries for organization-context usage, but cannot see raw generated content, prompt, raw input/output, generated content summaries, single-task details, or task-list summaries.
+- Eligible `org_advanced_admin` users may see redacted organization-context learner AI usage summaries and redacted audit
+  summaries where approved, but no enterprise AI quota consumption summary. They cannot see employee raw generated
+  content, Prompt text, raw input/output, generated content summaries, single-task details, or task-list summaries.
+- This learner-AI boundary does not prohibit eligible `org_advanced_admin` users from reviewing their own
+  organization-owned AI output for the approved organization-training draft handoff.
 - Generated content does not automatically become formal `question` or `paper`.
 - Generated content does not create formal `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
 - Adoption into formal `question` or `paper` draft flows requires a separate review and governance path.

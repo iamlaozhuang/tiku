@@ -2,7 +2,7 @@
 
 ## Actor
 
-Organization admin reviewing employee organization training summaries.
+`org_advanced_admin` reviewing employee organization training summaries.
 
 ## Goal
 

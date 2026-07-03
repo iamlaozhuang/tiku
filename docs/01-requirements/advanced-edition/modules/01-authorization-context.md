@@ -24,9 +24,11 @@ Define the advanced edition access context used by personal users, organization 
 
 - A personal user can use advanced edition capabilities only when the effective `authorization` context allows it.
 - An employee may use organization-provided access only inside the allowed organization context.
-- Organization admins can see organization-level summaries, not unrelated personal content.
+- Organization admins can see organization-level status summaries according to role, not unrelated personal content;
+  enterprise training, analytics, and organization AI summaries require eligible `org_advanced_admin` scope.
 - Existing unversioned authorization remains compatible by being interpreted as standard until a later approved migration records explicit edition.
-- Cleartext `redeem_code` must not be exposed in ordinary views, evidence, or logs.
+- Cleartext `redeem_code` must not be exposed outside the confirmed eligible operations product UI exception for
+  `ops_admin` / `super_admin`; evidence, screenshots, exports, committed docs, and logs remain redacted.
 
 ## Non-Goals
 

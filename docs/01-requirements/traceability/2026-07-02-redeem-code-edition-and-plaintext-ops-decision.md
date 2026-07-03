@@ -61,6 +61,8 @@ Confirmed behavior:
 
 Redaction boundary:
 
+- This decision supersedes ADR-007's older blanket plaintext prohibition only for the eligible operations product UI
+  surfaces listed above.
 - `audit_log` must record view/copy metadata, including actor, action, time, target `publicId`, and purpose or reason when collected.
 - `audit_log` must not store plaintext card values or card hashes.
 - Evidence, committed documents, runtime logs, error logs, screenshots, exported files, and non-distribution audit summaries must not contain plaintext `redeem_code` values.

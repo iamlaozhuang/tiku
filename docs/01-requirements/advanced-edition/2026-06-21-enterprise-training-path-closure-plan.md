@@ -1,17 +1,22 @@
 # Enterprise Training Path Closure Plan
 
 **Date:** 2026-06-21
-**Decision status:** blocked closure plan recorded; follow-up approval allows org_admin training content management to be considered first as a separate local implementation candidate.
+**Decision status:** blocked closure plan recorded; follow-up approval allows `org_advanced_admin` training content management to be considered first as a separate local implementation candidate.
 **Related use cases:** `UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE`, `UC-ADV-EMPLOYEE-TRAINING-ANSWER`, `UC-ADV-ORG-ANALYTICS-SUMMARY`, `UC-ADV-ORG-PORTAL-ADMIN`
+
+2026-07-02 supersession note: generic `org_admin` wording in this dated closure plan is read through the current
+decision package. First release `org_standard_admin` is scoped read-only for organization/employee/auth status;
+enterprise training, organization analytics, and organization AI capability apply only to eligible `org_advanced_admin`
+unless a later task explicitly approves delegated self-service mutation.
 
 ## Current Closure State
 
-The advanced enterprise backend and employee training path is not closed as a runtime experience. It is closed in this batch as `approval_blocked` with explicit next steps. Follow-up approval on 2026-06-21 selected option B: a later separately scoped org_admin `organization_training` content-management local implementation candidate may be considered before employee training and analytics, while runtime closure remains blocked.
+The advanced enterprise backend and employee training path is not closed as a runtime experience. It is closed in this batch as `approval_blocked` with explicit next steps. Follow-up approval on 2026-06-21 selected option B: a later separately scoped `org_advanced_admin` `organization_training` content-management local implementation candidate may be considered before employee training and analytics, while runtime closure remains blocked.
 
 Static facts:
 
 - Advanced requirements include organization training, employee answer statistics, and organization analytics.
-- Role matrix marks `org_admin` enterprise backend as `release_blocked` and employee training assignment as `gap`.
+- Role matrix marks organization admin enterprise backend as `release_blocked` and employee training assignment as `gap`.
 - Static routes and services exist for `organization_training`, employee answers, and organization analytics.
 - `organization-training-service.ts` contains explicit blockers such as `advanced_edition_required`, `org_auth_required`, `organization_training_capability_required`, `authorization_scope_mismatch`, and employee answer privacy behavior such as `own_summary_only`.
 - The org_auth scope model is not stable enough for runtime closure because subject, multi-profession, multi-level, quota attribution, and shared enterprise backend semantics still require implementation approval and security review.
@@ -28,15 +33,15 @@ Static facts:
 
 ## Follow-Up Task Split
 
-These tasks should not start until their prerequisites are met. Option B only relaxes the ordering for org_admin training content management as a local implementation candidate; it does not make the runtime experience closed.
+These tasks should not start until their prerequisites are met. Option B only relaxes the ordering for `org_advanced_admin` training content management as a local implementation candidate; it does not make the runtime experience closed.
 
-| order | task id                                           | classification                                       | prerequisite                                                                                                | scope                                                                                                        | validation                                                                        |
-| ----- | ------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| 1     | `close-organization-training-admin-management`    | `local_implementation`, `runtime_verification_later` | option B admin-first sequencing approval; preserve existing org_auth blockers and formal-content separation | Close org_admin draft, publish, take-down, copy, and source-context admin flow as local implementation only. | Focused unit/service/UI tests, redacted audit evidence; no runtime closure claim. |
-| 2     | `stabilize-org-auth-effective-scope-for-training` | `approval_blocked`, `security_review_required`       | merged org_auth contract/security preflight approval                                                        | Ensure advanced `org_auth` can grant organization_training capability safely.                                | Contract/service/security tests; no browser proof yet.                            |
-| 3     | `close-employee-training-answer-flow`             | `local_implementation`, `security_review_required`   | stable employee organization context and training visibility                                                | Close visible list, draft save, submit once per version, and read-only own summary.                          | Focused unit/service/UI tests, privacy assertions, duplicate blocking.            |
-| 4     | `close-organization-training-analytics-summary`   | `local_implementation`, `security_review_required`   | employee answer flow and privacy review                                                                     | Close organization-scoped aggregate statistics without raw answer leakage.                                   | Aggregate-only tests and redacted evidence scan.                                  |
-| 5     | `verify-enterprise-training-runtime-experience`   | `runtime_verification_later`, `approval_blocked`     | tasks 1 through 4 complete and fresh runtime approval                                                       | Run org_admin and employee browser/dev-server path verification.                                             | Browser/e2e or manual runtime evidence after approval only.                       |
+| order | task id                                           | classification                                       | prerequisite                                                                                                | scope                                                                                                                   | validation                                                                        |
+| ----- | ------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1     | `close-organization-training-admin-management`    | `local_implementation`, `runtime_verification_later` | option B admin-first sequencing approval; preserve existing org_auth blockers and formal-content separation | Close `org_advanced_admin` draft, publish, take-down, copy, and source-context admin flow as local implementation only. | Focused unit/service/UI tests, redacted audit evidence; no runtime closure claim. |
+| 2     | `stabilize-org-auth-effective-scope-for-training` | `approval_blocked`, `security_review_required`       | merged org_auth contract/security preflight approval                                                        | Ensure advanced `org_auth` can grant organization_training capability safely.                                           | Contract/service/security tests; no browser proof yet.                            |
+| 3     | `close-employee-training-answer-flow`             | `local_implementation`, `security_review_required`   | stable employee organization context and training visibility                                                | Close visible list, draft save, submit once per version, and read-only own summary.                                     | Focused unit/service/UI tests, privacy assertions, duplicate blocking.            |
+| 4     | `close-organization-training-analytics-summary`   | `local_implementation`, `security_review_required`   | employee answer flow and privacy review                                                                     | Close organization-scoped aggregate statistics without raw answer leakage.                                              | Aggregate-only tests and redacted evidence scan.                                  |
+| 5     | `verify-enterprise-training-runtime-experience`   | `runtime_verification_later`, `approval_blocked`     | tasks 1 through 4 complete and fresh runtime approval                                                       | Run `org_advanced_admin` and employee browser/dev-server path verification.                                             | Browser/e2e or manual runtime evidence after approval only.                       |
 
 ## Privacy And Security Rules
 
@@ -51,7 +56,7 @@ Before implementation, reviewers must confirm:
 
 ## Closure Status For This Batch
 
-- `org_admin` enterprise backend: admin content-management local implementation may be considered first as a separate scoped task, but runtime closure remains blocked until org_auth implementation and runtime proof.
+- `org_advanced_admin` enterprise backend: admin content-management local implementation may be considered first as a separate scoped task, but runtime closure remains blocked until org_auth implementation and runtime proof.
 - `employee` training assignment and answer flow: blocked until org_auth implementation, privacy review, and runtime proof.
 - Organization analytics: blocked until employee answer privacy and aggregate-only rules are verified.
 - Provider-backed training content generation: blocked by Provider/env/cost gates.
