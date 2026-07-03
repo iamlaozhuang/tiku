@@ -358,6 +358,146 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ops-authorization-ui-ux-contract-2026-07-02
+    title: Operations authorization UI/UX contract
+    phase: ops-authorization-ui-ux-contract-2026-07-02
+    sourceStory: current_user_approved_serial_ui_ux_contract_packages_with_required_reads_two_self_reviews_commit_merge_push_cleanup_2026_07_02
+    humanApprovalBoundary: current_user_approved_per_package_commit_fast_forward_merge_push_cleanup_2026_07_02
+    targetClosureItem: Establish package 1 operations authorization UI/UX contract for org_auth, redeem_code, employees, organization tree, and pagination from existing requirement decisions and current source implementation evidence.
+    behaviorBoundary: docs_ui_ux_requirement_contract_only_no_product_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_ui_ux_requirement_contract
+    moduleRunVersion: 2
+    status: closed
+    result: completed_package_1_ops_authorization_ui_ux_contract_with_two_review_passes_and_gates
+    priority: p1
+    branch: codex/ops-authorization-uiux-contract-2026-07-02
+    dependsOn:
+      - current-thread-decision-package-closeout-2026-07-02
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ops-authorization-ui-ux-contract.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-authorization-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-authorization-ui-ux-contract.md
+    requirementContractPath: docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md
+    allowedFiles:
+      - docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ops-authorization-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-ops-authorization-ui-ux-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ops-authorization-ui-ux-contract.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/services/admin-redeem-code-runtime.ts
+      - src/server/repositories/admin-redeem-code-runtime-repository.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/validators/org-auth.ts
+      - src/server/services/employee-account-service.ts
+      - src/server/validators/employee-account.ts
+      - src/server/repositories/employee-account-repository.ts
+      - src/app/api/v1/redeem-codes/**
+      - src/app/api/v1/org-auths/**
+      - src/app/api/v1/employees/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsUiUxContract: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_ui_ux_contract_only
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Contract cites existing decisions for org_auth overlap closure, redeem_code type/plaintext, employee import, organization tree, organization admin write boundary, and pagination.
+      - Contract separates existing requirements, current source implementation evidence, and follow-up source gaps.
+      - Contract contains no product source changes, schema decisions, Provider/browser/DB/dependency/deploy actions, release readiness, final Pass, production usability, or Cost Calibration claims.
+      - Two self-review passes are recorded before closeout.
+      - Commit, fast-forward merge, push, and cleanup happen only after declared validations pass.
+    validationCommands:
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-authorization-ui-ux-contract-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ops-authorization-ui-ux-contract-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-authorization-ui-ux-contract-2026-07-02 -SkipRemoteAheadCheck
+    validationSummary:
+      status: passed
+      prettierWritePassed: true
+      formatCheckPassed: true
+      gitDiffCheckPassed: true
+      moduleRunV2PreCommitHardeningPassed: true
+      moduleRunV2ModuleCloseoutReadinessPassed: true
+      moduleRunV2PrePushReadinessPassed: true
+      twoReviewPassesRecorded: true
+      requirementContractRecorded: true
+      currentImplementationEvidenceRecorded: true
+      followUpSourceGapRegisterRecorded: true
+      repositoryShaCheckpointRepaired: true
+      sourceOrTestChanged: false
+      productSourceChanged: false
+      providerCallExecuted: false
+      providerConfigurationRead: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+
   - id: current-thread-decision-package-closeout-2026-07-02
     title: Current thread decision package closeout
     phase: current-thread-decision-package-closeout-2026-07-02
