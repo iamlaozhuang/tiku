@@ -452,6 +452,26 @@ function RedeemCodePreparationNotice() {
   );
 }
 
+function AccountSupportNotice() {
+  return (
+    <section className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1">
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+          <AlertCircle className="size-4" aria-hidden="true" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-text-primary text-sm font-semibold">
+            账号与密码帮助
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            首期不支持学员自行修改手机号或密码。忘记密码、手机号变更或账号异常时，请联系平台运营处理。
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
   const contactConfig = LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG;
 
@@ -623,6 +643,7 @@ export function StudentProfilePage() {
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
       <ProfileHeader authContext={authContext} onLogout={handleLogout} />
       <ProfileNavLinks />
+      <AccountSupportNotice />
 
       <section className="space-y-3">
         <div className="flex items-center gap-2">
@@ -684,6 +705,9 @@ export function StudentRedeemCodePage() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [personalAuths, setPersonalAuths] = useState<PersonalAuthDto[]>([]);
   const [redeemCode, setRedeemCode] = useState("");
+  const [reviewedRedeemCode, setReviewedRedeemCode] = useState<string | null>(
+    null,
+  );
   const [submitState, setSubmitState] = useState<RedeemSubmitState>("idle");
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
@@ -695,6 +719,7 @@ export function StudentRedeemCodePage() {
     REDEEM_CODE_PATTERN.test(normalizedRedeemCode) &&
     submitState !== "submitting" &&
     loadState === "ready";
+  const isConfirmationReady = reviewedRedeemCode === normalizedRedeemCode;
 
   useEffect(() => {
     let isActive = true;
@@ -753,6 +778,13 @@ export function StudentRedeemCodePage() {
       return;
     }
 
+    if (!isConfirmationReady) {
+      setReviewedRedeemCode(normalizedRedeemCode);
+      setSubmitState("idle");
+      setFeedbackMessage(null);
+      return;
+    }
+
     setSubmitState("submitting");
     setFeedbackMessage(null);
 
@@ -784,6 +816,7 @@ export function StudentRedeemCodePage() {
         ),
       ]);
       setRedeemCode("");
+      setReviewedRedeemCode(null);
       setSubmitState("success");
       setFeedbackMessage("兑换成功");
     } catch {
@@ -852,11 +885,25 @@ export function StudentRedeemCodePage() {
               maxLength={10}
               placeholder="例如 ABCD2345"
               value={redeemCode}
-              onChange={(event) =>
-                setRedeemCode(normalizeRedeemCodeInput(event.target.value))
-              }
+              onChange={(event) => {
+                setRedeemCode(normalizeRedeemCodeInput(event.target.value));
+                setReviewedRedeemCode(null);
+              }}
             />
           </label>
+
+          {isConfirmationReady ? (
+            <section
+              className="border-border bg-background space-y-2 rounded-lg border p-3 text-sm"
+              data-testid="redeem-code-confirmation"
+            >
+              <p className="text-text-primary font-medium">确认兑换</p>
+              <p className="text-text-secondary leading-6">
+                本次将兑换卡密 {normalizedRedeemCode}
+                ，系统会校验卡密状态并开通对应专业、等级和版本授权。升级卡如存在多个可升级目标，需按页面提示显式选择目标授权后再继续。
+              </p>
+            </section>
+          ) : null}
 
           <div
             aria-live="polite"
@@ -875,10 +922,16 @@ export function StudentRedeemCodePage() {
             type="submit"
           >
             <KeyRound aria-hidden="true" />
-            {isSubmitting ? "兑换中" : "兑换"}
+            {isSubmitting
+              ? "兑换中"
+              : isConfirmationReady
+                ? "确认兑换"
+                : "预览权益"}
           </Button>
         </form>
       </section>
+
+      <AccountSupportNotice />
 
       {personalAuths.length === 0 ? <RedeemCodePreparationNotice /> : null}
 

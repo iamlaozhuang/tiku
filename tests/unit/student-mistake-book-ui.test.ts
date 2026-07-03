@@ -178,7 +178,7 @@ describe("StudentMistakeBookPage", () => {
   });
 
   it.each(["case_analysis", "calculation"] as const)(
-    "safely renders %s mistake_book entries without objective filter expansion",
+    "hides %s mistake_book entries behind the first-release objective boundary",
     async (questionType) => {
       localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
       const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
@@ -211,21 +211,14 @@ describe("StudentMistakeBookPage", () => {
 
       render(createElement(StudentMistakeBookPage));
 
-      const item = await screen.findByTestId(
-        `mistake-book-item-mistake-book-${questionType}-001`,
-      );
-
+      await screen.findByText("暂无错题记录");
       expect(
-        within(item).getByText(`Synthetic ${questionType} stem`),
-      ).toBeInTheDocument();
-      expect(
-        within(item).getByText(`Synthetic ${questionType} answer`),
-      ).toBeInTheDocument();
-      expect(
-        within(item).getByText(
-          questionType === "case_analysis" ? "案例分析题" : "计算题",
+        screen.queryByTestId(
+          `mistake-book-item-mistake-book-${questionType}-001`,
         ),
-      ).toBeInTheDocument();
+      ).toBeNull();
+      expect(screen.queryByText(`Synthetic ${questionType} stem`)).toBeNull();
+      expect(screen.getByText(/首期仅展示客观题错题/)).toBeInTheDocument();
       expect(screen.queryByRole("option", { name: "案例分析题" })).toBeNull();
       expect(screen.queryByRole("option", { name: "计算题" })).toBeNull();
     },

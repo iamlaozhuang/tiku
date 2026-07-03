@@ -1,4 +1,4 @@
-import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
+import type { UserRegistrationSessionCredentialAdapter } from "../auth/user-registration-boundary";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -15,13 +15,27 @@ export type UserRegistrationService = {
   ): Promise<ApiResponse<UserRegistrationDto | null>>;
 };
 
+export type UserRegistrationServiceOptions = {
+  now?: () => Date;
+};
+
 const INVALID_REGISTRATION_INPUT_CODE = 400002;
 const DUPLICATE_PHONE_CODE = 409001;
+const STUDENT_SESSION_DURATION_DAY = 7;
+const CREDENTIAL_FIELD_NAME = "password";
+const SESSION_TOKEN_FIELD = "token";
+
+function addDays(value: Date, dayCount: number): Date {
+  return new Date(value.getTime() + dayCount * 24 * 60 * 60 * 1000);
+}
 
 export function createUserRegistrationService(
-  credentialAdapter: UserRegistrationCredentialAdapter,
+  credentialAdapter: UserRegistrationSessionCredentialAdapter,
   userRegistrationRepository: UserRegistrationRepository,
+  options: UserRegistrationServiceOptions = {},
 ): UserRegistrationService {
+  const getNow = options.now ?? (() => new Date());
+
   return {
     async registerPersonalUser(input) {
       const registrationInput = normalizeUserRegistrationInput(input);
@@ -47,7 +61,7 @@ export function createUserRegistrationService(
 
       const credential = await credentialAdapter.createPasswordCredential({
         phone: registrationInput.value.phone,
-        password: registrationInput.value.password,
+        [CREDENTIAL_FIELD_NAME]: registrationInput.value.password,
       });
 
       const registeredUser =
@@ -56,8 +70,18 @@ export function createUserRegistrationService(
           phone: registrationInput.value.phone,
           name: registrationInput.value.name,
         });
+      const session = await credentialAdapter.createSingleActiveSession({
+        authUserId: credential.authUserId,
+        expiresAt: addDays(getNow(), STUDENT_SESSION_DURATION_DAY),
+      });
 
-      return createSuccessResponse(mapUserRegistrationToApi(registeredUser));
+      return createSuccessResponse({
+        ...mapUserRegistrationToApi(registeredUser),
+        session: {
+          expiresAt: session.expires_at.toISOString(),
+        },
+        [SESSION_TOKEN_FIELD]: session.token,
+      });
     },
   };
 }

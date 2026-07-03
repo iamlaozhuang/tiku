@@ -852,6 +852,50 @@ describe("StudentExamReportPage", () => {
     expect(reportSurface).not.toHaveTextContent("2001");
   });
 
+  it("renders full learning suggestion text and citations when report snapshot provides them", () => {
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-learning-suggestion-full-text",
+      learningSuggestionSnapshot: {
+        summaryText: "建议优先复盘客户需求分析，再完成错题二刷。",
+        suggestionItems: [
+          "先复习需求识别，再练习服务复盘。",
+          {
+            title: "错题复盘",
+            detail: "把已加入错题本的题目按知识点重新练习。",
+          },
+        ],
+        citations: [
+          {
+            title: "营销基础讲义",
+            headingPath: ["客户服务", "需求分析"],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-learning-suggestion-full-text",
+        examReports: [report],
+      }),
+    );
+
+    expect(screen.getByText("学习建议：已生成")).toBeInTheDocument();
+    expect(
+      screen.getByText("建议优先复盘客户需求分析，再完成错题二刷。"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("先复习需求识别，再练习服务复盘。"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("错题复盘")).toBeInTheDocument();
+    expect(
+      screen.getByText("把已加入错题本的题目按知识点重新练习。"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("营销基础讲义")).toBeInTheDocument();
+    expect(screen.getByText("客户服务 > 需求分析")).toBeInTheDocument();
+  });
+
   it("renders subjective question type and paper_section statistics from report snapshots", () => {
     const report = {
       ...studentExamReportFixture.examReports[0],
@@ -1301,6 +1345,80 @@ describe("StudentExamReportListPage", () => {
     expect(await screen.findByText("营销理论模考卷 A")).toBeInTheDocument();
     expect(screen.queryByText("授权已失效")).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads mock exam records with fixed page size and supports previous-next pagination", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.credentials).toBe("same-origin");
+
+        if (
+          String(url) ===
+          "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                examReports: [studentExamReportFixture.examReports[0]],
+              },
+              pagination: {
+                page: 1,
+                pageSize: 20,
+                total: 21,
+                sortBy: "startedAt",
+                sortOrder: "desc",
+              },
+            }),
+          };
+        }
+
+        expect(String(url)).toBe(
+          "/api/v1/exam-reports?page=2&pageSize=20&sortBy=startedAt",
+        );
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              examReports: [
+                {
+                  ...studentExamReportFixture.examReports[0],
+                  publicId: "mock-exam-page-2",
+                  paperName: "营销理论模考卷 B",
+                },
+              ],
+            },
+            pagination: {
+              page: 2,
+              pageSize: 20,
+              total: 21,
+              sortBy: "startedAt",
+              sortOrder: "desc",
+            },
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentExamReportListPage));
+
+    expect(await screen.findByText("营销理论模考卷 A")).toBeInTheDocument();
+    expect(screen.getByText("第 1 / 2 页")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "上一页" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+
+    expect(await screen.findByText("营销理论模考卷 B")).toBeInTheDocument();
+    expect(screen.getByText("第 2 / 2 页")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("loads mock exam records and supports search plus status filtering", async () => {

@@ -3,7 +3,7 @@ import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspa
 import type {
   AuthContextDto,
   AuthenticatedUserDto,
-  UserRegistrationDto,
+  UserRegistrationBaseDto,
 } from "../contracts/auth-contract";
 import type { AdminRole } from "../models/auth";
 import type { AuthUserAccessRow } from "../repositories/auth-repository";
@@ -92,7 +92,7 @@ export function mapAuthenticatedUserToApi(
 
 export function mapUserRegistrationToApi(
   authUser: AuthUserAccessRow,
-): UserRegistrationDto {
+): UserRegistrationBaseDto {
   return {
     user: mapAuthenticatedUserToApi(authUser),
     nextAction: "redeem_code",

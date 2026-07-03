@@ -74,6 +74,13 @@ const questionTypeLabels: Partial<Record<QuestionType, string>> = {
   true_false: "判断题",
 };
 
+const objectiveQuestionTypes = new Set<QuestionType>([
+  "fill_blank",
+  "multi_choice",
+  "single_choice",
+  "true_false",
+]);
+
 const pageSize = 20;
 
 const defaultFilters: MistakeBookFilterState = {
@@ -150,6 +157,12 @@ function readQuestionType(
   return typeof questionType === "string" && questionType in questionTypeLabels
     ? (questionType as QuestionType)
     : null;
+}
+
+function isObjectiveMistakeBook(mistakeBook: MistakeBookItemDto): boolean {
+  const questionType = readQuestionType(mistakeBook.questionSnapshot);
+
+  return questionType !== null && objectiveQuestionTypes.has(questionType);
 }
 
 function readQuestionStemRichText(
@@ -611,7 +624,11 @@ export function StudentMistakeBookPage() {
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const activeMistakeBooks = useMemo(
-    () => mistakeBooks.filter((mistakeBook) => !mistakeBook.isRemoved),
+    () =>
+      mistakeBooks.filter(
+        (mistakeBook) =>
+          !mistakeBook.isRemoved && isObjectiveMistakeBook(mistakeBook),
+      ),
     [mistakeBooks],
   );
 
@@ -801,7 +818,7 @@ export function StudentMistakeBookPage() {
               错题本
             </h1>
             <p className="text-text-secondary text-sm leading-6">
-              仅展示当前登录学员的错题记录，可收藏、标记掌握或移除。
+              首期仅展示客观题错题，可收藏、标记掌握或移除；主观题不进入学员错题本列表。
             </p>
           </div>
           <span className="bg-secondary text-secondary-foreground shrink-0 rounded-lg px-3 py-1 text-sm font-medium">

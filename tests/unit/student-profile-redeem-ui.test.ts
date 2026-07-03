@@ -242,13 +242,22 @@ describe("StudentRedeemCodePage", () => {
     expect(await screen.findByText("暂无个人授权记录")).toBeInTheDocument();
     expect(screen.getByText("等待卡密")).toBeInTheDocument();
     expect(screen.getByText("卡密来源：系统运营")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "兑换" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "预览权益" })).toBeDisabled();
 
     fireEvent.change(screen.getByLabelText("兑换码"), {
       target: { value: "ABCD2345" },
     });
 
-    expect(screen.getByRole("button", { name: "兑换" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "预览权益" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "ABCD2345",
+    );
+    expect(
+      screen.getByRole("button", { name: "确认兑换" }),
+    ).toBeInTheDocument();
   });
 
   it("submits redeem code with the cookie-backed session and shows contract-safe failure feedback", async () => {
@@ -298,7 +307,8 @@ describe("StudentRedeemCodePage", () => {
     fireEvent.change(screen.getByLabelText("兑换码"), {
       target: { value: "abcd-2345" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "兑换" }));
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认兑换" }));
 
     await waitFor(() =>
       expect(screen.getByText("该兑换码已被使用")).toBeInTheDocument(),

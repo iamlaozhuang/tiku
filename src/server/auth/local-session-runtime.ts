@@ -23,7 +23,7 @@ import type {
   PasswordCredentialInput,
   SessionCredentialAdapter,
 } from "./session-boundary";
-import type { UserRegistrationCredentialAdapter } from "./user-registration-boundary";
+import type { UserRegistrationSessionCredentialAdapter } from "./user-registration-boundary";
 import { createUserRegistrationRouteHandlers } from "./user-registration-route";
 import {
   createErrorResponse,
@@ -87,9 +87,12 @@ export type LocalUserRegistrationRuntimeOptions = {
   createAuthAccountId?: () => string;
   createAuthUserId?: () => string;
   createDatabase?: () => LocalSessionRuntimeDatabase;
+  createSessionId?: () => string;
+  createToken?: () => string;
   createUserPublicId?: () => string;
-  credentialAdapter?: UserRegistrationCredentialAdapter;
+  credentialAdapter?: UserRegistrationSessionCredentialAdapter;
   hashPasswordValue?: (password: string) => Promise<string>;
+  now?: () => Date;
   userRegistrationRepository?: UserRegistrationRepository;
 };
 
@@ -347,10 +350,14 @@ function createPostgresUserRegistrationCredentialAdapter(
   options: Required<
     Pick<
       LocalUserRegistrationRuntimeOptions,
-      "createAuthAccountId" | "createAuthUserId" | "hashPasswordValue"
+      | "createAuthAccountId"
+      | "createAuthUserId"
+      | "createSessionId"
+      | "createToken"
+      | "hashPasswordValue"
     >
   >,
-): UserRegistrationCredentialAdapter {
+): UserRegistrationSessionCredentialAdapter {
   return {
     async createPasswordCredential(input) {
       const database = getDatabase();
@@ -386,6 +393,38 @@ function createPostgresUserRegistrationCredentialAdapter(
       });
 
       return { authUserId };
+    },
+
+    async createSingleActiveSession(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        await transaction
+          .delete(authSession)
+          .where(eq(authSession.user_id, input.authUserId));
+
+        const [row] = await transaction
+          .insert(authSession)
+          .values({
+            expires_at: input.expiresAt,
+            id: options.createSessionId(),
+            ip_address: null,
+            [SESSION_TOKEN_FIELD]: options.createToken(),
+            user_agent: null,
+            user_id: input.authUserId,
+          })
+          .returning({
+            auth_user_id: authSession.user_id,
+            expires_at: authSession.expires_at,
+            [SESSION_TOKEN_FIELD]: authSession.token,
+          });
+
+        if (row === undefined) {
+          throw new Error("Session insert did not return a row.");
+        }
+
+        return row;
+      });
     },
   };
 }
@@ -604,6 +643,8 @@ function createUserRegistrationRuntimeService(
       createAuthAccountId:
         options.createAuthAccountId ?? createDefaultAuthAccountId,
       createAuthUserId: options.createAuthUserId ?? createDefaultAuthUserId,
+      createSessionId: options.createSessionId ?? createDefaultSessionId,
+      createToken: options.createToken ?? createDefaultToken,
       hashPasswordValue: options.hashPasswordValue ?? hashPassword,
     });
   const userRegistrationRepository =
@@ -616,6 +657,9 @@ function createUserRegistrationRuntimeService(
   return createUserRegistrationService(
     credentialAdapter,
     userRegistrationRepository,
+    {
+      now: options.now,
+    },
   );
 }
 

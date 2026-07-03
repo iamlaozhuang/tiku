@@ -88,6 +88,9 @@ describe("RegisterPage", () => {
           adminRoles: [],
         },
         nextAction: "redeem_code",
+        session: {
+          expiresAt: "2026-05-28T12:00:00.000Z",
+        },
       },
     });
 
@@ -111,6 +114,7 @@ describe("RegisterPage", () => {
       "/api/v1/users",
       expect.objectContaining({
         method: "POST",
+        credentials: "same-origin",
       }),
     );
     expect(document.body.textContent).not.toContain("abc12345");

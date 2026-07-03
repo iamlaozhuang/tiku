@@ -20,6 +20,7 @@ import {
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
+import type { ApiPagination } from "@/server/contracts/api-response";
 import type {
   ExamReportDetailDto,
   ExamReportListResultDto,
@@ -87,6 +88,14 @@ type MockExamPendingAnswerQueuePayload = {
 
 const mockExamCacheStorageKeyPrefix = "tiku.mockExam.cache.";
 const mockExamAnswerQueueStorageKeyPrefix = "tiku.mockExam.answerQueue.";
+const examReportPageSize = 20;
+const emptyExamReportPagination: ApiPagination = {
+  page: 1,
+  pageSize: examReportPageSize,
+  total: 0,
+  sortBy: "startedAt",
+  sortOrder: "desc",
+};
 
 function createMockExamCacheStorageKey(input: {
   paperPublicId?: string;
@@ -256,6 +265,22 @@ type ParsedReportSnapshot = {
   knowledgeNodeWeaknessSummaryText: string | null;
   knowledgeNodeAnalysis: KnowledgeNodeAnalysisResult[];
   questionResults: ReportQuestionResult[];
+};
+
+type ParsedLearningSuggestion = {
+  summaryText: string | null;
+  suggestionItems: ParsedLearningSuggestionItem[];
+  citations: ParsedLearningSuggestionCitation[];
+};
+
+type ParsedLearningSuggestionItem = {
+  title: string | null;
+  detail: string;
+};
+
+type ParsedLearningSuggestionCitation = {
+  title: string;
+  headingPath: string | null;
 };
 
 type ScoringProgressStatus = Extract<
@@ -978,6 +1003,81 @@ function parseReportSnapshot(
         ];
       },
     ),
+  };
+}
+
+function parseLearningSuggestion(
+  value: Record<string, unknown> | null,
+): ParsedLearningSuggestion | null {
+  if (value === null) {
+    return null;
+  }
+
+  const summaryText =
+    getStringField(value, "summaryText") ??
+    getStringField(value, "learningSuggestionText") ??
+    getStringField(value, "suggestionText");
+  const rawSuggestionItems = Array.isArray(value.suggestionItems)
+    ? value.suggestionItems
+    : Array.isArray(value.suggestions)
+      ? value.suggestions
+      : [];
+  const suggestionItems = rawSuggestionItems.flatMap(
+    (item): ParsedLearningSuggestionItem[] => {
+      if (typeof item === "string") {
+        return [{ title: null, detail: item }];
+      }
+
+      if (!isRecord(item)) {
+        return [];
+      }
+
+      const detail =
+        getStringField(item, "detail") ??
+        getStringField(item, "text") ??
+        getStringField(item, "description");
+
+      if (detail === null) {
+        return [];
+      }
+
+      return [
+        {
+          title: getStringField(item, "title"),
+          detail,
+        },
+      ];
+    },
+  );
+  const rawCitations = Array.isArray(value.citations) ? value.citations : [];
+  const citations = rawCitations.flatMap(
+    (citation): ParsedLearningSuggestionCitation[] => {
+      if (!isRecord(citation)) {
+        return [];
+      }
+
+      const title = getStringField(citation, "title");
+
+      if (title === null) {
+        return [];
+      }
+
+      const headingPath = getStringArray(citation.headingPath);
+
+      return [
+        {
+          title,
+          headingPath:
+            headingPath.length === 0 ? null : headingPath.join(" > "),
+        },
+      ];
+    },
+  );
+
+  return {
+    summaryText,
+    suggestionItems,
+    citations,
   };
 }
 
@@ -2120,6 +2220,9 @@ export function StudentExamReportPage({
   }
 
   const parsedReportSnapshot = parseReportSnapshot(examReport.reportSnapshot);
+  const parsedLearningSuggestion = parseLearningSuggestion(
+    examReport.learningSuggestionSnapshot,
+  );
 
   async function handleRetryScoring() {
     if (!isRuntimeMode) {
@@ -2383,6 +2486,54 @@ export function StudentExamReportPage({
             ? "学习建议：生成中"
             : "学习建议：已生成"}
         </p>
+        {parsedLearningSuggestion === null ? null : (
+          <div className="space-y-3 text-sm">
+            {parsedLearningSuggestion.summaryText === null ? null : (
+              <p className="text-text-primary leading-6">
+                {parsedLearningSuggestion.summaryText}
+              </p>
+            )}
+            {parsedLearningSuggestion.suggestionItems.length === 0 ? null : (
+              <ul className="text-text-secondary space-y-2">
+                {parsedLearningSuggestion.suggestionItems.map(
+                  (suggestionItem, index) => (
+                    <li
+                      key={`${suggestionItem.title ?? "suggestion"}-${index}`}
+                      className="border-border bg-background rounded-lg border p-3"
+                    >
+                      {suggestionItem.title === null ? null : (
+                        <p className="text-text-primary mb-1 font-medium">
+                          {suggestionItem.title}
+                        </p>
+                      )}
+                      <p>{suggestionItem.detail}</p>
+                    </li>
+                  ),
+                )}
+              </ul>
+            )}
+            {parsedLearningSuggestion.citations.length === 0 ? null : (
+              <div className="space-y-2">
+                <p className="text-text-primary font-medium">引用来源</p>
+                {parsedLearningSuggestion.citations.map((citation) => (
+                  <div
+                    key={`${citation.title}-${citation.headingPath ?? ""}`}
+                    className="border-border bg-background rounded-lg border p-3"
+                  >
+                    <p className="text-text-primary font-medium">
+                      {citation.title}
+                    </p>
+                    {citation.headingPath === null ? null : (
+                      <p className="text-text-secondary mt-1 text-xs">
+                        {citation.headingPath}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -2397,6 +2548,10 @@ export function StudentExamReportListPage({
   const [runtimeExamReports, setRuntimeExamReports] = useState<
     ExamReportSummaryDto[]
   >([]);
+  const [runtimePagination, setRuntimePagination] = useState<ApiPagination>(
+    emptyExamReportPagination,
+  );
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<ExamStatus | "all">(
     "all",
@@ -2404,6 +2559,10 @@ export function StudentExamReportListPage({
   const displayState =
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayExamReports = examReports ?? runtimeExamReports;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(runtimePagination.total / examReportPageSize),
+  );
   const filteredExamReports = displayExamReports.filter((examReport) => {
     const matchesSearch =
       searchKeyword.trim().length === 0 ||
@@ -2426,7 +2585,7 @@ export function StudentExamReportListPage({
 
       try {
         const reportPayload = await fetchStudentApi<ExamReportListResultDto>(
-          "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt",
+          `/api/v1/exam-reports?page=${currentPage}&pageSize=${examReportPageSize}&sortBy=startedAt`,
           storedSessionValue,
         );
 
@@ -2445,6 +2604,12 @@ export function StudentExamReportListPage({
         }
 
         setRuntimeExamReports(reportPayload.data.examReports);
+        setRuntimePagination(
+          reportPayload.pagination ?? {
+            ...emptyExamReportPagination,
+            page: currentPage,
+          },
+        );
         setRuntimeState("ready");
       } catch {
         if (isActive) {
@@ -2458,7 +2623,7 @@ export function StudentExamReportListPage({
     return () => {
       isActive = false;
     };
-  }, [isRuntimeMode, state]);
+  }, [currentPage, isRuntimeMode, state]);
 
   if (displayState === "loading") {
     return (
@@ -2602,6 +2767,30 @@ export function StudentExamReportListPage({
           ))}
         </div>
       )}
+
+      {isRuntimeMode ? (
+        <div className="border-border bg-surface flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
+          <button
+            type="button"
+            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border px-3 font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            上一页
+          </button>
+          <span className="text-text-secondary">
+            第 {runtimePagination.page} / {totalPages} 页
+          </span>
+          <button
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+            className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border px-3 font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            下一页
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

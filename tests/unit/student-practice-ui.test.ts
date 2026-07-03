@@ -1267,6 +1267,11 @@ describe("StudentPracticePage", () => {
     expect(
       screen.queryByTestId("practice-surface-practice-marketing-theory-001"),
     ).toBeNull();
+    expect(screen.getByText("返回首页")).toBeInTheDocument();
+    expect(screen.getByText("检测到未完成的练习")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "继续练习" }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("practice-resume-continue-button"));
 
@@ -1375,6 +1380,13 @@ describe("StudentPracticePage", () => {
 
     fireEvent.click(screen.getByTestId("practice-resume-restart-button"));
 
+    expect(
+      screen.getByTestId("practice-restart-confirmation"),
+    ).toHaveTextContent("重新开始会清空当前未完成进度");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole("button", { name: "确认重新开始练习" }));
+
     await waitFor(() =>
       expect(
         screen.getByTestId(
@@ -1460,6 +1472,13 @@ describe("StudentPracticePage", () => {
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("practice-restart-button"));
+
+    expect(
+      screen.getByTestId("practice-restart-confirmation"),
+    ).toHaveTextContent("重新开始会清空当前未完成进度");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole("button", { name: "确认重新开始练习" }));
 
     await waitFor(() =>
       expect(

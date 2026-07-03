@@ -30,7 +30,12 @@ export type SessionLoginDto = AuthContextDto & {
 
 export type UserRegistrationNextAction = "redeem_code";
 
-export type UserRegistrationDto = {
+export type UserRegistrationBaseDto = {
   user: AuthenticatedUserDto;
   nextAction: UserRegistrationNextAction;
+};
+
+export type UserRegistrationDto = UserRegistrationBaseDto & {
+  session: AuthSessionDto;
+  token: string;
 };

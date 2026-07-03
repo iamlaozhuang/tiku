@@ -245,6 +245,7 @@ describe("local session runtime", () => {
 
   it("creates a personal user registration without exposing credential internals", async () => {
     const createdCredentials: unknown[] = [];
+    const createdSessions: unknown[] = [];
     const createdUsers: unknown[] = [];
     const runtime = createLocalUserRegistrationRuntime({
       credentialAdapter: {
@@ -255,7 +256,17 @@ describe("local session runtime", () => {
             authUserId: "auth-user-registered-student",
           };
         },
+        async createSingleActiveSession(input) {
+          createdSessions.push(input);
+
+          return {
+            [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
+            auth_user_id: input.authUserId,
+            expires_at: input.expiresAt,
+          };
+        },
       },
+      now: () => new Date("2026-05-21T12:00:00.000Z"),
       userRegistrationRepository: {
         async findRegisteredUserByPhone() {
           return null;
@@ -304,6 +315,10 @@ describe("local session runtime", () => {
           adminRoles: [],
         },
         nextAction: "redeem_code",
+        session: {
+          expiresAt: "2026-05-28T12:00:00.000Z",
+        },
+        [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
       },
     });
     expect(createdCredentials).toEqual([
@@ -317,6 +332,12 @@ describe("local session runtime", () => {
         authUserId: "auth-user-registered-student",
         phone: "13900000003",
         name: "新学员",
+      },
+    ]);
+    expect(createdSessions).toEqual([
+      {
+        authUserId: "auth-user-registered-student",
+        expiresAt: new Date("2026-05-28T12:00:00.000Z"),
       },
     ]);
     expect(JSON.stringify(response)).not.toContain("abc12345");

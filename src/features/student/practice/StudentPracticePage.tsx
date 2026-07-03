@@ -520,13 +520,19 @@ function StudentPracticeStatusMessage({
 function PracticeResumeChoicePanel({
   practice,
   isRestarting,
+  isRestartConfirmationVisible,
   onContinuePractice,
-  onRestartPractice,
+  onCancelRestartPractice,
+  onConfirmRestartPractice,
+  onRequestRestartPractice,
 }: {
   practice: PracticeDto;
   isRestarting: boolean;
+  isRestartConfirmationVisible: boolean;
   onContinuePractice: () => void;
-  onRestartPractice: () => void;
+  onCancelRestartPractice: () => void;
+  onConfirmRestartPractice: () => void;
+  onRequestRestartPractice: () => void;
 }) {
   return (
     <section
@@ -540,7 +546,7 @@ function PracticeResumeChoicePanel({
             href="/home"
             className="text-brand-primary text-sm font-medium transition-transform active:scale-[0.98]"
           >
-            杩斿洖棣栭〉
+            返回首页
           </Link>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             {getPaperName(practice)}
@@ -557,14 +563,14 @@ function PracticeResumeChoicePanel({
       <div className="bg-surface ring-border space-y-4 rounded-xl p-4 shadow-sm ring-1">
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">
-            妫€娴嬪埌鏈畬鎴愮殑缁冧範
+            检测到未完成的练习
           </p>
           <h2 className="font-heading text-text-primary text-xl font-semibold">
-            缁х画涓婃杩涘害鎴栭噸鏂板紑濮?
+            继续上次进度或重新开始
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            褰撳墠杩涘害淇濈暀鍒扮 {practice.currentQuestionIndex + 1}{" "}
-            棰橈紝鏈夋晥鏈熻嚦 {practice.expiresAt.slice(0, 10)}銆?
+            当前进度保留到第 {practice.currentQuestionIndex + 1} 题，有效期至{" "}
+            {practice.expiresAt.slice(0, 10)}。
           </p>
         </div>
 
@@ -576,19 +582,51 @@ function PracticeResumeChoicePanel({
             className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
           >
             <CheckCircle2 className="size-4" aria-hidden="true" />
-            缁х画缁冧範
+            继续练习
           </button>
           <button
             type="button"
             data-testid="practice-resume-restart-button"
             disabled={isRestarting}
-            onClick={onRestartPractice}
+            onClick={onRequestRestartPractice}
             className="border-border text-text-primary flex h-10 items-center justify-center gap-2 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RotateCcw className="size-4" aria-hidden="true" />
-            閲嶆柊寮€濮?
+            重新开始
           </button>
         </div>
+
+        {isRestartConfirmationVisible ? (
+          <div
+            className="bg-warning/10 ring-warning/20 space-y-3 rounded-xl p-3 ring-1"
+            data-testid="practice-restart-confirmation"
+          >
+            <p className="text-text-primary text-sm font-medium">
+              重新开始会清空当前未完成进度
+            </p>
+            <p className="text-text-secondary text-sm leading-6">
+              已提交的作答记录仍保留在历史记录中，当前未完成练习会从第 1
+              题重新开始。
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={onCancelRestartPractice}
+                className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                disabled={isRestarting}
+                onClick={onConfirmRestartPractice}
+                className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                确认重新开始练习
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -1066,6 +1104,8 @@ export function StudentPracticePage({
   const [feedbackByQuestion, setFeedbackByQuestion] = useState(emptyFeedback);
   const [isMaterialOpen, setIsMaterialOpen] = useState(true);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [isRestartConfirmationVisible, setIsRestartConfirmationVisible] =
+    useState(false);
   const [
     favoriteSubmittingQuestionPublicId,
     setFavoriteSubmittingQuestionPublicId,
@@ -1502,6 +1542,7 @@ export function StudentPracticePage({
       setFeedbackByQuestion(emptyFeedback);
       setIsMaterialOpen(true);
       setIsResumeChoiceVisible(false);
+      setIsRestartConfirmationVisible(false);
       return;
     }
 
@@ -1551,6 +1592,7 @@ export function StudentPracticePage({
       setFeedbackByQuestion(emptyFeedback);
       setIsMaterialOpen(true);
       setIsResumeChoiceVisible(false);
+      setIsRestartConfirmationVisible(false);
       setRuntimeState("ready");
     } catch {
       setRuntimeState("error");
@@ -1564,8 +1606,11 @@ export function StudentPracticePage({
       <PracticeResumeChoicePanel
         practice={practice}
         isRestarting={isRestarting}
+        isRestartConfirmationVisible={isRestartConfirmationVisible}
         onContinuePractice={() => setIsResumeChoiceVisible(false)}
-        onRestartPractice={() => void handleRestartPractice()}
+        onCancelRestartPractice={() => setIsRestartConfirmationVisible(false)}
+        onConfirmRestartPractice={() => void handleRestartPractice()}
+        onRequestRestartPractice={() => setIsRestartConfirmationVisible(true)}
       />
     );
   }
@@ -1681,11 +1726,43 @@ export function StudentPracticePage({
         )}
       </article>
 
+      {isRestartConfirmationVisible ? (
+        <div
+          className="bg-warning/10 ring-warning/20 space-y-3 rounded-xl p-4 ring-1"
+          data-testid="practice-restart-confirmation"
+        >
+          <p className="text-text-primary text-sm font-medium">
+            重新开始会清空当前未完成进度
+          </p>
+          <p className="text-text-secondary text-sm leading-6">
+            已提交的作答记录仍保留在历史记录中，当前未完成练习会从第 1
+            题重新开始。
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setIsRestartConfirmationVisible(false)}
+              className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              disabled={isRestarting}
+              onClick={() => void handleRestartPractice()}
+              className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              确认重新开始练习
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <button
         type="button"
         data-testid="practice-restart-button"
         disabled={isRestarting}
-        onClick={() => void handleRestartPractice()}
+        onClick={() => setIsRestartConfirmationVisible(true)}
         className="border-border text-text-primary flex h-10 items-center justify-center gap-2 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
       >
         <RotateCcw className="size-4" aria-hidden="true" />

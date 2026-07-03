@@ -1,8 +1,160 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: employee-transfer-session-source-landing-2026-07-03
-updatedAt: "2026-07-03T07:55:15-07:00"
+currentPhase: learner-core-experience-source-landing-2026-07-03
+updatedAt: "2026-07-03T08:46:49-07:00"
+learnerCoreExperienceSourceLanding20260703:
+  taskId: learner-core-experience-source-landing-2026-07-03
+  phase: learner-core-experience-source-landing-2026-07-03
+  status: closed
+  result: learner_core_experience_source_landed_with_registration_session_redeem_confirm_restart_confirm_report_pagination_and_objective_mistake_book
+  priority: p1
+  taskKind: source_ui_service_contract_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - employee-transfer-session-source-landing-2026-07-03
+  sourceStory: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+  targetClosureItem: Land learner registration/session/redeem/profile/practice/mock/report/mistake-book core experience source contract.
+  behaviorBoundary: learner_core_experience_source_ui_service_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_actual_password_values_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_content_no_raw_dom
+  branch: codex/learner-core-experience-source-landing-2026-07-03
+  claimedAt: "2026-07-03T08:23:22-07:00"
+  plannedAt: "2026-07-03T08:23:22-07:00"
+  implementedAt: "2026-07-03T08:45:24-07:00"
+  validatedAt: "2026-07-03T08:46:49-07:00"
+  reviewedAt: "2026-07-03T08:46:49-07:00"
+  closedAt: "2026-07-03T08:46:49-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-learner-core-experience-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-learner-core-experience-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-learner-core-experience-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+    - docs/05-execution-logs/task-plans/2026-07-03-learner-core-experience-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-learner-core-experience-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-learner-core-experience-source-landing.md
+    - src/server/contracts/auth-contract.ts
+    - src/server/mappers/auth-mapper.ts
+    - src/server/auth/user-registration-boundary.ts
+    - src/server/auth/user-registration-route.ts
+    - src/server/auth/local-session-runtime.ts
+    - src/server/services/user-registration-service.ts
+    - src/app/(auth)/register/page.tsx
+    - src/features/student/profile/StudentProfileRedeemPage.tsx
+    - src/features/student/practice/StudentPracticePage.tsx
+    - src/features/student/mock-exam/StudentMockExamReportPage.tsx
+    - src/features/student/mistake-book/StudentMistakeBookPage.tsx
+    - src/server/services/user-registration-service.test.ts
+    - src/server/auth/user-registration-route.test.ts
+    - src/server/auth/local-session-runtime.test.ts
+    - tests/unit/student-register-ui.test.ts
+    - tests/unit/student-profile-redeem-ui.test.ts
+    - tests/unit/student-practice-ui.test.ts
+    - tests/unit/student-mock-exam-report-ui.test.ts
+    - tests/unit/student-mistake-book-ui.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/01-requirements/modules/01-user-auth.md
+    - docs/01-requirements/modules/03-student-experience.md
+    - docs/01-requirements/stories/epic-01-user-auth.md
+    - docs/01-requirements/stories/epic-03-student-experience.md
+    - docs/01-requirements/use-cases/use-case-catalog.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    providerCall: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Registration creates a learner session and route response sets cookie metadata without exposing the session token in JSON.
+    - Redeem page requires explicit preview/confirm before redemption and keeps support-only account/password guidance.
+    - Practice restart requires secondary confirmation and resume-panel copy is readable.
+    - Mock exam does not expose answers before submit and report surfaces fixed pagination plus learning suggestion detail.
+    - Mistake book first release renders objective question entries only with fixed page size 20.
+  validationCommands:
+    - npm.cmd run test:unit -- src/server/services/user-registration-service.test.ts src/server/auth/user-registration-route.test.ts src/server/auth/local-session-runtime.test.ts tests/unit/student-register-ui.test.ts tests/unit/student-profile-redeem-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-core-experience-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId learner-core-experience-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-core-experience-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+  validationSummary:
+    focusedUnitTests: pass_8_files_80_tests
+    typecheck: pass
+    lint: pass
+    formatCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceOrTestChanged: true
+    schemaMigrationOrDependencyChanged: false
+    providerCallOrConfigurationExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    browserRuntimeExecuted: false
+    actualPasswordValuesRecordedInEvidence: false
+    plaintextRedeemCodeRecordedInEvidence: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 employeeTransferSessionSourceLanding20260703:
   taskId: employee-transfer-session-source-landing-2026-07-03
   phase: employee-transfer-session-source-landing-2026-07-03
@@ -21076,8 +21228,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 587c163ce77e094ce706702ac0f179a35e62fbfc
-  lastKnownOriginMasterSha: 587c163ce77e094ce706702ac0f179a35e62fbfc
+  lastKnownMasterSha: ef90c2191eedf9b181968c2c673b0a8a0f174c2c
+  lastKnownOriginMasterSha: ef90c2191eedf9b181968c2c673b0a8a0f174c2c
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -21217,6 +21369,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: learner-core-experience-source-landing-2026-07-03
+  status: closed
+  result: learner_core_experience_source_landed_with_registration_session_redeem_confirm_restart_confirm_report_pagination_and_objective_mistake_book
+  taskKind: source_ui_service_contract_landing
+  moduleRunVersion: 2
+  branch: codex/learner-core-experience-source-landing-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-learner-core-experience-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-learner-core-experience-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-learner-core-experience-source-landing.md
+previousCurrentTaskBeforeLearnerCoreExperienceSourceLanding20260703:
   id: employee-transfer-session-source-landing-2026-07-03
   status: closed
   result: employee_transfer_session_review_source_landed_without_transfer_mutation_route
