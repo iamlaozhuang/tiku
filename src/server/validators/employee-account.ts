@@ -45,10 +45,12 @@ export function normalizeCreateEmployeeAccountInput(
     input.organizationPublicId,
   );
 
+  const hasInitialPassword = initialPassword.length > 0;
+
   if (
     !PHONE_PATTERN.test(phone) ||
     name.length === 0 ||
-    !PASSWORD_PATTERN.test(initialPassword) ||
+    (hasInitialPassword && !PASSWORD_PATTERN.test(initialPassword)) ||
     organizationPublicId.length === 0
   ) {
     return {

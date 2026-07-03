@@ -459,7 +459,6 @@ function parseEmployeeAccountImportContent(input: {
   const hasHeader =
     firstHeaderNames.has("phone") &&
     firstHeaderNames.has("name") &&
-    firstHeaderNames.has("initialpassword") &&
     firstHeaderNames.has("organizationpublicid");
   const headerIndexByName = new Map<string, number>(
     hasHeader
@@ -489,12 +488,15 @@ function parseEmployeeAccountImportContent(input: {
       headerIndexByName,
       name: "name",
     }),
-    initialPassword: readEmployeeAccountCell({
-      cells: row.cells,
-      fallbackIndex: 2,
-      headerIndexByName,
-      name: "initialpassword",
-    }),
+    initialPassword:
+      hasHeader && !headerIndexByName.has("initialpassword")
+        ? ""
+        : readEmployeeAccountCell({
+            cells: row.cells,
+            fallbackIndex: 2,
+            headerIndexByName,
+            name: "initialpassword",
+          }),
     organizationPublicId: readEmployeeAccountCell({
       cells: row.cells,
       fallbackIndex: 3,
@@ -578,12 +580,16 @@ async function importEmployeeAccounts(input: {
 }): Promise<EmployeeImportResultDto> {
   if (input.normalizedInput.rejectedRows.length > 0) {
     return {
+      generatedInitialPasswords: [],
       importedEmployees: [],
       rejectedRows: input.normalizedInput.rejectedRows,
     };
   }
 
   const importedEmployees: EmployeeSummaryDto[] = [];
+  const generatedInitialPasswords: NonNullable<
+    EmployeeImportResultDto["generatedInitialPasswords"]
+  > = [];
   const rejectedRows: EmployeeImportResultDto["rejectedRows"] = [];
 
   for (const accountInput of input.normalizedInput.employeeAccounts) {
@@ -597,6 +603,15 @@ async function importEmployeeAccounts(input: {
       importedEmployees.push(
         mapEmployeeAccountResultToEmployeeSummary(result.data),
       );
+      if (typeof result.data.generatedInitialPassword === "string") {
+        generatedInitialPasswords.push({
+          rowNumber,
+          phone: employeeAccountInput.phone,
+          name: employeeAccountInput.name,
+          organizationPublicId: employeeAccountInput.organizationPublicId,
+          initialPassword: result.data.generatedInitialPassword,
+        });
+      }
       continue;
     }
 
@@ -609,6 +624,7 @@ async function importEmployeeAccounts(input: {
   }
 
   return {
+    generatedInitialPasswords,
     importedEmployees,
     rejectedRows,
   };

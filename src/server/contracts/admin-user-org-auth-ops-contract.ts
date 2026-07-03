@@ -176,7 +176,16 @@ export type EmployeeImportRejectedRowDto = {
     | "user_not_found";
 };
 
+export type EmployeeInitialPasswordDistributionRowDto = {
+  rowNumber: number;
+  phone: string;
+  name: string;
+  organizationPublicId: string;
+  initialPassword: string;
+};
+
 export type EmployeeImportResultDto = {
+  generatedInitialPasswords?: EmployeeInitialPasswordDistributionRowDto[];
   importedEmployees: EmployeeSummaryDto[];
   rejectedRows: EmployeeImportRejectedRowDto[];
 };

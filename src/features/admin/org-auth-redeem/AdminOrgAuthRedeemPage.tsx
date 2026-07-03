@@ -160,6 +160,7 @@ type EmployeeImportInput =
 
 type EmployeeImportPreview = {
   formatLabel: string;
+  generatedPasswordRowCount: number;
   isReady: boolean;
   message: string;
   rowCount: number;
@@ -763,7 +764,7 @@ function createTargetedEmployeeAccountImportContent(input: {
   );
   const phoneIndex = headerIndexByName.get("phone") ?? 0;
   const nameIndex = headerIndexByName.get("name") ?? 1;
-  const initialPasswordIndex = headerIndexByName.get("initialpassword") ?? 2;
+  const initialPasswordIndex = headerIndexByName.get("initialpassword");
   const dataLines = input.lines.slice(1);
   const nextLines = dataLines.map((line) => {
     const cells = line.split(delimiter).map((cell) => cell.trim());
@@ -771,7 +772,9 @@ function createTargetedEmployeeAccountImportContent(input: {
     return [
       cells[phoneIndex] ?? "",
       cells[nameIndex] ?? "",
-      cells[initialPasswordIndex] ?? "",
+      initialPasswordIndex === undefined
+        ? ""
+        : (cells[initialPasswordIndex] ?? ""),
       input.targetOrganizationPublicId,
     ].join(delimiter);
   });
@@ -839,6 +842,30 @@ function buildForbiddenEmployeeImportScopeHeaderMessage(
   forbiddenLabels: string[],
 ): string {
   return `员工导入模板不得包含 ${forbiddenLabels.join(", ")}；专业、等级、版本与授权范围必须从组织授权继承。`;
+}
+
+function countRowsMissingEmployeeInitialPassword(lines: string[]): number {
+  const firstLine = lines[0] ?? "";
+  const delimiter = firstLine.includes("\t") ? "\t" : ",";
+  const headerCells = firstLine.split(delimiter);
+  const headerIndexByName = new Map(
+    headerCells.map((cell, index) => [
+      normalizeEmployeeImportHeaderCell(cell),
+      index,
+    ]),
+  );
+  const initialPasswordIndex = headerIndexByName.get("initialpassword");
+
+  if (initialPasswordIndex === undefined) {
+    return Math.max(lines.length - 1, 0);
+  }
+
+  return lines
+    .slice(1)
+    .filter(
+      (line) =>
+        (line.split(delimiter)[initialPasswordIndex] ?? "").trim().length === 0,
+    ).length;
 }
 
 function buildOrganizationInput(
@@ -930,9 +957,7 @@ function buildEmployeeImportInput(
 
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
-    firstLine.includes("phone") &&
-    firstLine.includes("name") &&
-    firstLine.includes("initialpassword");
+    firstLine.includes("phone") && firstLine.includes("name");
   const legacyRows = lines.map((line) =>
     line.split(",").map((item) => item.trim()),
   );
@@ -958,7 +983,7 @@ function buildEmployeeImportInput(
     return {
       input: null,
       message:
-        "员工账号导入必须包含 phone,name,initialPassword 表头，并先选择目标组织。",
+        "员工账号导入必须包含 phone,name 表头；initialPassword 可选，并先选择目标组织。",
     };
   }
 
@@ -983,6 +1008,7 @@ function buildEmployeeImportPreview(
   if (trimmedValue.length === 0) {
     return {
       formatLabel: "待输入",
+      generatedPasswordRowCount: 0,
       isReady: false,
       message: "请粘贴员工导入内容。",
       rowCount: 0,
@@ -998,6 +1024,7 @@ function buildEmployeeImportPreview(
   if (forbiddenScopeHeaders.length > 0) {
     return {
       formatLabel: "员工导入范围字段被阻断",
+      generatedPasswordRowCount: 0,
       isReady: false,
       message: buildForbiddenEmployeeImportScopeHeaderMessage(
         forbiddenScopeHeaders,
@@ -1008,9 +1035,7 @@ function buildEmployeeImportPreview(
 
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
-    firstLine.includes("phone") &&
-    firstLine.includes("name") &&
-    firstLine.includes("initialpassword");
+    firstLine.includes("phone") && firstLine.includes("name");
   const legacyRows = lines.map((line) =>
     line.split(",").map((item) => item.trim()),
   );
@@ -1023,6 +1048,7 @@ function buildEmployeeImportPreview(
   if (isLegacyPublicIdImport) {
     return {
       formatLabel: "userPublicId 绑定导入",
+      generatedPasswordRowCount: 0,
       isReady: lines.length > 0,
       message: `将按公开编号绑定格式解析 ${lines.length} 行员工。`,
       rowCount: lines.length,
@@ -1033,19 +1059,23 @@ function buildEmployeeImportPreview(
     ? "TSV"
     : "CSV";
   const rowCount = hasEmployeeAccountHeader ? Math.max(lines.length - 1, 0) : 0;
+  const generatedPasswordRowCount = hasEmployeeAccountHeader
+    ? countRowsMissingEmployeeInitialPassword(lines)
+    : 0;
 
   const hasTargetOrganization = targetOrganizationPublicId.trim().length > 0;
   const message =
     rowCount <= 0
       ? hasEmployeeAccountHeader
         ? "请至少提供一行员工数据。"
-        : "员工账号导入必须包含 phone,name,initialPassword 表头。"
+        : "员工账号导入必须包含 phone,name 表头；initialPassword 可选。"
       : hasTargetOrganization
         ? `将按员工账号 ${sourceFormat} 解析 ${rowCount} 行员工，并导入到已选择的目标组织。`
         : "请选择员工导入目标组织。";
 
   return {
     formatLabel: `员工账号 ${sourceFormat}`,
+    generatedPasswordRowCount,
     isReady: rowCount > 0 && hasTargetOrganization,
     message,
     rowCount,
@@ -2209,8 +2239,9 @@ function EmployeeImportActionPanel({
             员工批量导入
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            先选择目标组织，再粘贴 phone,name,initialPassword
-            CSV/TSV。员工导入仅绑定 organization，不得包含
+            先选择目标组织，再粘贴 phone,name CSV/TSV；initialPassword
+            可选，留空时系统生成初始密码并仅在本次结果窗口展示。员工导入仅绑定
+            organization，不得包含
             profession,level,edition,orgAuthScopePublicId。历史
             userPublicId,organizationPublicId 绑定格式仍可受控导入。
           </p>
@@ -2248,6 +2279,12 @@ function EmployeeImportActionPanel({
           <p className="text-text-muted mt-1 text-xs">
             格式 {importPreview.formatLabel} / 数据行 {importPreview.rowCount}
           </p>
+          {importPreview.generatedPasswordRowCount > 0 ? (
+            <p className="text-warning mt-2 text-xs leading-5">
+              {importPreview.generatedPasswordRowCount} 行未提供
+              initialPassword；成功新建账号时将在一次性分发窗口展示系统生成密码。
+            </p>
+          ) : null}
         </div>
         <button
           type="button"
@@ -2269,6 +2306,8 @@ function EmployeeImportResultPanel({
 }: {
   result: EmployeeImportResultDto;
 }) {
+  const generatedInitialPasswords = result.generatedInitialPasswords ?? [];
+
   return (
     <section
       className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
@@ -2281,8 +2320,7 @@ function EmployeeImportResultPanel({
             员工导入反馈
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            仅展示聚合数量、行号和拒绝原因；原始导入内容与公开编号
-            不在结果反馈中回显。
+            仅展示聚合数量、行号和拒绝原因；系统生成的初始密码只在本次窗口展示，普通员工列表和详情页不显示密码明文。
           </p>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
@@ -2310,6 +2348,57 @@ function EmployeeImportResultPanel({
               </li>
             ))}
           </ul>
+        )}
+        {generatedInitialPasswords.length === 0 ? null : (
+          <div
+            className="border-warning bg-warning/10 rounded-md border p-3"
+            data-testid="employee-generated-password-distribution"
+          >
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-1">
+                <p className="text-warning text-xs font-medium">一次性分发</p>
+                <h3 className="text-text-primary text-sm font-semibold">
+                  初始密码一次性分发窗口
+                </h3>
+                <p className="text-text-secondary text-xs leading-5">
+                  请在离开本结果前复制并线下交付；导入记录、普通列表和详情页不会保留密码明文。
+                </p>
+              </div>
+              <span className="bg-warning/10 text-warning w-fit rounded-lg px-2 py-1 text-xs font-medium">
+                {generatedInitialPasswords.length} 条
+              </span>
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {generatedInitialPasswords.map((distributionRow) => (
+                <div
+                  key={`${distributionRow.rowNumber}-${distributionRow.phone}`}
+                  className="border-border bg-surface rounded-md border p-3"
+                >
+                  <p className="text-text-primary text-sm font-medium">
+                    第 {distributionRow.rowNumber} 行 / {distributionRow.name}
+                  </p>
+                  <p className="text-text-secondary mt-1 text-xs">
+                    {distributionRow.phone} /{" "}
+                    {distributionRow.organizationPublicId}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <code className="bg-background text-text-primary rounded px-2 py-1 text-xs">
+                      {distributionRow.initialPassword}
+                    </code>
+                    <button
+                      type="button"
+                      className="border-border bg-background hover:bg-muted inline-flex h-7 items-center justify-center rounded-lg border px-2 text-xs font-medium transition-transform active:scale-[0.98]"
+                      onClick={() =>
+                        copyTextToClipboard(distributionRow.initialPassword)
+                      }
+                    >
+                      复制
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </section>

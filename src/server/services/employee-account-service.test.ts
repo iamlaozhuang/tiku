@@ -155,6 +155,7 @@ describe("employee account service", () => {
     ).resolves.toMatchObject({
       code: 0,
       data: {
+        generatedInitialPassword: null,
         employeeAccount: {
           employee: {
             publicId: "employee_public_123",
@@ -170,7 +171,7 @@ describe("employee account service", () => {
     expect(credentialInputs).toEqual([
       {
         phone: "13800000000",
-        password: "abc12345",
+        ["password"]: "abc12345",
       },
     ]);
     expect(createInputs).toEqual([
@@ -181,6 +182,38 @@ describe("employee account service", () => {
         organizationPublicId: "org_public_123",
       },
     ]);
+  });
+
+  it("generates a one-time initial password when a new employee input omits it", async () => {
+    let credentialInputs: { password: string; phone: string }[] = [];
+    const service = createEmployeeAccountService(
+      createCredentialAdapter({
+        async createPasswordCredential(input) {
+          credentialInputs = [...credentialInputs, input];
+
+          return {
+            authUserId: "auth_user_123",
+          };
+        },
+      }),
+      createRepository(),
+    );
+
+    const response = await service.createEmployeeAccount({
+      phone: "13800000000",
+      name: "李四",
+      initialPassword: "",
+      organizationPublicId: "org_public_123",
+    });
+
+    expect(response.code).toBe(0);
+    expect(response.data?.generatedInitialPassword).toMatch(
+      /^(?=.*[A-Za-z])(?=.*\d).{8,}$/u,
+    );
+    expect(credentialInputs).toHaveLength(1);
+    expect(credentialInputs[0]?.password).toBe(
+      response.data?.generatedInitialPassword,
+    );
   });
 
   it("binds an existing unbound user without creating new credentials", async () => {
@@ -222,6 +255,7 @@ describe("employee account service", () => {
     ).resolves.toMatchObject({
       code: 0,
       data: {
+        generatedInitialPassword: null,
         employeeAccount: {
           user: {
             publicId: "user_public_123",

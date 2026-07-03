@@ -368,6 +368,15 @@ function mockSystemOpsFetchWithOrganizationTree() {
           code: 0,
           message: "ok",
           data: {
+            generatedInitialPasswords: [
+              {
+                rowNumber: 2,
+                phone: "13900001111",
+                name: "Import One",
+                organizationPublicId: "org-district-001",
+                initialPassword: "Generated123",
+              },
+            ],
             importedEmployees: [
               {
                 publicId: "employee-imported-public-001",
@@ -1313,14 +1322,14 @@ describe("admin user organization authorization ops baseline", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
     const employeeImportContent = [
-      "phone,name,initialPassword",
-      "13900001111,Import One,Passw0rd!",
-      "13900002222,Import Two,Passw0rd!",
+      "phone,name",
+      "13900001111,Import One",
+      "13900002222,Import Two",
     ].join("\n");
     const expectedSubmittedContent = [
       "phone,name,initialPassword,organizationPublicId",
-      "13900001111,Import One,Passw0rd!,org-district-001",
-      "13900002222,Import Two,Passw0rd!,org-district-001",
+      "13900001111,Import One,,org-district-001",
+      "13900002222,Import Two,,org-district-001",
     ].join("\n");
 
     render(createElement(AdminOrgAuthPage));
@@ -1346,6 +1355,7 @@ describe("admin user organization authorization ops baseline", () => {
     const importPreview = screen.getByTestId("employee-import-preview");
     expect(importPreview).toHaveTextContent("员工账号 CSV");
     expect(importPreview).toHaveTextContent("2 行");
+    expect(importPreview).toHaveTextContent("2 行未提供 initialPassword");
 
     fireEvent.click(screen.getByTestId("employee-import-submit"));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认导入员工？");
@@ -1355,6 +1365,8 @@ describe("admin user organization authorization ops baseline", () => {
     expect(importResult).toHaveTextContent("成功 1");
     expect(importResult).toHaveTextContent("拒绝 1");
     expect(importResult).toHaveTextContent("第 3 行：手机号重复");
+    expect(importResult).toHaveTextContent("初始密码一次性分发窗口");
+    expect(importResult).toHaveTextContent("Generated123");
     expect(importResult).not.toHaveTextContent("user-rejected-public-001");
     expect(importResult).not.toHaveTextContent("org-missing-public-001");
     expect(importResult).not.toHaveTextContent("13900002222");
