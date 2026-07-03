@@ -358,6 +358,157 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: source-landing-8-role-acceptance-coverage-review-2026-07-03
+    title: Source landing 8 role acceptance coverage review
+    phase: source-landing-8-role-acceptance-coverage-review-2026-07-03
+    sourceStory: current_user_requested_read_only_review_of_current_8_role_acceptance_coverage_and_next_work_orchestration_2026_07_03
+    humanApprovalBoundary: current_user_requested_commit_ff_merge_push_cleanup_for_read_only_coverage_review_2026_07_03
+    targetClosureItem: Produce a read-only credential-backed versus fixture-first coverage acceptance checklist for the current 8-role acceptance evidence, then recommend serial next-work orchestration.
+    behaviorBoundary: docs_state_acceptance_review_only_no_product_source_no_test_source_no_schema_no_dependency_no_runtime_acceptance_no_dev_server_no_browser_no_db_no_env_secret_no_provider_no_staging_prod_no_release_claim
+    evidenceMode: redacted_file_paths_task_ids_role_names_coverage_modes_requirement_ids_status_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: docs_acceptance_review
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_experience_batch
+    status: closed
+    result: coverage_review_accepts_current_checkpoint_with_named_fixture_first_hardening_targets
+    priority: p0
+    branch: codex/source-landing-8-role-acceptance-coverage-review-2026-07-03
+    claimedAt: "2026-07-03T14:45:57-07:00"
+    plannedAt: "2026-07-03T14:45:57-07:00"
+    implementedAt: "2026-07-03T14:50:08-07:00"
+    validatedAt: "2026-07-03T14:50:08-07:00"
+    reviewedAt: "2026-07-03T14:50:08-07:00"
+    dependsOn:
+      - source-landing-8-role-local-acceptance-rerun-2026-07-03
+    roleOrder:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+    acceptanceChecklistPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-coverage-acceptance-checklist.md
+    nextWorkOrchestrationPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-credential-backed-work-orchestration.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-coverage-acceptance-checklist.md
+      - docs/01-requirements/traceability/2026-07-03-source-landing-8-role-credential-backed-work-orchestration.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-16-package-*.md
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-rerun-report.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - e2e/local-full-loop-baseline-accounts-auth-db.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - e2e/edition-aware-authorization-local-flow.spec.ts
+      - e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/role-separated-account-fixture-supplement.spec.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      readOnlySourceInspection: approved_no_sensitive_output
+      runtimeAcceptance: blocked
+      localDevServer: blocked
+      browserRuntime: blocked
+      localSourceChange: blocked
+      testSourceChange: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-acceptance-coverage-review.md docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-coverage-acceptance-checklist.md docs/01-requirements/traceability/2026-07-03-source-landing-8-role-credential-backed-work-orchestration.md docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-acceptance-coverage-review.md docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-8-role-acceptance-coverage-review-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId source-landing-8-role-acceptance-coverage-review-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_commit_ff_merge_push_cleanup_for_read_only_coverage_review_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_commit_ff_merge_push_cleanup_for_read_only_coverage_review_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_commit_ff_merge_push_cleanup_for_read_only_coverage_review_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_commit_ff_merge_push_cleanup_for_read_only_coverage_review_2026_07_03
+    validationSummary:
+      status: closed
+      personalStandardStudentCoverage: credential_backed_runtime_accept_current_checkpoint
+      personalAdvancedStudentCoverage: hybrid_route_fulfilled_fixture_first_accept_with_caveat
+      orgStandardEmployeeCoverage: fixture_first_plus_shared_runtime_accept_with_caveat
+      orgAdvancedEmployeeCoverage: fixture_first_plus_shared_runtime_accept_with_caveat
+      orgStandardAdminCoverage: credential_backed_boundary_plus_fixture_accept_current_checkpoint
+      orgAdvancedAdminCoverage: credential_backed_boundary_plus_fixture_accept_current_checkpoint
+      contentAdminCoverage: credential_backed_boundary_plus_fixture_accept_with_caveat
+      opsAdminCoverage: credential_backed_boundary_plus_fixture_accept_with_caveat
+      allRoleCredentialBackedClosureClaimed: false
+      nextWorkOrchestrationRecorded: true
+      prettierScopedCheckInitial: failed_markdown_formatting
+      prettierScopedWrite: pass
+      prettierScopedCheckFinal: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      runtimeAcceptanceExecuted: false
+      productSourceChanged: false
+      testSourceChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      envSecretAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
   - id: source-landing-8-role-local-acceptance-rerun-2026-07-03
     title: Source landing 8 role local acceptance rerun
     phase: source-landing-8-role-local-acceptance-rerun-2026-07-03
