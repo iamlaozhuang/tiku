@@ -17,6 +17,8 @@ The broader goal discussed with the user was sixteen source landing packages. Th
 package 6 as "6 of 6" is therefore interpreted as "6 of the currently materialized six-package subgoal", not the full
 sixteen-package goal.
 
+Current closeout state: packages 1 through 16 in this map are closed.
+
 ## Source Anchors
 
 - `docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md`
@@ -45,9 +47,9 @@ sixteen-package goal.
 | 15  | `employee-training-answer-result-source-landing-2026-07-03`      | closed         | `UX-REQ-17`, `G14`, `CT-REQ-036`, `D15`                                                                     | Landed learner-grade question answer UI, draft/save, submit confirmation, and own-result review DTO surface without schema or database persistence expansion.                    |
 | 16  | `content-ai-draft-adoption-source-landing-2026-07-03`            | closed         | `UX-REQ-09`, `UX-REQ-13`, `CT-REQ-023`, `CT-REQ-040`, `D11`                                                 | Landed content AI weak/none evidence gates, explicit weak confirmation, review/adoption boundary, and no direct publish.                                                         |
 
-## Execution Rule
+## Historical Execution Rule
 
-For each pending package:
+For each package while it was pending:
 
 1. Start a short `codex/` branch from current `master`.
 2. Read this map plus the package's source anchors and affected code.
@@ -59,7 +61,7 @@ For each pending package:
 
 ## Non-Claims
 
-- The pending ten packages are not implemented by this map.
+- There are no pending packages remaining in this 16-package source landing map.
 - Runtime acceptance remains unclaimed.
 - Release readiness, final Pass, production usability, Cost Calibration, Provider readiness, staging/prod, PR, and force
   push remain unclaimed.
