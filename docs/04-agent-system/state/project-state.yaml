@@ -1,8 +1,125 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: admin-model-prompt-log-governance-source-landing-2026-07-03
-updatedAt: "2026-07-03T05:28:54-07:00"
+currentPhase: source-landing-16-package-recovery-2026-07-03
+updatedAt: "2026-07-03T05:46:15-07:00"
+sourceLanding16PackageRecovery20260703:
+  taskId: source-landing-16-package-recovery-2026-07-03
+  phase: source-landing-16-package-recovery-2026-07-03
+  status: closed
+  result: recovered_sixteen_source_landing_package_map_with_six_closed_and_ten_pending
+  priority: p1
+  taskKind: docs_governance_recovery
+  moduleRunVersion: 2
+  dependsOn:
+    - admin-model-prompt-log-governance-source-landing-2026-07-03
+  sourceStory: current_user_corrected_total_source_landing_package_count_2026_07_03
+  targetClosureItem: Recover the canonical sixteen-package source landing execution map before continuing pending packages.
+  behaviorBoundary: docs_state_traceability_recovery_only_no_product_source_schema_dependency_provider_db_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_requirement_row_ids_status_counts_validation_commands_only_no_credentials_no_sessions_no_env_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_content_no_raw_dom
+  branch: codex/source-landing-16-package-recovery-2026-07-03
+  claimedAt: "2026-07-03T05:46:15-07:00"
+  plannedAt: "2026-07-03T05:46:15-07:00"
+  implementedAt: "2026-07-03T05:46:15-07:00"
+  validatedAt: "2026-07-03T05:46:15-07:00"
+  reviewedAt: "2026-07-03T05:46:15-07:00"
+  closedAt: "2026-07-03T05:46:15-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-16-package-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-recovery.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-recovery.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+    - docs/05-execution-logs/task-plans/2026-07-03-source-landing-16-package-recovery.md
+    - docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-recovery.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-recovery.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/evidence/2026-07-03-*-source-landing.md
+    - docs/05-execution-logs/task-plans/2026-07-03-*-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-*-source-landing.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: blocked
+    focusedUnitTest: blocked_not_needed_for_docs_recovery
+    typecheck: blocked_not_needed_for_docs_recovery
+    lint: blocked_not_needed_for_docs_recovery
+    formatCheck: approved
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    browserRuntime: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - The recovery map records sixteen source landing packages, not only the six already materialized packages.
+    - The six completed packages remain closed and are not reopened by this recovery task.
+    - Ten pending packages are named with source anchors and must be materialized one by one before implementation.
+    - Earlier package-6 wording is interpreted as six of the materialized six-package subgoal, not the full sixteen-package goal.
+    - No product source, schema, dependency, Provider, DB, browser, deploy, release-readiness, final Pass, or production-usability work is introduced.
+  validationCommands:
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-16-package-recovery-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId source-landing-16-package-recovery-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId source-landing-16-package-recovery-2026-07-03 -SkipRemoteAheadCheck
+  validationSummary:
+    status: passed
+    formatCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass
+    productSourceChanged: false
+    pendingSourcePackagesMaterialized: 10
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
 adminModelPromptLogGovernanceSourceLanding20260703:
   taskId: admin-model-prompt-log-governance-source-landing-2026-07-03
   phase: admin-model-prompt-log-governance-source-landing-2026-07-03
@@ -20153,8 +20270,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1ae6bcafe1e9a8b39251d3d4fda45cbf0dd38d94
-  lastKnownOriginMasterSha: 1ae6bcafe1e9a8b39251d3d4fda45cbf0dd38d94
+  lastKnownMasterSha: 587c163ce77e094ce706702ac0f179a35e62fbfc
+  lastKnownOriginMasterSha: 587c163ce77e094ce706702ac0f179a35e62fbfc
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -20294,6 +20411,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: source-landing-16-package-recovery-2026-07-03
+  status: closed
+  result: recovered_sixteen_source_landing_package_map_with_six_closed_and_ten_pending
+  taskKind: docs_governance_recovery
+  moduleRunVersion: 2
+  branch: codex/source-landing-16-package-recovery-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-16-package-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-recovery.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-recovery.md
+previousCurrentTaskBeforeSourceLanding16PackageRecovery20260703:
   id: admin-model-prompt-log-governance-source-landing-2026-07-03
   status: closed
   result: admin_model_prompt_log_governance_source_landed_with_role_gated_model_management_prompt_readonly_registry_connection_test_and_redacted_log_detail
