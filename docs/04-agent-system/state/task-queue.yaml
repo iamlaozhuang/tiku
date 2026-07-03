@@ -358,6 +358,125 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+    title: UI/UX contract evidence post-closeout normalization
+    phase: ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+    sourceStory: active_goal_completion_audit_found_stale_pre_closeout_evidence_placeholders_after_packages_1_to_6_were_merged_pushed_and_cleaned
+    humanApprovalBoundary: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+    targetClosureItem: Normalize stale evidence placeholders so packages 1 through 6 recover as closed after commit, fast-forward merge, push, and branch cleanup.
+    behaviorBoundary: docs_evidence_normalization_only_no_product_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_governance_evidence_normalization
+    moduleRunVersion: 2
+    status: closed
+    result: normalized_stale_evidence_placeholders_after_ui_ux_contract_packages_1_to_6_closeout
+    priority: p1
+    branch: codex/uiux-contract-evidence-normalization-2026-07-03
+    dependsOn:
+      - content-resource-management-ui-ux-contract-2026-07-02
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+      - docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+      - docs/05-execution-logs/evidence/2026-07-02-ops-authorization-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-organization-training-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-organization-analytics-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-organization-ai-post-actions-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-admin-model-prompt-log-governance-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-content-resource-management-ui-ux-contract.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsEvidenceNormalization: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_evidence_normalization_only
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Stale pre-closeout evidence placeholders for packages 1 through 6 are normalized to actual Git closeout facts.
+      - The repair does not rewrite requirement decisions, implementation gap semantics, or validation history beyond removing stale pending placeholders.
+      - The repair contains no product source changes, schema decisions, Provider/browser/DB/dependency/deploy actions, release readiness, final Pass, production usability, or Cost Calibration claims.
+      - Two self-review passes are recorded before closeout.
+      - Commit, fast-forward merge, push, and cleanup happen only after declared validations pass.
+    validationCommands:
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ui-ux-contract-evidence-post-closeout-normalization-2026-07-03 -SkipRemoteAheadCheck
+    validationSummary:
+      status: passed
+      formatCheckPassed: true
+      gitDiffCheckPassed: true
+      moduleRunV2PreCommitHardeningPassed: true
+      moduleRunV2ModuleCloseoutReadinessPassed: true
+      moduleRunV2PrePushReadinessPassed: true
+      staleEvidencePlaceholdersRemoved: true
+      twoReviewPassesRecorded: true
+      sourceOrTestChanged: false
+      productSourceChanged: false
+      providerCallExecuted: false
+      providerConfigurationRead: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_serial_ui_ux_contract_packages_commit_merge_push_cleanup_2026_07_02
+
   - id: ops-authorization-ui-ux-contract-2026-07-02
     title: Operations authorization UI/UX contract
     phase: ops-authorization-ui-ux-contract-2026-07-02

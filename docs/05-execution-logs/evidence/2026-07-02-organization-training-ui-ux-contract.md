@@ -17,7 +17,7 @@ nextModuleRunCandidate: package 3 UI/UX contract, starting from organization ana
 Batch range: UI/UX contract package 2 of 6, organization training creation/source/draft/publish/result contract.
 RED: existing code has partial organization training APIs and pages that can be mistaken for the confirmed UI/UX requirement; especially risky areas are `mock_exam` source acceptance, metadata-only source binding, old "组织培训" wording, employee numeric score forms, and the content-workspace route.
 GREEN: package-2 contract separates existing decisions, current source evidence, and follow-up source gaps without modifying product source.
-Commit: `0000000` pending at pre-commit evidence authoring; final handoff records actual git commit.
+Commit: `8264137da` (`docs(requirements): add organization training ui ux contract`) was fast-forward merged to `master`, pushed to `origin/master`, and short branch `codex/organization-training-uiux-contract-2026-07-02` was deleted during package closeout.
 localFullLoopGate: remains blocked for product runtime; this package is docs-only and does not run browser, Provider, DB, schema, migration, or product e2e flows.
 blocked remainder: product source implementation, tests, schema/migration, dependency changes, browser/runtime acceptance, DB actions, Provider/model actions, deployment, release readiness, final Pass, production usability, and Cost Calibration remain blocked for this package.
 
@@ -50,7 +50,6 @@ Key implementation observations:
 npm.cmd exec -- prettier --write --ignore-unknown docs/01-requirements/traceability/2026-07-02-organization-training-ui-ux-contract.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-organization-training-ui-ux-contract.md docs/05-execution-logs/evidence/2026-07-02-organization-training-ui-ux-contract.md docs/05-execution-logs/audits-reviews/2026-07-02-organization-training-ui-ux-contract.md
 ```
 
-Result: pending.
 Result: exited `0`.
 
 ### Format Check

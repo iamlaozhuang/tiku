@@ -21,7 +21,7 @@ nextModuleRunCandidate: package 6 UI/UX contract, content resource management an
 Batch range: UI/UX contract package 5 of 6, admin model configuration, Prompt registry, and log governance contract.
 RED: current source has model config and Prompt UI that can be mistaken for first-release-ready management; however no model connection test was found, Prompt UI still presents editable-style controls, and super-admin Prompt full-text view is not represented.
 GREEN: package-5 contract separates existing decisions, model connection-test requirements, Prompt read-only/full-text registry rules, log redaction boundaries, and follow-up source gaps without modifying product source.
-Commit: `0000000` pending at pre-commit evidence authoring; final handoff records actual git commit.
+Commit: `b59ec3e53` (`docs(requirements): add admin model prompt log governance ui ux contract`) was recorded as the package closeout commit after validation.
 localFullLoopGate: remains blocked for product runtime; this package is docs-only and does not run browser, Provider, DB, schema, migration, or product e2e flows.
 blocked remainder: product source implementation, tests, schema/migration, dependency changes, browser/runtime acceptance, DB actions, Provider/model actions, deployment, release readiness, final Pass, production usability, editable Prompt UI, log export/delete/archive, and Cost Calibration remain blocked for this package.
 
@@ -133,7 +133,7 @@ reported pre-push readiness passed.
 
 ## Git Closeout
 
-Pending until validation, commit, fast-forward merge, push, and branch cleanup complete.
+Closeout completed: commit `b59ec3e53` (`docs(requirements): add admin model prompt log governance ui ux contract`) was fast-forward merged to `master`, pushed to `origin/master`, and short branch `codex/admin-model-prompt-log-governance-uiux-contract-2026-07-02` was deleted during package closeout.
 
 ## Non-Claims
 

@@ -26,7 +26,7 @@ exposes technical terms such as RAG, Markdown, vector, chunk, publicId, and loca
 GREEN: package-6 contract records content-workspace ownership, non-technical workflow, role boundaries, current source
 gaps, and follow-up source tasks without modifying product source.
 
-Commit: `0000000` pending at pre-commit evidence authoring; final handoff records actual git commit.
+Commit: `2988bca8d` (`docs(requirements): add content resource management ui ux contract`) was recorded as the package closeout commit after validation.
 localFullLoopGate: docs-only local validation required before commit, fast-forward merge, push, and branch cleanup.
 blocked remainder: product source implementation, tests, schema/migration, dependency changes, browser/runtime
 acceptance, DB actions, Provider/model actions, deployment, release readiness, final Pass, production usability, OCR,
@@ -147,7 +147,7 @@ reported pre-push readiness passed.
 
 ## Git Closeout
 
-Pending until validation, commit, fast-forward merge, push, and branch cleanup complete.
+Closeout completed: commit `2988bca8d` (`docs(requirements): add content resource management ui ux contract`) was fast-forward merged to `master`, pushed to `origin/master`, and short branch `codex/content-resource-management-uiux-contract-2026-07-02` was deleted during package closeout.
 
 ## Non-Claims
 
