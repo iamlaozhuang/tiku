@@ -393,6 +393,15 @@ function mockSystemOpsFetchWithOrganizationTree() {
       if (path === "/api/v1/org-auths") {
         const body = JSON.parse(String(init?.body));
 
+        if (body.name === "Overlap Test") {
+          return createJsonResponse({
+            code: 409001,
+            message:
+              "Org auth scope overlaps an existing active authorization.",
+            data: null,
+          });
+        }
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -995,6 +1004,24 @@ describe("admin user organization authorization ops baseline", () => {
 
     await screen.findByTestId("org-auth-create-form");
 
+    const atomicScopePreview = screen.getByTestId(
+      "org-auth-atomic-scope-preview",
+    );
+    expect(atomicScopePreview).toHaveTextContent("原子范围预览");
+    expect(atomicScopePreview).toHaveTextContent("杭州烟草");
+    expect(atomicScopePreview).toHaveTextContent("专卖 3级");
+    expect(atomicScopePreview).toHaveTextContent("请选择授权版本");
+
+    const overlapGuidance = screen.getByTestId(
+      "org-auth-overlap-closure-guidance",
+    );
+    expect(overlapGuidance).toHaveTextContent("重叠授权必须显式闭环");
+    expect(overlapGuidance).toHaveTextContent("续费接续");
+    expect(overlapGuidance).toHaveTextContent("手动升级");
+    expect(overlapGuidance).toHaveTextContent("替换授权");
+    expect(overlapGuidance).toHaveTextContent("增量扩容");
+    expect(overlapGuidance).toHaveTextContent("系统不会自动续费");
+
     const createButton = screen.getByTestId("org-auth-create-button");
 
     expect(createButton).toBeDisabled();
@@ -1004,6 +1031,7 @@ describe("admin user organization authorization ops baseline", () => {
     });
 
     expect(createButton).not.toBeDisabled();
+    expect(atomicScopePreview).toHaveTextContent("高级版");
 
     fireEvent.click(createButton);
     expect(screen.getByRole("alertdialog")).toHaveTextContent("advanced");
@@ -1054,6 +1082,14 @@ describe("admin user organization authorization ops baseline", () => {
       target: { value: "2027-06-01" },
     });
 
+    const atomicScopePreview = screen.getByTestId(
+      "org-auth-atomic-scope-preview",
+    );
+    expect(atomicScopePreview).toHaveTextContent("西湖区烟草公司");
+    expect(atomicScopePreview).toHaveTextContent("物流 5级");
+    expect(atomicScopePreview).toHaveTextContent("高级版");
+    expect(atomicScopePreview).toHaveTextContent("额度 30人");
+
     fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认创建企业授权？",
@@ -1079,6 +1115,34 @@ describe("admin user organization authorization ops baseline", () => {
       purchaserOrganizationPublicId: "org-city-001",
       startsAt: "2026-06-01T00:00:00.000Z",
     });
+  });
+
+  it("maps organization auth overlap failure to explicit closure actions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业授权运营" });
+
+    fireEvent.change(screen.getByLabelText("授权名称"), {
+      target: { value: "Overlap Test" },
+    });
+    fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
+      target: { value: "standard" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认创建" }));
+
+    const alertMessage = await screen.findByRole("alert");
+    expect(alertMessage).toHaveTextContent("系统不会自动合并");
+    expect(alertMessage).toHaveTextContent("续费接续");
+    expect(alertMessage).toHaveTextContent("增量扩容");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/org-auths",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 
   it("creates, edits, and disables organization tree nodes from the organization page", async () => {

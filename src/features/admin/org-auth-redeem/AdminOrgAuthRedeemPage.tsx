@@ -568,6 +568,67 @@ function countQuotaRiskOrgAuths(
   ).length;
 }
 
+function isOrganizationInCoverage(
+  organization: AdminOrgAuthData["organizations"][number],
+  purchaserOrganizationPublicId: string,
+  organizationByPublicId: Map<
+    string,
+    AdminOrgAuthData["organizations"][number]
+  >,
+): boolean {
+  if (organization.publicId === purchaserOrganizationPublicId) {
+    return true;
+  }
+
+  const visitedPublicIds = new Set<string>();
+  let parentOrganizationPublicId = organization.parentOrganizationPublicId;
+
+  while (parentOrganizationPublicId !== null) {
+    if (parentOrganizationPublicId === purchaserOrganizationPublicId) {
+      return true;
+    }
+
+    if (visitedPublicIds.has(parentOrganizationPublicId)) {
+      return false;
+    }
+
+    visitedPublicIds.add(parentOrganizationPublicId);
+    parentOrganizationPublicId =
+      organizationByPublicId.get(parentOrganizationPublicId)
+        ?.parentOrganizationPublicId ?? null;
+  }
+
+  return false;
+}
+
+function selectOrgAuthCoverageOrganizations(
+  formState: OrgAuthFormState,
+  organizations: AdminOrgAuthData["organizations"],
+  purchaserOrganizationPublicId: string,
+): AdminOrgAuthData["organizations"] {
+  if (purchaserOrganizationPublicId.length === 0) {
+    return [];
+  }
+
+  if (formState.authScopeType === "specified_nodes") {
+    return organizations.filter((organization) =>
+      formState.organizationPublicIds.includes(organization.publicId),
+    );
+  }
+
+  const organizationByPublicId = new Map(
+    organizations.map((organization) => [organization.publicId, organization]),
+  );
+
+  return organizations.filter((organization) =>
+    isOrganizationInCoverage(
+      organization,
+      purchaserOrganizationPublicId,
+      organizationByPublicId,
+    ),
+  );
+}
+
 function buildOrgAuthInput(
   formState: OrgAuthFormState,
   organizations: AdminOrgAuthData["organizations"],
@@ -1008,7 +1069,7 @@ function mapOrganizationResultToListItem(
 
 function formatOrgAuthErrorMessage(message: string): string {
   return message === "Org auth scope overlaps an existing active authorization."
-    ? "所选专业/等级、有效期和企业范围已存在生效企业授权，请调整覆盖范围或取消旧授权。"
+    ? "所选企业范围、专业、等级、版本和有效期已存在生效授权；系统不会自动合并。请先选择续费接续、手动升级、替换或增量扩容等显式处理路径，再重新提交。"
     : message;
 }
 
@@ -1402,6 +1463,132 @@ function OperationsPendingWorkbench({
         ))}
       </div>
     </section>
+  );
+}
+
+function OrgAuthOverlapClosureGuidance() {
+  const closureActions = [
+    {
+      label: "续费接续",
+      description: "创建与原授权首尾衔接的新授权，让旧授权自然到期后接续生效。",
+    },
+    {
+      label: "手动升级",
+      description: "由运营记录标准版到高级版的受控升级，不覆写原始授权版本。",
+    },
+    {
+      label: "替换授权",
+      description: "在受控流程中取消或替换旧授权，再创建新的覆盖范围和有效期。",
+    },
+    {
+      label: "增量扩容",
+      description: "仅对同一有效原子范围增加额度，不改变覆盖范围或有效期语义。",
+    },
+  ];
+
+  return (
+    <div
+      className="border-border bg-background rounded-md border p-3"
+      data-testid="org-auth-overlap-closure-guidance"
+    >
+      <div className="space-y-1">
+        <p className="text-brand-primary text-xs font-medium">重叠处理</p>
+        <h3 className="text-text-primary text-sm font-semibold">
+          重叠授权必须显式闭环
+        </h3>
+        <p className="text-text-muted text-xs leading-5">
+          同一企业、专业、等级、版本和有效期形成重叠时默认阻断；系统不会自动续费、自动升级、自动替换或自动合并。
+        </p>
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        {closureActions.map((action) => (
+          <div
+            key={action.label}
+            className="border-border bg-surface rounded-md border p-3"
+          >
+            <p className="text-text-primary text-sm font-medium">
+              {action.label}
+            </p>
+            <p className="text-text-secondary mt-2 text-xs leading-5">
+              {action.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OrgAuthAtomicScopePreview({
+  coverageOrganizations,
+  formState,
+}: {
+  coverageOrganizations: AdminOrgAuthData["organizations"];
+  formState: OrgAuthFormState;
+}) {
+  const editionLabel =
+    formState.edition === ""
+      ? "请选择授权版本"
+      : editionLabels[formState.edition];
+  const levelLabel =
+    formState.level.trim().length === 0
+      ? "请选择等级"
+      : `${formState.level.trim()}级`;
+  const quotaLabel =
+    formState.accountQuota.trim().length === 0
+      ? "待填写额度"
+      : `${formState.accountQuota.trim()}人`;
+  const coverageRows =
+    coverageOrganizations.length === 0 ? [] : coverageOrganizations;
+
+  return (
+    <div
+      className="border-border bg-background rounded-md border p-3"
+      data-testid="org-auth-atomic-scope-preview"
+    >
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">范围预览</p>
+          <h3 className="text-text-primary text-sm font-semibold">
+            原子范围预览
+          </h3>
+          <p className="text-text-muted text-xs leading-5">
+            页面可以按授权包展示；保存、冲突校验、额度占用和审计仍按每个企业节点加专业、等级、版本拆分计算。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          {coverageRows.length} 个企业节点
+        </span>
+      </div>
+
+      {coverageRows.length === 0 ? (
+        <p className="text-text-muted mt-3 text-sm">
+          请选择购买主体或指定企业节点后查看原子范围。
+        </p>
+      ) : (
+        <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {coverageRows.map((organization) => (
+            <div
+              key={organization.publicId}
+              className="border-border bg-surface rounded-md border p-3"
+            >
+              <p className="text-text-primary text-sm font-medium">
+                {organization.name}
+              </p>
+              <p className="text-text-secondary mt-1 text-xs">
+                {professionLabels[formState.profession]} {levelLabel} /{" "}
+                {editionLabel}
+              </p>
+              <p className="text-text-muted mt-1 text-xs">
+                {formatDate(toStartOfDayIso(formState.startsAt))} 至{" "}
+                {formatDate(toStartOfDayIso(formState.expiresAt))} / 额度{" "}
+                {quotaLabel}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -2914,6 +3101,11 @@ function OrgAuthActionPanel({
     findFirstOrganizationPublicId(organizations);
   const organizationDepthByPublicId = createOrganizationDepthMap(organizations);
   const formValidation = buildOrgAuthInput(formState, organizations);
+  const coverageOrganizations = selectOrgAuthCoverageOrganizations(
+    formState,
+    organizations,
+    selectedPurchaserPublicId,
+  );
   const isCreateDisabled = disabled || formValidation.input === null;
 
   function updateFormState(nextFields: Partial<OrgAuthFormState>) {
@@ -3158,6 +3350,13 @@ function OrgAuthActionPanel({
             })}
           </div>
         </div>
+
+        <OrgAuthAtomicScopePreview
+          coverageOrganizations={coverageOrganizations}
+          formState={formState}
+        />
+
+        <OrgAuthOverlapClosureGuidance />
 
         {formValidation.message === null ? null : (
           <p className="text-destructive text-sm">{formValidation.message}</p>
