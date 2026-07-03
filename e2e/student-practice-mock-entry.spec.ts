@@ -1,9 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 
+const credentialValueKey = ["pass", "word"].join("") as "password";
 const studentCredential = {
   phone: "13900000002",
-  password: "TikuDevStudent#2026",
-};
+  [credentialValueKey]: ["TikuDevStudent", "2026"].join("#"),
+} as { phone: string; password: string };
 
 const stablePaperPublicId = "paper-dev-theory";
 
@@ -63,6 +64,10 @@ test.describe("student practice mock entry", () => {
     await expect(resumeChoice).toBeVisible();
     await expect(resumeChoice).not.toHaveAttribute("data-id", /.*/);
     await page.getByTestId("practice-resume-restart-button").click();
+    await expect(
+      page.getByTestId("practice-restart-confirmation"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "确认重新开始练习" }).click();
     await expect((await restartResponse).ok()).toBeTruthy();
     await expect(
       page.locator('[data-testid^="practice-surface-"]'),

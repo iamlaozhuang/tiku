@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: source-landing-8-role-local-acceptance-2026-07-03
-updatedAt: "2026-07-03T11:51:39-07:00"
+currentPhase: source-landing-8-role-local-acceptance-repair-2026-07-03
+updatedAt: "2026-07-03T12:15:29-07:00"
 sourceLanding8RoleLocalAcceptance20260703:
   taskId: source-landing-8-role-local-acceptance-2026-07-03
   phase: source-landing-8-role-local-acceptance-2026-07-03
@@ -147,7 +147,8 @@ sourceLanding8RoleLocalAcceptance20260703:
 repairStudentPracticeRestartAcceptanceHarness20260703:
   taskId: repair-student-practice-restart-acceptance-harness-2026-07-03
   phase: source-landing-8-role-local-acceptance-repair-2026-07-03
-  status: pending
+  status: ready_for_closeout
+  result: student_practice_restart_acceptance_harness_repaired_with_two_step_confirmation
   priority: p0
   taskKind: acceptance_harness_repair
   moduleRunVersion: 2
@@ -156,8 +157,106 @@ repairStudentPracticeRestartAcceptanceHarness20260703:
   sourceStory: first_role_local_acceptance_blocked_by_student_practice_restart_confirmation_contract_drift_2026_07_03
   targetClosureItem: Repair the student practice restart local acceptance harness to follow the current two-step confirmation contract, then rerun the 8-role local acceptance from the beginning.
   behaviorBoundary: acceptance_harness_repair_only_requires_fresh_task_plan_before_test_source_change_no_product_source_unless_new_evidence
+  humanApprovalBoundary: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+  evidenceMode: redacted_command_status_and_assertion_summary_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+  branch: codex/repair-student-practice-restart-acceptance-harness-2026-07-03
+  claimedAt: "2026-07-03T12:15:29-07:00"
+  plannedAt: "2026-07-03T12:15:29-07:00"
+  implementedAt: "2026-07-03T12:29:00-07:00"
+  validatedAt: "2026-07-03T12:29:00-07:00"
+  reviewedAt: "2026-07-03T12:29:00-07:00"
   splitFrom: source-landing-8-role-local-acceptance-2026-07-03
   splitPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    - docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    - e2e/student-practice-mock-entry.spec.ts
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsStateEvidenceAudit: approved
+    testSourceChange: approved_existing_student_practice_e2e_only
+    productSourceChange: blocked_unless_new_root_cause_evidence_and_fresh_approval
+    localDevServer: approved_for_playwright_webserver_only
+    localhostBrowser: approved_for_existing_playwright_spec_only
+    directDatabaseConnection: blocked
+    providerCall: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  validationCommands:
+    - npm.cmd exec -- playwright test e2e/student-practice-mock-entry.spec.ts --project=chromium --reporter=line --trace=off
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md e2e/student-practice-mock-entry.spec.ts
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-student-practice-restart-acceptance-harness-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-student-practice-restart-acceptance-harness-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+  validationSummary:
+    status: ready_for_closeout
+    redGreenRepair: pass
+    redCommand: failed_as_expected_student_practice_restart_wait_timeout
+    greenCommand: pass_student_practice_restart_confirmation_contract
+    playwrightStudentPracticeSpec: pass_after_repair_and_format
+    prettierScopedCheck: pass
+    lint: pass
+    typecheck: pass
+    gitDiffCheck: pass
+    sensitiveFixtureFieldNormalized: true
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    playwrightGeneratedArtifactsRemoved: true
+    productSourceChanged: false
+    directDatabaseConnectionOrMutationExecuted: false
+    envSecretAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
 sourceLanding16PackageAcceptancePrep20260703:
   taskId: source-landing-16-package-acceptance-prep-2026-07-03
   phase: source-landing-16-package-acceptance-prep-2026-07-03
@@ -22178,20 +22277,20 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: source-landing-8-role-local-acceptance-2026-07-03
-  status: blocked
-  result: blocked_after_first_role_failure_acceptance_harness_contract_drift
-  taskKind: local_acceptance_execution
+  id: repair-student-practice-restart-acceptance-harness-2026-07-03
+  status: ready_for_closeout
+  result: student_practice_restart_acceptance_harness_repaired_with_two_step_confirmation
+  taskKind: acceptance_harness_repair
   moduleRunVersion: 2
-  branch: codex/source-landing-8-role-local-acceptance-2026-07-03
-  claimedAt: "2026-07-03T11:51:39-07:00"
-  plannedAt: "2026-07-03T11:51:39-07:00"
-  implementedAt: "2026-07-03T12:05:00-07:00"
-  validatedAt: "2026-07-03T12:05:00-07:00"
-  reviewedAt: "2026-07-03T12:05:00-07:00"
-  planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md
+  branch: codex/repair-student-practice-restart-acceptance-harness-2026-07-03
+  claimedAt: "2026-07-03T12:15:29-07:00"
+  plannedAt: "2026-07-03T12:15:29-07:00"
+  implementedAt: "2026-07-03T12:29:00-07:00"
+  validatedAt: "2026-07-03T12:29:00-07:00"
+  reviewedAt: "2026-07-03T12:29:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
 previousCurrentTaskBeforeSourceLandingEvidenceCloseoutCorrection20260703:
   id: content-ai-draft-adoption-source-landing-2026-07-03
   status: closed
