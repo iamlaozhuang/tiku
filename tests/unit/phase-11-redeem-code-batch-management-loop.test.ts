@@ -79,6 +79,7 @@ function createAdminRepositories(auditInputs: unknown[] = []) {
         generation: {
           generationGroupId: "redeem-code-batch-public-001",
           count: input.count,
+          redeemCodeType: input.redeemCodeType,
           profession: input.profession,
           level: input.level,
           durationDay: input.durationDay,
@@ -88,6 +89,7 @@ function createAdminRepositories(auditInputs: unknown[] = []) {
           publicId: `redeem-code-public-${index + 1}`,
           codePlainText: generatedCodePlaceholder,
           codeDisplay: generatedCodePlaceholder,
+          redeemCodeType: input.redeemCodeType,
           profession: input.profession,
           level: input.level,
           status: "unused" as const,
@@ -104,6 +106,8 @@ function createAdminRepositories(auditInputs: unknown[] = []) {
           {
             publicId: "redeem-code-public-expired",
             codeDisplay: "ABCD****",
+            codePlainText: null,
+            redeemCodeType: "personal_standard_activation",
             canViewPlainText: false,
             profession: "monopoly",
             level: 3,
@@ -250,6 +254,7 @@ describe("phase 11 redeem_code batch management loop", () => {
         },
         body: JSON.stringify({
           count: 3,
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
           durationDay: 365,
@@ -262,6 +267,7 @@ describe("phase 11 redeem_code batch management loop", () => {
     expect(createInputs).toEqual([
       {
         count: 3,
+        redeemCodeType: "personal_standard_activation",
         profession: "monopoly",
         level: 3,
         durationDay: 365,
@@ -276,6 +282,7 @@ describe("phase 11 redeem_code batch management loop", () => {
         generation: {
           generationGroupId: "redeem-code-batch-public-001",
           count: 3,
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
           durationDay: 365,
@@ -292,6 +299,7 @@ describe("phase 11 redeem_code batch management loop", () => {
       publicId: "redeem-code-public-1",
       codeDisplay: generatedCodePlaceholder,
       codePlainText: generatedCodePlaceholder,
+      redeemCodeType: "personal_standard_activation",
       status: "unused",
     });
     expect(auditInputs).toEqual([
@@ -303,7 +311,7 @@ describe("phase 11 redeem_code batch management loop", () => {
         targetPublicId: "redeem-code-batch-public-001",
         resultStatus: "success",
         metadataSummary:
-          "redacted redeem_code batch metadata; count=3 profession=monopoly level=3 deadline=2026-06-24T15:59:59.999Z",
+          "redacted redeem_code batch metadata; count=3 type=personal_standard_activation profession=monopoly level=3 deadline=2026-06-24T15:59:59.999Z",
         requestIp: null,
       },
     ]);
@@ -335,7 +343,7 @@ describe("phase 11 redeem_code batch management loop", () => {
     expect(createInputs).toEqual([]);
   });
 
-  it("rejects redeem_code generation without explicit profession and level before repository mutation", async () => {
+  it("rejects redeem_code generation without explicit type, profession and level before repository mutation", async () => {
     const auditInputs: unknown[] = [];
     const { createInputs, repositories } = createAdminRepositories(auditInputs);
     const handlers = createAdminHandlers(repositories);
@@ -356,7 +364,8 @@ describe("phase 11 redeem_code batch management loop", () => {
 
     await expect(readJson(response)).resolves.toEqual({
       code: 422601,
-      message: "Redeem code generation requires explicit profession and level.",
+      message:
+        "Redeem code generation requires explicit type, profession and level.",
       data: null,
     });
     expect(createInputs).toEqual([]);

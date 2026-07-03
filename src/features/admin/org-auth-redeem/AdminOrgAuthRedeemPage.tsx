@@ -7,6 +7,7 @@ import {
   Building2,
   CheckCircle2,
   Clock3,
+  Copy,
   Eye,
   KeyRound,
   LoaderCircle,
@@ -49,6 +50,7 @@ import type {
   OrgTier,
   Profession,
   RedeemCodeStatus,
+  RedeemCodeType,
   UserStatus,
 } from "@/server/models/auth";
 
@@ -105,6 +107,7 @@ type CreateRedeemCodeInput = {
   durationDay: number;
   level: number;
   profession: Profession;
+  redeemCodeType: RedeemCodeType;
   redeemDeadlineDate: string;
 };
 
@@ -116,6 +119,7 @@ type RedeemCodeGenerationFormState = {
   generationMode: RedeemCodeGenerationMode;
   level: string;
   profession: Profession | "";
+  redeemCodeType: RedeemCodeType | "";
   redeemDeadlineDate: string;
 };
 
@@ -193,6 +197,7 @@ type ToastMessage = {
 };
 
 type GeneratedRedeemCodeSummary = RedeemCodeGenerationDto["generation"];
+type GeneratedRedeemCodeDistribution = RedeemCodeGenerationDto["redeemCodes"];
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const DEFAULT_LIST_QUERY = "page=1&pageSize=20";
@@ -226,6 +231,17 @@ const redeemCodeStatusLabels = {
   unused: "未使用",
   used: "已使用",
 } satisfies Record<RedeemCodeStatus, string>;
+
+const redeemCodeTypeLabels = {
+  edition_upgrade: "升级卡密",
+  personal_advanced_activation: "个人高级版开通",
+  personal_standard_activation: "个人标准版开通",
+} satisfies Record<RedeemCodeType, string>;
+
+const redeemCodeRedactionReasonLabels = {
+  code_hash_hidden_plaintext_role_allowed: "校验值已隐藏，明文已授权显示",
+  plaintext_redeem_code_and_hash_hidden: "明文与校验值均已隐藏",
+} satisfies Record<RedeemCodeDetailDto["redactionReason"], string>;
 
 const editionLabels = {
   advanced: "高级版",
@@ -293,6 +309,7 @@ const defaultRedeemCodeGenerationFormState: RedeemCodeGenerationFormState = {
   generationMode: "single",
   level: "",
   profession: "",
+  redeemCodeType: "",
   redeemDeadlineDate: "2026-06-24",
 };
 
@@ -577,7 +594,12 @@ function buildRedeemCodeGenerationInput(
   const durationDay = Number(formState.durationDay);
   const level = Number(formState.level);
   const profession = formState.profession;
+  const redeemCodeType = formState.redeemCodeType;
   const redeemDeadlineDate = formState.redeemDeadlineDate.trim();
+
+  if (redeemCodeType === "") {
+    return { input: null, message: "请选择卡密类型。" };
+  }
 
   if (profession === "") {
     return { input: null, message: "请选择卡密授权专业。" };
@@ -605,10 +627,48 @@ function buildRedeemCodeGenerationInput(
       durationDay,
       level,
       profession,
+      redeemCodeType,
       redeemDeadlineDate,
     },
     message: null,
   };
+}
+
+function createTargetedEmployeeAccountImportContent(input: {
+  lines: string[];
+  targetOrganizationPublicId: string;
+}): string {
+  const delimiter = input.lines.some((line) => line.includes("\t"))
+    ? "\t"
+    : ",";
+  const headerCells = input.lines[0]?.split(delimiter) ?? [];
+  const headerIndexByName = new Map(
+    headerCells.map((cell, index) => [
+      normalizeEmployeeImportHeaderCell(cell),
+      index,
+    ]),
+  );
+  const phoneIndex = headerIndexByName.get("phone") ?? 0;
+  const nameIndex = headerIndexByName.get("name") ?? 1;
+  const initialPasswordIndex = headerIndexByName.get("initialpassword") ?? 2;
+  const dataLines = input.lines.slice(1);
+  const nextLines = dataLines.map((line) => {
+    const cells = line.split(delimiter).map((cell) => cell.trim());
+
+    return [
+      cells[phoneIndex] ?? "",
+      cells[nameIndex] ?? "",
+      cells[initialPasswordIndex] ?? "",
+      input.targetOrganizationPublicId,
+    ].join(delimiter);
+  });
+
+  return [
+    ["phone", "name", "initialPassword", "organizationPublicId"].join(
+      delimiter,
+    ),
+    ...nextLines,
+  ].join("\n");
 }
 
 function maskRedeemCodeDisplay(codeDisplay: string): string {
@@ -619,6 +679,14 @@ function maskRedeemCodeDisplay(codeDisplay: string): string {
   }
 
   return `${normalizedCodeDisplay.slice(0, 4)}****`;
+}
+
+function copyTextToClipboard(value: string): void {
+  if (typeof navigator === "undefined" || navigator.clipboard === undefined) {
+    return;
+  }
+
+  void navigator.clipboard.writeText(value);
 }
 
 function normalizeOptionalOrganizationText(value: string): string | null {
@@ -715,7 +783,10 @@ function buildOrganizationInput(
   };
 }
 
-function buildEmployeeImportInput(value: string): {
+function buildEmployeeImportInput(
+  value: string,
+  targetOrganizationPublicId: string,
+): {
   input: EmployeeImportInput | null;
   message: string | null;
 } {
@@ -740,12 +811,15 @@ function buildEmployeeImportInput(value: string): {
     };
   }
 
+  if (targetOrganizationPublicId.trim().length === 0) {
+    return { input: null, message: "请选择员工导入目标组织。" };
+  }
+
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
     firstLine.includes("phone") &&
     firstLine.includes("name") &&
-    firstLine.includes("initialpassword") &&
-    firstLine.includes("organizationpublicid");
+    firstLine.includes("initialpassword");
   const legacyRows = lines.map((line) =>
     line.split(",").map((item) => item.trim()),
   );
@@ -767,16 +841,30 @@ function buildEmployeeImportInput(value: string): {
     };
   }
 
+  if (!hasEmployeeAccountHeader) {
+    return {
+      input: null,
+      message:
+        "员工账号导入必须包含 phone,name,initialPassword 表头，并先选择目标组织。",
+    };
+  }
+
   return {
     input: {
-      content: trimmedValue,
+      content: createTargetedEmployeeAccountImportContent({
+        lines,
+        targetOrganizationPublicId: targetOrganizationPublicId.trim(),
+      }),
       sourceFormat: lines.some((line) => line.includes("\t")) ? "tsv" : "csv",
     },
     message: null,
   };
 }
 
-function buildEmployeeImportPreview(value: string): EmployeeImportPreview {
+function buildEmployeeImportPreview(
+  value: string,
+  targetOrganizationPublicId: string,
+): EmployeeImportPreview {
   const trimmedValue = value.trim();
 
   if (trimmedValue.length === 0) {
@@ -809,8 +897,7 @@ function buildEmployeeImportPreview(value: string): EmployeeImportPreview {
   const hasEmployeeAccountHeader =
     firstLine.includes("phone") &&
     firstLine.includes("name") &&
-    firstLine.includes("initialpassword") &&
-    firstLine.includes("organizationpublicid");
+    firstLine.includes("initialpassword");
   const legacyRows = lines.map((line) =>
     line.split(",").map((item) => item.trim()),
   );
@@ -832,17 +919,22 @@ function buildEmployeeImportPreview(value: string): EmployeeImportPreview {
   const sourceFormat = lines.some((line) => line.includes("\t"))
     ? "TSV"
     : "CSV";
-  const rowCount = hasEmployeeAccountHeader
-    ? Math.max(lines.length - 1, 0)
-    : lines.length;
+  const rowCount = hasEmployeeAccountHeader ? Math.max(lines.length - 1, 0) : 0;
+
+  const hasTargetOrganization = targetOrganizationPublicId.trim().length > 0;
+  const message =
+    rowCount <= 0
+      ? hasEmployeeAccountHeader
+        ? "请至少提供一行员工数据。"
+        : "员工账号导入必须包含 phone,name,initialPassword 表头。"
+      : hasTargetOrganization
+        ? `将按员工账号 ${sourceFormat} 解析 ${rowCount} 行员工，并导入到已选择的目标组织。`
+        : "请选择员工导入目标组织。";
 
   return {
     formatLabel: `员工账号 ${sourceFormat}`,
-    isReady: rowCount > 0,
-    message:
-      rowCount > 0
-        ? `将按员工账号 ${sourceFormat} 解析 ${rowCount} 行员工。`
-        : "请至少提供一行员工数据。",
+    isReady: rowCount > 0 && hasTargetOrganization,
+    message,
     rowCount,
   };
 }
@@ -1664,13 +1756,19 @@ function EmployeeUnbindResultPanel({
 function EmployeeImportActionPanel({
   importText,
   importPreview,
+  organizations,
   onImportTextChange,
   onSubmit,
+  onTargetOrganizationChange,
+  targetOrganizationPublicId,
 }: {
   importText: string;
   importPreview: EmployeeImportPreview;
   onImportTextChange: (value: string) => void;
   onSubmit: () => void;
+  onTargetOrganizationChange: (value: string) => void;
+  organizations: AdminOrgAuthData["organizations"];
+  targetOrganizationPublicId: string;
 }) {
   return (
     <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
@@ -1681,12 +1779,28 @@ function EmployeeImportActionPanel({
             员工批量导入
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            支持 userPublicId,organizationPublicId，或粘贴
-            phone,name,initialPassword,organizationPublicId
+            先选择目标组织，再粘贴 phone,name,initialPassword
             CSV/TSV。员工导入仅绑定 organization，不得包含
-            profession,level,edition,orgAuthScopePublicId。
+            profession,level,edition,orgAuthScopePublicId。历史
+            userPublicId,organizationPublicId 绑定格式仍可受控导入。
           </p>
         </div>
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">目标组织</span>
+          <select
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            data-testid="employee-import-organization-select"
+            value={targetOrganizationPublicId}
+            onChange={(event) => onTargetOrganizationChange(event.target.value)}
+          >
+            <option value="">请选择目标组织</option>
+            {organizations.map((organization) => (
+              <option key={organization.publicId} value={organization.publicId}>
+                {organization.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <textarea
           className="border-border bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm"
           data-testid="employee-import-textarea"
@@ -1829,62 +1943,89 @@ function EmployeeConfirmationDialog({
 }
 
 function RedeemCodeList({
+  onCopyPlainText,
   onViewDetail,
   redeemCodes,
 }: {
+  onCopyPlainText: (value: string) => void;
   onViewDetail: (publicId: string) => void;
   redeemCodes: AdminRedeemCodeData["redeemCodes"];
 }) {
   return (
     <AdminPanel title="卡密列表">
-      {redeemCodes.map((redeemCode) => (
-        <AdminDataRow
-          key={redeemCode.publicId}
-          publicId={redeemCode.publicId}
-          testId={`admin-redeem-code-${redeemCode.publicId}`}
-        >
-          <div className="min-w-0 space-y-1">
-            <p className="text-text-primary font-mono text-sm font-semibold">
-              {redeemCode.codeDisplay}
-            </p>
-            <p className="text-text-secondary text-xs">
-              {formatProfessionLevel(redeemCode)} / 创建于{" "}
-              {formatDate(redeemCode.createdAt)}
-            </p>
-            <p className="text-text-muted flex flex-wrap gap-1 text-xs">
-              <span>兑换用户 {redeemCode.redeemedUserPublicId ?? "无"}</span>
-              <span>/</span>
-              <span>
-                {redeemCode.canViewPlainText ? "可查看明文" : "不可查看明文"}
+      {redeemCodes.map((redeemCode) => {
+        const visiblePlainText =
+          redeemCode.canViewPlainText && redeemCode.codePlainText !== null
+            ? redeemCode.codePlainText
+            : null;
+
+        return (
+          <AdminDataRow
+            key={redeemCode.publicId}
+            publicId={redeemCode.publicId}
+            testId={`admin-redeem-code-${redeemCode.publicId}`}
+          >
+            <div className="min-w-0 space-y-1">
+              <p className="text-text-primary font-mono text-sm font-semibold">
+                {visiblePlainText ?? redeemCode.codeDisplay}
+              </p>
+              <p className="text-text-secondary text-xs">
+                {redeemCodeTypeLabels[redeemCode.redeemCodeType]} /{" "}
+                {formatProfessionLevel(redeemCode)} / 创建于{" "}
+                {formatDate(redeemCode.createdAt)}
+              </p>
+              <p className="text-text-muted flex flex-wrap gap-1 text-xs">
+                <span>兑换用户 {redeemCode.redeemedUserPublicId ?? "无"}</span>
+                <span>/</span>
+                <span>
+                  {visiblePlainText === null ? "明文不可用" : "明文可复制"}
+                </span>
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+                {redeemCodeStatusLabels[redeemCode.status]}
               </span>
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-              {redeemCodeStatusLabels[redeemCode.status]}
-            </span>
-            <button
-              type="button"
-              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-              onClick={() => onViewDetail(redeemCode.publicId)}
-            >
-              <Eye className="size-3.5" aria-hidden="true" />
-              详情
-            </button>
-          </div>
-        </AdminDataRow>
-      ))}
+              {visiblePlainText === null ? null : (
+                <button
+                  type="button"
+                  className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                  onClick={() => onCopyPlainText(visiblePlainText)}
+                >
+                  <Copy className="size-3.5" aria-hidden="true" />
+                  复制
+                </button>
+              )}
+              <button
+                type="button"
+                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                onClick={() => onViewDetail(redeemCode.publicId)}
+              >
+                <Eye className="size-3.5" aria-hidden="true" />
+                详情
+              </button>
+            </div>
+          </AdminDataRow>
+        );
+      })}
     </AdminPanel>
   );
 }
 
 function RedeemCodeDetailPanel({
+  onCopyPlainText,
   onClose,
   redeemCode,
 }: {
+  onCopyPlainText: (value: string) => void;
   onClose: () => void;
   redeemCode: RedeemCodeDetailDto;
 }) {
+  const visiblePlainText =
+    redeemCode.canViewPlainText && redeemCode.codePlainText !== null
+      ? redeemCode.codePlainText
+      : null;
+
   return (
     <section
       aria-label="卡密详情"
@@ -1896,25 +2037,43 @@ function RedeemCodeDetailPanel({
         <div className="space-y-1">
           <p className="text-brand-primary text-xs font-medium">卡密详情</p>
           <h2 className="text-text-primary font-mono text-base font-semibold">
-            {redeemCode.codeDisplay}
+            {visiblePlainText ?? redeemCode.codeDisplay}
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            详情视图只展示脱敏字段和公开标识，不展示明文卡密或哈希。
+            详情视图不展示哈希或内部标识；明文只在接口明确授权时显示。
           </p>
         </div>
-        <button
-          type="button"
-          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-          onClick={onClose}
-        >
-          关闭
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {visiblePlainText === null ? null : (
+            <button
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+              onClick={() => onCopyPlainText(visiblePlainText)}
+            >
+              <Copy className="size-3.5" aria-hidden="true" />
+              复制明文
+            </button>
+          )}
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onClose}
+          >
+            关闭
+          </button>
+        </div>
       </div>
       <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">公开标识</dt>
           <dd className="text-text-primary mt-1 text-sm font-medium break-all">
             {redeemCode.publicId}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">卡密类型</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {redeemCodeTypeLabels[redeemCode.redeemCodeType]}
           </dd>
         </div>
         <div className="bg-background rounded-md p-3">
@@ -1982,16 +2141,97 @@ function RedeemCodeDetailPanel({
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">脱敏原因</dt>
           <dd className="text-text-primary mt-1 text-sm font-medium break-all">
-            {redeemCode.redactionReason}
+            {redeemCodeRedactionReasonLabels[redeemCode.redactionReason]}
           </dd>
         </div>
       </dl>
       <p className="text-text-muted mt-3 text-xs">
         明文状态：
-        {redeemCode.canViewPlainText
-          ? "仅本次生成响应允许查看"
-          : "历史列表不可查看"}
+        {visiblePlainText === null ? "当前接口未返回明文" : "可由运营复制分发"}
       </p>
+    </section>
+  );
+}
+
+function RedeemCodeDistributionWindow({
+  generation,
+  onCopyAll,
+  onCopyOne,
+  redeemCodes,
+}: {
+  generation: GeneratedRedeemCodeSummary;
+  onCopyAll: () => void;
+  onCopyOne: (value: string) => void;
+  redeemCodes: GeneratedRedeemCodeDistribution;
+}) {
+  return (
+    <section
+      aria-label="卡密分发窗口"
+      className="bg-surface border-success/40 rounded-md border p-4 shadow-sm"
+      data-testid="redeem-code-distribution-window"
+    >
+      <div className="space-y-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <p className="text-brand-primary text-xs font-medium">分发窗口</p>
+            <h2 className="text-text-primary text-base font-semibold">
+              本次生成的卡密明文
+            </h2>
+            <p className="text-text-secondary text-sm leading-6">
+              本窗口用于运营分发本批次卡密；验证证据与审计日志只记录批次、数量、类型、专业等级和截止日期摘要。
+            </p>
+          </div>
+          <button
+            type="button"
+            className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+            data-testid="redeem-code-distribution-copy-all"
+            onClick={onCopyAll}
+          >
+            <Copy className="size-4" aria-hidden="true" />
+            复制全部
+          </button>
+        </div>
+
+        <div
+          className="bg-background border-border rounded-md border p-3"
+          data-testid="redeem-code-generation-redacted-summary"
+        >
+          <p className="text-text-primary text-sm font-medium">批次摘要</p>
+          <p className="text-text-secondary mt-1 text-xs">
+            generationGroupId:{generation.generationGroupId}; count:
+            {generation.count}; type:
+            {generation.redeemCodeType}; profession:{generation.profession};
+            level:{generation.level}; deadline:{generation.redeemDeadlineAt}
+          </p>
+        </div>
+
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {redeemCodes.map((redeemCode) => (
+            <div
+              key={redeemCode.publicId}
+              className="bg-background border-border rounded-md border p-3"
+              data-public-id={redeemCode.publicId}
+              data-testid={`redeem-code-distribution-item-${redeemCode.publicId}`}
+            >
+              <p className="text-text-primary font-mono text-sm font-semibold break-all">
+                {redeemCode.codePlainText}
+              </p>
+              <p className="text-text-muted mt-1 text-xs">
+                {redeemCodeTypeLabels[redeemCode.redeemCodeType]} /{" "}
+                {formatProfessionLevel(redeemCode)}
+              </p>
+              <button
+                type="button"
+                className="border-border bg-surface hover:bg-muted hover:text-foreground mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                onClick={() => onCopyOne(redeemCode.codePlainText)}
+              >
+                <Copy className="size-3.5" aria-hidden="true" />
+                复制
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -2384,8 +2624,9 @@ function RedeemCodeConfirmationDialog({
         </div>
         <p className="text-text-muted text-sm">
           将生成 {input.count} 个 {input.profession} {input.level} 级卡密，
-          有效期 {input.durationDay} 天，兑换截止日期 {input.redeemDeadlineDate}
-          。普通页面和 evidence 只记录脱敏摘要。
+          类型为 {redeemCodeTypeLabels[input.redeemCodeType]}， 有效期{" "}
+          {input.durationDay} 天，兑换截止日期 {input.redeemDeadlineDate}
+          。审计日志和 evidence 只记录脱敏摘要。
         </p>
         <div className="flex gap-2">
           <button
@@ -2464,6 +2705,27 @@ function OrgAuthActionPanel({
           </h2>
           <p className="text-text-secondary text-sm leading-6">
             选择购买主体、授权范围、专业等级、额度和有效期；提交后后端会展开企业范围并校验重叠授权。
+          </p>
+        </div>
+
+        <div className="bg-background border-border grid gap-3 rounded-md border p-3 md:grid-cols-4">
+          {[
+            "选择购买主体",
+            "确认范围",
+            "填写专业等级和版本",
+            "提交后处理重叠提示",
+          ].map((step, index) => (
+            <div key={step} className="min-w-0">
+              <p className="text-brand-primary text-xs font-medium">
+                {index + 1}
+              </p>
+              <p className="text-text-primary mt-1 text-sm font-medium">
+                {step}
+              </p>
+            </div>
+          ))}
+          <p className="text-text-muted text-xs leading-5 md:col-span-4">
+            同一原子范围已有生效授权时默认阻断；运营需通过续期、手动升级、替换或增量扩容等显式动作形成闭环后再完成授权。
           </p>
         </div>
 
@@ -2784,6 +3046,25 @@ function RedeemCodeActionPanel({
           </div>
         </div>
 
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
+          <span className="text-text-secondary">卡密类型</span>
+          <select
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            data-testid="redeem-code-generation-type-select"
+            value={formState.redeemCodeType}
+            onChange={(event) =>
+              updateFormState({
+                redeemCodeType: event.target.value as RedeemCodeType | "",
+              })
+            }
+          >
+            <option value="">请选择</option>
+            <option value="personal_standard_activation">个人标准版开通</option>
+            <option value="personal_advanced_activation">个人高级版开通</option>
+            <option value="edition_upgrade">升级卡密</option>
+          </select>
+        </label>
+
         <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
           <span className="text-text-secondary">数量</span>
           <input
@@ -2862,7 +3143,7 @@ function RedeemCodeActionPanel({
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-text-muted text-sm">
           {formValidation.message ??
-            "筛选变化自动刷新；生成操作需要二次确认，普通页面只显示脱敏摘要。"}
+            "筛选变化自动刷新；生成操作需要二次确认，类型、专业、等级必须显式选择。"}
         </p>
         <button
           type="button"
@@ -3116,6 +3397,10 @@ export function AdminOrgAuthPage() {
   const [organizationFormState, setOrganizationFormState] =
     useState<OrganizationFormState>(defaultOrganizationFormState);
   const [employeeImportText, setEmployeeImportText] = useState("");
+  const [
+    employeeImportOrganizationPublicId,
+    setEmployeeImportOrganizationPublicId,
+  ] = useState("");
   const [lastEmployeeImportResult, setLastEmployeeImportResult] =
     useState<EmployeeImportResultDto | null>(null);
   const [lastEmployeeUnbindResult, setLastEmployeeUnbindResult] =
@@ -3138,9 +3423,15 @@ export function AdminOrgAuthPage() {
     [data.organizations],
   );
   const employeeImportPreview = useMemo(
-    () => buildEmployeeImportPreview(employeeImportText),
-    [employeeImportText],
+    () =>
+      buildEmployeeImportPreview(
+        employeeImportText,
+        employeeImportOrganizationPublicId,
+      ),
+    [employeeImportOrganizationPublicId, employeeImportText],
   );
+  const selectedEmployeeImportOrganizationPublicId =
+    employeeImportOrganizationPublicId;
   const selectedOrganizationDetail = useMemo(
     () =>
       selectedOrganizationPublicId === null
@@ -3430,7 +3721,10 @@ export function AdminOrgAuthPage() {
   }
 
   function handleSubmitEmployeeImport() {
-    const importDraft = buildEmployeeImportInput(employeeImportText);
+    const importDraft = buildEmployeeImportInput(
+      employeeImportText,
+      selectedEmployeeImportOrganizationPublicId,
+    );
 
     if (importDraft.input === null) {
       setLastEmployeeImportResult(null);
@@ -3618,11 +3912,17 @@ export function AdminOrgAuthPage() {
       <EmployeeImportActionPanel
         importText={employeeImportText}
         importPreview={employeeImportPreview}
+        organizations={data.organizations}
+        targetOrganizationPublicId={selectedEmployeeImportOrganizationPublicId}
         onImportTextChange={(nextImportText) => {
           setEmployeeImportText(nextImportText);
           setLastEmployeeImportResult(null);
         }}
         onSubmit={handleSubmitEmployeeImport}
+        onTargetOrganizationChange={(nextOrganizationPublicId) => {
+          setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
+          setLastEmployeeImportResult(null);
+        }}
       />
 
       {lastEmployeeImportResult === null ? null : (
@@ -3798,6 +4098,8 @@ export function AdminRedeemCodePage() {
     );
   const [generatedRedeemCodeSummary, setGeneratedRedeemCodeSummary] =
     useState<GeneratedRedeemCodeSummary | null>(null);
+  const [generatedRedeemCodes, setGeneratedRedeemCodes] =
+    useState<GeneratedRedeemCodeDistribution>([]);
   const [selectedRedeemCodePublicId, setSelectedRedeemCodePublicId] = useState<
     string | null
   >(null);
@@ -3806,8 +4108,23 @@ export function AdminRedeemCodePage() {
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const hasUnavailablePlainTextCode = data.redeemCodes.some(
     (redeemCode) =>
-      redeemCode.status === "unused" && !redeemCode.canViewPlainText,
+      redeemCode.status === "unused" &&
+      (!redeemCode.canViewPlainText || redeemCode.codePlainText === null),
   );
+
+  function handleCopyRedeemCodePlainText(value: string) {
+    copyTextToClipboard(value);
+    setToastMessage({ message: "卡密明文已复制", tone: "success" });
+  }
+
+  function handleCopyGeneratedRedeemCodes() {
+    copyTextToClipboard(
+      generatedRedeemCodes
+        .map((redeemCode) => redeemCode.codePlainText)
+        .join("\n"),
+    );
+    setToastMessage({ message: "本批次卡密已复制", tone: "success" });
+  }
 
   async function handleViewRedeemCodeDetail(publicId: string) {
     const sessionToken = getStoredSessionToken();
@@ -3869,15 +4186,18 @@ export function AdminRedeemCodePage() {
     const generatedRedeemCodes = createResponse.data.redeemCodes;
 
     setGeneratedRedeemCodeSummary(createResponse.data.generation);
+    setGeneratedRedeemCodes(generatedRedeemCodes);
     setData((currentData) => ({
       redeemCodes: [
         ...generatedRedeemCodes.map((redeemCode) => ({
-          canViewPlainText: false,
+          canViewPlainText: true,
           codeDisplay: maskRedeemCodeDisplay(redeemCode.codeDisplay),
+          codePlainText: redeemCode.codePlainText,
           createdAt: redeemCode.createdAt,
           level: redeemCode.level,
           profession: redeemCode.profession,
           publicId: redeemCode.publicId,
+          redeemCodeType: redeemCode.redeemCodeType,
           redeemDeadlineAt: redeemCode.redeemDeadlineAt,
           redeemedUserPublicId: null,
           status: redeemCode.status,
@@ -3921,14 +4241,14 @@ export function AdminRedeemCodePage() {
     <main className="space-y-6">
       <AdminPageHeader
         title="卡密管理"
-        description="查看卡密使用状态和授权范围。页面只展示接口提供的脱敏卡密，不展示明文或哈希。"
+        description="查看卡密使用状态、类型和授权范围；符合权限的运营人员可复制明文，页面不展示哈希或内部标识。"
         icon={<Ticket className="size-5" aria-hidden="true" />}
       />
 
       <SystemOpsRequiredRoleEntry
         actionHref="#redeem-code-generate-panel"
         actionLabel="生成卡密"
-        description="卡密生成入口在本页筛选区旁，点击后定位到内联操作；生成前必须经过二次确认，页面仍不会展示卡密哈希。"
+        description="卡密生成入口在本页筛选区旁，点击后定位到内联操作；生成前必须显式选择类型并经过二次确认。"
         testId="system-ops-redeem-code-generate-entry"
         title="生成卡密入口"
       />
@@ -3950,25 +4270,12 @@ export function AdminRedeemCodePage() {
       <SystemOpsPurchaseGuidanceContactConfig />
 
       {generatedRedeemCodeSummary === null ? null : (
-        <section
-          aria-label="本地卡密生成结果"
-          className="bg-surface border-success/40 rounded-md border p-4 shadow-sm"
-          data-testid="redeem-code-generation-redacted-summary"
-        >
-          <div className="space-y-2">
-            <p className="text-text-primary text-sm font-semibold">
-              卡密已生成，普通页面仅显示脱敏摘要。
-            </p>
-            <p className="text-text-secondary text-xs">
-              generationGroupId:
-              {generatedRedeemCodeSummary.generationGroupId}; count:
-              {generatedRedeemCodeSummary.count}; profession:
-              {generatedRedeemCodeSummary.profession}; level:
-              {generatedRedeemCodeSummary.level}; deadline:
-              {generatedRedeemCodeSummary.redeemDeadlineAt}
-            </p>
-          </div>
-        </section>
+        <RedeemCodeDistributionWindow
+          generation={generatedRedeemCodeSummary}
+          redeemCodes={generatedRedeemCodes}
+          onCopyAll={handleCopyGeneratedRedeemCodes}
+          onCopyOne={handleCopyRedeemCodePlainText}
+        />
       )}
 
       {hasUnavailablePlainTextCode ? (
@@ -4017,6 +4324,7 @@ export function AdminRedeemCodePage() {
       {selectedRedeemCodeDetail === null ? null : (
         <RedeemCodeDetailPanel
           redeemCode={selectedRedeemCodeDetail}
+          onCopyPlainText={handleCopyRedeemCodePlainText}
           onClose={() => {
             setSelectedRedeemCodePublicId(null);
             setSelectedRedeemCodeDetail(null);
@@ -4026,6 +4334,7 @@ export function AdminRedeemCodePage() {
 
       <RedeemCodeList
         redeemCodes={data.redeemCodes}
+        onCopyPlainText={handleCopyRedeemCodePlainText}
         onViewDetail={(publicId) => {
           void handleViewRedeemCodeDetail(publicId);
         }}

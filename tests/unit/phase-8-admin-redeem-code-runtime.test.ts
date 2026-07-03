@@ -65,6 +65,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
         generation: {
           generationGroupId: "redeem-code-batch-public-001",
           count: 1,
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
           durationDay: 365,
@@ -75,6 +76,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
             publicId: "redeem-code-public-generated",
             codePlainText: "ABCDEFG2",
             codeDisplay: "ABCDEFG2",
+            redeemCodeType: "personal_standard_activation",
             profession: "monopoly",
             level: 3,
             status: "unused",
@@ -90,7 +92,9 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
           {
             publicId: "redeem-code-public-001",
             codeDisplay: "RC-2026-****",
-            canViewPlainText: false,
+            codePlainText: "RC-2026-LIST-PLAIN",
+            redeemCodeType: "personal_standard_activation",
+            canViewPlainText: true,
             profession: "monopoly",
             level: 3,
             status: "unused",
@@ -116,7 +120,9 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
       return {
         publicId: "redeem-code-public-001",
         codeDisplay: "RC-2026-****",
-        canViewPlainText: false,
+        codePlainText: "RC-2026-DETAIL-PLAIN",
+        redeemCodeType: "personal_standard_activation",
+        canViewPlainText: true,
         profession: "monopoly",
         level: 3,
         status: "used",
@@ -128,7 +134,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
         createdAt: now.toISOString(),
         updatedAt: "2026-05-23T09:00:00.000Z",
         redactionStatus: "redacted",
-        redactionReason: "plaintext_redeem_code_and_hash_hidden",
+        redactionReason: "code_hash_hidden_plaintext_role_allowed",
       };
     },
   };
@@ -190,7 +196,7 @@ describe("phase 8 admin redeem code runtime", () => {
     });
   });
 
-  it("returns paginated redeem_code summaries with public identifiers and masked code display", async () => {
+  it("returns paginated redeem_code summaries with protected plaintext and public identifiers", async () => {
     const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
       repositories: createRepositories(),
       sessionService: createSessionService("super_admin"),
@@ -215,7 +221,9 @@ describe("phase 8 admin redeem code runtime", () => {
           {
             publicId: "redeem-code-public-001",
             codeDisplay: "RC-2026-****",
-            canViewPlainText: false,
+            codePlainText: "RC-2026-LIST-PLAIN",
+            redeemCodeType: "personal_standard_activation",
+            canViewPlainText: true,
             profession: "monopoly",
             level: 3,
             status: "unused",
@@ -268,7 +276,7 @@ describe("phase 8 admin redeem code runtime", () => {
     });
   });
 
-  it("returns a redacted redeem_code detail by publicId without plaintext or internal ids", async () => {
+  it("returns a protected redeem_code detail by publicId without hashes or internal ids", async () => {
     const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
       repositories: createRepositories(),
       sessionService: createSessionService("super_admin"),
@@ -296,7 +304,9 @@ describe("phase 8 admin redeem code runtime", () => {
         redeemCode: {
           publicId: "redeem-code-public-001",
           codeDisplay: "RC-2026-****",
-          canViewPlainText: false,
+          codePlainText: "RC-2026-DETAIL-PLAIN",
+          redeemCodeType: "personal_standard_activation",
+          canViewPlainText: true,
           profession: "monopoly",
           level: 3,
           status: "used",
@@ -308,7 +318,7 @@ describe("phase 8 admin redeem code runtime", () => {
           createdAt: now.toISOString(),
           updatedAt: "2026-05-23T09:00:00.000Z",
           redactionStatus: "redacted",
-          redactionReason: "plaintext_redeem_code_and_hash_hidden",
+          redactionReason: "code_hash_hidden_plaintext_role_allowed",
         },
       },
     });
@@ -317,7 +327,6 @@ describe("phase 8 admin redeem code runtime", () => {
 
     expect(serializedPayload).not.toContain('"id"');
     expect(serializedPayload).not.toContain("codeHash");
-    expect(serializedPayload).not.toContain("codePlainText");
     expect(serializedPayload).not.toContain("authUserId");
     expect(serializedPayload).not.toContain("password");
     expect(serializedPayload).not.toContain("admin-session-token");
@@ -387,6 +396,7 @@ describe("phase 8 admin redeem code runtime", () => {
     ).POST(
       new Request("http://localhost/api/v1/redeem-codes", {
         body: JSON.stringify({
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
         }),
@@ -404,6 +414,7 @@ describe("phase 8 admin redeem code runtime", () => {
         generation: {
           generationGroupId: "redeem-code-batch-public-001",
           count: 1,
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
           durationDay: 365,
@@ -414,6 +425,7 @@ describe("phase 8 admin redeem code runtime", () => {
             publicId: "redeem-code-public-generated",
             codePlainText: "ABCDEFG2",
             codeDisplay: "ABCDEFG2",
+            redeemCodeType: "personal_standard_activation",
             profession: "monopoly",
             level: 3,
             status: "unused",

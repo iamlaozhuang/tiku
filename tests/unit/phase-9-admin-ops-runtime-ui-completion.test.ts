@@ -601,15 +601,22 @@ describe("phase 9 admin ops runtime ui completion", () => {
       "密码已重置，未返回明文密码",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "生成卡密" }));
-    expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "卡密生成需要二次确认",
+    expect(screen.getByRole("link", { name: "打开卡密生成" })).toHaveAttribute(
+      "href",
+      "/ops/redeem-codes",
     );
-    fireEvent.click(screen.getByRole("button", { name: "确认生成" }));
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "卡密已生成，请仅在本地验证时复制给学员",
-    );
-    expect(screen.getByText("ABCDEFG2")).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(
+        ([input, init]) =>
+          String(input).startsWith("/api/v1/redeem-codes") &&
+          init?.method === "POST",
+      ),
+    ).toBe(false);
+    expect(screen.queryByText("卡密生成需要二次确认")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("卡密已生成，请仅在本地验证时复制给学员"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("ABCDEFG2")).not.toBeInTheDocument();
     expect(screen.queryByText("admin-session-token")).toBeNull();
   });
 });

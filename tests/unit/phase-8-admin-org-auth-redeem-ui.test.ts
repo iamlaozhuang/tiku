@@ -131,6 +131,8 @@ const redeemCodePayload = {
       {
         publicId: "redeem-code-public-001",
         codeDisplay: "RC-2026-****",
+        codePlainText: "RC-2026-0001-PLAIN",
+        redeemCodeType: "personal_standard_activation",
         canViewPlainText: false,
         profession: "monopoly",
         level: 3,
@@ -139,7 +141,6 @@ const redeemCodePayload = {
         createdAt: "2026-05-22T00:00:00.000Z",
         id: 401,
         code_hash: "do-not-render",
-        codePlainText: "RC-2026-0001-PLAIN",
       },
     ],
   },
@@ -353,7 +354,7 @@ describe("AdminRedeemCodePage", () => {
       "redeem-code-public-001",
     );
     expect(redeemCode).not.toHaveAttribute("data-id");
-    expect(within(redeemCode).getByText("不可查看明文")).toBeInTheDocument();
+    expect(within(redeemCode).getByText("明文不可用")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("do-not-render");
     expect(document.body.textContent).not.toContain("RC-2026-0001-PLAIN");

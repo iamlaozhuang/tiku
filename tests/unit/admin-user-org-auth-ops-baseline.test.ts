@@ -159,7 +159,9 @@ const redeemCodePayload = {
       {
         publicId: "redeem-code-public-001",
         codeDisplay: "RC-2026-****",
-        canViewPlainText: false,
+        codePlainText: "RC-2026-LIST-PLAIN",
+        redeemCodeType: "personal_standard_activation",
+        canViewPlainText: true,
         profession: "monopoly",
         level: 3,
         status: "unused",
@@ -178,7 +180,9 @@ const redeemCodeDetailPayload = {
     redeemCode: {
       publicId: "redeem-code-public-001",
       codeDisplay: "RC-2026-****",
-      canViewPlainText: false,
+      codePlainText: "RC-2026-DETAIL-PLAIN",
+      redeemCodeType: "personal_standard_activation",
+      canViewPlainText: true,
       profession: "monopoly",
       level: 3,
       status: "unused",
@@ -190,10 +194,9 @@ const redeemCodeDetailPayload = {
       createdAt: "2026-05-22T00:00:00.000Z",
       updatedAt: "2026-05-23T09:00:00.000Z",
       redactionStatus: "redacted",
-      redactionReason: "plaintext_redeem_code_and_hash_hidden",
+      redactionReason: "code_hash_hidden_plaintext_role_allowed",
       id: 402,
       code_hash: "detail-do-not-render",
-      codePlainText: "RC-2026-DETAIL-PLAIN",
     },
   },
 };
@@ -205,6 +208,7 @@ const generatedRedeemCodePayload = {
     generation: {
       generationGroupId: "redeem-code-batch-public-001",
       count: 2,
+      redeemCodeType: "edition_upgrade",
       profession: "logistics",
       level: 4,
       durationDay: 180,
@@ -215,6 +219,7 @@ const generatedRedeemCodePayload = {
         publicId: "redeem-code-public-generated-001",
         codePlainText: "LOCALTST",
         codeDisplay: "LOCALTST",
+        redeemCodeType: "edition_upgrade",
         profession: "logistics",
         level: 4,
         status: "unused",
@@ -562,6 +567,8 @@ describe("admin user organization authorization ops baseline", () => {
     expect(redeemCodeList.data?.redeemCodes[0]).toMatchObject({
       publicId: "redeem-code-public-001",
       codeDisplay: "RC-2026-****",
+      codePlainText: null,
+      redeemCodeType: "personal_standard_activation",
       canViewPlainText: false,
     });
     expect(redeemCodeList.data?.redeemCodes[0]).not.toHaveProperty("id");
@@ -640,6 +647,8 @@ describe("admin user organization authorization ops baseline", () => {
         redeemCodes: [
           {
             codeDisplay: "RC-2026-0001-PLAIN",
+            codePlainText: "RC-2026-0001-PLAIN",
+            redeemCodeType: "personal_standard_activation",
             canViewPlainText: true,
           },
         ],
@@ -1043,9 +1052,14 @@ describe("admin user organization authorization ops baseline", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
     const employeeImportContent = [
+      "phone,name,initialPassword",
+      "13900001111,Import One,Passw0rd!",
+      "13900002222,Import Two,Passw0rd!",
+    ].join("\n");
+    const expectedSubmittedContent = [
       "phone,name,initialPassword,organizationPublicId",
       "13900001111,Import One,Passw0rd!,org-district-001",
-      "13900002222,Import Two,Passw0rd!,org-missing-public-001",
+      "13900002222,Import Two,Passw0rd!,org-district-001",
     ].join("\n");
 
     render(createElement(AdminOrgAuthPage));
@@ -1055,6 +1069,18 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: employeeImportContent },
     });
+
+    expect(screen.getByTestId("employee-import-preview")).toHaveTextContent(
+      "请选择员工导入目标组织。",
+    );
+    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      {
+        target: { value: "org-district-001" },
+      },
+    );
 
     const importPreview = screen.getByTestId("employee-import-preview");
     expect(importPreview).toHaveTextContent("员工账号 CSV");
@@ -1076,7 +1102,7 @@ describe("admin user organization authorization ops baseline", () => {
       ([url]) => String(url) === "/api/v1/employees/import",
     );
     expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
-      content: employeeImportContent,
+      content: expectedSubmittedContent,
       sourceFormat: "csv",
     });
   });
@@ -1085,8 +1111,8 @@ describe("admin user organization authorization ops baseline", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
     const employeeImportContent = [
-      "phone,name,initialPassword,organizationPublicId,profession,level,edition,orgAuthScopePublicId",
-      "13900001111,Import One,Passw0rd!,org-district-001,monopoly,3,advanced,scope-public-001",
+      "phone,name,initialPassword,profession,level,edition,orgAuthScopePublicId",
+      "13900001111,Import One,Passw0rd!,monopoly,3,advanced,scope-public-001",
     ].join("\n");
 
     render(createElement(AdminOrgAuthPage));
@@ -1172,13 +1198,16 @@ describe("admin user organization authorization ops baseline", () => {
       target: { value: "RC-2026" },
     });
 
-    expect(await screen.findByText("RC-2026-****")).toBeInTheDocument();
+    expect(await screen.findByText("RC-2026-LIST-PLAIN")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/redeem-codes?page=1&pageSize=20&status=unused&keyword=RC-2026",
       expect.anything(),
     );
 
     fireEvent.click(screen.getByTestId("redeem-code-generation-mode-batch"));
+    fireEvent.change(screen.getByTestId("redeem-code-generation-type-select"), {
+      target: { value: "edition_upgrade" },
+    });
     fireEvent.change(screen.getByTestId("redeem-code-generation-count-input"), {
       target: { value: "2" },
     });
@@ -1220,10 +1249,13 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(generationSummary).toHaveTextContent("redeem-code-batch-public-001");
     expect(generationSummary).toHaveTextContent("2");
+    expect(generationSummary).toHaveTextContent("edition_upgrade");
     expect(generationSummary).toHaveTextContent("logistics");
     expect(generationSummary).toHaveTextContent("4");
     expect(generationSummary).not.toHaveTextContent("LOCALTST");
-    expect(screen.queryByText("LOCALTST")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("redeem-code-distribution-window"),
+    ).toHaveTextContent("LOCALTST");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/redeem-codes",
       expect.objectContaining({
@@ -1235,6 +1267,7 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(JSON.parse(String(generateCall?.[1]?.body))).toMatchObject({
       count: 2,
+      redeemCodeType: "edition_upgrade",
       profession: "logistics",
       level: 4,
       durationDay: 180,
@@ -1267,17 +1300,17 @@ describe("admin user organization authorization ops baseline", () => {
       "redeem-code-public-001",
     );
     expect(redeemCodeDetail).not.toHaveAttribute("data-id");
-    expect(redeemCodeDetail).toHaveTextContent("RC-2026-****");
+    expect(redeemCodeDetail).toHaveTextContent("RC-2026-DETAIL-PLAIN");
     expect(redeemCodeDetail).toHaveTextContent("redeem-code-public-001");
     expect(redeemCodeDetail).toHaveTextContent("redeem-code-batch-public-001");
     expect(redeemCodeDetail).toHaveTextContent("365");
     expect(redeemCodeDetail).toHaveTextContent("redacted");
+    expect(redeemCodeDetail).toHaveTextContent("校验值已隐藏，明文已授权显示");
     expect(redeemCodeDetail).toHaveTextContent("未兑换");
     expect(redeemCodeDetail).toHaveTextContent("2026-06-24");
     expect(redeemCodeDetail).not.toHaveTextContent("LOCALTST");
     expect(redeemCodeDetail).not.toHaveTextContent("code_hash");
     expect(redeemCodeDetail).not.toHaveTextContent("detail-do-not-render");
-    expect(redeemCodeDetail).not.toHaveTextContent("RC-2026-DETAIL-PLAIN");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/redeem-codes/redeem-code-public-001",
       expect.objectContaining({

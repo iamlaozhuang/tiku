@@ -14,7 +14,7 @@ import {
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { Profession } from "../models/auth";
+import type { Profession, RedeemCodeType } from "../models/auth";
 import {
   createPostgresAdminRedeemCodeRuntimeRepositories,
   REDEEM_CODE_BATCH_CREATE_LIMIT,
@@ -47,6 +47,7 @@ type AdminRedeemCodeClock = {
 
 type RedeemCodeBatchRequest = {
   count: number;
+  redeemCodeType: RedeemCodeType;
   profession: Profession;
   level: number;
   durationDay: number;
@@ -218,6 +219,7 @@ function normalizeRedeemCodeBatchRequest(
     source.durationDay,
     DEFAULT_REDEEM_CODE_DURATION_DAY,
   );
+  const redeemCodeType = readRedeemCodeType(source.redeemCodeType);
   const profession = readProfession(source.profession);
   const level = readOptionalInteger(source.level);
 
@@ -231,12 +233,12 @@ function normalizeRedeemCodeBatchRequest(
     };
   }
 
-  if (profession === null || level === null) {
+  if (redeemCodeType === null || profession === null || level === null) {
     return {
       success: false,
       response: createErrorResponse(
         ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
-        "Redeem code generation requires explicit profession and level.",
+        "Redeem code generation requires explicit type, profession and level.",
       ),
     };
   }
@@ -280,6 +282,7 @@ function normalizeRedeemCodeBatchRequest(
     success: true,
     value: {
       count,
+      redeemCodeType,
       profession,
       level,
       durationDay,
@@ -318,6 +321,14 @@ function readOptionalInteger(value: unknown): number | null {
 
 function readProfession(value: unknown): Profession | null {
   return value === "monopoly" || value === "marketing" || value === "logistics"
+    ? value
+    : null;
+}
+
+function readRedeemCodeType(value: unknown): RedeemCodeType | null {
+  return value === "personal_standard_activation" ||
+    value === "personal_advanced_activation" ||
+    value === "edition_upgrade"
     ? value
     : null;
 }
@@ -390,6 +401,7 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
             { redeemCodes: result.redeemCodes },
             result.pagination,
           ),
+          { headers: NO_STORE_HEADERS },
         );
       },
       async POST(request: Request): Promise<Response> {
@@ -444,12 +456,15 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
           targetResourceType: "redeem_code",
           targetPublicId: createdRedeemCodeBatch.generation.generationGroupId,
           resultStatus: "success",
-          metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodeBatch.generation.count} profession=${createdRedeemCodeBatch.generation.profession} level=${createdRedeemCodeBatch.generation.level} deadline=${createdRedeemCodeBatch.generation.redeemDeadlineAt}`,
+          metadataSummary: `redacted redeem_code batch metadata; count=${createdRedeemCodeBatch.generation.count} type=${createdRedeemCodeBatch.generation.redeemCodeType} profession=${createdRedeemCodeBatch.generation.profession} level=${createdRedeemCodeBatch.generation.level} deadline=${createdRedeemCodeBatch.generation.redeemDeadlineAt}`,
           requestIp: null,
         });
 
         return createJsonResponse(
           createSuccessResponse(createdRedeemCodeBatch),
+          {
+            headers: NO_STORE_HEADERS,
+          },
         );
       },
       detail: {

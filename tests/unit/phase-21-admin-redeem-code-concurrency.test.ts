@@ -28,6 +28,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       public_id: string;
       code_hash: string;
       code_display: string;
+      redeem_code_type: string;
       generation_group_id: string;
     }> = [];
     let transactionCount = 0;
@@ -48,6 +49,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
                   {
                     public_id: row.public_id,
                     code_display: row.code_display,
+                    redeem_code_type: row.redeem_code_type,
                     profession: "monopoly" as const,
                     level: 3,
                     status: "unused" as const,
@@ -82,6 +84,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
 
     const result = await repositories.createRedeemCodeBatch({
       count: 1,
+      redeemCodeType: "personal_standard_activation",
       profession: "monopoly",
       level: 3,
       durationDay: 365,
@@ -95,12 +98,14 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         public_id: "redeem-code-public-collision",
         code_hash: hashRedeemCode("AAAAAAA2"),
         code_display: "AAAAAAA2",
+        redeem_code_type: "personal_standard_activation",
         generation_group_id: "redeem-code-batch-fixed",
       },
       {
         public_id: "redeem-code-public-unique",
         code_hash: hashRedeemCode("BBBBBBB2"),
         code_display: "BBBBBBB2",
+        redeem_code_type: "personal_standard_activation",
         generation_group_id: "redeem-code-batch-fixed",
       },
     ]);
@@ -108,6 +113,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       generation: {
         generationGroupId: "redeem-code-batch-fixed",
         count: 1,
+        redeemCodeType: "personal_standard_activation",
         profession: "monopoly",
         level: 3,
         durationDay: 365,
@@ -118,6 +124,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
           publicId: "redeem-code-public-unique",
           codePlainText: "BBBBBBB2",
           codeDisplay: "BBBBBBB2",
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
           status: "unused",
@@ -180,6 +187,7 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
         },
         body: JSON.stringify({
           count: 1,
+          redeemCodeType: "personal_standard_activation",
           profession: "monopoly",
           level: 3,
           redeemDeadlineDate: "2026-06-24",

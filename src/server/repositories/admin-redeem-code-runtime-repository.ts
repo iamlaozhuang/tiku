@@ -24,7 +24,11 @@ import type {
   RedeemCodeGenerationItemDto,
   RedeemCodeListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { Profession, RedeemCodeStatus } from "../models/auth";
+import type {
+  Profession,
+  RedeemCodeStatus,
+  RedeemCodeType,
+} from "../models/auth";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminRedeemCodeRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
@@ -58,6 +62,7 @@ export type AdminRedeemCodeRuntimeRepositories = {
 
 export type CreateRedeemCodeBatchInput = {
   count: number;
+  redeemCodeType: RedeemCodeType;
   profession: Profession;
   level: number;
   durationDay: number;
@@ -161,6 +166,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
           generation: {
             generationGroupId,
             count: redeemCodes.length,
+            redeemCodeType: input.redeemCodeType,
             profession: input.profession,
             level: input.level,
             durationDay: input.durationDay,
@@ -179,6 +185,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
           id: redeemCode.id,
           public_id: redeemCode.public_id,
           code_display: redeemCode.code_display,
+          redeem_code_type: redeemCode.redeem_code_type,
           profession: redeemCode.profession,
           level: redeemCode.level,
           status: redeemCode.status,
@@ -207,7 +214,9 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
         redeemCodes: rows.map((row) => ({
           publicId: row.public_id,
           codeDisplay: maskRedeemCodeDisplay(row.code_display),
-          canViewPlainText: false,
+          codePlainText: row.code_display,
+          redeemCodeType: row.redeem_code_type,
+          canViewPlainText: true,
           profession: row.profession,
           level: row.level,
           status: getEffectiveRedeemCodeStatus(row, now),
@@ -228,6 +237,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
         .select({
           public_id: redeemCode.public_id,
           code_display: redeemCode.code_display,
+          redeem_code_type: redeemCode.redeem_code_type,
           profession: redeemCode.profession,
           level: redeemCode.level,
           status: redeemCode.status,
@@ -255,7 +265,9 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
       return {
         publicId: row.public_id,
         codeDisplay: maskRedeemCodeDisplay(row.code_display),
-        canViewPlainText: false,
+        codePlainText: row.code_display,
+        redeemCodeType: row.redeem_code_type,
+        canViewPlainText: true,
         profession: row.profession,
         level: row.level,
         status: getEffectiveRedeemCodeStatus(row, now),
@@ -270,7 +282,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
         createdAt: row.created_at.toISOString(),
         updatedAt: row.updated_at.toISOString(),
         redactionStatus: "redacted",
-        redactionReason: "plaintext_redeem_code_and_hash_hidden",
+        redactionReason: "code_hash_hidden_plaintext_role_allowed",
       };
     },
     auditLogRepository: {
@@ -315,6 +327,7 @@ async function createRedeemCodeWithRetry(
           public_id: helpers.createRedeemCodePublicId(),
           code_hash: createRedeemCodeHash(codePlainText),
           code_display: codePlainText,
+          redeem_code_type: input.redeemCodeType,
           profession: input.profession,
           level: input.level,
           duration_day: input.durationDay,
@@ -325,6 +338,7 @@ async function createRedeemCodeWithRetry(
         .returning({
           public_id: redeemCode.public_id,
           code_display: redeemCode.code_display,
+          redeem_code_type: redeemCode.redeem_code_type,
           profession: redeemCode.profession,
           level: redeemCode.level,
           status: redeemCode.status,
@@ -340,6 +354,7 @@ async function createRedeemCodeWithRetry(
         publicId: createdRedeemCode.public_id,
         codePlainText,
         codeDisplay: createdRedeemCode.code_display,
+        redeemCodeType: createdRedeemCode.redeem_code_type,
         profession: createdRedeemCode.profession,
         level: createdRedeemCode.level,
         status: createdRedeemCode.status,

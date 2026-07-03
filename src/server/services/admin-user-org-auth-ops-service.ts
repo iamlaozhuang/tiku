@@ -158,10 +158,11 @@ const sampleAuthorizations: AuthorizationListDto["authorizations"] = [
 
 const sampleRedeemCodes: Omit<
   RedeemCodeListDto["redeemCodes"][number],
-  "codeDisplay" | "canViewPlainText"
+  "codeDisplay" | "codePlainText" | "canViewPlainText"
 >[] = [
   {
     publicId: "redeem-code-public-001",
+    redeemCodeType: "personal_standard_activation",
     profession: "monopoly",
     level: 3,
     status: "unused",
@@ -228,6 +229,9 @@ export function createAdminUserOrgAuthOpsService({
         codeDisplay: actor.canViewRedeemCodePlainText
           ? "RC-2026-0001-PLAIN"
           : "RC-2026-****",
+        codePlainText: actor.canViewRedeemCodePlainText
+          ? "RC-2026-0001-PLAIN"
+          : null,
         canViewPlainText: actor.canViewRedeemCodePlainText,
       }));
 

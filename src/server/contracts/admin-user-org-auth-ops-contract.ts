@@ -5,6 +5,7 @@ import type {
   OrgTier,
   Profession,
   RedeemCodeStatus,
+  RedeemCodeType,
   UserStatus,
   UserType,
 } from "../models/auth";
@@ -169,6 +170,8 @@ export type AuthorizationListDto = {
 export type RedeemCodeSummaryDto = {
   publicId: string;
   codeDisplay: string;
+  codePlainText: string | null;
+  redeemCodeType: RedeemCodeType;
   canViewPlainText: boolean;
   profession: Profession;
   level: number;
@@ -188,7 +191,9 @@ export type RedeemCodeDetailDto = RedeemCodeSummaryDto & {
   generationGroupId: string;
   updatedAt: string;
   redactionStatus: "redacted";
-  redactionReason: "plaintext_redeem_code_and_hash_hidden";
+  redactionReason:
+    | "plaintext_redeem_code_and_hash_hidden"
+    | "code_hash_hidden_plaintext_role_allowed";
 };
 
 export type RedeemCodeDetailResultDto = {
@@ -199,6 +204,7 @@ export type RedeemCodeGenerationItemDto = {
   publicId: string;
   codePlainText: string;
   codeDisplay: string;
+  redeemCodeType: RedeemCodeType;
   profession: Profession;
   level: number;
   status: RedeemCodeStatus;
@@ -210,6 +216,7 @@ export type RedeemCodeGenerationDto = {
   generation: {
     generationGroupId: string;
     count: number;
+    redeemCodeType: RedeemCodeType;
     profession: Profession;
     level: number;
     durationDay: number;

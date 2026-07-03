@@ -681,12 +681,12 @@ export function AdminOpsManagement() {
           >
             企业授权页
           </Link>
-          <Button
-            variant="destructive"
-            onClick={() => setConfirmationState({ kind: "generateRedeemCode" })}
+          <Link
+            className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+            href="/ops/redeem-codes"
           >
-            生成卡密
-          </Button>
+            打开卡密生成
+          </Link>
         </div>
       </header>
 
