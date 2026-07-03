@@ -3,6 +3,7 @@ import type { Profession } from "../models/auth";
 import type {
   OrganizationTrainingAnswerStatus,
   OrganizationTrainingAuditLogTargetResourceType,
+  OrganizationTrainingQuestionType,
   OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingRetentionStatus,
   OrganizationTrainingSourceContextType,
@@ -37,11 +38,51 @@ export type OrganizationTrainingScopeSnapshotDto = {
   capturedAt: string;
 };
 
+export type OrganizationTrainingQuestionOptionSnapshotDto = {
+  publicId: string;
+  label: string;
+  content: string;
+};
+
+export type OrganizationTrainingQuestionSnapshotDto = {
+  publicId: string;
+  sequenceNumber: number;
+  questionType: OrganizationTrainingQuestionType;
+  materialTitle: string | null;
+  materialContent: string | null;
+  stem: string;
+  options: OrganizationTrainingQuestionOptionSnapshotDto[];
+  score: number;
+};
+
+export type EmployeeOrganizationTrainingAnswerItemDto = {
+  questionPublicId: string;
+  selectedOptionPublicIds: string[];
+  textAnswer: string | null;
+};
+
+export type EmployeeOrganizationTrainingScoringPointResultDto = {
+  label: string;
+  score: number;
+  maxScore: number;
+  reason: string;
+};
+
+export type EmployeeOrganizationTrainingQuestionResultDto = {
+  questionPublicId: string;
+  score: number;
+  maxScore: number;
+  standardAnswer: string | null;
+  analysis: string | null;
+  scoringPointResults: EmployeeOrganizationTrainingScoringPointResultDto[];
+};
+
 export type OrganizationTrainingPublishedVersionDto = {
   publicId: string;
   draftPublicId: string;
   versionNumber: number;
   organizationPublicId: string;
+  organizationName?: string | null;
   publishScopeSnapshot: OrganizationTrainingScopeSnapshotDto;
   profession: Profession;
   level: number;
@@ -52,8 +93,12 @@ export type OrganizationTrainingPublishedVersionDto = {
   totalScore: number;
   status: OrganizationTrainingVersionStatus;
   publishedAt: string;
+  answerDeadlineAt?: string | null;
+  employeeAnswerStatus?: "not_started" | OrganizationTrainingAnswerStatus;
+  submittedScoreSummary?: EmployeeOrganizationTrainingScoreSummaryDto | null;
   takenDownAt: string | null;
   takedownReason: string | null;
+  questions?: OrganizationTrainingQuestionSnapshotDto[];
 };
 
 export type EmployeeOrganizationTrainingScoreSummaryDto = {
@@ -71,6 +116,8 @@ export type EmployeeOrganizationTrainingAnswerDto = {
   scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto | null;
   submittedAt: string | null;
   resultSummaryVisible: boolean;
+  answerItems?: EmployeeOrganizationTrainingAnswerItemDto[];
+  questionResults?: EmployeeOrganizationTrainingQuestionResultDto[];
 };
 
 export type OrganizationTrainingAdminEmployeeSummaryDto = {

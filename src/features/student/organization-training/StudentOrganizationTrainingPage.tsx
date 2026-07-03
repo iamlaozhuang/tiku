@@ -17,7 +17,10 @@ import {
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
 import type {
+  EmployeeOrganizationTrainingAnswerItemDto,
   EmployeeOrganizationTrainingAnswerDto,
+  EmployeeOrganizationTrainingQuestionResultDto,
+  OrganizationTrainingQuestionSnapshotDto,
   OrganizationTrainingPublishedVersionDto,
 } from "@/server/contracts/organization-training-contract";
 
@@ -40,9 +43,12 @@ type AnswerPayload = {
 };
 
 type AnswerFormValues = {
-  answeredQuestionCount: string;
-  score: string;
-  totalScore: string;
+  answerItemsByQuestionPublicId: Record<string, AnswerItemFormValue>;
+};
+
+type AnswerItemFormValue = {
+  selectedOptionPublicIds: string[];
+  textAnswer: string;
 };
 
 type AnswerUiState = {
@@ -51,10 +57,8 @@ type AnswerUiState = {
   values: AnswerFormValues;
 };
 
-const defaultAnswerValues: AnswerFormValues = {
-  answeredQuestionCount: "1",
-  score: "0",
-  totalScore: "0",
+const emptyAnswerFormValues: AnswerFormValues = {
+  answerItemsByQuestionPublicId: {},
 };
 
 const professionLabels: Record<string, string> = {
@@ -82,36 +86,113 @@ function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
   );
 }
 
-function createInitialAnswerState(totalScore = "0"): AnswerUiState {
+function createEmptyAnswerItemValue(): AnswerItemFormValue {
   return {
-    answer: null,
-    message: null,
-    values: {
-      ...defaultAnswerValues,
-      totalScore,
-    },
+    selectedOptionPublicIds: [],
+    textAnswer: "",
   };
 }
 
+function createInitialAnswerValues(
+  version: OrganizationTrainingPublishedVersionDto | null,
+): AnswerFormValues {
+  if (version?.questions === undefined) {
+    return emptyAnswerFormValues;
+  }
+
+  return {
+    answerItemsByQuestionPublicId: Object.fromEntries(
+      version.questions.map((question) => [
+        question.publicId,
+        createEmptyAnswerItemValue(),
+      ]),
+    ),
+  };
+}
+
+function createInitialAnswerState(
+  version: OrganizationTrainingPublishedVersionDto | null = null,
+): AnswerUiState {
+  return {
+    answer: null,
+    message: null,
+    values: createInitialAnswerValues(version),
+  };
+}
+
+function readAnswerItemValue(
+  values: AnswerFormValues,
+  questionPublicId: string,
+): AnswerItemFormValue {
+  return (
+    values.answerItemsByQuestionPublicId[questionPublicId] ??
+    createEmptyAnswerItemValue()
+  );
+}
+
+function isQuestionAnswered(
+  question: OrganizationTrainingQuestionSnapshotDto,
+  values: AnswerFormValues,
+): boolean {
+  const answerItem = readAnswerItemValue(values, question.publicId);
+
+  if (question.questionType === "short_answer") {
+    return answerItem.textAnswer.trim().length > 0;
+  }
+
+  return answerItem.selectedOptionPublicIds.length > 0;
+}
+
+function countAnsweredQuestions(
+  version: OrganizationTrainingPublishedVersionDto,
+  values: AnswerFormValues,
+): number {
+  const questions = version.questions ?? [];
+
+  if (questions.length === 0) {
+    return 0;
+  }
+
+  return questions.filter((question) => isQuestionAnswered(question, values))
+    .length;
+}
+
+function createAnswerItems(
+  version: OrganizationTrainingPublishedVersionDto,
+  values: AnswerFormValues,
+): EmployeeOrganizationTrainingAnswerItemDto[] {
+  return (version.questions ?? []).map((question) => {
+    const answerItem = readAnswerItemValue(values, question.publicId);
+    const textAnswer = answerItem.textAnswer.trim();
+
+    return {
+      questionPublicId: question.publicId,
+      selectedOptionPublicIds: answerItem.selectedOptionPublicIds,
+      textAnswer: textAnswer.length > 0 ? textAnswer : null,
+    };
+  });
+}
+
 function createAnswerRequestBody(
-  trainingVersionPublicId: string,
+  version: OrganizationTrainingPublishedVersionDto,
   values: AnswerFormValues,
 ) {
   return {
-    trainingVersionPublicId,
-    answeredQuestionCount: Number(values.answeredQuestionCount),
+    trainingVersionPublicId: version.publicId,
+    answeredQuestionCount: countAnsweredQuestions(version, values),
+    answerItems: createAnswerItems(version, values),
   };
 }
 
 function createSubmitRequestBody(
-  trainingVersionPublicId: string,
+  version: OrganizationTrainingPublishedVersionDto,
   values: AnswerFormValues,
 ) {
   return {
-    ...createAnswerRequestBody(trainingVersionPublicId, values),
+    ...createAnswerRequestBody(version, values),
     scoreSummary: {
-      score: Number(values.score),
-      totalScore: Number(values.totalScore),
+      score: 0,
+      totalScore: version.totalScore,
     },
   };
 }
@@ -215,7 +296,7 @@ export function StudentOrganizationTrainingPage() {
           Object.fromEntries(
             response.data.versions.map((version) => [
               version.publicId,
-              createInitialAnswerState(String(version.totalScore)),
+              createInitialAnswerState(version),
             ]),
           ),
         );
@@ -295,12 +376,15 @@ export function StudentOrganizationTrainingPage() {
     }));
   }
 
-  async function handleSaveDraft(trainingVersionPublicId: string) {
+  async function handleSaveDraft(
+    version: OrganizationTrainingPublishedVersionDto,
+  ) {
     const sessionValue = readStudentSessionRequestToken();
+    const trainingVersionPublicId = version.publicId;
 
     const currentState =
       answerStateByVersionPublicId[trainingVersionPublicId] ??
-      createInitialAnswerState();
+      createInitialAnswerState(version);
     const response = await fetchStudentApi<AnswerPayload>(
       `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/draft-save`,
       sessionValue,
@@ -310,7 +394,7 @@ export function StudentOrganizationTrainingPage() {
           "content-type": "application/json",
         },
         body: JSON.stringify(
-          createAnswerRequestBody(trainingVersionPublicId, currentState.values),
+          createAnswerRequestBody(version, currentState.values),
         ),
       },
     );
@@ -342,12 +426,15 @@ export function StudentOrganizationTrainingPage() {
     }));
   }
 
-  async function handleSubmit(trainingVersionPublicId: string) {
+  async function handleSubmit(
+    version: OrganizationTrainingPublishedVersionDto,
+  ) {
     const sessionValue = readStudentSessionRequestToken();
+    const trainingVersionPublicId = version.publicId;
 
     const currentState =
       answerStateByVersionPublicId[trainingVersionPublicId] ??
-      createInitialAnswerState();
+      createInitialAnswerState(version);
     const response = await fetchStudentApi<AnswerPayload>(
       `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/submit`,
       sessionValue,
@@ -357,7 +444,7 @@ export function StudentOrganizationTrainingPage() {
           "content-type": "application/json",
         },
         body: JSON.stringify(
-          createSubmitRequestBody(trainingVersionPublicId, currentState.values),
+          createSubmitRequestBody(version, currentState.values),
         ),
       },
     );
@@ -449,7 +536,7 @@ export function StudentOrganizationTrainingPage() {
           <TrainingVersionCard
             answerState={
               answerStateByVersionPublicId[version.publicId] ??
-              createInitialAnswerState(String(version.totalScore))
+              createInitialAnswerState(version)
             }
             key={version.publicId}
             version={version}
@@ -462,8 +549,8 @@ export function StudentOrganizationTrainingPage() {
             onLoadReadonlySummary={() =>
               void handleLoadReadonlySummary(version.publicId)
             }
-            onSaveDraft={() => void handleSaveDraft(version.publicId)}
-            onSubmit={() => void handleSubmit(version.publicId)}
+            onSaveDraft={() => void handleSaveDraft(version)}
+            onSubmit={() => void handleSubmit(version)}
           />
         ))}
       </div>
@@ -486,10 +573,10 @@ function TrainingVersionCard({
   onSaveDraft: () => void;
   onSubmit: () => void;
 }) {
-  const scoreSummary = answerState.answer?.scoreSummary ?? null;
   const [isSubmitConfirming, setIsSubmitConfirming] = useState(false);
-  const answeredQuestionCount = Number(
-    answerState.values.answeredQuestionCount,
+  const answeredQuestionCount = countAnsweredQuestions(
+    version,
+    answerState.values,
   );
   const progressPercent =
     Number.isFinite(answeredQuestionCount) && version.questionCount > 0
@@ -502,6 +589,27 @@ function TrainingVersionCard({
   function handleSubmitClick() {
     setIsSubmitConfirming(true);
   }
+
+  function updateAnswerItemValue(
+    questionPublicId: string,
+    updater: (value: AnswerItemFormValue) => AnswerItemFormValue,
+  ) {
+    const currentAnswerItem = readAnswerItemValue(
+      answerState.values,
+      questionPublicId,
+    );
+
+    onChangeValues({
+      answerItemsByQuestionPublicId: {
+        ...answerState.values.answerItemsByQuestionPublicId,
+        [questionPublicId]: updater(currentAnswerItem),
+      },
+    });
+  }
+
+  const questions = version.questions ?? [];
+  const organizationName = version.organizationName ?? "当前组织节点";
+  const answerStatusLabel = getAnswerStatusLabel(version.employeeAnswerStatus);
 
   return (
     <article
@@ -527,26 +635,35 @@ function TrainingVersionCard({
             <span className="bg-muted rounded-md px-2 py-1">
               第 {version.versionNumber} 版
             </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              {organizationName}
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              共 {version.questionCount} 题
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              截止 {formatDateLabel(version.answerDeadlineAt)}
+            </span>
           </div>
         </div>
         <span className="bg-success/10 text-success inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium">
           <CheckCircle2 aria-hidden="true" className="size-3.5" />
-          可作答
+          {answerStatusLabel}
         </span>
       </div>
 
       <div
         aria-label="企业训练作答区"
-        className="bg-muted space-y-3 rounded-md p-3"
+        className="bg-muted space-y-4 rounded-md p-3"
         role="group"
       >
         <div className="text-text-primary flex items-center gap-2 text-sm font-medium">
           <ClipboardList aria-hidden="true" className="size-4" />
-          作答进度
+          作答区
         </div>
         <p className="text-text-secondary text-sm">
-          共 {version.questionCount} 题 / {version.totalScore}{" "}
-          分，提交后结果摘要只读。
+          已作答 {answeredQuestionCount} / {version.questionCount}{" "}
+          题，提交前可保存草稿。
         </p>
         <div className="bg-surface h-2 overflow-hidden rounded-full">
           <div
@@ -554,45 +671,30 @@ function TrainingVersionCard({
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-        <NumberField
-          label="完成题数"
-          value={answerState.values.answeredQuestionCount}
-          onChange={(value) =>
-            onChangeValues({
-              ...answerState.values,
-              answeredQuestionCount: value,
-            })
-          }
-        />
+        {questions.length === 0 ? (
+          <p className="text-text-secondary bg-surface rounded-md p-3 text-sm">
+            题目快照暂未返回，请稍后刷新或联系企业管理员确认训练来源。
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {questions.map((question) => (
+              <QuestionAnswerField
+                answerItem={readAnswerItemValue(
+                  answerState.values,
+                  question.publicId,
+                )}
+                key={question.publicId}
+                question={question}
+                onChange={(updater) =>
+                  updateAnswerItemValue(question.publicId, updater)
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <details className="border-border rounded-md border p-3">
-        <summary className="text-text-primary cursor-pointer text-sm font-medium">
-          结果摘要
-        </summary>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <NumberField
-            label="得分"
-            value={answerState.values.score}
-            onChange={(value) =>
-              onChangeValues({
-                ...answerState.values,
-                score: value,
-              })
-            }
-          />
-          <NumberField
-            label="总分"
-            value={answerState.values.totalScore}
-            onChange={(value) =>
-              onChangeValues({
-                ...answerState.values,
-                totalScore: value,
-              })
-            }
-          />
-        </div>
-      </details>
+      <TrainingResultPanel answer={answerState.answer} version={version} />
 
       <div className="grid grid-cols-3 gap-2">
         <button
@@ -652,35 +754,291 @@ function TrainingVersionCard({
       {answerState.message === null ? null : (
         <p className="text-brand-primary text-sm">{answerState.message}</p>
       )}
-      {scoreSummary === null ? null : (
-        <p className="text-text-primary text-sm font-medium">
-          结果 {scoreSummary.score} / {scoreSummary.totalScore}
-        </p>
-      )}
     </article>
   );
 }
 
-function NumberField({
-  label,
-  value,
+function QuestionAnswerField({
+  answerItem,
   onChange,
+  question,
 }: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
+  answerItem: AnswerItemFormValue;
+  onChange: (
+    updater: (value: AnswerItemFormValue) => AnswerItemFormValue,
+  ) => void;
+  question: OrganizationTrainingQuestionSnapshotDto;
+}) {
+  const inputName = `organization-training-${question.publicId}`;
+
+  function handleSingleChoice(optionPublicId: string) {
+    onChange((currentValue) => ({
+      ...currentValue,
+      selectedOptionPublicIds: [optionPublicId],
+    }));
+  }
+
+  function handleMultipleChoice(optionPublicId: string, checked: boolean) {
+    onChange((currentValue) => {
+      const currentSelected = currentValue.selectedOptionPublicIds;
+      const selectedOptionPublicIds = checked
+        ? Array.from(new Set([...currentSelected, optionPublicId]))
+        : currentSelected.filter((publicId) => publicId !== optionPublicId);
+
+      return {
+        ...currentValue,
+        selectedOptionPublicIds,
+      };
+    });
+  }
+
+  return (
+    <fieldset className="border-border bg-surface space-y-3 rounded-md border p-3">
+      <legend className="text-text-primary px-1 text-sm font-semibold">
+        第 {question.sequenceNumber} 题 ·{" "}
+        {getQuestionTypeLabel(question.questionType)} · {question.score} 分
+      </legend>
+      {question.materialTitle === null &&
+      question.materialContent === null ? null : (
+        <div className="bg-muted rounded-md p-3">
+          {question.materialTitle === null ? null : (
+            <p className="text-text-primary text-sm font-medium">
+              {question.materialTitle}
+            </p>
+          )}
+          {question.materialContent === null ? null : (
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              {question.materialContent}
+            </p>
+          )}
+        </div>
+      )}
+      <p className="text-text-primary text-sm leading-6">{question.stem}</p>
+      {question.questionType === "short_answer" ? (
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">
+            第 {question.sequenceNumber} 题作答
+          </span>
+          <textarea
+            aria-label={`第 ${question.sequenceNumber} 题作答`}
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-24 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+            value={answerItem.textAnswer}
+            onChange={(event) =>
+              onChange((currentValue) => ({
+                ...currentValue,
+                textAnswer: event.target.value,
+              }))
+            }
+          />
+        </label>
+      ) : (
+        <div className="space-y-2">
+          {question.options.map((option) => {
+            const optionLabel = `${option.label}. ${option.content}`;
+            const isChecked = answerItem.selectedOptionPublicIds.includes(
+              option.publicId,
+            );
+
+            return (
+              <label
+                className="border-border bg-background flex items-start gap-2 rounded-md border px-3 py-2 text-sm transition-transform active:scale-[0.98]"
+                key={option.publicId}
+              >
+                <input
+                  aria-label={optionLabel}
+                  checked={isChecked}
+                  className="mt-1"
+                  name={inputName}
+                  type={
+                    question.questionType === "multi_choice"
+                      ? "checkbox"
+                      : "radio"
+                  }
+                  onChange={(event) => {
+                    if (question.questionType === "multi_choice") {
+                      handleMultipleChoice(
+                        option.publicId,
+                        event.target.checked,
+                      );
+                      return;
+                    }
+
+                    handleSingleChoice(option.publicId);
+                  }}
+                />
+                <span className="text-text-primary">{optionLabel}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </fieldset>
+  );
+}
+
+function TrainingResultPanel({
+  answer,
+  version,
+}: {
+  answer: EmployeeOrganizationTrainingAnswerDto | null;
+  version: OrganizationTrainingPublishedVersionDto;
+}) {
+  if (answer === null) {
+    return (
+      <section className="border-border rounded-md border p-3">
+        <h3 className="text-text-primary text-sm font-medium">结果查看</h3>
+        <p className="text-text-secondary mt-2 text-sm">
+          提交后可查看自己的答案、得分、标准答案、解析和主观题评分点。
+        </p>
+      </section>
+    );
+  }
+
+  const answerItems = answer.answerItems ?? [];
+  const questionResults = answer.questionResults ?? [];
+
+  return (
+    <section className="border-border space-y-3 rounded-md border p-3">
+      <h3 className="text-text-primary text-sm font-medium">结果查看</h3>
+      {answer.scoreSummary === null ? (
+        <p className="text-text-secondary text-sm">
+          草稿已保存，提交后生成只读结果。
+        </p>
+      ) : (
+        <p className="text-text-primary text-sm font-semibold">
+          结果 {answer.scoreSummary.score} / {answer.scoreSummary.totalScore}
+        </p>
+      )}
+      {answerItems.length === 0 ? null : (
+        <div className="space-y-2">
+          <p className="text-text-primary text-sm font-medium">我的答案</p>
+          {answerItems.map((answerItem) => (
+            <p
+              className="text-text-secondary bg-muted rounded-md p-2 text-sm"
+              key={answerItem.questionPublicId}
+            >
+              {formatAnswerItemDisplay(answerItem, version.questions ?? [])}
+            </p>
+          ))}
+        </div>
+      )}
+      {questionResults.length === 0 ? null : (
+        <div className="space-y-3">
+          {questionResults.map((questionResult) => (
+            <QuestionResultSummary
+              key={questionResult.questionPublicId}
+              questionResult={questionResult}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function QuestionResultSummary({
+  questionResult,
+}: {
+  questionResult: EmployeeOrganizationTrainingQuestionResultDto;
 }) {
   return (
-    <label className="grid gap-2 text-sm font-medium">
-      <span className="text-text-secondary">{label}</span>
-      <input
-        aria-label={label}
-        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-        min={0}
-        type="number"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
+    <div className="bg-muted space-y-2 rounded-md p-3">
+      <p className="text-text-primary text-sm font-medium">
+        题目得分 {questionResult.score} / {questionResult.maxScore}
+      </p>
+      {questionResult.standardAnswer === null ? null : (
+        <p className="text-text-secondary text-sm">
+          标准答案：{questionResult.standardAnswer}
+        </p>
+      )}
+      {questionResult.analysis === null ? null : (
+        <p className="text-text-secondary text-sm leading-6">
+          {questionResult.analysis}
+        </p>
+      )}
+      {questionResult.scoringPointResults.length === 0 ? null : (
+        <div className="space-y-2">
+          {questionResult.scoringPointResults.map((scoringPoint) => (
+            <div
+              className="border-border bg-surface rounded-md border p-2"
+              key={scoringPoint.label}
+            >
+              <p className="text-text-primary text-sm font-medium">
+                {scoringPoint.label}：{scoringPoint.score} /{" "}
+                {scoringPoint.maxScore}
+              </p>
+              <p className="text-text-secondary mt-1 text-sm">
+                {scoringPoint.reason}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
+}
+
+function formatAnswerItemDisplay(
+  answerItem: EmployeeOrganizationTrainingAnswerItemDto,
+  questions: OrganizationTrainingQuestionSnapshotDto[],
+): string {
+  const question = questions.find(
+    (candidate) => candidate.publicId === answerItem.questionPublicId,
+  );
+
+  if (answerItem.textAnswer !== null) {
+    return answerItem.textAnswer;
+  }
+
+  if (question === undefined) {
+    return answerItem.selectedOptionPublicIds.join("、");
+  }
+
+  const selectedLabels = question.options
+    .filter((option) =>
+      answerItem.selectedOptionPublicIds.includes(option.publicId),
+    )
+    .map((option) => `${option.label}. ${option.content}`);
+
+  return selectedLabels.length > 0 ? selectedLabels.join("；") : "未作答";
+}
+
+function getAnswerStatusLabel(
+  status: OrganizationTrainingPublishedVersionDto["employeeAnswerStatus"],
+): string {
+  if (status === "submitted" || status === "read_only") {
+    return "已提交";
+  }
+
+  if (status === "in_progress") {
+    return "进行中";
+  }
+
+  return "未开始";
+}
+
+function getQuestionTypeLabel(
+  questionType: OrganizationTrainingQuestionSnapshotDto["questionType"],
+): string {
+  if (questionType === "single_choice") {
+    return "单选题";
+  }
+
+  if (questionType === "multi_choice") {
+    return "多选题";
+  }
+
+  if (questionType === "true_false") {
+    return "判断题";
+  }
+
+  return "简答题";
+}
+
+function formatDateLabel(value: string | null | undefined): string {
+  if (typeof value !== "string" || value.length < 10) {
+    return "无固定截止";
+  }
+
+  return value.slice(0, 10);
 }

@@ -18,6 +18,7 @@ const visibleVersion = {
   draftPublicId: "organization-training-draft-ui-001",
   versionNumber: 1,
   organizationPublicId: "organization-employee-scope-001",
+  organizationName: "营销一部",
   publishScopeSnapshot: {
     organizationPublicIds: ["organization-employee-scope-001"],
     capturedAt: "2026-06-18T08:00:00.000Z",
@@ -31,8 +32,44 @@ const visibleVersion = {
   totalScore: 10,
   status: "published",
   publishedAt: "2026-06-18T08:00:00.000Z",
+  answerDeadlineAt: "2026-06-25T18:00:00.000Z",
+  employeeAnswerStatus: "not_started",
+  submittedScoreSummary: null,
   takenDownAt: null,
   takedownReason: null,
+  questions: [
+    {
+      publicId: "organization-training-question-ui-001",
+      sequenceNumber: 1,
+      questionType: "single_choice",
+      materialTitle: "客户服务场景",
+      materialContent: "客户询问新品卷烟陈列位置时，需要先确认门店陈列规范。",
+      stem: "接待客户咨询时，第一步应当怎么做？",
+      options: [
+        {
+          publicId: "organization-training-option-ui-a",
+          label: "A",
+          content: "先确认客户诉求并核对门店陈列规范",
+        },
+        {
+          publicId: "organization-training-option-ui-b",
+          label: "B",
+          content: "直接推荐库存最多的商品",
+        },
+      ],
+      score: 4,
+    },
+    {
+      publicId: "organization-training-question-ui-002",
+      sequenceNumber: 2,
+      questionType: "short_answer",
+      materialTitle: null,
+      materialContent: null,
+      stem: "请写出一次门店服务复盘中需要记录的两个要点。",
+      options: [],
+      score: 6,
+    },
+  ],
   id: 8801,
 };
 
@@ -49,6 +86,19 @@ const draftAnswer = {
   scoreSummary: null,
   submittedAt: null,
   resultSummaryVisible: false,
+  answerItems: [
+    {
+      questionPublicId: "organization-training-question-ui-001",
+      selectedOptionPublicIds: ["organization-training-option-ui-a"],
+      textAnswer: null,
+    },
+    {
+      questionPublicId: "organization-training-question-ui-002",
+      selectedOptionPublicIds: [],
+      textAnswer: "记录客户诉求和服务改进动作。",
+    },
+  ],
+  questionResults: [],
   id: 9901,
 };
 
@@ -234,6 +284,31 @@ describe("StudentOrganizationTrainingPage", () => {
                 },
                 submittedAt: "2026-06-18T08:10:00.000Z",
                 resultSummaryVisible: true,
+                questionResults: [
+                  {
+                    questionPublicId: "organization-training-question-ui-001",
+                    score: 4,
+                    maxScore: 4,
+                    standardAnswer: "A",
+                    analysis: "服务类题目应先确认客户诉求，再按门店规范处理。",
+                    scoringPointResults: [],
+                  },
+                  {
+                    questionPublicId: "organization-training-question-ui-002",
+                    score: 3,
+                    maxScore: 6,
+                    standardAnswer: "客户诉求、处理动作、复盘改进。",
+                    analysis: "复盘记录需要同时覆盖事实和改进动作。",
+                    scoringPointResults: [
+                      {
+                        label: "记录客户诉求",
+                        score: 2,
+                        maxScore: 3,
+                        reason: "已覆盖客户诉求，但缺少完整场景。",
+                      },
+                    ],
+                  },
+                ],
               },
             },
           });
@@ -257,6 +332,31 @@ describe("StudentOrganizationTrainingPage", () => {
                 },
                 submittedAt: "2026-06-18T08:10:00.000Z",
                 resultSummaryVisible: true,
+                questionResults: [
+                  {
+                    questionPublicId: "organization-training-question-ui-001",
+                    score: 4,
+                    maxScore: 4,
+                    standardAnswer: "A",
+                    analysis: "服务类题目应先确认客户诉求，再按门店规范处理。",
+                    scoringPointResults: [],
+                  },
+                  {
+                    questionPublicId: "organization-training-question-ui-002",
+                    score: 3,
+                    maxScore: 6,
+                    standardAnswer: "客户诉求、处理动作、复盘改进。",
+                    analysis: "复盘记录需要同时覆盖事实和改进动作。",
+                    scoringPointResults: [
+                      {
+                        label: "记录客户诉求",
+                        score: 2,
+                        maxScore: 3,
+                        reason: "已覆盖客户诉求，但缺少完整场景。",
+                      },
+                    ],
+                  },
+                ],
               },
             },
           });
@@ -289,15 +389,33 @@ describe("StudentOrganizationTrainingPage", () => {
     expect(within(row).getByText("卷烟营销")).toBeInTheDocument();
     expect(within(row).getByText("3 级")).toBeInTheDocument();
     expect(within(row).getByText("理论")).toBeInTheDocument();
+    expect(within(row).getByText("营销一部")).toBeInTheDocument();
+    expect(within(row).getByText("第 1 版")).toBeInTheDocument();
+    expect(within(row).getByText("共 5 题")).toBeInTheDocument();
+    expect(within(row).getByText("截止 2026-06-25")).toBeInTheDocument();
+    expect(within(row).getByText("未开始")).toBeInTheDocument();
     expect(
       within(row).getByRole("group", { name: "企业训练作答区" }),
     ).toBeInTheDocument();
+    expect(within(row).getByText("客户服务场景")).toBeInTheDocument();
+    expect(
+      within(row).getByText("接待客户咨询时，第一步应当怎么做？"),
+    ).toBeInTheDocument();
+    expect(
+      within(row).getByText("请写出一次门店服务复盘中需要记录的两个要点。"),
+    ).toBeInTheDocument();
+    expect(within(row).queryByLabelText("完成题数")).toBeNull();
+    expect(within(row).queryByLabelText("得分")).toBeNull();
+    expect(within(row).queryByLabelText("总分")).toBeNull();
     expect(document.body.textContent).not.toContain(
       "organization-training-version-ui-001",
     );
 
-    fireEvent.change(within(row).getByLabelText("完成题数"), {
-      target: { value: "3" },
+    fireEvent.click(
+      within(row).getByLabelText("A. 先确认客户诉求并核对门店陈列规范"),
+    );
+    fireEvent.change(within(row).getByLabelText("第 2 题作答"), {
+      target: { value: "记录客户诉求和服务改进动作。" },
     });
     fireEvent.click(within(row).getByRole("button", { name: "保存草稿" }));
 
@@ -310,15 +428,21 @@ describe("StudentOrganizationTrainingPage", () => {
       ),
     ).toMatchObject({
       trainingVersionPublicId: "organization-training-version-ui-001",
-      answeredQuestionCount: 3,
+      answeredQuestionCount: 2,
+      answerItems: [
+        {
+          questionPublicId: "organization-training-question-ui-001",
+          selectedOptionPublicIds: ["organization-training-option-ui-a"],
+          textAnswer: null,
+        },
+        {
+          questionPublicId: "organization-training-question-ui-002",
+          selectedOptionPublicIds: [],
+          textAnswer: "记录客户诉求和服务改进动作。",
+        },
+      ],
     });
 
-    fireEvent.change(within(row).getByLabelText("得分"), {
-      target: { value: "4" },
-    });
-    fireEvent.change(within(row).getByLabelText("总分"), {
-      target: { value: "5" },
-    });
     fireEvent.click(within(row).getByRole("button", { name: "提交" }));
     expect(
       within(row).getByRole("group", { name: "企业训练提交确认" }),
@@ -334,16 +458,40 @@ describe("StudentOrganizationTrainingPage", () => {
       ),
     ).toMatchObject({
       trainingVersionPublicId: "organization-training-version-ui-001",
-      answeredQuestionCount: 3,
+      answeredQuestionCount: 2,
+      answerItems: [
+        {
+          questionPublicId: "organization-training-question-ui-001",
+          selectedOptionPublicIds: ["organization-training-option-ui-a"],
+          textAnswer: null,
+        },
+        {
+          questionPublicId: "organization-training-question-ui-002",
+          selectedOptionPublicIds: [],
+          textAnswer: "记录客户诉求和服务改进动作。",
+        },
+      ],
       scoreSummary: {
-        score: 4,
-        totalScore: 5,
+        score: 0,
+        totalScore: 10,
       },
     });
 
     fireEvent.click(within(row).getByRole("button", { name: "查看结果" }));
 
     expect(await screen.findByText("结果 4 / 5")).toBeInTheDocument();
+    expect(await screen.findByText("我的答案")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("记录客户诉求和服务改进动作。").length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("标准答案：A")).toBeInTheDocument();
+    expect(
+      screen.getByText("服务类题目应先确认客户诉求，再按门店规范处理。"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("记录客户诉求：2 / 3")).toBeInTheDocument();
+    expect(
+      screen.getByText("已覆盖客户诉求，但缺少完整场景。"),
+    ).toBeInTheDocument();
     expect(await screen.findByText("结果已加载")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-student-token");
     expect(document.body.textContent).not.toContain("9901");

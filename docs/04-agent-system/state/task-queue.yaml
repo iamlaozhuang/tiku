@@ -358,6 +358,139 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: employee-training-answer-result-source-landing-2026-07-03
+    title: Employee training answer result source landing
+    phase: employee-training-answer-result-source-landing-2026-07-03
+    sourceStory: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    humanApprovalBoundary: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    targetClosureItem: Land learner-grade employee enterprise training answer/result UI with real question rendering, draft-save, submit confirmation, and own-result review.
+    behaviorBoundary: employee_training_answer_result_source_ui_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+    taskKind: source_ui_contract_landing
+    moduleRunVersion: 2
+    status: closed
+    result: employee_training_answer_result_source_landed_with_question_answer_ui_submit_confirmation_and_own_result_review
+    priority: p1
+    branch: codex/employee-training-answer-result-source-landing-2026-07-03
+    claimedAt: "2026-07-03T09:20:47-07:00"
+    plannedAt: "2026-07-03T09:20:47-07:00"
+    implementedAt: "2026-07-03T09:25:56-07:00"
+    validatedAt: "2026-07-03T09:25:56-07:00"
+    reviewedAt: "2026-07-03T09:26:35-07:00"
+    closedAt: "2026-07-03T09:26:35-07:00"
+    dependsOn:
+      - learner-ai-context-source-landing-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-employee-training-answer-result-source-landing.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-employee-training-answer-result-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-employee-training-answer-result-source-landing.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+      - docs/05-execution-logs/task-plans/2026-07-03-employee-training-answer-result-source-landing.md
+      - docs/05-execution-logs/evidence/2026-07-03-employee-training-answer-result-source-landing.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-employee-training-answer-result-source-landing.md
+      - src/server/contracts/organization-training-contract.ts
+      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+      - tests/unit/organization-training-employee-entry-surface.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+      - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      focusedUnitTest: approved
+      typecheck: approved
+      lint: approved
+      localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+      localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Employee-facing enterprise training list shows organization node, profession, level, subject, version, question count, deadline, status, and submitted score summary when present.
+      - Employee answer UI renders actual questions, materials, options, and text inputs instead of numeric answer-count or score-entry forms.
+      - Draft-save and submit request bodies include question-level answer items while submit remains confirmation-gated.
+      - Employee own-result review can show own submitted answer, score summary, standard answer, analysis, and subjective scoring-point reasons when returned by the employee summary API.
+      - Organization admin raw employee answer exposure remains out of this package, and schema/database persistence remains a recorded follow-up gap.
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/organization-training-employee-entry-surface.test.ts src/server/services/organization-training-route.test.ts src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts src/server/mappers/organization-training-mapper.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId employee-training-answer-result-source-landing-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId employee-training-answer-result-source-landing-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId employee-training-answer-result-source-landing-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    validationSummary:
+      redTddFocusedUnit: pass_failed_before_implementation_missing_real_question_answer_ui
+      focusedUnitTests: pass_5_files_89_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceOrTestChanged: true
+      schemaMigrationOrDependencyChanged: false
+      providerCallOrConfigurationExecuted: false
+      directDatabaseConnectionOrMutationExecuted: false
+      browserRuntimeExecuted: false
+      rawEmployeeAnswerRecordedInEvidence: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: learner-ai-context-source-landing-2026-07-03
     title: Learner AI context source landing
     phase: learner-ai-context-source-landing-2026-07-03
