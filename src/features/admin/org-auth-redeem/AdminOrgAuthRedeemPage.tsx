@@ -516,6 +516,58 @@ function createOrganizationDepthMap(
   );
 }
 
+function findOrganizationDisplayName(
+  organizations: AdminOrgAuthData["organizations"],
+  publicId: string | null,
+): string {
+  if (publicId === null) {
+    return "无";
+  }
+
+  return (
+    organizations.find((organization) => organization.publicId === publicId)
+      ?.name ?? "父级未同步"
+  );
+}
+
+function countChildOrganizations(
+  organizations: AdminOrgAuthData["organizations"],
+  publicId: string,
+): number {
+  return organizations.filter(
+    (organization) => organization.parentOrganizationPublicId === publicId,
+  ).length;
+}
+
+function countExpiringOrgAuths(orgAuths: AdminOrgAuthData["orgAuths"]): number {
+  const now = Date.now();
+  const fortyFiveDaysInMilliseconds = 45 * 24 * 60 * 60 * 1000;
+
+  return orgAuths.filter((orgAuth) => {
+    if (orgAuth.status !== "active") {
+      return false;
+    }
+
+    const millisecondsUntilExpiry = new Date(orgAuth.expiresAt).getTime() - now;
+
+    return (
+      millisecondsUntilExpiry >= 0 &&
+      millisecondsUntilExpiry <= fortyFiveDaysInMilliseconds
+    );
+  }).length;
+}
+
+function countQuotaRiskOrgAuths(
+  orgAuths: AdminOrgAuthData["orgAuths"],
+): number {
+  return orgAuths.filter(
+    (orgAuth) =>
+      orgAuth.status === "active" &&
+      orgAuth.accountQuota > 0 &&
+      orgAuth.usedQuota / orgAuth.accountQuota >= 0.8,
+  ).length;
+}
+
 function buildOrgAuthInput(
   formState: OrgAuthFormState,
   organizations: AdminOrgAuthData["organizations"],
@@ -1208,6 +1260,151 @@ function AdminDataRow({
   );
 }
 
+function OrganizationTreeGuidancePanel() {
+  const guidanceItems = [
+    {
+      label: "平台维护",
+      title: "组织树写操作由平台处理",
+      description:
+        "运营可新增、编辑、停用和启用企业节点；组织管理员首期只能查看自身范围内的组织结构、员工状态和授权状态。",
+    },
+    {
+      label: "继承授权",
+      title: "员工范围从节点授权继承",
+      description:
+        "员工不在导入或资料里单独分配专业、等级或版本；可见内容由所在企业节点及覆盖该节点的有效企业授权计算。",
+    },
+    {
+      label: "移动限制",
+      title: "节点移动仅超级管理员",
+      description:
+        "首期不在普通运营表单提供移动企业组织按钮；需要调整父子关系时由超级管理员走受控流程，避免影响授权、额度和员工可见范围。",
+    },
+  ];
+
+  return (
+    <section
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="organization-tree-guidance"
+    >
+      <div className="space-y-1">
+        <p className="text-brand-primary text-xs font-medium">组织树说明</p>
+        <h2 className="text-text-primary text-base font-semibold">
+          组织树权限说明
+        </h2>
+        <p className="text-text-secondary text-sm leading-6">
+          组织树用于表达真实企业层级，授权是覆盖这些节点的独立记录；停用节点会影响企业授权内容使用，但不会删除企业、员工或学习记录。
+        </p>
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        {guidanceItems.map((item) => (
+          <div
+            key={item.title}
+            className="bg-background border-border rounded-md border p-3"
+          >
+            <p className="text-brand-primary text-xs font-medium">
+              {item.label}
+            </p>
+            <h3 className="text-text-primary mt-1 text-sm font-semibold">
+              {item.title}
+            </h3>
+            <p className="text-text-secondary mt-2 text-sm leading-6">
+              {item.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OperationsPendingWorkbench({
+  organizations,
+  orgAuths,
+}: {
+  organizations: AdminOrgAuthData["organizations"];
+  orgAuths: AdminOrgAuthData["orgAuths"];
+}) {
+  const expiringOrgAuthCount = countExpiringOrgAuths(orgAuths);
+  const quotaRiskOrgAuthCount = countQuotaRiskOrgAuths(orgAuths);
+  const disabledOrganizationCount = organizations.filter(
+    (organization) => organization.status === "disabled",
+  ).length;
+  const noDirectAuthSummaryCount = organizations.filter(
+    (organization) => organization.authSummary === null,
+  ).length;
+  const pendingItems = [
+    {
+      count: expiringOrgAuthCount,
+      description:
+        "到期授权需要进入授权详情或创建向导处理续费接续，不自动续费。",
+      href: "#org-auth-create-panel",
+      title: "授权到期复核",
+    },
+    {
+      count: quotaRiskOrgAuthCount,
+      description: "额度接近用尽时由运营选择增量扩容或替换授权，不自动扩容。",
+      href: "#org-auth-create-panel",
+      title: "额度风险复核",
+    },
+    {
+      count: 0,
+      description:
+        "同一原子范围重叠默认阻断；只能通过续费、手动升级、替换或增量扩容显式闭环。",
+      href: "#org-auth-create-panel",
+      title: "重叠阻断处理",
+    },
+    {
+      count: disabledOrganizationCount + noDirectAuthSummaryCount,
+      description: "停用节点和暂无直接授权摘要的节点需要运营核对继承授权影响。",
+      href: "#organization-tree-management-panel",
+      title: "组织树待确认",
+    },
+  ];
+
+  return (
+    <section
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="operations-pending-workbench"
+    >
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">运营待办</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            运营待办工作台
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            待办只帮助定位需要人工处理的授权、额度、重叠和组织树事项；系统不会自动续费、自动升级、自动合并或自动解决冲突。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          人工闭环
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {pendingItems.map((item) => (
+          <a
+            key={item.title}
+            className="border-border bg-background hover:bg-muted block rounded-md border p-3 transition-transform active:scale-[0.98]"
+            href={item.href}
+          >
+            <p className="text-text-muted text-xs">待办数量</p>
+            <p className="text-text-primary mt-1 text-2xl font-semibold">
+              {item.count}
+            </p>
+            <h3 className="text-text-primary mt-2 text-sm font-semibold">
+              {item.title}
+            </h3>
+            <p className="text-text-secondary mt-2 text-xs leading-5">
+              {item.description}
+            </p>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function OrganizationList({
   onDisableOrganization,
   onEditOrganization,
@@ -1223,73 +1420,92 @@ function OrganizationList({
   onViewOrganizationDetail: (publicId: string) => void;
   organizations: AdminOrgAuthData["organizations"];
 }) {
+  const organizationDepthByPublicId = createOrganizationDepthMap(organizations);
+
   return (
     <AdminPanel title="企业组织">
-      {organizations.map((organization) => (
-        <AdminDataRow
-          key={organization.publicId}
-          publicId={organization.publicId}
-          testId={`admin-organization-${organization.publicId}`}
-        >
-          <div className="min-w-0 space-y-1">
-            <p className="text-text-primary text-sm font-medium">
-              {organization.name}
-            </p>
-            <p className="text-text-secondary text-xs">
-              {orgTierLabels[organization.orgTier]} /{" "}
-              {organization.employeeCount} 名员工
-            </p>
-            <p className="text-text-muted text-xs">
-              父级 {organization.parentOrganizationPublicId ?? "无"} /{" "}
-              {organization.authSummary ?? "暂无授权摘要"}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-              {organization.status === "active" ? "启用" : "停用"}
-            </span>
-            <button
-              type="button"
-              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-              data-testid={`organization-detail-${organization.publicId}`}
-              onClick={() => onViewOrganizationDetail(organization.publicId)}
+      {organizations.map((organization) => {
+        const organizationDepth =
+          organizationDepthByPublicId.get(organization.publicId) ?? 0;
+        const childOrganizationCount = countChildOrganizations(
+          organizations,
+          organization.publicId,
+        );
+        const parentOrganizationName = findOrganizationDisplayName(
+          organizations,
+          organization.parentOrganizationPublicId,
+        );
+
+        return (
+          <AdminDataRow
+            key={organization.publicId}
+            publicId={organization.publicId}
+            testId={`admin-organization-${organization.publicId}`}
+          >
+            <div
+              className={`min-w-0 space-y-1 ${getOrganizationDepthPaddingClassName(organizationDepth)}`}
             >
-              <Eye className="size-3.5" aria-hidden="true" />
-              详情
-            </button>
-            <button
-              type="button"
-              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-              data-testid={`organization-edit-${organization.publicId}`}
-              onClick={() => onEditOrganization(organization)}
-            >
-              <Pencil className="size-3.5" aria-hidden="true" />
-              编辑
-            </button>
-            {organization.status === "active" ? (
+              <p className="text-text-primary text-sm font-medium">
+                {organization.name}
+              </p>
+              <p className="text-text-secondary text-xs">
+                {orgTierLabels[organization.orgTier]} /{" "}
+                {organization.employeeCount} 名员工 / 下级{" "}
+                {childOrganizationCount}
+              </p>
+              <p className="text-text-muted text-xs">
+                父级 {parentOrganizationName} /{" "}
+                {organization.authSummary ??
+                  "暂无直接授权摘要，需核对上级或指定范围继承"}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+                {organization.status === "active" ? "启用" : "停用"}
+              </span>
               <button
                 type="button"
-                className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                data-testid={`organization-disable-${organization.publicId}`}
-                onClick={() => onDisableOrganization(organization.publicId)}
+                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                data-testid={`organization-detail-${organization.publicId}`}
+                onClick={() => onViewOrganizationDetail(organization.publicId)}
               >
-                <Ban className="size-3.5" aria-hidden="true" />
-                停用
+                <Eye className="size-3.5" aria-hidden="true" />
+                详情
               </button>
-            ) : (
               <button
                 type="button"
-                className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                data-testid={`organization-enable-${organization.publicId}`}
-                onClick={() => onEnableOrganization(organization.publicId)}
+                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                data-testid={`organization-edit-${organization.publicId}`}
+                onClick={() => onEditOrganization(organization)}
               >
-                <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                启用
+                <Pencil className="size-3.5" aria-hidden="true" />
+                编辑
               </button>
-            )}
-          </div>
-        </AdminDataRow>
-      ))}
+              {organization.status === "active" ? (
+                <button
+                  type="button"
+                  className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                  data-testid={`organization-disable-${organization.publicId}`}
+                  onClick={() => onDisableOrganization(organization.publicId)}
+                >
+                  <Ban className="size-3.5" aria-hidden="true" />
+                  停用
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                  data-testid={`organization-enable-${organization.publicId}`}
+                  onClick={() => onEnableOrganization(organization.publicId)}
+                >
+                  <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                  启用
+                </button>
+              )}
+            </div>
+          </AdminDataRow>
+        );
+      })}
     </AdminPanel>
   );
 }
@@ -1333,6 +1549,10 @@ function OrganizationDetailPanel({
   const relatedEmployees = employees.filter(
     (employee) => employee.organizationPublicId === organization.publicId,
   );
+  const inheritedAccessSummary =
+    relatedOrgAuths.length === 0
+      ? "暂无直接或指定覆盖授权；员工仅在上级范围覆盖时继承企业授权。"
+      : `关联 ${relatedOrgAuths.length} 条授权；员工可见专业、等级和版本由这些有效企业授权计算。`;
 
   return (
     <section
@@ -1348,7 +1568,7 @@ function OrganizationDetailPanel({
             {organization.name}
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            基于当前后台列表数据聚合组织、授权和员工摘要；写操作继续通过既有二次确认提交。
+            基于当前后台列表数据聚合组织、授权和员工摘要；组织树写操作继续由平台运营处理，组织管理员只读查看范围内结构和授权影响。
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1389,6 +1609,27 @@ function OrganizationDetailPanel({
         </div>
       </div>
 
+      <div className="border-border bg-background mt-4 grid gap-3 rounded-md border p-3 md:grid-cols-3">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">继承授权</p>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            {inheritedAccessSummary}
+          </p>
+        </div>
+        <div>
+          <p className="text-brand-primary text-xs font-medium">停用影响</p>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            停用企业节点不删除企业、员工或学习记录；重新启用后，如授权仍有效，可恢复企业授权内容使用。
+          </p>
+        </div>
+        <div>
+          <p className="text-brand-primary text-xs font-medium">移动限制</p>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            节点移动仅超级管理员通过受控流程处理，当前页面不提供移动企业组织动作。
+          </p>
+        </div>
+      </div>
+
       <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">企业层级</dt>
@@ -1418,8 +1659,10 @@ function OrganizationDetailPanel({
           <dt className="text-text-muted text-xs">父级组织</dt>
           <dd className="text-text-primary mt-1 text-sm font-medium break-all">
             {parentOrganization?.name ??
-              organization.parentOrganizationPublicId ??
-              "无"}
+              findOrganizationDisplayName(
+                organizations,
+                organization.parentOrganizationPublicId,
+              )}
           </dd>
         </div>
         <div className="bg-background rounded-md p-3">
@@ -2443,7 +2686,8 @@ function OrganizationTreeActionPanel({
               企业组织树维护
             </h2>
             <p className="text-text-secondary text-sm leading-6">
-              维护省公司、地市公司、县区公司及站点层级；层级和父级关系会在提交前校验。
+              维护省公司、地市公司、县区公司及站点层级；层级和父级关系会在提交前校验。节点移动首期仅超级管理员
+              通过受控流程处理。
             </p>
           </div>
           <button
@@ -3872,6 +4116,13 @@ export function AdminOrgAuthPage() {
         testId="system-ops-org-auth-create-entry"
         title="新增企业授权入口"
       />
+
+      <OperationsPendingWorkbench
+        organizations={data.organizations}
+        orgAuths={data.orgAuths}
+      />
+
+      <OrganizationTreeGuidancePanel />
 
       <OrgAuthActionPanel
         disabled={data.organizations.length === 0}

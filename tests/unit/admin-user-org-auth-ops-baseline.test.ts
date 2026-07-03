@@ -1089,6 +1089,29 @@ describe("admin user organization authorization ops baseline", () => {
 
     await screen.findByTestId("organization-tree-management-form");
 
+    const pendingWorkbench = screen.getByTestId("operations-pending-workbench");
+    expect(pendingWorkbench).toHaveTextContent("运营待办工作台");
+    expect(pendingWorkbench).toHaveTextContent("系统不会自动续费");
+    expect(pendingWorkbench).toHaveTextContent("组织树待确认");
+    expect(pendingWorkbench).toHaveTextContent(
+      "停用节点和暂无直接授权摘要的节点需要运营核对继承授权影响",
+    );
+
+    const organizationTreeGuidance = screen.getByTestId(
+      "organization-tree-guidance",
+    );
+    expect(organizationTreeGuidance).toHaveTextContent("组织树权限说明");
+    expect(organizationTreeGuidance).toHaveTextContent(
+      "组织树写操作由平台处理",
+    );
+    expect(organizationTreeGuidance).toHaveTextContent(
+      "员工不在导入或资料里单独分配专业、等级或版本",
+    );
+    expect(organizationTreeGuidance).toHaveTextContent("节点移动仅超级管理员");
+    expect(
+      screen.queryByRole("button", { name: /移动企业组织/ }),
+    ).not.toBeInTheDocument();
+
     fireEvent.change(screen.getByTestId("organization-name-input"), {
       target: { value: "Fujian Test Tobacco" },
     });
@@ -1163,7 +1186,17 @@ describe("admin user organization authorization ops baseline", () => {
     expect(organizationDetail).toHaveTextContent("市级");
     expect(organizationDetail).toHaveTextContent("员工 42");
     expect(organizationDetail).toHaveTextContent("关联授权 1");
+    expect(organizationDetail).toHaveTextContent(
+      "组织管理员只读查看范围内结构和授权影响",
+    );
+    expect(organizationDetail).toHaveTextContent(
+      "员工可见专业、等级和版本由这些有效企业授权计算",
+    );
+    expect(organizationDetail).toHaveTextContent(
+      "节点移动仅超级管理员通过受控流程处理",
+    );
     expect(organizationDetail).toHaveTextContent("杭州烟草企业授权");
+    expect(organizationDetail).not.toHaveTextContent("organization-public-000");
     expect(organizationDetail).not.toHaveTextContent("101");
     expect(organizationDetail).not.toHaveTextContent("201");
     expect(organizationDetail).not.toHaveTextContent("301");

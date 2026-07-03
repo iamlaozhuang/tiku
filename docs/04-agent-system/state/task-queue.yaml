@@ -358,6 +358,137 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: organization-tree-ops-workbench-source-landing-2026-07-03
+    title: Organization tree ops workbench source landing
+    phase: organization-tree-ops-workbench-source-landing-2026-07-03
+    sourceStory: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    humanApprovalBoundary: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    targetClosureItem: Land the organization tree operations workbench source contract for platform-owned mutation, super-admin-only move restriction, inherited-access explanations, and pending-work routing.
+    behaviorBoundary: organization_tree_ops_workbench_source_ui_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+    taskKind: source_ui_contract_landing
+    moduleRunVersion: 2
+    status: closed
+    result: organization_tree_ops_workbench_source_landed_with_platform_owned_tree_guidance_move_restriction_inherited_access_and_pending_cards
+    priority: p1
+    branch: codex/organization-tree-ops-workbench-source-landing-2026-07-03
+    claimedAt: "2026-07-03T06:48:36-07:00"
+    plannedAt: "2026-07-03T06:48:36-07:00"
+    implementedAt: "2026-07-03T06:59:45-07:00"
+    validatedAt: "2026-07-03T06:59:45-07:00"
+    reviewedAt: "2026-07-03T06:59:45-07:00"
+    closedAt: "2026-07-03T06:59:45-07:00"
+    dependsOn:
+      - organization-workspace-role-boundary-source-landing-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-organization-tree-ops-workbench-source-landing.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-tree-ops-workbench-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-tree-ops-workbench-source-landing.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+      - docs/05-execution-logs/task-plans/2026-07-03-organization-tree-ops-workbench-source-landing.md
+      - docs/05-execution-logs/evidence/2026-07-03-organization-tree-ops-workbench-source-landing.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-organization-tree-ops-workbench-source-landing.md
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      focusedUnitTest: approved
+      typecheck: approved
+      lint: approved
+      localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+      localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Organization tree UI explains parent-child structure, disabled nodes, inherited org_auth, quota/employee impact, and scoped visibility in non-technical language.
+      - Platform ops can create, edit, disable, and enable organization nodes; node move remains super_admin-only and no organization-admin mutation is introduced.
+      - Organization admins remain read-only for organization tree and see only scoped inherited authorization impact without parent/sibling/global leakage.
+      - Operations pending-work cards route to relevant detail or guided surfaces for expiring authorization, quota risk, unresolved overlap blockers, and organization-tree follow-up without auto closure.
+      - Focused tests cover organization tree guidance, pending-work cards, existing mutation calls, and no sensitive/internal leakage without schema, dependency, direct DB, browser, deploy, release-readiness, final Pass, or production-usability work.
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-tree-ops-workbench-source-landing-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-tree-ops-workbench-source-landing-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-tree-ops-workbench-source-landing-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    validationSummary:
+      focusedUnitTests: pass_1_file_19_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      schemaMigrationOrDependencyChanged: false
+      providerCallOrConfigurationExecuted: false
+      directDatabaseConnectionOrMutationExecuted: false
+      browserRuntimeExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
   - id: organization-workspace-role-boundary-source-landing-2026-07-03
     title: Organization workspace role boundary source landing
     phase: organization-workspace-role-boundary-source-landing-2026-07-03
