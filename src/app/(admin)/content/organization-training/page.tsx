@@ -1,5 +1,5 @@
-import { AdminOrganizationTrainingPage } from "@/features/admin/organization-training/AdminOrganizationTrainingPage";
+import { redirect } from "next/navigation";
 
 export default function AdminOrganizationTrainingRoutePage() {
-  return <AdminOrganizationTrainingPage />;
+  redirect("/organization/organization-training");
 }

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createElement } from "react";
 import {
   cleanup,
@@ -11,6 +13,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import AdminOrganizationTrainingRoutePage from "@/app/(admin)/organization/organization-training/page";
 import { AdminOrganizationTrainingPage } from "@/features/admin/organization-training/AdminOrganizationTrainingPage";
+
+const contentOrganizationTrainingPagePath =
+  "src/app/(admin)/content/organization-training/page.tsx";
+
+function readSourceFile(sourcePath: string) {
+  return readFileSync(join(process.cwd(), sourcePath), "utf8");
+}
 
 const adminSessionPayload = {
   code: 0,
@@ -140,6 +149,17 @@ describe("AdminOrganizationTrainingPage", () => {
     );
   });
 
+  it("redirects the content workspace organization training route back to the organization workspace", () => {
+    const contentRouteSource = readSourceFile(
+      contentOrganizationTrainingPagePath,
+    );
+
+    expect(contentRouteSource).toContain(
+      'redirect("/organization/organization-training")',
+    );
+    expect(contentRouteSource).not.toContain("AdminOrganizationTrainingPage");
+  });
+
   it("renders unauthorized state without calling organization training writes when session is missing", async () => {
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       if (String(url) === "/api/v1/sessions") {
@@ -203,7 +223,7 @@ describe("AdminOrganizationTrainingPage", () => {
       "href",
       "/organization/portal",
     );
-    expect(screen.queryByRole("form", { name: "组织培训草稿表单" })).toBeNull();
+    expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
     ]);
@@ -291,36 +311,43 @@ describe("AdminOrganizationTrainingPage", () => {
 
     render(createElement(AdminOrganizationTrainingPage));
 
-    expect(screen.getByText("正在加载组织培训")).toBeInTheDocument();
+    expect(screen.getByText("正在加载企业训练")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "组织培训" }),
+      await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("本页仅创建和复制训练草稿")).toBeInTheDocument();
-    expect(screen.getByText(/创建草稿后才能绑定来源/u)).toBeInTheDocument();
-    expect(screen.getByText(/仅保存来源元数据/u)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "绑定来源" })).toBeDisabled();
+    expect(screen.getByText("企业训练列表")).toBeInTheDocument();
+    expect(screen.getAllByText("新建企业训练").length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(screen.getByText("平台试卷快照")).toBeInTheDocument();
+    expect(screen.getByText("企业 AI 结果")).toBeInTheDocument();
+    expect(screen.getByText("手动题组")).toBeInTheDocument();
+    expect(
+      screen.getByText(/模拟考试不作为企业训练来源入口/u),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "绑定试卷快照" })).toBeDisabled();
 
     const draftForm = within(
-      screen.getByRole("form", { name: "组织培训草稿表单" }),
+      screen.getByRole("form", { name: "企业训练配置表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织业务标识"), {
+    fireEvent.change(draftForm.getByLabelText("组织节点"), {
       target: { value: "organization-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("企业授权业务标识"), {
+    fireEvent.change(draftForm.getByLabelText("企业授权"), {
       target: { value: "org-auth-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("培训标题"), {
+    fireEvent.change(draftForm.getByLabelText("训练标题"), {
       target: { value: "门店服务训练" },
     });
-    fireEvent.change(draftForm.getByLabelText("培训说明"), {
+    fireEvent.change(draftForm.getByLabelText("训练说明"), {
       target: { value: "仅保存元数据" },
     });
-    fireEvent.click(draftForm.getByRole("button", { name: "创建草稿" }));
+    fireEvent.click(
+      draftForm.getByRole("button", { name: "创建企业训练草稿" }),
+    );
 
     const createdDraftStatus = await screen.findByRole("status");
-    expect(createdDraftStatus).toHaveTextContent(
-      "草稿 organization-training-draft-ui-001 已创建",
-    );
+    expect(createdDraftStatus).toHaveTextContent("企业训练草稿已创建");
     expect(
       readJsonRequestBody(fetchMock, "/api/v1/organization-trainings", "POST"),
     ).toMatchObject({
@@ -339,9 +366,9 @@ describe("AdminOrganizationTrainingPage", () => {
     });
 
     const sourceForm = within(
-      screen.getByRole("form", { name: "组织培训来源表单" }),
+      screen.getByRole("form", { name: "企业训练来源表单" }),
     );
-    fireEvent.change(sourceForm.getByLabelText("来源业务标识"), {
+    fireEvent.change(sourceForm.getByLabelText("试卷快照"), {
       target: { value: "paper-source-ui-001" },
     });
     fireEvent.change(sourceForm.getByLabelText("来源标题"), {
@@ -353,10 +380,10 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.change(sourceForm.getByLabelText("来源总分"), {
       target: { value: "10" },
     });
-    fireEvent.click(sourceForm.getByRole("button", { name: "绑定来源" }));
+    fireEvent.click(sourceForm.getByRole("button", { name: "绑定试卷快照" }));
 
     expect(
-      await screen.findByText("来源 paper-source-ui-001 已绑定"),
+      await screen.findByText("来源已绑定到企业训练草稿"),
     ).toBeInTheDocument();
     const sourceBody = readJsonRequestBody(
       fetchMock,
@@ -382,20 +409,18 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(JSON.stringify(sourceBody)).not.toContain("analysis");
 
     const copyForm = within(
-      screen.getByRole("form", { name: "组织培训复制表单" }),
+      screen.getByRole("form", { name: "企业训练复制表单" }),
     );
-    fireEvent.change(copyForm.getByLabelText("版本业务标识"), {
+    fireEvent.change(copyForm.getByLabelText("已发布版本"), {
       target: { value: "organization-training-version-ui-001" },
     });
-    fireEvent.change(copyForm.getByLabelText("新草稿标题"), {
+    fireEvent.change(copyForm.getByLabelText("新草稿名称"), {
       target: { value: "复训草稿" },
     });
     fireEvent.click(copyForm.getByRole("button", { name: "复制为草稿" }));
 
     expect(
-      await screen.findByText(
-        "草稿 organization-training-draft-copy-ui-001 已创建",
-      ),
+      await screen.findByText("已复制为新的企业训练草稿"),
     ).toBeInTheDocument();
     expect(
       readJsonRequestBody(
@@ -410,6 +435,9 @@ describe("AdminOrganizationTrainingPage", () => {
     });
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("9301");
+    expect(document.body.textContent).not.toContain(
+      "organization-training-draft-ui-001",
+    );
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
@@ -445,25 +473,27 @@ describe("AdminOrganizationTrainingPage", () => {
     render(createElement(AdminOrganizationTrainingPage));
 
     expect(
-      await screen.findByRole("heading", { name: "组织培训" }),
+      await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
 
     const draftForm = within(
-      screen.getByRole("form", { name: "组织培训草稿表单" }),
+      screen.getByRole("form", { name: "企业训练配置表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织业务标识"), {
+    fireEvent.change(draftForm.getByLabelText("组织节点"), {
       target: { value: "organization-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("企业授权业务标识"), {
+    fireEvent.change(draftForm.getByLabelText("企业授权"), {
       target: { value: "org-auth-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("培训标题"), {
+    fireEvent.change(draftForm.getByLabelText("训练标题"), {
       target: { value: "门店服务训练" },
     });
-    fireEvent.click(draftForm.getByRole("button", { name: "创建草稿" }));
+    fireEvent.click(
+      draftForm.getByRole("button", { name: "创建企业训练草稿" }),
+    );
 
     const mutationAlert = await screen.findByRole("alert");
-    expect(mutationAlert).toHaveTextContent("组织培训草稿创建失败");
+    expect(mutationAlert).toHaveTextContent("企业训练草稿创建失败");
   });
 
   it("shows submitting copy while creating an organization training draft", async () => {
@@ -501,22 +531,24 @@ describe("AdminOrganizationTrainingPage", () => {
     render(createElement(AdminOrganizationTrainingPage));
 
     expect(
-      await screen.findByRole("heading", { name: "组织培训" }),
+      await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
 
     const draftForm = within(
-      screen.getByRole("form", { name: "组织培训草稿表单" }),
+      screen.getByRole("form", { name: "企业训练配置表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织业务标识"), {
+    fireEvent.change(draftForm.getByLabelText("组织节点"), {
       target: { value: "organization-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("企业授权业务标识"), {
+    fireEvent.change(draftForm.getByLabelText("企业授权"), {
       target: { value: "org-auth-admin-scope-001" },
     });
-    fireEvent.change(draftForm.getByLabelText("培训标题"), {
+    fireEvent.change(draftForm.getByLabelText("训练标题"), {
       target: { value: "门店服务训练" },
     });
-    fireEvent.click(draftForm.getByRole("button", { name: "创建草稿" }));
+    fireEvent.click(
+      draftForm.getByRole("button", { name: "创建企业训练草稿" }),
+    );
 
     await waitFor(() =>
       expect(draftForm.getByRole("button", { name: "创建中" })).toBeDisabled(),
@@ -530,7 +562,7 @@ describe("AdminOrganizationTrainingPage", () => {
       }),
     );
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "草稿 organization-training-draft-ui-001 已创建",
+      "企业训练草稿已创建",
     );
   });
 });

@@ -1,8 +1,158 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ops-authorization-source-landing-2026-07-03
-updatedAt: "2026-07-03T02:20:00-07:00"
+currentPhase: organization-training-source-landing-2026-07-03
+updatedAt: "2026-07-03T03:19:17-07:00"
+organizationTrainingSourceLanding20260703:
+  taskId: organization-training-source-landing-2026-07-03
+  phase: organization-training-source-landing-2026-07-03
+  status: closed
+  result: organization_training_source_landed_with_enterprise_training_ui_contract_content_route_redirect_mock_exam_denial_and_employee_progress_confirmation
+  priority: p1
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - ops-authorization-source-landing-2026-07-03
+  sourceStory: current_user_approved_serial_source_landing_contract_packages_goal_2026_07_03
+  targetClosureItem: Land the accepted organization training UI/UX source contract within existing schema/runtime boundaries.
+  behaviorBoundary: organization_training_source_ui_validator_service_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_route_names_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_employee_answers_no_full_question_paper_material_resource_chunk_content_no_raw_dom
+  branch: codex/organization-training-source-landing-2026-07-03
+  claimedAt: "2026-07-03T02:55:28-07:00"
+  plannedAt: "2026-07-03T02:55:28-07:00"
+  implementedAt: "2026-07-03T03:19:17-07:00"
+  validatedAt: "2026-07-03T03:19:17-07:00"
+  reviewedAt: "2026-07-03T03:19:17-07:00"
+  closedAt: "2026-07-03T03:19:17-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-organization-training-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-training-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-training-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-organization-training-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-organization-training-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-organization-training-source-landing.md
+    - src/app/(admin)/content/organization-training/page.tsx
+    - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+    - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+    - src/server/services/organization-training-service.ts
+    - src/server/validators/organization-training.ts
+    - src/server/services/organization-training-service.test.ts
+    - src/server/validators/organization-training.test.ts
+    - tests/unit/organization-training-admin-entry-surface.test.ts
+    - tests/unit/organization-training-employee-entry-surface.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/evidence/2026-07-02-organization-training-ui-ux-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-organization-training-ui-ux-contract.md
+    - src/app/api/v1/organization-trainings/**
+    - src/server/contracts/organization-training-contract.ts
+    - src/server/models/organization-training.ts
+    - src/server/repositories/organization-training-repository.ts
+    - src/server/services/organization-training-route.ts
+    - src/db/schema/organization-training.ts
+    - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - package.json
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Organization-admin page uses confirmed `企业训练` wording and starts from a list plus visible four-step creation guide rather than three technical columns.
+    - First-release source choices are platform paper snapshot, organization AI result, and manual organization-private questions; `mock_exam` is not shown.
+    - mock_exam source context is denied by validator and service while historical model enum compatibility is left untouched.
+    - Content workspace route no longer grants a content-admin organization-training management surface.
+    - Employee page uses `企业训练` wording, readable assignment metadata, answer-like progress controls, save draft, submit confirmation, and own-result review copy without raw answers or formal mock_exam wording.
+    - Focused tests cover admin UI, employee UI, source-context denial, and service validator boundaries without schema, Provider, dependency, browser, or direct DB work.
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/validators/organization-training.test.ts src/server/services/organization-training-service.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-training-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  validationSummary:
+    status: passed
+    focusedUnitTestsPassed: true
+    focusedUnitTestFiles: 4
+    focusedUnitTestCount: 51
+    typecheckPassed: true
+    lintPassed: true
+    formatCheckPassed: true
+    gitDiffCheckPassed: true
+    moduleRunV2PreCommitHardeningPassed: true
+    moduleRunV2ModuleCloseoutReadinessPassed: true
+    moduleRunV2PrePushReadinessPassed: true
+    repositoryCheckpointDriftCorrected: true
+    contentOrganizationTrainingRouteRedirected: true
+    adminEnterpriseTrainingFourStepGuideLanded: true
+    adminFirstReleaseSourceChoicesLanded: true
+    mockExamSourceDeniedByValidatorAndService: true
+    employeeEnterpriseTrainingProgressAndConfirmationLanded: true
+    dependencyChanged: false
+    schemaChanged: false
+    providerCallExecuted: false
+    databaseAccessExecuted: false
+    browserRuntimeExecuted: false
+    releaseReadinessClaimed: false
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
 opsAuthorizationSourceLanding20260703:
   taskId: ops-authorization-source-landing-2026-07-03
   phase: ops-authorization-source-landing-2026-07-03
@@ -19589,8 +19739,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1784d8930edd651f95c44d45a262500a1853b4ce
-  lastKnownOriginMasterSha: 1784d8930edd651f95c44d45a262500a1853b4ce
+  lastKnownMasterSha: fae15f7055054352f278f656ad08de84fe3ba49a
+  lastKnownOriginMasterSha: fae15f7055054352f278f656ad08de84fe3ba49a
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -19730,6 +19880,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: organization-training-source-landing-2026-07-03
+  status: closed
+  result: organization_training_source_landed_with_enterprise_training_ui_contract_content_route_redirect_mock_exam_denial_and_employee_progress_confirmation
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  branch: codex/organization-training-source-landing-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-organization-training-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-training-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-training-source-landing.md
+previousCurrentTaskBeforeOrganizationTrainingSourceLanding20260703:
   id: ops-authorization-source-landing-2026-07-03
   status: closed
   result: operations_authorization_source_landed_with_explicit_redeem_code_type_plaintext_distribution_and_target_org_employee_import

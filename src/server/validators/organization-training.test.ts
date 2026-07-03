@@ -350,7 +350,7 @@ describe("organization training contract and validator scaffold", () => {
     ).toBe(false);
   });
 
-  it("normalizes source-context route input as metadata-only source references", () => {
+  it("normalizes first-release source-context route input as metadata-only paper references", () => {
     expect(
       normalizeOrganizationTrainingSourceContextInput({
         draftPublicId: " training_draft_public_123 ",
@@ -373,17 +373,6 @@ describe("organization training contract and validator scaffold", () => {
             subject: "theory",
             questionCount: 20,
             totalScore: 100,
-            sourceStatus: "published",
-          },
-          {
-            sourceType: "mock_exam",
-            sourcePublicId: " mock_exam_public_456 ",
-            title: " Mock exam reference ",
-            profession: "monopoly",
-            level: 3,
-            subject: "theory",
-            questionCount: 10,
-            totalScore: 50,
             sourceStatus: "published",
           },
         ],
@@ -413,6 +402,23 @@ describe("organization training contract and validator scaffold", () => {
             totalScore: 100,
             sourceStatus: "published",
           },
+        ],
+      },
+    });
+
+    expect(
+      normalizeOrganizationTrainingSourceContextInput({
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
           {
             sourceType: "mock_exam",
             sourcePublicId: "mock_exam_public_456",
@@ -425,7 +431,10 @@ describe("organization training contract and validator scaffold", () => {
             sourceStatus: "published",
           },
         ],
-      },
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid organization training source context input.",
     });
 
     const invalidSourceContextResult =

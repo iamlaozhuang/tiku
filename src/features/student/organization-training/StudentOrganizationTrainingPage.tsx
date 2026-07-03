@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, ClipboardCheck, LoaderCircle } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ClipboardCheck,
+  ClipboardList,
+  LoaderCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -51,6 +57,17 @@ const defaultAnswerValues: AnswerFormValues = {
   totalScore: "0",
 };
 
+const professionLabels: Record<string, string> = {
+  logistics: "物流配送",
+  marketing: "卷烟营销",
+  monopoly: "烟草专卖",
+};
+
+const subjectLabels: Record<string, string> = {
+  skill: "技能",
+  theory: "理论",
+};
+
 function readStudentSessionRequestToken(): StudentSessionRequestToken {
   const storedSessionValue = getStoredStudentSessionToken();
 
@@ -65,11 +82,14 @@ function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
   );
 }
 
-function createInitialAnswerState(): AnswerUiState {
+function createInitialAnswerState(totalScore = "0"): AnswerUiState {
   return {
     answer: null,
     message: null,
-    values: defaultAnswerValues,
+    values: {
+      ...defaultAnswerValues,
+      totalScore,
+    },
   };
 }
 
@@ -136,7 +156,7 @@ function StudentOrganizationTrainingLoading() {
     >
       <div className="text-text-secondary flex items-center gap-2 text-sm">
         <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-        正在加载组织培训
+        正在加载企业训练
       </div>
       <div className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1">
         <div className="bg-border h-5 w-2/3 animate-pulse rounded" />
@@ -195,7 +215,7 @@ export function StudentOrganizationTrainingPage() {
           Object.fromEntries(
             response.data.versions.map((version) => [
               version.publicId,
-              createInitialAnswerState(),
+              createInitialAnswerState(String(version.totalScore)),
             ]),
           ),
         );
@@ -222,7 +242,7 @@ export function StudentOrganizationTrainingPage() {
     return (
       <StudentOrganizationTrainingStatusMessage
         title="请先登录"
-        description="组织培训作答需要有效的员工会话。"
+        description="企业训练作答需要有效的员工会话。"
         action={
           <Link
             className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
@@ -238,8 +258,8 @@ export function StudentOrganizationTrainingPage() {
   if (loadState === "error") {
     return (
       <StudentOrganizationTrainingStatusMessage
-        title="组织培训加载失败"
-        description="请刷新页面，或重新登录后再查看组织培训。"
+        title="企业训练加载失败"
+        description="请刷新页面，或重新登录后再查看企业训练。"
       />
     );
   }
@@ -257,8 +277,8 @@ export function StudentOrganizationTrainingPage() {
     return (
       <StudentOrganizationTrainingStatusMessage
         role="status"
-        title="暂无组织培训"
-        description="当前组织范围内还没有可作答的组织培训。"
+        title="暂无企业训练"
+        description="当前组织范围内还没有可作答的企业训练。"
       />
     );
   }
@@ -393,7 +413,7 @@ export function StudentOrganizationTrainingPage() {
     if (response.code !== 0 || response.data === null) {
       updateAnswerState(trainingVersionPublicId, (state) => ({
         ...state,
-        message: "readonly-summary 加载失败",
+        message: "结果加载失败",
       }));
       return;
     }
@@ -403,7 +423,7 @@ export function StudentOrganizationTrainingPage() {
     updateAnswerState(trainingVersionPublicId, (state) => ({
       ...state,
       answer: readonlyAnswer,
-      message: "readonly-summary 已加载",
+      message: "结果已加载",
     }));
   }
 
@@ -413,10 +433,10 @@ export function StudentOrganizationTrainingPage() {
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">企业训练</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            组织培训作答
+            企业训练
           </h1>
           <p className="text-text-secondary text-sm leading-6">
-            查看组织分配的培训，保存作答进度，并提交只读摘要。
+            查看企业分配的训练，保存作答进度，提交后查看自己的结果。
           </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
@@ -429,7 +449,7 @@ export function StudentOrganizationTrainingPage() {
           <TrainingVersionCard
             answerState={
               answerStateByVersionPublicId[version.publicId] ??
-              createInitialAnswerState()
+              createInitialAnswerState(String(version.totalScore))
             }
             key={version.publicId}
             version={version}
@@ -467,6 +487,21 @@ function TrainingVersionCard({
   onSubmit: () => void;
 }) {
   const scoreSummary = answerState.answer?.scoreSummary ?? null;
+  const [isSubmitConfirming, setIsSubmitConfirming] = useState(false);
+  const answeredQuestionCount = Number(
+    answerState.values.answeredQuestionCount,
+  );
+  const progressPercent =
+    Number.isFinite(answeredQuestionCount) && version.questionCount > 0
+      ? Math.min(
+          100,
+          Math.max(0, (answeredQuestionCount / version.questionCount) * 100),
+        )
+      : 0;
+
+  function handleSubmitClick() {
+    setIsSubmitConfirming(true);
+  }
 
   return (
     <article
@@ -479,18 +514,48 @@ function TrainingVersionCard({
           <h2 className="font-heading text-text-primary text-lg font-semibold">
             {version.title}
           </h2>
-          <p className="text-text-secondary text-sm">
-            {version.questionCount} 题 / {version.totalScore} 分
-          </p>
+          <div className="text-text-secondary flex flex-wrap gap-2 text-xs">
+            <span className="bg-muted rounded-md px-2 py-1">
+              {professionLabels[version.profession] ?? version.profession}
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              {version.level} 级
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              {subjectLabels[version.subject] ?? version.subject}
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              第 {version.versionNumber} 版
+            </span>
+          </div>
         </div>
-        <code className="bg-muted text-text-secondary rounded-md px-2 py-1 font-mono text-xs">
-          {version.publicId}
-        </code>
+        <span className="bg-success/10 text-success inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium">
+          <CheckCircle2 aria-hidden="true" className="size-3.5" />
+          可作答
+        </span>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div
+        aria-label="企业训练作答区"
+        className="bg-muted space-y-3 rounded-md p-3"
+        role="group"
+      >
+        <div className="text-text-primary flex items-center gap-2 text-sm font-medium">
+          <ClipboardList aria-hidden="true" className="size-4" />
+          作答进度
+        </div>
+        <p className="text-text-secondary text-sm">
+          共 {version.questionCount} 题 / {version.totalScore}{" "}
+          分，提交后结果摘要只读。
+        </p>
+        <div className="bg-surface h-2 overflow-hidden rounded-full">
+          <div
+            className="bg-primary h-full rounded-full"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
         <NumberField
-          label="已答题数"
+          label="完成题数"
           value={answerState.values.answeredQuestionCount}
           onChange={(value) =>
             onChangeValues({
@@ -499,27 +564,35 @@ function TrainingVersionCard({
             })
           }
         />
-        <NumberField
-          label="得分"
-          value={answerState.values.score}
-          onChange={(value) =>
-            onChangeValues({
-              ...answerState.values,
-              score: value,
-            })
-          }
-        />
-        <NumberField
-          label="总分"
-          value={answerState.values.totalScore}
-          onChange={(value) =>
-            onChangeValues({
-              ...answerState.values,
-              totalScore: value,
-            })
-          }
-        />
       </div>
+
+      <details className="border-border rounded-md border p-3">
+        <summary className="text-text-primary cursor-pointer text-sm font-medium">
+          结果摘要
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <NumberField
+            label="得分"
+            value={answerState.values.score}
+            onChange={(value) =>
+              onChangeValues({
+                ...answerState.values,
+                score: value,
+              })
+            }
+          />
+          <NumberField
+            label="总分"
+            value={answerState.values.totalScore}
+            onChange={(value) =>
+              onChangeValues({
+                ...answerState.values,
+                totalScore: value,
+              })
+            }
+          />
+        </div>
+      </details>
 
       <div className="grid grid-cols-3 gap-2">
         <button
@@ -532,7 +605,7 @@ function TrainingVersionCard({
         <button
           className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
           type="button"
-          onClick={onSubmit}
+          onClick={handleSubmitClick}
         >
           提交
         </button>
@@ -544,6 +617,37 @@ function TrainingVersionCard({
           查看结果
         </button>
       </div>
+
+      {isSubmitConfirming ? (
+        <div
+          aria-label="企业训练提交确认"
+          className="border-warning/30 bg-warning/10 grid gap-3 rounded-md border p-3 text-sm"
+          role="group"
+        >
+          <p className="text-text-primary">
+            确认提交企业训练？提交后将进入结果查看。
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+              type="button"
+              onClick={() => setIsSubmitConfirming(false)}
+            >
+              取消
+            </button>
+            <button
+              className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+              type="button"
+              onClick={() => {
+                setIsSubmitConfirming(false);
+                onSubmit();
+              }}
+            >
+              确认提交
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {answerState.message === null ? null : (
         <p className="text-brand-primary text-sm">{answerState.message}</p>

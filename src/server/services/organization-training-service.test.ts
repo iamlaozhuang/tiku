@@ -1146,7 +1146,7 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain("rawAnswer");
   });
 
-  it("attaches paper and mock_exam context as redacted metadata only", async () => {
+  it("attaches first-release paper context as redacted metadata only", async () => {
     const { service, getAttachedSourceContexts } = createServiceFixture();
 
     const result = await service.attachSourceContext({
@@ -1173,20 +1173,6 @@ describe("organization training service", () => {
           analysis: "LEAK_ANALYSIS",
           privateRowId: 99001,
         } as never,
-        {
-          sourceType: "mock_exam",
-          sourcePublicId: " mock_exam_public_456 ",
-          title: " Mock exam reference ",
-          profession: "monopoly",
-          level: 3,
-          subject: "theory",
-          questionCount: 10,
-          totalScore: 50,
-          sourceStatus: "published",
-          extraSourceText: "SENTINEL_SOURCE_CONTEXT_EXTRA_TEXT",
-          extraPayloadText: "SENTINEL_SOURCE_CONTEXT_EXTRA_PAYLOAD",
-          extraAnswerText: "SENTINEL_SOURCE_CONTEXT_EXTRA_ANSWER",
-        } as never,
       ],
     });
 
@@ -1205,18 +1191,6 @@ describe("organization training service", () => {
             subject: "theory",
             questionCount: 20,
             totalScore: 100,
-            sourceStatus: "published",
-            redactionStatus: "metadata_only",
-          },
-          {
-            sourceType: "mock_exam",
-            sourcePublicId: "mock_exam_public_456",
-            title: "Mock exam reference",
-            profession: "monopoly",
-            level: 3,
-            subject: "theory",
-            questionCount: 10,
-            totalScore: 50,
             sourceStatus: "published",
             redactionStatus: "metadata_only",
           },
@@ -1244,18 +1218,6 @@ describe("organization training service", () => {
             sourceStatus: "published",
             redactionStatus: "metadata_only",
           },
-          {
-            sourceType: "mock_exam",
-            sourcePublicId: "mock_exam_public_456",
-            title: "Mock exam reference",
-            profession: "monopoly",
-            level: 3,
-            subject: "theory",
-            questionCount: 10,
-            totalScore: 50,
-            sourceStatus: "published",
-            redactionStatus: "metadata_only",
-          },
         ],
         formalUsagePolicy: {
           createFormalPaper: false,
@@ -1277,19 +1239,44 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain("LEAK_FULL_PAPER_QUESTION_BODY");
     expect(serializedResult).not.toContain("LEAK_STANDARD_ANSWER");
     expect(serializedResult).not.toContain("LEAK_ANALYSIS");
-    expect(serializedResult).not.toContain(
-      "SENTINEL_SOURCE_CONTEXT_EXTRA_TEXT",
-    );
-    expect(serializedResult).not.toContain(
-      "SENTINEL_SOURCE_CONTEXT_EXTRA_PAYLOAD",
-    );
-    expect(serializedResult).not.toContain(
-      "SENTINEL_SOURCE_CONTEXT_EXTRA_ANSWER",
-    );
     expect(serializedResult).not.toContain("privateRowId");
   });
 
-  it("builds metadata-only paper and mock_exam context usage without full paper content", () => {
+  it("blocks mock_exam as a first-release organization training source context", async () => {
+    const { service, getAttachedSourceContexts } = createServiceFixture();
+
+    const result = await service.attachSourceContext({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationContext: createAdvancedOrgAuthContext(),
+      draftPublicId: "training_draft_public_123",
+      organizationPublicId: "organization_public_123",
+      sourceContexts: [
+        {
+          sourceType: "mock_exam",
+          sourcePublicId: "mock_exam_public_456",
+          title: "Mock exam reference",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 10,
+          totalScore: 50,
+          sourceStatus: "published",
+        },
+      ],
+    });
+
+    expect(result).toEqual({
+      success: false,
+      reason: "invalid_source_context_input",
+      message: "Organization training source context is blocked.",
+    });
+    expect(getAttachedSourceContexts()).toEqual([]);
+  });
+
+  it("builds metadata-only paper context usage without full paper content", () => {
     const fullPaperContent = ["FULL", "PAPER", "CONTENT"].join("-");
     const fullQuestionBody = ["FULL", "QUESTION", "BODY"].join("-");
     const standardAnswer = ["STANDARD", "ANSWER", "BODY"].join("-");
@@ -1319,18 +1306,6 @@ describe("organization training service", () => {
           analysis,
           [protectedPayloadKey]: protectedPayloadMarker,
         } as never,
-        {
-          sourceType: "mock_exam",
-          sourcePublicId: " mock_exam_public_456 ",
-          title: " Mock exam reference ",
-          profession: "monopoly",
-          level: 3,
-          subject: "theory",
-          questionCount: 10,
-          totalScore: 50,
-          sourceStatus: "published",
-          fullPaperContent,
-        } as never,
       ],
     });
     const serializedResult = JSON.stringify(result);
@@ -1354,18 +1329,6 @@ describe("organization training service", () => {
             sourceStatus: "published",
             redactionStatus: "metadata_only",
           },
-          {
-            sourceType: "mock_exam",
-            sourcePublicId: "mock_exam_public_456",
-            title: "Mock exam reference",
-            profession: "monopoly",
-            level: 3,
-            subject: "theory",
-            questionCount: 10,
-            totalScore: 50,
-            sourceStatus: "published",
-            redactionStatus: "metadata_only",
-          },
         ],
         formalUsagePolicy: {
           createFormalPaper: false,
@@ -1383,6 +1346,32 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain(standardAnswer);
     expect(serializedResult).not.toContain(analysis);
     expect(serializedResult).not.toContain(protectedPayloadMarker);
+  });
+
+  it("returns null source context usage when mock_exam is supplied as a first-release source", () => {
+    const result = buildOrganizationTrainingSourceContextUsageReadModel({
+      draftPublicId: "training_draft_public_123",
+      organizationPublicId: "organization_public_123",
+      sourceContexts: [
+        {
+          sourceType: "mock_exam",
+          sourcePublicId: "mock_exam_public_456",
+          title: "Mock exam reference",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 10,
+          totalScore: 50,
+          sourceStatus: "published",
+        },
+      ],
+    });
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: null,
+    });
   });
 
   it("blocks source context attachment outside org_auth scope or content scope", async () => {
@@ -1433,9 +1422,9 @@ describe("organization training service", () => {
         organizationPublicId: "organization_public_123",
         sourceContexts: [
           {
-            sourceType: "mock_exam",
-            sourcePublicId: "mock_exam_public_456",
-            title: "Mock exam reference",
+            sourceType: "paper",
+            sourcePublicId: "paper_public_456",
+            title: "Paper reference",
             profession: "marketing",
             level: 3,
             subject: "theory",

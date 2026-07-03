@@ -144,9 +144,8 @@ describe("StudentOrganizationTrainingPage", () => {
     render(createElement(StudentOrganizationTrainingPage));
 
     expect(
-      await screen.findByRole("heading", { name: "组织培训作答" }),
+      await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("企业训练")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("Organization Training");
     expect(
       screen.getByTestId(
@@ -183,7 +182,7 @@ describe("StudentOrganizationTrainingPage", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("loads visible trainings and runs draft-save, submit, and readonly-summary through session runtime", async () => {
+  it("loads visible trainings and runs draft-save, submit, and result summary through session runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-student-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -274,9 +273,9 @@ describe("StudentOrganizationTrainingPage", () => {
 
     render(createElement(StudentOrganizationTrainingPage));
 
-    expect(screen.getByText("正在加载组织培训")).toBeInTheDocument();
+    expect(screen.getByText("正在加载企业训练")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "组织培训作答" }),
+      await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
     const row = screen.getByTestId(
       "organization-training-row-organization-training-version-ui-001",
@@ -287,8 +286,17 @@ describe("StudentOrganizationTrainingPage", () => {
     );
     expect(row).not.toHaveAttribute("data-id");
     expect(within(row).getByText("门店服务训练")).toBeInTheDocument();
+    expect(within(row).getByText("卷烟营销")).toBeInTheDocument();
+    expect(within(row).getByText("3 级")).toBeInTheDocument();
+    expect(within(row).getByText("理论")).toBeInTheDocument();
+    expect(
+      within(row).getByRole("group", { name: "企业训练作答区" }),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(
+      "organization-training-version-ui-001",
+    );
 
-    fireEvent.change(within(row).getByLabelText("已答题数"), {
+    fireEvent.change(within(row).getByLabelText("完成题数"), {
       target: { value: "3" },
     });
     fireEvent.click(within(row).getByRole("button", { name: "保存草稿" }));
@@ -312,6 +320,10 @@ describe("StudentOrganizationTrainingPage", () => {
       target: { value: "5" },
     });
     fireEvent.click(within(row).getByRole("button", { name: "提交" }));
+    expect(
+      within(row).getByRole("group", { name: "企业训练提交确认" }),
+    ).toBeInTheDocument();
+    fireEvent.click(within(row).getByRole("button", { name: "确认提交" }));
 
     expect(await screen.findByText("提交成功")).toBeInTheDocument();
     expect(
@@ -332,9 +344,7 @@ describe("StudentOrganizationTrainingPage", () => {
     fireEvent.click(within(row).getByRole("button", { name: "查看结果" }));
 
     expect(await screen.findByText("结果 4 / 5")).toBeInTheDocument();
-    expect(
-      await screen.findByText("readonly-summary 已加载"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("结果已加载")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-student-token");
     expect(document.body.textContent).not.toContain("9901");
     expect(document.body.textContent).not.toContain("standardAnswer");

@@ -329,6 +329,14 @@ function isOrganizationTrainingSourceContextType(
   );
 }
 
+function isFirstReleaseOrganizationTrainingSourceContextType(
+  value: unknown,
+): value is OrganizationTrainingSourceContextType {
+  return (
+    isOrganizationTrainingSourceContextType(value) && value !== "mock_exam"
+  );
+}
+
 function isOrganizationTrainingAuditLogTargetResourceType(
   value: unknown,
 ): value is OrganizationTrainingAuditLogTargetResourceType {
@@ -765,7 +773,7 @@ function normalizeSourceContextItem(
   const sourceStatus = normalizeRequiredText(input.sourceStatus);
 
   if (
-    !isOrganizationTrainingSourceContextType(input.sourceType) ||
+    !isFirstReleaseOrganizationTrainingSourceContextType(input.sourceType) ||
     sourcePublicId === null ||
     title === null ||
     !isProfession(input.profession) ||

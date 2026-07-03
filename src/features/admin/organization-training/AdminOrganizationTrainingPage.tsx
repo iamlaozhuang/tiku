@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, FilePlus2, Link2, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  ClipboardList,
+  Copy,
+  FilePlus2,
+  FileText,
+  Link2,
+  ShieldCheck,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,6 +98,25 @@ const defaultCopyFormValues: CopyFormValues = {
   newDraftTitle: "",
   sourceVersionPublicId: "",
 };
+
+const sourceChoices = [
+  {
+    title: "平台试卷快照",
+    description: "选择已发布试卷，发布前预览题目、答案和解析。",
+  },
+  {
+    title: "企业 AI 结果",
+    description: "把同授权范围内的 AI 出题或组卷结果复制为可编辑草稿。",
+  },
+  {
+    title: "手动题组",
+    description: "由企业管理员维护企业私有题组后再发布给当前或下级组织。",
+  },
+] as const;
+
+type SourceChoiceTitle = (typeof sourceChoices)[number]["title"];
+
+const wizardSteps = ["选择来源", "配置训练", "设置范围", "预览发布"] as const;
 
 function resolveOrganizationTrainingLoadState(authContext: AuthContextDto): {
   capabilitySummary: AdminWorkspaceCapabilitySummary;
@@ -198,6 +225,8 @@ export function AdminOrganizationTrainingPage() {
     defaultSourceContextFormValues,
   );
   const [copyFormValues, setCopyFormValues] = useState(defaultCopyFormValues);
+  const [selectedSourceChoice, setSelectedSourceChoice] =
+    useState<SourceChoiceTitle>("平台试卷快照");
   const [capabilitySummary, setCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
   const [lastDraft, setLastDraft] =
@@ -253,7 +282,7 @@ export function AdminOrganizationTrainingPage() {
   }, []);
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="正在加载组织培训" />;
+    return <AdminLoadingState label="正在加载企业训练" />;
   }
 
   if (loadState === "unauthorized") {
@@ -274,8 +303,8 @@ export function AdminOrganizationTrainingPage() {
   if (loadState === "error") {
     return (
       <AdminErrorState
-        title="组织培训加载失败"
-        description="请刷新页面，或重新登录后再进入组织培训。"
+        title="企业训练加载失败"
+        description="请刷新页面，或重新登录后再进入企业训练。"
       />
     );
   }
@@ -289,7 +318,7 @@ export function AdminOrganizationTrainingPage() {
 
     try {
       if (capabilitySummary === null) {
-        setErrorMessage("组织培训权限上下文缺失");
+        setErrorMessage("企业训练权限上下文缺失");
         return;
       }
 
@@ -302,14 +331,14 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("组织培训草稿创建失败");
+        setErrorMessage("企业训练草稿创建失败");
         return;
       }
 
       setLastDraft(response.data.draft);
-      setMessage(`草稿 ${response.data.draft.publicId} 已创建`);
+      setMessage("企业训练草稿已创建");
     } catch {
-      setErrorMessage("组织培训草稿创建失败");
+      setErrorMessage("企业训练草稿创建失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -319,7 +348,7 @@ export function AdminOrganizationTrainingPage() {
     const sessionToken = getStoredSessionToken();
 
     if (lastDraft === null) {
-      setErrorMessage("请先创建组织培训草稿");
+      setErrorMessage("请先创建企业训练草稿");
       return;
     }
 
@@ -329,7 +358,7 @@ export function AdminOrganizationTrainingPage() {
 
     try {
       if (capabilitySummary === null) {
-        setErrorMessage("组织培训权限上下文缺失");
+        setErrorMessage("企业训练权限上下文缺失");
         return;
       }
 
@@ -347,16 +376,13 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("组织培训来源绑定失败");
+        setErrorMessage("企业训练来源绑定失败");
         return;
       }
 
-      const sourcePublicId =
-        response.data.context.sourceContexts[0]?.sourcePublicId ??
-        values.sourcePublicId;
-      setMessage(`来源 ${sourcePublicId} 已绑定`);
+      setMessage("来源已绑定到企业训练草稿");
     } catch {
-      setErrorMessage("组织培训来源绑定失败");
+      setErrorMessage("企业训练来源绑定失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -381,14 +407,14 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("组织培训复制失败");
+        setErrorMessage("企业训练复制失败");
         return;
       }
 
       setLastDraft(response.data.draft);
-      setMessage(`草稿 ${response.data.draft.publicId} 已创建`);
+      setMessage("已复制为新的企业训练草稿");
     } catch {
-      setErrorMessage("组织培训复制失败");
+      setErrorMessage("企业训练复制失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -400,13 +426,11 @@ export function AdminOrganizationTrainingPage() {
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">企业后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            组织培训
+            企业训练
           </h1>
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
-            创建组织培训草稿，绑定来源元数据，并从已发布版本复制为新草稿。
-          </p>
-          <p className="text-text-secondary text-sm">
-            本页仅创建和复制训练草稿
+            从试卷快照、企业 AI
+            结果或手动题组创建训练，发布给当前组织或下级组织。
           </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
@@ -431,43 +455,242 @@ export function AdminOrganizationTrainingPage() {
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <DraftForm
-          isSubmitting={isSubmitting}
-          values={draftFormValues}
-          onChange={setDraftFormValues}
-          onSubmit={handleCreateDraft}
-        />
-        <SourceContextForm
-          disabled={lastDraft === null}
-          isSubmitting={isSubmitting}
-          values={sourceContextFormValues}
-          onChange={setSourceContextFormValues}
-          onSubmit={handleAttachSourceContext}
-        />
-        <CopyToDraftForm
-          isSubmitting={isSubmitting}
-          values={copyFormValues}
-          onChange={setCopyFormValues}
-          onSubmit={handleCopyToNewDraft}
-        />
-      </div>
+      <TrainingListPanel lastDraft={lastDraft} />
 
-      {lastDraft === null ? null : (
-        <article
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-public-id={lastDraft.publicId}
-          data-testid={`organization-training-draft-${lastDraft.publicId}`}
-        >
-          <h2 className="text-text-primary text-base font-semibold">
-            {lastDraft.title}
-          </h2>
-          <p className="text-text-secondary mt-2 text-sm">
-            {lastDraft.publicId}
-          </p>
-        </article>
-      )}
+      <section
+        aria-label="新建企业训练四步向导"
+        className="space-y-4"
+        id="organization-training-create"
+      >
+        <WizardHeader />
+        <div className="grid gap-4 xl:grid-cols-4">
+          <WizardStepCard step={1} title="选择来源">
+            <SourceChoiceList
+              selectedSourceChoice={selectedSourceChoice}
+              onSelect={setSelectedSourceChoice}
+            />
+          </WizardStepCard>
+          <WizardStepCard step={2} title="配置训练">
+            <DraftForm
+              isSubmitting={isSubmitting}
+              values={draftFormValues}
+              onChange={setDraftFormValues}
+              onSubmit={handleCreateDraft}
+            />
+          </WizardStepCard>
+          <WizardStepCard step={3} title="设置范围">
+            <PublishScopePreview />
+            {selectedSourceChoice === "平台试卷快照" ? (
+              <SourceContextForm
+                disabled={lastDraft === null}
+                isSubmitting={isSubmitting}
+                values={sourceContextFormValues}
+                onChange={setSourceContextFormValues}
+                onSubmit={handleAttachSourceContext}
+              />
+            ) : (
+              <DeferredSourceNotice sourceChoice={selectedSourceChoice} />
+            )}
+          </WizardStepCard>
+          <WizardStepCard step={4} title="预览发布">
+            <PublishReadinessPanel hasDraft={lastDraft !== null} />
+            <CopyToDraftForm
+              isSubmitting={isSubmitting}
+              values={copyFormValues}
+              onChange={setCopyFormValues}
+              onSubmit={handleCopyToNewDraft}
+            />
+          </WizardStepCard>
+        </div>
+      </section>
     </section>
+  );
+}
+
+function TrainingListPanel({
+  lastDraft,
+}: {
+  lastDraft: OrganizationTrainingDraftDto | null;
+}) {
+  return (
+    <section
+      aria-label="企业训练列表"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-text-primary text-base font-semibold">
+            企业训练列表
+          </h2>
+          <p className="text-text-secondary text-sm">
+            草稿、已发布、已下架和已作废训练在这里统一管理。
+          </p>
+        </div>
+        <a
+          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium"
+          href="#organization-training-create"
+        >
+          新建企业训练
+        </a>
+      </div>
+      <div className="border-border mt-4 rounded-md border">
+        {lastDraft === null ? (
+          <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
+            <p className="text-text-secondary text-sm">暂无可展示的企业训练</p>
+          </div>
+        ) : (
+          <article
+            className="grid gap-3 p-4 md:grid-cols-[1fr_auto]"
+            data-public-id={lastDraft.publicId}
+            data-testid={`organization-training-draft-${lastDraft.publicId}`}
+          >
+            <div className="space-y-1">
+              <h3 className="text-text-primary text-sm font-semibold">
+                {lastDraft.title}
+              </h3>
+              <p className="text-text-secondary text-sm">
+                {professionLabels[lastDraft.profession]} / {lastDraft.level} 级
+                / {subjectLabels[lastDraft.subject]}
+              </p>
+            </div>
+            <span className="bg-warning/10 text-warning inline-flex h-7 items-center rounded-md px-2 text-xs font-medium">
+              草稿
+            </span>
+          </article>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function WizardHeader() {
+  return (
+    <div className="space-y-3">
+      <h2 className="text-text-primary text-lg font-semibold">新建企业训练</h2>
+      <ol className="grid gap-2 md:grid-cols-4">
+        {wizardSteps.map((step, index) => (
+          <li
+            className="bg-muted text-text-secondary flex h-9 items-center gap-2 rounded-md px-3 text-sm"
+            key={step}
+          >
+            <span className="bg-surface text-text-primary flex size-5 items-center justify-center rounded-full text-xs font-semibold">
+              {index + 1}
+            </span>
+            {step}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function WizardStepCard({
+  children,
+  step,
+  title,
+}: {
+  children: React.ReactNode;
+  step: number;
+  title: string;
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="text-text-primary flex items-center gap-2 text-sm font-semibold">
+        <span className="bg-secondary text-secondary-foreground flex size-6 items-center justify-center rounded-full text-xs">
+          {step}
+        </span>
+        {title}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SourceChoiceList({
+  selectedSourceChoice,
+  onSelect,
+}: {
+  selectedSourceChoice: SourceChoiceTitle;
+  onSelect: (value: SourceChoiceTitle) => void;
+}) {
+  return (
+    <div className="space-y-2" role="radiogroup" aria-label="企业训练来源">
+      {sourceChoices.map((choice) => {
+        const isSelected = choice.title === selectedSourceChoice;
+
+        return (
+          <button
+            aria-checked={isSelected}
+            className="border-border bg-surface hover:bg-muted grid w-full gap-1 rounded-md border p-3 text-left text-sm"
+            key={choice.title}
+            role="radio"
+            type="button"
+            onClick={() => onSelect(choice.title)}
+          >
+            <span className="text-text-primary flex items-center gap-2 font-medium">
+              {isSelected ? (
+                <CheckCircle2 aria-hidden="true" className="size-4" />
+              ) : (
+                <FileText aria-hidden="true" className="size-4" />
+              )}
+              {choice.title}
+            </span>
+            <span className="text-text-secondary leading-5">
+              {choice.description}
+            </span>
+          </button>
+        );
+      })}
+      <p className="text-text-secondary text-xs leading-5">
+        模拟考试不作为企业训练来源入口。
+      </p>
+    </div>
+  );
+}
+
+function PublishScopePreview() {
+  return (
+    <div className="bg-muted text-text-secondary space-y-2 rounded-md p-3 text-sm">
+      <div className="text-text-primary flex items-center gap-2 font-medium">
+        <ClipboardList aria-hidden="true" className="size-4" />
+        发布范围
+      </div>
+      <p>默认发布给当前组织，可选择当前组织和下级组织。</p>
+      <p>作答截止时间可留空；下架后保留员工已提交摘要。</p>
+    </div>
+  );
+}
+
+function PublishReadinessPanel({ hasDraft }: { hasDraft: boolean }) {
+  return (
+    <div className="bg-muted text-text-secondary space-y-2 rounded-md p-3 text-sm">
+      <div className="text-text-primary flex items-center gap-2 font-medium">
+        <ShieldCheck aria-hidden="true" className="size-4" />
+        发布检查
+      </div>
+      <p>
+        {hasDraft
+          ? "草稿已创建，发布前需完成题目快照、答案解析和佐证状态检查。"
+          : "创建草稿后再预览题目、答案解析、范围和佐证状态。"}
+      </p>
+    </div>
+  );
+}
+
+function DeferredSourceNotice({
+  sourceChoice,
+}: {
+  sourceChoice: SourceChoiceTitle;
+}) {
+  const description =
+    sourceChoice === "企业 AI 结果"
+      ? "企业 AI 结果在 AI 出题或组卷完成后复制到企业训练草稿，不额外消耗 AI 额度。"
+      : "手动题组先在草稿中维护企业私有题目，再按四步流程预览发布。";
+
+  return (
+    <div className="bg-muted text-text-secondary rounded-md p-3 text-sm leading-6">
+      {description}
+    </div>
   );
 }
 
@@ -484,7 +707,7 @@ function DraftForm({
 }) {
   return (
     <form
-      aria-label="组织培训草稿表单"
+      aria-label="企业训练配置表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -493,35 +716,35 @@ function DraftForm({
     >
       <PanelHeader
         icon={<FilePlus2 aria-hidden="true" className="size-4" />}
-        title="创建草稿"
+        title="训练配置"
       />
       <TextField
-        label="组织业务标识"
+        label="组织节点"
         value={values.organizationPublicId}
         onChange={(value) =>
           onChange({ ...values, organizationPublicId: value })
         }
       />
       <TextField
-        label="企业授权业务标识"
+        label="企业授权"
         value={values.authorizationPublicId}
         onChange={(value) =>
           onChange({ ...values, authorizationPublicId: value })
         }
       />
       <TextField
-        label="培训标题"
+        label="训练标题"
         value={values.title}
         onChange={(value) => onChange({ ...values, title: value })}
       />
       <TextField
-        label="培训说明"
+        label="训练说明"
         value={values.description}
         onChange={(value) => onChange({ ...values, description: value })}
       />
       <ScopeFields values={values} onChange={onChange} />
       <Button disabled={isSubmitting} type="submit">
-        {isSubmitting ? "创建中" : "创建草稿"}
+        {isSubmitting ? "创建中" : "创建企业训练草稿"}
       </Button>
     </form>
   );
@@ -542,7 +765,7 @@ function SourceContextForm({
 }) {
   return (
     <form
-      aria-label="组织培训来源表单"
+      aria-label="企业训练来源表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -551,15 +774,15 @@ function SourceContextForm({
     >
       <PanelHeader
         icon={<Link2 aria-hidden="true" className="size-4" />}
-        title="绑定来源"
+        title="试卷快照"
       />
       {disabled ? (
         <p className="text-text-secondary text-sm leading-6">
-          创建草稿后才能绑定来源；本页仅保存来源元数据，不复制完整试卷内容。
+          创建草稿后再选择平台试卷快照；发布前需要预览题目、答案和解析。
         </p>
       ) : null}
       <TextField
-        label="来源业务标识"
+        label="试卷快照"
         value={values.sourcePublicId}
         onChange={(value) => onChange({ ...values, sourcePublicId: value })}
       />
@@ -579,7 +802,7 @@ function SourceContextForm({
         onChange={(value) => onChange({ ...values, totalScore: value })}
       />
       <Button disabled={disabled || isSubmitting} type="submit">
-        {isSubmitting ? "绑定中" : "绑定来源"}
+        {isSubmitting ? "绑定中" : "绑定试卷快照"}
       </Button>
     </form>
   );
@@ -598,7 +821,7 @@ function CopyToDraftForm({
 }) {
   return (
     <form
-      aria-label="组织培训复制表单"
+      aria-label="企业训练复制表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -607,17 +830,17 @@ function CopyToDraftForm({
     >
       <PanelHeader
         icon={<Copy aria-hidden="true" className="size-4" />}
-        title="复制版本"
+        title="复制为草稿"
       />
       <TextField
-        label="版本业务标识"
+        label="已发布版本"
         value={values.sourceVersionPublicId}
         onChange={(value) =>
           onChange({ ...values, sourceVersionPublicId: value })
         }
       />
       <TextField
-        label="新草稿标题"
+        label="新草稿名称"
         value={values.newDraftTitle}
         onChange={(value) => onChange({ ...values, newDraftTitle: value })}
       />

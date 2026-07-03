@@ -771,6 +771,14 @@ function isOrganizationTrainingSourceContextType(
   );
 }
 
+function isFirstReleaseOrganizationTrainingSourceContextType(
+  value: unknown,
+): value is OrganizationTrainingSourceContextType {
+  return (
+    isOrganizationTrainingSourceContextType(value) && value !== "mock_exam"
+  );
+}
+
 function isAdvancedOrgAuthContext(
   authorizationContext: EffectiveAuthorizationContextDto,
 ): boolean {
@@ -1388,7 +1396,9 @@ function normalizeSourceContext(
       : null;
 
   if (
-    !isOrganizationTrainingSourceContextType(sourceContext.sourceType) ||
+    !isFirstReleaseOrganizationTrainingSourceContextType(
+      sourceContext.sourceType,
+    ) ||
     sourcePublicId === null ||
     title === null ||
     !isProfession(sourceContext.profession) ||
