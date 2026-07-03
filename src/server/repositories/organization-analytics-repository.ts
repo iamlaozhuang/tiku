@@ -12,6 +12,7 @@ import type { OrganizationAnalyticsDateRangeDto } from "../contracts/organizatio
 import type {
   OrganizationAnalyticsEmployeeTrainingSummaryInput,
   OrganizationAnalyticsExportReadinessRow,
+  OrganizationAnalyticsWeakPointSummaryInput,
   OrganizationTrainingAggregateMetricsInput,
   OrganizationTrainingOfficialSubmission,
 } from "../models/organization-analytics";
@@ -45,16 +46,6 @@ export type OrganizationAnalyticsFormalLearningSummary = {
   redactionStatus: "summary_only";
 };
 
-export type OrganizationAnalyticsQuotaSummary = {
-  employeeAiTaskCount: number;
-  employeeAiSucceededTaskCount: number;
-  employeeAiFailedTaskCount: number;
-  employeeAiQuotaConsumedPoint: number;
-  organizationTrainingGenerationConsumedPoint: number;
-  quotaRemainingPoint: number | null;
-  redactionStatus: "summary_only";
-};
-
 export type OrganizationAnalyticsRepositoryExportReadinessRow = {
   rowPublicId: string;
   redactionStatus: Extract<
@@ -81,9 +72,9 @@ export type OrganizationAnalyticsRepositoryGateway = {
     OrganizationAnalyticsFormalLearningSummary,
     "redactionStatus"
   > | null>;
-  readQuotaSummary(
+  readKnowledgeWeakPointSummary(
     input: OrganizationAnalyticsScopeReadInput,
-  ): Promise<Omit<OrganizationAnalyticsQuotaSummary, "redactionStatus"> | null>;
+  ): Promise<OrganizationAnalyticsWeakPointSummaryInput | null>;
   readExportReadinessRows(
     input: OrganizationAnalyticsScopeReadInput,
   ): Promise<readonly OrganizationAnalyticsExportReadinessRow[]>;
@@ -104,9 +95,9 @@ export type OrganizationAnalyticsRepository = {
   readFormalLearningSummary(
     input: OrganizationAnalyticsScopeReadInput,
   ): Promise<OrganizationAnalyticsFormalLearningSummary | null>;
-  readQuotaSummary(
+  readKnowledgeWeakPointSummary(
     input: OrganizationAnalyticsScopeReadInput,
-  ): Promise<OrganizationAnalyticsQuotaSummary | null>;
+  ): Promise<OrganizationAnalyticsWeakPointSummaryInput | null>;
   readExportReadinessRows(
     input: OrganizationAnalyticsScopeReadInput,
   ): Promise<readonly OrganizationAnalyticsRepositoryExportReadinessRow[]>;
@@ -229,29 +220,19 @@ export function createOrganizationAnalyticsRepository(
           };
     },
 
-    async readQuotaSummary(input) {
+    async readKnowledgeWeakPointSummary(input) {
       const readInput = normalizeScopeReadInput(input);
 
       if (readInput === null) {
         return null;
       }
 
-      const quotaSummary = await gateway.readQuotaSummary(readInput);
+      const weakPointSummary =
+        await gateway.readKnowledgeWeakPointSummary(readInput);
 
-      return quotaSummary === null
+      return weakPointSummary === null
         ? null
-        : {
-            employeeAiTaskCount: quotaSummary.employeeAiTaskCount,
-            employeeAiSucceededTaskCount:
-              quotaSummary.employeeAiSucceededTaskCount,
-            employeeAiFailedTaskCount: quotaSummary.employeeAiFailedTaskCount,
-            employeeAiQuotaConsumedPoint:
-              quotaSummary.employeeAiQuotaConsumedPoint,
-            organizationTrainingGenerationConsumedPoint:
-              quotaSummary.organizationTrainingGenerationConsumedPoint,
-            quotaRemainingPoint: quotaSummary.quotaRemainingPoint,
-            redactionStatus: "summary_only",
-          };
+        : copyWeakPointSummaryInput(weakPointSummary);
     },
 
     async readExportReadinessRows(input) {
@@ -469,7 +450,7 @@ export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
       return null;
     },
 
-    async readQuotaSummary() {
+    async readKnowledgeWeakPointSummary() {
       return null;
     },
 
@@ -493,7 +474,7 @@ function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyti
     async readFormalLearningSummary() {
       return null;
     },
-    async readQuotaSummary() {
+    async readKnowledgeWeakPointSummary() {
       return null;
     },
     async readExportReadinessRows() {
@@ -946,6 +927,28 @@ function copyTrainingAggregateMetricsInput(
   };
 }
 
+function copyWeakPointSummaryInput(
+  input: OrganizationAnalyticsWeakPointSummaryInput,
+): OrganizationAnalyticsWeakPointSummaryInput {
+  return {
+    sampleSize: input.sampleSize,
+    trainingWeakPoints: input.trainingWeakPoints.map((weakPoint) => ({
+      sourceDomain: weakPoint.sourceDomain,
+      knowledgeNodeLabel: weakPoint.knowledgeNodeLabel,
+      affectedEmployeeCount: weakPoint.affectedEmployeeCount,
+      affectedEmployeePercent: weakPoint.affectedEmployeePercent,
+    })),
+    formalLearningWeakPoints: input.formalLearningWeakPoints.map(
+      (weakPoint) => ({
+        sourceDomain: weakPoint.sourceDomain,
+        knowledgeNodeLabel: weakPoint.knowledgeNodeLabel,
+        affectedEmployeeCount: weakPoint.affectedEmployeeCount,
+        affectedEmployeePercent: weakPoint.affectedEmployeePercent,
+      }),
+    ),
+  };
+}
+
 function copyEmployeeTrainingSummaryInput(
   input: OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput,
 ): OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput {
@@ -955,6 +958,10 @@ function copyEmployeeTrainingSummaryInput(
     organizationPublicId: input.organizationPublicId,
     organizationName: input.organizationName,
     visibleTrainingVersionPublicIds: [...input.visibleTrainingVersionPublicIds],
+    weakPointLabels:
+      input.weakPointLabels === undefined
+        ? undefined
+        : [...input.weakPointLabels],
     officialSubmissions: input.officialSubmissions.map((submission) => ({
       employeePublicId: submission.employeePublicId,
       trainingVersionPublicId: submission.trainingVersionPublicId,

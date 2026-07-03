@@ -49,15 +49,25 @@ function createFormalLearningSummaryFixture(guardedMarker: string) {
   };
 }
 
-function createQuotaSummaryFixture(guardedMarker: string) {
+function createKnowledgeWeakPointSummaryFixture(guardedMarker: string) {
   return {
-    employeeAiTaskCount: 11,
-    employeeAiSucceededTaskCount: 9,
-    employeeAiFailedTaskCount: 2,
-    employeeAiQuotaConsumedPoint: 135,
-    organizationTrainingGenerationConsumedPoint: 42,
-    quotaRemainingPoint: 823,
-    redactionStatus: "summary_only" as const,
+    sampleSize: 6,
+    trainingWeakPoints: [
+      {
+        sourceDomain: "organization_training" as const,
+        knowledgeNodeLabel: "客户异议处理",
+        affectedEmployeeCount: 3,
+        affectedEmployeePercent: 0.5,
+      },
+    ],
+    formalLearningWeakPoints: [
+      {
+        sourceDomain: "formal_learning" as const,
+        knowledgeNodeLabel: "案例分析",
+        affectedEmployeeCount: 2,
+        affectedEmployeePercent: 0.33,
+      },
+    ],
     guardedMarker,
   };
 }
@@ -111,7 +121,8 @@ function createValidCommand(): BuildOrganizationAnalyticsDashboardSummaryCommand
     },
     formalLearningSummary:
       createFormalLearningSummaryFixture(guardedMarkerFive),
-    quotaSummary: createQuotaSummaryFixture(guardedMarkerSix),
+    knowledgeWeakPointSummary:
+      createKnowledgeWeakPointSummaryFixture(guardedMarkerSix),
     updatedAt: "2026-06-16T08:15:00Z",
     guardedMarkerOne,
     guardedMarkerTwo,
@@ -163,6 +174,10 @@ function createValidEmployeeStatisticsCommand(): BuildOrganizationAnalyticsEmplo
         officialSubmissions: [officialSubmission],
       },
     ],
+    pagination: {
+      page: 1,
+      pageSize: 20,
+    },
     updatedAt: dashboardCommand.updatedAt,
     guardedMarkerOne,
     guardedMarkerTwo,
@@ -261,7 +276,9 @@ function createOrganizationAnalyticsServiceRepositoryFake(
     readFormalLearningSummary: vi.fn(
       async () => createValidCommand().formalLearningSummary,
     ),
-    readQuotaSummary: vi.fn(async () => createValidCommand().quotaSummary),
+    readKnowledgeWeakPointSummary: vi.fn(
+      async () => createValidCommand().knowledgeWeakPointSummary,
+    ),
     readExportReadinessRows: vi.fn(async () => [
       {
         rowPublicId: "employee_public_a",
@@ -327,13 +344,29 @@ describe("organization analytics dashboard service", () => {
           formalMistakeBookCount: 5,
           redactionStatus: "summary_only",
         },
-        quotaSummary: {
-          employeeAiTaskCount: 11,
-          employeeAiSucceededTaskCount: 9,
-          employeeAiFailedTaskCount: 2,
-          employeeAiQuotaConsumedPoint: 135,
-          organizationTrainingGenerationConsumedPoint: 42,
-          quotaRemainingPoint: 823,
+        knowledgeWeakPointSummary: {
+          sampleSize: 6,
+          lowConfidence: false,
+          trainingWeakPoints: [
+            {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabel: "客户异议处理",
+              affectedEmployeeCount: 3,
+              affectedEmployeePercent: 0.5,
+              confidenceStatus: "normal",
+              redactionStatus: "summary_only",
+            },
+          ],
+          formalLearningWeakPoints: [
+            {
+              sourceDomain: "formal_learning",
+              knowledgeNodeLabel: "案例分析",
+              affectedEmployeeCount: 2,
+              affectedEmployeePercent: 0.33,
+              confidenceStatus: "normal",
+              redactionStatus: "summary_only",
+            },
+          ],
           redactionStatus: "summary_only",
         },
         redactedStatisticsBoundary: expectedRedactedStatisticsBoundary,
@@ -421,7 +454,7 @@ describe("organization analytics repository-backed service", () => {
       ],
       dateRange: command.dateRange,
     });
-    expect(repository.readQuotaSummary).toHaveBeenCalledWith({
+    expect(repository.readKnowledgeWeakPointSummary).toHaveBeenCalledWith({
       organizationPublicId: "org_city_public_123",
       scopeOrganizationPublicIds: [
         "org_city_public_123",
@@ -452,12 +485,18 @@ describe("organization analytics repository-backed service", () => {
     });
     expect(repository.readTrainingAggregateMetricsInput).not.toHaveBeenCalled();
     expect(repository.readFormalLearningSummary).not.toHaveBeenCalled();
-    expect(repository.readQuotaSummary).not.toHaveBeenCalled();
+    expect(repository.readKnowledgeWeakPointSummary).not.toHaveBeenCalled();
   });
 
   it("builds employee statistics summary from injected repository read models", async () => {
     const repository = createOrganizationAnalyticsServiceRepositoryFake();
-    const command = createRepositoryBackedSummaryCommand(repository);
+    const command = {
+      ...createRepositoryBackedSummaryCommand(repository),
+      pagination: {
+        page: 1,
+        pageSize: 20,
+      } as const,
+    };
     const result =
       await buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository(
         command,
@@ -545,12 +584,24 @@ describe("organization analytics employee statistics service", () => {
             trainingCompletionRate: 0.5,
             trainingAverageScore: 88,
             latestTrainingSubmittedAt: "2026-06-10T09:30:00Z",
+            weakPointSummary: {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabels: [],
+              redactionStatus: "summary_only",
+            },
             redactionStatus: "summary_only",
           },
         ],
         redactedStatisticsBoundary: expectedRedactedStatisticsBoundary,
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T08:15:00Z",
+      },
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 1,
+        sortBy: "employeeDisplayName",
+        sortOrder: "asc",
       },
     });
     expect(serializedResult).not.toMatch(/"id":/);

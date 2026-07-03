@@ -1,8 +1,140 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-source-landing-2026-07-03
-updatedAt: "2026-07-03T03:19:17-07:00"
+currentPhase: organization-analytics-source-landing-2026-07-03
+updatedAt: "2026-07-03T03:52:41-07:00"
+organizationAnalyticsSourceLanding20260703:
+  taskId: organization-analytics-source-landing-2026-07-03
+  phase: organization-analytics-source-landing-2026-07-03
+  status: closed
+  result: organization_analytics_source_landed_with_separated_training_formal_learning_weak_points_pagination_and_content_route_redirect
+  priority: p1
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - organization-training-source-landing-2026-07-03
+  sourceStory: current_user_approved_serial_source_landing_contract_packages_goal_2026_07_03
+  targetClosureItem: Land the accepted organization analytics UI/UX source contract within existing schema/runtime boundaries.
+  behaviorBoundary: organization_analytics_source_ui_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_route_names_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_employee_answers_no_full_content_no_raw_dom
+  branch: codex/organization-analytics-source-landing-2026-07-03
+  claimedAt: "2026-07-03T03:29:06-07:00"
+  plannedAt: "2026-07-03T03:29:06-07:00"
+  implementedAt: "2026-07-03T03:52:41-07:00"
+  validatedAt: "2026-07-03T03:52:41-07:00"
+  reviewedAt: "2026-07-03T03:52:41-07:00"
+  closedAt: "2026-07-03T03:52:41-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-organization-analytics-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-analytics-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-analytics-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-organization-analytics-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-organization-analytics-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-organization-analytics-source-landing.md
+    - src/app/(admin)/content/organization-analytics/page.tsx
+    - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+    - src/server/contracts/organization-analytics-contract.ts
+    - src/server/contracts/organization-analytics-contract.test.ts
+    - src/server/mappers/organization-analytics-mapper.ts
+    - src/server/mappers/organization-analytics-mapper.test.ts
+    - src/server/models/organization-analytics.ts
+    - src/server/models/organization-analytics.test.ts
+    - src/server/repositories/organization-analytics-repository.ts
+    - src/server/repositories/organization-analytics-repository.test.ts
+    - src/server/services/organization-analytics-service.ts
+    - src/server/services/organization-analytics-service.test.ts
+    - src/server/services/organization-analytics-route.ts
+    - src/server/services/organization-analytics-route.test.ts
+    - src/server/validators/organization-analytics.ts
+    - src/server/validators/organization-analytics.test.ts
+    - tests/unit/organization-analytics-admin-entry-surface.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/evidence/2026-07-02-organization-analytics-ui-ux-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-organization-analytics-ui-ux-contract.md
+    - src/app/(admin)/organization/organization-analytics/page.tsx
+    - src/app/api/v1/organization-analytics/**
+    - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+    - src/features/admin/organization-workspace/admin-organization-workspace-access.ts
+    - src/server/services/organization-analytics-route.ts
+    - package.json
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Organization analytics uses dynamic 30-day default and visible 7/30/90/custom date controls.
+    - Enterprise-training analytics and formal learning aggregate signals are separated.
+    - Organization and employee knowledge weak-point summaries plus small-sample warnings are represented without raw answers.
+    - Organization admins do not receive enterprise AI quota consumption summaries.
+    - Employee summary uses pagination/page-size controls for 20, 50, and 100.
+    - Content workspace route no longer grants a content-admin organization analytics surface.
+    - Focused tests cover the changed UI and contract without schema, Provider, dependency, browser, direct DB, export, or deploy work.
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/organization-analytics-admin-entry-surface.test.ts src/server/contracts/organization-analytics-contract.test.ts src/server/models/organization-analytics.test.ts src/server/repositories/organization-analytics-repository.test.ts src/server/services/organization-analytics-service.test.ts src/server/validators/organization-analytics.test.ts src/server/services/organization-analytics-route.test.ts src/server/mappers/organization-analytics-mapper.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-analytics-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId organization-analytics-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-analytics-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
 organizationTrainingSourceLanding20260703:
   taskId: organization-training-source-landing-2026-07-03
   phase: organization-training-source-landing-2026-07-03
@@ -19739,8 +19871,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fae15f7055054352f278f656ad08de84fe3ba49a
-  lastKnownOriginMasterSha: fae15f7055054352f278f656ad08de84fe3ba49a
+  lastKnownMasterSha: 8b593dad555f3e2095a48f6d41e36217c89ebd53
+  lastKnownOriginMasterSha: 8b593dad555f3e2095a48f6d41e36217c89ebd53
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -19880,6 +20012,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: organization-analytics-source-landing-2026-07-03
+  status: closed
+  result: organization_analytics_source_landed_with_separated_training_formal_learning_weak_points_pagination_and_content_route_redirect
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  branch: codex/organization-analytics-source-landing-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-organization-analytics-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-analytics-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-analytics-source-landing.md
+previousCurrentTaskBeforeOrganizationAnalyticsSourceLanding20260703:
   id: organization-training-source-landing-2026-07-03
   status: closed
   result: organization_training_source_landed_with_enterprise_training_ui_contract_content_route_redirect_mock_exam_denial_and_employee_progress_confirmation

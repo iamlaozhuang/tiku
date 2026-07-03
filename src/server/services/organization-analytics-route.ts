@@ -22,7 +22,9 @@ import {
   type RuntimeDatabaseOptions,
 } from "../repositories/runtime-database";
 import {
+  parseOrganizationAnalyticsEmployeeStatisticsRouteQuery,
   parseOrganizationAnalyticsSummaryRouteQuery,
+  type OrganizationAnalyticsEmployeeStatisticsRouteQuery,
   type OrganizationAnalyticsSummaryRouteQuery,
 } from "../validators/organization-analytics";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
@@ -62,6 +64,22 @@ type OrganizationAnalyticsRouteAdminContextResolverInput = {
   routeQuery: OrganizationAnalyticsSummaryRouteQuery;
 };
 
+type OrganizationAnalyticsEmployeeStatisticsRouteAdminContextResolverInput = {
+  request: Request;
+  routeQuery: OrganizationAnalyticsEmployeeStatisticsRouteQuery;
+};
+
+type OrganizationAnalyticsAnyRouteAdminContextResolverInput = {
+  request: Request;
+  routeQuery:
+    | OrganizationAnalyticsSummaryRouteQuery
+    | OrganizationAnalyticsEmployeeStatisticsRouteQuery;
+};
+
+type OrganizationAnalyticsSharedAdminContextResolver = (
+  input: OrganizationAnalyticsAnyRouteAdminContextResolverInput,
+) => Promise<OrganizationAnalyticsDashboardSummaryRouteAdminContext | null>;
+
 export type OrganizationAnalyticsDashboardSummaryAdminContextResolver = (
   input: OrganizationAnalyticsRouteAdminContextResolverInput,
 ) =>
@@ -70,7 +88,7 @@ export type OrganizationAnalyticsDashboardSummaryAdminContextResolver = (
   | Promise<OrganizationAnalyticsDashboardSummaryRouteAdminContext | null>;
 
 export type OrganizationAnalyticsEmployeeStatisticsAdminContextResolver = (
-  input: OrganizationAnalyticsRouteAdminContextResolverInput,
+  input: OrganizationAnalyticsEmployeeStatisticsRouteAdminContextResolverInput,
 ) =>
   | OrganizationAnalyticsEmployeeStatisticsRouteAdminContext
   | null
@@ -82,7 +100,7 @@ export type OrganizationAnalyticsDashboardSummaryReaderInput =
   };
 
 export type OrganizationAnalyticsEmployeeStatisticsReaderInput =
-  OrganizationAnalyticsSummaryRouteQuery & {
+  OrganizationAnalyticsEmployeeStatisticsRouteQuery & {
     adminContext: OrganizationAnalyticsEmployeeStatisticsRouteAdminContext;
   };
 
@@ -224,6 +242,7 @@ function createRepositoryBackedEmployeeStatisticsReader(
       adminPublicId: input.adminContext.adminPublicId,
       organizationPublicId: input.organizationPublicId,
       dateRange: input.dateRange,
+      pagination: input.pagination,
       updatedAt: readUpdatedAt(),
       repository,
     });
@@ -231,10 +250,10 @@ function createRepositoryBackedEmployeeStatisticsReader(
 
 function createSessionBackedOrganizationAnalyticsAdminContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
-):
-  | OrganizationAnalyticsDashboardSummaryAdminContextResolver
-  | OrganizationAnalyticsEmployeeStatisticsAdminContextResolver {
-  return async ({ request }) => {
+): OrganizationAnalyticsSharedAdminContextResolver {
+  return async ({
+    request,
+  }: OrganizationAnalyticsAnyRouteAdminContextResolverInput) => {
     const sessionResponse = await sessionService.getCurrentSession({
       authorization: getRequestAuthorization(request),
     });
@@ -357,9 +376,10 @@ export function createOrganizationAnalyticsEmployeeStatisticsRouteHandlers(
   return createRouteHandlersWithErrorEnvelope({
     employeeStatistics: {
       async GET(request: Request): Promise<Response> {
-        const queryResponse = parseOrganizationAnalyticsSummaryRouteQuery(
-          readOrganizationAnalyticsSummaryRouteQuery(request),
-        );
+        const queryResponse =
+          parseOrganizationAnalyticsEmployeeStatisticsRouteQuery(
+            readOrganizationAnalyticsSummaryRouteQuery(request),
+          );
 
         if (queryResponse.data === null) {
           return createJsonResponse(queryResponse);

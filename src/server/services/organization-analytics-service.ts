@@ -1,5 +1,6 @@
 import {
   createErrorResponse,
+  createPaginatedResponse,
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
@@ -9,20 +10,22 @@ import {
   type OrganizationAnalyticsAuditLogReferenceDto,
   type OrganizationAnalyticsDashboardSummaryDto,
   type OrganizationAnalyticsDateRangeDto,
+  type OrganizationAnalyticsEmployeeStatisticsPaginationInput,
   type OrganizationAnalyticsEmployeeStatisticsSummaryDto,
   type OrganizationAnalyticsExportReadinessSummaryDto,
   type OrganizationAnalyticsExportScope,
   type OrganizationAnalyticsFormalLearningSummaryDto,
-  type OrganizationAnalyticsQuotaSummaryDto,
 } from "../contracts/organization-analytics-contract";
 import {
   createOrganizationAnalyticsAuditLogRedactedReference,
   createOrganizationAnalyticsEmployeeTrainingSummary,
   createOrganizationAnalyticsExportReadinessAssessment,
+  createOrganizationAnalyticsKnowledgeWeakPointSummary,
   createOrganizationTrainingAggregateMetrics,
   type OrganizationAnalyticsAuditLogReferenceInput,
   type OrganizationAnalyticsEmployeeTrainingSummaryInput,
   type OrganizationAnalyticsExportReadinessInput,
+  type OrganizationAnalyticsWeakPointSummaryInput,
   type OrganizationTrainingAggregateMetricsInput,
 } from "../models/organization-analytics";
 import type { OrganizationAnalyticsRepository } from "../repositories/organization-analytics-repository";
@@ -64,7 +67,7 @@ export type BuildOrganizationAnalyticsDashboardSummaryCommand =
       "dateRange"
     >;
     formalLearningSummary: OrganizationAnalyticsFormalLearningSummaryDto | null;
-    quotaSummary: OrganizationAnalyticsQuotaSummaryDto | null;
+    knowledgeWeakPointSummary: OrganizationAnalyticsWeakPointSummaryInput | null;
     updatedAt: string;
   };
 
@@ -75,6 +78,7 @@ export type BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand =
       OrganizationAnalyticsEmployeeTrainingSummaryInput,
       "dateRange"
     >[];
+    pagination: OrganizationAnalyticsEmployeeStatisticsPaginationInput;
     updatedAt: string;
   };
 
@@ -101,7 +105,9 @@ export type BuildOrganizationAnalyticsDashboardSummaryFromRepositoryCommand =
   BuildOrganizationAnalyticsRepositoryBackedSummaryCommand;
 
 export type BuildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepositoryCommand =
-  BuildOrganizationAnalyticsRepositoryBackedSummaryCommand;
+  BuildOrganizationAnalyticsRepositoryBackedSummaryCommand & {
+    pagination: OrganizationAnalyticsEmployeeStatisticsPaginationInput;
+  };
 
 export type BuildOrganizationAnalyticsExportReadinessSummaryFromRepositoryCommand =
   BuildOrganizationAnalyticsRepositoryBackedSummaryCommand & {
@@ -177,25 +183,6 @@ function createFormalLearningSummary(
   };
 }
 
-function createQuotaSummary(
-  summary: OrganizationAnalyticsQuotaSummaryDto | null,
-): OrganizationAnalyticsQuotaSummaryDto | null {
-  if (summary === null) {
-    return null;
-  }
-
-  return {
-    employeeAiTaskCount: summary.employeeAiTaskCount,
-    employeeAiSucceededTaskCount: summary.employeeAiSucceededTaskCount,
-    employeeAiFailedTaskCount: summary.employeeAiFailedTaskCount,
-    employeeAiQuotaConsumedPoint: summary.employeeAiQuotaConsumedPoint,
-    organizationTrainingGenerationConsumedPoint:
-      summary.organizationTrainingGenerationConsumedPoint,
-    quotaRemainingPoint: summary.quotaRemainingPoint,
-    redactionStatus: summary.redactionStatus,
-  };
-}
-
 export function buildOrganizationAnalyticsDashboardSummary(
   command: BuildOrganizationAnalyticsDashboardSummaryCommand,
 ): ApiResponse<OrganizationAnalyticsDashboardSummaryDto | null> {
@@ -214,7 +201,10 @@ export function buildOrganizationAnalyticsDashboardSummary(
     formalLearningSummary: createFormalLearningSummary(
       command.formalLearningSummary,
     ),
-    quotaSummary: createQuotaSummary(command.quotaSummary),
+    knowledgeWeakPointSummary:
+      createOrganizationAnalyticsKnowledgeWeakPointSummary(
+        command.knowledgeWeakPointSummary,
+      ),
     redactedStatisticsBoundary:
       createOrganizationAnalyticsRedactedStatisticsBoundary(),
     redactionStatus: "aggregate_only",
@@ -247,9 +237,9 @@ export async function buildOrganizationAnalyticsDashboardSummaryFromRepository(
     return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
-  const [formalLearningSummary, quotaSummary] = await Promise.all([
+  const [formalLearningSummary, knowledgeWeakPointSummary] = await Promise.all([
     command.repository.readFormalLearningSummary(summaryReadInput),
-    command.repository.readQuotaSummary(summaryReadInput),
+    command.repository.readKnowledgeWeakPointSummary(summaryReadInput),
   ]);
 
   return buildOrganizationAnalyticsDashboardSummary({
@@ -259,7 +249,7 @@ export async function buildOrganizationAnalyticsDashboardSummaryFromRepository(
     dateRange: command.dateRange,
     trainingMetricsInput,
     formalLearningSummary,
-    quotaSummary,
+    knowledgeWeakPointSummary,
     updatedAt: command.updatedAt,
   });
 }
@@ -354,18 +344,34 @@ export function buildOrganizationAnalyticsEmployeeStatisticsSummary(
       dateRange: command.dateRange,
     }),
   );
+  const total = employees.length;
+  const page = Math.max(command.pagination.page, 1);
+  const pageSize = command.pagination.pageSize;
+  const paginatedEmployees = employees.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
-  return createSuccessResponse({
-    organizationPublicId: command.organizationPublicId,
-    scopeOrganizationPublicIds: [...command.scopeOrganizationPublicIds],
-    dateRange: command.dateRange,
-    employeeCount: employees.length,
-    employees,
-    redactedStatisticsBoundary:
-      createOrganizationAnalyticsRedactedStatisticsBoundary(),
-    redactionStatus: "summary_only",
-    updatedAt: command.updatedAt,
-  });
+  return createPaginatedResponse(
+    {
+      organizationPublicId: command.organizationPublicId,
+      scopeOrganizationPublicIds: [...command.scopeOrganizationPublicIds],
+      dateRange: command.dateRange,
+      employeeCount: total,
+      employees: paginatedEmployees,
+      redactedStatisticsBoundary:
+        createOrganizationAnalyticsRedactedStatisticsBoundary(),
+      redactionStatus: "summary_only",
+      updatedAt: command.updatedAt,
+    },
+    {
+      page,
+      pageSize,
+      total,
+      sortBy: "employeeDisplayName",
+      sortOrder: "asc",
+    },
+  );
 }
 
 export async function buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository(
@@ -393,6 +399,10 @@ export async function buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRep
     scopeOrganizationPublicIds,
     dateRange: command.dateRange,
     employeeTrainingSummaryInputs,
+    pagination: {
+      page: command.pagination.page,
+      pageSize: command.pagination.pageSize,
+    },
     updatedAt: command.updatedAt,
   });
 }

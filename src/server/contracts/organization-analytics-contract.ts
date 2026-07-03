@@ -1,8 +1,18 @@
-import { createSuccessResponse, type ApiResponse } from "./api-response";
+import {
+  createPaginatedResponse,
+  createSuccessResponse,
+  type ApiPagination,
+  type ApiResponse,
+} from "./api-response";
 
 export type OrganizationAnalyticsDateRangeDto = {
   startAt: string;
   endAt: string;
+};
+
+export type OrganizationAnalyticsEmployeeStatisticsPaginationInput = {
+  page: number;
+  pageSize: 20 | 50 | 100;
 };
 
 export type OrganizationAnalyticsSubmittedTrendPointDto = {
@@ -29,13 +39,34 @@ export type OrganizationAnalyticsFormalLearningSummaryDto = {
   redactionStatus: "summary_only";
 };
 
-export type OrganizationAnalyticsQuotaSummaryDto = {
-  employeeAiTaskCount: number;
-  employeeAiSucceededTaskCount: number;
-  employeeAiFailedTaskCount: number;
-  employeeAiQuotaConsumedPoint: number;
-  organizationTrainingGenerationConsumedPoint: number;
-  quotaRemainingPoint: number | null;
+export type OrganizationAnalyticsWeakPointSourceDomain =
+  | "organization_training"
+  | "formal_learning";
+
+export type OrganizationAnalyticsWeakPointConfidenceStatus =
+  | "normal"
+  | "low_sample";
+
+export type OrganizationAnalyticsWeakPointItemDto = {
+  sourceDomain: OrganizationAnalyticsWeakPointSourceDomain;
+  knowledgeNodeLabel: string;
+  affectedEmployeeCount: number;
+  affectedEmployeePercent: number;
+  confidenceStatus: OrganizationAnalyticsWeakPointConfidenceStatus;
+  redactionStatus: "summary_only";
+};
+
+export type OrganizationAnalyticsKnowledgeWeakPointSummaryDto = {
+  sampleSize: number;
+  lowConfidence: boolean;
+  trainingWeakPoints: OrganizationAnalyticsWeakPointItemDto[];
+  formalLearningWeakPoints: OrganizationAnalyticsWeakPointItemDto[];
+  redactionStatus: "summary_only";
+};
+
+export type OrganizationAnalyticsEmployeeWeakPointSummaryDto = {
+  sourceDomain: "organization_training";
+  knowledgeNodeLabels: string[];
   redactionStatus: "summary_only";
 };
 
@@ -69,6 +100,7 @@ export type OrganizationAnalyticsEmployeeTrainingSummaryDto = {
   trainingCompletionRate: number;
   trainingAverageScore: number | null;
   latestTrainingSubmittedAt: string | null;
+  weakPointSummary: OrganizationAnalyticsEmployeeWeakPointSummaryDto;
   redactionStatus: "summary_only";
 };
 
@@ -159,7 +191,7 @@ export type OrganizationAnalyticsDashboardSummaryDto = {
   dateRange: OrganizationAnalyticsDateRangeDto;
   trainingSummary: OrganizationTrainingAggregateMetricsDto;
   formalLearningSummary: OrganizationAnalyticsFormalLearningSummaryDto | null;
-  quotaSummary: OrganizationAnalyticsQuotaSummaryDto | null;
+  knowledgeWeakPointSummary: OrganizationAnalyticsKnowledgeWeakPointSummaryDto;
   redactedStatisticsBoundary: OrganizationAnalyticsRedactedStatisticsBoundaryDto;
   redactionStatus: "aggregate_only";
   updatedAt: string;
@@ -189,21 +221,31 @@ function createFormalLearningSummaryRouteDto(
   };
 }
 
-function createQuotaSummaryRouteDto(
-  summary: OrganizationAnalyticsQuotaSummaryDto | null,
-): OrganizationAnalyticsQuotaSummaryDto | null {
-  if (summary === null) {
-    return null;
-  }
-
+function createWeakPointItemRouteDto(
+  item: OrganizationAnalyticsWeakPointItemDto,
+): OrganizationAnalyticsWeakPointItemDto {
   return {
-    employeeAiTaskCount: summary.employeeAiTaskCount,
-    employeeAiSucceededTaskCount: summary.employeeAiSucceededTaskCount,
-    employeeAiFailedTaskCount: summary.employeeAiFailedTaskCount,
-    employeeAiQuotaConsumedPoint: summary.employeeAiQuotaConsumedPoint,
-    organizationTrainingGenerationConsumedPoint:
-      summary.organizationTrainingGenerationConsumedPoint,
-    quotaRemainingPoint: summary.quotaRemainingPoint,
+    sourceDomain: item.sourceDomain,
+    knowledgeNodeLabel: item.knowledgeNodeLabel,
+    affectedEmployeeCount: item.affectedEmployeeCount,
+    affectedEmployeePercent: item.affectedEmployeePercent,
+    confidenceStatus: item.confidenceStatus,
+    redactionStatus: item.redactionStatus,
+  };
+}
+
+function createKnowledgeWeakPointSummaryRouteDto(
+  summary: OrganizationAnalyticsKnowledgeWeakPointSummaryDto,
+): OrganizationAnalyticsKnowledgeWeakPointSummaryDto {
+  return {
+    sampleSize: summary.sampleSize,
+    lowConfidence: summary.lowConfidence,
+    trainingWeakPoints: summary.trainingWeakPoints.map(
+      createWeakPointItemRouteDto,
+    ),
+    formalLearningWeakPoints: summary.formalLearningWeakPoints.map(
+      createWeakPointItemRouteDto,
+    ),
     redactionStatus: summary.redactionStatus,
   };
 }
@@ -271,7 +313,9 @@ export function createOrganizationAnalyticsDashboardRouteResponse(
       formalLearningSummary: createFormalLearningSummaryRouteDto(
         data.formalLearningSummary,
       ),
-      quotaSummary: createQuotaSummaryRouteDto(data.quotaSummary),
+      knowledgeWeakPointSummary: createKnowledgeWeakPointSummaryRouteDto(
+        data.knowledgeWeakPointSummary,
+      ),
       redactedStatisticsBoundary:
         createOrganizationAnalyticsRedactedStatisticsBoundaryRouteDto(
           data.redactedStatisticsBoundary,
@@ -286,51 +330,58 @@ export function createOrganizationAnalyticsDashboardRouteResponse(
 export function createOrganizationAnalyticsEmployeeStatisticsRouteResponse(
   data: OrganizationAnalyticsEmployeeStatisticsSummaryDto | null,
   message = "ok",
+  pagination?: ApiPagination,
 ): OrganizationAnalyticsEmployeeStatisticsRouteResponse {
   if (data === null) {
     return createSuccessResponse(null, message);
   }
 
-  return createSuccessResponse(
-    {
-      organizationPublicId: data.organizationPublicId,
-      dateRange: {
-        startAt: data.dateRange.startAt,
-        endAt: data.dateRange.endAt,
-      },
-      employeeCount: data.employeeCount,
-      employees: data.employees.map((employee) => ({
-        employeePublicId: employee.employeePublicId,
-        employeeDisplayName: employee.employeeDisplayName,
-        organizationPublicId: employee.organizationPublicId,
-        organizationName: employee.organizationName,
-        answerOrganizationSnapshot:
-          employee.answerOrganizationSnapshot === null
-            ? null
-            : {
-                organizationPublicId:
-                  employee.answerOrganizationSnapshot.organizationPublicId,
-                organizationName:
-                  employee.answerOrganizationSnapshot.organizationName,
-                capturedAt: employee.answerOrganizationSnapshot.capturedAt,
-              },
-        visibleTrainingCount: employee.visibleTrainingCount,
-        submittedTrainingCount: employee.submittedTrainingCount,
-        unfinishedTrainingCount: employee.unfinishedTrainingCount,
-        trainingCompletionRate: employee.trainingCompletionRate,
-        trainingAverageScore: employee.trainingAverageScore,
-        latestTrainingSubmittedAt: employee.latestTrainingSubmittedAt,
-        redactionStatus: employee.redactionStatus,
-      })),
-      redactedStatisticsBoundary:
-        createOrganizationAnalyticsRedactedStatisticsBoundaryRouteDto(
-          data.redactedStatisticsBoundary,
-        ),
-      redactionStatus: data.redactionStatus,
-      updatedAt: data.updatedAt,
+  const routeData: OrganizationAnalyticsEmployeeStatisticsRouteDto = {
+    organizationPublicId: data.organizationPublicId,
+    dateRange: {
+      startAt: data.dateRange.startAt,
+      endAt: data.dateRange.endAt,
     },
-    message,
-  );
+    employeeCount: data.employeeCount,
+    employees: data.employees.map((employee) => ({
+      employeePublicId: employee.employeePublicId,
+      employeeDisplayName: employee.employeeDisplayName,
+      organizationPublicId: employee.organizationPublicId,
+      organizationName: employee.organizationName,
+      answerOrganizationSnapshot:
+        employee.answerOrganizationSnapshot === null
+          ? null
+          : {
+              organizationPublicId:
+                employee.answerOrganizationSnapshot.organizationPublicId,
+              organizationName:
+                employee.answerOrganizationSnapshot.organizationName,
+              capturedAt: employee.answerOrganizationSnapshot.capturedAt,
+            },
+      visibleTrainingCount: employee.visibleTrainingCount,
+      submittedTrainingCount: employee.submittedTrainingCount,
+      unfinishedTrainingCount: employee.unfinishedTrainingCount,
+      trainingCompletionRate: employee.trainingCompletionRate,
+      trainingAverageScore: employee.trainingAverageScore,
+      latestTrainingSubmittedAt: employee.latestTrainingSubmittedAt,
+      weakPointSummary: {
+        sourceDomain: employee.weakPointSummary.sourceDomain,
+        knowledgeNodeLabels: [...employee.weakPointSummary.knowledgeNodeLabels],
+        redactionStatus: employee.weakPointSummary.redactionStatus,
+      },
+      redactionStatus: employee.redactionStatus,
+    })),
+    redactedStatisticsBoundary:
+      createOrganizationAnalyticsRedactedStatisticsBoundaryRouteDto(
+        data.redactedStatisticsBoundary,
+      ),
+    redactionStatus: data.redactionStatus,
+    updatedAt: data.updatedAt,
+  };
+
+  return pagination === undefined
+    ? createSuccessResponse(routeData, message)
+    : createPaginatedResponse(routeData, pagination, message);
 }
 
 export function createOrganizationAnalyticsExportReadinessRouteResponse(

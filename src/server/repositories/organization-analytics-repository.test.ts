@@ -56,6 +56,7 @@ function createGateway(
         "training_version_public_001",
         "training_version_public_002",
       ],
+      weakPointLabels: [" 客户异议处理 ", "案例分析"],
       officialSubmissions: [
         {
           employeePublicId: "employee_public_001",
@@ -86,16 +87,26 @@ function createGateway(
     detailFieldB: "hidden formal question",
     internalRowNumber: 904,
   }));
-  const readQuotaSummary = vi.fn(async () => ({
-    employeeAiTaskCount: 5,
-    employeeAiSucceededTaskCount: 4,
-    employeeAiFailedTaskCount: 1,
-    employeeAiQuotaConsumedPoint: 120,
-    organizationTrainingGenerationConsumedPoint: 80,
-    quotaRemainingPoint: 300,
-    hiddenFieldA: "hidden quota marker A",
-    hiddenFieldB: "hidden quota marker B",
-    hiddenFieldC: "hidden quota marker C",
+  const readKnowledgeWeakPointSummary = vi.fn(async () => ({
+    sampleSize: 6,
+    trainingWeakPoints: [
+      {
+        sourceDomain: "organization_training" as const,
+        knowledgeNodeLabel: "客户异议处理",
+        affectedEmployeeCount: 3,
+        affectedEmployeePercent: 0.5,
+        hiddenFieldA: "hidden weak marker A",
+      },
+    ],
+    formalLearningWeakPoints: [
+      {
+        sourceDomain: "formal_learning" as const,
+        knowledgeNodeLabel: "案例分析",
+        affectedEmployeeCount: 2,
+        affectedEmployeePercent: 0.33,
+        hiddenFieldB: "hidden weak marker B",
+      },
+    ],
     internalRowNumber: 905,
   }));
   const readExportReadinessRows = vi.fn(async () => [
@@ -112,7 +123,7 @@ function createGateway(
     readTrainingAggregateMetricsInput,
     readEmployeeTrainingSummaryInputs,
     readFormalLearningSummary,
-    readQuotaSummary,
+    readKnowledgeWeakPointSummary,
     readExportReadinessRows,
     ...overrides,
   };
@@ -123,7 +134,7 @@ function createGateway(
     readTrainingAggregateMetricsInput,
     readEmployeeTrainingSummaryInputs,
     readFormalLearningSummary,
-    readQuotaSummary,
+    readKnowledgeWeakPointSummary,
     readExportReadinessRows,
   };
 }
@@ -258,6 +269,7 @@ describe("organization analytics repository", () => {
           "training_version_public_001",
           "training_version_public_002",
         ],
+        weakPointLabels: [" 客户异议处理 ", "案例分析"],
         officialSubmissions: [
           {
             employeePublicId: "employee_public_001",
@@ -279,13 +291,14 @@ describe("organization analytics repository", () => {
     );
   });
 
-  it("returns formal learning, quota, and export readiness summaries without detail payloads", async () => {
+  it("returns formal learning, weak points, and export readiness summaries without detail payloads", async () => {
     const { gateway } = createGateway();
     const repository = createOrganizationAnalyticsRepository(gateway);
 
     const formalLearningSummary =
       await repository.readFormalLearningSummary(createScopeInput());
-    const quotaSummary = await repository.readQuotaSummary(createScopeInput());
+    const weakPointSummary =
+      await repository.readKnowledgeWeakPointSummary(createScopeInput());
     const exportRows =
       await repository.readExportReadinessRows(createScopeInput());
 
@@ -296,14 +309,24 @@ describe("organization analytics repository", () => {
       formalMistakeBookCount: 4,
       redactionStatus: "summary_only",
     });
-    expect(quotaSummary).toEqual({
-      employeeAiTaskCount: 5,
-      employeeAiSucceededTaskCount: 4,
-      employeeAiFailedTaskCount: 1,
-      employeeAiQuotaConsumedPoint: 120,
-      organizationTrainingGenerationConsumedPoint: 80,
-      quotaRemainingPoint: 300,
-      redactionStatus: "summary_only",
+    expect(weakPointSummary).toEqual({
+      sampleSize: 6,
+      trainingWeakPoints: [
+        {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabel: "客户异议处理",
+          affectedEmployeeCount: 3,
+          affectedEmployeePercent: 0.5,
+        },
+      ],
+      formalLearningWeakPoints: [
+        {
+          sourceDomain: "formal_learning",
+          knowledgeNodeLabel: "案例分析",
+          affectedEmployeeCount: 2,
+          affectedEmployeePercent: 0.33,
+        },
+      ],
     });
     expect(exportRows).toEqual([
       {
@@ -312,7 +335,7 @@ describe("organization analytics repository", () => {
       },
     ]);
     expect(
-      JSON.stringify({ formalLearningSummary, quotaSummary, exportRows }),
+      JSON.stringify({ formalLearningSummary, weakPointSummary, exportRows }),
     ).not.toMatch(
       /hidden|detailField|hiddenField|internalRowNumber|sourceRowNumber|downloadArtifact|generatedArtifact/u,
     );
@@ -324,7 +347,7 @@ describe("organization analytics repository", () => {
       readTrainingAggregateMetricsInput,
       readEmployeeTrainingSummaryInputs,
       readFormalLearningSummary,
-      readQuotaSummary,
+      readKnowledgeWeakPointSummary,
       readExportReadinessRows,
     } = createGateway();
     const repository = createOrganizationAnalyticsRepository(gateway);
@@ -343,7 +366,7 @@ describe("organization analytics repository", () => {
       repository.readFormalLearningSummary(blankScopeInput),
     ).resolves.toBeNull();
     await expect(
-      repository.readQuotaSummary(blankScopeInput),
+      repository.readKnowledgeWeakPointSummary(blankScopeInput),
     ).resolves.toBeNull();
     await expect(
       repository.readExportReadinessRows(blankScopeInput),
@@ -352,7 +375,7 @@ describe("organization analytics repository", () => {
     expect(readTrainingAggregateMetricsInput).not.toHaveBeenCalled();
     expect(readEmployeeTrainingSummaryInputs).not.toHaveBeenCalled();
     expect(readFormalLearningSummary).not.toHaveBeenCalled();
-    expect(readQuotaSummary).not.toHaveBeenCalled();
+    expect(readKnowledgeWeakPointSummary).not.toHaveBeenCalled();
     expect(readExportReadinessRows).not.toHaveBeenCalled();
   });
 
@@ -374,7 +397,7 @@ describe("organization analytics repository", () => {
       repository.readFormalLearningSummary(createScopeInput()),
     ).resolves.toBeNull();
     await expect(
-      repository.readQuotaSummary(createScopeInput()),
+      repository.readKnowledgeWeakPointSummary(createScopeInput()),
     ).resolves.toBeNull();
     await expect(
       repository.readExportReadinessRows(createScopeInput()),

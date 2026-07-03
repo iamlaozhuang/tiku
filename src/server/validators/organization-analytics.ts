@@ -5,6 +5,7 @@ import {
 } from "../contracts/api-response";
 import type {
   OrganizationAnalyticsDateRangeDto,
+  OrganizationAnalyticsEmployeeStatisticsPaginationInput,
   OrganizationAnalyticsExportScope,
 } from "../contracts/organization-analytics-contract";
 
@@ -27,6 +28,11 @@ export type OrganizationAnalyticsSummaryRouteQuery = {
 export type OrganizationAnalyticsExportReadinessRouteQuery =
   OrganizationAnalyticsSummaryRouteQuery & {
     exportScope: OrganizationAnalyticsExportScope;
+  };
+
+export type OrganizationAnalyticsEmployeeStatisticsRouteQuery =
+  OrganizationAnalyticsSummaryRouteQuery & {
+    pagination: OrganizationAnalyticsEmployeeStatisticsPaginationInput;
   };
 
 function createInvalidRouteInputResponse(): ApiResponse<null> {
@@ -106,6 +112,35 @@ function parseSummaryRouteQuery(
   };
 }
 
+function parsePositiveInteger(value: string | null): number | null {
+  if (value === null || !/^\d+$/u.test(value)) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isSafeInteger(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : null;
+}
+
+function parseEmployeeStatisticsPagination(
+  input: Record<string, unknown>,
+): OrganizationAnalyticsEmployeeStatisticsPaginationInput | null {
+  const page = parsePositiveInteger(selectTrimmedString(input, "page")) ?? 1;
+  const pageSize =
+    parsePositiveInteger(selectTrimmedString(input, "pageSize")) ?? 20;
+
+  if (pageSize !== 20 && pageSize !== 50 && pageSize !== 100) {
+    return null;
+  }
+
+  return {
+    page,
+    pageSize,
+  };
+}
+
 function parseExportScope(
   value: string | null,
 ): OrganizationAnalyticsExportScope | null {
@@ -144,5 +179,24 @@ export function parseOrganizationAnalyticsExportReadinessRouteQuery(
     : createSuccessResponse({
         ...summaryRouteQuery,
         exportScope,
+      });
+}
+
+export function parseOrganizationAnalyticsEmployeeStatisticsRouteQuery(
+  input: unknown,
+): ApiResponse<OrganizationAnalyticsEmployeeStatisticsRouteQuery | null> {
+  const summaryRouteQuery = parseSummaryRouteQuery(input);
+
+  if (!isRecord(input) || summaryRouteQuery === null) {
+    return createInvalidRouteInputResponse();
+  }
+
+  const pagination = parseEmployeeStatisticsPagination(input);
+
+  return pagination === null
+    ? createInvalidRouteInputResponse()
+    : createSuccessResponse({
+        ...summaryRouteQuery,
+        pagination,
       });
 }

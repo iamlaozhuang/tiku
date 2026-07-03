@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createElement } from "react";
 import {
   cleanup,
@@ -119,15 +121,30 @@ const dashboardSummaryPayload = {
       redactionStatus: "summary_only",
       hiddenSourceMarker: "hidden formal learning source",
     },
-    quotaSummary: {
-      employeeAiTaskCount: 11,
-      employeeAiSucceededTaskCount: 9,
-      employeeAiFailedTaskCount: 2,
-      employeeAiQuotaConsumedPoint: 135,
-      organizationTrainingGenerationConsumedPoint: 42,
-      quotaRemainingPoint: 823,
+    knowledgeWeakPointSummary: {
+      sampleSize: 4,
+      lowConfidence: true,
+      trainingWeakPoints: [
+        {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabel: "客户异议处理",
+          affectedEmployeeCount: 3,
+          affectedEmployeePercent: 0.75,
+          confidenceStatus: "low_sample",
+          redactionStatus: "summary_only",
+        },
+      ],
+      formalLearningWeakPoints: [
+        {
+          sourceDomain: "formal_learning",
+          knowledgeNodeLabel: "案例分析",
+          affectedEmployeeCount: 2,
+          affectedEmployeePercent: 0.5,
+          confidenceStatus: "low_sample",
+          redactionStatus: "summary_only",
+        },
+      ],
       redactionStatus: "summary_only",
-      internalNumericId: 77123,
     },
     redactedStatisticsBoundary: redactedStatisticsBoundaryPayload,
     redactionStatus: "aggregate_only",
@@ -167,6 +184,11 @@ const employeeStatisticsPayload = {
         trainingCompletionRate: 0.8,
         trainingAverageScore: 88,
         latestTrainingSubmittedAt: "2026-06-15T07:00:00.000Z",
+        weakPointSummary: {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabels: ["客户异议处理"],
+          redactionStatus: "summary_only",
+        },
         redactionStatus: "summary_only",
         rawAnswerText: "hidden employee subjective answer",
         id: 66123,
@@ -183,6 +205,11 @@ const employeeStatisticsPayload = {
         trainingCompletionRate: 0,
         trainingAverageScore: null,
         latestTrainingSubmittedAt: null,
+        weakPointSummary: {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabels: [],
+          redactionStatus: "summary_only",
+        },
         redactionStatus: "summary_only",
       },
     ],
@@ -190,6 +217,13 @@ const employeeStatisticsPayload = {
     redactionStatus: "summary_only",
     updatedAt: "2026-06-16T08:00:00.000Z",
     id: 77124,
+  },
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 2,
+    sortBy: "employeeDisplayName",
+    sortOrder: "asc",
   },
 };
 
@@ -201,11 +235,33 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
+function resolveRequestPath(value: RequestInfo | URL) {
+  return String(value);
+}
+
+function isOrganizationAnalyticsDashboardSummaryPath(path: string) {
+  return path.startsWith(
+    "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&",
+  );
+}
+
+function isOrganizationAnalyticsEmployeeStatisticsPath(path: string) {
+  return path.startsWith(
+    "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&",
+  );
+}
+
+function expectDefaultEmployeeStatisticsPaging(path: string) {
+  expect(path).toContain("page=1");
+  expect(path).toContain("pageSize=20");
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+  vi.useRealTimers();
 });
 
 describe("AdminOrganizationAnalyticsPage", () => {
@@ -213,6 +269,26 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(AdminOrganizationAnalyticsRoutePage()).toEqual(
       createElement(AdminOrganizationAnalyticsPage),
     );
+  });
+
+  it("redirects the content workspace alias back to the organization analytics workspace", () => {
+    const contentAliasSource = readFileSync(
+      join(
+        process.cwd(),
+        "src",
+        "app",
+        "(admin)",
+        "content",
+        "organization-analytics",
+        "page.tsx",
+      ),
+      "utf8",
+    );
+
+    expect(contentAliasSource).toContain(
+      'redirect("/organization/organization-analytics")',
+    );
+    expect(contentAliasSource).not.toContain("AdminOrganizationAnalyticsPage");
   });
 
   it("renders unauthorized state without calling organization analytics reads when session is missing", async () => {
@@ -287,23 +363,19 @@ describe("AdminOrganizationAnalyticsPage", () => {
   it("automatically loads scoped summary and redacted employee statistics for advanced organization admins", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-      const path = String(url);
+      const path = resolveRequestPath(url);
 
       if (path === "/api/v1/sessions") {
         return createJsonResponse(adminSessionPayload);
       }
 
-      if (
-        path ===
-        "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
-      ) {
+      if (isOrganizationAnalyticsDashboardSummaryPath(path)) {
         return createJsonResponse(dashboardSummaryPayload);
       }
 
-      if (
-        path ===
-        "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
-      ) {
+      if (isOrganizationAnalyticsEmployeeStatisticsPath(path)) {
+        expectDefaultEmployeeStatisticsPaging(path);
+
         return createJsonResponse(employeeStatisticsPayload);
       }
 
@@ -336,23 +408,19 @@ describe("AdminOrganizationAnalyticsPage", () => {
   it("loads scoped summary and employee statistics without manual organization id entry or hidden details", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-      const path = String(url);
+      const path = resolveRequestPath(url);
 
       if (path === "/api/v1/sessions") {
         return createJsonResponse(adminSessionPayload);
       }
 
-      if (
-        path ===
-        "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
-      ) {
+      if (isOrganizationAnalyticsDashboardSummaryPath(path)) {
         return createJsonResponse(dashboardSummaryPayload);
       }
 
-      if (
-        path ===
-        "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
-      ) {
+      if (isOrganizationAnalyticsEmployeeStatisticsPath(path)) {
+        expectDefaultEmployeeStatisticsPaging(path);
+
         return createJsonResponse(employeeStatisticsPayload);
       }
 
@@ -367,10 +435,12 @@ describe("AdminOrganizationAnalyticsPage", () => {
     render(createElement(AdminOrganizationAnalyticsPage));
 
     expect(
-      await screen.findByRole("heading", { name: "统计摘要" }),
+      await screen.findByRole("heading", { name: "组织统计" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("仅展示汇总趋势和脱敏员工统计"),
+      screen.getByText(
+        "按企业训练、正式学习信号和知识薄弱点分区查看汇总结果；员工原始作答和个人无关学习内容不展示。",
+      ),
     ).toBeInTheDocument();
 
     const scopeContext = await screen.findByTestId(
@@ -393,24 +463,28 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(summaryCard).toHaveTextContent("8 已提交员工");
     expect(summaryCard).toHaveTextContent("67% 完成率");
     expect(summaryCard).toHaveTextContent("82 平均分");
-    expect(summaryCard).toHaveTextContent("7 次正式练习");
-    expect(summaryCard).toHaveTextContent("823 剩余额度");
+    expect(summaryCard).toHaveTextContent("企业训练统计");
+    expect(summaryCard).toHaveTextContent("训练明细");
+    expect(summaryCard).toHaveTextContent("正式学习聚合信号");
+    expect(summaryCard).toHaveTextContent("7 正式练习");
+    expect(summaryCard).toHaveTextContent("知识薄弱点");
+    expect(summaryCard).toHaveTextContent("客户异议处理");
+    expect(summaryCard).toHaveTextContent("案例分析");
+    expect(summaryCard).toHaveTextContent("低置信");
     expect(summaryCard).toHaveTextContent("聚合脱敏");
     const redactedBoundaryPanel = within(summaryCard).getByTestId(
       "organization-analytics-redacted-statistics-boundary",
     );
+    expect(redactedBoundaryPanel).toHaveTextContent("隐私边界");
+    expect(redactedBoundaryPanel).toHaveTextContent("仅限本组织范围的脱敏统计");
     expect(redactedBoundaryPanel).toHaveTextContent(
-      "organization_admin_own_scope",
+      "只展示人数、完成率、分数和时间汇总",
     );
     expect(redactedBoundaryPanel).toHaveTextContent(
-      "summary_counts_score_time_only",
+      "只展示状态、分数、时间和弱点标签",
     );
-    expect(redactedBoundaryPanel).toHaveTextContent("status_score_time_only");
-    expect(redactedBoundaryPanel).toHaveTextContent("blocked");
-    expect(redactedBoundaryPanel).toHaveTextContent(
-      "blocked_requires_fresh_approval",
-    );
-    expect(redactedBoundaryPanel).toHaveTextContent("redacted_boundary");
+    expect(redactedBoundaryPanel).toHaveTextContent("Prompt 与模型请求");
+    expect(redactedBoundaryPanel).toHaveTextContent("首期不提供");
 
     expect(
       within(summaryCard).getByTestId("organization-analytics-submitted-trend"),
@@ -426,6 +500,7 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(employeeStatistics).toHaveTextContent("4 / 5");
     expect(employeeStatistics).toHaveTextContent("80%");
     expect(employeeStatistics).toHaveTextContent("88");
+    expect(employeeStatistics).toHaveTextContent("客户异议处理");
     expect(employeeStatistics).toHaveTextContent("员工乙");
     expect(employeeStatistics).toHaveTextContent("0 / 2");
     expect(employeeStatistics).toHaveTextContent("暂无");
@@ -434,10 +509,19 @@ describe("AdminOrganizationAnalyticsPage", () => {
     ).toBeDisabled();
     expect(
       screen.getByTestId("organization-analytics-export-readiness"),
-    ).toHaveTextContent("导出需单独审批");
+    ).toHaveTextContent("首期不提供导出");
+    expect(
+      screen.getByTestId("organization-analytics-employee-pagination"),
+    ).toHaveTextContent("第 1 / 1 页，共 2 条");
     expect(summaryCard).not.toHaveTextContent("Dashboard summary");
     expect(summaryCard).not.toHaveTextContent("eligible employees");
     expect(summaryCard).not.toHaveTextContent("aggregate_only");
+    expect(summaryCard).not.toHaveTextContent("AI任务");
+    expect(summaryCard).not.toHaveTextContent("剩余额度");
+    expect(summaryCard).not.toHaveTextContent("summary_counts_score_time_only");
+    expect(summaryCard).not.toHaveTextContent(
+      "blocked_requires_fresh_approval",
+    );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain(
       "organization-analytics-child-hidden-002",
@@ -446,7 +530,6 @@ describe("AdminOrganizationAnalyticsPage", () => {
       "organization-analytics-child-hidden-003",
     );
     expect(document.body.textContent).not.toContain("99123");
-    expect(document.body.textContent).not.toContain("77123");
     expect(document.body.textContent).not.toContain("77124");
     expect(document.body.textContent).not.toContain("66123");
     expect(document.body.textContent).not.toContain("hidden formal");
@@ -458,23 +541,19 @@ describe("AdminOrganizationAnalyticsPage", () => {
   it("shows an explicit employee statistics error state after the load action fails partially", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-      const path = String(url);
+      const path = resolveRequestPath(url);
 
       if (path === "/api/v1/sessions") {
         return createJsonResponse(adminSessionPayload);
       }
 
-      if (
-        path ===
-        "/api/v1/organization-analytics/dashboard-summary?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
-      ) {
+      if (isOrganizationAnalyticsDashboardSummaryPath(path)) {
         return createJsonResponse(dashboardSummaryPayload);
       }
 
-      if (
-        path ===
-        "/api/v1/organization-analytics/employee-statistics?organizationPublicId=organization-analytics-scope-001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z"
-      ) {
+      if (isOrganizationAnalyticsEmployeeStatisticsPath(path)) {
+        expectDefaultEmployeeStatisticsPaging(path);
+
         return createJsonResponse({
           code: 500001,
           message: "employee statistics unavailable",

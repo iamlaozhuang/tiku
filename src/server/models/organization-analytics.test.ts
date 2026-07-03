@@ -4,6 +4,7 @@ import {
   createOrganizationAnalyticsAuditLogRedactedReference,
   createOrganizationAnalyticsEmployeeTrainingSummary,
   createOrganizationAnalyticsExportReadinessAssessment,
+  createOrganizationAnalyticsKnowledgeWeakPointSummary,
   createOrganizationTrainingAggregateMetrics,
   rankOrganizationTrainingEmployeeSummaries,
   selectHistoricalOrganizationTrainingVersionPublicIds,
@@ -194,6 +195,7 @@ describe("organization analytics aggregate metrics", () => {
         "training_version_public_alpha",
         "training_version_public_beta",
       ],
+      weakPointLabels: [" 客户异议处理 ", "客户异议处理", ""],
       officialSubmissions: [
         officialSubmission,
         {
@@ -226,6 +228,11 @@ describe("organization analytics aggregate metrics", () => {
       trainingCompletionRate: 0.5,
       trainingAverageScore: 92,
       latestTrainingSubmittedAt: "2026-06-11T09:30:00Z",
+      weakPointSummary: {
+        sourceDomain: "organization_training",
+        knowledgeNodeLabels: ["客户异议处理"],
+        redactionStatus: "summary_only",
+      },
       redactionStatus: "summary_only",
     });
     expect(serializedSummary).not.toMatch(/"id":/);
@@ -294,6 +301,11 @@ describe("organization analytics aggregate metrics", () => {
       trainingCompletionRate: 1,
       trainingAverageScore: 90,
       latestTrainingSubmittedAt: "2026-06-11T09:30:00Z",
+      weakPointSummary: {
+        sourceDomain: "organization_training",
+        knowledgeNodeLabels: [],
+        redactionStatus: "summary_only",
+      },
       answerOrganizationSnapshot: {
         organizationPublicId: "org_district_public_456",
         organizationName: "District One",
@@ -328,8 +340,71 @@ describe("organization analytics aggregate metrics", () => {
       trainingCompletionRate: 0,
       trainingAverageScore: null,
       latestTrainingSubmittedAt: null,
+      weakPointSummary: {
+        sourceDomain: "organization_training",
+        knowledgeNodeLabels: [],
+        redactionStatus: "summary_only",
+      },
       redactionStatus: "summary_only",
     });
+  });
+
+  it("creates low-sample knowledge weak-point summaries without detail payloads", () => {
+    const guardedInput = {
+      sampleSize: 4.8,
+      trainingWeakPoints: [
+        {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabel: " 客户异议处理 ",
+          affectedEmployeeCount: 3.6,
+          affectedEmployeePercent: 1.2,
+          guardedMarker: "hidden weak point detail",
+        },
+        {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabel: " ",
+          affectedEmployeeCount: 1,
+          affectedEmployeePercent: 0.25,
+        },
+      ],
+      formalLearningWeakPoints: [
+        {
+          sourceDomain: "formal_learning",
+          knowledgeNodeLabel: "案例分析",
+          affectedEmployeeCount: 2,
+          affectedEmployeePercent: 0.5,
+        },
+      ],
+    } as const;
+    const summary =
+      createOrganizationAnalyticsKnowledgeWeakPointSummary(guardedInput);
+
+    expect(summary).toEqual({
+      sampleSize: 4,
+      lowConfidence: true,
+      trainingWeakPoints: [
+        {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabel: "客户异议处理",
+          affectedEmployeeCount: 3,
+          affectedEmployeePercent: 1,
+          confidenceStatus: "low_sample",
+          redactionStatus: "summary_only",
+        },
+      ],
+      formalLearningWeakPoints: [
+        {
+          sourceDomain: "formal_learning",
+          knowledgeNodeLabel: "案例分析",
+          affectedEmployeeCount: 2,
+          affectedEmployeePercent: 0.5,
+          confidenceStatus: "low_sample",
+          redactionStatus: "summary_only",
+        },
+      ],
+      redactionStatus: "summary_only",
+    });
+    expect(JSON.stringify(summary)).not.toContain("hidden weak point detail");
   });
 
   it("marks export readiness as blocked without object storage or external delivery", () => {

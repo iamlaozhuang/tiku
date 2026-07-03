@@ -53,7 +53,13 @@ describe("organization analytics route mapper", () => {
             submittedTrend: [],
           },
           formalLearningSummary: null,
-          quotaSummary: null,
+          knowledgeWeakPointSummary: {
+            sampleSize: 0,
+            lowConfidence: false,
+            trainingWeakPoints: [],
+            formalLearningWeakPoints: [],
+            redactionStatus: "summary_only",
+          },
           redactedStatisticsBoundary,
           redactionStatus: "aggregate_only",
           updatedAt: "2026-06-16T10:30:00Z",
@@ -80,7 +86,13 @@ describe("organization analytics route mapper", () => {
           submittedTrend: [],
         },
         formalLearningSummary: null,
-        quotaSummary: null,
+        knowledgeWeakPointSummary: {
+          sampleSize: 0,
+          lowConfidence: false,
+          trainingWeakPoints: [],
+          formalLearningWeakPoints: [],
+          redactionStatus: "summary_only",
+        },
         redactedStatisticsBoundary,
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:30:00Z",
@@ -127,6 +139,11 @@ describe("organization analytics route mapper", () => {
               trainingCompletionRate: 0,
               trainingAverageScore: null,
               latestTrainingSubmittedAt: null,
+              weakPointSummary: {
+                sourceDomain: "organization_training",
+                knowledgeNodeLabels: [],
+                redactionStatus: "summary_only",
+              },
               redactionStatus: "summary_only",
             },
           ],
@@ -159,6 +176,11 @@ describe("organization analytics route mapper", () => {
             trainingCompletionRate: 0,
             trainingAverageScore: null,
             latestTrainingSubmittedAt: null,
+            weakPointSummary: {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabels: [],
+              redactionStatus: "summary_only",
+            },
             redactionStatus: "summary_only",
           },
         ],
@@ -170,6 +192,47 @@ describe("organization analytics route mapper", () => {
     expect(JSON.stringify(response)).not.toContain(
       "scopeOrganizationPublicIds",
     );
+  });
+
+  it("preserves employee statistics pagination metadata", () => {
+    const mapperExports = organizationAnalyticsMapper as MapperExports;
+
+    const response =
+      mapperExports.mapOrganizationAnalyticsEmployeeStatisticsRouteResponse?.({
+        code: 0,
+        message: "ok",
+        data: {
+          organizationPublicId: "organization_public_root",
+          scopeOrganizationPublicIds: ["organization_public_root"],
+          dateRange: {
+            startAt: "2026-06-01T00:00:00Z",
+            endAt: "2026-06-16T23:59:59Z",
+          },
+          employeeCount: 0,
+          employees: [],
+          redactedStatisticsBoundary,
+          redactionStatus: "summary_only",
+          updatedAt: "2026-06-16T10:30:00Z",
+        },
+        pagination: {
+          page: 2,
+          pageSize: 50,
+          total: 55,
+          sortBy: "employeeDisplayName",
+          sortOrder: "asc",
+        },
+      });
+
+    expect(response).toMatchObject({
+      code: 0,
+      pagination: {
+        page: 2,
+        pageSize: 50,
+        total: 55,
+        sortBy: "employeeDisplayName",
+        sortOrder: "asc",
+      },
+    });
   });
 
   it("maps export readiness metadata without generated artifacts", () => {

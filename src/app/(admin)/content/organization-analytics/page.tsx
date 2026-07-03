@@ -1,5 +1,5 @@
-import { AdminOrganizationAnalyticsPage } from "@/features/admin/organization-analytics/AdminOrganizationAnalyticsPage";
+import { redirect } from "next/navigation";
 
 export default function AdminOrganizationAnalyticsRoutePage() {
-  return <AdminOrganizationAnalyticsPage />;
+  redirect("/organization/organization-analytics");
 }

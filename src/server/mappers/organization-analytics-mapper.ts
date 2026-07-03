@@ -40,6 +40,7 @@ export function mapOrganizationAnalyticsEmployeeStatisticsRouteResponse(
     : createOrganizationAnalyticsEmployeeStatisticsRouteResponse(
         response.data,
         response.message,
+        response.pagination,
       );
 }
 

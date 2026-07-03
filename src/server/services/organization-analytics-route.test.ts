@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createSuccessResponse } from "../contracts/api-response";
+import {
+  createPaginatedResponse,
+  createSuccessResponse,
+} from "../contracts/api-response";
 import {
   createOrganizationAnalyticsRedactedStatisticsBoundary,
   type OrganizationAnalyticsDashboardSummaryDto,
@@ -47,16 +50,27 @@ function createFormalLearningSummaryFixture() {
   };
 }
 
-function createQuotaSummaryFixture() {
+function createKnowledgeWeakPointSummaryFixture() {
   return {
-    employeeAiTaskCount: 11,
-    employeeAiSucceededTaskCount: 9,
-    employeeAiFailedTaskCount: 2,
-    employeeAiQuotaConsumedPoint: 135,
-    organizationTrainingGenerationConsumedPoint: 42,
-    quotaRemainingPoint: 823,
-    redactionStatus: "summary_only" as const,
-    hiddenSourceMarker: "hidden quota source",
+    sampleSize: 6,
+    trainingWeakPoints: [
+      {
+        sourceDomain: "organization_training" as const,
+        knowledgeNodeLabel: "客户异议处理",
+        affectedEmployeeCount: 3,
+        affectedEmployeePercent: 0.5,
+        hiddenSourceMarker: "hidden training weak point source",
+      },
+    ],
+    formalLearningWeakPoints: [
+      {
+        sourceDomain: "formal_learning" as const,
+        knowledgeNodeLabel: "案例分析",
+        affectedEmployeeCount: 2,
+        affectedEmployeePercent: 0.33,
+        hiddenSourceMarker: "hidden formal weak point source",
+      },
+    ],
   };
 }
 
@@ -86,7 +100,31 @@ function createDashboardSummary(
       ],
     },
     formalLearningSummary: createFormalLearningSummaryFixture(),
-    quotaSummary: createQuotaSummaryFixture(),
+    knowledgeWeakPointSummary: {
+      sampleSize: 6,
+      lowConfidence: false,
+      trainingWeakPoints: [
+        {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabel: "客户异议处理",
+          affectedEmployeeCount: 3,
+          affectedEmployeePercent: 0.5,
+          confidenceStatus: "normal",
+          redactionStatus: "summary_only",
+        },
+      ],
+      formalLearningWeakPoints: [
+        {
+          sourceDomain: "formal_learning",
+          knowledgeNodeLabel: "案例分析",
+          affectedEmployeeCount: 2,
+          affectedEmployeePercent: 0.33,
+          confidenceStatus: "normal",
+          redactionStatus: "summary_only",
+        },
+      ],
+      redactionStatus: "summary_only",
+    },
     redactedStatisticsBoundary:
       createOrganizationAnalyticsRedactedStatisticsBoundary(),
     redactionStatus: "aggregate_only",
@@ -122,6 +160,11 @@ function createEmployeeStatisticsSummary(
         trainingCompletionRate: 0.67,
         trainingAverageScore: 86,
         latestTrainingSubmittedAt: "2026-06-10T09:00:00.000Z",
+        weakPointSummary: {
+          sourceDomain: "organization_training",
+          knowledgeNodeLabels: ["客户异议处理"],
+          redactionStatus: "summary_only",
+        },
         redactionStatus: "summary_only",
       },
     ],
@@ -217,15 +260,15 @@ function createRepositoryBackedDashboardSummaryRepository(
 
       return createFormalLearningSummaryFixture();
     },
-    async readQuotaSummary(input) {
+    async readKnowledgeWeakPointSummary(input) {
       observedReads.push({
-        readName: "quota_summary",
+        readName: "knowledge_weak_point_summary",
         organizationPublicId: input.organizationPublicId,
         scopeOrganizationPublicIds: input.scopeOrganizationPublicIds,
         dateRange: input.dateRange,
       });
 
-      return createQuotaSummaryFixture();
+      return createKnowledgeWeakPointSummaryFixture();
     },
     async readExportReadinessRows() {
       return [];
@@ -270,6 +313,7 @@ function createRepositoryBackedEmployeeStatisticsRepository(
             "organization_analytics_training_version_public_001",
             "organization_analytics_training_version_public_002",
           ],
+          weakPointLabels: ["客户异议处理"],
           officialSubmissions: [
             {
               employeePublicId: "organization_analytics_employee_public_001",
@@ -292,7 +336,7 @@ function createRepositoryBackedEmployeeStatisticsRepository(
     async readFormalLearningSummary() {
       return null;
     },
-    async readQuotaSummary() {
+    async readKnowledgeWeakPointSummary() {
       return null;
     },
     async readExportReadinessRows() {
@@ -471,13 +515,29 @@ describe("organization analytics dashboard summary route handlers", () => {
           formalMistakeBookCount: 5,
           redactionStatus: "summary_only",
         },
-        quotaSummary: {
-          employeeAiTaskCount: 11,
-          employeeAiSucceededTaskCount: 9,
-          employeeAiFailedTaskCount: 2,
-          employeeAiQuotaConsumedPoint: 135,
-          organizationTrainingGenerationConsumedPoint: 42,
-          quotaRemainingPoint: 823,
+        knowledgeWeakPointSummary: {
+          sampleSize: 6,
+          lowConfidence: false,
+          trainingWeakPoints: [
+            {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabel: "客户异议处理",
+              affectedEmployeeCount: 3,
+              affectedEmployeePercent: 0.5,
+              confidenceStatus: "normal",
+              redactionStatus: "summary_only",
+            },
+          ],
+          formalLearningWeakPoints: [
+            {
+              sourceDomain: "formal_learning",
+              knowledgeNodeLabel: "案例分析",
+              affectedEmployeeCount: 2,
+              affectedEmployeePercent: 0.33,
+              confidenceStatus: "normal",
+              redactionStatus: "summary_only",
+            },
+          ],
           redactionStatus: "summary_only",
         },
         redactedStatisticsBoundary:
@@ -487,7 +547,7 @@ describe("organization analytics dashboard summary route handlers", () => {
       },
     });
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
-    expect(JSON.stringify(payload)).not.toMatch(/hidden formal|hidden quota/u);
+    expect(JSON.stringify(payload)).not.toMatch(/hidden formal|hidden weak/u);
   });
 
   it("returns invalid input envelope before calling dashboard reader", async () => {
@@ -610,13 +670,29 @@ describe("organization analytics dashboard summary route handlers", () => {
           formalMistakeBookCount: 5,
           redactionStatus: "summary_only",
         },
-        quotaSummary: {
-          employeeAiTaskCount: 11,
-          employeeAiSucceededTaskCount: 9,
-          employeeAiFailedTaskCount: 2,
-          employeeAiQuotaConsumedPoint: 135,
-          organizationTrainingGenerationConsumedPoint: 42,
-          quotaRemainingPoint: 823,
+        knowledgeWeakPointSummary: {
+          sampleSize: 6,
+          lowConfidence: false,
+          trainingWeakPoints: [
+            {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabel: "客户异议处理",
+              affectedEmployeeCount: 3,
+              affectedEmployeePercent: 0.5,
+              confidenceStatus: "normal",
+              redactionStatus: "summary_only",
+            },
+          ],
+          formalLearningWeakPoints: [
+            {
+              sourceDomain: "formal_learning",
+              knowledgeNodeLabel: "案例分析",
+              affectedEmployeeCount: 2,
+              affectedEmployeePercent: 0.33,
+              confidenceStatus: "normal",
+              redactionStatus: "summary_only",
+            },
+          ],
           redactionStatus: "summary_only",
         },
         redactedStatisticsBoundary:
@@ -655,7 +731,7 @@ describe("organization analytics dashboard summary route handlers", () => {
         },
       },
       {
-        readName: "quota_summary",
+        readName: "knowledge_weak_point_summary",
         organizationPublicId: "organization_analytics_route_org_public_001",
         scopeOrganizationPublicIds: [
           "organization_analytics_route_org_public_001",
@@ -667,7 +743,7 @@ describe("organization analytics dashboard summary route handlers", () => {
         },
       },
     ]);
-    expect(JSON.stringify(payload)).not.toMatch(/hidden formal|hidden quota/u);
+    expect(JSON.stringify(payload)).not.toMatch(/hidden formal|hidden weak/u);
   });
 
   it("wires injected runtime database and session through Postgres source readers", async () => {
@@ -767,7 +843,13 @@ describe("organization analytics dashboard summary route handlers", () => {
           ],
         },
         formalLearningSummary: null,
-        quotaSummary: null,
+        knowledgeWeakPointSummary: {
+          sampleSize: 0,
+          lowConfidence: false,
+          trainingWeakPoints: [],
+          formalLearningWeakPoints: [],
+          redactionStatus: "summary_only",
+        },
         redactedStatisticsBoundary:
           createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "aggregate_only",
@@ -896,10 +978,18 @@ describe("organization analytics employee statistics route handlers", () => {
     const observedQueries: Array<{
       organizationPublicId: string;
       dateRange: OrganizationAnalyticsDateRangeDto;
+      pagination: {
+        page: number;
+        pageSize: number;
+      };
     }> = [];
     const observedAdminContextInputs: Array<{
       organizationPublicId: string;
       dateRange: OrganizationAnalyticsDateRangeDto;
+      pagination: {
+        page: number;
+        pageSize: number;
+      };
     }> = [];
     const adminContext = createEmployeeStatisticsAdminContext();
     const { employeeStatistics } =
@@ -913,12 +1003,20 @@ describe("organization analytics employee statistics route handlers", () => {
           observedQueries.push({
             organizationPublicId: input.organizationPublicId,
             dateRange: input.dateRange,
+            pagination: input.pagination,
           });
 
           expect(input.adminContext).toEqual(adminContext);
 
-          return createSuccessResponse(
+          return createPaginatedResponse(
             createEmployeeStatisticsSummary(input.dateRange),
+            {
+              page: input.pagination.page,
+              pageSize: input.pagination.pageSize,
+              total: 1,
+              sortBy: "employeeDisplayName",
+              sortOrder: "asc",
+            },
             "employee statistics ready",
           );
         },
@@ -926,7 +1024,7 @@ describe("organization analytics employee statistics route handlers", () => {
 
     const response = await employeeStatistics.GET(
       createEmployeeStatisticsRequest(
-        "?organizationPublicId=%20organization_analytics_route_org_public_001%20&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+        "?organizationPublicId=%20organization_analytics_route_org_public_001%20&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z&page=2&pageSize=50",
       ),
     );
     const payload = await response.json();
@@ -937,6 +1035,10 @@ describe("organization analytics employee statistics route handlers", () => {
         dateRange: {
           startAt: "2026-06-01T00:00:00.000Z",
           endAt: "2026-06-16T00:00:00.000Z",
+        },
+        pagination: {
+          page: 2,
+          pageSize: 50,
         },
       },
     ]);
@@ -969,6 +1071,11 @@ describe("organization analytics employee statistics route handlers", () => {
             trainingCompletionRate: 0.67,
             trainingAverageScore: 86,
             latestTrainingSubmittedAt: "2026-06-10T09:00:00.000Z",
+            weakPointSummary: {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabels: ["客户异议处理"],
+              redactionStatus: "summary_only",
+            },
             redactionStatus: "summary_only",
           },
         ],
@@ -976,6 +1083,13 @@ describe("organization analytics employee statistics route handlers", () => {
           createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T08:30:00.000Z",
+      },
+      pagination: {
+        page: 2,
+        pageSize: 50,
+        total: 1,
+        sortBy: "employeeDisplayName",
+        sortOrder: "asc",
       },
     });
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
@@ -1100,6 +1214,11 @@ describe("organization analytics employee statistics route handlers", () => {
             trainingCompletionRate: 0.5,
             trainingAverageScore: 86,
             latestTrainingSubmittedAt: "2026-06-10T09:00:00.000Z",
+            weakPointSummary: {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabels: ["客户异议处理"],
+              redactionStatus: "summary_only",
+            },
             redactionStatus: "summary_only",
           },
         ],
@@ -1107,6 +1226,13 @@ describe("organization analytics employee statistics route handlers", () => {
           createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T10:30:00.000Z",
+      },
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 1,
+        sortBy: "employeeDisplayName",
+        sortOrder: "asc",
       },
     });
     expect(observedReads).toEqual([
@@ -1210,6 +1336,11 @@ describe("organization analytics employee statistics route handlers", () => {
             trainingCompletionRate: 1,
             trainingAverageScore: 86,
             latestTrainingSubmittedAt: "2026-06-10T09:00:00.000Z",
+            weakPointSummary: {
+              sourceDomain: "organization_training",
+              knowledgeNodeLabels: [],
+              redactionStatus: "summary_only",
+            },
             redactionStatus: "summary_only",
           },
         ],
@@ -1217,6 +1348,13 @@ describe("organization analytics employee statistics route handlers", () => {
           createOrganizationAnalyticsRedactedStatisticsBoundary(),
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T10:45:00.000Z",
+      },
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 1,
+        sortBy: "employeeDisplayName",
+        sortOrder: "asc",
       },
     });
     expect(sessionService.requests).toHaveLength(1);

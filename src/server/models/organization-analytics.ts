@@ -4,6 +4,9 @@ import type {
   OrganizationAnalyticsAuditLogReferenceDto,
   OrganizationAnalyticsDateRangeDto,
   OrganizationAnalyticsEmployeeTrainingSummaryDto,
+  OrganizationAnalyticsKnowledgeWeakPointSummaryDto,
+  OrganizationAnalyticsWeakPointItemDto,
+  OrganizationAnalyticsWeakPointSourceDomain,
   OrganizationAnalyticsExportReadinessAssessmentDto,
   OrganizationAnalyticsExportReadinessBlockedReason,
   OrganizationAnalyticsExportScope,
@@ -57,7 +60,20 @@ export type OrganizationAnalyticsEmployeeTrainingSummaryInput = {
   organizationName: string;
   visibleTrainingVersionPublicIds: readonly string[];
   officialSubmissions: readonly OrganizationAnalyticsEmployeeTrainingSubmission[];
+  weakPointLabels?: readonly string[];
   dateRange: OrganizationAnalyticsDateRangeDto;
+};
+
+export type OrganizationAnalyticsWeakPointSummaryInput = {
+  sampleSize: number;
+  trainingWeakPoints: readonly Omit<
+    OrganizationAnalyticsWeakPointItemDto,
+    "confidenceStatus" | "redactionStatus"
+  >[];
+  formalLearningWeakPoints: readonly Omit<
+    OrganizationAnalyticsWeakPointItemDto,
+    "confidenceStatus" | "redactionStatus"
+  >[];
 };
 
 export type OrganizationAnalyticsExportReadinessRowRedactionStatus =
@@ -180,6 +196,85 @@ function selectLatestEmployeeTrainingSubmissionsByVersion(
   return Object.values(latestSubmissionByTrainingVersion);
 }
 
+function normalizeWeakPointLabel(value: string): string | null {
+  const normalizedLabel = value.trim();
+
+  return normalizedLabel.length > 0 ? normalizedLabel : null;
+}
+
+function normalizeWeakPointLabels(values: readonly string[] = []): string[] {
+  return [
+    ...new Set(
+      values
+        .map(normalizeWeakPointLabel)
+        .filter((label): label is string => label !== null),
+    ),
+  ];
+}
+
+function normalizeWeakPointSourceDomain(
+  value: OrganizationAnalyticsWeakPointSourceDomain,
+): OrganizationAnalyticsWeakPointSourceDomain {
+  return value === "formal_learning"
+    ? "formal_learning"
+    : "organization_training";
+}
+
+function normalizeWeakPointItem(
+  item: Omit<
+    OrganizationAnalyticsWeakPointItemDto,
+    "confidenceStatus" | "redactionStatus"
+  >,
+  lowConfidence: boolean,
+): OrganizationAnalyticsWeakPointItemDto[] {
+  const knowledgeNodeLabel = normalizeWeakPointLabel(item.knowledgeNodeLabel);
+  const affectedEmployeeCount = Number.isFinite(item.affectedEmployeeCount)
+    ? Math.max(Math.floor(item.affectedEmployeeCount), 0)
+    : 0;
+  const affectedEmployeePercent = Number.isFinite(item.affectedEmployeePercent)
+    ? Math.min(Math.max(item.affectedEmployeePercent, 0), 1)
+    : 0;
+
+  if (knowledgeNodeLabel === null || affectedEmployeeCount <= 0) {
+    return [];
+  }
+
+  return [
+    {
+      sourceDomain: normalizeWeakPointSourceDomain(item.sourceDomain),
+      knowledgeNodeLabel,
+      affectedEmployeeCount,
+      affectedEmployeePercent,
+      confidenceStatus: lowConfidence ? "low_sample" : "normal",
+      redactionStatus: "summary_only",
+    },
+  ];
+}
+
+export function createOrganizationAnalyticsKnowledgeWeakPointSummary(
+  input: OrganizationAnalyticsWeakPointSummaryInput | null,
+): OrganizationAnalyticsKnowledgeWeakPointSummaryDto {
+  const sampleSize =
+    input === null || !Number.isFinite(input.sampleSize)
+      ? 0
+      : Math.max(Math.floor(input.sampleSize), 0);
+  const lowConfidence = sampleSize > 0 && sampleSize < 5;
+
+  return {
+    sampleSize,
+    lowConfidence,
+    trainingWeakPoints:
+      input?.trainingWeakPoints.flatMap((weakPoint) =>
+        normalizeWeakPointItem(weakPoint, lowConfidence),
+      ) ?? [],
+    formalLearningWeakPoints:
+      input?.formalLearningWeakPoints.flatMap((weakPoint) =>
+        normalizeWeakPointItem(weakPoint, lowConfidence),
+      ) ?? [],
+    redactionStatus: "summary_only",
+  };
+}
+
 export function createOrganizationTrainingAggregateMetrics(
   input: OrganizationTrainingAggregateMetricsInput,
 ): OrganizationTrainingAggregateMetricsDto {
@@ -278,6 +373,11 @@ export function createOrganizationAnalyticsEmployeeTrainingSummary(
       latestOfficialSubmissionsInRange,
     ),
     latestTrainingSubmittedAt: latestSubmission?.submittedAt ?? null,
+    weakPointSummary: {
+      sourceDomain: "organization_training",
+      knowledgeNodeLabels: normalizeWeakPointLabels(input.weakPointLabels),
+      redactionStatus: "summary_only",
+    },
     redactionStatus: "summary_only",
   };
 }
