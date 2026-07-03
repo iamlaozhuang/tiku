@@ -35,9 +35,22 @@ For role flow, organization authorization, enterprise training, organization ana
 and model/prompt/log governance design work, read
 `docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md`.
 
-It records the current docs-only baseline and decision register. It does not approve source implementation, schema,
-Provider execution, Prompt editing UI, runtime acceptance, release readiness, final Pass, production usability, or Cost
-Calibration.
+For personal `redeem_code` standard activation, advanced activation, upgrade card semantics, generation distribution,
+operations list/detail plaintext visibility, and redacted evidence boundaries, read
+`docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md`.
+
+For the current confirmed decisions across organization authorization overlap closure, administrator/employee account
+boundaries, employee import/password reset, organization tree, organization training, organization analytics,
+organization AI follow-up actions, model connection testing, Prompt/log governance, and operations guided flows, read
+`docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md`.
+
+For context-bloat recovery, duplicate-work prevention, and row-level follow-up planning, read
+`docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md` and cite relevant
+`CT-REQ-*` row ids in future task plans.
+
+These files record the current docs-only baseline, decision register, and reconciliation ledger. They do not approve
+source implementation, schema, Provider execution, Prompt editing UI, runtime acceptance, release readiness, final Pass,
+production usability, or Cost Calibration.
 
 ## Source Documents
 
@@ -50,6 +63,9 @@ Primary sources:
 - `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`
 - `docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md`
 - `docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md`
+- `docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md`
+- `docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md`
+- `docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md`
 

@@ -32,9 +32,14 @@
 
 ## Previously Confirmed Decisions
 
+2026-07-02 supersession note: quota-consumption wording below is superseded for organization admin first-release UI by
+`docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md`. Organization admins do not see
+enterprise AI quota consumption summaries in the first release. The no-raw-content and redacted-summary boundaries
+remain valid.
+
 The following points were already decided by the advanced edition MVP source documents and are not open product questions:
 
-1. Organization admins cannot view employees' raw learner AI outputs, prompts, raw AI input/output, generated content summaries, single-task details, or task-list summaries. They can view organization-scoped statistics, quota consumption summaries, and redacted audit summaries only.
+1. Organization admins cannot view employees' raw learner AI outputs, prompts, raw AI input/output, generated content summaries, single-task details, or task-list summaries. The older quota-summary wording for organization admin UI is superseded for the first release by the 2026-07-02 decision package; organization admins can view organization-scoped statistics and redacted audit summaries only.
 2. If an employee uses organization authorization and organization quota for learner AI generation, the generated learning content still belongs to the employee/user. The organization can see summary-level statistics and quota consumption, not raw content.
 3. Organization-owned generated content follows the organization training/content lifecycle: unpublished drafts are editable, published content is versioned/locked for direct edit, changes require copy/new draft/new version, and takedown stops new answering while preserving history summaries.
 4. Content admin adoption into formal `question` or `paper` is already a governed two-step flow: AI output first lands in an isolated review surface; a content admin reviews/edits/validates/adopts it into an editable formal draft; existing formal validation and publish rules still apply.

@@ -59,6 +59,8 @@
 - [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md)
 - [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)
 - [UI/UX Requirement Design Baseline Gap Analysis](./traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md)
+- [Role Auth Training Ops Decision Package](./traceability/2026-07-02-role-auth-training-ops-decision-package.md)
+- [Current Thread Requirement Reconciliation Ledger](./traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md)
 - [Org Auth Scope Product Decision](./traceability/2026-06-21-org-auth-scope-product-decision.md)
 - [Advanced Edition Requirements Index](./advanced-edition/00-index.md)
 
@@ -84,7 +86,16 @@
 2026-07-02 起，涉及角色流程、企业授权、多范围 `org_auth`、`redeem_code`、组织树、企业训练、组织统计、内容/运营/组织后台、AI 生成后续操作、模型配置、Prompt 和日志治理的设计任务，应先读取
 [UI/UX Requirement Design Baseline Gap Analysis](./traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md)。
 
-该文件只记录设计基线、缺口和建议决策项，不批准产品源码、测试、数据库、Provider、Prompt 编辑后台、浏览器验收、部署、Cost Calibration、release readiness 或 final Pass。
+涉及个人 `redeem_code` 标准版/高级版/升级类型、生成分发窗口、运营后台列表/详情明文查看复制、以及证据/日志脱敏边界时，还应读取
+[Redeem Code Edition And Plaintext Operations Decision](./traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md)。
+
+涉及本轮已确认的企业授权重叠闭环、企业管理员/员工账号边界、员工导入和密码重置、组织树、企业训练、组织统计、组织 AI 后续操作、模型连接测试、Prompt/日志治理和运营后台流程时，还应读取
+[Role Auth Training Ops Decision Package](./traceability/2026-07-02-role-auth-training-ops-decision-package.md)。
+
+为避免重复讨论、遗漏本轮决策或把已实现/未实现状态混入需求语义，后续涉及上述范围的 UI/UX、需求或实现任务还应读取
+[Current Thread Requirement Reconciliation Ledger](./traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md)，并在任务计划中引用相关 `CT-REQ-*` 行。
+
+这些 traceability 文件只记录设计基线、缺口、决策和对账口径，不批准产品源码、测试、数据库、Provider、Prompt 编辑后台、浏览器验收、部署、Cost Calibration、release readiness 或 final Pass。
 
 ---
 
@@ -102,8 +113,8 @@
 
 管理后台首期只支持 PC Web，不做移动端适配。后台分两个产品入口：
 
-1. **内容后台** — 面向内容老师、出题人。管理题库题目、材料、试卷、组卷、发布/下架。
-2. **运营后台** — 面向平台运营人员。管理企业组织、企业授权、个人卡密、用户账号、资源文件、Markdown 知识库、AI/RAG 配置和日志。
+1. **内容后台** — 面向内容老师、出题人。管理题库题目、材料、试卷、组卷、发布/下架、资源文件与 Markdown/RAG 知识库。
+2. **运营后台** — 面向平台运营人员。管理企业组织、企业授权、个人卡密、用户账号、联系配置、审计日志和 AI 调用日志等运营功能。
 
 两个后台共用账号体系和后端权限体系，但入口、菜单和使用体验分开。
 
@@ -113,11 +124,11 @@
 
 首期后台角色：
 
-| 角色       | 权限范围                                                                      |
-| ---------- | ----------------------------------------------------------------------------- |
-| 超级管理员 | 全局权限，管理运营后台和内容后台所有功能                                      |
-| 运营管理员 | 企业组织、企业授权、个人卡密、用户账号、资源、Markdown、AI 消耗日志等运营功能 |
-| 内容老师   | 题库、材料、试卷、组卷、发布/下架等内容维护功能                               |
+| 角色       | 权限范围                                                                           |
+| ---------- | ---------------------------------------------------------------------------------- |
+| 超级管理员 | 全局权限，管理运营后台和内容后台所有功能                                           |
+| 运营管理员 | 企业组织、企业授权、个人卡密、用户账号、联系配置、审计日志和 AI 调用日志等运营功能 |
+| 内容老师   | 题库、材料、试卷、组卷、发布/下架、资源与 Markdown/RAG 知识库等内容维护功能        |
 
 规则：
 

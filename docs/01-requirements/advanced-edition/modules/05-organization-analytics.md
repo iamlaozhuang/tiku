@@ -22,6 +22,20 @@ Define the summary analytics visible to organization admins for organization tra
 - Organization analytics does not write formal `exam_report` or formal `mistake_book`.
 - Export remains out of scope unless separately approved.
 
+## Confirmed First-Release Design
+
+- Analytics levels:
+  - organization overview;
+  - training detail;
+  - employee summary.
+- Default date range is 30 days.
+- Filters support 7 days, 30 days, 90 days, and custom range.
+- Small samples below 5 people show a warning.
+- Knowledge weak-point summaries may be shown for organizations and employees when derived from training results.
+- Weak-point summaries must not expose raw answer text.
+- Enterprise AI quota consumption summary is not shown to organization admins in the first release.
+- No export is available in the first release.
+
 ## Non-Goals
 
 - No employee statistics export.

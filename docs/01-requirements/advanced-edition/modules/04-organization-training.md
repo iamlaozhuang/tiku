@@ -31,6 +31,37 @@ Define how organization admins create organization training and how employees an
 - Employee answers are not copied into formal `answer_record` for formal `practice` or `mock_exam` unless a later approved formal flow exists.
 - Organization training does not publish formal `paper`.
 
+## Confirmed First-Release Design
+
+- UI label is `企业训练`; code and API names may continue to use `organization_training`.
+- Creation uses a four-step wizard:
+  1. choose source;
+  2. configure training;
+  3. set publish scope and answer settings;
+  4. preview and publish.
+- First-release sources:
+  - platform paper library copy snapshot;
+  - organization AI result;
+  - organization-private manual grouping/manual questions.
+- `mock_exam` is not a source entry for organization training.
+- Publish scope supports current organization node only or current plus descendant nodes.
+- Platform paper import lets organization admin view the full copied stem, options, `standard_answer`, and `analysis`.
+  Edits apply only to the copied snapshot and never write back to the platform paper.
+- Organization AI output can be copied into a training draft. Generated stem, options, `standard_answer`, and `analysis`
+  are editable in that draft.
+- `evidence_status = none` blocks publish. `evidence_status = weak` allows publish only after explicit confirmation.
+- Copying organization AI output into training does not consume additional AI quota.
+- Manual grouping first release supports `single_choice`, `multi_choice`, `true_false`, and `short_answer`.
+- No complex standalone organization question bank is introduced in the first release.
+- `short_answer` uses AI scoring by default. Manual grading is out of first-release scope.
+- Drafts can be discarded.
+- Published versions are immutable; changes require copying to a new draft and publishing a new version.
+- Takedown stops unstarted and in-progress answers while preserving submitted employee summaries as read-only.
+- One employee can submit once per published version.
+- `answerDeadlineAt` is optional. If it is `null`, employees can answer until takedown.
+- Reminders and badges are in-app only.
+- Organization training does not create formal `mock_exam`, formal `exam_report`, or formal `mistake_book` records.
+
 ## Non-Goals
 
 - No one-click adoption of organization training into formal `question` or `paper`.

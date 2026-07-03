@@ -1,8 +1,201 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
-updatedAt: "2026-07-02T16:00:00-07:00"
+currentPhase: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+updatedAt: "2026-07-02T18:10:00-07:00"
+redeemCodeEditionPlaintextDecisionDocUpdate20260702:
+  taskId: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+  phase: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+  status: closed
+  result: completed_current_thread_requirement_decision_package_and_reconciliation_ledger
+  priority: p1
+  taskKind: docs_requirement_decision_alignment
+  moduleRunVersion: 2
+  dependsOn:
+    - ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+  sourceStory: current_user_confirmed_redeem_code_types_plaintext_ops_role_auth_training_analytics_ai_model_log_decisions_2026_07_02
+  targetClosureItem: Record confirmed current-thread requirement decisions for redeem_code, org_auth overlap closure, admin/employee account boundaries, employee import/password reset, organization tree, organization training, analytics, organization AI follow-up, model connection test, Prompt/log governance, operations guided flows, learner UI/UX, content resources, system-admin users, and no-repeat decision recovery.
+  behaviorBoundary: docs_requirement_decision_alignment_only_no_product_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+  evidenceMode: redacted_source_paths_decision_items_validation_commands_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_output_no_full_content
+  branch: codex/redeem-code-decision-doc-update-2026-07-02
+  claimedAt: "2026-07-02T16:40:00-07:00"
+  plannedAt: "2026-07-02T16:40:00-07:00"
+  implementedAt: "2026-07-02T16:55:00-07:00"
+  validatedAt: "2026-07-02T16:55:00-07:00"
+  reviewedAt: "2026-07-02T16:55:00-07:00"
+  closedAt: "2026-07-02T16:55:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+  requirementDecisionPath: docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md
+  requirementDecisionPackagePath: docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+  requirementReconciliationLedgerPath: docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+  allowedFiles:
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/modules/01-user-auth.md
+    - docs/01-requirements/modules/05-rag-knowledge.md
+    - docs/01-requirements/modules/06-admin-ops.md
+    - docs/01-requirements/stories/epic-01-user-auth.md
+    - docs/01-requirements/stories/epic-06-admin-ops.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+    - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+    - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+    - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+    - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+    - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+    - docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md
+    - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+    - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md
+    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+    - docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md
+    - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+    - docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+    - docs/01-requirements/**
+    - src/db/schema/auth.ts
+    - drizzle/20260621024911_add_edition_aware_authorization.sql
+    - src/server/services/admin-redeem-code-runtime.ts
+    - src/server/repositories/admin-redeem-code-runtime-repository.ts
+    - src/server/services/redeem-code-authorization-service.ts
+    - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+    - src/server/contracts/admin-user-org-auth-ops-contract.ts
+    - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+    - src/server/validators/employee-account.ts
+    - src/server/services/employee-account-service.ts
+    - src/server/services/organization-training-service.ts
+    - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+    - src/db/schema/organization-training.ts
+    - src/server/services/organization-analytics-service.ts
+    - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+    - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+    - src/server/services/admin-ai-audit-log-runtime.ts
+    - src/server/auth/user-registration-route.ts
+    - src/server/services/user-registration-service.ts
+    - src/server/contracts/authorization/redeem-continuity.ts
+    - src/server/contracts/user-auth/session-boundary.ts
+    - src/features/student/home/StudentHomePage.tsx
+    - src/features/student/profile/StudentProfileRedeemPage.tsx
+    - src/features/student/practice/StudentPracticePage.tsx
+    - src/features/student/mock-exam/StudentMockExamReportPage.tsx
+    - src/features/student/mistake-book/StudentMistakeBookPage.tsx
+    - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+    - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
+    - src/app/(admin)/ops/resources/page.tsx
+    - src/app/(admin)/content/ContentKnowledgeOpsBaseline.tsx
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: blocked
+    focusedUnitTest: blocked_not_needed_docs_requirement_decision_only
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    localDevServer: blocked
+    localhostBrowser: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Standard requirement card section records personal_standard_activation, personal_advanced_activation, and edition_upgrade semantics.
+    - Advanced edition authorization and operations requirements record explicit redeem_code_type generation and eligible operations plaintext list/detail/copy behavior.
+    - Current-thread role, authorization, employee import, organization training, analytics, AI follow-up, model connection test, Prompt/log governance, operations guided-flow, learner UI/UX, content resource, system-admin user, and no-repeat recovery decisions are recorded in a traceability package and stable modules where needed.
+    - Current-thread requirement discussion items are reconciled into durable CT-REQ row ids that separate existing decisions, current deltas, implementation gaps, and UI/UX contract needs.
+    - Evidence, logs, screenshots, exports, committed docs, and non-distribution audit summaries remain forbidden from containing plaintext redeem_code values.
+    - Current implementation gaps are recorded as future source tasks, not changed in this docs-only task.
+    - No product source, tests, runtime, Provider, browser, DB, env, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is introduced.
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/01-requirements/00-index.md docs/01-requirements/modules/01-user-auth.md docs/01-requirements/modules/05-rag-knowledge.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/stories/epic-01-user-auth.md docs/01-requirements/stories/epic-06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md docs/01-requirements/advanced-edition/modules/04-organization-training.md docs/01-requirements/advanced-edition/modules/05-organization-analytics.md docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/01-requirements/00-index.md docs/01-requirements/modules/01-user-auth.md docs/01-requirements/modules/05-rag-knowledge.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/stories/epic-01-user-auth.md docs/01-requirements/stories/epic-06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md docs/01-requirements/advanced-edition/modules/04-organization-training.md docs/01-requirements/advanced-edition/modules/05-organization-analytics.md docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md docs/01-requirements/advanced-edition/stories/epic-04-ops-authorization-quota-governance.md docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md docs/01-requirements/traceability/edition-aware-authorization-acceptance-matrix.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId redeem-code-edition-plaintext-decision-doc-update-2026-07-02 -SkipRemoteAheadCheck
+  validationSummary:
+    status: passed
+    prettierWritePassed: true
+    prettierCheckPassed: true
+    gitDiffCheckPassed: true
+    moduleRunV2PreCommitHardeningPassed: true
+    moduleRunV2ModuleCloseoutReadinessPassed: true
+    moduleRunV2PrePushReadinessPassed: true
+    filesScannedByPreCommitHardening: 28
+    standardRequirementBackfilled: true
+    advancedRequirementUpdated: true
+    traceabilityDecisionRecorded: true
+    roleAuthTrainingOpsDecisionPackageRecorded: true
+    currentThreadRequirementReconciliationLedgerRecorded: true
+    supplementalUiUxLedgerRowsRecorded: true
+    organizationTrainingAnalyticsAiRequirementUpdated: true
+    modelConnectionTestRequirementRecorded: true
+    implementationGapRecorded: true
+    sourceOrTestChanged: false
+    productSourceChanged: false
+    providerCallExecuted: false
+    providerConfigurationRead: false
+    browserRuntimeExecuted: false
+    directDatabaseActionByAgent: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_fresh_approved_redeem_code_decision_package_commit_merge_push_cleanup_2026_07_02
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_fresh_approved_redeem_code_decision_package_commit_merge_push_cleanup_2026_07_02
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_fresh_approved_redeem_code_decision_package_commit_merge_push_cleanup_2026_07_02
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_fresh_approved_redeem_code_decision_package_commit_merge_push_cleanup_2026_07_02
+previousCurrentPhaseBeforeRedeemCodeEditionPlaintextDecisionDocUpdate20260702: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
 uiUxRequirementDesignBaselineGapAnalysis20260702:
   taskId: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
   phase: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
@@ -18089,6 +18282,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+  status: closed
+  result: completed_redeem_code_edition_plaintext_decision_doc_update
+  taskKind: docs_requirement_decision_alignment
+  moduleRunVersion: 2
+  branch: codex/redeem-code-decision-doc-update-2026-07-02
+  planPath: docs/05-execution-logs/task-plans/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+previousCurrentTaskBeforeRedeemCodeEditionPlaintextDecisionDocUpdate20260702:
   id: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
   status: closed
   result: completed_ui_ux_requirement_design_baseline_gap_analysis

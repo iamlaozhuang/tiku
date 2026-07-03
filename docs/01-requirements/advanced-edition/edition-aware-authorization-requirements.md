@@ -15,6 +15,7 @@ This document supplements the advanced edition requirement reading surface. It r
 - `docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md`
 - `docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md`
 - `docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md`
+- `docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md`
 - `docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md`
 
 ## Confirmed Decisions
@@ -46,7 +47,10 @@ Personal upgrade rules:
 - `edition_upgrade` requires an active standard `personal_auth` for the same user and `profession + level`.
 - `edition_upgrade` must not create a new `personal_auth`.
 - If the user already has effective advanced access for the same `profession + level`, the upgrade must not consume another upgrade code.
+- If multiple active standard `personal_auth` records match the same user and `profession + level`, the user or operator
+  must explicitly choose the upgrade target; the system must not silently pick one.
 - Upgrade expiry inherits the target `personal_auth.expires_at` unless a later approved requirement explicitly changes that rule.
+- Operations generation surfaces must require explicit `redeem_code_type`; defaulting all personal card generation to standard activation is not acceptable for standard/advanced combined requirements.
 
 ## Organization Authorization
 
@@ -72,6 +76,9 @@ Organization multi-scope rules:
 - Product and operations UI may present one bundle containing multiple `profession + level` combinations, but the system must decompose that bundle into atomic scopes for service checks and audit.
 - `auth_scope_type` continues to describe organization coverage only and must not be overloaded for `profession`, `level`, `subject`, or `edition`.
 - Active overlapping atomic scopes for the same effective `organization`, `profession`, `level`, `subject`, `edition`, and time window are denied unless a later approved upgrade, renewal, or extension rule defines precedence and audit wording.
+- Current first-release closure actions for a blocked overlap are explicit only: renewal successor, manual standard-to-advanced
+  upgrade through `auth_upgrade.source_type = ops_manual`, transactional replacement, or increase-only quota expansion
+  for the same active atomic scope. Silent auto-merge is not allowed.
 - Quota summaries may aggregate rows for display, but consumption and audit must retain the atomic scope that granted access.
 
 Employee import under multi-scope authorization:
@@ -130,14 +137,18 @@ Operations surfaces must support safe summaries for:
 - quota owner and quota summary;
 - operator, external reference, operations note, and audit linkage.
 
-Operations and evidence must not expose secret material, provider payloads, raw prompts, raw generated AI content, raw employee answer text, full paper content, internal database rows, or plaintext `redeem_code` values.
+Operations logs, evidence, committed documents, screenshots, error output, exported files, and non-distribution audit summaries must not expose secret material, provider payloads, raw prompts, raw generated AI content, raw employee answer text, full paper content, internal database rows, or plaintext `redeem_code` values.
 
 `redeem_code` generation requirements:
 
 - Operations can generate one `redeem_code` or a specified quantity.
-- Generation requires explicit `profession` and `level`.
-- Generation feedback, `audit_log`, evidence, and committed documents must not expose plaintext `redeem_code` values.
-- Any operational reveal/copy behavior for distribution must be governed, permissioned, and excluded from evidence output unless a later task explicitly approves a redacted evidence form.
+- Generation requires explicit `redeem_code_type`, `profession`, and `level`.
+- `redeem_code_type` values are `personal_standard_activation`, `personal_advanced_activation`, and `edition_upgrade`.
+- Generation success provides a distribution window that lets eligible operators view and copy the newly generated plaintext values.
+- After leaving the distribution window, ordinary operations list and detail pages may still show and copy plaintext `redeem_code` values for `ops_admin` and `super_admin`, because offline distribution, support, and replenishment are operational requirements.
+- `content_admin`, organization admins, employees, learners, and unauthenticated users must not be able to view plaintext `redeem_code` values.
+- View and copy actions must write `audit_log` metadata, but the audit row must not store plaintext card values or card hashes.
+- Evidence, committed documents, runtime logs, error logs, screenshots, and exported files must remain redacted and must not include plaintext `redeem_code` values.
 
 `audit_log` is required for governed authorization creation, upgrade, revocation, quota grant, and manual adjustment actions once those actions are implemented in later approved tasks.
 

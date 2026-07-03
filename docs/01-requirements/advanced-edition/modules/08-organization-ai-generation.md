@@ -22,6 +22,7 @@ Define how advanced organization admins use AI question generation and AI `paper
 - `org_standard_admin` must not see or use organization AI generation. Direct route access must be denied or show standard-unavailable state.
 - `org_advanced_admin` must see organization AI generation entries from the organization backend navigation or equivalent primary workspace surface.
 - Organization-owned AI generation consumes organization quota according to the approved quota owner rules; exact point values remain under the Cost Calibration Gate.
+- Organization admins do not see enterprise AI quota consumption summary in the first release.
 
 ## Current SSOT Baseline
 
@@ -41,6 +42,10 @@ Define how advanced organization admins use AI question generation and AI `paper
 - AI question generation and AI `paper` generation create trackable tasks and redacted operational evidence.
 - Organization-owned AI output is not written into the platform formal question bank or paper library.
 - Employee-visible training or paper-like assignments require explicit organization admin confirmation.
+- Organization-owned AI output may be copied into an organization training draft, where generated stem, options,
+  `standard_answer`, and `analysis` can be edited before publish.
+- `evidence_status = none` blocks training draft publish or formal content adoption. `evidence_status = weak` requires
+  explicit confirmation.
 - Unpublished organization drafts are editable before publish.
 - Published organization training/content cannot be directly edited; changes require copying to a new draft and publishing a new version.
 - Takedown stops new employee answers while preserving historical result summaries and audit evidence.
@@ -48,7 +53,8 @@ Define how advanced organization admins use AI question generation and AI `paper
 ## Confirmed Boundaries
 
 - Organization admins cannot inspect raw employee learner AI outputs, prompt, raw AI input/output, generated content summaries, single-task details, or task-list summaries.
-- Organization admins can inspect organization-scoped usage summaries, training statistics, quota consumption summaries, and redacted audit summaries.
+- Organization admins can inspect organization-scoped usage summaries, training statistics, and redacted audit summaries.
+- Organization admins do not see enterprise AI quota consumption summaries in the first release.
 - Organization training unpublished drafts follow the first-release draft retention policy.
 - Published organization training/content follows the approved long-term published retention policy.
 - Employee statistics export and organization aggregate export remain deferred in the first release.

@@ -19,6 +19,10 @@ Use AI to generate organization-owned questions and AI `paper` content for enter
 7. `org_advanced_admin` can discover `AI出题` and `AI组卷` from the organization backend workspace.
 8. `org_standard_admin` cannot discover or use organization AI generation by menu visibility or direct URL entry.
 9. Organization AI generation routes must not redirect organization admins into system operations or content-authoring workspaces.
+10. Organization AI output can be copied into an organization training draft for review and edit.
+11. Organization AI output must not directly create platform formal `question` or `paper` records.
+12. `evidence_status = none` blocks training draft publish or formal adoption. `evidence_status = weak` requires explicit confirmation.
+13. Organization admins do not see enterprise AI quota consumption summaries in the first release.
 
 ## Data Boundary
 
@@ -26,6 +30,7 @@ Use AI to generate organization-owned questions and AI `paper` content for enter
 - Prompt, provider payload, secret, token, and raw provider response must not appear in evidence.
 - Related `audit_log` and `ai_call_log` information must be redacted.
 - Standard organization denial evidence records only route, role, state, and redacted summary.
+- Organization AI follow-up actions must stay in organization training draft or organization-owned draft domains unless a later approved formal adoption path exists.
 
 ## Source Links
 
