@@ -68,6 +68,15 @@ const organizationPayload = {
         employeeCount: 42,
         authSummary: "专卖 3级 / 42 / 100",
       },
+      {
+        publicId: "organization-public-002",
+        name: "宁波烟草",
+        orgTier: "city",
+        parentOrganizationPublicId: "organization-public-000",
+        status: "active",
+        employeeCount: 100,
+        authSummary: "专卖 3级 / 100 / 100",
+      },
     ],
   },
 };
@@ -127,6 +136,23 @@ const orgAuthPayload = {
         status: "active",
         cancelledAt: null,
         organizationPublicIds: ["organization-public-001"],
+        createdAt: "2026-05-22T00:00:00.000Z",
+        updatedAt: "2026-05-22T00:00:00.000Z",
+      },
+      {
+        publicId: "org-auth-public-002",
+        name: "宁波烟草企业授权",
+        purchaserOrganizationPublicId: "organization-public-002",
+        authScopeType: "current_and_descendants",
+        profession: "monopoly",
+        level: 3,
+        accountQuota: 100,
+        usedQuota: 100,
+        startsAt: "2026-05-22T00:00:00.000Z",
+        expiresAt: "2026-08-22T00:00:00.000Z",
+        status: "active",
+        cancelledAt: null,
+        organizationPublicIds: ["organization-public-002"],
         createdAt: "2026-05-22T00:00:00.000Z",
         updatedAt: "2026-05-22T00:00:00.000Z",
       },
@@ -861,7 +887,7 @@ describe("admin user organization authorization ops baseline", () => {
     ).toHaveTextContent("LOCAL-RESET-ONCE");
     expect(
       screen.getByTestId("admin-user-reset-distribution-window"),
-    ).toHaveTextContent("正式运行时需吊销可用活跃会话");
+    ).toHaveTextContent("正式重置流程会撤销该账号已有活跃会话");
     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
     expect(
       screen.queryByTestId("admin-user-reset-distribution-window"),
@@ -1413,7 +1439,7 @@ describe("admin user organization authorization ops baseline", () => {
     ).toBe(false);
   });
 
-  it("manages employee unbind feedback and marks transfer as approval required", async () => {
+  it("manages employee unbind feedback and shows transfer quota session review", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetch();
 
@@ -1423,11 +1449,17 @@ describe("admin user organization authorization ops baseline", () => {
       "admin-employee-employee-public-001",
     );
     const transferBoundary = screen.getByTestId(
-      "employee-transfer-approval-required",
+      "employee-transfer-session-review",
     );
 
-    expect(transferBoundary).toHaveTextContent("approval_required");
-    expect(transferBoundary).toHaveTextContent("transfer route");
+    expect(transferBoundary).toHaveTextContent("员工调动影响复核");
+    expect(transferBoundary).toHaveTextContent("目标授权额度不足时阻断");
+    expect(transferBoundary).toHaveTextContent("撤销员工已有活跃会话");
+    expect(transferBoundary).toHaveTextContent("作答时企业归属快照");
+    expect(transferBoundary).toHaveTextContent("尚未提交的原组织企业训练");
+    expect(transferBoundary).toHaveTextContent("宁波烟草");
+    expect(transferBoundary).toHaveTextContent("目标授权额度不足");
+    expect(transferBoundary).not.toHaveTextContent("approval_required");
     expect(within(employee).getByText(/解绑影响/)).toHaveTextContent(
       "原组织员工数 -1",
     );

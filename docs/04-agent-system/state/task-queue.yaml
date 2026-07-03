@@ -358,6 +358,139 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: employee-transfer-session-source-landing-2026-07-03
+    title: Employee transfer session source landing
+    phase: employee-transfer-session-source-landing-2026-07-03
+    sourceStory: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    humanApprovalBoundary: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    targetClosureItem: Land employee transfer quota/session impact review and reset-session wording without adding a transfer mutation route.
+    behaviorBoundary: employee_transfer_session_source_ui_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+    taskKind: source_ui_contract_landing
+    moduleRunVersion: 2
+    status: closed
+    result: employee_transfer_session_review_source_landed_without_transfer_mutation_route
+    priority: p1
+    branch: codex/employee-transfer-session-source-landing-2026-07-03
+    claimedAt: "2026-07-03T07:55:15-07:00"
+    plannedAt: "2026-07-03T07:55:15-07:00"
+    implementedAt: "2026-07-03T08:06:32-07:00"
+    validatedAt: "2026-07-03T08:06:32-07:00"
+    reviewedAt: "2026-07-03T08:06:32-07:00"
+    closedAt: "2026-07-03T08:06:32-07:00"
+    dependsOn:
+      - employee-import-password-source-landing-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-employee-transfer-session-source-landing.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-employee-transfer-session-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-employee-transfer-session-source-landing.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+      - docs/05-execution-logs/task-plans/2026-07-03-employee-transfer-session-source-landing.md
+      - docs/05-execution-logs/evidence/2026-07-03-employee-transfer-session-source-landing.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-employee-transfer-session-source-landing.md
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/components/admin/UserOrgAuthOps/AdminUserOrgAuthOpsBaseline.tsx
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved
+      focusedUnitTest: approved
+      typecheck: approved
+      lint: approved
+      localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+      localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Transfer surface no longer displays approval_required as the product state.
+      - Transfer review shows target quota blocking, active-session revocation, old-organization snapshot retention, and in-progress training continuation blocking.
+      - Reset-password distribution copy preserves the active-session revocation requirement without recording actual password values in evidence.
+      - Focused tests cover the review copy and no transfer mutation route is introduced.
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId employee-transfer-session-source-landing-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId employee-transfer-session-source-landing-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId employee-transfer-session-source-landing-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    validationSummary:
+      focusedUnitTests: pass_1_file_20_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceOrTestChanged: true
+      schemaMigrationOrDependencyChanged: false
+      providerCallOrConfigurationExecuted: false
+      directDatabaseConnectionOrMutationExecuted: false
+      browserRuntimeExecuted: false
+      actualPasswordValuesRecordedInEvidence: false
+      transferMutationRouteIntroduced: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
   - id: employee-import-password-source-landing-2026-07-03
     title: Employee import password source landing
     phase: employee-import-password-source-landing-2026-07-03

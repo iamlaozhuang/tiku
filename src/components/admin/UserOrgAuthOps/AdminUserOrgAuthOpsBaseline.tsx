@@ -389,7 +389,7 @@ export function AdminUserOrgAuthOpsBaseline({
                 LOCAL-RESET-ONCE
               </p>
               <p className="text-text-muted text-xs">
-                本地合同不执行真实会话吊销，正式运行时需吊销可用活跃会话。
+                正式重置流程会撤销该账号已有活跃会话；本地合同仅展示一次性分发窗口。
               </p>
             </div>
             <Button

@@ -166,6 +166,17 @@ type EmployeeImportPreview = {
   rowCount: number;
 };
 
+type EmployeeTransferReviewRow = {
+  activeScopeCount: number;
+  availableQuota: number;
+  currentOrganizationName: string;
+  employeeName: string;
+  employeePublicId: string;
+  reason: "quota_available" | "quota_insufficient" | "target_no_active_auth";
+  targetOrganizationName: string;
+  targetOrganizationPublicId: string;
+};
+
 type EmployeeConfirmationState =
   | {
       kind: "importEmployees";
@@ -2068,37 +2079,156 @@ function OrgAuthDetailPanel({
   );
 }
 
-function EmployeeTransferApprovalRequiredPanel({
-  employeeCount,
-  organizationCount,
+function buildEmployeeTransferReviewRows(input: {
+  employees: AdminOrgAuthData["employees"];
+  organizations: AdminOrgAuthData["organizations"];
+  orgAuths: AdminOrgAuthData["orgAuths"];
+}): EmployeeTransferReviewRow[] {
+  const activeOrganizations = input.organizations.filter(
+    (organization) => organization.status === "active",
+  );
+
+  return input.employees.flatMap((employee) => {
+    const currentOrganization = input.organizations.find(
+      (organization) => organization.publicId === employee.organizationPublicId,
+    );
+    const targetOrganizations = activeOrganizations.filter(
+      (organization) => organization.publicId !== employee.organizationPublicId,
+    );
+
+    return targetOrganizations.map((targetOrganization) => {
+      const targetActiveOrgAuths = input.orgAuths.filter(
+        (orgAuth) =>
+          orgAuth.status === "active" &&
+          orgAuth.organizationPublicIds.includes(targetOrganization.publicId),
+      );
+      const availableQuota = targetActiveOrgAuths.reduce(
+        (totalAvailableQuota, orgAuth) =>
+          totalAvailableQuota +
+          Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0),
+        0,
+      );
+      const reason =
+        targetActiveOrgAuths.length === 0
+          ? "target_no_active_auth"
+          : availableQuota > 0
+            ? "quota_available"
+            : "quota_insufficient";
+
+      return {
+        activeScopeCount: targetActiveOrgAuths.length,
+        availableQuota,
+        currentOrganizationName:
+          currentOrganization?.name ?? employee.organizationPublicId,
+        employeeName: employee.name,
+        employeePublicId: employee.publicId,
+        reason,
+        targetOrganizationName: targetOrganization.name,
+        targetOrganizationPublicId: targetOrganization.publicId,
+      };
+    });
+  });
+}
+
+const employeeTransferReviewReasonLabels: Record<
+  EmployeeTransferReviewRow["reason"],
+  string
+> = {
+  quota_available: "可进入事务复核",
+  quota_insufficient: "目标授权额度不足",
+  target_no_active_auth: "目标组织暂无有效授权",
+};
+
+function EmployeeTransferSessionReviewPanel({
+  employees,
+  organizations,
+  orgAuths,
 }: {
-  employeeCount: number;
-  organizationCount: number;
+  employees: AdminOrgAuthData["employees"];
+  organizations: AdminOrgAuthData["organizations"];
+  orgAuths: AdminOrgAuthData["orgAuths"];
 }) {
+  const transferReviewRows = buildEmployeeTransferReviewRows({
+    employees,
+    organizations,
+    orgAuths,
+  });
+  const blockedReviewCount = transferReviewRows.filter(
+    (reviewRow) => reviewRow.reason !== "quota_available",
+  ).length;
+  const visibleReviewRows = transferReviewRows.slice(0, 4);
+
   return (
     <section
       className="bg-surface border-border rounded-md border border-dashed p-4 shadow-sm"
-      data-testid="employee-transfer-approval-required"
+      data-testid="employee-transfer-session-review"
     >
-      <div className="flex items-start gap-3">
-        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
-          <AlertCircle className="size-4" aria-hidden="true" />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+            <AlertCircle className="size-4" aria-hidden="true" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-brand-primary text-xs font-medium">
+              员工调动影响复核
+            </p>
+            <h2 className="text-text-primary text-base font-semibold">
+              转移前先复核额度、会话和历史归属
+            </h2>
+            <p className="text-text-secondary text-sm leading-6">
+              员工转移必须先确认目标组织有可用企业授权额度；额度不足时阻断，不形成已调入但无清晰授权的状态。
+            </p>
+            <p className="text-text-muted text-xs">
+              调动成功后撤销员工已有活跃会话并要求重新登录；已提交企业训练保留作答时企业归属快照，尚未提交的原组织企业训练不得继续作答。
+            </p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">
-            approval_required
-          </p>
-          <h2 className="text-text-primary text-base font-semibold">
-            员工转移运行时待批准
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            当前低风险批次仅关闭解绑管理；跨组织 transfer
-            route、service、repository 和 DB 更新语义需要后续任务批准后再实现。
-          </p>
-          <p className="text-text-muted text-xs">
-            当前可管理员工 {employeeCount}，可选企业组织 {organizationCount}。
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          阻断 {blockedReviewCount}
+        </span>
+      </div>
+
+      {visibleReviewRows.length === 0 ? (
+        <div className="border-border bg-background mt-4 rounded-md border p-3">
+          <p className="text-text-secondary text-sm">
+            暂无可选目标组织。后续执行转移时仍必须在事务中释放原组织额度、占用目标组织额度并撤销员工会话。
           </p>
         </div>
+      ) : (
+        <div className="mt-4 space-y-3">
+          {visibleReviewRows.map((reviewRow) => (
+            <AdminDataRow
+              key={`${reviewRow.employeePublicId}-${reviewRow.targetOrganizationPublicId}`}
+              publicId={reviewRow.employeePublicId}
+              testId={`employee-transfer-review-${reviewRow.employeePublicId}-${reviewRow.targetOrganizationPublicId}`}
+            >
+              <div className="min-w-0 space-y-1">
+                <p className="text-text-primary text-sm font-medium">
+                  {reviewRow.employeeName}：{reviewRow.currentOrganizationName}
+                  {" -> "}
+                  {reviewRow.targetOrganizationName}
+                </p>
+                <p className="text-text-secondary text-xs">
+                  目标有效授权范围 {reviewRow.activeScopeCount}；可用额度{" "}
+                  {reviewRow.availableQuota}
+                </p>
+                <p className="text-text-muted text-xs">
+                  提交前需再次复核授权范围、训练快照、会话撤销和未提交训练阻断。
+                </p>
+              </div>
+              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+                {employeeTransferReviewReasonLabels[reviewRow.reason]}
+              </span>
+            </AdminDataRow>
+          ))}
+        </div>
+      )}
+
+      <div className="text-text-muted mt-4 grid gap-2 text-xs md:grid-cols-4">
+        <p>可管理员工 {employees.length}</p>
+        <p>可选企业组织 {organizations.length}</p>
+        <p>目标授权额度不足时阻断</p>
+        <p>不提供员工级授权白名单</p>
       </div>
     </section>
   );
@@ -4468,9 +4598,10 @@ export function AdminOrgAuthPage() {
         <EmployeeImportResultPanel result={lastEmployeeImportResult} />
       )}
 
-      <EmployeeTransferApprovalRequiredPanel
-        employeeCount={data.employees.length}
-        organizationCount={data.organizations.length}
+      <EmployeeTransferSessionReviewPanel
+        employees={data.employees}
+        organizations={data.organizations}
+        orgAuths={data.orgAuths}
       />
 
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
