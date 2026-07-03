@@ -421,7 +421,9 @@ describe("AdminDashboardLayout navigation", () => {
     expect(screen.getAllByText("组织后台").length).toBeGreaterThan(0);
     expect(screen.getByText("标准版组织后台")).toBeInTheDocument();
     expect(
-      screen.getByText(/升级为高级版后可使用企业训练、统计摘要和组织 AI 能力/u),
+      screen.getByText(
+        /标准版仅开放员工名单、员工状态和授权状态查看；升级后可使用企业训练、统计摘要和组织 AI 能力/u,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
       "href",

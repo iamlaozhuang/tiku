@@ -127,6 +127,30 @@ describe("backend workspace role guard contract", () => {
     });
   });
 
+  it("keeps advanced organization routes unavailable for standard roles even when the capability flag is malformed", () => {
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/organization/organization-training",
+        capabilitySummary: capabilitySummary({
+          adminRoles: ["org_standard_admin"],
+          organizationEffectiveEdition: "advanced",
+          organizationPublicId: "organization-public-standard-malformed",
+          organizationAuthorizationSource: "org_auth",
+          canUseOrganizationAdvancedWorkspace: true,
+        }),
+      }),
+    ).toMatchObject({
+      status: "standard_unavailable",
+      workspace: "organization",
+      reason: "organization_advanced_capability_required",
+      requiredWorkspace: "organization",
+      requiredEffectiveEdition: "advanced",
+      requiredCapability: "organization_advanced_workspace",
+      requiredAuthorizationSource: "org_auth",
+      returnPath: "/organization/portal",
+    });
+  });
+
   it("denies advanced organization routes when capability summary is not service computed", () => {
     expect(
       resolveAdminWorkspaceRouteAccess({

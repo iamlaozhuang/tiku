@@ -4,7 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminDashboardLayout } from "@/components/AdminDashboardLayout";
 import { AdminAiGenerationEntryPage } from "@/features/admin/ai-generation/AdminAiGenerationEntryPage";
+import {
+  canUseOrganizationAdvancedWorkspaceCapability,
+  createOrganizationTrainingCapabilityContext,
+} from "@/features/admin/organization-workspace/admin-organization-workspace-access";
 import { AdminOrganizationTrainingPage } from "@/features/admin/organization-training/AdminOrganizationTrainingPage";
+import type { AdminRole } from "@/server/models/auth";
 import { mapAuthContextToApi } from "@/server/mappers/auth-mapper";
 
 const replaceMock = vi.fn();
@@ -26,11 +31,14 @@ function createJsonResponse(payload: unknown) {
 }
 
 function createOrganizationAdminSession(input: {
+  adminRoles?: AdminRole[];
   canUseOrganizationAdvancedWorkspace: boolean;
   capabilitySource?: "service_computed" | "session_fallback";
   organizationEffectiveEdition: "standard" | "advanced" | null;
   organizationAuthorizationSource?: "org_auth" | null;
 }) {
+  const adminRoles = input.adminRoles ?? ["org_advanced_admin"];
+
   return {
     code: 0,
     message: "ok",
@@ -45,9 +53,9 @@ function createOrganizationAdminSession(input: {
         employeePublicId: null,
         organizationPublicId: "organization-source-contract-001",
         adminPublicId: "admin-organization-source-contract-001",
-        adminRoles: ["org_advanced_admin"],
+        adminRoles,
         adminWorkspaceCapability: {
-          adminRoles: ["org_advanced_admin"],
+          adminRoles,
           organizationPublicId: "organization-source-contract-001",
           organizationEffectiveEdition: input.organizationEffectiveEdition,
           organizationAuthorizationSource:
@@ -146,6 +154,51 @@ describe("organization admin standard/advanced workspace source contract", () =>
           createOrganizationAdminSession({
             capabilitySource: "session_fallback",
             organizationAuthorizationSource: "org_auth",
+            organizationEffectiveEdition: "advanced",
+            canUseOrganizationAdvancedWorkspace: true,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "organization page"),
+      ),
+    );
+
+    expect(await screen.findByText("organization page")).toBeInTheDocument();
+    expect(screen.getByText("标准版组织后台")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /企业训练/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /统计摘要/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /AI出题/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /AI组卷/u })).toBeNull();
+  });
+
+  it("does not show advanced organization layout entries when a standard role carries a malformed advanced flag", async () => {
+    const malformedStandardCapability = createOrganizationAdminSession({
+      adminRoles: ["org_standard_admin"],
+      organizationEffectiveEdition: "advanced",
+      canUseOrganizationAdvancedWorkspace: true,
+    }).data.user.adminWorkspaceCapability;
+
+    expect(
+      canUseOrganizationAdvancedWorkspaceCapability(
+        malformedStandardCapability,
+      ),
+    ).toBe(false);
+    expect(() =>
+      createOrganizationTrainingCapabilityContext(malformedStandardCapability),
+    ).toThrow("Advanced organization workspace capability is required.");
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        createJsonResponse(
+          createOrganizationAdminSession({
+            adminRoles: ["org_standard_admin"],
             organizationEffectiveEdition: "advanced",
             canUseOrganizationAdvancedWorkspace: true,
           }),

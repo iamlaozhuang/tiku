@@ -531,7 +531,8 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
                 标准版组织后台
               </p>
               <p className="text-text-secondary mt-2 text-xs leading-5">
-                升级为高级版后可使用企业训练、统计摘要和组织 AI 能力。
+                标准版仅开放员工名单、员工状态和授权状态查看；升级后可使用企业训练、统计摘要和组织
+                AI 能力。
               </p>
               <Link
                 className="text-brand-primary mt-3 inline-flex text-xs font-medium transition-transform active:scale-[0.98]"

@@ -22,6 +22,15 @@ export type OrganizationTrainingCapabilityContext = {
   canCreateOrganizationTraining: true;
 };
 
+function hasAdvancedOrganizationWorkspaceRole(
+  capabilitySummary: AdminWorkspaceCapabilitySummary,
+): boolean {
+  return (
+    capabilitySummary.adminRoles.includes("org_advanced_admin") ||
+    capabilitySummary.adminRoles.includes("super_admin")
+  );
+}
+
 function createFallbackCapabilitySummary(
   authContext: AuthContextDto,
 ): AdminWorkspaceCapabilitySummary {
@@ -81,6 +90,7 @@ export function canUseOrganizationAdvancedWorkspaceCapability(
   capabilitySummary: AdminWorkspaceCapabilitySummary,
 ): boolean {
   return (
+    hasAdvancedOrganizationWorkspaceRole(capabilitySummary) &&
     capabilitySummary.capabilitySource === "service_computed" &&
     capabilitySummary.organizationAuthorizationSource === "org_auth" &&
     capabilitySummary.organizationPublicId !== null &&
@@ -96,6 +106,7 @@ export function createOrganizationTrainingCapabilityContext(
 
   if (
     effectiveEdition !== "advanced" ||
+    !hasAdvancedOrganizationWorkspaceRole(capabilitySummary) ||
     !capabilitySummary.canUseOrganizationAdvancedWorkspace
   ) {
     throw new Error("Advanced organization workspace capability is required.");

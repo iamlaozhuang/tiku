@@ -49,18 +49,18 @@ type OrganizationPortalDestination = OrganizationPortalSummary & {
 const organizationPortalSummaries: OrganizationPortalSummary[] = [
   {
     description:
-      "查看当前组织范围内的员工管理入口状态，不进入运营后台用户列表。",
+      "查看当前组织范围内的员工名单、账号状态和授权占用状态，不提供新增、导入、调动或解绑入口。",
     icon: <Building2 aria-hidden="true" className="size-4" />,
-    label: "员工管理",
-    stateLabel: "组织范围内",
+    label: "员工名单与状态",
+    stateLabel: "只读查看",
     testId: "organization-portal-summary-employees",
   },
   {
     description:
-      "查看当前组织授权版本和有效期状态，升级或续期仍按后续人工流程处理。",
+      "查看当前组织授权版本、有效期和高级能力状态，升级、续期或授权调整仍由平台运营处理。",
     icon: <ShieldCheck aria-hidden="true" className="size-4" />,
     label: "授权状态",
-    stateLabel: "标准/高级授权",
+    stateLabel: "状态查看",
     testId: "organization-portal-summary-authorization",
   },
 ];
@@ -218,7 +218,7 @@ export function AdminOrganizationPortalPage() {
         <p className="text-text-secondary mt-3 text-sm leading-6">
           {hasAdvancedAccess
             ? "高级版组织授权已生效。训练、统计和智能草稿入口已开放。"
-            : "当前组织仍可查看员工和授权摘要。高级版开通或升级请联系运营管理员。"}
+            : "当前组织仅开放员工名单、员工状态和授权状态查看。员工新增、导入、调动、解绑及授权调整仍由平台运营管理员处理。"}
         </p>
       </section>
 
@@ -248,7 +248,7 @@ export function AdminOrganizationPortalPage() {
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
             标准版暂不可用。高级版训练、统计和智能草稿能力需要高级版组织授权。
-            高级能力入口保持关闭。当前组织仍可查看员工和授权摘要。
+            高级能力入口保持关闭。当前组织仍可查看员工名单、员工状态和授权状态。
             高级版开通或升级请联系运营管理员。
           </p>
         </section>

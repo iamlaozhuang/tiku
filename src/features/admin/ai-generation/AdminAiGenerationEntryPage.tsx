@@ -1666,8 +1666,11 @@ export function AdminAiGenerationEntryPage({
               )
             : null;
         const nextLoadState =
-          organizationPageAccess?.loadState ??
-          resolveLoadState(sessionResponse.data, workspace, generationKind);
+          organizationPageAccess === null
+            ? resolveLoadState(sessionResponse.data, workspace, generationKind)
+            : organizationPageAccess.loadState === "unauthorized"
+              ? "permission-denied"
+              : organizationPageAccess.loadState;
 
         setAdminWorkspaceCapabilitySummary(
           organizationPageAccess?.capabilitySummary ?? null,

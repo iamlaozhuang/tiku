@@ -164,7 +164,8 @@ describe("AdminOrganizationPortalPage", () => {
         name: expect.stringContaining("AI组卷"),
       },
     ]);
-    expect(portalShell).toHaveTextContent("员工管理");
+    expect(portalShell).toHaveTextContent("员工名单与状态");
+    expect(portalShell).toHaveTextContent("不提供新增、导入、调动或解绑入口");
     expect(portalShell).toHaveTextContent("授权状态");
     expect(portalShell).toHaveTextContent("organization-portal-scope-001");
     expect(portalShell).toHaveTextContent("高级版组织授权已生效");
@@ -205,10 +206,18 @@ describe("AdminOrganizationPortalPage", () => {
 
     const portalShell = screen.getByTestId("organization-portal-shell");
     expect(portalShell).toHaveTextContent("organization-standard-scope-001");
-    expect(portalShell).toHaveTextContent("员工管理");
+    expect(portalShell).toHaveTextContent("员工名单与状态");
     expect(portalShell).toHaveTextContent("授权状态");
     expect(portalShell).toHaveTextContent("标准版暂不可用");
-    expect(portalShell).toHaveTextContent("当前组织仍可查看员工和授权摘要");
+    expect(portalShell).toHaveTextContent(
+      "当前组织仅开放员工名单、员工状态和授权状态查看",
+    );
+    expect(portalShell).toHaveTextContent(
+      "员工新增、导入、调动、解绑及授权调整仍由平台运营管理员处理",
+    );
+    expect(portalShell).toHaveTextContent(
+      "当前组织仍可查看员工名单、员工状态和授权状态",
+    );
     expect(portalShell).toHaveTextContent("高级版开通或升级请联系运营管理员");
     expect(portalShell).toHaveTextContent("高级能力入口保持关闭");
     expect(portalShell).not.toHaveTextContent("AI出题");
