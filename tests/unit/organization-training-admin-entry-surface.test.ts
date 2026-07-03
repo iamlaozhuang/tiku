@@ -442,6 +442,35 @@ describe("AdminOrganizationTrainingPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
 
+  it("shows organization AI result copy guidance when selected explicitly", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(
+      await screen.findByRole("heading", { name: "企业训练" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: /企业 AI 结果/u }));
+
+    expect(screen.queryByRole("form", { name: "企业训练来源表单" })).toBeNull();
+    expect(
+      screen.getByText(/企业 AI 结果在 AI 出题或组卷完成后复制到企业训练草稿/u),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/不额外消耗 AI 额度/u)).toBeInTheDocument();
+  });
+
   it("announces organization training mutation failures as alerts", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(

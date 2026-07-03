@@ -176,6 +176,7 @@ export type OrganizationTrainingEmployeeContext = {
 
 export type OrganizationTrainingManualDraftInput = {
   organizationPublicId: string;
+  sourceTaskPublicId?: string | null;
   profession: Profession;
   level: number;
   subject: Subject;
@@ -1577,7 +1578,9 @@ export function createOrganizationTrainingService(
         ownerPublicId: organizationPublicId,
         quotaOwnerType: "organization",
         quotaOwnerPublicId: organizationPublicId,
-        sourceTaskPublicId: null,
+        sourceTaskPublicId: normalizeOptionalText(
+          command.draftInput.sourceTaskPublicId ?? null,
+        ),
         organizationPublicId,
         authorizationSource: "org_auth",
         authorizationPublicId:

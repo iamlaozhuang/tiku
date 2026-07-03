@@ -171,6 +171,9 @@ export type AdminAiGenerationTaskHistoryItemDto = {
   contentVisibility: AiGenerationTaskResultContentVisibility;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
+  authorizationPublicId: string;
+  ownerPublicId: string;
+  organizationPublicId: string | null;
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
   runtimeBridgeStatus: AdminAiGenerationRuntimeBridgeStatusDto;
   providerCallExecuted: boolean;

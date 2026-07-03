@@ -598,6 +598,34 @@ describe("organization training service", () => {
     ]);
   });
 
+  it("preserves a source task public id when creating an AI-copied training draft", async () => {
+    const { service, getCreatedDrafts } = createServiceFixture();
+
+    const result = await service.createManualDraft({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationContext: createAdvancedOrgAuthContext(),
+      draftInput: {
+        organizationPublicId: "organization_public_123",
+        sourceTaskPublicId: " admin_ai_generation_task_public_123 ",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "AI copied training",
+        description: "AI source",
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(getCreatedDrafts()[0]).toMatchObject({
+      sourceTaskPublicId: "admin_ai_generation_task_public_123",
+      title: "AI copied training",
+      description: "AI source",
+    });
+  });
+
   it("builds a metadata-only admin lifecycle flow for draft, published, and taken-down training", () => {
     const rawQuestionBody = ["RAW", "QUESTION", "BODY"].join("-");
     const standardAnswer = ["STANDARD", "ANSWER", "BODY"].join("-");

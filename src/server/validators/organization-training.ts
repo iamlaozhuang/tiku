@@ -55,6 +55,7 @@ export type OrganizationTrainingEmployeeAnswerSubmitRouteInput =
 export type OrganizationTrainingManualDraftRouteInput = {
   organizationPublicId: string;
   authorizationPublicId: string;
+  sourceTaskPublicId: string | null;
   profession: (typeof professionValues)[number];
   level: number;
   subject: (typeof subjectValues)[number];
@@ -562,6 +563,7 @@ export function normalizeOrganizationTrainingManualDraftInput(
   const level = normalizePositiveInteger(input.level);
   const title = normalizeRequiredText(input.title);
   const description = normalizeOptionalText(input.description);
+  const sourceTaskPublicId = normalizeOptionalText(input.sourceTaskPublicId);
   const capabilityContext = normalizeCapabilityContext(input.capabilityContext);
 
   if (
@@ -584,6 +586,7 @@ export function normalizeOrganizationTrainingManualDraftInput(
     value: {
       organizationPublicId,
       authorizationPublicId,
+      sourceTaskPublicId,
       profession: input.profession,
       level,
       subject: input.subject,

@@ -1212,6 +1212,7 @@ export function createOrganizationTrainingRouteHandlers(
             createOrganizationTrainingAdminAuthorizationContext(input.value),
           draftInput: {
             organizationPublicId: input.value.organizationPublicId,
+            sourceTaskPublicId: input.value.sourceTaskPublicId,
             profession: input.value.profession,
             level: input.value.level,
             subject: input.value.subject,

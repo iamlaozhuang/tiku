@@ -167,6 +167,41 @@ describe("organization training contract and validator scaffold", () => {
         },
       },
     });
+
+    expect(
+      normalizeOrganizationTrainingManualDraftInput({
+        organizationPublicId: " organization_public_123 ",
+        authorizationPublicId: " org_auth_public_123 ",
+        sourceTaskPublicId: " admin_ai_generation_task_public_123 ",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: " AI copied training ",
+        description: " AI source ",
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_public_123",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "AI copied training",
+        description: "AI source",
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+      },
+    });
   });
 
   it("rejects deferred question types and incomplete publish confirmation", () => {
@@ -181,6 +216,7 @@ describe("organization training contract and validator scaffold", () => {
         draftPublicId: "training_draft_public_123",
         organizationPublicId: "organization_public_123",
         authorizationPublicId: "org_auth_public_123",
+        sourceTaskPublicId: null,
         profession: "monopoly",
         level: 3,
         subject: "theory",
@@ -291,6 +327,7 @@ describe("organization training contract and validator scaffold", () => {
       value: {
         organizationPublicId: "organization_public_123",
         authorizationPublicId: "org_auth_public_123",
+        sourceTaskPublicId: null,
         profession: "monopoly",
         level: 3,
         subject: "theory",
@@ -469,6 +506,39 @@ describe("organization training contract and validator scaffold", () => {
     expect(JSON.stringify(invalidSourceContextResult)).not.toContain(
       "LEAK_STANDARD_ANSWER",
     );
+
+    const invalidOrganizationAiSourceContextResult =
+      normalizeOrganizationTrainingSourceContextInput({
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
+          {
+            sourceType: "organization_ai_result",
+            sourcePublicId: "admin_ai_generation_result_public_123",
+            title: "Organization AI result reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 10,
+            sourceStatus: "ai_generated_draft_sufficient_evidence",
+            analysis: "LEAK_ANALYSIS",
+          },
+        ],
+      });
+
+    expect(invalidOrganizationAiSourceContextResult.success).toBe(false);
+    expect(
+      JSON.stringify(invalidOrganizationAiSourceContextResult),
+    ).not.toContain("LEAK_ANALYSIS");
   });
 
   it("normalizes employee answer draft and submit metadata while rejecting raw answer payloads", () => {

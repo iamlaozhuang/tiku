@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
+import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   AdminAiGenerationTaskHistoryGeneratedResultDto,
   AdminAiGenerationLocalContractDto,
@@ -18,6 +19,7 @@ import type {
 } from "@/server/contracts/admin-ai-generation-local-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type { OrganizationTrainingDraftDto } from "@/server/contracts/organization-training-contract";
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedProfession,
@@ -34,7 +36,10 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
-import { resolveOrganizationWorkspacePageAccess } from "../organization-workspace/admin-organization-workspace-access";
+import {
+  createOrganizationTrainingCapabilityContext,
+  resolveOrganizationWorkspacePageAccess,
+} from "../organization-workspace/admin-organization-workspace-access";
 
 type AdminAiGenerationEntryLoadState =
   | "loading"
@@ -79,6 +84,15 @@ type ContentAdminReviewActionInput = {
   generationKind: AdminAiGenerationKind;
   resultPublicId: string;
   reviewDecision: ContentAdminReviewDecision;
+};
+type OrganizationAiTrainingDraftCopyState =
+  | "idle"
+  | "copying"
+  | "copied"
+  | "error";
+type OrganizationAiTrainingDraftCopyInput = {
+  taskItem: AdminAiGenerationTaskHistoryItemDto;
+  confirmation: "not_required" | "weak_confirmed";
 };
 type AdminAiGenerationDetailControl = {
   inputMode: "select" | "number" | "text";
@@ -165,9 +179,10 @@ function getPageCopy(
   return {
     eyebrow: "组织高级 AI 草稿",
     title: isQuestionGeneration ? "组织 AI出题" : "组织 AI组卷",
-    description: "展示本次组织生成草稿，正式采用仍保留在组织内容草稿池。",
+    description:
+      "展示本次组织生成草稿；确认后可创建并关联企业训练草稿，发布前仍需编辑、预览和校验。",
     actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
-    boundaryLabel: "仅创建组织草稿",
+    boundaryLabel: "仅创建组织草稿，可关联为企业训练草稿",
   };
 }
 
@@ -238,6 +253,19 @@ function getFormalAdoptionStatusLabel(
   return labels[status];
 }
 
+function getOrganizationDraftUsageStatusLabel(
+  status: AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
+): string {
+  const labels = {
+    blocked: "未关联训练草稿",
+  } satisfies Record<
+    AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
+    string
+  >;
+
+  return labels[status];
+}
+
 function isAdminGeneratedResultGrounded(
   generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto,
 ): boolean {
@@ -245,6 +273,44 @@ function isAdminGeneratedResultGrounded(
     generatedResult.evidenceStatus === "sufficient" &&
     generatedResult.citationCount > 0
   );
+}
+
+function getEvidenceStatusLabel(
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto,
+): string {
+  if (
+    generatedResult.evidenceStatus === "sufficient" &&
+    generatedResult.citationCount > 0
+  ) {
+    return "资料充足";
+  }
+
+  if (generatedResult.evidenceStatus === "weak") {
+    return "资料较少";
+  }
+
+  return "资料不足";
+}
+
+function getOrganizationAiTrainingCopyReadiness(
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto,
+): "ready" | "weak_confirmation_required" | "blocked" {
+  if (isAdminGeneratedResultGrounded(generatedResult)) {
+    return "ready";
+  }
+
+  if (generatedResult.evidenceStatus === "weak") {
+    return "weak_confirmation_required";
+  }
+
+  return "blocked";
+}
+
+function createOrganizationAiTrainingDraftTitle(input: {
+  generationKind: AdminAiGenerationKind;
+  requestedAt: string;
+}): string {
+  return `${getGenerationKindLabel(input.generationKind)}训练草稿 ${formatRequestedAt(input.requestedAt)}`;
 }
 
 function formatRequestedAt(requestedAt: string): string {
@@ -747,7 +813,11 @@ function StructuredPreviewSummary({
 }
 
 function AdminAiGenerationTaskHistoryPanel({
+  adminWorkspaceCapabilitySummary,
+  copyActionStateByResultPublicId,
+  generationParameters,
   generationKind,
+  onCopyToTrainingDraft,
   onChangePage,
   onReviewContentDraft,
   pagination,
@@ -756,7 +826,14 @@ function AdminAiGenerationTaskHistoryPanel({
   taskHistory,
   workspace,
 }: {
+  adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
+  copyActionStateByResultPublicId: Record<
+    string,
+    OrganizationAiTrainingDraftCopyState
+  >;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   generationKind: AdminAiGenerationKind;
+  onCopyToTrainingDraft: (input: OrganizationAiTrainingDraftCopyInput) => void;
   onChangePage: (page: number) => void;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
   pagination: ApiPagination | null;
@@ -791,9 +868,9 @@ function AdminAiGenerationTaskHistoryPanel({
       ? {
           serviceLabel: "模型服务",
           serviceStatus: "待审批",
-          costLabel: "用量规则",
-          costStatus: "待审批",
-          formalStatus: "需后续评审",
+          costLabel: "创建规则",
+          costStatus: "创建草稿不触发模型服务",
+          formalStatus: "需创建训练草稿",
           historyError:
             "当前仅显示入口状态。历史接口失败不会启用模型服务，也不会写入正式题目或试卷。",
         }
@@ -946,7 +1023,9 @@ function AdminAiGenerationTaskHistoryPanel({
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-text-secondary">正式内容</dt>
+                  <dt className="text-text-secondary">
+                    {workspace === "organization" ? "训练草稿" : "正式内容"}
+                  </dt>
                   <dd className="text-text-primary mt-1">
                     {boundaryCopy.formalStatus}
                   </dd>
@@ -975,10 +1054,7 @@ function AdminAiGenerationTaskHistoryPanel({
                     <div>
                       <dt className="text-text-secondary">资料依据</dt>
                       <dd className="text-text-primary mt-1">
-                        {taskItem.generatedResult.evidenceStatus ===
-                        "sufficient"
-                          ? "资料充足"
-                          : "资料不足"}
+                        {getEvidenceStatusLabel(taskItem.generatedResult)}
                       </dd>
                     </div>
                     <div>
@@ -988,11 +1064,17 @@ function AdminAiGenerationTaskHistoryPanel({
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-text-secondary">正式采用</dt>
+                      <dt className="text-text-secondary">
+                        {workspace === "organization" ? "训练草稿" : "正式采用"}
+                      </dt>
                       <dd className="text-text-primary mt-1">
-                        {getFormalAdoptionStatusLabel(
-                          taskItem.generatedResult.formalAdoptionStatus,
-                        )}
+                        {workspace === "organization"
+                          ? getOrganizationDraftUsageStatusLabel(
+                              taskItem.generatedResult.formalAdoptionStatus,
+                            )
+                          : getFormalAdoptionStatusLabel(
+                              taskItem.generatedResult.formalAdoptionStatus,
+                            )}
                       </dd>
                     </div>
                   </dl>
@@ -1011,7 +1093,17 @@ function AdminAiGenerationTaskHistoryPanel({
                   ) : null}
                   {workspace === "organization" ? (
                     <OrganizationAiGenerationDraftNextStepPanel
+                      actionState={
+                        copyActionStateByResultPublicId[
+                          taskItem.generatedResult.resultPublicId
+                        ] ?? "idle"
+                      }
+                      adminWorkspaceCapabilitySummary={
+                        adminWorkspaceCapabilitySummary
+                      }
+                      generationParameters={generationParameters}
                       taskItem={taskItem}
+                      onCopyToTrainingDraft={onCopyToTrainingDraft}
                     />
                   ) : null}
                 </div>
@@ -1025,27 +1117,60 @@ function AdminAiGenerationTaskHistoryPanel({
 }
 
 function OrganizationAiGenerationDraftNextStepPanel({
+  actionState,
+  adminWorkspaceCapabilitySummary,
+  generationParameters,
   taskItem,
+  onCopyToTrainingDraft,
 }: {
+  actionState: OrganizationAiTrainingDraftCopyState;
+  adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   taskItem: AdminAiGenerationTaskHistoryItemDto;
+  onCopyToTrainingDraft: (input: OrganizationAiTrainingDraftCopyInput) => void;
 }) {
   if (taskItem.generatedResult === null) {
     return null;
   }
 
   const boundary = taskItem.organizationOwnedDraftBoundary;
+  const generatedResult = taskItem.generatedResult;
+  const copyReadiness = getOrganizationAiTrainingCopyReadiness(generatedResult);
   const isOrganizationPrivateDraft =
     boundary.generatedResultScope === "organization_private" &&
     boundary.organizationDraftAdoptionStatus ===
       "allowed_as_organization_private_draft";
+  const hasSameOrganizationTarget =
+    taskItem.organizationPublicId !== null &&
+    boundary.organizationPublicId !== null &&
+    taskItem.organizationPublicId === boundary.organizationPublicId &&
+    taskItem.ownerPublicId === boundary.ownerPublicId;
   const isTrainingSourceAllowed =
     isOrganizationPrivateDraft &&
     boundary.organizationTrainingSourceStatus ===
       "allowed_as_organization_private_training_source" &&
-    isAdminGeneratedResultGrounded(taskItem.generatedResult);
-  const trainingSourceStatus = isTrainingSourceAllowed
-    ? "可作为组织训练素材"
-    : "资料不足，暂不可作为组织训练素材";
+    copyReadiness !== "blocked" &&
+    hasSameOrganizationTarget;
+  const trainingSourceStatus =
+    copyReadiness === "ready" && isTrainingSourceAllowed
+      ? "可作为组织训练素材"
+      : copyReadiness === "weak_confirmation_required" &&
+          isTrainingSourceAllowed
+        ? "资料较少，确认后可作为组织训练素材"
+        : "资料不足，暂不可作为组织训练素材";
+  const isCopyActionDisabled =
+    actionState === "copying" ||
+    actionState === "copied" ||
+    !isTrainingSourceAllowed ||
+    adminWorkspaceCapabilitySummary === null;
+  const actionLabel =
+    actionState === "copied"
+      ? "已创建训练草稿"
+      : copyReadiness === "weak_confirmation_required"
+        ? "确认资料较少并创建训练草稿"
+        : "创建企业训练草稿";
+  const actionMessage =
+    resolveOrganizationAiTrainingDraftCopyActionMessage(actionState);
 
   return (
     <section
@@ -1067,22 +1192,81 @@ function OrganizationAiGenerationDraftNextStepPanel({
         </a>
       </div>
 
-      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-text-secondary">草稿用途</dt>
           <dd className="text-text-primary mt-1">{trainingSourceStatus}</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">正式发布</dt>
-          <dd className="text-text-primary mt-1">正式发布需后续编辑校验</dd>
+          <dt className="text-text-secondary">训练发布</dt>
+          <dd className="text-text-primary mt-1">发布前需后续编辑校验</dd>
         </div>
         <div>
           <dt className="text-text-secondary">员工可见</dt>
           <dd className="text-text-primary mt-1">发布前不可见</dd>
         </div>
+        <div>
+          <dt className="text-text-secondary">目标范围（当前参数）</dt>
+          <dd className="text-text-primary mt-1">
+            {adminProfessionLabelByValue[generationParameters.profession]}{" "}
+            {generationParameters.level}级 /{" "}
+            {adminSubjectLabelByValue[generationParameters.subject]}
+          </dd>
+        </div>
       </dl>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          data-testid="organization-ai-training-copy-action"
+          disabled={isCopyActionDisabled}
+          type="button"
+          onClick={() =>
+            onCopyToTrainingDraft({
+              taskItem,
+              confirmation:
+                copyReadiness === "weak_confirmation_required"
+                  ? "weak_confirmed"
+                  : "not_required",
+            })
+          }
+        >
+          {actionState === "copying" ? "创建中" : actionLabel}
+        </button>
+      </div>
+      {actionMessage === null ? null : (
+        <p
+          className={
+            actionState === "error"
+              ? "text-destructive mt-2 text-xs"
+              : "text-brand-primary mt-2 text-xs"
+          }
+          data-testid="organization-ai-training-copy-status"
+          role={actionState === "error" ? "alert" : "status"}
+        >
+          {actionMessage}
+        </p>
+      )}
     </section>
   );
+}
+
+function resolveOrganizationAiTrainingDraftCopyActionMessage(
+  actionState: OrganizationAiTrainingDraftCopyState,
+): string | null {
+  if (actionState === "copying") {
+    return "正在创建企业训练草稿";
+  }
+
+  if (actionState === "copied") {
+    return "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。";
+  }
+
+  if (actionState === "error") {
+    return "创建企业训练草稿失败，请确认企业授权和组织范围后重试。";
+  }
+
+  return null;
 }
 
 function resolveContentAdminReviewActionMessage(
@@ -1296,6 +1480,10 @@ export function AdminAiGenerationEntryPage({
     reviewActionStateByResultPublicId,
     setReviewActionStateByResultPublicId,
   ] = useState<Record<string, ContentAdminReviewActionState>>({});
+  const [copyActionStateByResultPublicId, setCopyActionStateByResultPublicId] =
+    useState<Record<string, OrganizationAiTrainingDraftCopyState>>({});
+  const [adminWorkspaceCapabilitySummary, setAdminWorkspaceCapabilitySummary] =
+    useState<AdminWorkspaceCapabilitySummary | null>(null);
   const pageCopy = getPageCopy(workspace, generationKind);
   const providerExecutionCopy =
     workspace === "organization"
@@ -1470,10 +1658,19 @@ export function AdminAiGenerationEntryPage({
           return;
         }
 
-        const nextLoadState = resolveLoadState(
-          sessionResponse.data,
-          workspace,
-          generationKind,
+        const organizationPageAccess =
+          workspace === "organization"
+            ? resolveOrganizationWorkspacePageAccess(
+                sessionResponse.data,
+                getOrganizationAiGenerationPath(generationKind),
+              )
+            : null;
+        const nextLoadState =
+          organizationPageAccess?.loadState ??
+          resolveLoadState(sessionResponse.data, workspace, generationKind);
+
+        setAdminWorkspaceCapabilitySummary(
+          organizationPageAccess?.capabilitySummary ?? null,
         );
 
         if (nextLoadState !== "ready") {
@@ -1600,6 +1797,112 @@ export function AdminAiGenerationEntryPage({
       setReviewActionStateByResultPublicId((currentState) => ({
         ...currentState,
         [input.resultPublicId]: "error",
+      }));
+    }
+  }
+
+  async function handleCopyOrganizationAiResultToTrainingDraft(
+    input: OrganizationAiTrainingDraftCopyInput,
+  ) {
+    const generatedResult = input.taskItem.generatedResult;
+
+    if (generatedResult === null) {
+      return;
+    }
+
+    const resultPublicId = generatedResult.resultPublicId;
+    const copyReadiness =
+      getOrganizationAiTrainingCopyReadiness(generatedResult);
+    const organizationPublicId =
+      input.taskItem.organizationPublicId ??
+      input.taskItem.organizationOwnedDraftBoundary.organizationPublicId;
+
+    if (
+      workspace !== "organization" ||
+      adminWorkspaceCapabilitySummary === null ||
+      organizationPublicId === null ||
+      copyReadiness === "blocked" ||
+      (copyReadiness === "weak_confirmation_required" &&
+        input.confirmation !== "weak_confirmed")
+    ) {
+      setCopyActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [resultPublicId]: "error",
+      }));
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    setCopyActionStateByResultPublicId((currentState) => ({
+      ...currentState,
+      [resultPublicId]: "copying",
+    }));
+
+    try {
+      const draftTitle = createOrganizationAiTrainingDraftTitle({
+        generationKind: input.taskItem.generationKind,
+        requestedAt: input.taskItem.requestedAt,
+      });
+      const capabilityContext = createOrganizationTrainingCapabilityContext(
+        adminWorkspaceCapabilitySummary,
+      );
+      const draftResponse = await fetchAdminApi<{
+        draft: OrganizationTrainingDraftDto;
+      }>("/api/v1/organization-trainings", sessionToken, {
+        body: JSON.stringify({
+          organizationPublicId,
+          authorizationPublicId: input.taskItem.authorizationPublicId,
+          sourceTaskPublicId: input.taskItem.taskPublicId,
+          profession: generationParameters.profession,
+          level: generationParameters.level,
+          subject: generationParameters.subject,
+          title: draftTitle,
+          description:
+            "由组织 AI 结果关联创建；发布前需编辑题目、标准答案、解析和资料依据。",
+          capabilityContext,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+        method: "POST",
+      });
+
+      if (isUnauthorizedResponse(draftResponse)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      const draft = draftResponse.data?.draft ?? null;
+
+      if (
+        draftResponse.code !== 0 ||
+        draft === null ||
+        draft.organizationPublicId !== organizationPublicId
+      ) {
+        setCopyActionStateByResultPublicId((currentState) => ({
+          ...currentState,
+          [resultPublicId]: "error",
+        }));
+        return;
+      }
+
+      if (draft.sourceTaskPublicId !== input.taskItem.taskPublicId) {
+        setCopyActionStateByResultPublicId((currentState) => ({
+          ...currentState,
+          [resultPublicId]: "error",
+        }));
+        return;
+      }
+
+      setCopyActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [resultPublicId]: "copied",
+      }));
+    } catch {
+      setCopyActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [resultPublicId]: "error",
       }));
     }
   }
@@ -1786,7 +2089,13 @@ export function AdminAiGenerationEntryPage({
       ) : null}
 
       <AdminAiGenerationTaskHistoryPanel
+        adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
+        copyActionStateByResultPublicId={copyActionStateByResultPublicId}
+        generationParameters={generationParameters}
         generationKind={generationKind}
+        onCopyToTrainingDraft={(input) =>
+          void handleCopyOrganizationAiResultToTrainingDraft(input)
+        }
         onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
         pagination={taskHistoryPagination}
         reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}

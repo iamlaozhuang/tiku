@@ -221,6 +221,16 @@ function createTaskHistoryResponse(input: {
         contentVisibility: "summary_only",
         evidenceStatus: input.generatedResult?.evidenceStatus ?? "none",
         citationCount: input.generatedResult?.citationCount ?? 0,
+        authorizationPublicId:
+          input.workspace === "organization"
+            ? "org_auth_local_contract_organization_public_123"
+            : "admin_role_content_ai_generation",
+        ownerPublicId:
+          input.workspace === "organization"
+            ? "organization_public_123"
+            : "platform_content_review_pool",
+        organizationPublicId:
+          input.workspace === "organization" ? "organization_public_123" : null,
         runtimeStatus: "local_contract_only",
         runtimeBridgeStatus: "provider_call_blocked",
         providerCallExecuted: false,
@@ -276,6 +286,18 @@ function createTaskHistoryResponse(input: {
           contentVisibility: "summary_only",
           evidenceStatus: input.generatedResult?.evidenceStatus ?? "none",
           citationCount: input.generatedResult?.citationCount ?? 0,
+          authorizationPublicId:
+            input.workspace === "organization"
+              ? "org_auth_local_contract_organization_public_123"
+              : "admin_role_content_ai_generation",
+          ownerPublicId:
+            input.workspace === "organization"
+              ? "organization_public_123"
+              : "platform_content_review_pool",
+          organizationPublicId:
+            input.workspace === "organization"
+              ? "organization_public_123"
+              : null,
           runtimeStatus: "local_contract_only",
           runtimeBridgeStatus: "provider_call_blocked",
           providerCallExecuted: false,
@@ -1479,7 +1501,16 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("可作为组织训练素材");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("正式发布需后续编辑校验");
+    ).toHaveTextContent("发布前需后续编辑校验");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("未关联训练草稿");
+    expect(
+      screen.getByTestId("organization-ai-training-copy-action"),
+    ).toHaveTextContent("创建企业训练草稿");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).not.toHaveTextContent("正式采用");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).not.toHaveTextContent("Provider");
@@ -1488,6 +1519,310 @@ describe("admin AI generation entry surfaces", () => {
     );
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
+  });
+
+  it("creates an organization training draft with source task attribution for a sufficiently grounded organization AI result", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const resultPublicId =
+      "admin_ai_generation_result_organization_question_copy_hidden_001";
+    const trainingDraftPublicId = "organization-training-draft-ai-copy-001";
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+      const method = init?.method ?? "GET";
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "organization",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for organization copy",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+          }),
+        );
+      }
+
+      if (path === "/api/v1/organization-trainings" && method === "POST") {
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            draft: {
+              publicId: trainingDraftPublicId,
+              sourceTaskPublicId:
+                "admin_ai_generation_task_organization_question_history",
+              organizationPublicId: "organization_public_123",
+              authorizationSource: "org_auth",
+              authorizationPublicId:
+                "org_auth_local_contract_organization_public_123",
+              profession: "marketing",
+              level: 3,
+              subject: "theory",
+              title: "AI出题训练草稿 2026-06-26 20:30",
+              description: "metadata only",
+              questionCount: 10,
+              totalScore: 10,
+              questionTypeSummary: {
+                singleChoice: 10,
+                multiChoice: 0,
+                trueFalse: 0,
+                shortAnswer: 0,
+              },
+              evidenceStatus: "sufficient",
+              validationStatus: "needs_review",
+              retentionStatus: "active",
+              createdAt: "2026-06-26T20:32:00.000Z",
+              expiresAt: null,
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    const copyAction = await screen.findByTestId(
+      "organization-ai-training-copy-action",
+    );
+
+    fireEvent.click(copyAction);
+
+    expect(
+      await screen.findByText(
+        "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。",
+      ),
+    ).toBeInTheDocument();
+
+    const draftBody = JSON.parse(
+      String(
+        fetchMock.mock.calls.find(
+          ([url, init]) =>
+            String(url) === "/api/v1/organization-trainings" &&
+            init?.method === "POST",
+        )?.[1]?.body,
+      ),
+    );
+    expect(draftBody).toMatchObject({
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_local_contract_organization_public_123",
+      sourceTaskPublicId:
+        "admin_ai_generation_task_organization_question_history",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      capabilityContext: {
+        effectiveEdition: "advanced",
+        authorizationSource: "org_auth",
+        canCreateOrganizationTraining: true,
+      },
+    });
+    expect(JSON.stringify(draftBody)).not.toContain("standardAnswer");
+    expect(JSON.stringify(draftBody)).not.toContain("analysis");
+    expect(JSON.stringify(draftBody)).not.toContain("providerPayload");
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).endsWith("/source-contexts"),
+      ),
+    ).toBe(false);
+  });
+
+  it("requires explicit weak-evidence wording before copying organization AI results and blocks none evidence", async () => {
+    const weakResultPublicId =
+      "admin_ai_generation_result_organization_question_weak_hidden_001";
+    const noneResultPublicId =
+      "admin_ai_generation_result_organization_question_none_hidden_001";
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "organization",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId: weakResultPublicId,
+              contentPreviewMasked: "weak organization result",
+              evidenceStatus: "weak",
+              citationCount: 1,
+            },
+          }),
+        );
+      }
+
+      if (String(url) === "/api/v1/organization-trainings") {
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            draft: {
+              publicId: "organization-training-draft-ai-weak-001",
+              sourceTaskPublicId:
+                "admin_ai_generation_task_organization_question_history",
+              organizationPublicId: "organization_public_123",
+              authorizationSource: "org_auth",
+              authorizationPublicId:
+                "org_auth_local_contract_organization_public_123",
+              profession: "marketing",
+              level: 3,
+              subject: "theory",
+              title: "AI出题训练草稿 2026-06-26 20:30",
+              description: null,
+              questionCount: 10,
+              totalScore: 10,
+              questionTypeSummary: {
+                singleChoice: 10,
+                multiChoice: 0,
+                trueFalse: 0,
+                shortAnswer: 0,
+              },
+              evidenceStatus: "weak",
+              validationStatus: "needs_review",
+              retentionStatus: "active",
+              createdAt: "2026-06-26T20:32:00.000Z",
+              expiresAt: null,
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    const weakCopyAction = await screen.findByTestId(
+      "organization-ai-training-copy-action",
+    );
+    expect(weakCopyAction).toHaveTextContent("确认资料较少并创建训练草稿");
+
+    fireEvent.click(weakCopyAction);
+
+    expect(
+      await screen.findByText(
+        "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。",
+      ),
+    ).toBeInTheDocument();
+
+    const weakDraftBody = JSON.parse(
+      String(
+        fetchMock.mock.calls.find(
+          ([url, init]) =>
+            String(url) === "/api/v1/organization-trainings" &&
+            init?.method === "POST",
+        )?.[1]?.body,
+      ),
+    );
+
+    expect(weakDraftBody).toMatchObject({
+      sourceTaskPublicId:
+        "admin_ai_generation_task_organization_question_history",
+    });
+
+    vi.unstubAllGlobals();
+    const noneFetchMock = vi.fn(
+      async (url: string | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/sessions") {
+          return Response.json(
+            createSessionResponse({
+              adminRoles: ["org_advanced_admin"],
+              organizationPublicId: "organization_public_123",
+            }),
+          );
+        }
+
+        if (
+          isAdminAiGenerationHistoryRequest(
+            url,
+            "/api/v1/organization-ai-generation-requests",
+            init,
+          )
+        ) {
+          return Response.json(
+            createTaskHistoryResponse({
+              workspace: "organization",
+              generationKind: "question",
+              generatedResult: {
+                resultPublicId: noneResultPublicId,
+                contentPreviewMasked: "none organization result",
+                evidenceStatus: "none",
+                citationCount: 0,
+              },
+            }),
+          );
+        }
+
+        throw new Error(`Unexpected fetch: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", noneFetchMock);
+    cleanup();
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    const blockedCopyAction = await screen.findByTestId(
+      "organization-ai-training-copy-action",
+    );
+
+    expect(blockedCopyAction).toBeDisabled();
+    expect(blockedCopyAction).toHaveTextContent("创建企业训练草稿");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("资料不足，暂不可作为组织训练素材");
+    expect(noneFetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+      "/api/v1/organization-ai-generation-requests?generationKind=question&page=1&pageSize=10",
+    ]);
   });
 
   it("shows an empty history state before any provider-disabled task exists", async () => {
