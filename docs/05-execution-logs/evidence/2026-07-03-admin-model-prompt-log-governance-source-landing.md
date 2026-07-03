@@ -10,6 +10,7 @@ result: pass
 
 - Branch: `codex/admin-model-prompt-log-governance-source-landing-2026-07-03`
 - Base commit: `1ae6bcafe1e9a8b39251d3d4fda45cbf0dd38d94`
+- Implementation commit: `587c163ce77e094ce706702ac0f179a35e62fbfc`
 - Evidence mode: redacted file paths, command results, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, raw employee answers, full question/paper/material/resource/chunk content, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -84,7 +85,7 @@ reported pre-push readiness passed after the project-state repository checkpoint
 
 ## Git Closeout
 
-pending_commit_merge_push_cleanup
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

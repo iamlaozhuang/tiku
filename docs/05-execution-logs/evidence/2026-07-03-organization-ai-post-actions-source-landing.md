@@ -6,7 +6,8 @@
 - Branch: `codex/organization-ai-post-actions-source-landing-2026-07-03`
 - Batch range: source landing package 5, single-task batch.
 - Base checkpoint: `efae583319fc72a342cfc28e04d7155b6516e85a`
-- Commit: current task commit on `master` after closeout amendment; use `git log -1 --oneline` as the non-self-referential source of truth.
+- Base commit: `efae583319fc72a342cfc28e04d7155b6516e85a`.
+- Implementation commit: `1ae6bcafe1e9a8b39251d3d4fda45cbf0dd38d94`.
 - Package: organization AI post-actions source UI/UX contract landing.
 - Evidence mode: redacted summaries only; no credentials, sessions, cookies, headers, env values, DB rows, PII, plaintext redeem_code, Provider payloads, prompts, AI I/O, raw employee answers, full question/paper/material/resource/chunk content, raw DOM, screenshots, traces, or exports.
 - Cost Calibration Gate remains blocked.

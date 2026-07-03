@@ -10,8 +10,8 @@ Branch: `codex/ops-authorization-source-landing-2026-07-03`
 
 Parent baseline: `1784d8930edd651f95c44d45a262500a1853b4ce`
 
-Commit: `1784d8930edd651f95c44d45a262500a1853b4ce` pre-closeout baseline; the task commit follows after
-validation, audit, Module Run v2 gates, and local commit.
+Base commit: `1784d8930edd651f95c44d45a262500a1853b4ce`.
+Implementation commit: `fae15f7055054352f278f656ad08de84fe3ba49a`.
 
 Cost Calibration Gate remains blocked.
 

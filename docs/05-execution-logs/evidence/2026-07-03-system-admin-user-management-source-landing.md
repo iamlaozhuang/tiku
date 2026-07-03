@@ -10,7 +10,7 @@ result: pass
 
 - Branch: `codex/system-admin-user-management-source-landing-2026-07-03`
 - Base commit: `10a5f672459ca22ec0870819f40353834d8bfdf2`
-- Commit: `10a5f672459ca22ec0870819f40353834d8bfdf2` is the pre-package-7 `master` and `origin/master` baseline; the implementation commit is pending local closeout.
+- Implementation commit: `64bd783d590522b4e41fe57c8dbb11c4896f2ac7`.
 - Evidence mode: redacted file paths, command results, role names, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, raw employee answers, full question/paper/material/resource/chunk content, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -80,7 +80,7 @@ reported pre-push readiness passed.
 
 ## Git Closeout
 
-pending_commit_merge_push_cleanup
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

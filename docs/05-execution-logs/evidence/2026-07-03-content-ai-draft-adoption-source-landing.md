@@ -10,7 +10,7 @@ result: pass
 
 - Branch: `codex/content-ai-draft-adoption-source-landing-2026-07-03`
 - Base commit: `e0d745d8af082d9fd2f8e96a76343bba341d81de`
-- Commit: to be recorded during local git closeout after module readiness gates.
+- Implementation commit: `0725b66720fe0ceee6ea36e91e6ff07f56b0c4db`.
 - Evidence mode: redacted file paths, task ids, command summaries, route names, role names, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII dumps, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, raw generated question/paper/material content, full source content dumps, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -56,7 +56,7 @@ blocked remainder: full visual editor mapping from persisted structured generate
 
 ## Git Closeout
 
-local_commit_merge_push_cleanup_to_follow
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

@@ -358,6 +358,115 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: source-landing-evidence-closeout-correction-2026-07-03
+    title: Source landing evidence closeout correction
+    phase: source-landing-evidence-closeout-correction-2026-07-03
+    sourceStory: current_user_requested_sixteen_package_pre_acceptance_review_and_separate_correction_2026_07_03
+    humanApprovalBoundary: current_user_requested_sixteen_package_pre_acceptance_review_and_separate_correction_2026_07_03
+    targetClosureItem: Correct stale commit and closeout placeholders found during the 16-package pre-acceptance review without entering acceptance design.
+    behaviorBoundary: docs_evidence_closeout_correction_only_no_product_source_no_tests_no_schema_no_provider_no_browser_no_deploy_release_claim
+    evidenceMode: redacted_file_paths_task_ids_commit_shas_and_validation_commands_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_content_no_raw_dom
+    taskKind: docs_governance_correction
+    moduleRunVersion: 2
+    status: closed
+    result: corrected_source_landing_evidence_closeout_placeholders_before_acceptance_design
+    branch: codex/source-landing-evidence-closeout-correction-2026-07-03
+    claimedAt: "2026-07-03T10:16:38-07:00"
+    plannedAt: "2026-07-03T10:16:38-07:00"
+    implementedAt: "2026-07-03T10:16:38-07:00"
+    validatedAt: "2026-07-03T10:16:38-07:00"
+    reviewedAt: "2026-07-03T10:16:38-07:00"
+    closedAt: "2026-07-03T10:16:38-07:00"
+    dependsOn:
+      - content-ai-draft-adoption-source-landing-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-evidence-closeout-correction.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-evidence-closeout-correction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-evidence-closeout-correction.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-source-landing-evidence-closeout-correction.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-evidence-closeout-correction.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-evidence-closeout-correction.md
+      - docs/05-execution-logs/evidence/2026-07-03-*-source-landing.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/task-plans/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_for_docs_only_correction
+      typecheck: approved
+      lint: approved
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/2026-07-03-*-source-landing.md docs/05-execution-logs/task-plans/2026-07-03-source-landing-evidence-closeout-correction.md docs/05-execution-logs/evidence/2026-07-03-source-landing-evidence-closeout-correction.md docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-evidence-closeout-correction.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-evidence-closeout-correction-2026-07-03
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_sixteen_package_pre_acceptance_review_and_separate_correction_2026_07_03
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_push_closeout_approval_not_requested_in_current_turn
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_push_closeout_approval_not_requested_in_current_turn
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: wait_for_merge_push_closeout_approval
+    validationSummary:
+      staleCloseoutPlaceholdersFound: true
+      staleCloseoutPlaceholdersCorrected: true
+      docsOnlyCorrection: true
+      productSourceChanged: false
+      schemaMigrationOrDependencyChanged: false
+      providerCallOrConfigurationExecuted: false
+      directDatabaseConnectionOrMutationExecuted: false
+      browserRuntimeExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: content-ai-draft-adoption-source-landing-2026-07-03
     title: Content AI draft adoption source landing
     phase: content-ai-draft-adoption-source-landing-2026-07-03

@@ -10,7 +10,7 @@ result: pass
 
 - Branch: `codex/org-auth-overlap-closure-source-landing-2026-07-03`
 - Base commit: `ddc2e5998bd1120bc27f11a180c76fa52464181a`
-- Commit: to be recorded during local git closeout after module readiness gates.
+- Implementation commit: `7b64869b5a4f15da07f7a62f90fb64328ad6502b`.
 - Evidence mode: redacted file paths, command results, route names, role names, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, raw employee answers, full question/paper/material/resource/chunk content, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -56,7 +56,7 @@ blocked remainder: real browser acceptance, direct database-backed overlap closu
 
 ## Git Closeout
 
-local_commit_merge_push_cleanup_to_follow_after_module_readiness_gates
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

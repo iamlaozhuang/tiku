@@ -5,7 +5,8 @@
 - Task ID: `organization-training-source-landing-2026-07-03`
 - Branch: `codex/organization-training-source-landing-2026-07-03`
 - Batch range: source landing package 3, single-task batch.
-- Commit: `fae15f7055054352f278f656ad08de84fe3ba49a` pre-commit base checkpoint; task commit is created after closeout gates pass.
+- Base commit: `fae15f7055054352f278f656ad08de84fe3ba49a`.
+- Implementation commit: `8b593dad555f3e2095a48f6d41e36217c89ebd53`.
 - Package: organization training source UI/UX contract landing.
 - Evidence mode: redacted summaries only; no credentials, sessions, cookies, headers, env values, DB rows, PII, plaintext redeem_code, Provider payloads, prompts, AI I/O, raw employee answers, full question/paper/material/resource/chunk content, raw DOM, screenshots, or traces.
 - Cost Calibration Gate remains blocked.

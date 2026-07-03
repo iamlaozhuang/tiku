@@ -10,7 +10,7 @@ result: pass
 
 - Branch: `codex/organization-workspace-role-boundary-source-landing-2026-07-03`
 - Base commit: `64bd783d590522b4e41fe57c8dbb11c4896f2ac7`
-- Commit: `64bd783d590522b4e41fe57c8dbb11c4896f2ac7` is the pre-package-8 `master` and `origin/master` baseline; the implementation commit is pending local git commit after validation closeout.
+- Implementation commit: `20f1ff8454fb822f3a6ab786325313768cc2a45c`.
 - Evidence mode: redacted file paths, command results, role names, route names, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, raw employee answers, full question/paper/material/resource/chunk content, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -74,7 +74,7 @@ completed with `pre-push readiness passed`.
 
 ## Git Closeout
 
-pending_commit_merge_push_cleanup
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

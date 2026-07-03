@@ -10,7 +10,7 @@ result: pass
 
 - Branch: `codex/employee-import-password-source-landing-2026-07-03`
 - Base commit: `7b64869b5a4f15da07f7a62f90fb64328ad6502b`
-- Commit: to be recorded during local git closeout after module readiness gates.
+- Implementation commit: `b0d4ccc253a499a49d4335049a7aaff89796cd6a`.
 - Evidence mode: redacted file paths, command results, route names, role names, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII, actual password values, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, raw employee answers, full question/paper/material/resource/chunk content, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -57,7 +57,7 @@ blocked remainder: real browser acceptance, direct database-backed import eviden
 
 ## Git Closeout
 
-local_commit_merge_push_cleanup_to_follow
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

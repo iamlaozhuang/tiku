@@ -10,7 +10,7 @@ result: pass
 
 - Branch: `codex/learner-core-experience-source-landing-2026-07-03`
 - Base commit: `ef90c2191eedf9b181968c2c673b0a8a0f174c2c`
-- Commit: to be recorded during local git closeout after module readiness gates.
+- Implementation commit: `b9bf4b55aa79b800830324175a31a83c385347c5`.
 - Evidence mode: redacted file paths, command results, route names, role names, and requirement/source alignment summaries only.
 - Forbidden evidence: credentials, sessions, cookies, auth headers, env values, raw DB rows, PII dumps, actual password values, plaintext `redeem_code`, Provider payloads, raw Prompt/full Prompt text, raw AI IO, full question/paper/material/resource/chunk content, screenshots, exports, traces, raw DOM, or private fixture material.
 
@@ -60,7 +60,7 @@ blocked remainder: learner AI context/quota/history/retry, enterprise training a
 
 ## Git Closeout
 
-local_commit_merge_push_cleanup_to_follow
+Committed, fast-forward merged to `master`, pushed to `origin/master`, and short branch cleaned in package closeout.
 
 ## Non-Claims
 

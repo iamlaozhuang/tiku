@@ -8,8 +8,8 @@ Task id: `content-resource-management-source-landing-2026-07-03`
 
 Branch: `codex/content-resource-management-source-landing-2026-07-03`
 
-Commit: `5dad2425923b0888b64b3bed1ddddefc0ce84907` is the parent baseline for this source landing package; this package
-commit is created only after validation succeeds.
+Base commit: `5dad2425923b0888b64b3bed1ddddefc0ce84907`.
+Implementation commit: `1784d8930edd651f95c44d45a262500a1853b4ce`.
 
 Cost Calibration Gate remains blocked.
 

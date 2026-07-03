@@ -5,7 +5,8 @@
 - Task ID: `organization-analytics-source-landing-2026-07-03`
 - Branch: `codex/organization-analytics-source-landing-2026-07-03`
 - Batch range: source landing package 4, single-task batch.
-- Commit: `8b593dad555f3e2095a48f6d41e36217c89ebd53` pre-commit base checkpoint; task commit is created after closeout gates pass.
+- Base commit: `8b593dad555f3e2095a48f6d41e36217c89ebd53`.
+- Implementation commit: `efae583319fc72a342cfc28e04d7155b6516e85a`.
 - Package: organization analytics source UI/UX contract landing.
 - Evidence mode: redacted summaries only; no credentials, sessions, cookies, headers, env values, DB rows, PII, plaintext redeem_code, Provider payloads, prompts, AI I/O, raw employee answers, full question/paper/material/resource/chunk content, raw DOM, screenshots, traces, or exports.
 - Cost Calibration Gate remains blocked.
