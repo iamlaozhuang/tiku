@@ -1,8 +1,158 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ui-ux-contract-packages-detailed-audit-2026-07-03
-updatedAt: "2026-07-03T01:15:00-07:00"
+currentPhase: content-resource-management-source-landing-2026-07-03
+updatedAt: "2026-07-03T01:53:11-07:00"
+contentResourceManagementSourceLanding20260703:
+  taskId: content-resource-management-source-landing-2026-07-03
+  phase: content-resource-management-source-landing-2026-07-03
+  status: closed
+  result: content_resource_management_source_landed_with_content_route_ops_redirect_ops_runtime_denial_business_copy_pagination_and_tests
+  priority: p1
+  taskKind: source_ui_auth_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - ui-ux-contract-packages-detailed-audit-2026-07-03
+  sourceStory: current_user_approved_serial_source_landing_contract_packages_goal_2026_07_03
+  targetClosureItem: Land the accepted content resource management UI/UX contract in source without expanding into schema, Provider, dependency, database, OCR, cloud conversion, Prompt, model, organization training, or release-readiness scope.
+  behaviorBoundary: content_resource_management_source_ui_route_nav_auth_copy_pagination_tests_only_no_db_provider_dependency_schema_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_route_names_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_employee_answers_no_full_content_no_raw_dom
+  branch: codex/content-resource-management-source-landing-2026-07-03
+  claimedAt: "2026-07-03T01:25:08-07:00"
+  plannedAt: "2026-07-03T01:25:08-07:00"
+  implementedAt: "2026-07-03T01:53:11-07:00"
+  validatedAt: "2026-07-03T01:53:11-07:00"
+  reviewedAt: "2026-07-03T01:53:11-07:00"
+  closedAt: "2026-07-03T01:53:11-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-content-resource-management-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-content-resource-management-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-content-resource-management-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-content-resource-management-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-content-resource-management-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-content-resource-management-source-landing.md
+    - src/app/(admin)/content/ContentKnowledgeOpsBaseline.tsx
+    - src/app/(admin)/content/resources/page.tsx
+    - src/app/(admin)/ops/resources/page.tsx
+    - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+    - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
+    - src/server/services/rag-resource-knowledge-runtime.ts
+    - tests/unit/admin-dashboard-layout-navigation.test.ts
+    - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+    - tests/unit/admin-resource-knowledge-ui-layout.test.ts
+    - tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/evidence/2026-07-02-content-resource-management-ui-ux-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-content-resource-management-ui-ux-contract.md
+    - src/app/api/v1/resources/**
+    - src/server/contracts/admin-content-knowledge-ops-contract.ts
+    - src/server/repositories/rag-resource-knowledge-runtime-repository.ts
+    - src/features/admin/content-admin-runtime.tsx
+    - package.json
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Content workspace exposes the resource management entry and page.
+    - Operations workspace no longer exposes a primary resource-management write menu entry.
+    - Old operations resource route redirects to the content resource path instead of remaining an operations write surface.
+    - Resource runtime access is denied to authenticated ops_admin and allowed to content_admin/super_admin.
+    - Ordinary resource UI copy uses business wording for资料、解析草稿、发布、重建检索索引 and does not foreground raw chunk/embedding/storage internals.
+    - Resource list has visible page-size, pagination, sort controls, and URL query preservation where practical.
+    - Focused unit tests cover route/nav ownership, ops denial, content access, UI copy, and safe redaction boundaries.
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/admin-resource-knowledge-ui-layout.test.ts tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-resource-management-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-resource-management-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-resource-management-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  validationSummary:
+    status: passed
+    focusedUnitTestsPassed: true
+    focusedUnitTestFiles: 4
+    focusedUnitTestCount: 32
+    typecheckPassed: true
+    lintPassed: true
+    formatCheckPassed: true
+    gitDiffCheckPassed: true
+    moduleRunV2PreCommitHardeningPassed: true
+    moduleRunV2ModuleCloseoutReadinessPassed: true
+    moduleRunV2PrePushReadinessPassed: true
+    repositoryCheckpointDriftCorrected: true
+    contentResourceRouteAdded: true
+    opsResourceRouteRedirected: true
+    opsResourceMenuRemoved: true
+    contentResourceMenuAdded: true
+    opsAdminResourceRuntimeDenied: true
+    resourceBusinessCopyLanded: true
+    resourcePaginationSortQueryControlsLanded: true
+    dependencyChanged: false
+    schemaChanged: false
+    providerCallExecuted: false
+    databaseAccessExecuted: false
+    browserRuntimeExecuted: false
+    releaseReadinessClaimed: false
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
 uiUxContractPackagesDetailedAudit20260703:
   taskId: ui-ux-contract-packages-detailed-audit-2026-07-03
   phase: ui-ux-contract-packages-detailed-audit-2026-07-03
@@ -19284,8 +19434,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 97eac61dbe511e5104892c2fc12bb13524511ddf
-  lastKnownOriginMasterSha: 97eac61dbe511e5104892c2fc12bb13524511ddf
+  lastKnownMasterSha: 5dad2425923b0888b64b3bed1ddddefc0ce84907
+  lastKnownOriginMasterSha: 5dad2425923b0888b64b3bed1ddddefc0ce84907
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -19425,6 +19575,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: content-resource-management-source-landing-2026-07-03
+  status: closed
+  result: content_resource_management_source_landed_with_content_route_ops_redirect_ops_runtime_denial_business_copy_pagination_and_tests
+  taskKind: source_ui_auth_landing
+  moduleRunVersion: 2
+  branch: codex/content-resource-management-source-landing-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-content-resource-management-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-content-resource-management-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-content-resource-management-source-landing.md
+previousCurrentTaskBeforeContentResourceManagementSourceLanding20260703:
   id: ui-ux-contract-packages-detailed-audit-2026-07-03
   status: closed
   result: audited_ui_ux_contract_packages_1_to_6_corrected_package_6_traceability_anchor_and_state_checkpoint_drift

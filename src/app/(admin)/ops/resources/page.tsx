@@ -1,5 +1,5 @@
-import { AdminResourceKnowledgeManagement } from "@/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement";
+import { redirect } from "next/navigation";
 
 export default function ResourcesPage() {
-  return <AdminResourceKnowledgeManagement />;
+  redirect("/content/resources");
 }

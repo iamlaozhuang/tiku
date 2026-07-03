@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 const adminResourceKnowledgeSourcePath =
   "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx";
+const contentResourcePagePath = "src/app/(admin)/content/resources/page.tsx";
+const opsResourcePagePath = "src/app/(admin)/ops/resources/page.tsx";
 const adminResourceModalShellClass =
   "fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg";
 
@@ -22,5 +24,14 @@ describe("admin resource knowledge UI layout", () => {
 
     expect(source).toContain("function AdminResourceModalShell");
     expect(countOccurrences(source, adminResourceModalShellClass)).toBe(1);
+  });
+
+  it("keeps the primary resource page under content and redirects the legacy ops route", () => {
+    const contentPageSource = readSourceFile(contentResourcePagePath);
+    const opsPageSource = readSourceFile(opsResourcePagePath);
+
+    expect(contentPageSource).toContain("AdminResourceKnowledgeManagement");
+    expect(opsPageSource).toContain('redirect("/content/resources")');
+    expect(opsPageSource).not.toContain("<AdminResourceKnowledgeManagement");
   });
 });

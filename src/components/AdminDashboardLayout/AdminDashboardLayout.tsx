@@ -55,6 +55,7 @@ const CONTENT_MENU: MenuItem[] = [
   { href: "/content/papers", label: "试卷管理", Icon: FileText },
   { href: "/content/questions", label: "题库管理", Icon: BookOpenText },
   { href: "/content/materials", label: "材料管理", Icon: Boxes },
+  { href: "/content/resources", label: "资源管理", Icon: FolderOpen },
   {
     href: "/content/ai-question-generation",
     label: "AI出题",
@@ -69,7 +70,6 @@ const OPS_MENU: MenuItem[] = [
   { href: "/ops/users", label: "用户管理", Icon: UserRoundCog },
   { href: "/ops/organizations", label: "企业管理", Icon: Building2 },
   { href: "/ops/redeem-codes", label: "卡密与企业授权", Icon: KeyRound },
-  { href: "/ops/resources", label: "资源管理", Icon: FolderOpen },
   { href: "/ops/ai-audit-logs", label: "审计与AI调用日志", Icon: ScrollText },
 ];
 

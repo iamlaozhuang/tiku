@@ -141,7 +141,7 @@ function createRuntimeRepositories(input: {
       },
       async createKnowledgeNode(createInput) {
         return {
-          publicId: "knowledge-node-public-license",
+          publicId: "knowledge-node-public-permit",
           parentKnowledgeNodePublicId: createInput.parentKnowledgeNodePublicId,
           profession: createInput.profession,
           levelList: createInput.levelList,
@@ -182,6 +182,29 @@ function createRuntimeRepositories(input: {
 }
 
 describe("phase 9 RAG resource knowledge runtime", () => {
+  it("denies ops admins from resource management runtime access", async () => {
+    const auditLogEntries: unknown[] = [];
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      repositories: createRuntimeRepositories({ auditLogEntries }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+
+    const response = await handlers.resources.collection.GET(
+      new Request("http://localhost/api/v1/resources?page=1&pageSize=20", {
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+    );
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 403621,
+      message: "Admin permission denied.",
+      data: null,
+    });
+    expect(JSON.stringify(payload)).not.toContain("resource-public-001");
+    expect(auditLogEntries).toEqual([]);
+  });
+
   it("rebuilds resource chunks locally and returns redaction-safe resource evidence", async () => {
     const auditLogEntries: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
@@ -329,7 +352,7 @@ describe("phase 9 RAG resource knowledge runtime", () => {
     );
     const disableResponse = await handlers.knowledgeNodes.disable.POST(
       new Request(
-        "http://localhost/api/v1/knowledge-nodes/knowledge-node-public-license/disable",
+        "http://localhost/api/v1/knowledge-nodes/knowledge-node-public-permit/disable",
         {
           method: "POST",
           headers: { authorization: "Bearer admin-session-token" },
@@ -337,7 +360,7 @@ describe("phase 9 RAG resource knowledge runtime", () => {
       ),
       {
         params: Promise.resolve({
-          publicId: "knowledge-node-public-license",
+          publicId: "knowledge-node-public-permit",
         }),
       },
     );
@@ -346,7 +369,7 @@ describe("phase 9 RAG resource knowledge runtime", () => {
       code: 0,
       data: {
         knowledgeNode: {
-          publicId: "knowledge-node-public-license",
+          publicId: "knowledge-node-public-permit",
           name: "许可证办理",
           knStatus: "active",
         },
@@ -356,7 +379,7 @@ describe("phase 9 RAG resource knowledge runtime", () => {
       code: 0,
       data: {
         knowledgeNode: {
-          publicId: "knowledge-node-public-license",
+          publicId: "knowledge-node-public-permit",
           knStatus: "disabled",
           isRecommendable: false,
         },
@@ -366,12 +389,12 @@ describe("phase 9 RAG resource knowledge runtime", () => {
       expect.objectContaining({
         actionType: "knowledge_node.create",
         targetResourceType: "knowledge_node",
-        targetPublicId: "knowledge-node-public-license",
+        targetPublicId: "knowledge-node-public-permit",
       }),
       expect.objectContaining({
         actionType: "knowledge_node.disable",
         targetResourceType: "knowledge_node",
-        targetPublicId: "knowledge-node-public-license",
+        targetPublicId: "knowledge-node-public-permit",
       }),
     ]);
     expect(JSON.stringify(auditLogEntries)).not.toContain(

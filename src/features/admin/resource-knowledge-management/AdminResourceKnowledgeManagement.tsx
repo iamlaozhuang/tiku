@@ -7,7 +7,6 @@ import {
   ChevronUp,
   CheckCircle2,
   DatabaseZap,
-  Download,
   FileText,
   Search,
   Upload,
@@ -18,7 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ResourceVectorRebuildResultDto } from "@/server/contracts/ai-rag-contract";
 import type { ApiResponse } from "@/server/contracts/api-response";
-import type { AdminResourceOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
+import {
+  ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS,
+  type AdminResourceOpsSummaryDto,
+} from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { ResourceStatus, ResourceType } from "@/server/models/ai-rag";
 import type { Profession } from "@/server/models/paper";
@@ -28,9 +30,7 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
-  DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
-  PublicId,
   createAdminAuthHeaders,
   fetchAdminApi,
   getStoredSessionToken,
@@ -50,6 +50,9 @@ type ResourceLoadState =
 type ResourceStatusFilter = "all" | ResourceStatus;
 type ResourceTypeFilter = "all" | ResourceType;
 type ProfessionFilter = "all" | Profession;
+type LevelFilter = "all" | "general" | "1" | "2" | "3" | "4" | "5";
+type ResourceSortField = "uploadedAt" | "updatedAt" | "publishedAt";
+type ResourceSortOrder = "asc" | "desc";
 
 type ResourceListDto = {
   resources: AdminResourceOpsSummaryDto[];
@@ -149,15 +152,15 @@ type MarkdownHeadingReviewItem = {
 };
 
 const resourceStatusLabels: Record<ResourceStatus, string> = {
-  conversion_failed: "转换失败",
-  converting: "转换中",
+  conversion_failed: "文件解析失败",
+  converting: "文件解析中",
   disabled: "已停用",
-  draft: "草稿待校对",
-  index_failed: "向量构建失败",
-  indexing: "向量构建中",
-  published: "已发布，待建向量",
-  rag_ready: "RAG 可用",
-  uploaded: "已上传",
+  draft: "解析草稿待校对",
+  index_failed: "检索索引重建失败",
+  indexing: "检索索引重建中",
+  published: "已发布，待重建检索索引",
+  rag_ready: "检索可用",
+  uploaded: "已上传待解析",
 };
 
 const resourceTypeLabels: Record<ResourceType, string> = {
@@ -168,6 +171,172 @@ const resourceTypeLabels: Record<ResourceType, string> = {
   textbook: "教材",
 };
 
+const RESOURCE_LIST_FETCH_QUERY =
+  "page=1&pageSize=100&sortBy=updatedAt&sortOrder=desc";
+
+const resourceSortFieldLabels: Record<ResourceSortField, string> = {
+  publishedAt: "发布时间",
+  updatedAt: "更新时间",
+  uploadedAt: "上传时间",
+};
+
+const levelFilterOptions: [LevelFilter, string][] = [
+  ["all", "全部等级"],
+  ["general", "专业通用资料"],
+  ["1", "1级"],
+  ["2", "2级"],
+  ["3", "3级"],
+  ["4", "4级"],
+  ["5", "5级"],
+];
+
+type ResourceListQueryState = {
+  keyword: string;
+  level: LevelFilter;
+  page: number;
+  pageSize: (typeof ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS)[number];
+  profession: ProfessionFilter;
+  resourceType: ResourceTypeFilter;
+  sortBy: ResourceSortField;
+  sortOrder: ResourceSortOrder;
+  status: ResourceStatusFilter;
+};
+
+const defaultResourceListQueryState: ResourceListQueryState = {
+  keyword: "",
+  level: "all",
+  page: 1,
+  pageSize: 20,
+  profession: "all",
+  resourceType: "all",
+  sortBy: "updatedAt",
+  sortOrder: "desc",
+  status: "all",
+};
+
+function parsePositivePage(value: string | null) {
+  const page = Number(value);
+
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
+function parsePageSize(
+  value: string | null,
+): ResourceListQueryState["pageSize"] {
+  const pageSize = Number(value);
+
+  return ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS.includes(
+    pageSize as ResourceListQueryState["pageSize"],
+  )
+    ? (pageSize as ResourceListQueryState["pageSize"])
+    : 20;
+}
+
+function parseResourceSortField(value: string | null): ResourceSortField {
+  return value === "uploadedAt" || value === "publishedAt"
+    ? value
+    : "updatedAt";
+}
+
+function parseResourceSortOrder(value: string | null): ResourceSortOrder {
+  return value === "asc" ? "asc" : "desc";
+}
+
+function parseResourceLevelFilter(value: string | null): LevelFilter {
+  return levelFilterOptions.some(([optionValue]) => optionValue === value)
+    ? (value as LevelFilter)
+    : "all";
+}
+
+function parseResourceProfessionFilter(value: string | null): ProfessionFilter {
+  return value === "marketing" || value === "logistics" || value === "monopoly"
+    ? value
+    : "all";
+}
+
+function parseResourceStatusFilter(value: string | null): ResourceStatusFilter {
+  return value !== null && value in resourceStatusLabels
+    ? (value as ResourceStatusFilter)
+    : "all";
+}
+
+function parseResourceTypeFilter(value: string | null): ResourceTypeFilter {
+  return value !== null && value in resourceTypeLabels
+    ? (value as ResourceTypeFilter)
+    : "all";
+}
+
+function readResourceListQueryState(): ResourceListQueryState {
+  if (typeof window === "undefined") {
+    return defaultResourceListQueryState;
+  }
+
+  const searchParams = new URLSearchParams(window.location.search);
+
+  return {
+    keyword: searchParams.get("keyword") ?? "",
+    level: parseResourceLevelFilter(searchParams.get("level")),
+    page: parsePositivePage(searchParams.get("page")),
+    pageSize: parsePageSize(searchParams.get("pageSize")),
+    profession: parseResourceProfessionFilter(searchParams.get("profession")),
+    resourceType: parseResourceTypeFilter(searchParams.get("resourceType")),
+    sortBy: parseResourceSortField(searchParams.get("sortBy")),
+    sortOrder: parseResourceSortOrder(searchParams.get("sortOrder")),
+    status: parseResourceStatusFilter(searchParams.get("status")),
+  };
+}
+
+function writeResourceListQueryState(queryState: ResourceListQueryState) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const searchParams = new URLSearchParams();
+
+  if (queryState.keyword.trim().length > 0) {
+    searchParams.set("keyword", queryState.keyword.trim());
+  }
+
+  if (queryState.profession !== "all") {
+    searchParams.set("profession", queryState.profession);
+  }
+
+  if (queryState.status !== "all") {
+    searchParams.set("status", queryState.status);
+  }
+
+  if (queryState.resourceType !== "all") {
+    searchParams.set("resourceType", queryState.resourceType);
+  }
+
+  if (queryState.level !== "all") {
+    searchParams.set("level", queryState.level);
+  }
+
+  if (queryState.page !== 1) {
+    searchParams.set("page", String(queryState.page));
+  }
+
+  if (queryState.pageSize !== 20) {
+    searchParams.set("pageSize", String(queryState.pageSize));
+  }
+
+  if (queryState.sortBy !== "updatedAt") {
+    searchParams.set("sortBy", queryState.sortBy);
+  }
+
+  if (queryState.sortOrder !== "desc") {
+    searchParams.set("sortOrder", queryState.sortOrder);
+  }
+
+  const queryString = searchParams.toString();
+  const nextUrl = `${window.location.pathname}${
+    queryString.length > 0 ? `?${queryString}` : ""
+  }${window.location.hash}`;
+
+  window.history.replaceState(window.history.state, "", nextUrl);
+}
+
 function isSafePublicId(value: string) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 }
@@ -177,11 +346,46 @@ function createTestId(value: string) {
 }
 
 function formatLevel(value: number | null) {
-  return value === null ? "通用" : `${value}级`;
+  return value === null ? "专业通用资料" : `${value}级`;
 }
 
 function formatResourceScope(resource: AdminResourceOpsSummaryDto) {
   return `${professionLabels[resource.profession]} ${formatLevel(resource.level)}`;
+}
+
+function matchesLevelFilter(value: number | null, expected: LevelFilter) {
+  if (expected === "all") {
+    return true;
+  }
+
+  if (expected === "general") {
+    return value === null;
+  }
+
+  return value === Number(expected);
+}
+
+function readResourceDateValue(
+  resource: AdminResourceOpsSummaryDto,
+  sortBy: ResourceSortField,
+) {
+  const value = resource[sortBy];
+
+  return value === null ? 0 : new Date(value).getTime();
+}
+
+function sortResources(
+  resources: AdminResourceOpsSummaryDto[],
+  sortBy: ResourceSortField,
+  sortOrder: ResourceSortOrder,
+) {
+  return [...resources].sort((leftResource, rightResource) => {
+    const leftValue = readResourceDateValue(leftResource, sortBy);
+    const rightValue = readResourceDateValue(rightResource, sortBy);
+    const result = leftValue - rightValue;
+
+    return sortOrder === "asc" ? result : -result;
+  });
 }
 
 function collectMarkdownHeadingReviewItems(
@@ -435,7 +639,7 @@ function useResourceData() {
         }
 
         const resourceResponse = await fetchAdminApi<ResourceListDto>(
-          `/api/v1/resources?${DEFAULT_CONTENT_LIST_QUERY}`,
+          `/api/v1/resources?${RESOURCE_LIST_FETCH_QUERY}`,
           sessionToken,
         );
 
@@ -470,10 +674,26 @@ function useResourceData() {
 }
 
 export function AdminResourceKnowledgeManagement() {
-  const [keyword, setKeyword] = useState("");
-  const [profession, setProfession] = useState<ProfessionFilter>("all");
-  const [status, setStatus] = useState<ResourceStatusFilter>("all");
-  const [resourceType, setResourceType] = useState<ResourceTypeFilter>("all");
+  const initialQueryState = useMemo(() => readResourceListQueryState(), []);
+  const [keyword, setKeyword] = useState(initialQueryState.keyword);
+  const [profession, setProfession] = useState<ProfessionFilter>(
+    initialQueryState.profession,
+  );
+  const [status, setStatus] = useState<ResourceStatusFilter>(
+    initialQueryState.status,
+  );
+  const [resourceType, setResourceType] = useState<ResourceTypeFilter>(
+    initialQueryState.resourceType,
+  );
+  const [level, setLevel] = useState<LevelFilter>(initialQueryState.level);
+  const [page, setPage] = useState(initialQueryState.page);
+  const [pageSize, setPageSize] = useState(initialQueryState.pageSize);
+  const [sortBy, setSortBy] = useState<ResourceSortField>(
+    initialQueryState.sortBy,
+  );
+  const [sortOrder, setSortOrder] = useState<ResourceSortOrder>(
+    initialQueryState.sortOrder,
+  );
   const [rebuildState, setRebuildState] = useState<RebuildState>({
     status: "idle",
   });
@@ -496,7 +716,7 @@ export function AdminResourceKnowledgeManagement() {
     profession: "marketing",
     resourceType: "knowledge_doc",
     status: "idle",
-    title: "本地资源验证资料",
+    title: "资料校对示例",
   });
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const { loadState, resources, setResources } = useResourceData();
@@ -518,11 +738,47 @@ export function AdminResourceKnowledgeManagement() {
           includesKeyword(searchableText, keyword) &&
           matchesFilter(resource.profession, profession) &&
           matchesFilter(resource.resourceStatus, status) &&
-          matchesFilter(resource.resourceType, resourceType)
+          matchesFilter(resource.resourceType, resourceType) &&
+          matchesLevelFilter(resource.level, level)
         );
       }),
-    [keyword, profession, resourceType, resources, status],
+    [keyword, level, profession, resourceType, resources, status],
   );
+  const sortedResources = useMemo(
+    () => sortResources(filteredResources, sortBy, sortOrder),
+    [filteredResources, sortBy, sortOrder],
+  );
+  const totalPages = Math.max(1, Math.ceil(sortedResources.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedResources = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+
+    return sortedResources.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, pageSize, sortedResources]);
+
+  useEffect(() => {
+    writeResourceListQueryState({
+      keyword,
+      level,
+      page: currentPage,
+      pageSize,
+      profession,
+      resourceType,
+      sortBy,
+      sortOrder,
+      status,
+    });
+  }, [
+    currentPage,
+    keyword,
+    level,
+    pageSize,
+    profession,
+    resourceType,
+    sortBy,
+    sortOrder,
+    status,
+  ]);
 
   async function handleConfirmRebuild() {
     if (rebuildState.status !== "confirming") {
@@ -537,7 +793,7 @@ export function AdminResourceKnowledgeManagement() {
     ) {
       setRebuildState({ status: "idle" });
       setToastMessage({
-        message: "资源 publicId 异常，请刷新后重试",
+        message: "资料编号异常，请刷新后重试",
         tone: "error",
       });
       return;
@@ -553,19 +809,19 @@ export function AdminResourceKnowledgeManagement() {
 
       if (rebuildResult === null) {
         setToastMessage({
-          message: "向量重建失败，请刷新后重试",
+          message: "检索索引重建失败，请刷新后重试",
           tone: "error",
         });
         return;
       }
 
       setToastMessage({
-        message: `向量重建完成：${rebuildResult.resourceVector.chunkCount} 个片段`,
+        message: `检索索引重建完成，已生成 ${rebuildResult.resourceVector.chunkCount} 段可检索内容`,
         tone: "success",
       });
     } catch {
       setToastMessage({
-        message: "向量重建失败，请刷新后重试",
+        message: "检索索引重建失败，请刷新后重试",
         tone: "error",
       });
     } finally {
@@ -586,7 +842,7 @@ export function AdminResourceKnowledgeManagement() {
     ) {
       setPublishState({ status: "idle" });
       setToastMessage({
-        message: "资源 publicId 异常，请刷新后重试",
+        message: "资料编号异常，请刷新后重试",
         tone: "error",
       });
       return;
@@ -602,7 +858,7 @@ export function AdminResourceKnowledgeManagement() {
 
       if (publishedResource === null) {
         setToastMessage({
-          message: "资源发布失败，请刷新后重试",
+          message: "资料发布失败，请刷新后重试",
           tone: "error",
         });
         return;
@@ -616,12 +872,12 @@ export function AdminResourceKnowledgeManagement() {
         ),
       );
       setToastMessage({
-        message: "资源发布完成，向量待重建",
+        message: "资料已发布，待重建检索索引",
         tone: "success",
       });
     } catch {
       setToastMessage({
-        message: "资源发布失败，请刷新后重试",
+        message: "资料发布失败，请刷新后重试",
         tone: "error",
       });
     } finally {
@@ -634,7 +890,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (sessionToken === null || uploadState.file === null) {
       setToastMessage({
-        message: "请选择本地资源文件",
+        message: "请选择资料文件",
         tone: "error",
       });
       return;
@@ -653,7 +909,7 @@ export function AdminResourceKnowledgeManagement() {
 
       if (uploadResult === null) {
         setToastMessage({
-          message: "资源上传失败，请确认格式和大小",
+          message: "资料上传失败，请确认格式和大小",
           tone: "error",
         });
         return;
@@ -668,8 +924,8 @@ export function AdminResourceKnowledgeManagement() {
       setToastMessage({
         message:
           uploadResult.localResource.skippedReason === null
-            ? "资源上传完成，已生成 Markdown 草稿"
-            : "资源上传完成，但本地解析失败",
+            ? "资料上传完成，已生成解析草稿"
+            : "资料上传完成，但文件解析失败",
         tone:
           uploadResult.localResource.skippedReason === null
             ? "success"
@@ -677,7 +933,7 @@ export function AdminResourceKnowledgeManagement() {
       });
     } catch {
       setToastMessage({
-        message: "资源上传失败，请稍后重试",
+        message: "资料上传失败，请稍后重试",
         tone: "error",
       });
     } finally {
@@ -695,7 +951,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (sessionToken === null || !isSafePublicId(resource.publicId)) {
       setToastMessage({
-        message: "资源 publicId 异常，请刷新后重试",
+        message: "资料编号异常，请刷新后重试",
         tone: "error",
       });
       return;
@@ -708,7 +964,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (resourceDetail === null || resourceDetail.markdownContent === null) {
       setToastMessage({
-        message: "Markdown 草稿不可用",
+        message: "解析草稿不可用",
         tone: "error",
       });
       return;
@@ -734,7 +990,7 @@ export function AdminResourceKnowledgeManagement() {
     ) {
       setMarkdownReviewState({ status: "idle" });
       setToastMessage({
-        message: "资源 publicId 异常，请刷新后重试",
+        message: "资料编号异常，请刷新后重试",
         tone: "error",
       });
       return;
@@ -754,7 +1010,7 @@ export function AdminResourceKnowledgeManagement() {
 
       if (savedResource === null) {
         setToastMessage({
-          message: "Markdown 草稿保存失败",
+          message: "解析草稿保存失败",
           tone: "error",
         });
         return;
@@ -768,13 +1024,13 @@ export function AdminResourceKnowledgeManagement() {
         ),
       );
       setToastMessage({
-        message: "Markdown 草稿已保存",
+        message: "解析草稿已保存",
         tone: "success",
       });
       setMarkdownReviewState({ status: "idle" });
     } catch {
       setToastMessage({
-        message: "Markdown 草稿保存失败",
+        message: "解析草稿保存失败",
         tone: "error",
       });
     }
@@ -793,7 +1049,7 @@ export function AdminResourceKnowledgeManagement() {
     ) {
       setDisableState({ status: "idle" });
       setToastMessage({
-        message: "资源 publicId 异常，请刷新后重试",
+        message: "资料编号异常，请刷新后重试",
         tone: "error",
       });
       return;
@@ -809,7 +1065,7 @@ export function AdminResourceKnowledgeManagement() {
 
       if (disabledResource === null) {
         setToastMessage({
-          message: "资源停用失败",
+          message: "资料停用失败",
           tone: "error",
         });
         return;
@@ -823,12 +1079,12 @@ export function AdminResourceKnowledgeManagement() {
         ),
       );
       setToastMessage({
-        message: "资源已停用",
+        message: "资料已停用",
         tone: "success",
       });
     } catch {
       setToastMessage({
-        message: "资源停用失败",
+        message: "资料停用失败",
         tone: "error",
       });
     } finally {
@@ -849,7 +1105,7 @@ export function AdminResourceKnowledgeManagement() {
     ) {
       setEnableState({ status: "idle" });
       setToastMessage({
-        message: "资源 publicId 异常，请刷新后重试",
+        message: "资料编号异常，请刷新后重试",
         tone: "error",
       });
       return;
@@ -865,7 +1121,7 @@ export function AdminResourceKnowledgeManagement() {
 
       if (enabledResource === null) {
         setToastMessage({
-          message: "资源启用失败",
+          message: "资料启用失败",
           tone: "error",
         });
         return;
@@ -879,12 +1135,12 @@ export function AdminResourceKnowledgeManagement() {
         ),
       );
       setToastMessage({
-        message: "资源已启用",
+        message: "资料已启用",
         tone: "success",
       });
     } catch {
       setToastMessage({
-        message: "资源启用失败",
+        message: "资料启用失败",
         tone: "error",
       });
     } finally {
@@ -893,7 +1149,7 @@ export function AdminResourceKnowledgeManagement() {
   }
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="正在加载资源与知识库" />;
+    return <AdminLoadingState label="正在加载资料与知识库" />;
   }
 
   if (loadState === "unauthorized") {
@@ -903,8 +1159,8 @@ export function AdminResourceKnowledgeManagement() {
   if (loadState === "error") {
     return (
       <AdminErrorState
-        description="请稍后刷新页面，或重新登录后再查看资源与知识库。"
-        title="资源与知识库加载失败"
+        description="请稍后刷新页面，或重新登录后再查看资料与知识库。"
+        title="资料与知识库加载失败"
       />
     );
   }
@@ -919,8 +1175,8 @@ export function AdminResourceKnowledgeManagement() {
           onSubmit={handleUploadResource}
         />
         <AdminEmptyState
-          description="当前运行时未返回资源数据。可先上传受控本地 Markdown/txt 文件建立草稿。"
-          title="暂无资源与知识库数据"
+          description="当前还没有资料。可先上传 Markdown 或文本文件生成解析草稿。"
+          title="暂无资料与知识库数据"
         />
       </section>
     );
@@ -948,9 +1204,12 @@ export function AdminResourceKnowledgeManagement() {
               <Input
                 aria-label="关键词"
                 className="pl-8"
-                placeholder="资源名称、文件名或 publicId"
+                placeholder="资料名称、文件名或资料编号"
                 value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
+                onChange={(event) => {
+                  setKeyword(event.target.value);
+                  setPage(1);
+                }}
               />
             </span>
           </label>
@@ -963,22 +1222,37 @@ export function AdminResourceKnowledgeManagement() {
               ["monopoly", "专卖"],
             ]}
             value={profession}
-            onChange={(value) => setProfession(value as ProfessionFilter)}
+            onChange={(value) => {
+              setProfession(value as ProfessionFilter);
+              setPage(1);
+            }}
+          />
+          <FilterSelect
+            label="等级"
+            options={levelFilterOptions}
+            value={level}
+            onChange={(value) => {
+              setLevel(value as LevelFilter);
+              setPage(1);
+            }}
           />
           <FilterSelect
             label="状态"
             options={[
               ["all", "全部状态"],
               ["uploaded", "已上传"],
-              ["draft", "草稿待校对"],
+              ["draft", "解析草稿待校对"],
               ["published", "已发布"],
-              ["indexing", "构建中"],
-              ["rag_ready", "RAG 可用"],
-              ["index_failed", "构建失败"],
+              ["indexing", "索引重建中"],
+              ["rag_ready", "检索可用"],
+              ["index_failed", "索引重建失败"],
               ["disabled", "已停用"],
             ]}
             value={status}
-            onChange={(value) => setStatus(value as ResourceStatusFilter)}
+            onChange={(value) => {
+              setStatus(value as ResourceStatusFilter);
+              setPage(1);
+            }}
           />
           <FilterSelect
             label="资料类型"
@@ -991,36 +1265,58 @@ export function AdminResourceKnowledgeManagement() {
               ["other", "其他"],
             ]}
             value={resourceType}
-            onChange={(value) => setResourceType(value as ResourceTypeFilter)}
+            onChange={(value) => {
+              setResourceType(value as ResourceTypeFilter);
+              setPage(1);
+            }}
           />
         </div>
+        <ResourceListControls
+          currentPage={currentPage}
+          pageSize={pageSize}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          totalPages={totalPages}
+          totalRows={sortedResources.length}
+          onChangePage={setPage}
+          onChangePageSize={(nextPageSize) => {
+            setPageSize(nextPageSize);
+            setPage(1);
+          }}
+          onChangeSortBy={(nextSortBy) => {
+            setSortBy(nextSortBy);
+            setPage(1);
+          }}
+          onToggleSortOrder={() => {
+            setSortOrder((currentSortOrder) =>
+              currentSortOrder === "desc" ? "asc" : "desc",
+            );
+            setPage(1);
+          }}
+        />
       </div>
 
-      <section className="grid gap-3 md:grid-cols-3" aria-label="资源摘要">
+      <section className="grid gap-3 md:grid-cols-3" aria-label="资料摘要">
+        <SummaryItem label="当前结果" value={`${sortedResources.length} 个`} />
         <SummaryItem
-          label="当前结果"
-          value={`${filteredResources.length} 个`}
-        />
-        <SummaryItem
-          label="RAG 可用"
+          label="检索可用"
           value={`${
-            filteredResources.filter(
+            sortedResources.filter(
               (resource) => resource.resourceStatus === "rag_ready",
             ).length
           } 个`}
         />
         <SummaryItem
-          label="待重建"
+          label="待重建检索索引"
           value={`${
-            filteredResources.filter((resource) => resource.isVectorStale)
-              .length
+            sortedResources.filter((resource) => resource.isVectorStale).length
           } 个`}
         />
       </section>
 
-      {filteredResources.length > 0 ? (
+      {paginatedResources.length > 0 ? (
         <ResourceList
-          rows={filteredResources}
+          rows={paginatedResources}
           onRequestPublish={(resource) => {
             setToastMessage(null);
             setPublishState({ resource, status: "confirming" });
@@ -1115,29 +1411,14 @@ function ResourcePageHeader() {
   return (
     <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="space-y-2">
-        <p className="text-brand-primary text-sm font-medium">Ops Admin</p>
+        <p className="text-brand-primary text-sm font-medium">内容后台</p>
         <h1 className="font-heading text-text-primary text-2xl font-semibold">
-          资源与知识库管理
+          资料与知识库管理
         </h1>
         <p className="text-text-secondary max-w-3xl text-sm">
-          查看 RAG 资源状态、Markdown
-          可预览边界和向量构建状态；手动重建向量时仅使用
-          publicId，不暴露内部自增 id、对象存储路径或 chunk 原文。
+          上传教材、讲义和课件资料，校对解析草稿，发布后手动重建检索索引。
+          学员端只会看到允许展示的引用标题和章节路径。
         </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button disabled variant="outline">
-          <Upload aria-hidden="true" data-icon="inline-start" />
-          云端上传待资源审批
-        </Button>
-        <Button disabled variant="outline">
-          <FileText aria-hidden="true" data-icon="inline-start" />
-          批量校对待规划
-        </Button>
-        <Button disabled variant="outline">
-          <Download aria-hidden="true" data-icon="inline-start" />
-          云端下载待资源审批
-        </Button>
       </div>
     </header>
   );
@@ -1156,9 +1437,9 @@ function ResourceUploadPanel({
     <section className="border-border bg-surface rounded-md border p-4 shadow-sm">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px_160px_160px_auto] lg:items-end">
         <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">本地资源标题</span>
+          <span className="text-text-secondary">资料名称</span>
           <Input
-            aria-label="本地资源标题"
+            aria-label="资料名称"
             value={uploadState.title}
             onChange={(event) =>
               onChange({ ...uploadState, title: event.target.value })
@@ -1179,14 +1460,21 @@ function ResourceUploadPanel({
         />
         <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">等级</span>
-          <Input
+          <select
             aria-label="等级"
-            inputMode="numeric"
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
             value={uploadState.level}
             onChange={(event) =>
               onChange({ ...uploadState, level: event.target.value })
             }
-          />
+          >
+            <option value="">专业通用资料</option>
+            <option value="1">1级</option>
+            <option value="2">2级</option>
+            <option value="3">3级</option>
+            <option value="4">4级</option>
+            <option value="5">5级</option>
+          </select>
         </label>
         <FilterSelect
           label="资料类型"
@@ -1204,9 +1492,9 @@ function ResourceUploadPanel({
         />
         <div className="flex flex-col gap-2">
           <label className="text-text-secondary text-sm font-medium">
-            本地文件
+            资料文件
             <input
-              aria-label="本地资源文件"
+              aria-label="资料文件"
               className="mt-2 block w-full text-sm"
               type="file"
               onChange={(event) =>
@@ -1222,15 +1510,108 @@ function ResourceUploadPanel({
             onClick={onSubmit}
           >
             <Upload aria-hidden="true" data-icon="inline-start" />
-            {uploadState.status === "submitting" ? "上传中" : "上传本地资源"}
+            {uploadState.status === "submitting"
+              ? "上传中"
+              : "上传资料并生成草稿"}
           </Button>
         </div>
       </div>
       <p className="text-text-muted mt-3 text-xs">
-        本地模式仅写入 ignored `.runtime/`，支持 Markdown/txt
-        转草稿；DOCX/PPTX/PDF 云端转换仍需后续资源审批。
+        支持 Markdown 或文本文件生成解析草稿，单个文件上限 50MB。DOCX、PPTX
+        和可抽取文本 PDF 的解析接入由后续任务落地；扫描型 PDF 不在首期范围。
       </p>
     </section>
+  );
+}
+
+function ResourceListControls({
+  currentPage,
+  onChangePage,
+  onChangePageSize,
+  onChangeSortBy,
+  onToggleSortOrder,
+  pageSize,
+  sortBy,
+  sortOrder,
+  totalPages,
+  totalRows,
+}: {
+  currentPage: number;
+  onChangePage: (page: number) => void;
+  onChangePageSize: (pageSize: ResourceListQueryState["pageSize"]) => void;
+  onChangeSortBy: (sortBy: ResourceSortField) => void;
+  onToggleSortOrder: () => void;
+  pageSize: ResourceListQueryState["pageSize"];
+  sortBy: ResourceSortField;
+  sortOrder: ResourceSortOrder;
+  totalPages: number;
+  totalRows: number;
+}) {
+  return (
+    <div className="border-border mt-4 flex flex-col gap-3 border-t pt-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-wrap gap-3">
+        <label className="flex min-w-32 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">每页条数</span>
+          <select
+            aria-label="每页条数"
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+            value={String(pageSize)}
+            onChange={(event) =>
+              onChangePageSize(
+                Number(
+                  event.target.value,
+                ) as ResourceListQueryState["pageSize"],
+              )
+            }
+          >
+            {ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex min-w-36 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">排序字段</span>
+          <select
+            aria-label="排序字段"
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+            value={sortBy}
+            onChange={(event) =>
+              onChangeSortBy(event.target.value as ResourceSortField)
+            }
+          >
+            {Object.entries(resourceSortFieldLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button variant="outline" onClick={onToggleSortOrder}>
+          {sortOrder === "desc" ? "降序" : "升序"}
+        </Button>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-text-secondary">
+          第 {currentPage} / {totalPages} 页，共 {totalRows} 条
+        </span>
+        <Button
+          disabled={currentPage <= 1}
+          variant="outline"
+          onClick={() => onChangePage(currentPage - 1)}
+        >
+          上一页
+        </Button>
+        <Button
+          disabled={currentPage >= totalPages}
+          variant="outline"
+          onClick={() => onChangePage(currentPage + 1)}
+        >
+          下一页
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -1286,9 +1667,9 @@ function ResourceList({
               </h2>
               <div className="flex flex-wrap gap-2 text-xs">
                 <MetricBadge
-                  label="Markdown"
+                  label="解析草稿"
                   value={
-                    resource.markdownPreviewAvailable ? "可预览" : "不可预览"
+                    resource.markdownPreviewAvailable ? "可校对" : "未生成"
                   }
                 />
                 <MetricBadge
@@ -1296,13 +1677,13 @@ function ResourceList({
                   value={resource.downloadAvailable ? "可申请下载" : "不可下载"}
                 />
                 <MetricBadge
-                  label="向量"
+                  label="检索索引"
                   value={resource.isVectorStale ? "待重建" : "已同步"}
                 />
               </div>
             </div>
             <div className="flex flex-col gap-3 xl:items-end">
-              <PublicId value={resource.publicId} />
+              <ResourceReference value={resource.publicId} />
               {resource.resourceStatus === "draft" ||
               resource.resourceStatus === "rag_ready" ? (
                 <Button
@@ -1314,7 +1695,7 @@ function ResourceList({
                   onClick={() => onRequestPublish(resource)}
                 >
                   <FileText aria-hidden="true" data-icon="inline-start" />
-                  发布 Markdown
+                  发布解析草稿
                 </Button>
               ) : null}
               <Button
@@ -1326,7 +1707,7 @@ function ResourceList({
                 onClick={() => onRequestMarkdownReview(resource)}
               >
                 <FileText aria-hidden="true" data-icon="inline-start" />
-                Markdown 校对
+                校对解析草稿
               </Button>
               <Button
                 disabled={!isSafePublicId(resource.publicId)}
@@ -1341,7 +1722,7 @@ function ResourceList({
                 {isSafePublicId(resource.publicId) ? (
                   <>
                     <DatabaseZap aria-hidden="true" data-icon="inline-start" />
-                    重建向量
+                    重建检索索引
                   </>
                 ) : (
                   <>
@@ -1349,7 +1730,7 @@ function ResourceList({
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    publicId 异常
+                    资料编号异常
                   </>
                 )}
               </Button>
@@ -1360,7 +1741,7 @@ function ResourceList({
                   onClick={() => onRequestEnable(resource)}
                 >
                   <CheckCircle2 aria-hidden="true" data-icon="inline-start" />
-                  启用资源
+                  启用资料
                 </Button>
               ) : (
                 <Button
@@ -1369,7 +1750,7 @@ function ResourceList({
                   onClick={() => onRequestDisable(resource)}
                 >
                   <XCircle aria-hidden="true" data-icon="inline-start" />
-                  停用资源
+                  停用资料
                 </Button>
               )}
             </div>
@@ -1384,6 +1765,17 @@ function ResourceList({
   );
 }
 
+function ResourceReference({ value }: { value: string }) {
+  return (
+    <span className="text-text-muted inline-flex items-center gap-2 text-xs">
+      <span>资料编号</span>
+      <code className="bg-muted text-text-secondary rounded-md px-2 py-1 font-mono">
+        {value}
+      </code>
+    </span>
+  );
+}
+
 function MetricBadge({ label, value }: { label: string; value: string }) {
   return (
     <span className="border-border text-text-secondary rounded-md border px-2 py-1">
@@ -1395,7 +1787,7 @@ function MetricBadge({ label, value }: { label: string; value: string }) {
 function FilteredEmptyState() {
   return (
     <div className="bg-surface border-border rounded-md border p-8 text-center shadow-sm">
-      <p className="text-text-primary font-medium">没有匹配的资源</p>
+      <p className="text-text-primary font-medium">没有匹配的资料</p>
       <p className="text-text-secondary mt-2 text-sm">
         调整关键词或筛选条件后再试。
       </p>
@@ -1430,10 +1822,10 @@ function PublishConfirmationDialog({
     <AdminResourceModalShell>
       <div className="space-y-3">
         <h2 className="text-text-primary text-base font-semibold">
-          确认发布{resource.title}的 Markdown？
+          确认发布{resource.title}的解析草稿？
         </h2>
         <p className="text-text-secondary text-sm">
-          发布后资源进入待建向量状态，RAG 仅在重建完成后使用新内容。
+          发布后资料进入待重建检索索引状态，知识库会在索引重建完成后使用新内容。
         </p>
         <div className="flex gap-2">
           <Button
@@ -1467,10 +1859,10 @@ function RebuildConfirmationDialog({
     <AdminResourceModalShell>
       <div className="space-y-3">
         <h2 className="text-text-primary text-base font-semibold">
-          确认重建{resource.title}的向量？
+          确认重建{resource.title}的检索索引？
         </h2>
         <p className="text-text-secondary text-sm">
-          重建仅提交资源 publicId，结果只展示安全摘要，不展示 chunk 原文。
+          重建期间旧索引如仍可用会继续服务检索；结果只展示安全摘要，不展示原文内容段。
         </p>
         <div className="flex gap-2">
           <Button
@@ -1507,7 +1899,7 @@ function DisableConfirmationDialog({
           确认停用{resource.title}？
         </h2>
         <p className="text-text-secondary text-sm">
-          停用后该资源不参与新的本地 RAG 检索。
+          停用后该资料不参与新的知识库检索。
         </p>
         <div className="flex gap-2">
           <Button
@@ -1544,7 +1936,7 @@ function EnableConfirmationDialog({
           确认启用{resource.title}？
         </h2>
         <p className="text-text-secondary text-sm">
-          启用后该资源将恢复到停用前的本地可用状态。
+          启用后该资料将恢复到停用前的可用状态。
         </p>
         <div className="flex gap-2">
           <Button disabled={isSubmitting} onClick={onConfirm}>
@@ -1604,13 +1996,15 @@ function MarkdownReviewDialog({
     >
       <div className="min-h-0 space-y-3 overflow-y-auto">
         <h2 className="text-text-primary text-base font-semibold">
-          校对{resource.title}的 Markdown
+          校对{resource.title}的解析草稿
         </h2>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
           <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">Markdown 草稿</span>
+            <span className="text-text-secondary">
+              解析草稿原文（Markdown）
+            </span>
             <textarea
-              aria-label="Markdown 草稿"
+              aria-label="解析草稿原文"
               className="border-border bg-surface text-text-primary min-h-80 resize-y rounded-md border p-3 font-mono text-sm"
               value={markdownContent}
               onChange={(event) => onChange(event.target.value)}
@@ -1625,12 +2019,12 @@ function MarkdownReviewDialog({
                 章节层级校对
               </h3>
               <p className="text-text-muted text-xs">
-                调整标题级别会同步改写 Markdown 标题符号。
+                调整标题级别会同步更新草稿标题符号。
               </p>
             </div>
             {headingReviewItems.length === 0 ? (
               <p className="text-text-secondary mt-4 text-sm">
-                当前草稿没有可识别的 Markdown 标题。
+                当前草稿没有可识别的标题。
               </p>
             ) : (
               <div className="mt-3 space-y-2">

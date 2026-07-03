@@ -204,9 +204,7 @@ function isContentAdminRole(role: string): role is ContentAdminRole {
 
 function canManageContent(actor: ContentAdminActor): boolean {
   return (
-    actor.roles.includes("super_admin") ||
-    actor.roles.includes("ops_admin") ||
-    actor.roles.includes("content_admin")
+    actor.roles.includes("super_admin") || actor.roles.includes("content_admin")
   );
 }
 

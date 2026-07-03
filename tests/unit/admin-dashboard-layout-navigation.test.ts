@@ -195,6 +195,7 @@ describe("AdminDashboardLayout navigation", () => {
     expect(
       screen.getByRole("link", { name: /审计与AI调用日志/u }),
     ).toHaveAttribute("href", "/ops/ai-audit-logs");
+    expect(screen.queryByRole("link", { name: /资源管理/u })).toBeNull();
   });
 
   it("shows a visible logout control for an allowed backend workspace", async () => {
@@ -229,6 +230,10 @@ describe("AdminDashboardLayout navigation", () => {
     expect(screen.getByRole("link", { name: /AI组卷/u })).toHaveAttribute(
       "href",
       "/content/ai-paper-generation",
+    );
+    expect(screen.getByRole("link", { name: /资源管理/u })).toHaveAttribute(
+      "href",
+      "/content/resources",
     );
     expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
     expect(

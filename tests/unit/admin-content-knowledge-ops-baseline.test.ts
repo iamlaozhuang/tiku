@@ -26,6 +26,7 @@ import { createAdminContentKnowledgeOpsRouteHandlers } from "@/server/services/a
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -319,7 +320,7 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
           data: {
             resource: {
               publicId: "resource-local-uploaded",
-              title: "本地资源验证资料",
+              title: "资料校对示例",
               resourceType: "knowledge_doc",
               resourceStatus: "draft",
               profession: "marketing",
@@ -662,14 +663,14 @@ describe("admin content and knowledge ops baseline", () => {
     expect(screen.getByText("营销知识库讲义")).toBeInTheDocument();
     expect(screen.queryByText("dev/resources/marketing/raw.pdf")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "发布资源" }));
-    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认发布资源？");
+    fireEvent.click(screen.getByRole("button", { name: "发布资料" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认发布资料？");
     fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
-    expect(screen.getByRole("status")).toHaveTextContent("资源发布已提交");
+    expect(screen.getByRole("status")).toHaveTextContent("资料发布已提交");
 
-    fireEvent.click(screen.getByRole("button", { name: "手动重建向量" }));
+    fireEvent.click(screen.getByRole("button", { name: "重建检索索引" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "向量重建需要二次确认",
+      "检索索引重建需要二次确认",
     );
     fireEvent.click(screen.getByRole("button", { name: "确认重建" }));
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -959,9 +960,9 @@ describe("admin content and knowledge ops baseline", () => {
 
     render(createElement(AdminResourceKnowledgeManagement));
 
-    expect(screen.getByText("正在加载资源与知识库")).toBeInTheDocument();
+    expect(screen.getByText("正在加载资料与知识库")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "资源与知识库管理" }),
+      await screen.findByRole("heading", { name: "资料与知识库管理" }),
     ).toBeInTheDocument();
 
     const firstResource = screen.getByTestId(
@@ -979,14 +980,21 @@ describe("admin content and knowledge ops baseline", () => {
     expect(within(firstResource).getByText("营销 3级")).toBeInTheDocument();
     expect(within(firstResource).getByText("讲义")).toBeInTheDocument();
     expect(
-      within(firstResource).getByText("已发布，待建向量"),
+      within(firstResource).getByText("已发布，待重建检索索引"),
     ).toBeInTheDocument();
     expect(
-      within(firstResource).getByText("Markdown 可预览"),
+      within(firstResource).getByText("解析草稿 可校对"),
     ).toBeInTheDocument();
     expect(
-      within(firstResource).getByText(/向量\s*待重建/),
+      within(firstResource).getByText(/检索索引\s*待重建/),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "50" },
+    });
+    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(window.location.search).toContain("pageSize=50");
+    expect(screen.getByLabelText("排序字段")).toHaveValue("updatedAt");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain(
       "dev/resources/marketing/raw.pdf",
@@ -995,15 +1003,15 @@ describe("admin content and knowledge ops baseline", () => {
     expect(document.body.textContent).not.toContain("RAW_CHUNK_TEXT");
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "重建向量" }),
+      within(firstResource).getByRole("button", { name: "重建检索索引" }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "确认重建营销知识库讲义的向量？",
+      "确认重建营销知识库讲义的检索索引？",
     );
     fireEvent.click(screen.getByRole("button", { name: "确认重建" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "向量重建完成：2 个片段",
+      "检索索引重建完成，已生成 2 段可检索内容",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001/rebuild-vector",
@@ -1015,7 +1023,7 @@ describe("admin content and knowledge ops baseline", () => {
     expect(document.body.textContent).not.toContain("hash-one");
   });
 
-  it("publishes a draft Markdown resource through the protected runtime", async () => {
+  it("publishes a draft resource through the protected runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockResourceFetch({
       ...resourcePayload,
@@ -1039,15 +1047,15 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "发布 Markdown" }),
+      within(firstResource).getByRole("button", { name: "发布解析草稿" }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "确认发布营销知识库讲义的 Markdown？",
+      "确认发布营销知识库讲义的解析草稿？",
     );
     fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "资源发布完成，向量待重建",
+      "资料已发布，待重建检索索引",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001/publish",
@@ -1060,17 +1068,17 @@ describe("admin content and knowledge ops baseline", () => {
     expect(document.body.textContent).not.toContain("objectStoragePath");
   });
 
-  it("uploads, reviews, and disables local resources through protected resource actions", async () => {
+  it("uploads, reviews, and disables resources through protected resource actions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockResourceFetch();
 
     render(createElement(AdminResourceKnowledgeManagement));
 
     expect(
-      await screen.findByRole("heading", { name: "资源与知识库管理" }),
+      await screen.findByRole("heading", { name: "资料与知识库管理" }),
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("本地资源文件"), {
+    fireEvent.change(screen.getByLabelText("资料文件"), {
       target: {
         files: [
           new File(["# 本地资源\n\n受控测试资料"], "local-resource.md", {
@@ -1079,11 +1087,11 @@ describe("admin content and knowledge ops baseline", () => {
         ],
       },
     });
-    fireEvent.click(screen.getByRole("button", { name: "上传本地资源" }));
+    fireEvent.click(screen.getByRole("button", { name: "上传资料并生成草稿" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "资源上传完成，已生成 Markdown 草稿",
+      "资料上传完成，已生成解析草稿",
     );
-    expect(screen.getByText("本地资源验证资料")).toBeInTheDocument();
+    expect(screen.getByText("资料校对示例")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources",
       expect.objectContaining({
@@ -1097,17 +1105,17 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "Markdown 校对" }),
+      within(firstResource).getByRole("button", { name: "校对解析草稿" }),
     );
     expect(await screen.findByRole("dialog")).toHaveTextContent(
-      "校对营销知识库讲义的 Markdown",
+      "校对营销知识库讲义的解析草稿",
     );
-    fireEvent.change(screen.getByLabelText("Markdown 草稿"), {
+    fireEvent.change(screen.getByLabelText("解析草稿原文"), {
       target: { value: "# 已校对\n\n受控摘要" },
     });
     fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "Markdown 草稿已保存",
+      "解析草稿已保存",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001",
@@ -1118,13 +1126,13 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "停用资源" }),
+      within(firstResource).getByRole("button", { name: "停用资料" }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认停用营销知识库讲义？",
     );
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
-    expect(await screen.findByRole("status")).toHaveTextContent("资源已停用");
+    expect(await screen.findByRole("status")).toHaveTextContent("资料已停用");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001/disable",
       expect.objectContaining({
@@ -1136,7 +1144,7 @@ describe("admin content and knowledge ops baseline", () => {
     expect(document.body.textContent).not.toContain("objectStoragePath");
   });
 
-  it("enables a disabled local resource through the protected resource action", async () => {
+  it("enables a disabled resource through the protected resource action", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockResourceFetch({
       ...resourcePayload,
@@ -1159,14 +1167,14 @@ describe("admin content and knowledge ops baseline", () => {
 
     expect(within(disabledResource).getByText("已停用")).toBeInTheDocument();
     fireEvent.click(
-      within(disabledResource).getByRole("button", { name: "启用资源" }),
+      within(disabledResource).getByRole("button", { name: "启用资料" }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认启用营销知识库讲义？",
     );
     fireEvent.click(screen.getByRole("button", { name: "确认启用" }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("资源已启用");
+    expect(await screen.findByRole("status")).toHaveTextContent("资料已启用");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001/enable",
       expect.objectContaining({
@@ -1174,7 +1182,7 @@ describe("admin content and knowledge ops baseline", () => {
         method: "POST",
       }),
     );
-    expect(within(disabledResource).getByText("RAG 可用")).toBeInTheDocument();
+    expect(within(disabledResource).getByText("检索可用")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("objectStoragePath");
   });
@@ -1190,7 +1198,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "Markdown 校对" }),
+      within(firstResource).getByRole("button", { name: "校对解析草稿" }),
     );
 
     const reviewDialog = await screen.findByRole("dialog");
@@ -1209,14 +1217,14 @@ describe("admin content and knowledge ops baseline", () => {
       }),
     );
 
-    expect(screen.getByLabelText("Markdown 草稿")).toHaveValue(
+    expect(screen.getByLabelText("解析草稿原文")).toHaveValue(
       "# 第一章\n\n# 第一节\n\n仅用于单元测试",
     );
 
     fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "Markdown 草稿已保存",
+      "解析草稿已保存",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001",
@@ -1275,7 +1283,7 @@ describe("admin content and knowledge ops baseline", () => {
     });
     render(createElement(AdminResourceKnowledgeManagement));
 
-    expect(await screen.findByText("暂无资源与知识库数据")).toBeInTheDocument();
+    expect(await screen.findByText("暂无资料与知识库数据")).toBeInTheDocument();
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -1283,9 +1291,9 @@ describe("admin content and knowledge ops baseline", () => {
     render(createElement(AdminResourceKnowledgeManagement));
     expect(await screen.findByText("物流成本知识点")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("关键词"), {
-      target: { value: "不存在的资源" },
+      target: { value: "不存在的资料" },
     });
-    expect(screen.getByText("没有匹配的资源")).toBeInTheDocument();
+    expect(screen.getByText("没有匹配的资料")).toBeInTheDocument();
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -1295,9 +1303,10 @@ describe("admin content and knowledge ops baseline", () => {
       data: null,
     });
     render(createElement(AdminResourceKnowledgeManagement));
-    expect(await screen.findByText("资源与知识库加载失败")).toBeInTheDocument();
+    expect(await screen.findByText("资料与知识库加载失败")).toBeInTheDocument();
 
     cleanup();
+    window.history.replaceState(null, "", "/");
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockResourceFetch({
       code: 0,
@@ -1318,7 +1327,7 @@ describe("admin content and knowledge ops baseline", () => {
       "resource-row-resource-public-unsafe",
     );
     expect(
-      within(unsafeRow).getByRole("button", { name: "publicId 异常" }),
+      within(unsafeRow).getByRole("button", { name: "资料编号异常" }),
     ).toBeDisabled();
   });
 });

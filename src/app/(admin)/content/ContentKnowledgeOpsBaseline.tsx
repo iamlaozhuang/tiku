@@ -108,13 +108,13 @@ export function AdminContentKnowledgeOpsBaseline({
         </div>
         <div className="flex flex-wrap gap-2">
           <Button onClick={() => setConfirmationKind("publishResource")}>
-            发布资源
+            发布资料
           </Button>
           <Button
             variant="destructive"
             onClick={() => setConfirmationKind("rebuildVector")}
           >
-            手动重建向量
+            重建检索索引
           </Button>
         </div>
       </header>
@@ -178,7 +178,7 @@ export function AdminContentKnowledgeOpsBaseline({
           ))}
         </AdminOpsPanel>
 
-        <AdminOpsPanel title="资源与知识库">
+        <AdminOpsPanel title="资料与知识库">
           {preview.resources.map((resource) => (
             <AdminOpsSummaryRow
               key={resource.publicId}
@@ -211,7 +211,7 @@ export function AdminContentKnowledgeOpsBaseline({
             if (confirmationKind === "publishResource") {
               setToastMessage({
                 tone: "success",
-                message: "资源发布已提交",
+                message: "资料发布已提交",
               });
               return;
             }
@@ -299,7 +299,7 @@ function AdminOpsConfirmationDialog({
   onConfirm: () => void;
 }) {
   const isRebuildVector = confirmationKind === "rebuildVector";
-  const title = isRebuildVector ? "向量重建需要二次确认" : "确认发布资源？";
+  const title = isRebuildVector ? "检索索引重建需要二次确认" : "确认发布资料？";
   const confirmLabel = isRebuildVector ? "确认重建" : "确认发布";
 
   return (
