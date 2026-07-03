@@ -90,20 +90,22 @@ sourceLandingEvidenceCloseoutCorrection20260703:
       approved: true
       approvalSource: current_user_requested_sixteen_package_pre_acceptance_review_and_separate_correction_2026_07_03
     fastForwardMerge:
-      approved: false
+      approved: true
       targetBranch: master
-      approvalSource: fresh_push_closeout_approval_not_requested_in_current_turn
+      approvalSource: current_user_approved_correction_merge_push_cleanup_then_acceptance_design_2026_07_03
     push:
-      approved: false
+      approved: true
       target: origin/master
-      approvalSource: fresh_push_closeout_approval_not_requested_in_current_turn
+      approvalSource: current_user_approved_correction_merge_push_cleanup_then_acceptance_design_2026_07_03
     cleanup:
-      deleteShortBranch: false
-      approvalSource: wait_for_merge_push_closeout_approval
+      deleteShortBranch: true
+      approvalSource: current_user_approved_correction_merge_push_cleanup_then_acceptance_design_2026_07_03
   validationSummary:
     staleCloseoutPlaceholdersFound: true
     staleCloseoutPlaceholdersCorrected: true
     docsOnlyCorrection: true
+    fastForwardMergedToMasterLocally: true
+    mergePushCleanupApprovalReceived: true
     productSourceChanged: false
     schemaMigrationOrDependencyChanged: false
     providerCallOrConfigurationExecuted: false

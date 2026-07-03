@@ -16,12 +16,16 @@ result: pass
 Cost Calibration Gate remains blocked.
 threadRolloverGate: stop before acceptance design if review finds a correction need; this correction closes the evidence-placeholder defect first.
 automationHandoffPolicy: no automation handoff; continue manually from committed docs, state, queue, and evidence.
-nextModuleRunCandidate: after this correction is reviewed and approved for merge/push, resume the 16-package pre-acceptance review conclusion and then acceptance design if no blockers remain.
+nextModuleRunCandidate: after this correction is merged, pushed, and cleaned up, resume the 16-package pre-acceptance review conclusion and then acceptance matrix design if no blockers remain.
 Batch range: source landing package evidence closeout correction for packages 1 through 16.
 RED: the pre-acceptance review found stale evidence wording such as closeout placeholders and implementation-commit-to-follow text after the related package commits had already been merged and pushed.
 GREEN: affected evidence files now record actual implementation commit ids and completed closeout wording, without changing product source or acceptance scope.
 localFullLoopGate: docs-only validation is limited to scoped Prettier check, `git diff --check`, and Module Run v2 pre-commit hardening.
-blocked remainder: acceptance design, browser/runtime acceptance, release readiness, final Pass, production usability, Cost Calibration, Provider execution, schema/migration, dependency changes, deployment, PR, force-push, and master push for this correction remain blocked without separate approval.
+closeoutApproval: current user approved correction branch merge, push, and cleanup on 2026-07-03 before acceptance design.
+closeoutMergeState: correction branch fast-forward merged locally to `master` from `e053e30feb64a4ae2cfec38c3afa2619bcef3224` to `88c88180a4c2dd9f9c27c93be185858d17dae666`.
+closeoutPushTarget: `origin/master`.
+closeoutCleanupTarget: local short branch `codex/source-landing-evidence-closeout-correction-2026-07-03` after successful push.
+blocked remainder: browser/runtime acceptance, release readiness, final Pass, production usability, Cost Calibration, Provider execution, schema/migration, dependency changes, deployment, PR, and force-push remain blocked without separate approval.
 
 ## Validation Results
 
