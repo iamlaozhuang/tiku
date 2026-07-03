@@ -1,6 +1,12 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  KeyRound,
+  LoaderCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { adminFilterGridPanelClassName } from "@/components/admin/admin-layout-primitives";
@@ -19,6 +25,29 @@ type ToastMessage = {
   message: string;
 };
 
+type PreviewUser = {
+  publicId: string;
+  phone: string;
+  name: string;
+  organizationName: string | null;
+  statusLabel: string;
+  userCategoryLabel: string;
+  authEditionLabel: string;
+  accountDomainLabel: string;
+  managedByLabel: string;
+  canResetPassword: boolean;
+  canDisable: boolean;
+  canEnable: boolean;
+};
+
+type PreviewAdminRole = {
+  role: string;
+  label: string;
+  scopeLabel: string;
+  managerLabel: string;
+  canManageAdminAccount: boolean;
+};
+
 export function AdminUserOrgAuthOpsBaseline({
   state = "ready",
 }: {
@@ -27,25 +56,112 @@ export function AdminUserOrgAuthOpsBaseline({
   const [confirmationKind, setConfirmationKind] =
     useState<ConfirmationKind | null>(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
+  const [resetUserPublicId, setResetUserPublicId] = useState<string | null>(
+    null,
+  );
 
   const preview = useMemo(
     () => ({
       users: [
         {
+          publicId: "user-public-000",
+          phone: "13700000000",
+          name: "王五",
+          organizationName: null,
+          statusLabel: "正常",
+          userCategoryLabel: "未授权个人",
+          authEditionLabel: "未授权",
+          accountDomainLabel: "学员/员工账号域",
+          managedByLabel: "平台运营",
+          canResetPassword: true,
+          canDisable: true,
+          canEnable: false,
+        },
+        {
+          publicId: "user-public-standard-001",
+          phone: "13600000000",
+          name: "赵六",
+          organizationName: null,
+          statusLabel: "正常",
+          userCategoryLabel: "标准版个人",
+          authEditionLabel: "标准版",
+          accountDomainLabel: "学员/员工账号域",
+          managedByLabel: "平台运营",
+          canResetPassword: true,
+          canDisable: true,
+          canEnable: false,
+        },
+        {
+          publicId: "user-public-advanced-001",
+          phone: "13500000000",
+          name: "孙七",
+          organizationName: null,
+          statusLabel: "正常",
+          userCategoryLabel: "高级版个人",
+          authEditionLabel: "高级版",
+          accountDomainLabel: "学员/员工账号域",
+          managedByLabel: "平台运营",
+          canResetPassword: true,
+          canDisable: true,
+          canEnable: false,
+        },
+        {
           publicId: "user-public-001",
           phone: "13800000000",
           name: "张三",
           organizationName: "杭州烟草",
-          authStatus: "active",
+          statusLabel: "正常",
+          userCategoryLabel: "企业员工",
+          authEditionLabel: "继承企业授权",
+          accountDomainLabel: "学员/员工账号域",
+          managedByLabel: "平台运营",
+          canResetPassword: true,
+          canDisable: true,
+          canEnable: false,
         },
         {
           publicId: "user-public-002",
           phone: "13900000000",
           name: "李四",
           organizationName: null,
-          authStatus: "expired",
+          statusLabel: "停用",
+          userCategoryLabel: "停用用户",
+          authEditionLabel: "已过期",
+          accountDomainLabel: "学员/员工账号域",
+          managedByLabel: "平台运营",
+          canResetPassword: true,
+          canDisable: false,
+          canEnable: true,
         },
-      ],
+        {
+          publicId: "admin-public-001",
+          phone: "13100000000",
+          name: "内容老师账号",
+          organizationName: null,
+          statusLabel: "正常",
+          userCategoryLabel: "后台管理员",
+          authEditionLabel: "后台角色",
+          accountDomainLabel: "后台管理员账号域",
+          managedByLabel: "超级管理员",
+          canResetPassword: true,
+          canDisable: true,
+          canEnable: false,
+        },
+        {
+          publicId: "admin-org-public-001",
+          phone: "13000000000",
+          name: "企业管理员账号",
+          organizationName: "杭州烟草",
+          statusLabel: "正常",
+          userCategoryLabel: "后台管理员",
+          authEditionLabel: "组织管理员",
+          accountDomainLabel: "后台管理员账号域",
+          managedByLabel: "运营管理员限组织管理员",
+          canResetPassword: true,
+          canDisable: true,
+          canEnable: false,
+        },
+      ] satisfies PreviewUser[],
       organizations: [
         {
           publicId: "organization-public-001",
@@ -70,12 +186,48 @@ export function AdminUserOrgAuthOpsBaseline({
         },
       ],
       adminRoles: [
-        { role: "super_admin", label: "超级管理员" },
-        { role: "ops_admin", label: "运营管理员" },
-        { role: "content_admin", label: "内容老师" },
-      ],
+        {
+          role: "super_admin",
+          label: "超级管理员",
+          scopeLabel: "全局",
+          managerLabel: "超级管理员维护",
+          canManageAdminAccount: true,
+        },
+        {
+          role: "ops_admin",
+          label: "运营管理员",
+          scopeLabel: "运营后台",
+          managerLabel: "超级管理员维护",
+          canManageAdminAccount: false,
+        },
+        {
+          role: "content_admin",
+          label: "内容老师",
+          scopeLabel: "内容后台",
+          managerLabel: "超级管理员维护",
+          canManageAdminAccount: false,
+        },
+        {
+          role: "org_standard_admin",
+          label: "标准版企业管理员",
+          scopeLabel: "组织后台",
+          managerLabel: "运营管理员限明确组织范围维护",
+          canManageAdminAccount: true,
+        },
+        {
+          role: "org_advanced_admin",
+          label: "高级版企业管理员",
+          scopeLabel: "组织后台",
+          managerLabel: "运营管理员限明确组织范围维护",
+          canManageAdminAccount: true,
+        },
+      ] satisfies PreviewAdminRole[],
     }),
     [],
+  );
+
+  const resetUser = preview.users.find(
+    (user) => user.publicId === resetUserPublicId,
   );
 
   if (state === "loading") {
@@ -130,60 +282,127 @@ export function AdminUserOrgAuthOpsBaseline({
       </header>
 
       <div className={adminFilterGridPanelClassName}>
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">每页条数</span>
-          <select
-            aria-label="每页条数"
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-            defaultValue="20"
-          >
-            {ADMIN_PAGE_SIZE_OPTIONS.map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">运营范围</span>
-          <select
-            aria-label="运营范围"
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-            defaultValue="user"
-          >
-            <option value="user">用户</option>
-            <option value="organization">企业组织</option>
-            <option value="authorization">企业授权</option>
-            <option value="redeemCode">卡密</option>
-          </select>
-        </label>
+        <AdminOpsSelect label="每页条数" defaultValue="20">
+          {ADMIN_PAGE_SIZE_OPTIONS.map((pageSize) => (
+            <option key={pageSize} value={pageSize}>
+              {pageSize}
+            </option>
+          ))}
+        </AdminOpsSelect>
+        <AdminOpsSelect label="运营范围" defaultValue="user">
+          <option value="user">用户</option>
+          <option value="organization">企业组织</option>
+          <option value="authorization">企业授权</option>
+          <option value="redeemCode">卡密</option>
+        </AdminOpsSelect>
+        <AdminOpsSelect label="用户分类" defaultValue="all">
+          <option value="all">全部用户</option>
+          <option value="no_auth_personal">未授权个人</option>
+          <option value="personal_standard">标准版个人</option>
+          <option value="personal_advanced">高级版个人</option>
+          <option value="employee">企业员工</option>
+          <option value="backend_admin">后台管理员</option>
+          <option value="disabled">停用用户</option>
+        </AdminOpsSelect>
+        <AdminOpsSelect label="授权状态" defaultValue="all">
+          <option value="all">全部授权</option>
+          <option value="none">未授权</option>
+          <option value="standard">标准版</option>
+          <option value="advanced">高级版</option>
+          <option value="expired">已过期</option>
+        </AdminOpsSelect>
         <div className="text-text-muted flex items-end text-sm">
-          后台账号与学员账号独立管理
+          后台账号与学员/员工账号独立管理
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <AdminOpsPanel title="用户管理">
+      <AdminOpsPanel title="用户管理">
+        <div className="space-y-3">
           {preview.users.map((user) => (
             <div
-              className="border-border flex items-center justify-between border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
+              className="border-border grid gap-3 border-t py-3 first:border-t-0 first:pt-0 last:pb-0 md:grid-cols-[minmax(0,1fr)_auto]"
               data-public-id={user.publicId}
               data-testid={`admin-user-${user.publicId}`}
               key={user.publicId}
             >
-              <div>
-                <p className="text-text-primary text-sm font-medium">
-                  {user.name} / {user.phone}
+              <div className="min-w-0 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-text-primary text-sm font-medium">
+                    {user.name} / {user.phone}
+                  </p>
+                  <AdminOpsBadge>{user.userCategoryLabel}</AdminOpsBadge>
+                  <AdminOpsBadge>{user.statusLabel}</AdminOpsBadge>
+                  <AdminOpsBadge>{user.authEditionLabel}</AdminOpsBadge>
+                </div>
+                <p className="text-text-muted text-xs">
+                  {user.organizationName ?? "未绑定企业"} /{" "}
+                  {user.accountDomainLabel} / {user.managedByLabel}
                 </p>
                 <p className="text-text-muted text-xs">
-                  {user.organizationName ?? "未绑定企业"} / {user.authStatus}
+                  手机号不可修改；首期不做物理删除
                 </p>
               </div>
-              <Button variant="outline">查看详情</Button>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <Button variant="outline">查看详情</Button>
+                <Button
+                  variant="outline"
+                  disabled={!user.canResetPassword}
+                  onClick={() => setResetUserPublicId(user.publicId)}
+                >
+                  <KeyRound aria-hidden="true" className="size-4" />
+                  重置密码
+                </Button>
+                {user.canEnable ? (
+                  <Button variant="outline">启用</Button>
+                ) : (
+                  <Button variant="destructive" disabled={!user.canDisable}>
+                    停用
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
-        </AdminOpsPanel>
+        </div>
+      </AdminOpsPanel>
 
+      {resetUser === undefined ? null : (
+        <section
+          className="border-border bg-surface rounded-md border p-4 shadow-sm"
+          data-testid="admin-user-reset-distribution-window"
+        >
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <KeyRound
+                  aria-hidden="true"
+                  className="text-brand-primary size-4"
+                />
+                <h2 className="text-text-primary text-base font-semibold">
+                  一次性密码分发窗口
+                </h2>
+              </div>
+              <p className="text-text-secondary text-sm">
+                {resetUser.name}{" "}
+                的重置结果仅在本次窗口展示；提交审计时不记录明文。
+              </p>
+              <p className="text-text-primary text-sm font-medium">
+                LOCAL-RESET-ONCE
+              </p>
+              <p className="text-text-muted text-xs">
+                本地合同不执行真实会话吊销，正式运行时需吊销可用活跃会话。
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setResetUserPublicId(null)}
+            >
+              关闭
+            </Button>
+          </div>
+        </section>
+      )}
+
+      <div className="grid gap-4 xl:grid-cols-2">
         <AdminOpsPanel title="企业组织">
           {preview.organizations.map((organization) => (
             <AdminOpsSummaryRow
@@ -218,14 +437,34 @@ export function AdminUserOrgAuthOpsBaseline({
         </AdminOpsPanel>
 
         <AdminOpsPanel title="后台角色与权限">
-          {preview.adminRoles.map((adminRole) => (
-            <AdminOpsSummaryRow
-              key={adminRole.role}
-              label={adminRole.label}
-              meta={adminRole.role}
-              publicId={adminRole.role}
-            />
-          ))}
+          <div className="space-y-3">
+            {preview.adminRoles.map((adminRole) => (
+              <div
+                className="border-border flex items-center justify-between gap-3 border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
+                data-public-id={adminRole.role}
+                key={adminRole.role}
+              >
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-text-primary text-sm font-medium">
+                      {adminRole.label}
+                    </p>
+                    <AdminOpsBadge>{adminRole.scopeLabel}</AdminOpsBadge>
+                  </div>
+                  <p className="text-text-muted text-xs">
+                    {adminRole.managerLabel}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  disabled={!adminRole.canManageAdminAccount}
+                >
+                  <ShieldCheck aria-hidden="true" className="size-4" />
+                  管理账号
+                </Button>
+              </div>
+            ))}
+          </div>
         </AdminOpsPanel>
       </div>
 
@@ -288,6 +527,37 @@ function AdminOpsPanel({
       <h2 className="text-text-primary text-base font-semibold">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
+  );
+}
+
+function AdminOpsSelect({
+  children,
+  defaultValue,
+  label,
+}: {
+  children: React.ReactNode;
+  defaultValue: string;
+  label: string;
+}) {
+  return (
+    <label className="flex flex-col gap-2 text-sm font-medium">
+      <span className="text-text-secondary">{label}</span>
+      <select
+        aria-label={label}
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+        defaultValue={defaultValue}
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
+
+function AdminOpsBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+      {children}
+    </span>
   );
 }
 

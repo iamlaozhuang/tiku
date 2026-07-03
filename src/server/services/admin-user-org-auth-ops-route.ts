@@ -1,4 +1,6 @@
 import type {
+  AdminUserAuthFilter,
+  AdminUserCategory,
   AdminAuthOperationListQuery,
   AdminAuthOperationPageSize,
 } from "../contracts/admin-user-org-auth-ops-contract";
@@ -20,6 +22,34 @@ function createJsonResponse<TData>(
   return Response.json(response);
 }
 
+function readUserCategory(value: string | null): AdminUserCategory | "all" {
+  if (
+    value === "no_auth_personal" ||
+    value === "personal_standard" ||
+    value === "personal_advanced" ||
+    value === "employee" ||
+    value === "backend_admin" ||
+    value === "disabled"
+  ) {
+    return value;
+  }
+
+  return "all";
+}
+
+function readAuthFilter(value: string | null): AdminUserAuthFilter {
+  if (
+    value === "none" ||
+    value === "standard" ||
+    value === "advanced" ||
+    value === "expired"
+  ) {
+    return value;
+  }
+
+  return "all";
+}
+
 function readListQuery(request: Request): Partial<AdminAuthOperationListQuery> {
   const searchParams = new URL(request.url).searchParams;
   const page = Number(searchParams.get("page"));
@@ -32,6 +62,8 @@ function readListQuery(request: Request): Partial<AdminAuthOperationListQuery> {
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: safePageSize,
     keyword,
+    userCategory: readUserCategory(searchParams.get("userCategory")),
+    authFilter: readAuthFilter(searchParams.get("authFilter")),
   };
 }
 

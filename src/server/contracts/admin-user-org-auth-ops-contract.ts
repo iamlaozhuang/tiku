@@ -34,6 +34,28 @@ export type AdminAuthOperationSortField =
 
 export type AdminAuthOperationSortOrder = "asc" | "desc";
 
+export type AdminUserCategory =
+  | "no_auth_personal"
+  | "personal_standard"
+  | "personal_advanced"
+  | "employee"
+  | "backend_admin"
+  | "disabled";
+
+export type AdminUserAuthFilter =
+  | "all"
+  | "none"
+  | "standard"
+  | "advanced"
+  | "expired";
+
+export type AdminUserAccountDomain = "learner_employee" | "admin";
+
+export type AdminUserManagedBy =
+  | "super_admin"
+  | "ops_admin_scoped_org_admin"
+  | "platform_ops";
+
 export type AdminAuthOperationListQuery = {
   page: number;
   pageSize: AdminAuthOperationPageSize;
@@ -42,6 +64,8 @@ export type AdminAuthOperationListQuery = {
   keyword: string | null;
   status: UserStatus | AuthStatus | RedeemCodeStatus | "all";
   userType: UserType | "all";
+  userCategory?: AdminUserCategory | "all";
+  authFilter?: AdminUserAuthFilter;
 };
 
 export type AdminUserSummaryDto = {
@@ -54,6 +78,20 @@ export type AdminUserSummaryDto = {
   organizationPublicId: string | null;
   organizationName: string | null;
   authStatus: AuthStatus | null;
+  userCategory?: AdminUserCategory;
+  accountDomain?: AdminUserAccountDomain;
+  authEditionLabel?:
+    | "none"
+    | "standard"
+    | "advanced"
+    | "expired"
+    | "admin_not_applicable";
+  isPhoneEditable?: false;
+  canBePhysicallyDeleted?: false;
+  canResetPassword?: boolean;
+  canDisable?: boolean;
+  canEnable?: boolean;
+  managedBy?: AdminUserManagedBy;
 };
 
 export type AdminUserListDto = {
@@ -225,11 +263,25 @@ export type RedeemCodeGenerationDto = {
   redeemCodes: RedeemCodeGenerationItemDto[];
 };
 
+export type AdminUserPasswordResetResultDto = {
+  userPublicId: string;
+  oneTimePasswordPlainText: string | null;
+  distributionWindow: {
+    visibleOnce: boolean;
+    expiresAt: string | null;
+    redactionNotice: string;
+    sessionRevocation:
+      | "revoked_active_sessions"
+      | "not_executed_in_local_contract";
+  };
+};
+
 export type AdminRoleSummaryDto = {
   role: AdminRole;
   label: string;
-  scope: "global" | "operations" | "content";
+  scope: "global" | "operations" | "content" | "organization";
   canManageAdminAccount: boolean;
+  managedBy: AdminUserManagedBy;
 };
 
 export type AdminRoleListDto = {
@@ -248,6 +300,8 @@ export function createAdminAuthOperationListQuery(
     sortOrder: "desc",
     status: "all",
     userType: "all",
+    userCategory: "all",
+    authFilter: "all",
     ...queryOverrides,
     keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,
   };

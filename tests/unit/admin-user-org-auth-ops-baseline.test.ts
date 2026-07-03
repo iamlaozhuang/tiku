@@ -506,6 +506,8 @@ describe("admin user organization authorization ops baseline", () => {
       keyword: "  13800000000  ",
       status: "active",
       userType: "employee",
+      userCategory: "employee",
+      authFilter: "advanced",
     });
 
     expect(ADMIN_AUTH_OPERATION_PAGE_SIZE_OPTIONS).toEqual([20, 50, 100]);
@@ -529,6 +531,8 @@ describe("admin user organization authorization ops baseline", () => {
       keyword: "13800000000",
       status: "active",
       userType: "employee",
+      userCategory: "employee",
+      authFilter: "advanced",
     });
     expect(query).not.toHaveProperty("id");
   });
@@ -552,9 +556,35 @@ describe("admin user organization authorization ops baseline", () => {
     expect(userList).toMatchObject({
       code: 0,
       message: "ok",
-      pagination: { page: 1, pageSize: 20, total: 2 },
+      pagination: { page: 1, pageSize: 20, total: 7 },
     });
-    expect(userList.data?.users[0]).toMatchObject({
+    expect(userList.data?.users).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          userCategory: "no_auth_personal",
+          authEditionLabel: "none",
+          accountDomain: "learner_employee",
+          isPhoneEditable: false,
+          canBePhysicallyDeleted: false,
+        }),
+        expect.objectContaining({
+          userCategory: "personal_standard",
+          authEditionLabel: "standard",
+        }),
+        expect.objectContaining({
+          userCategory: "personal_advanced",
+          authEditionLabel: "advanced",
+        }),
+        expect.objectContaining({
+          userCategory: "backend_admin",
+          accountDomain: "admin",
+          managedBy: "super_admin",
+        }),
+      ]),
+    );
+    expect(
+      userList.data?.users.find((user) => user.publicId === "user-public-001"),
+    ).toMatchObject({
       publicId: "user-public-001",
       phone: "13800000000",
       userType: "employee",
@@ -572,11 +602,88 @@ describe("admin user organization authorization ops baseline", () => {
       canViewPlainText: false,
     });
     expect(redeemCodeList.data?.redeemCodes[0]).not.toHaveProperty("id");
-    expect(adminRoleList.data?.adminRoles).toHaveLength(3);
+    expect(adminRoleList.data?.adminRoles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: "org_standard_admin",
+          scope: "organization",
+          managedBy: "ops_admin_scoped_org_admin",
+        }),
+        expect.objectContaining({
+          role: "org_advanced_admin",
+          scope: "organization",
+          managedBy: "ops_admin_scoped_org_admin",
+        }),
+      ]),
+    );
     expect(resetPassword).toMatchObject({
       code: 403601,
       message: "Admin permission denied.",
       data: null,
+    });
+  });
+
+  it("applies admin user filters and role-scoped reset-password boundaries", async () => {
+    const opsService = createAdminUserOrgAuthOpsService({
+      actor: {
+        publicId: "admin-ops-001",
+        roles: ["ops_admin"],
+        canViewRedeemCodePlainText: false,
+      },
+    });
+    const superService = createAdminUserOrgAuthOpsService({
+      actor: {
+        publicId: "admin-super-001",
+        roles: ["super_admin"],
+        canViewRedeemCodePlainText: false,
+      },
+    });
+
+    const filteredUsers = await superService.listUsers({
+      userCategory: "personal_advanced",
+      authFilter: "advanced",
+    });
+    const deniedBackendReset =
+      await opsService.resetUserPassword("admin-public-001");
+    const allowedOrgAdminReset = await opsService.resetUserPassword(
+      "admin-org-public-001",
+    );
+    const superBackendReset =
+      await superService.resetUserPassword("admin-public-001");
+
+    expect(filteredUsers).toMatchObject({
+      code: 0,
+      pagination: { total: 1 },
+      data: {
+        users: [
+          expect.objectContaining({
+            publicId: "user-public-advanced-001",
+            userCategory: "personal_advanced",
+            authEditionLabel: "advanced",
+          }),
+        ],
+      },
+    });
+    expect(deniedBackendReset).toMatchObject({
+      code: 403601,
+      data: null,
+    });
+    expect(allowedOrgAdminReset).toMatchObject({
+      code: 0,
+      data: {
+        userPublicId: "admin-org-public-001",
+        distributionWindow: {
+          visibleOnce: true,
+          sessionRevocation: "not_executed_in_local_contract",
+        },
+      },
+    });
+    expect(superBackendReset).toMatchObject({
+      code: 0,
+      data: {
+        userPublicId: "admin-public-001",
+        oneTimePasswordPlainText: expect.any(String),
+      },
     });
   });
 
@@ -604,7 +711,9 @@ describe("admin user organization authorization ops baseline", () => {
     );
 
     const usersResponse = await handlers.users.GET(
-      new Request("http://localhost/api/v1/users?page=2&pageSize=50"),
+      new Request(
+        "http://localhost/api/v1/users?page=2&pageSize=50&userCategory=employee&authFilter=advanced",
+      ),
     );
     const redeemCodesResponse = await handlers.redeemCodes.GET(
       new Request("http://localhost/api/v1/redeem-codes?page=1&pageSize=20"),
@@ -631,12 +740,14 @@ describe("admin user organization authorization ops baseline", () => {
       pagination: {
         page: 2,
         pageSize: 50,
-        total: 2,
+        total: 1,
       },
       data: {
         users: expect.arrayContaining([
           expect.objectContaining({
             publicId: "user-public-001",
+            userCategory: "employee",
+            authEditionLabel: "advanced",
           }),
         ]),
       },
@@ -654,10 +765,16 @@ describe("admin user organization authorization ops baseline", () => {
         ],
       },
     });
-    await expect(resetPasswordResponse.json()).resolves.toEqual({
+    await expect(resetPasswordResponse.json()).resolves.toMatchObject({
       code: 0,
       message: "ok",
-      data: null,
+      data: {
+        userPublicId: "user-public-001",
+        distributionWindow: {
+          visibleOnce: true,
+          sessionRevocation: "not_executed_in_local_contract",
+        },
+      },
     });
   });
 
@@ -686,8 +803,55 @@ describe("admin user organization authorization ops baseline", () => {
     expect(
       screen.getByTestId("admin-user-user-public-001"),
     ).not.toHaveAttribute("data-id");
+    expect(screen.getByLabelText("用户分类")).toHaveValue("all");
+    expect(screen.getByLabelText("授权状态")).toHaveValue("all");
+    expect(
+      screen.getByRole("option", { name: "未授权个人" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "标准版个人" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "高级版个人" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "企业员工" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "后台管理员" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "停用用户" }),
+    ).toBeInTheDocument();
+    expect(document.body).toHaveTextContent("后台管理员账号域");
+    expect(
+      screen.getAllByText("手机号不可修改；首期不做物理删除"),
+    ).toHaveLength(7);
+    expect(screen.queryByRole("button", { name: "删除" })).toBeNull();
     expect(screen.getByText("RC-2026-****")).toBeInTheDocument();
     expect(screen.queryByText("RC-2026-0001-PLAIN")).not.toBeInTheDocument();
+
+    const employeeUser = screen.getByTestId("admin-user-user-public-001");
+    fireEvent.click(
+      within(employeeUser).getByRole("button", { name: "重置密码" }),
+    );
+    expect(
+      screen.getByTestId("admin-user-reset-distribution-window"),
+    ).toHaveTextContent("一次性密码分发窗口");
+    expect(
+      screen.getByTestId("admin-user-reset-distribution-window"),
+    ).toHaveTextContent("LOCAL-RESET-ONCE");
+    expect(
+      screen.getByTestId("admin-user-reset-distribution-window"),
+    ).toHaveTextContent("正式运行时需吊销可用活跃会话");
+    fireEvent.click(screen.getByRole("button", { name: "关闭" }));
+    expect(
+      screen.queryByTestId("admin-user-reset-distribution-window"),
+    ).toBeNull();
+
+    expect(screen.getByText("标准版企业管理员")).toBeInTheDocument();
+    expect(screen.getByText("高级版企业管理员")).toBeInTheDocument();
+    expect(screen.getAllByText("运营管理员限明确组织范围维护")).toHaveLength(2);
 
     fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent(

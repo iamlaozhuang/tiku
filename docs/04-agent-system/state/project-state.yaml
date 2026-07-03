@@ -1,8 +1,142 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: source-landing-16-package-recovery-2026-07-03
-updatedAt: "2026-07-03T05:46:15-07:00"
+currentPhase: system-admin-user-management-source-landing-2026-07-03
+updatedAt: "2026-07-03T06:02:52-07:00"
+systemAdminUserManagementSourceLanding20260703:
+  taskId: system-admin-user-management-source-landing-2026-07-03
+  phase: system-admin-user-management-source-landing-2026-07-03
+  status: closed
+  result: system_admin_user_management_source_landed_with_user_categories_account_domain_boundaries_role_scoped_admin_management_and_reset_distribution_window
+  priority: p1
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - source-landing-16-package-recovery-2026-07-03
+  sourceStory: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+  targetClosureItem: Land the accepted system-admin user/account management UI/UX source contract within existing admin user/org/auth ops baseline.
+  behaviorBoundary: system_admin_user_management_source_ui_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_raw_content_no_raw_dom
+  branch: codex/system-admin-user-management-source-landing-2026-07-03
+  claimedAt: "2026-07-03T06:02:52-07:00"
+  plannedAt: "2026-07-03T06:02:52-07:00"
+  implementedAt: "2026-07-03T06:16:56-07:00"
+  validatedAt: "2026-07-03T06:16:56-07:00"
+  reviewedAt: "2026-07-03T06:16:56-07:00"
+  closedAt: "2026-07-03T06:16:56-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-system-admin-user-management-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-system-admin-user-management-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-system-admin-user-management-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/traceability/2026-07-03-source-landing-16-package-execution-map.md
+    - docs/05-execution-logs/task-plans/2026-07-03-system-admin-user-management-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-system-admin-user-management-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-system-admin-user-management-source-landing.md
+    - src/components/admin/UserOrgAuthOps/AdminUserOrgAuthOpsBaseline.tsx
+    - src/server/contracts/admin-user-org-auth-ops-contract.ts
+    - src/server/services/admin-user-org-auth-ops-service.ts
+    - src/server/services/admin-user-org-auth-ops-route.ts
+    - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - src/server/models/auth.ts
+    - src/app/api/v1/users/**
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    providerCall: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - User management distinguishes no-auth personal users, standard personal users, advanced personal users, organization employees, disabled users, and backend admins with visible filters and status badges.
+    - Phone is immutable, physical deletion remains absent, and backend-admin account domain does not reuse learner/employee phone numbers.
+    - Super admin owns backend admin account and role management; ops admin can maintain organization admin accounts only when explicitly scoped and cannot manage ops/content admin accounts.
+    - Password reset uses a one-time distribution-window result and session-revocation notice without recording real credentials or session material in evidence.
+    - Focused tests cover DTO, service, route, and rendered UI behavior without schema, dependency, direct DB, browser, deploy, release-readiness, final Pass, or production-usability work.
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId system-admin-user-management-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId system-admin-user-management-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId system-admin-user-management-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_continue_previously_approved_source_landing_goal_2026_07_03
+  validationSummary:
+    focusedUnitTests: pass_1_file_19_tests
+    adjacentRuntimeTests: pass_4_files_13_tests
+    typecheck: pass
+    lint: pass
+    formatCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass_after_evidence_anchor_update
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sourceOrTestChanged: true
+    schemaMigrationOrDependencyChanged: false
+    providerCallOrConfigurationExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    browserRuntimeExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
 sourceLanding16PackageRecovery20260703:
   taskId: source-landing-16-package-recovery-2026-07-03
   phase: source-landing-16-package-recovery-2026-07-03
@@ -20411,6 +20545,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: system-admin-user-management-source-landing-2026-07-03
+  status: closed
+  result: system_admin_user_management_source_landed_with_user_categories_account_domain_boundaries_role_scoped_admin_management_and_reset_distribution_window
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  branch: codex/system-admin-user-management-source-landing-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-system-admin-user-management-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-system-admin-user-management-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-system-admin-user-management-source-landing.md
+previousCurrentTaskBeforeSystemAdminUserManagementSourceLanding20260703:
   id: source-landing-16-package-recovery-2026-07-03
   status: closed
   result: recovered_sixteen_source_landing_package_map_with_six_closed_and_ten_pending
