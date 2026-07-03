@@ -82,7 +82,10 @@ The following points are already decided and are not reopened by this contract:
 - Files, Markdown derivatives, and chunks are private. Learners only see citation title and section path, not direct
   file downloads.
 - `chunk` manual adjustment and chunking parameter controls are out of first-release UI scope.
-- Current decision anchors include `UX-REQ-14`, `CT-REQ-031`, `CT-REQ-057`, `CT-REQ-059`, and `CT-REQ-060`.
+- Current decision anchors include `UX-REQ-14`, `CT-REQ-031`, `CT-REQ-045`, `CT-REQ-057`, `CT-REQ-059`,
+  and `CT-REQ-060`.
+- Source decision-package anchors include D12, D20, D32, and D34 for content-resource ownership, legacy operations
+  entry correction, older role-matrix cleanup, and owner-facing operations-resource checklist supersession.
 
 ## Role And Access Contract
 

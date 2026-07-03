@@ -358,6 +358,129 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ui-ux-contract-packages-detailed-audit-2026-07-03
+    title: UI/UX contract packages detailed audit
+    phase: ui-ux-contract-packages-detailed-audit-2026-07-03
+    sourceStory: current_user_requested_detailed_per_package_audit_before_next_work_2026_07_03
+    humanApprovalBoundary: current_user_approved_detailed_ui_ux_contract_audit_closeout_2026_07_03
+    targetClosureItem: Re-audit UI/UX contract packages 1 through 6 for omissions, errors, source-alignment mistakes, and closeout evidence consistency; correct documentation-only issues found.
+    behaviorBoundary: docs_requirement_contract_audit_only_no_product_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_contract_audit
+    moduleRunVersion: 2
+    status: closed
+    priority: p1
+    branch: codex/uiux-contracts-detailed-audit-2026-07-03
+    dependsOn:
+      - ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md
+      - docs/01-requirements/traceability/2026-07-02-organization-training-ui-ux-contract.md
+      - docs/01-requirements/traceability/2026-07-02-organization-analytics-ui-ux-contract.md
+      - docs/01-requirements/traceability/2026-07-02-organization-ai-post-actions-ui-ux-contract.md
+      - docs/01-requirements/traceability/2026-07-02-admin-model-prompt-log-governance-ui-ux-contract.md
+      - docs/01-requirements/traceability/2026-07-02-content-resource-management-ui-ux-contract.md
+      - docs/05-execution-logs/task-plans/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+      - docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/evidence/2026-07-02-*-ui-ux-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-*-ui-ux-contract.md
+      - docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+      - src/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_contract_audit_only
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Six UI/UX contract packages are checked against current-thread decision anchors and package evidence/audits.
+      - Source-alignment observations are spot-checked against current source snippets without modifying source.
+      - Any found documentation omission or conflict is corrected without changing product source behavior.
+      - Two self-review passes are recorded before closeout.
+      - Commit, fast-forward merge, push, and cleanup happen only after declared validations pass.
+    validationCommands:
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ui-ux-contract-packages-detailed-audit-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ui-ux-contract-packages-detailed-audit-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ui-ux-contract-packages-detailed-audit-2026-07-03 -SkipRemoteAheadCheck
+    validationSummary:
+      status: passed
+      package1Audited: true
+      package2Audited: true
+      package3Audited: true
+      package4Audited: true
+      package5Audited: true
+      package6Audited: true
+      documentationOmissionCorrected: true
+      repositoryCheckpointDriftCorrected: true
+      currentTaskPointerDriftCorrected: true
+      formatCheckPassed: true
+      gitDiffCheckPassed: true
+      moduleRunV2PreCommitHardeningPassed: true
+      moduleRunV2ModuleCloseoutReadinessPassed: true
+      moduleRunV2PrePushReadinessPassed: true
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_detailed_ui_ux_contract_audit_closeout_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_detailed_ui_ux_contract_audit_closeout_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_detailed_ui_ux_contract_audit_closeout_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_detailed_ui_ux_contract_audit_closeout_2026_07_03
   - id: ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
     title: UI/UX contract evidence post-closeout normalization
     phase: ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
