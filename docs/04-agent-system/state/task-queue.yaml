@@ -358,6 +358,214 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: source-landing-8-role-local-acceptance-2026-07-03
+    title: Source landing 8 role local acceptance
+    phase: source-landing-8-role-local-acceptance-2026-07-03
+    sourceStory: current_user_approved_actual_8_role_local_acceptance_execution_2026_07_03
+    humanApprovalBoundary: current_user_approved_actual_8_role_local_acceptance_execution_2026_07_03
+    targetClosureItem: Execute the approved local 8-role acceptance sequence with redacted evidence and record pass, fail, or block honestly; stop and split repair work on the first defect or blocking fixture gap.
+    behaviorBoundary: local_acceptance_execution_only_no_product_source_no_test_source_no_schema_no_dependency_no_direct_db_no_env_secret_no_provider_no_staging_prod_no_release_claim
+    evidenceMode: redacted_role_names_route_categories_assertion_categories_command_status_and_failure_or_block_summary_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_acceptance_execution
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_experience_batch
+    status: blocked
+    result: blocked_after_first_role_failure_acceptance_harness_contract_drift
+    branch: codex/source-landing-8-role-local-acceptance-2026-07-03
+    claimedAt: "2026-07-03T11:51:39-07:00"
+    plannedAt: "2026-07-03T11:51:39-07:00"
+    implementedAt: "2026-07-03T12:05:00-07:00"
+    validatedAt: "2026-07-03T12:05:00-07:00"
+    reviewedAt: "2026-07-03T12:05:00-07:00"
+    dependsOn:
+      - source-landing-16-package-acceptance-prep-2026-07-03
+    roleOrder:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md
+    acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-report.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md
+    gapSplitPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-report.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md
+      - docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-16-package-*.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-acceptance-prep.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-acceptance-prep.md
+      - package.json
+      - playwright.config.ts
+      - e2e/**
+      - src/**
+      - tests/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localDevServer: approved_for_playwright_webserver_only
+      localhostBrowser: approved_for_existing_playwright_specs_only
+      browserAcceptance: approved_for_existing_playwright_specs_only
+      credentialBackedLocalFixtureUse: approved_existing_e2e_fixtures_redacted_evidence_only
+      runtimeApiMutationThroughExistingSpecs: approved_test_owned_local_artifacts_only
+      localSourceChange: blocked
+      testSourceChange: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd exec -- playwright test e2e/local-full-loop-baseline-accounts-auth-db.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/student-practice-mock-entry.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/personal-ai-generation-local-request.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/edition-aware-authorization-local-flow.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-report.md docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-8-role-local-acceptance-2026-07-03
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_actual_8_role_local_acceptance_execution_2026_07_03
+      fastForwardMerge:
+        approved: false
+        approvalRequired: fresh_user_closeout_approval_after_acceptance_result
+      push:
+        approved: false
+        approvalRequired: fresh_user_closeout_approval_after_acceptance_result
+      cleanup:
+        deleteShortBranch: false
+        approvalRequired: fresh_user_closeout_approval_after_acceptance_result
+    validationSummary:
+      status: blocked
+      acceptanceExecuted: partial_stopped_on_first_role_failure
+      baselineAccountSessionSmoke: pass
+      personalStandardStudent: fail_acceptance_harness_contract_drift
+      personalAdvancedStudent: blocked_not_executed_stop_rule
+      orgStandardEmployee: blocked_not_executed_stop_rule
+      orgAdvancedEmployee: blocked_not_executed_stop_rule
+      orgStandardAdmin: blocked_not_executed_stop_rule
+      orgAdvancedAdmin: blocked_not_executed_stop_rule
+      contentAdmin: blocked_not_executed_stop_rule
+      opsAdmin: blocked_not_executed_stop_rule
+      firstFailedOrBlockedRole: personal_standard_student
+      splitRepairTaskId: repair-student-practice-restart-acceptance-harness-2026-07-03
+      playwrightGeneratedArtifactsRemoved: true
+      prettierScopedCheckInitial: failed_markdown_formatting
+      prettierScopedWrite: pass
+      prettierScopedCheckFinal: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      productSourceChanged: false
+      testSourceChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      envSecretAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+  - id: repair-student-practice-restart-acceptance-harness-2026-07-03
+    title: Repair student practice restart acceptance harness
+    phase: source-landing-8-role-local-acceptance-repair-2026-07-03
+    sourceStory: first_role_local_acceptance_blocked_by_student_practice_restart_confirmation_contract_drift_2026_07_03
+    humanApprovalBoundary: fresh_approval_required_before_test_source_change
+    targetClosureItem: Repair the existing student practice local acceptance harness to follow the current two-step restart confirmation contract, then rerun the 8-role local acceptance from the beginning.
+    behaviorBoundary: acceptance_harness_repair_only_requires_fresh_task_plan_before_test_source_change_no_product_source_unless_new_evidence
+    evidenceMode: redacted_command_status_and_assertion_summary_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: acceptance_harness_repair
+    moduleRunVersion: 2
+    status: pending
+    priority: p0
+    dependsOn:
+      - source-landing-8-role-local-acceptance-2026-07-03
+    splitFrom: source-landing-8-role-local-acceptance-2026-07-03
+    splitPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - e2e/student-practice-mock-entry.spec.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved_after_fresh_claim
+      testSourceChange: requires_fresh_user_approval
+      productSourceChange: blocked_unless_new_root_cause_evidence_and_fresh_approval
+      localDevServer: requires_fresh_user_approval
+      localhostBrowser: requires_fresh_user_approval
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
   - id: source-landing-16-package-acceptance-prep-2026-07-03
     title: Source landing 16 package acceptance prep
     phase: source-landing-16-package-acceptance-prep-2026-07-03
