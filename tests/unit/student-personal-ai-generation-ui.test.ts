@@ -358,6 +358,29 @@ function createAdvancedAuthorizationListResponse(
   ]);
 }
 
+function createPersonalAndOrganizationAdvancedAuthorizationListResponse() {
+  return createAuthorizationListResponse([
+    createAuthorizationContext({
+      authorizationSource: "personal_auth",
+      authorizationPublicId: "personal-auth-context-dual-001",
+      ownerType: "personal",
+      ownerPublicId: "employee-session-user-public-123",
+      organizationPublicId: null,
+      quotaOwnerType: "personal",
+      quotaOwnerPublicId: "employee-session-user-public-123",
+    }),
+    createAuthorizationContext({
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org-auth-context-dual-001",
+      ownerType: "organization",
+      ownerPublicId: "organization-public-123",
+      organizationPublicId: "organization-public-123",
+      quotaOwnerType: "organization",
+      quotaOwnerPublicId: "organization-public-123",
+    }),
+  ]);
+}
+
 function createAuthorizationListResponse(
   authorizationContexts: EffectiveAuthorizationContextDto[],
 ) {
@@ -869,7 +892,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       responseMode: "local_browser_experience",
       userPublicId: localSessionUserPublicId,
       requestPublicId: expect.stringMatching(/^personal-ai-request-public-/),
-      authorizationPublicId: "personal-auth-public-001",
+      authorizationPublicId: "authorization-context-ui-001",
       aiFuncType: "explanation",
       questionPublicId: "question-public-001",
       answerRecordPublicId: "answer-record-public-001",
@@ -883,10 +906,10 @@ describe("StudentPersonalAiGenerationPage", () => {
       actorPublicId: localSessionUserPublicId,
       authorizationSource: "personal_auth",
       ownerType: "personal",
-      ownerPublicId: localSessionUserPublicId,
+      ownerPublicId: "student-public-ui-001",
       organizationPublicId: null,
       quotaOwnerType: "personal",
-      quotaOwnerPublicId: localSessionUserPublicId,
+      quotaOwnerPublicId: "student-public-ui-001",
       effectiveEdition: "advanced",
       isAuthorizationActive: true,
       isScopeAllowed: true,
@@ -1048,6 +1071,115 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(JSON.stringify(submittedBodies[0])).not.toContain(
       "unit-test-session-token",
     );
+  });
+
+  it("defaults learner AI to the personal context and uses organization quota only after explicit selection", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createPersonalAndOrganizationAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init?.method).toBe("POST");
+          submittedBodies.push(
+            JSON.parse(String(init?.body)) as Record<string, unknown>,
+          );
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/sessions") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(screen.getByText("授权上下文")).toBeInTheDocument();
+    expect(screen.getByText("额度归属确认")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("个人授权 · 高级版 · monopoly 3级"),
+    ).toBeChecked();
+    expect(screen.getByText(/当前将使用个人额度/u)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      authorizationPublicId: "personal-auth-context-dual-001",
+      authorizationSource: "personal_auth",
+      ownerType: "personal",
+      ownerPublicId: "employee-session-user-public-123",
+      organizationPublicId: null,
+      quotaOwnerType: "personal",
+      quotaOwnerPublicId: "employee-session-user-public-123",
+    });
+
+    fireEvent.click(screen.getByLabelText("组织授权 · 高级版 · monopoly 3级"));
+    expect(screen.getByText(/当前将使用组织额度/u)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(2));
+    expect(submittedBodies[1]).toMatchObject({
+      authorizationPublicId: "org-auth-context-dual-001",
+      authorizationSource: "org_auth",
+      ownerType: "organization",
+      ownerPublicId: "organization-public-123",
+      organizationPublicId: "organization-public-123",
+      quotaOwnerType: "organization",
+      quotaOwnerPublicId: "organization-public-123",
+      taskType: "ai_paper_generation",
+    });
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
   });
 
   it("renders learner AI detail controls for advanced organization employee before submitting", async () => {

@@ -113,8 +113,6 @@ type StudentPersonalAiGenerationDetailControl = {
 };
 
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
-const ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID =
-  "org-auth-public-local-contract";
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
 const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
@@ -408,32 +406,76 @@ function readAuthorizationContexts(
   return payload.authorizationContexts ?? [];
 }
 
-function canUsePersonalAiGeneration(
-  authorizationContexts: EffectiveAuthorizationContextDto[],
+function canUseAuthorizationContextForPersonalAiGeneration(
+  authorizationContext: EffectiveAuthorizationContextDto,
 ): boolean {
-  return authorizationContexts.some(
-    (authorizationContext) =>
-      authorizationContext.effectiveEdition === "advanced" &&
-      (authorizationContext.capabilities.canGenerateAiQuestion ||
-        authorizationContext.capabilities.canGenerateAiPaper),
+  return (
+    authorizationContext.effectiveEdition === "advanced" &&
+    (authorizationContext.capabilities.canGenerateAiQuestion ||
+      authorizationContext.capabilities.canGenerateAiPaper)
+  );
+}
+
+function canUseAuthorizationContextForPersonalAiGenerationTask(
+  authorizationContext: EffectiveAuthorizationContextDto,
+  taskType: StudentPersonalAiGenerationTaskType,
+): boolean {
+  if (authorizationContext.effectiveEdition !== "advanced") {
+    return false;
+  }
+
+  return taskType === "ai_question_generation"
+    ? authorizationContext.capabilities.canGenerateAiQuestion
+    : authorizationContext.capabilities.canGenerateAiPaper;
+}
+
+function readPersonalAiGenerationAuthorizationContexts(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+): EffectiveAuthorizationContextDto[] {
+  return authorizationContexts.filter(
+    canUseAuthorizationContextForPersonalAiGeneration,
+  );
+}
+
+function selectDefaultPersonalAiGenerationAuthorizationContext(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+): EffectiveAuthorizationContextDto | null {
+  return (
+    authorizationContexts.find(
+      (authorizationContext) =>
+        authorizationContext.authorizationSource === "personal_auth",
+    ) ??
+    authorizationContexts[0] ??
+    null
   );
 }
 
 function selectPersonalAiGenerationAuthorizationContext(
   authorizationContexts: EffectiveAuthorizationContextDto[],
   taskType: StudentPersonalAiGenerationTaskType,
+  selectedAuthorizationPublicId: string | null,
 ): EffectiveAuthorizationContextDto | null {
-  return (
-    authorizationContexts.find((authorizationContext) => {
-      if (authorizationContext.effectiveEdition !== "advanced") {
-        return false;
-      }
+  const selectedAuthorizationContext =
+    selectedAuthorizationPublicId === null
+      ? selectDefaultPersonalAiGenerationAuthorizationContext(
+          authorizationContexts,
+        )
+      : (authorizationContexts.find(
+          (authorizationContext) =>
+            authorizationContext.authorizationPublicId ===
+            selectedAuthorizationPublicId,
+        ) ?? null);
 
-      return taskType === "ai_question_generation"
-        ? authorizationContext.capabilities.canGenerateAiQuestion
-        : authorizationContext.capabilities.canGenerateAiPaper;
-    }) ?? null
-  );
+  if (selectedAuthorizationContext === null) {
+    return null;
+  }
+
+  return canUseAuthorizationContextForPersonalAiGenerationTask(
+    selectedAuthorizationContext,
+    taskType,
+  )
+    ? selectedAuthorizationContext
+    : null;
 }
 
 function createStudentGenerationParameters(
@@ -492,35 +534,34 @@ function createPersonalAiGenerationRequestBody(
   draft: StudentPersonalAiGenerationRequestDraft,
   sessionUser: AuthContextDto["user"],
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+  authorizationContext: EffectiveAuthorizationContextDto,
 ) {
   const userPublicId = sessionUser.publicId;
-  const authorizationContext =
-    sessionUser.userType === "employee" &&
-    sessionUser.organizationPublicId !== null
-      ? {
-          authorizationPublicId: ORGANIZATION_AI_LOCAL_AUTHORIZATION_PUBLIC_ID,
-          authorizationSource: "org_auth" as const,
-          ownerType: "organization" as const,
-          ownerPublicId: sessionUser.organizationPublicId,
-          organizationPublicId: sessionUser.organizationPublicId,
-          quotaOwnerType: "organization" as const,
-          quotaOwnerPublicId: sessionUser.organizationPublicId,
-        }
-      : {
-          authorizationPublicId: draft.authorizationPublicId,
-          authorizationSource: "personal_auth" as const,
-          ownerType: "personal" as const,
-          ownerPublicId: userPublicId,
-          organizationPublicId: null,
-          quotaOwnerType: "personal" as const,
-          quotaOwnerPublicId: userPublicId,
-        };
+  const ownerType =
+    authorizationContext.ownerType === "organization"
+      ? ("organization" as const)
+      : ("personal" as const);
+  const quotaOwnerType =
+    authorizationContext.quotaOwnerType === "organization"
+      ? ("organization" as const)
+      : ("personal" as const);
+  const organizationPublicId =
+    authorizationContext.authorizationSource === "org_auth"
+      ? (authorizationContext.organizationPublicId ??
+        authorizationContext.ownerPublicId)
+      : null;
 
   return {
     responseMode: "local_browser_experience",
     ...draft,
     ...createPersonalAiGenerationRequestIdentifiers(),
-    ...authorizationContext,
+    authorizationPublicId: authorizationContext.authorizationPublicId,
+    authorizationSource: authorizationContext.authorizationSource,
+    ownerType,
+    ownerPublicId: authorizationContext.ownerPublicId,
+    organizationPublicId,
+    quotaOwnerType,
+    quotaOwnerPublicId: authorizationContext.quotaOwnerPublicId,
     generationParameters,
     userPublicId,
     actorPublicId: userPublicId,
@@ -736,6 +777,149 @@ function ContractField({ label, value }: { label: string; value: string }) {
         {contractValueLabelMap[value] ?? value}
       </dd>
     </div>
+  );
+}
+
+function getAuthorizationSourceLabel(
+  authorizationSource: EffectiveAuthorizationContextDto["authorizationSource"],
+): string {
+  return authorizationSource === "personal_auth" ? "个人授权" : "组织授权";
+}
+
+function getEditionLabel(
+  edition: EffectiveAuthorizationContextDto["effectiveEdition"] | undefined,
+): string {
+  return edition === "advanced" ? "高级版" : "标准版";
+}
+
+function getQuotaOwnerLabel(
+  quotaOwnerType: EffectiveAuthorizationContextDto["quotaOwnerType"],
+): string {
+  if (quotaOwnerType === "organization") {
+    return "组织";
+  }
+
+  if (quotaOwnerType === "platform") {
+    return "平台";
+  }
+
+  return "个人";
+}
+
+function getAuthorizationContextAccessibleLabel(
+  authorizationContext: EffectiveAuthorizationContextDto,
+): string {
+  return `${getAuthorizationSourceLabel(
+    authorizationContext.authorizationSource,
+  )} · ${getEditionLabel(authorizationContext.effectiveEdition)} · ${
+    authorizationContext.profession
+  } ${authorizationContext.level}级`;
+}
+
+function StudentPersonalAiGenerationAuthorizationContextSelector({
+  authorizationContexts,
+  disabled,
+  onSelectAuthorizationContext,
+  selectedAuthorizationPublicId,
+}: {
+  authorizationContexts: EffectiveAuthorizationContextDto[];
+  disabled: boolean;
+  onSelectAuthorizationContext: (authorizationPublicId: string) => void;
+  selectedAuthorizationPublicId: string | null;
+}) {
+  const selectedAuthorizationContext =
+    authorizationContexts.find(
+      (authorizationContext) =>
+        authorizationContext.authorizationPublicId ===
+        selectedAuthorizationPublicId,
+    ) ??
+    selectDefaultPersonalAiGenerationAuthorizationContext(
+      authorizationContexts,
+    );
+
+  if (authorizationContexts.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="border-border bg-surface rounded-xl border p-4">
+      <div className="mb-3 space-y-1">
+        <h2 className="font-heading text-text-primary text-base font-semibold">
+          授权上下文
+        </h2>
+        <p className="text-text-secondary text-sm leading-6">
+          选择本次 AI训练
+          使用的授权范围；个人学习默认使用个人授权，组织额度需手动选择。
+        </p>
+      </div>
+
+      <fieldset
+        aria-label="AI训练授权上下文"
+        className="grid grid-cols-1 gap-2"
+      >
+        {authorizationContexts.map((authorizationContext, index) => {
+          const authorizationContextLabel =
+            getAuthorizationContextAccessibleLabel(authorizationContext);
+          const isSelected =
+            selectedAuthorizationContext?.authorizationPublicId ===
+            authorizationContext.authorizationPublicId;
+
+          return (
+            <label
+              className="border-border bg-background flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+              key={`${authorizationContext.authorizationSource}-${index}`}
+            >
+              <input
+                aria-label={authorizationContextLabel}
+                checked={isSelected}
+                className="mt-1 size-4 accent-current"
+                disabled={disabled}
+                name="student-ai-authorization-context"
+                onChange={() =>
+                  onSelectAuthorizationContext(
+                    authorizationContext.authorizationPublicId,
+                  )
+                }
+                type="radio"
+                value={String(index)}
+              />
+              <span className="min-w-0 flex-1">
+                <span className="text-text-primary block font-medium">
+                  {authorizationContextLabel}
+                </span>
+                <span className="text-text-secondary mt-2 flex flex-wrap gap-2 text-xs">
+                  <span className="bg-muted rounded-md px-2 py-1">
+                    原始{getEditionLabel(authorizationContext.edition)}
+                  </span>
+                  <span className="bg-muted rounded-md px-2 py-1">
+                    有效{getEditionLabel(authorizationContext.effectiveEdition)}
+                  </span>
+                  <span className="bg-muted rounded-md px-2 py-1">
+                    到期 {authorizationContext.expiresAt ?? "未设置"}
+                  </span>
+                  <span className="bg-muted rounded-md px-2 py-1">
+                    额度{" "}
+                    {getQuotaOwnerLabel(authorizationContext.quotaOwnerType)}
+                  </span>
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </fieldset>
+
+      {selectedAuthorizationContext !== null ? (
+        <div className="bg-muted mt-3 rounded-lg px-3 py-3">
+          <p className="text-text-primary text-sm font-medium">额度归属确认</p>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            当前将使用
+            {getQuotaOwnerLabel(selectedAuthorizationContext.quotaOwnerType)}
+            额度，范围为 {selectedAuthorizationContext.profession}{" "}
+            {selectedAuthorizationContext.level}级。
+          </p>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -1449,6 +1633,11 @@ export function StudentPersonalAiGenerationPage() {
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
   const [practiceFeedbackState, setPracticeFeedbackState] =
     useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
+  const [authorizationContexts, setAuthorizationContexts] = useState<
+    EffectiveAuthorizationContextDto[]
+  >([]);
+  const [selectedAuthorizationPublicId, setSelectedAuthorizationPublicId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     const sessionRequestToken = readStudentSessionRequestToken();
@@ -1466,6 +1655,8 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
+      setAuthorizationContexts([]);
+      setSelectedAuthorizationPublicId(null);
     }
 
     function markUnavailable() {
@@ -1480,6 +1671,8 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("idle");
       setResultDetail(null);
       setSelectedResultPublicId(null);
+      setAuthorizationContexts([]);
+      setSelectedAuthorizationPublicId(null);
     }
 
     async function markUnauthorizedOrUnavailable() {
@@ -1550,7 +1743,7 @@ export function StudentPersonalAiGenerationPage() {
     }
 
     async function confirmPersonalAiGenerationAuthorization(): Promise<boolean> {
-      const authorizationContexts =
+      const fetchedAuthorizationContexts =
         await fetchPersonalAiGenerationAuthorizationContexts(
           sessionRequestToken,
         );
@@ -1559,10 +1752,35 @@ export function StudentPersonalAiGenerationPage() {
         return false;
       }
 
-      if (!canUsePersonalAiGeneration(authorizationContexts)) {
+      const selectableAuthorizationContexts =
+        readPersonalAiGenerationAuthorizationContexts(
+          fetchedAuthorizationContexts,
+        );
+
+      if (selectableAuthorizationContexts.length === 0) {
         markUnavailable();
         return false;
       }
+
+      setAuthorizationContexts(selectableAuthorizationContexts);
+      setSelectedAuthorizationPublicId((currentAuthorizationPublicId) => {
+        if (
+          currentAuthorizationPublicId !== null &&
+          selectableAuthorizationContexts.some(
+            (authorizationContext) =>
+              authorizationContext.authorizationPublicId ===
+              currentAuthorizationPublicId,
+          )
+        ) {
+          return currentAuthorizationPublicId;
+        }
+
+        return (
+          selectDefaultPersonalAiGenerationAuthorizationContext(
+            selectableAuthorizationContexts,
+          )?.authorizationPublicId ?? null
+        );
+      });
 
       return true;
     }
@@ -1694,6 +1912,8 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("unauthorized");
       setResultDetail(null);
       setSelectedResultPublicId(null);
+      setAuthorizationContexts([]);
+      setSelectedAuthorizationPublicId(null);
     }
 
     function markUnavailable() {
@@ -1708,6 +1928,8 @@ export function StudentPersonalAiGenerationPage() {
       setResultDetailState("idle");
       setResultDetail(null);
       setSelectedResultPublicId(null);
+      setAuthorizationContexts([]);
+      setSelectedAuthorizationPublicId(null);
     }
 
     setLastSubmittedTaskType(taskType);
@@ -1752,26 +1974,37 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
-      const authorizationContexts =
+      const fetchedAuthorizationContexts =
         await fetchPersonalAiGenerationAuthorizationContexts(
           sessionRequestToken,
         );
+      const selectableAuthorizationContexts =
+        readPersonalAiGenerationAuthorizationContexts(
+          fetchedAuthorizationContexts,
+        );
 
-      if (!canUsePersonalAiGeneration(authorizationContexts)) {
+      if (selectableAuthorizationContexts.length === 0) {
         markUnavailable();
         return;
       }
 
+      setAuthorizationContexts(selectableAuthorizationContexts);
+
       const generationAuthorizationContext =
         selectPersonalAiGenerationAuthorizationContext(
-          authorizationContexts,
+          selectableAuthorizationContexts,
           taskType,
+          selectedAuthorizationPublicId,
         );
 
       if (generationAuthorizationContext === null) {
         markUnavailable();
         return;
       }
+
+      setSelectedAuthorizationPublicId(
+        generationAuthorizationContext.authorizationPublicId,
+      );
 
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
@@ -1790,6 +2023,7 @@ export function StudentPersonalAiGenerationPage() {
                   generationAuthorizationContext,
                   taskType,
                 ),
+                generationAuthorizationContext,
               ),
             ),
           },
@@ -2066,6 +2300,8 @@ export function StudentPersonalAiGenerationPage() {
     pageState !== "checking" &&
     pageState !== "unauthorized" &&
     pageState !== "unavailable";
+  const shouldShowAuthorizationContextSelector =
+    shouldShowAiGenerationDetailControls && authorizationContexts.length > 0;
   const hasLocalAiGenerationExperience =
     pageState === "ready" && experience !== null;
   const canUseGeneratedPractice =
@@ -2092,6 +2328,15 @@ export function StudentPersonalAiGenerationPage() {
         </h1>
         <p className="text-text-secondary text-sm leading-6">{copy.subtitle}</p>
       </div>
+
+      {shouldShowAuthorizationContextSelector ? (
+        <StudentPersonalAiGenerationAuthorizationContextSelector
+          authorizationContexts={authorizationContexts}
+          disabled={isAiGenerationActionDisabled}
+          onSelectAuthorizationContext={setSelectedAuthorizationPublicId}
+          selectedAuthorizationPublicId={selectedAuthorizationPublicId}
+        />
+      ) : null}
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <button
