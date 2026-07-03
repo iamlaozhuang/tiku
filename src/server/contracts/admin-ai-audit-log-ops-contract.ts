@@ -46,6 +46,46 @@ export type ModelConfigSnapshotPolicy = "redacted_metadata";
 
 export type PromptTemplateStatus = "draft" | "active" | "disabled";
 
+export type AdminPromptTemplateRegistrationSource =
+  | "project_prompt_catalog"
+  | "runtime_registry";
+
+export type AdminPromptTemplateCatalogGapStatus = "registered" | "catalog_gap";
+
+export type ModelConfigConnectionTestStatus =
+  | "succeeded"
+  | "failed"
+  | "missing_secret"
+  | "permission_denied";
+
+export type ModelConfigConnectionTestFailureCategory =
+  | "none"
+  | "missing_secret"
+  | "model_config_incomplete"
+  | "permission_denied"
+  | "synthetic_health_check_failed";
+
+export type ModelConfigConnectionTestDto = {
+  modelConfigPublicId: string;
+  status: ModelConfigConnectionTestStatus;
+  testedAt: string;
+  testedByPublicId: string | null;
+  durationMs: number;
+  failureCategory: ModelConfigConnectionTestFailureCategory;
+  redactionStatus: "redacted";
+  actionType: "model_config_health_check";
+  requestBodyStored: false;
+  responseBodyStored: false;
+  providerPayloadStored: false;
+  rawPromptStored: false;
+  rawUserDataStored: false;
+  modelDisabledByTest: false;
+};
+
+export type ModelConfigConnectionTestResultDto = {
+  connectionTest: ModelConfigConnectionTestDto;
+};
+
 export type RedactedMetadata = Record<string, string | number | boolean | null>;
 
 export type ModelConfigRuntimeAlignmentDto = {
@@ -146,6 +186,11 @@ export type PromptTemplateSummaryDto = {
   description: string | null;
   bodyDigest: string;
   bodyPreviewMasked: string;
+  bodyFullText: string | null;
+  canViewFullText: boolean;
+  requiredVariables: string[];
+  registrationSource: AdminPromptTemplateRegistrationSource;
+  catalogGapStatus: AdminPromptTemplateCatalogGapStatus;
   status: PromptTemplateStatus;
   isActive: boolean;
   updatedAt: string;

@@ -84,6 +84,9 @@ describe("admin ai and audit log ops baseline", () => {
     const auditLogList = await service.listAuditLogs({});
     const aiCallLogList = await service.listAiCallLogs({});
     const aiCallLogSummary = await service.summarizeAiCallLogs({});
+    const connectionTest = await service.testModelConfigConnection(
+      "model-config-public-001",
+    );
     const enableModelConfig = await service.enableModelConfig(
       "model-config-public-001",
     );
@@ -148,6 +151,19 @@ describe("admin ai and audit log ops baseline", () => {
       callCount: 12,
       estimatedCostCny: "3.60",
     });
+    expect(connectionTest.data?.connectionTest).toMatchObject({
+      modelConfigPublicId: "model-config-public-001",
+      status: "succeeded",
+      failureCategory: "none",
+      redactionStatus: "redacted",
+      actionType: "model_config_health_check",
+      requestBodyStored: false,
+      responseBodyStored: false,
+      providerPayloadStored: false,
+      rawPromptStored: false,
+      rawUserDataStored: false,
+      modelDisabledByTest: false,
+    });
     expect(enableModelConfig).toEqual({
       code: 0,
       message: "ok",
@@ -165,6 +181,13 @@ describe("admin ai and audit log ops baseline", () => {
 
     await expect(
       service.enableModelConfig("model-config-public-001"),
+    ).resolves.toEqual({
+      code: 403641,
+      message: "Admin permission denied.",
+      data: null,
+    });
+    await expect(
+      service.testModelConfigConnection("model-config-public-001"),
     ).resolves.toEqual({
       code: 403641,
       message: "Admin permission denied.",
@@ -269,6 +292,20 @@ describe("admin ai and audit log ops baseline", () => {
         }),
       },
     );
+    const testConnectionResponse =
+      await handlers.testModelConfigConnection.POST(
+        new Request(
+          "http://localhost/api/v1/model-configs/model-config-public-001/test-connection",
+          {
+            method: "POST",
+          },
+        ),
+        {
+          params: Promise.resolve({
+            publicId: "model-config-public-001",
+          }),
+        },
+      );
 
     await expect(modelConfigsResponse.json()).resolves.toMatchObject({
       code: 0,
@@ -312,6 +349,18 @@ describe("admin ai and audit log ops baseline", () => {
       code: 0,
       message: "ok",
       data: null,
+    });
+    await expect(testConnectionResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        connectionTest: {
+          actionType: "model_config_health_check",
+          modelDisabledByTest: false,
+          providerPayloadStored: false,
+          rawPromptStored: false,
+          status: "succeeded",
+        },
+      },
     });
   });
 

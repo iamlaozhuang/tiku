@@ -60,6 +60,15 @@ export function createAdminAiAuditLogOpsRouteHandlers(
         return createJsonResponse(await service.disableModelConfig(publicId));
       },
     },
+    testModelConfigConnection: {
+      async POST(_request: Request, context: RouteContext): Promise<Response> {
+        const { publicId } = await context.params;
+
+        return createJsonResponse(
+          await service.testModelConfigConnection(publicId),
+        );
+      },
+    },
     auditLogs: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(

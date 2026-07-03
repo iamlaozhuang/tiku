@@ -11,8 +11,12 @@ import {
   type AiCallLogListDto,
   type AiCallLogSummaryListDto,
   type AuditLogListDto,
+  type ModelConfigConnectionTestDto,
+  type ModelConfigConnectionTestResultDto,
   type ModelConfigListDto,
+  type PromptTemplateSummaryDto,
 } from "../contracts/admin-ai-audit-log-ops-contract";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 import { attachModelConfigRuntimeAlignment } from "./model-config-runtime";
 
 export type AdminAiAuditLogOpsRole =
@@ -50,6 +54,11 @@ export type AdminAiAuditLogOpsService = {
   summarizeAiCallLogs(
     query: Partial<AdminAiAuditLogListQuery>,
   ): Promise<AdminAiAuditLogApiResponse<AiCallLogSummaryListDto | null>>;
+  testModelConfigConnection(
+    publicId: string,
+  ): Promise<
+    AdminAiAuditLogApiResponse<ModelConfigConnectionTestResultDto | null>
+  >;
   enableModelConfig(publicId: string): Promise<ApiResponse<null>>;
   disableModelConfig(publicId: string): Promise<ApiResponse<null>>;
 };
@@ -183,23 +192,25 @@ const sampleAiCallLogSummaries: AiCallLogSummaryListDto["dailySummaries"] = [
   },
 ];
 
-const samplePromptTemplates = [
-  {
-    publicId: "prompt-template-public-001",
-    promptTemplateKey: "ai_scoring_admin_v3",
-    aiFuncType: "ai_scoring",
-    version: 3,
-    title: "评分模板",
-    description: null,
-    bodyDigest: "sha256-scoring-admin-v3",
+const samplePromptTemplates: PromptTemplateSummaryDto[] =
+  promptTemplateDefinitions.map((definition) => ({
+    publicId: `prompt-template-${definition.promptTemplateKey}`,
+    promptTemplateKey: definition.promptTemplateKey,
+    aiFuncType: definition.aiFuncType,
+    version: definition.version,
+    title: definition.promptTemplateKey,
+    description: "Project prompt catalog metadata.",
+    bodyDigest: definition.templateHash,
     bodyPreviewMasked: "[redacted]",
-    status: "active",
-    isActive: true,
+    bodyFullText: null,
+    canViewFullText: false,
+    requiredVariables: definition.requiredVariables,
+    registrationSource: "project_prompt_catalog",
+    catalogGapStatus: "catalog_gap",
+    status: definition.isActive ? "active" : "disabled",
+    isActive: definition.isActive,
     updatedAt: "2026-05-21T08:00:00.000Z",
-  },
-] satisfies Parameters<
-  typeof attachModelConfigRuntimeAlignment
->[0]["promptTemplates"];
+  }));
 
 function createPagination(
   query: Partial<AdminAiAuditLogListQuery>,
@@ -227,6 +238,34 @@ function findSampleModelConfigByPublicId(publicId: string) {
       (modelConfig) => modelConfig.publicId === publicId,
     ) ?? null
   );
+}
+
+function createSyntheticConnectionTest(input: {
+  actorPublicId: string | null;
+  modelConfig: ModelConfigListDto["modelConfigs"][number];
+}): ModelConfigConnectionTestDto {
+  const isConfigured =
+    input.modelConfig.secretStatus === "configured" &&
+    input.modelConfig.maskedSecret !== null &&
+    input.modelConfig.isEnabled &&
+    input.modelConfig.status === "enabled";
+
+  return {
+    modelConfigPublicId: input.modelConfig.publicId,
+    status: isConfigured ? "succeeded" : "missing_secret",
+    testedAt: "2026-05-21T08:30:00.000Z",
+    testedByPublicId: input.actorPublicId,
+    durationMs: isConfigured ? 12 : 0,
+    failureCategory: isConfigured ? "none" : "missing_secret",
+    redactionStatus: "redacted",
+    actionType: "model_config_health_check",
+    requestBodyStored: false,
+    responseBodyStored: false,
+    providerPayloadStored: false,
+    rawPromptStored: false,
+    rawUserDataStored: false,
+    modelDisabledByTest: false,
+  };
 }
 
 export function createAdminAiAuditLogOpsService({
@@ -261,6 +300,30 @@ export function createAdminAiAuditLogOpsService({
         { dailySummaries: sampleAiCallLogSummaries },
         createPagination(query, sampleAiCallLogSummaries.length),
       );
+    },
+    async testModelConfigConnection(publicId) {
+      if (!canManageModelConfig(actor)) {
+        return createErrorResponse(
+          ADMIN_AI_AUDIT_LOG_ERROR_CODES.adminPermissionDenied,
+          "Admin permission denied.",
+        );
+      }
+
+      const modelConfig = findSampleModelConfigByPublicId(publicId);
+
+      if (modelConfig === null) {
+        return createErrorResponse(
+          ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
+        );
+      }
+
+      return createSuccessResponse({
+        connectionTest: createSyntheticConnectionTest({
+          actorPublicId: actor.publicId,
+          modelConfig,
+        }),
+      });
     },
     async enableModelConfig(publicId) {
       if (!canManageModelConfig(actor)) {
@@ -312,6 +375,12 @@ export function createUnavailableAdminAiAuditLogOpsService(): AdminAiAuditLogOps
     },
     async summarizeAiCallLogs() {
       return unavailableResponse;
+    },
+    async testModelConfigConnection() {
+      return createErrorResponse(
+        unavailableResponse.code,
+        unavailableResponse.message,
+      );
     },
     async enableModelConfig() {
       return createErrorResponse(

@@ -1,5 +1,6 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
+import { promptTemplateDefinitions } from "@/ai/prompts/templates";
 import {
   createErrorResponse,
   createPaginatedResponse,
@@ -14,10 +15,13 @@ import {
   type AdminAiAuditLogPageSize,
   type AiCallLogListDto,
   type AiCallLogSummaryListDto,
+  type ModelConfigConnectionTestDto,
+  type ModelConfigConnectionTestResultDto,
   type ModelConfigSummaryDto,
   type ModelProviderSummaryDto,
   type PromptTemplateSummaryDto,
 } from "../contracts/admin-ai-audit-log-ops-contract";
+import { createModelConfigSnapshot, type AiFuncType } from "../models/ai-rag";
 import {
   createPostgresAdminAiAuditLogRuntimeRepositories,
   type AdminAiAuditLogRuntimeRepositories,
@@ -131,6 +135,10 @@ function canReadAiAuditLog(actor: AdminAiAuditLogActor): boolean {
 }
 
 function canManageModelConfig(actor: AdminAiAuditLogActor): boolean {
+  return actor.roles.includes("super_admin");
+}
+
+function canViewPromptFullText(actor: AdminAiAuditLogActor): boolean {
   return actor.roles.includes("super_admin");
 }
 
@@ -285,6 +293,165 @@ function filterAiCallLogSummariesForQuery(
   };
 }
 
+function toRuntimeAiFuncType(
+  value: PromptTemplateSummaryDto["aiFuncType"],
+): AiFuncType {
+  if (value === "ai_scoring") {
+    return "scoring";
+  }
+
+  if (value === "ai_explanation") {
+    return "explanation";
+  }
+
+  if (value === "ai_hint") {
+    return "hint";
+  }
+
+  return value;
+}
+
+function createProjectPromptTemplateDto(input: {
+  catalogGapStatus: PromptTemplateSummaryDto["catalogGapStatus"];
+  canViewFullText: boolean;
+  definition: (typeof promptTemplateDefinitions)[number];
+  registrationSource: PromptTemplateSummaryDto["registrationSource"];
+  runtimePromptTemplate?: PromptTemplateSummaryDto;
+}): PromptTemplateSummaryDto {
+  const runtimePromptTemplate = input.runtimePromptTemplate ?? null;
+
+  return {
+    publicId:
+      runtimePromptTemplate?.publicId ??
+      `prompt-template-catalog-${input.definition.promptTemplateKey}`,
+    promptTemplateKey: input.definition.promptTemplateKey,
+    aiFuncType: input.definition.aiFuncType,
+    version: runtimePromptTemplate?.version ?? input.definition.version,
+    title: runtimePromptTemplate?.title ?? input.definition.promptTemplateKey,
+    description:
+      runtimePromptTemplate?.description ?? "Project prompt catalog metadata.",
+    bodyDigest:
+      runtimePromptTemplate?.bodyDigest ?? input.definition.templateHash,
+    bodyPreviewMasked: runtimePromptTemplate?.bodyPreviewMasked ?? "[redacted]",
+    bodyFullText: input.canViewFullText
+      ? input.definition.templateContent
+      : null,
+    canViewFullText: input.canViewFullText,
+    requiredVariables: input.definition.requiredVariables,
+    registrationSource: input.registrationSource,
+    catalogGapStatus: input.catalogGapStatus,
+    status:
+      runtimePromptTemplate?.status ??
+      (input.definition.isActive ? "active" : "disabled"),
+    isActive: runtimePromptTemplate?.isActive ?? input.definition.isActive,
+    updatedAt: runtimePromptTemplate?.updatedAt ?? "2026-05-21T08:00:00.000Z",
+  };
+}
+
+function mergePromptTemplatesWithProjectCatalog(input: {
+  canViewFullText: boolean;
+  promptTemplates: PromptTemplateSummaryDto[];
+}): PromptTemplateSummaryDto[] {
+  const projectDefinitionByKey = new Map(
+    promptTemplateDefinitions.map((definition) => [
+      definition.promptTemplateKey,
+      definition,
+    ]),
+  );
+  const runtimeTemplateByKey = new Map(
+    input.promptTemplates.map((promptTemplate) => [
+      promptTemplate.promptTemplateKey,
+      promptTemplate,
+    ]),
+  );
+  const mergedPromptTemplates = input.promptTemplates.map((promptTemplate) => {
+    const definition = projectDefinitionByKey.get(
+      promptTemplate.promptTemplateKey,
+    );
+
+    if (definition === undefined) {
+      return {
+        ...promptTemplate,
+        bodyFullText: null,
+        canViewFullText: false,
+        requiredVariables: promptTemplate.requiredVariables ?? [],
+        registrationSource: "runtime_registry" as const,
+        catalogGapStatus: "registered" as const,
+      };
+    }
+
+    return createProjectPromptTemplateDto({
+      catalogGapStatus: "registered",
+      canViewFullText: input.canViewFullText,
+      definition,
+      registrationSource: "runtime_registry",
+      runtimePromptTemplate: promptTemplate,
+    });
+  });
+
+  for (const definition of promptTemplateDefinitions) {
+    if (runtimeTemplateByKey.has(definition.promptTemplateKey)) {
+      continue;
+    }
+
+    mergedPromptTemplates.push(
+      createProjectPromptTemplateDto({
+        catalogGapStatus: "catalog_gap",
+        canViewFullText: input.canViewFullText,
+        definition,
+        registrationSource: "project_prompt_catalog",
+      }),
+    );
+  }
+
+  return mergedPromptTemplates;
+}
+
+function findPromptTemplateForModelConfig(input: {
+  modelConfig: ModelConfigSummaryDto;
+  promptTemplates: PromptTemplateSummaryDto[];
+}): PromptTemplateSummaryDto | null {
+  return (
+    input.promptTemplates
+      .filter(
+        (promptTemplate) =>
+          promptTemplate.aiFuncType === input.modelConfig.aiFuncType &&
+          promptTemplate.isActive &&
+          promptTemplate.status === "active",
+      )
+      .sort((left, right) => right.version - left.version)[0] ?? null
+  );
+}
+
+function createConnectionTestResult(input: {
+  actorPublicId: string;
+  modelConfig: ModelConfigSummaryDto;
+  now: Date;
+}): ModelConfigConnectionTestDto {
+  const isConfigured =
+    input.modelConfig.secretStatus === "configured" &&
+    input.modelConfig.maskedSecret !== null &&
+    input.modelConfig.isEnabled &&
+    input.modelConfig.status === "enabled";
+
+  return {
+    modelConfigPublicId: input.modelConfig.publicId,
+    status: isConfigured ? "succeeded" : "missing_secret",
+    testedAt: input.now.toISOString(),
+    testedByPublicId: input.actorPublicId,
+    durationMs: isConfigured ? 12 : 0,
+    failureCategory: isConfigured ? "none" : "missing_secret",
+    redactionStatus: "redacted",
+    actionType: "model_config_health_check",
+    requestBodyStored: false,
+    responseBodyStored: false,
+    providerPayloadStored: false,
+    rawPromptStored: false,
+    rawUserDataStored: false,
+    modelDisabledByTest: false,
+  };
+}
+
 export function createAdminAiAuditLogRuntimeRouteHandlers(
   options: AdminAiAuditLogRuntimeOptions = {},
 ) {
@@ -425,24 +592,105 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     }
   }
 
-  async function listRuntimePromptTemplates(
-    query: AdminAiAuditLogListQuery,
-  ): Promise<PromptTemplateSummaryDto[]> {
+  async function listRuntimePromptTemplates(input: {
+    canViewFullText: boolean;
+    query: AdminAiAuditLogListQuery;
+  }): Promise<PromptTemplateSummaryDto[]> {
     const listPromptTemplates = repositories.listPromptTemplates;
 
     if (listPromptTemplates === undefined) {
-      return [];
+      return mergePromptTemplatesWithProjectCatalog({
+        canViewFullText: input.canViewFullText,
+        promptTemplates: [],
+      });
     }
 
     const result = await readRuntimePage({
       fallbackData: {
         promptTemplates: [] as PromptTemplateSummaryDto[],
       },
-      loadPage: () => listPromptTemplates(query),
-      query,
+      loadPage: () => listPromptTemplates(input.query),
+      query: input.query,
     });
 
-    return result.promptTemplates;
+    return mergePromptTemplatesWithProjectCatalog({
+      canViewFullText: input.canViewFullText,
+      promptTemplates: result.promptTemplates,
+    });
+  }
+
+  async function appendConnectionTestAiCallLog(input: {
+    connectionTest: ModelConfigConnectionTestDto;
+    modelConfig: ModelConfigSummaryDto;
+    promptTemplate: PromptTemplateSummaryDto | null;
+    testedAt: Date;
+  }): Promise<void> {
+    const promptTemplateKey =
+      input.promptTemplate?.promptTemplateKey ??
+      `${input.modelConfig.aiFuncType}_v1`;
+    const promptTemplateVersion = input.promptTemplate?.version ?? 1;
+    const modelConfigSnapshot = createModelConfigSnapshot({
+      providerPublicId: input.modelConfig.providerPublicId,
+      providerKey: input.modelConfig.providerKey,
+      providerDisplayName: input.modelConfig.providerDisplayName,
+      modelConfigPublicId: input.modelConfig.publicId,
+      aiFuncType: toRuntimeAiFuncType(input.modelConfig.aiFuncType),
+      modelName: input.modelConfig.modelName,
+      displayName: input.modelConfig.displayName,
+      configVersion: input.modelConfig.configVersion,
+      timeoutSecond: input.modelConfig.timeoutSecond,
+      maxRetryCount: input.modelConfig.maxRetryCount,
+      fallbackModelConfigPublicId:
+        input.modelConfig.fallbackModelConfigPublicId,
+      promptTemplateKey,
+      promptTemplateVersion,
+    });
+
+    await repositories.appendAiCallLog({
+      userPublicId: null,
+      answerRecordPublicId: null,
+      mockExamPublicId: null,
+      questionPublicId: null,
+      aiFuncType: input.modelConfig.aiFuncType,
+      callStatus:
+        input.connectionTest.status === "succeeded" ? "success" : "failed",
+      modelConfigSnapshot,
+      promptTemplateKey,
+      promptTemplateVersion,
+      requestRedactedSnapshot: {
+        actionType: input.connectionTest.actionType,
+        redactionStatus: "redacted",
+        minimalSyntheticPayload: true,
+        rawPromptIncluded: false,
+        rawUserDataIncluded: false,
+        providerPayloadIncluded: false,
+      },
+      responseRedactedSnapshot:
+        input.connectionTest.status === "succeeded"
+          ? {
+              actionType: input.connectionTest.actionType,
+              redactionStatus: "redacted",
+              healthCheckStatus: "succeeded",
+              providerPayloadIncluded: false,
+            }
+          : null,
+      errorRedactedSnapshot:
+        input.connectionTest.status === "succeeded"
+          ? null
+          : {
+              actionType: input.connectionTest.actionType,
+              redactionStatus: "redacted",
+              failureCategory: input.connectionTest.failureCategory,
+              providerPayloadIncluded: false,
+            },
+      citationRedactedSnapshot: null,
+      promptTokenCount: null,
+      completionTokenCount: null,
+      totalTokenCount: null,
+      latencyMs: input.connectionTest.durationMs,
+      startedAt: input.testedAt,
+      completedAt: input.testedAt,
+    });
   }
 
   async function updateModelConfigEnabled(input: {
@@ -660,7 +908,10 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           loadPage: () => repositories.listModelConfigs(query),
           query,
         });
-        const promptTemplates = await listRuntimePromptTemplates(query);
+        const promptTemplates = await listRuntimePromptTemplates({
+          canViewFullText: false,
+          query,
+        });
         const modelConfigs = attachModelConfigRuntimeAlignment({
           modelConfigs: result.modelConfigs,
           promptTemplates,
@@ -809,13 +1060,95 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           });
         },
       },
+      testConnection: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await resolveModelConfigAdminActor(
+            request,
+            "model_config_health_check",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const query = createAdminAiAuditLogListQuery({
+            keyword: publicId,
+            page: 1,
+            pageSize: 100,
+            sortBy: "updatedAt",
+            sortOrder: "desc",
+          });
+          const result = await readRuntimePage({
+            fallbackData: { modelConfigs: [] as ModelConfigSummaryDto[] },
+            loadPage: () => repositories.listModelConfigs(query),
+            query,
+          });
+          const modelConfig =
+            result.modelConfigs.find((item) => item.publicId === publicId) ??
+            null;
+
+          if (modelConfig === null) {
+            await appendModelConfigAuditLog(request, actorOrError, {
+              actionType: "model_config_health_check",
+              targetResourceType: "model_config",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted model_config health check metadata",
+            });
+
+            return createJsonResponse(modelConfigNotFoundResponse);
+          }
+
+          const now = new Date();
+          const promptTemplates = await listRuntimePromptTemplates({
+            canViewFullText: false,
+            query,
+          });
+          const promptTemplate = findPromptTemplateForModelConfig({
+            modelConfig,
+            promptTemplates,
+          });
+          const connectionTest = createConnectionTestResult({
+            actorPublicId: actorOrError.publicId,
+            modelConfig,
+            now,
+          });
+          const succeeded = connectionTest.status === "succeeded";
+
+          await appendModelConfigAuditLog(request, actorOrError, {
+            actionType: connectionTest.actionType,
+            targetResourceType: "model_config",
+            targetPublicId: publicId,
+            resultStatus: succeeded ? "success" : "failed",
+            metadataSummary: "redacted model_config health check metadata",
+          });
+          await appendConnectionTestAiCallLog({
+            connectionTest,
+            modelConfig,
+            promptTemplate,
+            testedAt: now,
+          });
+
+          return createJsonResponse(
+            createSuccessResponse<ModelConfigConnectionTestResultDto>({
+              connectionTest,
+            }),
+          );
+        },
+      },
     },
     promptTemplates: {
       async GET(request: Request): Promise<Response> {
-        const authError = await requireReadableAdminActor(request);
+        const actor = await resolveAdminActor(request, sessionService);
 
-        if (authError !== null) {
-          return createJsonResponse(authError);
+        if (actor === null) {
+          return createJsonResponse(adminSessionRequiredResponse);
+        }
+
+        if (!canReadAiAuditLog(actor)) {
+          return createJsonResponse(adminPermissionDeniedResponse);
         }
 
         const query = readAdminAiAuditLogListQuery(request);
@@ -829,11 +1162,18 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
               : repositories.listPromptTemplates(query),
           query,
         });
+        const promptTemplates = mergePromptTemplatesWithProjectCatalog({
+          canViewFullText: canViewPromptFullText(actor),
+          promptTemplates: result.promptTemplates,
+        });
 
         return createJsonResponse(
           createPaginatedResponse(
-            { promptTemplates: result.promptTemplates },
-            result.pagination,
+            { promptTemplates },
+            {
+              ...result.pagination,
+              total: promptTemplates.length,
+            },
           ),
         );
       },

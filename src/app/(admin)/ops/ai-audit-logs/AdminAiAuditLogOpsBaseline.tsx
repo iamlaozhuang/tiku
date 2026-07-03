@@ -1,14 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, LoaderCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import {
   AdminModelConfigManagement,
   type ModelConfigFormInput,
   type ModelProviderFormInput,
-  type PromptTemplateFormInput,
 } from "@/features/admin/model-config-management/AdminModelConfigManagement";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
@@ -16,17 +15,22 @@ import type {
   AiCallLogListDto,
   AuditLogSummaryDto,
   AuditLogListDto,
+  ModelConfigConnectionTestResultDto,
   ModelConfigListDto,
   ModelConfigSummaryDto,
   ModelProviderListDto,
   ModelProviderSummaryDto,
   PromptTemplateListDto,
-  PromptTemplateSummaryDto,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
 import type { PersonalAiGenerationFormalAdoptionReviewDto } from "@/server/contracts/personal-ai-generation-formal-adoption-contract";
 
 type AdminAiAuditLogOpsState = "ready" | "loading" | "empty" | "error";
 type AdminFormalAdoptionReviewState = "idle" | "loading" | "success" | "error";
+type AdminAiAuditLogOpsRoleMode = "super_admin" | "ops_admin";
+type AdminAiAuditLogOpsQueryState = {
+  keyword: string;
+  pageSize: 20 | 50 | 100;
+};
 
 type AdminAiAuditRuntimeData = {
   aiCallLogs: AiCallLogListDto["aiCallLogs"];
@@ -38,7 +42,6 @@ type AdminAiAuditRuntimeData = {
 };
 
 const sessionTokenStorageKey = "tiku.localSessionToken";
-const runtimeQuery = "page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc";
 const formalAdoptionTargetResourceType = "personal_ai_generation_result";
 const formalAdoptionReviewTargetType = "question";
 const formalAdoptionReviewReasonCategory = "content_quality_passed";
@@ -118,6 +121,17 @@ const staticRuntimeData: AdminAiAuditRuntimeData = {
       description: "Metadata only",
       bodyDigest: "sha256:redacted",
       bodyPreviewMasked: "Scoring template preview [redacted]",
+      bodyFullText:
+        "Read-only scoring prompt text for privileged local preview.",
+      canViewFullText: true,
+      requiredVariables: [
+        "question",
+        "studentAnswer",
+        "scoringPoints",
+        "ragContext",
+      ],
+      registrationSource: "runtime_registry",
+      catalogGapStatus: "registered",
       status: "active",
       isActive: true,
       updatedAt: "2026-05-21T08:00:00.000Z",
@@ -188,9 +202,11 @@ const staticRuntimeData: AdminAiAuditRuntimeData = {
 };
 
 export function AdminAiAuditLogOpsBaseline({
+  currentRole = "super_admin",
   runtimeEnabled = false,
   state = "ready",
 }: {
+  currentRole?: AdminAiAuditLogOpsRoleMode;
   runtimeEnabled?: boolean;
   state?: AdminAiAuditLogOpsState;
 }) {
@@ -203,12 +219,55 @@ export function AdminAiAuditLogOpsBaseline({
   const [formalAdoptionReview, setFormalAdoptionReview] = useState<
     PersonalAiGenerationFormalAdoptionReviewDto["adoptionReview"] | null
   >(null);
+  const [opsQuery, setOpsQuery] = useState<AdminAiAuditLogOpsQueryState>({
+    keyword: "",
+    pageSize: 20,
+  });
+  const [selectedAuditLogPublicId, setSelectedAuditLogPublicId] = useState<
+    string | null
+  >(null);
+  const [selectedAiCallLogPublicId, setSelectedAiCallLogPublicId] = useState<
+    string | null
+  >(null);
   const shouldLoadRuntimeData = runtimeEnabled && state === "ready";
   const effectiveRuntimeState = shouldLoadRuntimeData ? runtimeState : state;
+  const runtimeQuery = useMemo(() => createRuntimeQuery(opsQuery), [opsQuery]);
   const formalAdoptionReviewCandidate = useMemo(
     () => findFormalAdoptionReviewCandidate(runtimeData.auditLogs),
     [runtimeData.auditLogs],
   );
+  const displayedAuditLogs = useMemo(
+    () =>
+      filterAuditLogs(runtimeData.auditLogs, opsQuery).slice(
+        0,
+        opsQuery.pageSize,
+      ),
+    [opsQuery, runtimeData.auditLogs],
+  );
+  const displayedAiCallLogs = useMemo(
+    () =>
+      filterAiCallLogs(runtimeData.aiCallLogs, opsQuery).slice(
+        0,
+        opsQuery.pageSize,
+      ),
+    [opsQuery, runtimeData.aiCallLogs],
+  );
+  const displayedCostSummaries = useMemo(
+    () =>
+      filterCostSummaries(runtimeData.costSummaries, opsQuery).slice(
+        0,
+        opsQuery.pageSize,
+      ),
+    [opsQuery, runtimeData.costSummaries],
+  );
+  const selectedAuditLog =
+    runtimeData.auditLogs.find(
+      (auditLog) => auditLog.publicId === selectedAuditLogPublicId,
+    ) ?? null;
+  const selectedAiCallLog =
+    runtimeData.aiCallLogs.find(
+      (aiCallLog) => aiCallLog.publicId === selectedAiCallLogPublicId,
+    ) ?? null;
   const managementKey = [
     runtimeData.modelProviders.map((provider) => provider.publicId).join(","),
     runtimeData.modelConfigs
@@ -242,7 +301,7 @@ export function AdminAiAuditLogOpsBaseline({
       }
     });
 
-    loadRuntimeData(storedSessionToken)
+    loadRuntimeData(storedSessionToken, runtimeQuery)
       .then((loadedData) => {
         if (!isCurrentLoad) {
           return;
@@ -262,7 +321,7 @@ export function AdminAiAuditLogOpsBaseline({
     return () => {
       isCurrentLoad = false;
     };
-  }, [shouldLoadRuntimeData]);
+  }, [runtimeQuery, shouldLoadRuntimeData]);
 
   const runtimeCallbacks = useMemo(() => {
     if (!runtimeEnabled) {
@@ -349,6 +408,8 @@ export function AdminAiAuditLogOpsBaseline({
         initialModelConfigs={runtimeData.modelConfigs}
         initialModelProviders={runtimeData.modelProviders}
         initialPromptTemplates={runtimeData.promptTemplates}
+        canManageModelConfig={currentRole === "super_admin"}
+        canViewPromptFullText={currentRole === "super_admin"}
         {...runtimeCallbacks}
       />
 
@@ -359,10 +420,12 @@ export function AdminAiAuditLogOpsBaseline({
         onSubmit={() => void handleSubmitFormalAdoptionReview()}
       />
 
+      <AdminOpsQueryControls query={opsQuery} onChange={setOpsQuery} />
+
       <div className="grid gap-4 xl:grid-cols-3">
         <AdminOpsPanel title="审计日志">
           <p className="text-text-muted mb-2 text-xs">审计日志只读</p>
-          {runtimeData.auditLogs.map((auditLog) => (
+          {displayedAuditLogs.map((auditLog) => (
             <AdminOpsSummaryRow
               key={auditLog.publicId}
               label={formatAdminOpsDisplayValue(auditLog.actionType)}
@@ -375,13 +438,18 @@ export function AdminAiAuditLogOpsBaseline({
               badges={["metadata-only", "redacted", "summary_only"]}
               publicId={auditLog.publicId}
               testId={`admin-audit-log-${auditLog.publicId}`}
-            />
+            >
+              <AdminOpsDetailButton
+                label="查看脱敏详情"
+                onClick={() => setSelectedAuditLogPublicId(auditLog.publicId)}
+              />
+            </AdminOpsSummaryRow>
           ))}
         </AdminOpsPanel>
 
         <AdminOpsPanel title="AI 调用日志">
           <p className="text-text-muted mb-2 text-xs">AI 调用日志只读</p>
-          {runtimeData.aiCallLogs.map((aiCallLog) => (
+          {displayedAiCallLogs.map((aiCallLog) => (
             <AdminOpsSummaryRow
               key={aiCallLog.publicId}
               label={formatAdminOpsDisplayValue(aiCallLog.aiFuncType)}
@@ -394,12 +462,17 @@ export function AdminAiAuditLogOpsBaseline({
               ].join(" / ")}
               publicId={aiCallLog.publicId}
               testId={`admin-ai-call-log-${aiCallLog.publicId}`}
-            />
+            >
+              <AdminOpsDetailButton
+                label="查看脱敏详情"
+                onClick={() => setSelectedAiCallLogPublicId(aiCallLog.publicId)}
+              />
+            </AdminOpsSummaryRow>
           ))}
         </AdminOpsPanel>
 
         <AdminOpsPanel title="成本汇总">
-          {runtimeData.costSummaries.map((costSummary) => (
+          {displayedCostSummaries.map((costSummary) => (
             <AdminOpsSummaryRow
               key={[
                 costSummary.bucket,
@@ -420,6 +493,11 @@ export function AdminAiAuditLogOpsBaseline({
           ))}
         </AdminOpsPanel>
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <AdminAuditLogDetailPanel auditLog={selectedAuditLog} />
+        <AdminAiCallLogDetailPanel aiCallLog={selectedAiCallLog} />
+      </div>
     </div>
   );
 }
@@ -439,8 +517,96 @@ function findFormalAdoptionReviewCandidate(
     : { targetPublicId: candidate.targetPublicId };
 }
 
+function createRuntimeQuery(query: AdminAiAuditLogOpsQueryState): string {
+  const searchParams = new URLSearchParams({
+    page: "1",
+    pageSize: String(query.pageSize),
+    sortBy: "updatedAt",
+    sortOrder: "desc",
+  });
+  const keyword = query.keyword.trim();
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  return searchParams.toString();
+}
+
+function filterAuditLogs(
+  auditLogs: AuditLogListDto["auditLogs"],
+  query: AdminAiAuditLogOpsQueryState,
+): AuditLogListDto["auditLogs"] {
+  const keyword = query.keyword.trim().toLowerCase();
+
+  if (keyword.length === 0) {
+    return auditLogs;
+  }
+
+  return auditLogs.filter((auditLog) =>
+    [
+      auditLog.actionType,
+      auditLog.targetResourceType,
+      auditLog.resultStatus,
+      auditLog.metadataSummary ?? "",
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(keyword),
+  );
+}
+
+function filterAiCallLogs(
+  aiCallLogs: AiCallLogListDto["aiCallLogs"],
+  query: AdminAiAuditLogOpsQueryState,
+): AiCallLogListDto["aiCallLogs"] {
+  const keyword = query.keyword.trim().toLowerCase();
+
+  if (keyword.length === 0) {
+    return aiCallLogs;
+  }
+
+  return aiCallLogs.filter((aiCallLog) =>
+    [
+      aiCallLog.aiFuncType,
+      aiCallLog.callStatus,
+      aiCallLog.providerDisplayName,
+      aiCallLog.modelAlias,
+      aiCallLog.promptSummary ?? "",
+      aiCallLog.outputSummary ?? "",
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(keyword),
+  );
+}
+
+function filterCostSummaries(
+  costSummaries: AiCallLogCostSummaryDto[],
+  query: AdminAiAuditLogOpsQueryState,
+): AiCallLogCostSummaryDto[] {
+  const keyword = query.keyword.trim().toLowerCase();
+
+  if (keyword.length === 0) {
+    return costSummaries;
+  }
+
+  return costSummaries.filter((costSummary) =>
+    [
+      costSummary.bucket,
+      costSummary.aiFuncType,
+      costSummary.providerDisplayName,
+      costSummary.modelAlias,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(keyword),
+  );
+}
+
 async function loadRuntimeData(
   sessionToken: string,
+  runtimeQuery: string,
 ): Promise<AdminAiAuditRuntimeData> {
   const [
     modelProviders,
@@ -572,24 +738,16 @@ function createRuntimeCallbacks() {
 
       return readApiData(response).modelConfig;
     },
-    onSaveTemplate: async (
-      form: PromptTemplateFormInput,
-    ): Promise<PromptTemplateSummaryDto> => {
-      const response = await postAdminApi<{
-        promptTemplate: PromptTemplateSummaryDto;
-      }>("/api/v1/prompt-templates", readRequiredSessionToken(), {
-        aiFuncType: "ai_explanation",
-        bodyDigest: form.bodyDigest,
-        bodyPreviewMasked: form.bodyPreviewMasked,
-        description: "Metadata only",
-        isActive: true,
-        promptTemplateKey: form.promptTemplateKey,
-        status: "active",
-        title: form.title,
-        version: 1,
-      });
+    onTestConnection: async (
+      publicId: string,
+    ): Promise<ModelConfigConnectionTestResultDto["connectionTest"]> => {
+      const response = await postAdminApi<ModelConfigConnectionTestResultDto>(
+        `/api/v1/model-configs/${encodeURIComponent(publicId)}/test-connection`,
+        readRequiredSessionToken(),
+        {},
+      );
 
-      return readApiData(response).promptTemplate;
+      return readApiData(response).connectionTest;
     },
     onToggleConfig: (publicId: string, isEnabled: boolean) =>
       postAdminAction(
@@ -599,11 +757,6 @@ function createRuntimeCallbacks() {
     onToggleProvider: (publicId: string, isEnabled: boolean) =>
       postAdminAction(
         `/api/v1/model-providers/${publicId}/${isEnabled ? "enable" : "disable"}`,
-        readRequiredSessionToken(),
-      ),
-    onToggleTemplate: (publicId: string, isActive: boolean) =>
-      postAdminAction(
-        `/api/v1/prompt-templates/${publicId}/${isActive ? "enable" : "disable"}`,
         readRequiredSessionToken(),
       ),
   };
@@ -817,14 +970,188 @@ function AdminOpsPanel({
   );
 }
 
+function AdminOpsQueryControls({
+  onChange,
+  query,
+}: {
+  onChange: (query: AdminAiAuditLogOpsQueryState) => void;
+  query: AdminAiAuditLogOpsQueryState;
+}) {
+  return (
+    <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
+        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+          <span>日志关键词</span>
+          <input
+            aria-label="日志关键词"
+            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+            value={query.keyword}
+            onChange={(event) =>
+              onChange({ ...query, keyword: event.target.value })
+            }
+          />
+        </label>
+        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+          <span>每页条数</span>
+          <select
+            aria-label="每页条数"
+            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+            value={query.pageSize}
+            onChange={(event) =>
+              onChange({
+                ...query,
+                pageSize: Number(event.target.value) as 20 | 50 | 100,
+              })
+            }
+          >
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </label>
+      </div>
+    </section>
+  );
+}
+
+function AdminOpsDetailButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="border-border text-text-secondary hover:bg-muted flex h-9 shrink-0 items-center rounded-md border px-3 text-sm font-medium active:scale-[0.98]"
+      onClick={onClick}
+    >
+      <Eye aria-hidden="true" className="mr-2 size-4" />
+      {label}
+    </button>
+  );
+}
+
+function AdminAuditLogDetailPanel({
+  auditLog,
+}: {
+  auditLog: AuditLogSummaryDto | null;
+}) {
+  return (
+    <AdminOpsPanel title="审计日志详情">
+      {auditLog === null ? (
+        <p className="text-text-muted text-sm">
+          选择一条审计日志查看脱敏详情。
+        </p>
+      ) : (
+        <div className="space-y-3">
+          <AdminOpsReadonlyDetail
+            label="动作"
+            value={formatAdminOpsDisplayValue(auditLog.actionType)}
+          />
+          <AdminOpsReadonlyDetail
+            label="对象"
+            value={formatAdminOpsDisplayValue(auditLog.targetResourceType)}
+          />
+          <AdminOpsReadonlyDetail
+            label="结果"
+            value={formatAdminOpsDisplayValue(auditLog.resultStatus)}
+          />
+          <AdminOpsReadonlyDetail
+            label="摘要"
+            value={auditLog.metadataSummary ?? "已脱敏元数据"}
+          />
+          <div className="flex flex-wrap gap-1">
+            <AdminOpsStatusBadge label="metadata-only" />
+            <AdminOpsStatusBadge label="redacted" />
+            <AdminOpsStatusBadge label="summary_only" />
+          </div>
+          <p className="text-text-muted text-xs">
+            原始请求体、密钥、卡密、会话和内部自增 ID 不展示。
+          </p>
+        </div>
+      )}
+    </AdminOpsPanel>
+  );
+}
+
+function AdminAiCallLogDetailPanel({
+  aiCallLog,
+}: {
+  aiCallLog: AiCallLogListDto["aiCallLogs"][number] | null;
+}) {
+  return (
+    <AdminOpsPanel title="AI 调用日志详情">
+      {aiCallLog === null ? (
+        <p className="text-text-muted text-sm">
+          选择一条 AI 调用日志查看脱敏详情。
+        </p>
+      ) : (
+        <div className="space-y-3">
+          <AdminOpsReadonlyDetail
+            label="能力"
+            value={formatAdminOpsDisplayValue(aiCallLog.aiFuncType)}
+          />
+          <AdminOpsReadonlyDetail
+            label="模型"
+            value={`${aiCallLog.providerDisplayName} / ${aiCallLog.modelAlias}`}
+          />
+          <AdminOpsReadonlyDetail
+            label="状态"
+            value={formatAdminOpsDisplayValue(aiCallLog.callStatus)}
+          />
+          <AdminOpsReadonlyDetail
+            label="输入摘要"
+            value={aiCallLog.promptSummary ?? "Prompt 摘要已脱敏"}
+          />
+          <AdminOpsReadonlyDetail
+            label="输出摘要"
+            value={aiCallLog.outputSummary ?? "输出摘要已脱敏"}
+          />
+          <AdminOpsReadonlyDetail
+            label="Token"
+            value={String(aiCallLog.totalTokenCount ?? 0)}
+          />
+          <div className="flex flex-wrap gap-1">
+            <AdminOpsStatusBadge label="redacted" />
+            <AdminOpsStatusBadge label="summary_only" />
+          </div>
+          <p className="text-text-muted text-xs">
+            原始 Prompt、Provider 请求/响应、原始 AI
+            输入输出和完整材料内容不展示。
+          </p>
+        </div>
+      )}
+    </AdminOpsPanel>
+  );
+}
+
+function AdminOpsReadonlyDetail({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="border-border border-b pb-2 last:border-b-0 last:pb-0">
+      <dt className="text-text-muted text-xs">{label}</dt>
+      <dd className="text-text-primary mt-1 text-sm font-medium">{value}</dd>
+    </div>
+  );
+}
+
 function AdminOpsSummaryRow({
   badges = [],
+  children,
   label,
   meta,
   publicId,
   testId,
 }: {
   badges?: string[];
+  children?: ReactNode;
   label: string;
   meta: string;
   publicId: string;
@@ -847,6 +1174,7 @@ function AdminOpsSummaryRow({
           </div>
         )}
       </div>
+      {children}
     </div>
   );
 }

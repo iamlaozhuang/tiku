@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, ToggleLeft, ToggleRight } from "lucide-react";
+import { Eye, PlugZap, Save, ToggleLeft, ToggleRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type {
   AdminAiFunctionType,
+  ModelConfigConnectionTestDto,
   ModelConfigSummaryDto,
   ModelProviderSummaryDto,
   PromptTemplateSummaryDto,
@@ -20,16 +21,17 @@ type AdminModelConfigManagementProps = {
   initialModelProviders?: ModelProviderSummaryDto[];
   initialModelConfigs?: ModelConfigSummaryDto[];
   initialPromptTemplates?: PromptTemplateSummaryDto[];
+  canManageModelConfig?: boolean;
+  canViewPromptFullText?: boolean;
   onSaveProvider?: (
     form: ModelProviderFormInput,
   ) => Promise<ModelProviderSummaryDto>;
   onSaveConfig?: (form: ModelConfigFormInput) => Promise<ModelConfigSummaryDto>;
-  onSaveTemplate?: (
-    form: PromptTemplateFormInput,
-  ) => Promise<PromptTemplateSummaryDto>;
+  onTestConnection?: (
+    publicId: string,
+  ) => Promise<ModelConfigConnectionTestDto>;
   onToggleProvider?: (publicId: string, isEnabled: boolean) => Promise<void>;
   onToggleConfig?: (publicId: string, isEnabled: boolean) => Promise<void>;
-  onToggleTemplate?: (publicId: string, isActive: boolean) => Promise<void>;
 };
 
 type ActiveTab = "model_provider" | "model_config" | "prompt_template";
@@ -59,14 +61,7 @@ const emptyConfigForm = {
 
 export type ModelConfigFormInput = typeof emptyConfigForm;
 
-const emptyTemplateForm = {
-  promptTemplateKey: "",
-  title: "",
-  bodyDigest: "",
-  bodyPreviewMasked: "",
-};
-
-export type PromptTemplateFormInput = typeof emptyTemplateForm;
+type ConnectionTestState = ModelConfigConnectionTestDto | "testing" | "error";
 
 const aiFuncTypeLabels: Partial<Record<AdminAiFunctionType, string>> = {
   ai_explanation: "AI 讲解",
@@ -92,23 +87,26 @@ export function AdminModelConfigManagement({
   initialModelProviders = emptyModelProviders,
   initialModelConfigs = emptyModelConfigs,
   initialPromptTemplates = emptyPromptTemplates,
+  canManageModelConfig = true,
+  canViewPromptFullText = true,
   onSaveConfig,
   onSaveProvider,
-  onSaveTemplate,
+  onTestConnection,
   onToggleConfig,
   onToggleProvider,
-  onToggleTemplate,
 }: AdminModelConfigManagementProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>("model_provider");
   const [modelProviders, setModelProviders] = useState(initialModelProviders);
   const [modelConfigs, setModelConfigs] = useState(initialModelConfigs);
-  const [promptTemplates, setPromptTemplates] = useState(
-    initialPromptTemplates,
-  );
   const [providerForm, setProviderForm] = useState(emptyProviderForm);
   const [configForm, setConfigForm] = useState(emptyConfigForm);
-  const [templateForm, setTemplateForm] = useState(emptyTemplateForm);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [connectionTestsByConfig, setConnectionTestsByConfig] = useState<
+    Record<string, ConnectionTestState>
+  >({});
+  const [selectedPromptTemplatePublicId, setSelectedPromptTemplatePublicId] =
+    useState<string | null>(null);
+  const promptTemplates = initialPromptTemplates;
 
   const hasAnyData = useMemo(
     () =>
@@ -174,32 +172,41 @@ export function AdminModelConfigManagement({
     }
   }
 
-  async function handleSaveTemplate() {
-    const promptTemplateKey = templateForm.promptTemplateKey.trim();
-    const title = templateForm.title.trim();
-    const bodyDigest = templateForm.bodyDigest.trim();
-    const bodyPreviewMasked = templateForm.bodyPreviewMasked.trim();
+  async function handleTestConnection(publicId: string) {
+    const modelConfig =
+      modelConfigs.find((item) => item.publicId === publicId) ?? null;
 
-    if (
-      promptTemplateKey.length === 0 ||
-      title.length === 0 ||
-      bodyDigest.length === 0 ||
-      bodyPreviewMasked.length === 0
-    ) {
+    if (modelConfig === null) {
+      setActionMessage("模型配置不存在。");
       return;
     }
 
-    try {
-      const promptTemplate =
-        onSaveTemplate === undefined
-          ? createLocalPromptTemplate(templateForm)
-          : await onSaveTemplate(templateForm);
+    setConnectionTestsByConfig((current) => ({
+      ...current,
+      [publicId]: "testing",
+    }));
 
-      setPromptTemplates((current) => [...current, promptTemplate]);
-      setTemplateForm(emptyTemplateForm);
-      setActionMessage("Prompt 模板已保存。");
+    try {
+      const connectionTest =
+        onTestConnection === undefined
+          ? createLocalConnectionTest(modelConfig)
+          : await onTestConnection(publicId);
+
+      setConnectionTestsByConfig((current) => ({
+        ...current,
+        [publicId]: connectionTest,
+      }));
+      setActionMessage(
+        connectionTest.status === "succeeded"
+          ? "模型配置连接测试已通过。"
+          : "模型配置连接测试未通过。",
+      );
     } catch {
-      setActionMessage("Prompt 模板保存失败。");
+      setConnectionTestsByConfig((current) => ({
+        ...current,
+        [publicId]: "error",
+      }));
+      setActionMessage("模型配置连接测试失败。");
     }
   }
 
@@ -242,6 +249,7 @@ export function AdminModelConfigManagement({
 
       {activeTab === "model_provider" ? (
         <AdminModelProviderPanel
+          canManageModelConfig={canManageModelConfig}
           form={providerForm}
           modelProviders={modelProviders}
           onChange={setProviderForm}
@@ -273,8 +281,11 @@ export function AdminModelConfigManagement({
         <AdminModelConfigPanel
           form={configForm}
           modelConfigs={modelConfigs}
+          canManageModelConfig={canManageModelConfig}
+          connectionTestsByConfig={connectionTestsByConfig}
           onChange={setConfigForm}
           onSave={() => void handleSaveConfig()}
+          onTestConnection={(publicId) => void handleTestConnection(publicId)}
           onToggle={(publicId) => {
             const targetConfig = modelConfigs.find(
               (modelConfig) => modelConfig.publicId === publicId,
@@ -301,31 +312,10 @@ export function AdminModelConfigManagement({
 
       {activeTab === "prompt_template" ? (
         <AdminPromptTemplatePanel
-          form={templateForm}
+          canViewPromptFullText={canViewPromptFullText}
+          onSelectPromptTemplate={setSelectedPromptTemplatePublicId}
           promptTemplates={promptTemplates}
-          onChange={setTemplateForm}
-          onSave={() => void handleSaveTemplate()}
-          onToggle={(publicId) => {
-            const targetTemplate = promptTemplates.find(
-              (promptTemplate) => promptTemplate.publicId === publicId,
-            );
-            const nextActive = !(targetTemplate?.isActive ?? false);
-
-            setPromptTemplates((current) =>
-              current.map((promptTemplate) =>
-                promptTemplate.publicId === publicId
-                  ? {
-                      ...promptTemplate,
-                      isActive: nextActive,
-                      status: nextActive ? "active" : "disabled",
-                    }
-                  : promptTemplate,
-              ),
-            );
-            void onToggleTemplate?.(publicId, nextActive).catch(() => {
-              setActionMessage("Prompt 模板状态更新失败。");
-            });
-          }}
+          selectedPromptTemplatePublicId={selectedPromptTemplatePublicId}
         />
       ) : null}
 
@@ -409,23 +399,30 @@ function createLocalModelConfig(
   };
 }
 
-function createLocalPromptTemplate(
-  form: PromptTemplateFormInput,
-): PromptTemplateSummaryDto {
-  const promptTemplateKey = form.promptTemplateKey.trim();
+function createLocalConnectionTest(
+  modelConfig: ModelConfigSummaryDto,
+): ModelConfigConnectionTestDto {
+  const isConfigured =
+    modelConfig.secretStatus === "configured" &&
+    modelConfig.maskedSecret !== null &&
+    modelConfig.isEnabled &&
+    modelConfig.status === "enabled";
 
   return {
-    publicId: `prompt-template-${promptTemplateKey}`,
-    promptTemplateKey,
-    aiFuncType: "ai_explanation",
-    version: 1,
-    title: form.title.trim(),
-    description: "Metadata only",
-    bodyDigest: form.bodyDigest.trim(),
-    bodyPreviewMasked: form.bodyPreviewMasked.trim(),
-    status: "active",
-    isActive: true,
-    updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
+    modelConfigPublicId: modelConfig.publicId,
+    status: isConfigured ? "succeeded" : "missing_secret",
+    testedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
+    testedByPublicId: null,
+    durationMs: isConfigured ? 12 : 0,
+    failureCategory: isConfigured ? "none" : "missing_secret",
+    redactionStatus: "redacted",
+    actionType: "model_config_health_check",
+    requestBodyStored: false,
+    responseBodyStored: false,
+    providerPayloadStored: false,
+    rawPromptStored: false,
+    rawUserDataStored: false,
+    modelDisabledByTest: false,
   };
 }
 
@@ -458,12 +455,14 @@ function AdminModelConfigTab({
 }
 
 function AdminModelProviderPanel({
+  canManageModelConfig,
   form,
   modelProviders,
   onChange,
   onSave,
   onToggle,
 }: {
+  canManageModelConfig: boolean;
   form: typeof emptyProviderForm;
   modelProviders: ModelProviderSummaryDto[];
   onChange: (form: typeof emptyProviderForm) => void;
@@ -474,41 +473,50 @@ function AdminModelProviderPanel({
     form.providerKey.trim().length > 0 && form.displayName.trim().length > 0;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-      <AdminPanel title="供应商表单">
-        <div className="space-y-3">
-          <AdminTextField
-            label="供应商标识"
-            value={form.providerKey}
-            onChange={(value) => onChange({ ...form, providerKey: value })}
-          />
-          <AdminTextField
-            label="供应商显示名称"
-            value={form.displayName}
-            onChange={(value) => onChange({ ...form, displayName: value })}
-          />
-          <AdminTextField
-            label="密钥值"
-            type="password"
-            value={form.secretValue}
-            onChange={(value) => onChange({ ...form, secretValue: value })}
-          />
-          <AdminTextField
-            label="基础地址"
-            value={form.baseUrl}
-            onChange={(value) => onChange({ ...form, baseUrl: value })}
-          />
-          <Button disabled={!canSave} onClick={onSave}>
-            <Save aria-hidden="true" className="mr-2 size-4" />
-            保存供应商
-          </Button>
-        </div>
-      </AdminPanel>
+    <div
+      className={
+        canManageModelConfig
+          ? "grid gap-4 lg:grid-cols-[20rem_1fr]"
+          : "grid gap-4"
+      }
+    >
+      {canManageModelConfig ? (
+        <AdminPanel title="供应商表单">
+          <div className="space-y-3">
+            <AdminTextField
+              label="供应商标识"
+              value={form.providerKey}
+              onChange={(value) => onChange({ ...form, providerKey: value })}
+            />
+            <AdminTextField
+              label="供应商显示名称"
+              value={form.displayName}
+              onChange={(value) => onChange({ ...form, displayName: value })}
+            />
+            <AdminTextField
+              label="密钥值"
+              type="password"
+              value={form.secretValue}
+              onChange={(value) => onChange({ ...form, secretValue: value })}
+            />
+            <AdminTextField
+              label="基础地址"
+              value={form.baseUrl}
+              onChange={(value) => onChange({ ...form, baseUrl: value })}
+            />
+            <Button disabled={!canSave} onClick={onSave}>
+              <Save aria-hidden="true" className="mr-2 size-4" />
+              保存供应商
+            </Button>
+          </div>
+        </AdminPanel>
+      ) : null}
 
       <AdminPanel title="模型供应商">
         {modelProviders.map((provider) => (
           <AdminProviderRow
             key={provider.publicId}
+            canManageModelConfig={canManageModelConfig}
             provider={provider}
             onToggle={onToggle}
           />
@@ -519,71 +527,90 @@ function AdminModelProviderPanel({
 }
 
 function AdminModelConfigPanel({
+  canManageModelConfig,
+  connectionTestsByConfig,
   form,
   modelConfigs,
   onChange,
   onSave,
+  onTestConnection,
   onToggle,
 }: {
+  canManageModelConfig: boolean;
+  connectionTestsByConfig: Record<string, ConnectionTestState>;
   form: typeof emptyConfigForm;
   modelConfigs: ModelConfigSummaryDto[];
   onChange: (form: typeof emptyConfigForm) => void;
   onSave: () => void;
+  onTestConnection: (publicId: string) => void;
   onToggle: (publicId: string) => void;
 }) {
   const canSave =
     form.modelName.trim().length > 0 && form.displayName.trim().length > 0;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-      <AdminPanel title="配置表单">
-        <div className="space-y-3">
-          <AdminTextField
-            label="供应商业务标识"
-            value={form.modelProviderPublicId}
-            onChange={(value) =>
-              onChange({ ...form, modelProviderPublicId: value })
-            }
-          />
-          <AdminTextField
-            label="模型名称"
-            value={form.modelName}
-            onChange={(value) => onChange({ ...form, modelName: value })}
-          />
-          <AdminTextField
-            label="模型别名"
-            value={form.modelAlias}
-            onChange={(value) => onChange({ ...form, modelAlias: value })}
-          />
-          <AdminTextField
-            label="配置显示名称"
-            value={form.displayName}
-            onChange={(value) => onChange({ ...form, displayName: value })}
-          />
-          <AdminTextField
-            label="备用模型配置业务标识"
-            value={form.fallbackModelConfigPublicId}
-            onChange={(value) =>
-              onChange({ ...form, fallbackModelConfigPublicId: value })
-            }
-          />
-          <AdminTextField
-            label="备用优先级"
-            value={form.fallbackPriority}
-            onChange={(value) => onChange({ ...form, fallbackPriority: value })}
-          />
-          <Button disabled={!canSave} onClick={onSave}>
-            <Save aria-hidden="true" className="mr-2 size-4" />
-            保存配置
-          </Button>
-        </div>
-      </AdminPanel>
+    <div
+      className={
+        canManageModelConfig
+          ? "grid gap-4 lg:grid-cols-[20rem_1fr]"
+          : "grid gap-4"
+      }
+    >
+      {canManageModelConfig ? (
+        <AdminPanel title="配置表单">
+          <div className="space-y-3">
+            <AdminTextField
+              label="供应商业务标识"
+              value={form.modelProviderPublicId}
+              onChange={(value) =>
+                onChange({ ...form, modelProviderPublicId: value })
+              }
+            />
+            <AdminTextField
+              label="模型名称"
+              value={form.modelName}
+              onChange={(value) => onChange({ ...form, modelName: value })}
+            />
+            <AdminTextField
+              label="模型别名"
+              value={form.modelAlias}
+              onChange={(value) => onChange({ ...form, modelAlias: value })}
+            />
+            <AdminTextField
+              label="配置显示名称"
+              value={form.displayName}
+              onChange={(value) => onChange({ ...form, displayName: value })}
+            />
+            <AdminTextField
+              label="备用模型配置业务标识"
+              value={form.fallbackModelConfigPublicId}
+              onChange={(value) =>
+                onChange({ ...form, fallbackModelConfigPublicId: value })
+              }
+            />
+            <AdminTextField
+              label="备用优先级"
+              value={form.fallbackPriority}
+              onChange={(value) =>
+                onChange({ ...form, fallbackPriority: value })
+              }
+            />
+            <Button disabled={!canSave} onClick={onSave}>
+              <Save aria-hidden="true" className="mr-2 size-4" />
+              保存配置
+            </Button>
+          </div>
+        </AdminPanel>
+      ) : null}
 
       <AdminPanel title="模型配置">
         {modelConfigs.map((modelConfig) => (
           <AdminConfigRow
             key={modelConfig.publicId}
+            canManageModelConfig={canManageModelConfig}
+            connectionTest={connectionTestsByConfig[modelConfig.publicId]}
             modelConfig={modelConfig}
+            onTestConnection={onTestConnection}
             onToggle={onToggle}
           />
         ))}
@@ -593,67 +620,81 @@ function AdminModelConfigPanel({
 }
 
 function AdminPromptTemplatePanel({
-  form,
-  onChange,
-  onSave,
-  onToggle,
+  canViewPromptFullText,
+  onSelectPromptTemplate,
   promptTemplates,
+  selectedPromptTemplatePublicId,
 }: {
-  form: typeof emptyTemplateForm;
-  onChange: (form: typeof emptyTemplateForm) => void;
-  onSave: () => void;
-  onToggle: (publicId: string) => void;
+  canViewPromptFullText: boolean;
+  onSelectPromptTemplate: (publicId: string | null) => void;
   promptTemplates: PromptTemplateSummaryDto[];
+  selectedPromptTemplatePublicId: string | null;
 }) {
-  const canSave =
-    form.promptTemplateKey.trim().length > 0 &&
-    form.title.trim().length > 0 &&
-    form.bodyDigest.trim().length > 0 &&
-    form.bodyPreviewMasked.trim().length > 0;
+  const selectedPromptTemplate =
+    promptTemplates.find(
+      (promptTemplate) =>
+        promptTemplate.publicId === selectedPromptTemplatePublicId,
+    ) ?? null;
+  const canShowSelectedFullText =
+    canViewPromptFullText &&
+    selectedPromptTemplate?.canViewFullText === true &&
+    selectedPromptTemplate.bodyFullText !== null;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-      <AdminPanel title="模板表单">
-        <div className="space-y-3">
-          <AdminTextField
-            label="模板标识"
-            value={form.promptTemplateKey}
-            onChange={(value) =>
-              onChange({ ...form, promptTemplateKey: value })
-            }
-          />
-          <AdminTextField
-            label="模板标题"
-            value={form.title}
-            onChange={(value) => onChange({ ...form, title: value })}
-          />
-          <AdminTextField
-            label="正文摘要"
-            value={form.bodyDigest}
-            onChange={(value) => onChange({ ...form, bodyDigest: value })}
-          />
-          <AdminTextField
-            label="脱敏正文预览"
-            value={form.bodyPreviewMasked}
-            onChange={(value) =>
-              onChange({ ...form, bodyPreviewMasked: value })
-            }
-          />
-          <Button disabled={!canSave} onClick={onSave}>
-            <Save aria-hidden="true" className="mr-2 size-4" />
-            保存模板
-          </Button>
-        </div>
-      </AdminPanel>
-
-      <AdminPanel title="Prompt 模板">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
+      <AdminPanel title="Prompt 只读注册表">
+        <p className="text-text-muted text-sm leading-6">
+          首期仅展示项目已注册 Prompt
+          的元数据、变量和目录状态，不提供新增、编辑、启停、复制、导出或删除。
+        </p>
         {promptTemplates.map((promptTemplate) => (
           <AdminPromptTemplateRow
             key={promptTemplate.publicId}
-            onToggle={onToggle}
+            canViewPromptFullText={canViewPromptFullText}
+            onSelectPromptTemplate={onSelectPromptTemplate}
             promptTemplate={promptTemplate}
           />
         ))}
+      </AdminPanel>
+
+      <AdminPanel title="Prompt 全文查看">
+        {selectedPromptTemplate === null ? (
+          <p className="text-text-muted text-sm">
+            选择一个 Prompt 后在此查看授权范围内的信息。
+          </p>
+        ) : null}
+        {selectedPromptTemplate !== null && !canShowSelectedFullText ? (
+          <div className="space-y-2">
+            <p className="text-text-primary text-sm font-medium">
+              {selectedPromptTemplate.title ??
+                selectedPromptTemplate.promptTemplateKey}
+            </p>
+            <p className="text-text-muted text-sm">
+              当前角色仅可查看 Prompt 元数据，全文不在此角色范围内展示。
+            </p>
+            <div className="flex flex-wrap gap-1">
+              <AdminMetadataBadge label="只读" />
+              <AdminMetadataBadge label="仅元数据" />
+              <AdminMetadataBadge label="不导出" />
+            </div>
+          </div>
+        ) : null}
+        {selectedPromptTemplate !== null && canShowSelectedFullText ? (
+          <div className="space-y-3">
+            <div>
+              <p className="text-text-primary text-sm font-medium">
+                {selectedPromptTemplate.title ??
+                  selectedPromptTemplate.promptTemplateKey}
+              </p>
+              <p className="text-text-muted text-xs">
+                全文仅在超级管理员只读视图展示，不写入日志或导出。
+              </p>
+            </div>
+            <pre className="border-border bg-muted text-text-primary max-h-72 overflow-auto rounded-md border p-3 text-xs leading-5 whitespace-pre-wrap">
+              {selectedPromptTemplate.bodyFullText}
+            </pre>
+          </div>
+        ) : null}
       </AdminPanel>
     </div>
   );
@@ -699,9 +740,11 @@ function AdminTextField({
 }
 
 function AdminProviderRow({
+  canManageModelConfig,
   onToggle,
   provider,
 }: {
+  canManageModelConfig: boolean;
   onToggle: (publicId: string) => void;
   provider: ModelProviderSummaryDto;
 }) {
@@ -724,26 +767,40 @@ function AdminProviderRow({
           {provider.maskedSecret ?? "未配置"} / {statusText}
         </p>
       </div>
-      <Button variant="outline" onClick={() => onToggle(provider.publicId)}>
-        {provider.isEnabled ? (
-          <ToggleLeft aria-hidden="true" className="mr-2 size-4" />
-        ) : (
-          <ToggleRight aria-hidden="true" className="mr-2 size-4" />
-        )}
-        {actionLabel}
-      </Button>
+      {canManageModelConfig ? (
+        <Button variant="outline" onClick={() => onToggle(provider.publicId)}>
+          {provider.isEnabled ? (
+            <ToggleLeft aria-hidden="true" className="mr-2 size-4" />
+          ) : (
+            <ToggleRight aria-hidden="true" className="mr-2 size-4" />
+          )}
+          {actionLabel}
+        </Button>
+      ) : null}
     </div>
   );
 }
 
 function AdminConfigRow({
+  canManageModelConfig,
+  connectionTest,
   modelConfig,
+  onTestConnection,
   onToggle,
 }: {
+  canManageModelConfig: boolean;
+  connectionTest?: ConnectionTestState;
   modelConfig: ModelConfigSummaryDto;
+  onTestConnection: (publicId: string) => void;
   onToggle: (publicId: string) => void;
 }) {
   const actionLabel = modelConfig.isEnabled ? "禁用配置" : "启用配置";
+  const canTestConnection =
+    canManageModelConfig &&
+    modelConfig.secretStatus === "configured" &&
+    modelConfig.maskedSecret !== null &&
+    modelConfig.isEnabled &&
+    modelConfig.status === "enabled";
   const runtimeAlignment = modelConfig.runtimeAlignment ?? null;
   const runtimeText =
     runtimeAlignment === null
@@ -761,6 +818,7 @@ function AdminConfigRow({
     modelConfig.fallbackModelConfigPublicId === null
       ? "备用：无"
       : "备用：标识符已隐藏";
+  const connectionTestText = formatConnectionTestState(connectionTest);
 
   return (
     <div
@@ -782,18 +840,69 @@ function AdminConfigRow({
         <div className="mt-2 flex flex-wrap gap-1">
           <AdminMetadataBadge label="仅元数据" />
           <AdminMetadataBadge label="已脱敏" />
+          <AdminMetadataBadge
+            label={canManageModelConfig ? "超级管理员可测" : "仅超级管理员可测"}
+          />
+          <AdminMetadataBadge label="不自动停用" />
         </div>
+        <p className="text-text-muted mt-2 text-xs">
+          连接测试：{connectionTestText} / 不发送真实 Provider 请求 / 不保存原始
+          Prompt
+        </p>
       </div>
-      <Button variant="outline" onClick={() => onToggle(modelConfig.publicId)}>
-        {modelConfig.isEnabled ? (
-          <ToggleLeft aria-hidden="true" className="mr-2 size-4" />
-        ) : (
-          <ToggleRight aria-hidden="true" className="mr-2 size-4" />
-        )}
-        {actionLabel}
-      </Button>
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+        {canManageModelConfig ? (
+          <Button
+            disabled={!canTestConnection || connectionTest === "testing"}
+            variant="outline"
+            onClick={() => onTestConnection(modelConfig.publicId)}
+          >
+            <PlugZap aria-hidden="true" className="mr-2 size-4" />
+            测试连接
+          </Button>
+        ) : null}
+        {canManageModelConfig ? (
+          <Button
+            variant="outline"
+            onClick={() => onToggle(modelConfig.publicId)}
+          >
+            {modelConfig.isEnabled ? (
+              <ToggleLeft aria-hidden="true" className="mr-2 size-4" />
+            ) : (
+              <ToggleRight aria-hidden="true" className="mr-2 size-4" />
+            )}
+            {actionLabel}
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
+}
+
+function formatConnectionTestState(
+  connectionTest: ConnectionTestState | undefined,
+): string {
+  if (connectionTest === undefined) {
+    return "未测试";
+  }
+
+  if (connectionTest === "testing") {
+    return "测试中";
+  }
+
+  if (connectionTest === "error") {
+    return "接口失败";
+  }
+
+  if (connectionTest.status === "succeeded") {
+    return "已通过";
+  }
+
+  if (connectionTest.status === "missing_secret") {
+    return "密钥未配置";
+  }
+
+  return "未通过";
 }
 
 function AdminMetadataBadge({ label }: { label: string }) {
@@ -805,13 +914,18 @@ function AdminMetadataBadge({ label }: { label: string }) {
 }
 
 function AdminPromptTemplateRow({
-  onToggle,
+  canViewPromptFullText,
+  onSelectPromptTemplate,
   promptTemplate,
 }: {
-  onToggle: (publicId: string) => void;
+  canViewPromptFullText: boolean;
+  onSelectPromptTemplate: (publicId: string | null) => void;
   promptTemplate: PromptTemplateSummaryDto;
 }) {
-  const actionLabel = promptTemplate.isActive ? "禁用模板" : "启用模板";
+  const canOpenFullText =
+    canViewPromptFullText &&
+    promptTemplate.canViewFullText &&
+    promptTemplate.bodyFullText !== null;
 
   return (
     <div
@@ -826,19 +940,32 @@ function AdminPromptTemplateRow({
         <p className="text-text-muted text-xs">
           {promptTemplate.promptTemplateKey} / v{promptTemplate.version} /{" "}
           {formatModelConfigStatus(promptTemplate.status)} /{" "}
-          {promptTemplate.bodyDigest} / {promptTemplate.bodyPreviewMasked}
+          {promptTemplate.bodyDigest} / {promptTemplate.bodyPreviewMasked} /{" "}
+          {promptTemplate.registrationSource === "project_prompt_catalog"
+            ? "项目目录"
+            : "运行时注册"}{" "}
+          /{" "}
+          {promptTemplate.catalogGapStatus === "catalog_gap"
+            ? "待注册"
+            : "已注册"}
         </p>
+        <p className="text-text-muted mt-1 text-xs">
+          变量：{promptTemplate.requiredVariables.join("、") || "无"}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <AdminMetadataBadge label="只读" />
+          <AdminMetadataBadge label="不导出" />
+          <AdminMetadataBadge
+            label={canOpenFullText ? "可看全文" : "仅元数据"}
+          />
+        </div>
       </div>
       <Button
         variant="outline"
-        onClick={() => onToggle(promptTemplate.publicId)}
+        onClick={() => onSelectPromptTemplate(promptTemplate.publicId)}
       >
-        {promptTemplate.isActive ? (
-          <ToggleLeft aria-hidden="true" className="mr-2 size-4" />
-        ) : (
-          <ToggleRight aria-hidden="true" className="mr-2 size-4" />
-        )}
-        {actionLabel}
+        <Eye aria-hidden="true" className="mr-2 size-4" />
+        {canOpenFullText ? "查看全文" : "查看元数据"}
       </Button>
     </div>
   );

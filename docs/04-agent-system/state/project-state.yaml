@@ -1,8 +1,157 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-ai-post-actions-source-landing-2026-07-03
-updatedAt: "2026-07-03T04:41:55-07:00"
+currentPhase: admin-model-prompt-log-governance-source-landing-2026-07-03
+updatedAt: "2026-07-03T05:28:54-07:00"
+adminModelPromptLogGovernanceSourceLanding20260703:
+  taskId: admin-model-prompt-log-governance-source-landing-2026-07-03
+  phase: admin-model-prompt-log-governance-source-landing-2026-07-03
+  status: closed
+  result: admin_model_prompt_log_governance_source_landed_with_role_gated_model_management_prompt_readonly_registry_connection_test_and_redacted_log_detail
+  priority: p1
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  dependsOn:
+    - organization-ai-post-actions-source-landing-2026-07-03
+    - admin-model-prompt-log-governance-ui-ux-contract-2026-07-02
+  sourceStory: current_user_approved_serial_source_landing_contract_packages_goal_2026_07_03
+  targetClosureItem: Land the accepted admin model configuration, Prompt registry, and log governance UI/UX source contract within existing schema/runtime boundaries.
+  behaviorBoundary: admin_model_prompt_log_governance_source_ui_contract_tests_only_no_schema_migration_dependency_provider_db_connection_browser_deploy_release_claim
+  evidenceMode: redacted_task_ids_file_paths_route_names_role_names_validation_commands_expected_observed_summaries_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_full_text_no_raw_ai_io_no_raw_employee_answers_no_full_question_paper_material_resource_chunk_content_no_raw_dom
+  branch: codex/admin-model-prompt-log-governance-source-landing-2026-07-03
+  claimedAt: "2026-07-03T05:04:12-07:00"
+  plannedAt: "2026-07-03T05:04:12-07:00"
+  implementedAt: "2026-07-03T05:28:54-07:00"
+  validatedAt: "2026-07-03T05:28:54-07:00"
+  reviewedAt: "2026-07-03T05:28:54-07:00"
+  closedAt: "2026-07-03T05:28:54-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+    - docs/05-execution-logs/evidence/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+    - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+    - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+    - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+    - src/app/api/v1/model-configs/**/test-connection/route.ts
+    - src/server/contracts/admin-ai-audit-log-ops-contract.ts
+    - src/server/services/admin-ai-audit-log-ops-service.ts
+    - src/server/services/admin-ai-audit-log-ops-route.ts
+    - src/server/services/admin-ai-audit-log-runtime.ts
+    - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
+    - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+    - tests/unit/admin-model-config-management-ui.test.ts
+    - tests/unit/phase-12-model-config-server-runtime.test.ts
+    - tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts
+    - tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/03-standards/ui-code.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    - docs/05-execution-logs/evidence/2026-07-02-admin-model-prompt-log-governance-ui-ux-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-02-admin-model-prompt-log-governance-ui-ux-contract.md
+    - src/ai/prompts/templates.ts
+    - src/server/contracts/ai-call-log/log-governance-contract.ts
+    - src/server/contracts/audit-log/log-governance-contract.ts
+    - src/server/services/model-config-runtime.ts
+    - src/server/models/ai-rag.ts
+    - src/db/schema/ai-rag.ts
+    - package.json
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    localSourceChange: approved
+    focusedUnitTest: approved
+    typecheck: approved
+    lint: approved
+    localDevServer: blocked_not_needed_for_this_unit_rendered_source_package
+    localhostBrowser: blocked_not_needed_for_this_unit_rendered_source_package
+    providerCall: blocked
+    providerConfigurationRead: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  acceptanceStandards:
+    - Super admin can see all registered project Prompt entries and can open read-only full Prompt text; ops admin receives metadata-only Prompt rows and no full text.
+    - Prompt first release removes create, update, enable, disable, copy, export, and delete-style UI actions from the visible management surface.
+    - Model config rows expose a super-admin-only connection test action that uses a minimal redacted health-check contract, writes redacted audit/AI-call metadata, and never disables a model automatically.
+    - Connection test does not call a real Provider, read env secrets, expose API keys beyond masked status/last-four, or persist raw Prompt/user data/provider payload/private content.
+    - Audit logs and AI call logs remain read-only, paginated through 20/50/100 page-size controls, and expose redacted detail summaries without raw viewer/export/delete/archive actions.
+    - Focused tests cover the changed UI, DTOs, routes, and service behavior without schema, Provider, dependency, browser, direct DB, raw Prompt evidence, raw AI output, or deploy work.
+  validationCommands:
+    - npm.cmd run test:unit -- tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/admin-model-config-management-ui.test.ts tests/unit/phase-12-model-config-server-runtime.test.ts tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx src/ai/prompts/templates.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - npm.cmd run format:check
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId admin-model-prompt-log-governance-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId admin-model-prompt-log-governance-source-landing-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId admin-model-prompt-log-governance-source-landing-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_goal_mode_serial_source_landing_commit_merge_push_cleanup_2026_07_03
+  validationSummary:
+    focusedUnitTests: pass_7_files_32_tests
+    typecheck: pass
+    lint: pass
+    formatCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2ModuleCloseoutReadiness: pass
+    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    sourceOrTestChanged: true
+    schemaMigrationOrDependencyChanged: false
+    providerCallOrConfigurationExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    browserRuntimeExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    costCalibrationExecuted: false
 organizationAiPostActionsSourceLanding20260703:
   taskId: organization-ai-post-actions-source-landing-2026-07-03
   phase: organization-ai-post-actions-source-landing-2026-07-03
@@ -20004,8 +20153,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: efae583319fc72a342cfc28e04d7155b6516e85a
-  lastKnownOriginMasterSha: efae583319fc72a342cfc28e04d7155b6516e85a
+  lastKnownMasterSha: 1ae6bcafe1e9a8b39251d3d4fda45cbf0dd38d94
+  lastKnownOriginMasterSha: 1ae6bcafe1e9a8b39251d3d4fda45cbf0dd38d94
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -20145,6 +20294,16 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: admin-model-prompt-log-governance-source-landing-2026-07-03
+  status: closed
+  result: admin_model_prompt_log_governance_source_landed_with_role_gated_model_management_prompt_readonly_registry_connection_test_and_redacted_log_detail
+  taskKind: source_ui_contract_landing
+  moduleRunVersion: 2
+  branch: codex/admin-model-prompt-log-governance-source-landing-2026-07-03
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+previousCurrentTaskBeforeAdminModelPromptLogGovernanceSourceLanding20260703:
   id: organization-ai-post-actions-source-landing-2026-07-03
   status: closed
   result: organization_ai_post_actions_source_landed_with_associated_training_draft_creation_source_task_attribution_weak_confirmation_and_schema_boundary_preserved
