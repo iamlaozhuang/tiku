@@ -26860,32 +26860,34 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
-  phase: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+  id: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+  phase: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
   status: closed
-  result: pass_source_repair_ready_for_scenario_3_rerun
-  taskKind: local_source_test_doc_repair
+  result: pass_scenario_3_organization_tree_rerun_after_empty_state_create_flow_repair
+  taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
-  claimedAt: "2026-07-04T14:25:00-07:00"
-  plannedAt: "2026-07-04T14:25:00-07:00"
-  completedAt: "2026-07-04T14:31:00-07:00"
+  branch: codex/full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+  claimedAt: "2026-07-04T14:32:00-07:00"
+  plannedAt: "2026-07-04T14:32:00-07:00"
+  completedAt: "2026-07-04T14:38:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   dependsOn:
     - full-chain-scenario-3-organization-tree-2026-07-04
+    - full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
   sourceBlockTaskId: full-chain-scenario-3-organization-tree-2026-07-04
-  expectedRerunTask: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
+  repairDependency: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
-    - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
-    - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  privateAllowedFiles:
+    - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/organization-tree/organization-tree-plan.json
   blockedFiles:
     - AGENTS.md
     - package.json
@@ -26905,6 +26907,9 @@ currentTask:
     - .next/**
     - .runtime/**
     - .env*
+    - src/**
+    - tests/**
+    - e2e/**
   closeoutPolicy:
     localCommit:
       approved: true
@@ -26920,28 +26925,64 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  runtimeScope:
+    targetDbLabel: tiku_full_chain_acceptance_20260704_001
+    actorSelectorLabel: fc_ops_admin_created_by_super_admin
+    negativeActorSelectorLabel: fc_content_admin_created_by_super_admin
+    scenarioSelectorLabel: fc_scenario_3_org_tree
+    browserRuntimeAllowed: true
+    directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+    productMutationAllowed: organization_tree_only
+    downstreamFamiliesBlocked:
+      - org_auth
+      - admin_organization
+      - employee
+      - redeem_code
+      - personal_auth
+      - auth_upgrade
+  validationCommands:
+    - node - <redacted Scenario 3 runtime browser and DB aggregate verification>
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - git diff --check
+    - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
   validationSummary:
-    status: passed
-    rootCauseConfirmed: pass_empty_loaded_state_hid_first_create_surface
-    failingTestObservedBeforeFix: pass_red_test_failed_before_source_repair
-    focusedUnitTest: passed_exit_0
-    lint: passed_exit_0
-    typecheck: passed_exit_0
-    scopedPrettierWrite: passed_exit_0
-    scopedPrettierCheck: passed_exit_0
-    gitDiffCheck: passed_exit_0
-    blockedPathDiffCheck: passed_exit_0_no_output
-    moduleRunV2PreCommitHardening: passed_exit_0
-    sourceTestChanged: true
-    browserRuntimeExecuted: false
-    devServerStarted: false
-    directDbConnectionExecuted: false
+    status: pass
+    runtimeBrowserAndDbAggregateVerification: pass
+    targetDbPreflight: pass
+    privateInputMetadataPreflight: pass
+    opsAdminProductSession: pass
+    organizationTreeCreation: pass
+    contentAdminNegativeProbe: pass_denied
+    selectorScopedAggregateDbVerification: pass
+    aggregateOrganizationNodeCount: 8
+    aggregateActiveOrganizationNodeCount: 8
+    aggregateTierCounts: 2_each_for_province_city_district_station
+    aggregateParentLinkCount: 6
+    downstreamOrgAuthCount: 0
+    downstreamAdminOrganizationCount: 0
+    downstreamEmployeeCount: 0
+    downstreamRedeemCodeCount: 0
+    auditOrganizationCreateSuccessCount: 8
+    auditOrganizationCreateDeniedCount: 1
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    sourceTestChanged: false
+    browserRuntimeExecuted: true
+    devServerStarted: true
+    directDbConnectionExecuted: true
     directDbMutationExecuted: false
+    productDbMutationExecuted: organization_tree_only
     schemaMigrationSeedChanged: false
     providerCallOrConfigurationExecuted: false
     dependencyOrLockfileChanged: false
     privateValueOutput: false
-    nextAction: closeout_repair_and_rerun_scenario_3_from_organization_tree_node
+    localAppServerStopped: pass
+    nextAction: commit_merge_push_cleanup_then_scenario_4
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
@@ -27118,6 +27159,132 @@ fullChainScenario3OrganizationEmptyStateCreateFlowRepair20260704:
     providerCallOrConfigurationExecuted: false
     dependencyOrLockfileChanged: false
     privateValueOutput: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+fullChainScenario3OrganizationTreeRerunAfterEmptyStateCreateFlowRepair20260704:
+  taskId: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+  phase: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+  status: closed
+  result: pass_scenario_3_organization_tree_rerun_after_empty_state_create_flow_repair
+  priority: p0
+  taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
+  moduleRunVersion: 2
+  dependsOn:
+    - full-chain-scenario-3-organization-tree-2026-07-04
+    - full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+  sourceStory: scenario_3_rerun_after_empty_organization_first_create_surface_repair
+  targetClosureItem: Prove ops_admin creates the Scenario 3 organization tree through product runtime after repair with redacted aggregate verification.
+  branch: codex/full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+  approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  plannedAt: "2026-07-04T14:32:00-07:00"
+  completedAt: "2026-07-04T14:38:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+  privateAllowedFiles:
+    - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/organization-tree/organization-tree-plan.json
+  blockedFiles:
+    - AGENTS.md
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - compose.yaml
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - .env*
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  runtimeScope:
+    targetDbLabel: tiku_full_chain_acceptance_20260704_001
+    actorSelectorLabel: fc_ops_admin_created_by_super_admin
+    negativeActorSelectorLabel: fc_content_admin_created_by_super_admin
+    scenarioSelectorLabel: fc_scenario_3_org_tree
+    browserRuntimeAllowed: true
+    directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+    productMutationAllowed: organization_tree_only
+    downstreamFamiliesBlocked:
+      - org_auth
+      - admin_organization
+      - employee
+      - redeem_code
+      - personal_auth
+      - auth_upgrade
+  validationCommands:
+    - node - <redacted Scenario 3 runtime browser and DB aggregate verification>
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    - git diff --check
+    - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+  validationSummary:
+    status: pass
+    runtimeBrowserAndDbAggregateVerification: pass
+    targetDbPreflight: pass
+    privateInputMetadataPreflight: pass
+    opsAdminProductSession: pass
+    organizationTreeCreation: pass
+    contentAdminNegativeProbe: pass_denied
+    selectorScopedAggregateDbVerification: pass
+    aggregateOrganizationNodeCount: 8
+    aggregateActiveOrganizationNodeCount: 8
+    aggregateTierCounts: 2_each_for_province_city_district_station
+    aggregateParentLinkCount: 6
+    downstreamOrgAuthCount: 0
+    downstreamAdminOrganizationCount: 0
+    downstreamEmployeeCount: 0
+    downstreamRedeemCodeCount: 0
+    auditOrganizationCreateSuccessCount: 8
+    auditOrganizationCreateDeniedCount: 1
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    sourceTestChanged: false
+    browserRuntimeExecuted: true
+    devServerStarted: true
+    directDbConnectionExecuted: true
+    directDbMutationExecuted: false
+    productDbMutationExecuted: organization_tree_only
+    schemaMigrationSeedChanged: false
+    providerCallOrConfigurationExecuted: false
+    dependencyOrLockfileChanged: false
+    privateValueOutput: false
+    localAppServerStopped: pass
+    nextAction: commit_merge_push_cleanup_then_scenario_4
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
