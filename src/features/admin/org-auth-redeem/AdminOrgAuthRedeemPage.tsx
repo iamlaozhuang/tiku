@@ -3949,13 +3949,7 @@ function useAdminOrgAuthData() {
         };
 
         setData(nextData);
-        setLoadState(
-          nextData.organizations.length === 0 &&
-            nextData.orgAuths.length === 0 &&
-            nextData.employees.length === 0
-            ? "empty"
-            : "ready",
-        );
+        setLoadState("ready");
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -4570,7 +4564,7 @@ export function AdminOrgAuthPage() {
       />
 
       <OrganizationTreeActionPanel
-        disabled={data.organizations.length === 0}
+        disabled={false}
         formState={organizationFormState}
         organizations={data.organizations}
         onFormChange={setOrganizationFormState}

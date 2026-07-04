@@ -182,6 +182,42 @@ const employeeListPayload: {
   },
 };
 
+const emptyOrganizationListPayload: {
+  code: number;
+  message: string;
+  data: OrganizationListDto;
+} = {
+  code: 0,
+  message: "ok",
+  data: {
+    organizations: [],
+  },
+};
+
+const emptyOrgAuthListPayload: {
+  code: number;
+  message: string;
+  data: OrgAuthListDto;
+} = {
+  code: 0,
+  message: "ok",
+  data: {
+    orgAuths: [],
+  },
+};
+
+const emptyEmployeeListPayload: {
+  code: number;
+  message: string;
+  data: EmployeeListDto;
+} = {
+  code: 0,
+  message: "ok",
+  data: {
+    employees: [],
+  },
+};
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -451,6 +487,85 @@ function mockOrganizationPageFetch() {
   return fetchMock;
 }
 
+function mockEmptyOrganizationPageFetch() {
+  const fetchMock = vi.fn(
+    async (url: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            session: { expiresAt: "2027-05-31T00:00:00.000Z" },
+            user: {
+              publicId: "admin-user-public-001",
+              phone: "13900000000",
+              name: "Admin User",
+              userType: null,
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: null,
+              organizationPublicId: null,
+              adminPublicId: "admin-public-001",
+              adminRoles: ["ops_admin"],
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+        return createJsonResponse(emptyOrganizationListPayload);
+      }
+
+      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+        return createJsonResponse(emptyOrgAuthListPayload);
+      }
+
+      if (path === "/api/v1/employees?page=1&pageSize=20") {
+        return createJsonResponse(emptyEmployeeListPayload);
+      }
+
+      if (path === "/api/v1/organizations" && init?.method === "POST") {
+        const body = JSON.parse(String(init.body)) as {
+          name: string;
+          orgTier: OrganizationDto["orgTier"];
+          parentOrganizationPublicId: string | null;
+        };
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            organization: {
+              publicId: "org-province-001",
+              name: body.name,
+              orgTier: body.orgTier,
+              parentOrganizationPublicId: body.parentOrganizationPublicId,
+              status: "active",
+              contactName: null,
+              contactPhone: null,
+              remark: null,
+              createdAt: "2026-05-31T00:00:00.000Z",
+              updatedAt: "2026-05-31T00:10:00.000Z",
+            },
+          },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    },
+  );
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
+}
+
 describe("phase 20 RA-06-03 organization employee management completion", () => {
   it("adds organization enable, employee batch import, and employee unbind runtime routes with redacted audits", async () => {
     const auditInputs: unknown[] = [];
@@ -675,6 +790,12 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: "user-public-002,org-city-001" },
     });
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      {
+        target: { value: "org-city-001" },
+      },
+    );
     fireEvent.click(screen.getByTestId("employee-import-submit"));
     fireEvent.click(screen.getByTestId("employee-confirm-action"));
 
@@ -702,6 +823,51 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/v1/employees/employee-public-001/unbind",
         expect.objectContaining({ method: "POST" }),
+      ),
+    );
+  });
+
+  it("keeps the organization first-create surface available when enterprise data is empty", async () => {
+    localStorage.setItem("tiku.localSessionToken", sessionToken);
+    const fetchMock = mockEmptyOrganizationPageFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业授权运营" });
+
+    expect(screen.queryByText("暂无企业授权运营数据")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("organization-tree-management-form"),
+    ).toBeVisible();
+    expect(screen.getByTestId("organization-submit-button")).toBeDisabled();
+
+    fireEvent.change(screen.getByTestId("organization-name-input"), {
+      target: { value: "Scenario Root Organization" },
+    });
+    fireEvent.change(screen.getByTestId("organization-tier-select"), {
+      target: { value: "province" },
+    });
+
+    expect(screen.getByTestId("organization-submit-button")).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId("organization-submit-button"));
+    fireEvent.click(screen.getByTestId("organization-confirm-action"));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/organizations",
+        expect.objectContaining({
+          body: JSON.stringify({
+            contactName: null,
+            contactPhone: null,
+            name: "Scenario Root Organization",
+            orgTier: "province",
+            parentOrganizationPublicId: null,
+            remark: null,
+            status: "active",
+          }),
+          method: "POST",
+        }),
       ),
     );
   });
