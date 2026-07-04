@@ -1,8 +1,152 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
-updatedAt: "2026-07-04T00:44:00-07:00"
+currentPhase: stage-c-1-read-only-provider-target-inventory-2026-07-04
+updatedAt: "2026-07-04T01:11:43-07:00"
+stageC1ReadOnlyProviderTargetInventory20260704:
+  taskId: stage-c-1-read-only-provider-target-inventory-2026-07-04
+  phase: stage-c-1-read-only-provider-target-inventory-2026-07-04
+  status: closed
+  result: completed_read_only_public_provider_target_inventory_no_execution
+  priority: p0
+  taskKind: docs_state_read_only_provider_target_inventory
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  sourceStory: current_user_requested_stage_c_1_read_only_provider_target_inventory_public_code_config_only_2026_07_04
+  targetClosureItem: List optional Stage C-1 Provider and model labels from public committed code/config without reading `.env*` or calling Provider.
+  behaviorBoundary: docs_state_read_only_inventory_public_code_config_only_no_env_file_read_no_provider_call_no_model_request_no_browser_no_e2e_no_dev_server_no_db_connection_no_db_query_no_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_no_source_test_dependency_change_no_staging_prod_no_cloud_deploy_no_payment_no_external_service_no_cost_calibration_no_release_claim
+  branch: codex/stage-c-1-read-only-provider-target-inventory-2026-07-04
+  claimedAt: "2026-07-04T01:11:43-07:00"
+  plannedAt: "2026-07-04T01:11:43-07:00"
+  completedAt: "2026-07-04T01:15:26-07:00"
+  inventorySummary:
+    inventoryStatus: public_code_config_inventory_materialized
+    providerExecuted: false
+    envFileRead: false
+    dbConnectionOrQueryExecuted: false
+    browserE2eExecuted: false
+    stagingProdExecuted: false
+    costCalibrationExecuted: false
+    concreteRouteIntegratedCandidate:
+      modelProvider: openai_compatible
+      providerName: alibaba-qwen
+      modelName: qwen3.7-max
+      hostLabel: dashscope.aliyuncs.com
+      envKeyAlias: ALIBABA_API_KEY
+      maxRequests: 1
+      maxRetries: 0
+      maxOutputTokens: 1800
+      timeoutMs: 60000
+    adapterProviderLabels:
+      - alibaba
+      - openai_compatible
+    adminSampleModelLabels:
+      - qwen-plus
+      - qwen-turbo
+      - qwen-turbo-fallback
+    localMockProviderLabels:
+      - mock
+      - local_deterministic
+    packageCapabilityLabels:
+      - ai
+      - "@ai-sdk/alibaba"
+      - "@ai-sdk/openai-compatible"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  acceptanceInventoryPath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+    - docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+    - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/**
+    - package.json
+    - src/ai/mock-provider.ts
+    - src/db/dev-seed.ts
+    - src/db/schema/ai-rag.ts
+    - src/app/api/v1/model-providers/**
+    - src/app/api/v1/model-configs/**
+    - src/app/api/v1/content-ai-generation-requests/route.ts
+    - src/app/api/v1/personal-ai-generation-requests/route.ts
+    - src/app/api/v1/organization-ai-generation-requests/route.ts
+    - src/server/contracts/ai-generation-task-provider-adapter-contract.ts
+    - src/server/contracts/route-integrated-provider-execution-contract.ts
+    - src/server/contracts/admin-ai-audit-log-ops-contract.ts
+    - src/server/services/ai-generation-task-provider-adapter-service.ts
+    - src/server/services/route-integrated-provider-execution-service.ts
+    - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+    - src/server/services/model-config-runtime.ts
+    - src/server/services/ai-mock-provider-runtime.ts
+    - src/server/services/admin-ai-audit-log-ops-service.ts
+    - src/server/services/admin-ai-audit-log-ops-route.ts
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+  closeoutPolicy:
+    localCommit: approved
+    fastForwardMerge:
+      approved: false
+      approvalRequired: fresh_user_approval
+      targetBranch: master
+    push:
+      approved: false
+      approvalRequired: fresh_user_approval
+      target: origin/master
+    cleanup:
+      deleteShortBranchAfterMerge: true
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-read-only-provider-target-inventory.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-read-only-provider-target-inventory.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-read-only-provider-target-inventory.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-read-only-provider-target-inventory.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-read-only-provider-target-inventory.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-read-only-provider-target-inventory.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-c-1-read-only-provider-target-inventory-2026-07-04
+  validationSummary:
+    status: passed_governance_validation
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    blockedWriteScopeDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    currentTaskPointerCorrected: true
+    providerExecuted: false
+    envFileRead: false
+    dbConnectionOrQueryExecuted: false
+    dbWriteExecuted: false
+    browserE2eExecuted: false
+    stagingProdExecuted: false
+    costCalibrationExecuted: false
+    sourceTestDependencySchemaEnvChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 stageBLocalAcceptanceCloseoutAndStageCApprovalPrep20260704:
   taskId: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
   phase: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
@@ -24756,21 +24900,28 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: stage-c-1-read-only-provider-target-inventory-2026-07-04
+  phase: stage-c-1-read-only-provider-target-inventory-2026-07-04
+  status: closed
+  result: completed_read_only_public_provider_target_inventory_no_execution
+  taskKind: docs_state_read_only_provider_target_inventory
+  moduleRunVersion: 2
+  branch: codex/stage-c-1-read-only-provider-target-inventory-2026-07-04
+  claimedAt: "2026-07-04T01:11:43-07:00"
+  plannedAt: "2026-07-04T01:11:43-07:00"
+  completedAt: "2026-07-04T01:15:26-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  acceptanceInventoryPath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-read-only-provider-target-inventory.md
+previousCurrentTaskBeforeStageC1ReadOnlyProviderTargetInventory20260704:
   id: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
-  phase: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
   status: closed
   result: completed_docs_only_stage_b_local_acceptance_closeout_and_stage_c_approval_package_prepared_no_execution
   taskKind: docs_only_acceptance_closeout_and_approval_prep
   moduleRunVersion: 2
   branch: codex/stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
-  claimedAt: "2026-07-04T00:40:00-07:00"
-  plannedAt: "2026-07-04T00:40:00-07:00"
   completedAt: "2026-07-04T00:44:00-07:00"
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
-  closeoutSummaryPath: docs/05-execution-logs/acceptance/2026-07-04-stage-b-local-acceptance-closeout-summary.md
-  stageCApprovalPackagePath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
 previousCurrentTaskBeforeStageBLocalAcceptanceCloseoutAndStageCApprovalPrep20260704:
   id: stage-b-db-backed-8-role-local-acceptance-2026-07-03
   status: closed
