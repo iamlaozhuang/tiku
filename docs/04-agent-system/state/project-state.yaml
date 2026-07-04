@@ -1,8 +1,149 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
-updatedAt: "2026-07-03T15:16:00-07:00"
+currentPhase: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+updatedAt: "2026-07-03T15:34:00-07:00"
+sourceLanding8RoleLocalAccountDataFixtureHardening20260703:
+  taskId: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+  phase: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+  status: closed
+  result: all_8_private_account_role_markers_present_runtime_validity_deferred_to_next_rerun
+  priority: p0
+  taskKind: local_fixture_readiness
+  moduleRunVersion: 2
+  dependsOn:
+    - source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
+  sourceStory: current_user_requested_serial_goal_for_credential_backed_8_role_acceptance_closure_2026_07_03
+  targetClosureItem: Prepare redacted local account, organization, authorization, and data fixture readiness before credential-backed 8-role runtime rerun.
+  behaviorBoundary: redacted_readiness_only_private_account_file_read_approved_as_login_input_metadata_no_private_value_output_no_product_source_no_test_source_no_fixture_source_no_seed_no_script_no_schema_no_dependency_no_runtime_acceptance_no_dev_server_no_browser_no_db_no_env_secret_no_provider_no_staging_prod_no_release_claim
+  evidenceMode: redacted_file_paths_existence_status_role_names_role_marker_booleans_command_status_and_readiness_summaries_only_no_credentials_no_passwords_no_sessions_no_cookies_no_headers_no_localStorage_no_env_values_no_connection_strings_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+  branch: codex/source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+  claimedAt: "2026-07-03T15:34:00-07:00"
+  plannedAt: "2026-07-03T15:34:00-07:00"
+  implementedAt: "2026-07-03T15:43:00-07:00"
+  validatedAt: "2026-07-03T15:43:00-07:00"
+  reviewedAt: "2026-07-03T15:43:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  readinessPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-account-data-fixture-readiness.md
+  traceabilityPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+    - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-account-data-fixture-readiness.md
+    - docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+    - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-credential-backed-fixture-target-matrix.md
+    - docs/01-requirements/traceability/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
+    - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance-rerun.md
+    - e2e/**
+    - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+    - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  capabilities:
+    docsRequirementAlignment: approved
+    docsStateEvidenceAudit: approved
+    privateAccountFileRead: approved_read_only_role_marker_presence_no_matching_line_output
+    readOnlySourceInspection: approved_no_sensitive_output
+    runtimeAcceptance: blocked
+    localDevServer: blocked
+    browserRuntime: blocked
+    localSourceChange: blocked
+    testSourceChange: blocked
+    fixtureSourceChange: blocked
+    seedScriptChange: blocked
+    directDatabaseConnection: blocked
+    databaseMutationByAgent: blocked
+    providerCall: blocked
+    envSecretAccessByAgent: blocked
+    dependencyIntroduction: blocked
+    schemaMigration: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pr: blocked
+    costCalibrationGate: blocked
+  localPrivateInputs:
+    roleSeparatedLocalAccounts:
+      path: D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      currentTaskUsage: approved_read_only_role_marker_presence_no_private_value_output
+  validationCommands:
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-account-data-fixture-readiness.md docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId source-landing-8-role-local-account-data-fixture-hardening-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_serial_goal_with_per_task_commit_merge_push_cleanup_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_serial_goal_with_per_task_commit_merge_push_cleanup_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_serial_goal_with_per_task_commit_merge_push_cleanup_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_serial_goal_with_per_task_commit_merge_push_cleanup_2026_07_03
+  validationSummary:
+    status: closed
+    privateAccountFileRead: redacted_role_marker_scan_only
+    privateFixtureExists: true
+    allEightPrimaryRoleMarkersPresent: true
+    blockedFixtureGap: false
+    blockedScopeGap: false
+    splitRepairTaskCreated: false
+    runtimeValidityDeferredToNextRerun: true
+    prettierScopedCheckInitial: failed_markdown_formatting
+    prettierScopedWrite: pass
+    prettierScopedCheckFinal: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PreCommitHardeningDefaultTask: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    moduleRunV2PrePushReadinessDefaultTask: pass_skip_remote_ahead_check
+    runtimeAcceptanceExecuted: false
+    productSourceChanged: false
+    testSourceChanged: false
+    directDatabaseConnectionOrMutationExecuted: false
+    envSecretAccessExecuted: false
+    providerCallOrConfigurationExecuted: false
+    stagingProdDeployExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+    costCalibrationExecuted: false
 sourceLanding8RoleCredentialBackedFixtureHardeningPlan20260703:
   taskId: source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
   phase: source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
@@ -22704,22 +22845,22 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
+  id: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
   status: closed
-  result: credential_backed_fixture_hardening_target_matrix_materialized_without_private_account_read
-  taskKind: docs_acceptance_planning
+  result: all_8_private_account_role_markers_present_runtime_validity_deferred_to_next_rerun
+  taskKind: local_fixture_readiness
   moduleRunVersion: 2
-  branch: codex/source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
-  claimedAt: "2026-07-03T15:16:00-07:00"
-  plannedAt: "2026-07-03T15:16:00-07:00"
-  implementedAt: "2026-07-03T15:16:00-07:00"
-  validatedAt: "2026-07-03T15:16:00-07:00"
-  reviewedAt: "2026-07-03T15:16:00-07:00"
-  planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
-  targetMatrixPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-credential-backed-fixture-target-matrix.md
-  traceabilityPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
+  branch: codex/source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+  claimedAt: "2026-07-03T15:34:00-07:00"
+  plannedAt: "2026-07-03T15:34:00-07:00"
+  implementedAt: "2026-07-03T15:43:00-07:00"
+  validatedAt: "2026-07-03T15:43:00-07:00"
+  reviewedAt: "2026-07-03T15:43:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  readinessPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-account-data-fixture-readiness.md
+  traceabilityPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
 previousCurrentTaskBeforeSourceLandingEvidenceCloseoutCorrection20260703:
   id: content-ai-draft-adoption-source-landing-2026-07-03
   status: closed
