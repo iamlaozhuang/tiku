@@ -4,10 +4,16 @@
 
 - Task ID: `stage-b-db-backed-8-role-local-acceptance-2026-07-03`
 - Branch: `codex/stage-b-db-backed-8-role-local-acceptance-2026-07-03`
-- Status: boundary materialization only, awaiting fresh execution approval
+- Status: completed local DB-backed Stage B 8-role acceptance execution
 - Request: open a separate DB-backed Stage B 8-role local acceptance task, and define browser, e2e, DB-read, evidence, and stop-on-fail boundaries before execution.
 
-This task does not execute DB-backed acceptance. It does not start or restart a dev server, run browser or e2e tests, run DB queries, read private credentials, write the database, call a Provider, or modify product source, tests, dependencies, schema, migration, seed, or env files.
+This task first materialized the execution boundary, then received fresh approval on 2026-07-04 for local
+`127.0.0.1:3000` browser/e2e, Playwright Chromium `--trace=off`, selector-scoped read-only DB aggregate/status queries
+against `tiku-postgres` / `tiku_fresh_phase25_20260601_001`, private fixture in-memory login use, and stop-on-fail.
+
+It did not start or restart a dev server, perform direct DB write/provisioning/cleanup/reset, run schema migration,
+call a Provider, or modify product source, tests, dependencies, schema, migration, seed, or env files. The approved
+browser/e2e positive workflows did exercise local test-owned product actions through the app runtime.
 
 ## Required Reads
 
@@ -29,7 +35,7 @@ This task does not execute DB-backed acceptance. It does not start or restart a 
 | Local DB service label            | `tiku-postgres`                                                                |
 | Private fixture path              | `D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md` |
 | Post-repair Stage B-0.3 preflight | passed, 8 roles, 0 fail, 0 block                                               |
-| DB-backed Stage B acceptance      | not started                                                                    |
+| DB-backed Stage B acceptance      | completed locally: 8 command pass, 0 fail, 0 block                             |
 
 ## Execution Boundary For The Later Fresh-Approved Run
 
@@ -80,4 +86,32 @@ git diff --check
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-db-backed-8-role-local-acceptance-2026-07-03
 ```
 
-No browser/e2e/dev-server/DB-backed acceptance command is part of this boundary task.
+The initial boundary validation ran before acceptance execution. Post-execution governance validation is recorded in
+the evidence file.
+
+## Execution Addendum
+
+Fresh approval was received in-thread on 2026-07-04. The execution used the approved boundary:
+
+- reused the already running local app at `http://127.0.0.1:3000`;
+- ran selector-scoped read-only DB preflight against `tiku-postgres` / `tiku_fresh_phase25_20260601_001`;
+- read private fixture login input only in process memory;
+- ran Playwright Chromium with `--trace=off`;
+- kept stop-on-fail active, but no fail or block occurred.
+
+No direct DB write, provisioning, cleanup, reset, schema migration, Provider call, dev-server start/restart, or
+source/test/dependency/env change was executed by the agent. Local app workflow mutations created by approved browser/e2e
+positive paths were treated as test-owned product workflow data, not as DB provisioning.
+
+Command sequence executed:
+
+1. `npm.cmd exec -- playwright test e2e/credential-backed-8-role-local-acceptance.spec.ts --project=chromium --reporter=line --trace=off`
+2. `npm.cmd exec -- playwright test e2e/student-practice-mock-entry.spec.ts --project=chromium --reporter=line --trace=off`
+3. `npm.cmd exec -- playwright test e2e/personal-ai-generation-local-request.spec.ts --project=chromium --reporter=line --trace=off`
+4. `npm.cmd exec -- playwright test e2e/edition-aware-authorization-local-flow.spec.ts --project=chromium --reporter=line --trace=off`
+5. `npm.cmd exec -- playwright test e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --project=chromium --reporter=line --trace=off`
+6. `npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts --project=chromium --reporter=line --trace=off`
+7. `npm.cmd exec -- playwright test e2e/role-separated-account-fixture-supplement.spec.ts --project=chromium --reporter=line --trace=off`
+8. `npm.cmd exec -- playwright test e2e/local-full-loop-knowledge-rag-maintenance-smoke.spec.ts --project=chromium --reporter=line --trace=off`
+
+Result: 8/8 commands passed, 0 fail, 0 block.

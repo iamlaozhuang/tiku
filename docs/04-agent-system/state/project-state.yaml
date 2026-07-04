@@ -2,31 +2,33 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
-updatedAt: "2026-07-03T23:40:00-07:00"
+updatedAt: "2026-07-04T00:15:00-07:00"
 stageBDbBacked8RoleLocalAcceptance20260703:
   taskId: stage-b-db-backed-8-role-local-acceptance-2026-07-03
   phase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
-  status: awaiting_fresh_execution_approval
-  result: boundary_materialized_no_db_backed_acceptance_executed
+  status: closed
+  result: completed_db_backed_stage_b_8_role_local_acceptance_passed_no_fail_no_block
   priority: p0
-  taskKind: local_db_backed_8_role_acceptance_boundary
+  taskKind: local_db_backed_8_role_acceptance_execution
   moduleRunVersion: 2
   dependsOn:
     - stage-b-0-2-local-db-baseline-decision-2026-07-03
     - stage-b-0-3-redacted-fixture-preflight-2026-07-03
     - stage-b-test-owned-fixture-provisioning-repair-2026-07-03
   sourceStory: current_user_requested_open_stage_b_db_backed_8_role_local_acceptance_with_browser_e2e_db_boundary_and_stop_on_fail_rules_2026_07_03
-  targetClosureItem: Open the DB-backed Stage B 8-role local acceptance task and make execution boundaries explicit before running it.
-  behaviorBoundary: docs_state_boundary_only_no_db_backed_acceptance_no_browser_no_e2e_no_dev_server_start_no_db_query_no_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_change_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
+  targetClosureItem: Execute DB-backed Stage B 8-role local acceptance with redacted evidence.
+  behaviorBoundary: fresh_approved_local_127_0_0_1_browser_e2e_selector_scoped_read_only_db_preflight_private_fixture_in_memory_login_use_stop_on_fail_no_direct_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_change_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
   branch: codex/stage-b-db-backed-8-role-local-acceptance-2026-07-03
   claimedAt: "2026-07-03T23:40:00-07:00"
   plannedAt: "2026-07-03T23:40:00-07:00"
+  completedAt: "2026-07-04T00:15:00-07:00"
   executionApprovalRequired:
     requiredBeforeDbBackedAcceptanceRun: true
     requiredBeforeBrowserE2eRuntime: true
-    requiredBeforeDevServerStartOrRestart: true
+    requiredBeforeDevServerStartOrRestart: false
     requiredBeforeDbReadExecution: true
-    approvalStatus: not_yet_requested_after_boundary_materialization
+    approvalStatus: received_current_user_message_2026_07_04
+    approvalScope: local_127_0_0_1_browser_e2e_playwright_chromium_trace_off_tiku_postgres_tiku_fresh_phase25_20260601_001_selector_scoped_read_only_db_aggregate_status_query_private_fixture_in_memory_login_use_stop_on_fail
   prerequisiteStatus:
     localDbBaselineDecision: accepted_current_non_empty_local_db_with_fixture_preflight_constraints
     targetService: tiku-postgres
@@ -36,7 +38,29 @@ stageBDbBacked8RoleLocalAcceptance20260703:
     preflightPassCount: 8
     preflightFailCount: 0
     preflightBlockCount: 0
-    dbBackedAcceptanceStarted: false
+    dbBackedAcceptanceStarted: true
+  executionSummary:
+    serviceReachability: local_127_0_0_1_3000_http_200
+    dbServiceRunning: tiku-postgres
+    dbSelectorPreflight:
+      targetDatabaseLabel: tiku_fresh_phase25_20260601_001
+      mode: selector_scoped_read_only_aggregate_status_query
+      rolesChecked: 8
+      passCount: 8
+      failCount: 0
+      blockCount: 0
+      rawRowsRecorded: false
+    e2eExecution:
+      playwrightReuseExistingServer: true
+      traceMode: off
+      commandsRun: 8
+      passCount: 8
+      failCount: 0
+      blockCount: 0
+      stoppedEarly: false
+      generatedArtifactsCleaned: true
+      appWorkflowMutationExecuted: true
+      appWorkflowMutationBoundary: local_test_owned_product_workflow_actions_only_no_direct_db_provisioning_cleanup_reset
   privateFixtureInput:
     path: D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
     allowedFutureUseAfterFreshApproval: read_login_identifiers_and_credential_values_in_process_memory_only_for_local_login
@@ -45,7 +69,7 @@ stageBDbBacked8RoleLocalAcceptance20260703:
     browserE2e: local_only_127_0_0_1_3000_playwright_chromium_reporter_line_trace_off_no_screenshot_trace_video_dom_artifact_commit
     dbRead: local_docker_compose_tiku_postgres_read_only_selector_scoped_aggregate_status_queries_only
     dbTarget: tiku_fresh_phase25_20260601_001
-    dbWrite: forbidden
+    directDbWrite: forbidden
     cleanupResetOrDestructiveAction: forbidden
     sourceTestDependencyChange: forbidden
     providerCall: forbidden
@@ -117,22 +141,24 @@ stageBDbBacked8RoleLocalAcceptance20260703:
     - git diff --check
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-db-backed-8-role-local-acceptance-2026-07-03
   validationSummary:
-    status: passed_governance_validation
+    status: passed_post_execution_governance_validation
     scopedPrettierWrite: passed
     scopedPrettierCheck: passed
     gitDiffCheck: passed
     moduleRunV2PreCommit: passed
-    dbBackedAcceptanceExecuted: false
-    browserAcceptanceExecuted: false
-    e2eExecuted: false
+    dbBackedAcceptanceExecuted: true
+    browserAcceptanceExecuted: true
+    e2eExecuted: true
     devServerStartedOrRestarted: false
-    dbReadExecuted: false
+    dbReadExecuted: true
     dbWriteExecuted: false
+    directDbWriteExecuted: false
+    appWorkflowMutationExecuted: true
     localDataCleanupExecuted: false
     localDataResetExecuted: false
     destructiveDbActionExecuted: false
     schemaMigrationSeedOrDdlExecuted: false
-    privateFixtureRead: false
+    privateFixtureRead: true
     credentialOrLoginIdentifierRecorded: false
     rawDbRowsInternalIdsOrPiiRecorded: false
     envFileRead: false
@@ -24618,13 +24644,14 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
 currentTask:
   id: stage-b-db-backed-8-role-local-acceptance-2026-07-03
   phase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
-  status: awaiting_fresh_execution_approval
-  result: boundary_materialized_no_db_backed_acceptance_executed
-  taskKind: local_db_backed_8_role_acceptance_boundary
+  status: closed
+  result: completed_db_backed_stage_b_8_role_local_acceptance_passed_no_fail_no_block
+  taskKind: local_db_backed_8_role_acceptance_execution
   moduleRunVersion: 2
   branch: codex/stage-b-db-backed-8-role-local-acceptance-2026-07-03
   claimedAt: "2026-07-03T23:40:00-07:00"
   plannedAt: "2026-07-03T23:40:00-07:00"
+  completedAt: "2026-07-04T00:15:00-07:00"
   planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
   acceptanceBoundaryPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-backed-8-role-local-acceptance-boundary.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md

@@ -2,19 +2,22 @@
 
 ## Decision
 
-The DB-backed Stage B 8-role local acceptance task is opened, but execution is blocked until fresh approval explicitly covers the local browser/e2e runtime, read-only DB checks, private fixture in-memory login use, and dev-server handling.
+The DB-backed Stage B 8-role local acceptance task was opened with a boundary first. Fresh approval was received on
+2026-07-04 for local browser/e2e runtime, read-only DB checks, private fixture in-memory login use, and stop-on-fail.
 
-This boundary does not claim any DB-backed acceptance result.
+The approved local Stage B execution completed with 8/8 command pass, 0 fail, and 0 block. This is a local DB-backed
+Stage B acceptance result only. It is not release readiness, final Pass, production usability, Provider readiness,
+staging readiness, or Cost Calibration.
 
 ## Runtime Boundary
 
-| Area                  | Allowed after fresh approval                                                                             | Forbidden in this boundary task                                                                                |
-| --------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Browser/e2e           | Local-only `127.0.0.1:3000`, Playwright Chromium, line reporter, trace off.                              | Running browser/e2e now, committing screenshots, traces, video, raw DOM, cookies, storage, tokens, or headers. |
-| DB read               | Selector-scoped aggregate/status queries on `tiku-postgres`, DB label `tiku_fresh_phase25_20260601_001`. | Any DB query in this boundary task, raw rows, internal IDs, connection strings, or broad inspection.           |
-| DB write              | None.                                                                                                    | Provisioning, cleanup, reset, delete, truncate, drop, DDL, migration, seed, or `drizzle-kit push`.             |
-| Private fixture       | In-memory login input only after fresh approval.                                                         | Recording credentials, phone/email, passwords, hashes, tokens, sessions, or raw fixture rows.                  |
-| Provider/staging/prod | None.                                                                                                    | Provider calls, staging/prod/cloud/deploy, Cost Calibration, release readiness, final Pass.                    |
+| Area                  | Allowed after fresh approval                                                                             | Forbidden in this boundary task                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Browser/e2e           | Local-only `127.0.0.1:3000`, Playwright Chromium, line reporter, trace off.                              | Committing screenshots, traces, video, raw DOM, cookies, storage, tokens, or headers.              |
+| DB read               | Selector-scoped aggregate/status queries on `tiku-postgres`, DB label `tiku_fresh_phase25_20260601_001`. | Raw rows, internal IDs, connection strings, or broad inspection.                                   |
+| Direct DB write       | None.                                                                                                    | Provisioning, cleanup, reset, delete, truncate, drop, DDL, migration, seed, or `drizzle-kit push`. |
+| Private fixture       | In-memory login input only after fresh approval.                                                         | Recording credentials, phone/email, passwords, hashes, tokens, sessions, or raw fixture rows.      |
+| Provider/staging/prod | None.                                                                                                    | Provider calls, staging/prod/cloud/deploy, Cost Calibration, release readiness, final Pass.        |
 
 ## Role Matrix
 
@@ -50,6 +53,15 @@ Forbidden evidence:
 
 - credentials, passwords, password hashes, tokens, cookies, sessions, authorization headers, env values, connection strings, raw DB rows, internal IDs, PII, phone, email, plaintext `redeem_code`, Provider payloads, prompt text, raw AI input/output, full question/paper/material/resource/chunk content, screenshots, traces, video, raw DOM, or exports.
 
-## Current Gate State
+## Execution Result
 
-The post-repair Stage B-0.3 preflight passed all 8 role fixture rows against `tiku_fresh_phase25_20260601_001`. This is a fixture preflight fact only. The DB-backed Stage B 8-role browser/e2e acceptance has not been executed.
+The post-repair Stage B-0.3 preflight passed all 8 role fixture rows against `tiku_fresh_phase25_20260601_001`.
+Fresh-approved local DB-backed browser/e2e execution then completed under the stop-on-fail rule.
+
+The 2026-07-04 execution added:
+
+- selector-scoped read-only DB aggregate/status preflight: 8 roles pass, 0 fail, 0 block;
+- Playwright Chromium local e2e command sequence: 8 commands pass, 0 fail, 0 block;
+- dev server start/restart: not executed;
+- direct DB write, cleanup, reset, seed, migration, DDL, Provider, staging/prod, source/test/dependency change: not executed;
+- local app workflow mutations from approved positive browser/e2e paths: executed as test-owned product workflow data.

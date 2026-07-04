@@ -359,22 +359,23 @@ standingApprovals:
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
   - id: stage-b-db-backed-8-role-local-acceptance-2026-07-03
-    title: Stage B DB-backed 8-role local acceptance boundary
+    title: Stage B DB-backed 8-role local acceptance
     phase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
     sourceStory: current_user_requested_open_stage_b_db_backed_8_role_local_acceptance_with_browser_e2e_db_boundary_and_stop_on_fail_rules_2026_07_03
-    humanApprovalBoundary: fresh_execution_approval_required_before_browser_e2e_db_read_or_dev_server_runtime
-    targetClosureItem: Open the DB-backed Stage B 8-role local acceptance task and make execution boundaries explicit before running it.
-    behaviorBoundary: docs_state_boundary_only_no_db_backed_acceptance_no_browser_no_e2e_no_dev_server_start_no_db_query_no_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_change_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
+    humanApprovalBoundary: fresh_execution_approval_received_for_local_browser_e2e_read_only_db_preflight_private_fixture_in_memory_login_use_stop_on_fail
+    targetClosureItem: Execute DB-backed Stage B 8-role local acceptance with redacted evidence.
+    behaviorBoundary: fresh_approved_local_127_0_0_1_browser_e2e_selector_scoped_read_only_db_preflight_private_fixture_in_memory_login_use_stop_on_fail_no_direct_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_change_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
     evidenceMode: redacted_role_labels_route_labels_status_categories_aggregate_counts_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
-    taskKind: local_db_backed_8_role_acceptance_boundary
+    taskKind: local_db_backed_8_role_acceptance_execution
     moduleRunVersion: 2
-    executionProfile: boundary_materialization_only_pending_fresh_execution_approval
-    status: awaiting_fresh_execution_approval
-    result: boundary_materialized_no_db_backed_acceptance_executed
+    executionProfile: fresh_approved_local_browser_e2e_with_read_only_db_preflight_stop_on_fail
+    status: closed
+    result: completed_db_backed_stage_b_8_role_local_acceptance_passed_no_fail_no_block
     priority: p0
     branch: codex/stage-b-db-backed-8-role-local-acceptance-2026-07-03
     claimedAt: "2026-07-03T23:40:00-07:00"
     plannedAt: "2026-07-03T23:40:00-07:00"
+    completedAt: "2026-07-04T00:15:00-07:00"
     dependsOn:
       - stage-b-0-2-local-db-baseline-decision-2026-07-03
       - stage-b-0-3-redacted-fixture-preflight-2026-07-03
@@ -388,7 +389,30 @@ tasks:
       preflightPassCount: 8
       preflightFailCount: 0
       preflightBlockCount: 0
-      dbBackedAcceptanceStarted: false
+      dbBackedAcceptanceStarted: true
+    executionSummary:
+      approvalSource: current_user_message_2026_07_04
+      serviceReachability: local_127_0_0_1_3000_http_200
+      dbServiceRunning: tiku-postgres
+      dbSelectorPreflight:
+        targetDatabaseLabel: tiku_fresh_phase25_20260601_001
+        mode: selector_scoped_read_only_aggregate_status_query
+        rolesChecked: 8
+        passCount: 8
+        failCount: 0
+        blockCount: 0
+        rawRowsRecorded: false
+      e2eExecution:
+        playwrightReuseExistingServer: true
+        traceMode: off
+        commandsRun: 8
+        passCount: 8
+        failCount: 0
+        blockCount: 0
+        stoppedEarly: false
+        generatedArtifactsCleaned: true
+        appWorkflowMutationExecuted: true
+        appWorkflowMutationBoundary: local_test_owned_product_workflow_actions_only_no_direct_db_provisioning_cleanup_reset
     requiredFreshApprovalBeforeExecution:
       - browser_or_e2e_runtime
       - dev_server_start_or_restart
@@ -481,18 +505,20 @@ tasks:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-db-backed-8-role-local-acceptance-2026-07-03
     validationSummary:
-      status: passed_governance_validation
+      status: passed_post_execution_governance_validation
       scopedPrettierWrite: passed
       scopedPrettierCheck: passed
       gitDiffCheck: passed
       moduleRunV2PreCommit: passed
-      dbBackedAcceptanceExecuted: false
-      browserAcceptanceExecuted: false
-      e2eExecuted: false
+      dbBackedAcceptanceExecuted: true
+      browserAcceptanceExecuted: true
+      e2eExecuted: true
       devServerStartedOrRestarted: false
-      dbReadExecuted: false
+      dbReadExecuted: true
       dbWriteExecuted: false
-      privateFixtureRead: false
+      directDbWriteExecuted: false
+      appWorkflowMutationExecuted: true
+      privateFixtureRead: true
       credentialOrLoginIdentifierRecorded: false
       rawDbRowsInternalIdsOrPiiRecorded: false
       providerExecuted: false
