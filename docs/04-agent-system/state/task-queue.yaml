@@ -44,6 +44,46 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 standingApprovals:
+  fullChainLocalContinuityCentralApproval20260704:
+    approvedAt: "2026-07-04T10:05:10-07:00"
+    approvedBy: laozhuang
+    approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    approvalTextSummary: >-
+      User approved the copyable centralized local continuity authorization for the 2026-07-04 full-chain acceptance
+      goal. Covered local-only task classes may proceed serially after each task materializes exact read lists,
+      allowedFiles, blockedFiles, DB boundary, Provider boundary, browser boundary, credential boundary, evidence
+      redaction, validation commands, audit, and closeoutPolicy. Covered classes include current Scenario 1 blocked
+      package closeout, Scenario 1 governed super_admin admin-account creation repair, local app/browser/e2e execution,
+      in-memory private credential use, selector-scoped isolated local DB reads/writes/aggregate verification,
+      minimal root-cause source/test/doc repairs, local provisioning through approved runtime or documented provisioning
+      flows, non-destructive task-scoped local schema/migration/seed repair when required, validation, commit,
+      fast-forward merge to master, push origin/master, branch cleanup, and affected-node rerun.
+    executionRule: >-
+      Central approval does not permit a mega-branch or implicit execution. Every task remains serial and must first
+      create or reuse its own short codex branch, read task-relevant SSOT/traceability/evidence/audit/source/tests,
+      materialize exact boundaries, validate, write redacted evidence and audit, commit one reviewable task,
+      fast-forward merge to master, push origin/master, delete the merged short branch, and rerun from the affected
+      node or Scenario 1 when narrower restart is not defensible.
+    stillForbidden:
+      - provider_execution_or_provider_credential_configuration
+      - staging_prod_cloud_deploy_payment_external_service
+      - cost_calibration_or_budget_bearing_run
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_or_lockfile_change
+      - pr_creation_or_force_push
+      - release_readiness_final_pass_or_production_usability_claim
+      - evidence_redaction_violation
+      - permission_weakening
+      - fake_data_or_fixture_expansion_for_convenience
+    forbiddenEvidence:
+      - credentials_passwords_account_private_values
+      - phone_email_connection_strings_environment_values
+      - tokens_sessions_cookies_localStorage_Authorization_headers
+      - raw_db_rows_internal_ids
+      - screenshots_raw_dom_traces
+      - provider_payloads_raw_prompt_raw_ai_io
+      - full_material_question_paper_content_employee_answers_plaintext_card_values_private_fixture_contents
+    approvalAddendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
   aiGenerationCentralRepairApproval20260701:
     approvedAt: "2026-07-01T08:24:18-07:00"
     approvedBy: laozhuang
@@ -18224,3 +18264,233 @@ tasks:
       moduleRunV2PreCommitHardening: pass
     retryCount: 0
     lastFailurePath: null
+
+  - id: full-chain-scenario-1-admin-role-bootstrap-2026-07-04
+    title: Full-chain Scenario 1 admin role bootstrap
+    phase: full-chain-scenario-1-admin-role-bootstrap-2026-07-04
+    sourceStory: current_user_approved_scenario_1_local_full_chain_admin_role_bootstrap_2026_07_04
+    dependencies:
+      - full-chain-goal-control-ledger-2026-07-04
+      - full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+    taskPlanPolicy: required_before_runtime_execution
+    humanApprovalBoundary: >-
+      User approved Scenario 1 local-only runtime acceptance using the isolated DB target label
+      tiku_full_chain_acceptance_20260704_001 and bootstrap selector fc_bootstrap_super_admin. The approval allows app
+      start, browser/e2e, private credentials in memory, and selector-scoped read-only aggregate DB verification only for
+      the product runtime proof that super_admin creates ops_admin and content_admin. The source preflight blocked before
+      runtime because no governed product creation flow exists.
+    targetClosureItem: Prove product runtime creation of ops_admin and content_admin by super_admin.
+    behaviorBoundary: local_acceptance_pre_runtime_block_then_centralized_local_continuity_closeout_and_repair
+    executionProfile: local_acceptance_source_preflight_then_stop_on_missing_product_flow
+    evidenceMode: redacted_task_id_branch_surface_labels_selector_labels_role_labels_counts_command_names_status_and_summary_only
+    validationPolicy: scoped_prettier_diff_blocked_path_precommit_hardening
+    taskKind: local_acceptance_pre_runtime_block
+    moduleRunVersion: 2
+    status: blocked_pending_repair_under_centralized_approval
+    result: block_no_governed_super_admin_product_flow_for_ops_and_content_admin_creation
+    approvedAt: "2026-07-04T09:50:25-07:00"
+    approvedBy: laozhuang
+    branch: codex/full-chain-scenario-1-admin-role-bootstrap-2026-07-04
+    capabilities:
+      docsStateEvidenceAudit: approved
+      appStart: stopped_before_execution
+      browserRuntime: stopped_before_execution
+      e2eRuntime: stopped_before_execution
+      privateCredentialInMemoryUse: stopped_before_execution
+      localDatabaseReadOnlyAggregateVerification: stopped_before_execution
+      localDatabaseMutation: blocked
+      schemaMigration: blocked
+      seedExecution: blocked
+      providerCall: blocked
+      stagingProdDeploy: blocked
+      costCalibrationGate: blocked
+      sensitiveAdminAccountCreationSourceRepair: ready_under_centralized_local_continuity_approval
+      releaseReadinessDecision: blocked
+      finalPassClaim: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-*.md
+      - package.json
+      - src/app/**
+      - src/server/**
+      - src/features/**
+      - src/db/schema/auth.ts
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    riskTypes:
+      - full_chain_acceptance
+      - stop_on_fail
+      - sensitive_admin_permission_repair_required
+      - no_runtime_executed_after_source_block
+      - no_final_pass
+      - cost_calibration_blocked
+    preRuntimeBlock:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      runSelector: full_chain_acceptance_20260704
+      bootstrapSelector: fc_bootstrap_super_admin
+      requiredTargetRoles:
+        - ops_admin
+        - content_admin
+      blockedReason: no_governed_super_admin_product_flow_for_platform_backend_admin_creation
+      rejectedWorkarounds:
+        - db_seed_or_direct_write
+        - fixture_expansion
+        - synthetic_local_acceptance_session
+        - permission_bypass
+    nextTask:
+      id: full-chain-scenario-1-admin-account-creation-flow-repair-2026-07-04
+      status: ready_under_centralized_local_continuity_approval
+      approvalPackagePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md
+    continuityApprovalAdjustment:
+      status: approved
+      approvedAt: "2026-07-04T10:05:10-07:00"
+      approvedBy: laozhuang
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      requestedBy: current_user_requested_no_break_centralized_authorization_adjustment_2026_07_04
+      addendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+      coversIfApproved:
+        - current_scenario_1_block_package_closeout
+        - scenario_1_governed_admin_account_creation_flow_repair
+        - serial_local_acceptance_browser_e2e_app_private_credential_in_memory_use
+        - selector_scoped_isolated_local_db_read_write_aggregate_verification
+        - minimal_root_cause_source_test_doc_repair
+        - local_provisioning_through_approved_runtime_or_documented_provisioning_flows
+        - non_destructive_task_scoped_local_schema_migration_seed_repair_when_required
+        - validation_commit_ff_merge_push_branch_cleanup_and_affected_node_rerun
+      stillBlockedWithoutSeparateBoundedApproval:
+        - provider_execution_or_provider_credential_configuration
+        - staging_prod_cloud_deploy_payment_external_service
+        - cost_calibration_or_budget_bearing_run
+        - destructive_db_operation_or_unscoped_db_mutation
+        - dependency_or_lockfile_change
+        - pr_creation_or_force_push
+        - release_readiness_final_pass_or_production_usability_claim
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-1-admin-role-bootstrap-2026-07-04
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md
+    continuityApprovalAddendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    coveredByCentralizedApproval:
+      - current_scenario_1_block_package_closeout
+      - scenario_1_governed_admin_account_creation_flow_repair
+      - local_app_browser_e2e_private_credential_in_memory_use_after_task_materialization
+      - selector_scoped_isolated_local_db_read_write_and_aggregate_verification
+      - minimal_root_cause_source_test_doc_repair
+      - local_provisioning_through_approved_runtime_or_documented_provisioning_flows
+      - non_destructive_task_scoped_local_schema_migration_seed_repair_when_required
+      - validation_commit_ff_merge_push_branch_cleanup_and_affected_node_rerun
+    stillBlockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+    validationSummary:
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditReviewPrepared: true
+      repairDecisionPrepared: true
+      sourceOrTestChanged: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      privateCredentialValueUsed: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_blocked_path_diff
+      moduleRunV2PreCommitHardening: pass
+      continuityApprovalAddendumPrepared: true
+      continuityApprovalConsumed: true
+      validationStatus: pass_block_evidence_governance_validation
+    retryCount: 0
+    lastFailurePath: null
+
+  - id: full-chain-scenario-1-admin-account-creation-flow-repair-2026-07-04
+    title: Full-chain Scenario 1 admin account creation flow repair
+    phase: full-chain-scenario-1-admin-account-creation-flow-repair-2026-07-04
+    sourceStory: scenario_1_blocked_by_missing_governed_super_admin_admin_account_creation_flow
+    dependencies:
+      - full-chain-scenario-1-admin-role-bootstrap-2026-07-04
+    status: ready_under_centralized_local_continuity_approval
+    taskKind: sensitive_admin_permission_source_repair
+    moduleRunVersion: 2
+    targetClosureItem: Add the minimal governed product flow for super_admin to create platform ops_admin and content_admin accounts, then rerun Scenario 1.
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md
+    centralizedApprovalAddendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - database_connection_read_write_migration_or_seed
+      - schema_migration_or_drizzle_push
+      - provider_call_or_provider_configuration_or_credential_read
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - merge_push_cleanup_pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
