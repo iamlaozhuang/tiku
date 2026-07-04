@@ -358,6 +358,149 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-c-1-provider-smoke-2026-07-04
+    title: Stage C-1 Provider smoke
+    phase: stage-c-1-provider-smoke-2026-07-04
+    sourceStory: current_user_approved_stage_c_1_local_only_provider_smoke_2026_07_04
+    humanApprovalBoundary: current_user_approved_one_local_only_provider_smoke_openai_compatible_alibaba_qwen_qwen37_max_runtime_secret_process_memory_only_redacted_evidence_no_release_claim_2026_07_04
+    targetClosureItem: Execute exactly one local-only Provider smoke if runtime secret is present; otherwise stop and record block.
+    behaviorBoundary: local_only_stage_c_1_provider_smoke_max_one_call_zero_retry_max_output_tokens_1800_timeout_60000_synthetic_non_sensitive_data_runtime_alibaba_api_key_process_env_only_no_env_file_read_no_raw_prompt_payload_ai_output_secret_evidence_no_browser_e2e_dev_server_no_db_no_source_test_dependency_schema_migration_seed_no_staging_prod_no_cost_calibration_no_release_claim
+    evidenceMode: redacted_task_ids_public_provider_model_host_labels_status_categories_request_count_duration_token_counts_output_size_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_only_provider_smoke_execution
+    moduleRunVersion: 2
+    executionProfile: fresh_approved_local_only_single_provider_call_stop_on_fail
+    status: closed
+    result: blocked_missing_runtime_secret_no_provider_call
+    priority: p0
+    branch: codex/stage-c-1-provider-smoke-2026-07-04
+    claimedAt: "2026-07-04T01:32:00-07:00"
+    plannedAt: "2026-07-04T01:32:00-07:00"
+    completedAt: "2026-07-04T01:58:41-07:00"
+    dependsOn:
+      - stage-c-1-read-only-provider-target-inventory-2026-07-04
+      - stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+    approvedTarget:
+      providerLabel: openai_compatible/alibaba-qwen
+      modelLabel: qwen3.7-max
+      hostLabel: dashscope.aliyuncs.com
+      envKeyAlias: ALIBABA_API_KEY
+      maxProviderCalls: 1
+      maxRetries: 0
+      maxOutputTokens: 1800
+      timeoutMs: 60000
+    runtimeBoundaries:
+      providerCallApproved: true
+      providerCallLimit: 1
+      retryLimit: 0
+      runtimeSecretAccessApproved: true
+      runtimeSecretSource: current_process_environment_only
+      envFileReadOrWrite: false
+      rawPromptPayloadAiOutputEvidence: false
+      browserE2eDevServer: false
+      dbConnectionQueryWrite: false
+      sourceTestDependencySchemaChange: false
+      stagingProdCloudDeploy: false
+      costCalibration: false
+    executionSummary:
+      status: blocked
+      stopReason: missing_runtime_secret
+      runtimeSecretPresent: false
+      runtimeSecretValueAccessed: false
+      providerCallExecuted: false
+      providerRequestCount: 0
+      envFileReadOrWrite: false
+      rawPromptPayloadAiOutputEvidence: false
+      browserE2eDevServer: false
+      dbConnectionQueryWrite: false
+      sourceTestDependencySchemaChange: false
+      stagingProdCloudDeploy: false
+      costCalibration: false
+    stopRules:
+      - missing_runtime_secret
+      - provider_error
+      - unsafe_costly_unstable_or_oversized_output
+      - redaction_failure
+      - target_mismatch
+      - boundary_expansion_required
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke.md
+      - docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke.md
+      - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - package.json
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        approvalRequired: fresh_user_approval
+        targetBranch: master
+      push:
+        approved: false
+        approvalRequired: fresh_user_approval
+        target: origin/master
+      cleanup:
+        deleteShortBranchAfterMerge: true
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-c-1-provider-smoke-2026-07-04
+    validationSummary:
+      status: passed_governance_validation_with_provider_smoke_blocked_missing_runtime_secret
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      blockedWriteScopeDiffCheck: passed_no_blocked_files_changed
+      moduleRunV2PreCommit: passed
+      currentTaskPointerCorrected: true
+      providerExecuted: false
+      providerRequestCount: 0
+      envFileRead: false
+      dbConnectionOrQueryExecuted: false
+      dbWriteExecuted: false
+      browserE2eExecuted: false
+      stagingProdExecuted: false
+      costCalibrationExecuted: false
+      sourceTestDependencySchemaEnvChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: stage-c-1-read-only-provider-target-inventory-2026-07-04
     title: Stage C-1 read-only Provider target inventory
     phase: stage-c-1-read-only-provider-target-inventory-2026-07-04
