@@ -1,8 +1,163 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-isolated-db-account-plan-prep-2026-07-04
-updatedAt: "2026-07-04T08:59:11-07:00"
+currentPhase: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+updatedAt: "2026-07-04T09:16:42-07:00"
+fullChainIsolatedDbBootstrapSeedExecution20260704:
+  taskId: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  phase: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  status: closed
+  result: pass_isolated_db_created_migrated_and_fc_bootstrap_super_admin_seeded_redacted
+  priority: p0
+  taskKind: local_isolated_db_bootstrap_seed_execution
+  moduleRunVersion: 2
+  dependsOn:
+    - full-chain-isolated-db-account-plan-prep-2026-07-04
+    - full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
+  sourceStory: current_user_approved_isolated_db_target_create_select_empty_migration_and_fc_bootstrap_super_admin_seed_2026_07_04
+  targetClosureItem: Create or select the isolated local DB target, apply reviewed migrations to an empty target, seed only fc_bootstrap_super_admin, and record redacted aggregate verification.
+  behaviorBoundary: local_only_isolated_db_target_create_select_empty_migration_and_single_bootstrap_super_admin_seed_only_no_ops_admin_content_admin_org_tree_org_auth_org_admin_employee_redeem_code_content_paper_learning_training_analytics_browser_dev_server_e2e_provider_staging_prod_cost_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_file_paths_selector_labels_counts_statuses_validation_results_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_email_phone_password_hash_plaintext_redeem_code_prompts_provider_payloads_raw_ai_io_full_question_paper_material_dom_screenshot_trace
+  branch: codex/full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  claimedAt: "2026-07-04T09:13:03-07:00"
+  plannedAt: "2026-07-04T09:13:03-07:00"
+  completedAt: "2026-07-04T09:16:42-07:00"
+  executionScope:
+    localServiceLabel: local_docker_compose_postgresql
+    localContainerLabel: tiku-postgres-dev
+    targetDbLabel: tiku_full_chain_acceptance_20260704_001
+    runSelector: full_chain_acceptance_20260704
+    fixtureNamespace: full-chain-acceptance-2026-07-04
+    bootstrapSelector: fc_bootstrap_super_admin
+    migrationMode: existing_reviewed_migrations_empty_target_only
+    seedMode: idempotent_single_bootstrap_super_admin_only
+    privateCredentialPath: D:/tiku-local-private/acceptance/full-chain-isolated-db-bootstrap-super-admin-credential-2026-07-04.md
+    currentTaskBrowserOrE2eExecuted: false
+    currentTaskDevServerStarted: false
+    currentTaskProviderCallExecuted: false
+    currentTaskStagingProdDeployExecuted: false
+    targetExistedBeforeTask: false
+    targetCreatedOrSelected: true
+    emptyTargetPreMigrationBaseTableCount: 0
+    reviewedMigrationFileCountApplied: 19
+    postMigrationPublicBaseTableCount: 52
+    bootstrapSeedExecuted: true
+    bootstrapAggregateCounts:
+      authUser: 1
+      authAccount: 1
+      adminSuperAdmin: 1
+    forbiddenScenarioOutputAggregateCounts:
+      adminScenarioRoles: 0
+      organization: 0
+      orgAuth: 0
+      employee: 0
+      redeemCode: 0
+      learnerUser: 0
+      student: 0
+      question: 0
+      paper: 0
+      practice: 0
+      mockExam: 0
+      organizationTrainingVersion: 0
+      aiGenerationTask: 0
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+  privateAllowedFiles:
+    - D:/tiku-local-private/acceptance/full-chain-isolated-db-bootstrap-super-admin-credential-2026-07-04.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-package.md
+    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-account-plan.md
+    - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    - compose.yaml
+    - drizzle.config.ts
+    - drizzle/**
+    - package.json
+    - src/db/schema/**
+    - src/server/auth/local-session-runtime.ts
+    - src/server/repositories/runtime-database.ts
+    - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - compose.yaml
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/** except D:/tiku-local-private/acceptance/full-chain-isolated-db-bootstrap-super-admin-credential-2026-07-04.md
+  closeoutPolicy:
+    localCommit: approved
+    fastForwardMerge:
+      approved: false
+      approvalRequired: fresh_user_approval
+      targetBranch: master
+    push:
+      approved: false
+      approvalRequired: fresh_user_approval
+      target: origin/master
+    cleanup:
+      deleteShortBranchAfterMerge: true
+      approvalRequired: after_fresh_merge_approval
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+    - git diff --check
+    - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  validationSummary:
+    status: passed_local_bootstrap_seed_execution_and_governance_validation
+    localPostgresServiceHealthy: true
+    targetCreatedOrSelected: true
+    targetWasEmptyBeforeMigration: true
+    reviewedMigrationApplication: passed_file_count_19
+    bootstrapSeed: passed_fc_bootstrap_super_admin_only
+    credentialProbe: passed_no_value_recorded
+    redactedAggregateVerification: passed_bootstrap_1_1_1_forbidden_outputs_0
+    scopedPrettierWrite: passed_exit_0
+    scopedPrettierCheck: passed_exit_0
+    gitDiffCheck: passed_exit_0
+    blockedPathDiffCheck: passed_exit_0_no_output
+    moduleRunV2PreCommitHardening: passed_exit_0
+    sourceOrTestChanged: false
+    packageOrLockfileChanged: false
+    schemaMigrationSeedFileChanged: false
+    browserOrE2eExecuted: false
+    devServerStarted: false
+    providerCallExecuted: false
+    stagingProdDeployExecuted: false
+    costCalibrationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 fullChainIsolatedDbAccountPlanPrep20260704:
   taskId: full-chain-isolated-db-account-plan-prep-2026-07-04
   phase: full-chain-isolated-db-account-plan-prep-2026-07-04
@@ -25624,6 +25779,20 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  phase: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  status: closed
+  result: pass_isolated_db_created_migrated_and_fc_bootstrap_super_admin_seeded_redacted
+  taskKind: local_isolated_db_bootstrap_seed_execution
+  moduleRunVersion: 2
+  branch: codex/full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+  claimedAt: "2026-07-04T09:13:03-07:00"
+  plannedAt: "2026-07-04T09:13:03-07:00"
+  completedAt: "2026-07-04T09:16:42-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+previousCurrentTaskBeforeFullChainIsolatedDbBootstrapSeedExecution20260704:
   id: full-chain-isolated-db-account-plan-prep-2026-07-04
   phase: full-chain-isolated-db-account-plan-prep-2026-07-04
   status: closed
