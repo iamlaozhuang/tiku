@@ -1,8 +1,109 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-c-1-provider-smoke-2026-07-04
-updatedAt: "2026-07-04T02:00:44-07:00"
+currentPhase: stage-c-1-secret-availability-decision-2026-07-04
+updatedAt: "2026-07-04T06:37:57-07:00"
+stageC1SecretAvailabilityDecision20260704:
+  taskId: stage-c-1-secret-availability-decision-2026-07-04
+  phase: stage-c-1-secret-availability-decision-2026-07-04
+  status: closed
+  result: prepared_parent_process_env_injection_decision_no_secret_access
+  priority: p0
+  taskKind: docs_only_secret_availability_decision
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-c-1-provider-smoke-2026-07-04
+  sourceStory: current_user_requested_stage_c_1_secret_availability_decision_no_env_read_2026_07_04
+  targetClosureItem: Decide how ALIBABA_API_KEY can be made available to the local smoke process without `.env*` reads or committed secret material.
+  behaviorBoundary: docs_only_secret_availability_decision_no_secret_value_access_no_env_file_read_write_no_provider_call_no_model_request_no_browser_no_e2e_no_dev_server_no_db_no_source_test_dependency_schema_migration_seed_no_staging_prod_no_cost_calibration_no_release_claim
+  evidenceMode: redacted_task_ids_file_paths_public_env_key_alias_decision_status_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+  branch: codex/stage-c-1-secret-availability-decision-2026-07-04
+  claimedAt: "2026-07-04T06:37:57-07:00"
+  plannedAt: "2026-07-04T06:37:57-07:00"
+  completedAt: "2026-07-04T06:37:57-07:00"
+  decisionSummary:
+    preferredSecretAvailabilityPath: owner_parent_process_or_same_process_tree_environment_injection
+    envKeyAlias: ALIBABA_API_KEY
+    secretValueAccessed: false
+    envFileReadOrWrite: false
+    providerCallExecuted: false
+    persistentUserOrMachineEnvWrite: deferred_requires_fresh_approval_and_cleanup_plan
+    rerunRequiresFreshApproval: true
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-secret-availability-decision.md
+  decisionPath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-secret-availability-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-c-1-secret-availability-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-secret-availability-decision.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-secret-availability-decision.md
+    - docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-secret-availability-decision.md
+    - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-secret-availability-decision.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-secret-availability-decision.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md
+    - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+  closeoutPolicy:
+    localCommit: approved
+    fastForwardMerge:
+      approved: false
+      approvalRequired: fresh_user_approval
+      targetBranch: master
+    push:
+      approved: false
+      approvalRequired: fresh_user_approval
+      target: origin/master
+    cleanup:
+      deleteShortBranchAfterMerge: true
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-secret-availability-decision.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-secret-availability-decision.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-secret-availability-decision.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-secret-availability-decision.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-secret-availability-decision.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-secret-availability-decision.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-secret-availability-decision.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-secret-availability-decision.md
+    - git diff --check
+    - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-c-1-secret-availability-decision-2026-07-04
+  validationSummary:
+    status: passed_governance_validation
+    scopedPrettierWrite: passed_exit_0
+    scopedPrettierCheck: passed_exit_0
+    gitDiffCheck: passed_exit_0
+    blockedWriteScopeDiffCheck: passed_exit_0_no_output
+    moduleRunV2PreCommit: passed_exit_0
+    secretValueAccessed: false
+    envFileRead: false
+    providerExecuted: false
+    dbConnectionOrQueryExecuted: false
+    browserE2eExecuted: false
+    stagingProdExecuted: false
+    costCalibrationExecuted: false
+    sourceTestDependencySchemaEnvChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 stageC1ProviderSmoke20260704:
   taskId: stage-c-1-provider-smoke-2026-07-04
   phase: stage-c-1-provider-smoke-2026-07-04
@@ -25041,6 +25142,21 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: stage-c-1-secret-availability-decision-2026-07-04
+  phase: stage-c-1-secret-availability-decision-2026-07-04
+  status: closed
+  result: prepared_parent_process_env_injection_decision_no_secret_access
+  taskKind: docs_only_secret_availability_decision
+  moduleRunVersion: 2
+  branch: codex/stage-c-1-secret-availability-decision-2026-07-04
+  claimedAt: "2026-07-04T06:37:57-07:00"
+  plannedAt: "2026-07-04T06:37:57-07:00"
+  completedAt: "2026-07-04T06:37:57-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-secret-availability-decision.md
+  decisionPath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-secret-availability-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-c-1-secret-availability-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-secret-availability-decision.md
+previousCurrentTaskBeforeStageC1SecretAvailabilityDecision20260704:
   id: stage-c-1-provider-smoke-2026-07-04
   phase: stage-c-1-provider-smoke-2026-07-04
   status: closed
