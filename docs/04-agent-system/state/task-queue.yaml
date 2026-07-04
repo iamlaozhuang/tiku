@@ -358,6 +358,116 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+    title: Stage B-0.1 read-only aggregate local DB inventory
+    phase: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+    sourceStory: current_user_requested_stage_b_0_1_read_only_aggregate_local_db_inventory_2026_07_03
+    humanApprovalBoundary: current_user_requested_stage_b_0_1_execution_2026_07_03
+    targetClosureItem: Run read-only aggregate local DB inventory and stop before Stage B DB-backed acceptance.
+    behaviorBoundary: local_docker_compose_postgres_read_only_aggregate_counts_only_no_db_mutation_no_cleanup_no_env_file_read_no_provider_no_staging_prod_no_dev_server_no_browser_no_product_source_no_schema_no_dependency_no_release_claim
+    targetLabel: local_docker_compose_tiku_postgres_service_container_tiku_postgres_dev
+    selectors:
+      - public_schema_base_table_aggregate_row_counts
+      - namespace_aggregate_match_counts_stage_b_local_full_loop_credential_backed_test_owned_source_landing
+    evidenceMode: redacted_target_label_table_names_pattern_labels_aggregate_counts_command_status_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_db_read_only_aggregate_inventory
+    moduleRunVersion: 2
+    executionProfile: local_db_read_only_aggregate_counts
+    status: closed
+    result: stage_b_0_1_read_only_aggregate_inventory_completed_no_stage_b_db_backed_acceptance
+    priority: p0
+    branch: codex/stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+    claimedAt: "2026-07-03T20:05:00-07:00"
+    plannedAt: "2026-07-03T20:05:00-07:00"
+    completedAt: "2026-07-03T21:25:00-07:00"
+    dependsOn:
+      - stage-b-0-local-data-baseline-cleanup-decision-package-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+      - docs/05-execution-logs/evidence/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - src/db/schema/**
+      - drizzle.config.ts
+      - package.json
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+    validationCommands:
+      - docker compose ps --format json
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku -X -v ON_ERROR_STOP=1 <redacted read-only aggregate table count query>
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku -X -v ON_ERROR_STOP=1 <redacted read-only namespace count query>
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md docs/05-execution-logs/evidence/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_stage_b_0_1_execution_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_stage_b_0_1_execution_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_stage_b_0_1_execution_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_stage_b_0_1_execution_2026_07_03
+    validationSummary:
+      status: passed
+      dbConnection: read_only_aggregate_only
+      dockerComposeTargetCheck: pass_local_tiku_postgres_running_healthy
+      publicSchemaBaseTableCount: 46
+      namespaceAggregateMatchCount: 0
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      dbMutationExecuted: false
+      localDataCleanupExecuted: false
+      envFileRead: false
+      providerExecuted: false
+      stagingProdDeployExecuted: false
+      devServerStarted: false
+      browserAcceptanceExecuted: false
+      stageBDbBackedAcceptanceStarted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: stage-b-0-local-data-baseline-cleanup-decision-package-2026-07-03
     title: Stage B-0 local data baseline cleanup decision package
     phase: stage-b-0-local-data-baseline-cleanup-decision-package-2026-07-03
