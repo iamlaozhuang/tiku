@@ -17371,6 +17371,134 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-chain-scenario-2-content-pack-provisioning-2026-07-04
+    title: Full-chain Scenario 2 content pack provisioning
+    phase: full-chain-scenario-2-content-pack-provisioning-2026-07-04
+    sourceStory: scenario_2_missing_full_chain_private_content_pack_provisioning
+    dependencies:
+      - full-chain-scenario-2-content-baseline-2026-07-04
+      - full-chain-scenario-2-closeout-sha-repair-2026-07-04
+    status: closed
+    result: pass_local_private_scenario_2_content_pack_provisioned_redacted
+    taskKind: local_private_input_provisioning
+    moduleRunVersion: 2
+    targetClosureItem: Create the missing local-private full-chain Scenario 2 content/question/paper input package without repo fixture expansion.
+    centralizedApprovalAddendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+    claimedAt: "2026-07-04T12:22:00-07:00"
+    plannedAt: "2026-07-04T12:22:00-07:00"
+    completedAt: "2026-07-04T12:31:00-07:00"
+    branch: codex/full-chain-scenario-2-content-pack-provisioning-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    behaviorBoundary: local_private_package_creation_only_no_browser_no_db_no_provider_no_staging_prod_no_cost_no_source_test_change_no_repo_private_content_storage
+    evidenceMode: redacted_task_ids_branch_package_labels_category_counts_command_names_pass_fail_block_and_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline.md
+      - docs/01-requirements/traceability/2026-06-21-paper-question-count-and-type-policy.md
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/features/admin/paper-management/AdminPaperManagementClient.tsx
+      - src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx
+      - src/db/owner-preview-resource-import.ts
+      - tests/unit/owner-preview-resource-import.test.ts
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/**
+    localPrivateWriteBoundary:
+      root: D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04
+      allowed: true
+      evidencePolicy: metadata_counts_only_no_private_content
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    blockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - fake_data_or_fixture_expansion_in_repository
+      - redaction_violation
+      - browser_runtime
+      - direct_db_connection_or_mutation
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted full-chain private pack creation and metadata validation>"
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-pack-provisioning.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-2-content-pack-provisioning-2026-07-04
+    validationSummary:
+      status: pass
+      privatePackageRootCreated: true
+      privatePackageFileCount: 5
+      materialSelectionCount: 6
+      knowledgeNodeCandidateCount: 3
+      questionInputCount: 7
+      canonicalQuestionTypeCoverageCount: 7
+      legacyQuestionTypeAliasCount: 0
+      paperPlanCount: 1
+      browserRuntimeExecuted: false
+      directDbConnectionExecuted: false
+      directDbMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      sourceTestChanged: false
+      nextAction: rerun_full_chain_scenario_2_content_baseline
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-after-panel-repair-2026-07-04
     title: Full-chain Scenario 1 admin role bootstrap runtime rerun after panel repair
     phase: full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-after-panel-repair-2026-07-04
