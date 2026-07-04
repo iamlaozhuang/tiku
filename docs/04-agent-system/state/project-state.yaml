@@ -1,8 +1,122 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
-updatedAt: "2026-07-04T00:15:00-07:00"
+currentPhase: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+updatedAt: "2026-07-04T00:44:00-07:00"
+stageBLocalAcceptanceCloseoutAndStageCApprovalPrep20260704:
+  taskId: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  phase: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  status: closed
+  result: completed_docs_only_stage_b_local_acceptance_closeout_and_stage_c_approval_package_prepared_no_execution
+  priority: p0
+  taskKind: docs_only_acceptance_closeout_and_approval_prep
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-b-db-backed-8-role-local-acceptance-2026-07-03
+  sourceStory: current_user_requested_stage_b_local_acceptance_closeout_and_stage_c_provider_staging_cost_approval_prep_2026_07_04
+  targetClosureItem: Summarize local DB-backed Stage B 8-role evidence and prepare Stage C Provider/staging/Cost Calibration approval package without execution.
+  behaviorBoundary: docs_only_no_provider_no_model_call_no_env_secret_no_browser_no_e2e_no_dev_server_no_db_connection_no_db_query_no_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_no_source_test_dependency_change_no_staging_prod_no_cloud_deploy_no_payment_no_external_service_no_cost_calibration_no_release_claim
+  branch: codex/stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  claimedAt: "2026-07-04T00:40:00-07:00"
+  plannedAt: "2026-07-04T00:40:00-07:00"
+  completedAt: "2026-07-04T00:44:00-07:00"
+  stageBLocalEvidenceSummary:
+    sourceTaskId: stage-b-db-backed-8-role-local-acceptance-2026-07-03
+    localDbBacked8RoleResult: pass
+    roleCount: 8
+    failCount: 0
+    blockCount: 0
+    providerExecuted: false
+    stagingProdExecuted: false
+    costCalibrationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+  stageCApprovalPackage:
+    packageStatus: prepared_for_human_decision_only
+    executionStatus: not_executed
+    gates:
+      providerSmoke: fresh_approval_required_before_execution
+      stagingPreview: fresh_approval_required_before_execution
+      costCalibration: fresh_approval_required_before_execution
+    serialRecommendation:
+      - stage_c_1_provider_smoke
+      - stage_c_3_cost_calibration_after_provider_scope_explicit
+      - stage_c_2_staging_preview_after_resource_owner_and_data_policy_explicit
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+  closeoutSummaryPath: docs/05-execution-logs/acceptance/2026-07-04-stage-b-local-acceptance-closeout-summary.md
+  stageCApprovalPackagePath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+    - docs/05-execution-logs/acceptance/2026-07-04-stage-b-local-acceptance-closeout-summary.md
+    - docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md
+    - docs/05-execution-logs/evidence/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/02-architecture/interfaces/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/**
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+  closeoutPolicy:
+    localCommit: approved
+    fastForwardMerge:
+      approved: false
+      approvalRequired: fresh_user_approval
+      targetBranch: master
+    push:
+      approved: false
+      approvalRequired: fresh_user_approval
+      target: origin/master
+    cleanup:
+      deleteShortBranchAfterMerge: true
+  validationCommands:
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md docs/05-execution-logs/acceptance/2026-07-04-stage-b-local-acceptance-closeout-summary.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md docs/05-execution-logs/evidence/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  validationSummary:
+    status: passed_governance_validation
+    scopedPrettierWrite: passed
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    providerExecuted: false
+    stagingProdExecuted: false
+    browserE2eExecuted: false
+    dbConnectionOrQueryExecuted: false
+    dbWriteExecuted: false
+    costCalibrationExecuted: false
+    sourceTestDependencySchemaEnvChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 stageBDbBacked8RoleLocalAcceptance20260703:
   taskId: stage-b-db-backed-8-role-local-acceptance-2026-07-03
   phase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
@@ -24642,8 +24756,23 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  phase: stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  status: closed
+  result: completed_docs_only_stage_b_local_acceptance_closeout_and_stage_c_approval_package_prepared_no_execution
+  taskKind: docs_only_acceptance_closeout_and_approval_prep
+  moduleRunVersion: 2
+  branch: codex/stage-b-local-acceptance-closeout-and-stage-c-approval-prep-2026-07-04
+  claimedAt: "2026-07-04T00:40:00-07:00"
+  plannedAt: "2026-07-04T00:40:00-07:00"
+  completedAt: "2026-07-04T00:44:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+  closeoutSummaryPath: docs/05-execution-logs/acceptance/2026-07-04-stage-b-local-acceptance-closeout-summary.md
+  stageCApprovalPackagePath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-b-local-acceptance-closeout-and-stage-c-approval-prep.md
+previousCurrentTaskBeforeStageBLocalAcceptanceCloseoutAndStageCApprovalPrep20260704:
   id: stage-b-db-backed-8-role-local-acceptance-2026-07-03
-  phase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
   status: closed
   result: completed_db_backed_stage_b_8_role_local_acceptance_passed_no_fail_no_block
   taskKind: local_db_backed_8_role_acceptance_execution
