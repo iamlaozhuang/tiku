@@ -358,6 +358,136 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
+    title: Full chain isolated DB bootstrap seed approval prep
+    phase: full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
+    sourceStory: current_user_requested_separate_isolated_db_target_and_bootstrap_seed_approval_prep_after_full_chain_package_closeout_2026_07_04
+    taskKind: docs_only_db_bootstrap_approval_prep
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_only_isolated_db_bootstrap_seed_approval_package_prepared
+    priority: p0
+    dependencies:
+      - full-chain-acceptance-planning-and-materials-prep-2026-07-04
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user requested opening a separate isolated DB target plus bootstrap seed approval/preparation task after
+      the full-chain acceptance preparation package was merged and pushed. This task is docs-only and may prepare
+      future approval text, selectors, boundaries, evidence, audit, project-state, and task-queue entries only. It must
+      not execute DB connection/read/write/create/drop/migration/seed/cleanup/reset, source/test/dependency/schema/script
+      changes, private fixture edits, env/secret access, browser/e2e, dev server, Provider, staging/prod/deploy, Cost
+      Calibration, release readiness, final Pass, or production usability claims.
+    targetClosureItem: Prepare the future isolated local DB target and bootstrap super-admin seed approval package.
+    behaviorBoundary: docs_state_acceptance_approval_preparation_only_no_runtime_or_db_execution
+    evidenceMode: redacted_task_ids_file_paths_selector_labels_counts_statuses_validation_results_only_no_private_values_or_raw_rows
+    approvalPrepSummary:
+      proposedDbLabel: tiku_full_chain_acceptance_20260704_001
+      proposedRunSelector: full_chain_acceptance_20260704
+      fixtureNamespace: full-chain-acceptance-2026-07-04
+      bootstrapSeedDefault: super_admin_only
+      contactConfigBoundary: runtime_local_repository_not_db_seed_by_default
+      scenarioOutputSeedDefault: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-package.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-*.md
+      - src/db/schema/auth.ts
+      - src/db/schema/system.ts
+      - src/server/services/contact-config-service.ts
+      - src/server/contracts/contact-config-contract.ts
+      - src/lib/local-purchase-guidance-contact-config.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_read_write_create_drop_migration_seed_cleanup_reset_raw_rows_or_drizzle_push
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_secret_access_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_credentials_passwords_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    evidenceRedaction:
+      allowed: task_ids_file_paths_selector_labels_counts_statuses_validation_commands_commit_branch_redacted_expected_observed_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_password_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        approvalRequired: fresh_user_approval
+        targetBranch: master
+      push:
+        approved: false
+        approvalRequired: fresh_user_approval
+        target: origin/master
+      cleanup:
+        deleteShortBranchAfterMerge: true
+        approvalRequired: after_fresh_merge_approval
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-package.md docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-package.md docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-prep.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
+    validationSummary:
+      status: passed_governance_validation_after_blocked_path_command_repair
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output_after_command_repair
+      preCommitHookTaskSelectionRepair: corrected_stale_current_task_before_final_commit
+      postCommitTaskInventoryPathRepair: added_queue_plan_acceptance_evidence_audit_paths_before_final_amended_commit
+      moduleRunV2PreCommitHardening: passed_exit_0
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      dbConnectionOrMutationExecuted: false
+      browserOrE2eExecuted: false
+      devServerStarted: false
+      providerCallExecuted: false
+      envSecretAccessed: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-acceptance-planning-and-materials-prep-2026-07-04
     title: Full chain acceptance planning and materials prep
     phase: full-chain-acceptance-planning-and-materials-prep-2026-07-04
