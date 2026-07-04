@@ -358,6 +358,148 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-b-db-backed-8-role-local-acceptance-2026-07-03
+    title: Stage B DB-backed 8-role local acceptance boundary
+    phase: stage-b-db-backed-8-role-local-acceptance-2026-07-03
+    sourceStory: current_user_requested_open_stage_b_db_backed_8_role_local_acceptance_with_browser_e2e_db_boundary_and_stop_on_fail_rules_2026_07_03
+    humanApprovalBoundary: fresh_execution_approval_required_before_browser_e2e_db_read_or_dev_server_runtime
+    targetClosureItem: Open the DB-backed Stage B 8-role local acceptance task and make execution boundaries explicit before running it.
+    behaviorBoundary: docs_state_boundary_only_no_db_backed_acceptance_no_browser_no_e2e_no_dev_server_start_no_db_query_no_db_write_no_cleanup_no_reset_no_seed_no_migration_no_schema_change_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
+    evidenceMode: redacted_role_labels_route_labels_status_categories_aggregate_counts_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_db_backed_8_role_acceptance_boundary
+    moduleRunVersion: 2
+    executionProfile: boundary_materialization_only_pending_fresh_execution_approval
+    status: awaiting_fresh_execution_approval
+    result: boundary_materialized_no_db_backed_acceptance_executed
+    priority: p0
+    branch: codex/stage-b-db-backed-8-role-local-acceptance-2026-07-03
+    claimedAt: "2026-07-03T23:40:00-07:00"
+    plannedAt: "2026-07-03T23:40:00-07:00"
+    dependsOn:
+      - stage-b-0-2-local-db-baseline-decision-2026-07-03
+      - stage-b-0-3-redacted-fixture-preflight-2026-07-03
+      - stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    prerequisiteStatus:
+      localDbBaselineDecision: accepted_current_non_empty_local_db_with_fixture_preflight_constraints
+      targetService: tiku-postgres
+      targetDatabaseLabel: tiku_fresh_phase25_20260601_001
+      postRepairPreflightStatus: passed
+      rolesPreflighted: 8
+      preflightPassCount: 8
+      preflightFailCount: 0
+      preflightBlockCount: 0
+      dbBackedAcceptanceStarted: false
+    requiredFreshApprovalBeforeExecution:
+      - browser_or_e2e_runtime
+      - dev_server_start_or_restart
+      - db_read_query_execution
+      - private_fixture_login_identifier_or_credential_read
+      - any_session_login_flow
+    futureAllowedAfterFreshApproval:
+      browserE2e: local_only_127_0_0_1_3000_playwright_chromium_reporter_line_trace_off_no_screenshot_trace_video_dom_artifact_commit
+      dbRead: local_docker_compose_tiku_postgres_read_only_selector_scoped_aggregate_status_queries_only
+      dbTarget: tiku_fresh_phase25_20260601_001
+      privateFixtureInput: D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      roleOrder:
+        - personal_standard_student
+        - personal_advanced_student
+        - org_standard_employee
+        - org_advanced_employee
+        - org_standard_admin
+        - org_advanced_admin
+        - content_admin
+        - ops_admin
+    stopOnFailRules:
+      serialRoleOrderRequired: true
+      stopImmediatelyOnFirstFailOrBlock: true
+      doNotContinueLaterRolesAfterFailOrBlock: true
+      splitRepairOrProvisioningTaskBeforeContinuing: true
+      restartFull8RoleSequenceFromPersonalStandardStudentAfterRepair: true
+      dbTargetMismatchIsBlock: true
+      fixtureSelectorMismatchIsBlock: true
+      credentialLoginFailureIsBlockUntilClassified: true
+      providerEnvStagingCostNeedIsOutOfScopeBlock: true
+    forbiddenUntilSeparateApproval:
+      - db_write
+      - db_cleanup
+      - db_reset
+      - destructive_delete_truncate_drop
+      - schema_migration
+      - ddl
+      - seed_framework_work
+      - product_source_change
+      - test_source_change
+      - dependency_change
+      - provider_call
+      - staging_prod_deploy
+      - cost_calibration
+      - release_readiness_claim
+      - final_pass_claim
+      - production_usability_claim
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+    acceptanceBoundaryPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-backed-8-role-local-acceptance-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-backed-8-role-local-acceptance-boundary.md
+      - docs/05-execution-logs/evidence/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - e2e/credential-backed-8-role-local-acceptance.spec.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-backed-8-role-local-acceptance-boundary.md docs/05-execution-logs/evidence/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-backed-8-role-local-acceptance.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-db-backed-8-role-local-acceptance-2026-07-03
+    validationSummary:
+      status: passed_governance_validation
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      dbBackedAcceptanceExecuted: false
+      browserAcceptanceExecuted: false
+      e2eExecuted: false
+      devServerStartedOrRestarted: false
+      dbReadExecuted: false
+      dbWriteExecuted: false
+      privateFixtureRead: false
+      credentialOrLoginIdentifierRecorded: false
+      rawDbRowsInternalIdsOrPiiRecorded: false
+      providerExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03
     title: Stage B test-owned fixture provisioning scope refresh
     phase: stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03
