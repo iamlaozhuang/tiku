@@ -302,21 +302,35 @@ export type PlatformAdminAccountCreationRole = Extract<
   "ops_admin" | "content_admin"
 >;
 
+export type OrganizationAdminAccountCreationRole = Extract<
+  AdminRole,
+  "org_standard_admin" | "org_advanced_admin"
+>;
+
+export type AdminAccountCreationRole =
+  | PlatformAdminAccountCreationRole
+  | OrganizationAdminAccountCreationRole;
+
 export type AdminAccountCreationInputDto = {
   phone: string;
   name: string;
   password: string;
-  adminRole: PlatformAdminAccountCreationRole;
+  adminRole: AdminAccountCreationRole;
+  organizationPublicId: string | null;
 };
 
 export type AdminAccountCreationSummaryDto = {
   publicId: string;
   name: string;
-  adminRole: PlatformAdminAccountCreationRole;
+  adminRole: AdminAccountCreationRole;
+  organizationPublicId: string | null;
   registeredAt: string;
   status: UserStatus;
   accountDomain: "admin";
-  managedBy: "super_admin";
+  managedBy: Extract<
+    AdminUserManagedBy,
+    "super_admin" | "ops_admin_scoped_org_admin"
+  >;
 };
 
 export type AdminAccountCreationResultDto = {
@@ -330,6 +344,8 @@ export type AdminAccountCreationConflictReason =
 export type AdminAccountCreationConflictDto = {
   reason: AdminAccountCreationConflictReason;
 };
+
+export type AdminAccountCreationNotFoundReason = "organization_not_found";
 
 export function createAdminAuthOperationListQuery(
   overrides: Partial<AdminAuthOperationListQuery> = {},

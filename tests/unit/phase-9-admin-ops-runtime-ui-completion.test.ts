@@ -495,6 +495,121 @@ function mockBootstrapOnlyAdminOpsFetch() {
   });
 }
 
+function mockOpsAdminOrganizationAdminCreationFetch() {
+  localStorage.setItem("tiku.localSessionToken", "ops-admin-session-token");
+
+  const capturedAdminAccountBodies: unknown[] = [];
+  const fetchMock = vi.spyOn(globalThis, "fetch");
+
+  fetchMock.mockImplementation(async (input, init) => {
+    const url =
+      input instanceof Request
+        ? input.url
+        : typeof input === "string"
+          ? input
+          : input.toString();
+    const method = input instanceof Request ? input.method : init?.method;
+
+    if (url.startsWith("/api/v1/sessions")) {
+      return Response.json(
+        createOkPayload({
+          session: { expiresAt: "2026-05-23T16:00:00.000Z" },
+          user: {
+            publicId: "admin-user-public-001",
+            phone: "13900000001",
+            name: "运营管理员",
+            userType: null,
+            status: "active",
+            lockedUntilAt: null,
+            employeePublicId: null,
+            organizationPublicId: null,
+            adminPublicId: "admin-public-001",
+            adminRoles: ["ops_admin"],
+          },
+        }),
+      );
+    }
+
+    if (url.startsWith("/api/v1/admin-accounts") && method === "POST") {
+      const body =
+        input instanceof Request
+          ? await input.clone().json()
+          : JSON.parse(String(init?.body ?? "{}"));
+
+      capturedAdminAccountBodies.push(body);
+
+      return Response.json(
+        createOkPayload({
+          adminAccount: {
+            publicId: "admin-public-created-org-standard",
+            name: "组织管理员",
+            adminRole: "org_standard_admin",
+            organizationPublicId: "organization-public-001",
+            registeredAt: now,
+            status: "active",
+            accountDomain: "admin",
+            managedBy: "ops_admin_scoped_org_admin",
+          },
+        }),
+      );
+    }
+
+    if (url.startsWith("/api/v1/users")) {
+      return Response.json(createOkPayload({ users: [] }));
+    }
+
+    if (url.startsWith("/api/v1/organizations")) {
+      return Response.json(
+        createOkPayload({
+          organizations: [
+            {
+              publicId: "organization-public-001",
+              name: "杭州烟草",
+              orgTier: "city",
+              parentOrganizationPublicId: null,
+              status: "active",
+              employeeCount: 1,
+              authSummary: "monopoly / level 3",
+            },
+          ],
+        }),
+      );
+    }
+
+    if (url.startsWith("/api/v1/employees")) {
+      return Response.json(createOkPayload({ employees: [] }));
+    }
+
+    if (url.startsWith("/api/v1/org-auths")) {
+      return Response.json(createOkPayload({ orgAuths: [] }));
+    }
+
+    if (url.startsWith("/api/v1/redeem-codes")) {
+      return Response.json(createOkPayload({ redeemCodes: [] }));
+    }
+
+    if (url.startsWith("/api/v1/audit-logs")) {
+      return Response.json(createOkPayload({ auditLogs: [] }));
+    }
+
+    if (url.startsWith("/api/v1/ai-call-logs/summary")) {
+      return Response.json(createOkPayload({ dailySummaries: [] }));
+    }
+
+    if (url.startsWith("/api/v1/ai-call-logs")) {
+      return Response.json(createOkPayload({ aiCallLogs: [] }));
+    }
+
+    return Response.json({
+      code: 404001,
+      message: "Not found.",
+      data: null,
+    });
+  });
+
+  return { capturedAdminAccountBodies, fetchMock };
+}
+
 describe("phase 9 admin ops runtime ui completion", () => {
   it("protects user reset password with admin role, publicId, audit log, and redacted response", async () => {
     const { auditInputs, repositories, resetInputs } =
@@ -706,5 +821,50 @@ describe("phase 9 admin ops runtime ui completion", () => {
       screen.getByRole("region", { name: "后台账号创建" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "创建账号" })).toBeDisabled();
+  });
+
+  it("renders ops admin organization-admin creation with a required organization binding", async () => {
+    const { capturedAdminAccountBodies } =
+      mockOpsAdminOrganizationAdminCreationFetch();
+
+    render(createElement(AdminOpsManagement));
+
+    expect(
+      await screen.findByRole("heading", { name: "运营后台闭环" }),
+    ).toBeInTheDocument();
+
+    const roleSelect = screen.getByLabelText("角色") as HTMLSelectElement;
+
+    expect(roleSelect.value).toBe("org_standard_admin");
+    expect(
+      screen.queryByRole("option", { name: "运营管理员" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("option", { name: "内容管理员" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("绑定组织")).toHaveValue(
+      "organization-public-001",
+    );
+
+    fireEvent.change(screen.getByLabelText("手机号"), {
+      target: { value: "13900009010" },
+    });
+    fireEvent.change(screen.getByLabelText("姓名"), {
+      target: { value: "组织管理员" },
+    });
+    fireEvent.change(screen.getByLabelText("初始密码"), {
+      target: { value: "OrgAdmin2026" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "创建账号" }));
+
+    await waitFor(() => {
+      expect(capturedAdminAccountBodies).toEqual([
+        expect.objectContaining({
+          adminRole: "org_standard_admin",
+          organizationPublicId: "organization-public-001",
+        }),
+      ]);
+    });
+    expect(screen.queryByText("OrgAdmin2026")).not.toBeInTheDocument();
   });
 });

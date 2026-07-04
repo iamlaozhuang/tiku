@@ -6,7 +6,12 @@ import {
 } from "@/server/services/admin-flow-runtime";
 import type { SessionService } from "@/server/services/session-service";
 
-type AdminSessionRole = "super_admin" | "ops_admin" | "content_admin";
+type AdminSessionRole =
+  | "super_admin"
+  | "ops_admin"
+  | "content_admin"
+  | "org_standard_admin"
+  | "org_advanced_admin";
 
 const adminAccountPasswordRequestField = "pass" + "word";
 const validAdminAccountCredentialValue = ["Created", "Pass", "2026"].join("");
@@ -14,11 +19,15 @@ const validAdminAccountCredentialValue = ["Created", "Pass", "2026"].join("");
 function createAdminAccountRequestBody(input: {
   adminRole: string;
   name: string;
+  organizationPublicId?: string;
   phone: string;
 }): Record<string, unknown> {
   return {
     adminRole: input.adminRole,
     name: input.name,
+    ...(input.organizationPublicId === undefined
+      ? {}
+      : { organizationPublicId: input.organizationPublicId }),
     [adminAccountPasswordRequestField]: validAdminAccountCredentialValue,
     phone: input.phone,
   };
@@ -55,7 +64,11 @@ function createAdminSessionService(
 function createRepositories(input: {
   auditInputs: unknown[];
   createInputs: unknown[];
-  createStatus?: "created" | "admin_phone_exists" | "user_phone_exists";
+  createStatus?:
+    | "created"
+    | "admin_phone_exists"
+    | "user_phone_exists"
+    | "organization_not_found";
 }): AdminFlowRuntimeRepositories {
   return {
     userOrgAuthRepository: {
@@ -71,7 +84,7 @@ function createRepositories(input: {
           },
         };
       },
-      async createPlatformAdminAccount(createInput) {
+      async createAdminAccount(createInput) {
         input.createInputs.push(createInput);
 
         if (input.createStatus === "admin_phone_exists") {
@@ -88,12 +101,22 @@ function createRepositories(input: {
           };
         }
 
+        if (input.createStatus === "organization_not_found") {
+          return {
+            reason: "organization_not_found",
+            status: "not_found",
+          };
+        }
+
         return {
           adminAccount: {
             accountDomain: "admin",
             adminRole: createInput.adminRole,
-            managedBy: "super_admin",
+            managedBy: createInput.adminRole.startsWith("org_")
+              ? "ops_admin_scoped_org_admin"
+              : "super_admin",
             name: createInput.name,
+            organizationPublicId: createInput.organizationPublicId,
             publicId: `admin-public-created-${createInput.adminRole}`,
             registeredAt: "2026-07-04T18:00:00.000Z",
             status: "active",
@@ -188,6 +211,7 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
           adminRole: "ops_admin",
           managedBy: "super_admin",
           name: "Created Ops Admin",
+          organizationPublicId: null,
           publicId: "admin-public-created-ops_admin",
           registeredAt: "2026-07-04T18:00:00.000Z",
           status: "active",
@@ -220,7 +244,59 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
     );
   });
 
-  it("denies ops_admin and does not call the creation repository", async () => {
+  it("allows ops_admin to create organization admins only with an organization binding", async () => {
+    const auditInputs: unknown[] = [];
+    const createInputs: unknown[] = [];
+    const response = await postAdminAccount({
+      body: createAdminAccountRequestBody({
+        adminRole: "org_standard_admin",
+        name: "Created Org Admin",
+        organizationPublicId: "organization-public-boundary",
+        phone: "13900009006",
+      }),
+      repositories: createRepositories({ auditInputs, createInputs }),
+      role: "ops_admin",
+    });
+
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 0,
+      data: {
+        adminAccount: {
+          accountDomain: "admin",
+          adminRole: "org_standard_admin",
+          managedBy: "ops_admin_scoped_org_admin",
+          name: "Created Org Admin",
+          organizationPublicId: "organization-public-boundary",
+          publicId: "admin-public-created-org_standard_admin",
+          registeredAt: "2026-07-04T18:00:00.000Z",
+          status: "active",
+        },
+      },
+      message: "ok",
+    });
+    expect(createInputs).toEqual([
+      expect.objectContaining({
+        adminRole: "org_standard_admin",
+        organizationPublicId: "organization-public-boundary",
+      }),
+    ]);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "admin_account.create",
+        actorRole: "ops_admin",
+        metadataSummary: "redacted admin account creation metadata",
+        resultStatus: "success",
+        targetResourceType: "admin",
+      }),
+    ]);
+    expect(JSON.stringify({ payload, auditInputs })).not.toMatch(
+      /CreatedPass2026|password|hash|admin-session-token|13900009006/i,
+    );
+  });
+
+  it("denies ops_admin creating platform admins and does not call the creation repository", async () => {
     const auditInputs: unknown[] = [];
     const createInputs: unknown[] = [];
     const response = await postAdminAccount({
@@ -253,6 +329,40 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
     ]);
   });
 
+  it("denies content_admin creating organization admins and does not call the creation repository", async () => {
+    const auditInputs: unknown[] = [];
+    const createInputs: unknown[] = [];
+    const response = await postAdminAccount({
+      body: createAdminAccountRequestBody({
+        adminRole: "org_advanced_admin",
+        name: "Denied Org Admin",
+        organizationPublicId: "organization-public-boundary",
+        phone: "13900009007",
+      }),
+      repositories: createRepositories({ auditInputs, createInputs }),
+      role: "content_admin",
+    });
+
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 403601,
+      data: null,
+      message: "Admin permission denied.",
+    });
+    expect(createInputs).toEqual([]);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "admin_account.create",
+        actorRole: "content_admin",
+        metadataSummary:
+          "redacted admin account creation permission denial metadata",
+        resultStatus: "failed",
+        targetResourceType: "admin",
+      }),
+    ]);
+  });
+
   it("rejects unsupported admin roles before repository mutation", async () => {
     const auditInputs: unknown[] = [];
     const createInputs: unknown[] = [];
@@ -277,6 +387,69 @@ describe("full-chain Scenario 1 admin account creation flow repair", () => {
     expect(auditInputs).toEqual([
       expect.objectContaining({
         metadataSummary: "redacted admin account creation validation metadata",
+        resultStatus: "failed",
+      }),
+    ]);
+  });
+
+  it("rejects organization admin creation without an organization binding before repository mutation", async () => {
+    const auditInputs: unknown[] = [];
+    const createInputs: unknown[] = [];
+    const response = await postAdminAccount({
+      body: createAdminAccountRequestBody({
+        adminRole: "org_standard_admin",
+        name: "Unbound Org Admin",
+        phone: "13900009008",
+      }),
+      repositories: createRepositories({ auditInputs, createInputs }),
+      role: "super_admin",
+    });
+
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 422601,
+      data: null,
+      message: "Invalid admin account creation input.",
+    });
+    expect(createInputs).toEqual([]);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        metadataSummary: "redacted admin account creation validation metadata",
+        resultStatus: "failed",
+      }),
+    ]);
+  });
+
+  it("returns a redacted not-found response when the target organization is not active", async () => {
+    const auditInputs: unknown[] = [];
+    const createInputs: unknown[] = [];
+    const response = await postAdminAccount({
+      body: createAdminAccountRequestBody({
+        adminRole: "org_advanced_admin",
+        name: "Missing Org Admin",
+        organizationPublicId: "organization-public-missing",
+        phone: "13900009009",
+      }),
+      repositories: createRepositories({
+        auditInputs,
+        createInputs,
+        createStatus: "organization_not_found",
+      }),
+      role: "ops_admin",
+    });
+
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 404601,
+      data: null,
+      message: "Organization does not exist.",
+    });
+    expect(createInputs).toHaveLength(1);
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        metadataSummary: "redacted admin account creation not found metadata",
         resultStatus: "failed",
       }),
     ]);

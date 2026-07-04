@@ -18,13 +18,16 @@ import {
   type AdminContentKnowledgePageSize,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import {
+  type AdminAccountCreationRole,
   type AdminAccountCreationConflictDto,
   type AdminAccountCreationResultDto,
+  type OrganizationAdminAccountCreationRole,
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   createAdminAuthOperationListQuery,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import type { AdminRole } from "../models/auth";
 import {
   createPostgresAdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositories,
@@ -42,7 +45,7 @@ export type AdminFlowRuntimeOptions = AdminFlowRuntimeRepositoryOptions & {
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
 
-type AdminFlowRole = "super_admin" | "ops_admin" | "content_admin";
+type AdminFlowRole = AdminRole;
 
 type AdminFlowActor = {
   publicId: string;
@@ -89,6 +92,10 @@ const adminAccountCreationValidationFailedResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
   "Invalid admin account creation input.",
 );
+const organizationNotFoundResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+  "Organization does not exist.",
+);
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -104,7 +111,11 @@ async function readJsonBody(request: Request): Promise<unknown> {
 
 function isAdminFlowRole(role: string): role is AdminFlowRole {
   return (
-    role === "super_admin" || role === "ops_admin" || role === "content_admin"
+    role === "super_admin" ||
+    role === "ops_admin" ||
+    role === "content_admin" ||
+    role === "org_standard_admin" ||
+    role === "org_advanced_admin"
   );
 }
 
@@ -163,8 +174,24 @@ function canReadUserManagement(actor: AdminFlowActor): boolean {
   );
 }
 
-function canCreatePlatformAdminAccount(actor: AdminFlowActor): boolean {
-  return actor.roles.includes("super_admin");
+function isOrganizationAdminAccountCreationRole(
+  role: AdminAccountCreationRole,
+): role is OrganizationAdminAccountCreationRole {
+  return role === "org_standard_admin" || role === "org_advanced_admin";
+}
+
+function canCreateAdminAccount(
+  actor: AdminFlowActor,
+  targetRole: AdminAccountCreationRole,
+): boolean {
+  if (actor.roles.includes("super_admin")) {
+    return true;
+  }
+
+  return (
+    actor.roles.includes("ops_admin") &&
+    isOrganizationAdminAccountCreationRole(targetRole)
+  );
 }
 
 function readRequestIp(request: Request): string | null {
@@ -365,27 +392,11 @@ export function createAdminFlowRuntimeRouteHandlers(
     return resolveAdminActor(request, sessionService);
   }
 
-  async function createPlatformAdminAccount(
-    request: Request,
-  ): Promise<Response> {
+  async function createAdminAccount(request: Request): Promise<Response> {
     const actor = await requireAdminActor(request);
 
     if (actor === null) {
       return createJsonResponse(adminSessionRequiredResponse);
-    }
-
-    if (!canCreatePlatformAdminAccount(actor)) {
-      await appendAdminAccountCreationAuditLog({
-        repositories,
-        request,
-        actor,
-        resultStatus: "failed",
-        targetPublicId: null,
-        metadataSummary:
-          "redacted admin account creation permission denial metadata",
-      });
-
-      return createJsonResponse(adminUserPermissionDeniedResponse);
     }
 
     const createInput = normalizeAdminAccountCreationInput(
@@ -405,10 +416,21 @@ export function createAdminFlowRuntimeRouteHandlers(
       return createJsonResponse(adminAccountCreationValidationFailedResponse);
     }
 
-    if (
-      repositories.userOrgAuthRepository.createPlatformAdminAccount ===
-      undefined
-    ) {
+    if (!canCreateAdminAccount(actor, createInput.value.adminRole)) {
+      await appendAdminAccountCreationAuditLog({
+        repositories,
+        request,
+        actor,
+        resultStatus: "failed",
+        targetPublicId: null,
+        metadataSummary:
+          "redacted admin account creation permission denial metadata",
+      });
+
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    if (repositories.userOrgAuthRepository.createAdminAccount === undefined) {
       await appendAdminAccountCreationAuditLog({
         repositories,
         request,
@@ -421,10 +443,9 @@ export function createAdminFlowRuntimeRouteHandlers(
       return createJsonResponse(adminAccountCreationUnavailableResponse);
     }
 
-    const result =
-      await repositories.userOrgAuthRepository.createPlatformAdminAccount(
-        createInput.value,
-      );
+    const result = await repositories.userOrgAuthRepository.createAdminAccount(
+      createInput.value,
+    );
 
     if (result.status === "conflict") {
       await appendAdminAccountCreationAuditLog({
@@ -441,6 +462,19 @@ export function createAdminFlowRuntimeRouteHandlers(
           reason: result.reason,
         }),
       );
+    }
+
+    if (result.status === "not_found") {
+      await appendAdminAccountCreationAuditLog({
+        repositories,
+        request,
+        actor,
+        resultStatus: "failed",
+        targetPublicId: null,
+        metadataSummary: "redacted admin account creation not found metadata",
+      });
+
+      return createJsonResponse(organizationNotFoundResponse);
     }
 
     await appendAdminAccountCreationAuditLog({
@@ -541,7 +575,7 @@ export function createAdminFlowRuntimeRouteHandlers(
   return createRouteHandlersWithErrorEnvelope({
     adminAccounts: {
       collection: {
-        POST: createPlatformAdminAccount,
+        POST: createAdminAccount,
       },
     },
     users: {

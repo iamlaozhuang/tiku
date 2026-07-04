@@ -31,6 +31,7 @@ import { questionTypeValues, type QuestionType } from "../models/paper";
 import type {
   AdminAccountCreationConflictReason,
   AdminAccountCreationInputDto,
+  AdminAccountCreationNotFoundReason,
   AdminAccountCreationResultDto,
   AdminAuthOperationListQuery,
   AdminUserDetailDto,
@@ -56,7 +57,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
   getUserDetail?(publicId: string): Promise<AdminUserDetailDto | null>;
-  createPlatformAdminAccount?(
+  createAdminAccount?(
     input: AdminAccountCreationInputDto,
   ): Promise<AdminAccountCreationRepositoryResult>;
   resetUserPassword?(
@@ -82,6 +83,10 @@ export type AdminAccountCreationRepositoryResult =
   | {
       status: "conflict";
       reason: AdminAccountCreationConflictReason;
+    }
+  | {
+      status: "not_found";
+      reason: AdminAccountCreationNotFoundReason;
     };
 
 export type UserActiveFlowTerminationResult = {
@@ -118,6 +123,7 @@ export type AdminFlowRuntimeRepositories = {
 
 const {
   admin,
+  adminOrganization,
   authAccount,
   authSession,
   authUser,
@@ -500,7 +506,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         authorizations,
       };
     },
-    async createPlatformAdminAccount(input) {
+    async createAdminAccount(input) {
       const database = getDatabase();
       const [existingAdminRow] = await database
         .select({ public_id: admin.public_id })
@@ -528,10 +534,39 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         };
       }
 
+      const targetOrganizationRow =
+        input.organizationPublicId === null
+          ? null
+          : (
+              await database
+                .select({ id: organization.id })
+                .from(organization)
+                .where(
+                  and(
+                    eq(organization.public_id, input.organizationPublicId),
+                    eq(organization.status, "active"),
+                  ),
+                )
+                .limit(1)
+            )[0];
+
+      if (
+        input.organizationPublicId !== null &&
+        targetOrganizationRow === undefined
+      ) {
+        return {
+          reason: "organization_not_found",
+          status: "not_found",
+        };
+      }
+
       const now = new Date();
       const authUserId = `auth-user-${randomUUID()}`;
       const adminPublicId = `admin-public-${randomUUID()}`;
       const passwordHash = await hashPassword(input.password);
+      const managedBy = input.adminRole.startsWith("org_")
+        ? "ops_admin_scoped_org_admin"
+        : "super_admin";
 
       await database.transaction(async (transaction) => {
         await transaction.insert(authUser).values({
@@ -558,24 +593,40 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           updated_at: now,
           user_id: authUserId,
         });
-        await transaction.insert(admin).values({
-          admin_role: input.adminRole,
-          auth_user_id: authUserId,
-          created_at: now,
-          name: input.name,
-          phone: input.phone,
-          public_id: adminPublicId,
-          status: "active",
-          updated_at: now,
-        });
+        const [createdAdminRow] = await transaction
+          .insert(admin)
+          .values({
+            admin_role: input.adminRole,
+            auth_user_id: authUserId,
+            created_at: now,
+            name: input.name,
+            phone: input.phone,
+            public_id: adminPublicId,
+            status: "active",
+            updated_at: now,
+          })
+          .returning({ id: admin.id });
+
+        if (
+          targetOrganizationRow !== null &&
+          targetOrganizationRow !== undefined &&
+          createdAdminRow !== undefined
+        ) {
+          await transaction.insert(adminOrganization).values({
+            admin_id: createdAdminRow.id,
+            created_at: now,
+            organization_id: targetOrganizationRow.id,
+          });
+        }
       });
 
       return {
         adminAccount: {
           accountDomain: "admin",
           adminRole: input.adminRole,
-          managedBy: "super_admin",
+          managedBy,
           name: input.name,
+          organizationPublicId: input.organizationPublicId,
           publicId: adminPublicId,
           registeredAt: now.toISOString(),
           status: "active",

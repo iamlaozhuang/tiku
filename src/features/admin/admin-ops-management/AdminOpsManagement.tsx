@@ -35,10 +35,11 @@ import type {
   AuditLogListDto,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
 import type {
+  AdminAccountCreationRole,
   AdminAccountCreationResultDto,
   EmployeeListDto,
+  OrganizationAdminAccountCreationRole,
   OrganizationListDto,
-  PlatformAdminAccountCreationRole,
   RedeemCodeGenerationDto,
   RedeemCodeListDto,
   AdminUserDetailDto,
@@ -93,9 +94,10 @@ type ToastMessage = {
 };
 
 type AdminAccountCreationFormState = {
-  adminRole: PlatformAdminAccountCreationRole;
+  adminRole: AdminAccountCreationRole;
   initialSecret: string;
   name: string;
+  organizationPublicId: string;
   phone: string;
 };
 
@@ -217,7 +219,21 @@ const adminRolePolicies = [
   ["super_admin", "超级管理员", "后台账号与角色管理"],
   ["ops_admin", "运营管理员", "用户、企业、授权、卡密运营"],
   ["content_admin", "内容管理员", "题库、试卷、知识点内容维护"],
+  ["org_standard_admin", "标准版组织管理员", "组织员工与授权状态查看"],
+  ["org_advanced_admin", "高级版组织管理员", "企业训练、统计与组织 AI"],
 ] as const;
+
+const superAdminAccountCreationRoles = [
+  "ops_admin",
+  "content_admin",
+  "org_standard_admin",
+  "org_advanced_admin",
+] as const satisfies readonly AdminAccountCreationRole[];
+
+const opsAdminAccountCreationRoles = [
+  "org_standard_admin",
+  "org_advanced_admin",
+] as const satisfies readonly OrganizationAdminAccountCreationRole[];
 
 const emptyAdminOpsData: AdminOpsData = {
   aiCallLogs: [],
@@ -280,6 +296,49 @@ function hasAdminOpsData(data: AdminOpsData): boolean {
 
 function hasAdminOpsWorkspaceContext(data: AdminOpsData): boolean {
   return data.currentAdminRoles.length > 0 || hasAdminOpsData(data);
+}
+
+function isOrganizationAdminAccountCreationRole(
+  role: AdminAccountCreationRole,
+): role is OrganizationAdminAccountCreationRole {
+  return role === "org_standard_admin" || role === "org_advanced_admin";
+}
+
+function getAllowedAdminAccountCreationRoles(
+  currentAdminRoles: AdminRole[],
+): AdminAccountCreationRole[] {
+  if (currentAdminRoles.includes("super_admin")) {
+    return [...superAdminAccountCreationRoles];
+  }
+
+  if (currentAdminRoles.includes("ops_admin")) {
+    return [...opsAdminAccountCreationRoles];
+  }
+
+  return [];
+}
+
+function normalizeAdminAccountCreationForm(
+  formState: AdminAccountCreationFormState,
+  allowedRoles: AdminAccountCreationRole[],
+  organizations: OrganizationListDto["organizations"],
+): AdminAccountCreationFormState {
+  const adminRole = allowedRoles.includes(formState.adminRole)
+    ? formState.adminRole
+    : (allowedRoles[0] ?? formState.adminRole);
+  const organizationPublicId =
+    isOrganizationAdminAccountCreationRole(adminRole) &&
+    formState.organizationPublicId.length === 0
+      ? (organizations[0]?.publicId ?? "")
+      : formState.organizationPublicId;
+
+  return {
+    ...formState,
+    adminRole,
+    organizationPublicId: isOrganizationAdminAccountCreationRole(adminRole)
+      ? organizationPublicId
+      : "",
+  };
 }
 
 function formatMappedLabel(
@@ -472,6 +531,7 @@ export function AdminOpsManagement() {
       adminRole: "ops_admin",
       initialSecret: "",
       name: "",
+      organizationPublicId: "",
       phone: "",
     });
   const [isCreatingAdminAccount, setIsCreatingAdminAccount] = useState(false);
@@ -494,6 +554,19 @@ export function AdminOpsManagement() {
         userType,
       }),
     [auditKeyword, sortBy, sortOrder, userStatus, userType],
+  );
+  const allowedAdminAccountCreationRoles = useMemo(
+    () => getAllowedAdminAccountCreationRoles(data.currentAdminRoles),
+    [data.currentAdminRoles],
+  );
+  const normalizedAdminAccountForm = useMemo(
+    () =>
+      normalizeAdminAccountCreationForm(
+        adminAccountForm,
+        allowedAdminAccountCreationRoles,
+        data.organizations,
+      ),
+    [adminAccountForm, allowedAdminAccountCreationRoles, data.organizations],
   );
 
   useEffect(() => {
@@ -670,7 +743,7 @@ export function AdminOpsManagement() {
     setLoadState(result.loadState);
   }
 
-  async function handleCreatePlatformAdminAccount() {
+  async function handleCreateAdminAccount() {
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -679,14 +752,21 @@ export function AdminOpsManagement() {
     }
 
     setIsCreatingAdminAccount(true);
+    const isOrganizationAdmin = isOrganizationAdminAccountCreationRole(
+      normalizedAdminAccountForm.adminRole,
+    );
     const createResponse = await postAdminApi<AdminAccountCreationResultDto>(
       "/api/v1/admin-accounts",
       sessionToken,
       {
-        adminRole: adminAccountForm.adminRole,
-        name: adminAccountForm.name,
-        [adminAccountPasswordRequestField]: adminAccountForm.initialSecret,
-        phone: adminAccountForm.phone,
+        adminRole: normalizedAdminAccountForm.adminRole,
+        name: normalizedAdminAccountForm.name,
+        organizationPublicId: isOrganizationAdmin
+          ? normalizedAdminAccountForm.organizationPublicId
+          : null,
+        [adminAccountPasswordRequestField]:
+          normalizedAdminAccountForm.initialSecret,
+        phone: normalizedAdminAccountForm.phone,
       },
     );
 
@@ -701,9 +781,10 @@ export function AdminOpsManagement() {
     }
 
     setAdminAccountForm({
-      adminRole: "ops_admin",
+      adminRole: allowedAdminAccountCreationRoles[0] ?? "ops_admin",
       initialSecret: "",
       name: "",
+      organizationPublicId: data.organizations[0]?.publicId ?? "",
       phone: "",
     });
     await refreshAdminOpsData(sessionToken);
@@ -832,12 +913,14 @@ export function AdminOpsManagement() {
 
       <AdminAccountSecurityPolicyPanel />
 
-      {data.currentAdminRoles.includes("super_admin") ? (
+      {allowedAdminAccountCreationRoles.length > 0 ? (
         <AdminAccountCreationPanel
-          formState={adminAccountForm}
+          allowedRoles={allowedAdminAccountCreationRoles}
+          formState={normalizedAdminAccountForm}
           isSubmitting={isCreatingAdminAccount}
+          organizations={data.organizations}
           onChange={setAdminAccountForm}
-          onSubmit={() => void handleCreatePlatformAdminAccount()}
+          onSubmit={() => void handleCreateAdminAccount()}
         />
       ) : null}
 
@@ -1139,20 +1222,28 @@ function AdminAccountSecurityPolicyPanel() {
 }
 
 function AdminAccountCreationPanel({
+  allowedRoles,
   formState,
   isSubmitting,
+  organizations,
   onChange,
   onSubmit,
 }: {
+  allowedRoles: AdminAccountCreationRole[];
   formState: AdminAccountCreationFormState;
   isSubmitting: boolean;
+  organizations: OrganizationListDto["organizations"];
   onChange: (value: AdminAccountCreationFormState) => void;
   onSubmit: () => void;
 }) {
+  const isOrganizationAdmin = isOrganizationAdminAccountCreationRole(
+    formState.adminRole,
+  );
   const canSubmit =
     /^1[3-9]\d{9}$/.test(formState.phone.trim()) &&
     formState.name.trim().length > 0 &&
     /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(formState.initialSecret.trim()) &&
+    (!isOrganizationAdmin || formState.organizationPublicId.length > 0) &&
     !isSubmitting;
 
   return (
@@ -1160,24 +1251,61 @@ function AdminAccountCreationPanel({
       aria-label="后台账号创建"
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">角色</span>
           <select
             className="border-input bg-background text-foreground h-9 rounded-md border px-3 text-sm"
             value={formState.adminRole}
-            onChange={(event) =>
+            onChange={(event) => {
+              const adminRole = event.currentTarget
+                .value as AdminAccountCreationRole;
+
               onChange({
                 ...formState,
-                adminRole: event.currentTarget
-                  .value as PlatformAdminAccountCreationRole,
-              })
-            }
+                adminRole,
+                organizationPublicId: isOrganizationAdminAccountCreationRole(
+                  adminRole,
+                )
+                  ? formState.organizationPublicId ||
+                    organizations[0]?.publicId ||
+                    ""
+                  : "",
+              });
+            }}
           >
-            <option value="ops_admin">运营管理员</option>
-            <option value="content_admin">内容管理员</option>
+            {allowedRoles.map((role) => (
+              <option key={role} value={role}>
+                {adminRoleLabels[role]}
+              </option>
+            ))}
           </select>
         </label>
+        {isOrganizationAdmin ? (
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">绑定组织</span>
+            <select
+              className="border-input bg-background text-foreground h-9 rounded-md border px-3 text-sm"
+              value={formState.organizationPublicId}
+              onChange={(event) =>
+                onChange({
+                  ...formState,
+                  organizationPublicId: event.currentTarget.value,
+                })
+              }
+            >
+              <option value="">请选择组织</option>
+              {organizations.map((organization) => (
+                <option
+                  key={organization.publicId}
+                  value={organization.publicId}
+                >
+                  {organization.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">手机号</span>
           <Input
