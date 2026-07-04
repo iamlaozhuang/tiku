@@ -17225,8 +17225,8 @@ tasks:
     sourceStory: scenario_2_content_admin_paper_collection_cookie_backed_session_block
     dependencies:
       - full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
-    status: pending
-    result: pending
+    status: closed
+    result: pass_admin_flow_cookie_backed_session_auth_repair
     taskKind: minimal_source_test_repair
     moduleRunVersion: 2
     branch: codex/full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
@@ -17234,6 +17234,9 @@ tasks:
     targetClosureItem: Repair admin-flow runtime session lookup to accept shared cookie-backed admin sessions without exposing client tokens.
     behaviorBoundary: local_source_test_doc_repair_only_no_db_write_no_schema_migration_seed_no_provider_no_staging_prod_no_cost_no_dependency_no_release_final_or_production_claim
     evidenceMode: redacted_task_ids_branch_file_paths_route_labels_role_labels_command_names_pass_fail_block_summary_only
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -17302,6 +17305,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
     retryCount: 0
     lastFailurePath: null
+    nextRequiredTask: full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
 
   - id: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
     title: Full-chain Scenario 2 paper auth block closeout SHA repair

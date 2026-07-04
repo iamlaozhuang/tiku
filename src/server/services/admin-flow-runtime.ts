@@ -109,12 +109,6 @@ function isAdminFlowRole(role: string): role is AdminFlowRole {
 }
 
 function getAdminFlowAuthorization(request: Request): string | null {
-  const authorization = request.headers.get("authorization")?.trim() ?? null;
-
-  if (authorization === null || authorization === "") {
-    return null;
-  }
-
   return getRequestAuthorization(request);
 }
 

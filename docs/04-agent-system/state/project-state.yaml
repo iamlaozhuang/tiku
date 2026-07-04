@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
-updatedAt: "2026-07-04T13:30:00-07:00"
+currentPhase: full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
+updatedAt: "2026-07-04T13:35:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -26719,8 +26719,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: bf59481dc54a7ee6c122a86fb5cfdc80bde0a9a5
-  lastKnownOriginMasterSha: d91b1b0c26bcf94c5d3c91a55fe8c9022c0c073a
+  lastKnownMasterSha: 6537296f5a45141fb3eaca3d6b28d31a98c485fc
+  lastKnownOriginMasterSha: 6537296f5a45141fb3eaca3d6b28d31a98c485fc
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -26860,27 +26860,32 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
-  phase: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+  id: full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
+  phase: full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
   status: closed
-  result: pass_repository_sha_checkpoint_repaired_after_scenario_2_paper_auth_block
-  taskKind: local_closeout_sha_checkpoint_repair
+  result: pass_admin_flow_cookie_backed_session_auth_repair
+  taskKind: minimal_source_test_repair
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
-  claimedAt: "2026-07-04T13:30:00-07:00"
-  plannedAt: "2026-07-04T13:30:00-07:00"
-  completedAt: "2026-07-04T13:30:00-07:00"
+  branch: codex/full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
+  claimedAt: "2026-07-04T13:31:00-07:00"
+  plannedAt: "2026-07-04T13:31:00-07:00"
+  implementedAt: "2026-07-04T13:33:00-07:00"
+  validatedAt: "2026-07-04T13:35:00-07:00"
+  reviewedAt: "2026-07-04T13:35:00-07:00"
+  completedAt: "2026-07-04T13:35:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   sourceBlockTaskId: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
+    - src/server/services/admin-flow-runtime.ts
+    - src/server/services/admin-flow-runtime.test.ts
   blockedFiles:
     - AGENTS.md
     - package.json
@@ -26888,8 +26893,6 @@ currentTask:
     - package-lock.json
     - pnpm-lock.yaml
     - pnpm-workspace.yaml
-    - src/**
-    - tests/**
     - e2e/**
     - src/db/schema/**
     - drizzle/**
@@ -26904,20 +26907,23 @@ currentTask:
     - .env*
   validationSummary:
     status: pass
+    focusedRegressionBeforeRepair: failed_as_expected_exit_1
+    focusedRegressionAfterRepair: passed_exit_0
+    typecheck: passed_exit_0
     scopedPrettierWrite: passed_exit_0
     scopedPrettierCheck: passed_exit_0
     gitDiffCheck: passed_exit_0
-    blockedPathDiffCheck: passed_exit_0_no_output
-    prePushShaDriftBlockCaptured: true
-    repositoryShaCheckpointRepaired: true
     moduleRunV2PreCommitHardening: passed_exit_0
-    moduleRunV2PrePushReadiness: passed_exit_0
+    sourceRepairChanged: true
+    testAdded: true
     directDbConnectionExecuted: false
     directDbMutationExecuted: false
     browserRuntimeExecuted: false
+    devServerStarted: false
     providerCallOrConfigurationExecuted: false
-    sourceTestChanged: false
-    nextAction: push_retry_then_full_chain_scenario_2_admin_flow_cookie_session_auth_repair
+    schemaMigrationSeedChanged: false
+    dependencyOrLockfileChanged: false
+    nextAction: full_chain_scenario_2_content_baseline_rerun_after_admin_flow_cookie_session_repair
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
@@ -52841,8 +52847,8 @@ fullChainScenario2ContentBaselineRerunAfterKnowledgeBaselineProvisioning20260704
 fullChainScenario2AdminFlowCookieSessionAuthRepair20260704:
   taskId: full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
   phase: full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
-  status: pending
-  result: pending
+  status: closed
+  result: pass_admin_flow_cookie_backed_session_auth_repair
   priority: p0
   taskKind: minimal_source_test_repair
   moduleRunVersion: 2
@@ -52851,6 +52857,11 @@ fullChainScenario2AdminFlowCookieSessionAuthRepair20260704:
   targetClosureItem: Repair admin-flow runtime session lookup so cookie-backed admin sessions work for content-admin paper collection GET.
   branch: codex/full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  plannedAt: "2026-07-04T13:31:00-07:00"
+  implementedAt: "2026-07-04T13:33:00-07:00"
+  validatedAt: "2026-07-04T13:35:00-07:00"
+  reviewedAt: "2026-07-04T13:35:00-07:00"
+  closedAt: "2026-07-04T13:35:00-07:00"
   planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-admin-flow-cookie-session-auth-repair.md
@@ -52869,3 +52880,28 @@ fullChainScenario2AdminFlowCookieSessionAuthRepair20260704:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  validationSummary:
+    status: pass
+    focusedRegressionBeforeRepair: failed_as_expected_exit_1
+    focusedRegressionAfterRepair: passed_exit_0
+    typecheck: passed_exit_0
+    scopedPrettierWrite: passed_exit_0
+    scopedPrettierCheck: passed_exit_0
+    gitDiffCheck: passed_exit_0
+    moduleRunV2PreCommitHardening: passed_exit_0
+    sourceRepairChanged: true
+    testAdded: true
+    browserOrE2eExecuted: false
+    devServerStarted: false
+    directDbConnectionExecuted: false
+    directDbMutationExecuted: false
+    schemaMigrationSeedChanged: false
+    providerCallOrConfigurationExecuted: false
+    dependencyOrLockfileChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+  nextRequiredTask:
+    taskId: full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
+    status: pending_rerun_from_affected_node
+    reason: repair_closed_and_scenario_2_paper_collection_node_requires_rerun
