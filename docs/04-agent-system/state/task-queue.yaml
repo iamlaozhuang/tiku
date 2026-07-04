@@ -18901,3 +18901,156 @@ tasks:
       productionUsabilityClaimed: false
     retryCount: 0
     lastFailurePath: null
+
+  - id: full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-2026-07-04
+    title: Full-chain Scenario 1 admin role bootstrap runtime rerun
+    phase: full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-2026-07-04
+    sourceStory: scenario_1_rerun_after_private_admin_input_provisioning
+    dependencies:
+      - full-chain-scenario-1-admin-input-provisioning-2026-07-04
+      - full-chain-scenario-1-admin-account-creation-flow-repair-2026-07-04
+      - full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+    status: closed
+    result: blocked_requires_source_repair_admin_ops_empty_state_hides_super_admin_creation_panel
+    taskKind: local_acceptance_runtime_browser_db_aggregate
+    moduleRunVersion: 2
+    targetClosureItem: Prove bootstrap super_admin creates ops_admin and content_admin through the product runtime flow in the isolated local DB.
+    centralizedApprovalAddendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
+    claimedAt: "2026-07-04T10:52:12-07:00"
+    plannedAt: "2026-07-04T10:52:12-07:00"
+    branch: codex/full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    runtimeScope:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      runSelector: full_chain_acceptance_20260704
+      bootstrapSelector: fc_bootstrap_super_admin
+      targetRoleSelectors:
+        - fc_ops_admin_created_by_super_admin
+        - fc_content_admin_created_by_super_admin
+      targetRoleLabels:
+        - ops_admin
+        - content_admin
+      productSurfaces:
+        - /login
+        - /ops/users
+      productRoutes:
+        - /api/v1/sessions
+        - /api/v1/admin-accounts
+      privateCredentialUse: in_memory_only
+      browserArtifactsAllowed: false
+      screenshotsAllowed: false
+      rawDomAllowed: false
+      traceAllowed: false
+      directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+    nextRequiredTask:
+      id: full-chain-scenario-1-admin-ops-empty-state-role-panel-repair-2026-07-04
+      status: pending_repair
+      reason: source_repair_required_before_scenario_1_rerun_can_create_admin_accounts
+    behaviorBoundary: local_app_browser_e2e_private_credentials_in_memory_product_flow_selector_scoped_db_aggregate_only_no_repo_secret_values_no_source_test_change_no_schema_migration_seed_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_and_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-*.md
+      - src/app/(auth)/login/page.tsx
+      - src/app/(admin)/ops/users/page.tsx
+      - src/features/admin/**
+      - src/server/**
+      - e2e/**
+      - .env*
+      - D:/tiku-local-private/acceptance/**
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    blockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - fake_data_or_fixture_expansion_in_repository
+      - redaction_violation
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted runtime DB target check>"
+      - powershell.exe -NoProfile -Command "<local dev server start with redacted env>"
+      - powershell.exe -NoProfile -Command "<browser product flow with private credentials in memory>"
+      - powershell.exe -NoProfile -Command "<selector-scoped aggregate DB verification>"
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-runtime-rerun.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-2026-07-04
+    validationSummary:
+      status: blocked
+      taskPlanPrepared: true
+      runtimeDbTargetCheck: pass
+      devServerStarted: true
+      browserProductFlowExecuted: partial_login_and_ops_users_route_reached_panel_hidden
+      selectorScopedAggregateDbVerification: pass_no_target_or_forbidden_family_writes
+      targetRoleCreationCounts:
+        ops_admin: 0
+        content_admin: 0
+        total: 0
+      privateValueOutput: false
+      sourceTestChanged: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      stopCategory: source_repair_required
+      blockedReason: admin_ops_empty_state_ignores_super_admin_role_context
+    retryCount: 0
+    lastFailurePath: null
