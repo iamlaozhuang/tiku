@@ -358,6 +358,138 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-isolated-db-account-plan-prep-2026-07-04
+    title: Full chain isolated DB account plan prep
+    phase: full-chain-isolated-db-account-plan-prep-2026-07-04
+    sourceStory: current_user_approved_updating_account_information_for_full_chain_isolated_db_run_2026_07_04
+    taskKind: private_account_plan_prep
+    moduleRunVersion: 2
+    status: closed
+    result: pass_private_account_selector_plan_prepared_no_db_or_runtime_execution
+    priority: p0
+    dependencies:
+      - full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user approved executing the account information update after the full-chain isolated DB bootstrap approval
+      prep. This task may prepare a run-specific private account selector plan outside the repository and update
+      repository docs/state/evidence/audit only. It must not execute DB connection/read/write/create/drop/migration/seed,
+      browser/e2e, dev server, Provider, staging/prod/deploy, Cost Calibration, source/test/dependency/schema/script/env
+      changes, release readiness, final Pass, or production usability claims. Repository evidence must be redacted.
+    targetClosureItem: Prepare the run-specific account selector plan for the later full-chain isolated DB acceptance run.
+    behaviorBoundary: repo_docs_state_acceptance_evidence_audit_plus_one_private_redacted_account_plan_only_no_runtime_or_db_execution
+    evidenceMode: redacted_task_ids_file_paths_selector_labels_counts_statuses_validation_results_only_no_private_values_or_raw_rows
+    accountPlanSummary:
+      proposedDbLabel: tiku_full_chain_acceptance_20260704_001
+      proposedRunSelector: full_chain_acceptance_20260704
+      fixtureNamespace: full-chain-acceptance-2026-07-04
+      privatePlanPath: D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+      oldEightRoleFixturePath: D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      oldEightRoleFixtureRoleHeadingCount: 8
+      bootstrapSeedCandidate: fc_bootstrap_super_admin
+      scenarioOutputSeedDefault: blocked
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-account-plan.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-bootstrap-seed-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-account-provisioning-order.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-dependency-dag.md
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/** except D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    localDbBoundary: no_database_connection_read_write_create_drop_migration_seed_cleanup_reset_raw_rows_or_drizzle_push
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_secret_access_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_credentials_passwords_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    evidenceRedaction:
+      allowed: task_ids_file_paths_selector_labels_counts_statuses_validation_commands_commit_branch_redacted_expected_observed_summary_only
+      forbidden:
+        - credentials_tokens_sessions_cookies_auth_headers
+        - env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_password_plaintext_redeem_code
+        - provider_payloads_prompts_raw_ai_io
+        - full_question_paper_material_resource_chunk_content
+        - raw_dom_screenshots_traces_html_reports
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-account-plan.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        approvalRequired: fresh_user_approval
+        targetBranch: master
+      push:
+        approved: false
+        approvalRequired: fresh_user_approval
+        target: origin/master
+      cleanup:
+        deleteShortBranchAfterMerge: true
+        approvalRequired: after_fresh_merge_approval
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-account-plan-prep.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-account-plan.md docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-account-plan-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-isolated-db-account-plan-prep.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-isolated-db-account-plan.md docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-account-plan-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-account-plan-prep.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -Command "if (-not (Test-Path 'D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md')) { throw 'private account plan missing' }"
+      - powershell.exe -NoProfile -Command "$content = Get-Content 'D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md' -Raw; if ($content -match '(?i)(password\s*[:=]\s*\S+|token\s*[:=]\s*\S+|redeem_code\s*[:=]\s*\S+)') { throw 'private account plan redaction sentinel failed' }"
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-isolated-db-account-plan-prep-2026-07-04
+    validationSummary:
+      status: passed_governance_validation_after_redaction_sentinel_command_quote_repair
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      privateAccountPlanExists: passed_exit_0
+      privateAccountPlanRedactionSentinel: passed_after_command_quote_repair
+      moduleRunV2PreCommitHardening: passed_exit_0
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      dbConnectionOrMutationExecuted: false
+      browserOrE2eExecuted: false
+      devServerStarted: false
+      providerCallExecuted: false
+      envSecretAccessed: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
     title: Full chain isolated DB bootstrap seed approval prep
     phase: full-chain-isolated-db-bootstrap-seed-approval-prep-2026-07-04
