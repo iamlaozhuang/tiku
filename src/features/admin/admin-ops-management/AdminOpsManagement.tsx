@@ -278,6 +278,10 @@ function hasAdminOpsData(data: AdminOpsData): boolean {
   );
 }
 
+function hasAdminOpsWorkspaceContext(data: AdminOpsData): boolean {
+  return data.currentAdminRoles.length > 0 || hasAdminOpsData(data);
+}
+
 function formatMappedLabel(
   labels: Record<string, string>,
   value: string,
@@ -442,7 +446,7 @@ async function loadAdminOpsData(
 
     return {
       data,
-      loadState: hasAdminOpsData(data) ? "ready" : "empty",
+      loadState: hasAdminOpsWorkspaceContext(data) ? "ready" : "empty",
     };
   } catch {
     return {

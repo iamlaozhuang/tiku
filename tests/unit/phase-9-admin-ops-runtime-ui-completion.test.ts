@@ -422,6 +422,79 @@ function mockAdminOpsFetch() {
   });
 }
 
+function mockBootstrapOnlyAdminOpsFetch() {
+  localStorage.setItem("tiku.localSessionToken", "admin-session-token");
+
+  const fetchMock = vi.spyOn(globalThis, "fetch");
+
+  return fetchMock.mockImplementation(async (input) => {
+    const url =
+      input instanceof Request
+        ? input.url
+        : typeof input === "string"
+          ? input
+          : input.toString();
+
+    if (url.startsWith("/api/v1/sessions")) {
+      return Response.json(
+        createOkPayload({
+          session: { expiresAt: "2026-05-23T16:00:00.000Z" },
+          user: {
+            publicId: "admin-user-public-001",
+            phone: "13900000001",
+            name: "超级管理员",
+            userType: null,
+            status: "active",
+            lockedUntilAt: null,
+            employeePublicId: null,
+            organizationPublicId: null,
+            adminPublicId: "admin-public-001",
+            adminRoles: ["super_admin"],
+          },
+        }),
+      );
+    }
+
+    if (url.startsWith("/api/v1/users")) {
+      return Response.json(createOkPayload({ users: [] }));
+    }
+
+    if (url.startsWith("/api/v1/organizations")) {
+      return Response.json(createOkPayload({ organizations: [] }));
+    }
+
+    if (url.startsWith("/api/v1/employees")) {
+      return Response.json(createOkPayload({ employees: [] }));
+    }
+
+    if (url.startsWith("/api/v1/org-auths")) {
+      return Response.json(createOkPayload({ orgAuths: [] }));
+    }
+
+    if (url.startsWith("/api/v1/redeem-codes")) {
+      return Response.json(createOkPayload({ redeemCodes: [] }));
+    }
+
+    if (url.startsWith("/api/v1/audit-logs")) {
+      return Response.json(createOkPayload({ auditLogs: [] }));
+    }
+
+    if (url.startsWith("/api/v1/ai-call-logs/summary")) {
+      return Response.json(createOkPayload({ dailySummaries: [] }));
+    }
+
+    if (url.startsWith("/api/v1/ai-call-logs")) {
+      return Response.json(createOkPayload({ aiCallLogs: [] }));
+    }
+
+    return Response.json({
+      code: 404001,
+      message: "Not found.",
+      data: null,
+    });
+  });
+}
+
 describe("phase 9 admin ops runtime ui completion", () => {
   it("protects user reset password with admin role, publicId, audit log, and redacted response", async () => {
     const { auditInputs, repositories, resetInputs } =
@@ -618,5 +691,20 @@ describe("phase 9 admin ops runtime ui completion", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("ABCDEFG2")).not.toBeInTheDocument();
     expect(screen.queryByText("admin-session-token")).toBeNull();
+  });
+
+  it("renders super admin account creation on a bootstrap-only ops workspace", async () => {
+    mockBootstrapOnlyAdminOpsFetch();
+
+    render(createElement(AdminOpsManagement));
+
+    expect(
+      await screen.findByRole("heading", { name: "运营后台闭环" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("暂无运营后台数据")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "后台账号创建" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "创建账号" })).toBeDisabled();
   });
 });
