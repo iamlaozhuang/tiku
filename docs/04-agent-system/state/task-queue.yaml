@@ -17128,6 +17128,166 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning-2026-07-04
+    title: Full-chain Scenario 4 standard org package rerun after org-admin input provisioning
+    phase: full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning-2026-07-04
+    sourceStory: scenario_4_standard_org_package_rerun_after_private_org_admin_input_provisioning
+    dependencies:
+      - full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+      - full-chain-scenario-4-standard-org-package-2026-07-04
+      - full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+      - full-chain-scenario-4-org-admin-create-bind-flow-repair-2026-07-04
+      - full-chain-scenario-4-standard-org-package-rerun-after-org-admin-create-bind-flow-repair-2026-07-04
+      - full-chain-scenario-4-org-admin-input-provisioning-2026-07-04
+    status: closed
+    result: pass_scenario_4_standard_org_package_rerun_after_org_admin_input_provisioning
+    taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    targetClosureItem: Rerun Scenario 4 from the affected org-admin private input gate and prove standard organization authorization, org admin binding, and employee import through product runtime.
+    behaviorBoundary: local_app_browser_e2e_in_memory_private_inputs_product_runtime_standard_org_auth_org_admin_binding_employee_import_selector_scoped_aggregate_db_verification_no_source_test_dependency_schema_migration_seed_provider_staging_prod_cost_destructive_db_or_release_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only
+    plannedAt: "2026-07-04T15:57:09-07:00"
+    completedAt: "2026-07-04T16:08:53-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/organization-tree/organization-tree-plan.json
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/standard-employee-import-selector.json
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/standard-employee-import.csv
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/authorization-matrix.yaml
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+      - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-*.md
+      - src/app/(auth)/login/page.tsx
+      - src/app/(admin)/ops/organizations/page.tsx
+      - src/app/api/v1/sessions/route.ts
+      - src/app/api/v1/organizations/route.ts
+      - src/app/api/v1/org-auths/route.ts
+      - src/app/api/v1/admin-accounts/route.ts
+      - src/app/api/v1/employees/import/route.ts
+      - src/server/auth/session-route.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/contracts/organization-auth-contract.ts
+      - src/server/validators/org-auth.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
+      - src/server/validators/admin-account-creation.ts
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/validators/employee-account.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - package.json
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - C:/Users/jzzhu/.codex/skills/playwright/SKILL.md
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted Scenario 4 private metadata and DB target preflight>"
+      - powershell.exe -NoProfile -Command "<local app startup with redacted runtime env>"
+      - node - <redacted Scenario 4 browser and product API flow>
+      - docker compose exec -T tiku-postgres psql <redacted selector-scoped aggregate verification>
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      browserRuntimeExecuted: true
+      devServerStarted: true
+      directDbConnectionExecuted: true
+      directDbMutationExecuted: false
+      productDbMutationExecuted: true
+      privateInputSelectorSectionsRead: 2
+      orgAuthCreatedCount: 3
+      orgAuthStandardActiveCount: 3
+      orgAuthStandardUsedQuotaSum: 0
+      orgStandardAdminCreatedCount: 1
+      adminOrganizationStandardBindingCount: 1
+      standardEmployeeImportedCount: 6
+      standardEmployeeRejectedCount: 0
+      deniedBoundaryCount: 3
+      allowedBoundaryCount: 0
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      providerCallOrConfigurationExecuted: false
+      dependencyOrLockfileChanged: false
+      privateValueOutput: false
+      screenshotCaptured: false
+      rawDomCaptured: false
+      traceCaptured: false
+      rawDbRowsCaptured: false
+      internalIdsCaptured: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
     title: Full-chain Scenario 2 content baseline rerun after knowledge baseline provisioning
     phase: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
