@@ -14,7 +14,7 @@ Suggested subdirectories:
 
 | Directory               | Purpose                                                        | Repo evidence allowed                          |
 | ----------------------- | -------------------------------------------------------------- | ---------------------------------------------- |
-| `accounts/`             | Private account selector source and credential handling notes  | Role labels and selector presence only         |
+| `accounts/`             | Private account input source and credential handling notes     | Role labels and selector presence only         |
 | `organization-tree/`    | Multi-level organization tree input                            | Node counts by tier                            |
 | `employee-import/`      | Standard and advanced employee CSVs with more than 5 rows each | Row counts and forbidden-column check          |
 | `redeem-code/`          | Standard, advanced, and upgrade card selector pack             | Type/status counts only                        |
@@ -27,17 +27,17 @@ Suggested subdirectories:
 
 ## Required Materials
 
-| Material set              | Must include                                                                                                                             | Depends on                                | Later usage                                                 |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------- |
-| Content source selection  | At least one usable material set for each selected profession/level/subject path.                                                        | Existing local-private package            | Upload, parse/review, publish, knowledge-node build.        |
-| Knowledge-node candidates | Candidate nodes mapped to selected material labels.                                                                                      | Content source selection                  | AI context and learner weak-point summaries.                |
-| Question import set       | All current question types: `single_choice`, `multi_choice`, `true_false`, `fill_blank`, `short_answer`, `case_analysis`, `calculation`. | Content source selection                  | Question bank, paper, practice, mock, training.             |
-| Paper set                 | Theory and skill papers with section mapping and answer/analysis support.                                                                | Question import set                       | Paper library, mock/practice, organization training source. |
-| AI generation matrix      | Content, learner, organization AI supported scope labels and unsupported-role expectations.                                              | Knowledge-node candidates, question types | Provider-approved AI generation and AI组卷 acceptance.      |
-| Organization tree         | Province/city/district/station or equivalent multi-level tree with standard and advanced branches.                                       | DB target                                 | Org auth, admin binding, employee import.                   |
-| Employee imports          | Standard branch >5 employees and advanced branch >5 employees.                                                                           | Organization tree and org auth            | Employee learning and analytics.                            |
-| Card pack                 | One standard activation, one advanced activation, one upgrade path per required `profession + level`.                                    | Personal users and ops admin              | Personal standard and advanced learner chains.              |
-| Learning workload plan    | Practice, mock, mistake-book, AI explanation, AI generation, enterprise training submissions.                                            | Content, auth, employees                  | Analytics and owner-facing experiential validation.         |
+| Material set              | Must include                                                                                                                             | Depends on                                  | Later usage                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------- |
+| Content source selection  | At least one usable material set for each selected profession/level/subject path.                                                        | Existing local-private package              | Upload, parse/review, publish, knowledge-node build.        |
+| Knowledge-node candidates | Candidate nodes mapped to selected material labels.                                                                                      | Content source selection                    | AI context and learner weak-point summaries.                |
+| Question import set       | All current question types: `single_choice`, `multi_choice`, `true_false`, `fill_blank`, `short_answer`, `case_analysis`, `calculation`. | Content source selection                    | Question bank, paper, practice, mock, training.             |
+| Paper set                 | Theory and skill papers with section mapping and answer/analysis support.                                                                | Question import set                         | Paper library, mock/practice, organization training source. |
+| AI generation matrix      | Content, learner, organization AI supported scope labels and unsupported-role expectations.                                              | Knowledge-node candidates, question types   | Provider-approved AI generation and AI组卷 acceptance.      |
+| Organization tree         | Province/city/district/station or equivalent multi-level tree with standard and advanced branches.                                       | DB target                                   | Org auth, admin binding, employee import.                   |
+| Employee imports          | Standard branch >5 employees and advanced branch >5 employees.                                                                           | Organization tree and org auth              | Employee learning and analytics.                            |
+| Card pack                 | One standard activation, one advanced activation, one upgrade path per required `profession + level`.                                    | `ops_admin` and authorization package input | Personal standard and advanced learner chains.              |
+| Learning workload plan    | Practice, mock, mistake-book, AI explanation, AI generation, enterprise training submissions.                                            | Content, auth, employees                    | Analytics and owner-facing experiential validation.         |
 
 ## Minimum Question Type Matrix
 
@@ -52,6 +52,21 @@ Suggested subdirectories:
 | `calculation`   | skill paper and report                              | Required because current minimal CSV lacks it.                                 |
 
 ## Account And Card Data Redaction
+
+## Baseline Seed And Scenario Input Rule
+
+Full-chain acceptance should distinguish three data classes:
+
+- Bootstrap seed: isolated DB label, reviewed empty-DB migrations, bootstrap `super_admin`, and required static config
+  such as `contact_config`.
+- Scenario input: private account inputs, organization tree files, employee CSVs, material files, and card request labels
+  that are used by the later flow without exposing values in repo evidence.
+- Scenario output: accounts other than bootstrap `super_admin`, organization rows, authorization rows, cards, personal
+  users, content, papers, learning records, training records, audit records, and analytics aggregates created by the
+  later experiential flow.
+
+Pre-creating scenario outputs would make the run a fixture verification, not a true full-chain creation proof. Any future
+task that chooses this shortcut must get fresh approval and record exactly which proof is narrowed.
 
 Private account and card files must remain outside the repository. Repo docs may use these selector labels only:
 
@@ -76,8 +91,10 @@ Private account and card files must remain outside the repository. Repo docs may
 - Multi-level organization tree.
 - Standard and advanced enterprise packages represented as expanded current-schema `org_auth` rows.
 - Personal standard activation, direct advanced activation, and upgrade card paths.
-- Content baseline before AI and learning.
+- Content creation before AI and learning.
 - Learning data before analytics.
+- `contact_config` readiness before no-auth ordinary user contact validation.
+- Scenario outputs are not pre-created unless separately approved with proof-narrowing notes.
 - Provider/Cost approval before real AI execution.
 - Redacted evidence policy reviewed before execution.
 

@@ -17,8 +17,8 @@ steps or manually repairing data outside an approved repair/provisioning task.
 | R1   | Isolated DB target inventory                | No DB mutation approval needed if read-only  | Target label match or block                    |
 | R2   | Provisioning scope plan                     | R1 target clear                              | Exact selectors and idempotent upsert boundary |
 | R3   | Fresh approval for provisioning             | R2 accepted                                  | Local-only provisioning execution task         |
-| R4   | Fixture provisioning                        | R3 approval                                  | Redacted aggregate counts                      |
-| R5   | Redacted preflight                          | R4 complete                                  | Pass/fail/block readiness by selector          |
+| R4   | Bootstrap seed only                         | R3 approval                                  | Redacted bootstrap and static config counts    |
+| R5   | Input-material and absence preflight        | R4 complete                                  | Input readiness plus scenario-output absence   |
 | R6   | Browser/e2e approval                        | R5 pass                                      | Runtime acceptance boundary                    |
 | R7   | Full-chain execution T1-T7                  | R6 approval                                  | Redacted pass/fail/block evidence              |
 | R8   | Defect split if needed                      | Any fail/block                               | Repair/provisioning task                       |
@@ -30,8 +30,9 @@ steps or manually repairing data outside an approved repair/provisioning task.
 Stop immediately when any of these occurs:
 
 - DB target or app runtime target is ambiguous or mismatched.
-- Required selector, account, organization, authorization, employee, content, question, paper, card, or training fixture
-  is missing.
+- A required bootstrap selector, private input, or step-specific scenario prerequisite is missing when that step is
+  reached.
+- DB provisioning would pre-create a scenario output that the later experiential flow is supposed to prove.
 - Any action requires cleanup/reset/delete/truncate/drop or unapproved schema migration.
 - Any role sees data or routes outside its boundary.
 - Any standard role can use advanced-only AI or enterprise training.

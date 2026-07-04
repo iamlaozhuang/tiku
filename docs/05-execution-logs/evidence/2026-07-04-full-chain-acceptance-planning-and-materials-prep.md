@@ -62,6 +62,7 @@ Evidence status: pass.
 | `git diff --check`                                                                                            | pass              | No whitespace errors.                                                                                                                                       |
 | `git diff --name-only -- <blocked paths>`                                                                     | pass              | No blocked source, test, dependency, DB, script, runtime, or env path changes.                                                                              |
 | `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-acceptance-planning-and-materials-prep-2026-07-04` | pass after repair | First run failed on missing evidence/audit requirement mapping result; evidence and audit were updated with the required mapping anchor, then rerun passed. |
+| Second-review scoped governance rerun                                                                         | pass              | After boundary correction, scoped Prettier check, `git diff --check`, blocked-path diff, and Module Run v2 pre-commit hardening passed.                     |
 | `git commit` pre-commit hook                                                                                  | repaired          | Initial commit attempt used stale previous-task `currentTask`; project-state current task was corrected before rerun.                                       |
 
 ## Validation Summary
@@ -71,6 +72,7 @@ Evidence status: pass.
 - gitDiffCheck: pass
 - blockedPathDiffCheck: pass
 - moduleRunV2PreCommitHardening: pass after one documentation-anchor repair
+- secondReviewBoundaryCorrection: pass, bootstrap seed separated from scenario-created outputs
 - commitHookCurrentTaskAnchor: repaired after stale previous-task anchor
 - sourceOrTestChanged: false
 - packageOrLockfileChanged: false
@@ -84,6 +86,20 @@ Evidence status: pass.
 - releaseReadinessClaimed: false
 - finalPassClaimed: false
 - productionUsabilityClaimed: false
+
+## Two-Pass Review Correction
+
+- reviewPass1: found one material boundary issue.
+- issue: the original DB/provisioning wording could be read as permission to pre-create scenario-owned business outputs,
+  which would weaken the later full-chain creation proof.
+- correction: dependency DAG, DB approval package, account order, materials spec, runbook, track matrix, and task plan now
+  separate bootstrap seed, scenario input, scenario output, and shortcut seed.
+- reviewPass2: contact information prerequisite was made explicit through `contact_config`; stop rules now block missing
+  or ambiguous contact config before ordinary user contact validation.
+- reviewPass2: runbook stop wording was narrowed to step-specific prerequisites, and card-pack dependency was corrected
+  so card creation depends on `ops_admin` and authorization-package input rather than personal users.
+- runtimeBoundary: no DB, browser/e2e, dev server, Provider, staging, production, or Cost Calibration was executed during
+  this review correction.
 
 ## Non-Claims
 

@@ -18,7 +18,7 @@ fullChainAcceptancePlanningAndMaterialsPrep20260704:
   branch: codex/full-chain-acceptance-planning-and-materials-prep-2026-07-04
   claimedAt: "2026-07-04T08:08:05-07:00"
   plannedAt: "2026-07-04T08:08:05-07:00"
-  completedAt: "2026-07-04T08:16:50-07:00"
+  completedAt: "2026-07-04T08:31:41-07:00"
   dbBaselineDecision:
     defaultStrategy: new_isolated_local_db
     proposedDbLabel: tiku_full_chain_acceptance_20260704_001
@@ -30,6 +30,8 @@ fullChainAcceptancePlanningAndMaterialsPrep20260704:
     ownerScenarioCount: 12
     accountDomainBoundary: admin_domain_separate_from_learner_employee_domain
     orgAuthCurrentSchemaExpansion: multi_profession_multi_level_package_expands_to_multiple_org_auth_rows
+    secondReviewBoundaryCorrection: bootstrap_seed_separated_from_scenario_created_outputs
+    contactConfigPrerequisiteRecorded: true
     localPrivateFixtureRoot: D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated
     localPrivateValuesCommitted: false
   planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
@@ -64,7 +66,7 @@ fullChainAcceptancePlanningAndMaterialsPrep20260704:
     - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-acceptance-planning-and-materials-prep-2026-07-04
   validationSummary:
-    status: passed_governance_validation_after_document_anchor_repair
+    status: passed_governance_validation_after_second_review_boundary_correction
     scopedPrettierWrite: passed_exit_0
     scopedPrettierCheck: passed_exit_0
     gitDiffCheck: passed_exit_0
@@ -72,6 +74,8 @@ fullChainAcceptancePlanningAndMaterialsPrep20260704:
     moduleRunV2PreCommitHardening:
       initialRun: failed_missing_requirement_mapping_result_anchor
       finalRun: passed_exit_0
+      secondReviewRerun: passed_exit_0
+    secondReviewBoundaryCorrectionValidated: true
     sourceOrTestChanged: false
     packageOrLockfileChanged: false
     dbConnectionOrMutationExecuted: false

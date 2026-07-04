@@ -12,24 +12,27 @@ Status: account preparation plan only.
 | Learner/employee domain | `auth_user`, `auth_account`, `user`, `student`, `employee`                          | personal users, personal students, organization employees                               | Existing learner accounts may be bound as employees inside this domain. |
 | Authorization domain    | `redeem_code`, `personal_auth`, `org_auth`, `org_auth_organization`, `auth_upgrade` | personal and organization authorization                                                 | `effectiveEdition` is computed; do not overwrite source `edition`.      |
 
+Prepared input means private data or templates available for the later run. Scenario-created output means the later
+acceptance flow must create the row or state unless a separately approved shortcut narrows that proof.
+
 ## Provisioning Order
 
-| Step | Actor owner                                   | Prepared entities                                  | Must happen after | Must happen before                       | Notes                                                               |
-| ---- | --------------------------------------------- | -------------------------------------------------- | ----------------- | ---------------------------------------- | ------------------------------------------------------------------- |
-| A01  | Future isolated DB task                       | DB label and run selector                          | Approval          | Any account provisioning                 | Proposed label: `tiku_full_chain_acceptance_20260704_001`.          |
-| A02  | `super_admin`                                 | `super_admin` fixture confirmation                 | A01               | A03                                      | May be pre-existing; later task records selector only.              |
-| A03  | `super_admin`                                 | `ops_admin`, `content_admin`                       | A02               | T2/T3 operations                         | Admin-domain accounts.                                              |
-| A04  | `content_admin`                               | Content operator readiness                         | A03               | Content upload/build                     | No operations or org authorization ownership.                       |
-| A05  | `ops_admin`                                   | Organization tree                                  | A03               | Org auth/admin/employee                  | Multiple `org_tier` levels required.                                |
-| A06  | `ops_admin`                                   | Standard enterprise `org_auth` rows                | A05               | Standard org admin and employees         | Multi-scope package expands into multiple rows.                     |
-| A07  | `ops_admin`                                   | Advanced enterprise `org_auth` rows                | A05               | Advanced org admin and employees         | Same expansion rule.                                                |
-| A08  | `ops_admin` or `super_admin`                  | `org_standard_admin`, `org_advanced_admin`         | A05/A06/A07       | Org admin preflight                      | Bind through `admin_organization`.                                  |
-| A09  | `ops_admin`                                   | Standard employees, more than 5                    | A05/A06           | Standard employee learning               | Import target organization node is selected before upload.          |
-| A10  | `ops_admin`                                   | Advanced employees, more than 5                    | A05/A07           | Advanced employee learning and analytics | Import target organization node is selected before upload.          |
-| A11  | `ops_admin`                                   | `redeem_code` rows for standard, advanced, upgrade | A03               | Personal redemption                      | Plaintext values remain private.                                    |
-| A12  | User registration flow or future fixture task | No-auth personal user                              | Content baseline  | Standard card redemption                 | Used for contact and redeem checks.                                 |
-| A13  | User redemption flow                          | Standard `personal_auth`                           | A11/A12           | Upgrade card redemption                  | `personal_standard_activation` creates standard auth.               |
-| A14  | User redemption flow                          | Advanced auth via direct card or upgrade           | A11/A13           | Advanced learner AI                      | `edition_upgrade` writes `auth_upgrade`, not a new `personal_auth`. |
+| Step | Actor owner                  | Prepared input                                      | Scenario-created output                             | Must happen after | Must happen before                       | Notes                                                               |
+| ---- | ---------------------------- | --------------------------------------------------- | --------------------------------------------------- | ----------------- | ---------------------------------------- | ------------------------------------------------------------------- |
+| A01  | Future isolated DB task      | DB label and run selector                           | Empty isolated DB target after approved migrations  | Approval          | Any account action                       | Proposed label: `tiku_full_chain_acceptance_20260704_001`.          |
+| A02  | Future bootstrap task        | `super_admin` selector and static config selector   | Bootstrap `super_admin` and `contact_config` only   | A01               | A03                                      | May be pre-existing or seeded after fresh approval.                 |
+| A03  | `super_admin`                | Private `ops_admin`, `content_admin` account input  | `ops_admin`, `content_admin` admin-domain accounts  | A02               | T2/T3 operations                         | Creation should be proven by scenario 1.                            |
+| A04  | `content_admin`              | Content operator account from A03                   | Content upload/build actions                        | A03               | Content upload/build                     | No operations or org authorization ownership.                       |
+| A05  | `ops_admin`                  | Organization tree input                             | Organization tree rows                              | A03               | Org auth/admin/employee                  | Multiple `org_tier` levels required.                                |
+| A06  | `ops_admin`                  | Standard enterprise authorization package input     | Standard enterprise `org_auth` rows                 | A05               | Standard org admin and employees         | Multi-scope package expands into multiple rows.                     |
+| A07  | `ops_admin`                  | Advanced enterprise authorization package input     | Advanced enterprise `org_auth` rows                 | A05               | Advanced org admin and employees         | Same expansion rule.                                                |
+| A08  | `ops_admin` or `super_admin` | Private org admin account inputs                    | `org_standard_admin`, `org_advanced_admin` bindings | A05/A06/A07       | Org admin preflight                      | Bind through `admin_organization`.                                  |
+| A09  | `ops_admin`                  | Standard employee import CSV, more than 5 rows      | Standard employees                                  | A05/A06           | Standard employee learning               | Import target organization node is selected before upload.          |
+| A10  | `ops_admin`                  | Advanced employee import CSV, more than 5 rows      | Advanced employees                                  | A05/A07           | Advanced employee learning and analytics | Import target organization node is selected before upload.          |
+| A11  | `ops_admin`                  | Card request labels for standard, advanced, upgrade | `redeem_code` rows for standard, advanced, upgrade  | A03               | Personal redemption                      | Plaintext values remain private.                                    |
+| A12  | User registration flow       | No-auth personal user input                         | Registered no-auth personal user                    | Content baseline  | Standard card redemption                 | Used for contact and redeem checks.                                 |
+| A13  | User redemption flow         | Standard card private value                         | Standard `personal_auth`                            | A11/A12           | Upgrade card redemption                  | `personal_standard_activation` creates standard auth.               |
+| A14  | User redemption flow         | Upgrade card private value                          | Advanced effective auth via `auth_upgrade`          | A11/A13           | Advanced learner AI                      | `edition_upgrade` writes `auth_upgrade`, not a new `personal_auth`. |
 
 ## Employee Import Rules
 
@@ -75,6 +78,10 @@ does not approve a schema change.
 - Stop if employee import is attempted before target organization and `org_auth` exist.
 - Stop if upgrade card redemption is attempted before an active matching standard `personal_auth`.
 - Stop if any role can see a surface outside its required boundary.
+- Stop if `ops_admin`, `content_admin`, organization tree, `org_auth`, organization admins, employees, cards, personal
+  users, content, learning, training, or analytics rows are pre-created when the later run is supposed to prove their
+  creation through the scenario flow.
+- Stop if `contact_config` is absent or ambiguous before ordinary user contact validation.
 
 ## Non-Claims
 

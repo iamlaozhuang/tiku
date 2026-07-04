@@ -17,6 +17,8 @@ Status: pass.
 | Validating analytics before employee activity exists                         | High risk     | DAG requires learning/training data before organization analytics.                          |
 | Recording private fixture content in repo                                    | High risk     | Materials inventory and evidence rules allow metadata only.                                 |
 | Inferring production readiness from local prep                               | High risk     | Non-claims repeated across artifacts.                                                       |
+| Pre-creating scenario-owned business outputs during DB provisioning          | High risk     | Docs now separate bootstrap seed, scenario input, scenario output, and shortcut seed.       |
+| Checking ordinary user contact without configured contact data               | Medium risk   | `contact_config` is now an explicit prerequisite and stop condition.                        |
 
 ## Completeness Review
 
@@ -34,6 +36,9 @@ Status: pass.
 | AI Provider and cost boundary                | covered                          |
 | Evidence redaction                           | covered                          |
 | Stop-on-fail repair split                    | covered                          |
+| Bootstrap seed vs scenario-created output    | covered after second review      |
+| Contact configuration prerequisite           | covered after second review      |
+| Step-specific prerequisite wording           | covered after second review      |
 
 ## Requirement Mapping Result
 
@@ -55,6 +60,7 @@ Status: pass.
 | `git diff --check`                 | pass              | No whitespace errors.                                                                                    |
 | Blocked path diff check            | pass              | No source/test/dependency/schema/DB/script/runtime/env path changes.                                     |
 | Module Run v2 pre-commit hardening | pass after repair | Added required Requirement Mapping Result anchor to evidence/audit after initial hardening failure.      |
+| Second-review governance rerun     | pass              | Scoped Prettier, `git diff --check`, blocked-path diff, and Module Run v2 passed after boundary fixes.   |
 | Commit hook current-task anchor    | repaired          | Initial commit attempt used stale previous-task `currentTask`; project-state current task was corrected. |
 
 ## Residual Risk
@@ -64,6 +70,8 @@ Status: pass.
 - Local-private fixture gaps remain open: more-than-5 employee CSVs, full question-type coverage, organization tree,
   private card selector pack, and analytics workload data.
 - The proposed isolated DB label is a planning selector only; no DB readiness is proven.
+- If a future task chooses to seed scenario-owned outputs for speed, that task must get fresh approval and record which
+  creation proof is intentionally narrowed.
 
 ## Non-Claims
 

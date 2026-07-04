@@ -38,37 +38,49 @@ as strict as:
 > Approve local-only non-destructive fixture provisioning for
 > `full-chain-acceptance-planning-and-materials-prep-2026-07-04` follow-up on local Docker Compose PostgreSQL, target DB
 > label `tiku_full_chain_acceptance_20260704_001`, run selector `full_chain_acceptance_20260704`, using private fixture
-> account and material inputs in memory only, allowing idempotent create/upsert for the exact listed auth, user, admin,
-> organization, authorization, content, paper, practice, mock, training, and audit metadata tables required by the
-> approved selector plan. No cleanup/reset/delete/truncate/drop, no schema migration, no source/test/dependency/script
-> changes, no Provider, no browser/e2e unless separately approved, and redacted evidence only.
+> account and material inputs in memory only, allowing idempotent create/upsert only for the explicitly approved
+> bootstrap `super_admin` selector and required static configuration such as `contact_config`. Scenario-owned outputs
+> including `ops_admin`, `content_admin`, organization tree, `org_auth`, organization admins, employee accounts,
+> `redeem_code`, personal users, content, paper, practice, mock, training, and analytics rows must be created by the
+> later acceptance flow unless a future task separately approves a shortcut and records the proof it narrows. No
+> cleanup/reset/delete/truncate/drop, no schema migration, no source/test/dependency/script changes, no Provider, no
+> browser/e2e unless separately approved, and redacted evidence only.
+
+## Baseline Seed Versus Scenario-Created Data
+
+| Category        | Allowed default preparation stance                               | Examples                                                                                             |
+| --------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Bootstrap seed  | May be idempotently created after fresh approval                 | Isolated DB label, reviewed migrations for an empty DB, bootstrap `super_admin`, `contact_config`.   |
+| Scenario input  | May be prepared outside DB and used in memory during execution   | Private account inputs, employee CSVs, organization tree plan, material files, card request labels.  |
+| Scenario output | Must be created by the later experiential flow by default        | `ops_admin`, `content_admin`, org tree, `org_auth`, org admins, employees, cards, content, learning. |
+| Shortcut seed   | Blocked unless separately approved with explicit proof narrowing | Any pre-created organization, authorization, card, user, question, paper, answer, training row.      |
 
 ## Provisioning Phases For Later Execution
 
-| Phase  | Allowed future action after approval                                                                                 | Required proof                                                              |
-| ------ | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| DB-P1  | Create or select isolated local DB label                                                                             | Target label and app runtime label match; no connection string in evidence. |
-| DB-P2  | Apply existing reviewed migrations only if the isolated DB is empty and task explicitly approves migration execution | Migration file inventory and command summary; no `drizzle-kit push`.        |
-| DB-P3  | Idempotently provision admin-domain accounts                                                                         | Counts by role, no phone/email/password values.                             |
-| DB-P4  | Idempotently provision content baseline                                                                              | Counts by material/question/paper/status/type only.                         |
-| DB-P5  | Idempotently provision organization tree                                                                             | Node counts by `org_tier` and status only.                                  |
-| DB-P6  | Idempotently provision `org_auth` rows                                                                               | Row counts by edition/profession/level/status; multi-scope expansion table. |
-| DB-P7  | Idempotently bind organization admins and employees                                                                  | Counts by role/type/org selector only.                                      |
-| DB-P8  | Idempotently provision personal cards and auth                                                                       | Counts by `redeem_code_type`, edition, status only.                         |
-| DB-P9  | Idempotently create minimal learning/training data only if separately approved                                       | Aggregate counts by surface; no raw answers.                                |
-| DB-P10 | Run read-only aggregate preflight                                                                                    | Selector-scoped counts and fail/block classification.                       |
+| Phase | Allowed future action after approval                                                                                 | Required proof                                                              |
+| ----- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| DB-P1 | Create or select isolated local DB label                                                                             | Target label and app runtime label match; no connection string in evidence. |
+| DB-P2 | Apply existing reviewed migrations only if the isolated DB is empty and task explicitly approves migration execution | Migration file inventory and command summary; no `drizzle-kit push`.        |
+| DB-P3 | Idempotently provision bootstrap `super_admin` and required static config only                                       | Counts by bootstrap role/config label only.                                 |
+| DB-P4 | Verify scenario-owned outputs are absent or marked pending before browser/e2e                                        | Zero/pending counts by selector family; no raw rows.                        |
+| DB-P5 | Prepare private scenario inputs outside DB                                                                           | Input file presence and shape only; no private values.                      |
+| DB-P6 | Run browser/e2e scenario actions after separate approval                                                             | Scenario-created counts by role/surface/status.                             |
+| DB-P7 | Run selector-scoped read-only aggregate proof after each scenario batch                                              | Counts by edition/profession/level/status; no raw rows.                     |
+| DB-P8 | Split repair/provisioning only on fail/block                                                                         | Repair task id and blocked selector summary.                                |
 
-## Allowed Future Table Families
+## Table Family Boundary
 
 This list is a planning boundary, not current approval:
 
-- Auth/account family: `auth_user`, `auth_account`, `admin`, `user`, `student`, `employee`.
-- Organization family: `organization`, `admin_organization`, `org_auth`, `org_auth_organization`, `auth_upgrade`.
-- Personal authorization family: `redeem_code`, `personal_auth`, `auth_upgrade`.
-- Content family: `material`, `knowledge_node`, `question`, `question_option`, `paper`, `paper_question`, `paper_asset`.
-- Learning family: `practice`, `mock_exam`, `answer_record`, `exam_report`, `mistake_book`.
-- Enterprise training family: `organization_training_*` tables required by the current schema and approved follow-up scope.
-- Audit family: redacted `audit_log` and `ai_call_log` metadata only when required by the approved execution task.
+- Bootstrap write candidates after fresh approval: reviewed migrations for an empty isolated DB, bootstrap
+  `super_admin`, auth/session-compatible account rows required for that selector, `contact_config`, and other explicitly
+  named static config.
+- Scenario-created write candidates during later browser/e2e approval: `ops_admin`, `content_admin`, `organization`,
+  `admin_organization`, `org_auth`, `org_auth_organization`, `employee`, `redeem_code`, `personal_auth`, `auth_upgrade`,
+  content, paper, learning, mock, mistake-book, enterprise training, audit, and AI call metadata rows generated by the
+  scenario itself.
+- Read-only verification candidates: selector-scoped aggregates for the same families, with no raw rows, no internal ids,
+  and no private values in evidence.
 
 ## Blocked Future Operations Unless Separately Approved
 
@@ -85,13 +97,12 @@ This list is a planning boundary, not current approval:
 Later preflight must record only redacted aggregates:
 
 - Isolated DB target label equals app runtime target label.
-- `super_admin`, `ops_admin`, `content_admin`, `org_standard_admin`, and `org_advanced_admin` selectors exist.
-- Admin-domain and learner/employee-domain phone selectors do not collide.
-- Organization tree contains multiple levels and active target nodes.
-- Standard and advanced enterprise packages expand into expected `org_auth` row counts.
-- Standard and advanced employee imports each exceed 5 employees.
-- Personal standard, advanced, and upgrade card selectors exist.
-- Content baseline has material, knowledge node, question type, and paper coverage.
+- Bootstrap `super_admin` and required static config selectors exist.
+- Scenario-owned output families are absent or explicitly marked pending before the experiential flow starts.
+- Private input files for `ops_admin`, `content_admin`, org admins, employees, cards, organization tree, and materials
+  are present and shape-checked without values.
+- Employee import inputs each exceed 5 employees and contain no authorization fields.
+- Question, paper, AI support, and learning workload inputs cover the required shapes.
 - No forbidden raw value appears in evidence.
 
 ## Non-Claims

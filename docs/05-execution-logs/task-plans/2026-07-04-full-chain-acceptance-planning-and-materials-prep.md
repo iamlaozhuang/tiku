@@ -74,6 +74,7 @@ Blocked work:
 | Employee import                      | `CT-REQ-011`, `CT-REQ-051`, fixture template fields                     | Import is target-organization-first and contains no authorization fields.                        |
 | Content and AI prerequisites         | AI SSOT alignment, UI/UX baseline, fixture manifest                     | Materials, knowledge nodes, question bank, and paper library precede AI generation and training. |
 | Analytics prerequisites              | Role-auth decision and UI/UX baseline                                   | Employee learning and enterprise training data must exist before analytics validation.           |
+| Contact information readiness        | Requirement index, role-auth decision                                   | `contact_config` is a bootstrap/static prerequisite before ordinary user contact validation.     |
 | Evidence redaction                   | AGENTS, ADR-007, fixture redaction policy                               | Only selectors, labels, counts, status, file paths, and redacted summaries are allowed.          |
 
 ## Implementation Plan
@@ -81,7 +82,8 @@ Blocked work:
 1. Record the 7-track acceptance matrix and map the 12 owner scenarios into track order.
 2. Record the dependency DAG so later execution cannot start AI, analytics, training, or advanced admin checks before
    content, authorization, employees, and learning data exist.
-3. Record the DB selector and provisioning approval package using a new isolated local DB baseline decision.
+3. Record the DB selector and provisioning approval package using a new isolated local DB baseline decision, with
+   bootstrap seed separated from business objects that must be created by the later experiential flow.
 4. Record account provisioning order and account-domain boundaries.
 5. Record local-private fixture reuse inventory and the exact gaps that must be filled outside the repo.
 6. Record materials pack spec, Provider/Cost approval boundaries, runbook, stop rules, evidence, and audit.
@@ -107,6 +109,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 - AI generation and AI组卷 remain blocked until Provider and cost boundaries are approved for the specific execution task.
 - Organization analytics is blocked until employee learning and enterprise training data exist.
 - Later execution must stop on first fail/block and split repair or provisioning work.
+- Later DB preparation must not pre-create scenario-owned outputs such as `ops_admin`, `content_admin`, organization
+  tree, `org_auth`, organization admins, employee accounts, `redeem_code`, personal users, content, papers, learning
+  records, enterprise training, or analytics data unless a future task explicitly approves that shortcut and records the
+  proof it narrows.
 
 ## Non-Claims
 
