@@ -9,6 +9,15 @@
 
 Approval package materialized. No DB write or provisioning has been executed.
 
+## Scope Refresh Result
+
+`stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03` refreshed this package before execution:
+
+- target DB label: `tiku_fresh_phase25_20260601_001`;
+- `org_standard_admin`: `admin_role=org_standard_admin`;
+- `org_advanced_admin`: `admin_role=org_advanced_admin`;
+- stale database label `tiku` and old `ops_admin` organization-admin selector wording are no longer execution scope.
+
 ## Adversarial Review
 
 | Risk                            | Control                                                                                                                     |
@@ -22,7 +31,7 @@ Approval package materialized. No DB write or provisioning has been executed.
 
 ## Required Approval Before Execution
 
-The next step requires explicit user approval for the boundary recorded in
+The next step requires explicit user approval for the refreshed boundary recorded in
 `docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md`.
 
 ## 品味合规自检 Checklist

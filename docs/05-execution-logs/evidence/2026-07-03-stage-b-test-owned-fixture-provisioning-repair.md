@@ -40,16 +40,27 @@ screenshots, traces, raw DOM, or exports.
 
 ## Expected Shape Check
 
-| Role                        | Expected shape                                                                      |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `personal_standard_student` | `personal_auth edition=standard`                                                    |
-| `personal_advanced_student` | `personal_auth edition=advanced`                                                    |
-| `org_standard_employee`     | `employee in organization with org_auth edition=standard`                           |
-| `org_advanced_employee`     | `employee in organization with org_auth edition=advanced`                           |
-| `org_standard_admin`        | `organization-bound admin using existing ops_admin role; org_auth edition=standard` |
-| `org_advanced_admin`        | `organization-bound admin using existing ops_admin role; org_auth edition=advanced` |
-| `content_admin`             | `admin_role=content_admin only`                                                     |
-| `ops_admin`                 | `admin_role=ops_admin only`                                                         |
+This shape was refreshed by `stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03`.
+
+| Role                        | Expected shape                                                   |
+| --------------------------- | ---------------------------------------------------------------- |
+| `personal_standard_student` | Personal learner with active `personal_auth` edition `standard`. |
+| `personal_advanced_student` | Personal learner with active `personal_auth` edition `advanced`. |
+| `org_standard_employee`     | Employee bound to target organization with standard org context. |
+| `org_advanced_employee`     | Employee bound to target organization with advanced org context. |
+| `org_standard_admin`        | Organization-bound admin with `admin_role=org_standard_admin`.   |
+| `org_advanced_admin`        | Organization-bound admin with `admin_role=org_advanced_admin`.   |
+| `content_admin`             | Backend admin with `admin_role=content_admin`.                   |
+| `ops_admin`                 | Backend admin with `admin_role=ops_admin`.                       |
+
+## Refreshed DB Target
+
+| Target aspect        | Refreshed value                   |
+| -------------------- | --------------------------------- |
+| Local service label  | `tiku-postgres`                   |
+| App runtime DB label | `tiku_fresh_phase25_20260601_001` |
+| Previous stale label | `tiku`                            |
+| Raw connection value | not recorded                      |
 
 ## Boundary Confirmation Before Fresh Approval
 

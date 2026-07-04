@@ -358,6 +358,115 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03
+    title: Stage B test-owned fixture provisioning scope refresh
+    phase: stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03
+    sourceStory: current_user_requested_docs_only_scope_refresh_before_fresh_approval_2026_07_03
+    humanApprovalBoundary: current_user_requested_docs_only_scope_refresh_no_db_write_2026_07_03
+    targetClosureItem: Refresh pending fixture provisioning repair to app runtime DB and Stage B 8-role SSOT selector.
+    behaviorBoundary: docs_state_only_scope_refresh_no_db_write_no_cleanup_no_reset_no_provisioning_no_seed_no_migration_no_ddl_no_login_no_session_no_browser_no_e2e_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
+    evidenceMode: redacted_task_ids_file_paths_target_labels_role_labels_expected_shape_labels_status_categories_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: docs_state_provisioning_scope_refresh
+    moduleRunVersion: 2
+    executionProfile: docs_state_only_scope_refresh
+    status: closed
+    result: completed_docs_only_scope_refresh_app_runtime_db_target_and_8_role_ssot_selector_ready_for_fresh_approval
+    priority: p0
+    branch: codex/stage-b-test-owned-account-db-target-alignment-2026-07-03
+    claimedAt: "2026-07-03T23:15:00-07:00"
+    plannedAt: "2026-07-03T23:15:00-07:00"
+    completedAt: "2026-07-03T23:15:00-07:00"
+    dependsOn:
+      - stage-b-test-owned-account-db-target-alignment-2026-07-03
+      - stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+      - stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    refreshedDbTarget:
+      serviceLabel: tiku-postgres
+      appRuntimeHostPortLabel: localhost_5432
+      appRuntimeDbNameLabel: tiku_fresh_phase25_20260601_001
+      staleDbNameLabel: tiku
+      rawConnectionStringRecorded: false
+    refreshedSelector:
+      personal_standard_student: personal_user_student_active_personal_auth_standard
+      personal_advanced_student: personal_user_student_active_personal_auth_advanced
+      org_standard_employee: employee_bound_to_organization_active_org_auth_standard
+      org_advanced_employee: employee_bound_to_organization_active_org_auth_advanced
+      org_standard_admin: organization_bound_admin_role_org_standard_admin_standard_org_context
+      org_advanced_admin: organization_bound_admin_role_org_advanced_admin_advanced_org_context
+      content_admin: admin_role_content_admin
+      ops_admin: admin_role_ops_admin
+    freshApprovalRequired:
+      requiredBeforeDbWrite: true
+      approvalTextRequired: approve_non_destructive_local_only_fixture_provisioning_for_stage_b_test_owned_fixture_provisioning_repair_2026_07_03_on_tiku_fresh_phase25_20260601_001
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+    acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+      - docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-test-owned-fixture-provisioning-scope-refresh.md
+      - docs/05-execution-logs/task-plans/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md
+      - docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown <task files>
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03
+    validationSummary:
+      status: passed_governance_validation
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      dbWriteExecuted: false
+      provisioningExecuted: false
+      localDataCleanupExecuted: false
+      localDataResetExecuted: false
+      destructiveDbActionExecuted: false
+      schemaMigrationSeedOrDdlExecuted: false
+      loginOrAuthSessionCreated: false
+      browserSessionAccessed: false
+      credentialOrLoginIdentifierRecorded: false
+      rawEnvOrConnectionStringRecorded: false
+      providerExecuted: false
+      stagingProdDeployExecuted: false
+      stageBDbBackedAcceptanceStarted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
     title: Stage B 8 role fixture label SSOT decision
     phase: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
@@ -640,7 +749,8 @@ tasks:
     proposedDbWriteScopeAfterFreshApproval:
       mode: non_destructive_idempotent_create_upsert_only
       targetService: tiku-postgres
-      targetDatabaseLabel: tiku
+      targetDatabaseLabel: tiku_fresh_phase25_20260601_001
+      previousStaleTargetDatabaseLabel: tiku
       tables:
         - auth_user
         - auth_account

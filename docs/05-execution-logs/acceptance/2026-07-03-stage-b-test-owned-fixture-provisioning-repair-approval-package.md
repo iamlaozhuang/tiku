@@ -4,24 +4,25 @@
 
 Fresh approval is required before any local DB write or provisioning.
 
-## Supersession Notice
+## Scope Refresh Notice
 
-The selector shape in this approval package is historical and must not be used directly for DB write execution after
+This package has been refreshed by `stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03`.
+
+The DB target is the app runtime DB label recorded by the read-only alignment task, and the selector follows
 `stage-b-8-role-fixture-label-ssot-decision-2026-07-03`.
-
-Before any provisioning, a follow-up package must refresh the DB target and selector so `org_standard_admin` and
-`org_advanced_admin` use their own admin roles instead of the earlier "existing `ops_admin` role" wording.
 
 ## Why This Is Needed
 
-Stage B-0.3 redacted fixture preflight proved that the private fixture file has all 8 required role rows, but the current
-local DB does not contain matching test-owned account/admin principals for those login identifiers.
+Stage B-0.3 redacted fixture preflight queried the stale database label `tiku`. The later read-only alignment proved the
+running app uses `tiku_fresh_phase25_20260601_001`, and the private selectors exist there but do not match the required
+8-role shapes.
 
 ## Approval Boundary
 
 Approve only this:
 
-- Local-only DB target: Docker Compose service `tiku-postgres`, database label `tiku`.
+- Local-only DB target: Docker Compose service `tiku-postgres`, app runtime DB label
+  `tiku_fresh_phase25_20260601_001`.
 - Private input: the 8 role rows in
   `D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md`.
 - Private input use: read login identifiers and credential values in process memory only.
@@ -30,16 +31,16 @@ Approve only this:
 
 ## Exact Selector
 
-| Role                        | Expected shape                                                                      |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `personal_standard_student` | `personal_auth edition=standard`                                                    |
-| `personal_advanced_student` | `personal_auth edition=advanced`                                                    |
-| `org_standard_employee`     | `employee in organization with org_auth edition=standard`                           |
-| `org_advanced_employee`     | `employee in organization with org_auth edition=advanced`                           |
-| `org_standard_admin`        | `organization-bound admin using existing ops_admin role; org_auth edition=standard` |
-| `org_advanced_admin`        | `organization-bound admin using existing ops_admin role; org_auth edition=advanced` |
-| `content_admin`             | `admin_role=content_admin only`                                                     |
-| `ops_admin`                 | `admin_role=ops_admin only`                                                         |
+| Role                        | Expected shape                                                   |
+| --------------------------- | ---------------------------------------------------------------- |
+| `personal_standard_student` | Personal learner with active `personal_auth` edition `standard`. |
+| `personal_advanced_student` | Personal learner with active `personal_auth` edition `advanced`. |
+| `org_standard_employee`     | Employee bound to target organization with standard org context. |
+| `org_advanced_employee`     | Employee bound to target organization with advanced org context. |
+| `org_standard_admin`        | Organization-bound admin with `admin_role=org_standard_admin`.   |
+| `org_advanced_admin`        | Organization-bound admin with `admin_role=org_advanced_admin`.   |
+| `content_admin`             | Backend admin with `admin_role=content_admin`.                   |
+| `ops_admin`                 | Backend admin with `admin_role=ops_admin`.                       |
 
 ## Tables In Scope
 
@@ -71,7 +72,8 @@ Approve only this:
 
 ## Stop Conditions
 
-- DB target is not local Docker Compose `tiku-postgres` / database label `tiku`.
+- DB target is not local Docker Compose `tiku-postgres` / app runtime DB label
+  `tiku_fresh_phase25_20260601_001`.
 - Any role selector is missing, duplicated, or ambiguous.
 - A selected login identifier already maps to an unexpected non-test-owned account/admin principal.
 - Password credential creation cannot use the current project-compatible auth credential format safely.

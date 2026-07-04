@@ -29,6 +29,16 @@ presence:
 - 4 learner/employee roles failed at `account_presence`.
 - 4 backend roles failed at `admin_account_presence`.
 
+## Scope Refresh
+
+`stage-b-test-owned-fixture-provisioning-scope-refresh-2026-07-03` supersedes the original DB target and organization
+admin selector wording:
+
+- target DB label is now the app runtime DB label `tiku_fresh_phase25_20260601_001`, not stale database label `tiku`;
+- `org_standard_admin` must use `admin_role=org_standard_admin`;
+- `org_advanced_admin` must use `admin_role=org_advanced_admin`;
+- fresh approval remains required before any DB write.
+
 ## Selector
 
 Private fixture file:
@@ -60,7 +70,7 @@ This scope is not approved until the user gives fresh approval.
 Allowed target after approval:
 
 - Local Docker Compose service: `tiku-postgres`
-- Local database label: `tiku`
+- Local database label: `tiku_fresh_phase25_20260601_001`
 - Environment boundary: local dev only
 
 Candidate write tables after approval:
@@ -115,7 +125,8 @@ After the repair, rerun Stage B-0.3 redacted fixture preflight from scratch:
 Before any DB write, the user must explicitly approve this exact boundary:
 
 > Approve non-destructive local-only fixture provisioning for
-> `stage-b-test-owned-fixture-provisioning-repair-2026-07-03` on local Docker Compose `tiku-postgres` / database `tiku`,
+> `stage-b-test-owned-fixture-provisioning-repair-2026-07-03` on local Docker Compose `tiku-postgres` / app runtime DB
+> label `tiku_fresh_phase25_20260601_001`,
 > using the 8 role rows from
 > `D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md` as in-memory private input, allowing
 > idempotent create/upsert to the listed auth/user/admin/organization/authorization tables only, with no cleanup/reset,
