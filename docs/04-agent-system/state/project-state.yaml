@@ -1,8 +1,114 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
-updatedAt: "2026-07-03T21:25:00-07:00"
+currentPhase: stage-b-0-2-local-db-baseline-decision-2026-07-03
+updatedAt: "2026-07-03T21:45:00-07:00"
+stageB02LocalDbBaselineDecision20260703:
+  taskId: stage-b-0-2-local-db-baseline-decision-2026-07-03
+  phase: stage-b-0-2-local-db-baseline-decision-2026-07-03
+  status: closed
+  result: accepted_current_local_db_as_stage_b_db_backed_baseline_with_fixture_preflight_constraints_no_cleanup_reset_requested_now
+  priority: p0
+  taskKind: docs_state_decision_package
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+  sourceStory: current_user_requested_stage_b_0_2_local_db_baseline_decision_2026_07_03
+  targetClosureItem: Decide whether to accept current non-empty local DB as DB-backed Stage B baseline or request cleanup/reset approval.
+  behaviorBoundary: docs_state_only_local_db_baseline_decision_no_db_connection_no_db_read_no_db_write_no_cleanup_no_reset_no_seed_no_migration_no_env_file_read_no_credential_read_no_provider_no_staging_prod_no_browser_no_e2e_no_product_source_no_schema_no_dependency_no_release_claim
+  decision: accept_current_local_db_as_db_backed_stage_b_baseline_with_fixture_preflight_constraints_no_cleanup_reset_requested_now
+  decisionFacts:
+    localDbNonEmpty: true
+    stageBNamespaceAggregateMatchCount: 0
+    cleanupResetSelectorAvailable: false
+    stageBDbBackedAcceptanceStarted: false
+  evidenceMode: redacted_task_ids_file_paths_boundary_categories_source_evidence_labels_decision_status_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+  branch: codex/stage-b-0-2-local-db-baseline-decision-2026-07-03
+  claimedAt: "2026-07-03T21:45:00-07:00"
+  plannedAt: "2026-07-03T21:45:00-07:00"
+  completedAt: "2026-07-03T21:45:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+    - docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+    - docs/05-execution-logs/evidence/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/**
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+  validationCommands:
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-2-local-db-baseline-decision.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-2-local-db-baseline-decision.md docs/05-execution-logs/evidence/2026-07-03-stage-b-0-2-local-db-baseline-decision.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-0-2-local-db-baseline-decision-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stage-b-0-2-local-db-baseline-decision-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_stage_b_0_2_local_db_baseline_decision_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_stage_b_0_2_local_db_baseline_decision_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_stage_b_0_2_local_db_baseline_decision_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_stage_b_0_2_local_db_baseline_decision_2026_07_03
+  validationSummary:
+    status: passed
+    docsOnly: true
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    repositoryShaCheckpointUpdated: true
+    dbConnected: false
+    dbMutationExecuted: false
+    localDataCleanupExecuted: false
+    localDataResetExecuted: false
+    envFileRead: false
+    credentialFileRead: false
+    providerExecuted: false
+    stagingProdDeployExecuted: false
+    browserAcceptanceExecuted: false
+    e2eExecuted: false
+    stageBDbBackedAcceptanceStarted: false
+    costCalibrationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 stageB0ReadOnlyAggregateLocalDbInventory20260703:
   taskId: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
   phase: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
@@ -23561,8 +23667,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ef90c2191eedf9b181968c2c673b0a8a0f174c2c
-  lastKnownOriginMasterSha: ef90c2191eedf9b181968c2c673b0a8a0f174c2c
+  lastKnownMasterSha: 3c1d001c35e459c61a29768882670c219c8d0cc0
+  lastKnownOriginMasterSha: 3c1d001c35e459c61a29768882670c219c8d0cc0
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -23702,14 +23808,29 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: stage-b-0-2-local-db-baseline-decision-2026-07-03
+  status: closed
+  result: accepted_current_local_db_as_stage_b_db_backed_baseline_with_fixture_preflight_constraints_no_cleanup_reset_requested_now
+  taskKind: docs_state_decision_package
+  moduleRunVersion: 2
+  branch: codex/stage-b-0-2-local-db-baseline-decision-2026-07-03
+  claimedAt: "2026-07-03T21:45:00-07:00"
+  plannedAt: "2026-07-03T21:45:00-07:00"
+  completedAt: "2026-07-03T21:45:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  decisionPackagePath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+previousCurrentTaskBeforeStageB02LocalDbBaselineDecision20260703:
   id: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
-  status: in_progress
-  result: pending_read_only_aggregate_inventory
+  status: closed
+  result: stage_b_0_1_read_only_aggregate_inventory_completed_no_stage_b_db_backed_acceptance
   taskKind: local_db_read_only_aggregate_inventory
   moduleRunVersion: 2
   branch: codex/stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
   claimedAt: "2026-07-03T20:05:00-07:00"
   plannedAt: "2026-07-03T20:05:00-07:00"
+  completedAt: "2026-07-03T21:25:00-07:00"
   planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
   acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
