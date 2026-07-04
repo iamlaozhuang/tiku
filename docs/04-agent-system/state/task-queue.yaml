@@ -358,6 +358,126 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-acceptance-planning-and-materials-prep-2026-07-04
+    title: Full chain acceptance planning and materials prep
+    phase: full-chain-acceptance-planning-and-materials-prep-2026-07-04
+    sourceStory: current_user_requested_full_role_full_chain_acceptance_preparation_package_materialization_2026_07_04
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_only_full_chain_acceptance_preparation_package_materialized
+    priority: p0
+    dependencies:
+      - stage-c-1-provider-smoke-rerun-2026-07-04
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user requested implementation of the docs-only full-role full-chain acceptance preparation package. This
+      task may materialize planning, acceptance, evidence, audit, project-state, and task-queue files only. It must not
+      execute acceptance, write or read DB targets, start dev server, run browser/e2e, call Provider, access secrets,
+      change source/tests/dependencies/schema/migrations/seeds/scripts, stage/prod/deploy, Cost Calibration, release
+      readiness, final Pass, or production usability.
+    targetClosureItem: Materialize the preparation package for later full-chain experiential acceptance.
+    behaviorBoundary: docs_state_acceptance_materials_preparation_only_no_runtime_execution_or_release_claim
+    evidenceMode: redacted_task_ids_file_paths_selector_labels_counts_statuses_validation_results_only_no_private_values_or_full_content
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-7-track-matrix.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-dependency-dag.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-db-selector-and-provisioning-approval.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-account-provisioning-order.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-materials-reuse-and-gap-inventory.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-materials-pack-spec.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-provider-cost-approval.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-runbook-and-stop-rules.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - src/db/schema/auth.ts
+      - src/db/schema/paper.ts
+      - src/db/schema/student-experience.ts
+      - src/db/schema/organization-training.ts
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_secret_access_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_credentials_passwords_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_production_usability_no_cost_calibration
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_implement_this_docs_only_plan_2026_07_04
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_closeout_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_closeout_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_closeout_approval_required_after_merge
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-7-track-matrix.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-dependency-dag.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-db-selector-and-provisioning-approval.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-account-provisioning-order.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-materials-reuse-and-gap-inventory.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-materials-pack-spec.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-provider-cost-approval.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-runbook-and-stop-rules.md docs/05-execution-logs/evidence/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-7-track-matrix.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-dependency-dag.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-db-selector-and-provisioning-approval.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-account-provisioning-order.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-materials-reuse-and-gap-inventory.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-materials-pack-spec.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-provider-cost-approval.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-runbook-and-stop-rules.md docs/05-execution-logs/evidence/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-acceptance-planning-and-materials-prep-2026-07-04
+    validationSummary:
+      status: passed_governance_validation_after_document_anchor_repair
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening:
+        initialRun: failed_missing_requirement_mapping_result_anchor
+        finalRun: passed_exit_0
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      dbConnectionOrMutationExecuted: false
+      browserOrE2eExecuted: false
+      devServerStarted: false
+      providerCallExecuted: false
+      envSecretAccessed: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
   - id: stage-c-1-provider-smoke-rerun-2026-07-04
     title: Stage C-1 Provider smoke rerun
     phase: stage-c-1-provider-smoke-rerun-2026-07-04
