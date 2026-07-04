@@ -1,8 +1,154 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-b-0-2-local-db-baseline-decision-2026-07-03
-updatedAt: "2026-07-03T21:45:00-07:00"
+currentPhase: stage-b-0-3-redacted-fixture-preflight-2026-07-03
+updatedAt: "2026-07-03T22:25:00-07:00"
+stageB03RedactedFixturePreflight20260703:
+  taskId: stage-b-0-3-redacted-fixture-preflight-2026-07-03
+  phase: stage-b-0-3-redacted-fixture-preflight-2026-07-03
+  status: closed
+  result: failed_redacted_fixture_preflight_all_8_roles_missing_matching_local_account_or_admin_principal_no_db_mutation_no_stage_b_acceptance
+  priority: p0
+  taskKind: local_db_read_only_fixture_preflight
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-b-0-2-local-db-baseline-decision-2026-07-03
+  sourceStory: current_user_requested_stage_b_0_3_redacted_fixture_preflight_2026_07_03
+  targetClosureItem: Verify 8 role test-owned account, organization binding, and authorization context preconditions before DB-backed Stage B.
+  behaviorBoundary: local_docker_compose_postgres_read_only_fixture_preflight_private_fixture_read_in_memory_only_no_db_mutation_no_cleanup_no_reset_no_seed_no_migration_no_provisioning_no_repair_no_env_file_read_no_provider_no_staging_prod_no_browser_no_e2e_no_product_source_no_schema_no_dependency_no_release_claim
+  targetLabel: local_docker_compose_tiku_postgres_service_container_tiku_postgres_dev
+  privateFixtureInput:
+    path: D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+    allowedUse: read_role_labels_login_identifiers_expected_authorization_shape_in_process_memory_only
+    forbiddenEvidence: credentials_tokens_cookies_sessions_headers_env_connection_strings_raw_db_rows_internal_ids_pii_email_phone_plaintext_redeem_code_provider_payload_prompt_ai_io_full_content_screenshots_traces_dom
+  roles:
+    - personal_standard_student
+    - personal_advanced_student
+    - org_standard_employee
+    - org_advanced_employee
+    - org_standard_admin
+    - org_advanced_admin
+    - content_admin
+    - ops_admin
+  evidenceMode: redacted_role_labels_expected_shape_labels_target_labels_aggregate_counts_status_categories_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+  branch: codex/stage-b-0-3-redacted-fixture-preflight-2026-07-03
+  claimedAt: "2026-07-03T22:04:00-07:00"
+  plannedAt: "2026-07-03T22:04:00-07:00"
+  completedAt: "2026-07-03T22:25:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+    - docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+    - docs/05-execution-logs/evidence/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/**
+    - src/db/schema/**
+    - package.json
+    - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/owner-facing-fixtures/**
+  validationCommands:
+    - docker compose ps --format json
+    - redacted private fixture marker check for 8 role labels
+    - docker compose exec -T tiku-postgres psql -U tiku -d tiku -X -v ON_ERROR_STOP=1 <redacted read-only fixture preflight aggregate/status query>
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md docs/05-execution-logs/evidence/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-0-3-redacted-fixture-preflight-2026-07-03
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stage-b-0-3-redacted-fixture-preflight-2026-07-03 -SkipRemoteAheadCheck
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_stage_b_0_3_redacted_fixture_preflight_2026_07_03
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_stage_b_0_3_redacted_fixture_preflight_2026_07_03
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_stage_b_0_3_redacted_fixture_preflight_2026_07_03
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_stage_b_0_3_redacted_fixture_preflight_2026_07_03
+  preflightSummary:
+    privateFixtureRoleCount: 8
+    parsedRoleCount: 8
+    missingRoleCount: 0
+    duplicateRoleCount: 0
+    allRolesHaveLoginIdentifier: true
+    allRolesHaveExpectedShape: true
+    dbTargetService: tiku-postgres
+    rolesPreflighted: 8
+    passCount: 0
+    failCount: 8
+    blockCount: 0
+    accountPresenceFailures: 4
+    adminAccountPresenceFailures: 4
+    failureMeaning: current_local_db_does_not_match_private_test_owned_fixture_login_identifiers
+    stoppedBeforeStageBDbBackedAcceptance: true
+  followUpTaskSplit:
+    id: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    status: pending_human_approval_and_task_materialization
+    reason: stage_b_0_3_preflight_failed_for_all_8_roles_due_missing_matching_local_account_or_admin_principal
+    requiredBeforeStageBDbBackedAcceptance: true
+    approvalRequiredBeforeDbWriteProvisioningRepair: true
+    cleanupResetStillRequiresSeparateExplicitSelectorApproval: true
+  validationSummary:
+    status: passed_governance_validation_with_fixture_preflight_fail_result
+    privateFixtureReadInMemory: true
+    fixturePreflightStatus: failed
+    dbTargetVerified: true
+    dbReadOnlyAggregateStatusQueryExecuted: true
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    moduleRunV2PrePush: passed_skip_remote_ahead_check
+    dbConnection: read_only_fixture_preflight_only
+    dbMutationExecuted: false
+    localDataCleanupExecuted: false
+    localDataResetExecuted: false
+    seedMigrationOrDdlExecuted: false
+    provisioningOrRepairExecuted: false
+    envFileRead: false
+    providerExecuted: false
+    stagingProdDeployExecuted: false
+    browserAcceptanceExecuted: false
+    e2eExecuted: false
+    stageBDbBackedAcceptanceStarted: false
+    costCalibrationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 stageB02LocalDbBaselineDecision20260703:
   taskId: stage-b-0-2-local-db-baseline-decision-2026-07-03
   phase: stage-b-0-2-local-db-baseline-decision-2026-07-03
@@ -23667,8 +23813,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3c1d001c35e459c61a29768882670c219c8d0cc0
-  lastKnownOriginMasterSha: 3c1d001c35e459c61a29768882670c219c8d0cc0
+  lastKnownMasterSha: 246666d2ec88ae10e85a7d8fc151862baa4b1646
+  lastKnownOriginMasterSha: 246666d2ec88ae10e85a7d8fc151862baa4b1646
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -23808,6 +23954,29 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: stage-b-0-3-redacted-fixture-preflight-2026-07-03
+  status: closed
+  result: failed_redacted_fixture_preflight_all_8_roles_missing_matching_local_account_or_admin_principal_no_db_mutation_no_stage_b_acceptance
+  taskKind: local_db_read_only_fixture_preflight
+  moduleRunVersion: 2
+  branch: codex/stage-b-0-3-redacted-fixture-preflight-2026-07-03
+  claimedAt: "2026-07-03T22:04:00-07:00"
+  plannedAt: "2026-07-03T22:04:00-07:00"
+  completedAt: "2026-07-03T22:25:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+nextRecommendedTaskAfterStageB03RedactedFixturePreflight20260703:
+  id: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+  status: pending_human_approval_and_task_materialization
+  result: pending
+  taskKind: local_test_owned_fixture_provisioning_repair
+  moduleRunVersion: 2
+  reason: stage_b_0_3_preflight_failed_for_all_8_roles_due_missing_matching_local_account_or_admin_principal
+  requiredBeforeStageBDbBackedAcceptance: true
+  blockedUntilApproved: true
+previousCurrentTaskBeforeStageB03RedactedFixturePreflight20260703:
   id: stage-b-0-2-local-db-baseline-decision-2026-07-03
   status: closed
   result: accepted_current_local_db_as_stage_b_db_backed_baseline_with_fixture_preflight_constraints_no_cleanup_reset_requested_now
