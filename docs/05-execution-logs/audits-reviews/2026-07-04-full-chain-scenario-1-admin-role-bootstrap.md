@@ -2,7 +2,7 @@
 
 Task id: `full-chain-scenario-1-admin-role-bootstrap-2026-07-04`
 
-Status: block.
+Status: closed block.
 
 ## Adversarial Review
 
@@ -58,6 +58,8 @@ its own task under the centralized local boundary.
 | Module Run v2 pre-commit hardening        | pass   |
 | Source/test/dependency/schema path change | none   |
 | Runtime/browser/DB/private credential use | none   |
+| First master pre-push readiness           | block  |
+| Closeout state repair                     | pass   |
 
 ## Non-Claims
 

@@ -18286,10 +18286,11 @@ tasks:
     validationPolicy: scoped_prettier_diff_blocked_path_precommit_hardening
     taskKind: local_acceptance_pre_runtime_block
     moduleRunVersion: 2
-    status: blocked_pending_repair_under_centralized_approval
+    status: closed
     result: block_no_governed_super_admin_product_flow_for_ops_and_content_admin_creation
     approvedAt: "2026-07-04T09:50:25-07:00"
     approvedBy: laozhuang
+    closedAt: "2026-07-04T10:05:10-07:00"
     branch: codex/full-chain-scenario-1-admin-role-bootstrap-2026-07-04
     capabilities:
       docsStateEvidenceAudit: approved

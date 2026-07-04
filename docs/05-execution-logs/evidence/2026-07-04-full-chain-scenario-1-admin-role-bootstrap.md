@@ -4,7 +4,7 @@ Task id: `full-chain-scenario-1-admin-role-bootstrap-2026-07-04`
 
 Branch: `codex/full-chain-scenario-1-admin-role-bootstrap-2026-07-04`
 
-Status: block.
+Status: closed block.
 
 ## Approval Boundary
 
@@ -93,5 +93,7 @@ Prompt, raw AI I/O, full material/question/paper content, employee answers, or p
 | `git diff --check`                                                                                     | pass   | No whitespace errors.                                                                 |
 | `git diff --name-only -- <blocked paths>`                                                              | pass   | No blocked source/test/dependency/schema/runtime/env path changes.                    |
 | `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-1-admin-role-bootstrap-2026-07-04` | pass   | Scope scan, sensitive evidence scan, terminology scan, and Module Run anchors passed. |
+| First master pre-push readiness                                                                        | block  | State task status still active, so accepted SHA ancestry policy did not apply.        |
+| Closeout state repair                                                                                  | pass   | Scenario 1 blocked package status moved to closed and repair task remained next.      |
 
 Cost Calibration Gate remains blocked.
