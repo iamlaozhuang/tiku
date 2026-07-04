@@ -358,6 +358,151 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-goal-control-ledger-2026-07-04
+    title: Full chain goal control ledger
+    phase: full-chain-goal-control-ledger-2026-07-04
+    sourceStory: current_user_requested_goal_mode_full_role_full_chain_acceptance_control_packet_2026_07_04
+    taskKind: docs_only
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_only_full_chain_goal_control_coverage_ledger_materialized
+    priority: p0
+    claimedAt: "2026-07-04T09:37:33-07:00"
+    plannedAt: "2026-07-04T09:37:33-07:00"
+    completedAt: "2026-07-04T09:41:05-07:00"
+    dependencies:
+      - full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
+      - full-chain-acceptance-planning-and-materials-prep-2026-07-04
+    taskPlanPolicy: required_before_state_or_docs_edit
+    humanApprovalBoundary: >-
+      Current user requested goal mode and Step 0 docs-only kickoff/control packet, then explicitly instructed that Step
+      0 must commit, fast-forward merge to master, push origin/master, and delete the short branch after completion. This
+      task may create only docs/state/queue/evidence/audit artifacts and must not start dev server, run browser/e2e,
+      connect to DB, read or write DB, call Provider, read private credential values, access .env values, change source,
+      tests, dependencies, schema, migrations, seeds, scripts, staging/prod/deploy, Cost Calibration, release readiness,
+      final Pass, or production usability.
+    targetClosureItem: Materialize the docs-only goal kickoff/control and coverage ledger before Scenario 1 runtime approval.
+    behaviorBoundary: docs_state_acceptance_evidence_audit_only_no_runtime_execution_or_release_claim
+    executionProfile: docs_only_goal_control_packet
+    evidenceMode: redacted_task_ids_file_paths_selector_labels_role_labels_counts_statuses_validation_results_only
+    controlSummary:
+      trackCount: 7
+      ownerScenarioCount: 12
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      runSelector: full_chain_acceptance_20260704
+      bootstrapSelector: fc_bootstrap_super_admin
+      nextScenario: scenario_1_super_admin_creates_ops_admin_and_content_admin
+      providerCostCalibrationRequiresFreshApproval: true
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-goal-control-ledger.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-goal-control-and-coverage-ledger.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-goal-control-ledger.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-goal-control-ledger.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-acceptance-planning-and-materials-prep.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+      - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    aiProviderBoundary: no_ai_or_provider_call_no_provider_configuration_no_secret_access_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    accountCredentialBoundary: no_credential_values_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_production_usability_no_cost_calibration
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_step0_commit_ff_merge_push_branch_cleanup_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_step0_commit_ff_merge_push_branch_cleanup_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_step0_commit_ff_merge_push_branch_cleanup_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_step0_commit_ff_merge_push_branch_cleanup_2026_07_04
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-goal-control-ledger.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-goal-control-and-coverage-ledger.md docs/05-execution-logs/evidence/2026-07-04-full-chain-goal-control-ledger.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-goal-control-ledger.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-goal-control-ledger.md docs/05-execution-logs/acceptance/2026-07-04-full-chain-goal-control-and-coverage-ledger.md docs/05-execution-logs/evidence/2026-07-04-full-chain-goal-control-ledger.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-goal-control-ledger.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-goal-control-ledger-2026-07-04
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-goal-control-ledger.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-goal-control-and-coverage-ledger.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-goal-control-ledger.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-goal-control-ledger.md
+    blockedWithoutFreshApproval:
+      - source_or_test_change
+      - package_or_lockfile_change
+      - schema_migration_file_change_or_drizzle_push
+      - db_connection_or_mutation
+      - browser_or_playwright_runtime
+      - dev_server_start
+      - provider_call_or_provider_configuration
+      - staging_prod_deploy
+      - cost_calibration
+      - release_readiness_or_final_pass_or_production_usability_claim
+    validationSummary:
+      validationStatus: passed_docs_only_goal_control_ledger_governance_validation
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening: passed_exit_0
+      sourceOrTestChanged: false
+      packageOrLockfileChanged: false
+      dbConnectionOrMutationExecuted: false
+      browserOrE2eExecuted: false
+      devServerStarted: false
+      providerCallExecuted: false
+      envSecretAccessed: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
     title: Full chain isolated DB bootstrap seed execution
     phase: full-chain-isolated-db-bootstrap-seed-execution-2026-07-04
