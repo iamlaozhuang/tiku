@@ -358,6 +358,117 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+    title: Stage B 8 role fixture label SSOT decision
+    phase: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+    sourceStory: current_user_requested_follow_recommendation_after_stage_b_fixture_label_ssot_question_2026_07_03
+    humanApprovalBoundary: current_user_requested_follow_recommendation_docs_state_read_only_no_db_write_2026_07_03
+    targetClosureItem: Decide whether Stage B 8 role fixture labels are the target SSOT before local DB provisioning.
+    behaviorBoundary: docs_state_read_only_decision_no_db_write_no_cleanup_no_reset_no_provisioning_no_seed_no_migration_no_ddl_no_login_no_session_no_browser_no_e2e_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
+    evidenceMode: redacted_task_ids_file_paths_role_labels_expected_shape_labels_enum_categories_aggregate_status_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: docs_state_read_only_fixture_label_ssot_decision
+    moduleRunVersion: 2
+    executionProfile: docs_state_read_only_role_label_ssot_decision
+    status: closed
+    result: completed_read_only_decision_stage_b_8_role_labels_are_target_ssot_private_fixture_selector_mapping_requires_repair_before_db_backed_stage_b
+    priority: p0
+    branch: codex/stage-b-test-owned-account-db-target-alignment-2026-07-03
+    claimedAt: "2026-07-03T22:55:00-07:00"
+    plannedAt: "2026-07-03T22:55:00-07:00"
+    completedAt: "2026-07-03T22:55:00-07:00"
+    dependsOn:
+      - stage-b-test-owned-account-db-target-alignment-2026-07-03
+      - stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    decision:
+      stageB8RoleLabelsAreTargetSsot: true
+      privateFixtureFileIsSelectorInputOnly: true
+      loginCapableAccountIsNotSufficientIfRoleShapeFails: true
+      organizationAdminsUseOwnAdminRolesForStageB: true
+      supersedesExistingOpsAdminRoleWordingInProvisioningApproval: true
+      provisioningShouldRunNow: false
+    targetRoleShapes:
+      personal_standard_student: personal_user_student_active_personal_auth_standard
+      personal_advanced_student: personal_user_student_active_personal_auth_advanced
+      org_standard_employee: employee_bound_to_organization_active_org_auth_standard
+      org_advanced_employee: employee_bound_to_organization_active_org_auth_advanced
+      org_standard_admin: organization_bound_admin_role_org_standard_admin_standard_org_context
+      org_advanced_admin: organization_bound_admin_role_org_advanced_admin_advanced_org_context
+      content_admin: admin_role_content_admin
+      ops_admin: admin_role_ops_admin
+    immediateNextTask:
+      id: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+      requiredAction: refresh_target_db_and_selector_before_fresh_approval_and_any_db_write
+      dbWriteStillRequiresFreshApproval: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md
+      - docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - src/db/schema/auth.ts
+      - e2e/credential-backed-8-role-local-acceptance.spec.ts
+      - e2e/role-separated-account-fixture-supplement.spec.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    validationCommands:
+      - redacted docs/schema/e2e role label source check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+    validationSummary:
+      status: passed_governance_validation
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      dbWriteExecuted: false
+      provisioningExecuted: false
+      localDataCleanupExecuted: false
+      localDataResetExecuted: false
+      destructiveDbActionExecuted: false
+      schemaMigrationSeedOrDdlExecuted: false
+      loginOrAuthSessionCreated: false
+      browserSessionAccessed: false
+      credentialOrLoginIdentifierRecorded: false
+      rawEnvOrConnectionStringRecorded: false
+      providerExecuted: false
+      stagingProdDeployExecuted: false
+      stageBDbBackedAcceptanceStarted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: stage-b-test-owned-account-db-target-alignment-2026-07-03
     title: Stage B test-owned account DB target alignment
     phase: stage-b-test-owned-account-db-target-alignment-2026-07-03

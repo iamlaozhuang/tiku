@@ -1,8 +1,126 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-b-test-owned-account-db-target-alignment-2026-07-03
-updatedAt: "2026-07-03T22:35:00-07:00"
+currentPhase: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+updatedAt: "2026-07-03T22:55:00-07:00"
+stageB8RoleFixtureLabelSsotDecision20260703:
+  taskId: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+  phase: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+  status: closed
+  result: completed_read_only_decision_stage_b_8_role_labels_are_target_ssot_private_fixture_selector_mapping_requires_repair_before_db_backed_stage_b
+  priority: p0
+  taskKind: docs_state_read_only_fixture_label_ssot_decision
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-b-test-owned-account-db-target-alignment-2026-07-03
+    - stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+  sourceStory: current_user_requested_follow_recommendation_after_stage_b_fixture_label_ssot_question_2026_07_03
+  targetClosureItem: Decide whether Stage B 8 role fixture labels are the target SSOT before local DB provisioning.
+  behaviorBoundary: docs_state_read_only_decision_no_db_write_no_cleanup_no_reset_no_provisioning_no_seed_no_migration_no_ddl_no_login_no_session_no_browser_no_e2e_no_provider_no_staging_prod_no_source_test_dependency_change_no_release_claim
+  branch: codex/stage-b-test-owned-account-db-target-alignment-2026-07-03
+  claimedAt: "2026-07-03T22:55:00-07:00"
+  plannedAt: "2026-07-03T22:55:00-07:00"
+  completedAt: "2026-07-03T22:55:00-07:00"
+  decision:
+    stageB8RoleLabelsAreTargetSsot: true
+    privateFixtureFileIsSelectorInputOnly: true
+    loginCapableAccountIsNotSufficientIfRoleShapeFails: true
+    organizationAdminsUseOwnAdminRolesForStageB: true
+    supersedesExistingOpsAdminRoleWordingInProvisioningApproval: true
+    provisioningShouldRunNow: false
+  targetRoleShapes:
+    personal_standard_student: personal_user_student_active_personal_auth_standard
+    personal_advanced_student: personal_user_student_active_personal_auth_advanced
+    org_standard_employee: employee_bound_to_organization_active_org_auth_standard
+    org_advanced_employee: employee_bound_to_organization_active_org_auth_advanced
+    org_standard_admin: organization_bound_admin_role_org_standard_admin_standard_org_context
+    org_advanced_admin: organization_bound_admin_role_org_advanced_admin_advanced_org_context
+    content_admin: admin_role_content_admin
+    ops_admin: admin_role_ops_admin
+  evidenceBasis:
+    requirementMatrix: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-credential-backed-fixture-target-matrix.md
+    uiUxBaseline: docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    roleAuthDecisionPackage: docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    editionAuthRequirement: docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    adr007: docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
+    schemaEnum: src/db/schema/auth.ts
+    credentialBackedSpec: e2e/credential-backed-8-role-local-acceptance.spec.ts
+    fixtureSupplementSpec: e2e/role-separated-account-fixture-supplement.spec.ts
+    priorAlignmentEvidence: docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-account-db-target-alignment.md
+  immediateNextTask:
+    id: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    requiredAction: refresh_target_db_and_selector_before_fresh_approval_and_any_db_write
+    dbWriteStillRequiresFreshApproval: true
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    - docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    - docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md
+    - docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/**
+    - docs/05-execution-logs/**
+    - src/db/schema/auth.ts
+    - e2e/credential-backed-8-role-local-acceptance.spec.ts
+    - e2e/role-separated-account-fixture-supplement.spec.ts
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+  validationCommands:
+    - redacted docs/schema/e2e role label source check
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+  validationSummary:
+    status: passed_governance_validation
+    scopedPrettierCheck: passed
+    gitDiffCheck: passed
+    moduleRunV2PreCommit: passed
+    dbWriteExecuted: false
+    provisioningExecuted: false
+    localDataCleanupExecuted: false
+    localDataResetExecuted: false
+    destructiveDbActionExecuted: false
+    schemaMigrationSeedOrDdlExecuted: false
+    loginOrAuthSessionCreated: false
+    browserSessionAccessed: false
+    credentialOrLoginIdentifierRecorded: false
+    rawEnvOrConnectionStringRecorded: false
+    providerExecuted: false
+    stagingProdDeployExecuted: false
+    stageBDbBackedAcceptanceStarted: false
+    costCalibrationExecuted: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 stageBTestOwnedAccountDbTargetAlignment20260703:
   taskId: stage-b-test-owned-account-db-target-alignment-2026-07-03
   phase: stage-b-test-owned-account-db-target-alignment-2026-07-03
@@ -24224,6 +24342,20 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
+  id: stage-b-8-role-fixture-label-ssot-decision-2026-07-03
+  status: closed
+  result: completed_read_only_decision_stage_b_8_role_labels_are_target_ssot_private_fixture_selector_mapping_requires_repair_before_db_backed_stage_b
+  taskKind: docs_state_read_only_fixture_label_ssot_decision
+  moduleRunVersion: 2
+  branch: codex/stage-b-test-owned-account-db-target-alignment-2026-07-03
+  claimedAt: "2026-07-03T22:55:00-07:00"
+  plannedAt: "2026-07-03T22:55:00-07:00"
+  completedAt: "2026-07-03T22:55:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-8-role-fixture-label-ssot-decision.md
+previousCurrentTaskBeforeStageB8RoleFixtureLabelSsotDecision20260703:
   id: stage-b-test-owned-account-db-target-alignment-2026-07-03
   status: closed
   result: completed_read_only_alignment_app_db_target_differs_from_stage_b_0_3_target_all_8_selectors_match_app_db_only_1_of_8_precise_shapes_pass

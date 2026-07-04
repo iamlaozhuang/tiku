@@ -4,6 +4,14 @@
 
 Fresh approval is required before any local DB write or provisioning.
 
+## Supersession Notice
+
+The selector shape in this approval package is historical and must not be used directly for DB write execution after
+`stage-b-8-role-fixture-label-ssot-decision-2026-07-03`.
+
+Before any provisioning, a follow-up package must refresh the DB target and selector so `org_standard_admin` and
+`org_advanced_admin` use their own admin roles instead of the earlier "existing `ops_admin` role" wording.
+
 ## Why This Is Needed
 
 Stage B-0.3 redacted fixture preflight proved that the private fixture file has all 8 required role rows, but the current
