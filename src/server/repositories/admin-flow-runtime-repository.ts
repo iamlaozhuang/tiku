@@ -29,6 +29,9 @@ import type {
 } from "../contracts/admin-content-knowledge-ops-contract";
 import { questionTypeValues, type QuestionType } from "../models/paper";
 import type {
+  AdminAccountCreationConflictReason,
+  AdminAccountCreationInputDto,
+  AdminAccountCreationResultDto,
   AdminAuthOperationListQuery,
   AdminUserDetailDto,
   AdminUserListDto,
@@ -38,6 +41,7 @@ import { createRuntimeDatabaseForSchema } from "./runtime-database";
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 const questionTypeSet = new Set<string>(questionTypeValues);
 const authPasswordColumn = "password";
+const credentialProviderId = "credential";
 
 export type AdminFlowRuntimeRepositoryOptions = {
   createDatabase?: () => AdminFlowRuntimeDatabase;
@@ -52,6 +56,9 @@ export type AdminUserOrgAuthRuntimeRepository = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
   getUserDetail?(publicId: string): Promise<AdminUserDetailDto | null>;
+  createPlatformAdminAccount?(
+    input: AdminAccountCreationInputDto,
+  ): Promise<AdminAccountCreationRepositoryResult>;
   resetUserPassword?(
     publicId: string,
     input: UserPasswordResetRepositoryInput,
@@ -67,6 +74,15 @@ export type AdminUserOrgAuthRuntimeRepository = {
 export type UserPasswordResetRepositoryInput = {
   newPassword: string;
 };
+
+export type AdminAccountCreationRepositoryResult =
+  | ({
+      status: "created";
+    } & AdminAccountCreationResultDto)
+  | {
+      status: "conflict";
+      reason: AdminAccountCreationConflictReason;
+    };
 
 export type UserActiveFlowTerminationResult = {
   practiceCount: number;
@@ -101,8 +117,10 @@ export type AdminFlowRuntimeRepositories = {
 };
 
 const {
+  admin,
   authAccount,
   authSession,
+  authUser,
   employee,
   mockExam,
   orgAuth,
@@ -480,6 +498,89 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
                 status: userDetailRow.status,
               },
         authorizations,
+      };
+    },
+    async createPlatformAdminAccount(input) {
+      const database = getDatabase();
+      const [existingAdminRow] = await database
+        .select({ public_id: admin.public_id })
+        .from(admin)
+        .where(eq(admin.phone, input.phone))
+        .limit(1);
+
+      if (existingAdminRow !== undefined) {
+        return {
+          reason: "admin_phone_exists",
+          status: "conflict",
+        };
+      }
+
+      const [existingUserRow] = await database
+        .select({ public_id: user.public_id })
+        .from(user)
+        .where(eq(user.phone, input.phone))
+        .limit(1);
+
+      if (existingUserRow !== undefined) {
+        return {
+          reason: "learner_employee_phone_exists",
+          status: "conflict",
+        };
+      }
+
+      const now = new Date();
+      const authUserId = `auth-user-${randomUUID()}`;
+      const adminPublicId = `admin-public-${randomUUID()}`;
+      const passwordHash = await hashPassword(input.password);
+
+      await database.transaction(async (transaction) => {
+        await transaction.insert(authUser).values({
+          created_at: now,
+          email: `admin-${randomUUID()}@tiku.local`,
+          email_verified: now,
+          id: authUserId,
+          image: null,
+          name: input.name,
+          updated_at: now,
+        });
+        await transaction.insert(authAccount).values({
+          access_token: null,
+          access_token_expires_at: null,
+          account_id: authUserId,
+          created_at: now,
+          id: `auth-account-${randomUUID()}`,
+          id_token: null,
+          [authPasswordColumn]: passwordHash,
+          provider_id: credentialProviderId,
+          refresh_token: null,
+          refresh_token_expires_at: null,
+          scope: null,
+          updated_at: now,
+          user_id: authUserId,
+        });
+        await transaction.insert(admin).values({
+          admin_role: input.adminRole,
+          auth_user_id: authUserId,
+          created_at: now,
+          name: input.name,
+          phone: input.phone,
+          public_id: adminPublicId,
+          status: "active",
+          updated_at: now,
+        });
+      });
+
+      return {
+        adminAccount: {
+          accountDomain: "admin",
+          adminRole: input.adminRole,
+          managedBy: "super_admin",
+          name: input.name,
+          publicId: adminPublicId,
+          registeredAt: now.toISOString(),
+          status: "active",
+        },
+        status: "created",
       };
     },
     async resetUserPassword(publicId, input) {

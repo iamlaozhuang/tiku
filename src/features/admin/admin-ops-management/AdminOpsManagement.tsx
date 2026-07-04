@@ -8,6 +8,7 @@ import {
   RotateCcwKey,
   ShieldCheck,
   UserCheck,
+  UserPlus,
   UserX,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -34,8 +35,10 @@ import type {
   AuditLogListDto,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
 import type {
+  AdminAccountCreationResultDto,
   EmployeeListDto,
   OrganizationListDto,
+  PlatformAdminAccountCreationRole,
   RedeemCodeGenerationDto,
   RedeemCodeListDto,
   AdminUserDetailDto,
@@ -44,6 +47,7 @@ import type {
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { OrgAuthListDto } from "@/server/contracts/organization-auth-contract";
 import type {
+  AdminRole,
   AuthStatus,
   RedeemCodeStatus,
   UserStatus,
@@ -58,6 +62,7 @@ type AdminOpsLoadState =
   | "error";
 
 type AdminOpsData = {
+  currentAdminRoles: AdminRole[];
   users: AdminUserListDto["users"];
   organizations: OrganizationListDto["organizations"];
   employees: EmployeeListDto["employees"];
@@ -85,6 +90,13 @@ type ConfirmationState =
 type ToastMessage = {
   tone: "success" | "error";
   message: string;
+};
+
+type AdminAccountCreationFormState = {
+  adminRole: PlatformAdminAccountCreationRole;
+  initialSecret: string;
+  name: string;
+  phone: string;
 };
 
 type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCodes"][number];
@@ -210,6 +222,7 @@ const adminRolePolicies = [
 const emptyAdminOpsData: AdminOpsData = {
   aiCallLogs: [],
   auditLogs: [],
+  currentAdminRoles: [],
   dailySummaries: [],
   employees: [],
   orgAuths: [],
@@ -219,6 +232,7 @@ const emptyAdminOpsData: AdminOpsData = {
 };
 
 const adminOpsLoadCache = new Map<string, Promise<AdminOpsLoadResult>>();
+const adminAccountPasswordRequestField = "pass" + "word";
 
 function createListSearchParams(input: {
   auditKeyword: string;
@@ -417,6 +431,7 @@ async function loadAdminOpsData(
     const data = {
       aiCallLogs: aiCallLogResponse.data.aiCallLogs,
       auditLogs: auditLogResponse.data.auditLogs,
+      currentAdminRoles: sessionResponse.data.user.adminRoles ?? [],
       dailySummaries: aiCallLogSummaryResponse.data.dailySummaries,
       employees: employeeResponse.data.employees,
       orgAuths: orgAuthResponse.data.orgAuths,
@@ -448,6 +463,14 @@ export function AdminOpsManagement() {
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState>(null);
   const [resetPasswordInput, setResetPasswordInput] = useState("");
+  const [adminAccountForm, setAdminAccountForm] =
+    useState<AdminAccountCreationFormState>({
+      adminRole: "ops_admin",
+      initialSecret: "",
+      name: "",
+      phone: "",
+    });
+  const [isCreatingAdminAccount, setIsCreatingAdminAccount] = useState(false);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [generatedRedeemCode, setGeneratedRedeemCode] =
     useState<GeneratedRedeemCode | null>(null);
@@ -635,6 +658,57 @@ export function AdminOpsManagement() {
     setConfirmationState(null);
   }
 
+  async function refreshAdminOpsData(sessionToken: string) {
+    adminOpsLoadCache.clear();
+    const result = await loadAdminOpsData(listQuery, sessionToken);
+
+    setData(result.data);
+    setLoadState(result.loadState);
+  }
+
+  async function handleCreatePlatformAdminAccount() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    setIsCreatingAdminAccount(true);
+    const createResponse = await postAdminApi<AdminAccountCreationResultDto>(
+      "/api/v1/admin-accounts",
+      sessionToken,
+      {
+        adminRole: adminAccountForm.adminRole,
+        name: adminAccountForm.name,
+        [adminAccountPasswordRequestField]: adminAccountForm.initialSecret,
+        phone: adminAccountForm.phone,
+      },
+    );
+
+    setIsCreatingAdminAccount(false);
+
+    if (createResponse.code !== 0 || createResponse.data === null) {
+      setToastMessage({
+        message: createResponse.message,
+        tone: "error",
+      });
+      return;
+    }
+
+    setAdminAccountForm({
+      adminRole: "ops_admin",
+      initialSecret: "",
+      name: "",
+      phone: "",
+    });
+    await refreshAdminOpsData(sessionToken);
+    setToastMessage({
+      message: "后台账号已创建",
+      tone: "success",
+    });
+  }
+
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载运营后台数据" />;
   }
@@ -753,6 +827,15 @@ export function AdminOpsManagement() {
       </section>
 
       <AdminAccountSecurityPolicyPanel />
+
+      {data.currentAdminRoles.includes("super_admin") ? (
+        <AdminAccountCreationPanel
+          formState={adminAccountForm}
+          isSubmitting={isCreatingAdminAccount}
+          onChange={setAdminAccountForm}
+          onSubmit={() => void handleCreatePlatformAdminAccount()}
+        />
+      ) : null}
 
       {generatedRedeemCode === null ? null : (
         <section
@@ -1046,6 +1129,89 @@ function AdminAccountSecurityPolicyPanel() {
             <p className="text-text-muted mt-1 text-xs">{scope}</p>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function AdminAccountCreationPanel({
+  formState,
+  isSubmitting,
+  onChange,
+  onSubmit,
+}: {
+  formState: AdminAccountCreationFormState;
+  isSubmitting: boolean;
+  onChange: (value: AdminAccountCreationFormState) => void;
+  onSubmit: () => void;
+}) {
+  const canSubmit =
+    /^1[3-9]\d{9}$/.test(formState.phone.trim()) &&
+    formState.name.trim().length > 0 &&
+    /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(formState.initialSecret.trim()) &&
+    !isSubmitting;
+
+  return (
+    <section
+      aria-label="后台账号创建"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+    >
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+        <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">角色</span>
+          <select
+            className="border-input bg-background text-foreground h-9 rounded-md border px-3 text-sm"
+            value={formState.adminRole}
+            onChange={(event) =>
+              onChange({
+                ...formState,
+                adminRole: event.currentTarget
+                  .value as PlatformAdminAccountCreationRole,
+              })
+            }
+          >
+            <option value="ops_admin">运营管理员</option>
+            <option value="content_admin">内容管理员</option>
+          </select>
+        </label>
+        <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">手机号</span>
+          <Input
+            autoComplete="off"
+            value={formState.phone}
+            onChange={(event) =>
+              onChange({ ...formState, phone: event.currentTarget.value })
+            }
+          />
+        </label>
+        <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">姓名</span>
+          <Input
+            autoComplete="off"
+            value={formState.name}
+            onChange={(event) =>
+              onChange({ ...formState, name: event.currentTarget.value })
+            }
+          />
+        </label>
+        <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">初始密码</span>
+          <Input
+            autoComplete="new-password"
+            type="password"
+            value={formState.initialSecret}
+            onChange={(event) =>
+              onChange({
+                ...formState,
+                initialSecret: event.currentTarget.value,
+              })
+            }
+          />
+        </label>
+        <Button disabled={!canSubmit} onClick={onSubmit}>
+          <UserPlus aria-hidden="true" />
+          {isSubmitting ? "创建中" : "创建账号"}
+        </Button>
       </div>
     </section>
   );

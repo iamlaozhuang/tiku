@@ -18,6 +18,8 @@ import {
   type AdminContentKnowledgePageSize,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import {
+  type AdminAccountCreationConflictDto,
+  type AdminAccountCreationResultDto,
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   createAdminAuthOperationListQuery,
   type AdminAuthOperationListQuery,
@@ -28,6 +30,7 @@ import {
   type AdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositoryOptions,
 } from "../repositories/admin-flow-runtime-repository";
+import { normalizeAdminAccountCreationInput } from "../validators/admin-account-creation";
 import { normalizeUserPasswordResetInput } from "../validators/user-password-reset";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
@@ -77,6 +80,14 @@ const userLifecycleMutationUnavailableResponse = createErrorResponse(
 const userDetailUnavailableResponse = createErrorResponse(
   503603,
   "Admin user detail runtime is not configured.",
+);
+const adminAccountCreationUnavailableResponse = createErrorResponse(
+  503604,
+  "Admin account creation runtime is not configured.",
+);
+const adminAccountCreationValidationFailedResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Invalid admin account creation input.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -156,6 +167,10 @@ function canReadUserManagement(actor: AdminFlowActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
+}
+
+function canCreatePlatformAdminAccount(actor: AdminFlowActor): boolean {
+  return actor.roles.includes("super_admin");
 }
 
 function readRequestIp(request: Request): string | null {
@@ -252,6 +267,36 @@ async function appendUserLifecycleAuditLog(input: {
   });
 }
 
+async function appendAdminAccountCreationAuditLog(input: {
+  repositories: AdminFlowRuntimeRepositories;
+  request: Request;
+  actor: AdminFlowActor;
+  resultStatus: "success" | "failed";
+  targetPublicId: string | null;
+  metadataSummary: string;
+}): Promise<void> {
+  await input.repositories.auditLogRepository.appendAuditLog({
+    actorPublicId: input.actor.publicId,
+    actorRole: input.actor.roles[0],
+    actionType: "admin_account.create",
+    targetResourceType: "admin",
+    targetPublicId: input.targetPublicId,
+    resultStatus: input.resultStatus,
+    metadataSummary: input.metadataSummary,
+    requestIp: readRequestIp(input.request),
+  });
+}
+
+function createAdminAccountCreationConflictResponse(
+  data: AdminAccountCreationConflictDto,
+): ApiResponse<AdminAccountCreationConflictDto> {
+  return {
+    code: ADMIN_AUTH_OPERATION_ERROR_CODES.concurrentConflict,
+    data,
+    message: "Admin account phone already exists.",
+  };
+}
+
 function matchesAuditLogFilter(
   value: string,
   expected: string | "all",
@@ -324,6 +369,100 @@ export function createAdminFlowRuntimeRouteHandlers(
 
   async function requireAdminActor(request: Request) {
     return resolveAdminActor(request, sessionService);
+  }
+
+  async function createPlatformAdminAccount(
+    request: Request,
+  ): Promise<Response> {
+    const actor = await requireAdminActor(request);
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse);
+    }
+
+    if (!canCreatePlatformAdminAccount(actor)) {
+      await appendAdminAccountCreationAuditLog({
+        repositories,
+        request,
+        actor,
+        resultStatus: "failed",
+        targetPublicId: null,
+        metadataSummary:
+          "redacted admin account creation permission denial metadata",
+      });
+
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    const createInput = normalizeAdminAccountCreationInput(
+      await readJsonBody(request),
+    );
+
+    if (!createInput.success) {
+      await appendAdminAccountCreationAuditLog({
+        repositories,
+        request,
+        actor,
+        resultStatus: "failed",
+        targetPublicId: null,
+        metadataSummary: "redacted admin account creation validation metadata",
+      });
+
+      return createJsonResponse(adminAccountCreationValidationFailedResponse);
+    }
+
+    if (
+      repositories.userOrgAuthRepository.createPlatformAdminAccount ===
+      undefined
+    ) {
+      await appendAdminAccountCreationAuditLog({
+        repositories,
+        request,
+        actor,
+        resultStatus: "failed",
+        targetPublicId: null,
+        metadataSummary: "redacted admin account creation unavailable metadata",
+      });
+
+      return createJsonResponse(adminAccountCreationUnavailableResponse);
+    }
+
+    const result =
+      await repositories.userOrgAuthRepository.createPlatformAdminAccount(
+        createInput.value,
+      );
+
+    if (result.status === "conflict") {
+      await appendAdminAccountCreationAuditLog({
+        repositories,
+        request,
+        actor,
+        resultStatus: "failed",
+        targetPublicId: null,
+        metadataSummary: "redacted admin account creation conflict metadata",
+      });
+
+      return createJsonResponse(
+        createAdminAccountCreationConflictResponse({
+          reason: result.reason,
+        }),
+      );
+    }
+
+    await appendAdminAccountCreationAuditLog({
+      repositories,
+      request,
+      actor,
+      resultStatus: "success",
+      targetPublicId: result.adminAccount.publicId,
+      metadataSummary: "redacted admin account creation metadata",
+    });
+
+    return createJsonResponse(
+      createSuccessResponse<AdminAccountCreationResultDto>({
+        adminAccount: result.adminAccount,
+      }),
+    );
   }
 
   async function updateUserLifecycle(input: {
@@ -406,6 +545,11 @@ export function createAdminFlowRuntimeRouteHandlers(
   }
 
   return createRouteHandlersWithErrorEnvelope({
+    adminAccounts: {
+      collection: {
+        POST: createPlatformAdminAccount,
+      },
+    },
     users: {
       collection: {
         async GET(request: Request): Promise<Response> {

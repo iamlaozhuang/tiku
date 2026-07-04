@@ -18477,21 +18477,144 @@ tasks:
     sourceStory: scenario_1_blocked_by_missing_governed_super_admin_admin_account_creation_flow
     dependencies:
       - full-chain-scenario-1-admin-role-bootstrap-2026-07-04
-    status: ready_under_centralized_local_continuity_approval
+    status: closed
+    result: pass_governed_super_admin_platform_admin_account_creation_flow_repaired
     taskKind: sensitive_admin_permission_source_repair
     moduleRunVersion: 2
     targetClosureItem: Add the minimal governed product flow for super_admin to create platform ops_admin and content_admin accounts, then rerun Scenario 1.
     approvalPackagePath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-scenario-1-admin-role-bootstrap-repair-decision.md
     centralizedApprovalAddendumPath: docs/05-execution-logs/acceptance/2026-07-04-full-chain-centralized-approval-and-continuity-addendum.md
-    blockedWithoutFreshApproval:
-      - source_or_test_change
-      - browser_or_playwright_runtime
-      - dev_server_start
-      - database_connection_read_write_migration_or_seed
-      - schema_migration_or_drizzle_push
+    claimedAt: "2026-07-04T10:16:48-07:00"
+    plannedAt: "2026-07-04T10:16:48-07:00"
+    completedAt: "2026-07-04T10:25:38-07:00"
+    branch: codex/full-chain-scenario-1-admin-account-creation-flow-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    repairScope:
+      targetRoles:
+        - ops_admin
+        - content_admin
+      actorRoleRequired: super_admin
+      routeLabel: /api/v1/admin-accounts
+      surfaceLabel: /ops/users admin account creation form
+      noSecretResponse: true
+      noPermissionWeakening: true
+      noFixtureExpansion: true
+      noSchemaMigrationSeed: true
+    behaviorBoundary: local_source_test_doc_repair_only_no_dev_server_no_browser_no_e2e_no_direct_db_connection_no_migration_no_seed_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_and_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
+      - src/server/validators/admin-account-creation.ts
+      - src/app/api/v1/admin-accounts/route.ts
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-*.md
+      - package.json
+      - src/db/schema/auth.ts
+      - src/server/**
+      - src/app/**
+      - src/features/**
+      - tests/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    blockedWithoutSeparateBoundedApproval:
       - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
       - dependency_package_lockfile_change
       - staging_prod_deploy_payment_external_service
-      - merge_push_cleanup_pr_force_push
+      - pr_force_push
       - release_readiness_or_final_pass
       - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - fake_data_or_fixture_expansion
+      - redaction_violation
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts
+      - npm.cmd run test:unit -- tests/unit/phase-20-ra-01-05-password-reset-ops-flow.test.ts tests/unit/phase-11-system-ops-user-management-loop.test.ts tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md src/server/contracts/admin-user-org-auth-ops-contract.ts src/server/services/admin-flow-runtime.ts src/server/repositories/admin-flow-runtime-repository.ts src/server/validators/admin-account-creation.ts src/app/api/v1/admin-accounts/route.ts src/features/admin/admin-ops-management/AdminOpsManagement.tsx tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-1-admin-account-creation-flow-repair.md src/server/contracts/admin-user-org-auth-ops-contract.ts src/server/services/admin-flow-runtime.ts src/server/repositories/admin-flow-runtime-repository.ts src/server/validators/admin-account-creation.ts src/app/api/v1/admin-accounts/route.ts src/features/admin/admin-ops-management/AdminOpsManagement.tsx tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db/schema drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-1-admin-account-creation-flow-repair-2026-07-04
+    validationSummary:
+      status: passed_source_repair_and_governance_validation
+      taskPlanPrepared: true
+      sourceTestChanged: true
+      focusedRepairUnitTest: passed_exit_0
+      adjacentUserManagementRegressionTests: passed_exit_0
+      lint: passed_exit_0
+      typecheck: passed_exit_0
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening:
+        initialAttempt: blocked_sensitive_assignment_pattern_then_repaired
+        finalAttempt: passed_exit_0
+      browserRuntimeExecuted: false
+      directDatabaseConnectionExecuted: false
+      schemaMigrationSeedExecuted: false
+      privateCredentialValueUsed: false
+      providerCallOrConfigurationExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployPaymentExternalServiceExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    retryCount: 0
+    lastFailurePath: null

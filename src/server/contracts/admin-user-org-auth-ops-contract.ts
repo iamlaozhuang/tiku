@@ -297,6 +297,40 @@ export type AdminRoleListDto = {
   adminRoles: AdminRoleSummaryDto[];
 };
 
+export type PlatformAdminAccountCreationRole = Extract<
+  AdminRole,
+  "ops_admin" | "content_admin"
+>;
+
+export type AdminAccountCreationInputDto = {
+  phone: string;
+  name: string;
+  password: string;
+  adminRole: PlatformAdminAccountCreationRole;
+};
+
+export type AdminAccountCreationSummaryDto = {
+  publicId: string;
+  name: string;
+  adminRole: PlatformAdminAccountCreationRole;
+  registeredAt: string;
+  status: UserStatus;
+  accountDomain: "admin";
+  managedBy: "super_admin";
+};
+
+export type AdminAccountCreationResultDto = {
+  adminAccount: AdminAccountCreationSummaryDto;
+};
+
+export type AdminAccountCreationConflictReason =
+  | "admin_phone_exists"
+  | "learner_employee_phone_exists";
+
+export type AdminAccountCreationConflictDto = {
+  reason: AdminAccountCreationConflictReason;
+};
+
 export function createAdminAuthOperationListQuery(
   overrides: Partial<AdminAuthOperationListQuery> = {},
 ): AdminAuthOperationListQuery {
