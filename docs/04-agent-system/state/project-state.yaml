@@ -958,7 +958,7 @@ fullChainScenario1AdminOpsEmptyStateRolePanelRepair20260704:
 fullChainScenario1AdminRoleBootstrapRuntimeRerunAfterPanelRepair20260704:
   taskId: full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-after-panel-repair-2026-07-04
   phase: full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-after-panel-repair-2026-07-04
-  status: in_progress
+  status: closed
   result: pending_runtime_rerun
   priority: p0
   taskKind: local_acceptance_runtime_browser_db_aggregate
@@ -1068,7 +1068,7 @@ fullChainScenario1AdminRoleBootstrapRuntimeRerunAfterPanelRepair20260704:
     - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
     - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-1-admin-role-bootstrap-runtime-rerun-after-panel-repair-2026-07-04
   validationSummary:
-    status: pending
+    status: pass
     runtimeDbTargetCheck: pending
     devServerStarted: false
     browserProductFlowExecuted: false
@@ -26860,31 +26860,31 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-4-standard-org-package-2026-07-04
-  phase: full-chain-scenario-4-standard-org-package-2026-07-04
-  status: closed
-  result: blocked_missing_full_chain_standard_employee_import_input
-  taskKind: local_acceptance_pre_mutation_private_input_gate
+  id: full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+  phase: full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+  status: in_progress
+  result: pass_private_standard_employee_input_provisioned_redacted
+  taskKind: local_private_fixture_provisioning
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-4-standard-org-package-2026-07-04
-  claimedAt: "2026-07-04T14:52:00-07:00"
-  plannedAt: "2026-07-04T14:52:00-07:00"
-  completedAt: "2026-07-04T14:54:00-07:00"
+  branch: codex/full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+  claimedAt: "2026-07-04T14:56:00-07:00"
+  plannedAt: "2026-07-04T14:56:00-07:00"
+  completedAt: "2026-07-04T14:59:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   dependsOn:
     - full-chain-scenario-3-organization-tree-2026-07-04
     - full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
   sourceBlockTaskId: full-chain-scenario-3-organization-tree-2026-07-04
   repairDependency: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-org-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-org-package.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
   privateAllowedFiles:
     - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
     - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/organization-tree/organization-tree-plan.json
@@ -26925,24 +26925,25 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  runtimeScope:
-    targetDbLabel: tiku_full_chain_acceptance_20260704_001
-    actorSelectorLabel: fc_ops_admin_created_by_super_admin
+  provisioningScope:
     scenarioSelectorLabel: fc_scenario_4_standard_org_package
-    browserRuntimeAllowed: false_blocked_before_runtime
-    directDbVerificationAllowed: false_blocked_before_runtime
-    productMutationAllowed: false_blocked_before_runtime
+    provisionedSelectorLabel: fc_org_standard_employee_batch
+    privateOutputLocation: local_private_full_chain_employee_import_pack
+    browserRuntimeAllowed: false
+    directDbVerificationAllowed: false
+    productMutationAllowed: false
   validationCommands:
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -Command <redacted private standard employee input provisioning>
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -Command <redacted private standard employee input metadata verification>
     - npm.cmd exec -- prettier --write --ignore-unknown <scoped docs>
     - npm.cmd exec -- prettier --check --ignore-unknown <scoped docs>
     - git diff --check
     - git diff --name-only -- <blocked paths>
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-4-standard-org-package-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId full-chain-scenario-4-standard-org-package-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
   validationSummary:
-    status: blocked_with_closeout_pass
-    privateMetadataPreflight: pass
-    moduleRunV2ModuleCloseoutReadiness: pass
+    status: pending_closeout_validation
+    privateInputProvisioning: pass
+    privateMetadataVerification: pass
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     gitDiffCheck: pass
@@ -26958,11 +26959,53 @@ currentTask:
     providerCallOrConfigurationExecuted: false
     dependencyOrLockfileChanged: false
     privateValueOutput: false
-    nextAction: close_block_then_split_standard_employee_input_provisioning
+    nextAction: provision_private_standard_employee_input_then_rerun_scenario_4
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
 
+fullChainScenario4StandardEmployeeInputProvisioning20260704:
+  taskId: full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+  phase: full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+  status: closed
+  result: pass_private_standard_employee_input_provisioned_redacted
+  priority: p0
+  taskKind: local_private_fixture_provisioning
+  moduleRunVersion: 2
+  sourceBlockedTaskId: full-chain-scenario-4-standard-org-package-2026-07-04
+  branch: codex/full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+  approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  plannedAt: "2026-07-04T14:56:00-07:00"
+  completedAt: "2026-07-04T14:59:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+  validationSummary:
+    status: pass
+    privateInputProvisioning: pass
+    privateMetadataVerification: pass
+    provisionedSelectorLabel: fc_org_standard_employee_batch
+    provisionedDataRows: 6
+    provisionedForbiddenColumnCount: 0
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    sourceTestChanged: false
+    browserRuntimeExecuted: false
+    devServerStarted: false
+    directDbConnectionExecuted: false
+    directDbMutationExecuted: false
+    productDbMutationExecuted: false
+    schemaMigrationSeedChanged: false
+    providerCallOrConfigurationExecuted: false
+    dependencyOrLockfileChanged: false
+    privateValueOutput: false
+    nextAction: provision_private_standard_employee_input_then_rerun_scenario_4
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 fullChainScenario4StandardOrgPackage20260704:
   taskId: full-chain-scenario-4-standard-org-package-2026-07-04
   phase: full-chain-scenario-4-standard-org-package-2026-07-04
