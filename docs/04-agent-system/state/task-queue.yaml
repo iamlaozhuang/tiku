@@ -358,6 +358,160 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-c-1-provider-smoke-rerun-2026-07-04
+    title: Stage C-1 Provider smoke rerun
+    phase: stage-c-1-provider-smoke-rerun-2026-07-04
+    sourceStory: current_user_approved_stage_c_1_provider_smoke_rerun_and_env_local_key_presence_check_2026_07_04
+    humanApprovalBoundary: current_user_approved_check_alibaba_api_key_key_presence_in_env_local_and_rerun_single_stage_c1_provider_smoke_2026_07_04
+    targetClosureItem: Rerun the Stage C-1 local Provider smoke after confirming the approved local `.env.local` key alias can provide `ALIBABA_API_KEY` to the current command process only.
+    behaviorBoundary: local_only_stage_c_1_provider_smoke_rerun_max_one_call_zero_retry_model_qwen37_max_host_dashscope_aliyuncs_com_timeout_60000_readonly_env_local_single_key_alias_lookup_only_current_command_process_injection_no_env_value_output_no_env_file_write_no_raw_prompt_payload_ai_output_secret_evidence_no_browser_e2e_dev_server_no_db_no_source_test_dependency_schema_migration_seed_no_staging_prod_no_cost_calibration_no_release_claim
+    evidenceMode: redacted_task_ids_file_paths_public_provider_model_host_labels_public_env_key_alias_boolean_presence_status_request_count_duration_token_counts_result_status_failure_category_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_only_provider_smoke_rerun
+    moduleRunVersion: 2
+    executionProfile: fresh_approved_env_local_single_key_readonly_lookup_single_provider_call_stop_on_fail
+    status: closed
+    result: pass_local_provider_smoke_single_call_redacted
+    priority: p0
+    branch: codex/stage-c-1-provider-smoke-rerun-2026-07-04
+    claimedAt: "2026-07-04T06:52:10-07:00"
+    plannedAt: "2026-07-04T06:52:10-07:00"
+    completedAt: "2026-07-04T06:55:44-07:00"
+    dependsOn:
+      - stage-c-1-provider-smoke-2026-07-04
+      - stage-c-1-secret-availability-decision-2026-07-04
+    approvedTarget:
+      providerLabel: openai_compatible/alibaba-qwen
+      modelLabel: qwen3.7-max
+      hostLabel: dashscope.aliyuncs.com
+      baseUrlLabel: https://dashscope.aliyuncs.com/compatible-mode/v1
+      envKeyAlias: ALIBABA_API_KEY
+      secretSource: readonly_env_local_single_key_alias_lookup_to_current_command_process_only
+      approvedMaxProviderCalls: 1
+      actualMaxProviderCalls: 1
+      retryLimit: 0
+      approvedMaxOutputTokens: 1800
+      scriptMaxOutputTokens: 8
+      timeoutMs: 60000
+    runtimeBoundaries:
+      envLocalKeyPresenceCheckApproved: true
+      envLocalReadOnlySingleKeyAliasLookupApproved: true
+      envFileWriteApproved: false
+      envValueOutputApproved: false
+      providerCallApproved: true
+      providerCallLimit: 1
+      retryLimit: 0
+      rawPromptPayloadAiOutputEvidence: false
+      browserE2eDevServer: false
+      dbConnectionQueryWrite: false
+      sourceTestDependencySchemaChange: false
+      stagingProdCloudDeploy: false
+      costCalibration: false
+    executionSummary:
+      status: passed
+      envLocalExists: true
+      envLocalKeyPresent: true
+      runtimeSecretValuePrintedOrRecorded: false
+      providerCallExecuted: true
+      providerRequestCount: 1
+      resultStatus: pass
+      failureCategory: null
+      durationMs: 10599
+      usageSummary:
+        inputTokens: 24
+        outputTokens: 516
+        totalTokens: 540
+        reasoningTokens: 510
+        cachedInputTokens: 0
+      redactionStatus: passed
+    stopRules:
+      - missing_env_local
+      - missing_alibaba_api_key_key
+      - missing_or_empty_runtime_secret
+      - provider_error
+      - unsafe_costly_unstable_or_oversized_output
+      - redaction_failure
+      - target_mismatch
+      - boundary_expansion_required
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke-rerun.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke-rerun.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke-rerun.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-04-stage-c-provider-staging-cost-calibration-approval-package.md
+      - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke.md
+      - docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-secret-availability-decision.md
+      - docs/05-execution-logs/evidence/2026-07-04-stage-c-1-secret-availability-decision.md
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - .env.local
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        approvalRequired: fresh_user_approval
+        targetBranch: master
+      push:
+        approved: false
+        approvalRequired: fresh_user_approval
+        target: origin/master
+      cleanup:
+        deleteShortBranchAfterMerge: true
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke-rerun.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke-rerun.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke-rerun.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-stage-c-1-provider-smoke-rerun.md docs/05-execution-logs/acceptance/2026-07-04-stage-c-1-provider-smoke-rerun.md docs/05-execution-logs/evidence/2026-07-04-stage-c-1-provider-smoke-rerun.md docs/05-execution-logs/audits-reviews/2026-07-04-stage-c-1-provider-smoke-rerun.md
+      - git diff --check
+      - git diff --name-only -- .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml src tests e2e src/db/schema drizzle migrations seed scripts playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-c-1-provider-smoke-rerun-2026-07-04
+    validationSummary:
+      status: passed_governance_validation
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedWriteScopeDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommit: passed_exit_0
+      envFileValueOutput: false
+      providerCallLimitRespected: true
+      redactionPassed: true
+      dbConnectionOrQueryExecuted: false
+      browserE2eExecuted: false
+      stagingProdExecuted: false
+      costCalibrationExecuted: false
+      sourceTestDependencySchemaEnvChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: stage-c-1-secret-availability-decision-2026-07-04
     title: Stage C-1 secret availability decision
     phase: stage-c-1-secret-availability-decision-2026-07-04
