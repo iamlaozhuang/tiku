@@ -358,6 +358,122 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    title: Source landing 8 role credential-backed local acceptance rerun after content harness repair
+    phase: source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    sourceStory: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+    humanApprovalBoundary: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+    targetClosureItem: Restart full 8-role credential-backed local acceptance from personal_standard_student after content-admin resource/RAG harness repair.
+    behaviorBoundary: local_playwright_acceptance_runtime_approved_trace_off_redacted_evidence_private_account_read_as_login_input_only_no_product_source_no_schema_no_dependency_no_provider_bound_smoke_no_env_secret_output_no_db_direct_no_staging_prod_no_release_claim
+    evidenceMode: redacted_file_paths_role_names_route_categories_assertion_categories_command_status_coverage_mode_and_failure_or_block_summary_only_no_credentials_no_passwords_no_sessions_no_cookies_no_headers_no_localStorage_no_env_values_no_connection_strings_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_acceptance_execution
+    moduleRunVersion: 2
+    executionProfile: local_acceptance_runtime
+    status: closed
+    result: scoped_no_provider_8_role_credential_backed_local_acceptance_rerun_observed_pass_provider_bound_stage_b_deferred
+    priority: p0
+    branch: codex/source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    claimedAt: "2026-07-03T18:25:00-07:00"
+    plannedAt: "2026-07-03T18:25:00-07:00"
+    validatedAt: "2026-07-03T18:42:00-07:00"
+    reviewedAt: "2026-07-03T18:42:00-07:00"
+    dependsOn:
+      - repair-content-admin-cookie-backed-acceptance-harness-2026-07-03
+    roleOrder:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+    acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-report.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-report.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
+      - e2e/**
+      - playwright.config.ts
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd exec -- playwright test e2e/credential-backed-8-role-local-acceptance.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/student-practice-mock-entry.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/personal-ai-generation-local-request.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/edition-aware-authorization-local-flow.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/role-separated-account-fixture-supplement.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/local-full-loop-knowledge-rag-maintenance-smoke.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-report.md docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+    validationSummary:
+      status: closed
+      runtimeAcceptanceExecuted: true
+      commandsPassed: 8
+      failOrBlockFound: none
+      splitRepairTaskCreated: no
+      providerBoundAiSmokeExecuted: false
+      productSourceChanged: false
+      testSourceChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      envSecretAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
   - id: repair-content-admin-cookie-backed-acceptance-harness-2026-07-03
     title: Repair content admin cookie-backed acceptance harness
     phase: repair-content-admin-cookie-backed-acceptance-harness-2026-07-03
