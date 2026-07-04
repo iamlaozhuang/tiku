@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
+currentPhase: full-chain-scenario-3-organization-tree-2026-07-04
 updatedAt: "2026-07-04T13:45:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
@@ -26860,32 +26860,30 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
-  phase: full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
+  id: full-chain-scenario-3-organization-tree-2026-07-04
+  phase: full-chain-scenario-3-organization-tree-2026-07-04
   status: closed
-  result: pass_private_organization_tree_input_provisioned_redacted
-  taskKind: local_private_input_provisioning
+  result: blocked_empty_state_hides_first_organization_create_surface
+  taskKind: local_acceptance_runtime_browser_db_aggregate
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
-  claimedAt: "2026-07-04T13:55:00-07:00"
-  plannedAt: "2026-07-04T13:55:00-07:00"
-  executedAt: "2026-07-04T13:56:00-07:00"
-  validatedAt: "2026-07-04T14:00:00-07:00"
-  reviewedAt: "2026-07-04T14:00:00-07:00"
-  closedAt: "2026-07-04T14:00:00-07:00"
+  branch: codex/full-chain-scenario-3-organization-tree-2026-07-04
+  claimedAt: "2026-07-04T14:08:00-07:00"
+  plannedAt: "2026-07-04T14:08:00-07:00"
+  blockedAt: "2026-07-04T14:18:00-07:00"
+  closedAt: "2026-07-04T14:18:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  sourceBlockTaskId: full-chain-scenario-3-organization-tree-2026-07-04
   dependsOn:
+    - full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
     - full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree.md
   blockedFiles:
     - AGENTS.md
     - package.json
@@ -26922,26 +26920,118 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   validationSummary:
-    status: pass
-    privateInputMetadataValidation: passed_exit_0
+    status: blocked
+    runtimeBrowserAndDbAggregateVerification: blocked_empty_state_hides_first_organization_create_surface
     scopedPrettierWrite: passed_exit_0
     scopedPrettierCheck: passed_exit_0
     gitDiffCheck: passed_exit_0
     blockedPathDiffCheck: passed_exit_0_no_output
     moduleRunV2PreCommitHardening: passed_exit_0
     sourceTestChanged: false
-    browserRuntimeExecuted: false
-    devServerStarted: false
-    directDbConnectionExecuted: false
+    browserRuntimeExecuted: true
+    devServerStarted: true
+    directDbConnectionExecuted: true
     directDbMutationExecuted: false
     schemaMigrationSeedChanged: false
     providerCallOrConfigurationExecuted: false
     dependencyOrLockfileChanged: false
     privateValueOutput: false
-    nextAction: run_full_chain_scenario_3_organization_tree_runtime
+    localAppServerStopped: true
+    organizationCountAfterBlock: 0
+    orgAuthCountAfterBlock: 0
+    adminOrganizationCountAfterBlock: 0
+    employeeCountAfterBlock: 0
+    redeemCodeCountAfterBlock: 0
+    nextAction: split_full_chain_scenario_3_empty_state_create_flow_repair
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
+  nextRequiredTask:
+    taskId: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+    status: pending_repair_under_centralized_local_continuity_approval
+    reason: organization_empty_state_hides_first_create_surface
+
+fullChainScenario3OrganizationTree20260704:
+  taskId: full-chain-scenario-3-organization-tree-2026-07-04
+  phase: full-chain-scenario-3-organization-tree-2026-07-04
+  status: closed
+  result: blocked_empty_state_hides_first_organization_create_surface
+  priority: p0
+  taskKind: local_acceptance_runtime_browser_db_aggregate
+  moduleRunVersion: 2
+  dependsOn:
+    - full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
+    - full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
+  targetClosureItem: Prove ops_admin creates the Scenario 3 organization tree through product runtime with redacted aggregate verification.
+  branch: codex/full-chain-scenario-3-organization-tree-2026-07-04
+  approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  plannedAt: "2026-07-04T14:08:00-07:00"
+  blockedAt: "2026-07-04T14:18:00-07:00"
+  closedAt: "2026-07-04T14:18:00-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-3-organization-tree.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  runtimeScope:
+    targetDbLabel: tiku_full_chain_acceptance_20260704_001
+    actorSelectorLabel: fc_ops_admin_created_by_super_admin
+    negativeActorSelectorLabel: fc_content_admin_created_by_super_admin
+    scenarioSelectorLabel: fc_scenario_3_org_tree
+    browserRuntimeAllowed: true
+    directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+    productMutationAllowed: organization_tree_only
+    downstreamFamiliesBlocked:
+      - org_auth
+      - admin_organization
+      - employee
+      - redeem_code
+      - personal_auth
+      - auth_upgrade
+  validationSummary:
+    status: blocked
+    runtimeBrowserAndDbAggregateVerification: blocked_empty_state_hides_first_organization_create_surface
+    scopedPrettierWrite: passed_exit_0
+    scopedPrettierCheck: passed_exit_0
+    gitDiffCheck: passed_exit_0
+    blockedPathDiffCheck: passed_exit_0_no_output
+    moduleRunV2PreCommitHardening: passed_exit_0
+    sourceTestChanged: false
+    browserRuntimeExecuted: true
+    devServerStarted: true
+    directDbConnectionExecuted: true
+    directDbMutationExecuted: false
+    schemaMigrationSeedChanged: false
+    providerCallOrConfigurationExecuted: false
+    dependencyOrLockfileChanged: false
+    privateValueOutput: false
+    localAppServerStopped: true
+    organizationCountAfterBlock: 0
+    orgAuthCountAfterBlock: 0
+    adminOrganizationCountAfterBlock: 0
+    employeeCountAfterBlock: 0
+    redeemCodeCountAfterBlock: 0
+    nextAction: split_full_chain_scenario_3_empty_state_create_flow_repair
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+  nextRequiredTask:
+    taskId: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+    status: pending_repair_under_centralized_local_continuity_approval
+    reason: organization_empty_state_hides_first_create_surface
 previousCurrentTaskBeforeFullChainScenario2KnowledgeBaselineDbProvisioning20260704:
   id: full-chain-scenario-2-rerun-closeout-sha-repair-2026-07-04
   phase: full-chain-scenario-2-rerun-closeout-sha-repair-2026-07-04
