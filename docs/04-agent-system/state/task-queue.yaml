@@ -499,25 +499,126 @@ tasks:
     sourceStory: split_from_source_landing_8_role_credential_backed_local_acceptance_rerun_preflight_2026_07_03
     humanApprovalBoundary: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
     targetClosureItem: Adapt the local acceptance harness so all 8 primary roles can be exercised through credential-backed local runtime login/session paths with redacted evidence.
-    behaviorBoundary: pending_materialization_required_before_execution_test_harness_source_changes_only_if_needed_no_product_source_no_schema_no_dependency_no_provider_no_staging_prod_no_release_claim
-    evidenceMode: redacted_role_names_route_categories_assertion_categories_command_status_and_failure_or_block_summary_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    behaviorBoundary: test_harness_source_change_only_no_product_source_no_schema_no_dependency_private_account_read_as_login_input_only_no_private_value_output_focused_playwright_runtime_allowed_no_provider_no_staging_prod_no_release_claim
+    evidenceMode: redacted_file_paths_role_names_route_categories_assertion_categories_command_status_and_failure_or_block_summary_only_no_credentials_no_passwords_no_sessions_no_cookies_no_headers_no_localStorage_no_env_values_no_connection_strings_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
     taskKind: acceptance_harness_repair
     moduleRunVersion: 2
     executionProfile: local_low_risk_experience_batch
-    status: pending
-    result: pending_materialization
+    status: closed
+    result: credential_backed_8_role_login_session_harness_repaired_with_red_green_validation
     priority: p0
+    branch: codex/repair-8-role-credential-backed-acceptance-harness-2026-07-03
+    claimedAt: "2026-07-03T16:18:00-07:00"
+    plannedAt: "2026-07-03T16:18:00-07:00"
+    implementedAt: "2026-07-03T16:36:00-07:00"
+    validatedAt: "2026-07-03T16:36:00-07:00"
+    reviewedAt: "2026-07-03T16:36:00-07:00"
     dependsOn:
       - source-landing-8-role-credential-backed-local-acceptance-rerun-preflight-2026-07-03
-    plannedBranch: codex/repair-8-role-credential-backed-acceptance-harness-2026-07-03
-    plannedAllowedFileAreas:
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
+    harnessPath: e2e/credential-backed-8-role-local-acceptance.spec.ts
+    allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
       - docs/05-execution-logs/evidence/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
       - docs/05-execution-logs/audits-reviews/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
+      - e2e/credential-backed-8-role-local-acceptance.spec.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/**
       - e2e/**
-    blockedUntilMaterialized: true
+      - playwright.config.ts
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      testSourceChange: approved_e2e_harness_only
+      privateAccountFileRead: approved_read_only_login_input_no_private_value_output
+      focusedPlaywrightRuntime: approved_trace_off_redacted_output
+      localDevServer: approved_for_playwright_webserver_only
+      browserRuntime: approved_for_focused_e2e_only
+      productSourceChange: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd exec -- playwright test e2e/credential-backed-8-role-local-acceptance.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md docs/05-execution-logs/evidence/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md docs/05-execution-logs/audits-reviews/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md e2e/credential-backed-8-role-local-acceptance.spec.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-8-role-credential-backed-acceptance-harness-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-8-role-credential-backed-acceptance-harness-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+    validationSummary:
+      status: closed
+      tddRed: pass_expected_failure_loader_returned_zero_roles
+      tddGreenFirstRun: failed_harness_assertion_personal_user_type_expected_student_observed_personal
+      tddGreen: pass
+      focusedPlaywright: pass_2
+      testResultsRemoved: true
+      prettierScopedCheckInitial: failed_task_plan_evidence_e2e_formatting
+      prettierScopedWrite: pass
+      prettierScopedCheckFinal: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardeningInitial: failed_sensitive_evidence_scan_assignment_shape
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      productSourceChanged: false
+      testSourceChanged: true
+      directDatabaseConnectionOrMutationExecuted: false
+      envSecretAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
   - id: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
     title: Source landing 8 role local account data fixture hardening
     phase: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
