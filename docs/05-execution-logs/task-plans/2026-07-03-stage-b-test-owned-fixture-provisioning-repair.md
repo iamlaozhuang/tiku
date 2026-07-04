@@ -4,7 +4,7 @@
 
 - Task ID: `stage-b-test-owned-fixture-provisioning-repair-2026-07-03`
 - Branch: `codex/stage-b-test-owned-fixture-provisioning-repair-2026-07-03`
-- Status: awaiting fresh approval before DB write/provisioning
+- Status: completed local-only non-destructive provisioning and redacted preflight rerun; governance validation passed
 
 ## Required Reading Completed
 
@@ -132,3 +132,22 @@ Before any DB write, the user must explicitly approve this exact boundary:
 > idempotent create/upsert to the listed auth/user/admin/organization/authorization tables only, with no cleanup/reset,
 > no destructive delete/truncate/drop, no schema migration, no source/test/dependency changes, no browser/e2e/Provider,
 > and redacted evidence only.
+
+## Execution Result
+
+Fresh approval was received in-thread for the exact refreshed boundary above.
+
+Executed after approval:
+
+- Redacted dry-run selector classification against app runtime DB label `tiku_fresh_phase25_20260601_001`.
+- Non-destructive local-only idempotent create/upsert in a single transaction for the approved tables only.
+- Stage B-0.3 redacted fixture preflight rerun from scratch against the app runtime DB label.
+
+Result:
+
+- Provisioning status: committed.
+- Roles provisioned: 8.
+- Redacted preflight rerun: 8 pass, 0 fail, 0 block.
+- DB-backed Stage B acceptance: not started.
+- Browser/e2e/Provider/dev server: not executed by this task.
+- Cleanup/reset/destructive delete/truncate/drop/schema migration/source/test/dependency change: not executed.

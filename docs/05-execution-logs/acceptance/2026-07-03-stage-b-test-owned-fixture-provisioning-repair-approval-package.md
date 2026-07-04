@@ -1,8 +1,10 @@
 # 2026-07-03 Stage B Test-Owned Fixture Provisioning Repair Approval Package
 
-## Decision Needed
+## Decision Status
 
-Fresh approval is required before any local DB write or provisioning.
+Fresh approval was received in-thread for the exact refreshed boundary recorded below. Local-only non-destructive
+provisioning was executed after that approval, and post-repair Stage B-0.3 redacted fixture preflight rerun passed for all
+8 roles.
 
 ## Scope Refresh Notice
 
@@ -79,10 +81,12 @@ Approve only this:
 - Password credential creation cannot use the current project-compatible auth credential format safely.
 - A proposed write would require destructive cleanup/reset or schema migration.
 
-## After Approval
+## After Approval Execution Result
 
-1. Execute the narrow provisioning repair.
-2. Record redacted aggregate write counts and status categories.
-3. Rerun Stage B-0.3 redacted fixture preflight from scratch.
-4. Stop if the rerun fails or blocks.
-5. Only after preflight passes may a separate task enter DB-backed Stage B acceptance.
+1. Narrow provisioning repair executed against local Docker Compose `tiku-postgres` / app runtime DB label
+   `tiku_fresh_phase25_20260601_001`.
+2. Redacted aggregate write counts and status categories recorded in
+   `docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md`.
+3. Stage B-0.3 redacted fixture preflight rerun from scratch: 8 pass, 0 fail, 0 block.
+4. DB-backed Stage B acceptance was not started in this task.
+5. A separate task is still required before DB-backed Stage B acceptance execution.

@@ -707,19 +707,20 @@ tasks:
     title: Stage B test-owned fixture provisioning repair
     phase: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
     sourceStory: current_user_requested_stage_b_test_owned_fixture_provisioning_repair_2026_07_03
-    humanApprovalBoundary: fresh_approval_required_before_db_write_provisioning_or_repair
+    humanApprovalBoundary: fresh_approval_received_for_local_only_non_destructive_fixture_provisioning
     targetClosureItem: Provision or repair local test-owned account/admin, organization binding, and authorization contexts for 8-role DB-backed Stage B readiness.
-    behaviorBoundary: approval_materialization_only_until_fresh_approval_no_db_write_no_provisioning_no_cleanup_no_reset_no_destructive_delete_truncate_drop_no_schema_migration_no_source_test_dependency_change_no_browser_e2e_no_stage_b_db_backed_acceptance_no_provider_no_staging_prod_no_release_claim
+    behaviorBoundary: fresh_approved_local_only_non_destructive_fixture_provisioning_no_cleanup_no_reset_no_destructive_delete_truncate_drop_no_schema_migration_no_source_test_dependency_change_no_browser_e2e_no_stage_b_db_backed_acceptance_no_provider_no_staging_prod_no_release_claim
     evidenceMode: redacted_role_labels_expected_shape_labels_status_categories_validation_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_raw_db_rows_no_internal_ids_no_pii_no_email_no_phone_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
     taskKind: local_test_owned_fixture_provisioning_repair
     moduleRunVersion: 2
-    executionProfile: approval_materialization_then_pending_high_risk_local_db_fixture_provisioning_requires_fresh_approval
-    status: awaiting_fresh_approval
-    result: approval_package_materialized_no_db_write_no_provisioning
+    executionProfile: fresh_approved_local_only_non_destructive_fixture_provisioning_then_redacted_preflight_rerun
+    status: closed
+    result: completed_non_destructive_local_fixture_provisioning_and_post_repair_stage_b_0_3_preflight_passed_8_of_8
     priority: p0
     branch: codex/stage-b-test-owned-fixture-provisioning-repair-2026-07-03
     claimedAt: "2026-07-03T22:20:00-07:00"
     plannedAt: "2026-07-03T22:20:00-07:00"
+    completedAt: "2026-07-03T23:20:00-07:00"
     dependsOn:
       - stage-b-0-3-redacted-fixture-preflight-2026-07-03
     blockerFrom:
@@ -764,6 +765,26 @@ tasks:
         - personal_auth
         - org_auth
         - org_auth_organization
+    executionSummary:
+      freshApprovalReceived: true
+      approvalSource: current_user_message_approve_non_destructive_local_only_fixture_provisioning_2026_07_03
+      dryRunSelectorClassification: passed_8_write_ready_0_block
+      provisioningExecuted: true
+      provisioningMode: local_only_non_destructive_idempotent_create_upsert_update_single_transaction
+      targetService: tiku-postgres
+      targetDatabaseLabel: tiku_fresh_phase25_20260601_001
+      rolesProvisioned: 8
+      credentialRowsVerified: 8
+      postRepairPreflight:
+        status: passed
+        rolesPreflighted: 8
+        passCount: 8
+        failCount: 0
+        blockCount: 0
+      stageBDbBackedAcceptanceStarted: false
+      cleanupResetOrDestructiveActionExecuted: false
+      schemaMigrationSeedOrDdlExecuted: false
+      browserE2eProviderExecuted: false
     forbiddenUntilApproved:
       - db_write
       - db_cleanup
@@ -827,20 +848,27 @@ tasks:
     validationCommands:
       - redacted private fixture role marker and expected shape check
       - docker compose ps --services --filter status=running
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku_fresh_phase25_20260601_001 -X -qAt <redacted dry-run selector classification query>
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku_fresh_phase25_20260601_001 -X -qAt <redacted non-destructive fixture provisioning transaction>
+      - docker compose exec -T tiku-postgres psql -U tiku -d tiku_fresh_phase25_20260601_001 -X -qAt <redacted post-repair Stage B-0.3 preflight rerun>
       - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-test-owned-fixture-provisioning-repair-approval-package.md docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-test-owned-fixture-provisioning-repair-2026-07-03
     validationSummary:
-      status: approval_package_governance_validation_passed_awaiting_fresh_approval
+      status: passed_governance_validation_with_fixture_preflight_pass_result
       scopedPrettierCheck: passed
       gitDiffCheck: passed
       moduleRunV2PreCommit: passed
-      dbWriteExecuted: false
-      provisioningExecuted: false
+      dbWriteExecuted: true
+      provisioningExecuted: true
       localDataCleanupExecuted: false
       localDataResetExecuted: false
       destructiveDbActionExecuted: false
       schemaMigrationSeedOrDdlExecuted: false
+      privateFixtureReadInMemory: true
+      credentialVerificationInMemoryOnly: true
+      credentialOrLoginIdentifierRecorded: false
+      rawDbRowsInternalIdsOrPiiRecorded: false
       envFileRead: false
       providerExecuted: false
       stagingProdDeployExecuted: false
@@ -968,7 +996,7 @@ tasks:
       stoppedBeforeStageBDbBackedAcceptance: true
     followUpTaskSplit:
       id: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
-      status: pending_human_approval_and_task_materialization
+      status: completed_by_stage_b_test_owned_fixture_provisioning_repair_2026_07_03
       requiredBeforeStageBDbBackedAcceptance: true
     validationSummary:
       status: passed_governance_validation_with_fixture_preflight_fail_result
