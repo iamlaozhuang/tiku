@@ -17303,6 +17303,107 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+    title: Full-chain Scenario 2 paper auth block closeout SHA repair
+    phase: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+    sourceStory: scenario_2_paper_auth_block_pre_push_repository_sha_checkpoint_drift
+    dependencies:
+      - full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    status: closed
+    result: pass_repository_sha_checkpoint_repaired_after_scenario_2_paper_auth_block
+    taskKind: local_closeout_sha_checkpoint_repair
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    targetClosureItem: Repair repository SHA checkpoint drift after the Scenario 2 paper auth block commit was fast-forward merged to master but pre-push readiness stopped the push.
+    behaviorBoundary: docs_state_queue_evidence_audit_only_update_repository_sha_checkpoint_no_source_test_db_browser_provider_schema_migration_seed_dependency_staging_prod_cost_or_release_claim
+    evidenceMode: redacted_task_ids_branch_command_names_status_checkpoint_summary_only
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - git rev-parse master
+      - git rev-parse origin/master
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+    validationSummary:
+      status: pass
+      prePushShaDriftBlockCaptured: true
+      repositoryShaCheckpointRepaired: true
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening: passed_exit_0
+      moduleRunV2PrePushReadiness: passed_exit_0
+      sourceTestChanged: false
+      browserRuntimeExecuted: false
+      directDbConnectionExecuted: false
+      directDbMutationExecuted: false
+      providerCallOrConfigurationExecuted: false
+      scenario2BlockedConclusionChanged: false
+      pushRetryRequired: true
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: full-chain-scenario-2-content-baseline-2026-07-04
     title: Full-chain Scenario 2 content baseline
     phase: full-chain-scenario-2-content-baseline-2026-07-04
