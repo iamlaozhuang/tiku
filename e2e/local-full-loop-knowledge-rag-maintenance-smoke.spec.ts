@@ -1,6 +1,11 @@
 import { Buffer } from "node:buffer";
 
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type APIResponse,
+} from "@playwright/test";
 
 type ApiPayload<TData = unknown> = {
   code: number;
@@ -10,11 +15,15 @@ type ApiPayload<TData = unknown> = {
 };
 
 type SessionLoginData = {
-  token: string;
   user: {
     adminRoles?: string[];
     status: "active";
   };
+};
+
+type AuthenticatedClient = {
+  cookieHeader: string;
+  roleLabel: "content_admin";
 };
 
 type KnowledgeNodeData = {
@@ -84,9 +93,9 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
 }, testInfo) => {
   test.setTimeout(45_000);
 
-  const sessionValue = await loginAsContentAdmin(request);
-  const authorizationHeaders = {
-    authorization: `Bearer ${sessionValue}`,
+  const contentAdmin = await loginAsContentAdmin(request);
+  const requestHeaders = {
+    cookie: contentAdmin.cookieHeader,
   };
   const uniqueSuffix = Date.now().toString(36);
   const knowledgeNodeName = `本地RAG闭环节点-${uniqueSuffix}`;
@@ -111,7 +120,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
       profession: "marketing",
       sortOrder: 628,
     },
-    authorizationHeaders,
+    requestHeaders,
   );
   const knowledgeNodePublicId =
     createKnowledgeNodePayload.data?.knowledgeNode.publicId;
@@ -128,7 +137,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
     `/api/v1/knowledge-nodes?profession=marketing&keyword=${encodeURIComponent(
       knowledgeNodeName,
     )}&page=1&pageSize=20`,
-    authorizationHeaders,
+    requestHeaders,
   );
 
   expect(listKnowledgeNodePayload.data?.knowledgeNodes).toEqual(
@@ -155,7 +164,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
       resourceType: "knowledge_doc",
       title: resourceTitle,
     },
-    authorizationHeaders,
+    requestHeaders,
   );
   const resourcePublicId = uploadResourcePayload.data?.resource.publicId;
 
@@ -175,7 +184,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
     request,
     `/api/v1/resources/${resourcePublicId}/publish`,
     null,
-    authorizationHeaders,
+    requestHeaders,
   );
 
   expect(publishResourcePayload.data?.resource).toMatchObject({
@@ -187,7 +196,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
     request,
     `/api/v1/resources/${resourcePublicId}/rebuild-vector`,
     null,
-    authorizationHeaders,
+    requestHeaders,
   );
 
   expect(rebuildVectorPayload.data?.resourceVector).toMatchObject({
@@ -203,7 +212,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
     `/api/v1/resources?status=rag_ready&keyword=${encodeURIComponent(
       resourceTitle,
     )}&page=1&pageSize=20`,
-    authorizationHeaders,
+    requestHeaders,
   );
 
   expect(listResourcePayload.data?.resources).toEqual(
@@ -226,7 +235,7 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
     expectStandardApiEnvelope(payload);
     expectCamelCaseJsonKeys(payload);
     expectNoInternalIdKeys(payload);
-    expectNoRawRuntimePayload(payload, sessionValue);
+    expectNoRawRuntimePayload(payload);
   }
 
   await testInfo.attach("local-full-loop-knowledge-rag-summary", {
@@ -257,22 +266,24 @@ test("maintains local knowledge_node and resource RAG lifecycle via localhost AP
 
 async function loginAsContentAdmin(
   request: APIRequestContext,
-): Promise<string> {
-  const payload = await postJson<SessionLoginData>(
-    request,
-    "/api/v1/sessions",
-    contentAdminCredential,
-    {},
-  );
+): Promise<AuthenticatedClient> {
+  const response = await request.post("/api/v1/sessions", {
+    data: contentAdminCredential,
+    headers: {
+      "content-type": "application/json",
+    },
+  });
+  const payload = await readOkPayload<SessionLoginData>(response);
 
   expect(payload.data?.user.status).toBe("active");
   expect(payload.data?.user.adminRoles ?? []).toEqual(["content_admin"]);
+  expectClientVisibleTokenOmitted(payload.data);
+  expectNoRawRuntimePayload(payload);
 
-  const sessionValue = payload.data?.token;
-
-  expect(sessionValue).toEqual(expect.any(String));
-
-  return sessionValue ?? "";
+  return {
+    cookieHeader: readRequiredSessionCookieHeader(response),
+    roleLabel: "content_admin",
+  };
 }
 
 async function getJson<TData>(
@@ -317,7 +328,7 @@ async function postMultipart<TData>(
 }
 
 async function readOkPayload<TData>(
-  response: Awaited<ReturnType<APIRequestContext["post"]>>,
+  response: APIResponse,
 ): Promise<ApiPayload<TData>> {
   const payload = (await response.json()) as ApiPayload<TData>;
 
@@ -329,6 +340,23 @@ async function readOkPayload<TData>(
   });
 
   return payload;
+}
+
+function expectClientVisibleTokenOmitted(data: unknown) {
+  expect(isRecord(data) ? data["token"] : undefined).toBeUndefined();
+}
+
+function readRequiredSessionCookieHeader(response: APIResponse): string {
+  const sessionCookieHeader = response.headers()["set-cookie"] ?? "";
+  const sessionCookiePair = sessionCookieHeader.split(";")[0] ?? "";
+
+  expect(sessionCookieHeader).toContain("tiku_session=");
+  expect(sessionCookieHeader).toContain("HttpOnly");
+  expect(sessionCookieHeader).toContain("SameSite=Lax");
+  expect(sessionCookieHeader).toContain("Path=/");
+  expect(sessionCookiePair).toMatch(/^tiku_session=/u);
+
+  return sessionCookiePair;
 }
 
 function expectStandardApiEnvelope(
@@ -383,13 +411,15 @@ function expectNoInternalIdKeys(value: unknown) {
   }
 }
 
-function expectNoRawRuntimePayload(value: unknown, sessionValue: string) {
+function expectNoRawRuntimePayload(value: unknown) {
   const serializedValue = JSON.stringify(value);
 
   for (const forbiddenValue of [
     contentAdminCredential.password,
-    sessionValue,
     rawResourceBodyMarker,
+    "tiku_session=",
+    "Bearer ",
+    "Authorization",
     ".runtime",
     "objectKey",
     "storageRoot",
@@ -398,4 +428,8 @@ function expectNoRawRuntimePayload(value: unknown, sessionValue: string) {
   ]) {
     expect(serializedValue).not.toContain(forbiddenValue);
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
