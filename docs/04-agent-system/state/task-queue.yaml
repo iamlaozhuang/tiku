@@ -358,6 +358,85 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-b-db-provider-staging-cost-approval-package-2026-07-03
+    title: Stage B DB Provider staging cost approval package
+    phase: stage-b-db-provider-staging-cost-approval-package-2026-07-03
+    sourceStory: current_user_requested_serial_goal_stage_b_approval_package_after_8_role_local_acceptance_2026_07_03
+    humanApprovalBoundary: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+    targetClosureItem: Prepare Stage B DB/Provider/staging/cost approval package without executing DB, Provider, staging, or cost calibration.
+    behaviorBoundary: docs_only_approval_package_no_db_no_provider_no_staging_prod_no_cost_calibration_no_env_secret_no_product_source_no_schema_no_dependency_no_release_claim
+    evidenceMode: redacted_task_ids_file_paths_approval_categories_boundary_categories_command_status_only_no_credentials_no_tokens_no_cookies_no_sessions_no_headers_no_env_values_no_connection_strings_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: approval_package
+    moduleRunVersion: 2
+    executionProfile: docs_only_approval_package
+    status: closed
+    result: stage_b_db_provider_staging_cost_approval_package_prepared_no_execution
+    priority: p0
+    branch: codex/stage-b-db-provider-staging-cost-approval-package-2026-07-03
+    claimedAt: "2026-07-03T18:55:00-07:00"
+    plannedAt: "2026-07-03T18:55:00-07:00"
+    completedAt: "2026-07-03T18:55:00-07:00"
+    dependsOn:
+      - source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    approvalPackagePath: docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+      - docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+      - docs/05-execution-logs/evidence/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md docs/05-execution-logs/acceptance/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md docs/05-execution-logs/evidence/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-b-db-provider-staging-cost-approval-package-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stage-b-db-provider-staging-cost-approval-package-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_serial_goal_with_stop_on_fail_repair_loop_2026_07_03
+    validationSummary:
+      status: closed
+      docsOnly: true
+      dbExecuted: false
+      providerExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
   - id: source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
     title: Source landing 8 role credential-backed local acceptance rerun after content harness repair
     phase: source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
