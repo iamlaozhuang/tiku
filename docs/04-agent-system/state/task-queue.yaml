@@ -18101,19 +18101,21 @@ tasks:
       productionUsabilityClaimed: false
 
   - id: full-chain-login-input-state-binding-repair-2026-07-04
-    title: Full-chain login input state binding repair
+    title: Full-chain login hydrated readiness repair
     phase: full-chain-login-input-state-binding-repair-2026-07-04
-    sourceStory: source_repair_after_browser_login_submit_stays_disabled
+    sourceStory: acceptance_harness_repair_after_browser_login_submit_stays_disabled_before_hydration
     dependencies:
       - full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
-    status: pending
-    result: pending_source_repair_for_browser_login_submit_state
-    taskKind: source_repair
+    status: closed
+    result: pass_acceptance_hydration_readiness_repair_no_product_source_change
+    taskKind: local_acceptance_harness_repair
     moduleRunVersion: 2
     branch: codex/full-chain-login-input-state-binding-repair-2026-07-04
     humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    targetClosureItem: Repair login input state binding so browser/e2e login can enable submit with valid credentials.
-    behaviorBoundary: source_test_docs_browser_focused_validation_no_auth_weakening_no_permission_bypass_no_schema_migration_seed_no_dependency_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+    plannedAt: "2026-07-04T18:00:52-07:00"
+    completedAt: "2026-07-04T18:12:23-07:00"
+    targetClosureItem: Repair login browser readiness timing so browser/e2e fills private credentials only after the login surface is hydrated and can enable submit with valid credentials.
+    behaviorBoundary: test_docs_browser_focused_validation_no_product_source_change_no_auth_weakening_no_permission_bypass_no_schema_migration_seed_no_dependency_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
     evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_command_names_pass_fail_block_and_summary_only
     planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-login-input-state-binding-repair.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
@@ -18121,6 +18123,7 @@ tasks:
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-runbook-and-stop-rules.md
       - docs/05-execution-logs/task-plans/2026-07-04-full-chain-login-input-state-binding-repair.md
       - docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
       - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
@@ -18128,6 +18131,25 @@ tasks:
       - src/components/ui/input.tsx
       - tests/**
       - e2e/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
     privateAllowedFiles:
       - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
     readOnlyAllowedFiles:
@@ -18175,7 +18197,7 @@ tasks:
         deleteShortBranch: true
         approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
     validationCommands:
-      - npm.cmd run test -- <focused login/input tests>
+      - npm.cmd run test:unit -- tests/unit/ui-input-contract.test.ts tests/unit/student-login-ui.test.ts
       - npm.cmd run typecheck
       - powershell.exe -NoProfile -Command "<focused browser login submit-state validation with redacted private values>"
       - npm.cmd exec -- prettier --write --ignore-unknown <scoped files>
@@ -18184,10 +18206,30 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-login-input-state-binding-repair-2026-07-04
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-login-input-state-binding-repair-2026-07-04 -SkipRemoteAheadCheck
     validationSummary:
-      status: pending
-      sourceRepairRequired: true
+      status: pass
+      taskPlanPrepared: true
+      baselineFocusedLoginUiUnit: pass
+      baseUiInputContractReviewed: pass
+      rootCause: hydration_readiness_timing_not_service_start_or_db_target
+      sourceRepairRequired: false
+      productSourceChanged: false
       sourceTestRequired: true
+      inputContractUnitTest: pass
+      earlyFillAdversarialBrowserProbe: fail_expected_hydration_timing
+      hydratedBrowserLoginFocusedValidation: pass
+      localRuntimeCleanup: pass
+      browserLoginReadinessRunbookUpdate: pass
+      evidenceLaneSeparationRule: pass
       browserLoginFocusedValidationRequired: true
+      focusedUnitValidation: pass
+      typecheck: pass
+      lint: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
       schemaMigrationSeedChanged: false
       providerCallOrConfigurationExecuted: false
       dependencyOrLockfileChanged: false

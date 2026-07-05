@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
-updatedAt: "2026-07-04T17:56:00-07:00"
+currentPhase: full-chain-login-input-state-binding-repair-2026-07-04
+updatedAt: "2026-07-04T18:00:52-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -26860,68 +26860,30 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
-  phase: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+  id: full-chain-login-input-state-binding-repair-2026-07-04
+  phase: full-chain-login-input-state-binding-repair-2026-07-04
   status: closed
-  result: blocked_requires_source_repair_login_input_state_binding
-  taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
+  result: pass_acceptance_hydration_readiness_repair_no_product_source_change
+  taskKind: local_acceptance_harness_repair
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
-  plannedAt: "2026-07-04T17:48:00-07:00"
-  completedAt: "2026-07-04T17:56:00-07:00"
+  branch: codex/full-chain-login-input-state-binding-repair-2026-07-04
+  plannedAt: "2026-07-04T18:00:52-07:00"
+  completedAt: "2026-07-04T18:12:23-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  dependsOn:
-    - full-chain-scenario-5-advanced-org-package-2026-07-04
-    - full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-login-input-state-binding-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
-  privateAllowedFiles:
-    - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
-    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import-selector.json
-    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import.csv
-  readOnlyAllowedFiles:
-    - AGENTS.md
-    - docs/03-standards/code-taste-ten-commandments.md
-    - docs/02-architecture/adr/**
-    - docs/04-agent-system/state/project-state.yaml
-    - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
-    - docs/01-requirements/00-index.md
-    - docs/01-requirements/advanced-edition/00-index.md
-    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
-    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
-    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
-    - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
-    - src/app/(auth)/login/page.tsx
-    - src/app/api/v1/sessions/route.ts
-    - src/app/api/v1/employees/import/route.ts
-    - src/app/api/v1/org-auths/route.ts
-    - src/app/api/v1/admin-accounts/route.ts
-    - src/server/auth/session-cookie.ts
-    - src/server/services/admin-organization-org-auth-runtime.ts
-    - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
-    - src/server/contracts/admin-user-org-auth-ops-contract.ts
-    - src/server/services/admin-flow-runtime.ts
-    - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
-    - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
-    - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
-    - C:/Users/jzzhu/.codex/skills/playwright/SKILL.md
-    - C:/Users/jzzhu/.codex/plugins/cache/openai-bundled/browser/26.623.101652/skills/control-in-app-browser/SKILL.md
+    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-runbook-and-stop-rules.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-login-input-state-binding-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
+    - tests/unit/ui-input-contract.test.ts
   blockedFiles:
     - AGENTS.md
+    - .env*
     - package.json
     - package-lock.yaml
     - package-lock.json
@@ -26939,18 +26901,16 @@ currentTask:
     - test-results/**
     - .next/**
     - .runtime/**
-    - .env*
+    - D:/tiku-local-private/**
   runtimeScope:
     targetDbLabel: tiku_full_chain_acceptance_20260704_001
-    actorSelectorLabel: fc_ops_admin_created_by_super_admin
-    scenarioSelectorLabel: fc_scenario_5_advanced_org_package
-    advancedOrgAdminSelectorLabel: fc_org_advanced_admin_created_by_ops
-    advancedEmployeeSelectorLabel: fc_org_advanced_employee_batch
-    restartNode: scenario_5_employee_import_node
-    productMutationAllowed: advanced_employee_import_only
-    preserveExistingAdvancedOrgAuthAndAdmin: true
-    browserRuntimeAllowed: true
-    directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+    browserRuntimeExecuted: true
+    browserLoginReadinessRule: hydrated_interactable_required_before_private_credential_fill
+    productSourceChanged: false
+    productDbMutationExecuted: false
+    sessionCreated: false
+    browserLoginReadinessRunbookUpdate: pass
+    evidenceLaneSeparationRule: pass
   closeoutPolicy:
     localCommit:
       approved: true
@@ -26976,52 +26936,42 @@ currentTask:
     - cost_calibration_gate
     - schema_migration_or_seed
     - permission_weakening
+    - product_source_change
     - fake_data_or_fixture_expansion_in_repository
     - redaction_violation
   validationCommands:
-    - powershell.exe -NoProfile -Command "<redacted Scenario 5 private metadata and DB target preflight>"
-    - powershell.exe -NoProfile -Command "<local app startup with redacted runtime env>"
-    - node - <redacted Scenario 5 employee import-node runtime rerun>
-    - docker compose exec -T tiku-postgres psql <redacted selector-scoped aggregate verification>
-    - npm.cmd exec -- prettier --write --ignore-unknown <scoped docs>
-    - npm.cmd exec -- prettier --check --ignore-unknown <scoped docs>
+    - npm.cmd run test:unit -- tests/unit/ui-input-contract.test.ts tests/unit/student-login-ui.test.ts
+    - npm.cmd run typecheck
+    - npm.cmd run lint
+    - node - <redacted hydrated browser login submit-state validation>
+    - npm.cmd exec -- prettier --write --ignore-unknown <scoped files>
+    - npm.cmd exec -- prettier --check --ignore-unknown <scoped files>
     - git diff --check
-    - git diff --name-only -- <blocked paths>
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04 -SkipRemoteAheadCheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-login-input-state-binding-repair-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-login-input-state-binding-repair-2026-07-04 -SkipRemoteAheadCheck
   validationSummary:
-    status: blocked_requires_source_repair_login_input_state_binding
-    taskPlanPrepared: true
-    privateSelectorPreflight: pass
-    runtimeDbTargetCheck: pass
-    browserRuntimeExecuted: blocked
-    devServerStarted: pass
-    directDbConnectionExecuted: pass
-    directDbMutationExecuted: false
-    productDbMutationExecuted: advanced_employee_import_only
-    advancedOrgAuthActiveCount: 5
-    orgAdvancedAdminActiveCount: 1
-    adminOrganizationAdvancedBindingCount: 1
-    advancedEmployeeImportedCount: 6
-    advancedEmployeeRejectedCount: 0
-    advancedOrgAdminAllowedSurfaceCount: 0
-    advancedOrgAdminDeniedGlobalCount: 0
-    standardOrgAdminDeniedAdvancedCount: 0
+    status: pass
+    rootCause: hydration_readiness_timing_not_service_start_or_db_target
+    productSourceChanged: false
+    sourceRepairRequired: false
+    inputContractUnitTest: pass
+    hydratedBrowserLoginFocusedValidation: pass
+    localRuntimeCleanup: pass
+    browserLoginReadinessRunbookUpdate: pass
+    evidenceLaneSeparationRule: pass
+    typecheck: pass
+    lint: pass
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     gitDiffCheck: pass
-    blockedPathDiffCheck: pass_no_output
+    blockedPathDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_sha_checkpoint_reconciliation
-    sourceTestChanged: false
+    moduleRunV2PrePushReadiness: pass
     schemaMigrationSeedChanged: false
     providerCallOrConfigurationExecuted: false
     dependencyOrLockfileChanged: false
     privateValueOutput: false
     stagingProdCostReleaseExecuted: false
-    localRuntimeCleanup: pass
-    sourceRepairRequired: true
-    nextRequiredTask: full-chain-login-input-state-binding-repair-2026-07-04
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
@@ -27029,22 +26979,47 @@ currentTask:
 fullChainLoginInputStateBindingRepair20260704:
   taskId: full-chain-login-input-state-binding-repair-2026-07-04
   phase: full-chain-login-input-state-binding-repair-2026-07-04
-  status: pending
-  result: pending_source_repair_for_browser_login_submit_state
+  status: closed
+  result: pass_acceptance_hydration_readiness_repair_no_product_source_change
   priority: p0
-  taskKind: source_repair
+  taskKind: local_acceptance_harness_repair
   moduleRunVersion: 2
   sourceBlockedTaskId: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
   branch: codex/full-chain-login-input-state-binding-repair-2026-07-04
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  targetClosureItem: Repair login input state binding so browser/e2e login can enable submit with valid credentials.
-  behaviorBoundary: source_test_docs_only_no_auth_weakening_no_permission_bypass_no_schema_migration_seed_no_dependency_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+  plannedAt: "2026-07-04T18:00:52-07:00"
+  completedAt: "2026-07-04T18:12:23-07:00"
+  targetClosureItem: Repair login browser readiness timing so browser/e2e fills private credentials only after the login surface is hydrated and can enable submit with valid credentials.
+  behaviorBoundary: test_docs_browser_focused_validation_no_product_source_change_no_auth_weakening_no_permission_bypass_no_schema_migration_seed_no_dependency_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-login-input-state-binding-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
   nextRerunTask: full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
   validationSummary:
-    status: pending
-    sourceRepairRequired: true
+    status: pass
+    taskPlanPrepared: true
+    baselineFocusedLoginUiUnit: pass
+    baseUiInputContractReviewed: pass
+    rootCause: hydration_readiness_timing_not_service_start_or_db_target
+    sourceRepairRequired: false
+    productSourceChanged: false
     sourceTestRequired: true
+    inputContractUnitTest: pass
+    earlyFillAdversarialBrowserProbe: fail_expected_hydration_timing
+    hydratedBrowserLoginFocusedValidation: pass
+    localRuntimeCleanup: pass
+    browserLoginReadinessRunbookUpdate: pass
+    evidenceLaneSeparationRule: pass
     browserLoginFocusedValidationRequired: true
+    focusedUnitValidation: pass
+    typecheck: pass
+    lint: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
     providerCallOrConfigurationExecuted: false
     schemaMigrationSeedChanged: false
     dependencyOrLockfileChanged: false

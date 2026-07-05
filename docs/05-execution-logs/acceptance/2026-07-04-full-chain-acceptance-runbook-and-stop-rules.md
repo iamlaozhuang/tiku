@@ -25,6 +25,24 @@ steps or manually repairing data outside an approved repair/provisioning task.
 | R9   | Rerun from start                            | Repair merged and approved                   | Full-chain rerun evidence                      |
 | R10  | Stage C decisions                           | Local full-chain evidence closed             | Provider, Cost, or staging task selection      |
 
+## Browser Login Readiness Gate
+
+All full-chain browser acceptance tasks that use the login page must wait for the login surface to be hydrated and
+interactable before filling private credentials. Waiting only for `domcontentloaded` is insufficient and can produce a
+false blocker where DOM values exist but React-controlled state has not observed the input events.
+
+Before any browser flow that will create or mutate product DB state, run a minimal browser login smoke against the same
+local app and DB target:
+
+1. Navigate to `login_surface`.
+2. Wait for the page to be hydrated/interactable.
+3. Fill a selector-owned private credential in memory.
+4. Verify the submit action enables from React-observed form state.
+5. Stop and split repair if the form state does not update.
+
+This smoke must not create session state or product DB writes unless the scenario task explicitly scopes that action. A
+successful API session check does not replace this browser form-state check.
+
 ## Global Stop Rules
 
 Stop immediately when any of these occurs:
@@ -37,6 +55,8 @@ Stop immediately when any of these occurs:
 - Any role sees data or routes outside its boundary.
 - Any standard role can use advanced-only AI or enterprise training.
 - Any organization admin can mutate employees, organization tree, or global authorization outside approved ops ownership.
+- Browser credential fill would run before the login page is hydrated/interactable, or any flow attempts product DB
+  writes before the minimal browser login smoke has passed for the same runtime target.
 - Any evidence would contain credentials, connection strings, raw DB rows, phone, email, password, plaintext `redeem_code`,
   token, cookie, session, localStorage, Authorization header, raw Prompt, Provider payload, raw AI output, raw employee
   answer, full question, full paper, full material, DOM, screenshot, or trace.
@@ -60,6 +80,17 @@ Allowed evidence:
 
 - Task id, branch, file paths, role labels, route/surface labels, selector labels, DB target label, provider/model labels,
   counts, status, pass/fail/block, command names, duration, token counts, and redacted expected/observed summaries.
+
+Browser login evidence must keep three evidence lanes separate:
+
+- API session lane: route label, selector label, role label, and redacted pass/fail only.
+- Browser login form-state lane: route label, selector label, hydration/interactable readiness, submit-enabled state, and
+  redacted pass/fail only.
+- Permission/surface boundary lane: role label, route/surface label, allowed/denied summary, aggregate counts if needed,
+  and redacted pass/fail only.
+
+API session success must not be used as browser login success. Browser login success must not be used as permission or
+surface-boundary success.
 
 Forbidden evidence:
 
