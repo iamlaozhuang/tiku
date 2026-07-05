@@ -398,6 +398,147 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: stage-c-3-cost-calibration-execution-2026-07-05
+    title: Stage C-3 Cost Calibration execution
+    phase: stage-c-3-cost-calibration-execution-2026-07-05
+    sourceStory: current_user_approved_bounded_cost_calibration_execution_2026_07_05
+    dependencies:
+      - stage-c-3-cost-calibration-execution-boundary-2026-07-05
+      - stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
+      - full-chain-provider-cost-staging-approval-package-2026-07-05
+      - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+      - full-chain-post-acceptance-queue-cleanup-2026-07-05
+    status: closed
+    result: pass_bounded_local_cost_calibration_aggregate_redacted
+    taskKind: provider_cost_calibration_execution
+    executionProfile: local_dev_bounded_provider_cost_calibration
+    validationPolicy: scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/stage-c-3-cost-calibration-execution-2026-07-05
+    humanApprovalBoundary: current_user_approved_bounded_cost_calibration_execution_2026_07_05
+    plannedAt: "2026-07-05T09:43:22-07:00"
+    claimedAt: "2026-07-05T09:43:22-07:00"
+    materializedAt: "2026-07-05T09:43:22-07:00"
+    executedAt: "2026-07-05T09:47:50-07:00"
+    completedAt: "2026-07-05T09:50:12-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution.md
+      - docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution.md
+      - docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    runtimeReadOnlyAllowed:
+      - .env.local single key ALIBABA_API_KEY, value never printed or recorded
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - official Alibaba Cloud Model Studio pricing/model/API pages
+    localDbBoundary: no_database_connection_no_raw_rows_no_direct_or_product_runtime_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: readonly_env_local_single_key_alibaba_api_key_child_process_memory_only_no_secret_value_output_commit_or_evidence
+    providerBoundary:
+      providerExecution: approved_bounded_cost_calibration_only
+      target: openai_compatible_alibaba_qwen_qwen37_max_dashscope_aliyuncs_com
+      pricingSourceUrl: https://help.aliyun.com/zh/model-studio/model-pricing
+      pricingAccessDate: "2026-07-05"
+      maxRequests: 4
+      maxRetries: 0
+      timeoutMsPerRequest: 60000
+      maxOutputTokensPerRequest: 1800
+      maxSpendCny: "5.00"
+      rawPromptPayloadAiIoEvidence: blocked
+      quotaDefaults: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_bounded_cost_calibration_execution_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_bounded_cost_calibration_execution_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_bounded_cost_calibration_execution_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_bounded_cost_calibration_execution_2026_07_05
+    acceptanceStandards:
+      - Official Alibaba pricing source is rechecked before any Provider call and source/date are recorded.
+      - Provider execution is limited to the approved target labels, at most four requests, zero retries, 60000 ms timeout per request, and max output tokens not exceeding 1800 per request.
+      - Worst-case preflight estimate stays under CNY 5.00 before execution.
+      - Evidence contains aggregate token, cost, duration, and status summaries only.
+      - No Provider readiness, production pricing, quota default, staging readiness, release readiness, final Pass, production usability, or production readiness claim is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution.md docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution.md docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution.md docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution.md docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution.md docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution.md docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/archive docs/05-execution-logs/execution-log-index.yaml
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-c-3-cost-calibration-execution-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stage-c-3-cost-calibration-execution-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_bounded_local_cost_calibration_aggregate_redacted
+      readGate: pass
+      taskPlanPrepared: true
+      acceptancePrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      pricingSourceRechecked: pass
+      providerCallExecuted: true
+      costCalibrationExecuted: true
+      requestCount: 4
+      retryCount: 0
+      aggregateInputTokens: 96
+      aggregateOutputTokens: 1994
+      aggregateTotalTokens: 2090
+      aggregateReasoningTokens: 1970
+      aggregateCachedInputTokens: 0
+      aggregateDurationMs: 39825
+      estimatedCostCny: "0.072936"
+      spendCapCny: "5.00"
+      spendStatus: pass
+      redactionStatus: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      closeoutGates: pass
   - id: stage-c-3-cost-calibration-execution-boundary-2026-07-05
     title: Stage C-3 Cost Calibration execution boundary
     phase: stage-c-3-cost-calibration-execution-boundary-2026-07-05
