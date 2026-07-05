@@ -485,13 +485,15 @@ tasks:
     sourceStory: scenario_9_rerun_blocked_by_browser_harness_tab_handle_mapping_before_product_db_write
     dependencies:
       - full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-    status: pending
-    result: pending
+    status: closed
+    result: pass_redacted_programmatic_browser_harness_control_path_available
     taskKind: local_acceptance_browser_harness_repair
     moduleRunVersion: 2
     branch: codex/full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
     humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
     plannedAt: "2026-07-04T21:48:00-07:00"
+    claimedAt: "2026-07-04T22:06:00-07:00"
+    completedAt: "2026-07-04T22:19:00-07:00"
     targetClosureItem: Repair or provision the local browser acceptance harness control path after stale in-app browser tab handle mapping blocked Scenario 9 before product DB write.
     behaviorBoundary: browser_acceptance_harness_only_no_product_source_auth_authorization_redeem_runtime_db_schema_seed_dependency_provider_staging_prod_cost_destructive_db_release_final_or_production_claim
     restartRule: after_repair_rerun_scenario_9_from_browser_login_node_do_not_repeat_scenario_8_standard_redeem_or_learning_data
@@ -542,16 +544,29 @@ tasks:
         deleteShortBranch: true
         approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
     validationSummary:
-      status: pending
-      readGate: pending
-      harnessRepairOrProvisioning: pending
-      noProductSourceChange: pending
-      runtimeCleanup: pending
-      scopedPrettierCheck: pending
-      gitDiffCheck: pending
-      blockedPathDiffCheck: pending
-      moduleRunV2PreCommitHardening: pending
-      moduleRunV2PrePushReadiness: pending
+      status: pass
+      readGate: pass
+      taskClaimHelper: unavailable_script_argument_binding_failure_raw_state_queue_checked
+      npxAvailability: pass
+      playwrightPackageAvailability: pass_at_playwright_test_present
+      minimalBrowserHarnessProbe: pass
+      harnessRepairOrProvisioning: pass_redacted_programmatic_playwright_control_path_available
+      noProductSourceChange: pass
+      authAuthorizationRedeemRuntimeChanged: false
+      dependencyOrLockfileChanged: false
+      schemaMigrationSeedFixtureChanged: false
+      providerStagingProdCostExecuted: false
+      runtimeCleanup: pass_browser_closed_no_dev_server_started
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_final_closeout_gate
+      currentTaskPointerAlignedForCommitHook: pass
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
 
   - id: full-chain-goal-control-ledger-2026-07-04
     title: Full chain goal control ledger

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-updatedAt: "2026-07-04T21:48:00-07:00"
+currentPhase: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+updatedAt: "2026-07-04T22:26:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -224,19 +224,48 @@ fullChainScenario9AdvancedPersonalRerunAfterRedeemRepair20260704:
 fullChainScenario9BrowserTabMappingHarnessRepair20260704:
   taskId: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
   phase: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
-  status: pending
-  result: pending
+  status: closed
+  result: pass_redacted_programmatic_browser_harness_control_path_available
   priority: p0
   taskKind: local_acceptance_browser_harness_repair
   moduleRunVersion: 2
   branch: codex/full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   plannedAt: "2026-07-04T21:48:00-07:00"
+  claimedAt: "2026-07-04T22:06:00-07:00"
+  completedAt: "2026-07-04T22:19:00-07:00"
   dependsOn:
     - full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
   targetClosureItem: Repair or provision the local browser acceptance harness control path after stale in-app browser tab handle mapping blocked Scenario 9 before product DB write.
   behaviorBoundary: browser_acceptance_harness_only_no_product_source_auth_authorization_redeem_runtime_db_schema_seed_dependency_provider_staging_prod_cost_destructive_db_release_final_or_production_claim
   restartRule: after_repair_rerun_scenario_9_from_browser_login_node_do_not_repeat_scenario_8_standard_redeem_or_learning_data
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+  validationSummary:
+    status: pass
+    readGate: pass
+    taskClaimHelper: unavailable_script_argument_binding_failure_raw_state_queue_checked
+    npxAvailability: pass
+    playwrightPackageAvailability: pass_at_playwright_test_present
+    minimalBrowserHarnessProbe: pass
+    harnessRepairOrProvisioning: pass_redacted_programmatic_playwright_control_path_available
+    noProductSourceChange: pass
+    authAuthorizationRedeemRuntimeChanged: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedFixtureChanged: false
+    providerStagingProdCostExecuted: false
+    runtimeCleanup: pass_browser_closed_no_dev_server_started
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_final_closeout_gate
+    currentTaskPointerAlignedForCommitHook: pass
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 
 fullChainScenario1AdminRoleBootstrap20260704:
   taskId: full-chain-scenario-1-admin-role-bootstrap-2026-07-04
@@ -26970,32 +26999,32 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-  phase: full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-  status: blocked
-  result: blocked_browser_acceptance_harness_tab_mapping_before_product_db_write
-  taskKind: local_acceptance_runtime_browser_redeem_upgrade_pre_provider
+  id: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+  phase: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+  status: closed
+  result: pass_redacted_programmatic_browser_harness_control_path_available
+  taskKind: local_acceptance_browser_harness_repair
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-  plannedAt: "2026-07-04T21:18:00-07:00"
-  blockedAt: "2026-07-04T21:48:00-07:00"
-  closedAt: "2026-07-04T21:55:00-07:00"
+  branch: codex/full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+  plannedAt: "2026-07-04T21:48:00-07:00"
+  claimedAt: "2026-07-04T22:06:00-07:00"
+  completedAt: "2026-07-04T22:19:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   dependsOn:
-    - full-chain-scenario-8-standard-personal-learning-2026-07-04
-    - full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
-  targetClosureItem: Rerun Scenario 9 from the affected browser login and advanced personal upgrade node after redeem runtime repair, without repeating Scenario 8 or invoking Provider.
-  behaviorBoundary: local_browser_product_ui_upgrade_redeem_and_selector_aggregate_db_verification_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
-  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
+    - full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
+  targetClosureItem: Repair or provision the local browser acceptance harness control path after stale in-app browser tab handle mapping blocked Scenario 9 before product DB write.
+  behaviorBoundary: browser_acceptance_harness_only_no_product_source_auth_authorization_redeem_runtime_db_schema_seed_dependency_provider_staging_prod_cost_destructive_db_release_final_or_production_claim
+  restartRule: after_repair_rerun_scenario_9_from_browser_login_node_do_not_repeat_scenario_8_standard_redeem_or_learning_data
+  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -27033,33 +27062,36 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   validationCommands:
-    - powershell.exe -NoProfile -Command "<redacted Scenario 9 private selector, upgrade card, DB target, and baseline aggregate preflight>"
-    - powershell.exe -NoProfile -Command "<local app startup with redacted process-only runtime env>"
-    - node - <redacted browser login, upgrade redemption, advanced surface, and aggregate verification>
-    - docker compose exec -T tiku-postgres psql <redacted selector-scoped aggregate verification>
-    - npm.cmd run test:unit -- --run tests/unit/phase-8-student-authorization-redeem-runtime.test.ts src/server/services/redeem-code-authorization-service.test.ts
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
+    - node - <redacted minimal browser harness probe using existing @playwright/test>
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
     - git diff --check
-    - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
+    - git diff --name-only -- AGENTS.md .env .env.local .env.development .env.production package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04 -SkipRemoteAheadCheck
   validationSummary:
-    status: blocked_closeout_validated_requires_browser_harness_repair
+    status: pass
     readGate: pass
-    privatePreflight: pass
-    runtimeDbTargetCheck: pass
-    browserLoginSmoke: blocked_browser_tab_handle_mapping_before_private_input_fill
-    upgradeRedemption: not_executed
-    advancedSurfaceBoundary: not_executed
-    aggregateDbVerification: pass_no_mutation_after_block
-    runtimeCleanup: pass
-    focusedUnitTests: passed_exit_0
-    scopedPrettierCheck: passed_exit_0
-    gitDiffCheck: passed_exit_0
-    blockedPathDiffCheck: passed_exit_0_no_output
-    moduleRunV2PreCommitHardening: passed_exit_0
-    moduleRunV2PrePushReadiness: passed_exit_0
-    repositoryCheckpointAligned: true
+    taskClaimHelper: unavailable_script_argument_binding_failure_raw_state_queue_checked
+    npxAvailability: pass
+    playwrightPackageAvailability: pass_at_playwright_test_present
+    minimalBrowserHarnessProbe: pass
+    harnessRepairOrProvisioning: pass_redacted_programmatic_playwright_control_path_available
+    noProductSourceChange: pass
+    authAuthorizationRedeemRuntimeChanged: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedFixtureChanged: false
+    providerStagingProdCostExecuted: false
+    runtimeCleanup: pass_browser_closed_no_dev_server_started
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_final_closeout_gate
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 
 fullChainScenario9AdvancedPersonalPreProvider20260704:
   taskId: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
