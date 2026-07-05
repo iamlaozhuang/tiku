@@ -1,0 +1,41 @@
+export const personalAiGenerationLearningSessionOwnerTypeValues = [
+  "personal",
+  "organization",
+] as const;
+
+export type PersonalAiGenerationLearningSessionOwnerType =
+  (typeof personalAiGenerationLearningSessionOwnerTypeValues)[number];
+
+export const personalAiGenerationLearningSessionQuestionTypeValues = [
+  "single_choice",
+  "multi_choice",
+  "true_false",
+  "short_answer",
+] as const;
+
+export type PersonalAiGenerationLearningSessionQuestionType =
+  (typeof personalAiGenerationLearningSessionQuestionTypeValues)[number];
+
+export type PersonalAiGenerationLearningContentDomain = "personal_ai_learning";
+
+export type PersonalAiGenerationLearningFormalWriteStatus = "blocked";
+
+export type PersonalAiGenerationLearningAnswerFeedbackStatus =
+  | "scored"
+  | "submitted_review_required"
+  | "blocked";
+
+export type PersonalAiGenerationLearningSessionCreationStatus =
+  | "created"
+  | "blocked";
+
+export type PersonalAiGenerationLearningSessionCreationBlockReason =
+  | "insufficient_grounding_evidence"
+  | "structured_preview_unavailable"
+  | "structured_preview_not_parsed"
+  | "no_usable_generated_questions";
+
+export type PersonalAiGenerationLearningAnswerBlockReason =
+  | "session_not_found"
+  | "actor_not_allowed"
+  | "question_not_found";

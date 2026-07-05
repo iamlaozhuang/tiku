@@ -398,6 +398,130 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: ai-generation-learning-session-loop-2026-07-05
+    title: AI generation learning session loop
+    phase: ai-generation-learning-session-loop-2026-07-05
+    sourceStory: current_user_created_goal_for_ai_generation_closed_loop_2026_07_05
+    dependencies:
+      - full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+      - full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    status: closed
+    result: pass_ai_generation_learning_session_loop_no_provider_db_formal_write
+    taskKind: source_test_docs_personal_ai_generation_learning_session_loop
+    executionProfile: local_source_unit_test_no_provider_no_db_mutation
+    validationPolicy: red_first_service_contract_focused_unit_tests_scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/ai-generation-learning-loop-2026-07-05
+    humanApprovalBoundary: current_user_created_goal_for_ai_generation_closed_loop_2026_07_05
+    plannedAt: "2026-07-05T12:25:03-07:00"
+    claimedAt: "2026-07-05T12:25:03-07:00"
+    materializedAt: "2026-07-05T12:25:03-07:00"
+    completedAt: "2026-07-05T12:34:03-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-ai-generation-learning-session-loop.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-ai-generation-learning-session-loop.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-ai-generation-learning-session-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-ai-generation-learning-session-loop.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-ai-generation-learning-session-loop.md
+      - docs/05-execution-logs/acceptance/2026-07-05-ai-generation-learning-session-loop.md
+      - docs/05-execution-logs/evidence/2026-07-05-ai-generation-learning-session-loop.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-ai-generation-learning-session-loop.md
+      - src/server/contracts/personal-ai-generation-learning-session-contract.ts
+      - src/server/models/personal-ai-generation-learning-session.ts
+      - src/server/validators/personal-ai-generation-learning-session.ts
+      - src/server/services/personal-ai-generation-learning-session-service.ts
+      - src/server/services/personal-ai-generation-learning-session-service.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: blocked_for_this_service_contract_task
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_created_goal_for_ai_generation_closed_loop_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_created_goal_for_ai_generation_closed_loop_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_created_goal_for_ai_generation_closed_loop_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_created_goal_for_ai_generation_closed_loop_2026_07_05
+    acceptanceStandards:
+      - Personal advanced students and organization advanced employees can create an isolated AI learning session from current parsed AI question drafts when grounding is sufficient.
+      - The learning session normalizes supported question types and keeps source ownership metadata without exposing formal internal ids.
+      - Objective question answers receive deterministic feedback inside the isolated AI learning session.
+      - The service explicitly blocks formal writes to question, paper, practice, answer_record, exam_report, and mistake_book.
+      - Paper draft summaries without usable generated questions are rejected instead of being represented as a complete practice paper.
+      - No Provider call, Cost Calibration, staging/prod, dependency, schema, migration, seed, DB connection, DB mutation, browser runtime, or dev server work is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-ai-generation-learning-session-loop.md docs/05-execution-logs/acceptance/2026-07-05-ai-generation-learning-session-loop.md docs/05-execution-logs/evidence/2026-07-05-ai-generation-learning-session-loop.md docs/05-execution-logs/audits-reviews/2026-07-05-ai-generation-learning-session-loop.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/validators/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-ai-generation-learning-session-loop.md docs/05-execution-logs/acceptance/2026-07-05-ai-generation-learning-session-loop.md docs/05-execution-logs/evidence/2026-07-05-ai-generation-learning-session-loop.md docs/05-execution-logs/audits-reviews/2026-07-05-ai-generation-learning-session-loop.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/validators/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-learning-session-loop-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-learning-session-loop-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ai_generation_learning_session_loop_no_provider_db_formal_write
+      readGate: pass
+      taskPlanPrepared: true
+      acceptancePrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      redFirstTest: pass_missing_learning_session_service
+      sourceRepair: pass
+      focusedUnitTests: pass
+      typecheck: pass
+      lint: pass
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      firstModuleRunV2PrePush: blocked_repository_sha_checkpoint_drift
+      moduleRunV2PrePush: pass_after_repository_checkpoint_alignment
+      repositoryCheckpointAligned: true
+      providerCallExecuted: false
+      dbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
     title: Full-chain AI paper visible draft review experience repair
     phase: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
