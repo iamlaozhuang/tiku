@@ -219,6 +219,7 @@ fullChainScenario9AdvancedPersonalRerunAfterRedeemRepair20260704:
     blockedPathDiffCheck: passed_exit_0_no_output
     moduleRunV2PreCommitHardening: passed_exit_0
     moduleRunV2PrePushReadiness: passed_exit_0
+    repositoryCheckpointAligned: true
 
 fullChainScenario9BrowserTabMappingHarnessRepair20260704:
   taskId: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
@@ -26828,7 +26829,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 36c0094480eb13cad3ecc00ed221145e8d789ef6
+  lastKnownMasterSha: c7b1c731b0c1b3a14de8612dab68ffb81891afc3
   lastKnownOriginMasterSha: 36c0094480eb13cad3ecc00ed221145e8d789ef6
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
@@ -27058,6 +27059,7 @@ currentTask:
     blockedPathDiffCheck: passed_exit_0_no_output
     moduleRunV2PreCommitHardening: passed_exit_0
     moduleRunV2PrePushReadiness: passed_exit_0
+    repositoryCheckpointAligned: true
 
 fullChainScenario9AdvancedPersonalPreProvider20260704:
   taskId: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04

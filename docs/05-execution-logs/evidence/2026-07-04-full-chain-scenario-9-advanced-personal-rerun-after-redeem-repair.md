@@ -67,6 +67,7 @@ Pre-write and post-block selector-scoped aggregate counts matched:
 - Blocked path diff: pass_no_output
 - Module Run v2 pre-commit: pass
 - Module Run v2 pre-push: pass
+- Repository checkpoint alignment: pass_after_post_merge_master_checkpoint_update
 
 ## Next Required Task
 
