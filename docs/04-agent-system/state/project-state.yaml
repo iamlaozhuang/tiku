@@ -26862,7 +26862,7 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
 currentTask:
   id: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
   phase: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
-  status: blocked
+  status: closed
   result: blocked_edition_upgrade_redemption_contract_missing_before_runtime
   taskKind: local_acceptance_pre_runtime_source_contract_block
   moduleRunVersion: 2
@@ -27026,7 +27026,7 @@ currentTask:
 fullChainScenario9AdvancedPersonalPreProvider20260704:
   taskId: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
   phase: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
-  status: blocked
+  status: closed
   result: blocked_edition_upgrade_redemption_contract_missing_before_runtime
   priority: p0
   taskKind: local_acceptance_pre_runtime_source_contract_block

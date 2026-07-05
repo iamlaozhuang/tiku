@@ -20580,7 +20580,7 @@ tasks:
     dependencies:
       - full-chain-scenario-8-standard-personal-learning-2026-07-04
       - full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
-    status: blocked
+    status: closed
     result: blocked_edition_upgrade_redemption_contract_missing_before_runtime
     taskKind: local_acceptance_pre_runtime_source_contract_block
     moduleRunVersion: 2
