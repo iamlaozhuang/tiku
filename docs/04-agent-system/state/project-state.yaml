@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
-updatedAt: "2026-07-05T05:12:00-07:00"
+currentPhase: full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
+updatedAt: "2026-07-05T05:26:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -27377,34 +27377,34 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
-  phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
+  id: full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
+  phase: full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
   status: closed
-  result: blocked_closeout_status_alignment_runtime_not_started_training_baseline_evidence_conflict
+  result: pass_training_baseline_present_no_duplicate_provisioning_needed
   priority: p0
-  taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+  taskKind: local_acceptance_provisioning_preflight_read_only_reconciliation
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
+  branch: codex/full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  plannedAt: "2026-07-05T04:55:34-07:00"
-  claimedAt: "2026-07-05T04:55:34-07:00"
-  materializedAt: "2026-07-05T04:55:34-07:00"
-  blockedAt: "2026-07-05T05:12:00-07:00"
-  closedAt: "2026-07-05T05:12:00-07:00"
+  plannedAt: "2026-07-05T05:20:00-07:00"
+  claimedAt: "2026-07-05T05:20:00-07:00"
+  materializedAt: "2026-07-05T05:20:00-07:00"
+  completedAt: "2026-07-05T05:26:00-07:00"
+  closedAt: "2026-07-05T05:26:00-07:00"
   dependsOn:
-    - full-chain-scenario-11-advanced-employee-learning-surface-gap-repair-or-provisioning-2026-07-04
-  targetClosureItem: Close out the materialized S11 affected-node rerun task without runtime after the latest operator instruction conflicts with committed training-baseline evidence.
-  behaviorBoundary: closeout_status_alignment_only_no_browser_runtime_no_dev_server_no_product_db_write_no_employee_import_repeat_no_s10_learning_repeat_no_s1_to_s10_runtime_no_old_authorization_flow_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
+    - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
+  targetClosureItem: Reconcile whether S11's assigned published enterprise training baseline is actually missing before any duplicate provisioning or runtime rerun.
+  behaviorBoundary: read_only_selector_scoped_training_baseline_reconciliation_only_no_browser_runtime_no_dev_server_no_product_db_write_no_direct_db_write_no_employee_import_repeat_no_s10_learning_repeat_no_s1_to_s10_runtime_no_old_authorization_flow_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
   evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_scope_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
+    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+    - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
   privateAllowedFiles:
     - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
     - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import-selector.json
@@ -27485,8 +27485,8 @@ currentTask:
     targetDbLabel: tiku_full_chain_acceptance_20260704_001
     selectorLabel: fc_org_advanced_employee
     scopeLabel: marketing:3
-    restartNode: s11_browser_login_advanced_employee_learning_and_enterprise_training_boundary
-    allowedDbUse: selector_scoped_aggregate_read_only_pre_and_post_runtime_counts_only
+    restartNode: s11_training_baseline_preflight_reconciliation_before_runtime_or_duplicate_provisioning
+    allowedDbUse: selector_scoped_aggregate_read_only_preflight_counts_only
     browserRuntimeAllowed: false
     directDbWriteAllowed: false
     productRuntimeDbWriteAllowed: false
@@ -27513,44 +27513,32 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   validationCommands:
-    - closeout status alignment evidence conflict check
+    - redacted selector-scoped read-only aggregate DB reconciliation
     - no browser/runtime check
-    - no product DB write check
-    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
+    - no product or direct DB write check
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
     - git diff --check
     - git diff --name-only -- AGENTS.md .env .env.local .env.development .env.production package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04 -SkipRemoteAheadCheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05 -SkipRemoteAheadCheck
   validationSummary:
-    status: blocked_closeout_status_alignment_runtime_not_started_training_baseline_evidence_conflict
+    status: pass_closeout_complete_final_gates_passed
     readGate: pass
-    taskPlanPrepared: pass
-    minimumPreBrowserChecklist: conflict_current_branch_recorded_training_present_latest_operator_instruction_says_missing
+    taskPlanPrepared: true
+    selectorScopedReadOnlyReconciliation: pass
     targetDbMatched: 1
-    selectorPrivateInputPresent: 1
-    selectorAccountMatched: 1
-    activeAdvancedMarketing3EmployeeCount: 6
-    activeAdvancedMarketing3OrgAuthForSelector: 1
-    effectiveScopeCountForSelector: 5
-    marketing3ScopePresent: 1
-    firstEffectiveScopeIsMarketing3: 0
-    publishedMarketing3Paper: 1
-    publishedMarketing3PaperQuestion: 7
-    publishedMarketing3PaperWithQuestions: 1
-    assignedPublishedMarketing3Training: 1
-    activeMarketing3PracticeBeforeRuntime: 0
-    existingMarketing3TrainingAnswerBeforeRuntime: 0
-    browserLoginReadinessSmoke: not_executed_runtime_frozen
-    targetScopeSelectionGate: not_executed_runtime_frozen
-    advancedEmployeeLearningLane: not_executed_runtime_frozen
-    enterpriseTrainingBoundaryLane: not_executed_runtime_frozen
-    aiTrainingNoSubmitBoundary: not_executed_runtime_frozen
-    selectorScopedAggregateDbVerification: not_executed_after_runtime_frozen
-    runtimeCleanup: not_needed_no_runtime_started
+    activeAdvancedMarketing3OrgAuth: 4
+    activeAdvancedMarketing3Employee: 6
+    assignedPublishedAdvancedMarketing3Training: 1
+    assignedAdvancedEmployeeCoverage: 6
+    advancedTrainingAnswer: 0
+    duplicateProvisioningNeeded: false
+    nextRecommendedTask: s11_affected_node_rerun_from_browser_login_advanced_employee_learning_enterprise_training_boundary
     directDbReadExecuted: true
     directDbWriteExecuted: false
     browserRuntimeStarted: false
+    devServerStarted: false
     employeeImportRepeated: false
     s10LearningRepeated: false
     s1ToS10RuntimeRepeated: false
@@ -27564,9 +27552,6 @@ currentTask:
     blockedPathDiff: passed_exit_0_no_output
     moduleRunV2PreCommitHardening: passed_exit_0
     moduleRunV2PrePushReadiness: passed_exit_0
-    closeoutStatusAlignment: passed_final_gates
-    documentConflictDetected: true
-    nextDecisionRequired: resolve_whether_to_continue_from_scope_selection_rerun_or_open_new_training_baseline_provisioning
     releaseReadinessClaimed: false
     finalPassClaimed: false
 
