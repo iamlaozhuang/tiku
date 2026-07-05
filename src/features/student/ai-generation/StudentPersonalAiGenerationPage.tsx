@@ -79,6 +79,13 @@ type StudentAiLearningAnswerFeedback = {
   analysis: string | null;
 };
 
+type StudentAiLearningAnswerFeedbackByQuestion = Record<
+  string,
+  StudentAiLearningAnswerFeedback
+>;
+
+type StudentAiLearningSelectedLabelsByQuestion = Record<string, string[]>;
+
 type StudentSessionRequestToken = string | null;
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
 type StudentPersonalAiGenerationTaskType =
@@ -1402,16 +1409,24 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
 }
 
 function StudentAiLearningSessionPanel({
-  answerFeedback,
+  answerFeedbackByQuestion,
   onSelectOptionLabel,
-  question,
-  selectedOptionLabels,
+  questions,
+  selectedOptionLabelsByQuestion,
 }: {
-  answerFeedback: StudentAiLearningAnswerFeedback | null;
-  onSelectOptionLabel: (optionLabel: string) => void;
-  question: PersonalAiGenerationLearningSessionQuestionDto;
-  selectedOptionLabels: string[];
+  answerFeedbackByQuestion: StudentAiLearningAnswerFeedbackByQuestion;
+  onSelectOptionLabel: (
+    question: PersonalAiGenerationLearningSessionQuestionDto,
+    optionLabel: string,
+  ) => void;
+  questions: PersonalAiGenerationLearningSessionQuestionDto[];
+  selectedOptionLabelsByQuestion: StudentAiLearningSelectedLabelsByQuestion;
 }) {
+  const summary = createStudentAiLearningSessionSummary({
+    answerFeedbackByQuestion,
+    questions,
+  });
+
   return (
     <section
       className="border-border bg-surface rounded-xl border p-4"
@@ -1428,88 +1443,184 @@ function StudentAiLearningSessionPanel({
           <p className="text-text-secondary mt-1 text-sm leading-6">
             仅用于本次 AI 草稿自练，正式练习未写入，错题本未写入。
           </p>
-        </div>
-      </div>
-
-      <div className="border-border bg-muted/40 rounded-lg border p-3">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <h3 className="text-text-primary text-sm font-semibold">
-            题目 {question.sourceDraftNumber}
-          </h3>
-          <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
-            {question.questionType}
-          </span>
-        </div>
-        <p className="text-text-primary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
-          {question.questionStem}
-        </p>
-        {question.questionOptions.length > 0 ? (
-          <fieldset className="mt-3 space-y-2">
-            <legend className="text-text-secondary text-xs font-medium">
-              选择答案
-            </legend>
-            {question.questionOptions.map((option) => (
-              <label
-                className="border-border bg-background flex cursor-pointer items-start gap-2 rounded-md border px-2 py-2 text-sm"
-                key={`${question.sessionQuestionPublicId}-${option.optionLabel}`}
-              >
-                <input
-                  aria-label={`${option.optionLabel} ${option.optionText}`}
-                  checked={selectedOptionLabels.includes(option.optionLabel)}
-                  className="mt-1 size-4 accent-current"
-                  name={`student-ai-learning-answer-${question.sessionQuestionPublicId}`}
-                  onChange={() => onSelectOptionLabel(option.optionLabel)}
-                  type="radio"
-                  value={option.optionLabel}
-                />
-                <span className="text-text-primary leading-6">
-                  <span className="text-brand-primary mr-2 font-medium">
-                    {option.optionLabel}
-                  </span>
-                  {option.optionText}
-                </span>
-              </label>
-            ))}
-          </fieldset>
-        ) : (
-          <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm">
-            当前题型需人工评阅，本次不写入 AI 评分。
+          <p className="text-text-secondary mt-2 text-sm leading-6">
+            自测 {summary.questionCount} 题 · 已提交 {summary.submittedCount} 题
+            · 正确 {summary.correctCount} 题 · 得分 {summary.score}/
+            {summary.maxScore}
           </p>
-        )}
+        </div>
       </div>
 
-      {answerFeedback !== null ? (
+      {summary.submittedCount > 0 ? (
         <div
           className="border-border bg-background mt-3 rounded-lg border p-3"
           aria-live="polite"
         >
-          <p className="text-text-primary text-sm font-semibold">
-            {answerFeedback.isCorrect === true
-              ? "回答正确"
-              : answerFeedback.isCorrect === false
-                ? "回答错误"
-                : "已提交，待人工评阅"}
-          </p>
+          <p className="text-text-primary text-sm font-semibold">自测结果</p>
           <div className="text-text-secondary mt-2 flex flex-wrap gap-2 text-xs">
             <span className="bg-muted rounded-md px-2 py-1">
-              得分 {answerFeedback.score ?? "待评阅"}/{answerFeedback.maxScore}
+              已提交 {summary.submittedCount} 题
             </span>
             <span className="bg-muted rounded-md px-2 py-1">
-              正确答案{" "}
-              {answerFeedback.standardAnswerLabels.length > 0
-                ? answerFeedback.standardAnswerLabels.join("、")
-                : (answerFeedback.standardAnswerText ?? "待评阅")}
+              正确 {summary.correctCount} 题
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              得分 {summary.score}/{summary.maxScore}
             </span>
           </div>
-          {answerFeedback.analysis !== null ? (
-            <p className="text-text-primary bg-muted mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
-              {answerFeedback.analysis}
-            </p>
-          ) : null}
         </div>
       ) : null}
+
+      <div className="mt-3 space-y-3">
+        {questions.map((question) => {
+          const selectedOptionLabels =
+            selectedOptionLabelsByQuestion[question.sessionQuestionPublicId] ??
+            [];
+          const answerFeedback =
+            answerFeedbackByQuestion[question.sessionQuestionPublicId] ?? null;
+          const inputType =
+            question.questionType === "multi_choice" ? "checkbox" : "radio";
+
+          return (
+            <div
+              className="border-border bg-muted/40 rounded-lg border p-3"
+              key={question.sessionQuestionPublicId}
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <h3 className="text-text-primary text-sm font-semibold">
+                  题目 {question.sourceDraftNumber}
+                </h3>
+                <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+                  {question.questionType}
+                </span>
+              </div>
+              <p className="text-text-primary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+                {question.questionStem}
+              </p>
+              {question.questionOptions.length > 0 ? (
+                <fieldset className="mt-3 space-y-2">
+                  <legend className="text-text-secondary text-xs font-medium">
+                    选择答案
+                  </legend>
+                  {question.questionOptions.map((option) => (
+                    <label
+                      className="border-border bg-background flex cursor-pointer items-start gap-2 rounded-md border px-2 py-2 text-sm"
+                      key={`${question.sessionQuestionPublicId}-${option.optionLabel}`}
+                    >
+                      <input
+                        aria-label={`${option.optionLabel} ${option.optionText}`}
+                        checked={selectedOptionLabels.includes(
+                          option.optionLabel,
+                        )}
+                        className="mt-1 size-4 accent-current"
+                        name={`student-ai-learning-answer-${question.sessionQuestionPublicId}`}
+                        onChange={() =>
+                          onSelectOptionLabel(question, option.optionLabel)
+                        }
+                        type={inputType}
+                        value={option.optionLabel}
+                      />
+                      <span className="text-text-primary leading-6">
+                        <span className="text-brand-primary mr-2 font-medium">
+                          {option.optionLabel}
+                        </span>
+                        {option.optionText}
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : (
+                <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm">
+                  当前题型需人工评阅，本次不写入 AI 评分。
+                </p>
+              )}
+
+              {answerFeedback !== null ? (
+                <div
+                  className="border-border bg-background mt-3 rounded-lg border p-3"
+                  aria-live="polite"
+                >
+                  <p className="text-text-primary text-sm font-semibold">
+                    {answerFeedback.isCorrect === true
+                      ? "回答正确"
+                      : answerFeedback.isCorrect === false
+                        ? "回答错误"
+                        : "已提交，待人工评阅"}
+                  </p>
+                  <div className="text-text-secondary mt-2 flex flex-wrap gap-2 text-xs">
+                    <span className="bg-muted rounded-md px-2 py-1">
+                      得分 {answerFeedback.score ?? "待评阅"}/
+                      {answerFeedback.maxScore}
+                    </span>
+                    <span className="bg-muted rounded-md px-2 py-1">
+                      正确答案{" "}
+                      {answerFeedback.standardAnswerLabels.length > 0
+                        ? answerFeedback.standardAnswerLabels.join("、")
+                        : (answerFeedback.standardAnswerText ?? "待评阅")}
+                    </span>
+                  </div>
+                  {answerFeedback.analysis !== null ? (
+                    <p className="text-text-primary bg-muted mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+                      {answerFeedback.analysis}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
+}
+
+function createStudentAiLearningSessionSummary(input: {
+  answerFeedbackByQuestion: StudentAiLearningAnswerFeedbackByQuestion;
+  questions: PersonalAiGenerationLearningSessionQuestionDto[];
+}) {
+  const submittedFeedback = input.questions
+    .map(
+      (question) =>
+        input.answerFeedbackByQuestion[question.sessionQuestionPublicId],
+    )
+    .filter(
+      (answerFeedback): answerFeedback is StudentAiLearningAnswerFeedback =>
+        answerFeedback !== undefined,
+    );
+  const score = submittedFeedback.reduce(
+    (totalScore, answerFeedback) =>
+      totalScore + parseStudentAiLearningScore(answerFeedback.score),
+    0,
+  );
+  const maxScore = input.questions.reduce(
+    (totalScore, question) =>
+      totalScore + parseStudentAiLearningScore(question.maxScore),
+    0,
+  );
+
+  return {
+    questionCount: input.questions.length,
+    submittedCount: submittedFeedback.length,
+    correctCount: submittedFeedback.filter(
+      (answerFeedback) => answerFeedback.isCorrect === true,
+    ).length,
+    score: formatStudentAiLearningScore(score),
+    maxScore: formatStudentAiLearningScore(maxScore),
+  };
+}
+
+function parseStudentAiLearningScore(score: string | null): number {
+  if (score === null) {
+    return 0;
+  }
+
+  const parsedScore = Number.parseFloat(score);
+
+  return Number.isFinite(parsedScore) ? parsedScore : 0;
+}
+
+function formatStudentAiLearningScore(score: number): string {
+  return score.toFixed(1);
 }
 
 function getStudentAiLearningSessionQuestions(
@@ -2060,10 +2171,14 @@ export function StudentPersonalAiGenerationPage() {
     useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
   const [isAiLearningSessionStarted, setIsAiLearningSessionStarted] =
     useState(false);
-  const [selectedAiLearningAnswerLabels, setSelectedAiLearningAnswerLabels] =
-    useState<string[]>([]);
-  const [aiLearningAnswerFeedback, setAiLearningAnswerFeedback] =
-    useState<StudentAiLearningAnswerFeedback | null>(null);
+  const [
+    selectedAiLearningAnswerLabelsByQuestion,
+    setSelectedAiLearningAnswerLabelsByQuestion,
+  ] = useState<StudentAiLearningSelectedLabelsByQuestion>({});
+  const [
+    aiLearningAnswerFeedbackByQuestion,
+    setAiLearningAnswerFeedbackByQuestion,
+  ] = useState<StudentAiLearningAnswerFeedbackByQuestion>({});
   const [authorizationContexts, setAuthorizationContexts] = useState<
     EffectiveAuthorizationContextDto[]
   >([]);
@@ -2367,8 +2482,8 @@ export function StudentPersonalAiGenerationPage() {
     setHistoryTaskType(taskType);
     setPracticeFeedbackState("waiting");
     setIsAiLearningSessionStarted(false);
-    setSelectedAiLearningAnswerLabels([]);
-    setAiLearningAnswerFeedback(null);
+    setSelectedAiLearningAnswerLabelsByQuestion({});
+    setAiLearningAnswerFeedbackByQuestion({});
     setHasSessionToken(true);
     setPageState("loading");
 
@@ -2741,7 +2856,6 @@ export function StudentPersonalAiGenerationPage() {
   const aiLearningSessionQuestions = hasLocalAiGenerationExperience
     ? getStudentAiLearningSessionQuestions(experience)
     : [];
-  const currentAiLearningQuestion = aiLearningSessionQuestions[0] ?? null;
   const canUseGeneratedPractice =
     hasLocalAiGenerationExperience &&
     canUseCurrentGeneratedPractice(experience);
@@ -2758,39 +2872,49 @@ export function StudentPersonalAiGenerationPage() {
       : practiceFeedbackState;
 
   function handleStartAiLearningSession() {
-    if (!canUseGeneratedPractice || currentAiLearningQuestion === null) {
+    if (!canUseGeneratedPractice || aiLearningSessionQuestions.length === 0) {
       return;
     }
 
     setIsAiLearningSessionStarted(true);
-    setSelectedAiLearningAnswerLabels([]);
-    setAiLearningAnswerFeedback(null);
+    setSelectedAiLearningAnswerLabelsByQuestion({});
+    setAiLearningAnswerFeedbackByQuestion({});
     setPracticeFeedbackState("practice_ready");
   }
 
   function handleSubmitAiLearningAnswer() {
-    if (!canUseGeneratedPractice || currentAiLearningQuestion === null) {
+    if (!canUseGeneratedPractice || aiLearningSessionQuestions.length === 0) {
       return;
     }
 
     setIsAiLearningSessionStarted(true);
-    setAiLearningAnswerFeedback(
-      createStudentAiLearningAnswerFeedback({
-        question: currentAiLearningQuestion,
-        selectedOptionLabels: selectedAiLearningAnswerLabels,
-      }),
+    setAiLearningAnswerFeedbackByQuestion(
+      Object.fromEntries(
+        aiLearningSessionQuestions.map((question) => [
+          question.sessionQuestionPublicId,
+          createStudentAiLearningAnswerFeedback({
+            question,
+            selectedOptionLabels:
+              selectedAiLearningAnswerLabelsByQuestion[
+                question.sessionQuestionPublicId
+              ] ?? [],
+          }),
+        ]),
+      ),
     );
     setPracticeFeedbackState("answer_submitted");
   }
 
   function handleViewAiLearningFeedback() {
-    if (!canUseGeneratedPractice || currentAiLearningQuestion === null) {
+    if (!canUseGeneratedPractice || aiLearningSessionQuestions.length === 0) {
       return;
     }
 
     setIsAiLearningSessionStarted(true);
     setPracticeFeedbackState(
-      aiLearningAnswerFeedback === null ? "practice_ready" : "feedback_ready",
+      Object.keys(aiLearningAnswerFeedbackByQuestion).length === 0
+        ? "practice_ready"
+        : "feedback_ready",
     );
   }
 
@@ -2881,15 +3005,35 @@ export function StudentPersonalAiGenerationPage() {
         />
       ) : null}
 
-      {isAiLearningSessionStarted && currentAiLearningQuestion !== null ? (
+      {isAiLearningSessionStarted && aiLearningSessionQuestions.length > 0 ? (
         <StudentAiLearningSessionPanel
-          answerFeedback={aiLearningAnswerFeedback}
-          onSelectOptionLabel={(optionLabel) => {
-            setSelectedAiLearningAnswerLabels([optionLabel]);
-            setAiLearningAnswerFeedback(null);
+          answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
+          onSelectOptionLabel={(question, optionLabel) => {
+            setSelectedAiLearningAnswerLabelsByQuestion(
+              (currentSelectedLabels) => {
+                const currentQuestionLabels =
+                  currentSelectedLabels[question.sessionQuestionPublicId] ?? [];
+                const nextQuestionLabels =
+                  question.questionType === "multi_choice"
+                    ? currentQuestionLabels.includes(optionLabel)
+                      ? currentQuestionLabels.filter(
+                          (currentLabel) => currentLabel !== optionLabel,
+                        )
+                      : [...currentQuestionLabels, optionLabel]
+                    : [optionLabel];
+
+                return {
+                  ...currentSelectedLabels,
+                  [question.sessionQuestionPublicId]: nextQuestionLabels,
+                };
+              },
+            );
+            setAiLearningAnswerFeedbackByQuestion({});
           }}
-          question={currentAiLearningQuestion}
-          selectedOptionLabels={selectedAiLearningAnswerLabels}
+          questions={aiLearningSessionQuestions}
+          selectedOptionLabelsByQuestion={
+            selectedAiLearningAnswerLabelsByQuestion
+          }
         />
       ) : null}
 

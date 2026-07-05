@@ -2163,7 +2163,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
-  it("renders transient AI paper draft preview counts from the learner paper action", async () => {
+  it("renders transient AI paper draft preview counts and multi-question self-test from the learner paper action", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const paperVisibleResponse = {
       ...localExperienceResponse,
@@ -2173,6 +2173,9 @@ describe("StudentPersonalAiGenerationPage", () => {
         resultState: {
           ...localExperienceResponse.data.resultState,
           status: "succeeded",
+          resultPublicId: "ai-generation-result-visible-paper-learner-001",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
         },
         requestFlow: {
           ...localExperienceResponse.data.requestFlow,
@@ -2214,10 +2217,43 @@ describe("StudentPersonalAiGenerationPage", () => {
                         {
                           optionLabel: "A",
                           optionText: "synthetic visible learner paper option",
+                          isCorrect: true,
+                        },
+                        {
+                          optionLabel: "B",
+                          optionText:
+                            "synthetic visible learner paper distractor",
+                          isCorrect: false,
                         },
                       ],
-                      standardAnswer: "synthetic visible learner paper answer",
+                      standardAnswer: "A",
                       analysis: "synthetic visible learner paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                    {
+                      draftNumber: 2,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem:
+                        "synthetic visible learner paper second stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText:
+                            "synthetic visible learner paper second distractor",
+                          isCorrect: false,
+                        },
+                        {
+                          optionLabel: "B",
+                          optionText:
+                            "synthetic visible learner paper second correct",
+                          isCorrect: true,
+                        },
+                      ],
+                      standardAnswer: "B",
+                      analysis:
+                        "synthetic visible learner paper second analysis",
                       reviewStatus: "draft_review_required",
                     },
                   ],
@@ -2256,9 +2292,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible learner paper option",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
-      "synthetic visible learner paper answer",
-    );
+    expect(visibleGeneratedContent).toHaveTextContent("A");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible learner paper analysis",
     );
@@ -2266,6 +2300,34 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).toHaveTextContent("大题模块 2");
     expect(visibleGeneratedContent).toHaveTextContent("题量 50");
     expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    const learningSession = await screen.findByTestId(
+      "student-ai-learning-session",
+    );
+    expect(learningSession).toHaveTextContent("自测 2 题");
+    expect(learningSession).toHaveTextContent(
+      "synthetic visible learner paper stem",
+    );
+    expect(learningSession).toHaveTextContent(
+      "synthetic visible learner paper second stem",
+    );
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /A synthetic visible learner paper option/,
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /B synthetic visible learner paper second correct/,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    expect(await screen.findByText("自测结果")).toBeInTheDocument();
+    expect(learningSession).toHaveTextContent("正确 2 题");
+    expect(learningSession).toHaveTextContent("得分 2.0/2.0");
+    expect(screen.getAllByText("回答正确")).toHaveLength(2);
+    expect(learningSession).toHaveTextContent("正式练习未写入");
+    expect(learningSession).toHaveTextContent("错题本未写入");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("Authorization");
@@ -2283,6 +2345,9 @@ describe("StudentPersonalAiGenerationPage", () => {
         resultState: {
           ...localExperienceResponse.data.resultState,
           status: "succeeded",
+          resultPublicId: "ai-generation-result-visible-paper-employee-001",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
         },
         requestFlow: {
           ...localExperienceResponse.data.requestFlow,
@@ -2324,9 +2389,16 @@ describe("StudentPersonalAiGenerationPage", () => {
                         {
                           optionLabel: "A",
                           optionText: "synthetic visible employee paper option",
+                          isCorrect: true,
+                        },
+                        {
+                          optionLabel: "B",
+                          optionText:
+                            "synthetic visible employee paper distractor",
+                          isCorrect: false,
                         },
                       ],
-                      standardAnswer: "synthetic visible employee paper answer",
+                      standardAnswer: "A",
                       analysis: "synthetic visible employee paper analysis",
                       reviewStatus: "draft_review_required",
                     },
@@ -2429,12 +2501,26 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible employee paper option",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
-      "synthetic visible employee paper answer",
-    );
+    expect(visibleGeneratedContent).toHaveTextContent("A");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible employee paper analysis",
     );
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    const learningSession = await screen.findByTestId(
+      "student-ai-learning-session",
+    );
+    expect(learningSession).toHaveTextContent("自测 1 题");
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /B synthetic visible employee paper distractor/,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    expect(await screen.findByText("回答错误")).toBeInTheDocument();
+    expect(learningSession).toHaveTextContent("正确 0 题");
+    expect(learningSession).toHaveTextContent("得分 0.0/1.0");
+    expect(learningSession).toHaveTextContent("正式练习未写入");
+    expect(learningSession).toHaveTextContent("错题本未写入");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
