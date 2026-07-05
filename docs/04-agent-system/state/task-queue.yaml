@@ -398,6 +398,90 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05
+    title: Full-chain Scenario 11 advanced employee affected-node rerun after question snapshot repair
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05
+    sourceStory: s11_continue_after_paper_source_question_snapshot_dto_repair
+    dependencies:
+      - full-chain-scenario-11-enterprise-training-question-snapshot-source-repair-2026-07-05
+    status: closed
+    result: blocked_paper_source_question_snapshot_candidate_count_exceeds_training_question_count_source_repair_required
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-11-affected-node-rerun-after-question-snapshot-repair-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T06:40:00-07:00"
+    claimedAt: "2026-07-05T06:40:00-07:00"
+    materializedAt: "2026-07-05T06:40:00-07:00"
+    blockedAt: "2026-07-05T06:50:00-07:00"
+    closedAt: "2026-07-05T06:50:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: blocked_paper_source_question_snapshot_candidate_count_exceeds_training_question_count_source_repair_required
+      readGate: pass
+      taskPlanPrepared: true
+      minimumPreBrowserChecklist: blocked_question_snapshot_candidate_count_mismatch
+      browserLoginReadinessSmoke: not_run_stop_before_runtime
+      enterpriseTrainingAnswerability: not_run_stop_before_runtime
+      enterpriseTrainingProductUiWrite: not_run_stop_before_runtime
+      aiTrainingNoSubmitBoundary: not_run_stop_before_runtime
+      selectorScopedAggregateDbVerification: pass
+      runtimeCleanup: not_applicable_no_runtime_started
+      publishedTrainingQuestionCount: 4
+      trainingSourceContextQuestionCount: 4
+      paperSourceQuestionSnapshotCandidateCount: 7
+      directDbReadExecuted: true
+      directDbWriteExecuted: false
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass_empty_output
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      closeoutGates: pass
   - id: full-chain-scenario-11-enterprise-training-question-snapshot-source-repair-2026-07-05
     title: Full-chain Scenario 11 enterprise training question snapshot source repair
     phase: full-chain-scenario-11-enterprise-training-question-snapshot-source-repair-2026-07-05
