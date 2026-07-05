@@ -27236,8 +27236,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 535570298ad87f788621f20ca9d4c65240fc062f
-  lastKnownOriginMasterSha: 535570298ad87f788621f20ca9d4c65240fc062f
+  lastKnownMasterSha: 02783d49cb47469d5cc1ba3d1a1389038cd9c967
+  lastKnownOriginMasterSha: 02783d49cb47469d5cc1ba3d1a1389038cd9c967
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -27377,46 +27377,91 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04
-  phase: full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04
+  id: full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
+  phase: full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
   status: closed
-  result: pass_duplicate_active_practice_state_provisioned_non_delete_status_only
+  result: pass_closeout_complete_final_gates_passed
   priority: p0
-  taskKind: selector_scoped_non_delete_db_state_provisioning
+  taskKind: local_acceptance_runtime_browser_employee_learning_rerun_after_db_state_provisioning
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04
+  branch: codex/full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  plannedAt: "2026-07-05T01:20:00-07:00"
-  claimedAt: "2026-07-05T01:26:00-07:00"
-  completedAt: "2026-07-05T01:33:00-07:00"
+  plannedAt: "2026-07-05T01:30:00-07:00"
+  claimedAt: "2026-07-05T01:40:00-07:00"
+  completedAt: "2026-07-05T02:03:00-07:00"
   dependsOn:
-    - full-chain-scenario-10-standard-employee-learning-rerun-after-practice-start-idempotency-repair-2026-07-04
-  targetClosureItem: Resolve leftover duplicate active marketing:3 practice state from the prior blocked S10 run without deleting rows, then rerun Scenario 10 from browser login and standard learning node.
-  behaviorBoundary: selector_scoped_local_db_non_delete_status_provisioning_only_no_browser_runtime_no_employee_import_repeat_no_product_source_test_dependency_schema_migration_seed_provider_staging_prod_cost_destructive_db_release_final_or_production_claim
-  evidenceMode: redacted_task_ids_branch_selector_labels_scope_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
+    - full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04
+  targetClosureItem: Rerun Scenario 10 from browser login and standard employee learning node after duplicate active practice state provisioning; do not repeat employee import.
+  behaviorBoundary: local_browser_login_smoke_standard_employee_product_practice_permission_boundary_selector_scoped_aggregate_db_verification_only_no_employee_import_repeat_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_scope_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+  privateAllowedFiles:
+    - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/standard-employee-import-selector.json
+    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/standard-employee-import.csv
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
     - docs/02-architecture/adr/**
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/advanced-edition/modules/01-authorization-context.md
+    - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+    - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+    - docs/01-requirements/modules/02-question-paper.md
+    - docs/01-requirements/modules/03-student-experience.md
+    - docs/01-requirements/modules/04-ai-scoring.md
+    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
     - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
     - docs/05-execution-logs/evidence/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
     - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-isolated-db-bootstrap-seed-execution.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-content-scope-provisioning-after-marketing-3-input.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-content-scope-provisioning-after-marketing-3-input.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning.md
     - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-practice-start-idempotency-repair.md
     - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-practice-start-idempotency-repair.md
     - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-practice-start-idempotency-repair.md
     - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-practice-start-idempotency-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
+    - src/app/(auth)/login/page.tsx
+    - src/app/(student)/home/page.tsx
+    - src/app/(student)/practice/page.tsx
+    - src/app/(student)/mock-exam/page.tsx
+    - src/app/(student)/organization-training/page.tsx
+    - src/app/(student)/ai-generation/page.tsx
+    - src/features/student/home/StudentHomePage.tsx
+    - src/features/student/practice/StudentPracticePage.tsx
+    - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+    - src/server/services/practice-service.ts
+    - src/server/repositories/practice-repository.ts
+    - src/server/services/student-paper-service.ts
+    - src/server/services/effective-authorization-service.ts
+    - src/db/schema/auth.ts
     - src/db/schema/student-experience.ts
+    - src/db/schema/organization-training.ts
+    - tests/unit/student-login-ui.test.ts
+    - tests/unit/ui-input-contract.test.ts
+    - tests/unit/student-home-ui.test.ts
+    - tests/unit/student-practice-ui.test.ts
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -27441,11 +27486,11 @@ currentTask:
     targetDbLabel: tiku_full_chain_acceptance_20260704_001
     selectorLabel: fc_org_standard_employee
     scopeLabel: marketing:3
-    allowedDbUse: selector_scoped_aggregate_read_and_non_delete_status_update_only
-    allowedStatusTransition: duplicate_active_practice_to_expired
-    restartPointAfterCloseout: browser_login_and_standard_learning_node
+    allowedDbUse: selector_scoped_aggregate_read_only_after_product_ui_learning_write
+    restartPoint: browser_login_and_standard_learning_node
     employeeImportRepeatAllowed: false
-    browserRuntimeAllowed: false
+    browserRuntimeAllowed: true
+    productUiLearningWriteAllowed: true
     productSourceTestChangeAllowed: false
     providerBoundary: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io_no_generation_submit
     destructiveDbOperationAllowed: false
@@ -27465,51 +27510,84 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   validationCommands:
-    - redacted selector/db target/pre-state aggregate preflight
-    - redacted selector-scoped non-delete status provisioning
-    - redacted selector/db post-state aggregate verification
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-duplicate-active-practice-state-provisioning.md
+    - redacted selector/db target/private input/content/duplicate-state preflight
+    - redacted browser login smoke with hydrated/interactable readiness
+    - redacted standard employee practice learning flow
+    - redacted standard employee permission/surface boundary check
+    - selector-scoped aggregate DB verification
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
     - git diff --check
     - git diff --name-only -- AGENTS.md .env .env.local .env.development .env.production package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed compose.yaml playwright-report test-results .next .runtime
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04 -SkipRemoteAheadCheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04 -SkipRemoteAheadCheck
   validationSummary:
     status: pass_closeout_complete_final_gates_passed
     readGate: pass
     taskPlanPrepared: true
-    aggregateDbPreflight: pass
-    dbTargetMatchBefore: 1
-    marketing3PracticeTotalBefore: 2
-    marketing3PracticeInProgressBefore: 2
-    marketing3DuplicateActiveUserPaperGroupsBefore: 1
-    marketing3AnswerRecordTotalBefore: 1
-    nonDeleteStatusProvisioning: pass
-    expiredDuplicateActivePracticeCount: 1
-    deletedRows: 0
-    destructiveDbOperationExecuted: false
-    aggregateDbPostCheck: pass
-    dbTargetMatchAfter: 1
-    marketing3PracticeTotalAfter: 2
+    selectorDbPreflight: pass
+    dbTargetMatch: 1
+    privateAccountPlanPresent: 1
+    privateStandardEmployeeImportSelectorPresent: 1
+    privateStandardEmployeeImportCsvPresent: 1
+    privateStandardEmployeeImportRows: 6
+    activeStandardMarketing3OrgAuth: 4
+    activeStandardMarketing3Employee: 6
+    publishedMarketing3Paper: 1
+    publishedMarketing3PaperQuestion: 7
+    availableMarketing3Material: 2
+    availableMarketing3Question: 7
+    marketing3PracticeBefore: 2
+    marketing3PracticeInProgressBefore: 1
+    marketing3PracticeExpiredBefore: 1
+    marketing3DuplicateActiveUserPaperGroupsBefore: 0
+    marketing3AnswerRecordBefore: 1
+    marketing3AnswerRecordScoredBefore: 1
+    browserLoginSmoke: pass
+    loginPostStatus: 200
+    routeAfterLogin: /home
+    standardEmployeeLearning: pass
+    selectedScopeLabel: marketing:3
+    routeAfterLearning: /practice
+    practiceStartPostStatus: 200
+    resumeChoiceObserved: true
+    submittedAnswerCount: 1
+    feedbackVisible: true
+    permissionSurfaceBoundary: pass
+    homeAiTrainingLinkCount: 0
+    homeOrganizationTrainingLinkCount: 0
+    organizationTrainingAnswerAreaCount: 0
+    organizationTrainingSubmitButtonCount: 0
+    aiGenerationEnabledActionButtonCount: 0
+    providerOrAiSubmitPostCount: 0
+    organizationTrainingSubmitPostCount: 0
+    selectorScopedAggregateDbVerification: pass
+    marketing3PracticeAfter: 2
     marketing3PracticeInProgressAfter: 1
     marketing3PracticeExpiredAfter: 1
     marketing3DuplicateActiveUserPaperGroupsAfter: 0
-    marketing3AnswerRecordTotalAfter: 1
-    nextTask: full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
-    browserRuntimeStarted: false
-    employeeImportRepeated: false
-    productSourceTestChanged: false
-    schemaMigrationSeedChanged: false
-    destructiveDbOperationAllowed: false
-    providerStagingProdCostAllowed: false
-    releaseReadinessClaimed: false
-    finalPassClaimed: false
+    marketing3AnswerRecordAfter: 2
+    marketing3AnswerRecordScoredAfter: 2
+    marketing3MockExamAfter: 0
+    marketing3ExamReportAfter: 0
+    marketing3MistakeBookAfter: 1
+    organizationTrainingAnswerAfter: 0
+    aiCallLogForSelectedScopeAfter: 0
+    runtimeCleanup: pass
+    remaining3106Listeners: 0
+    closeoutGates: pass
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     gitDiffCheck: pass
     blockedPathDiffCheck: pass_no_output
-    repositoryShaHandoffAlignment: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    employeeImportRepeated: false
+    productSourceTestChanged: false
+    schemaMigrationSeedChanged: false
+    providerStagingProdCostAllowed: false
+    destructiveDbOperationAllowed: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
 
 fullChainScenario10StandardEmployeeLearningRerunAfterMarketing3ContentProvisioning20260704:
   taskId: full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning-2026-07-04
@@ -27739,24 +27817,48 @@ fullChainScenario10DuplicateActivePracticeStateProvisioning20260704:
 fullChainScenario10StandardEmployeeLearningRerunAfterDuplicateActivePracticeStateProvisioning20260704:
   taskId: full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
   phase: full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
-  status: pending
-  result: not_started
+  status: closed
+  result: pass_closeout_complete_final_gates_passed
   priority: p0
   taskKind: local_acceptance_runtime_browser_employee_learning_rerun_after_db_state_provisioning
   moduleRunVersion: 2
   branch: codex/full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   plannedAt: "2026-07-05T01:30:00-07:00"
+  claimedAt: "2026-07-05T01:40:00-07:00"
+  completedAt: "2026-07-05T02:03:00-07:00"
   dependsOn:
     - full-chain-scenario-10-duplicate-active-practice-state-provisioning-2026-07-04
   targetClosureItem: Rerun Scenario 10 from browser login and standard employee learning node after duplicate active practice state provisioning; do not repeat employee import.
   behaviorBoundary: local_browser_login_smoke_standard_employee_product_practice_permission_boundary_selector_scoped_aggregate_db_verification_only_no_employee_import_repeat_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_scope_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
   planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
   validationSummary:
-    status: pending_after_duplicate_active_practice_state_provisioning
+    status: pass_closeout_complete_final_gates_passed
+    readGate: pass
+    taskPlanPrepared: true
     restartPoint: browser_login_and_standard_learning_node
+    selectorDbPreflight: pass
+    dbTargetMatch: 1
+    selectedScopeLabel: marketing:3
+    browserLoginSmoke: pass
+    standardEmployeeLearning: pass
+    permissionSurfaceBoundary: pass
+    selectorScopedAggregateDbVerification: pass
+    marketing3AnswerRecordAfter: 2
+    marketing3DuplicateActiveUserPaperGroupsAfter: 0
+    organizationTrainingAnswerAfter: 0
+    aiCallLogForSelectedScopeAfter: 0
+    runtimeCleanup: pass
+    closeoutGates: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     employeeImportRepeatAllowed: false
     providerStagingProdCostAllowed: false
     releaseReadinessClaimed: false
