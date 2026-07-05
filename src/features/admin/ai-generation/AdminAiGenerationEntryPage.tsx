@@ -40,6 +40,10 @@ import {
   createOrganizationTrainingCapabilityContext,
   resolveOrganizationWorkspacePageAccess,
 } from "../organization-workspace/admin-organization-workspace-access";
+import {
+  createContentAdminFormalReviewedDraftPayload,
+  type AdminAiGenerationFormalReviewedDraftPayload,
+} from "./admin-ai-generation-formal-draft-payload";
 
 type AdminAiGenerationEntryLoadState =
   | "loading"
@@ -84,6 +88,7 @@ type ContentAdminReviewActionInput = {
   generationKind: AdminAiGenerationKind;
   resultPublicId: string;
   reviewDecision: ContentAdminReviewDecision;
+  reviewedDraft?: AdminAiGenerationFormalReviewedDraftPayload | null;
   weakEvidenceConfirmed?: boolean;
 };
 type OrganizationAiTrainingDraftCopyState =
@@ -1054,6 +1059,7 @@ function StructuredPreviewSummary({
 function AdminAiGenerationTaskHistoryPanel({
   adminWorkspaceCapabilitySummary,
   copyActionStateByResultPublicId,
+  currentLocalContractSummary,
   generationParameters,
   generationKind,
   onCopyToTrainingDraft,
@@ -1070,6 +1076,7 @@ function AdminAiGenerationTaskHistoryPanel({
     string,
     OrganizationAiTrainingDraftCopyState
   >;
+  currentLocalContractSummary: AdminAiGenerationLocalContractDto | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   generationKind: AdminAiGenerationKind;
   onCopyToTrainingDraft: (input: OrganizationAiTrainingDraftCopyInput) => void;
@@ -1219,136 +1226,153 @@ function AdminAiGenerationTaskHistoryPanel({
 
       {state === "ready" ? (
         <div className="mt-4 space-y-3">
-          {items.map((taskItem) => (
-            <article
-              className="border-border bg-background rounded-md border p-3"
-              key={taskItem.taskPublicId}
-            >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h3 className="text-text-primary text-sm font-semibold">
-                    {getGenerationKindLabel(taskItem.generationKind)}
-                  </h3>
-                  <p className="text-text-secondary mt-1 text-xs">
-                    {formatRequestedAt(taskItem.requestedAt)}
-                  </p>
-                </div>
-                <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-                  {getTaskStatusLabel(taskItem.status)}
-                </span>
-              </div>
+          {items.map((taskItem) => {
+            const contentAdminReviewedDraft =
+              workspace === "content" &&
+              taskItem.generatedResult !== null &&
+              currentLocalContractSummary?.generatedResult.resultPublicId ===
+                taskItem.generatedResult.resultPublicId
+                ? createContentAdminFormalReviewedDraftPayload({
+                    localContractSummary: currentLocalContractSummary,
+                    generationParameters,
+                    requestedAt: taskItem.requestedAt,
+                  })
+                : null;
 
-              <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                <div>
-                  <dt className="text-text-secondary">结果状态</dt>
-                  <dd className="text-text-primary mt-1">
-                    {getVisibilityLabel(taskItem.contentVisibility)}
-                  </dd>
+            return (
+              <article
+                className="border-border bg-background rounded-md border p-3"
+                key={taskItem.taskPublicId}
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 className="text-text-primary text-sm font-semibold">
+                      {getGenerationKindLabel(taskItem.generationKind)}
+                    </h3>
+                    <p className="text-text-secondary mt-1 text-xs">
+                      {formatRequestedAt(taskItem.requestedAt)}
+                    </p>
+                  </div>
+                  <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+                    {getTaskStatusLabel(taskItem.status)}
+                  </span>
                 </div>
-                <div>
-                  <dt className="text-text-secondary">
-                    {boundaryCopy.serviceLabel}
-                  </dt>
-                  <dd className="text-text-primary mt-1">
-                    {boundaryCopy.serviceStatus}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-text-secondary">
-                    {boundaryCopy.costLabel}
-                  </dt>
-                  <dd className="text-text-primary mt-1">
-                    {boundaryCopy.costStatus}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-text-secondary">
-                    {workspace === "organization" ? "训练草稿" : "正式内容"}
-                  </dt>
-                  <dd className="text-text-primary mt-1">
-                    {boundaryCopy.formalStatus}
-                  </dd>
-                </div>
-              </dl>
 
-              {taskItem.generatedResult !== null ? (
-                <div className="border-border bg-muted/40 mt-3 rounded-md border p-3">
-                  <p className="text-brand-primary text-xs font-medium">
-                    历史草稿摘要
-                  </p>
-                  <p className="text-text-primary mt-2 text-sm leading-6">
-                    {resolveAdminAiGenerationBusinessPreview(
-                      taskItem.generatedResult.contentPreviewMasked,
-                    )}
-                  </p>
-                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                      <dt className="text-text-secondary">草稿状态</dt>
-                      <dd className="text-text-primary mt-1">
-                        {getVisibilityLabel(
-                          taskItem.generatedResult.contentVisibility,
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-text-secondary">资料依据</dt>
-                      <dd className="text-text-primary mt-1">
-                        {getEvidenceStatusLabel(taskItem.generatedResult)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-text-secondary">依据数量</dt>
-                      <dd className="text-text-primary mt-1">
-                        {taskItem.generatedResult.citationCount}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-text-secondary">
-                        {workspace === "organization" ? "训练草稿" : "正式采用"}
-                      </dt>
-                      <dd className="text-text-primary mt-1">
-                        {workspace === "organization"
-                          ? getOrganizationDraftUsageStatusLabel(
-                              taskItem.generatedResult.formalAdoptionStatus,
-                            )
-                          : getFormalAdoptionStatusLabel(
-                              taskItem.generatedResult.formalAdoptionStatus,
-                            )}
-                      </dd>
-                    </div>
-                  </dl>
-                  {workspace === "content" ? (
-                    <ContentAdminReviewTraceabilityPanel
-                      actionState={
-                        reviewActionStateByResultPublicId[
-                          taskItem.generatedResult.resultPublicId
-                        ] ?? "idle"
-                      }
-                      generationKind={taskItem.generationKind}
-                      generatedResult={taskItem.generatedResult}
-                      resultPublicId={taskItem.generatedResult.resultPublicId}
-                      onReviewContentDraft={onReviewContentDraft}
-                    />
-                  ) : null}
-                  {workspace === "organization" ? (
-                    <OrganizationAiGenerationDraftNextStepPanel
-                      actionState={
-                        copyActionStateByResultPublicId[
-                          taskItem.generatedResult.resultPublicId
-                        ] ?? "idle"
-                      }
-                      adminWorkspaceCapabilitySummary={
-                        adminWorkspaceCapabilitySummary
-                      }
-                      generationParameters={generationParameters}
-                      taskItem={taskItem}
-                      onCopyToTrainingDraft={onCopyToTrainingDraft}
-                    />
-                  ) : null}
-                </div>
-              ) : null}
-            </article>
-          ))}
+                <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <dt className="text-text-secondary">结果状态</dt>
+                    <dd className="text-text-primary mt-1">
+                      {getVisibilityLabel(taskItem.contentVisibility)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-text-secondary">
+                      {boundaryCopy.serviceLabel}
+                    </dt>
+                    <dd className="text-text-primary mt-1">
+                      {boundaryCopy.serviceStatus}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-text-secondary">
+                      {boundaryCopy.costLabel}
+                    </dt>
+                    <dd className="text-text-primary mt-1">
+                      {boundaryCopy.costStatus}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-text-secondary">
+                      {workspace === "organization" ? "训练草稿" : "正式内容"}
+                    </dt>
+                    <dd className="text-text-primary mt-1">
+                      {boundaryCopy.formalStatus}
+                    </dd>
+                  </div>
+                </dl>
+
+                {taskItem.generatedResult !== null ? (
+                  <div className="border-border bg-muted/40 mt-3 rounded-md border p-3">
+                    <p className="text-brand-primary text-xs font-medium">
+                      历史草稿摘要
+                    </p>
+                    <p className="text-text-primary mt-2 text-sm leading-6">
+                      {resolveAdminAiGenerationBusinessPreview(
+                        taskItem.generatedResult.contentPreviewMasked,
+                      )}
+                    </p>
+                    <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                      <div>
+                        <dt className="text-text-secondary">草稿状态</dt>
+                        <dd className="text-text-primary mt-1">
+                          {getVisibilityLabel(
+                            taskItem.generatedResult.contentVisibility,
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-text-secondary">资料依据</dt>
+                        <dd className="text-text-primary mt-1">
+                          {getEvidenceStatusLabel(taskItem.generatedResult)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-text-secondary">依据数量</dt>
+                        <dd className="text-text-primary mt-1">
+                          {taskItem.generatedResult.citationCount}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-text-secondary">
+                          {workspace === "organization"
+                            ? "训练草稿"
+                            : "正式采用"}
+                        </dt>
+                        <dd className="text-text-primary mt-1">
+                          {workspace === "organization"
+                            ? getOrganizationDraftUsageStatusLabel(
+                                taskItem.generatedResult.formalAdoptionStatus,
+                              )
+                            : getFormalAdoptionStatusLabel(
+                                taskItem.generatedResult.formalAdoptionStatus,
+                              )}
+                        </dd>
+                      </div>
+                    </dl>
+                    {workspace === "content" ? (
+                      <ContentAdminReviewTraceabilityPanel
+                        actionState={
+                          reviewActionStateByResultPublicId[
+                            taskItem.generatedResult.resultPublicId
+                          ] ?? "idle"
+                        }
+                        generationKind={taskItem.generationKind}
+                        generatedResult={taskItem.generatedResult}
+                        reviewedDraft={contentAdminReviewedDraft}
+                        resultPublicId={taskItem.generatedResult.resultPublicId}
+                        onReviewContentDraft={onReviewContentDraft}
+                      />
+                    ) : null}
+                    {workspace === "organization" ? (
+                      <OrganizationAiGenerationDraftNextStepPanel
+                        actionState={
+                          copyActionStateByResultPublicId[
+                            taskItem.generatedResult.resultPublicId
+                          ] ?? "idle"
+                        }
+                        adminWorkspaceCapabilitySummary={
+                          adminWorkspaceCapabilitySummary
+                        }
+                        generationParameters={generationParameters}
+                        taskItem={taskItem}
+                        onCopyToTrainingDraft={onCopyToTrainingDraft}
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
         </div>
       ) : null}
     </section>
@@ -1538,12 +1562,14 @@ function ContentAdminReviewTraceabilityPanel({
   actionState,
   generationKind,
   generatedResult,
+  reviewedDraft,
   resultPublicId,
   onReviewContentDraft,
 }: {
   actionState: ContentAdminReviewActionState;
   generationKind: AdminAiGenerationKind;
   generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto;
+  reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   resultPublicId: string;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
 }) {
@@ -1552,8 +1578,12 @@ function ContentAdminReviewTraceabilityPanel({
   const isCompleted = actionState === "adopted" || actionState === "rejected";
   const actionMessage = resolveContentAdminReviewActionMessage(actionState);
   const reviewReadiness = getContentAdminReviewReadiness(generatedResult);
+  const hasReviewedDraft = reviewedDraft !== null;
   const isAdoptActionDisabled =
-    isSubmitting || isCompleted || reviewReadiness === "blocked";
+    isSubmitting ||
+    isCompleted ||
+    reviewReadiness === "blocked" ||
+    !hasReviewedDraft;
   const isRejectActionDisabled = isSubmitting || isCompleted;
   const evidenceLabel =
     reviewReadiness === "ready"
@@ -1562,17 +1592,21 @@ function ContentAdminReviewTraceabilityPanel({
         ? "资料较少"
         : "资料不足";
   const adoptionRequirementLabel =
-    reviewReadiness === "ready"
-      ? "可提交采用"
-      : reviewReadiness === "weak_confirmation_required"
-        ? "需人工确认"
-        : "不可采用";
+    !hasReviewedDraft && reviewReadiness !== "blocked"
+      ? "需本次结构化草稿"
+      : reviewReadiness === "ready"
+        ? "可提交采用"
+        : reviewReadiness === "weak_confirmation_required"
+          ? "需人工确认"
+          : "不可采用";
   const adoptActionLabel =
     actionState === "adopted"
       ? "已提交采用"
-      : reviewReadiness === "weak_confirmation_required"
-        ? "确认资料较少并采用草稿"
-        : "采用草稿";
+      : !hasReviewedDraft && reviewReadiness !== "blocked"
+        ? "需本次结构化草稿"
+        : reviewReadiness === "weak_confirmation_required"
+          ? "确认资料较少并采用草稿"
+          : "采用草稿";
 
   return (
     <section
@@ -1668,6 +1702,7 @@ function ContentAdminReviewTraceabilityPanel({
               generationKind,
               resultPublicId,
               reviewDecision: "approved",
+              reviewedDraft,
               weakEvidenceConfirmed:
                 reviewReadiness === "weak_confirmation_required"
                   ? true
@@ -2012,6 +2047,14 @@ export function AdminAiGenerationEntryPage({
     const pendingState =
       input.reviewDecision === "approved" ? "adopting" : "rejecting";
 
+    if (input.reviewDecision === "approved" && input.reviewedDraft == null) {
+      setReviewActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [input.resultPublicId]: "error",
+      }));
+      return;
+    }
+
     setReviewActionStateByResultPublicId((currentState) => ({
       ...currentState,
       [input.resultPublicId]: pendingState,
@@ -2027,6 +2070,9 @@ export function AdminAiGenerationEntryPage({
               reviewDecision: input.reviewDecision,
               reviewerConfirmed: true,
               targetType: input.generationKind,
+              ...(input.reviewDecision === "approved"
+                ? { reviewedDraft: input.reviewedDraft }
+                : {}),
               weakEvidenceConfirmed: input.weakEvidenceConfirmed,
             }),
             headers: {
@@ -2353,6 +2399,7 @@ export function AdminAiGenerationEntryPage({
       <AdminAiGenerationTaskHistoryPanel
         adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
         copyActionStateByResultPublicId={copyActionStateByResultPublicId}
+        currentLocalContractSummary={localContractSummary}
         generationParameters={generationParameters}
         generationKind={generationKind}
         onCopyToTrainingDraft={(input) =>

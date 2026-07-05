@@ -1627,12 +1627,456 @@ describe("admin AI generation entry surfaces", () => {
     expect(historyPanel).not.toHaveTextContent("redacted");
   });
 
-  it("submits content admin review adoption without fabricating a reviewed draft payload", async () => {
+  it("submits content admin current question review adoption with a reviewed draft payload", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_current_review_456";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const blockedResponse = createLocalContractResponse({
+      workspace: "content",
+      generationKind: "question",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        resultState: {
+          ...blockedResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        taskPersistence: {
+          ...blockedResponse.data.taskPersistence,
+          status: "succeeded",
+          resultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        generatedResult: {
+          persistenceStatus: "created",
+          resultPublicId,
+          contentVisibility: "redacted_snapshot",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+          formalAdoptionStatus: "blocked",
+          redactionStatus: "redacted",
+        },
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "生成题目草稿已创建，待评审查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 1,
+              actualQuestionCount: 1,
+              draftCount: 1,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  questionStem: "synthetic reviewed question stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic reviewed option A",
+                      isCorrect: true,
+                    },
+                    {
+                      optionLabel: "B",
+                      optionText: "synthetic reviewed option B",
+                      isCorrect: false,
+                    },
+                  ],
+                  standardAnswer: "A",
+                  analysis: "synthetic reviewed analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+    let requestSubmitted = false;
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        requestSubmitted = true;
+
+        return Response.json(providerVisibleResponse);
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          requestSubmitted
+            ? createTaskHistoryResponse({
+                workspace: "content",
+                generationKind: "question",
+                generatedResult: {
+                  resultPublicId,
+                  contentPreviewMasked:
+                    "redacted generated result summary for current review",
+                  evidenceStatus: "sufficient",
+                  citationCount: 2,
+                },
+              })
+            : createEmptyTaskHistoryResponse("content"),
+        );
+      }
+
+      if (path === adoptionUrl && init?.method === "POST") {
+        const adoptionRequestBody = JSON.parse(String(init.body));
+
+        expect(adoptionRequestBody).toMatchObject({
+          reviewDecision: "approved",
+          reviewerConfirmed: true,
+          targetType: "question",
+          reviewedDraft: {
+            questionType: "single_choice",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            stemRichText: "synthetic reviewed question stem",
+            standardAnswerRichText: "A",
+            analysisRichText: "synthetic reviewed analysis",
+            multiChoiceRule: "all_correct_only",
+            scoringMethod: "auto_match",
+            materialPublicId: null,
+            questionOptions: [
+              {
+                label: "A",
+                contentRichText: "synthetic reviewed option A",
+                isCorrect: true,
+                sortOrder: 1,
+              },
+              {
+                label: "B",
+                contentRichText: "synthetic reviewed option B",
+                isCorrect: false,
+                sortOrder: 2,
+              },
+            ],
+            scoringPoints: [],
+            fillBlankAnswers: [],
+            knowledgeNodePublicIds: [],
+            tagPublicIds: [],
+          },
+        });
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain(
+          "providerPayload",
+        );
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              redactionStatus: "redacted",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+    expect(
+      await screen.findByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("生成题目草稿");
+    fireEvent.click(
+      await screen.findByTestId("content-admin-review-adopt-action"),
+    );
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        adoptionUrl,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+    expect(
+      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+    ).toBeInTheDocument();
+  });
+
+  it("submits content admin current paper review adoption with composed companion question drafts", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const resultPublicId =
+      "admin_ai_generation_result_content_paper_current_review_456";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const blockedResponse = createLocalContractResponse({
+      workspace: "content",
+      generationKind: "paper",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        resultState: {
+          ...blockedResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        taskPersistence: {
+          ...blockedResponse.data.taskPersistence,
+          status: "succeeded",
+          resultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        generatedResult: {
+          persistenceStatus: "created",
+          resultPublicId,
+          contentVisibility: "redacted_snapshot",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+          formalAdoptionStatus: "blocked",
+          redactionStatus: "redacted",
+        },
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "生成试卷草稿已创建，待评审查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 1,
+              questionCount: 1,
+              questionTypeDistributionCount: 1,
+              knowledgeCoverageCount: 1,
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic reviewed paper section",
+                  description: "synthetic reviewed paper section description",
+                  questionCount: 1,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem: "synthetic reviewed paper question stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText: "synthetic reviewed paper option A",
+                          isCorrect: true,
+                        },
+                      ],
+                      standardAnswer: "A",
+                      analysis: "synthetic reviewed paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
+              reviewStatus: "draft_review_required",
+            },
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+    let requestSubmitted = false;
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        requestSubmitted = true;
+
+        return Response.json(providerVisibleResponse);
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          requestSubmitted
+            ? createTaskHistoryResponse({
+                workspace: "content",
+                generationKind: "paper",
+                generatedResult: {
+                  resultPublicId,
+                  contentPreviewMasked:
+                    "redacted generated result summary for current paper review",
+                  evidenceStatus: "sufficient",
+                  citationCount: 2,
+                },
+              })
+            : createEmptyTaskHistoryResponse("content"),
+        );
+      }
+
+      if (path === adoptionUrl && init?.method === "POST") {
+        const adoptionRequestBody = JSON.parse(String(init.body));
+
+        expect(adoptionRequestBody).toMatchObject({
+          reviewDecision: "approved",
+          reviewerConfirmed: true,
+          targetType: "paper",
+          reviewedDraft: {
+            name: "AI组卷草稿 2026-06-26 20:30",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            paperType: "mock_paper",
+            source: "content_ai_generation",
+            paperSections: [
+              {
+                title: "synthetic reviewed paper section",
+                description: "synthetic reviewed paper section description",
+                sortOrder: 1,
+                paperQuestions: [
+                  {
+                    questionPublicId: null,
+                    score: "1.0",
+                    sortOrder: 1,
+                    questionGroup: null,
+                    companionQuestionDraft: {
+                      questionType: "single_choice",
+                      stemRichText: "synthetic reviewed paper question stem",
+                      standardAnswerRichText: "A",
+                      analysisRichText: "synthetic reviewed paper analysis",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain(
+          "providerPayload",
+        );
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              redactionStatus: "redacted",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "paper",
+      }),
+    );
+
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+    expect(
+      await screen.findByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("生成试卷草稿");
+    fireEvent.click(
+      await screen.findByTestId("content-admin-review-adopt-action"),
+    );
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        adoptionUrl,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+    expect(
+      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps history-only content admin adoption unavailable without fabricating a reviewed draft payload", async () => {
     const taskPublicId =
       "admin_ai_generation_task_content_question_review_hidden_456";
     const resultPublicId =
       "admin_ai_generation_result_content_question_review_hidden_456";
-    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
     const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
       if (String(url) === "/api/v1/sessions") {
         return Response.json(
@@ -1661,33 +2105,6 @@ describe("admin AI generation entry surfaces", () => {
             },
           }),
         );
-      }
-
-      if (String(url) === adoptionUrl && init?.method === "POST") {
-        const adoptionRequestBody = JSON.parse(String(init.body));
-
-        expect(adoptionRequestBody).toMatchObject({
-          reviewDecision: "approved",
-          reviewerConfirmed: true,
-          targetType: "question",
-        });
-        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
-        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
-        expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
-        expect(JSON.stringify(adoptionRequestBody)).not.toContain(
-          "providerPayload",
-        );
-
-        return Response.json({
-          code: 0,
-          message: "ok",
-          data: {
-            persistenceStatus: "created",
-            adoption: {
-              redactionStatus: "redacted",
-            },
-          },
-        });
       }
 
       throw new Error(`Unexpected fetch: ${String(url)}`);
@@ -1740,34 +2157,21 @@ describe("admin AI generation entry surfaces", () => {
     expect(localValidationPanel).not.toHaveTextContent("not_executed");
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
-    ).toBeEnabled();
+    ).toBeDisabled();
     expect(
       screen.getByTestId("content-admin-review-reject-action"),
     ).toBeEnabled();
     expect(
       screen.getByTestId("content-admin-review-adopt-action"),
-    ).toHaveTextContent("采用草稿");
+    ).toHaveTextContent("需本次结构化草稿");
     expect(
       screen.getByTestId("content-admin-review-reject-action"),
     ).toHaveTextContent("驳回草稿");
 
-    fireEvent.click(screen.getByTestId("content-admin-review-adopt-action"));
-
-    await waitFor(() =>
-      expect(fetchMock).toHaveBeenCalledWith(
-        adoptionUrl,
-        expect.objectContaining({ method: "POST" }),
-      ),
-    );
-    expect(
-      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
-    ).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("adopt_disabled");
     expect(document.body.textContent).not.toContain("reject_disabled");
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
-      "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
-      adoptionUrl,
       "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
     ]);
     expect(document.body.textContent).not.toContain(taskPublicId);
@@ -1843,15 +2247,108 @@ describe("admin AI generation entry surfaces", () => {
     ]);
   });
 
-  it("requires explicit weak-evidence confirmation before content admin adoption request", async () => {
+  it("requires explicit weak-evidence confirmation before content admin current adoption request", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const resultPublicId =
       "admin_ai_generation_result_content_question_weak_hidden_456";
     const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const blockedResponse = createLocalContractResponse({
+      workspace: "content",
+      generationKind: "question",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        resultState: {
+          ...blockedResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId,
+          evidenceStatus: "weak",
+          citationCount: 1,
+        },
+        taskPersistence: {
+          ...blockedResponse.data.taskPersistence,
+          status: "succeeded",
+          resultPublicId,
+          evidenceStatus: "weak",
+          citationCount: 1,
+        },
+        generatedResult: {
+          persistenceStatus: "created",
+          resultPublicId,
+          contentVisibility: "redacted_snapshot",
+          evidenceStatus: "weak",
+          citationCount: 1,
+          formalAdoptionStatus: "blocked",
+          redactionStatus: "redacted",
+        },
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "弱依据题目草稿已创建，待评审查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "weak",
+              citationCount: 1,
+            },
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 1,
+              actualQuestionCount: 1,
+              draftCount: 1,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  questionStem: "synthetic weak reviewed question stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic weak reviewed option A",
+                      isCorrect: true,
+                    },
+                  ],
+                  standardAnswer: "A",
+                  analysis: "synthetic weak reviewed analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+    let requestSubmitted = false;
     const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
-      if (String(url) === "/api/v1/sessions") {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
         return Response.json(
           createSessionResponse({ adminRoles: ["content_admin"] }),
         );
+      }
+
+      if (
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        requestSubmitted = true;
+
+        return Response.json(providerVisibleResponse);
       }
 
       if (
@@ -1862,21 +2359,23 @@ describe("admin AI generation entry surfaces", () => {
         )
       ) {
         return Response.json(
-          createTaskHistoryResponse({
-            workspace: "content",
-            generationKind: "question",
-            generatedResult: {
-              resultPublicId,
-              contentPreviewMasked:
-                "redacted generated result summary for weak evidence review",
-              evidenceStatus: "weak",
-              citationCount: 1,
-            },
-          }),
+          requestSubmitted
+            ? createTaskHistoryResponse({
+                workspace: "content",
+                generationKind: "question",
+                generatedResult: {
+                  resultPublicId,
+                  contentPreviewMasked:
+                    "redacted generated result summary for weak evidence review",
+                  evidenceStatus: "weak",
+                  citationCount: 1,
+                },
+              })
+            : createEmptyTaskHistoryResponse("content"),
         );
       }
 
-      if (String(url) === adoptionUrl && init?.method === "POST") {
+      if (path === adoptionUrl && init?.method === "POST") {
         const adoptionRequestBody = JSON.parse(String(init.body));
 
         expect(adoptionRequestBody).toMatchObject({
@@ -1884,8 +2383,13 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "question",
           weakEvidenceConfirmed: true,
+          reviewedDraft: {
+            questionType: "single_choice",
+            stemRichText: "synthetic weak reviewed question stem",
+            standardAnswerRichText: "A",
+            analysisRichText: "synthetic weak reviewed analysis",
+          },
         });
-        expect(adoptionRequestBody).not.toHaveProperty("reviewedDraft");
 
         return Response.json({
           code: 0,
@@ -1910,6 +2414,11 @@ describe("admin AI generation entry surfaces", () => {
       }),
     );
 
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+    expect(
+      await screen.findByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("生成题目草稿");
+
     const traceabilityPanel = await screen.findByTestId(
       "content-admin-review-traceability",
     );
@@ -1930,6 +2439,9 @@ describe("admin AI generation entry surfaces", () => {
         expect.objectContaining({ method: "POST" }),
       ),
     );
+    expect(
+      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+    ).toBeInTheDocument();
   });
 
   it("converts persisted diagnostic generated result summaries for organization advanced admin history", async () => {
