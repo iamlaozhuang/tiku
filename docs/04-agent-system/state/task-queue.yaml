@@ -17935,7 +17935,7 @@ tasks:
     dependencies:
       - full-chain-scenario-5-advanced-org-package-2026-07-04
       - full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-    status: blocked
+    status: closed
     result: blocked_requires_source_repair_login_input_state_binding
     taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
     moduleRunVersion: 2
