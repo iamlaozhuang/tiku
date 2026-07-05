@@ -34,9 +34,14 @@ import type {
   PersonalAiGenerationResultDetailDto,
   PersonalAiGenerationResultHistoryDto,
 } from "@/server/contracts/personal-ai-generation-result-history-contract";
+import type { PersonalAiGenerationLearningSessionQuestionDto } from "@/server/contracts/personal-ai-generation-learning-session-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "@/server/contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
+import {
+  createPersonalAiLearningSessionQuestion,
+  normalizePersonalAiLearningLabels,
+} from "@/server/validators/personal-ai-generation-learning-session";
 
 type StudentPersonalAiGenerationPageState =
   | "checking"
@@ -64,6 +69,15 @@ type StudentPersonalAiGenerationPracticeFeedbackState =
   | "practice_ready"
   | "answer_submitted"
   | "feedback_ready";
+
+type StudentAiLearningAnswerFeedback = {
+  isCorrect: boolean | null;
+  score: string | null;
+  maxScore: string;
+  standardAnswerLabels: string[];
+  standardAnswerText: string | null;
+  analysis: string | null;
+};
 
 type StudentSessionRequestToken = string | null;
 type StudentAuthorizationListPayload = EffectiveAuthorizationListDto;
@@ -1387,6 +1401,180 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
   );
 }
 
+function StudentAiLearningSessionPanel({
+  answerFeedback,
+  onSelectOptionLabel,
+  question,
+  selectedOptionLabels,
+}: {
+  answerFeedback: StudentAiLearningAnswerFeedback | null;
+  onSelectOptionLabel: (optionLabel: string) => void;
+  question: PersonalAiGenerationLearningSessionQuestionDto;
+  selectedOptionLabels: string[];
+}) {
+  return (
+    <section
+      className="border-border bg-surface rounded-xl border p-4"
+      data-testid="student-ai-learning-session"
+    >
+      <div className="mb-3 flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <BookOpen className="size-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="font-heading text-text-primary text-base font-semibold">
+            隔离 AI 学习
+          </h2>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            仅用于本次 AI 草稿自练，正式练习未写入，错题本未写入。
+          </p>
+        </div>
+      </div>
+
+      <div className="border-border bg-muted/40 rounded-lg border p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <h3 className="text-text-primary text-sm font-semibold">
+            题目 {question.sourceDraftNumber}
+          </h3>
+          <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+            {question.questionType}
+          </span>
+        </div>
+        <p className="text-text-primary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+          {question.questionStem}
+        </p>
+        {question.questionOptions.length > 0 ? (
+          <fieldset className="mt-3 space-y-2">
+            <legend className="text-text-secondary text-xs font-medium">
+              选择答案
+            </legend>
+            {question.questionOptions.map((option) => (
+              <label
+                className="border-border bg-background flex cursor-pointer items-start gap-2 rounded-md border px-2 py-2 text-sm"
+                key={`${question.sessionQuestionPublicId}-${option.optionLabel}`}
+              >
+                <input
+                  aria-label={`${option.optionLabel} ${option.optionText}`}
+                  checked={selectedOptionLabels.includes(option.optionLabel)}
+                  className="mt-1 size-4 accent-current"
+                  name={`student-ai-learning-answer-${question.sessionQuestionPublicId}`}
+                  onChange={() => onSelectOptionLabel(option.optionLabel)}
+                  type="radio"
+                  value={option.optionLabel}
+                />
+                <span className="text-text-primary leading-6">
+                  <span className="text-brand-primary mr-2 font-medium">
+                    {option.optionLabel}
+                  </span>
+                  {option.optionText}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        ) : (
+          <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm">
+            当前题型需人工评阅，本次不写入 AI 评分。
+          </p>
+        )}
+      </div>
+
+      {answerFeedback !== null ? (
+        <div
+          className="border-border bg-background mt-3 rounded-lg border p-3"
+          aria-live="polite"
+        >
+          <p className="text-text-primary text-sm font-semibold">
+            {answerFeedback.isCorrect === true
+              ? "回答正确"
+              : answerFeedback.isCorrect === false
+                ? "回答错误"
+                : "已提交，待人工评阅"}
+          </p>
+          <div className="text-text-secondary mt-2 flex flex-wrap gap-2 text-xs">
+            <span className="bg-muted rounded-md px-2 py-1">
+              得分 {answerFeedback.score ?? "待评阅"}/{answerFeedback.maxScore}
+            </span>
+            <span className="bg-muted rounded-md px-2 py-1">
+              正确答案{" "}
+              {answerFeedback.standardAnswerLabels.length > 0
+                ? answerFeedback.standardAnswerLabels.join("、")
+                : (answerFeedback.standardAnswerText ?? "待评阅")}
+            </span>
+          </div>
+          {answerFeedback.analysis !== null ? (
+            <p className="text-text-primary bg-muted mt-3 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+              {answerFeedback.analysis}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function getStudentAiLearningSessionQuestions(
+  experience: PersonalAiGenerationLocalBrowserExperienceDto,
+): PersonalAiGenerationLearningSessionQuestionDto[] {
+  const visibleGeneratedContent =
+    experience.runtimeBridge.visibleGeneratedContent;
+  const structuredPreview = visibleGeneratedContent?.structuredPreview;
+
+  if (structuredPreview == null || structuredPreview.parseStatus !== "parsed") {
+    return [];
+  }
+
+  const questionDrafts =
+    structuredPreview.kind === "question_set"
+      ? structuredPreview.draftSummaries
+      : structuredPreview.paperSectionSummaries.flatMap(
+          (paperSectionSummary) => paperSectionSummary.questionDrafts,
+        );
+
+  return questionDrafts.reduce<
+    PersonalAiGenerationLearningSessionQuestionDto[]
+  >((questions, questionDraft) => {
+    const question = createPersonalAiLearningSessionQuestion({
+      sessionPublicId: "student-ai-learning-session",
+      usableQuestionIndex: questions.length + 1,
+      draft: questionDraft,
+    });
+
+    if (question !== null) {
+      questions.push(question);
+    }
+
+    return questions;
+  }, []);
+}
+
+function createStudentAiLearningAnswerFeedback(input: {
+  question: PersonalAiGenerationLearningSessionQuestionDto;
+  selectedOptionLabels: string[];
+}): StudentAiLearningAnswerFeedback {
+  const selectedOptionLabels = normalizePersonalAiLearningLabels(
+    input.selectedOptionLabels,
+  );
+  const standardAnswerLabels = normalizePersonalAiLearningLabels(
+    input.question.standardAnswerLabels,
+  );
+  const isObjectiveQuestion =
+    input.question.questionType !== "short_answer" &&
+    standardAnswerLabels.length > 0;
+  const isCorrect = isObjectiveQuestion
+    ? selectedOptionLabels.join("|") === standardAnswerLabels.join("|")
+    : null;
+
+  return {
+    isCorrect,
+    score:
+      isCorrect === null ? null : isCorrect ? input.question.maxScore : "0.0",
+    maxScore: input.question.maxScore,
+    standardAnswerLabels,
+    standardAnswerText: input.question.standardAnswerText,
+    analysis: input.question.analysis,
+  };
+}
+
 function canUseCurrentGeneratedPractice(
   experience: PersonalAiGenerationLocalBrowserExperienceDto,
 ): boolean {
@@ -1395,7 +1583,8 @@ function canUseCurrentGeneratedPractice(
     experience.resultState.status === "succeeded" &&
     experience.resultState.resultPublicId !== null &&
     experience.resultState.evidenceStatus === "sufficient" &&
-    experience.resultState.citationCount > 0
+    experience.resultState.citationCount > 0 &&
+    getStudentAiLearningSessionQuestions(experience).length > 0
   );
 }
 
@@ -1869,6 +2058,12 @@ export function StudentPersonalAiGenerationPage() {
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
   const [practiceFeedbackState, setPracticeFeedbackState] =
     useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
+  const [isAiLearningSessionStarted, setIsAiLearningSessionStarted] =
+    useState(false);
+  const [selectedAiLearningAnswerLabels, setSelectedAiLearningAnswerLabels] =
+    useState<string[]>([]);
+  const [aiLearningAnswerFeedback, setAiLearningAnswerFeedback] =
+    useState<StudentAiLearningAnswerFeedback | null>(null);
   const [authorizationContexts, setAuthorizationContexts] = useState<
     EffectiveAuthorizationContextDto[]
   >([]);
@@ -2171,6 +2366,9 @@ export function StudentPersonalAiGenerationPage() {
     setLastSubmittedTaskType(taskType);
     setHistoryTaskType(taskType);
     setPracticeFeedbackState("waiting");
+    setIsAiLearningSessionStarted(false);
+    setSelectedAiLearningAnswerLabels([]);
+    setAiLearningAnswerFeedback(null);
     setHasSessionToken(true);
     setPageState("loading");
 
@@ -2540,6 +2738,10 @@ export function StudentPersonalAiGenerationPage() {
     shouldShowAiGenerationDetailControls && authorizationContexts.length > 0;
   const hasLocalAiGenerationExperience =
     pageState === "ready" && experience !== null;
+  const aiLearningSessionQuestions = hasLocalAiGenerationExperience
+    ? getStudentAiLearningSessionQuestions(experience)
+    : [];
+  const currentAiLearningQuestion = aiLearningSessionQuestions[0] ?? null;
   const canUseGeneratedPractice =
     hasLocalAiGenerationExperience &&
     canUseCurrentGeneratedPractice(experience);
@@ -2554,6 +2756,43 @@ export function StudentPersonalAiGenerationPage() {
     !canUseGeneratedPractice
       ? "insufficient"
       : practiceFeedbackState;
+
+  function handleStartAiLearningSession() {
+    if (!canUseGeneratedPractice || currentAiLearningQuestion === null) {
+      return;
+    }
+
+    setIsAiLearningSessionStarted(true);
+    setSelectedAiLearningAnswerLabels([]);
+    setAiLearningAnswerFeedback(null);
+    setPracticeFeedbackState("practice_ready");
+  }
+
+  function handleSubmitAiLearningAnswer() {
+    if (!canUseGeneratedPractice || currentAiLearningQuestion === null) {
+      return;
+    }
+
+    setIsAiLearningSessionStarted(true);
+    setAiLearningAnswerFeedback(
+      createStudentAiLearningAnswerFeedback({
+        question: currentAiLearningQuestion,
+        selectedOptionLabels: selectedAiLearningAnswerLabels,
+      }),
+    );
+    setPracticeFeedbackState("answer_submitted");
+  }
+
+  function handleViewAiLearningFeedback() {
+    if (!canUseGeneratedPractice || currentAiLearningQuestion === null) {
+      return;
+    }
+
+    setIsAiLearningSessionStarted(true);
+    setPracticeFeedbackState(
+      aiLearningAnswerFeedback === null ? "practice_ready" : "feedback_ready",
+    );
+  }
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -2635,10 +2874,22 @@ export function StudentPersonalAiGenerationPage() {
           canUseGeneratedPractice={canUseGeneratedPractice}
           isRetryDisabled={isRetryGenerationDisabled}
           practiceFeedbackState={practiceFeedbackStateForCurrentResult}
-          onStartPractice={() => setPracticeFeedbackState("practice_ready")}
-          onSubmitAnswer={() => setPracticeFeedbackState("answer_submitted")}
-          onViewFeedback={() => setPracticeFeedbackState("feedback_ready")}
+          onStartPractice={handleStartAiLearningSession}
+          onSubmitAnswer={handleSubmitAiLearningAnswer}
+          onViewFeedback={handleViewAiLearningFeedback}
           onRetryGeneration={handleRetryPersonalAiGenerationRequest}
+        />
+      ) : null}
+
+      {isAiLearningSessionStarted && currentAiLearningQuestion !== null ? (
+        <StudentAiLearningSessionPanel
+          answerFeedback={aiLearningAnswerFeedback}
+          onSelectOptionLabel={(optionLabel) => {
+            setSelectedAiLearningAnswerLabels([optionLabel]);
+            setAiLearningAnswerFeedback(null);
+          }}
+          question={currentAiLearningQuestion}
+          selectedOptionLabels={selectedAiLearningAnswerLabels}
         />
       ) : null}
 

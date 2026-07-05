@@ -1536,6 +1536,13 @@ describe("StudentPersonalAiGenerationPage", () => {
       ...localExperienceResponse,
       data: {
         ...localExperienceResponse.data,
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId: "ai-generation-result-visible-learner-001",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
         runtimeBridge: {
           ...localExperienceResponse.data.runtimeBridge,
           bridgeStatus: "provider_call_succeeded",
@@ -1582,9 +1589,10 @@ describe("StudentPersonalAiGenerationPage", () => {
                     {
                       optionLabel: "A",
                       optionText: "synthetic visible learner option",
+                      isCorrect: true,
                     },
                   ],
-                  standardAnswer: "synthetic visible learner answer",
+                  standardAnswer: "A",
                   analysis: "synthetic visible learner analysis",
                   reviewStatus: "draft_review_required",
                 },
@@ -1626,10 +1634,27 @@ describe("StudentPersonalAiGenerationPage", () => {
     ).toHaveTextContent("synthetic visible learner option");
     expect(
       screen.getByTestId("student-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible learner answer");
+    ).toHaveTextContent("A");
     expect(
       screen.getByTestId("student-visible-generated-content"),
     ).toHaveTextContent("synthetic visible learner analysis");
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    const learningSession = await screen.findByTestId(
+      "student-ai-learning-session",
+    );
+    expect(learningSession).toHaveTextContent("隔离 AI 学习");
+    expect(learningSession).toHaveTextContent(
+      "synthetic visible learner question stem",
+    );
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /A synthetic visible learner option/,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    expect(await screen.findByText("回答正确")).toBeInTheDocument();
+    expect(learningSession).toHaveTextContent("正式练习未写入");
+    expect(learningSession).toHaveTextContent("错题本未写入");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
@@ -1642,6 +1667,13 @@ describe("StudentPersonalAiGenerationPage", () => {
       message: "ok",
       data: {
         ...localExperienceResponse.data,
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId: "ai-generation-result-visible-employee-001",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
         runtimeBridge: {
           ...localExperienceResponse.data.runtimeBridge,
           bridgeStatus: "provider_call_succeeded",
@@ -1687,9 +1719,15 @@ describe("StudentPersonalAiGenerationPage", () => {
                     {
                       optionLabel: "A",
                       optionText: "synthetic visible employee option",
+                      isCorrect: true,
+                    },
+                    {
+                      optionLabel: "B",
+                      optionText: "synthetic visible employee distractor",
+                      isCorrect: false,
                     },
                   ],
-                  standardAnswer: "synthetic visible employee answer",
+                  standardAnswer: "A",
                   analysis: "synthetic visible employee analysis",
                   reviewStatus: "draft_review_required",
                 },
@@ -1787,12 +1825,25 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible employee option",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
-      "synthetic visible employee answer",
-    );
+    expect(visibleGeneratedContent).toHaveTextContent("A");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible employee analysis",
     );
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    const learningSession = await screen.findByTestId(
+      "student-ai-learning-session",
+    );
+    expect(learningSession).toHaveTextContent("隔离 AI 学习");
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /B synthetic visible employee distractor/,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    expect(await screen.findByText("回答错误")).toBeInTheDocument();
+    expect(learningSession).toHaveTextContent("正确答案 A");
+    expect(learningSession).toHaveTextContent("正式练习未写入");
+    expect(learningSession).toHaveTextContent("错题本未写入");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
