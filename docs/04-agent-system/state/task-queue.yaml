@@ -398,13 +398,101 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    title: Full-chain Scenario 12 pre-push status alignment
+    phase: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    sourceStory: s12_prepush_repository_sha_readiness_block_after_local_master_ff_merge
+    dependencies:
+      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    status: closed
+    result: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
+    taskKind: docs_state_closeout_status_alignment
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-12-prepush-sha-alignment-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T07:44:00-07:00"
+    claimedAt: "2026-07-05T07:44:00-07:00"
+    materializedAt: "2026-07-05T07:44:00-07:00"
+    closedAt: "2026-07-05T07:44:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
+      readGate: pass
+      taskPlanPrepared: true
+      priorS12PreflightStatusChangedToClosed: true
+      priorS12PreflightResultPreserved: true
+      localMasterAfterS12Commit: 8659b0fe5a5a174cf183695cf94a11b64fe7518c
+      originMasterBeforePush: 36a5123ec7fa67492672fea7e2948c1cadddb8fd
+      directDbReadExecuted: false
+      directDbWriteExecuted: false
+      browserRuntimeExecuted: false
+      sourceTestChanged: false
+      providerStagingProdCostExecuted: false
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      closeoutGates: pass
+      repositoryCheckpointAligned: true
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
     title: Full-chain Scenario 12 advanced org admin analytics training preflight
     phase: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
     sourceStory: s12_minimum_preflight_after_s11_training_submission
     dependencies:
       - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
-    status: blocked
+    status: closed
     result: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
     taskKind: local_read_only_acceptance_preflight
     moduleRunVersion: 2

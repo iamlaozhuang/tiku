@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-updatedAt: "2026-07-05T07:32:00-07:00"
+currentPhase: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+updatedAt: "2026-07-05T07:44:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -27377,31 +27377,34 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-  phase: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-  status: blocked
-  result: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
+  id: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+  phase: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+  status: closed
+  result: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
   priority: p0
-  taskKind: local_read_only_acceptance_preflight
+  taskKind: docs_state_closeout_status_alignment
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+  branch: codex/full-chain-scenario-12-prepush-sha-alignment-2026-07-05
   approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  plannedAt: "2026-07-05T07:32:00-07:00"
-  claimedAt: "2026-07-05T07:32:00-07:00"
-  materializedAt: "2026-07-05T07:32:00-07:00"
-  blockedAt: "2026-07-05T07:36:00-07:00"
+  plannedAt: "2026-07-05T07:44:00-07:00"
+  claimedAt: "2026-07-05T07:44:00-07:00"
+  materializedAt: "2026-07-05T07:44:00-07:00"
+  closedAt: "2026-07-05T07:44:00-07:00"
   dependsOn:
     - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
-  targetClosureItem: Materialize and run the minimum read-only S12 prerequisite checklist before any advanced organization admin browser/runtime acceptance.
-  behaviorBoundary: docs_state_queue_plan_evidence_audit_plus_selector_scoped_read_only_aggregate_db_preflight_only_no_browser_runtime_no_dev_server_no_product_db_write_no_employee_import_repeat_no_s10_learning_repeat_no_provider_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
-  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_scope_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
-  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+  targetClosureItem: Align the completed S12 blocked preflight task status to closed so Module Run v2 pre-push can apply the accepted ancestor checkpoint policy.
+  behaviorBoundary: docs_state_queue_evidence_audit_only_no_db_browser_runtime_dev_server_product_source_test_dependency_schema_migration_seed_provider_staging_prod_cost_or_release_claim
+  evidenceMode: redacted_task_ids_branch_commit_labels_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
     - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
     - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
   privateAllowedFiles: []
@@ -27411,26 +27414,9 @@ currentTask:
     - docs/02-architecture/adr/**
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/01-requirements/**
-    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
-    - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-    - src/app/(admin)/organization/organization-analytics/page.tsx
-    - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
-    - src/server/services/organization-analytics-route.ts
-    - src/server/services/organization-analytics-service.ts
-    - src/server/repositories/organization-analytics-repository.ts
-    - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
-    - src/app/api/v1/organization-analytics/employee-statistics/route.ts
-    - tests/unit/organization-analytics-admin-entry-surface.test.ts
-    - src/app/(admin)/organization/organization-training/page.tsx
-    - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
-    - src/server/services/organization-training-service.ts
-    - src/server/repositories/organization-training-repository.ts
-    - tests/unit/organization-training-admin-entry-surface.test.ts
-    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
-    - src/app/api/v1/organization-ai-generation-requests/route.ts
-    - tests/unit/admin-ai-generation-entry-surface.test.ts
+    - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -27451,19 +27437,6 @@ currentTask:
     - test-results/**
     - .next/**
     - .runtime/**
-  localDbBoundary:
-    targetDbLabel: tiku_full_chain_acceptance_20260704_001
-    allowed: selector_scoped_read_only_aggregate_preflight_counts_only
-    mutation: blocked
-    rawRowsEvidence: blocked
-  browserBoundary:
-    browserRuntime: blocked_in_this_preflight
-    devServer: blocked_in_this_preflight
-    screenshotsRawDomTrace: blocked
-  providerBoundary:
-    providerExecution: blocked
-    costCalibration: blocked
-    stagingProd: blocked
   closeoutPolicy:
     localCommit:
       approved: true
@@ -27480,24 +27453,14 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   validationSummary:
-    status: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
+    status: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
     readGate: pass
     taskPlanPrepared: true
-    minimumPreflightChecklist: blocked
-    targetDbMatched: 1
-    activeAdvancedMarketing3AuthCount: 1
-    advancedOrgAdminBindingCount: 1
-    importedAdvancedEmployeeCount: 6
-    publishedMarketing3TrainingCount: 1
-    publishedTrainingQuestionCountSum: 4
-    submittedTrainingAnswerCount: 1
-    distinctSubmittedEmployeeCount: 1
-    formalPracticeCount: 1
-    formalMockExamCount: 0
-    formalExamReportCount: 0
-    s12AnalyticsThreshold: 5
-    s12AnalyticsPrerequisiteMet: 0
-    directDbReadExecuted: true
+    priorS12PreflightStatusChangedToClosed: true
+    priorS12PreflightResultPreserved: true
+    localMasterAfterS12Commit: 8659b0fe5a5a174cf183695cf94a11b64fe7518c
+    originMasterBeforePush: 36a5123ec7fa67492672fea7e2948c1cadddb8fd
+    directDbReadExecuted: false
     directDbWriteExecuted: false
     browserRuntimeExecuted: false
     devServerStarted: false
