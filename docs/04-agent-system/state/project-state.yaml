@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-post-acceptance-queue-cleanup-2026-07-05
-updatedAt: "2026-07-05T08:25:02-07:00"
+currentPhase: full-chain-provider-cost-staging-approval-package-2026-07-05
+updatedAt: "2026-07-05T08:43:32-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -27236,8 +27236,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e7a775d0bd6f31fae214061529e711dc465f51ea
-  lastKnownOriginMasterSha: e7a775d0bd6f31fae214061529e711dc465f51ea
+  lastKnownMasterSha: 74ec14fb0ff916b839b51d3b2638912e7bcd3fd7
+  lastKnownOriginMasterSha: 74ec14fb0ff916b839b51d3b2638912e7bcd3fd7
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -27376,50 +27376,48 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     finalPassClaimed: false
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
-currentTask:
+previousCurrentTaskBeforeFullChainProviderCostStagingApprovalPackage20260705:
   id: full-chain-post-acceptance-queue-cleanup-2026-07-05
-  phase: full-chain-post-acceptance-queue-cleanup-2026-07-05
   status: closed
   result: pass_queue_cleanup_archived_five_terminal_full_chain_task_blocks_no_final_pass
-  priority: p0
-  taskKind: docs_only
-  executionProfile: docs_state_queue_archive_index_cleanup
-  validationPolicy: scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
-  moduleRunVersion: 2
   branch: codex/full-chain-post-acceptance-queue-cleanup-2026-07-05
-  approvalBoundary: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
-  plannedAt: "2026-07-05T08:17:35-07:00"
-  claimedAt: "2026-07-05T08:17:35-07:00"
-  materializedAt: "2026-07-05T08:17:35-07:00"
   completedAt: "2026-07-05T08:25:02-07:00"
-  dependsOn:
-    - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
-  targetClosureItem: Move a narrow exact batch of five terminal full-chain task records from active task queue to the July task queue archive with history-index entries.
-  behaviorBoundary: docs_state_queue_archive_index_only_no_execution_log_move_no_browser_runtime_dev_server_e2e_db_connection_private_credential_read_source_test_dependency_schema_migration_seed_provider_staging_prod_cost_release_final_or_production_claim
-  evidenceMode: redacted_task_ids_branch_file_paths_status_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
-  archiveBatch:
-    targetArchivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
-    targetIndexPath: docs/04-agent-system/state/task-history-index.yaml
-    taskCount: 5
-    taskIds:
-      - full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
-      - full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
-      - full-chain-scenario-12-prepush-status-alignment-2026-07-05
-      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-      - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
   planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+currentTask:
+  id: full-chain-provider-cost-staging-approval-package-2026-07-05
+  phase: full-chain-provider-cost-staging-approval-package-2026-07-05
+  status: closed
+  result: pass_provider_cost_staging_approval_package_materialized_no_runtime_execution
+  priority: p0
+  taskKind: docs_only
+  executionProfile: docs_state_provider_cost_staging_approval_package
+  validationPolicy: scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+  moduleRunVersion: 2
+  branch: codex/full-chain-provider-cost-staging-approval-package-2026-07-05
+  approvalBoundary: current_user_approved_single_provider_cost_staging_materialization_task_2026_07_05
+  plannedAt: "2026-07-05T08:35:53-07:00"
+  claimedAt: "2026-07-05T08:35:53-07:00"
+  materializedAt: "2026-07-05T08:35:53-07:00"
+  completedAt: "2026-07-05T08:43:32-07:00"
+  dependsOn:
+    - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    - full-chain-post-acceptance-queue-cleanup-2026-07-05
+  targetClosureItem: Prepare a docs-only Provider, Cost Calibration, and staging approval package after local S1-S12 acceptance and queue cleanup.
+  behaviorBoundary: docs_state_acceptance_evidence_audit_only_no_provider_call_no_cost_calibration_no_staging_prod_cloud_deploy_no_env_secret_no_db_no_browser_no_source_test_dependency_schema_migration_seed_script_runtime_config_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_branch_file_paths_public_labels_status_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-provider-cost-staging-approval-package.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
-    - docs/04-agent-system/state/task-history-index.yaml
-    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
-    - docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
-    - docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
-    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    - docs/05-execution-logs/acceptance/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    - docs/05-execution-logs/evidence/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-provider-cost-staging-approval-package.md
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -27441,56 +27439,51 @@ currentTask:
     - test-results/**
     - .next/**
     - .runtime/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
     - docs/05-execution-logs/archive/**
     - docs/05-execution-logs/execution-log-index.yaml
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
   localDbBoundary: no_database_connection_no_raw_rows_no_direct_or_product_runtime_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
-  aiProviderBoundary: no_provider_call_no_provider_configuration_no_secret_access_no_prompt_payload_no_raw_ai_io
+  aiProviderBoundary: no_provider_call_no_provider_configuration_no_secret_access_no_prompt_payload_no_raw_ai_io_no_cost_calibration
   browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
-  accountCredentialBoundary: no_private_credential_read_or_use_no_credential_values_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
-  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_production_usability_no_cost_calibration
+  accountCredentialBoundary: no_private_credential_read_or_use_no_env_secret_access_no_credential_values_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+  releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_production_usability_no_production_readiness
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      approvalSource: current_user_approved_single_provider_cost_staging_materialization_task_2026_07_05
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      approvalSource: current_user_approved_single_provider_cost_staging_materialization_task_2026_07_05
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      approvalSource: current_user_approved_single_provider_cost_staging_materialization_task_2026_07_05
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      approvalSource: current_user_approved_single_provider_cost_staging_materialization_task_2026_07_05
   validationCommands:
-    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-provider-cost-staging-approval-package.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-provider-cost-staging-approval-package.md docs/05-execution-logs/evidence/2026-07-05-full-chain-provider-cost-staging-approval-package.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-provider-cost-staging-approval-package.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-provider-cost-staging-approval-package.md docs/05-execution-logs/evidence/2026-07-05-full-chain-provider-cost-staging-approval-package.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-provider-cost-staging-approval-package.md
     - git diff --check
-    - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime .env docs/05-execution-logs/archive docs/05-execution-logs/execution-log-index.yaml
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-post-acceptance-queue-cleanup-2026-07-05
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-post-acceptance-queue-cleanup-2026-07-05 -SkipRemoteAheadCheck
+    - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/archive docs/05-execution-logs/execution-log-index.yaml
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-provider-cost-staging-approval-package-2026-07-05
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-provider-cost-staging-approval-package-2026-07-05 -SkipRemoteAheadCheck
   validationSummary:
-    status: pass_queue_cleanup_archived_five_terminal_full_chain_task_blocks_no_final_pass
+    status: pass_provider_cost_staging_approval_package_materialized_no_runtime_execution
     readGate: pass
     taskPlanPrepared: true
-    stateQueueMaterialized: true
-    archiveTaskIdsListed: 5
-    queueArchiveMovement: pass
-    historyIndexEntries: 5
-    archivedTaskBlocks: 5
-    activeQueueTaskCountAfterCloseout: 210
-    activeQueueNonTerminalCountAfterCloseout: 6
-    activeQueueTerminalCountAfterCloseout: 204
-    archiveCandidateCountAfterCloseout: 195
-    highRiskMetadataRepairBlockedCountAfterCloseout: 188
-    executionLogFilesMoved: 0
+    approvalPackageMaterialized: true
+    copyableApprovalTextPrepared: true
+    providerExecution: false
+    costCalibrationExecuted: false
+    stagingProdExecuted: false
     browserRuntimeExecuted: false
     directDbReadOrWriteExecuted: false
-    privateCredentialReadOrUsed: false
-    providerStagingProdCostExecuted: false
+    privateCredentialOrSecretValueRead: false
     sourceTestChanged: false
     schemaMigrationSeedChanged: false
     dependencyOrLockfileChanged: false
@@ -27504,8 +27497,6 @@ currentTask:
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass
     closeoutGates: pass
-  followUp:
-    providerCostStagingStatus: consider_only_after_queue_cleanup_and_requires_fresh_approval
 fullChainScenario11AdvancedEmployeeAffectedNodeRerun20260704:
   taskId: full-chain-scenario-11-advanced-employee-affected-node-rerun-2026-07-04
   phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-2026-07-04
