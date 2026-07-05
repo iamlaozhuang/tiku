@@ -12,16 +12,21 @@ import {
   organizationTrainingDraft,
   organizationTrainingSourceContext,
   organizationTrainingVersion,
+  paper,
+  paperQuestion,
 } from "@/db/schema";
-import { and, desc, eq, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
+  OrganizationTrainingQuestionOptionSnapshotDto,
+  OrganizationTrainingQuestionSnapshotDto,
   OrganizationTrainingScopeSnapshotDto,
   OrganizationTrainingSourceContextAttachmentDto,
 } from "../contracts/organization-training-contract";
+import { organizationTrainingQuestionTypeValues } from "../models/organization-training";
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
   OrganizationTrainingEmployeeAnswerSubmissionWrite,
@@ -167,6 +172,19 @@ export type OrganizationTrainingEmployeeVisibleVersionListInput = {
   visibleOrganizationPublicIds?: readonly string[];
 };
 
+export type OrganizationTrainingPaperQuestionSnapshotLookupInput = {
+  draftPublicIds: readonly string[];
+};
+
+export type OrganizationTrainingPaperQuestionSnapshotRow = {
+  trainingDraftPublicId: string;
+  paperQuestionPublicId: string;
+  questionSnapshot: Record<string, unknown>;
+  materialSnapshot: Record<string, unknown> | null;
+  score: number | string | null;
+  sortOrder: number;
+};
+
 export type OrganizationTrainingVersionLookupInput = {
   trainingVersionPublicId: string;
 };
@@ -262,6 +280,9 @@ export type OrganizationTrainingVersionGateway = {
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
+  listPaperQuestionSnapshotsForTrainingDrafts(
+    input: OrganizationTrainingPaperQuestionSnapshotLookupInput,
+  ): Promise<OrganizationTrainingPaperQuestionSnapshotRow[]>;
   findVersionQuestionTypeSummaryByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingVersionRow["question_type_summary"] | null>;
@@ -536,8 +557,9 @@ export function createOrganizationTrainingRepository(
         await gateway.listPublishedVersionsForEmployeeOrganization(
           normalizedInput,
         );
+      const versions = rows.map(mapOrganizationTrainingVersionRowToDto);
 
-      return rows.map(mapOrganizationTrainingVersionRowToDto);
+      return attachPaperSourceQuestionSnapshotsToVersions(versions, gateway);
     },
 
     async findPublishedVersionByPublicId(input) {
@@ -549,7 +571,16 @@ export function createOrganizationTrainingRepository(
 
       const row = await gateway.findPublishedVersionByPublicId(normalizedInput);
 
-      return row === null ? null : mapOrganizationTrainingVersionRowToDto(row);
+      if (row === null) {
+        return null;
+      }
+
+      const [version] = await attachPaperSourceQuestionSnapshotsToVersions(
+        [mapOrganizationTrainingVersionRowToDto(row)],
+        gateway,
+      );
+
+      return version ?? null;
     },
 
     async findEmployeeAnswerByVersion(input) {
@@ -768,6 +799,9 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async findPublishedVersionByPublicId(input) {
       return findPublishedVersionByPublicId(getDatabase(), input);
+    },
+    async listPaperQuestionSnapshotsForTrainingDrafts(input) {
+      return listPaperQuestionSnapshotsForTrainingDrafts(getDatabase(), input);
     },
     async findVersionQuestionTypeSummaryByPublicId(input) {
       return findVersionQuestionTypeSummaryByPublicId(getDatabase(), input);
@@ -1007,6 +1041,207 @@ function normalizeTextList(values: readonly string[]): string[] {
   return values
     .map((value) => normalizeRequiredText(value))
     .filter((value): value is string => value !== null);
+}
+
+async function attachPaperSourceQuestionSnapshotsToVersions(
+  versions: readonly OrganizationTrainingPublishedVersionDto[],
+  gateway: Pick<
+    OrganizationTrainingVersionGateway,
+    "listPaperQuestionSnapshotsForTrainingDrafts"
+  >,
+): Promise<OrganizationTrainingPublishedVersionDto[]> {
+  const draftPublicIds = [
+    ...new Set(
+      versions
+        .map((version) => normalizeRequiredText(version.draftPublicId))
+        .filter((draftPublicId): draftPublicId is string => {
+          return draftPublicId !== null;
+        }),
+    ),
+  ];
+
+  if (draftPublicIds.length === 0) {
+    return [...versions];
+  }
+
+  const snapshotRows =
+    await gateway.listPaperQuestionSnapshotsForTrainingDrafts({
+      draftPublicIds,
+    });
+  const snapshotRowsByDraftPublicId = snapshotRows.reduce(
+    (rowsByDraftPublicId, row) => {
+      const draftPublicId = normalizeRequiredText(row.trainingDraftPublicId);
+
+      if (draftPublicId === null) {
+        return rowsByDraftPublicId;
+      }
+
+      rowsByDraftPublicId.set(draftPublicId, [
+        ...(rowsByDraftPublicId.get(draftPublicId) ?? []),
+        row,
+      ]);
+
+      return rowsByDraftPublicId;
+    },
+    new Map<string, OrganizationTrainingPaperQuestionSnapshotRow[]>(),
+  );
+
+  return versions.map((version) => {
+    const rows = snapshotRowsByDraftPublicId.get(version.draftPublicId) ?? [];
+    const questions = mapPaperQuestionSnapshotRowsToDto(rows);
+
+    return questions.length === 0
+      ? version
+      : {
+          ...version,
+          questions,
+        };
+  });
+}
+
+function mapPaperQuestionSnapshotRowsToDto(
+  rows: readonly OrganizationTrainingPaperQuestionSnapshotRow[],
+): OrganizationTrainingQuestionSnapshotDto[] {
+  return [...rows]
+    .sort((left, right) => {
+      if (left.sortOrder !== right.sortOrder) {
+        return left.sortOrder - right.sortOrder;
+      }
+
+      return left.paperQuestionPublicId.localeCompare(
+        right.paperQuestionPublicId,
+      );
+    })
+    .map((row, index) => mapPaperQuestionSnapshotRowToDto(row, index + 1))
+    .filter(
+      (question): question is OrganizationTrainingQuestionSnapshotDto =>
+        question !== null,
+    );
+}
+
+function mapPaperQuestionSnapshotRowToDto(
+  row: OrganizationTrainingPaperQuestionSnapshotRow,
+  sequenceNumber: number,
+): OrganizationTrainingQuestionSnapshotDto | null {
+  const snapshot = asRecord(row.questionSnapshot);
+  const publicId =
+    normalizeRequiredText(row.paperQuestionPublicId) ??
+    getFirstStringField(snapshot, [
+      "paperQuestionPublicId",
+      "questionPublicId",
+    ]);
+  const questionType = getOrganizationTrainingQuestionType(
+    snapshot.questionType,
+  );
+  const stem = getFirstStringField(snapshot, [
+    "stemRichText",
+    "stem",
+    "questionStem",
+  ]);
+
+  if (publicId === null || questionType === null || stem === null) {
+    return null;
+  }
+
+  const materialSnapshot =
+    row.materialSnapshot === null ? null : asRecord(row.materialSnapshot);
+
+  return {
+    publicId,
+    sequenceNumber,
+    questionType,
+    materialTitle:
+      materialSnapshot === null
+        ? null
+        : getFirstStringField(materialSnapshot, ["title", "name"]),
+    materialContent:
+      materialSnapshot === null
+        ? null
+        : getFirstStringField(materialSnapshot, [
+            "contentRichText",
+            "content",
+            "bodyRichText",
+          ]),
+    stem,
+    options: mapQuestionOptionSnapshots(snapshot, publicId),
+    score: getNonNegativeNumber(row.score ?? snapshot.score),
+  };
+}
+
+function mapQuestionOptionSnapshots(
+  snapshot: Record<string, unknown>,
+  questionPublicId: string,
+): OrganizationTrainingQuestionOptionSnapshotDto[] {
+  const rawOptions = Array.isArray(snapshot.questionOptions)
+    ? snapshot.questionOptions
+    : Array.isArray(snapshot.options)
+      ? snapshot.options
+      : [];
+
+  return rawOptions
+    .filter((option): option is Record<string, unknown> => isRecord(option))
+    .map((option, index) => {
+      const label =
+        getFirstStringField(option, ["label"]) ??
+        String.fromCharCode("A".charCodeAt(0) + index);
+      const content =
+        getFirstStringField(option, ["contentRichText", "content", "text"]) ??
+        label;
+      const publicId =
+        getFirstStringField(option, ["publicId"]) ??
+        `${questionPublicId}_option_${label}`;
+
+      return {
+        publicId,
+        label,
+        content,
+      };
+    });
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return isRecord(value) ? value : {};
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getFirstStringField(
+  value: Record<string, unknown>,
+  keys: readonly string[],
+): string | null {
+  for (const key of keys) {
+    const field = value[key];
+
+    if (typeof field === "string" && field.trim().length > 0) {
+      return field;
+    }
+  }
+
+  return null;
+}
+
+function getOrganizationTrainingQuestionType(
+  value: unknown,
+): OrganizationTrainingQuestionSnapshotDto["questionType"] | null {
+  return typeof value === "string" &&
+    (organizationTrainingQuestionTypeValues as readonly string[]).includes(
+      value,
+    )
+    ? (value as OrganizationTrainingQuestionSnapshotDto["questionType"])
+    : null;
+}
+
+function getNonNegativeNumber(value: unknown): number {
+  const numberValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : 0;
+
+  return Number.isFinite(numberValue) && numberValue >= 0 ? numberValue : 0;
 }
 
 function normalizeTrustedPersistenceLineageLookupInput(
@@ -2037,6 +2272,61 @@ async function findPublishedVersionByPublicId(
     .limit(1);
 
   return (row as OrganizationTrainingVersionRow | undefined) ?? null;
+}
+
+async function listPaperQuestionSnapshotsForTrainingDrafts(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingPaperQuestionSnapshotLookupInput,
+): Promise<OrganizationTrainingPaperQuestionSnapshotRow[]> {
+  const draftPublicIds = [...new Set(normalizeTextList(input.draftPublicIds))];
+
+  if (draftPublicIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select({
+      training_draft_public_id:
+        organizationTrainingSourceContext.organization_training_draft_public_id,
+      paper_question_public_id: paperQuestion.public_id,
+      question_snapshot: paperQuestion.question_snapshot,
+      material_snapshot: paperQuestion.material_snapshot,
+      score: paperQuestion.score,
+      sort_order: paperQuestion.sort_order,
+    })
+    .from(organizationTrainingSourceContext)
+    .innerJoin(
+      paper,
+      eq(organizationTrainingSourceContext.source_public_id, paper.public_id),
+    )
+    .innerJoin(paperQuestion, eq(paperQuestion.paper_id, paper.id))
+    .where(
+      and(
+        inArray(
+          organizationTrainingSourceContext.organization_training_draft_public_id,
+          draftPublicIds,
+        ),
+        eq(organizationTrainingSourceContext.source_type, "paper"),
+        eq(paper.paper_status, "published"),
+      ),
+    )
+    .orderBy(
+      asc(
+        organizationTrainingSourceContext.organization_training_draft_public_id,
+      ),
+      asc(paperQuestion.sort_order),
+      asc(paperQuestion.public_id),
+    );
+
+  return rows.map((row) => ({
+    trainingDraftPublicId: row.training_draft_public_id,
+    paperQuestionPublicId: row.paper_question_public_id,
+    questionSnapshot: asRecord(row.question_snapshot),
+    materialSnapshot:
+      row.material_snapshot === null ? null : asRecord(row.material_snapshot),
+    score: row.score,
+    sortOrder: row.sort_order,
+  }));
 }
 
 async function findVersionQuestionTypeSummaryByPublicId(

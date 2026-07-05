@@ -70,6 +70,19 @@ type EmployeeAnswerPersistenceLineage = {
   totalScore: number;
 };
 
+type PaperQuestionSnapshotLookupInput = {
+  draftPublicIds: readonly string[];
+};
+
+type PaperQuestionSnapshotRow = {
+  trainingDraftPublicId: string;
+  paperQuestionPublicId: string;
+  questionSnapshot: Record<string, unknown>;
+  materialSnapshot: Record<string, unknown> | null;
+  score: number | string | null;
+  sortOrder: number;
+};
+
 type EmployeeAnswerDraftUpsertInput = {
   publicId: string;
   organizationTrainingVersionId: number;
@@ -452,6 +465,7 @@ function createGateway(
     manualDraftInsertResult?: "row" | "null";
     sourceContextInsertResult?: "rows" | "empty";
     takedownUpdateResult?: "row" | "null";
+    paperQuestionSnapshotRows?: PaperQuestionSnapshotRow[];
   } = {},
 ) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
@@ -465,6 +479,8 @@ function createGateway(
     [];
   let versionLookupInputs: OrganizationTrainingVersionLookupInput[] = [];
   let employeeAnswerLookupInputs: OrganizationTrainingEmployeeAnswerLookupInput[] =
+    [];
+  let paperQuestionSnapshotLookupInputs: PaperQuestionSnapshotLookupInput[] =
     [];
   const findLatestVersionNumberByDraftPublicId = vi.fn(
     async () => options.latestVersionNumber ?? null,
@@ -504,6 +520,16 @@ function createGateway(
       return createVersionRow({
         public_id: input.trainingVersionPublicId,
       });
+    },
+  );
+  const listPaperQuestionSnapshotsForTrainingDrafts = vi.fn(
+    async (input: PaperQuestionSnapshotLookupInput) => {
+      paperQuestionSnapshotLookupInputs = [
+        ...paperQuestionSnapshotLookupInputs,
+        input,
+      ];
+
+      return options.paperQuestionSnapshotRows ?? [];
     },
   );
   const findEmployeeAnswerByVersionPublicId = vi.fn(
@@ -734,6 +760,7 @@ function createGateway(
     findDraftPersistenceLineageByPublicIds,
     listPublishedVersionsForEmployeeOrganization,
     findPublishedVersionByPublicId,
+    listPaperQuestionSnapshotsForTrainingDrafts,
     findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
     insertManualDraft,
@@ -753,6 +780,7 @@ function createGateway(
     findDraftPersistenceLineageByPublicIds,
     listPublishedVersionsForEmployeeOrganization,
     findPublishedVersionByPublicId,
+    listPaperQuestionSnapshotsForTrainingDrafts,
     findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
     insertManualDraft,
@@ -769,6 +797,8 @@ function createGateway(
     getEmployeeVisibleVersionListInputs: () => employeeVisibleVersionListInputs,
     getVersionLookupInputs: () => versionLookupInputs,
     getEmployeeAnswerLookupInputs: () => employeeAnswerLookupInputs,
+    getPaperQuestionSnapshotLookupInputs: () =>
+      paperQuestionSnapshotLookupInputs,
   };
 }
 
@@ -845,6 +875,39 @@ function createEmployeeAnswerRow(
     },
     created_at: new Date("2026-06-16T09:00:00.000Z"),
     updated_at: new Date("2026-06-16T09:05:00.000Z"),
+    ...overrides,
+  };
+}
+
+function createPaperQuestionSnapshotRow(
+  overrides: Partial<PaperQuestionSnapshotRow> = {},
+): PaperQuestionSnapshotRow {
+  return {
+    trainingDraftPublicId: "training_draft_public_123",
+    paperQuestionPublicId: "paper_question_public_123",
+    questionSnapshot: {
+      questionType: "single_choice",
+      stemRichText: "<p>Question stem</p>",
+      questionOptions: [
+        {
+          publicId: "question_option_public_A",
+          label: "A",
+          contentRichText: "<p>Option A</p>",
+        },
+        {
+          publicId: "question_option_public_B",
+          label: "B",
+          contentRichText: "<p>Option B</p>",
+        },
+      ],
+      standardAnswerLabels: ["A"],
+    },
+    materialSnapshot: {
+      title: "Training material",
+      contentRichText: "<p>Training material body</p>",
+    },
+    score: "2",
+    sortOrder: 1,
     ...overrides,
   };
 }
@@ -1613,6 +1676,61 @@ describe("organization training repository", () => {
       submittedAt: "2026-06-16T09:05:00.000Z",
       resultSummaryVisible: true,
     });
+  });
+
+  it("attaches paper-source question snapshots to employee visible versions by draft public id", async () => {
+    const {
+      gateway,
+      listPaperQuestionSnapshotsForTrainingDrafts,
+      getPaperQuestionSnapshotLookupInputs,
+    } = createGateway({
+      paperQuestionSnapshotRows: [createPaperQuestionSnapshotRow()],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const versions = await repository.listEmployeeVisibleVersions({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+    const version = await repository.findPublishedVersionByPublicId({
+      trainingVersionPublicId: "training_version_public_123",
+    });
+
+    const expectedQuestions = [
+      {
+        publicId: "paper_question_public_123",
+        sequenceNumber: 1,
+        questionType: "single_choice",
+        materialTitle: "Training material",
+        materialContent: "<p>Training material body</p>",
+        stem: "<p>Question stem</p>",
+        options: [
+          {
+            publicId: "question_option_public_A",
+            label: "A",
+            content: "<p>Option A</p>",
+          },
+          {
+            publicId: "question_option_public_B",
+            label: "B",
+            content: "<p>Option B</p>",
+          },
+        ],
+        score: 2,
+      },
+    ];
+
+    expect(versions[0]?.questions).toEqual(expectedQuestions);
+    expect(version?.questions).toEqual(expectedQuestions);
+    expect(listPaperQuestionSnapshotsForTrainingDrafts).toHaveBeenCalledTimes(
+      2,
+    );
+    expect(getPaperQuestionSnapshotLookupInputs()).toEqual([
+      { draftPublicIds: ["training_draft_public_123"] },
+      { draftPublicIds: ["training_draft_public_123"] },
+    ]);
+    expect(JSON.stringify(versions)).not.toContain('"id"');
+    expect(JSON.stringify(version)).not.toContain('"id"');
   });
 
   it("passes employee visible organization scope to the visible version gateway", async () => {
