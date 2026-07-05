@@ -297,7 +297,7 @@ function createPersonalRouteIntegratedInstruction(
       requestContext.taskType === "ai_question_generation"
         ? "个人训练 AI出题"
         : "个人训练 AI组卷",
-    draftInstruction: "不要引用真实题目全文；输出可读的要点或小练习草稿。",
+    draftInstruction: "不要引用资料原文；输出可训练使用的结构化题目草稿。",
     groundingContext,
   });
 }

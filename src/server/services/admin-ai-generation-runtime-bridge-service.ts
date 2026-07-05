@@ -321,7 +321,8 @@ function createAdminRouteIntegratedInstruction(
     sceneLabel: `${workspaceLabel} ${
       requestContext.generationKind === "question" ? "AI出题" : "AI组卷"
     }`,
-    draftInstruction: "不要写入正式题库；输出可读的草稿摘要和关键检查点。",
+    draftInstruction:
+      "不要写入正式题库；输出可评审的结构化题目草稿和关键检查点。",
     groundingContext,
   });
 }

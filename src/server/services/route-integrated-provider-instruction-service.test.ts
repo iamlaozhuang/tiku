@@ -57,8 +57,16 @@ describe("route-integrated Provider instruction service", () => {
       expect(readOutputContractLine(instruction)).toContain(
         "不要输出 Markdown",
       );
-      expect(readOutputContractLine(instruction)).toContain("不得输出完整题干");
-      expect(readOutputContractLine(instruction)).toContain("选项、答案或解析");
+      expect(readOutputContractLine(instruction)).toContain("questionStem");
+      expect(readOutputContractLine(instruction)).toContain("questionOptions");
+      expect(readOutputContractLine(instruction)).toContain("standardAnswer");
+      expect(readOutputContractLine(instruction)).toContain("analysis");
+      expect(readOutputContractLine(instruction)).not.toContain(
+        "redactedDraftSummary",
+      );
+      expect(readOutputContractLine(instruction)).not.toContain(
+        "不得输出完整题干",
+      );
       expect(readOutputContractLine(instruction)).toContain(
         `${questionCount} 条`,
       );

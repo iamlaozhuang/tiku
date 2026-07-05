@@ -932,6 +932,242 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("providerPayload");
   });
 
+  it("renders authorized admin AI question drafts before governance details", async () => {
+    globalThis.localStorage?.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token",
+    );
+    const blockedResponse = createLocalContractResponse({
+      workspace: "content",
+      generationKind: "question",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "生成草稿已创建，待评审查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 10,
+              actualQuestionCount: 10,
+              draftCount: 10,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  knowledgeNodeLabels: ["synthetic knowledge node"],
+                  questionStem: "synthetic visible admin question stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic visible option",
+                    },
+                  ],
+                  standardAnswer: "synthetic visible answer",
+                  analysis: "synthetic visible analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(providerVisibleResponse);
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("content"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "admin-visible-generated-content",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent("生成题目草稿");
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible admin question stem",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible option",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible answer",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible analysis",
+    );
+    expect(
+      visibleGeneratedContent.compareDocumentPosition(
+        screen.getByTestId("admin-ai-generation-task-history"),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("renders organization advanced admin AI question drafts on the same structured surface", async () => {
+    const blockedResponse = createLocalContractResponse({
+      workspace: "organization",
+      generationKind: "question",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "生成草稿已创建，待评审查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 10,
+              actualQuestionCount: 10,
+              draftCount: 10,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  questionStem: "synthetic visible organization question stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic visible organization option",
+                    },
+                  ],
+                  standardAnswer: "synthetic visible organization answer",
+                  analysis: "synthetic visible organization analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(providerVisibleResponse);
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("organization"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "admin-visible-generated-content",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent("生成题目草稿");
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization question stem",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization option",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization answer",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization analysis",
+    );
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
   it("submits organization advanced admin local contract requests to the organization API", async () => {
     const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
       if (String(url) === "/api/v1/sessions") {

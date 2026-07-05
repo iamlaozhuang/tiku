@@ -5,6 +5,8 @@ import type {
   AiGenerationRouteIntegratedProviderFailureCategory,
   AiGenerationRouteIntegratedProviderLimits,
   AiGenerationRouteIntegratedProviderMetadata,
+  AiGenerationRouteIntegratedQuestionDraftSummary,
+  AiGenerationRouteIntegratedQuestionOptionDraft,
   AiGenerationRouteIntegratedStructuredPreview,
   AiGenerationRouteIntegratedStructuredPreviewOptions,
   AiGenerationRouteIntegratedProviderUsageSummary,
@@ -380,9 +382,53 @@ function createQuestionSetStructuredPreview(
           "knowledge_node",
           "knowledge_node_ids",
         ]),
+        ...readProductVisibleQuestionDraftFields(questionDraftObject),
         reviewStatus: "draft_review_required",
-      };
+      } satisfies AiGenerationRouteIntegratedQuestionDraftSummary;
     }),
+  };
+}
+
+function readProductVisibleQuestionDraftFields(
+  questionDraftObject: Record<string, unknown>,
+): Partial<AiGenerationRouteIntegratedQuestionDraftSummary> {
+  const knowledgeNodeLabels = readStringArray(questionDraftObject, [
+    "knowledgeNodeLabels",
+    "knowledgeNodes",
+    "knowledge_node_labels",
+    "knowledge_node",
+  ]);
+  const questionStem = readVisibleDraftText(questionDraftObject, [
+    "questionStem",
+    "question_stem",
+    "stem",
+    "title",
+  ]);
+  const questionOptions = readQuestionOptionDrafts(questionDraftObject, [
+    "questionOptions",
+    "question_options",
+    "options",
+    "choices",
+  ]);
+  const standardAnswer = readVisibleDraftText(questionDraftObject, [
+    "standardAnswer",
+    "standard_answer",
+    "answer",
+    "correctAnswer",
+    "correct_answer",
+  ]);
+  const analysis = readVisibleDraftText(questionDraftObject, [
+    "analysis",
+    "explanation",
+    "解析",
+  ]);
+
+  return {
+    ...(knowledgeNodeLabels.length > 0 ? { knowledgeNodeLabels } : {}),
+    ...(questionStem !== null ? { questionStem } : {}),
+    ...(questionOptions.length > 0 ? { questionOptions } : {}),
+    ...(standardAnswer !== null ? { standardAnswer } : {}),
+    ...(analysis !== null ? { analysis } : {}),
   };
 }
 
@@ -688,6 +734,132 @@ function readSafeLabel(
   }
 
   return null;
+}
+
+function readVisibleDraftText(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): string | null {
+  for (const key of keys) {
+    const value = source[key];
+
+    if (typeof value !== "string") {
+      continue;
+    }
+
+    const normalizedValue = value.trim();
+
+    if (normalizedValue.length > 0 && normalizedValue.length <= 1200) {
+      return normalizedValue;
+    }
+  }
+
+  return null;
+}
+
+function readStringArray(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): string[] {
+  for (const key of keys) {
+    const value = source[key];
+
+    if (!Array.isArray(value)) {
+      continue;
+    }
+
+    const normalizedValues = value
+      .map((item) =>
+        typeof item === "string"
+          ? item.trim()
+          : isRecord(item)
+            ? readVisibleDraftText(item, ["label", "name", "title", "text"])
+            : null,
+      )
+      .filter(
+        (item): item is string =>
+          item !== null && item.length > 0 && item.length <= 120,
+      );
+
+    if (normalizedValues.length > 0) {
+      return normalizedValues.slice(0, 12);
+    }
+  }
+
+  return [];
+}
+
+function readQuestionOptionDrafts(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+): AiGenerationRouteIntegratedQuestionOptionDraft[] {
+  for (const key of keys) {
+    const value = source[key];
+
+    if (!Array.isArray(value)) {
+      continue;
+    }
+
+    const questionOptions = value
+      .map((option, index) => normalizeQuestionOptionDraft(option, index))
+      .filter(
+        (option): option is AiGenerationRouteIntegratedQuestionOptionDraft =>
+          option !== null,
+      );
+
+    if (questionOptions.length > 0) {
+      return questionOptions.slice(0, 8);
+    }
+  }
+
+  return [];
+}
+
+function normalizeQuestionOptionDraft(
+  option: unknown,
+  index: number,
+): AiGenerationRouteIntegratedQuestionOptionDraft | null {
+  if (typeof option === "string") {
+    const optionText = option.trim();
+
+    return optionText.length > 0 && optionText.length <= 600
+      ? {
+          optionLabel: String.fromCharCode(65 + index),
+          optionText,
+        }
+      : null;
+  }
+
+  if (!isRecord(option)) {
+    return null;
+  }
+
+  const optionText = readVisibleDraftText(option, [
+    "optionText",
+    "option_text",
+    "text",
+    "content",
+    "value",
+  ]);
+
+  if (optionText === null) {
+    return null;
+  }
+
+  return {
+    optionLabel: readSafeLabel(option, [
+      "optionLabel",
+      "option_label",
+      "label",
+      "key",
+    ]),
+    optionText,
+    ...(typeof option.isCorrect === "boolean"
+      ? { isCorrect: option.isCorrect }
+      : typeof option.is_correct === "boolean"
+        ? { isCorrect: option.is_correct }
+        : {}),
+  };
 }
 
 function readCollectionCount(

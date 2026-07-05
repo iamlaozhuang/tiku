@@ -1576,6 +1576,16 @@ describe("StudentPersonalAiGenerationPage", () => {
                   questionType: "single_choice",
                   difficulty: "medium",
                   knowledgeNodeCount: 1,
+                  knowledgeNodeLabels: ["synthetic knowledge node"],
+                  questionStem: "synthetic visible learner question stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic visible learner option",
+                    },
+                  ],
+                  standardAnswer: "synthetic visible learner answer",
+                  analysis: "synthetic visible learner analysis",
                   reviewStatus: "draft_review_required",
                 },
               ],
@@ -1598,16 +1608,194 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(
       await screen.findByTestId("student-visible-generated-content"),
-    ).toHaveTextContent("学生端本次生成内容：先复习知识点，再完成两道自练题。");
+    ).toHaveTextContent("生成题目草稿");
     expect(
       screen.getByTestId("student-visible-generated-content"),
     ).toHaveTextContent("结构化预览");
     expect(
       screen.getByTestId("student-visible-generated-content"),
     ).toHaveTextContent("草稿 10/10");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("生成题目草稿");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible learner question stem");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible learner option");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible learner answer");
+    expect(
+      screen.getByTestId("student-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible learner analysis");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("renders organization employee AI question drafts from org authorization context", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const visibleResponse = {
+      code: 0,
+      message: "ok",
+      data: {
+        ...localExperienceResponse.data,
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          bridgeMode: "controlled_runner",
+          runnerMode: "route_integrated_provider_runner",
+          explicitLocalSwitchPresent: true,
+          realProviderExecutionApproved: true,
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          providerExecutionSummary: {
+            requestCount: 1,
+            resultStatus: "pass",
+            failureCategory: null,
+            durationMs: 42,
+            usageSummary: {
+              inputTokens: 12,
+              outputTokens: 24,
+              totalTokens: 36,
+            },
+            providerErrorSummary: null,
+            redactionStatus: "redacted",
+          },
+          visibleGeneratedContent: {
+            content: "生成草稿已创建，待训练页查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 10,
+              actualQuestionCount: 10,
+              draftCount: 10,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  questionStem: "synthetic visible employee question stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic visible employee option",
+                    },
+                  ],
+                  standardAnswer: "synthetic visible employee answer",
+                  analysis: "synthetic visible employee analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          blockedReasons: [],
+        },
+      },
+    };
+    const historyResponses = [
+      emptyServerHistoryResponse,
+      emptyServerHistoryResponse,
+    ];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/sessions") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-123",
+                organizationPublicId: "organization-public-123",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-123",
+              }),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () =>
+                historyResponses.shift() ?? emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init?.method).toBe("POST");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => visibleResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "student-visible-generated-content",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent("生成题目草稿");
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee question stem",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee option",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee answer",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee analysis",
+    );
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
   });
 
   it("renders a redacted history error state when the post-submit server refresh fails", async () => {

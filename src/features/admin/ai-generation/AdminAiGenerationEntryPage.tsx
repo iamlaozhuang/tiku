@@ -754,6 +754,9 @@ function AdminAiGenerationVisibleGeneratedContent({
   const visibleGeneratedContentText = resolveAdminAiGenerationBusinessPreview(
     visibleGeneratedContent.content,
   );
+  const visibleQuestionDrafts = getAdminVisibleQuestionDrafts(
+    visibleGeneratedContent.structuredPreview,
+  );
 
   return (
     <section
@@ -764,22 +767,150 @@ function AdminAiGenerationVisibleGeneratedContent({
         <div>
           <p className="text-brand-primary text-xs font-medium">本次生成草稿</p>
           <h3 className="text-text-primary mt-1 text-sm font-semibold">
-            临时展示内容
+            {visibleQuestionDrafts.length > 0 ? "生成题目草稿" : "临时展示内容"}
           </h3>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
           待评审草稿
         </span>
       </div>
-      <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
-        {visibleGeneratedContentText}
-      </p>
+      {visibleQuestionDrafts.length > 0 ? (
+        <AdminQuestionDraftList questionDrafts={visibleQuestionDrafts} />
+      ) : (
+        <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
+          {visibleGeneratedContentText}
+        </p>
+      )}
       {visibleGeneratedContent.structuredPreview ? (
         <StructuredPreviewSummary
           structuredPreview={visibleGeneratedContent.structuredPreview}
         />
       ) : null}
     </section>
+  );
+}
+
+type AdminVisibleGeneratedContentDto = NonNullable<
+  AdminAiGenerationLocalContractDto["runtimeBridge"]["visibleGeneratedContent"]
+>;
+
+type AdminQuestionDraftSummary = Extract<
+  NonNullable<AdminVisibleGeneratedContentDto["structuredPreview"]>,
+  { kind: "question_set"; parseStatus: "parsed" }
+>["draftSummaries"][number];
+
+function getAdminVisibleQuestionDrafts(
+  structuredPreview: AdminVisibleGeneratedContentDto["structuredPreview"],
+): AdminQuestionDraftSummary[] {
+  if (
+    structuredPreview?.kind !== "question_set" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    return [];
+  }
+
+  return structuredPreview.draftSummaries.filter(hasVisibleQuestionDraftBody);
+}
+
+function hasVisibleQuestionDraftBody(
+  questionDraft: AdminQuestionDraftSummary,
+): boolean {
+  return Boolean(
+    questionDraft.questionStem ||
+    questionDraft.questionOptions?.length ||
+    questionDraft.standardAnswer ||
+    questionDraft.analysis,
+  );
+}
+
+function AdminQuestionDraftList({
+  questionDrafts,
+}: {
+  questionDrafts: AdminQuestionDraftSummary[];
+}) {
+  return (
+    <div className="mt-3 space-y-3" data-testid="admin-ai-question-drafts">
+      {questionDrafts.map((questionDraft) => (
+        <section
+          className="border-border bg-muted/40 rounded-md border p-3"
+          data-testid="admin-ai-question-draft-card"
+          key={questionDraft.draftNumber}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <h4 className="text-text-primary text-sm font-semibold">
+              题目 {questionDraft.draftNumber}
+            </h4>
+            <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+              {[questionDraft.questionType, questionDraft.difficulty]
+                .filter(Boolean)
+                .join(" / ") || "待评审"}
+            </span>
+          </div>
+          <QuestionDraftField label="题干" value={questionDraft.questionStem} />
+          {questionDraft.questionOptions &&
+          questionDraft.questionOptions.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-text-secondary text-xs font-medium">选项</p>
+              <ol className="mt-2 space-y-2">
+                {questionDraft.questionOptions.map((option, index) => (
+                  <li
+                    className="text-text-primary bg-background rounded-md px-2 py-2 text-sm leading-6"
+                    key={`${option.optionLabel ?? index}-${option.optionText}`}
+                  >
+                    <span className="text-brand-primary mr-2 font-medium">
+                      {option.optionLabel ?? String.fromCharCode(65 + index)}
+                    </span>
+                    {option.optionText}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+          <QuestionDraftField
+            label="标准答案"
+            value={questionDraft.standardAnswer}
+          />
+          <QuestionDraftField label="解析" value={questionDraft.analysis} />
+          {questionDraft.knowledgeNodeLabels &&
+          questionDraft.knowledgeNodeLabels.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-text-secondary text-xs font-medium">知识点</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {questionDraft.knowledgeNodeLabels.map((knowledgeNodeLabel) => (
+                  <span
+                    className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
+                    key={knowledgeNodeLabel}
+                  >
+                    {knowledgeNodeLabel}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function QuestionDraftField({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string;
+}) {
+  if (!value) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3">
+      <p className="text-text-secondary text-xs font-medium">{label}</p>
+      <p className="text-text-primary bg-background mt-2 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+        {value}
+      </p>
+    </div>
   );
 }
 

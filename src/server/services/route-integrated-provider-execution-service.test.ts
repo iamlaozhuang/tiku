@@ -94,12 +94,19 @@ describe("shared route-integrated Provider execution primitives", () => {
     expect(createRouteIntegratedVisibleGeneratedContent(null)).toBeNull();
   });
 
-  it("builds a parsed question-set structured preview only from safe counts", () => {
+  it("builds a parsed question-set structured preview with product-visible draft fields", () => {
     const content = JSON.stringify({
       questions: Array.from({ length: 10 }, (_, index) => ({
         questionType: index % 2 === 0 ? "single_choice" : "judge",
         difficulty: "medium",
         knowledgeNodeLabels: ["redacted_knowledge_node"],
+        questionStem: `synthetic question stem ${index + 1}`,
+        questionOptions: [
+          { optionLabel: "A", optionText: "synthetic option A" },
+          { optionLabel: "B", optionText: "synthetic option B" },
+        ],
+        standardAnswer: "synthetic standard answer",
+        analysis: "synthetic analysis",
       })),
     });
 
@@ -130,6 +137,14 @@ describe("shared route-integrated Provider execution primitives", () => {
       questionType: "single_choice",
       difficulty: "medium",
       knowledgeNodeCount: 1,
+      knowledgeNodeLabels: ["redacted_knowledge_node"],
+      questionStem: "synthetic question stem 1",
+      questionOptions: [
+        { optionLabel: "A", optionText: "synthetic option A" },
+        { optionLabel: "B", optionText: "synthetic option B" },
+      ],
+      standardAnswer: "synthetic standard answer",
+      analysis: "synthetic analysis",
       reviewStatus: "draft_review_required",
     });
   });

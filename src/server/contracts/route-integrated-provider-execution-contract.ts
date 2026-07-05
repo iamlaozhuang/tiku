@@ -142,7 +142,18 @@ export type AiGenerationRouteIntegratedQuestionDraftSummary = {
   questionType: string | null;
   difficulty: string | null;
   knowledgeNodeCount: number | null;
+  knowledgeNodeLabels?: string[];
+  questionStem?: string;
+  questionOptions?: AiGenerationRouteIntegratedQuestionOptionDraft[];
+  standardAnswer?: string;
+  analysis?: string;
   reviewStatus: "draft_review_required";
+};
+
+export type AiGenerationRouteIntegratedQuestionOptionDraft = {
+  optionLabel: string | null;
+  optionText: string;
+  isCorrect?: boolean | null;
 };
 
 export type AiGenerationRouteIntegratedStructuredPreview =

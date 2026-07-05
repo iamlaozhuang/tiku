@@ -932,6 +932,10 @@ function StudentPersonalAiGenerationVisibleGeneratedContent({
     return null;
   }
 
+  const visibleQuestionDrafts = getStudentVisibleQuestionDrafts(
+    visibleGeneratedContent.structuredPreview,
+  );
+
   return (
     <section
       className="border-border bg-background mb-3 rounded-lg border p-3"
@@ -939,21 +943,157 @@ function StudentPersonalAiGenerationVisibleGeneratedContent({
     >
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-text-primary text-sm font-semibold">
-          本次生成内容
+          {visibleQuestionDrafts.length > 0 ? "生成题目草稿" : "本次生成内容"}
         </h3>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
           临时展示
         </span>
       </div>
-      <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
-        {visibleGeneratedContent.content}
-      </p>
+      {visibleQuestionDrafts.length > 0 ? (
+        <StudentQuestionDraftList questionDrafts={visibleQuestionDrafts} />
+      ) : (
+        <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
+          {visibleGeneratedContent.content}
+        </p>
+      )}
       {visibleGeneratedContent.structuredPreview ? (
         <StudentStructuredPreviewSummary
           structuredPreview={visibleGeneratedContent.structuredPreview}
         />
       ) : null}
     </section>
+  );
+}
+
+type StudentVisibleGeneratedContentDto = NonNullable<
+  PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["visibleGeneratedContent"]
+>;
+
+type StudentQuestionDraftSummary = Extract<
+  NonNullable<StudentVisibleGeneratedContentDto["structuredPreview"]>,
+  { kind: "question_set"; parseStatus: "parsed" }
+>["draftSummaries"][number];
+
+function getStudentVisibleQuestionDrafts(
+  structuredPreview: StudentVisibleGeneratedContentDto["structuredPreview"],
+): StudentQuestionDraftSummary[] {
+  if (
+    structuredPreview?.kind !== "question_set" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    return [];
+  }
+
+  return structuredPreview.draftSummaries.filter(
+    hasStudentVisibleQuestionDraftBody,
+  );
+}
+
+function hasStudentVisibleQuestionDraftBody(
+  questionDraft: StudentQuestionDraftSummary,
+): boolean {
+  return Boolean(
+    questionDraft.questionStem ||
+    questionDraft.questionOptions?.length ||
+    questionDraft.standardAnswer ||
+    questionDraft.analysis,
+  );
+}
+
+function StudentQuestionDraftList({
+  questionDrafts,
+}: {
+  questionDrafts: StudentQuestionDraftSummary[];
+}) {
+  return (
+    <div className="mt-3 space-y-3" data-testid="student-ai-question-drafts">
+      {questionDrafts.map((questionDraft) => (
+        <section
+          className="border-border bg-muted/40 rounded-md border p-3"
+          data-testid="student-ai-question-draft-card"
+          key={questionDraft.draftNumber}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <h4 className="text-text-primary text-sm font-semibold">
+              题目 {questionDraft.draftNumber}
+            </h4>
+            <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+              {[questionDraft.questionType, questionDraft.difficulty]
+                .filter(Boolean)
+                .join(" / ") || "练习草稿"}
+            </span>
+          </div>
+          <StudentQuestionDraftField
+            label="题干"
+            value={questionDraft.questionStem}
+          />
+          {questionDraft.questionOptions &&
+          questionDraft.questionOptions.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-text-secondary text-xs font-medium">选项</p>
+              <ol className="mt-2 space-y-2">
+                {questionDraft.questionOptions.map((option, index) => (
+                  <li
+                    className="text-text-primary bg-background rounded-md px-2 py-2 text-sm leading-6"
+                    key={`${option.optionLabel ?? index}-${option.optionText}`}
+                  >
+                    <span className="text-brand-primary mr-2 font-medium">
+                      {option.optionLabel ?? String.fromCharCode(65 + index)}
+                    </span>
+                    {option.optionText}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+          <StudentQuestionDraftField
+            label="标准答案"
+            value={questionDraft.standardAnswer}
+          />
+          <StudentQuestionDraftField
+            label="解析"
+            value={questionDraft.analysis}
+          />
+          {questionDraft.knowledgeNodeLabels &&
+          questionDraft.knowledgeNodeLabels.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-text-secondary text-xs font-medium">知识点</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {questionDraft.knowledgeNodeLabels.map((knowledgeNodeLabel) => (
+                  <span
+                    className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
+                    key={knowledgeNodeLabel}
+                  >
+                    {knowledgeNodeLabel}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function StudentQuestionDraftField({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string;
+}) {
+  if (!value) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3">
+      <p className="text-text-secondary text-xs font-medium">{label}</p>
+      <p className="text-text-primary bg-background mt-2 rounded-md px-2 py-2 text-sm leading-6 whitespace-pre-wrap">
+        {value}
+      </p>
+    </div>
   );
 }
 
