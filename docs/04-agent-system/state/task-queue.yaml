@@ -18238,6 +18238,187 @@ tasks:
       finalPassClaimed: false
       productionUsabilityClaimed: false
 
+  - id: full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
+    title: Full-chain Scenario 5 advanced org package rerun after login readiness repair
+    phase: full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
+    sourceStory: scenario_5_affected_node_rerun_after_login_hydration_readiness_repair
+    dependencies:
+      - full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+      - full-chain-login-input-state-binding-repair-2026-07-04
+    status: closed
+    result: pass_affected_node_rerun_after_login_readiness_repair
+    taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-04T18:25:18-07:00"
+    completedAt: "2026-07-04T18:39:43-07:00"
+    targetClosureItem: Rerun Scenario 5 from the browser login and advanced organization surface node after login readiness repair, without repeating employee import.
+    behaviorBoundary: local_app_browser_e2e_private_credentials_in_memory_product_flow_selector_scoped_db_aggregate_only_no_employee_import_rerun_no_provider_no_staging_prod_no_cost_no_schema_migration_seed_no_dependency_no_product_source_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/01-authorization-context.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package.md
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-login-input-state-binding-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
+      - src/app/(auth)/login/page.tsx
+      - src/app/api/v1/sessions/route.ts
+      - src/server/auth/session-route.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/admin-workspace-role-guard-service.ts
+      - src/features/admin/organization-workspace/admin-organization-workspace-access.ts
+      - src/features/admin/content-admin-runtime.tsx
+      - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+      - src/db/schema/auth.ts
+      - src/db/schema/organization-training.ts
+      - C:/Users/jzzhu/.codex/skills/playwright/SKILL.md
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    runtimeScope:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      actorSelectorLabel: fc_org_advanced_admin_created_by_ops
+      negativeBoundarySelectorLabel: fc_org_standard_admin_created_by_ops
+      scenarioSelectorLabel: fc_scenario_5_advanced_org_package
+      restartNode: browser_login_and_advanced_organization_surface
+      employeeImportRerunAllowed: false
+      productMutationAllowed: browser_login_session_only
+      browserRuntimeAllowed: true
+      directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+      browserLoginReadinessRule: hydrated_interactable_required_before_private_credential_fill
+      evidenceLanes:
+        - api_session
+        - browser_login_form_state
+        - permission_surface_boundary
+    blockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - product_source_change
+      - employee_import_rerun_or_fixture_expansion
+      - fake_data_or_fixture_expansion_in_repository
+      - redaction_violation
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted Scenario 5 affected-node private selector and DB target preflight>"
+      - powershell.exe -NoProfile -Command "<local app startup with redacted runtime env>"
+      - node - <redacted Scenario 5 hydrated browser login and organization surface rerun>
+      - docker compose exec -T tiku-postgres psql <redacted selector-scoped aggregate verification>
+      - npm.cmd exec -- prettier --write --ignore-unknown <scoped docs>
+      - npm.cmd exec -- prettier --check --ignore-unknown <scoped docs>
+      - git diff --check
+      - git diff --name-only -- <blocked paths>
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      rootCause: hydration_readiness_timing_not_service_start_or_db_target
+      privateSelectorPreflight: pass
+      runtimeDbTargetCheck: pass
+      apiSessionLane: pass
+      browserLoginFormStateLane: pass
+      permissionSurfaceBoundaryLane: pass
+      selectorScopedAggregateDbVerification: pass
+      employeeImportRerunExecuted: false
+      productSourceChanged: false
+      productDbMutationExecuted: browser_login_session_only
+      advancedOrgAuthActiveCount: 5
+      orgAdvancedAdminActiveCount: 1
+      adminOrganizationAdvancedBindingCount: 1
+      advancedEmployeeImportedCount: 6
+      advancedEmployeeRejectedCount: 0
+      advancedOrgAdminAllowedSurfaceCount: 3
+      advancedOrgAdminDeniedGlobalCount: 2
+      standardOrgAdminDeniedAdvancedCount: 2
+      localRuntimeCleanup: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      schemaMigrationSeedChanged: false
+      providerCallOrConfigurationExecuted: false
+      dependencyOrLockfileChanged: false
+      privateValueOutput: false
+      stagingProdCostReleaseExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
     title: Full-chain Scenario 2 content baseline rerun after knowledge baseline provisioning
     phase: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
