@@ -20759,6 +20759,180 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    title: Full-chain Scenario 6 personal contact private input provisioning
+    phase: full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    sourceStory: scenario_6_preflight_after_scenario_7_card_generation
+    dependencies:
+      - full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    status: closed
+    result: pass_private_input_provisioned_for_scenario_6_personal_contact_registration
+    taskKind: local_private_input_provisioning
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-04T19:42:24-07:00"
+    completedAt: "2026-07-04T19:45:54-07:00"
+    targetClosureItem: Provision only the missing private registration input for Scenario 6 selector fc_personal_contact_user_registered before browser registration/contact surface acceptance.
+    behaviorBoundary: local_private_input_mapping_only_no_repo_secret_values_no_dev_server_no_browser_no_e2e_no_product_source_or_test_change_no_schema_migration_seed_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_selector_labels_field_presence_counts_command_names_pass_fail_block_and_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/stories/epic-01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md
+      - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+      - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/evidence/phase-20-fix-ra-01-09-contact-config-runtime.md
+      - src/app/(auth)/register/page.tsx
+      - src/app/(auth)/login/page.tsx
+      - src/app/api/v1/users/route.ts
+      - src/server/auth/user-registration-route.ts
+      - src/server/services/user-registration-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/server/auth/session-cookie.ts
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/app/(student)/redeem-code/page.tsx
+      - src/app/api/v1/redeem-codes/redeem/route.ts
+      - src/server/services/student-authorization-redeem-runtime.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/lib/local-purchase-guidance-contact-config.ts
+      - src/server/services/contact-config-service.ts
+      - src/server/contracts/contact-config-contract.ts
+      - src/app/api/v1/contact-configs/route.ts
+      - src/features/admin/contact-config/AdminContactConfigPage.tsx
+      - tests/unit/student-register-ui.test.ts
+      - src/server/auth/user-registration-route.test.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - src/server/services/user-registration-service.test.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts
+      - tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    runtimeScope:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      targetSelectorLabel: fc_personal_contact_user_registered
+      futureScenarioSelectorLabel: fc_scenario_6_personal_registration_contact
+      privateInputWriteAllowed: true
+      repositoryPrivateValueOutputAllowed: false
+      browserRuntimeAllowed: false
+      devServerAllowed: false
+      directDbMutationAllowed: false
+    blockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - fake_data_or_fixture_expansion_in_repository
+      - redaction_violation
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted private selector shape preflight>"
+      - powershell.exe -NoProfile -Command "<private input provisioning script with redacted output>"
+      - powershell.exe -NoProfile -Command "<redacted private input field-presence verification>"
+      - powershell.exe -NoProfile -Command "<selector-scoped collision aggregate check with counts only>"
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      privateProvisioningExecuted: true
+      privateSelectorLabelPresent: true
+      privateSelectorSectionBeforeProvisioning: absent_expected
+      privateSelectorFieldsPresentAfterProvisioning: true
+      collisionAggregateCount: 0
+      candidateRetryCount: 0
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      privateValueOutput: false
+      browserRuntimeExecuted: false
+      devServerStarted: false
+      directDatabaseConnectionExecuted: false
+      dbMutationExecuted: false
+      productSourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      providerCallOrConfigurationExecuted: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+
   - id: full-chain-scenario-2-content-baseline-2026-07-04
     title: Full-chain Scenario 2 content baseline
     phase: full-chain-scenario-2-content-baseline-2026-07-04
