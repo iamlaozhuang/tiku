@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-updatedAt: "2026-07-04T17:34:00-07:00"
+currentPhase: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+updatedAt: "2026-07-04T17:56:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -26719,8 +26719,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 96e17fc19410996aceb1d77026c61c1310bbc36f
-  lastKnownOriginMasterSha: 96e17fc19410996aceb1d77026c61c1310bbc36f
+  lastKnownMasterSha: 29e8e55b14e1bf067965e502879bf6d0e3b86a0a
+  lastKnownOriginMasterSha: 29e8e55b14e1bf067965e502879bf6d0e3b86a0a
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
@@ -26860,47 +26860,66 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-  phase: full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-  status: closed
-  result: pass_harness_repair_contract_closed_after_test_contract_repair
-  taskKind: local_acceptance_harness_repair_rerun
+  id: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+  phase: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+  status: blocked
+  result: blocked_requires_source_repair_login_input_state_binding
+  taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-  plannedAt: "2026-07-04T17:34:00-07:00"
-  completedAt: "2026-07-04T17:39:00-07:00"
+  branch: codex/full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+  plannedAt: "2026-07-04T17:48:00-07:00"
+  completedAt: "2026-07-04T17:56:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   dependsOn:
-    - full-chain-scenario-5-employee-import-harness-repair-2026-07-04
-    - full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
+    - full-chain-scenario-5-advanced-org-package-2026-07-04
+    - full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair.md
+  privateAllowedFiles:
+    - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import-selector.json
+    - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import.csv
   readOnlyAllowedFiles:
     - AGENTS.md
     - docs/03-standards/code-taste-ten-commandments.md
     - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
     - docs/01-requirements/00-index.md
     - docs/01-requirements/advanced-edition/00-index.md
     - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
     - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
     - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package.md
     - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-harness-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-harness-repair.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-harness-repair-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-input-provisioning.md
+    - src/app/(auth)/login/page.tsx
+    - src/app/api/v1/sessions/route.ts
+    - src/app/api/v1/employees/import/route.ts
+    - src/app/api/v1/org-auths/route.ts
+    - src/app/api/v1/admin-accounts/route.ts
+    - src/server/auth/session-cookie.ts
     - src/server/services/admin-organization-org-auth-runtime.ts
-    - tests/unit/phase-20-ra-01-04-employee-import.test.ts
-    - src/server/validators/employee-account.ts
-    - src/server/validators/employee-account.test.ts
-    - src/server/services/employee-account-route.test.ts
+    - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+    - src/server/contracts/admin-user-org-auth-ops-contract.ts
+    - src/server/services/admin-flow-runtime.ts
+    - src/features/admin/organization-portal/AdminOrganizationPortalPage.tsx
+    - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+    - src/features/admin/organization-analytics/AdminOrganizationAnalyticsPage.tsx
+    - C:/Users/jzzhu/.codex/skills/playwright/SKILL.md
+    - C:/Users/jzzhu/.codex/plugins/cache/openai-bundled/browser/26.623.101652/skills/control-in-app-browser/SKILL.md
   blockedFiles:
     - AGENTS.md
     - package.json
@@ -26921,6 +26940,17 @@ currentTask:
     - .next/**
     - .runtime/**
     - .env*
+  runtimeScope:
+    targetDbLabel: tiku_full_chain_acceptance_20260704_001
+    actorSelectorLabel: fc_ops_admin_created_by_super_admin
+    scenarioSelectorLabel: fc_scenario_5_advanced_org_package
+    advancedOrgAdminSelectorLabel: fc_org_advanced_admin_created_by_ops
+    advancedEmployeeSelectorLabel: fc_org_advanced_employee_batch
+    restartNode: scenario_5_employee_import_node
+    productMutationAllowed: advanced_employee_import_only
+    preserveExistingAdvancedOrgAuthAndAdmin: true
+    browserRuntimeAllowed: true
+    directDbVerificationAllowed: selector_scoped_aggregate_counts_only
   closeoutPolicy:
     localCommit:
       approved: true
@@ -26936,46 +26966,88 @@ currentTask:
     cleanup:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-  repairScope:
-    sourceBlockedTaskId: full-chain-scenario-5-employee-import-harness-repair-2026-07-04
-    prerequisiteRepairTaskId: full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04
-    employeeImportRequestShape: csv_content_and_source_format
-    employeeImportAuthorizationColumns: forbidden
-    changedSourceTestFileCount: 0
-    productSourceChanged: false
-    nextRerunRestartNode: scenario_5_employee_import_node
+  blockedWithoutSeparateBoundedApproval:
+    - provider_call_or_provider_configuration_or_credential_read
+    - destructive_db_operation_or_unscoped_db_mutation
+    - dependency_package_lockfile_change
+    - staging_prod_deploy_payment_external_service
+    - pr_force_push
+    - release_readiness_or_final_pass
+    - cost_calibration_gate
+    - schema_migration_or_seed
+    - permission_weakening
+    - fake_data_or_fixture_expansion_in_repository
+    - redaction_violation
   validationCommands:
-    - npm.cmd run test:unit -- tests/unit/phase-20-ra-01-04-employee-import.test.ts src/server/validators/employee-account.test.ts
-    - npm.cmd run test:unit -- tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts
+    - powershell.exe -NoProfile -Command "<redacted Scenario 5 private metadata and DB target preflight>"
+    - powershell.exe -NoProfile -Command "<local app startup with redacted runtime env>"
+    - node - <redacted Scenario 5 employee import-node runtime rerun>
+    - docker compose exec -T tiku-postgres psql <redacted selector-scoped aggregate verification>
     - npm.cmd exec -- prettier --write --ignore-unknown <scoped docs>
     - npm.cmd exec -- prettier --check --ignore-unknown <scoped docs>
     - git diff --check
     - git diff --name-only -- <blocked paths>
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-5-employee-import-harness-repair-rerun-2026-07-04 -SkipRemoteAheadCheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04 -SkipRemoteAheadCheck
   validationSummary:
-    status: pass
+    status: blocked_requires_source_repair_login_input_state_binding
     taskPlanPrepared: true
-    focusedEmployeeImportUnitAfterRepair: pass
-    adjacentEmployeeAccountRuntimeUnit: pass
+    privateSelectorPreflight: pass
+    runtimeDbTargetCheck: pass
+    browserRuntimeExecuted: blocked
+    devServerStarted: pass
+    directDbConnectionExecuted: pass
+    directDbMutationExecuted: false
+    productDbMutationExecuted: advanced_employee_import_only
+    advancedOrgAuthActiveCount: 5
+    orgAdvancedAdminActiveCount: 1
+    adminOrganizationAdvancedBindingCount: 1
+    advancedEmployeeImportedCount: 6
+    advancedEmployeeRejectedCount: 0
+    advancedOrgAdminAllowedSurfaceCount: 0
+    advancedOrgAdminDeniedGlobalCount: 0
+    standardOrgAdminDeniedAdvancedCount: 0
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     gitDiffCheck: pass
     blockedPathDiffCheck: pass_no_output
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    moduleRunV2PrePushReadiness: pass_after_sha_checkpoint_reconciliation
     sourceTestChanged: false
-    productSourceChanged: false
-    browserRuntimeExecuted: false
-    devServerStarted: false
-    directDbConnectionExecuted: false
-    directDbMutationExecuted: false
-    productDbMutationExecuted: false
     schemaMigrationSeedChanged: false
     providerCallOrConfigurationExecuted: false
     dependencyOrLockfileChanged: false
     privateValueOutput: false
-    nextAction: validate_then_closeout_then_rerun_scenario_5_employee_import_node
+    stagingProdCostReleaseExecuted: false
+    localRuntimeCleanup: pass
+    sourceRepairRequired: true
+    nextRequiredTask: full-chain-login-input-state-binding-repair-2026-07-04
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+
+fullChainLoginInputStateBindingRepair20260704:
+  taskId: full-chain-login-input-state-binding-repair-2026-07-04
+  phase: full-chain-login-input-state-binding-repair-2026-07-04
+  status: pending
+  result: pending_source_repair_for_browser_login_submit_state
+  priority: p0
+  taskKind: source_repair
+  moduleRunVersion: 2
+  sourceBlockedTaskId: full-chain-scenario-5-advanced-org-package-rerun-after-employee-import-harness-repair-2026-07-04
+  branch: codex/full-chain-login-input-state-binding-repair-2026-07-04
+  approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  targetClosureItem: Repair login input state binding so browser/e2e login can enable submit with valid credentials.
+  behaviorBoundary: source_test_docs_only_no_auth_weakening_no_permission_bypass_no_schema_migration_seed_no_dependency_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+  nextRerunTask: full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
+  validationSummary:
+    status: pending
+    sourceRepairRequired: true
+    sourceTestRequired: true
+    browserLoginFocusedValidationRequired: true
+    providerCallOrConfigurationExecuted: false
+    schemaMigrationSeedChanged: false
+    dependencyOrLockfileChanged: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
