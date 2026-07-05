@@ -1088,7 +1088,10 @@ async function attachPaperSourceQuestionSnapshotsToVersions(
 
   return versions.map((version) => {
     const rows = snapshotRowsByDraftPublicId.get(version.draftPublicId) ?? [];
-    const questions = mapPaperQuestionSnapshotRowsToDto(rows);
+    const questions = mapPaperQuestionSnapshotRowsToDto(
+      rows,
+      version.questionCount,
+    );
 
     return questions.length === 0
       ? version
@@ -1101,7 +1104,12 @@ async function attachPaperSourceQuestionSnapshotsToVersions(
 
 function mapPaperQuestionSnapshotRowsToDto(
   rows: readonly OrganizationTrainingPaperQuestionSnapshotRow[],
+  maxQuestionCount: number,
 ): OrganizationTrainingQuestionSnapshotDto[] {
+  if (!Number.isInteger(maxQuestionCount) || maxQuestionCount < 1) {
+    return [];
+  }
+
   return [...rows]
     .sort((left, right) => {
       if (left.sortOrder !== right.sortOrder) {
@@ -1116,7 +1124,8 @@ function mapPaperQuestionSnapshotRowsToDto(
     .filter(
       (question): question is OrganizationTrainingQuestionSnapshotDto =>
         question !== null,
-    );
+    )
+    .slice(0, maxQuestionCount);
 }
 
 function mapPaperQuestionSnapshotRowToDto(

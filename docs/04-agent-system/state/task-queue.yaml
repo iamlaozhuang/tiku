@@ -398,6 +398,81 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
+    title: Full-chain Scenario 11 paper-source question count boundary repair
+    phase: full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
+    sourceStory: s11_preflight_blocked_paper_source_question_snapshot_candidates_exceed_training_question_count
+    dependencies:
+      - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05
+    status: closed
+    result: pass_paper_source_question_count_boundary_repair_validated_no_final_pass
+    taskKind: local_source_test_repair
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T07:00:00-07:00"
+    claimedAt: "2026-07-05T07:00:00-07:00"
+    materializedAt: "2026-07-05T07:00:00-07:00"
+    closedAt: "2026-07-05T07:10:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: pass_paper_source_question_count_boundary_repair_validated_no_final_pass
+      readGate: pass
+      taskPlanPrepared: true
+      tddRedTestObserved: pass
+      sourceRepair: pass
+      scopedUnitValidation: pass
+      lint: pass
+      typecheck: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      closeoutGates: pass
   - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05
     title: Full-chain Scenario 11 advanced employee affected-node rerun after question snapshot repair
     phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05

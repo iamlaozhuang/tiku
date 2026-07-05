@@ -1733,6 +1733,37 @@ describe("organization training repository", () => {
     expect(JSON.stringify(version)).not.toContain('"id"');
   });
 
+  it("caps paper-source question snapshots by the published training question count", async () => {
+    const { gateway } = createGateway({
+      paperQuestionSnapshotRows: [
+        createPaperQuestionSnapshotRow({
+          paperQuestionPublicId: "paper_question_public_001",
+          sortOrder: 1,
+        }),
+        createPaperQuestionSnapshotRow({
+          paperQuestionPublicId: "paper_question_public_002",
+          sortOrder: 2,
+        }),
+        createPaperQuestionSnapshotRow({
+          paperQuestionPublicId: "paper_question_public_003",
+          sortOrder: 3,
+        }),
+      ],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const versions = await repository.listEmployeeVisibleVersions({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+
+    expect(versions[0]?.questionCount).toBe(2);
+    expect(versions[0]?.questions).toHaveLength(2);
+    expect(
+      versions[0]?.questions?.map((question) => question.publicId),
+    ).toEqual(["paper_question_public_001", "paper_question_public_002"]);
+  });
+
   it("passes employee visible organization scope to the visible version gateway", async () => {
     const {
       getEmployeeVisibleVersionListInputs,
