@@ -107,9 +107,13 @@ affected browser login / advanced employee learning node without repeating emplo
 | first Module Run v2 pre-push readiness        | block  |
 | repository checkpoint alignment               | pass   |
 | final Module Run v2 pre-push readiness        | pass   |
+| closeout task status alignment                | pass   |
 | browser/runtime started                       | false  |
 | product DB write executed                     | false  |
 | product source/test/schema/dependency changed | false  |
+
+Closeout status note: task inventory status is `closed` with a blocked result because S11 stopped correctly at the
+preflight gate and completed closeout. The blocked result remains the required input for the next provisioning task.
 
 ## Non-Claims
 

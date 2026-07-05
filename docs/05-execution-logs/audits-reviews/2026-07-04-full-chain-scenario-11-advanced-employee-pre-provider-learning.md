@@ -40,6 +40,7 @@ Status: blocked with closeout pass
 | Closeout formatting/whitespace/blocked diff gates passed           | pass   |
 | Module Run v2 pre-commit hardening passed                          | pass   |
 | Module Run v2 pre-push readiness passed after checkpoint alignment | pass   |
+| Task inventory status uses closed-with-blocked-result closeout     | pass   |
 
 ## Stop-On-Fail Review
 
@@ -62,3 +63,6 @@ readiness/final Pass/production usability.
 Closeout note: the first pre-push readiness run blocked on stale repository checkpoint metadata. The task updated the
 accepted ancestor checkpoint to the current local `master`/`origin/master` commit and reran pre-push readiness
 successfully.
+
+Status alignment note: the task inventory is closed while preserving the blocked preflight result, so post-merge
+readiness can apply accepted-ancestor SHA semantics without erasing the required provisioning follow-up.

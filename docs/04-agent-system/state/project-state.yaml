@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
-updatedAt: "2026-07-05T02:38:00-07:00"
+updatedAt: "2026-07-05T02:50:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -27379,7 +27379,7 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
 currentTask:
   id: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
   phase: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
-  status: blocked
+  status: closed
   result: blocked_missing_assigned_published_enterprise_training_baseline_preflight
   priority: p0
   taskKind: local_acceptance_runtime_browser_advanced_employee_learning_pre_provider
@@ -27584,7 +27584,7 @@ currentTask:
 fullChainScenario11AdvancedEmployeePreProviderLearning20260704:
   taskId: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
   phase: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
-  status: blocked
+  status: closed
   result: blocked_missing_assigned_published_enterprise_training_baseline_preflight
   priority: p0
   taskKind: local_acceptance_runtime_browser_advanced_employee_learning_pre_provider

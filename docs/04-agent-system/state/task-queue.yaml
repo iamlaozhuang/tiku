@@ -405,7 +405,7 @@ tasks:
     dependencies:
       - full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
       - full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
-    status: blocked
+    status: closed
     result: blocked_missing_assigned_published_enterprise_training_baseline_preflight
     taskKind: local_acceptance_runtime_browser_advanced_employee_learning_pre_provider
     moduleRunVersion: 2
