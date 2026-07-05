@@ -179,7 +179,7 @@ fullChainScenario9EditionUpgradeRedeemRuntimeRepair20260704:
 fullChainScenario9AdvancedPersonalRerunAfterRedeemRepair20260704:
   taskId: full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
   phase: full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-  status: blocked
+  status: closed
   result: blocked_browser_acceptance_harness_tab_mapping_before_product_db_write
   priority: p0
   taskKind: local_acceptance_runtime_browser_redeem_upgrade_pre_provider
@@ -4699,7 +4699,7 @@ sourceLanding8RoleLocalAcceptanceRerun20260703:
 sourceLanding8RoleLocalAcceptance20260703:
   taskId: source-landing-8-role-local-acceptance-2026-07-03
   phase: source-landing-8-role-local-acceptance-2026-07-03
-  status: blocked
+  status: closed
   result: blocked_after_first_role_failure_acceptance_harness_contract_drift
   priority: p0
   taskKind: local_acceptance_execution

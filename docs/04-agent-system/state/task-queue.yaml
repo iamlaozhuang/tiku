@@ -405,7 +405,7 @@ tasks:
     dependencies:
       - full-chain-scenario-8-standard-personal-learning-2026-07-04
       - full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
-    status: blocked
+    status: closed
     result: blocked_browser_acceptance_harness_tab_mapping_before_product_db_write
     taskKind: local_acceptance_runtime_browser_redeem_upgrade_pre_provider
     moduleRunVersion: 2
