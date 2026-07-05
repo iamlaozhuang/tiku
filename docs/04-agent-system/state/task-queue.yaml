@@ -404,7 +404,7 @@ tasks:
     sourceStory: s11_affected_node_rerun_after_learning_surface_route_selection_classification
     dependencies:
       - full-chain-scenario-11-advanced-employee-learning-surface-gap-repair-or-provisioning-2026-07-04
-    status: blocked
+    status: closed
     result: blocked_closeout_status_alignment_runtime_not_started_training_baseline_evidence_conflict
     taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
     moduleRunVersion: 2
