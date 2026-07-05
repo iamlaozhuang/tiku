@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
-updatedAt: "2026-07-04T22:26:00-07:00"
+currentPhase: full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+updatedAt: "2026-07-04T22:50:00-07:00"
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -263,6 +263,189 @@ fullChainScenario9BrowserTabMappingHarnessRepair20260704:
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_final_closeout_gate
     currentTaskPointerAlignedForCommitHook: pass
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
+
+fullChainScenario9AdvancedPersonalRerunAfterBrowserHarnessRepair20260704:
+  taskId: full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+  phase: full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+  status: closed
+  result: pass_advanced_personal_upgrade_auth_upgrade_and_surface_boundary_rerun
+  priority: p0
+  taskKind: local_acceptance_runtime_browser_redeem_upgrade_pre_provider_rerun
+  moduleRunVersion: 2
+  branch: codex/full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+  approvalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  plannedAt: "2026-07-04T22:34:00-07:00"
+  claimedAt: "2026-07-04T22:34:00-07:00"
+  completedAt: "2026-07-04T22:50:00-07:00"
+  dependsOn:
+    - full-chain-scenario-8-standard-personal-learning-2026-07-04
+    - full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
+    - full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
+    - full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+  targetClosureItem: Rerun Scenario 9 from the affected browser login and advanced personal upgrade node after browser harness repair, without repeating Scenario 8 standard redemption or learning data and without Provider execution.
+  behaviorBoundary: local_browser_login_smoke_product_ui_upgrade_redeem_advanced_personal_surface_discovery_selector_aggregate_db_verification_only_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/01-requirements/advanced-edition/modules/01-authorization-context.md
+    - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+    - docs/01-requirements/advanced-edition/modules/06-ops-authorization-quota.md
+    - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    - docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    - docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md
+    - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/acceptance/2026-07-04-full-chain-acceptance-*.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-8-standard-personal-learning.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-8-standard-personal-learning.md
+    - src/app/(auth)/login/page.tsx
+    - src/app/(student)/redeem-code/page.tsx
+    - src/features/student/profile/StudentProfileRedeemPage.tsx
+    - src/app/(student)/home/page.tsx
+    - src/features/student/home/StudentHomePage.tsx
+    - src/app/(student)/ai-generation/page.tsx
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    - src/app/api/v1/redeem-codes/redeem/route.ts
+    - src/server/services/redeem-code-route.ts
+    - src/server/services/student-authorization-redeem-runtime.ts
+    - src/server/services/redeem-code-authorization-service.ts
+    - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+    - src/server/repositories/redeem-code-authorization-repository.ts
+    - src/server/services/effective-authorization-service.ts
+    - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+    - src/server/services/redeem-code-authorization-service.test.ts
+    - tests/unit/student-login-ui.test.ts
+    - tests/unit/ui-input-contract.test.ts
+    - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - e2e/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - scripts/**
+    - compose.yaml
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  runtimeScope:
+    targetDbLabel: tiku_full_chain_acceptance_20260704_001
+    learnerSelectorLabel: fc_personal_contact_user_registered
+    upgradeCardSelectorLabel: fc_redeem_code_edition_upgrade
+    scenarioSelectorLabel: fc_scenario_9_advanced_personal_rerun_after_browser_harness_repair
+    roleLabel: personal_advanced_student
+    browserReadinessRule: wait_for_login_page_hydrated_and_interactable_before_private_input_fill
+    restartPoint: browser_login_node
+    doNotRepeat:
+      - scenario_8_standard_redeem
+      - scenario_8_learning_data_creation
+      - employee_import
+    allowedDbUse: selector_scoped_read_aggregate_before_and_after_product_ui_redemption_only
+    allowedProductMutation: product_ui_upgrade_redeem_confirm_against_test_owned_selector_only
+    providerBoundary: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io_no_generation_submit
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+  validationCommands:
+    - redacted private selector preflight
+    - redacted runtime DB target and selector aggregate check
+    - local app startup on loopback
+    - redacted Playwright browser login smoke with hydrated/interactable readiness
+    - redacted Playwright product UI upgrade redeem flow
+    - redacted Playwright advanced personal surface boundary check without AI submit
+    - selector-scoped aggregate DB verification
+    - npm.cmd run test:unit -- --run tests/unit/phase-8-student-authorization-redeem-runtime.test.ts src/server/services/redeem-code-authorization-service.test.ts tests/unit/student-login-ui.test.ts tests/unit/ui-input-contract.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - git diff --check
+    - git diff --name-only -- AGENTS.md .env .env.local .env.development .env.production package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04 -SkipRemoteAheadCheck
+  validationSummary:
+    status: pass
+    readGate: pass
+    privateSelectorPreflight: pass
+    runtimeDbTargetCheck: pass
+    preRunAggregateDbVerification: pass
+    devServerStarted: true
+    browserRuntimeExecuted: true
+    browserLoginSmoke: pass
+    browserLoginFormState: pass_hydrated_interactable_submit_enabled
+    loginHarnessResponsePathCorrection: pass_api_v1_sessions
+    apiSessionLane: pass
+    upgradeRedemption: pass
+    advancedPersonalSurfaceBoundary: pass_no_ai_submit
+    selectorScopedAggregateDbVerification: pass
+    runtimeCleanup: pass
+    focusedUnitTests: passed_5_files_35_tests
+    prettierScoped: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    finalCloseoutFreeze: pass
+    learnerCount: 1
+    activeStandardPersonalAuthCount: 1
+    activeAdvancedPersonalAuthCount: 0
+    activeAuthUpgradeCount: 1
+    upgradeCardUnusedCount: 0
+    upgradeCardUsedCount: 1
+    scenario8StandardRedeemRepeated: false
+    scenario8LearningDataRepeated: false
+    employeeImportRepeated: false
+    aiGenerationSubmitClicked: false
+    providerStagingProdCostExecuted: false
+    sourceTestChanged: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    rawDomScreenshotTraceCaptured: false
+    privateValueOutput: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
@@ -26999,32 +27182,35 @@ previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
     productionUsabilityClaimed: false
     costCalibrationExecuted: false
 currentTask:
-  id: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
-  phase: full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+  id: full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+  phase: full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
   status: closed
-  result: pass_redacted_programmatic_browser_harness_control_path_available
-  taskKind: local_acceptance_browser_harness_repair
+  result: pass_advanced_personal_upgrade_auth_upgrade_and_surface_boundary_rerun
+  taskKind: local_acceptance_runtime_browser_redeem_upgrade_pre_provider_rerun
   moduleRunVersion: 2
-  branch: codex/full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
-  plannedAt: "2026-07-04T21:48:00-07:00"
-  claimedAt: "2026-07-04T22:06:00-07:00"
-  completedAt: "2026-07-04T22:19:00-07:00"
+  branch: codex/full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+  plannedAt: "2026-07-04T22:34:00-07:00"
+  claimedAt: "2026-07-04T22:34:00-07:00"
+  completedAt: "2026-07-04T22:50:00-07:00"
   approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   dependsOn:
+    - full-chain-scenario-8-standard-personal-learning-2026-07-04
+    - full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
     - full-chain-scenario-9-advanced-personal-rerun-after-redeem-repair-2026-07-04
-  targetClosureItem: Repair or provision the local browser acceptance harness control path after stale in-app browser tab handle mapping blocked Scenario 9 before product DB write.
-  behaviorBoundary: browser_acceptance_harness_only_no_product_source_auth_authorization_redeem_runtime_db_schema_seed_dependency_provider_staging_prod_cost_destructive_db_release_final_or_production_claim
-  restartRule: after_repair_rerun_scenario_9_from_browser_login_node_do_not_repeat_scenario_8_standard_redeem_or_learning_data
-  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
-  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
+  targetClosureItem: Rerun Scenario 9 from the affected browser login and advanced personal upgrade node after browser harness repair, without repeating Scenario 8 standard redemption or learning data and without Provider execution.
+  behaviorBoundary: local_browser_login_smoke_product_ui_upgrade_redeem_advanced_personal_surface_discovery_selector_aggregate_db_verification_only_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
+  restartRule: rerun_from_browser_login_node_do_not_repeat_scenario_8_standard_redeem_learning_data_or_employee_import
+  evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+  planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
-    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -27046,6 +27232,8 @@ currentTask:
     - test-results/**
     - .next/**
     - .runtime/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
   closeoutPolicy:
     localCommit:
       approved: true
@@ -27062,33 +27250,59 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
   validationCommands:
-    - node - <redacted minimal browser harness probe using existing @playwright/test>
-    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-browser-tab-mapping-harness-repair.md
+    - redacted private selector preflight
+    - redacted runtime DB target and selector aggregate check
+    - local app startup on loopback
+    - redacted Playwright browser login smoke with hydrated/interactable readiness
+    - redacted Playwright product UI upgrade redeem flow
+    - redacted Playwright advanced personal surface boundary check without AI submit
+    - selector-scoped aggregate DB verification
+    - npm.cmd run test:unit -- --run tests/unit/phase-8-student-authorization-redeem-runtime.test.ts src/server/services/redeem-code-authorization-service.test.ts tests/unit/student-login-ui.test.ts tests/unit/ui-input-contract.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
     - git diff --check
     - git diff --name-only -- AGENTS.md .env .env.local .env.development .env.production package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-9-browser-tab-mapping-harness-repair-2026-07-04 -SkipRemoteAheadCheck
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair-2026-07-04 -SkipRemoteAheadCheck
   validationSummary:
     status: pass
     readGate: pass
-    taskClaimHelper: unavailable_script_argument_binding_failure_raw_state_queue_checked
-    npxAvailability: pass
-    playwrightPackageAvailability: pass_at_playwright_test_present
-    minimalBrowserHarnessProbe: pass
-    harnessRepairOrProvisioning: pass_redacted_programmatic_playwright_control_path_available
-    noProductSourceChange: pass
-    authAuthorizationRedeemRuntimeChanged: false
-    dependencyOrLockfileChanged: false
-    schemaMigrationSeedFixtureChanged: false
-    providerStagingProdCostExecuted: false
-    runtimeCleanup: pass_browser_closed_no_dev_server_started
-    scopedPrettierWrite: pass
-    scopedPrettierCheck: pass
+    privateSelectorPreflight: pass
+    runtimeDbTargetCheck: pass
+    preRunAggregateDbVerification: pass
+    devServerStarted: true
+    browserRuntimeExecuted: true
+    browserLoginSmoke: pass
+    browserLoginFormState: pass_hydrated_interactable_submit_enabled
+    loginHarnessResponsePathCorrection: pass_api_v1_sessions
+    apiSessionLane: pass
+    upgradeRedemption: pass
+    advancedPersonalSurfaceBoundary: pass_no_ai_submit
+    selectorScopedAggregateDbVerification: pass
+    runtimeCleanup: pass
+    focusedUnitTests: passed_5_files_35_tests
+    prettierScoped: pass
     gitDiffCheck: pass
     blockedPathDiffCheck: pass_no_output
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_final_closeout_gate
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    finalCloseoutFreeze: pass
+    learnerCount: 1
+    activeStandardPersonalAuthCount: 1
+    activeAdvancedPersonalAuthCount: 0
+    activeAuthUpgradeCount: 1
+    upgradeCardUnusedCount: 0
+    upgradeCardUsedCount: 1
+    scenario8StandardRedeemRepeated: false
+    scenario8LearningDataRepeated: false
+    employeeImportRepeated: false
+    aiGenerationSubmitClicked: false
+    providerStagingProdCostExecuted: false
+    sourceTestChanged: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    rawDomScreenshotTraceCaptured: false
+    privateValueOutput: false
     releaseReadinessClaimed: false
     finalPassClaimed: false
     productionUsabilityClaimed: false
