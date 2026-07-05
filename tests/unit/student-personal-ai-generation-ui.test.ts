@@ -2146,6 +2146,32 @@ describe("StudentPersonalAiGenerationPage", () => {
               questionCount: 50,
               questionTypeDistributionCount: 3,
               knowledgeCoverageCount: 4,
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic learner paper section",
+                  questionCount: 20,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem: "synthetic visible learner paper stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText: "synthetic visible learner paper option",
+                        },
+                      ],
+                      standardAnswer: "synthetic visible learner paper answer",
+                      analysis: "synthetic visible learner paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
               reviewStatus: "draft_review_required",
             },
           },
@@ -2169,7 +2195,22 @@ describe("StudentPersonalAiGenerationPage", () => {
       "student-visible-generated-content",
     );
 
-    expect(visibleGeneratedContent).toHaveTextContent("本次自测试卷草稿摘要");
+    expect(visibleGeneratedContent).toHaveTextContent("生成试卷草稿");
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic learner paper section",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible learner paper stem",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible learner paper option",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible learner paper answer",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible learner paper analysis",
+    );
     expect(visibleGeneratedContent).toHaveTextContent("结构化预览");
     expect(visibleGeneratedContent).toHaveTextContent("大题模块 2");
     expect(visibleGeneratedContent).toHaveTextContent("题量 50");
@@ -2179,6 +2220,173 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("Authorization");
     expect(document.body.textContent).not.toContain("localStorage");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("renders organization employee AI paper drafts from org authorization context", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const paperVisibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          resultReference: {
+            ...localExperienceResponse.data.requestFlow.resultReference,
+            taskType: "ai_paper_generation",
+          },
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "生成试卷草稿已创建，待训练页查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 1,
+              questionCount: 20,
+              questionTypeDistributionCount: 1,
+              knowledgeCoverageCount: 1,
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic employee paper section",
+                  questionCount: 20,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem: "synthetic visible employee paper stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText: "synthetic visible employee paper option",
+                        },
+                      ],
+                      standardAnswer: "synthetic visible employee paper answer",
+                      analysis: "synthetic visible employee paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
+              reviewStatus: "draft_review_required",
+            },
+          },
+        },
+      },
+    };
+    const historyResponses = [
+      emptyServerHistoryResponse,
+      emptyServerHistoryResponse,
+    ];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/sessions") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-123",
+                organizationPublicId: "organization-public-123",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-123",
+              }),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () =>
+                historyResponses.shift() ?? emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init?.method).toBe("POST");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => paperVisibleResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "student-visible-generated-content",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent("生成试卷草稿");
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic employee paper section",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee paper stem",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee paper option",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee paper answer",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible employee paper analysis",
+    );
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
   });
 
   it("renders redacted recent request history rows from camelCase read-model fields", async () => {

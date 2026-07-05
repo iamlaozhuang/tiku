@@ -757,6 +757,15 @@ function AdminAiGenerationVisibleGeneratedContent({
   const visibleQuestionDrafts = getAdminVisibleQuestionDrafts(
     visibleGeneratedContent.structuredPreview,
   );
+  const visiblePaperSections = getAdminVisiblePaperSections(
+    visibleGeneratedContent.structuredPreview,
+  );
+  const visibleGeneratedContentTitle =
+    visibleQuestionDrafts.length > 0
+      ? "生成题目草稿"
+      : visiblePaperSections.length > 0
+        ? "生成试卷草稿"
+        : "临时展示内容";
 
   return (
     <section
@@ -767,7 +776,7 @@ function AdminAiGenerationVisibleGeneratedContent({
         <div>
           <p className="text-brand-primary text-xs font-medium">本次生成草稿</p>
           <h3 className="text-text-primary mt-1 text-sm font-semibold">
-            {visibleQuestionDrafts.length > 0 ? "生成题目草稿" : "临时展示内容"}
+            {visibleGeneratedContentTitle}
           </h3>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
@@ -776,6 +785,8 @@ function AdminAiGenerationVisibleGeneratedContent({
       </div>
       {visibleQuestionDrafts.length > 0 ? (
         <AdminQuestionDraftList questionDrafts={visibleQuestionDrafts} />
+      ) : visiblePaperSections.length > 0 ? (
+        <AdminPaperDraftList paperSections={visiblePaperSections} />
       ) : (
         <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
           {visibleGeneratedContentText}
@@ -799,6 +810,15 @@ type AdminQuestionDraftSummary = Extract<
   { kind: "question_set"; parseStatus: "parsed" }
 >["draftSummaries"][number];
 
+type AdminPaperSectionDraftSummary = Extract<
+  NonNullable<AdminVisibleGeneratedContentDto["structuredPreview"]>,
+  { kind: "paper_draft"; parseStatus: "parsed" }
+>["paperSectionSummaries"][number];
+
+type AdminVisibleQuestionDraftSummary =
+  | AdminQuestionDraftSummary
+  | AdminPaperSectionDraftSummary["questionDrafts"][number];
+
 function getAdminVisibleQuestionDrafts(
   structuredPreview: AdminVisibleGeneratedContentDto["structuredPreview"],
 ): AdminQuestionDraftSummary[] {
@@ -812,8 +832,28 @@ function getAdminVisibleQuestionDrafts(
   return structuredPreview.draftSummaries.filter(hasVisibleQuestionDraftBody);
 }
 
+function getAdminVisiblePaperSections(
+  structuredPreview: AdminVisibleGeneratedContentDto["structuredPreview"],
+): AdminPaperSectionDraftSummary[] {
+  if (
+    structuredPreview?.kind !== "paper_draft" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    return [];
+  }
+
+  return structuredPreview.paperSectionSummaries
+    .map((paperSection) => ({
+      ...paperSection,
+      questionDrafts: paperSection.questionDrafts.filter(
+        hasVisibleQuestionDraftBody,
+      ),
+    }))
+    .filter(hasVisiblePaperSectionBody);
+}
+
 function hasVisibleQuestionDraftBody(
-  questionDraft: AdminQuestionDraftSummary,
+  questionDraft: AdminVisibleQuestionDraftSummary,
 ): boolean {
   return Boolean(
     questionDraft.questionStem ||
@@ -823,13 +863,25 @@ function hasVisibleQuestionDraftBody(
   );
 }
 
+function hasVisiblePaperSectionBody(
+  paperSection: AdminPaperSectionDraftSummary,
+): boolean {
+  return Boolean(
+    paperSection.title ||
+    paperSection.description ||
+    paperSection.questionDrafts.length,
+  );
+}
+
 function AdminQuestionDraftList({
   questionDrafts,
+  testId = "admin-ai-question-drafts",
 }: {
-  questionDrafts: AdminQuestionDraftSummary[];
+  questionDrafts: AdminVisibleQuestionDraftSummary[];
+  testId?: string;
 }) {
   return (
-    <div className="mt-3 space-y-3" data-testid="admin-ai-question-drafts">
+    <div className="mt-3 space-y-3" data-testid={testId}>
       {questionDrafts.map((questionDraft) => (
         <section
           className="border-border bg-muted/40 rounded-md border p-3"
@@ -886,6 +938,47 @@ function AdminQuestionDraftList({
                 ))}
               </div>
             </div>
+          ) : null}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function AdminPaperDraftList({
+  paperSections,
+}: {
+  paperSections: AdminPaperSectionDraftSummary[];
+}) {
+  return (
+    <div className="mt-3 space-y-4" data-testid="admin-ai-paper-drafts">
+      {paperSections.map((paperSection) => (
+        <section
+          className="border-border bg-muted/40 rounded-md border p-3"
+          data-testid="admin-ai-paper-section-draft-card"
+          key={paperSection.sectionNumber}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-brand-primary text-xs font-medium">
+                大题 {paperSection.sectionNumber}
+              </p>
+              <h4 className="text-text-primary mt-1 text-sm font-semibold">
+                {paperSection.title ?? "未命名大题"}
+              </h4>
+            </div>
+            <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+              {[paperSection.paperSectionType, paperSection.questionCount]
+                .filter(Boolean)
+                .join(" / ") || "待评审"}
+            </span>
+          </div>
+          <QuestionDraftField label="说明" value={paperSection.description} />
+          {paperSection.questionDrafts.length > 0 ? (
+            <AdminQuestionDraftList
+              questionDrafts={paperSection.questionDrafts}
+              testId="admin-ai-paper-question-drafts"
+            />
           ) : null}
         </section>
       ))}

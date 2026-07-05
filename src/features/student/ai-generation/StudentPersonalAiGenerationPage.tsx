@@ -935,6 +935,15 @@ function StudentPersonalAiGenerationVisibleGeneratedContent({
   const visibleQuestionDrafts = getStudentVisibleQuestionDrafts(
     visibleGeneratedContent.structuredPreview,
   );
+  const visiblePaperSections = getStudentVisiblePaperSections(
+    visibleGeneratedContent.structuredPreview,
+  );
+  const visibleGeneratedContentTitle =
+    visibleQuestionDrafts.length > 0
+      ? "生成题目草稿"
+      : visiblePaperSections.length > 0
+        ? "生成试卷草稿"
+        : "本次生成内容";
 
   return (
     <section
@@ -943,7 +952,7 @@ function StudentPersonalAiGenerationVisibleGeneratedContent({
     >
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-text-primary text-sm font-semibold">
-          {visibleQuestionDrafts.length > 0 ? "生成题目草稿" : "本次生成内容"}
+          {visibleGeneratedContentTitle}
         </h3>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
           临时展示
@@ -951,6 +960,8 @@ function StudentPersonalAiGenerationVisibleGeneratedContent({
       </div>
       {visibleQuestionDrafts.length > 0 ? (
         <StudentQuestionDraftList questionDrafts={visibleQuestionDrafts} />
+      ) : visiblePaperSections.length > 0 ? (
+        <StudentPaperDraftList paperSections={visiblePaperSections} />
       ) : (
         <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
           {visibleGeneratedContent.content}
@@ -974,6 +985,15 @@ type StudentQuestionDraftSummary = Extract<
   { kind: "question_set"; parseStatus: "parsed" }
 >["draftSummaries"][number];
 
+type StudentPaperSectionDraftSummary = Extract<
+  NonNullable<StudentVisibleGeneratedContentDto["structuredPreview"]>,
+  { kind: "paper_draft"; parseStatus: "parsed" }
+>["paperSectionSummaries"][number];
+
+type StudentVisibleQuestionDraftSummary =
+  | StudentQuestionDraftSummary
+  | StudentPaperSectionDraftSummary["questionDrafts"][number];
+
 function getStudentVisibleQuestionDrafts(
   structuredPreview: StudentVisibleGeneratedContentDto["structuredPreview"],
 ): StudentQuestionDraftSummary[] {
@@ -989,8 +1009,28 @@ function getStudentVisibleQuestionDrafts(
   );
 }
 
+function getStudentVisiblePaperSections(
+  structuredPreview: StudentVisibleGeneratedContentDto["structuredPreview"],
+): StudentPaperSectionDraftSummary[] {
+  if (
+    structuredPreview?.kind !== "paper_draft" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    return [];
+  }
+
+  return structuredPreview.paperSectionSummaries
+    .map((paperSection) => ({
+      ...paperSection,
+      questionDrafts: paperSection.questionDrafts.filter(
+        hasStudentVisibleQuestionDraftBody,
+      ),
+    }))
+    .filter(hasStudentVisiblePaperSectionBody);
+}
+
 function hasStudentVisibleQuestionDraftBody(
-  questionDraft: StudentQuestionDraftSummary,
+  questionDraft: StudentVisibleQuestionDraftSummary,
 ): boolean {
   return Boolean(
     questionDraft.questionStem ||
@@ -1000,13 +1040,25 @@ function hasStudentVisibleQuestionDraftBody(
   );
 }
 
+function hasStudentVisiblePaperSectionBody(
+  paperSection: StudentPaperSectionDraftSummary,
+): boolean {
+  return Boolean(
+    paperSection.title ||
+    paperSection.description ||
+    paperSection.questionDrafts.length,
+  );
+}
+
 function StudentQuestionDraftList({
   questionDrafts,
+  testId = "student-ai-question-drafts",
 }: {
-  questionDrafts: StudentQuestionDraftSummary[];
+  questionDrafts: StudentVisibleQuestionDraftSummary[];
+  testId?: string;
 }) {
   return (
-    <div className="mt-3 space-y-3" data-testid="student-ai-question-drafts">
+    <div className="mt-3 space-y-3" data-testid={testId}>
       {questionDrafts.map((questionDraft) => (
         <section
           className="border-border bg-muted/40 rounded-md border p-3"
@@ -1069,6 +1121,50 @@ function StudentQuestionDraftList({
                 ))}
               </div>
             </div>
+          ) : null}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function StudentPaperDraftList({
+  paperSections,
+}: {
+  paperSections: StudentPaperSectionDraftSummary[];
+}) {
+  return (
+    <div className="mt-3 space-y-4" data-testid="student-ai-paper-drafts">
+      {paperSections.map((paperSection) => (
+        <section
+          className="border-border bg-muted/40 rounded-md border p-3"
+          data-testid="student-ai-paper-section-draft-card"
+          key={paperSection.sectionNumber}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-brand-primary text-xs font-medium">
+                大题 {paperSection.sectionNumber}
+              </p>
+              <h4 className="text-text-primary mt-1 text-sm font-semibold">
+                {paperSection.title ?? "未命名大题"}
+              </h4>
+            </div>
+            <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+              {[paperSection.paperSectionType, paperSection.questionCount]
+                .filter(Boolean)
+                .join(" / ") || "练习草稿"}
+            </span>
+          </div>
+          <StudentQuestionDraftField
+            label="说明"
+            value={paperSection.description}
+          />
+          {paperSection.questionDrafts.length > 0 ? (
+            <StudentQuestionDraftList
+              questionDrafts={paperSection.questionDrafts}
+              testId="student-ai-paper-question-drafts"
+            />
           ) : null}
         </section>
       ))}

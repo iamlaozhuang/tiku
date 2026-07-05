@@ -5,6 +5,7 @@ import type {
   AiGenerationRouteIntegratedProviderFailureCategory,
   AiGenerationRouteIntegratedProviderLimits,
   AiGenerationRouteIntegratedProviderMetadata,
+  AiGenerationRouteIntegratedPaperSectionDraftSummary,
   AiGenerationRouteIntegratedQuestionDraftSummary,
   AiGenerationRouteIntegratedQuestionOptionDraft,
   AiGenerationRouteIntegratedStructuredPreview,
@@ -365,27 +366,34 @@ function createQuestionSetStructuredPreview(
     requestedQuestionCount: options.requestedQuestionCount,
     actualQuestionCount: questions.length,
     draftCount: questions.length,
-    draftSummaries: questions.map((questionDraft, index) => {
-      const questionDraftObject = isRecord(questionDraft) ? questionDraft : {};
+    draftSummaries: questions.map((questionDraft, index) =>
+      createQuestionDraftSummary(questionDraft, index),
+    ),
+  };
+}
 
-      return {
-        draftNumber: index + 1,
-        questionType: readSafeLabel(questionDraftObject, [
-          "questionType",
-          "question_type",
-          "type",
-        ]),
-        difficulty: readSafeLabel(questionDraftObject, ["difficulty"]),
-        knowledgeNodeCount: readCollectionCount(questionDraftObject, [
-          "knowledgeNodeLabels",
-          "knowledgeNodes",
-          "knowledge_node",
-          "knowledge_node_ids",
-        ]),
-        ...readProductVisibleQuestionDraftFields(questionDraftObject),
-        reviewStatus: "draft_review_required",
-      } satisfies AiGenerationRouteIntegratedQuestionDraftSummary;
-    }),
+function createQuestionDraftSummary(
+  questionDraft: unknown,
+  index: number,
+): AiGenerationRouteIntegratedQuestionDraftSummary {
+  const questionDraftObject = isRecord(questionDraft) ? questionDraft : {};
+
+  return {
+    draftNumber: index + 1,
+    questionType: readSafeLabel(questionDraftObject, [
+      "questionType",
+      "question_type",
+      "type",
+    ]),
+    difficulty: readSafeLabel(questionDraftObject, ["difficulty"]),
+    knowledgeNodeCount: readCollectionCount(questionDraftObject, [
+      "knowledgeNodeLabels",
+      "knowledgeNodes",
+      "knowledge_node",
+      "knowledge_node_ids",
+    ]),
+    ...readProductVisibleQuestionDraftFields(questionDraftObject),
+    reviewStatus: "draft_review_required",
   };
 }
 
@@ -531,6 +539,9 @@ function createPaperDraftStructuredPreview(
     "knowledgeNodes",
     "knowledge_node",
   ]);
+  const paperSectionSummaries = paperSections.map((paperSection, index) =>
+    createPaperSectionDraftSummary(paperSection, index),
+  );
   const requestedQuestionCount = options.requestedQuestionCount ?? null;
 
   if (requestedQuestionCount !== null && questionCount === null) {
@@ -572,8 +583,64 @@ function createPaperDraftStructuredPreview(
     questionCount,
     questionTypeDistributionCount,
     knowledgeCoverageCount,
+    paperSectionSummaries,
     reviewStatus: "draft_review_required",
   };
+}
+
+function createPaperSectionDraftSummary(
+  paperSection: unknown,
+  index: number,
+): AiGenerationRouteIntegratedPaperSectionDraftSummary {
+  const paperSectionObject = isRecord(paperSection) ? paperSection : {};
+  const description = readVisibleDraftText(paperSectionObject, [
+    "description",
+    "paperSectionDescription",
+    "paper_section_description",
+  ]);
+  const questionDrafts = readNestedPaperSectionQuestionDrafts(
+    paperSectionObject,
+  ).map((questionDraft, questionIndex) =>
+    createQuestionDraftSummary(questionDraft, questionIndex),
+  );
+
+  return {
+    sectionNumber: index + 1,
+    paperSectionType: readSafeLabel(paperSectionObject, [
+      "paperSectionType",
+      "paper_section_type",
+      "questionType",
+      "question_type",
+      "type",
+    ]),
+    title: readVisibleDraftText(paperSectionObject, [
+      "title",
+      "paperSectionTitle",
+      "paper_section_title",
+      "name",
+    ]),
+    ...(description !== null ? { description } : {}),
+    questionCount:
+      normalizeQuestionCount(
+        paperSectionObject.questionCount ?? paperSectionObject.question_count,
+      ) ?? (questionDrafts.length > 0 ? questionDrafts.length : null),
+    questionDrafts,
+  };
+}
+
+function readNestedPaperSectionQuestionDrafts(
+  paperSection: Record<string, unknown>,
+): unknown[] {
+  return (
+    readArrayProperty(paperSection, [
+      "questions",
+      "questionDrafts",
+      "question_drafts",
+      "questionItems",
+      "question_items",
+      "items",
+    ]) ?? []
+  );
 }
 
 function parseJsonValueFromProviderText(

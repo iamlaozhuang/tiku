@@ -156,6 +156,15 @@ export type AiGenerationRouteIntegratedQuestionOptionDraft = {
   isCorrect?: boolean | null;
 };
 
+export type AiGenerationRouteIntegratedPaperSectionDraftSummary = {
+  sectionNumber: number;
+  paperSectionType: string | null;
+  title: string | null;
+  description?: string;
+  questionCount: number | null;
+  questionDrafts: AiGenerationRouteIntegratedQuestionDraftSummary[];
+};
+
 export type AiGenerationRouteIntegratedStructuredPreview =
   | {
       kind: "question_set";
@@ -184,6 +193,7 @@ export type AiGenerationRouteIntegratedStructuredPreview =
       questionCount: number | null;
       questionTypeDistributionCount: number | null;
       knowledgeCoverageCount: number | null;
+      paperSectionSummaries: AiGenerationRouteIntegratedPaperSectionDraftSummary[];
       reviewStatus: "draft_review_required";
     }
   | {

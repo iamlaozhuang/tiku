@@ -1,41 +1,42 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
-updatedAt: "2026-07-05T11:04:25-07:00"
+currentPhase: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+updatedAt: "2026-07-05T12:03:04-07:00"
 currentTask:
-  id: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
-  phase: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+  id: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+  phase: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
   status: closed
-  result: pass_ai_question_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+  result: pass_ai_paper_visible_draft_review_experience_repair_no_provider_db_schema_dependency
   priority: p0
-  taskKind: source_test_docs_ai_question_visible_draft_review_experience_repair
+  taskKind: source_test_docs_ai_paper_visible_draft_review_experience_repair
   executionProfile: local_source_test_browser_smoke_no_provider_no_db_mutation
   validationPolicy: red_first_source_repair_focused_unit_tests_browser_smoke_scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
   moduleRunVersion: 2
-  branch: codex/full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
-  approvalBoundary: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
-  plannedAt: "2026-07-05T11:04:25-07:00"
-  claimedAt: "2026-07-05T11:04:25-07:00"
-  materializedAt: "2026-07-05T11:04:25-07:00"
-  completedAt: "2026-07-05T11:20:58-07:00"
+  branch: codex/full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+  approvalBoundary: current_user_fresh_approval_for_ai_paper_four_role_browser_smoke_2026_07_05
+  plannedAt: "2026-07-05T11:27:04-07:00"
+  claimedAt: "2026-07-05T11:27:04-07:00"
+  materializedAt: "2026-07-05T11:27:04-07:00"
+  completedAt: "2026-07-05T12:03:04-07:00"
   dependsOn:
+    - full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
     - stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
     - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
-  targetClosureItem: Repair AI question generation so authorized product surfaces for content_admin, org_advanced_admin, org_advanced_employee, and advanced_student show structured question drafts for review/use while evidence, audit, logs, and history summaries stay redacted.
+  targetClosureItem: Repair AI paper generation so authorized product surfaces for content_admin, org_advanced_admin, org_advanced_employee, and advanced_student show structured paper drafts for review/training while evidence, audit, logs, and history summaries stay redacted.
   behaviorBoundary: local_source_test_docs_browser_smoke_only_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_db_mutation_no_schema_migration_seed_dependency_no_staging_prod_cloud_deploy_no_release_final_or_production_claim_no_credential_raw_dom_screenshot_trace_output
   evidenceMode: redacted_task_ids_branch_route_surface_role_labels_selector_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
-  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
-    - docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
-    - docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
-    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    - docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    - docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    - docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
     - src/server/contracts/route-integrated-provider-execution-contract.ts
     - src/server/services/route-integrated-provider-instruction-service.ts
     - src/server/services/route-integrated-provider-execution-service.ts
@@ -52,20 +53,20 @@ currentTask:
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
     fastForwardMerge:
       approved: true
       targetBranch: master
-      approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
     push:
       approved: true
       target: origin/master
-      approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
     cleanup:
       deleteShortBranch: true
-      approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
   validationSummary:
-    status: pass_ai_question_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+    status: pass_ai_paper_visible_draft_review_experience_repair_no_provider_db_schema_dependency
     readGate: pass
     taskPlanPrepared: true
     acceptancePrepared: true
@@ -76,21 +77,27 @@ currentTask:
     focusedUnitTests: pass
     typecheck: pass
     lint: pass
-    browserSmoke: pass
-    scopedPrettierWrite: pass
-    scopedPrettierCheck: pass
-    gitDiffCheck: pass
+    browserSmoke: pass_four_role_ai_paper_surface
+    scopedPrettier: pass
+    gitDiffCheck: pass_no_output
     blockedPathDiffCheck: pass_no_output
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
-    closeoutGates: pass
-    repositoryShaCheckpointAligned: true
+    moduleRunV2PreCommit: pass
+    moduleRunV2PrePush: pass
     providerCallExecuted: false
     dbMutated: false
     schemaMigrationSeedChanged: false
     dependencyChanged: false
     stagingProdExecuted: false
     releaseFinalProductionClaimed: false
+previousCurrentTaskBeforeAiPaperVisibleDraftReviewExperienceRepair20260705:
+  id: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+  phase: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+  status: closed
+  result: pass_ai_question_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+  branch: codex/full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
 previousCurrentTaskBeforeAiQuestionVisibleDraftReviewExperienceRepair20260705:
   id: stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
   phase: stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
@@ -27713,8 +27720,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 527706cb7347e15c413cebef6d0472e3d2c13ba2
-  lastKnownOriginMasterSha: 527706cb7347e15c413cebef6d0472e3d2c13ba2
+  lastKnownMasterSha: fef6b528b2b89610a521942b1d117199ae60b3fe
+  lastKnownOriginMasterSha: fef6b528b2b89610a521942b1d117199ae60b3fe
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

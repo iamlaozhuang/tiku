@@ -398,6 +398,137 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    title: Full-chain AI paper visible draft review experience repair
+    phase: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    sourceStory: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+    dependencies:
+      - full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+      - stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
+      - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    status: closed
+    result: pass_ai_paper_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+    taskKind: source_test_docs_ai_paper_visible_draft_review_experience_repair
+    executionProfile: local_source_test_browser_smoke_no_provider_no_db_mutation
+    validationPolicy: red_first_source_repair_focused_unit_tests_browser_smoke_scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    humanApprovalBoundary: current_user_fresh_approval_for_ai_paper_four_role_browser_smoke_2026_07_05
+    plannedAt: "2026-07-05T11:27:04-07:00"
+    claimedAt: "2026-07-05T11:27:04-07:00"
+    materializedAt: "2026-07-05T11:27:04-07:00"
+    completedAt: "2026-07-05T12:03:04-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/route-integrated-provider-instruction-service.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: localhost_browser_smoke_allowed_after_source_tests_no_provider_trigger_no_raw_dom_no_screenshot_no_trace_output
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+    acceptanceStandards:
+      - Product UI for content_admin, org_advanced_admin, org_advanced_employee, and advanced_student can render authorized structured AI paper drafts after generation.
+      - Paper draft rendering includes editable/reviewable paper sections, question bodies, options, standard answers, analyses, and knowledge labels where present.
+      - Evidence, audit, runtime logs, and history summaries stay redacted and do not record full material, question, paper, answer, prompt, provider payload, or raw AI I/O.
+      - Content admin and organization admin retain review/use affordances without direct formal publish.
+      - Standard roles and unauthorized roles are not broadened by this repair.
+      - No Provider call, Cost Calibration, staging/prod, dependency, schema, migration, seed, or DB mutation is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ai_paper_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+      readGate: pass
+      taskPlanPrepared: true
+      acceptancePrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      redFirstTest: pass
+      sourceRepair: pass
+      focusedUnitTests: pass
+      typecheck: pass
+      lint: pass
+      browserSmoke: pass_four_role_ai_paper_surface
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      providerCallExecuted: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
     title: Full-chain AI question visible draft review experience repair
     phase: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05

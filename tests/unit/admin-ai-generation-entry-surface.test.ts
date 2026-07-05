@@ -860,6 +860,32 @@ describe("admin AI generation entry surfaces", () => {
               questionCount: 50,
               questionTypeDistributionCount: 3,
               knowledgeCoverageCount: 4,
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic visible paper section",
+                  questionCount: 20,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem: "synthetic visible paper question stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText: "synthetic visible paper option",
+                        },
+                      ],
+                      standardAnswer: "synthetic visible paper answer",
+                      analysis: "synthetic visible paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
               reviewStatus: "draft_review_required",
             },
           },
@@ -910,7 +936,22 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("后台本次生成草稿：包含试卷结构和知识点覆盖建议。");
+    ).toHaveTextContent("生成试卷草稿");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible paper section");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible paper question stem");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible paper option");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible paper answer");
+    expect(
+      screen.getByTestId("admin-visible-generated-content"),
+    ).toHaveTextContent("synthetic visible paper analysis");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("结构化预览");
@@ -928,6 +969,136 @@ describe("admin AI generation entry surfaces", () => {
         ) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("renders organization advanced admin AI paper drafts on the same structured surface", async () => {
+    const blockedResponse = createLocalContractResponse({
+      workspace: "organization",
+      generationKind: "paper",
+    });
+    const providerVisibleResponse = {
+      ...blockedResponse,
+      data: {
+        ...blockedResponse.data,
+        runtimeBridge: {
+          ...blockedResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          envSecretAccessed: true,
+          providerConfigurationRead: true,
+          visibleGeneratedContent: {
+            content: "生成试卷草稿已创建，待评审查看",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 1,
+              questionCount: 20,
+              questionTypeDistributionCount: 1,
+              knowledgeCoverageCount: 1,
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic organization paper section",
+                  questionCount: 20,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem:
+                        "synthetic visible organization paper question stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText:
+                            "synthetic visible organization paper option",
+                        },
+                      ],
+                      standardAnswer:
+                        "synthetic visible organization paper answer",
+                      analysis: "synthetic visible organization paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
+              reviewStatus: "draft_review_required",
+            },
+          },
+          redactionStatus: "redacted",
+        },
+      },
+    };
+
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationPostRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(providerVisibleResponse);
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("organization"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "paper",
+      }),
+    );
+
+    fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+    const visibleGeneratedContent = await screen.findByTestId(
+      "admin-visible-generated-content",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent("生成试卷草稿");
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic organization paper section",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization paper question stem",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization paper option",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization paper answer",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent(
+      "synthetic visible organization paper analysis",
+    );
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("providerPayload");
   });

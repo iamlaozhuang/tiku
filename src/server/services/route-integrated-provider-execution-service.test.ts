@@ -532,7 +532,24 @@ describe("shared route-integrated Provider execution primitives", () => {
   it("builds a parsed paper structured preview from section and coverage counts", () => {
     const content = JSON.stringify({
       paperSections: [
-        { paperSectionType: "single_choice", questionCount: 20 },
+        {
+          paperSectionType: "single_choice",
+          title: "synthetic paper section title",
+          questionCount: 20,
+          questions: [
+            {
+              questionType: "single_choice",
+              difficulty: "medium",
+              knowledgeNodeLabels: ["redacted_knowledge_node_a"],
+              questionStem: "synthetic paper question stem",
+              questionOptions: [
+                { optionLabel: "A", optionText: "synthetic paper option A" },
+              ],
+              standardAnswer: "synthetic paper standard answer",
+              analysis: "synthetic paper analysis",
+            },
+          ],
+        },
         { paperSectionType: "judge", questionCount: 30 },
       ],
       questionTypeDistribution: {
@@ -561,6 +578,37 @@ describe("shared route-integrated Provider execution primitives", () => {
         knowledgeCoverageCount: 2,
         reviewStatus: "draft_review_required",
       },
+    });
+    const structuredPreview = createRouteIntegratedVisibleGeneratedContent(
+      content,
+      {
+        structuredPreview: {
+          kind: "paper_draft",
+        },
+      },
+    )?.structuredPreview;
+
+    expect(
+      structuredPreview?.kind === "paper_draft" &&
+        structuredPreview.parseStatus === "parsed"
+        ? structuredPreview.paperSectionSummaries[0]
+        : null,
+    ).toMatchObject({
+      sectionNumber: 1,
+      paperSectionType: "single_choice",
+      title: "synthetic paper section title",
+      questionCount: 20,
+      questionDrafts: [
+        expect.objectContaining({
+          draftNumber: 1,
+          questionStem: "synthetic paper question stem",
+          questionOptions: [
+            { optionLabel: "A", optionText: "synthetic paper option A" },
+          ],
+          standardAnswer: "synthetic paper standard answer",
+          analysis: "synthetic paper analysis",
+        }),
+      ],
     });
   });
 

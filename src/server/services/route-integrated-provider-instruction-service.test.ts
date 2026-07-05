@@ -89,6 +89,11 @@ describe("route-integrated Provider instruction service", () => {
 
     expect(instruction).toContain("个人训练 AI组卷");
     expect(readOutputContractLine(instruction)).toContain("paperSections");
+    expect(readOutputContractLine(instruction)).toContain("questions");
+    expect(readOutputContractLine(instruction)).toContain("questionStem");
+    expect(readOutputContractLine(instruction)).toContain("questionOptions");
+    expect(readOutputContractLine(instruction)).toContain("standardAnswer");
+    expect(readOutputContractLine(instruction)).toContain("analysis");
     expect(readOutputContractLine(instruction)).toContain(
       "questionTypeDistribution",
     );
