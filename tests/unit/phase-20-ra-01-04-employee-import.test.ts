@@ -183,6 +183,7 @@ describe("phase 20 RA-01-04 employee import", () => {
       code: 0,
       message: "ok",
       data: {
+        generatedInitialPasswords: [],
         importedEmployees: [
           {
             publicId: "employee-public-1001",
@@ -264,6 +265,7 @@ describe("phase 20 RA-01-04 employee import", () => {
       code: 0,
       message: "ok",
       data: {
+        generatedInitialPasswords: [],
         importedEmployees: [],
         rejectedRows: [
           {
@@ -326,6 +328,7 @@ describe("phase 20 RA-01-04 employee import", () => {
       code: 0,
       message: "ok",
       data: {
+        generatedInitialPasswords: [],
         importedEmployees: [],
         rejectedRows: [
           {

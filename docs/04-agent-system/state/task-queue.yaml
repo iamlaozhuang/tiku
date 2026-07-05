@@ -17685,6 +17685,123 @@ tasks:
       finalPassClaimed: false
       productionUsabilityClaimed: false
 
+  - id: full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04
+    title: Full-chain Scenario 5 employee import test contract repair
+    phase: full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04
+    sourceStory: scenario_5_harness_repair_blocked_by_stale_employee_import_unit_expectation
+    dependencies:
+      - full-chain-scenario-5-employee-import-harness-repair-2026-07-04
+    status: closed
+    result: pass_employee_import_test_contract_aligned_with_generated_passwords_aggregate
+    taskKind: focused_unit_test_contract_repair
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    targetClosureItem: Align employee import focused unit expectations with the current redacted generatedInitialPasswords aggregate.
+    behaviorBoundary: focused_unit_test_expectation_repair_plus_docs_state_evidence_audit_only_no_product_source_dependency_schema_migration_seed_db_browser_dev_server_provider_staging_prod_cost_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_file_paths_request_shape_labels_command_names_statuses_and_summary_only
+    plannedAt: "2026-07-04T17:20:00-07:00"
+    completedAt: "2026-07-04T17:25:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-test-contract-repair.md
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/adr-007-edition-aware-authorization-source-of-truth.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-employee-import-harness-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-employee-import-harness-repair.md
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    repairScope:
+      sourceBlockedTaskId: full-chain-scenario-5-employee-import-harness-repair-2026-07-04
+      changedTestFileCount: 1
+      expectedGeneratedInitialPasswordsField: empty_array_for_covered_cases
+      productSourceChanged: false
+      nextRerunRestartNode: scenario_5_harness_repair_contract
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/phase-20-ra-01-04-employee-import.test.ts src/server/validators/employee-account.test.ts
+      - npm.cmd run test:unit -- tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown <scoped files>
+      - npm.cmd exec -- prettier --check --ignore-unknown <scoped files>
+      - git diff --check
+      - git diff --name-only -- <blocked paths>
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-5-employee-import-test-contract-repair-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      focusedEmployeeImportUnitAfterRepair: pass
+      adjacentEmployeeAccountRuntimeUnit: pass
+      lint: pass
+      typecheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sourceTestChanged: true
+      productSourceChanged: false
+      browserRuntimeExecuted: false
+      devServerStarted: false
+      directDbConnectionExecuted: false
+      directDbMutationExecuted: false
+      schemaMigrationSeedChanged: false
+      providerCallOrConfigurationExecuted: false
+      dependencyOrLockfileChanged: false
+      privateValueOutput: false
+      nextAction: closeout_then_rerun_scenario_5_employee_import_harness_repair
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
   - id: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
     title: Full-chain Scenario 2 content baseline rerun after knowledge baseline provisioning
     phase: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
