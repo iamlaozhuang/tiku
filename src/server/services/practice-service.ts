@@ -99,6 +99,10 @@ const objectiveAiExplanationText =
   "Local AI explanation: compare your answer with the standard answer and teacher analysis.";
 const objectiveAiExplanationLearningSuggestion =
   "Review this knowledge point and retry a similar objective question.";
+const inFlightFreshPracticeByUserPaper = new Map<
+  string,
+  Promise<PracticeRow>
+>();
 
 void [practiceContractTerm, answerRecordContractTerm, mistakeBookContractTerm];
 
@@ -745,7 +749,14 @@ async function createFreshPractice(
   paper: PracticePaperRow,
   startedAt: Date,
 ): Promise<PracticeRow> {
-  return repository.createPractice({
+  const startKey = `${userContext.userPublicId}\u0000${paper.public_id}`;
+  const inFlightPractice = inFlightFreshPracticeByUserPaper.get(startKey);
+
+  if (inFlightPractice !== undefined) {
+    return inFlightPractice;
+  }
+
+  const practicePromise = repository.createPractice({
     publicId: publicIdFactory.createPublicId("practice"),
     userPublicId: userContext.userPublicId,
     paperPublicId: paper.public_id,
@@ -756,6 +767,16 @@ async function createFreshPractice(
     startedAt,
     expiresAt: addPracticeRetentionWindow(startedAt),
   });
+
+  inFlightFreshPracticeByUserPaper.set(startKey, practicePromise);
+
+  try {
+    return await practicePromise;
+  } finally {
+    if (inFlightFreshPracticeByUserPaper.get(startKey) === practicePromise) {
+      inFlightFreshPracticeByUserPaper.delete(startKey);
+    }
+  }
 }
 
 async function createPracticeResult(

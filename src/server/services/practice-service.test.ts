@@ -423,6 +423,61 @@ describe("practice service", () => {
     ]);
   });
 
+  it("deduplicates concurrent start requests for the same user and paper", async () => {
+    const createdInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findActivePracticeByPaper() {
+          return null;
+        },
+        async createPractice(input) {
+          createdInputs.push(input);
+          await Promise.resolve();
+
+          return createPractice({
+            public_id: input.publicId,
+            paper_public_id: input.paperPublicId,
+            paper_snapshot: input.paperSnapshot,
+            profession: input.profession,
+            level: input.level,
+            subject: input.subject,
+            started_at: input.startedAt,
+            expires_at: input.expiresAt,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    const [firstResult, secondResult] = await Promise.all([
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ]);
+
+    expect(createdInputs).toHaveLength(1);
+    expect(firstResult).toMatchObject({
+      code: 0,
+      data: {
+        practice: {
+          publicId: "practice_public_1",
+        },
+      },
+    });
+    expect(secondResult).toMatchObject({
+      code: 0,
+      data: {
+        practice: {
+          publicId: "practice_public_1",
+        },
+      },
+    });
+  });
+
   it.each([
     ["empty", 0],
     ["oversized", 101],
