@@ -29,6 +29,7 @@ function createRedeemCode(
     code_display: "ABCD2345",
     profession: "monopoly",
     level: 3,
+    redeem_code_type: "personal_standard_activation",
     duration_day: 365,
     redeem_deadline_at: activeDeadline,
     status: "unused",
@@ -261,6 +262,9 @@ describe("redeem code authorization service", () => {
         redeemCodeId: 7,
         userPublicId: "user_public_123",
         redeemedAt: now,
+        redeemCodeType: "personal_standard_activation",
+        profession: "monopoly",
+        level: 3,
         durationDay: 365,
       },
     ]);

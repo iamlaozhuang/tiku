@@ -17128,6 +17128,87 @@ tasks:
     retryCount: 0
     lastFailurePath: null
 
+  - id: full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
+    title: Full-chain Scenario 9 edition upgrade redeem runtime repair
+    phase: full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
+    sourceStory: scenario_9_blocked_edition_upgrade_redeem_runtime_contract
+    dependencies:
+      - full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
+    status: closed
+    result: pass_redeem_code_type_driven_personal_activation_and_upgrade_runtime_repair
+    taskKind: local_source_test_repair
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-9-edition-upgrade-redeem-runtime-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-04T20:58:00-07:00"
+    targetClosureItem: Repair student redeem runtime so personal_advanced_activation creates advanced personal_auth and edition_upgrade creates auth_upgrade without a new personal_auth.
+    behaviorBoundary: minimal_source_test_doc_repair_no_schema_migration_seed_dependency_db_runtime_browser_provider_staging_prod_cost_destructive_db_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_file_paths_selector_labels_role_labels_command_names_statuses_and_summary_only_no_private_values_raw_rows_internal_ids_or_plaintext_card_values
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-edition-upgrade-redeem-runtime-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-edition-upgrade-redeem-runtime-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-edition-upgrade-redeem-runtime-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-9-edition-upgrade-redeem-runtime-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-edition-upgrade-redeem-runtime-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-edition-upgrade-redeem-runtime-repair.md
+      - src/server/repositories/redeem-code-authorization-repository.ts
+      - src/server/services/redeem-code-authorization-service.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/server/services/redeem-code-authorization-service.test.ts
+      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: passed_source_test_repair_closeout
+      readGate: pass
+      sourceRepairImplemented: pass
+      focusedUnitTests: passed_exit_0
+      lint: passed_exit_0
+      typecheck: passed_exit_0
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening: passed_exit_0
+      moduleRunV2PrePushReadiness: passed_after_state_checkpoint_repair
+      schemaMigrationSeedDependencyChanged: false
+      dbRuntimeBrowserProviderStagingProdCostExecuted: false
+      releaseReadinessFinalPassProductionUsabilityClaimed: false
+
   - id: full-chain-scenario-7-redeem-code-contact-config-2026-07-04
     title: Full-chain Scenario 7 redeem code and contact config readiness
     phase: full-chain-scenario-7-redeem-code-contact-config-2026-07-04

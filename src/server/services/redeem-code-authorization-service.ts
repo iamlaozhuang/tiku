@@ -81,9 +81,11 @@ export function createRedeemCodeAuthorizationService(
         );
       }
 
+      const redeemedAt = clock.now();
+
       if (
         redeemCode.status === "expired" ||
-        redeemCode.redeem_deadline_at < clock.now()
+        redeemCode.redeem_deadline_at < redeemedAt
       ) {
         return createErrorResponse(
           REDEEM_CODE_EXPIRED_CODE,
@@ -96,7 +98,10 @@ export function createRedeemCodeAuthorizationService(
           code: redeemCodeInput.value.code,
           redeemCodeId: redeemCode.id,
           userPublicId: userContext.userPublicId,
-          redeemedAt: clock.now(),
+          redeemedAt,
+          redeemCodeType: redeemCode.redeem_code_type,
+          profession: redeemCode.profession,
+          level: redeemCode.level,
           durationDay: redeemCode.duration_day,
         });
 

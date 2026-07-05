@@ -163,6 +163,7 @@ function createRedeemCodeRow(
     code_display: generatedCodePlaceholder,
     profession: "monopoly",
     level: 3,
+    redeem_code_type: "personal_standard_activation",
     duration_day: 365,
     redeem_deadline_at: new Date("2026-06-24T15:59:59.999Z"),
     status: "unused",
@@ -397,6 +398,8 @@ describe("phase 11 redeem_code batch management loop", () => {
         sortBy: "expiresAt",
         sortOrder: "asc",
         userType: "all",
+        userCategory: "all",
+        authFilter: "all",
       },
     ]);
     expect(payload).toMatchObject({

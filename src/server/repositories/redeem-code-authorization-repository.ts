@@ -1,4 +1,9 @@
-import type { AuthStatus, Profession, RedeemCodeStatus } from "../models/auth";
+import type {
+  AuthStatus,
+  Profession,
+  RedeemCodeStatus,
+  RedeemCodeType,
+} from "../models/auth";
 
 export type RedeemCodeAuthorizationRow = {
   id: number;
@@ -6,6 +11,7 @@ export type RedeemCodeAuthorizationRow = {
   code_display: string;
   profession: Profession;
   level: number;
+  redeem_code_type: RedeemCodeType;
   duration_day: number;
   redeem_deadline_at: Date;
   status: RedeemCodeStatus;
@@ -29,6 +35,9 @@ export type RedeemCodeForUserInput = {
   redeemCodeId: number;
   userPublicId: string;
   redeemedAt: Date;
+  redeemCodeType: RedeemCodeType;
+  profession: Profession;
+  level: number;
   durationDay: number;
 };
 
