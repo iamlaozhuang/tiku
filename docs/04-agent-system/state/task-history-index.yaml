@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: remaining-terminal-active-queue-archive-index-cleanup-2026-06-30
-  updatedAt: "2026-06-30T10:15:00-07:00"
+  updatedByTask: full-chain-post-acceptance-queue-cleanup-2026-07-05
+  updatedAt: "2026-07-05T08:17:35-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -16831,3 +16831,48 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: "2026-07-02"
+  - id: full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
+    phase: full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_org_admin_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-05T08:15:00-07:00"
+  - id: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+    phase: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+    status: closed
+    taskKind: local_product_runtime_activity_provisioning
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-05T08:02:00-07:00"
+  - id: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    phase: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    status: closed
+    taskKind: docs_state_closeout_status_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-05T07:44:00-07:00"
+  - id: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    phase: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    status: closed
+    taskKind: local_read_only_acceptance_preflight
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-05"
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: "2026-07-05T07:25:00-07:00"

@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 lowRiskTaskTemplates:
   blockedFiles: &low_risk_blocked_files
     - .env*
@@ -95,7 +95,7 @@ standingApprovals:
       prevent regressions with focused tests and gates, and stop rather than introduce new issues.
     approvalSource: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
     approvalTextSummary: >-
-      User centrally authorized the remaining AI 鍑洪 / AI 缁勫嵎 repair program, including local source/test repair, local
+      User centrally authorized the remaining AI 閸戞椽顣?/ AI 缂佸嫬宓?repair program, including local source/test repair, local
       DB read/write/reset/seed/resource import when task-scoped, D drive local resource package read/import when
       task-scoped, localhost browser multi-role walkthrough, real Qwen Provider sample, env file read/write when
       task-scoped, package/lockfile/dependency change when task-scoped, schema/migration/seed changes when
@@ -393,11 +393,141 @@ standingApprovals:
         evidenceMode: redacted_status_count_summary_only_no_raw_fixture_content
     aiGenerationReusePolicy:
       rule: >-
-        Multi-role `AI鍑洪` and `AI缁勫嵎` repairs must reuse existing AI generation contracts, services, UI primitives, and
+        Multi-role `AI閸戞椽顣絗 and `AI缂佸嫬宓巂 repairs must reuse existing AI generation contracts, services, UI primitives, and
         validation patterns wherever feasible. Do not duplicate role-specific implementations unless a task records a
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-post-acceptance-queue-cleanup-2026-07-05
+    title: Full-chain post-acceptance queue cleanup
+    phase: full-chain-post-acceptance-queue-cleanup-2026-07-05
+    sourceStory: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+    dependencies:
+      - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    status: closed
+    result: pass_queue_cleanup_archived_five_terminal_full_chain_task_blocks_no_final_pass
+    taskKind: docs_only
+    executionProfile: docs_state_queue_archive_index_cleanup
+    validationPolicy: scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-post-acceptance-queue-cleanup-2026-07-05
+    humanApprovalBoundary: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+    plannedAt: "2026-07-05T08:17:35-07:00"
+    claimedAt: "2026-07-05T08:17:35-07:00"
+    materializedAt: "2026-07-05T08:17:35-07:00"
+    completedAt: "2026-07-05T08:25:02-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    archiveBatch:
+      targetArchivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+      targetIndexPath: docs/04-agent-system/state/task-history-index.yaml
+      taskCount: 5
+      taskIds:
+        - full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
+        - full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+        - full-chain-scenario-12-prepush-status-alignment-2026-07-05
+        - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+        - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+      - docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_database_connection_no_raw_rows_no_direct_or_product_runtime_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: no_private_credential_read_or_use_no_private_evidence_no_tokens_sessions_cookies_headers_env_values_connection_strings
+    providerBoundary:
+      providerExecution: blocked
+      costCalibration: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_local_rollup_queue_cleanup_provider_cost_staging_sequence_2026_07_05
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime .env docs/05-execution-logs/archive docs/05-execution-logs/execution-log-index.yaml
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-post-acceptance-queue-cleanup-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-post-acceptance-queue-cleanup-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_queue_cleanup_archived_five_terminal_full_chain_task_blocks_no_final_pass
+      readGate: pass
+      taskPlanPrepared: true
+      stateQueueMaterialized: true
+      archiveTaskIdsListed: 5
+      queueArchiveMovement: pass
+      historyIndexEntries: 5
+      archivedTaskBlocks: 5
+      activeQueueTaskCountAfterCloseout: 210
+      activeQueueNonTerminalCountAfterCloseout: 6
+      activeQueueTerminalCountAfterCloseout: 204
+      archiveCandidateCountAfterCloseout: 195
+      highRiskMetadataRepairBlockedCountAfterCloseout: 188
+      executionLogFilesMoved: 0
+      browserRuntimeExecuted: false
+      directDbReadOrWriteExecuted: false
+      privateCredentialReadOrUsed: false
+      providerStagingProdCostExecuted: false
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      closeoutGates: pass
+
   - id: full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
     title: Full-chain local acceptance rollup and residual risk ledger
     phase: full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
@@ -506,581 +636,6 @@ tasks:
       moduleRunV2PrePushReadiness: pass
       closeoutGates: pass
 
-  - id: full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
-    title: Full-chain Scenario 12 advanced org admin analytics training rerun after activity provisioning
-    phase: full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
-    sourceStory: s12_activity_prerequisite_provisioned_rerun_advanced_org_admin_affected_node
-    dependencies:
-      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-      - full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
-    status: closed
-    result: pass_s12_advanced_org_admin_analytics_training_affected_node_rerun_closeout_gates_passed_no_final_pass
-    taskKind: local_acceptance_runtime_browser_advanced_org_admin_affected_node_rerun
-    moduleRunVersion: 2
-    priority: p0
-    branch: codex/full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
-    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    plannedAt: "2026-07-05T08:05:00-07:00"
-    claimedAt: "2026-07-05T08:05:00-07:00"
-    materializedAt: "2026-07-05T08:05:00-07:00"
-    completedAt: "2026-07-05T08:15:00-07:00"
-    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
-      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
-      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    privateAllowedFiles:
-      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
-      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
-    localDbBoundary:
-      targetDbLabel: tiku_full_chain_acceptance_20260704_001
-      allowed: selector_scoped_read_only_aggregate_preflight_and_post_runtime_counts_only
-      directMutation: blocked
-      productRuntimeMutation: blocked
-      rawRowsEvidence: blocked
-    browserBoundary:
-      browserRuntime: approved_localhost_only_after_minimum_preflight_and_login_readiness_smoke
-      devServer: approved_localhost_only
-      screenshotsRawDomTrace: blocked
-    credentialBoundary:
-      privateCredentialUse: approved_in_memory_only
-      privateEvidence: blocked
-    providerBoundary:
-      providerExecution: blocked
-      aiSubmit: blocked
-      costCalibration: blocked
-      stagingProd: blocked
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    validationSummary:
-      status: pass_s12_advanced_org_admin_analytics_training_affected_node_rerun_closeout_gates_passed_no_final_pass
-      readGate: pass
-      taskPlanPrepared: true
-      stateQueueMaterialized: true
-      minimumPreflightChecklist: pass
-      privateSelectorInput: pass
-      targetDbMatched: 1
-      activeAdvancedMarketing3AuthCount: 1
-      advancedOrgAdminBindingCount: 1
-      standardOrgAdminCount: 1
-      importedAdvancedEmployeeCount: 6
-      publishedMarketing3TrainingCount: 1
-      submittedTrainingAnswerCount: 5
-      distinctSubmittedEmployeeCount: 5
-      s12AnalyticsPrerequisiteMet: true
-      browserLoginReadinessSmoke: pass
-      advancedOrgAdminLogin: pass
-      standardOrgAdminLogin: pass
-      advancedOrgAdminAnalyticsSurface: pass
-      analyticsSubmittedEmployeeCountVisible: 5
-      analyticsEligibleEmployeeCountVisible: 5
-      analyticsEmployeeStatisticsVisible: 1
-      redactedStatisticsBoundaryVisible: 1
-      analyticsExportDisabled: 1
-      advancedOrgAdminEnterpriseTrainingSurface: pass
-      organizationAiNoSubmitBoundary: pass
-      standardOrgAdminReverseBoundary: pass
-      aggregateDbVerification: pass
-      organizationTrainingDraftCountAfter: 1
-      organizationTrainingVersionCountAfter: 1
-      submittedTrainingAnswerCountAfter: 5
-      distinctSubmittedEmployeeCountAfter: 5
-      runtimeCleanup: pass
-      focusedUnitTests: passed_2_files_15_tests
-      scopedPrettierWrite: pass
-      scopedPrettierCheck: pass
-      gitDiffCheck: pass
-      blockedPathDiffCheck: pass_no_output
-      moduleRunV2PreCommitHardening: pass
-      moduleRunV2PrePushReadiness: pass
-      closeoutGates: pass
-      directDbReadExecuted: true
-      directDbWriteExecuted: false
-      productRuntimeDbWriteExecuted: false
-      providerStagingProdCostExecuted: false
-      sourceTestChanged: false
-      schemaMigrationSeedChanged: false
-      dependencyOrLockfileChanged: false
-      releaseReadinessClaimed: false
-      finalPassClaimed: false
-      productionUsabilityClaimed: false
-
-  - id: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
-    title: Full-chain Scenario 12 advanced employee activity provisioning
-    phase: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
-    sourceStory: s12_preflight_blocked_by_insufficient_distinct_submitted_employee_activity
-    dependencies:
-      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-      - full-chain-scenario-12-prepush-status-alignment-2026-07-05
-    status: closed
-    result: pass_s12_advanced_employee_activity_provisioned_for_analytics_threshold
-    taskKind: local_product_runtime_activity_provisioning
-    moduleRunVersion: 2
-    priority: p0
-    branch: codex/full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
-    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    plannedAt: "2026-07-05T08:02:00-07:00"
-    claimedAt: "2026-07-05T08:02:00-07:00"
-    materializedAt: "2026-07-05T08:02:00-07:00"
-    completedAt: "2026-07-05T08:02:00-07:00"
-    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
-      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
-      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    localDbBoundary:
-      targetDbLabel: tiku_full_chain_acceptance_20260704_001
-      allowed: selector_scoped_read_only_aggregate_preflight_and_post_runtime_counts_only
-      directMutation: blocked
-      productRuntimeMutation: approved_only_for_enterprise_training_answer_submission_by_existing_advanced_employee_accounts
-      rawRowsEvidence: blocked
-    browserBoundary:
-      browserRuntime: approved_localhost_only_after_minimum_preflight_and_login_readiness_smoke
-      devServer: approved_localhost_only
-      screenshotsRawDomTrace: blocked
-    credentialBoundary:
-      privateCredentialUse: approved_in_memory_only
-      privateEvidence: blocked
-    providerBoundary:
-      providerExecution: blocked
-      aiSubmit: blocked
-      costCalibration: blocked
-      stagingProd: blocked
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    validationSummary:
-      status: passed_activity_provisioning_and_closeout
-      readGate: pass
-      taskPlanPrepared: true
-      minimumPreflightChecklist: pass
-      privateSelectorInput: pass
-      browserLoginReadinessSmoke: pass
-      productRuntimeTrainingSubmissions: pass
-      productRuntimeTrainingSubmissionCount: 4
-      duplicateSubmissionBoundaryObserved: pass_redacted_business_boundary
-      aggregateDbVerification: pass
-      distinctSubmittedEmployeeCountBefore: 1
-      distinctSubmittedEmployeeCountAfter: 5
-      s12AnalyticsThreshold: 5
-      s12AnalyticsPrerequisiteMet: true
-      runtimeCleanup: pass
-      closeoutGates: pass
-      directDbReadExecuted: true
-      directDbWriteExecuted: false
-      productRuntimeDbWriteExecuted: true
-      providerStagingProdCostExecuted: false
-      focusedUnitValidation: passed_exit_0
-      scopedPrettierWrite: passed_exit_0
-      scopedPrettierCheck: passed_exit_0
-      gitDiffCheck: passed_exit_0
-      blockedPathDiffCheck: passed_exit_0_no_output
-      moduleRunV2PreCommitHardening: passed_exit_0
-      moduleRunV2PrePushReadiness: passed_exit_0_skip_remote_ahead_check
-      sourceTestChanged: false
-      schemaMigrationSeedChanged: false
-      dependencyOrLockfileChanged: false
-      releaseReadinessClaimed: false
-      finalPassClaimed: false
-      productionUsabilityClaimed: false
-
-  - id: full-chain-scenario-12-prepush-status-alignment-2026-07-05
-    title: Full-chain Scenario 12 pre-push status alignment
-    phase: full-chain-scenario-12-prepush-status-alignment-2026-07-05
-    sourceStory: s12_prepush_repository_sha_readiness_block_after_local_master_ff_merge
-    dependencies:
-      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-    status: closed
-    result: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
-    taskKind: docs_state_closeout_status_alignment
-    moduleRunVersion: 2
-    priority: p0
-    branch: codex/full-chain-scenario-12-prepush-sha-alignment-2026-07-05
-    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    plannedAt: "2026-07-05T07:44:00-07:00"
-    claimedAt: "2026-07-05T07:44:00-07:00"
-    materializedAt: "2026-07-05T07:44:00-07:00"
-    closedAt: "2026-07-05T07:44:00-07:00"
-    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
-      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
-      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
-      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    validationSummary:
-      status: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
-      readGate: pass
-      taskPlanPrepared: true
-      priorS12PreflightStatusChangedToClosed: true
-      priorS12PreflightResultPreserved: true
-      localMasterAfterS12Commit: 8659b0fe5a5a174cf183695cf94a11b64fe7518c
-      originMasterBeforePush: 36a5123ec7fa67492672fea7e2948c1cadddb8fd
-      directDbReadExecuted: false
-      directDbWriteExecuted: false
-      browserRuntimeExecuted: false
-      sourceTestChanged: false
-      providerStagingProdCostExecuted: false
-      scopedPrettierWrite: pass
-      scopedPrettierCheck: pass
-      gitDiffCheck: pass
-      blockedPathDiff: pass
-      moduleRunV2PreCommit: pass
-      moduleRunV2PrePush: pass
-      closeoutGates: pass
-      repositoryCheckpointAligned: true
-      releaseReadinessClaimed: false
-      finalPassClaimed: false
-      productionUsabilityClaimed: false
-
-  - id: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-    title: Full-chain Scenario 12 advanced org admin analytics training preflight
-    phase: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-    sourceStory: s12_minimum_preflight_after_s11_training_submission
-    dependencies:
-      - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
-    status: closed
-    result: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
-    taskKind: local_read_only_acceptance_preflight
-    moduleRunVersion: 2
-    priority: p0
-    branch: codex/full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
-    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    plannedAt: "2026-07-05T07:32:00-07:00"
-    claimedAt: "2026-07-05T07:32:00-07:00"
-    materializedAt: "2026-07-05T07:32:00-07:00"
-    blockedAt: "2026-07-05T07:36:00-07:00"
-    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    localDbBoundary:
-      targetDbLabel: tiku_full_chain_acceptance_20260704_001
-      allowed: selector_scoped_read_only_aggregate_preflight_counts_only
-      mutation: blocked
-      rawRowsEvidence: blocked
-    browserBoundary:
-      browserRuntime: blocked_in_this_preflight
-      devServer: blocked_in_this_preflight
-      screenshotsRawDomTrace: blocked
-    providerBoundary:
-      providerExecution: blocked
-      costCalibration: blocked
-      stagingProd: blocked
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    validationSummary:
-      status: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
-      readGate: pass
-      taskPlanPrepared: true
-      minimumPreflightChecklist: blocked
-      targetDbMatched: 1
-      activeAdvancedMarketing3AuthCount: 1
-      advancedOrgAdminBindingCount: 1
-      importedAdvancedEmployeeCount: 6
-      publishedMarketing3TrainingCount: 1
-      publishedTrainingQuestionCountSum: 4
-      submittedTrainingAnswerCount: 1
-      distinctSubmittedEmployeeCount: 1
-      formalPracticeCount: 1
-      formalMockExamCount: 0
-      formalExamReportCount: 0
-      s12AnalyticsThreshold: 5
-      s12AnalyticsPrerequisiteMet: 0
-      directDbReadExecuted: true
-      directDbWriteExecuted: false
-      browserRuntimeExecuted: false
-      devServerStarted: false
-      providerStagingProdCostExecuted: false
-      scopedPrettierWrite: pass
-      scopedPrettierCheck: pass
-      gitDiffCheck: pass
-      blockedPathDiff: pass
-      moduleRunV2PreCommit: pass
-      moduleRunV2PrePush: pass
-      closeoutGates: pass
-      repositoryCheckpointAligned: true
-      sourceTestChanged: false
-      schemaMigrationSeedChanged: false
-      dependencyOrLockfileChanged: false
-      releaseReadinessClaimed: false
-      finalPassClaimed: false
-      productionUsabilityClaimed: false
-    followUp:
-      status: split_activity_provisioning_required
-      nextTask: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
-      restartNode: s12_browser_login_advanced_org_admin_analytics_training_boundary
-      doNotRepeat:
-        - employee_import
-        - s10_standard_employee_learning_data
-        - old_authorization_flow
-        - direct_db_fixture_insertion
-
-  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
-    title: Full-chain Scenario 11 advanced employee affected-node rerun after question count boundary repair
-    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
-    sourceStory: s11_continue_after_paper_source_question_count_boundary_repair
-    dependencies:
-      - full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
-    status: closed
-    result: pass_s11_affected_node_rerun_after_question_count_boundary_repair_closeout_gates_passed_no_final_pass
-    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
-    moduleRunVersion: 2
-    priority: p0
-    branch: codex/full-chain-scenario-11-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
-    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    plannedAt: "2026-07-05T07:15:00-07:00"
-    claimedAt: "2026-07-05T07:15:00-07:00"
-    materializedAt: "2026-07-05T07:15:00-07:00"
-    closedAt: "2026-07-05T07:25:00-07:00"
-    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
-    validationSummary:
-      status: pass_s11_affected_node_rerun_after_question_count_boundary_repair_closeout_gates_passed_no_final_pass
-      readGate: pass
-      taskPlanPrepared: true
-      minimumPreBrowserChecklist: pass
-      targetDbMatched: 1
-      privateAccountPlanPresent: 1
-      privateEmployeeSelectorPresent: 1
-      activeAdvancedMarketing3AuthCount: 1
-      activeAdvancedMarketing3EmployeeCount: 6
-      publishedMarketing3TrainingCount: 1
-      publishedTrainingQuestionCount: 4
-      trainingSourceContextCount: 1
-      trainingSourceContextQuestionCount: 4
-      paperSourceQuestionSnapshotCandidateCount: 7
-      expectedCappedQuestionSnapshotCount: 4
-      existingAdvancedTrainingAnswerCount: 0
-      directDbReadExecuted: true
-      directDbWriteExecuted: false
-      browserLoginReadinessSmoke: pass
-      productBrowserLoginSucceeded: 1
-      enterpriseTrainingAnswerability: pass
-      visibleEnterpriseTrainingRows: 1
-      exposedTrainingQuestionCount: 4
-      answerableQuestionFields: 4
-      enterpriseTrainingProductUiWrite: pass
-      productUiDraftActionExecuted: true
-      productUiSubmitSucceeded: true
-      aiTrainingNoSubmitBoundary: pass
-      aiTrainingSurfaceAvailable: 1
-      aiSubmitExecuted: false
-      selectorScopedAggregateDbVerification: pass
-      postRuntimeTargetEmployeeCount: 1
-      postRuntimeVisibleTrainingCount: 1
-      postRuntimeTrainingAnswerTotalCount: 1
-      postRuntimeSubmittedTrainingAnswerCount: 1
-      postRuntimeInProgressTrainingAnswerCount: 0
-      runtimeCleanup: pass
-      scopedUnitValidation: pass
-      scopedPrettierWrite: pass
-      scopedPrettierCheck: pass
-      gitDiffCheck: pass
-      blockedPathDiff: pass
-      moduleRunV2PreCommit: pass
-      moduleRunV2PrePush: pass
-      closeoutGates: pass
-      repositoryCheckpointAligned: true
-      sourceTestChanged: false
-      schemaMigrationSeedChanged: false
-      dependencyOrLockfileChanged: false
-      providerStagingProdCostExecuted: false
-      releaseReadinessClaimed: false
-      finalPassClaimed: false
-      productionUsabilityClaimed: false
   - id: full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
     title: Full-chain Scenario 11 paper-source question count boundary repair
     phase: full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
@@ -11451,11 +11006,11 @@ tasks:
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - Organization-admin page uses confirmed `企业训练` wording and starts from a list plus visible four-step creation guide rather than three technical columns.
+      - Organization-admin page uses confirmed `浼佷笟璁粌` wording and starts from a list plus visible four-step creation guide rather than three technical columns.
       - First-release source choices are platform paper snapshot, organization AI result, and manual organization-private questions; `mock_exam` is not shown.
       - mock_exam source context is denied by validator and service while historical model enum compatibility is left untouched.
       - Content workspace route no longer grants a content-admin organization-training management surface.
-      - Employee page uses `企业训练` wording, readable assignment metadata, answer-like progress controls, save draft, submit confirmation, and own-result review copy without raw answers or formal mock_exam wording.
+      - Employee page uses `浼佷笟璁粌` wording, readable assignment metadata, answer-like progress controls, save draft, submit confirmation, and own-result review copy without raw answers or formal mock_exam wording.
       - Focused tests cover admin UI, employee UI, source-context denial, and service validator boundaries without schema, Provider, dependency, browser, or direct DB work.
     validationCommands:
       - npm.cmd run test:unit -- tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/validators/organization-training.test.ts src/server/services/organization-training-service.test.ts
@@ -11749,7 +11304,7 @@ tasks:
       - Operations workspace no longer exposes a primary resource-management write menu entry.
       - Old operations resource route redirects to the content resource path instead of remaining an operations write surface.
       - Resource runtime access is denied to authenticated ops_admin and allowed to content_admin/super_admin.
-      - Ordinary resource UI copy uses business wording for资料、解析草稿、发布、重建检索索引 and does not foreground raw chunk/embedding/storage internals.
+      - Ordinary resource UI copy uses business wording for璧勬枡銆佽В鏋愯崏绋裤€佸彂甯冦€侀噸寤烘绱㈢储寮?and does not foreground raw chunk/embedding/storage internals.
       - Resource list has visible page-size, pagination, sort controls, and URL query preservation where practical.
       - Focused unit tests cover route/nav ownership, ops denial, content access, UI copy, and safe redaction boundaries.
     validationCommands:
@@ -12964,7 +12519,7 @@ tasks:
       - npm.cmd run format:check
       - git diff --check
       - powershell.exe -NoProfile -Command "Select-String -Path docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md -Pattern '\| `CT-REQ-[0-9]{3}` \|'"
-      - rg -n -e '运营手动触发重建' -e '需运营手动触发重建' -e '作为\*\*运营管理员，\*\*我想要\*\*手动触发向量重建' docs/01-requirements/modules docs/01-requirements/stories docs/01-requirements/traceability
+      - rg -n -e '杩愯惀鎵嬪姩瑙﹀彂閲嶅缓' -e '闇€杩愯惀鎵嬪姩瑙﹀彂閲嶅缓' -e '浣滀负\*\*杩愯惀绠＄悊鍛橈紝\*\*鎴戞兂瑕乗*\*鎵嬪姩瑙﹀彂鍚戦噺閲嶅缓' docs/01-requirements/modules docs/01-requirements/stories docs/01-requirements/traceability
     validationSummary:
       status: passed
       prettierCheckPassed: true
@@ -13983,7 +13538,7 @@ tasks:
       costCalibrationGate: blocked
     acceptanceStandards:
       - Stage4 baseline records that the first 20 AI generation issue classes are closed or superseded and must not be repeated as repair work without fresh current-baseline evidence.
-      - The AI generation goal-completion audit and acceptance-baseline normalization remain the active closeout records for old AI鍑洪 / AI缁勫嵎 residuals.
+      - The AI generation goal-completion audit and acceptance-baseline normalization remain the active closeout records for old AI閸戞椽顣?/ AI缂佸嫬宓?residuals.
       - The original Stage3 role-workflow blocked evidence remains historical, while the session-cookie follow-up is the active local session/e2e baseline for future walkthrough work.
       - Requirement indexes and AGENTS point to the same recovery order and do not replace the requirement SSOT.
       - No source, test, Provider, browser, DB, dependency, schema, deploy, release readiness, final Pass, production usability, Cost Calibration, prompt, payload, AI output, or full-content evidence is introduced.
@@ -14119,7 +13674,7 @@ tasks:
       - Admin role denial fixture validates current-session workspace denial without synthetic bearer tokens.
       - The exact same stage 3 Playwright spec set is rerun after repair.
       - Evidence contains only redacted status/count/failure-class summaries and no raw sensitive runtime material.
-      - No AI Provider, AI鍔熻兘楠屾敹, release readiness, final Pass, production usability, Cost Calibration, env, direct DB, dependency, schema, or deploy claim is made.
+      - No AI Provider, AI閸旂喕鍏樻灞炬暪, release readiness, final Pass, production usability, Cost Calibration, env, direct DB, dependency, schema, or deploy claim is made.
     validationCommands:
       - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts src/server/auth/session-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
       - npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
@@ -14397,7 +13952,7 @@ tasks:
       costCalibrationGate: blocked
     acceptanceStandards:
       - Current requirement SSOT baseline is mapped to actual source, route, service, repository, schema, and test surfaces.
-      - AI鍑洪 and AI缁勫嵎 reuse is assessed against shared contracts, Provider execution, instruction, structured preview, and role adapters.
+      - AI閸戞椽顣?and AI缂佸嫬宓?reuse is assessed against shared contracts, Provider execution, instruction, structured preview, and role adapters.
       - Findings distinguish static implementation gaps, runtime validation gaps, future product/schema decisions, and non-current-scope items.
       - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
     validationCommands:
@@ -14718,7 +14273,7 @@ tasks:
     phase: ai-generation-requirements-ssot-alignment-2026-07-02
     sourceStory: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
     humanApprovalBoundary: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
-    targetClosureItem: Align AI鍑洪 and AI缁勫嵎 requirements SSOT with the current 2026-07-02 acceptance baseline
+    targetClosureItem: Align AI閸戞椽顣?and AI缂佸嫬宓?requirements SSOT with the current 2026-07-02 acceptance baseline
     behaviorBoundary: docs_requirement_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
     taskKind: docs_requirement_alignment
     moduleRunVersion: 2
@@ -14811,7 +14366,7 @@ tasks:
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - Current AI鍑洪 and AI缁勫嵎 requirement reading is expressed as one dated traceability overlay.
+      - Current AI閸戞椽顣?and AI缂佸嫬宓?requirement reading is expressed as one dated traceability overlay.
       - Standard-only AI generation non-goal remains preserved while unified standard/advanced repair scope remains explicit.
       - Content admin, advanced learner, advanced organization employee, and advanced organization admin AI generation boundaries are mapped to current docs.
       - Older blocked/gap wording is marked historical or superseded where the 2026-07-02 baseline already covers it.
@@ -14868,7 +14423,7 @@ tasks:
     phase: ai-generation-acceptance-baseline-normalization-2026-07-02
     sourceStory: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
     humanApprovalBoundary: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
-    targetClosureItem: Normalize current AI鍑洪 and AI缁勫嵎 evidence and state into one current baseline
+    targetClosureItem: Normalize current AI閸戞椽顣?and AI缂佸嫬宓?evidence and state into one current baseline
     behaviorBoundary: docs_state_evidence_baseline_normalization_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
     taskKind: docs_state_acceptance_baseline_normalization
     moduleRunVersion: 2
@@ -14947,7 +14502,7 @@ tasks:
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - Current AI鍑洪 and AI缁勫嵎 acceptance baseline is expressed as one current state.
+      - Current AI閸戞椽顣?and AI缂佸嫬宓?acceptance baseline is expressed as one current state.
       - Quick acceptance ops_admin local login residual is marked closed by later local login residual evidence.
       - Quick acceptance logistics non-covered wording is superseded for the declared AI generation acceptance scope by later resource-pack and Provider evidence, without claiming broad production/full logistics coverage.
       - MML-RERUN-01 and MML-RERUN-02 are closed or superseded by later monopoly OCR/runtime RAG, parser, and Provider count evidence.
@@ -15006,7 +14561,7 @@ tasks:
     phase: ai-generation-goal-completion-audit-2026-07-02
     sourceStory: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
     humanApprovalBoundary: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
-    targetClosureItem: Audit AI鍑洪 and AI缁勫嵎 goal acceptance criteria and close the problem list only if every criterion has evidence
+    targetClosureItem: Audit AI閸戞椽顣?and AI缂佸嫬宓?goal acceptance criteria and close the problem list only if every criterion has evidence
     behaviorBoundary: docs_state_goal_completion_audit_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
     taskKind: docs_state_goal_completion_audit
     moduleRunVersion: 2
@@ -15092,9 +14647,9 @@ tasks:
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - Every AI鍑洪 and AI缁勫嵎 goal criterion maps to closed child evidence.
-      - The old AI缁勫嵎 total-count residual is explicitly superseded by later parser and Provider count evidence.
-      - The old monopoly AI鍑洪 residual is explicitly closed by OCR/runtime RAG coverage, parser repair, and bounded Provider rerun evidence.
+      - Every AI閸戞椽顣?and AI缂佸嫬宓?goal criterion maps to closed child evidence.
+      - The old AI缂佸嫬宓?total-count residual is explicitly superseded by later parser and Provider count evidence.
+      - The old monopoly AI閸戞椽顣?residual is explicitly closed by OCR/runtime RAG coverage, parser repair, and bounded Provider rerun evidence.
       - Focused AI generation regression tests, lint, typecheck, scoped Prettier, diff check, and Module Run v2 gates pass.
       - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
     validationCommands:
@@ -15152,7 +14707,7 @@ tasks:
     phase: ai-generation-ai-question-provider-structured-output-robustness-2026-07-02
     sourceStory: seeded_by_bounded_provider_rerun_ai_question_residual_2026_07_02
     humanApprovalBoundary: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
-    targetClosureItem: Harden AI鍑洪 structured-output parsing and Provider instructions without changing evidence redaction
+    targetClosureItem: Harden AI閸戞椽顣?structured-output parsing and Provider instructions without changing evidence redaction
     behaviorBoundary: local_source_test_shared_parser_instruction_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
     taskKind: implementation
     moduleRunVersion: 2
@@ -15232,9 +14787,9 @@ tasks:
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - AI鍑洪 parser accepts strict top-level `questions` and compatible array roots without loosening exact requested count.
-      - AI鍑洪 Provider instruction requires a single JSON object, top-level `questions`, exact requested count, and no Markdown/prose wrapper.
-      - Existing AI缁勫嵎 structured count behavior remains unchanged.
+      - AI閸戞椽顣?parser accepts strict top-level `questions` and compatible array roots without loosening exact requested count.
+      - AI閸戞椽顣?Provider instruction requires a single JSON object, top-level `questions`, exact requested count, and no Markdown/prose wrapper.
+      - Existing AI缂佸嫬宓?structured count behavior remains unchanged.
       - Focused route/runtime tests pass for admin and personal shared Provider flows.
       - No Provider call, browser runtime, DB access, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration claim is allowed in this task.
     validationCommands:
@@ -15288,7 +14843,7 @@ tasks:
     phase: ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
     sourceStory: seeded_by_ai_question_provider_structured_output_robustness_2026_07_02
     humanApprovalBoundary: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
-    targetClosureItem: Rerun the previously failed content-admin AI鍑洪 Provider samples after shared parser repair
+    targetClosureItem: Rerun the previously failed content-admin AI閸戞椽顣?Provider samples after shared parser repair
     behaviorBoundary: bounded_localhost_content_admin_provider_rerun_only_no_source_dependency_schema_deploy_release_claim
     taskKind: bounded_provider_acceptance_rerun
     moduleRunVersion: 2
@@ -15365,10 +14920,10 @@ tasks:
       costCalibrationGate: blocked
     acceptanceStandards:
       - Provider submit attempts are at most 2 and Provider retries are 0.
-      - content_admin monopoly skill AI鍑洪 returns structured preview question_set `10/10`.
-      - content_admin logistics theory AI鍑洪 returns structured preview question_set `10/10`.
+      - content_admin monopoly skill AI閸戞椽顣?returns structured preview question_set `10/10`.
+      - content_admin logistics theory AI閸戞椽顣?returns structured preview question_set `10/10`.
       - Evidence records only redacted status/category/count/duration metadata.
-      - No source/test code, AI缁勫嵎 repair, direct DB action by agent, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
+      - No source/test code, AI缂佸嫬宓?repair, direct DB action by agent, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
     validationCommands:
       - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
       - npm.cmd run lint
@@ -15471,7 +15026,7 @@ tasks:
       - src/**/resource*/**
       - src/**/knowledge*/**
       - src/**/local-acceptance*/**
-      - D:\tiku\rawfiles\鏁欐潗涓庨壌瀹氱偣缁嗗垯\涓撳崠璧勬枡\**
+      - D:\tiku\rawfiles\閺佹瑦娼楁稉搴ㄥ鐎规氨鍋ｇ紒鍡楀灟\娑撴挸宕犵挧鍕灐\**
       - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
       - .env.local
     blockedFiles:
@@ -15758,7 +15313,7 @@ tasks:
       - src/db/owner-preview-runtime-rag-resource-import.ts
       - tests/unit/owner-preview-resource-import.test.ts
       - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
-      - D:\tiku\rawfiles\鏁欐潗涓庨壌瀹氱偣缁嗗垯\**
+      - D:\tiku\rawfiles\閺佹瑦娼楁稉搴ㄥ鐎规氨鍋ｇ紒鍡楀灟\**
     blockedFiles:
       - .env*
       - package.json
@@ -16464,7 +16019,7 @@ tasks:
     phase: ai-generation-20-fix-quick-acceptance-2026-07-02
     sourceStory: current_user_approved_quick_acceptance_for_20_ai_generation_repairs_2026_07_02
     humanApprovalBoundary: current_user_fresh_approved_quick_acceptance_2026_07_02
-    targetClosureItem: quick acceptance for the 20 repaired AI鍑洪 / AI缁勫嵎 issue classes
+    targetClosureItem: quick acceptance for the 20 repaired AI閸戞椽顣?/ AI缂佸嫬宓?issue classes
     behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     taskKind: local_browser_owner_preview_quick_acceptance
     moduleRunVersion: 2
@@ -16555,7 +16110,7 @@ tasks:
     phase: ai-generation-owner-preview-closeout-audit-2026-07-02
     sourceStory: current_user_asked_remaining_task_estimate_for_ai_generation_owner_preview_goal_2026_07_02
     humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
-    targetClosureItem: audit remaining AI鍑洪 / AI缁勫嵎 owner-preview task count and unclosed finding classes
+    targetClosureItem: audit remaining AI閸戞椽顣?/ AI缂佸嫬宓?owner-preview task count and unclosed finding classes
     behaviorBoundary: docs_state_only_no_runtime_source_db_provider_env_dependency_schema_e2e_deploy
     taskKind: docs_state_closeout_audit
     moduleRunVersion: 2
@@ -16807,7 +16362,7 @@ tasks:
     phase: ai-generation-bounded-provider-closure-rerun-2026-07-02
     sourceStory: current_goal_after_post_application_closure_rerun_provider_sample_deferred_2026_07_02
     humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
-    targetClosureItem: bounded localhost Provider rerun for fresh AI 鍑洪 / AI缁勫嵎 current-result closure after application-state repair
+    targetClosureItem: bounded localhost Provider rerun for fresh AI 閸戞椽顣?/ AI缂佸嫬宓?current-result closure after application-state repair
     behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     executionProfile: localhost_owner_preview_bounded_provider_redacted_evidence_only
     evidenceMode: role_route_status_count_duration_bucket_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
@@ -16912,7 +16467,7 @@ tasks:
     phase: ai-generation-post-application-closure-rerun-2026-07-02
     sourceStory: current_goal_after_application_closure_and_mixed_state_repair_2026_07_02
     humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
-    targetClosureItem: rerun localhost owner-preview AI 鍑洪 / AI缁勫嵎 after application closure and learner mixed-state repair
+    targetClosureItem: rerun localhost owner-preview AI 閸戞椽顣?/ AI缂佸嫬宓?after application closure and learner mixed-state repair
     behaviorBoundary: local_dev_server_browser_role_matrix_docs_state_only_no_source_dependency_schema_env_deploy
     executionProfile: localhost_owner_preview_rerun_redacted_evidence_only
     evidenceMode: role_route_status_count_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
@@ -17116,7 +16671,7 @@ tasks:
     phase: ai-generation-post-adoption-closure-rerun-2026-07-02
     sourceStory: current_goal_after_grounded_result_adoption_closure_repair_2026_07_02
     humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
-    targetClosureItem: rerun local owner-preview AI 鍑洪 / AI缁勫嵎 after grounded structured result and no-fabricated-adoption repair
+    targetClosureItem: rerun local owner-preview AI 閸戞椽顣?/ AI缂佸嫬宓?after grounded structured result and no-fabricated-adoption repair
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     executionProfile: localhost_owner_preview_rerun_redacted_evidence_only
     evidenceMode: role_route_status_count_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
@@ -17309,7 +16864,7 @@ tasks:
     phase: ai-generation-post-query-wording-provider-rerun-2026-07-02
     sourceStory: current_goal_after_grounding_query_and_ordinary_ui_wording_repair_2026_07_02
     humanApprovalBoundary: current_user_bounded_goal_credential_localhost_provider_and_cross_surface_scan_reminder_2026_07_02
-    targetClosureItem: rerun localhost owner-preview AI 鍑洪 / AI缁勫嵎 after grounding query token alignment and ordinary UI wording repair
+    targetClosureItem: rerun localhost owner-preview AI 閸戞椽顣?/ AI缂佸嫬宓?after grounding query token alignment and ordinary UI wording repair
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     executionProfile: local_owner_preview_role_provider_rerun_docs_state_only_after_source_repair
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
@@ -17443,7 +16998,7 @@ tasks:
     phase: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
     sourceStory: current_goal_post_runtime_resource_provider_rerun_findings_2026_07_02
     humanApprovalBoundary: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
-    targetClosureItem: repair shared grounding query token alignment and remove contract-ready technical wording from ordinary AI generation UI across shared AI 鍑洪 / AI缁勫嵎 surfaces
+    targetClosureItem: repair shared grounding query token alignment and remove contract-ready technical wording from ordinary AI generation UI across shared AI 閸戞椽顣?/ AI缂佸嫬宓?surfaces
     behaviorBoundary: local_source_test_repair_only_no_db_provider_env_browser_dependency_schema_deploy
     executionProfile: systematic_debugging_tdd_first_shared_service_reuse_cross_surface_static_scan
     evidenceMode: redacted_status_count_validation_summary_only_no_prompt_payload_raw_ai_output_or_generated_content
@@ -17582,7 +17137,7 @@ tasks:
     phase: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
     sourceStory: current_goal_after_runtime_rag_resource_import_2026_07_02
     humanApprovalBoundary: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
-    targetClosureItem: rerun local owner-preview AI 鍑洪 / AI缁勫嵎 after runtime RAG resource import and verify grounded Provider behavior on supported scopes
+    targetClosureItem: rerun local owner-preview AI 閸戞椽顣?/ AI缂佸嫬宓?after runtime RAG resource import and verify grounded Provider behavior on supported scopes
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     executionProfile: local_owner_preview_role_provider_rerun_docs_state_only
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
@@ -17718,7 +17273,7 @@ tasks:
     phase: ai-generation-resource-runtime-coverage-2026-07-02
     sourceStory: current_user_resource_grounding_and_internal_wording_cross_surface_scan_reminder_2026_07_02
     humanApprovalBoundary: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
-    targetClosureItem: import available owner-facing material package content into local runtime RAG coverage for AI 鍑洪 / AI缁勫嵎 before the next Provider/browser rerun
+    targetClosureItem: import available owner-facing material package content into local runtime RAG coverage for AI 閸戞椽顣?/ AI缂佸嫬宓?before the next Provider/browser rerun
     behaviorBoundary: local_runtime_resource_catalog_and_source_tests_only_no_db_env_provider_e2e_schema_deploy
     executionProfile: systematic_debugging_tdd_first_shared_runtime_rag_reuse
     evidenceMode: redacted_status_count_coverage_summary_only_no_resource_body_prompt_payload_raw_ai_output_or_generated_content
@@ -17841,7 +17396,7 @@ tasks:
     phase: ai-generation-cross-surface-closure-2026-07-02
     sourceStory: current_user_cross_surface_grounding_and_ui_leakage_reminder_2026_07_02
     humanApprovalBoundary: current_user_bounded_ai_generation_goal_and_cross_surface_scan_reminder_2026_07_02
-    targetClosureItem: close remaining cross-role AI 鍑洪 / AI 缁勫嵎 resource grounding and ordinary UI technical wording risks with source/tests before the next browser/provider rerun
+    targetClosureItem: close remaining cross-role AI 閸戞椽顣?/ AI 缂佸嫬宓?resource grounding and ordinary UI technical wording risks with source/tests before the next browser/provider rerun
     behaviorBoundary: local_source_test_docs_only_no_db_provider_env_browser_dependency_schema_deploy
     executionProfile: systematic_debugging_tdd_first_shared_contract_reuse
     evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
@@ -17985,7 +17540,7 @@ tasks:
     phase: ai-generation-post-repair-localhost-rerun-2026-07-01
     sourceStory: current_goal_ai_generation_post_repair_owner_preview_validation_2026_07_01
     humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-    targetClosureItem: rerun localhost owner preview for AI 鍑洪 / AI 缁勫嵎 after grounding, idempotency, visible result, and UI wording repairs
+    targetClosureItem: rerun localhost owner preview for AI 閸戞椽顣?/ AI 缂佸嫬宓?after grounding, idempotency, visible result, and UI wording repairs
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_deploy
     executionProfile: local_browser_real_provider_matrix_rerun_docs_state
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_ai_output
@@ -18243,7 +17798,7 @@ tasks:
     phase: ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
     sourceStory: current_goal_ai_generation_post_debug_summary_repair_owner_preview_validation_2026_07_01
     humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-    targetClosureItem: rerun localhost owner preview after admin debug summary repair and verify AI 鍑洪 / AI缁勫嵎 surfaces do not show diagnostic wording; run bounded Provider samples only when grounding is sufficient
+    targetClosureItem: rerun localhost owner preview after admin debug summary repair and verify AI 閸戞椽顣?/ AI缂佸嫬宓?surfaces do not show diagnostic wording; run bounded Provider samples only when grounding is sufficient
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
     taskKind: local_real_provider_owner_preview_matrix_rerun
@@ -18363,7 +17918,7 @@ tasks:
     phase: ai-generation-admin-parameters-runtime-repair-2026-07-01
     sourceStory: current_goal_ai_generation_post_admin_debug_summary_localhost_rerun_2026_07_01
     humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-    targetClosureItem: repair shared admin AI generation page parameter-state runtime crash that blocks content and organization admin AI 鍑洪 / AI缁勫嵎 pages
+    targetClosureItem: repair shared admin AI generation page parameter-state runtime crash that blocks content and organization admin AI 閸戞椽顣?/ AI缂佸嫬宓?pages
     behaviorBoundary: source_and_focused_tests_only_no_db_provider_env_dependency_schema_deploy
     taskKind: source_test_repair
     moduleRunVersion: 2
@@ -18391,7 +17946,7 @@ tasks:
       note: >-
         User explicitly reminded that resource-pack/RAG grounding and technical governance wording leaks span
         multiple roles and UI surfaces. This task only removes the admin runtime blocker; the follow-up walkthrough
-        must scan every AI 鍑洪 / AI缁勫嵎 role entrance before marking those concerns closed.
+        must scan every AI 閸戞椽顣?/ AI缂佸嫬宓?role entrance before marking those concerns closed.
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -18464,7 +18019,7 @@ tasks:
     phase: ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
     sourceStory: current_goal_ai_generation_admin_parameters_runtime_repair_2026_07_01
     humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-    targetClosureItem: rerun localhost owner preview after admin parameter runtime repair and scan all AI 鍑洪 / AI缁勫嵎 role entrances for resource grounding and ordinary UI wording leakage
+    targetClosureItem: rerun localhost owner preview after admin parameter runtime repair and scan all AI 閸戞椽顣?/ AI缂佸嫬宓?role entrances for resource grounding and ordinary UI wording leakage
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
     taskKind: local_owner_preview_matrix_rerun
@@ -18573,7 +18128,7 @@ tasks:
     phase: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
     sourceStory: current_goal_ai_generation_post_admin_parameters_localhost_rerun_2026_07_01
     humanApprovalBoundary: current_user_cross_role_scan_reminder_and_prior_central_authorization_2026_07_01
-    targetClosureItem: remove local-preview owner-preview and internal governance wording from ordinary AI 鍑洪 / AI缁勫嵎 UI across shared admin and student surfaces
+    targetClosureItem: remove local-preview owner-preview and internal governance wording from ordinary AI 閸戞椽顣?/ AI缂佸嫬宓?UI across shared admin and student surfaces
     behaviorBoundary: source_and_focused_tests_only_no_db_provider_env_browser_dependency_schema_or_runtime_mutation
     evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
     taskKind: source_test_repair
@@ -18706,7 +18261,7 @@ tasks:
     phase: ai-generation-resource-grounding-enforcement-repair-2026-07-01
     sourceStory: current_goal_ai_generation_resource_pack_grounding_after_localhost_rerun_2026_07_01
     humanApprovalBoundary: current_user_cross_role_scan_reminder_and_prior_central_authorization_2026_07_01
-    targetClosureItem: ensure AI 鍑洪 / AI缁勫嵎 Provider execution is constrained by imported resource knowledge chunk citation evidence and blocked when evidence is insufficient
+    targetClosureItem: ensure AI 閸戞椽顣?/ AI缂佸嫬宓?Provider execution is constrained by imported resource knowledge chunk citation evidence and blocked when evidence is insufficient
     behaviorBoundary: source_and_focused_tests_only_no_env_secret_output_no_provider_runtime_no_dependency_schema_or_deploy
     evidenceMode: redacted_status_count_contract_summary_only_no_provider_payload_prompt_raw_ai_output_or_full_generated_content
     taskKind: source_test_repair
@@ -18838,7 +18393,7 @@ tasks:
     phase: ai-generation-eight-role-credential-backed-rerun-2026-07-01
     sourceStory: current_goal_ai_generation_post_source_repairs_exact_owner_preview_role_matrix_2026_07_01
     humanApprovalBoundary: current_user_authorized_localhost_credential_entry_without_evidence_capture_2026_07_01
-    targetClosureItem: rerun exact eight-role localhost owner preview AI 鍑洪 / AI缁勫嵎 matrix after UI wording and resource grounding repairs
+    targetClosureItem: rerun exact eight-role localhost owner preview AI 閸戞椽顣?/ AI缂佸嫬宓?matrix after UI wording and resource grounding repairs
     behaviorBoundary: local_dev_server_browser_role_matrix_and_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_resource_content
     taskKind: local_owner_preview_matrix_rerun
@@ -19325,7 +18880,7 @@ tasks:
     phase: ai-generation-post-grounding-provider-matrix-rerun-2026-07-01
     sourceStory: current_goal_post_grounding_ai_generation_owner_preview_rerun_2026_07_01
     humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-    targetClosureItem: rerun AI 鍑洪 / AI 缁勫嵎 role-function Provider matrix after grounding and product UI repair
+    targetClosureItem: rerun AI 閸戞椽顣?/ AI 缂佸嫬宓?role-function Provider matrix after grounding and product UI repair
     behaviorBoundary: local_browser_real_provider_matrix_rerun_docs_state_only_no_source_repair_no_e2e_no_schema_migration_dependency_deploy
     executionProfile: local_owner_preview_role_provider_rerun_docs_state_only
     evidenceMode: role_route_workflow_status_count_duration_bucket_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_ai_output
@@ -19432,7 +18987,7 @@ tasks:
     phase: ai-generation-grounding-product-ui-repair-2026-07-01
     sourceStory: current_owner_preview_feedback_ai_generation_resource_grounding_and_governance_copy_2026_07_01
     humanApprovalBoundary: current_user_central_authorization_for_ai_generation_full_repair_chain_2026_07_01
-    targetClosureItem: shared AI 鍑洪 / AI 缁勫嵎 grounding gate, product UI wording, ops route guard, and paper quantity preview regression repair
+    targetClosureItem: shared AI 閸戞椽顣?/ AI 缂佸嫬宓?grounding gate, product UI wording, ops route guard, and paper quantity preview regression repair
     behaviorBoundary: local_source_test_docs_repair_no_db_mutation_no_provider_no_env_no_dependency_no_schema_no_browser_no_deploy
     executionProfile: tdd_first_shared_contract_reuse_and_product_surface_repair
     evidenceMode: redacted_status_and_validation_summary_only_no_raw_content_or_provider_io
@@ -19965,7 +19520,7 @@ tasks:
       - OP-01
       - OP-05
       - OP-06
-    scope: Repair AI 鍑洪 / AI 缁勫嵎 task semantics, level parameter contract, and structured quantity/result contract using shared services and fake Provider tests.
+    scope: Repair AI 閸戞椽顣?/ AI 缂佸嫬宓?task semantics, level parameter contract, and structured quantity/result contract using shared services and fake Provider tests.
     requiredBeforeImplementation:
       - create_short_codex_branch
       - materialize_task_boundaries_and_plan
@@ -20069,7 +19624,7 @@ tasks:
       schemaMigrationOrSeedChanged: false
       deploymentExecuted: false
     targetExitCriteria:
-      - learner AI 鍑洪 and AI 缁勫嵎 no longer share incorrect task/function semantics
+      - learner AI 閸戞椽顣?and AI 缂佸嫬宓?no longer share incorrect task/function semantics
       - level options are 1_2_3_4_5 by shared contract
       - quantity 10 produces 10 structured drafts or explicit parse failure
 
@@ -20219,7 +19774,7 @@ tasks:
     targetExitCriteria:
       - empty knowledge or missing question bank states are explicit
       - current generation result is visible near the action area or focused by UI behavior
-      - AI 鍑洪 and AI 缁勫嵎 histories are isolated and paginated/filterable
+      - AI 閸戞椽顣?and AI 缂佸嫬宓?histories are isolated and paginated/filterable
 
   - id: ai-generation-data-backed-walkthrough-2026-07-01
     title: AI generation data-backed walkthrough
@@ -20235,7 +19790,7 @@ tasks:
     dependsOn:
       - ai-generation-p2-history-ux-2026-07-01
     centralApproval: ai-generation-central-repair-approval-2026-07-01
-    scope: Validate AI 鍑洪 / AI 缁勫嵎 with an approved local鑴辨晱 resource set covering profession, level, subject, knowledge_node, question bank, and paper examples.
+    scope: Validate AI 閸戞椽顣?/ AI 缂佸嫬宓?with an approved local閼磋鲸鏅?resource set covering profession, level, subject, knowledge_node, question bank, and paper examples.
     centralApprovalCovers:
       - local_database_connection_or_mutation_if_needed
       - resource_import_or_seed
@@ -20261,8 +19816,8 @@ tasks:
       - D:/tiku-local-private/**
       - D:/*resource*
       - D:/*Resource*
-      - D:/*璧勬枡*
-      - D:/*璧勬簮*
+      - D:/*鐠у嫭鏋?
+      - D:/*鐠у嫭绨?
       - scripts/**
       - package.json
       - docs/**
@@ -20336,7 +19891,7 @@ tasks:
     dependsOn:
       - ai-generation-data-backed-walkthrough-2026-07-01
     centralApproval: ai-generation-central-repair-approval-2026-07-01
-    scope: Build or repair a dry-run-first local owner-preview importer contract for the approved private resource package so data-backed AI 鍑洪 / AI 缁勫嵎 walkthrough has profession, level, subject, knowledge_node, question, paper, material, and resource coverage.
+    scope: Build or repair a dry-run-first local owner-preview importer contract for the approved private resource package so data-backed AI 閸戞椽顣?/ AI 缂佸嫬宓?walkthrough has profession, level, subject, knowledge_node, question, paper, material, and resource coverage.
     centralApprovalCovers:
       - local_database_connection_or_mutation_if_task_scoped
       - reading_local_private_resource_package
@@ -20466,7 +20021,7 @@ tasks:
       - ai-generation-p2-history-ux-2026-07-01
       - ai-generation-resource-import-contract-2026-07-01
     centralApproval: ai-generation-central-repair-approval-2026-07-01
-    scope: Rerun the AI 鍑洪 / AI 缁勫嵎 role/function matrix and record pass/fail/blocked/not_applicable outcomes.
+    scope: Rerun the AI 閸戞椽顣?/ AI 缂佸嫬宓?role/function matrix and record pass/fail/blocked/not_applicable outcomes.
     runtimeApprovalCoveredBy: ai-generation-central-repair-approval-2026-07-01
     latestApprovalRefreshAt: "2026-07-01T11:04:40-07:00"
     latestApprovalRefreshSource: current_user_authorized_agent_read_and_input_local_role_credentials_2026_07_01
@@ -20572,7 +20127,7 @@ tasks:
     dependsOn:
       - ai-generation-eight-role-matrix-rerun-2026-07-01
     centralApproval: ai-generation-central-repair-approval-2026-07-01
-    scope: Run a small local Qwen sample only for already-unblocked eligible roles, at most one AI 鍑洪 and one AI 缁勫嵎 per role.
+    scope: Run a small local Qwen sample only for already-unblocked eligible roles, at most one AI 閸戞椽顣?and one AI 缂佸嫬宓?per role.
     branch: codex/ai-generation-real-provider-sample
     claimedAt: "2026-07-01T11:20:00-07:00"
     plannedAt: "2026-07-01T11:20:00-07:00"
@@ -20790,7 +20345,7 @@ tasks:
     validatedAt: "2026-07-01T12:50:59-07:00"
     reviewedAt: "2026-07-01T12:50:59-07:00"
     closedAt: "2026-07-01T12:50:59-07:00"
-    scope: Rerun scoped owner-preview AI 鍑洪 / AI 缁勫嵎 role matrix after Provider structure and feedback repair.
+    scope: Rerun scoped owner-preview AI 閸戞椽顣?/ AI 缂佸嫬宓?role matrix after Provider structure and feedback repair.
     maxProviderSubmitAttempts: 9
     roleMatrix:
       roles:

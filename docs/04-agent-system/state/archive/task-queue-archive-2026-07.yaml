@@ -1,10 +1,12 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 archive:
   month: 2026-07
   sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: queue-and-execution-log-archive-first-batch-2026-07-02
   archivedAt: "2026-07-02T14:00:00-07:00"
-  taskCount: 10
+  updatedByTask: full-chain-post-acceptance-queue-cleanup-2026-07-05
+  updatedAt: "2026-07-05T08:17:35-07:00"
+  taskCount: 15
 tasks:
   - id: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
     title: AI generation bounded monopoly question Provider rerun after plaintext acceptance repair
@@ -1273,3 +1275,579 @@ tasks:
       finalPassClaimed: false
       costCalibrationExecuted: false
       nextRecommendedTaskId: ai-generation-ai-question-provider-structured-output-robustness-2026-07-02
+
+  - id: full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
+    title: Full-chain Scenario 12 advanced org admin analytics training rerun after activity provisioning
+    phase: full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
+    sourceStory: s12_activity_prerequisite_provisioned_rerun_advanced_org_admin_affected_node
+    dependencies:
+      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+      - full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+    status: closed
+    result: pass_s12_advanced_org_admin_analytics_training_affected_node_rerun_closeout_gates_passed_no_final_pass
+    taskKind: local_acceptance_runtime_browser_advanced_org_admin_affected_node_rerun
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T08:05:00-07:00"
+    claimedAt: "2026-07-05T08:05:00-07:00"
+    materializedAt: "2026-07-05T08:05:00-07:00"
+    completedAt: "2026-07-05T08:15:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+      - D:/tiku-local-private/acceptance/role-separated-local-accounts-2026-06-23.md
+    localDbBoundary:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      allowed: selector_scoped_read_only_aggregate_preflight_and_post_runtime_counts_only
+      directMutation: blocked
+      productRuntimeMutation: blocked
+      rawRowsEvidence: blocked
+    browserBoundary:
+      browserRuntime: approved_localhost_only_after_minimum_preflight_and_login_readiness_smoke
+      devServer: approved_localhost_only
+      screenshotsRawDomTrace: blocked
+    credentialBoundary:
+      privateCredentialUse: approved_in_memory_only
+      privateEvidence: blocked
+    providerBoundary:
+      providerExecution: blocked
+      aiSubmit: blocked
+      costCalibration: blocked
+      stagingProd: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: pass_s12_advanced_org_admin_analytics_training_affected_node_rerun_closeout_gates_passed_no_final_pass
+      readGate: pass
+      taskPlanPrepared: true
+      stateQueueMaterialized: true
+      minimumPreflightChecklist: pass
+      privateSelectorInput: pass
+      targetDbMatched: 1
+      activeAdvancedMarketing3AuthCount: 1
+      advancedOrgAdminBindingCount: 1
+      standardOrgAdminCount: 1
+      importedAdvancedEmployeeCount: 6
+      publishedMarketing3TrainingCount: 1
+      submittedTrainingAnswerCount: 5
+      distinctSubmittedEmployeeCount: 5
+      s12AnalyticsPrerequisiteMet: true
+      browserLoginReadinessSmoke: pass
+      advancedOrgAdminLogin: pass
+      standardOrgAdminLogin: pass
+      advancedOrgAdminAnalyticsSurface: pass
+      analyticsSubmittedEmployeeCountVisible: 5
+      analyticsEligibleEmployeeCountVisible: 5
+      analyticsEmployeeStatisticsVisible: 1
+      redactedStatisticsBoundaryVisible: 1
+      analyticsExportDisabled: 1
+      advancedOrgAdminEnterpriseTrainingSurface: pass
+      organizationAiNoSubmitBoundary: pass
+      standardOrgAdminReverseBoundary: pass
+      aggregateDbVerification: pass
+      organizationTrainingDraftCountAfter: 1
+      organizationTrainingVersionCountAfter: 1
+      submittedTrainingAnswerCountAfter: 5
+      distinctSubmittedEmployeeCountAfter: 5
+      runtimeCleanup: pass
+      focusedUnitTests: passed_2_files_15_tests
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      closeoutGates: pass
+      directDbReadExecuted: true
+      directDbWriteExecuted: false
+      productRuntimeDbWriteExecuted: false
+      providerStagingProdCostExecuted: false
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
+  - id: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+    title: Full-chain Scenario 12 advanced employee activity provisioning
+    phase: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+    sourceStory: s12_preflight_blocked_by_insufficient_distinct_submitted_employee_activity
+    dependencies:
+      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+      - full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    status: closed
+    result: pass_s12_advanced_employee_activity_provisioned_for_analytics_threshold
+    taskKind: local_product_runtime_activity_provisioning
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T08:02:00-07:00"
+    claimedAt: "2026-07-05T08:02:00-07:00"
+    materializedAt: "2026-07-05T08:02:00-07:00"
+    completedAt: "2026-07-05T08:02:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-employee-activity-provisioning.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    localDbBoundary:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      allowed: selector_scoped_read_only_aggregate_preflight_and_post_runtime_counts_only
+      directMutation: blocked
+      productRuntimeMutation: approved_only_for_enterprise_training_answer_submission_by_existing_advanced_employee_accounts
+      rawRowsEvidence: blocked
+    browserBoundary:
+      browserRuntime: approved_localhost_only_after_minimum_preflight_and_login_readiness_smoke
+      devServer: approved_localhost_only
+      screenshotsRawDomTrace: blocked
+    credentialBoundary:
+      privateCredentialUse: approved_in_memory_only
+      privateEvidence: blocked
+    providerBoundary:
+      providerExecution: blocked
+      aiSubmit: blocked
+      costCalibration: blocked
+      stagingProd: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: passed_activity_provisioning_and_closeout
+      readGate: pass
+      taskPlanPrepared: true
+      minimumPreflightChecklist: pass
+      privateSelectorInput: pass
+      browserLoginReadinessSmoke: pass
+      productRuntimeTrainingSubmissions: pass
+      productRuntimeTrainingSubmissionCount: 4
+      duplicateSubmissionBoundaryObserved: pass_redacted_business_boundary
+      aggregateDbVerification: pass
+      distinctSubmittedEmployeeCountBefore: 1
+      distinctSubmittedEmployeeCountAfter: 5
+      s12AnalyticsThreshold: 5
+      s12AnalyticsPrerequisiteMet: true
+      runtimeCleanup: pass
+      closeoutGates: pass
+      directDbReadExecuted: true
+      directDbWriteExecuted: false
+      productRuntimeDbWriteExecuted: true
+      providerStagingProdCostExecuted: false
+      focusedUnitValidation: passed_exit_0
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening: passed_exit_0
+      moduleRunV2PrePushReadiness: passed_exit_0_skip_remote_ahead_check
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
+  - id: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    title: Full-chain Scenario 12 pre-push status alignment
+    phase: full-chain-scenario-12-prepush-status-alignment-2026-07-05
+    sourceStory: s12_prepush_repository_sha_readiness_block_after_local_master_ff_merge
+    dependencies:
+      - full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    status: closed
+    result: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
+    taskKind: docs_state_closeout_status_alignment
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-12-prepush-sha-alignment-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T07:44:00-07:00"
+    claimedAt: "2026-07-05T07:44:00-07:00"
+    materializedAt: "2026-07-05T07:44:00-07:00"
+    closedAt: "2026-07-05T07:44:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-prepush-status-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: pass_s12_blocked_preflight_closed_status_alignment_for_prepush
+      readGate: pass
+      taskPlanPrepared: true
+      priorS12PreflightStatusChangedToClosed: true
+      priorS12PreflightResultPreserved: true
+      localMasterAfterS12Commit: 8659b0fe5a5a174cf183695cf94a11b64fe7518c
+      originMasterBeforePush: 36a5123ec7fa67492672fea7e2948c1cadddb8fd
+      directDbReadExecuted: false
+      directDbWriteExecuted: false
+      browserRuntimeExecuted: false
+      sourceTestChanged: false
+      providerStagingProdCostExecuted: false
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      closeoutGates: pass
+      repositoryCheckpointAligned: true
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+
+  - id: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    title: Full-chain Scenario 12 advanced org admin analytics training preflight
+    phase: full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    sourceStory: s12_minimum_preflight_after_s11_training_submission
+    dependencies:
+      - full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    status: closed
+    result: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
+    taskKind: local_read_only_acceptance_preflight
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-12-advanced-org-admin-analytics-training-preflight-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T07:32:00-07:00"
+    claimedAt: "2026-07-05T07:32:00-07:00"
+    materializedAt: "2026-07-05T07:32:00-07:00"
+    blockedAt: "2026-07-05T07:36:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-preflight.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    localDbBoundary:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      allowed: selector_scoped_read_only_aggregate_preflight_counts_only
+      mutation: blocked
+      rawRowsEvidence: blocked
+    browserBoundary:
+      browserRuntime: blocked_in_this_preflight
+      devServer: blocked_in_this_preflight
+      screenshotsRawDomTrace: blocked
+    providerBoundary:
+      providerExecution: blocked
+      costCalibration: blocked
+      stagingProd: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: blocked_insufficient_distinct_submitted_employee_activity_for_s12_analytics
+      readGate: pass
+      taskPlanPrepared: true
+      minimumPreflightChecklist: blocked
+      targetDbMatched: 1
+      activeAdvancedMarketing3AuthCount: 1
+      advancedOrgAdminBindingCount: 1
+      importedAdvancedEmployeeCount: 6
+      publishedMarketing3TrainingCount: 1
+      publishedTrainingQuestionCountSum: 4
+      submittedTrainingAnswerCount: 1
+      distinctSubmittedEmployeeCount: 1
+      formalPracticeCount: 1
+      formalMockExamCount: 0
+      formalExamReportCount: 0
+      s12AnalyticsThreshold: 5
+      s12AnalyticsPrerequisiteMet: 0
+      directDbReadExecuted: true
+      directDbWriteExecuted: false
+      browserRuntimeExecuted: false
+      devServerStarted: false
+      providerStagingProdCostExecuted: false
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      closeoutGates: pass
+      repositoryCheckpointAligned: true
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    followUp:
+      status: split_activity_provisioning_required
+      nextTask: full-chain-scenario-12-advanced-employee-activity-provisioning-2026-07-05
+      restartNode: s12_browser_login_advanced_org_admin_analytics_training_boundary
+      doNotRepeat:
+        - employee_import
+        - s10_standard_employee_learning_data
+        - old_authorization_flow
+        - direct_db_fixture_insertion
+
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    title: Full-chain Scenario 11 advanced employee affected-node rerun after question count boundary repair
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    sourceStory: s11_continue_after_paper_source_question_count_boundary_repair
+    dependencies:
+      - full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
+    status: closed
+    result: pass_s11_affected_node_rerun_after_question_count_boundary_repair_closeout_gates_passed_no_final_pass
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-11-affected-node-rerun-after-question-count-boundary-repair-2026-07-05
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T07:15:00-07:00"
+    claimedAt: "2026-07-05T07:15:00-07:00"
+    materializedAt: "2026-07-05T07:15:00-07:00"
+    closedAt: "2026-07-05T07:25:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationSummary:
+      status: pass_s11_affected_node_rerun_after_question_count_boundary_repair_closeout_gates_passed_no_final_pass
+      readGate: pass
+      taskPlanPrepared: true
+      minimumPreBrowserChecklist: pass
+      targetDbMatched: 1
+      privateAccountPlanPresent: 1
+      privateEmployeeSelectorPresent: 1
+      activeAdvancedMarketing3AuthCount: 1
+      activeAdvancedMarketing3EmployeeCount: 6
+      publishedMarketing3TrainingCount: 1
+      publishedTrainingQuestionCount: 4
+      trainingSourceContextCount: 1
+      trainingSourceContextQuestionCount: 4
+      paperSourceQuestionSnapshotCandidateCount: 7
+      expectedCappedQuestionSnapshotCount: 4
+      existingAdvancedTrainingAnswerCount: 0
+      directDbReadExecuted: true
+      directDbWriteExecuted: false
+      browserLoginReadinessSmoke: pass
+      productBrowserLoginSucceeded: 1
+      enterpriseTrainingAnswerability: pass
+      visibleEnterpriseTrainingRows: 1
+      exposedTrainingQuestionCount: 4
+      answerableQuestionFields: 4
+      enterpriseTrainingProductUiWrite: pass
+      productUiDraftActionExecuted: true
+      productUiSubmitSucceeded: true
+      aiTrainingNoSubmitBoundary: pass
+      aiTrainingSurfaceAvailable: 1
+      aiSubmitExecuted: false
+      selectorScopedAggregateDbVerification: pass
+      postRuntimeTargetEmployeeCount: 1
+      postRuntimeVisibleTrainingCount: 1
+      postRuntimeTrainingAnswerTotalCount: 1
+      postRuntimeSubmittedTrainingAnswerCount: 1
+      postRuntimeInProgressTrainingAnswerCount: 0
+      runtimeCleanup: pass
+      scopedUnitValidation: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      closeoutGates: pass
+      repositoryCheckpointAligned: true
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      dependencyOrLockfileChanged: false
+      providerStagingProdCostExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
