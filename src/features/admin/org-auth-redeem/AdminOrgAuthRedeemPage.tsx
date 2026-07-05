@@ -4775,6 +4775,7 @@ export function AdminRedeemCodePage() {
       redeemCode.status === "unused" &&
       (!redeemCode.canViewPlainText || redeemCode.codePlainText === null),
   );
+  const isRedeemCodeListEmpty = loadState === "empty";
 
   function handleCopyRedeemCodePlainText(value: string) {
     copyTextToClipboard(value);
@@ -4892,15 +4893,6 @@ export function AdminRedeemCodePage() {
     );
   }
 
-  if (loadState === "empty") {
-    return (
-      <AdminEmptyState
-        title="暂无卡密数据"
-        description="当前没有可展示的卡密记录。"
-      />
-    );
-  }
-
   return (
     <main className="space-y-6">
       <AdminPageHeader
@@ -4996,13 +4988,20 @@ export function AdminRedeemCodePage() {
         />
       )}
 
-      <RedeemCodeList
-        redeemCodes={data.redeemCodes}
-        onCopyPlainText={handleCopyRedeemCodePlainText}
-        onViewDetail={(publicId) => {
-          void handleViewRedeemCodeDetail(publicId);
-        }}
-      />
+      {isRedeemCodeListEmpty ? (
+        <AdminEmptyState
+          title="暂无卡密数据"
+          description="当前没有可展示的卡密记录。"
+        />
+      ) : (
+        <RedeemCodeList
+          redeemCodes={data.redeemCodes}
+          onCopyPlainText={handleCopyRedeemCodePlainText}
+          onViewDetail={(publicId) => {
+            void handleViewRedeemCodeDetail(publicId);
+          }}
+        />
+      )}
 
       {confirmationState === null ? null : (
         <RedeemCodeConfirmationDialog

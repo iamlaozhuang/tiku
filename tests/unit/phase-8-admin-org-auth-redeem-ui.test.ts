@@ -386,6 +386,10 @@ describe("AdminRedeemCodePage", () => {
     render(createElement(AdminRedeemCodePage));
 
     expect(await screen.findByText("暂无卡密数据")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("system-ops-redeem-code-generate-entry"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("redeem-code-generate-button")).toBeDisabled();
 
     cleanup();
     vi.stubGlobal(
