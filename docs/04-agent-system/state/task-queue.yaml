@@ -398,6 +398,205 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
+    title: Full-chain Scenario 11 advanced employee pre-Provider learning
+    phase: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
+    sourceStory: scenario_11_advanced_employee_learning_pre_provider_after_s10_standard_employee_learning
+    dependencies:
+      - full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair-2026-07-04
+      - full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning-2026-07-04
+    status: blocked
+    result: blocked_missing_assigned_published_enterprise_training_baseline_preflight
+    taskKind: local_acceptance_runtime_browser_advanced_employee_learning_pre_provider
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-05T02:12:00-07:00"
+    claimedAt: "2026-07-05T02:12:00-07:00"
+    completedAt: "2026-07-05T02:38:00-07:00"
+    targetClosureItem: Prove the advanced organization employee local learning and enterprise-training pre-Provider path without repeating employee import or invoking real Provider execution.
+    behaviorBoundary: local_browser_login_smoke_advanced_employee_practice_learning_enterprise_training_surface_or_submission_if_preexisting_published_training_exists_ai_training_surface_no_submit_selector_scoped_aggregate_db_verification_only_no_employee_import_repeat_no_provider_ai_submit_staging_prod_cost_source_test_dependency_schema_migration_seed_destructive_db_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_scope_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents_employee_answers
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import-selector.json
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/employee-import/advanced-employee-import.csv
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/01-authorization-context.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/modules/03-student-experience.md
+      - docs/01-requirements/modules/04-ai-scoring.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+      - docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-org-package-rerun-after-login-input-state-binding-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-5-advanced-employee-input-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-5-advanced-employee-input-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-rerun-after-browser-harness-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-login-input-state-binding-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-login-input-state-binding-repair.md
+      - src/app/(auth)/login/page.tsx
+      - src/app/(student)/home/page.tsx
+      - src/app/(student)/practice/page.tsx
+      - src/app/(student)/organization-training/page.tsx
+      - src/app/(student)/ai-generation/page.tsx
+      - src/features/student/home/StudentHomePage.tsx
+      - src/features/student/practice/StudentPracticePage.tsx
+      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/server/services/practice-service.ts
+      - src/server/repositories/practice-repository.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/effective-authorization-service.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/student-experience.ts
+      - src/db/schema/organization-training.ts
+      - src/db/schema/ai-rag.ts
+      - tests/unit/ui-input-contract.test.ts
+      - tests/unit/student-practice-ui.test.ts
+      - tests/unit/organization-training-employee-entry-surface.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    runtimeScope:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      selectorLabel: fc_org_advanced_employee
+      scopeLabel: marketing:3
+      scenarioSelectorLabel: fc_scenario_11_advanced_employee_pre_provider_learning
+      roleLabel: org_advanced_employee
+      allowedDbUse: selector_scoped_aggregate_read_only_after_product_ui_learning_or_training_write
+      employeeImportRepeatAllowed: false
+      browserRuntimeAllowed: true
+      productUiLearningWriteAllowed: true
+      enterpriseTrainingProductWriteAllowed: only_if_published_training_preexists_and_employee_answer_does_not_require_raw_answer_evidence
+      productSourceTestChangeAllowed: false
+      providerBoundary: no_provider_call_no_provider_config_no_prompt_payload_no_raw_ai_io_no_generation_submit
+      destructiveDbOperationAllowed: false
+      stagingProdCostBoundary: blocked_requires_later_fresh_approval
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - redacted selector/db target/private input/content/training/pre-state aggregate preflight
+      - redacted browser login smoke with hydrated/interactable readiness
+      - redacted advanced employee practice learning flow
+      - redacted advanced employee enterprise-training surface or submission flow if preexisting published training exists
+      - redacted advanced employee AI-training surface no-submit boundary check
+      - selector-scoped aggregate DB verification
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+      - git diff --check
+      - git diff --name-only -- AGENTS.md .env .env.local .env.development .env.production package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: blocked_missing_assigned_published_enterprise_training_baseline_preflight
+      readGate: pass
+      taskPlanPrepared: true
+      selectorDbPreflight: blocked_missing_assigned_published_enterprise_training_baseline
+      dbTargetMatched: 1
+      privateAccountPlanPresent: 1
+      privateAdvancedEmployeeSelectorPresent: 1
+      privateAdvancedEmployeeCsvPresent: 1
+      privateAdvancedEmployeeCsvRows: 6
+      importedAdvancedUserCount: 6
+      importedAdvancedEmployeeCount: 6
+      activeAdvancedMarketing3OrgAuth: 1
+      publishedMarketing3Paper: 1
+      publishedMarketing3PaperQuestion: 7
+      assignedPublishedMarketing3TrainingVersion: 0
+      prePracticeCount: 0
+      preTrainingAnswerCount: 0
+      preAiTaskCount: 0
+      aiCallLogCount: 0
+      browserLoginSmoke: blocked_not_started_preflight_stop
+      advancedEmployeeLearning: blocked_not_started_preflight_stop
+      enterpriseTrainingSurfaceOrSubmission: blocked_missing_assigned_published_enterprise_training_baseline
+      aiTrainingSurfaceNoSubmitBoundary: blocked_not_started_preflight_stop
+      selectorScopedAggregateDbVerification: blocked_pre_state_only_no_runtime_post_state
+      runtimeCleanup: pass_runtime_not_started
+      closeoutGates: pass_after_repository_checkpoint_alignment
+      employeeImportRepeated: false
+      productRuntimeStarted: false
+      directDbReadExecuted: true
+      directDbWriteExecuted: false
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiff: pass
+      moduleRunV2PreCommitHardening: pass
+      firstModuleRunV2PrePushReadiness: blocked_repository_sha_drift
+      repositoryCheckpointAligned: true
+      finalModuleRunV2PrePushReadiness: pass
+      productSourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      providerStagingProdCostAllowed: false
+      destructiveDbOperationAllowed: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+
   - id: full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning-2026-07-04
     title: Full-chain Scenario 10 standard employee learning rerun after marketing 3 content provisioning
     phase: full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning-2026-07-04
