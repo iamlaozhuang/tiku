@@ -1,8 +1,218 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
-updatedAt: "2026-07-05T09:14:27-07:00"
+currentPhase: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+updatedAt: "2026-07-05T09:28:23-07:00"
+currentTask:
+  id: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+  phase: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+  status: closed
+  result: pass_cost_calibration_execution_boundary_materialized_no_execution
+  priority: p0
+  taskKind: docs_state_cost_calibration_boundary
+  executionProfile: docs_state_stage_c_3_cost_calibration_execution_boundary
+  validationPolicy: scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+  moduleRunVersion: 2
+  branch: codex/stage-c-3-cost-calibration-boundary-2026-07-05
+  approvalBoundary: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+  plannedAt: "2026-07-05T09:24:31-07:00"
+  claimedAt: "2026-07-05T09:24:31-07:00"
+  materializedAt: "2026-07-05T09:24:31-07:00"
+  completedAt: "2026-07-05T09:28:23-07:00"
+  dependsOn:
+    - stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
+    - full-chain-provider-cost-staging-approval-package-2026-07-05
+    - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    - full-chain-post-acceptance-queue-cleanup-2026-07-05
+  targetClosureItem: Materialize the Stage C-3 Cost Calibration execution boundary before any spend-bearing Provider call.
+  behaviorBoundary: docs_state_acceptance_evidence_audit_only_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_db_no_browser_no_dev_server_no_e2e_no_source_test_dependency_schema_migration_seed_no_staging_prod_no_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_branch_file_paths_public_provider_model_host_labels_pricing_source_url_access_date_sample_size_spend_cap_stop_thresholds_validation_commands_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_content_screenshots_traces_raw_dom_private_fixture_contents
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+stageC3CostCalibrationExecutionBoundary20260705:
+  taskId: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+  phase: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+  status: closed
+  result: pass_cost_calibration_execution_boundary_materialized_no_execution
+  priority: p0
+  taskKind: docs_state_cost_calibration_boundary
+  moduleRunVersion: 2
+  dependsOn:
+    - stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
+    - full-chain-provider-cost-staging-approval-package-2026-07-05
+    - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    - full-chain-post-acceptance-queue-cleanup-2026-07-05
+  sourceStory: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+  targetClosureItem: Materialize the Stage C-3 Cost Calibration execution boundary before any spend-bearing Provider call.
+  behaviorBoundary: docs_state_acceptance_evidence_audit_only_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_db_no_browser_no_dev_server_no_e2e_no_source_test_dependency_schema_migration_seed_no_staging_prod_no_release_final_or_production_claim
+  evidenceMode: redacted_task_ids_branch_file_paths_public_provider_model_host_labels_pricing_source_url_access_date_sample_size_spend_cap_stop_thresholds_validation_commands_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_content_screenshots_traces_raw_dom_private_fixture_contents
+  branch: codex/stage-c-3-cost-calibration-boundary-2026-07-05
+  claimedAt: "2026-07-05T09:24:31-07:00"
+  plannedAt: "2026-07-05T09:24:31-07:00"
+  materializedAt: "2026-07-05T09:24:31-07:00"
+  completedAt: "2026-07-05T09:28:23-07:00"
+  pricingSourcePolicy:
+    primarySourceLabel: Alibaba Cloud Model Studio official model pricing
+    primarySourceUrl: https://help.aliyun.com/zh/model-studio/model-pricing
+    modelReferenceUrl: https://www.alibabacloud.com/help/en/model-studio/models
+    apiBillingReferenceUrl: https://help.aliyun.com/zh/model-studio/qwen-api-via-dashscope
+    accessDate: "2026-07-05"
+    priceValuesRecordedInThisTask: false
+    executionTaskMustRecheckSource: true
+  proposedExecutionBoundary:
+    target: openai_compatible_alibaba_qwen_qwen37_max_dashscope_aliyuncs_com
+    targetEnvironment: local_dev_only
+    secretSourceAllowedOnlyWithFreshExecutionApproval: readonly_env_local_single_key_alibaba_api_key_or_preinjected_process_env_label
+    maxRequests: 4
+    maxRetries: 0
+    timeoutMsPerRequest: 60000
+    maxOutputTokensPerRequest: 1800
+    maxSpendCny: "5.00"
+    pricingAmbiguityStop: true
+    rawPromptPayloadAiIoEvidence: blocked
+    productionQuotaDefaults: blocked
+    providerReadinessClaim: blocked
+    stagingProd: blocked
+    releaseFinalProductionClaim: blocked
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+  readOnlyAllowedFiles:
+    - AGENTS.md
+    - docs/03-standards/code-taste-ten-commandments.md
+    - docs/02-architecture/adr/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/01-requirements/00-index.md
+    - docs/01-requirements/advanced-edition/00-index.md
+    - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+    - docs/05-execution-logs/acceptance/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    - docs/05-execution-logs/acceptance/2026-07-05-stage-c-1-provider-freshness-env-local-single-key-rerun.md
+    - docs/05-execution-logs/evidence/2026-07-05-stage-c-1-provider-freshness-env-local-single-key-rerun.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-1-provider-freshness-env-local-single-key-rerun.md
+    - docs/05-execution-logs/acceptance/2026-07-05-full-chain-local-acceptance-rollup-and-residual-risk-ledger.md
+    - docs/05-execution-logs/evidence/2026-07-05-full-chain-local-acceptance-rollup-and-residual-risk-ledger.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-local-acceptance-rollup-and-residual-risk-ledger.md
+    - docs/05-execution-logs/acceptance/2026-06-23-provider-cost-staging-decision-package.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - scripts/**
+    - src/db/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - compose.yaml
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - docs/04-agent-system/state/archive/**
+    - docs/04-agent-system/state/task-history-index.yaml
+    - docs/05-execution-logs/archive/**
+    - docs/05-execution-logs/execution-log-index.yaml
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  localDbBoundary: no_database_connection_no_raw_rows_no_direct_or_product_runtime_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+  browserBoundary: no_browser_runtime_no_dev_server_no_e2e_no_raw_dom_no_screenshot_no_trace
+  credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+  providerBoundary:
+    providerExecution: blocked_in_this_boundary_task
+    costCalibrationExecution: blocked_in_this_boundary_task_requires_fresh_execution_approval
+    futureExecutionRequiresPricingRecheck: true
+    stagingProd: blocked
+    providerConfigurationChange: blocked
+    releaseFinalProductionClaim: blocked
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+    push:
+      approved: true
+      target: origin/master
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+    cleanup:
+      deleteShortBranch: true
+      approvalSource: current_user_requested_pin_down_cost_calibration_execution_boundary_2026_07_05
+  validationCommands:
+    - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md docs/05-execution-logs/acceptance/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    - git diff --check
+    - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests scripts src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime .env docs/04-agent-system/state/archive docs/04-agent-system/state/task-history-index.yaml docs/05-execution-logs/archive docs/05-execution-logs/execution-log-index.yaml
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId stage-c-3-cost-calibration-execution-boundary-2026-07-05
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId stage-c-3-cost-calibration-execution-boundary-2026-07-05 -SkipRemoteAheadCheck
+  validationSummary:
+    status: pass_cost_calibration_execution_boundary_materialized_no_execution
+    readGate: pass
+    taskPlanPrepared: true
+    acceptanceBoundaryPrepared: true
+    evidencePrepared: true
+    auditPrepared: true
+    pricingSourceDateRecorded: true
+    futureExecutionRequiresFreshApproval: true
+    futureExecutionRequiresPricingRecheck: true
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    gitDiffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass
+    closeoutGates: pass
+    costCalibrationExecuted: false
+    providerCallExecuted: false
+    stagingProdExecuted: false
+    browserRuntimeExecuted: false
+    directDbReadOrWriteExecuted: false
+    secretAccessed: false
+    sourceTestChanged: false
+    dependencyOrLockfileChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 fullChainGoalControlLedger20260704:
   taskId: full-chain-goal-control-ledger-2026-07-04
   phase: full-chain-goal-control-ledger-2026-07-04
@@ -27385,7 +27595,7 @@ previousCurrentTaskBeforeFullChainProviderCostStagingApprovalPackage20260705:
   planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
-currentTask:
+previousCurrentTaskBeforeStageC3CostCalibrationBoundary20260705:
   id: stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
   phase: stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
   status: closed
