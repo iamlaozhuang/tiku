@@ -47,8 +47,8 @@ activeTasks:
   - id: ai-generation-runtime-acceptance-2026-07-06
     title: AI generation runtime acceptance on 0704 local DB and current master
     phase: ai-generation-runtime-acceptance-2026-07-06
-    status: in_progress
-    result: pending_runtime_acceptance
+    status: closed
+    result: pass_ai_generation_runtime_acceptance_local_0704_browser_provider_closed_loop_with_fix
     priority: p0
     taskKind: acceptance_runtime_walkthrough
     executionProfile: local_0704_db_browser_provider_small_sample_docs_only_no_source_change_exact_reviewed_migration_execution_if_precheck_requires
@@ -59,6 +59,9 @@ activeTasks:
       - organization-training-admin-ui-loop-2026-07-06
       - content-admin-history-adoption-loop-2026-07-06
     branch: codex/ai-generation-runtime-acceptance-2026-07-06
+    completedAt: "2026-07-06T11:05:00Z"
+    commitSha: 640eea9111e408b92aa74450ac330d35cb22bfaf
+    separateFixCommitSha: edd48ccfbdf947368a414f93aeb602e460ad4095
     humanApprovalBoundary: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
     targetClosureItem: Verify 0704 local DB plus current master can run AI出题 / AI组卷 role, Provider, and closed-loop runtime paths without reopening closed source/unit tasks.
     behaviorBoundary: local_0704_db_schema_precheck_exact_reviewed_non_destructive_local_migration_execution_for_20260706031000_and_20260706052000_if_required_localhost_browser_role_matrix_provider_disabled_enabled_small_sample_existing_product_flows_docs_state_evidence_only_no_source_test_package_lockfile_schema_file_change_seed_destructive_db_staging_prod_release_final_claim
@@ -122,7 +125,7 @@ activeTasks:
         deleteShortBranch: true
         approvalSource: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
     validationSummary:
-      status: pending_closeout_validation
+      status: pass_ai_generation_runtime_acceptance_local_0704_browser_provider_closed_loop_with_fix
       sourceUnitBaseline: inherited_pass_333_files_1661_tests_from_master_8b9e72d26
       runtimeDbSchemaPrecheck: pass_after_exact_reviewed_0704_migration_pair
       browserRoleMatrix: pass_6_roles_1_personal_standard_fixture_gap

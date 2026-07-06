@@ -2,12 +2,12 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: ai-generation-runtime-acceptance-2026-07-06
-updatedAt: "2026-07-06T10:55:00Z"
+updatedAt: "2026-07-06T11:05:00Z"
 currentTask:
   id: ai-generation-runtime-acceptance-2026-07-06
   phase: ai-generation-runtime-acceptance-2026-07-06
-  status: in_progress
-  result: pending_runtime_acceptance
+  status: closed
+  result: pass_ai_generation_runtime_acceptance_local_0704_browser_provider_closed_loop_with_fix
   priority: p0
   taskKind: acceptance_runtime_walkthrough
   executionProfile: local_0704_db_browser_provider_small_sample_docs_only_no_source_change_exact_reviewed_migration_execution_if_precheck_requires
@@ -18,6 +18,9 @@ currentTask:
   plannedAt: "2026-07-06T08:05:00Z"
   claimedAt: "2026-07-06T08:05:00Z"
   materializedAt: "2026-07-06T08:05:00Z"
+  completedAt: "2026-07-06T11:05:00Z"
+  commitSha: 640eea9111e408b92aa74450ac330d35cb22bfaf
+  separateFixCommitSha: edd48ccfbdf947368a414f93aeb602e460ad4095
   dependsOn:
     - learner-ai-training-api-ui-loop-2026-07-06
     - organization-ai-training-closed-loop-2026-07-06
@@ -73,7 +76,7 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
   validationSummary:
-    status: pending_closeout_validation
+    status: pass_ai_generation_runtime_acceptance_local_0704_browser_provider_closed_loop_with_fix
     readGate: pass
     taskPlanPrepared: true
     evidencePrepared: true
