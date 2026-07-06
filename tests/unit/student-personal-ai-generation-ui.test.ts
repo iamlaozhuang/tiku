@@ -14,6 +14,16 @@ import type {
   EffectiveAuthorizationCapabilitiesDto,
   EffectiveAuthorizationContextDto,
 } from "@/server/contracts/effective-authorization-contract";
+import type {
+  PersonalAiGenerationLearningFormalWriteBoundaryDto,
+  PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+  PersonalAiGenerationLearningSessionQuestionDto,
+} from "@/server/contracts/personal-ai-generation-learning-session-contract";
+import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "@/server/contracts/route-integrated-provider-execution-contract";
+import {
+  collectPersonalAiLearningQuestionDrafts,
+  createPersonalAiLearningSessionQuestion,
+} from "@/server/validators/personal-ai-generation-learning-session";
 
 const pageTitle = "AI训练";
 const requestButtonLabel = "AI出题：生成练习题";
@@ -212,7 +222,10 @@ const localExperienceResponse = {
           authorizationSource: "personal_auth",
           authorizationPublicId: "personal-auth-public-001",
           ownerType: "personal",
+          ownerPublicId: "student-public-001",
+          organizationPublicId: null,
           quotaOwnerType: "personal",
+          quotaOwnerPublicId: "student-public-001",
         },
         aiFuncType: "explanation",
         runtimeStatus: "local_contract_only",
@@ -399,6 +412,8 @@ function createPersonalAiGenerationFetchMock(
   experienceResponse: unknown = localExperienceResponse,
   historyResponse: unknown = emptyServerHistoryResponse,
 ) {
+  const learningSessionMockState = createPersonalAiLearningSessionMockState();
+
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
 
@@ -463,6 +478,19 @@ function createPersonalAiGenerationFetchMock(
       };
     }
 
+    const learningSessionResponse = await handlePersonalAiLearningSessionFetch({
+      actorPublicId: localSessionUserPublicId,
+      init,
+      ownerPublicId: "student-public-ui-001",
+      ownerType: "personal",
+      path,
+      state: learningSessionMockState,
+    });
+
+    if (learningSessionResponse !== null) {
+      return learningSessionResponse;
+    }
+
     throw new Error(`Unexpected fetch path: ${path}`);
   });
 }
@@ -472,6 +500,7 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
   experienceResponse: unknown = localExperienceResponse,
 ) {
   const remainingHistoryResponses = [...historyResponses];
+  const learningSessionMockState = createPersonalAiLearningSessionMockState();
 
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
@@ -540,8 +569,441 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
       };
     }
 
+    const learningSessionResponse = await handlePersonalAiLearningSessionFetch({
+      actorPublicId: localSessionUserPublicId,
+      init,
+      ownerPublicId: "student-public-ui-001",
+      ownerType: "personal",
+      path,
+      state: learningSessionMockState,
+    });
+
+    if (learningSessionResponse !== null) {
+      return learningSessionResponse;
+    }
+
     throw new Error(`Unexpected fetch path: ${path}`);
   });
+}
+
+function createLearningSessionFormalWriteBoundary(): PersonalAiGenerationLearningFormalWriteBoundaryDto {
+  return {
+    questionWriteStatus: "blocked",
+    paperWriteStatus: "blocked",
+    practiceWriteStatus: "blocked",
+    answerRecordWriteStatus: "blocked",
+    examReportWriteStatus: "blocked",
+    mistakeBookWriteStatus: "blocked",
+  };
+}
+
+function createLearningSessionQuestion(input: {
+  sessionPublicId: string;
+  questionStem: string;
+  correctOptionLabel: string;
+  correctOptionText: string;
+  wrongOptionLabel: string;
+  wrongOptionText: string;
+  analysis: string;
+}): PersonalAiGenerationLearningSessionQuestionDto {
+  return {
+    sessionQuestionPublicId: `${input.sessionPublicId}_q_1`,
+    sourceDraftNumber: 1,
+    questionType: "single_choice",
+    difficulty: "medium",
+    knowledgeNodeLabels: ["synthetic knowledge node"],
+    questionStem: input.questionStem,
+    questionOptions: [
+      {
+        optionLabel: input.correctOptionLabel,
+        optionText: input.correctOptionText,
+        isCorrect: true,
+      },
+      {
+        optionLabel: input.wrongOptionLabel,
+        optionText: input.wrongOptionText,
+        isCorrect: false,
+      },
+    ],
+    standardAnswerLabels: [input.correctOptionLabel],
+    standardAnswerText: input.correctOptionLabel,
+    analysis: input.analysis,
+    maxScore: "1.0",
+    reviewStatus: "draft_review_required",
+  };
+}
+
+function createLearningSessionCreatedResponse(input: {
+  sessionPublicId: string;
+  sourceResultPublicId: string;
+  sourceTaskPublicId: string;
+  ownerType: "personal" | "organization";
+  ownerPublicId: string;
+  actorPublicId: string;
+  question?: PersonalAiGenerationLearningSessionQuestionDto;
+  questions?: PersonalAiGenerationLearningSessionQuestionDto[];
+}) {
+  const questions = input.questions ?? (input.question ? [input.question] : []);
+
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      status: "created",
+      blockReason: null,
+      session: {
+        sessionPublicId: input.sessionPublicId,
+        contentDomain: "personal_ai_learning",
+        sourceResultPublicId: input.sourceResultPublicId,
+        sourceTaskPublicId: input.sourceTaskPublicId,
+        ownerType: input.ownerType,
+        ownerPublicId: input.ownerPublicId,
+        actorPublicId: input.actorPublicId,
+        evidenceStatus: "sufficient",
+        citationCount: 2,
+        questionCount: questions.length,
+        questions,
+        formalWriteBoundary: createLearningSessionFormalWriteBoundary(),
+        createdAt: "2026-07-06T03:50:00.000Z",
+      },
+    },
+  };
+}
+
+function createLearningAnswerFeedbackResponse(input: {
+  sessionPublicId: string;
+  actorPublicId: string;
+  question: PersonalAiGenerationLearningSessionQuestionDto;
+  selectedOptionLabels: string[];
+}): {
+  code: 0;
+  message: "ok";
+  data: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
+} {
+  const isCorrect =
+    input.selectedOptionLabels.join("|") ===
+    input.question.standardAnswerLabels.join("|");
+
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      status: "scored",
+      blockReason: null,
+      sessionPublicId: input.sessionPublicId,
+      sessionQuestionPublicId: input.question.sessionQuestionPublicId,
+      actorPublicId: input.actorPublicId,
+      selectedOptionLabels: input.selectedOptionLabels,
+      textAnswer: null,
+      isCorrect,
+      score: isCorrect ? "1.0" : "0.0",
+      maxScore: "1.0",
+      standardAnswerLabels: input.question.standardAnswerLabels,
+      standardAnswerText: input.question.standardAnswerText,
+      analysis: input.question.analysis,
+      aiScoringStatus: "blocked",
+      formalWriteBoundary: createLearningSessionFormalWriteBoundary(),
+      mistakeBookPublicId: null,
+      submittedAt: "2026-07-06T03:51:00.000Z",
+    },
+  };
+}
+
+function createLearningProgressResponse(input: {
+  sessionPublicId: string;
+  sourceResultPublicId: string;
+  sourceTaskPublicId: string;
+  ownerType: "personal" | "organization";
+  ownerPublicId: string;
+  actorPublicId: string;
+  answerFeedback?: PersonalAiGenerationLearningSessionAnswerFeedbackDto;
+  answerFeedbacks?: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
+  questionCount?: number;
+}) {
+  const answerFeedbacks =
+    input.answerFeedbacks ??
+    (input.answerFeedback ? [input.answerFeedback] : []);
+  const correctCount = answerFeedbacks.filter(
+    (answerFeedback) => answerFeedback.isCorrect === true,
+  ).length;
+  const submittedCount = answerFeedbacks.length;
+  const questionCount = input.questionCount ?? submittedCount;
+  const score = answerFeedbacks
+    .reduce(
+      (totalScore, answerFeedback) =>
+        totalScore + Number(answerFeedback.score ?? "0"),
+      0,
+    )
+    .toFixed(1);
+  const maxScore = answerFeedbacks
+    .reduce(
+      (totalScore, answerFeedback) =>
+        totalScore + Number(answerFeedback.maxScore ?? "0"),
+      0,
+    )
+    .toFixed(1);
+
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      status: "ready",
+      blockReason: null,
+      progress: {
+        sessionPublicId: input.sessionPublicId,
+        contentDomain: "personal_ai_learning",
+        sourceResultPublicId: input.sourceResultPublicId,
+        sourceTaskPublicId: input.sourceTaskPublicId,
+        ownerType: input.ownerType,
+        ownerPublicId: input.ownerPublicId,
+        actorPublicId: input.actorPublicId,
+        persistenceStatus: "repository_persisted",
+        resumeStatus: "resumable",
+        evidenceStatus: "sufficient",
+        citationCount: 2,
+        questionCount,
+        answerFeedbacks,
+        statistics: {
+          questionCount,
+          submittedCount,
+          correctCount,
+          incorrectCount: submittedCount - correctCount,
+          reviewRequiredCount: 0,
+          completionRate:
+            questionCount > 0 ? submittedCount / questionCount : 0,
+          accuracyRate:
+            submittedCount > 0 ? correctCount / submittedCount : null,
+          score,
+          maxScore,
+          updatedAt: "2026-07-06T03:52:00.000Z",
+        },
+        formalWriteBoundary: createLearningSessionFormalWriteBoundary(),
+        createdAt: "2026-07-06T03:50:00.000Z",
+      },
+    },
+  };
+}
+
+type PersonalAiLearningSessionFetchResponse = {
+  ok: true;
+  status: 200;
+  json: () => Promise<unknown>;
+};
+
+type PersonalAiLearningSessionMockSession = {
+  sessionPublicId: string;
+  sourceResultPublicId: string;
+  sourceTaskPublicId: string;
+  ownerType: "personal" | "organization";
+  ownerPublicId: string;
+  actorPublicId: string;
+  questions: PersonalAiGenerationLearningSessionQuestionDto[];
+  answerFeedbacksByQuestionPublicId: Map<
+    string,
+    PersonalAiGenerationLearningSessionAnswerFeedbackDto
+  >;
+};
+
+type PersonalAiLearningSessionMockState = {
+  sessionsByPublicId: Map<string, PersonalAiLearningSessionMockSession>;
+};
+
+function createPersonalAiLearningSessionMockState(): PersonalAiLearningSessionMockState {
+  return {
+    sessionsByPublicId: new Map(),
+  };
+}
+
+async function handlePersonalAiLearningSessionFetch(input: {
+  actorPublicId: string;
+  init: RequestInit | undefined;
+  onAnswerSubmitBody?: (body: Record<string, unknown>) => void;
+  onProgressUrl?: (path: string) => void;
+  onSessionCreateBody?: (body: Record<string, unknown>) => void;
+  ownerPublicId: string;
+  ownerType: "personal" | "organization";
+  path: string;
+  state: PersonalAiLearningSessionMockState;
+}): Promise<PersonalAiLearningSessionFetchResponse | null> {
+  const basePath = "/api/v1/personal-ai-generation-learning-sessions";
+
+  if (input.path === basePath) {
+    expect(input.init?.method).toBe("POST");
+    expect(input.init?.headers).toMatchObject({
+      authorization: "Bearer unit-test-session-token",
+      "content-type": "application/json",
+    });
+
+    const body = readPersonalAiLearningSessionJsonBody(input.init);
+    input.onSessionCreateBody?.(body);
+
+    const sessionPublicId = String(body.sessionPublicId);
+    const sourceResultPublicId = String(body.sourceResultPublicId);
+    const sourceTaskPublicId = String(body.sourceTaskPublicId);
+    const visibleGeneratedContent =
+      body.visibleGeneratedContent as AiGenerationRouteIntegratedVisibleGeneratedContent;
+    const questions = createPersonalAiLearningSessionQuestions({
+      sessionPublicId,
+      visibleGeneratedContent,
+    });
+    const session: PersonalAiLearningSessionMockSession = {
+      actorPublicId: input.actorPublicId,
+      answerFeedbacksByQuestionPublicId: new Map(),
+      ownerPublicId: input.ownerPublicId,
+      ownerType: input.ownerType,
+      questions,
+      sessionPublicId,
+      sourceResultPublicId,
+      sourceTaskPublicId,
+    };
+    input.state.sessionsByPublicId.set(sessionPublicId, session);
+
+    return {
+      ok: true,
+      status: 200,
+      json: async () =>
+        createLearningSessionCreatedResponse({
+          actorPublicId: input.actorPublicId,
+          ownerPublicId: input.ownerPublicId,
+          ownerType: input.ownerType,
+          questions,
+          sessionPublicId,
+          sourceResultPublicId,
+          sourceTaskPublicId,
+        }),
+    };
+  }
+
+  const answersSuffix = "/answers";
+  const progressSuffix = "/progress";
+
+  if (
+    input.path.startsWith(`${basePath}/`) &&
+    input.path.endsWith(answersSuffix)
+  ) {
+    expect(input.init?.method).toBe("POST");
+    expect(input.init?.headers).toMatchObject({
+      authorization: "Bearer unit-test-session-token",
+      "content-type": "application/json",
+    });
+
+    const sessionPublicId = input.path.slice(
+      `${basePath}/`.length,
+      -answersSuffix.length,
+    );
+    const session = input.state.sessionsByPublicId.get(sessionPublicId);
+    const body = readPersonalAiLearningSessionJsonBody(input.init);
+    input.onAnswerSubmitBody?.(body);
+    const question = session?.questions.find(
+      (sessionQuestion) =>
+        sessionQuestion.sessionQuestionPublicId ===
+        String(body.sessionQuestionPublicId),
+    );
+
+    if (!session || !question) {
+      throw new Error(`Unexpected learning session answer path: ${input.path}`);
+    }
+
+    const selectedOptionLabels = Array.isArray(body.selectedOptionLabels)
+      ? body.selectedOptionLabels.map((label) => String(label))
+      : [];
+    const response = createLearningAnswerFeedbackResponse({
+      actorPublicId: session.actorPublicId,
+      question,
+      selectedOptionLabels,
+      sessionPublicId,
+    });
+    session.answerFeedbacksByQuestionPublicId.set(
+      question.sessionQuestionPublicId,
+      response.data,
+    );
+
+    return {
+      ok: true,
+      status: 200,
+      json: async () => response,
+    };
+  }
+
+  if (
+    input.path.startsWith(`${basePath}/`) &&
+    input.path.endsWith(progressSuffix)
+  ) {
+    expect(input.init?.method).toBe("GET");
+    expect(input.init?.headers).toMatchObject({
+      authorization: "Bearer unit-test-session-token",
+    });
+
+    input.onProgressUrl?.(input.path);
+    const sessionPublicId = input.path.slice(
+      `${basePath}/`.length,
+      -progressSuffix.length,
+    );
+    const session = input.state.sessionsByPublicId.get(sessionPublicId);
+
+    if (!session) {
+      throw new Error(
+        `Unexpected learning session progress path: ${input.path}`,
+      );
+    }
+
+    return {
+      ok: true,
+      status: 200,
+      json: async () =>
+        createLearningProgressResponse({
+          actorPublicId: session.actorPublicId,
+          answerFeedbacks: Array.from(
+            session.answerFeedbacksByQuestionPublicId.values(),
+          ),
+          ownerPublicId: session.ownerPublicId,
+          ownerType: session.ownerType,
+          questionCount: session.questions.length,
+          sessionPublicId,
+          sourceResultPublicId: session.sourceResultPublicId,
+          sourceTaskPublicId: session.sourceTaskPublicId,
+        }),
+    };
+  }
+
+  return null;
+}
+
+function createPersonalAiLearningSessionQuestions(input: {
+  sessionPublicId: string;
+  visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent;
+}): PersonalAiGenerationLearningSessionQuestionDto[] {
+  const structuredPreview = input.visibleGeneratedContent.structuredPreview;
+
+  if (!structuredPreview) {
+    return [];
+  }
+
+  const questionDrafts =
+    collectPersonalAiLearningQuestionDrafts(structuredPreview);
+
+  if (questionDrafts === null) {
+    return [];
+  }
+
+  return questionDrafts
+    .map((draft, draftIndex) =>
+      createPersonalAiLearningSessionQuestion({
+        draft,
+        sessionPublicId: input.sessionPublicId,
+        usableQuestionIndex: draftIndex + 1,
+      }),
+    )
+    .filter(
+      (question): question is PersonalAiGenerationLearningSessionQuestionDto =>
+        question !== null,
+    );
+}
+
+function readPersonalAiLearningSessionJsonBody(
+  init: RequestInit | undefined,
+): Record<string, unknown> {
+  return JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
 }
 
 function expectRenderedTextToHideValues(
@@ -1742,13 +2204,16 @@ describe("StudentPersonalAiGenerationPage", () => {
       emptyServerHistoryResponse,
       emptyServerHistoryResponse,
     ];
+    const learningSessionMockState = createPersonalAiLearningSessionMockState();
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
         expect(init?.headers).toMatchObject({
           authorization: "Bearer unit-test-session-token",
         });
 
-        if (String(url) === "/api/v1/sessions") {
+        if (path === "/api/v1/sessions") {
           expect(init?.method).toBe("GET");
 
           return {
@@ -1758,7 +2223,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/authorizations") {
+        if (path === "/api/v1/authorizations") {
           expect(init?.method).toBe("GET");
 
           return {
@@ -1776,7 +2241,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
           if (init?.method === "GET") {
             return {
               ok: true,
@@ -1795,7 +2260,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
 
           return {
@@ -1805,7 +2270,21 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        throw new Error(`Unexpected fetch path: ${String(url)}`);
+        const learningSessionResponse =
+          await handlePersonalAiLearningSessionFetch({
+            actorPublicId: "employee-session-user-public-123",
+            init,
+            ownerPublicId: "organization-public-123",
+            ownerType: "organization",
+            path,
+            state: learningSessionMockState,
+          });
+
+        if (learningSessionResponse !== null) {
+          return learningSessionResponse;
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
       },
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -2415,13 +2894,16 @@ describe("StudentPersonalAiGenerationPage", () => {
       emptyServerHistoryResponse,
       emptyServerHistoryResponse,
     ];
+    const learningSessionMockState = createPersonalAiLearningSessionMockState();
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
         expect(init?.headers).toMatchObject({
           authorization: "Bearer unit-test-session-token",
         });
 
-        if (String(url) === "/api/v1/sessions") {
+        if (path === "/api/v1/sessions") {
           expect(init?.method).toBe("GET");
 
           return {
@@ -2431,7 +2913,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url) === "/api/v1/authorizations") {
+        if (path === "/api/v1/authorizations") {
           expect(init?.method).toBe("GET");
 
           return {
@@ -2449,7 +2931,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
           if (init?.method === "GET") {
             return {
               ok: true,
@@ -2468,7 +2950,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
           expect(init?.method).toBe("GET");
 
           return {
@@ -2478,7 +2960,21 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        throw new Error(`Unexpected fetch path: ${String(url)}`);
+        const learningSessionResponse =
+          await handlePersonalAiLearningSessionFetch({
+            actorPublicId: "employee-session-user-public-123",
+            init,
+            ownerPublicId: "organization-public-123",
+            ownerType: "organization",
+            path,
+            state: learningSessionMockState,
+          });
+
+        if (learningSessionResponse !== null) {
+          return learningSessionResponse;
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
       },
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -2719,6 +3215,678 @@ describe("StudentPersonalAiGenerationPage", () => {
       );
     });
     expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
+  });
+
+  it("persists a personal advanced AI question learning session before answer and progress review", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const sourceResultPublicId =
+      "ai-generation-result-visible-personal-api-001";
+    const sourceTaskPublicId = "ai-generation-task-visible-personal-api-001";
+    const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+    const learningSessionQuestion = createLearningSessionQuestion({
+      sessionPublicId,
+      questionStem: "synthetic persisted personal learner stem",
+      correctOptionLabel: "A",
+      correctOptionText: "synthetic persisted personal correct option",
+      wrongOptionLabel: "B",
+      wrongOptionText: "synthetic persisted personal distractor",
+      analysis: "synthetic persisted personal analysis",
+    });
+    const visibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          taskPublicId: sourceTaskPublicId,
+          resultPublicId: sourceResultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "synthetic persisted personal content",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 1,
+              actualQuestionCount: 1,
+              draftCount: 1,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  knowledgeNodeLabels: ["synthetic knowledge node"],
+                  questionStem: "synthetic persisted personal learner stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText: "synthetic persisted personal correct option",
+                      isCorrect: true,
+                    },
+                    {
+                      optionLabel: "B",
+                      optionText: "synthetic persisted personal distractor",
+                      isCorrect: false,
+                    },
+                  ],
+                  standardAnswer: "A",
+                  analysis: "synthetic persisted personal analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          blockedReasons: [],
+        },
+      },
+    };
+    const sessionCreateBodies: unknown[] = [];
+    const answerSubmitBodies: unknown[] = [];
+    const progressUrls: string[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (path === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => visibleResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        if (path === "/api/v1/personal-ai-generation-learning-sessions") {
+          sessionCreateBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createLearningSessionCreatedResponse({
+                sessionPublicId,
+                sourceResultPublicId,
+                sourceTaskPublicId,
+                ownerType: "personal",
+                ownerPublicId: "student-public-ui-001",
+                actorPublicId: localSessionUserPublicId,
+                question: learningSessionQuestion,
+              }),
+          };
+        }
+
+        if (
+          path ===
+          `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/answers`
+        ) {
+          answerSubmitBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createLearningAnswerFeedbackResponse({
+                sessionPublicId,
+                actorPublicId: localSessionUserPublicId,
+                question: learningSessionQuestion,
+                selectedOptionLabels: ["A"],
+              }),
+          };
+        }
+
+        if (
+          path ===
+          `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`
+        ) {
+          progressUrls.push(path);
+          const answerFeedback = createLearningAnswerFeedbackResponse({
+            sessionPublicId,
+            actorPublicId: localSessionUserPublicId,
+            question: learningSessionQuestion,
+            selectedOptionLabels: ["A"],
+          }).data;
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createLearningProgressResponse({
+                sessionPublicId,
+                sourceResultPublicId,
+                sourceTaskPublicId,
+                ownerType: "personal",
+                ownerPublicId: "student-public-ui-001",
+                actorPublicId: localSessionUserPublicId,
+                answerFeedback,
+              }),
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+    expect(
+      await screen.findByText("synthetic persisted personal learner stem"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
+    expect(sessionCreateBodies[0]).toMatchObject({
+      sessionPublicId,
+      sourceResultPublicId,
+      sourceTaskPublicId,
+      ownerType: "personal",
+      ownerPublicId: "student-public-001",
+    });
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /A synthetic persisted personal correct option/,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    await waitFor(() => expect(answerSubmitBodies).toHaveLength(1));
+    expect(answerSubmitBodies[0]).toMatchObject({
+      sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+    });
+    expect(await screen.findByText("回答正确")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "查看学习反馈" }));
+    await waitFor(() =>
+      expect(progressUrls).toEqual([
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
+      ]),
+    );
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
+  });
+
+  it("persists an organization employee personal-authorization AI question learning session under personal owner context", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const sourceResultPublicId =
+      "ai-generation-result-visible-employee-personal-api-001";
+    const sourceTaskPublicId =
+      "ai-generation-task-visible-employee-personal-api-001";
+    const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+    const visibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          taskPublicId: sourceTaskPublicId,
+          resultPublicId: sourceResultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          contextSelection: {
+            ...localExperienceResponse.data.requestFlow.contextSelection,
+            userPublicId: "employee-session-user-public-123",
+            authorizationBoundary: {
+              authorizationSource: "personal_auth",
+              authorizationPublicId: "personal-auth-context-dual-001",
+              ownerType: "personal",
+              ownerPublicId: "employee-session-user-public-123",
+              organizationPublicId: null,
+              quotaOwnerType: "personal",
+              quotaOwnerPublicId: "employee-session-user-public-123",
+            },
+          },
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "synthetic employee personal content",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            structuredPreview: {
+              kind: "question_set",
+              parseStatus: "parsed",
+              requestedQuestionCount: 1,
+              actualQuestionCount: 1,
+              draftCount: 1,
+              draftSummaries: [
+                {
+                  draftNumber: 1,
+                  questionType: "single_choice",
+                  difficulty: "medium",
+                  knowledgeNodeCount: 1,
+                  knowledgeNodeLabels: ["synthetic knowledge node"],
+                  questionStem:
+                    "synthetic persisted employee personal learner stem",
+                  questionOptions: [
+                    {
+                      optionLabel: "A",
+                      optionText:
+                        "synthetic persisted employee personal correct option",
+                      isCorrect: true,
+                    },
+                    {
+                      optionLabel: "B",
+                      optionText:
+                        "synthetic persisted employee personal distractor",
+                      isCorrect: false,
+                    },
+                  ],
+                  standardAnswer: "A",
+                  analysis: "synthetic persisted employee personal analysis",
+                  reviewStatus: "draft_review_required",
+                },
+              ],
+            },
+          },
+          blockedReasons: [],
+        },
+      },
+    };
+    const historyResponses = [
+      emptyServerHistoryResponse,
+      emptyServerHistoryResponse,
+    ];
+    const sessionCreateBodies: unknown[] = [];
+    const learningSessionMockState = createPersonalAiLearningSessionMockState();
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (path === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        if (path === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createPersonalAndOrganizationAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () =>
+                historyResponses.shift() ?? emptyServerHistoryResponse,
+            };
+          }
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => visibleResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        const learningSessionResponse =
+          await handlePersonalAiLearningSessionFetch({
+            actorPublicId: "employee-session-user-public-123",
+            init,
+            onSessionCreateBody: (body) => sessionCreateBodies.push(body),
+            ownerPublicId: "employee-session-user-public-123",
+            ownerType: "personal",
+            path,
+            state: learningSessionMockState,
+          });
+
+        if (learningSessionResponse !== null) {
+          return learningSessionResponse;
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+    expect(
+      await screen.findByText(
+        "synthetic persisted employee personal learner stem",
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
+    expect(sessionCreateBodies[0]).toMatchObject({
+      sessionPublicId,
+      sourceResultPublicId,
+      sourceTaskPublicId,
+      ownerType: "personal",
+      ownerPublicId: "employee-session-user-public-123",
+    });
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
+  });
+
+  it("persists an organization employee AI paper learning session under organization context", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const sourceResultPublicId =
+      "ai-generation-result-visible-employee-paper-api-001";
+    const sourceTaskPublicId =
+      "ai-generation-task-visible-employee-paper-api-001";
+    const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+    const learningSessionQuestion = createLearningSessionQuestion({
+      sessionPublicId,
+      questionStem: "synthetic persisted employee paper stem",
+      correctOptionLabel: "A",
+      correctOptionText: "synthetic persisted employee paper correct option",
+      wrongOptionLabel: "B",
+      wrongOptionText: "synthetic persisted employee paper distractor",
+      analysis: "synthetic persisted employee paper analysis",
+    });
+    const visibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          taskPublicId: sourceTaskPublicId,
+          resultPublicId: sourceResultPublicId,
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          contextSelection: {
+            ...localExperienceResponse.data.requestFlow.contextSelection,
+            authorizationBoundary: {
+              authorizationSource: "org_auth",
+              authorizationPublicId: "org-auth-context-api-001",
+              ownerType: "organization",
+              ownerPublicId: "organization-public-123",
+              organizationPublicId: "organization-public-123",
+              quotaOwnerType: "organization",
+              quotaOwnerPublicId: "organization-public-123",
+            },
+          },
+          resultReference: {
+            ...localExperienceResponse.data.requestFlow.resultReference,
+            taskType: "ai_paper_generation",
+          },
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "synthetic persisted employee paper content",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            groundingSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 1,
+              questionCount: 50,
+              questionTypeDistributionCount: 1,
+              knowledgeCoverageCount: 1,
+              reviewStatus: "draft_review_required",
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic persisted employee paper section",
+                  questionCount: 1,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      knowledgeNodeLabels: ["synthetic knowledge node"],
+                      questionStem: "synthetic persisted employee paper stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText:
+                            "synthetic persisted employee paper correct option",
+                          isCorrect: true,
+                        },
+                        {
+                          optionLabel: "B",
+                          optionText:
+                            "synthetic persisted employee paper distractor",
+                          isCorrect: false,
+                        },
+                      ],
+                      standardAnswer: "A",
+                      analysis: "synthetic persisted employee paper analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          blockedReasons: [],
+        },
+      },
+    };
+    const sessionCreateBodies: unknown[] = [];
+    const answerSubmitBodies: unknown[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        if (path === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                authorizationPublicId: "org-auth-context-api-001",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-123",
+                organizationPublicId: "organization-public-123",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-123",
+              }),
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => visibleResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        if (path === "/api/v1/personal-ai-generation-learning-sessions") {
+          sessionCreateBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createLearningSessionCreatedResponse({
+                sessionPublicId,
+                sourceResultPublicId,
+                sourceTaskPublicId,
+                ownerType: "organization",
+                ownerPublicId: "organization-public-123",
+                actorPublicId: "employee-session-user-public-123",
+                question: learningSessionQuestion,
+              }),
+          };
+        }
+
+        if (
+          path ===
+          `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/answers`
+        ) {
+          answerSubmitBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createLearningAnswerFeedbackResponse({
+                sessionPublicId,
+                actorPublicId: "employee-session-user-public-123",
+                question: learningSessionQuestion,
+                selectedOptionLabels: ["B"],
+              }),
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+    expect(
+      await screen.findByText("synthetic persisted employee paper stem"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
+    expect(sessionCreateBodies[0]).toMatchObject({
+      sessionPublicId,
+      sourceResultPublicId,
+      sourceTaskPublicId,
+      ownerType: "organization",
+      ownerPublicId: "organization-public-123",
+    });
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /B synthetic persisted employee paper distractor/,
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
+    await waitFor(() => expect(answerSubmitBodies).toHaveLength(1));
+    expect(answerSubmitBodies[0]).toMatchObject({
+      sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+      selectedOptionLabels: ["B"],
+      textAnswer: null,
+    });
+    expect(await screen.findByText("回答错误")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
   });
 
   it("renders request history error state without exposing private content", async () => {
