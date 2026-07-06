@@ -1,42 +1,43 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-paper-route-plan-select-wiring-2026-07-06
-updatedAt: "2026-07-06T12:57:00-07:00"
+currentPhase: ai-paper-admin-route-container-contract-2026-07-06
+updatedAt: "2026-07-06T13:10:00-07:00"
 currentTask:
-  id: ai-paper-route-plan-select-wiring-2026-07-06
-  title: AI paper route plan select wiring
+  id: ai-paper-admin-route-container-contract-2026-07-06
+  title: AI paper admin route container contract
   phase: ai-generation-recontract-local-repair-goal-2026-07-06
   status: closed
-  result: pass_route_plan_select_wiring_unit_gates
+  result: pass_admin_route_paper_container_contract_unit_gates
   priority: p0
-  taskKind: source_test_route_plan_select_wiring_contract
-  executionProfile: local_source_and_focused_unit_route_plan_select_wiring_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
+  taskKind: source_test_admin_route_paper_container_contract
+  executionProfile: local_source_and_focused_unit_admin_route_paper_container_contract_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
   validationPolicy: read_gate_task_plan_tdd_red_green_focused_unit_lint_typecheck_precommit_redacted_evidence_audit
   moduleRunVersion: 2
   dependsOn:
-    - ai-paper-route-source-resolution-integration-2026-07-06
-  branch: codex/ai-paper-route-plan-select-wiring-2026-07-06
+    - ai-paper-route-plan-select-wiring-2026-07-06
+  branch: codex/ai-paper-admin-route-container-contract-2026-07-06
   approvalBoundary: active_parent_goal_continuation_local_source_only_no_remote_closeout_2026_07_06
-  plannedAt: "2026-07-06T12:57:00-07:00"
-  claimedAt: "2026-07-06T12:57:00-07:00"
-  materializedAt: "2026-07-06T12:57:00-07:00"
-  completedAt: "2026-07-06T13:03:00-07:00"
-  targetClosureItem: Compose route-integrated AI组卷 visible plan output with role-aware formal question source resolution and local plan-and-select assembly through injected repositories, without DB runtime, Provider call, persistence, or UI claim.
+  plannedAt: "2026-07-06T13:10:00-07:00"
+  claimedAt: "2026-07-06T13:10:00-07:00"
+  materializedAt: "2026-07-06T13:10:00-07:00"
+  completedAt: "2026-07-06T13:14:00-07:00"
+  targetClosureItem: Expose a redacted AI组卷 paper assembly container handoff in content/organization admin local route contracts through an injected local assembly resolver, before persistence, without DB runtime, Provider call, persistence claim beyond unit fakes, or UI claim.
   behaviorBoundary: source_test_docs_state_evidence_audit_only_no_dependency_no_package_lockfile_no_schema_migration_seed_no_env_secret_no_direct_db_runtime_no_provider_call_no_browser_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
   evidenceMode: redacted_file_paths_test_names_command_statuses_role_labels_source_categories_counts_and_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-paper-route-plan-select-wiring.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-route-plan-select-wiring.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-route-plan-select-wiring.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-paper-admin-route-container-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-admin-route-container-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-admin-route-container-contract.md
   requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-06-ai-paper-route-plan-select-wiring.md
-    - docs/05-execution-logs/evidence/2026-07-06-ai-paper-route-plan-select-wiring.md
-    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-route-plan-select-wiring.md
-    - src/server/services/ai-paper-route-plan-select-wiring-service.ts
-    - src/server/services/ai-paper-route-plan-select-wiring-service.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-06-ai-paper-admin-route-container-contract.md
+    - docs/05-execution-logs/evidence/2026-07-06-ai-paper-admin-route-container-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-admin-route-container-contract.md
+    - src/server/contracts/admin-ai-generation-local-contract.ts
+    - src/server/services/admin-ai-generation-local-contract-route.ts
+    - src/server/services/admin-ai-generation-local-contract-route.test.ts
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -58,13 +59,13 @@ currentTask:
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
   validationCommands:
-    - npm.cmd run test:unit -- src/server/services/ai-paper-route-plan-select-wiring-service.test.ts
-    - npm.cmd run test:unit -- src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts src/server/services/ai-paper-source-adapter-service.test.ts
+    - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts
+    - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts src/server/services/ai-paper-source-adapter-service.test.ts
     - git diff --check
     - npm.cmd run typecheck
     - npm.cmd run lint
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-paper-route-plan-select-wiring.md docs/05-execution-logs/evidence/2026-07-06-ai-paper-route-plan-select-wiring.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-route-plan-select-wiring.md src/server/services/ai-paper-route-plan-select-wiring-service.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-paper-route-plan-select-wiring-2026-07-06
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-paper-admin-route-container-contract.md docs/05-execution-logs/evidence/2026-07-06-ai-paper-admin-route-container-contract.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-admin-route-container-contract.md src/server/contracts/admin-ai-generation-local-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-paper-admin-route-container-contract-2026-07-06
   closeoutPolicy:
     localCommit:
       approved: true
@@ -81,18 +82,18 @@ currentTask:
       deleteShortBranch: false
       approvalSource: fresh_approval_required
   validationSummary:
-    status: pass_route_plan_select_wiring_unit_gates
+    status: pass_admin_route_paper_container_contract_unit_gates
     readGate: pass
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
-    tddRedObserved: pass_missing_service_import_failure
-    unit: pass_1_file_4_tests
-    focusedUnit: pass_5_files_21_tests
+    tddRedObserved: pass_missing_admin_route_paper_assembly_resolver_handoff
+    unit: pass_1_file_30_tests
+    focusedUnit: pass_6_files_51_tests
     gitDiffCheck: pass
-    typecheck: pass_after_test_helper_type_fix
+    typecheck: pass
     lint: pass
-    scopedPrettierCheck: pass_after_evidence_audit_creation
+    scopedPrettierCheck: pass_after_scoped_write
     moduleRunV2PreCommitHardening: pass
     sourceChanged: true
     testChanged: true
@@ -108,6 +109,14 @@ currentTask:
     productionUsability: not_claimed
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
+previousCurrentTaskBeforeAiPaperAdminRouteContainerContract20260706:
+  id: ai-paper-route-plan-select-wiring-2026-07-06
+  status: closed
+  result: pass_route_plan_select_wiring_unit_gates
+  branch: codex/ai-paper-route-plan-select-wiring-2026-07-06
+  commit: c9fa69da9
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-route-plan-select-wiring.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-route-plan-select-wiring.md
 previousCurrentTaskBeforeAiPaperRoutePlanSelectWiring20260706:
   id: ai-paper-route-source-resolution-integration-2026-07-06
   status: closed

@@ -17,6 +17,7 @@ import type {
   AdminAiGenerationLocalContractBaseDto,
   AdminAiGenerationLocalContractDto,
   AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto,
+  AdminAiGenerationLocalContractPaperAssemblyDto,
   AdminAiGenerationLocalContractRuntimeBridgeDto,
   AdminAiGenerationLocalContractTaskPersistenceDto,
   AdminAiGenerationRejectedErrorDto,
@@ -45,6 +46,7 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
+import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceDto,
@@ -76,6 +78,7 @@ export type AdminAiGenerationLocalContractRouteOptions = {
   requestClock?: () => Date;
   sessionService?: Pick<SessionService, "getCurrentSession">;
   runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControl;
+  paperAssemblyResolver?: AdminAiGenerationPaperAssemblyResolver;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 };
@@ -110,6 +113,23 @@ type AdminAiGenerationProviderDisabledRuntimeBridgeOutcome = {
   blockedReasons?: string[];
   executionSummary?: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
 };
+
+type AdminAiGenerationPaperAssemblyResolverInput = {
+  actor: AdminAiGenerationActor;
+  generationKind: AdminAiGenerationKind;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  requestPublicId: string;
+  resultPublicId: string;
+  runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
+  taskRequest: AdminAiGenerationLocalContractBaseDto["taskRequest"];
+  workspace: AdminAiGenerationWorkspace;
+};
+
+export type AdminAiGenerationPaperAssemblyResolver = (
+  input: AdminAiGenerationPaperAssemblyResolverInput,
+) =>
+  | AiPaperRoutePlanSelectWiringResult
+  | Promise<AiPaperRoutePlanSelectWiringResult>;
 
 export type AdminAiGenerationRuntimeBridgeControl = {
   bridgeMode?: "controlled_runner";
@@ -737,6 +757,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   requestClock: () => Date;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
+  paperAssemblyResolver: AdminAiGenerationPaperAssemblyResolver | undefined;
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
   resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
@@ -797,6 +818,22 @@ async function buildAdminAiGenerationLocalContract(input: {
     return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
   }
 
+  const paperAssemblyResult = await resolveAdminAiGenerationPaperAssembly({
+    actor: input.actor,
+    generationKind: input.generationKind,
+    generationParameters: input.generationParameters,
+    paperAssemblyResolver: input.paperAssemblyResolver,
+    requestPublicId,
+    resultPublicId,
+    runtimeBridge,
+    taskRequest,
+    workspace: input.workspace,
+  });
+
+  if (paperAssemblyResult.status === "rejected") {
+    return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
+  }
+
   const localContract = {
     runtimeStatus: "local_contract_only",
     workspace: input.workspace,
@@ -824,6 +861,7 @@ async function buildAdminAiGenerationLocalContract(input: {
         ownerPublicId: taskRequest.ownerPublicId,
         organizationPublicId: taskRequest.organizationPublicId,
       }),
+    paperAssembly: paperAssemblyResult.paperAssembly,
   } satisfies AdminAiGenerationLocalContractBaseDto;
 
   const taskPersistence =
@@ -857,6 +895,68 @@ async function buildAdminAiGenerationLocalContract(input: {
         generatedResult,
       ),
   });
+}
+
+type AdminAiGenerationPaperAssemblyResolveResult =
+  | {
+      status: "resolved" | "not_applicable";
+      paperAssembly: AdminAiGenerationLocalContractPaperAssemblyDto;
+    }
+  | {
+      status: "rejected";
+      paperAssembly: null;
+    };
+
+async function resolveAdminAiGenerationPaperAssembly(input: {
+  actor: AdminAiGenerationActor;
+  generationKind: AdminAiGenerationKind;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
+  paperAssemblyResolver: AdminAiGenerationPaperAssemblyResolver | undefined;
+  requestPublicId: string;
+  resultPublicId: string;
+  runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
+  taskRequest: AdminAiGenerationLocalContractBaseDto["taskRequest"];
+  workspace: AdminAiGenerationWorkspace;
+}): Promise<AdminAiGenerationPaperAssemblyResolveResult> {
+  if (
+    input.generationKind !== "paper" ||
+    input.generationParameters === null ||
+    input.paperAssemblyResolver === undefined
+  ) {
+    return {
+      status: "not_applicable",
+      paperAssembly: null,
+    };
+  }
+
+  const result = await input.paperAssemblyResolver({
+    actor: input.actor,
+    generationKind: input.generationKind,
+    generationParameters: input.generationParameters,
+    requestPublicId: input.requestPublicId,
+    resultPublicId: input.resultPublicId,
+    runtimeBridge: input.runtimeBridge,
+    taskRequest: input.taskRequest,
+    workspace: input.workspace,
+  });
+
+  if (result.status === "rejected") {
+    return {
+      status: "rejected",
+      paperAssembly: null,
+    };
+  }
+
+  return {
+    status: "resolved",
+    paperAssembly: {
+      status: result.status,
+      sourceDiagnostics: result.sourceDiagnostics,
+      container: result.assembly.container,
+      insufficiency: result.assembly.insufficiency,
+      redactionStatus: "redacted",
+    },
+  };
 }
 
 function mapAdminAiGenerationTaskPersistenceResultToLocalContractDto(input: {
@@ -1016,7 +1116,29 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
       input.localContract.organizationOwnedDraftBoundary.publishStatus,
     studentVisibleStatus:
       input.localContract.organizationOwnedDraftBoundary.studentVisibleStatus,
+    ...(input.localContract.paperAssembly === null
+      ? {}
+      : {
+          paperAssembly: createAdminAiGenerationPaperAssemblyRedactedSnapshot(
+            input.localContract.paperAssembly,
+          ),
+        }),
     ...(formalReviewedDraft === null ? {} : { formalReviewedDraft }),
+  };
+}
+
+function createAdminAiGenerationPaperAssemblyRedactedSnapshot(
+  paperAssembly: Exclude<AdminAiGenerationLocalContractPaperAssemblyDto, null>,
+) {
+  return {
+    status: paperAssembly.status,
+    redactionStatus: "redacted",
+    requestedQuestionCount: paperAssembly.container.requestedQuestionCount,
+    selectedQuestionCount: paperAssembly.container.selectedQuestionCount,
+    sourceComposition: paperAssembly.container.sourceComposition,
+    matchQuality: paperAssembly.container.matchQuality,
+    sectionCount: paperAssembly.container.sections.length,
+    insufficiency: paperAssembly.insufficiency,
   };
 }
 
@@ -1286,6 +1408,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             createRequestPublicId,
             generationKind,
             generationParameters,
+            paperAssemblyResolver: options.paperAssemblyResolver,
             requestClock,
             resultPersistenceRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,

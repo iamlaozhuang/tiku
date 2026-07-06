@@ -23,6 +23,7 @@ import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedGroundingContext,
 } from "../contracts/route-integrated-provider-execution-contract";
+import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRepository,
@@ -241,6 +242,9 @@ async function postLocalContractRequest(input: {
   requestPublicId?: string;
   requestedAt?: Date;
   runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControl;
+  paperAssemblyResolver?: () =>
+    | AiPaperRoutePlanSelectWiringResult
+    | Promise<AiPaperRoutePlanSelectWiringResult>;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 }) {
@@ -264,6 +268,9 @@ async function postLocalContractRequest(input: {
       input.requestedAt ?? new Date("2026-06-26T20:00:00.000Z"),
     ...(input.runtimeBridgeControl
       ? { runtimeBridgeControl: input.runtimeBridgeControl }
+      : {}),
+    ...(input.paperAssemblyResolver
+      ? { paperAssemblyResolver: input.paperAssemblyResolver }
       : {}),
   } as unknown as Parameters<
     typeof createAdminAiGenerationLocalContractRouteHandlers
@@ -627,6 +634,86 @@ function createGeneratedResultPersistenceRecorder(
           input.persistenceStatus ?? "created",
         );
       },
+    },
+  };
+}
+
+function createAssembledPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
+  return {
+    status: "assembled",
+    sourceDiagnostics: {
+      role: "org_advanced_admin",
+      platformQuestionCount: 2,
+      enterpriseQuestionCount: 1,
+      enterpriseSourceStatus: "resolved",
+    },
+    assembly: {
+      status: "assembled",
+      container: {
+        title: "redacted paper container",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        requestedQuestionCount: 3,
+        selectedQuestionCount: 3,
+        sourceComposition: {
+          platformFormalQuestionCount: 2,
+          enterpriseTrainingSnapshotCount: 1,
+        },
+        matchQuality: "fully_matched",
+        sections: [
+          {
+            sectionKey: "single_choice",
+            title: "redacted section",
+            questionType: "single_choice",
+            targetQuestionCount: 3,
+            selectedQuestionCount: 3,
+            selectedQuestions: [
+              {
+                questionPublicId: "platform_question_public_a",
+                sourceKind: "platform_formal_question",
+                matchTier: "exact",
+                score: 1,
+              },
+              {
+                questionPublicId: "platform_question_public_b",
+                sourceKind: "platform_formal_question",
+                matchTier: "exact",
+                score: 1,
+              },
+              {
+                questionPublicId: "enterprise_question_public_a",
+                sourceKind: "enterprise_training_snapshot",
+                matchTier: "exact",
+                score: 1,
+              },
+            ],
+            degradationSummary: {
+              exactCount: 3,
+              nearbyKnowledgeCount: 0,
+              sameScopeCount: 0,
+            },
+          },
+        ],
+      },
+      insufficiency: null,
+    },
+    rejection: null,
+  };
+}
+
+function createRejectedPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
+  return {
+    status: "rejected",
+    sourceDiagnostics: {
+      role: "org_advanced_admin",
+      platformQuestionCount: 0,
+      enterpriseQuestionCount: 0,
+      enterpriseSourceStatus: "resolved",
+    },
+    assembly: null,
+    rejection: {
+      failureCategory: "provider_question_content_forbidden",
     },
   };
 }
@@ -1019,6 +1106,210 @@ describe("admin AI generation local contract route handlers", () => {
       },
     });
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_J");
+    expect(providerInputs).toHaveLength(1);
+  });
+
+  it("hands off assembled AI paper containers in organization advanced admin local contracts before persistence", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const paperAssemblyResolverCalls: string[] = [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      requestPublicId: "admin_ai_generation_request_public_org_route_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      paperAssemblyResolver: () => {
+        paperAssemblyResolverCalls.push("called");
+
+        return createAssembledPaperRouteResult();
+      },
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
+        providerInputs,
+        {
+          content: JSON.stringify({
+            totalQuestionCount: 3,
+            paperSections: [
+              {
+                paperSectionType: "single_choice",
+                questionCount: 3,
+              },
+            ],
+            questionTypeDistribution: {
+              single_choice: 3,
+            },
+            knowledgeCoverage: ["redacted_knowledge_node"],
+          }),
+        },
+      ),
+      body: {
+        generationKind: "paper",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 3,
+        },
+        clientOnlyFixturePaperAssembly: "OMITTED_FIXTURE_PAPER_ASSEMBLY",
+      },
+    });
+    const payload = await response.json();
+
+    expect(paperAssemblyResolverCalls).toHaveLength(1);
+    expect(taskPersistenceRecorder.calls[0]?.localContract).toMatchObject({
+      paperAssembly: {
+        status: "assembled",
+        redactionStatus: "redacted",
+        sourceDiagnostics: {
+          role: "org_advanced_admin",
+          platformQuestionCount: 2,
+          enterpriseQuestionCount: 1,
+          enterpriseSourceStatus: "resolved",
+        },
+        container: {
+          requestedQuestionCount: 3,
+          selectedQuestionCount: 3,
+          sourceComposition: {
+            platformFormalQuestionCount: 2,
+            enterpriseTrainingSnapshotCount: 1,
+          },
+          matchQuality: "fully_matched",
+        },
+        insufficiency: null,
+      },
+    });
+    expect(
+      generatedResultPersistenceRecorder.calls[0]?.contentRedactedSnapshot,
+    ).toMatchObject({
+      paperAssembly: {
+        status: "assembled",
+        redactionStatus: "redacted",
+        selectedQuestionCount: 3,
+        sourceComposition: {
+          platformFormalQuestionCount: 2,
+          enterpriseTrainingSnapshotCount: 1,
+        },
+      },
+    });
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        paperAssembly: {
+          status: "assembled",
+          redactionStatus: "redacted",
+          sourceDiagnostics: {
+            role: "org_advanced_admin",
+            platformQuestionCount: 2,
+            enterpriseQuestionCount: 1,
+            enterpriseSourceStatus: "resolved",
+          },
+          container: {
+            requestedQuestionCount: 3,
+            selectedQuestionCount: 3,
+            matchQuality: "fully_matched",
+          },
+          insufficiency: null,
+        },
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain(
+      "OMITTED_FIXTURE_PAPER_ASSEMBLY",
+    );
+    expect(JSON.stringify(payload)).not.toMatch(/"id":/);
+    expect(providerInputs).toHaveLength(1);
+  });
+
+  it("does not invoke AI paper assembly for admin AI question local contracts", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const paperAssemblyResolverCalls: string[] = [];
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      paperAssemblyResolver: () => {
+        paperAssemblyResolverCalls.push("called");
+
+        return createAssembledPaperRouteResult();
+      },
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
+      body: {
+        generationKind: "question",
+      },
+    });
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        generationKind: "question",
+        paperAssembly: null,
+      },
+    });
+    expect(paperAssemblyResolverCalls).toHaveLength(0);
+    expect(providerInputs).toHaveLength(1);
+  });
+
+  it("blocks admin AI paper persistence when local paper assembly rejects the provider plan", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const paperAssemblyResolverCalls: string[] = [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      paperAssemblyResolver: () => {
+        paperAssemblyResolverCalls.push("called");
+
+        return createRejectedPaperRouteResult();
+      },
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
+        providerInputs,
+        {
+          content: JSON.stringify({
+            totalQuestionCount: 3,
+            paperSections: [
+              {
+                paperSectionType: "single_choice",
+                questionCount: 3,
+              },
+            ],
+            questionTypeDistribution: {
+              single_choice: 3,
+            },
+            knowledgeCoverage: ["redacted_knowledge_node"],
+          }),
+        },
+      ),
+      body: {
+        generationKind: "paper",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 3,
+        },
+      },
+    });
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 409015,
+      data: {
+        rejectionReason: "generated_output_unacceptable",
+        redactionStatus: "redacted",
+      },
+    });
+    expect(paperAssemblyResolverCalls).toHaveLength(1);
+    expect(taskPersistenceRecorder.calls).toHaveLength(0);
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(0);
     expect(providerInputs).toHaveLength(1);
   });
 

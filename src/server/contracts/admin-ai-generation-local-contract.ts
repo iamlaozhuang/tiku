@@ -7,6 +7,11 @@ import type {
 import type { AiGenerationTaskResultContentVisibility } from "../models/ai-generation-task-request";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-contract";
 import type {
+  AiPaperAssemblyRole,
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperPlanAndSelectInsufficiencyDto,
+} from "./ai-paper-plan-and-select-contract";
+import type {
   AdminAiGenerationResultContentVisibility,
   AdminAiGenerationResultFormalAdoptionStatus,
   AdminAiGenerationResultStatus,
@@ -122,6 +127,19 @@ export type AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto = {
   redactionStatus: "redacted";
 };
 
+export type AdminAiGenerationLocalContractPaperAssemblyDto = {
+  status: "assembled" | "insufficient";
+  sourceDiagnostics: {
+    role: AiPaperAssemblyRole;
+    platformQuestionCount: number;
+    enterpriseQuestionCount: number;
+    enterpriseSourceStatus: "not_applicable" | "resolved" | "not_resolved";
+  };
+  container: AiPaperPlanAndSelectContainerDto;
+  insufficiency: AiPaperPlanAndSelectInsufficiencyDto | null;
+  redactionStatus: "redacted";
+} | null;
+
 export type AdminAiGenerationLocalContractBaseDto = {
   runtimeStatus: AdminAiGenerationLocalContractRuntimeStatus;
   workspace: AdminAiGenerationWorkspace;
@@ -133,6 +151,7 @@ export type AdminAiGenerationLocalContractBaseDto = {
   runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto;
   formalContentBoundary: AdminAiGenerationLocalContractFormalContentBoundaryDto;
   organizationOwnedDraftBoundary: AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto;
+  paperAssembly: AdminAiGenerationLocalContractPaperAssemblyDto;
 };
 
 export type AdminAiGenerationLocalContractTaskPersistenceDto = {
