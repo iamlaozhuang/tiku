@@ -354,6 +354,120 @@ activeTasks:
       stagingProdDeployExecuted: false
       costCalibrationExecutedOrClaimed: false
       releaseFinalProductionClaimed: false
+  - id: post-fix-provider-disabled-localhost-replay-2026-07-06
+    title: Post fix Provider-disabled localhost replay
+    phase: post-fix-provider-disabled-localhost-replay-2026-07-06
+    status: closed
+    result: pass_provider_disabled_admin_routes_safe_409015_no_provider_no_persistence_standard_denial_browser_mapping
+    priority: p0
+    taskKind: local_provider_disabled_runtime_replay
+    executionProfile: local_next_start_provider_disabled_route_browser_replay_docs_state_evidence_no_source_change_no_dependency_no_schema_no_migration_no_staging_prod_no_cost_calibration
+    validationPolicy: read_gate_task_plan_redacted_evidence_audit_lint_typecheck_target_unit_build_localhost_redacted_aggregate_probes_precommit
+    moduleRunVersion: 2
+    dependsOn:
+      - post-admin-observability-fix-local-recheck-2026-07-06
+    branch: codex/post-fix-provider-disabled-localhost-replay-2026-07-06
+    humanApprovalBoundary: current_user_approved_post_fix_provider_disabled_localhost_replay_merge_push_cleanup_2026_07_06
+    plannedAt: "2026-07-06T08:25:00-07:00"
+    claimedAt: "2026-07-06T08:25:00-07:00"
+    materializedAt: "2026-07-06T08:25:00-07:00"
+    completedAt: "2026-07-06T08:35:00-07:00"
+    targetClosureItem: Freshly replay Provider-disabled localhost behavior for admin AI generation routes after the safe rejection reason fix.
+    behaviorBoundary: docs_state_evidence_audit_localhost_next_start_probe_only_no_product_source_no_test_source_no_dependency_no_schema_no_migration_no_env_secret_change_no_destructive_db_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_file_line_references_function_names_error_codes_failure_categories_booleans_counts_and_test_results_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
+    planPath: docs/05-execution-logs/task-plans/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+      - docs/05-execution-logs/evidence/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+      - docs/05-execution-logs/audits-reviews/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run build
+      - localhost next-start Provider-disabled redacted replay script
+      - git diff --check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-post-fix-provider-disabled-localhost-replay.md docs/05-execution-logs/evidence/2026-07-06-post-fix-provider-disabled-localhost-replay.md docs/05-execution-logs/audits-reviews/2026-07-06-post-fix-provider-disabled-localhost-replay.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId post-fix-provider-disabled-localhost-replay-2026-07-06
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId post-fix-provider-disabled-localhost-replay-2026-07-06 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_post_fix_provider_disabled_localhost_replay_merge_push_cleanup_2026_07_06
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_post_fix_provider_disabled_localhost_replay_merge_push_cleanup_2026_07_06
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_post_fix_provider_disabled_localhost_replay_merge_push_cleanup_2026_07_06
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_post_fix_provider_disabled_localhost_replay_merge_push_cleanup_2026_07_06
+    validationSummary:
+      status: pass_provider_disabled_admin_routes_safe_409015_no_provider_no_persistence_standard_denial_browser_mapping
+      readGate: pass
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      sourceUnit: pass
+      dbBackedRuntime: partial_full_acceptance_pass_provider_disabled_admin_route_no_persistence
+      browser: partial_full_matrix_pass_content_admin_provider_disabled_mapping
+      providerDisabled: pass_content_and_org_admin_routes
+      providerEnabledSmallSample: not_tested
+      releaseReadiness: not_claimed
+      productionUsability: not_claimed
+      staging: not_executed_requires_fresh_approval
+      costCalibration: not_executed_requires_fresh_approval
+      safeRejectionReasonReturnedWith409015: true
+      providerDisabledSafeReason: provider_execution_unavailable
+      providerCallExecuted: false
+      providerConfigurationRead: false
+      envSecretAccessed: false
+      costCalibrationExecuted: false
+      noPersistenceAggregateHistoryObserved: true
+      frontendSafeBusinessMessageMapping: true
+      standardOrgAdminDenied403011: true
+      targetUnitTests: pass_3_files_66_tests
+      lint: pass
+      typecheck: pass
+      build: pass
+      sourceChanged: false
+      testChanged: false
+      dependencyChanged: false
+      destructiveDbOperationExecuted: false
+      devServerExecuted: true_localhost_next_start_only
+      browserMatrixExecuted: partial_content_admin_only
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
   - id: 0704-local-acceptance-branch-closeout-2026-07-06
     title: 0704 local acceptance branch closeout
     phase: 0704-local-acceptance-branch-closeout-2026-07-06
