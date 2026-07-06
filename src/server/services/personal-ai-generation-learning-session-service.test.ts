@@ -21,6 +21,10 @@ function createInMemoryRepository(): PersonalAiGenerationLearningSessionReposito
   const repository: PersonalAiGenerationLearningSessionRepository = {
     async saveSession(session) {
       sessions.set(session.sessionPublicId, session);
+      return {
+        status: "saved",
+        blockReason: null,
+      };
     },
     async findSessionByPublicId(sessionPublicId) {
       return sessions.get(sessionPublicId) ?? null;
@@ -416,6 +420,31 @@ describe("personal AI generation learning session service", () => {
     expect(result).toEqual({
       status: "blocked",
       blockReason: "insufficient_grounding_evidence",
+      session: null,
+    });
+  });
+
+  it("blocks DB-persisted learning session creation when source result id is missing", async () => {
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    });
+
+    const result = await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_public_missing_source_result_001",
+      sourceResultPublicId: null,
+      sourceTaskPublicId: "ai_generation_task_public_missing_source_result_001",
+      ownerType: "personal",
+      ownerPublicId: "student_public_missing_source_result_001",
+      actorPublicId: "student_public_missing_source_result_001",
+      visibleGeneratedContent: createVisibleGeneratedContent(
+        createQuestionSetPreview(),
+      ),
+      createdAt: new Date("2026-07-05T12:00:00.000Z"),
+    });
+
+    expect(result).toEqual({
+      status: "blocked",
+      blockReason: "source_result_required",
       session: null,
     });
   });

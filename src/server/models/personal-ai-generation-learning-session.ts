@@ -36,6 +36,8 @@ export type PersonalAiGenerationLearningSessionCreationStatus =
 
 export type PersonalAiGenerationLearningSessionCreationBlockReason =
   | "insufficient_grounding_evidence"
+  | "source_result_required"
+  | "source_result_not_found"
   | "structured_preview_unavailable"
   | "structured_preview_not_parsed"
   | "no_usable_generated_questions";

@@ -43,6 +43,10 @@ async function createLearningSession(
     return blockCreation("insufficient_grounding_evidence");
   }
 
+  if (input.sourceResultPublicId === null) {
+    return blockCreation("source_result_required");
+  }
+
   const structuredPreview = input.visibleGeneratedContent.structuredPreview;
 
   if (structuredPreview === undefined) {
@@ -91,7 +95,11 @@ async function createLearningSession(
     createdAt: input.createdAt.toISOString(),
   };
 
-  await repository.saveSession(session);
+  const saveResult = await repository.saveSession(session);
+
+  if (saveResult.status === "blocked") {
+    return blockCreation(saveResult.blockReason);
+  }
 
   return {
     status: "created",

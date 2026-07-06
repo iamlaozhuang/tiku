@@ -177,10 +177,25 @@ export type PersonalAiGenerationLearningSessionProgressResultDto =
       progress: null;
     };
 
+export type PersonalAiGenerationLearningSessionSaveResultDto =
+  | {
+      status: "saved";
+      blockReason: null;
+    }
+  | {
+      status: "blocked";
+      blockReason: Extract<
+        PersonalAiGenerationLearningSessionCreationBlockReason,
+        "source_result_not_found"
+      >;
+    };
+
 export type PersonalAiGenerationLearningSessionRepository = {
   saveSession(
     session: PersonalAiGenerationLearningSessionDto,
-  ): Promise<void> | void;
+  ):
+    | Promise<PersonalAiGenerationLearningSessionSaveResultDto>
+    | PersonalAiGenerationLearningSessionSaveResultDto;
   findSessionByPublicId(
     sessionPublicId: string,
   ):
