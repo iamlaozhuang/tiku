@@ -108,6 +108,24 @@ const createdDraft = {
   id: 9301,
 };
 
+const persistedAiDraft = {
+  ...createdDraft,
+  publicId: "organization-training-draft-ai-ui-001",
+  sourceTaskPublicId: "admin-ai-generation-task-organization-ui-001",
+  title: "AI 生成训练草稿",
+  description: "AI 结果复制草稿",
+  questionCount: 1,
+  totalScore: 5,
+  questionTypeSummary: {
+    singleChoice: 1,
+    multiChoice: 0,
+    trueFalse: 0,
+    shortAnswer: 0,
+  },
+  evidenceStatus: "sufficient",
+  validationStatus: "needs_review",
+};
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -238,6 +256,17 @@ describe("AdminOrganizationTrainingPage", () => {
 
         if (path === "/api/v1/sessions") {
           return createJsonResponse(adminSessionPayload);
+        }
+
+        if (path === "/api/v1/organization-trainings" && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              items: [],
+              redactionStatus: "metadata_only",
+            },
+          });
         }
 
         if (path === "/api/v1/organization-trainings" && method === "POST") {
@@ -439,7 +468,7 @@ describe("AdminOrganizationTrainingPage", () => {
       "organization-training-draft-ui-001",
     );
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
   });
 
   it("shows organization AI result copy guidance when selected explicitly", async () => {
@@ -469,6 +498,173 @@ describe("AdminOrganizationTrainingPage", () => {
       screen.getByText(/企业 AI 结果在 AI 出题或组卷完成后复制到企业训练草稿/u),
     ).toBeInTheDocument();
     expect(screen.getByText(/不额外消耗 AI 额度/u)).toBeInTheDocument();
+  });
+
+  it("loads persisted AI-created drafts and publishes reviewed question snapshots through the existing organization training API", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+        const method = init?.method ?? "GET";
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (path === "/api/v1/organization-trainings" && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              items: [
+                {
+                  publicId: persistedAiDraft.publicId,
+                  resourceType: "organization_training_draft",
+                  organizationPublicId: persistedAiDraft.organizationPublicId,
+                  authorizationPublicId: persistedAiDraft.authorizationPublicId,
+                  profession: persistedAiDraft.profession,
+                  level: persistedAiDraft.level,
+                  subject: persistedAiDraft.subject,
+                  title: persistedAiDraft.title,
+                  description: persistedAiDraft.description,
+                  questionCount: persistedAiDraft.questionCount,
+                  totalScore: persistedAiDraft.totalScore,
+                  questionTypeSummary: persistedAiDraft.questionTypeSummary,
+                  status: "draft",
+                  availableActions: ["publish"],
+                },
+              ],
+              redactionStatus: "metadata_only",
+            },
+          });
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-ui-001/publish" &&
+          method === "POST"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              version: {
+                publicId: "organization-training-version-ai-ui-001",
+                draftPublicId: "organization-training-draft-ai-ui-001",
+                versionNumber: 1,
+                organizationPublicId: "organization-admin-scope-001",
+                publishScopeSnapshot: {
+                  organizationPublicIds: ["organization-admin-scope-001"],
+                  capturedAt: "2026-07-06T06:20:00.000Z",
+                },
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "AI 生成训练草稿",
+                description: "AI 结果复制草稿",
+                questionCount: 1,
+                totalScore: 5,
+                status: "published",
+                publishedAt: "2026-07-06T06:20:00.000Z",
+                takenDownAt: null,
+                takedownReason: null,
+              },
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const persistedDraftCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-draft-ai-ui-001",
+    );
+    expect(persistedDraftCard).toHaveTextContent("AI 生成训练草稿");
+    expect(persistedDraftCard).toHaveTextContent("草稿");
+    expect(persistedDraftCard).toHaveTextContent("待发布");
+
+    fireEvent.click(
+      within(persistedDraftCard).getByRole("button", { name: "发布" }),
+    );
+
+    const publishForm = within(
+      screen.getByRole("form", { name: "企业训练发布表单" }),
+    );
+    fireEvent.change(publishForm.getByLabelText("题目快照"), {
+      target: {
+        value: JSON.stringify([
+          {
+            publicId: "organization-training-question-ai-ui-001",
+            sequenceNumber: 1,
+            questionType: "single_choice",
+            materialTitle: null,
+            materialContent: null,
+            stem: "synthetic reviewed organization training stem",
+            options: [
+              {
+                publicId: "organization-training-question-option-ai-ui-a",
+                label: "A",
+                content: "synthetic reviewed option A",
+              },
+              {
+                publicId: "organization-training-question-option-ai-ui-b",
+                label: "B",
+                content: "synthetic reviewed option B",
+              },
+            ],
+            score: 5,
+            standardAnswer: "A",
+            analysisSummary: "synthetic reviewed analysis",
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+          },
+        ]),
+      },
+    });
+    fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "企业训练已发布",
+    );
+    const publishBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/organization-trainings/organization-training-draft-ai-ui-001/publish",
+      "POST",
+    );
+    expect(publishBody).toMatchObject({
+      draftPublicId: "organization-training-draft-ai-ui-001",
+      organizationPublicId: "organization-admin-scope-001",
+      authorizationPublicId: "org-auth-admin-scope-001",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      title: "AI 生成训练草稿",
+      questionCount: 1,
+      totalScore: 5,
+      questionTypeSummary: {
+        singleChoice: 1,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 0,
+      },
+      publishScopeOrganizationPublicIds: ["organization-admin-scope-001"],
+      capabilityContext: {
+        effectiveEdition: "advanced",
+        authorizationSource: "org_auth",
+        canCreateOrganizationTraining: true,
+      },
+      weakEvidenceConfirmed: false,
+    });
+    expect(JSON.stringify(publishBody)).not.toContain("rawPrompt");
+    expect(JSON.stringify(publishBody)).not.toContain("providerPayload");
   });
 
   it("announces organization training mutation failures as alerts", async () => {

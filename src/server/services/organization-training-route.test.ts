@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { POST as manualDraftRoutePost } from "@/app/api/v1/organization-trainings/route";
+import {
+  GET as adminLifecycleRouteGet,
+  POST as manualDraftRoutePost,
+} from "@/app/api/v1/organization-trainings/route";
 import { POST as copyToNewDraftRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/copy-to-new-draft/route";
 import { POST as sourceContextRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/source-contexts/route";
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
@@ -67,6 +70,16 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
   ),
   findEmployeeAnswerByVersion: vi.fn(
     async (): Promise<EmployeeOrganizationTrainingAnswerDto | null> => null,
+  ),
+  listAdminLifecycleDrafts: vi.fn(
+    async (): Promise<OrganizationTrainingDraftDto[]> => [
+      createManualDraftDto(),
+    ],
+  ),
+  listAdminLifecycleVersions: vi.fn(
+    async (): Promise<OrganizationTrainingPublishedVersionDto[]> => [
+      createEmployeeVisibleVersion(),
+    ],
   ),
   lookupVersionQuestionTypeSummary: vi.fn(
     async (): Promise<OrganizationTrainingQuestionTypeSummary | null> => ({
@@ -772,6 +785,14 @@ describe("organization training draft source-context route handlers", () => {
       trueFalse: 0,
       shortAnswer: 0,
     });
+    runtimeRepositoryMock.listAdminLifecycleDrafts.mockClear();
+    runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValue([
+      createManualDraftDto(),
+    ]);
+    runtimeRepositoryMock.listAdminLifecycleVersions.mockClear();
+    runtimeRepositoryMock.listAdminLifecycleVersions.mockResolvedValue([
+      createEmployeeVisibleVersion(),
+    ]);
     runtimeRepositoryMock.createManualDraft.mockClear();
     runtimeRepositoryMock.createManualDraft.mockResolvedValue(
       createManualDraftDto(),
@@ -798,9 +819,74 @@ describe("organization training draft source-context route handlers", () => {
   });
 
   it("exports thin App Router entrypoints for manual draft, copy-to-new-draft, and source-context attachment", () => {
+    expect(adminLifecycleRouteGet).toEqual(expect.any(Function));
     expect(manualDraftRoutePost).toEqual(expect.any(Function));
     expect(copyToNewDraftRoutePost).toEqual(expect.any(Function));
     expect(sourceContextRoutePost).toEqual(expect.any(Function));
+  });
+
+  it("lists organization training draft and version lifecycle items through the runtime route", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.manualDraft.GET(
+      new Request("http://localhost/api/v1/organization-trainings", {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+    );
+
+    const payload = await resolveJsonPayload(response);
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        redactionStatus: "metadata_only",
+        items: [
+          {
+            publicId: "organization_training_draft_route_401",
+            resourceType: "organization_training_draft",
+            organizationPublicId: "organization_route_public_401",
+            authorizationPublicId: "org_auth_route_public_401",
+            profession: "logistics",
+            level: 4,
+            subject: "theory",
+            title: "Route draft training",
+            status: "draft",
+            availableActions: ["publish"],
+          },
+          {
+            publicId: "organization_training_version_route_401",
+            resourceType: "organization_training_version",
+            organizationPublicId: "organization_route_public_401",
+            profession: "logistics",
+            level: 4,
+            subject: "theory",
+            status: "published",
+            availableActions: ["take_down", "copy_to_new_draft"],
+          },
+        ],
+      },
+    });
+    expect(JSON.stringify(payload)).not.toMatch(/"id":/u);
+    expect(runtimeRepositoryMock.listAdminLifecycleDrafts).toHaveBeenCalledWith(
+      {
+        visibleOrganizationPublicIds: ["organization_route_public_401"],
+      },
+    );
+    expect(
+      runtimeRepositoryMock.listAdminLifecycleVersions,
+    ).toHaveBeenCalledWith({
+      visibleOrganizationPublicIds: ["organization_route_public_401"],
+    });
   });
 
   it("creates a manual draft through the runtime route with a standard envelope", async () => {

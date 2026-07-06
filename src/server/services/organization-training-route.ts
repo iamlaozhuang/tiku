@@ -10,6 +10,7 @@ import type {
 } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
@@ -45,6 +46,7 @@ import {
   type OrganizationTrainingSourceContextRouteInput,
 } from "../validators/organization-training";
 import {
+  buildOrganizationTrainingAdminLifecycleFlowReadModel,
   createOrganizationTrainingService,
   organizationTrainingEmployeeAnswerBlockedMessage,
   organizationTrainingCopyToNewDraftBlockedMessage,
@@ -122,6 +124,8 @@ export type OrganizationTrainingVisibleOrganizationScopeResolver = (
 ) => Promise<readonly string[] | null>;
 
 export type OrganizationTrainingRouteOptions = {
+  listAdminLifecycleDrafts?: OrganizationTrainingAdminLifecycleDraftsReader;
+  listAdminLifecycleVersions?: OrganizationTrainingAdminLifecycleVersionsReader;
   listEmployeeVisibleVersions?: OrganizationTrainingEmployeeVisibleVersionsReader;
   lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
   resolveEmployeeAnswer?: OrganizationTrainingEmployeeAnswerResolver;
@@ -147,6 +151,8 @@ export type OrganizationTrainingVersionOrganizationPublicIdResolver = (
 
 export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
+  | "listAdminLifecycleDrafts"
+  | "listAdminLifecycleVersions"
   | "listEmployeeVisibleVersions"
   | "resolveEmployeeAnswer"
   | "resolveEmployeeContext"
@@ -168,6 +174,19 @@ export type OrganizationTrainingEmployeeContextResolverInput = {
   request: Request;
   pathPublicId: string | null;
 };
+
+export type OrganizationTrainingAdminLifecycleReaderInput = {
+  request: Request;
+  adminContext: OrganizationTrainingAdminContext;
+};
+
+export type OrganizationTrainingAdminLifecycleDraftsReader = (
+  input: OrganizationTrainingAdminLifecycleReaderInput,
+) => Promise<OrganizationTrainingDraftDto[]>;
+
+export type OrganizationTrainingAdminLifecycleVersionsReader = (
+  input: OrganizationTrainingAdminLifecycleReaderInput,
+) => Promise<OrganizationTrainingPublishedVersionDto[]>;
 
 export type OrganizationTrainingEmployeeContextResolver = (
   input: OrganizationTrainingEmployeeContextResolverInput,
@@ -377,6 +396,18 @@ async function defaultResolveVersionOrganizationPublicId(): Promise<null> {
 
 async function defaultResolveEmployeeContext(): Promise<null> {
   return null;
+}
+
+async function defaultListAdminLifecycleDrafts(): Promise<
+  OrganizationTrainingDraftDto[]
+> {
+  return [];
+}
+
+async function defaultListAdminLifecycleVersions(): Promise<
+  OrganizationTrainingPublishedVersionDto[]
+> {
+  return [];
 }
 
 async function defaultListEmployeeVisibleVersions(): Promise<
@@ -783,6 +814,27 @@ function createRepositoryBackedEmployeeVisibleVersionsReader(
     });
 }
 
+function createRepositoryBackedAdminLifecycleDraftsReader(
+  repository: Pick<OrganizationTrainingRepository, "listAdminLifecycleDrafts">,
+): OrganizationTrainingAdminLifecycleDraftsReader {
+  return async ({ adminContext }) =>
+    repository.listAdminLifecycleDrafts({
+      visibleOrganizationPublicIds: adminContext.visibleOrganizationPublicIds,
+    });
+}
+
+function createRepositoryBackedAdminLifecycleVersionsReader(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "listAdminLifecycleVersions"
+  >,
+): OrganizationTrainingAdminLifecycleVersionsReader {
+  return async ({ adminContext }) =>
+    repository.listAdminLifecycleVersions({
+      visibleOrganizationPublicIds: adminContext.visibleOrganizationPublicIds,
+    });
+}
+
 function createRepositoryBackedPublishedVersionResolver(
   repository: Pick<
     OrganizationTrainingRepository,
@@ -1141,6 +1193,10 @@ export function createOrganizationTrainingRouteHandlers(
   const getEmployeeAnswerReadonlySummaryService =
     organizationTrainingService.getEmployeeAnswerReadonlySummary ??
     defaultEmployeeAnswerServiceResult;
+  const listAdminLifecycleDrafts =
+    options.listAdminLifecycleDrafts ?? defaultListAdminLifecycleDrafts;
+  const listAdminLifecycleVersions =
+    options.listAdminLifecycleVersions ?? defaultListAdminLifecycleVersions;
   const listEmployeeVisibleVersions =
     options.listEmployeeVisibleVersions ?? defaultListEmployeeVisibleVersions;
   const resolveEmployeeAnswer =
@@ -1170,6 +1226,32 @@ export function createOrganizationTrainingRouteHandlers(
 
   return createRouteHandlersWithErrorEnvelope({
     manualDraft: {
+      async GET(request: Request): Promise<Response> {
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId: "organization_training_admin_lifecycle",
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createManualDraftAdminContextUnavailableResponse(),
+          );
+        }
+
+        return createJsonResponse(
+          buildOrganizationTrainingAdminLifecycleFlowReadModel({
+            adminContext,
+            drafts: await listAdminLifecycleDrafts({
+              request,
+              adminContext,
+            }),
+            versions: await listAdminLifecycleVersions({
+              request,
+              adminContext,
+            }),
+          }),
+        );
+      },
       async POST(request: Request): Promise<Response> {
         const input = normalizeOrganizationTrainingManualDraftInput(
           await readRequestJson(request),
@@ -1797,6 +1879,12 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       sessionService,
       effectiveAuthorizationService,
     );
+  const listAdminLifecycleDrafts =
+    options.listAdminLifecycleDrafts ??
+    createRepositoryBackedAdminLifecycleDraftsReader(repository);
+  const listAdminLifecycleVersions =
+    options.listAdminLifecycleVersions ??
+    createRepositoryBackedAdminLifecycleVersionsReader(repository);
   const listEmployeeVisibleVersions =
     options.listEmployeeVisibleVersions ??
     createRepositoryBackedEmployeeVisibleVersionsReader(repository);
@@ -1821,6 +1909,8 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       resolveOrganizationAdminContext,
       resolveVersionOrganizationPublicId,
       resolveEmployeeContext,
+      listAdminLifecycleDrafts,
+      listAdminLifecycleVersions,
       listEmployeeVisibleVersions,
       resolvePublishedVersion,
       resolveSourceVersion,

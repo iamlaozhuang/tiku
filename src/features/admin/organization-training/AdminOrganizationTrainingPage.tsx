@@ -17,9 +17,12 @@ import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
+  OrganizationTrainingAdminLifecycleItemDto,
   OrganizationTrainingDraftDto,
+  OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingSourceContextAttachmentDto,
 } from "@/server/contracts/organization-training-contract";
+import type { OrganizationTrainingPublishInput } from "@/server/models/organization-training";
 import type { Profession, Subject } from "@/server/models/paper";
 
 import {
@@ -47,6 +50,8 @@ type AdminOrganizationTrainingLoadState =
   | "unauthorized"
   | "error";
 
+type OrganizationTrainingListState = "loading" | "ready" | "error";
+
 type DraftFormValues = {
   authorizationPublicId: string;
   description: string;
@@ -73,6 +78,12 @@ type CopyFormValues = {
   sourceVersionPublicId: string;
 };
 
+type PublishFormValues = {
+  publishScopeOrganizationPublicIds: string;
+  questionSnapshotJson: string;
+  weakEvidenceConfirmed: boolean;
+};
+
 const defaultDraftFormValues: DraftFormValues = {
   authorizationPublicId: "",
   description: "",
@@ -97,6 +108,12 @@ const defaultSourceContextFormValues: SourceContextFormValues = {
 const defaultCopyFormValues: CopyFormValues = {
   newDraftTitle: "",
   sourceVersionPublicId: "",
+};
+
+const defaultPublishFormValues: PublishFormValues = {
+  publishScopeOrganizationPublicIds: "",
+  questionSnapshotJson: "[]",
+  weakEvidenceConfirmed: false,
 };
 
 const sourceChoices = [
@@ -149,6 +166,121 @@ async function mutateAdminOrganizationTrainingApi<TData>(
   });
 
   return (await response.json()) as ApiResponse<TData | null>;
+}
+
+async function fetchAdminOrganizationTrainingApi<TData>(
+  path: string,
+  sessionToken: string | null,
+): Promise<ApiResponse<TData | null>> {
+  const response = await fetch(path, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: createAdminAuthHeaders(sessionToken),
+  });
+
+  return (await response.json()) as ApiResponse<TData | null>;
+}
+
+function createApiErrorMessage(
+  fallbackMessage: string,
+  response: ApiResponse<unknown> | null,
+) {
+  return response === null
+    ? fallbackMessage
+    : `${fallbackMessage}（code: ${response.code}）`;
+}
+
+function createLifecycleItemFromDraft(
+  draft: OrganizationTrainingDraftDto,
+): OrganizationTrainingAdminLifecycleItemDto {
+  return {
+    publicId: draft.publicId,
+    resourceType: "organization_training_draft",
+    organizationPublicId: draft.organizationPublicId,
+    authorizationPublicId: draft.authorizationPublicId,
+    profession: draft.profession,
+    level: draft.level,
+    subject: draft.subject,
+    title: draft.title,
+    description: draft.description,
+    questionCount: draft.questionCount,
+    totalScore: draft.totalScore,
+    questionTypeSummary: draft.questionTypeSummary,
+    status: "draft",
+    availableActions: ["publish"],
+  };
+}
+
+function createLifecycleItemFromVersion(
+  version: OrganizationTrainingPublishedVersionDto,
+): OrganizationTrainingAdminLifecycleItemDto {
+  return {
+    publicId: version.publicId,
+    resourceType: "organization_training_version",
+    organizationPublicId: version.organizationPublicId,
+    profession: version.profession,
+    level: version.level,
+    subject: version.subject,
+    title: version.title,
+    description: version.description,
+    questionCount: version.questionCount,
+    totalScore: version.totalScore,
+    status: version.status,
+    availableActions:
+      version.status === "published"
+        ? ["take_down", "copy_to_new_draft"]
+        : ["copy_to_new_draft"],
+  };
+}
+
+function upsertLifecycleItem(
+  items: OrganizationTrainingAdminLifecycleItemDto[],
+  item: OrganizationTrainingAdminLifecycleItemDto,
+) {
+  const itemExists = items.some(
+    (currentItem) => currentItem.publicId === item.publicId,
+  );
+
+  return itemExists
+    ? items.map((currentItem) =>
+        currentItem.publicId === item.publicId ? item : currentItem,
+      )
+    : [item, ...items];
+}
+
+function replaceLifecycleItem(
+  items: OrganizationTrainingAdminLifecycleItemDto[],
+  sourcePublicId: string,
+  item: OrganizationTrainingAdminLifecycleItemDto,
+) {
+  return items.map((currentItem) =>
+    currentItem.publicId === sourcePublicId ? item : currentItem,
+  );
+}
+
+function parseQuestionSnapshotJson(
+  value: string,
+): OrganizationTrainingPublishInput["questions"] | null {
+  try {
+    const parsedValue = JSON.parse(value) as unknown;
+
+    return Array.isArray(parsedValue)
+      ? (parsedValue as OrganizationTrainingPublishInput["questions"])
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizePublishScope(rawValue: string, organizationPublicId: string) {
+  const normalizedValues = rawValue
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  return normalizedValues.length === 0
+    ? [organizationPublicId]
+    : [...new Set(normalizedValues)];
 }
 
 function createManualDraftInput(
@@ -215,6 +347,54 @@ function createCopyToDraftInput(
   };
 }
 
+function createPublishTrainingInput({
+  capabilitySummary,
+  draft,
+  values,
+}: {
+  capabilitySummary: AdminWorkspaceCapabilitySummary;
+  draft: OrganizationTrainingAdminLifecycleItemDto;
+  values: PublishFormValues;
+}): OrganizationTrainingPublishInput | null {
+  const questions = parseQuestionSnapshotJson(values.questionSnapshotJson);
+
+  if (
+    draft.authorizationPublicId === undefined ||
+    draft.profession === undefined ||
+    draft.level === undefined ||
+    draft.subject === undefined ||
+    draft.questionCount === undefined ||
+    draft.totalScore === undefined ||
+    draft.questionTypeSummary === undefined ||
+    questions === null ||
+    questions.length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    draftPublicId: draft.publicId,
+    organizationPublicId: draft.organizationPublicId,
+    authorizationPublicId: draft.authorizationPublicId,
+    profession: draft.profession,
+    level: draft.level,
+    subject: draft.subject,
+    title: draft.title,
+    description: draft.description ?? null,
+    questions,
+    publishScopeOrganizationPublicIds: normalizePublishScope(
+      values.publishScopeOrganizationPublicIds,
+      draft.organizationPublicId,
+    ),
+    capabilityContext:
+      createOrganizationTrainingCapabilityContext(capabilitySummary),
+    questionCount: draft.questionCount,
+    totalScore: draft.totalScore,
+    questionTypeSummary: draft.questionTypeSummary,
+    weakEvidenceConfirmed: values.weakEvidenceConfirmed,
+  };
+}
+
 export function AdminOrganizationTrainingPage() {
   const [loadState, setLoadState] =
     useState<AdminOrganizationTrainingLoadState>("loading");
@@ -225,12 +405,25 @@ export function AdminOrganizationTrainingPage() {
     defaultSourceContextFormValues,
   );
   const [copyFormValues, setCopyFormValues] = useState(defaultCopyFormValues);
+  const [publishFormValues, setPublishFormValues] = useState(
+    defaultPublishFormValues,
+  );
   const [selectedSourceChoice, setSelectedSourceChoice] =
     useState<SourceChoiceTitle>("平台试卷快照");
   const [capabilitySummary, setCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
   const [lastDraft, setLastDraft] =
     useState<OrganizationTrainingDraftDto | null>(null);
+  const [trainingListState, setTrainingListState] =
+    useState<OrganizationTrainingListState>("loading");
+  const [trainingListMessage, setTrainingListMessage] = useState<string | null>(
+    null,
+  );
+  const [trainingItems, setTrainingItems] = useState<
+    OrganizationTrainingAdminLifecycleItemDto[]
+  >([]);
+  const [selectedPublishDraft, setSelectedPublishDraft] =
+    useState<OrganizationTrainingAdminLifecycleItemDto | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -280,6 +473,56 @@ export function AdminOrganizationTrainingPage() {
       isActive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (loadState !== "ready") {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadTrainingLifecycle() {
+      const sessionToken = getStoredSessionToken();
+
+      setTrainingListState("loading");
+      setTrainingListMessage(null);
+
+      try {
+        const response = await fetchAdminOrganizationTrainingApi<{
+          items: OrganizationTrainingAdminLifecycleItemDto[];
+          redactionStatus: "metadata_only";
+        }>("/api/v1/organization-trainings", sessionToken);
+
+        if (!isActive) {
+          return;
+        }
+
+        if (response.code !== 0 || response.data === null) {
+          setTrainingItems([]);
+          setTrainingListMessage(
+            createApiErrorMessage("企业训练列表加载失败", response),
+          );
+          setTrainingListState("error");
+          return;
+        }
+
+        setTrainingItems(response.data.items);
+        setTrainingListState("ready");
+      } catch {
+        if (isActive) {
+          setTrainingItems([]);
+          setTrainingListMessage("企业训练列表加载失败");
+          setTrainingListState("error");
+        }
+      }
+    }
+
+    void loadTrainingLifecycle();
+
+    return () => {
+      isActive = false;
+    };
+  }, [loadState]);
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载企业训练" />;
@@ -331,11 +574,21 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练草稿创建失败");
+        setErrorMessage(
+          createApiErrorMessage("企业训练草稿创建失败", response),
+        );
         return;
       }
 
-      setLastDraft(response.data.draft);
+      const createdDraft = response.data.draft;
+
+      setLastDraft(createdDraft);
+      setTrainingItems((currentItems) =>
+        upsertLifecycleItem(
+          currentItems,
+          createLifecycleItemFromDraft(createdDraft),
+        ),
+      );
       setMessage("企业训练草稿已创建");
     } catch {
       setErrorMessage("企业训练草稿创建失败");
@@ -376,7 +629,9 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练来源绑定失败");
+        setErrorMessage(
+          createApiErrorMessage("企业训练来源绑定失败", response),
+        );
         return;
       }
 
@@ -407,14 +662,77 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练复制失败");
+        setErrorMessage(createApiErrorMessage("企业训练复制失败", response));
         return;
       }
 
-      setLastDraft(response.data.draft);
+      const copiedDraft = response.data.draft;
+
+      setLastDraft(copiedDraft);
+      setTrainingItems((currentItems) =>
+        upsertLifecycleItem(
+          currentItems,
+          createLifecycleItemFromDraft(copiedDraft),
+        ),
+      );
       setMessage("已复制为新的企业训练草稿");
     } catch {
       setErrorMessage("企业训练复制失败");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handlePublishTraining(values: PublishFormValues) {
+    const sessionToken = getStoredSessionToken();
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    setMessage(null);
+
+    try {
+      if (capabilitySummary === null || selectedPublishDraft === null) {
+        setErrorMessage("企业训练发布上下文缺失");
+        return;
+      }
+
+      const publishInput = createPublishTrainingInput({
+        capabilitySummary,
+        draft: selectedPublishDraft,
+        values,
+      });
+
+      if (publishInput === null) {
+        setErrorMessage("企业训练发布内容不完整");
+        return;
+      }
+
+      const response = await mutateAdminOrganizationTrainingApi<{
+        version: OrganizationTrainingPublishedVersionDto;
+      }>(
+        `/api/v1/organization-trainings/${selectedPublishDraft.publicId}/publish`,
+        sessionToken,
+        publishInput,
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setErrorMessage(createApiErrorMessage("企业训练发布失败", response));
+        return;
+      }
+
+      const publishedVersion = response.data.version;
+
+      setTrainingItems((currentItems) =>
+        replaceLifecycleItem(
+          currentItems,
+          selectedPublishDraft.publicId,
+          createLifecycleItemFromVersion(publishedVersion),
+        ),
+      );
+      setSelectedPublishDraft(null);
+      setMessage("企业训练已发布");
+    } catch {
+      setErrorMessage("企业训练发布失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -455,7 +773,19 @@ export function AdminOrganizationTrainingPage() {
         </div>
       )}
 
-      <TrainingListPanel lastDraft={lastDraft} />
+      <TrainingListPanel
+        items={trainingItems}
+        lastDraft={lastDraft}
+        listMessage={trainingListMessage}
+        listState={trainingListState}
+        onPublishDraft={(draft) => {
+          setSelectedPublishDraft(draft);
+          setPublishFormValues({
+            ...defaultPublishFormValues,
+            publishScopeOrganizationPublicIds: draft.organizationPublicId,
+          });
+        }}
+      />
 
       <section
         aria-label="新建企业训练四步向导"
@@ -494,6 +824,15 @@ export function AdminOrganizationTrainingPage() {
           </WizardStepCard>
           <WizardStepCard step={4} title="预览发布">
             <PublishReadinessPanel hasDraft={lastDraft !== null} />
+            {selectedPublishDraft === null ? null : (
+              <PublishTrainingForm
+                draft={selectedPublishDraft}
+                isSubmitting={isSubmitting}
+                values={publishFormValues}
+                onChange={setPublishFormValues}
+                onSubmit={handlePublishTraining}
+              />
+            )}
             <CopyToDraftForm
               isSubmitting={isSubmitting}
               values={copyFormValues}
@@ -508,10 +847,23 @@ export function AdminOrganizationTrainingPage() {
 }
 
 function TrainingListPanel({
+  items,
   lastDraft,
+  listMessage,
+  listState,
+  onPublishDraft,
 }: {
+  items: OrganizationTrainingAdminLifecycleItemDto[];
   lastDraft: OrganizationTrainingDraftDto | null;
+  listMessage: string | null;
+  listState: OrganizationTrainingListState;
+  onPublishDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
 }) {
+  const visibleItems =
+    lastDraft === null
+      ? items
+      : upsertLifecycleItem(items, createLifecycleItemFromDraft(lastDraft));
+
   return (
     <section
       aria-label="企业训练列表"
@@ -534,32 +886,84 @@ function TrainingListPanel({
         </a>
       </div>
       <div className="border-border mt-4 rounded-md border">
-        {lastDraft === null ? (
+        {listState === "loading" ? (
+          <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
+            <p className="text-text-secondary text-sm">正在加载企业训练</p>
+          </div>
+        ) : listState === "error" ? (
+          <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
+            <p className="text-destructive text-sm">
+              {listMessage ?? "企业训练列表加载失败"}
+            </p>
+          </div>
+        ) : visibleItems.length === 0 ? (
           <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
             <p className="text-text-secondary text-sm">暂无可展示的企业训练</p>
           </div>
         ) : (
-          <article
-            className="grid gap-3 p-4 md:grid-cols-[1fr_auto]"
-            data-public-id={lastDraft.publicId}
-            data-testid={`organization-training-draft-${lastDraft.publicId}`}
-          >
-            <div className="space-y-1">
-              <h3 className="text-text-primary text-sm font-semibold">
-                {lastDraft.title}
-              </h3>
-              <p className="text-text-secondary text-sm">
-                {professionLabels[lastDraft.profession]} / {lastDraft.level} 级
-                / {subjectLabels[lastDraft.subject]}
-              </p>
-            </div>
-            <span className="bg-warning/10 text-warning inline-flex h-7 items-center rounded-md px-2 text-xs font-medium">
-              草稿
-            </span>
-          </article>
+          <div className="divide-border divide-y">
+            {visibleItems.map((item) => (
+              <TrainingLifecycleItemCard
+                item={item}
+                key={item.publicId}
+                onPublishDraft={onPublishDraft}
+              />
+            ))}
+          </div>
         )}
       </div>
     </section>
+  );
+}
+
+function TrainingLifecycleItemCard({
+  item,
+  onPublishDraft,
+}: {
+  item: OrganizationTrainingAdminLifecycleItemDto;
+  onPublishDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
+}) {
+  const isDraft = item.resourceType === "organization_training_draft";
+  const statusLabel = isDraft
+    ? "草稿"
+    : item.status === "published"
+      ? "已发布"
+      : "已下架";
+  const actionLabel = isDraft ? "待发布" : "可复训";
+  const canPublish = item.availableActions.includes("publish");
+
+  return (
+    <article
+      className="grid gap-3 p-4 md:grid-cols-[1fr_auto]"
+      data-testid={`organization-training-lifecycle-${item.publicId}`}
+    >
+      <div className="space-y-1">
+        <h3 className="text-text-primary text-sm font-semibold">
+          {item.title}
+        </h3>
+        <p className="text-text-secondary text-sm">
+          {item.profession === undefined
+            ? "企业训练"
+            : professionLabels[item.profession]}{" "}
+          / {item.level ?? "-"} 级 /{" "}
+          {item.subject === undefined ? "科目" : subjectLabels[item.subject]}
+        </p>
+        <p className="text-text-secondary text-xs">
+          {actionLabel} · 题量 {item.questionCount ?? 0} · 总分{" "}
+          {item.totalScore ?? 0}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 md:justify-end">
+        <span className="bg-warning/10 text-warning inline-flex h-7 items-center rounded-md px-2 text-xs font-medium">
+          {statusLabel}
+        </span>
+        {canPublish ? (
+          <Button type="button" onClick={() => onPublishDraft(item)}>
+            发布
+          </Button>
+        ) : null}
+      </div>
+    </article>
   );
 }
 
@@ -808,6 +1212,71 @@ function SourceContextForm({
   );
 }
 
+function PublishTrainingForm({
+  draft,
+  isSubmitting,
+  values,
+  onChange,
+  onSubmit,
+}: {
+  draft: OrganizationTrainingAdminLifecycleItemDto;
+  isSubmitting: boolean;
+  values: PublishFormValues;
+  onChange: (values: PublishFormValues) => void;
+  onSubmit: (values: PublishFormValues) => void;
+}) {
+  return (
+    <form
+      aria-label="企业训练发布表单"
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(values);
+      }}
+    >
+      <PanelHeader
+        icon={<ShieldCheck aria-hidden="true" className="size-4" />}
+        title="发布训练"
+      />
+      <div className="bg-muted text-text-secondary rounded-md p-3 text-sm leading-6">
+        {draft.title}
+      </div>
+      <TextField
+        label="发布组织"
+        value={values.publishScopeOrganizationPublicIds}
+        onChange={(value) =>
+          onChange({ ...values, publishScopeOrganizationPublicIds: value })
+        }
+      />
+      <TextAreaField
+        label="题目快照"
+        value={values.questionSnapshotJson}
+        onChange={(value) =>
+          onChange({ ...values, questionSnapshotJson: value })
+        }
+      />
+      <label className="text-text-secondary flex items-center gap-2 text-sm">
+        <input
+          aria-label="确认弱佐证"
+          checked={values.weakEvidenceConfirmed}
+          className="border-input size-4 rounded"
+          type="checkbox"
+          onChange={(event) =>
+            onChange({
+              ...values,
+              weakEvidenceConfirmed: event.target.checked,
+            })
+          }
+        />
+        确认弱佐证
+      </label>
+      <Button disabled={isSubmitting} type="submit">
+        {isSubmitting ? "发布中" : "发布训练"}
+      </Button>
+    </form>
+  );
+}
+
 function CopyToDraftForm({
   isSubmitting,
   values,
@@ -938,6 +1407,28 @@ function TextField({
       <span className="text-text-secondary">{label}</span>
       <Input
         aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-medium">
+      <span className="text-text-secondary">{label}</span>
+      <textarea
+        aria-label={label}
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-32 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />

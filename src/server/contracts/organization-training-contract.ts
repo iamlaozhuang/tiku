@@ -160,7 +160,15 @@ export type OrganizationTrainingAdminLifecycleItemDto = {
   publicId: string;
   resourceType: "organization_training_draft" | "organization_training_version";
   organizationPublicId: string;
+  authorizationPublicId?: string;
+  profession?: Profession;
+  level?: number;
+  subject?: Subject;
   title: string;
+  description?: string | null;
+  questionCount?: number;
+  totalScore?: number;
+  questionTypeSummary?: OrganizationTrainingQuestionTypeSummary;
   status: "draft" | OrganizationTrainingVersionStatus;
   availableActions: OrganizationTrainingAdminLifecycleAction[];
 };

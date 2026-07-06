@@ -84,6 +84,10 @@ export type OrganizationTrainingVersionOrganizationLookupInput = {
   versionPublicId: string;
 };
 
+export type OrganizationTrainingAdminLifecycleListInput = {
+  visibleOrganizationPublicIds: readonly string[];
+};
+
 export type OrganizationTrainingVersionTakedownPersistenceInput =
   OrganizationTrainingVersionTakedownWrite;
 
@@ -301,6 +305,12 @@ export type OrganizationTrainingVersionGateway = {
   findEmployeeAnswerByVersionPublicId(
     input: OrganizationTrainingEmployeeAnswerLookupInput,
   ): Promise<OrganizationTrainingAnswerRow | null>;
+  listAdminLifecycleDrafts(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingDraftRow[]>;
+  listAdminLifecycleVersions(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingVersionRow[]>;
   insertManualDraft(
     input: OrganizationTrainingDraftInsertInput,
   ): Promise<OrganizationTrainingDraftRow | null>;
@@ -343,6 +353,12 @@ export type OrganizationTrainingRepository = {
   findEmployeeAnswerByVersion(
     input: OrganizationTrainingEmployeeAnswerLookupInput,
   ): Promise<EmployeeOrganizationTrainingAnswerDto | null>;
+  listAdminLifecycleDrafts(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingDraftDto[]>;
+  listAdminLifecycleVersions(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingPublishedVersionDto[]>;
   publishVersion(
     input: OrganizationTrainingPublishedVersionPersistenceInput,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
@@ -611,6 +627,38 @@ export function createOrganizationTrainingRepository(
       return row === null ? null : mapOrganizationTrainingAnswerRowToDto(row);
     },
 
+    async listAdminLifecycleDrafts(input) {
+      const normalizedInput = normalizeAdminLifecycleListInput(
+        input.visibleOrganizationPublicIds,
+      );
+
+      if (normalizedInput === null) {
+        return [];
+      }
+
+      const rows = await gateway.listAdminLifecycleDrafts({
+        visibleOrganizationPublicIds: normalizedInput,
+      });
+
+      return rows.map(mapOrganizationTrainingDraftRowToDto);
+    },
+
+    async listAdminLifecycleVersions(input) {
+      const normalizedInput = normalizeAdminLifecycleListInput(
+        input.visibleOrganizationPublicIds,
+      );
+
+      if (normalizedInput === null) {
+        return [];
+      }
+
+      const rows = await gateway.listAdminLifecycleVersions({
+        visibleOrganizationPublicIds: normalizedInput,
+      });
+
+      return rows.map(mapOrganizationTrainingVersionRowToDto);
+    },
+
     async publishVersion(input) {
       const latestVersionNumber =
         await gateway.findLatestVersionNumberByDraftPublicId(
@@ -823,6 +871,12 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async findEmployeeAnswerByVersionPublicId(input) {
       return findEmployeeAnswerByVersionPublicId(getDatabase(), input);
+    },
+    async listAdminLifecycleDrafts(input) {
+      return listAdminLifecycleDrafts(getDatabase(), input);
+    },
+    async listAdminLifecycleVersions(input) {
+      return listAdminLifecycleVersions(getDatabase(), input);
     },
     async insertManualDraft(input) {
       const createdAt = new Date(input.createdAt);
@@ -1577,6 +1631,18 @@ function normalizeEmployeeVisibleVersionListInput(
     organizationPublicId,
     visibleOrganizationPublicIds,
   };
+}
+
+function normalizeAdminLifecycleListInput(
+  visibleOrganizationPublicIds: readonly string[],
+): string[] | null {
+  const normalizedVisibleOrganizationPublicIds = [
+    ...new Set(normalizeTextList(visibleOrganizationPublicIds)),
+  ].filter((value): value is string => value !== null);
+
+  return normalizedVisibleOrganizationPublicIds.length === 0
+    ? null
+    : normalizedVisibleOrganizationPublicIds;
 }
 
 function normalizeVersionLookupInput(
@@ -2493,6 +2559,53 @@ async function findEmployeeAnswerByVersionPublicId(
     .limit(1);
 
   return (row as OrganizationTrainingAnswerRow | undefined) ?? null;
+}
+
+async function listAdminLifecycleDrafts(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingAdminLifecycleListInput,
+): Promise<OrganizationTrainingDraftRow[]> {
+  if (input.visibleOrganizationPublicIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select(organizationTrainingDraftSelection)
+    .from(organizationTrainingDraft)
+    .where(
+      and(
+        inArray(organizationTrainingDraft.organization_public_id, [
+          ...input.visibleOrganizationPublicIds,
+        ]),
+        eq(organizationTrainingDraft.retention_status, "active"),
+      ),
+    )
+    .orderBy(desc(organizationTrainingDraft.created_at))
+    .limit(100);
+
+  return rows as OrganizationTrainingDraftRow[];
+}
+
+async function listAdminLifecycleVersions(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingAdminLifecycleListInput,
+): Promise<OrganizationTrainingVersionRow[]> {
+  if (input.visibleOrganizationPublicIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select(organizationTrainingVersionSelection)
+    .from(organizationTrainingVersion)
+    .where(
+      inArray(organizationTrainingVersion.organization_public_id, [
+        ...input.visibleOrganizationPublicIds,
+      ]),
+    )
+    .orderBy(desc(organizationTrainingVersion.published_at))
+    .limit(100);
+
+  return rows as OrganizationTrainingVersionRow[];
 }
 
 async function findEmployeeAnswerPersistenceLineageByPublicIds(
