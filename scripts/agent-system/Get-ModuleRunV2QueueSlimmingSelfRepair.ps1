@@ -9,7 +9,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateRange(0, 50)]
-    [int]$TerminalRecoveryWindow = 8
+    [int]$TerminalRecoveryWindow = 8,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateRange(0, 500)]
+    [int]$TerminalBatchArchiveThreshold = 30
 )
 
 $ErrorActionPreference = "Stop"
@@ -136,6 +140,8 @@ function Write-QueueSlimmingResult {
         [Parameter(Mandatory = $false)][int]$ActiveQueueNonTerminalCount = 0,
         [Parameter(Mandatory = $false)][int]$ActiveQueueTerminalCount = 0,
         [Parameter(Mandatory = $false)][int]$TerminalRecoveryWindowCount = 0,
+        [Parameter(Mandatory = $false)][int]$DeferredArchiveCandidateCount = 0,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$ArchiveDeferralReason = "none",
         [Parameter(Mandatory = $false)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ArchiveCandidates = @(),
         [Parameter(Mandatory = $false)][AllowEmptyCollection()][AllowEmptyString()][string[]]$SelfRepairCandidates = @(),
         [Parameter(Mandatory = $false)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedRepairCandidates = @(),
@@ -149,7 +155,11 @@ function Write-QueueSlimmingResult {
     Write-Output "activeQueueTerminalCount: $ActiveQueueTerminalCount"
     Write-Output "terminalRecoveryWindow: $TerminalRecoveryWindow"
     Write-Output "terminalRecoveryWindowCount: $TerminalRecoveryWindowCount"
+    Write-Output "terminalBatchArchiveThreshold: $TerminalBatchArchiveThreshold"
+    Write-Output "terminalBatchArchiveThresholdExceeded: $(($ActiveQueueTerminalCount -gt $TerminalBatchArchiveThreshold).ToString().ToLowerInvariant())"
     Write-Output "archiveCandidateCount: $($ArchiveCandidates.Count)"
+    Write-Output "deferredArchiveCandidateCount: $DeferredArchiveCandidateCount"
+    Write-Output "archiveDeferralReason: $ArchiveDeferralReason"
     Write-Output "selfRepairCandidateCount: $($SelfRepairCandidates.Count)"
     Write-Output "highRiskRepairBlockedCount: $($BlockedRepairCandidates.Count)"
     Write-Output "firstArchiveCandidates: $(Join-FirstItems -Values $ArchiveCandidates)"
@@ -187,6 +197,7 @@ try {
         $status = Get-ModuleRunV2ScalarValue -Block $block.Lines -Key "status"
         if ($status -in @("closed", "done", "merged", "pushed")) {
             $terminalIds.Add($block.Id)
+            continue
         } else {
             $nonTerminalIds.Add($block.Id)
         }
@@ -205,12 +216,22 @@ try {
     }
 
     $terminalRecoveryCount = [Math]::Min($TerminalRecoveryWindow, $terminalIds.Count)
-    $archiveCandidates = @()
+    $recoveryArchiveCandidates = @()
     if ($terminalIds.Count -gt $terminalRecoveryCount) {
-        $archiveCandidates = @($terminalIds.ToArray() | Select-Object -First ($terminalIds.Count - $terminalRecoveryCount))
+        $recoveryArchiveCandidates = @($terminalIds.ToArray() | Select-Object -First ($terminalIds.Count - $terminalRecoveryCount))
     }
     if (-not [string]::IsNullOrWhiteSpace($currentTaskId)) {
-        $archiveCandidates = @($archiveCandidates | Where-Object { $_ -ne $currentTaskId })
+        $recoveryArchiveCandidates = @($recoveryArchiveCandidates | Where-Object { $_ -ne $currentTaskId })
+    }
+
+    $archiveCandidates = @()
+    $deferredArchiveCandidateCount = 0
+    $archiveDeferralReason = "none"
+    if ($terminalIds.Count -gt $TerminalBatchArchiveThreshold) {
+        $archiveCandidates = @($recoveryArchiveCandidates)
+    } elseif ($recoveryArchiveCandidates.Count -gt 0) {
+        $deferredArchiveCandidateCount = $recoveryArchiveCandidates.Count
+        $archiveDeferralReason = "below_terminal_batch_archive_threshold"
     }
 
     $decision = "clean"
@@ -220,7 +241,9 @@ try {
         $reason = "safe mechanism docs/state task-packet metadata repair candidates exist"
     } elseif ($archiveCandidates.Count -gt 0) {
         $decision = "slimming_candidates"
-        $reason = "terminal active-queue tasks exceed recovery window"
+        $reason = "terminal active-queue tasks exceed batch archive threshold"
+    } elseif ($deferredArchiveCandidateCount -gt 0) {
+        $reason = "terminal active-queue tasks are within batch archive threshold; recovery-window candidates deferred"
     }
 
     Write-QueueSlimmingResult -Decision $decision `
@@ -229,6 +252,8 @@ try {
         -ActiveQueueNonTerminalCount $nonTerminalIds.Count `
         -ActiveQueueTerminalCount $terminalIds.Count `
         -TerminalRecoveryWindowCount $terminalRecoveryCount `
+        -DeferredArchiveCandidateCount $deferredArchiveCandidateCount `
+        -ArchiveDeferralReason $archiveDeferralReason `
         -ArchiveCandidates $archiveCandidates `
         -SelfRepairCandidates $selfRepairCandidates.ToArray() `
         -BlockedRepairCandidates $blockedRepairCandidates.ToArray()

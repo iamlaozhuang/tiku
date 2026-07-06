@@ -88,6 +88,8 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/terminal-current.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/terminal-current.md
     planPath: docs/05-execution-logs/task-plans/terminal-current.md
+  - id: terminal-missing-metadata
+    status: closed
   - id: safe-metadata-repair
     status: pending
     taskKind: docs_only
@@ -124,15 +126,95 @@ tasks:
     }
 
     Assert-Contains -Output $output -Pattern "queueSlimmingDecision: self_repair_candidates"
-    Assert-Contains -Output $output -Pattern "activeQueueTaskCount: 5"
+    Assert-Contains -Output $output -Pattern "activeQueueTaskCount: 6"
     Assert-Contains -Output $output -Pattern "activeQueueNonTerminalCount: 2"
-    Assert-Contains -Output $output -Pattern "activeQueueTerminalCount: 3"
-    Assert-Contains -Output $output -Pattern "archiveCandidateCount: 2"
+    Assert-Contains -Output $output -Pattern "activeQueueTerminalCount: 4"
+    Assert-Contains -Output $output -Pattern "terminalBatchArchiveThreshold: 30"
+    Assert-Contains -Output $output -Pattern "terminalBatchArchiveThresholdExceeded: false"
+    Assert-Contains -Output $output -Pattern "archiveCandidateCount: 0"
+    Assert-Contains -Output $output -Pattern "deferredArchiveCandidateCount: 2"
+    Assert-Contains -Output $output -Pattern "archiveDeferralReason: below_terminal_batch_archive_threshold"
     Assert-Contains -Output $output -Pattern "selfRepairCandidateCount: 1"
     Assert-Contains -Output $output -Pattern "highRiskRepairBlockedCount: 1"
     Assert-Contains -Output $output -Pattern "firstSelfRepairCandidates: safe-metadata-repair:moduleRunVersion\+planPath"
     Assert-Contains -Output $output -Pattern "firstBlockedRepairCandidates: blocked-product-repair:"
     Assert-Contains -Output $output -Pattern "applyMode: diagnostic_only_v1"
+
+    $thresholdProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state-threshold.yaml"
+    $thresholdQueuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue-threshold.yaml"
+
+    @"
+schemaVersion: 1
+currentTask:
+  id: threshold-terminal-30
+  status: closed
+"@ | Set-Content -LiteralPath $thresholdProjectStatePath -Encoding UTF8
+
+    $terminalTaskBlocks = @()
+    for ($index = 1; $index -le 30; $index += 1) {
+        $terminalTaskBlocks += @"
+  - id: threshold-terminal-$index
+    status: closed
+    taskKind: docs_only
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    validationPolicy: docs_state
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - docs/04-agent-system/state/archive/**
+    validationCommands:
+      - git diff --check
+    closeoutPolicy:
+      localCommit:
+        approved: true
+    evidencePath: docs/05-execution-logs/evidence/threshold-terminal-$index.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/threshold-terminal-$index.md
+    planPath: docs/05-execution-logs/task-plans/threshold-terminal-$index.md
+"@
+    }
+
+    @"
+schemaVersion: 1
+tasks:
+$($terminalTaskBlocks -join "`n")
+"@ | Set-Content -LiteralPath $thresholdQueuePath -Encoding UTF8
+
+    $belowThresholdOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $thresholdProjectStatePath `
+            -QueuePath $thresholdQueuePath `
+            -TerminalRecoveryWindow 8 `
+            -TerminalBatchArchiveThreshold 30
+    )
+    if ($LASTEXITCODE -ne 0) {
+        throw "Expected below-threshold queue slimming diagnostic to pass.`n$($belowThresholdOutput -join "`n")"
+    }
+
+    Assert-Contains -Output $belowThresholdOutput -Pattern "queueSlimmingDecision: clean"
+    Assert-Contains -Output $belowThresholdOutput -Pattern "activeQueueTerminalCount: 30"
+    Assert-Contains -Output $belowThresholdOutput -Pattern "terminalBatchArchiveThresholdExceeded: false"
+    Assert-Contains -Output $belowThresholdOutput -Pattern "archiveCandidateCount: 0"
+    Assert-Contains -Output $belowThresholdOutput -Pattern "deferredArchiveCandidateCount: 22"
+    Assert-Contains -Output $belowThresholdOutput -Pattern "archiveDeferralReason: below_terminal_batch_archive_threshold"
+    Assert-Contains -Output $belowThresholdOutput -Pattern "reason: terminal active-queue tasks are within batch archive threshold; recovery-window candidates deferred"
+
+    $aboveThresholdOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $thresholdProjectStatePath `
+            -QueuePath $thresholdQueuePath `
+            -TerminalRecoveryWindow 8 `
+            -TerminalBatchArchiveThreshold 29
+    )
+    if ($LASTEXITCODE -ne 0) {
+        throw "Expected above-threshold queue slimming diagnostic to pass.`n$($aboveThresholdOutput -join "`n")"
+    }
+
+    Assert-Contains -Output $aboveThresholdOutput -Pattern "queueSlimmingDecision: slimming_candidates"
+    Assert-Contains -Output $aboveThresholdOutput -Pattern "terminalBatchArchiveThresholdExceeded: true"
+    Assert-Contains -Output $aboveThresholdOutput -Pattern "archiveCandidateCount: 22"
+    Assert-Contains -Output $aboveThresholdOutput -Pattern "deferredArchiveCandidateCount: 0"
+    Assert-Contains -Output $aboveThresholdOutput -Pattern "archiveDeferralReason: none"
 } finally {
     Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
 }

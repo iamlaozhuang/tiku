@@ -163,7 +163,7 @@ $queueSlimmingArgs = Join-Arguments -Values @(
     "-QueuePath", $QueuePath
 )
 $queueSlimmingResult = Invoke-DiagnosticScript -ScriptPath (Join-Path -Path $scriptRoot -ChildPath "Get-ModuleRunV2QueueSlimmingSelfRepair.ps1") -Arguments $queueSlimmingArgs
-Write-ToolSummary -Name "Queue Slimming Self Repair" -Result $queueSlimmingResult -Keys @("queueSlimmingDecision", "archiveCandidateCount", "selfRepairCandidateCount", "highRiskRepairBlockedCount", "firstArchiveCandidates", "firstSelfRepairCandidates", "firstBlockedRepairCandidates", "applyMode")
+Write-ToolSummary -Name "Queue Slimming Self Repair" -Result $queueSlimmingResult -Keys @("queueSlimmingDecision", "terminalBatchArchiveThreshold", "terminalBatchArchiveThresholdExceeded", "archiveCandidateCount", "deferredArchiveCandidateCount", "archiveDeferralReason", "selfRepairCandidateCount", "highRiskRepairBlockedCount", "firstArchiveCandidates", "firstSelfRepairCandidates", "firstBlockedRepairCandidates", "applyMode")
 
 $nextActionDecision = Get-OutputValue -Output $nextActionResult.Output -Key "nextActionDecision"
 $nextExecutableTask = Get-OutputValue -Output $nextActionResult.Output -Key "nextExecutableTask"
