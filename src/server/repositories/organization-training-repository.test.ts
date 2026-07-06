@@ -559,6 +559,7 @@ function createGateway(
     visibleOrganizationScopeSource?: OrganizationTrainingVisibleOrganizationScopeSource | null;
     versionOrganizationPublicId?: string | null;
     employeeAnswerPersistenceLineage?: EmployeeAnswerPersistenceLineage | null;
+    employeeVisibleVersionRows?: OrganizationTrainingVersionRow[];
     draftPersistenceLineage?: DraftPersistenceLineage | null;
     manualDraftInsertResult?: "row" | "null";
     sourceContextInsertResult?: "rows" | "empty";
@@ -606,7 +607,7 @@ function createGateway(
         input,
       ];
 
-      return [createVersionRow()];
+      return options.employeeVisibleVersionRows ?? [createVersionRow()];
     },
   );
   const findPublishedVersionByPublicId = vi.fn(
@@ -1918,6 +1919,57 @@ describe("organization training repository", () => {
     ]);
     expect(JSON.stringify(versions)).not.toContain('"id"');
     expect(JSON.stringify(version)).not.toContain('"id"');
+  });
+
+  it("lists server-only employee visible question snapshots for AI paper source", async () => {
+    const questionSnapshot = createVersionWrite().questionSnapshot;
+    const {
+      gateway,
+      listPublishedVersionsForEmployeeOrganization,
+      getEmployeeVisibleVersionListInputs,
+    } = createGateway({
+      employeeVisibleVersionRows: [
+        createVersionRow({
+          question_snapshot: questionSnapshot,
+        }),
+        createVersionRow({
+          public_id: "training_version_taken_down",
+          question_snapshot: [
+            {
+              ...questionSnapshot[0],
+              publicId: "training_question_public_taken_down",
+            },
+          ],
+          taken_down_at: new Date("2026-06-16T08:00:00.000Z"),
+        }),
+      ],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const snapshots =
+      await repository.listEmployeeVisibleQuestionSnapshotsForAiPaperSource({
+        employeePublicId: " employee_public_123 ",
+        organizationPublicId: " organization_public_123 ",
+      });
+
+    expect(listPublishedVersionsForEmployeeOrganization).toHaveBeenCalledWith({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+      visibleOrganizationPublicIds: ["organization_public_123"],
+    });
+    expect(getEmployeeVisibleVersionListInputs()).toEqual([
+      {
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+    ]);
+    expect(snapshots).toEqual(questionSnapshot);
+    expect(JSON.stringify(snapshots)).toContain("standardAnswer");
+    expect(JSON.stringify(snapshots)).toContain("analysisSummary");
+    expect(JSON.stringify(snapshots)).not.toContain(
+      "training_question_public_taken_down",
+    );
   });
 
   it("caps paper-source question snapshots by the published training question count", async () => {

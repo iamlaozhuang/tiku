@@ -13,12 +13,14 @@ import { createPersonalAiGenerationLearningSessionRouteHandlers } from "./person
 const personalUserContext = {
   userPublicId: "learner_route_student_public_001",
   userType: "personal",
+  employeePublicId: null,
   organizationPublicId: null,
 } as const;
 
 const employeeUserContext = {
   userPublicId: "learner_route_employee_public_001",
   userType: "employee",
+  employeePublicId: "learner_route_employee_record_public_001",
   organizationPublicId: "learner_route_organization_public_001",
 } as const;
 

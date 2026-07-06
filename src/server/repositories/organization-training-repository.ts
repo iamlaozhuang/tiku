@@ -179,6 +179,9 @@ export type OrganizationTrainingEmployeeVisibleVersionListInput = {
   visibleOrganizationPublicIds?: readonly string[];
 };
 
+export type OrganizationTrainingEmployeeVisibleQuestionSnapshotSourceInput =
+  OrganizationTrainingEmployeeVisibleVersionListInput;
+
 export type OrganizationTrainingPaperQuestionSnapshotLookupInput = {
   draftPublicIds: readonly string[];
 };
@@ -347,6 +350,9 @@ export type OrganizationTrainingRepository = {
   listEmployeeVisibleVersions(
     input: OrganizationTrainingEmployeeVisibleVersionListInput,
   ): Promise<OrganizationTrainingPublishedVersionDto[]>;
+  listEmployeeVisibleQuestionSnapshotsForAiPaperSource(
+    input: OrganizationTrainingEmployeeVisibleQuestionSnapshotSourceInput,
+  ): Promise<OrganizationTrainingQuestionSnapshotValue[]>;
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingPublishedVersionDto | null>;
@@ -591,6 +597,29 @@ export function createOrganizationTrainingRepository(
       const versions = rows.map(mapOrganizationTrainingVersionRowToDto);
 
       return attachPaperSourceQuestionSnapshotsToVersions(versions, gateway);
+    },
+
+    async listEmployeeVisibleQuestionSnapshotsForAiPaperSource(input) {
+      const normalizedInput = normalizeEmployeeVisibleVersionListInput(input);
+
+      if (normalizedInput === null) {
+        return [];
+      }
+
+      const rows =
+        await gateway.listPublishedVersionsForEmployeeOrganization(
+          normalizedInput,
+        );
+
+      return rows.flatMap((row) => {
+        if (row.version_status !== "published" || row.taken_down_at !== null) {
+          return [];
+        }
+
+        return Array.isArray(row.question_snapshot)
+          ? row.question_snapshot
+          : [];
+      });
     },
 
     async findPublishedVersionByPublicId(input) {

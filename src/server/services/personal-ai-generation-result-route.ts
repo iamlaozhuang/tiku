@@ -16,6 +16,7 @@ import {
 export type PersonalAiGenerationResultUserContext = {
   userPublicId: string;
   userType: "personal" | "employee";
+  employeePublicId: string | null;
   organizationPublicId: string | null;
 };
 
@@ -187,12 +188,14 @@ export function createPersonalAiGenerationResultUserResolver(
       return {
         userPublicId: sessionResponse.data.user.publicId,
         userType: "personal",
+        employeePublicId: null,
         organizationPublicId: null,
       };
     }
 
     if (
       sessionResponse.data.user.userType !== "employee" ||
+      sessionResponse.data.user.employeePublicId === null ||
       sessionResponse.data.user.organizationPublicId === null
     ) {
       return null;
@@ -201,6 +204,7 @@ export function createPersonalAiGenerationResultUserResolver(
     return {
       userPublicId: sessionResponse.data.user.publicId,
       userType: "employee",
+      employeePublicId: sessionResponse.data.user.employeePublicId,
       organizationPublicId: sessionResponse.data.user.organizationPublicId,
     };
   };

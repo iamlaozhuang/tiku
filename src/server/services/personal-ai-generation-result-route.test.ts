@@ -12,12 +12,14 @@ import type { SessionService } from "./session-service";
 const userContext = {
   userPublicId: "result_route_user_public_123",
   userType: "personal",
+  employeePublicId: null,
   organizationPublicId: null,
 } as const;
 
 const employeeUserContext = {
   userPublicId: "employee_result_user_public_123",
   userType: "employee",
+  employeePublicId: "employee_public_123",
   organizationPublicId: "organization_public_123",
 } as const;
 
@@ -198,6 +200,7 @@ describe("personal AI generation result route handlers", () => {
     expect(resolvedUserContext).toEqual({
       userPublicId: "session_result_user_public_123",
       userType: "personal",
+      employeePublicId: null,
       organizationPublicId: null,
     });
     expect(observedAuthorizationValues).toEqual([
@@ -244,6 +247,7 @@ describe("personal AI generation result route handlers", () => {
     expect(resolvedUserContext).toEqual({
       userPublicId: "employee_result_user_public_123",
       userType: "employee",
+      employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",
     });
   });
@@ -291,6 +295,7 @@ describe("personal AI generation result route handlers", () => {
     expect(resolvedUserContext).toEqual({
       userPublicId: "cookie_employee_result_user_public_123",
       userType: "employee",
+      employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",
     });
     expect(observedAuthorizationValues).toEqual([
