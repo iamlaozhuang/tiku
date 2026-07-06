@@ -619,8 +619,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).toHaveTextContent("知识点覆盖");
     expect(detailControls).toHaveTextContent("试卷结构");
     expect(detailControls).toHaveTextContent("组卷目标");
-    expect(detailControls).toHaveTextContent("组织草稿");
+    expect(detailControls).toHaveTextContent("训练试卷草稿");
     expect(screen.getByLabelText("等级")).toHaveDisplayValue("3级");
+    expect(screen.getByLabelText("题目数量")).toHaveDisplayValue("30");
     expect(screen.getByLabelText("试卷结构")).toHaveDisplayValue(
       "按大题模块组织",
     );
@@ -632,6 +633,132 @@ describe("admin AI generation entry surfaces", () => {
       "/api/v1/sessions",
       "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
     ]);
+  });
+
+  it("renders organization admin AI question generation as enterprise training draft workbench", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+        )
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("organization"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    expect(await screen.findByText("企业 AI 训练内容")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "训练题草稿" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("出题数量")).toHaveDisplayValue("3");
+    expect(screen.getByLabelText("出题数量")).toHaveAttribute("max", "10");
+    expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
+      "生成训练题草稿",
+    );
+    expect(document.body).toHaveTextContent(
+      "这些题目还未发布，员工暂时看不到。",
+    );
+    expect(document.body).not.toHaveTextContent("组织 AI出题");
+    expect(document.body).not.toHaveTextContent("Provider");
+  });
+
+  it("renders organization admin AI paper generation source and draft actions contract", async () => {
+    const resultPublicId =
+      "admin_ai_generation_result_organization_paper_recontract_hidden_001";
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "organization",
+            generationKind: "paper",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for organization paper draft",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "paper",
+      }),
+    );
+
+    const detailControls = await screen.findByTestId(
+      "admin-ai-generation-detail-controls",
+    );
+
+    expect(screen.getByText("企业 AI 训练内容")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "训练试卷草稿" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("题目数量")).toHaveDisplayValue("30");
+    expect(screen.getByLabelText("题目数量")).toHaveAttribute("max", "80");
+    expect(screen.getByLabelText("题源偏好")).toHaveDisplayValue("均衡使用");
+    expect(screen.getByLabelText("知识点覆盖")).toHaveDisplayValue("均衡覆盖");
+    expect(detailControls).toHaveTextContent("平台正式题库");
+    expect(detailControls).toHaveTextContent("本企业已发布训练题");
+    expect(detailControls).toHaveTextContent("优先使用企业题");
+    expect(detailControls).toHaveTextContent("优先使用平台题");
+    expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
+      "生成训练试卷草稿",
+    );
+
+    const nextStep = await screen.findByTestId(
+      "organization-ai-generation-draft-next-step",
+    );
+    expect(nextStep).toHaveTextContent("企业训练试卷草稿");
+    expect(nextStep).toHaveTextContent("编辑试卷");
+    expect(nextStep).toHaveTextContent("调整题目");
+    expect(nextStep).toHaveTextContent("预览员工视角");
+    expect(nextStep).toHaveTextContent("保存草稿");
+    expect(nextStep).toHaveTextContent("发布训练");
+    expect(document.body).not.toHaveTextContent("组织 AI组卷");
+    expect(document.body).not.toHaveTextContent("Provider");
   });
 
   it.each([
@@ -654,21 +781,21 @@ describe("admin AI generation entry surfaces", () => {
       workspace: "content" as const,
     },
     {
-      actionLabel: "AI出题",
+      actionLabel: "生成训练题草稿",
       adminRoles: ["org_advanced_admin"] satisfies AdminRole[],
       generationKind: "question" as const,
       historyPath:
         "/api/v1/organization-ai-generation-requests?generationKind=question&page=1&pageSize=10",
-      title: "组织 AI出题",
+      title: "训练题草稿",
       workspace: "organization" as const,
     },
     {
-      actionLabel: "AI组卷",
+      actionLabel: "生成训练试卷草稿",
       adminRoles: ["org_advanced_admin"] satisfies AdminRole[],
       generationKind: "paper" as const,
       historyPath:
         "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
-      title: "组织 AI组卷",
+      title: "训练试卷草稿",
       workspace: "organization" as const,
     },
   ])(
@@ -2625,7 +2752,7 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("草稿快照");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("组织私有草稿");
+    ).toHaveTextContent("企业训练试卷草稿");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("可作为组织训练素材");
@@ -2833,8 +2960,8 @@ describe("admin AI generation entry surfaces", () => {
           profession: "marketing",
           level: 3,
           subject: "theory",
-          questionCount: 10,
-          totalScore: 10,
+          questionCount: 3,
+          totalScore: 3,
           sourceStatus: "ai_generated_sufficient_evidence",
         },
       ],

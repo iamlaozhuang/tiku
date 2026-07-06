@@ -348,7 +348,7 @@ describe("AdminAiGenerationEntryPage", () => {
     await waitFor(() => {
       expect(
         screen.getByTestId("admin-ai-generation-local-contract-error"),
-      ).toHaveTextContent("Provider 未配置或不可用");
+      ).toHaveTextContent("AI服务未配置或不可用");
     });
     expect(
       screen.getByTestId("admin-ai-generation-local-contract-error"),

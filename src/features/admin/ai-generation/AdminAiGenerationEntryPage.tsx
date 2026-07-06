@@ -92,10 +92,10 @@ const ADMIN_AI_GENERATION_REJECTION_MESSAGE_BY_REASON: Record<
   grounding_evidence_insufficient:
     "资料依据不足，未执行模型服务，也未创建草稿。",
   provider_credential_unavailable:
-    "Provider 未配置或不可用，未执行模型服务，也未创建草稿。",
-  provider_execution_failed: "Provider 执行未成功，未创建草稿。",
+    "AI服务未配置或不可用，未执行生成，也未创建草稿。",
+  provider_execution_failed: "AI服务执行未成功，未创建草稿。",
   provider_execution_unavailable:
-    "Provider 未启用或不可用，未执行模型服务，也未创建草稿。",
+    "AI服务未启用或不可用，未执行生成，也未创建草稿。",
 };
 type ContentAdminReviewDecision = "approved" | "rejected";
 type ContentAdminReviewActionState =
@@ -124,6 +124,7 @@ type OrganizationAiTrainingDraftCopyInput = {
 type AdminAiGenerationDetailControl = {
   inputMode: "select" | "number" | "text";
   label: string;
+  max?: number;
   options?: readonly string[];
   value: string;
 };
@@ -238,12 +239,12 @@ function getPageCopy(
   }
 
   return {
-    eyebrow: "组织高级 AI 草稿",
-    title: isQuestionGeneration ? "组织 AI出题" : "组织 AI组卷",
+    eyebrow: "企业 AI 训练内容",
+    title: isQuestionGeneration ? "训练题草稿" : "训练试卷草稿",
     description:
-      "展示本次组织生成草稿；确认后可创建并关联企业训练草稿，发布前仍需编辑、预览和校验。",
-    actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
-    boundaryLabel: "仅创建组织草稿，可关联为企业训练草稿",
+      "为本企业准备训练题目和训练试卷草稿；发布前仍需编辑、预览员工视角并确认范围。",
+    actionLabel: isQuestionGeneration ? "生成训练题草稿" : "生成训练试卷草稿",
+    boundaryLabel: "这些内容只进入企业训练草稿，不写入平台正式题库或正式试卷。",
   };
 }
 
@@ -493,17 +494,38 @@ const adminDifficultyValueByLabel = Object.fromEntries(
 
 function createDefaultAdminGenerationParameters(
   generationKind: AdminAiGenerationKind,
+  workspace: AdminAiGenerationWorkspace,
 ): AiGenerationRouteIntegratedGenerationParameters {
+  const isOrganizationWorkspace = workspace === "organization";
+
   return {
     profession: "marketing",
     level: 3,
     subject: "theory",
     knowledgeNode:
-      generationKind === "question" ? "卷烟营销基础" : "覆盖薄弱知识点",
+      generationKind === "question"
+        ? "卷烟营销基础"
+        : isOrganizationWorkspace
+          ? "均衡覆盖"
+          : "覆盖薄弱知识点",
     questionType: generationKind === "question" ? "single_choice" : null,
-    questionCount: generationKind === "question" ? 10 : 50,
+    questionCount:
+      generationKind === "question"
+        ? isOrganizationWorkspace
+          ? 3
+          : 10
+        : isOrganizationWorkspace
+          ? 30
+          : 50,
     difficulty: "medium",
-    learningObjective: generationKind === "question" ? "弱项巩固" : "阶段自测",
+    learningObjective:
+      workspace === "organization"
+        ? generationKind === "question"
+          ? "企业训练巩固"
+          : "企业阶段测验"
+        : generationKind === "question"
+          ? "弱项巩固"
+          : "阶段自测",
   };
 }
 
@@ -562,10 +584,24 @@ function resolveNullableText(
 
 export function resolveAdminAiGenerationParameters(
   generationKind: AdminAiGenerationKind,
-  generationParameterState: AdminAiGenerationParameterState | null | undefined,
+  workspaceOrGenerationParameterState?:
+    | AdminAiGenerationWorkspace
+    | AdminAiGenerationParameterState
+    | null,
+  generationParameterStateInput?: AdminAiGenerationParameterState | null,
 ): AiGenerationRouteIntegratedGenerationParameters {
-  const defaultParameters =
-    createDefaultAdminGenerationParameters(generationKind);
+  const workspace =
+    typeof workspaceOrGenerationParameterState === "string"
+      ? workspaceOrGenerationParameterState
+      : "content";
+  const generationParameterState =
+    typeof workspaceOrGenerationParameterState === "string"
+      ? generationParameterStateInput
+      : workspaceOrGenerationParameterState;
+  const defaultParameters = createDefaultAdminGenerationParameters(
+    generationKind,
+    workspace,
+  );
 
   if (
     generationParameterState?.generationKind !== generationKind ||
@@ -663,6 +699,7 @@ function getAiGenerationDetailControls(
         {
           inputMode: "number",
           label: "出题数量",
+          max: 10,
           value: String(generationParameters.questionCount),
         },
         {
@@ -687,7 +724,14 @@ function getAiGenerationDetailControls(
         {
           inputMode: "number",
           label: "题目数量",
+          max: 80,
           value: String(generationParameters.questionCount),
+        },
+        {
+          inputMode: "select",
+          label: "题源偏好",
+          options: ["均衡使用", "优先使用企业题", "优先使用平台题"],
+          value: "均衡使用",
         },
         {
           inputMode: "select",
@@ -711,9 +755,10 @@ function getAiGenerationDetailControls(
                 ] ?? "中等"),
         },
         {
-          inputMode: "text",
+          inputMode: "select",
           label: "知识点覆盖",
-          value: generationParameters.knowledgeNode ?? "",
+          options: ["均衡覆盖", "指定知识点", "薄弱知识点优先", "综合测验"],
+          value: generationParameters.knowledgeNode ?? "均衡覆盖",
         },
         {
           inputMode: "select",
@@ -745,8 +790,16 @@ function AdminAiGenerationDetailControls({
     generationParameters,
   );
   const draftBoundaryLabel =
-    workspace === "organization" ? "组织草稿" : "草稿评审";
+    workspace === "organization"
+      ? generationKind === "question"
+        ? "训练题草稿"
+        : "训练试卷草稿"
+      : "草稿评审";
   const title = generationKind === "question" ? "出题细节" : "组卷细节";
+  const isOrganizationPaper =
+    workspace === "organization" && generationKind === "paper";
+  const isOrganizationQuestion =
+    workspace === "organization" && generationKind === "question";
 
   return (
     <section
@@ -802,6 +855,7 @@ function AdminAiGenerationDetailControls({
                   control.inputMode === "number" ? "numeric" : undefined
                 }
                 min={control.inputMode === "number" ? 1 : undefined}
+                max={control.max}
                 type={control.inputMode === "number" ? "number" : "text"}
                 onChange={(event) =>
                   onChange({
@@ -815,9 +869,29 @@ function AdminAiGenerationDetailControls({
         ))}
       </div>
 
+      {isOrganizationPaper ? (
+        <section className="border-border bg-muted/40 mt-4 rounded-md border p-3">
+          <p className="text-brand-primary text-xs font-medium">题源说明</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {["平台正式题库", "本企业已发布训练题"].map((sourceLabel) => (
+              <span
+                className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
+                key={sourceLabel}
+              >
+                {sourceLabel}
+              </span>
+            ))}
+          </div>
+          <p className="text-text-secondary mt-2 text-xs leading-5">
+            系统会先按所选范围匹配，数量不足时可自动从相近知识点或同范围题目中补足。
+          </p>
+        </section>
+      ) : null}
+
       <p className="text-text-secondary mt-3 text-xs leading-5">
-        当前准备生成条件和{draftBoundaryLabel}
-        入口；只生成待评审草稿，不触发正式题库写入。
+        {isOrganizationQuestion
+          ? "这些题目还未发布，员工暂时看不到。"
+          : `当前准备生成条件和${draftBoundaryLabel}入口；只生成待评审草稿，不触发正式题库写入。`}
       </p>
     </section>
   );
@@ -1529,6 +1603,10 @@ function OrganizationAiGenerationDraftNextStepPanel({
     actionState,
     actionErrorMessage,
   );
+  const draftActionLabels =
+    taskItem.generationKind === "paper"
+      ? ["编辑试卷", "调整题目", "预览员工视角", "保存草稿", "发布训练"]
+      : ["编辑题目", "移除题目", "加入训练草稿", "保存草稿", "发布训练"];
 
   return (
     <section
@@ -1537,7 +1615,11 @@ function OrganizationAiGenerationDraftNextStepPanel({
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-brand-primary text-xs font-medium">组织私有草稿</p>
+          <p className="text-brand-primary text-xs font-medium">
+            {taskItem.generationKind === "paper"
+              ? "企业训练试卷草稿"
+              : "企业训练题草稿"}
+          </p>
           <h4 className="text-text-primary mt-1 text-sm font-semibold">
             下一步处理
           </h4>
@@ -1574,6 +1656,14 @@ function OrganizationAiGenerationDraftNextStepPanel({
       </dl>
 
       <div className="mt-3 flex flex-wrap gap-2">
+        {draftActionLabels.map((actionLabel) => (
+          <span
+            className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium"
+            key={actionLabel}
+          >
+            {actionLabel}
+          </span>
+        ))}
         <button
           className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           data-testid="organization-ai-training-copy-action"
@@ -1865,7 +1955,10 @@ export function AdminAiGenerationEntryPage({
   const [generationParameterState, setGenerationParameterState] =
     useState<AdminAiGenerationParameterState>(() => ({
       generationKind,
-      parameters: createDefaultAdminGenerationParameters(generationKind),
+      parameters: createDefaultAdminGenerationParameters(
+        generationKind,
+        workspace,
+      ),
     }));
   const [taskHistory, setTaskHistory] =
     useState<AdminAiGenerationTaskHistoryDto | null>(null);
@@ -1900,6 +1993,7 @@ export function AdminAiGenerationEntryPage({
 
   const generationParameters = resolveAdminAiGenerationParameters(
     generationKind,
+    workspace,
     generationParameterState,
   );
 
@@ -1910,6 +2004,7 @@ export function AdminAiGenerationEntryPage({
     setGenerationParameterState((currentState) => {
       const currentParameters = resolveAdminAiGenerationParameters(
         generationKind,
+        workspace,
         currentState,
       );
 
