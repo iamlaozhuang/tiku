@@ -1,43 +1,42 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-paper-plan-and-select-backend-contract-2026-07-06
-updatedAt: "2026-07-06T11:57:00-07:00"
+currentPhase: ai-paper-source-adapters-2026-07-06
+updatedAt: "2026-07-06T12:10:00-07:00"
 currentTask:
-  id: ai-paper-plan-and-select-backend-contract-2026-07-06
-  title: AI paper plan-and-select backend contract
+  id: ai-paper-source-adapters-2026-07-06
+  title: AI paper source adapters
   phase: ai-generation-recontract-local-repair-goal-2026-07-06
   status: closed
-  result: pass_backend_contract_plan_and_select_local_unit_gates
+  result: pass_source_adapters_metadata_only_unit_gates
   priority: p0
-  taskKind: source_test_backend_contract
-  executionProfile: local_source_and_focused_unit_backend_contract_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
+  taskKind: source_test_adapter_contract
+  executionProfile: local_source_and_focused_unit_source_adapter_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
   validationPolicy: read_gate_task_plan_tdd_red_green_focused_unit_lint_typecheck_precommit_redacted_evidence_audit
   moduleRunVersion: 2
   dependsOn:
-    - ai-generation-recontract-requirements-materialization-2026-07-06
-  branch: codex/ai-paper-plan-and-select-backend-contract-2026-07-06
-  approvalBoundary: current_user_created_parent_goal_and_approved_ai_paper_plan_and_select_backend_contract_2026_07_06
-  plannedAt: "2026-07-06T11:47:43-07:00"
-  claimedAt: "2026-07-06T11:47:43-07:00"
-  materializedAt: "2026-07-06T11:47:43-07:00"
-  completedAt: "2026-07-06T11:57:00-07:00"
-  targetClosureItem: Implement the backend contract foundation for AI组卷 as AI assembly plan plus local selection from allowed formal question sources, including plan DTO, role source boundary, platform and enterprise source selectors, degradation/insufficiency categories, and paper container DTO.
+    - ai-paper-plan-and-select-backend-contract-2026-07-06
+  branch: codex/ai-paper-source-adapters-2026-07-06
+  approvalBoundary: active_parent_goal_continuation_local_source_only_no_remote_closeout_2026_07_06
+  plannedAt: "2026-07-06T12:08:00-07:00"
+  claimedAt: "2026-07-06T12:08:00-07:00"
+  materializedAt: "2026-07-06T12:08:00-07:00"
+  completedAt: "2026-07-06T12:10:00-07:00"
+  targetClosureItem: Implement pure source adapters that map platform available question rows and same-organization published training version question snapshots into AI组卷 plan-and-select selectable candidates without exposing full content.
   behaviorBoundary: source_test_docs_state_evidence_audit_only_no_dependency_no_package_lockfile_no_schema_migration_seed_no_env_secret_no_direct_db_runtime_no_provider_call_no_browser_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
   evidenceMode: redacted_file_paths_test_names_command_statuses_role_labels_source_categories_counts_and_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-paper-plan-and-select-backend-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-plan-and-select-backend-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-plan-and-select-backend-contract.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-paper-source-adapters.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-source-adapters.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-source-adapters.md
   requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-06-ai-paper-plan-and-select-backend-contract.md
-    - docs/05-execution-logs/evidence/2026-07-06-ai-paper-plan-and-select-backend-contract.md
-    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-plan-and-select-backend-contract.md
-    - src/server/contracts/ai-paper-plan-and-select-contract.ts
-    - src/server/services/ai-paper-plan-and-select-service.ts
-    - src/server/services/ai-paper-plan-and-select-service.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-06-ai-paper-source-adapters.md
+    - docs/05-execution-logs/evidence/2026-07-06-ai-paper-source-adapters.md
+    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-source-adapters.md
+    - src/server/services/ai-paper-source-adapter-service.ts
+    - src/server/services/ai-paper-source-adapter-service.test.ts
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -59,16 +58,16 @@ currentTask:
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
   validationCommands:
-    - npm.cmd run test:unit -- src/server/services/ai-paper-plan-and-select-service.test.ts
+    - npm.cmd run test:unit -- src/server/services/ai-paper-source-adapter-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts
     - git diff --check
     - npm.cmd run typecheck
     - npm.cmd run lint
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-paper-plan-and-select-backend-contract.md docs/05-execution-logs/evidence/2026-07-06-ai-paper-plan-and-select-backend-contract.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-plan-and-select-backend-contract.md src/server/contracts/ai-paper-plan-and-select-contract.ts src/server/services/ai-paper-plan-and-select-service.ts src/server/services/ai-paper-plan-and-select-service.test.ts
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-paper-plan-and-select-backend-contract-2026-07-06
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-paper-source-adapters.md docs/05-execution-logs/evidence/2026-07-06-ai-paper-source-adapters.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-source-adapters.md src/server/services/ai-paper-source-adapter-service.ts src/server/services/ai-paper-source-adapter-service.test.ts
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-paper-source-adapters-2026-07-06
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: current_user_created_parent_goal_and_approved_ai_paper_plan_and_select_backend_contract_2026_07_06
+      approvalSource: active_parent_goal_continuation_local_source_only_no_remote_closeout_2026_07_06
     fastForwardMerge:
       approved: false
       targetBranch: master
@@ -81,13 +80,13 @@ currentTask:
       deleteShortBranch: false
       approvalSource: fresh_approval_required
   validationSummary:
-    status: pass_backend_contract_plan_and_select_local_unit_gates
+    status: pass_source_adapters_metadata_only_unit_gates
     readGate: pass
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
     tddRedObserved: pass_missing_service_import_failure
-    focusedUnit: pass_1_file_5_tests
+    focusedUnit: pass_2_files_8_tests
     gitDiffCheck: pass
     typecheck: pass
     lint: pass
@@ -107,6 +106,14 @@ currentTask:
     productionUsability: not_claimed
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
+previousCurrentTaskBeforeAiPaperSourceAdapters20260706:
+  id: ai-paper-plan-and-select-backend-contract-2026-07-06
+  status: closed
+  result: pass_backend_contract_plan_and_select_local_unit_gates
+  branch: codex/ai-paper-plan-and-select-backend-contract-2026-07-06
+  commit: 8b5e5af5f
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-plan-and-select-backend-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-plan-and-select-backend-contract.md
 previousCurrentTaskBeforeAiPaperPlanAndSelectBackendContract20260706:
   id: ai-generation-recontract-requirements-materialization-2026-07-06
   status: closed
