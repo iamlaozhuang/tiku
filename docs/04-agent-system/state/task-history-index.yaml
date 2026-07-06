@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-tasks-slimming-batch-9-2026-07-06
-  updatedAt: "2026-07-06T15:03:00Z"
+  updatedByTask: active-tasks-slimming-batch-10-2026-07-06
+  updatedAt: "2026-07-06T05:33:00-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -18667,3 +18667,84 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: 2026-07-04T20:39:00-07:00
+  - id: learner-ai-training-db-persistence-loop-2026-07-05
+    phase: learner-ai-training-db-persistence-loop-2026-07-05
+    status: closed
+    taskKind: schema_migration_test_docs_learner_ai_training_db_persistence
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T20:18:10-07:00
+  - id: learner-ai-training-attempt-stats-2026-07-05
+    phase: learner-ai-training-attempt-stats-2026-07-05
+    status: closed
+    taskKind: source_test_docs_learner_ai_training_attempt_stats_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T20:00:05-07:00
+  - id: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    phase: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    status: closed
+    taskKind: source_test_docs_ai_paper_visible_draft_review_experience_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T12:03:04-07:00
+  - id: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+    phase: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+    status: closed
+    taskKind: source_test_docs_ai_question_visible_draft_review_experience_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T11:20:58-07:00
+  - id: source-landing-8-role-local-acceptance-2026-07-03
+    phase: source-landing-8-role-local-acceptance-2026-07-03
+    status: closed
+    taskKind: local_acceptance_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-06T04:13:00-07:00
+  - id: repair-student-practice-restart-acceptance-harness-2026-07-03
+    phase: source-landing-8-role-local-acceptance-repair-2026-07-03
+    status: closed
+    taskKind: acceptance_harness_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-06T04:13:00-07:00
+  - id: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    phase: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_db_aggregate
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-06T04:13:00-07:00
+  - id: full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    phase: full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_redeem_code_private_handoff_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T19:28:59-07:00
+  - id: full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    phase: full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    status: closed
+    taskKind: local_private_input_provisioning
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T19:45:54-07:00

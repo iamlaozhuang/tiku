@@ -4,9 +4,9 @@ archive:
   sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: queue-and-execution-log-archive-first-batch-2026-07-02
   archivedAt: "2026-07-02T14:00:00-07:00"
-  updatedByTask: active-tasks-slimming-batch-9-2026-07-06
-  updatedAt: "2026-07-06T15:03:00Z"
-  taskCount: 214
+  updatedByTask: active-tasks-slimming-batch-10-2026-07-06
+  updatedAt: "2026-07-06T05:33:00-07:00"
+  taskCount: 223
 tasks:
   - id: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
     title: AI generation bounded monopoly question Provider rerun after plaintext acceptance repair
@@ -28091,6 +28091,1235 @@ tasks:
       providerCallOrConfigurationExecuted: false
       costCalibrationExecuted: false
       schemaMigrationSeedChanged: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+  - id: learner-ai-training-db-persistence-loop-2026-07-05
+    title: Learner AI training DB persistence loop
+    phase: learner-ai-training-db-persistence-loop-2026-07-05
+    sourceStory: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    dependencies:
+      - learner-ai-training-attempt-stats-2026-07-05
+    status: closed
+    result: pass_learner_ai_training_db_persistence_loop_full_unit_green
+    taskKind: schema_migration_test_docs_learner_ai_training_db_persistence
+    executionProfile: local_schema_migration_generation_test_docs_no_provider_no_db_mutation
+    validationPolicy: red_first_schema_test_drizzle_migration_generation_focused_schema_unit_typecheck_lint_format_git_diff_full_unit_module_run_v2
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/learner-ai-training-db-loop-2026-07-05
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    plannedAt: "2026-07-05T20:05:30-07:00"
+    claimedAt: "2026-07-05T20:05:30-07:00"
+    materializedAt: "2026-07-05T20:05:30-07:00"
+    completedAt: "2026-07-05T20:18:10-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md
+      - docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - drizzle/**
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_runtime_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_seed_or_migrate_execution
+    migrationBoundary: drizzle_schema_and_migration_generation_allowed_for_learner_ai_learning_session_tables_only
+    credentialBoundary: env_file_read_allowed_only_by_existing_drizzle_config_if_generate_requires_database_url_no_secret_output_no_manual_secret_read
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    acceptanceStandards:
+      - Learner AI learning sessions have dedicated persisted session and answer-feedback schema definitions.
+      - Tables keep personal and organization owner context plus actor scope for personal advanced and organization employee use.
+      - Tables avoid formal practice, answer_record, exam_report, mistake_book, raw prompt, Provider payload, and raw AI I/O columns.
+      - Generated migration SQL is scoped to the new learner AI learning-session tables and indexes.
+      - No runtime DB mutation, Provider call, dependency change, browser runtime, staging/prod, or release/final claim is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/db/schema/ai-rag.test.ts
+      - npm.cmd exec -- drizzle-kit generate --name add_personal_ai_learning_session
+      - npm.cmd exec -- vitest run src/db/schema/ai-rag.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run test:unit
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts drizzle
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts drizzle
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-ai-training-db-persistence-loop-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-ai-training-db-persistence-loop-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_learner_ai_training_db_persistence_loop_full_unit_green
+      readGate: pass
+      taskPlanPrepared: true
+      redFirstSchemaTest: pass_missing_learning_session_tables_confirmed
+      schemaRepair: pass_added_personal_ai_learning_session_and_feedback_tables
+      drizzleMigrationGeneration: pass_generated_and_renamed_timestamp_migration
+      focusedSchemaTests: pass_1_file_32_tests
+      typecheck: pass
+      lint: pass
+      firstFullUnitTests: fail_2_unrelated_timeout_cases
+      timeoutFocusedReruns: pass_2_files_11_tests
+      fullUnitTests: pass_331_files_1643_tests
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      providerCallExecuted: false
+      envReadViaDrizzleConfig: possible_drizzle_config_read_no_secret_output
+      runtimeDbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationChanged: true
+      seedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
+  - id: learner-ai-training-attempt-stats-2026-07-05
+    title: Learner AI training attempt stats
+    phase: learner-ai-training-attempt-stats-2026-07-05
+    sourceStory: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    dependencies:
+      - ai-generation-closed-loop-target-alignment-2026-07-05
+    status: closed
+    result: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+    taskKind: source_test_docs_learner_ai_training_attempt_stats_contract
+    executionProfile: local_source_test_docs_only_no_provider_no_db
+    validationPolicy: red_first_service_contract_minimal_repair_focused_unit_typecheck_lint_format_git_diff_full_unit_module_run_v2
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/learner-ai-training-attempt-stats-2026-07-05
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    plannedAt: "2026-07-05T19:49:30-07:00"
+    claimedAt: "2026-07-05T19:49:30-07:00"
+    materializedAt: "2026-07-05T19:49:30-07:00"
+    completedAt: "2026-07-05T20:00:05-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md
+      - docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
+      - src/server/contracts/personal-ai-generation-learning-session-contract.ts
+      - src/server/models/personal-ai-generation-learning-session.ts
+      - src/server/services/personal-ai-generation-learning-session-service.ts
+      - src/server/services/personal-ai-generation-learning-session-service.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: blocked_for_this_service_contract_task
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    acceptanceStandards:
+      - Personal advanced student learner AI sessions save answer feedback and expose a resumable statistics snapshot.
+      - Organization advanced employee learner AI sessions use the same contract under organization owner context without exposing raw content to admins.
+      - Latest saved feedback per generated question is used for statistics.
+      - Cross-actor progress reads remain blocked.
+      - Formal question, paper, practice, answer_record, exam_report, and mistake_book writes remain blocked.
+      - No Provider call, DB action, schema/migration/seed, dependency, browser runtime, staging/prod, or release/final claim is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run test:unit
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-ai-training-attempt-stats-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-ai-training-attempt-stats-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+      readGate: pass
+      taskPlanPrepared: true
+      redFirstTest: pass_missing_progress_service_method_confirmed
+      sourceRepair: pass_saved_feedback_and_resumable_statistics_contract
+      focusedUnitTests: pass_1_file_6_tests
+      typecheck: pass
+      lint: pass
+      fullUnitTests: pass_331_files_1640_tests
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      providerCallExecuted: false
+      dbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
+  - id: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    title: Full-chain AI paper visible draft review experience repair
+    phase: full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    sourceStory: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+    dependencies:
+      - full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+      - stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
+      - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    status: closed
+    result: pass_ai_paper_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+    taskKind: source_test_docs_ai_paper_visible_draft_review_experience_repair
+    executionProfile: local_source_test_browser_smoke_no_provider_no_db_mutation
+    validationPolicy: red_first_source_repair_focused_unit_tests_browser_smoke_scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+    humanApprovalBoundary: current_user_fresh_approval_for_ai_paper_four_role_browser_smoke_2026_07_05
+    plannedAt: "2026-07-05T11:27:04-07:00"
+    claimedAt: "2026-07-05T11:27:04-07:00"
+    materializedAt: "2026-07-05T11:27:04-07:00"
+    completedAt: "2026-07-05T12:03:04-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/route-integrated-provider-instruction-service.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: localhost_browser_smoke_allowed_after_source_tests_no_provider_trigger_no_raw_dom_no_screenshot_no_trace_output
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_for_ai_paper_visible_draft_review_experience_repair_2026_07_05
+    acceptanceStandards:
+      - Product UI for content_admin, org_advanced_admin, org_advanced_employee, and advanced_student can render authorized structured AI paper drafts after generation.
+      - Paper draft rendering includes editable/reviewable paper sections, question bodies, options, standard answers, analyses, and knowledge labels where present.
+      - Evidence, audit, runtime logs, and history summaries stay redacted and do not record full material, question, paper, answer, prompt, provider payload, or raw AI I/O.
+      - Content admin and organization admin retain review/use affordances without direct formal publish.
+      - Standard roles and unauthorized roles are not broadened by this repair.
+      - No Provider call, Cost Calibration, staging/prod, dependency, schema, migration, seed, or DB mutation is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-paper-visible-draft-review-experience-repair.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-ai-paper-visible-draft-review-experience-repair-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ai_paper_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+      readGate: pass
+      taskPlanPrepared: true
+      acceptancePrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      redFirstTest: pass
+      sourceRepair: pass
+      focusedUnitTests: pass
+      typecheck: pass
+      lint: pass
+      browserSmoke: pass_four_role_ai_paper_surface
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      providerCallExecuted: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
+  - id: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+    title: Full-chain AI question visible draft review experience repair
+    phase: full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+    sourceStory: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+    dependencies:
+      - stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
+      - full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    status: closed
+    result: pass_ai_question_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+    taskKind: source_test_docs_ai_question_visible_draft_review_experience_repair
+    executionProfile: local_source_test_browser_smoke_no_provider_no_db_mutation
+    validationPolicy: red_first_source_repair_focused_unit_tests_browser_smoke_scoped_prettier_git_diff_blocked_path_module_run_v2_precommit_prepush
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+    humanApprovalBoundary: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+    plannedAt: "2026-07-05T11:04:25-07:00"
+    claimedAt: "2026-07-05T11:04:25-07:00"
+    materializedAt: "2026-07-05T11:04:25-07:00"
+    completedAt: "2026-07-05T11:20:58-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+      - src/server/services/route-integrated-provider-instruction-service.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: localhost_browser_smoke_allowed_after_source_tests_no_provider_trigger_no_raw_dom_no_screenshot_no_trace_output
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_for_ai_question_visible_draft_review_experience_repair_2026_07_05
+    acceptanceStandards:
+      - Product UI for content_admin, org_advanced_admin, org_advanced_employee, and advanced_student can render authorized structured AI question drafts after generation.
+      - Evidence, audit, runtime logs, and history summaries stay redacted and do not record full material, question, answer, prompt, provider payload, or raw AI I/O.
+      - Content admin and organization admin retain review/use affordances without direct formal publish.
+      - Standard roles and unauthorized roles are not broadened by this repair.
+      - No Provider call, Cost Calibration, staging/prod, dependency, schema, migration, seed, or DB mutation is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md docs/05-execution-logs/acceptance/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md docs/05-execution-logs/evidence/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-ai-question-visible-draft-review-experience-repair.md src/server/contracts/route-integrated-provider-execution-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-execution-service.ts src/server/services/admin-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-ai-question-visible-draft-review-experience-repair-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ai_question_visible_draft_review_experience_repair_no_provider_db_schema_dependency
+      readGate: pass
+      taskPlanPrepared: true
+      acceptancePrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      redFirstTest: pass
+      sourceRepair: pass
+      focusedUnitTests: pass
+      typecheck: pass
+      lint: pass
+      browserSmoke: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+      closeoutGates: pass
+      repositoryShaCheckpointAligned: true
+      providerCallExecuted: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
+  - id: source-landing-8-role-local-acceptance-2026-07-03
+    title: Source landing 8 role local acceptance
+    phase: source-landing-8-role-local-acceptance-2026-07-03
+    sourceStory: current_user_approved_actual_8_role_local_acceptance_execution_2026_07_03
+    humanApprovalBoundary: current_user_approved_actual_8_role_local_acceptance_execution_2026_07_03
+    targetClosureItem: Execute the approved local 8-role acceptance sequence with redacted evidence and record pass, fail, or block honestly; stop and split repair work on the first defect or blocking fixture gap.
+    behaviorBoundary: local_acceptance_execution_only_no_product_source_no_test_source_no_schema_no_dependency_no_direct_db_no_env_secret_no_provider_no_staging_prod_no_release_claim
+    evidenceMode: redacted_role_names_route_categories_assertion_categories_command_status_and_failure_or_block_summary_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_internal_ids_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: local_acceptance_execution
+    moduleRunVersion: 2
+    executionProfile: local_low_risk_experience_batch
+    status: closed
+    result: closed_superseded_by_later_8_role_acceptance_reruns_after_harness_repairs
+    branch: codex/source-landing-8-role-local-acceptance-2026-07-03
+    closedAt: "2026-07-06T04:13:00-07:00"
+    closedByTask: non-terminal-queue-triage-2026-07-06
+    supersededBy:
+      - repair-student-practice-restart-acceptance-harness-2026-07-03
+      - source-landing-8-role-local-acceptance-rerun-2026-07-03
+      - source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    claimedAt: "2026-07-03T11:51:39-07:00"
+    plannedAt: "2026-07-03T11:51:39-07:00"
+    implementedAt: "2026-07-03T12:05:00-07:00"
+    validatedAt: "2026-07-03T12:05:00-07:00"
+    reviewedAt: "2026-07-03T12:05:00-07:00"
+    dependsOn:
+      - source-landing-16-package-acceptance-prep-2026-07-03
+    roleOrder:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+      - org_standard_admin
+      - org_advanced_admin
+      - content_admin
+      - ops_admin
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md
+    acceptanceReportPath: docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-report.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md
+    gapSplitPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-report.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md
+      - docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/**
+      - docs/05-execution-logs/acceptance/2026-07-03-source-landing-16-package-*.md
+      - docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-acceptance-prep.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-acceptance-prep.md
+      - package.json
+      - playwright.config.ts
+      - e2e/**
+      - src/**
+      - tests/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      localDevServer: approved_for_playwright_webserver_only
+      localhostBrowser: approved_for_existing_playwright_specs_only
+      browserAcceptance: approved_for_existing_playwright_specs_only
+      credentialBackedLocalFixtureUse: approved_existing_e2e_fixtures_redacted_evidence_only
+      runtimeApiMutationThroughExistingSpecs: approved_test_owned_local_artifacts_only
+      localSourceChange: blocked
+      testSourceChange: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd exec -- playwright test e2e/local-full-loop-baseline-accounts-auth-db.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/student-practice-mock-entry.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/personal-ai-generation-local-request.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/edition-aware-authorization-local-flow.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-source-landing-8-role-local-acceptance.md docs/05-execution-logs/acceptance/2026-07-03-source-landing-8-role-local-acceptance-report.md docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance.md docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId source-landing-8-role-local-acceptance-2026-07-03
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_actual_8_role_local_acceptance_execution_2026_07_03
+      fastForwardMerge:
+        approved: false
+        approvalRequired: fresh_user_closeout_approval_after_acceptance_result
+      push:
+        approved: false
+        approvalRequired: fresh_user_closeout_approval_after_acceptance_result
+      cleanup:
+        deleteShortBranch: false
+        approvalRequired: fresh_user_closeout_approval_after_acceptance_result
+    validationSummary:
+      status: closed_superseded_by_later_8_role_acceptance_reruns_after_harness_repairs
+      acceptanceExecuted: partial_stopped_on_first_role_failure
+      baselineAccountSessionSmoke: pass
+      personalStandardStudent: fail_acceptance_harness_contract_drift
+      personalAdvancedStudent: blocked_not_executed_stop_rule
+      orgStandardEmployee: blocked_not_executed_stop_rule
+      orgAdvancedEmployee: blocked_not_executed_stop_rule
+      orgStandardAdmin: blocked_not_executed_stop_rule
+      orgAdvancedAdmin: blocked_not_executed_stop_rule
+      contentAdmin: blocked_not_executed_stop_rule
+      opsAdmin: blocked_not_executed_stop_rule
+      firstFailedOrBlockedRole: personal_standard_student
+      splitRepairTaskId: repair-student-practice-restart-acceptance-harness-2026-07-03
+      playwrightGeneratedArtifactsRemoved: true
+      prettierScopedCheckInitial: failed_markdown_formatting
+      prettierScopedWrite: pass
+      prettierScopedCheckFinal: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      productSourceChanged: false
+      testSourceChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      envSecretAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+      closedByTask: non-terminal-queue-triage-2026-07-06
+  - id: repair-student-practice-restart-acceptance-harness-2026-07-03
+    title: Repair student practice restart acceptance harness
+    phase: source-landing-8-role-local-acceptance-repair-2026-07-03
+    sourceStory: first_role_local_acceptance_blocked_by_student_practice_restart_confirmation_contract_drift_2026_07_03
+    humanApprovalBoundary: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+    targetClosureItem: Repair the existing student practice local acceptance harness to follow the current two-step restart confirmation contract, then rerun the 8-role local acceptance from the beginning.
+    behaviorBoundary: acceptance_harness_repair_only_requires_fresh_task_plan_before_test_source_change_no_product_source_unless_new_evidence
+    evidenceMode: redacted_command_status_and_assertion_summary_only_no_credentials_no_sessions_no_cookies_no_headers_no_env_values_no_db_rows_no_pii_no_plaintext_redeem_code_no_provider_payload_no_prompt_no_ai_io_no_full_content_no_screenshots_no_traces_no_dom_dump
+    taskKind: acceptance_harness_repair
+    moduleRunVersion: 2
+    status: closed
+    result: closed_student_practice_restart_acceptance_harness_repair_merged_and_pushed
+    priority: p0
+    branch: codex/repair-student-practice-restart-acceptance-harness-2026-07-03
+    closedAt: "2026-07-06T04:13:00-07:00"
+    closedByTask: non-terminal-queue-triage-2026-07-06
+    closeoutVerifiedBy:
+      - master_contains_commit_ad23cc3aa
+      - origin_master_contains_commit_ad23cc3aa
+    claimedAt: "2026-07-03T12:15:29-07:00"
+    plannedAt: "2026-07-03T12:15:29-07:00"
+    implementedAt: "2026-07-03T12:29:00-07:00"
+    validatedAt: "2026-07-03T12:29:00-07:00"
+    reviewedAt: "2026-07-03T12:29:00-07:00"
+    dependsOn:
+      - source-landing-8-role-local-acceptance-2026-07-03
+    splitFrom: source-landing-8-role-local-acceptance-2026-07-03
+    splitPath: docs/01-requirements/traceability/2026-07-03-source-landing-8-role-local-acceptance-gap-split.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md
+      - e2e/student-practice-mock-entry.spec.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      testSourceChange: approved_existing_student_practice_e2e_only
+      productSourceChange: blocked_unless_new_root_cause_evidence_and_fresh_approval
+      localDevServer: approved_for_playwright_webserver_only
+      localhostBrowser: approved_for_existing_playwright_spec_only
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd exec -- playwright test e2e/student-practice-mock-entry.spec.ts --project=chromium --reporter=line --trace=off
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-03-repair-student-practice-restart-acceptance-harness.md docs/05-execution-logs/evidence/2026-07-03-repair-student-practice-restart-acceptance-harness.md docs/05-execution-logs/audits-reviews/2026-07-03-repair-student-practice-restart-acceptance-harness.md e2e/student-practice-mock-entry.spec.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId repair-student-practice-restart-acceptance-harness-2026-07-03
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId repair-student-practice-restart-acceptance-harness-2026-07-03 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_for_repair_merge_push_cleanup_and_8_role_rerun_goal_2026_07_03
+    validationSummary:
+      status: closed
+      redGreenRepair: pass
+      redCommand: failed_as_expected_student_practice_restart_wait_timeout
+      greenCommand: pass_student_practice_restart_confirmation_contract
+      playwrightStudentPracticeSpec: pass_after_repair_and_format
+      prettierScopedCheck: pass
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      sensitiveFixtureFieldNormalized: true
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      playwrightGeneratedArtifactsRemoved: true
+      productSourceChanged: false
+      directDatabaseConnectionOrMutationExecuted: false
+      envSecretAccessExecuted: false
+      providerCallOrConfigurationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+      closedByTask: non-terminal-queue-triage-2026-07-06
+  - id: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    title: Full-chain Scenario 2 content baseline rerun after knowledge baseline provisioning
+    phase: full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    sourceStory: scenario_2_rerun_after_knowledge_baseline_db_provisioning
+    dependencies:
+      - full-chain-scenario-2-content-pack-provisioning-2026-07-04
+      - full-chain-scenario-2-knowledge-baseline-db-provisioning-2026-07-04
+    status: closed
+    result: closed_superseded_by_admin_flow_cookie_session_auth_repair_and_scenario_2_pass_rerun
+    taskKind: local_acceptance_runtime_browser_db_aggregate
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    closedAt: "2026-07-06T04:13:00-07:00"
+    closedByTask: non-terminal-queue-triage-2026-07-06
+    supersededBy:
+      - full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
+      - full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    targetClosureItem: Prove Scenario 2 content baseline through product runtime after knowledge baseline provisioning.
+    behaviorBoundary: local_app_browser_e2e_private_credentials_in_memory_product_flow_selector_scoped_db_aggregate_only_no_provider_no_staging_prod_no_cost_no_schema_migration_seed_no_dependency_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_and_summary_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-*.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/modules/05-rag-knowledge.md
+      - docs/01-requirements/stories/epic-02-question-paper.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-21-paper-question-count-and-type-policy.md
+      - src/app/(auth)/login/page.tsx
+      - src/server/auth/session-cookie.ts
+      - src/features/admin/**
+      - src/server/**
+      - src/db/schema/**
+      - C:/Users/jzzhu/.codex/skills/playwright/SKILL.md
+      - D:/tiku-local-private/acceptance/**
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/**
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - .env*
+    blockedReason: admin_flow_runtime_rejects_cookie_backed_session_for_paper_collection_get
+    nextRequiredTask: full-chain-scenario-2-admin-flow-cookie-session-auth-repair-2026-07-04
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+    validationSummary:
+      status: closed_superseded_by_admin_flow_cookie_session_auth_repair_and_scenario_2_pass_rerun
+      scopedPrettierWrite: passed_exit_0
+      scopedPrettierCheck: passed_exit_0
+      gitDiffCheck: passed_exit_0
+      blockedPathDiffCheck: passed_exit_0_no_output
+      moduleRunV2PreCommitHardening: passed_exit_0
+      browserLogin: pass
+      contentSurfaceRouteStatusCount: 3_of_3
+      contentApiRouteStatusBusinessCount: 3_of_4
+      materialCount: 1
+      questionCount: 7
+      paperPublishedCount: 1
+      paperQuestionBindingCount: 7
+      providerCallOrConfigurationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      closedByTask: non-terminal-queue-triage-2026-07-06
+    retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning.md
+  - id: full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    title: Full-chain Scenario 7 redeem code and contact config rerun after empty-state generation panel repair
+    phase: full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    sourceStory: scenario_7_affected_node_rerun_after_redeem_code_empty_state_generation_panel_repair
+    dependencies:
+      - full-chain-scenario-7-redeem-code-contact-config-2026-07-04
+      - full-chain-scenario-7-redeem-code-empty-state-generation-panel-repair-2026-07-04
+    status: closed
+    result: pass_scenario_7_redeem_code_contact_config_rerun_after_empty_state_generation_panel_repair
+    taskKind: local_acceptance_runtime_browser_redeem_code_private_handoff_rerun
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-04T19:18:26-07:00"
+    completedAt: "2026-07-04T19:28:59-07:00"
+    targetClosureItem: Rerun Scenario 7 from the redeem_code generation node after the empty-state generation panel repair, create one standard activation, one advanced activation, and one edition-upgrade card through product runtime, write plaintext values only to the approved private selector pack, and record redacted aggregate evidence.
+    behaviorBoundary: local_app_browser_e2e_private_credentials_in_memory_product_runtime_redeem_code_creation_private_selector_handoff_selector_scoped_db_aggregate_only_no_product_source_no_provider_no_staging_prod_no_cost_no_schema_migration_seed_no_dependency_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_route_surface_labels_selector_labels_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+      - D:/tiku-local-private/owner-facing-fixtures/2026-06-28-rawfiles-curated/full-chain-acceptance-2026-07-04/redeem-code/full-chain/redeem-code-selector-pack-2026-07-04.json
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/**
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-01-user-auth.md
+      - docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md
+      - docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-7-redeem-code-contact-config.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config.md
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-7-redeem-code-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/evidence/phase-20-fix-ra-01-09-contact-config-runtime.md
+      - docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+      - src/app/(auth)/login/page.tsx
+      - src/app/api/v1/sessions/route.ts
+      - src/app/api/v1/redeem-codes/route.ts
+      - src/app/api/v1/redeem-codes/[publicId]/route.ts
+      - src/app/api/v1/contact-configs/route.ts
+      - src/server/auth/session-route.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/admin-redeem-code-runtime.ts
+      - src/server/repositories/admin-redeem-code-runtime-repository.ts
+      - src/server/validators/redeem-code.ts
+      - src/server/services/redeem-code-route.ts
+      - src/server/services/redeem-code-authorization-service.ts
+      - src/server/repositories/redeem-code-authorization-repository.ts
+      - src/server/services/contact-config-service.ts
+      - src/server/contracts/contact-config-contract.ts
+      - src/server/contracts/redeem-code-reference-contract.ts
+      - src/db/schema/auth.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/features/admin/contact-config/AdminContactConfigPage.tsx
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - C:/Users/jzzhu/.codex/skills/playwright/SKILL.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    runtimeScope:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      actorSelectorLabel: fc_ops_admin_created_by_super_admin
+      scenarioSelectorLabel: fc_scenario_7_redeem_code_contact_config
+      restartNode: redeem_code_generation_node
+      cardSelectorLabels:
+        - fc_redeem_code_standard_activation
+        - fc_redeem_code_advanced_activation
+        - fc_redeem_code_edition_upgrade
+      productMutationAllowed: redeem_code_single_card_generation_only
+      contactConfigScope: active_config_readiness_and_ops_surface_access_only
+      privateCardValueHandoff: approved_private_selector_pack_only
+      browserLoginReadinessRule: hydrated_interactable_required_before_private_credential_fill
+      directDbVerificationAllowed: selector_scoped_aggregate_counts_only
+    blockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - fake_data_or_fixture_expansion_in_repository
+      - redaction_violation
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted Scenario 7 private selector and DB target preflight>"
+      - powershell.exe -NoProfile -Command "<local app startup with redacted process-only runtime env>"
+      - node - <redacted Scenario 7 hydrated browser login, contact readiness, card generation, private handoff, and permission boundary>
+      - docker compose exec -T tiku-postgres psql <redacted selector-scoped aggregate verification>
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      privateSelectorPreflight: pass
+      runtimeDbTargetCheck: pass
+      devServerStarted: true
+      browserLoginReadiness: pass
+      apiSessionLane: pass
+      browserLoginFormStateLane: pass
+      permissionSurfaceBoundaryLane: pass
+      contactConfigActiveChannelCount: 1
+      redeemCodeStandardActivationCreatedCount: 1
+      redeemCodeAdvancedActivationCreatedCount: 1
+      redeemCodeEditionUpgradeCreatedCount: 1
+      redeemCodeUnusedStatusCount: 3
+      deniedBoundaryCount: 4
+      privateSelectorPackWrite: pass
+      runtimeCleanup: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      repositoryCheckpointAligned: true
+      sourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      providerCallOrConfigurationExecuted: false
+      dependencyOrLockfileChanged: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+    retryCount: 0
+    lastFailurePath: null
+  - id: full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    title: Full-chain Scenario 6 personal contact private input provisioning
+    phase: full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    sourceStory: scenario_6_preflight_after_scenario_7_card_generation
+    dependencies:
+      - full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair-2026-07-04
+    status: closed
+    result: pass_private_input_provisioned_for_scenario_6_personal_contact_registration
+    taskKind: local_private_input_provisioning
+    moduleRunVersion: 2
+    branch: codex/full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+    humanApprovalBoundary: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    plannedAt: "2026-07-04T19:42:24-07:00"
+    completedAt: "2026-07-04T19:45:54-07:00"
+    targetClosureItem: Provision only the missing private registration input for Scenario 6 selector fc_personal_contact_user_registered before browser registration/contact surface acceptance.
+    behaviorBoundary: local_private_input_mapping_only_no_repo_secret_values_no_dev_server_no_browser_no_e2e_no_product_source_or_test_change_no_schema_migration_seed_no_provider_no_staging_prod_no_cost_no_release_final_or_production_claim
+    evidenceMode: redacted_task_ids_branch_selector_labels_field_presence_counts_command_names_pass_fail_block_and_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_dom_screenshot_trace_provider_payload_prompt_ai_io_full_content_private_fixture_contents
+    planPath: docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+    privateAllowedFiles:
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/stories/epic-01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/traceability/2026-07-02-redeem-code-edition-and-plaintext-ops-decision.md
+      - docs/01-requirements/traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+      - docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md
+      - docs/05-execution-logs/acceptance/2026-07-04-full-chain-*.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair.md
+      - docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-7-redeem-code-contact-config-rerun-after-empty-state-generation-panel-repair.md
+      - docs/05-execution-logs/evidence/phase-20-fix-ra-01-09-contact-config-runtime.md
+      - src/app/(auth)/register/page.tsx
+      - src/app/(auth)/login/page.tsx
+      - src/app/api/v1/users/route.ts
+      - src/server/auth/user-registration-route.ts
+      - src/server/services/user-registration-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/server/auth/session-cookie.ts
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/app/(student)/redeem-code/page.tsx
+      - src/app/api/v1/redeem-codes/redeem/route.ts
+      - src/server/services/student-authorization-redeem-runtime.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/lib/local-purchase-guidance-contact-config.ts
+      - src/server/services/contact-config-service.ts
+      - src/server/contracts/contact-config-contract.ts
+      - src/app/api/v1/contact-configs/route.ts
+      - src/features/admin/contact-config/AdminContactConfigPage.tsx
+      - tests/unit/student-register-ui.test.ts
+      - src/server/auth/user-registration-route.test.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - src/server/services/user-registration-service.test.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - tests/unit/phase-20-ra-01-09-contact-config-runtime.test.ts
+      - tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts
+      - D:/tiku-local-private/acceptance/full-chain-isolated-db-account-plan-2026-07-04.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - scripts/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    runtimeScope:
+      targetDbLabel: tiku_full_chain_acceptance_20260704_001
+      targetSelectorLabel: fc_personal_contact_user_registered
+      futureScenarioSelectorLabel: fc_scenario_6_personal_registration_contact
+      privateInputWriteAllowed: true
+      repositoryPrivateValueOutputAllowed: false
+      browserRuntimeAllowed: false
+      devServerAllowed: false
+      directDbMutationAllowed: false
+    blockedWithoutSeparateBoundedApproval:
+      - provider_call_or_provider_configuration_or_credential_read
+      - destructive_db_operation_or_unscoped_db_mutation
+      - dependency_package_lockfile_change
+      - staging_prod_deploy_payment_external_service
+      - pr_force_push
+      - release_readiness_or_final_pass
+      - cost_calibration_gate
+      - schema_migration_or_seed
+      - permission_weakening
+      - fake_data_or_fixture_expansion_in_repository
+      - redaction_violation
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_full_chain_centralized_local_continuity_authorization_2026_07_04
+    validationCommands:
+      - powershell.exe -NoProfile -Command "<redacted private selector shape preflight>"
+      - powershell.exe -NoProfile -Command "<private input provisioning script with redacted output>"
+      - powershell.exe -NoProfile -Command "<redacted private input field-presence verification>"
+      - powershell.exe -NoProfile -Command "<selector-scoped collision aggregate check with counts only>"
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-6-personal-contact-input-provisioning.md
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed scripts compose.yaml playwright-report test-results .next .runtime .env*
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-chain-scenario-6-personal-contact-input-provisioning-2026-07-04 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      privateProvisioningExecuted: true
+      privateSelectorLabelPresent: true
+      privateSelectorSectionBeforeProvisioning: absent_expected
+      privateSelectorFieldsPresentAfterProvisioning: true
+      collisionAggregateCount: 0
+      candidateRetryCount: 0
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      blockedPathDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      privateValueOutput: false
+      browserRuntimeExecuted: false
+      devServerStarted: false
+      directDatabaseConnectionExecuted: false
+      dbMutationExecuted: false
+      productSourceTestChanged: false
+      schemaMigrationSeedChanged: false
+      providerCallOrConfigurationExecuted: false
       dependencyOrLockfileChanged: false
       releaseReadinessClaimed: false
       finalPassClaimed: false
