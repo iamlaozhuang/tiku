@@ -44,119 +44,34 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 activeTasks:
-  - id: personal-ai-generation-authorization-gate-fix-2026-07-06
-    title: Personal AI generation backend authorization gate fix
-    phase: personal-ai-generation-authorization-gate-fix-2026-07-06
-    status: validated
-    result: pass_personal_ai_generation_authorization_gate_fix
+  - id: ai-generation-runtime-acceptance-2026-07-06
+    title: AI generation runtime acceptance on 0704 local DB and current master
+    phase: ai-generation-runtime-acceptance-2026-07-06
+    status: in_progress
+    result: pending_runtime_acceptance
     priority: p0
-    taskKind: source_test_docs_personal_ai_generation_authorization_gate_fix
-    moduleRunVersion: 2
-    branch: fix/personal-ai-generation-authorization-gate-2026-07-06
-    humanApprovalBoundary: current_user_requested_runtime_acceptance_with_minimal_fix_if_current_code_issue_2026_07_06
-    targetClosureItem: Enforce service-computed advanced AI authorization on personal AI generation local browser POST before persistence or Provider bridge execution.
-    behaviorBoundary: local_source_test_docs_runtime_validation_on_0704_db_no_destructive_db_operation_no_dependency_change_no_schema_migration_no_provider_payload_raw_prompt_raw_ai_output_no_release_readiness_claim
-    evidenceMode: redacted_task_ids_branch_file_paths_public_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
-    planPath: docs/05-execution-logs/task-plans/2026-07-06-personal-ai-generation-authorization-gate-fix.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-06-personal-ai-generation-authorization-gate-fix.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-06-personal-ai-generation-authorization-gate-fix.md
-      - docs/05-execution-logs/evidence/2026-07-06-personal-ai-generation-authorization-gate-fix.md
-      - src/app/api/v1/personal-ai-generation-requests/route.ts
-      - src/server/services/personal-ai-generation-request-route.ts
-      - src/server/services/personal-ai-generation-request-route.test.ts
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - e2e/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    validationCommands:
-      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
-      - npm.cmd run typecheck
-      - npm.cmd run lint -- src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/app/api/v1/personal-ai-generation-requests/route.ts
-      - runtime localhost 127.0.0.1:3107 Provider-disabled standard and advanced employee direct POST aggregate validation
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId personal-ai-generation-authorization-gate-fix-2026-07-06
-    closeoutPolicy:
-      localCommit:
-        approved: true
-        approvalSource: current_user_requested_runtime_acceptance_with_minimal_fix_if_current_code_issue_2026_07_06
-      fastForwardMerge:
-        approved: false
-        targetBranch: master
-        approvalSource: fresh_closeout_not_yet_requested_for_this_fix_branch
-      push:
-        approved: false
-        target: origin/master
-        approvalSource: fresh_closeout_not_yet_requested_for_this_fix_branch
-      cleanup:
-        deleteShortBranch: false
-        approvalSource: fresh_closeout_not_yet_requested_for_this_fix_branch
-    validationSummary:
-      status: pass_personal_ai_generation_authorization_gate_fix
-      redFirstTests: fail_expected_2_cases
-      focusedRouteTest: pass_1_file_30_tests
-      typecheck: pass
-      lint: pass
-      runtimeDbConnectionUsed: true_local_0704_only
-      dbMutated: temporary_short_lived_auth_session_rows_and_advanced_request_metadata_only
-      providerCallExecuted: false
-      schemaMigrationChanged: false
-      seedChanged: false
-      dependencyChanged: false
-      browserRuntimeExecuted: false
-      releaseFinalProductionClaimed: false
-  - id: content-admin-history-adoption-loop-2026-07-06
-    title: Content admin historical AI generation formal draft adoption loop
-    phase: content-admin-history-adoption-loop-2026-07-06
-    status: closed
-    result: pass_content_admin_history_adoption_loop_full_unit_green
-    priority: p0
-    taskKind: source_test_docs_content_admin_ai_generation_history_adoption_loop
+    taskKind: acceptance_runtime_walkthrough
+    executionProfile: local_0704_db_browser_provider_small_sample_docs_only_no_source_change_exact_reviewed_migration_execution_if_precheck_requires
     moduleRunVersion: 2
     dependsOn:
+      - learner-ai-training-api-ui-loop-2026-07-06
+      - organization-ai-training-closed-loop-2026-07-06
       - organization-training-admin-ui-loop-2026-07-06
-    branch: codex/content-admin-history-adoption-loop-2026-07-06
-    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
-    targetClosureItem: Persist and surface content-admin AI generated reviewed draft snapshots so both current and historical AI出题 / AI组卷 results can enter formal draft review/adoption without direct publish.
-    behaviorBoundary: local_source_test_docs_only_no_runtime_db_connection_no_db_mutation_no_schema_migration_no_seed_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_browser_no_dev_server_no_e2e_no_staging_prod_cloud_deploy_no_release_final_or_production_claim_no_raw_question_material_paper_content_evidence
-    evidenceMode: redacted_task_ids_branch_file_paths_public_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
-    planPath: docs/05-execution-logs/task-plans/2026-07-06-content-admin-history-adoption-loop.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-06-content-admin-history-adoption-loop.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-content-admin-history-adoption-loop.md
+      - content-admin-history-adoption-loop-2026-07-06
+    branch: codex/ai-generation-runtime-acceptance-2026-07-06
+    humanApprovalBoundary: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
+    targetClosureItem: Verify 0704 local DB plus current master can run AI出题 / AI组卷 role, Provider, and closed-loop runtime paths without reopening closed source/unit tasks.
+    behaviorBoundary: local_0704_db_schema_precheck_exact_reviewed_non_destructive_local_migration_execution_for_20260706031000_and_20260706052000_if_required_localhost_browser_role_matrix_provider_disabled_enabled_small_sample_existing_product_flows_docs_state_evidence_only_no_source_test_package_lockfile_schema_file_change_seed_destructive_db_staging_prod_release_final_claim
+    evidenceMode: redacted_task_ids_branch_file_paths_public_role_labels_aggregate_counts_business_error_codes_status_labels_duration_token_count_summaries_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
+    planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-generation-runtime-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-generation-runtime-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-runtime-acceptance.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-06-content-admin-history-adoption-loop.md
-      - docs/05-execution-logs/evidence/2026-07-06-content-admin-history-adoption-loop.md
-      - docs/05-execution-logs/audits-reviews/2026-07-06-content-admin-history-adoption-loop.md
-      - src/lib/admin-ai-generation-formal-draft-payload.ts
-      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
-      - src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts
-      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
-      - src/server/contracts/admin-ai-generation-local-contract.ts
-      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
-      - src/server/services/admin-ai-generation-local-contract-route.ts
-      - src/server/services/admin-ai-generation-local-contract-route.test.ts
-      - src/server/repositories/admin-ai-generation-result-persistence-repository.ts
-      - src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts
-      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
-      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - docs/05-execution-logs/task-plans/2026-07-06-ai-generation-runtime-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-06-ai-generation-runtime-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-runtime-acceptance.md
     blockedFiles:
       - AGENTS.md
       - .env*
@@ -164,6 +79,9 @@ activeTasks:
       - package-lock.yaml
       - package-lock.json
       - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
       - src/db/schema/**
       - drizzle/**
       - migrations/**
@@ -177,47 +95,51 @@ activeTasks:
       - D:/tiku-local-private/**
       - D:\tiku-local-private\**
     validationCommands:
-      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - git status --short --branch
+      - redacted 0704 DB schema precheck command
+      - localhost browser role matrix runtime walkthrough
+      - provider-disabled runtime walkthrough
+      - provider-enabled small-sample runtime walkthrough if local secret boundary is available
       - npm.cmd run typecheck
       - npm.cmd run lint
-      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-content-admin-history-adoption-loop.md docs/05-execution-logs/evidence/2026-07-06-content-admin-history-adoption-loop.md docs/05-execution-logs/audits-reviews/2026-07-06-content-admin-history-adoption-loop.md src/lib/admin-ai-generation-formal-draft-payload.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts src/server/contracts/admin-ai-generation-local-contract.ts src/server/contracts/admin-ai-generation-result-persistence-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-generation-runtime-acceptance.md docs/05-execution-logs/evidence/2026-07-06-ai-generation-runtime-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-runtime-acceptance.md
       - git diff --check
-      - npm.cmd run test:unit
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-history-adoption-loop-2026-07-06
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-history-adoption-loop-2026-07-06 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-runtime-acceptance-2026-07-06
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-runtime-acceptance-2026-07-06 -SkipRemoteAheadCheck
     closeoutPolicy:
       localCommit:
         approved: true
-        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+        approvalSource: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
       fastForwardMerge:
         approved: true
         targetBranch: master
-        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+        approvalSource: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
       push:
         approved: true
         target: origin/master
-        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+        approvalSource: current_user_requested_verify_then_merge_push_cleanup_for_runtime_acceptance_2026_07_06
       cleanup:
         deleteShortBranch: true
-        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+        approvalSource: current_user_requested_0704_db_current_master_browser_provider_ai_generation_closed_loop_runtime_acceptance_2026_07_06
     validationSummary:
-      status: pass_content_admin_history_adoption_loop_full_unit_green
-      redFirstTests: fail_expected_2_files_2_cases
-      focusedCombinedTests: pass_4_files_73_tests
+      status: pending_closeout_validation
+      sourceUnitBaseline: inherited_pass_333_files_1661_tests_from_master_8b9e72d26
+      runtimeDbSchemaPrecheck: pass_after_exact_reviewed_0704_migration_pair
+      browserRoleMatrix: pass_6_roles_1_personal_standard_fixture_gap
+      providerDisabled: pass_clear_missing_provider_credential_and_standard_backend_denial_403057
+      providerEnabledSmallSample: pass_personal_org_content_question_and_paper_samples
+      closedLoopRuntime: pass_learner_org_content_runtime_paths
+      evidencePrepared: true
+      auditPrepared: true
+      separateFixCommit: edd48ccfb_personal_ai_generation_authorization_gate
+      sourceOrTestChanged: false_for_acceptance_docs_commit_true_in_separate_fix_commit
+      dependencyChanged: false
       typecheck: pass
       lint: pass
-      formatCheck: pass
+      formatCheck: pass_after_prettier_write
       diffCheck: pass
-      fullUnit: pass_333_files_1661_tests
-      moduleRunV2PreCommit: pass
-      moduleRunV2PrePush: pass
-      providerCallExecuted: false
-      runtimeDbConnectionUsed: false
-      dbMutated: false
-      schemaMigrationChanged: false
-      seedChanged: false
-      dependencyChanged: false
-      browserRuntimeExecuted: false
+      moduleRunV2PreCommit: pass_after_role_ssot_and_acceptance_mapping_anchor
+      moduleRunV2PrePush: pass_skip_remote_ahead_check
       stagingProdExecuted: false
       releaseFinalProductionClaimed: false
 standingApprovals:
