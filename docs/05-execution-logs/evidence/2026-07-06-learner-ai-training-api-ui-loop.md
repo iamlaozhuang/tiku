@@ -60,3 +60,9 @@
 
 - Status: pass.
 - No Provider call, credential/env access, runtime DB connection, DB mutation, schema/migration/seed/dependency change, browser/dev-server/e2e, staging/prod, or release final action was performed.
+
+## Post-Merge Master Evidence
+
+- Merge: fast-forwarded `codex/learner-ai-training-api-ui-loop-2026-07-06` into `master`.
+- `npm.cmd run test:unit` on `master`
+  - Result: pass, 333 test files, 1656 tests.
