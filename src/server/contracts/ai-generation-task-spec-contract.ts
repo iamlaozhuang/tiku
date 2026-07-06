@@ -19,7 +19,7 @@ export type AiGenerationSharedTaskCountSemantic =
 
 export type AiGenerationSharedTaskRedactionCategory =
   | "question_draft_summary_only"
-  | "paper_draft_summary_only";
+  | "paper_plan_summary_only";
 
 export type AiGenerationSharedTaskSpec = {
   taskType: AiGenerationSharedTaskType;
@@ -53,16 +53,16 @@ export const aiGenerationSharedTaskSpecs = {
     label: "AI组卷",
     structuredPreviewKind: "paper_draft",
     countSemantic: "requested_total_question_count",
-    defaultQuestionCount: 10,
+    defaultQuestionCount: 30,
     allowedOutputFields: [
-      "paperSections",
-      "paper_sections",
-      "questionCount",
-      "totalQuestionCount",
-      "questionTypeDistribution",
+      "title",
+      "targetQuestionCount",
+      "difficultyGoal",
+      "sourcePreference",
+      "sections",
       "knowledgeCoverage",
     ],
-    redactionCategory: "paper_draft_summary_only",
+    redactionCategory: "paper_plan_summary_only",
   },
 } as const satisfies Record<
   AiGenerationSharedTaskType,

@@ -79,27 +79,29 @@ describe("route-integrated Provider instruction service", () => {
     },
   );
 
-  it("builds the shared AI paper instruction with total question count fields", () => {
+  it("builds the shared AI paper instruction as an assembly plan without generated question bodies", () => {
     const instruction = createRouteIntegratedProviderInstruction({
       taskType: "ai_paper_generation",
       sceneLabel: "个人训练 AI组卷",
-      draftInstruction: "不要引用真实题目全文；输出可读的组卷草稿摘要。",
+      draftInstruction: "输出可读的组卷方案摘要。",
       groundingContext: createGroundingContext(50),
     });
 
     expect(instruction).toContain("个人训练 AI组卷");
-    expect(readOutputContractLine(instruction)).toContain("paperSections");
-    expect(readOutputContractLine(instruction)).toContain("questions");
-    expect(readOutputContractLine(instruction)).toContain("questionStem");
-    expect(readOutputContractLine(instruction)).toContain("questionOptions");
-    expect(readOutputContractLine(instruction)).toContain("standardAnswer");
-    expect(readOutputContractLine(instruction)).toContain("analysis");
+    expect(readOutputContractLine(instruction)).toContain("sections");
     expect(readOutputContractLine(instruction)).toContain(
-      "questionTypeDistribution",
+      "targetQuestionCount",
     );
     expect(readOutputContractLine(instruction)).toContain("knowledgeCoverage");
-    expect(readOutputContractLine(instruction)).toContain("totalQuestionCount");
+    expect(readOutputContractLine(instruction)).toContain("sourcePreference");
     expect(readOutputContractLine(instruction)).toContain("50");
+    expect(readOutputContractLine(instruction)).not.toContain("questions");
+    expect(readOutputContractLine(instruction)).not.toContain("questionStem");
+    expect(readOutputContractLine(instruction)).not.toContain(
+      "questionOptions",
+    );
+    expect(readOutputContractLine(instruction)).not.toContain("standardAnswer");
+    expect(readOutputContractLine(instruction)).not.toContain("analysis");
     expect(instruction).toContain("仅依据下列资料片段生成");
   });
 

@@ -67,16 +67,17 @@ describe("shared route-integrated Provider execution primitives", () => {
       label: "AI组卷",
       structuredPreviewKind: "paper_draft",
       countSemantic: "requested_total_question_count",
-      redactionCategory: "paper_draft_summary_only",
+      defaultQuestionCount: 30,
+      redactionCategory: "paper_plan_summary_only",
     });
     expect(
       aiGenerationSharedTaskSpecs.ai_paper_generation.allowedOutputFields,
     ).toEqual([
-      "paperSections",
-      "paper_sections",
-      "questionCount",
-      "totalQuestionCount",
-      "questionTypeDistribution",
+      "title",
+      "targetQuestionCount",
+      "difficultyGoal",
+      "sourcePreference",
+      "sections",
       "knowledgeCoverage",
     ]);
   });
@@ -531,24 +532,13 @@ describe("shared route-integrated Provider execution primitives", () => {
 
   it("builds a parsed paper structured preview from section and coverage counts", () => {
     const content = JSON.stringify({
-      paperSections: [
+      title: "synthetic paper plan title",
+      targetQuestionCount: 50,
+      sections: [
         {
           paperSectionType: "single_choice",
           title: "synthetic paper section title",
           questionCount: 20,
-          questions: [
-            {
-              questionType: "single_choice",
-              difficulty: "medium",
-              knowledgeNodeLabels: ["redacted_knowledge_node_a"],
-              questionStem: "synthetic paper question stem",
-              questionOptions: [
-                { optionLabel: "A", optionText: "synthetic paper option A" },
-              ],
-              standardAnswer: "synthetic paper standard answer",
-              analysis: "synthetic paper analysis",
-            },
-          ],
         },
         { paperSectionType: "judge", questionCount: 30 },
       ],
@@ -598,17 +588,46 @@ describe("shared route-integrated Provider execution primitives", () => {
       paperSectionType: "single_choice",
       title: "synthetic paper section title",
       questionCount: 20,
-      questionDrafts: [
-        expect.objectContaining({
-          draftNumber: 1,
-          questionStem: "synthetic paper question stem",
-          questionOptions: [
-            { optionLabel: "A", optionText: "synthetic paper option A" },
+      questionDrafts: [],
+    });
+  });
+
+  it("rejects paper structured previews that include Provider-generated nested question content", () => {
+    const content = JSON.stringify({
+      title: "synthetic paper plan title",
+      targetQuestionCount: 1,
+      sections: [
+        {
+          paperSectionType: "single_choice",
+          questionCount: 1,
+          questions: [
+            {
+              questionStem: "synthetic forbidden stem",
+              standardAnswer: "synthetic forbidden answer",
+            },
           ],
-          standardAnswer: "synthetic paper standard answer",
-          analysis: "synthetic paper analysis",
-        }),
+        },
       ],
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 1,
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "provider_question_content_forbidden",
+        requestedQuestionCount: 1,
+        paperSectionCount: 1,
+        questionCount: 1,
+        reviewStatus: "structured_parse_failed",
+      },
     });
   });
 
@@ -630,51 +649,19 @@ describe("shared route-integrated Provider execution primitives", () => {
       50,
     ],
     [
+      "top-level targetQuestionCount",
+      {
+        sections: [{ paperSectionType: "single_choice" }],
+        targetQuestionCount: 50,
+      },
+      50,
+    ],
+    [
       "section questionCount",
       {
-        paperSections: [
+        sections: [
           { paperSectionType: "single_choice", questionCount: 20 },
           { paperSectionType: "judge", questionCount: 30 },
-        ],
-      },
-      50,
-    ],
-    [
-      "nested questions",
-      {
-        paperSections: [
-          {
-            paperSectionType: "single_choice",
-            questions: Array.from({ length: 20 }, () => ({
-              redactedDraftSummary: "synthetic question summary",
-            })),
-          },
-          {
-            paperSectionType: "judge",
-            questions: Array.from({ length: 30 }, () => ({
-              redactedDraftSummary: "synthetic question summary",
-            })),
-          },
-        ],
-      },
-      50,
-    ],
-    [
-      "nested questionDrafts",
-      {
-        paperSections: [
-          {
-            paperSectionType: "single_choice",
-            questionDrafts: Array.from({ length: 20 }, () => ({
-              redactedDraftSummary: "synthetic question summary",
-            })),
-          },
-          {
-            paperSectionType: "judge",
-            questionDrafts: Array.from({ length: 30 }, () => ({
-              redactedDraftSummary: "synthetic question summary",
-            })),
-          },
         ],
       },
       50,
@@ -855,7 +842,7 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toBe(false);
   });
 
-  it("derives paper question counts from nested section question arrays", () => {
+  it("does not derive AI paper plan counts from nested generated question arrays", () => {
     const content = JSON.stringify({
       paperSections: [
         {
@@ -888,11 +875,13 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toMatchObject({
       structuredPreview: {
         kind: "paper_draft",
-        parseStatus: "parsed",
+        parseStatus: "failed",
+        failureCategory: "provider_question_content_forbidden",
         paperSectionCount: 2,
         questionCount: 3,
         questionTypeDistributionCount: 2,
         knowledgeCoverageCount: 1,
+        reviewStatus: "structured_parse_failed",
       },
     });
   });

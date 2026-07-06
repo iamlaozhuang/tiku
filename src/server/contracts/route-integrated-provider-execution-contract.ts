@@ -203,7 +203,8 @@ export type AiGenerationRouteIntegratedStructuredPreview =
         | "invalid_json"
         | "missing_paper_sections"
         | "missing_question_count"
-        | "question_count_mismatch";
+        | "question_count_mismatch"
+        | "provider_question_content_forbidden";
       requestedQuestionCount?: number | null;
       paperSectionCount: number;
       questionCount: number | null;

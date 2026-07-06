@@ -69,6 +69,26 @@ const questionDraftContainerKeys = [
   "output",
   "payload",
 ] as const;
+const forbiddenPaperPlanGeneratedQuestionKeys = new Set([
+  "questions",
+  "questionDrafts",
+  "question_drafts",
+  "questionItems",
+  "question_items",
+  "questionStem",
+  "question_stem",
+  "stem",
+  "questionOptions",
+  "question_options",
+  "options",
+  "standardAnswer",
+  "standard_answer",
+  "answer",
+  "answers",
+  "analysis",
+  "scoringPoints",
+  "scoring_points",
+]);
 const plainTextQuestionDraftMarkerPattern =
   /^(?:\s*>?\s*)?(?:[-*]\s*)?(?:#{1,6}\s*)?(?:(\d{1,3})[.)、）]\s*|题目\s*(\d{1,3})\s*[:：]|第\s*(\d{1,3})\s*题\s*[:：]?)/gim;
 
@@ -509,6 +529,7 @@ function createPaperDraftStructuredPreview(
   }
 
   const paperSections = readArrayProperty(parsedContent, [
+    "sections",
     "paperSections",
     "paper_sections",
     "paper_section",
@@ -543,6 +564,20 @@ function createPaperDraftStructuredPreview(
     createPaperSectionDraftSummary(paperSection, index),
   );
   const requestedQuestionCount = options.requestedQuestionCount ?? null;
+
+  if (containsForbiddenPaperPlanGeneratedQuestionContent(parsedContent)) {
+    return {
+      kind: "paper_draft",
+      parseStatus: "failed",
+      failureCategory: "provider_question_content_forbidden",
+      requestedQuestionCount,
+      paperSectionCount: paperSections.length,
+      questionCount,
+      questionTypeDistributionCount,
+      knowledgeCoverageCount,
+      reviewStatus: "structured_parse_failed",
+    };
+  }
 
   if (requestedQuestionCount !== null && questionCount === null) {
     return {
@@ -598,11 +633,6 @@ function createPaperSectionDraftSummary(
     "paperSectionDescription",
     "paper_section_description",
   ]);
-  const questionDrafts = readNestedPaperSectionQuestionDrafts(
-    paperSectionObject,
-  ).map((questionDraft, questionIndex) =>
-    createQuestionDraftSummary(questionDraft, questionIndex),
-  );
 
   return {
     sectionNumber: index + 1,
@@ -622,25 +652,13 @@ function createPaperSectionDraftSummary(
     ...(description !== null ? { description } : {}),
     questionCount:
       normalizeQuestionCount(
-        paperSectionObject.questionCount ?? paperSectionObject.question_count,
-      ) ?? (questionDrafts.length > 0 ? questionDrafts.length : null),
-    questionDrafts,
+        paperSectionObject.questionCount ??
+          paperSectionObject.question_count ??
+          paperSectionObject.targetQuestionCount ??
+          paperSectionObject.target_question_count,
+      ) ?? null,
+    questionDrafts: [],
   };
-}
-
-function readNestedPaperSectionQuestionDrafts(
-  paperSection: Record<string, unknown>,
-): unknown[] {
-  return (
-    readArrayProperty(paperSection, [
-      "questions",
-      "questionDrafts",
-      "question_drafts",
-      "questionItems",
-      "question_items",
-      "items",
-    ]) ?? []
-  );
 }
 
 function parseJsonValueFromProviderText(
@@ -972,7 +990,9 @@ function readPaperQuestionCount(
       parsedContent.questionCount ??
         parsedContent.question_count ??
         parsedContent.totalQuestionCount ??
-        parsedContent.total_question_count,
+        parsedContent.total_question_count ??
+        parsedContent.targetQuestionCount ??
+        parsedContent.target_question_count,
     ) ??
     sumQuestionCounts(paperSections) ??
     sumQuestionTypeDistributionCounts(parsedContent)
@@ -988,10 +1008,12 @@ function sumQuestionCounts(paperSections: unknown[]): number | null {
       continue;
     }
 
-    const questionCount =
-      normalizeQuestionCount(
-        paperSection.questionCount ?? paperSection.question_count,
-      ) ?? readNestedSectionQuestionCount(paperSection);
+    const questionCount = normalizeQuestionCount(
+      paperSection.questionCount ??
+        paperSection.question_count ??
+        paperSection.targetQuestionCount ??
+        paperSection.target_question_count,
+    );
 
     if (questionCount !== null) {
       sectionWithQuestionCount = true;
@@ -1031,19 +1053,6 @@ function sumQuestionTypeDistributionCounts(
   return distributionWithQuestionCount ? totalQuestionCount : null;
 }
 
-function readNestedSectionQuestionCount(
-  paperSection: Record<string, unknown>,
-): number | null {
-  const nestedQuestions = readArrayProperty(paperSection, [
-    "questions",
-    "questionDrafts",
-    "question_drafts",
-    "items",
-  ]);
-
-  return nestedQuestions === null ? null : nestedQuestions.length;
-}
-
 function normalizeQuestionCount(value: unknown): number | null {
   const numericValue =
     typeof value === "number"
@@ -1061,6 +1070,24 @@ function normalizeQuestionCount(value: unknown): number | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function containsForbiddenPaperPlanGeneratedQuestionContent(
+  input: unknown,
+): boolean {
+  if (Array.isArray(input)) {
+    return input.some(containsForbiddenPaperPlanGeneratedQuestionContent);
+  }
+
+  if (!isRecord(input)) {
+    return false;
+  }
+
+  return Object.entries(input).some(
+    ([key, value]) =>
+      forbiddenPaperPlanGeneratedQuestionKeys.has(key) ||
+      containsForbiddenPaperPlanGeneratedQuestionContent(value),
+  );
 }
 
 export function ensureRouteIntegratedVisibleGeneratedContentSafe(
