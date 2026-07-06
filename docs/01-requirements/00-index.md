@@ -58,6 +58,7 @@
 - [Advanced AI Generation Scope Clarification](./traceability/2026-06-23-advanced-ai-generation-scope-clarification.md)
 - [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md)
 - [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)
+- [AI Generation Closed Loop Target Alignment](./traceability/2026-07-05-ai-generation-closed-loop-target-alignment.md)
 - [UI/UX Requirement Design Baseline Gap Analysis](./traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md)
 - [Role Auth Training Ops Decision Package](./traceability/2026-07-02-role-auth-training-ops-decision-package.md)
 - [Current Thread Requirement Reconciliation Ledger](./traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md)
@@ -73,6 +74,10 @@
 2026-07-02 起，AI出题 / AI组卷 后续任务必须先读取 [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md) 和对应 baseline evidence，再使用更早的 quick acceptance、MML rerun、能力目录或用例目录残留。
 
 阶段4恢复和验收口径归一见 [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)。它只固化读取顺序和 supersession 口径，不新增 AI 出题 / AI 组卷修复范围。
+
+2026-07-05 起，本轮“全角色 AI 出题 / AI 组卷有效闭环”实现任务还必须读取
+[AI Generation Closed Loop Target Alignment](./traceability/2026-07-05-ai-generation-closed-loop-target-alignment.md)，
+并按角色区分显式审核/发布/练习/统计路径，不得把闭环解释为 AI 生成后自动写入正式表。
 
 当前口径：
 

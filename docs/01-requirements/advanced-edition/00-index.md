@@ -20,6 +20,8 @@ For AI出题 / AI组卷 work, the current recovery entry is
 `docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md`.
 The Stage4 recovery guard is
 `docs/01-requirements/traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md`.
+The current closed-loop target overlay for this implementation run is
+`docs/01-requirements/traceability/2026-07-05-ai-generation-closed-loop-target-alignment.md`.
 
 Use it before older quick acceptance, MML rerun, capability-catalog, or use-case-catalog residual wording. It preserves these requirements:
 
@@ -28,6 +30,7 @@ Use it before older quick acceptance, MML rerun, capability-catalog, or use-case
 - `content_admin` uses content backend `AI出题` and `AI组卷` for isolated draft/review content.
 - Standard learners, `org_standard_employee`, and `org_standard_admin` remain denied, hidden, upgrade-guided, or unavailable for advanced AI generation.
 - Release readiness, final Pass, production usability, Cost Calibration, and broad production/full coverage remain unclaimed.
+- Closed-loop implementation must use explicit review/adoption/publish or persisted AI training-domain actions and must not mean automatic formal writes.
 
 ## Current UI/UX Requirement Design Baseline
 
