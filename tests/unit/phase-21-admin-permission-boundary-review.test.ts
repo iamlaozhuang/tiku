@@ -54,17 +54,31 @@ describe("phase 21 admin permission boundary review", () => {
 
     await expect(
       superAdminUserOps.resetUserPassword("user-public-001"),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       code: 0,
       message: "ok",
-      data: null,
+      data: {
+        userPublicId: "user-public-001",
+        oneTimePasswordPlainText: expect.any(String),
+        distributionWindow: {
+          visibleOnce: true,
+          sessionRevocation: "not_executed_in_local_contract",
+        },
+      },
     });
     await expect(
       opsAdminUserOps.resetUserPassword("user-public-001"),
-    ).resolves.toEqual({
+    ).resolves.toMatchObject({
       code: 0,
       message: "ok",
-      data: null,
+      data: {
+        userPublicId: "user-public-001",
+        oneTimePasswordPlainText: expect.any(String),
+        distributionWindow: {
+          visibleOnce: true,
+          sessionRevocation: "not_executed_in_local_contract",
+        },
+      },
     });
     await expect(
       contentAdminUserOps.resetUserPassword("user-public-001"),

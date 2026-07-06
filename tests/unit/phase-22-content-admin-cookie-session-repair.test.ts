@@ -241,24 +241,25 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
     expect(listPapers).toHaveBeenCalled();
   });
 
-  it("keeps raw cookie-only admin-flow user reads unauthenticated", async () => {
+  it("authenticates raw cookie-only admin-flow user reads before enforcing role permissions", async () => {
     const sessionService = createCookieBackedSessionService();
+    const listUsers = vi.fn(async () => ({
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        sortBy: "updatedAt",
+        sortOrder: "desc",
+        total: 0,
+      },
+      users: [],
+    }));
     const handlers = createAdminFlowRuntimeRouteHandlers({
       repositories: {
         aiAuditLogRepository: {},
         auditLogRepository: {},
         contentKnowledgeRepository: {},
         userOrgAuthRepository: {
-          listUsers: vi.fn(async () => ({
-            pagination: {
-              page: 1,
-              pageSize: 20,
-              sortBy: "updatedAt",
-              sortOrder: "desc",
-              total: 0,
-            },
-            users: [],
-          })),
+          listUsers,
         },
       } as never,
       sessionService,
@@ -269,10 +270,14 @@ describe("Phase 22 content admin cookie-backed session repair", () => {
     );
 
     await expect(response.json()).resolves.toEqual({
-      code: 401001,
+      code: 403601,
       data: null,
-      message: "Admin session is required.",
+      message: "Admin permission denied.",
     });
+    expect(sessionService.getCurrentSession).toHaveBeenCalledWith({
+      authorization: expectedCookieAuthorization,
+    });
+    expect(listUsers).not.toHaveBeenCalled();
   });
 
   it("resolves resource/knowledge runtime admin actors from session cookies", async () => {
