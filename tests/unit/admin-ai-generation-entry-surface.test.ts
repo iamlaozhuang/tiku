@@ -163,6 +163,7 @@ function createLocalContractResponse(input: {
         questionWriteStatus: "blocked_without_follow_up_task",
         paperWriteStatus: "blocked_without_follow_up_task",
       },
+      paperAssembly: null,
       taskPersistence: {
         persistenceStatus: "created",
         requestPublicId: `admin_ai_generation_request_${input.workspace}_${input.generationKind}`,
@@ -175,6 +176,61 @@ function createLocalContractResponse(input: {
         redactionStatus: "redacted",
       },
     },
+  };
+}
+
+function createContentPaperAssembly() {
+  return {
+    status: "assembled",
+    sourceDiagnostics: {
+      role: "content_admin",
+      platformQuestionCount: 2,
+      enterpriseQuestionCount: 0,
+      enterpriseSourceStatus: "not_applicable",
+    },
+    container: {
+      title: "待审试卷草稿",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      requestedQuestionCount: 2,
+      selectedQuestionCount: 2,
+      sourceComposition: {
+        platformFormalQuestionCount: 2,
+        enterpriseTrainingSnapshotCount: 0,
+      },
+      matchQuality: "fully_matched",
+      sections: [
+        {
+          sectionKey: "single_choice",
+          title: "单选题",
+          questionType: "single_choice",
+          targetQuestionCount: 2,
+          selectedQuestionCount: 2,
+          selectedQuestions: [
+            {
+              questionPublicId: "platform_formal_question_public_a",
+              sourceKind: "platform_formal_question",
+              matchTier: "exact",
+              score: 1,
+            },
+            {
+              questionPublicId: "platform_formal_question_public_b",
+              sourceKind: "platform_formal_question",
+              matchTier: "nearby_knowledge",
+              score: 1,
+            },
+          ],
+          degradationSummary: {
+            exactCount: 1,
+            nearbyKnowledgeCount: 1,
+            sameScopeCount: 0,
+          },
+        },
+      ],
+    },
+    insufficiency: null,
+    redactionStatus: "redacted",
   };
 }
 
@@ -416,8 +472,8 @@ describe("admin AI generation entry surfaces", () => {
     expect(paperRouteSource).toContain("AdminAiGenerationEntryPage");
     expect(paperRouteSource).toContain('workspace="content"');
     expect(paperRouteSource).toContain('generationKind="paper"');
-    expect(sharedSurfaceSource).toContain("内容 AI 草稿/评审");
-    expect(sharedSurfaceSource).toContain("正式题目或试卷写入仍需评审");
+    expect(sharedSurfaceSource).toContain("内容 AI 辅助");
+    expect(sharedSurfaceSource).toContain("待审题目和待审试卷");
     expect(sharedSurfaceSource).not.toContain("本地 owner preview");
     expect(sharedSurfaceSource).not.toContain("本地生成");
     expect(sharedSurfaceSource).not.toContain("本地预览");
@@ -550,8 +606,8 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).toHaveTextContent("题型");
     expect(detailControls).toHaveTextContent("出题数量");
     expect(detailControls).toHaveTextContent("难度");
-    expect(detailControls).toHaveTextContent("学习目标");
-    expect(detailControls).toHaveTextContent("草稿评审");
+    expect(detailControls).toHaveTextContent("评审目标");
+    expect(detailControls).toHaveTextContent("待审题目草稿");
     expect(screen.getByLabelText("专业")).toHaveDisplayValue("市场营销");
     expect(screen.getByLabelText("等级")).toHaveDisplayValue("3级");
     expect(detailControls).toHaveTextContent("1级");
@@ -561,6 +617,11 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).not.toHaveTextContent("技师");
     expect(screen.getByLabelText("科目")).toHaveDisplayValue("理论知识");
     expect(screen.getByLabelText("题型")).toHaveDisplayValue("单选题");
+    expect(screen.getByLabelText("出题数量")).toHaveDisplayValue("3");
+    expect(screen.getByLabelText("出题数量")).toHaveAttribute("max", "10");
+    expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
+      "生成待审题目草稿",
+    );
     fireEvent.change(screen.getByLabelText("专业"), {
       target: { value: "物流管理" },
     });
@@ -633,6 +694,59 @@ describe("admin AI generation entry surfaces", () => {
       "/api/v1/sessions",
       "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
     ]);
+  });
+
+  it("renders content admin AI paper generation as platform-only reviewable paper draft", async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+        )
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("content"));
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "paper",
+      }),
+    );
+
+    const detailControls = await screen.findByTestId(
+      "admin-ai-generation-detail-controls",
+    );
+
+    expect(screen.getByText("内容 AI 辅助")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "待审试卷草稿" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("题目数量")).toHaveDisplayValue("30");
+    expect(screen.getByLabelText("题目数量")).toHaveAttribute("max", "80");
+    expect(screen.getByLabelText("知识点覆盖")).toHaveDisplayValue("均衡覆盖");
+    expect(detailControls).toHaveTextContent("平台正式题库");
+    expect(detailControls).not.toHaveTextContent("本企业已发布训练题");
+    expect(detailControls).not.toHaveTextContent("优先使用企业题");
+    expect(detailControls).not.toHaveTextContent("优先使用平台题");
+    expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
+      "生成待审试卷草稿",
+    );
+    expect(document.body).toHaveTextContent(
+      "待审试卷草稿仍需编辑、驳回、审核和发布正式试卷",
+    );
+    expect(document.body).not.toHaveTextContent("内容 AI组卷");
+    expect(document.body).not.toHaveTextContent("Provider");
   });
 
   it("renders organization admin AI question generation as enterprise training draft workbench", async () => {
@@ -763,21 +877,21 @@ describe("admin AI generation entry surfaces", () => {
 
   it.each([
     {
-      actionLabel: "AI出题",
+      actionLabel: "生成待审题目草稿",
       adminRoles: ["content_admin"] satisfies AdminRole[],
       generationKind: "question" as const,
       historyPath:
         "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
-      title: "内容 AI出题",
+      title: "待审题目草稿",
       workspace: "content" as const,
     },
     {
-      actionLabel: "AI组卷",
+      actionLabel: "生成待审试卷草稿",
       adminRoles: ["content_admin"] satisfies AdminRole[],
       generationKind: "paper" as const,
       historyPath:
         "/api/v1/content-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
-      title: "内容 AI组卷",
+      title: "待审试卷草稿",
       workspace: "content" as const,
     },
     {
@@ -939,7 +1053,7 @@ describe("admin AI generation entry surfaces", () => {
         subject: "theory",
         knowledgeNode: "卷烟营销基础",
         questionType: "single_choice",
-        questionCount: 10,
+        questionCount: 3,
       },
     });
     expect(
@@ -1026,6 +1140,7 @@ describe("admin AI generation entry surfaces", () => {
           },
           redactionStatus: "redacted",
         },
+        paperAssembly: createContentPaperAssembly(),
       },
     };
 
@@ -1071,31 +1186,31 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("生成试卷草稿");
+    ).toHaveTextContent("待审试卷草稿");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible paper section");
+    ).toHaveTextContent("平台正式题库");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible paper question stem");
+    ).toHaveTextContent("已选 2 / 2 题");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible paper option");
+    ).toHaveTextContent("单选题");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible paper answer");
+    ).not.toHaveTextContent("synthetic visible paper question stem");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible paper analysis");
+    ).not.toHaveTextContent("synthetic visible paper answer");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("结构化预览");
+    ).not.toHaveTextContent("synthetic visible paper analysis");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("大题模块 2");
+    ).not.toHaveTextContent("platform_formal_question_public_a");
     expect(
       screen.getByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("题量 50");
+    ).not.toHaveTextContent("paper_draft");
     expect(
       screen
         .getByTestId("admin-visible-generated-content")
@@ -1978,11 +2093,11 @@ describe("admin AI generation entry surfaces", () => {
       ),
     );
     expect(
-      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+      await screen.findByText("待审草稿已创建；正式发布仍需审核和发布校验。"),
     ).toBeInTheDocument();
   });
 
-  it("submits content admin current paper review adoption with composed companion question drafts", async () => {
+  it("submits content admin current paper review adoption with selected platform formal questions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const resultPublicId =
       "admin_ai_generation_result_content_paper_current_review_456";
@@ -2073,6 +2188,7 @@ describe("admin AI generation entry surfaces", () => {
           },
           redactionStatus: "redacted",
         },
+        paperAssembly: createContentPaperAssembly(),
       },
     };
     let requestSubmitted = false;
@@ -2129,7 +2245,7 @@ describe("admin AI generation entry surfaces", () => {
           reviewerConfirmed: true,
           targetType: "paper",
           reviewedDraft: {
-            name: "AI组卷草稿 2026-06-26 20:30",
+            name: "待审试卷草稿 2026-06-26 20:30",
             profession: "marketing",
             level: 3,
             subject: "theory",
@@ -2137,27 +2253,35 @@ describe("admin AI generation entry surfaces", () => {
             source: "content_ai_generation",
             paperSections: [
               {
-                title: "synthetic reviewed paper section",
-                description: "synthetic reviewed paper section description",
+                title: "单选题",
+                description: null,
                 sortOrder: 1,
                 paperQuestions: [
                   {
-                    questionPublicId: null,
+                    questionPublicId: "platform_formal_question_public_a",
                     score: "1.0",
                     sortOrder: 1,
                     questionGroup: null,
-                    companionQuestionDraft: {
-                      questionType: "single_choice",
-                      stemRichText: "synthetic reviewed paper question stem",
-                      standardAnswerRichText: "A",
-                      analysisRichText: "synthetic reviewed paper analysis",
-                    },
+                    companionQuestionDraft: null,
+                  },
+                  {
+                    questionPublicId: "platform_formal_question_public_b",
+                    score: "1.0",
+                    sortOrder: 2,
+                    questionGroup: null,
+                    companionQuestionDraft: null,
                   },
                 ],
               },
             ],
           },
         });
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain(
+          "synthetic reviewed paper question stem",
+        );
+        expect(JSON.stringify(adoptionRequestBody)).not.toContain(
+          "synthetic reviewed paper analysis",
+        );
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawPrompt");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain("rawOutput");
         expect(JSON.stringify(adoptionRequestBody)).not.toContain(
@@ -2191,7 +2315,7 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("生成试卷草稿");
+    ).toHaveTextContent("待审试卷草稿");
     fireEvent.click(
       await screen.findByTestId("content-admin-review-adopt-action"),
     );
@@ -2203,7 +2327,7 @@ describe("admin AI generation entry surfaces", () => {
       ),
     );
     expect(
-      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+      await screen.findByText("待审草稿已创建；正式发布仍需审核和发布校验。"),
     ).toBeInTheDocument();
   });
 
@@ -2259,7 +2383,7 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(traceabilityPanel).toHaveTextContent("单次结果可追溯");
     expect(traceabilityPanel).toHaveTextContent("待评审");
-    expect(traceabilityPanel).toHaveTextContent("正式发布需单独审批");
+    expect(traceabilityPanel).toHaveTextContent("正式发布需审核");
     expect(traceabilityPanel).toHaveTextContent("未执行");
     expect(traceabilityPanel).not.toHaveTextContent("single_result_traceable");
     expect(traceabilityPanel).not.toHaveTextContent("awaiting_metadata_review");
@@ -2412,7 +2536,7 @@ describe("admin AI generation entry surfaces", () => {
     );
 
     expect(adoptAction).toBeEnabled();
-    expect(adoptAction).toHaveTextContent("采用草稿");
+    expect(adoptAction).toHaveTextContent("创建待审题目草稿");
 
     fireEvent.click(adoptAction);
 
@@ -2423,7 +2547,7 @@ describe("admin AI generation entry surfaces", () => {
       ),
     );
     expect(
-      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+      await screen.findByText("待审草稿已创建；正式发布仍需审核和发布校验。"),
     ).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("rawOutput");
@@ -2678,7 +2802,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(traceabilityPanel).toHaveTextContent("资料较少");
     expect(traceabilityPanel).toHaveTextContent("需人工确认");
     expect(adoptAction).toBeEnabled();
-    expect(adoptAction).toHaveTextContent("确认资料较少并采用草稿");
+    expect(adoptAction).toHaveTextContent("确认资料较少并创建待审题目草稿");
 
     fireEvent.click(adoptAction);
 
@@ -2689,7 +2813,7 @@ describe("admin AI generation entry surfaces", () => {
       ),
     );
     expect(
-      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+      await screen.findByText("待审草稿已创建；正式发布仍需审核和发布校验。"),
     ).toBeInTheDocument();
   });
 

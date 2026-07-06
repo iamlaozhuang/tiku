@@ -229,12 +229,16 @@ function getPageCopy(
 
   if (workspace === "content") {
     return {
-      eyebrow: "内容 AI 草稿/评审",
-      title: isQuestionGeneration ? "内容 AI出题" : "内容 AI组卷",
+      eyebrow: "内容 AI 辅助",
+      title: isQuestionGeneration ? "待审题目草稿" : "待审试卷草稿",
       description:
-        "展示本次生成草稿；正式题目或试卷写入仍需评审、编辑、校验和审计日志。",
-      actionLabel: isQuestionGeneration ? "AI出题" : "AI组卷",
-      boundaryLabel: "不直接写入正式题目或试卷",
+        "待审题目和待审试卷进入内容评审流程；发布前仍需编辑、审核和发布校验。",
+      actionLabel: isQuestionGeneration
+        ? "生成待审题目草稿"
+        : "生成待审试卷草稿",
+      boundaryLabel: isQuestionGeneration
+        ? "待审题目草稿不直接发布正式题目"
+        : "待审试卷草稿不直接发布正式试卷",
     };
   }
 
@@ -509,14 +513,7 @@ function createDefaultAdminGenerationParameters(
           ? "均衡覆盖"
           : "覆盖薄弱知识点",
     questionType: generationKind === "question" ? "single_choice" : null,
-    questionCount:
-      generationKind === "question"
-        ? isOrganizationWorkspace
-          ? 3
-          : 10
-        : isOrganizationWorkspace
-          ? 30
-          : 50,
+    questionCount: generationKind === "question" ? 3 : 30,
     difficulty: "medium",
     learningObjective:
       workspace === "organization"
@@ -524,8 +521,8 @@ function createDefaultAdminGenerationParameters(
           ? "企业训练巩固"
           : "企业阶段测验"
         : generationKind === "question"
-          ? "弱项巩固"
-          : "阶段自测",
+          ? "内容题目评审"
+          : "内容试卷评审",
   };
 }
 
@@ -655,6 +652,7 @@ const aiGenerationDetailControlClassName =
 function getAiGenerationDetailControls(
   generationKind: AdminAiGenerationKind,
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+  workspace: AdminAiGenerationWorkspace,
 ): readonly AdminAiGenerationDetailControl[] {
   const baseControls = [
     {
@@ -677,101 +675,113 @@ function getAiGenerationDetailControls(
     },
   ] satisfies readonly AdminAiGenerationDetailControl[];
 
-  return generationKind === "question"
-    ? ([
-        ...baseControls,
-        {
-          inputMode: "text",
-          label: "知识点",
-          value: generationParameters.knowledgeNode ?? "",
-        },
-        {
-          inputMode: "select",
-          label: "题型",
-          options: ["单选题", "多选题", "判断题", "案例分析题"],
-          value:
-            generationParameters.questionType === null
-              ? "单选题"
-              : (adminQuestionTypeLabelByValue[
-                  generationParameters.questionType as keyof typeof adminQuestionTypeLabelByValue
-                ] ?? "单选题"),
-        },
-        {
-          inputMode: "number",
-          label: "出题数量",
-          max: 10,
-          value: String(generationParameters.questionCount),
-        },
-        {
-          inputMode: "select",
-          label: "难度",
-          options: ["基础", "中等", "进阶"],
-          value:
-            generationParameters.difficulty === null
-              ? "中等"
-              : (adminDifficultyLabelByValue[
-                  generationParameters.difficulty as keyof typeof adminDifficultyLabelByValue
-                ] ?? "中等"),
-        },
-        {
-          inputMode: "text",
-          label: "学习目标",
-          value: generationParameters.learningObjective ?? "",
-        },
-      ] satisfies readonly AdminAiGenerationDetailControl[])
-    : ([
-        ...baseControls,
-        {
-          inputMode: "number",
-          label: "题目数量",
-          max: 80,
-          value: String(generationParameters.questionCount),
-        },
-        {
-          inputMode: "select",
-          label: "题源偏好",
-          options: ["均衡使用", "优先使用企业题", "优先使用平台题"],
-          value: "均衡使用",
-        },
-        {
-          inputMode: "select",
-          label: "题型分布",
-          options: [
-            "单选 40% / 多选 30% / 判断 30%",
-            "单选 50% / 多选 25% / 判断 25%",
-            "按薄弱项动态分配",
-          ],
-          value: "单选 40% / 多选 30% / 判断 30%",
-        },
-        {
-          inputMode: "select",
-          label: "难度",
-          options: ["基础", "中等", "进阶"],
-          value:
-            generationParameters.difficulty === null
-              ? "中等"
-              : (adminDifficultyLabelByValue[
-                  generationParameters.difficulty as keyof typeof adminDifficultyLabelByValue
-                ] ?? "中等"),
-        },
-        {
-          inputMode: "select",
-          label: "知识点覆盖",
-          options: ["均衡覆盖", "指定知识点", "薄弱知识点优先", "综合测验"],
-          value: generationParameters.knowledgeNode ?? "均衡覆盖",
-        },
-        {
-          inputMode: "select",
-          label: "试卷结构",
-          options: ["按大题模块组织", "按知识点模块组织"],
-          value: "按大题模块组织",
-        },
-        {
-          inputMode: "text",
-          label: "组卷目标",
-          value: generationParameters.learningObjective ?? "",
-        },
-      ] satisfies readonly AdminAiGenerationDetailControl[]);
+  if (generationKind === "question") {
+    return [
+      ...baseControls,
+      {
+        inputMode: "text",
+        label: "知识点",
+        value: generationParameters.knowledgeNode ?? "",
+      },
+      {
+        inputMode: "select",
+        label: "题型",
+        options: ["单选题", "多选题", "判断题", "案例分析题"],
+        value:
+          generationParameters.questionType === null
+            ? "单选题"
+            : (adminQuestionTypeLabelByValue[
+                generationParameters.questionType as keyof typeof adminQuestionTypeLabelByValue
+              ] ?? "单选题"),
+      },
+      {
+        inputMode: "number",
+        label: "出题数量",
+        max: 10,
+        value: String(generationParameters.questionCount),
+      },
+      {
+        inputMode: "select",
+        label: "难度",
+        options: ["基础", "中等", "进阶"],
+        value:
+          generationParameters.difficulty === null
+            ? "中等"
+            : (adminDifficultyLabelByValue[
+                generationParameters.difficulty as keyof typeof adminDifficultyLabelByValue
+              ] ?? "中等"),
+      },
+      {
+        inputMode: "text",
+        label: workspace === "organization" ? "训练目标" : "评审目标",
+        value: generationParameters.learningObjective ?? "",
+      },
+    ] satisfies readonly AdminAiGenerationDetailControl[];
+  }
+
+  const paperControls = [
+    ...baseControls,
+    {
+      inputMode: "number",
+      label: "题目数量",
+      max: 80,
+      value: String(generationParameters.questionCount),
+    },
+  ] satisfies readonly AdminAiGenerationDetailControl[];
+  const organizationPaperControls =
+    workspace === "organization"
+      ? ([
+          ...paperControls,
+          {
+            inputMode: "select",
+            label: "题源偏好",
+            options: ["均衡使用", "优先使用企业题", "优先使用平台题"],
+            value: "均衡使用",
+          },
+        ] satisfies readonly AdminAiGenerationDetailControl[])
+      : paperControls;
+
+  return [
+    ...organizationPaperControls,
+    {
+      inputMode: "select",
+      label: "题型分布",
+      options: [
+        "单选 40% / 多选 30% / 判断 30%",
+        "单选 50% / 多选 25% / 判断 25%",
+        "按薄弱项动态分配",
+      ],
+      value: "单选 40% / 多选 30% / 判断 30%",
+    },
+    {
+      inputMode: "select",
+      label: "难度",
+      options: ["基础", "中等", "进阶"],
+      value:
+        generationParameters.difficulty === null
+          ? "中等"
+          : (adminDifficultyLabelByValue[
+              generationParameters.difficulty as keyof typeof adminDifficultyLabelByValue
+            ] ?? "中等"),
+    },
+    {
+      inputMode: "select",
+      label: "知识点覆盖",
+      options: ["均衡覆盖", "指定知识点", "薄弱知识点优先", "综合测验"],
+      value: generationParameters.knowledgeNode ?? "均衡覆盖",
+    },
+    {
+      inputMode: "select",
+      label: "试卷结构",
+      options: ["按大题模块组织", "按知识点模块组织"],
+      value: "按大题模块组织",
+    },
+    {
+      inputMode: "text",
+      label: workspace === "organization" ? "组卷目标" : "评审目标",
+      value: generationParameters.learningObjective ?? "",
+    },
+  ] satisfies readonly AdminAiGenerationDetailControl[];
 }
 
 function AdminAiGenerationDetailControls({
@@ -788,16 +798,20 @@ function AdminAiGenerationDetailControls({
   const controls = getAiGenerationDetailControls(
     generationKind,
     generationParameters,
+    workspace,
   );
   const draftBoundaryLabel =
     workspace === "organization"
       ? generationKind === "question"
         ? "训练题草稿"
         : "训练试卷草稿"
-      : "草稿评审";
+      : generationKind === "question"
+        ? "待审题目草稿"
+        : "待审试卷草稿";
   const title = generationKind === "question" ? "出题细节" : "组卷细节";
   const isOrganizationPaper =
     workspace === "organization" && generationKind === "paper";
+  const isContentPaper = workspace === "content" && generationKind === "paper";
   const isOrganizationQuestion =
     workspace === "organization" && generationKind === "question";
 
@@ -869,11 +883,14 @@ function AdminAiGenerationDetailControls({
         ))}
       </div>
 
-      {isOrganizationPaper ? (
+      {isOrganizationPaper || isContentPaper ? (
         <section className="border-border bg-muted/40 mt-4 rounded-md border p-3">
           <p className="text-brand-primary text-xs font-medium">题源说明</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {["平台正式题库", "本企业已发布训练题"].map((sourceLabel) => (
+            {(isOrganizationPaper
+              ? ["平台正式题库", "本企业已发布训练题"]
+              : ["平台正式题库"]
+            ).map((sourceLabel) => (
               <span
                 className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
                 key={sourceLabel}
@@ -891,7 +908,11 @@ function AdminAiGenerationDetailControls({
       <p className="text-text-secondary mt-3 text-xs leading-5">
         {isOrganizationQuestion
           ? "这些题目还未发布，员工暂时看不到。"
-          : `当前准备生成条件和${draftBoundaryLabel}入口；只生成待评审草稿，不触发正式题库写入。`}
+          : workspace === "content" && generationKind === "paper"
+            ? "待审试卷草稿仍需编辑、驳回、审核和发布正式试卷；系统只从平台正式题库选题。"
+            : workspace === "content" && generationKind === "question"
+              ? "待审题目草稿仍需编辑、驳回、审核和发布正式题目。"
+              : `当前准备生成条件和${draftBoundaryLabel}入口；只生成待评审草稿，不触发正式题库写入。`}
       </p>
     </section>
   );
@@ -918,12 +939,15 @@ function AdminAiGenerationVisibleGeneratedContent({
   const visiblePaperSections = getAdminVisiblePaperSections(
     visibleGeneratedContent.structuredPreview,
   );
+  const paperAssembly = localContractSummary.paperAssembly ?? null;
   const visibleGeneratedContentTitle =
-    visibleQuestionDrafts.length > 0
-      ? "生成题目草稿"
-      : visiblePaperSections.length > 0
-        ? "生成试卷草稿"
-        : "临时展示内容";
+    paperAssembly !== null
+      ? getAdminPaperAssemblyContainerLabel(localContractSummary.workspace)
+      : visibleQuestionDrafts.length > 0
+        ? "生成题目草稿"
+        : visiblePaperSections.length > 0
+          ? "生成试卷草稿"
+          : "临时展示内容";
 
   return (
     <section
@@ -943,6 +967,11 @@ function AdminAiGenerationVisibleGeneratedContent({
       </div>
       {visibleQuestionDrafts.length > 0 ? (
         <AdminQuestionDraftList questionDrafts={visibleQuestionDrafts} />
+      ) : paperAssembly !== null ? (
+        <AdminPaperAssemblyContainer
+          paperAssembly={paperAssembly}
+          workspace={localContractSummary.workspace}
+        />
       ) : visiblePaperSections.length > 0 ? (
         <AdminPaperDraftList paperSections={visiblePaperSections} />
       ) : (
@@ -950,12 +979,144 @@ function AdminAiGenerationVisibleGeneratedContent({
           {visibleGeneratedContentText}
         </p>
       )}
-      {visibleGeneratedContent.structuredPreview ? (
+      {visibleGeneratedContent.structuredPreview && paperAssembly === null ? (
         <StructuredPreviewSummary
           structuredPreview={visibleGeneratedContent.structuredPreview}
         />
       ) : null}
     </section>
+  );
+}
+
+type AdminPaperAssembly = Exclude<
+  AdminAiGenerationLocalContractDto["paperAssembly"],
+  null
+>;
+
+function getAdminPaperAssemblyContainerLabel(
+  workspace: AdminAiGenerationWorkspace,
+): string {
+  return workspace === "organization" ? "企业训练试卷草稿" : "待审试卷草稿";
+}
+
+function getAdminPaperAssemblyMatchQualityLabel(
+  matchQuality: AdminPaperAssembly["container"]["matchQuality"],
+): string {
+  const labels = {
+    fully_matched: "全部按条件匹配",
+    supplemented_from_nearby_knowledge: "已从相近知识点自动补足",
+    supplemented_from_same_scope: "已从同范围题目自动补足",
+    insufficient: "题源不足，需调整条件",
+  } satisfies Record<AdminPaperAssembly["container"]["matchQuality"], string>;
+
+  return labels[matchQuality];
+}
+
+function AdminPaperAssemblyContainer({
+  paperAssembly,
+  workspace,
+}: {
+  paperAssembly: AdminPaperAssembly;
+  workspace: AdminAiGenerationWorkspace;
+}) {
+  const container = paperAssembly.container;
+  const sourceLabels = [
+    container.sourceComposition.platformFormalQuestionCount > 0
+      ? `平台正式题库 ${container.sourceComposition.platformFormalQuestionCount} 题`
+      : null,
+    container.sourceComposition.enterpriseTrainingSnapshotCount > 0
+      ? `本企业已发布训练题 ${container.sourceComposition.enterpriseTrainingSnapshotCount} 题`
+      : null,
+  ].filter((sourceLabel) => sourceLabel !== null);
+  const nextActionLabels =
+    workspace === "organization"
+      ? ["编辑试卷", "调整题目", "预览员工视角", "保存草稿", "发布训练"]
+      : ["编辑", "驳回", "审核", "发布正式试卷"];
+
+  return (
+    <div
+      className="mt-3 space-y-3"
+      data-testid="admin-ai-paper-assembly-container"
+    >
+      <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt className="text-text-secondary">试卷容器</dt>
+          <dd className="text-text-primary mt-1">
+            {getAdminPaperAssemblyContainerLabel(workspace)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">题量</dt>
+          <dd className="text-text-primary mt-1">
+            已选 {container.selectedQuestionCount} /{" "}
+            {container.requestedQuestionCount} 题
+          </dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">题源说明</dt>
+          <dd className="text-text-primary mt-1">
+            {sourceLabels.join("，") || "题源不足"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-text-secondary">匹配说明</dt>
+          <dd className="text-text-primary mt-1">
+            {getAdminPaperAssemblyMatchQualityLabel(container.matchQuality)}
+          </dd>
+        </div>
+      </dl>
+
+      {paperAssembly.insufficiency !== null ? (
+        <p className="text-destructive text-sm leading-6">
+          仍缺 {paperAssembly.insufficiency.missingQuestionCount}{" "}
+          题，请调整知识点、题型或题量。
+        </p>
+      ) : (
+        <p className="text-text-secondary text-sm leading-6">
+          已按允许的正式题源完成组卷，未使用 AI 生成题目正文。
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {container.sections.map((paperSection) => (
+          <section
+            className="border-border bg-muted/40 rounded-md border p-3"
+            key={paperSection.sectionKey}
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <h4 className="text-text-primary text-sm font-semibold">
+                {paperSection.title}
+              </h4>
+              <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+                已选 {paperSection.selectedQuestionCount} /{" "}
+                {paperSection.targetQuestionCount} 题
+              </span>
+            </div>
+            <p className="text-text-secondary mt-2 text-xs leading-5">
+              精确匹配 {paperSection.degradationSummary.exactCount}{" "}
+              题，相近知识点补足{" "}
+              {paperSection.degradationSummary.nearbyKnowledgeCount}{" "}
+              题，同范围补足 {paperSection.degradationSummary.sameScopeCount}{" "}
+              题。
+            </p>
+          </section>
+        ))}
+      </div>
+
+      <div
+        className="flex flex-wrap gap-2"
+        data-testid="admin-ai-paper-assembly-next-actions"
+      >
+        {nextActionLabels.map((actionLabel) => (
+          <span
+            className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium"
+            key={actionLabel}
+          >
+            {actionLabel}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -1733,7 +1894,7 @@ function resolveContentAdminReviewActionMessage(
   }
 
   if (actionState === "adopted") {
-    return "草稿采用已提交；正式发布仍需单独校验。";
+    return "待审草稿已创建；正式发布仍需审核和发布校验。";
   }
 
   if (actionState === "rejected") {
@@ -1784,18 +1945,24 @@ function ContentAdminReviewTraceabilityPanel({
     !hasReviewedDraft && reviewReadiness !== "blocked"
       ? "需本次结构化草稿"
       : reviewReadiness === "ready"
-        ? "可提交采用"
+        ? "可创建待审草稿"
         : reviewReadiness === "weak_confirmation_required"
           ? "需人工确认"
           : "不可采用";
+  const draftTargetLabel =
+    generationKind === "paper" ? "待审试卷草稿" : "待审题目草稿";
   const adoptActionLabel =
     actionState === "adopted"
-      ? "已提交采用"
+      ? `已创建${draftTargetLabel}`
       : !hasReviewedDraft && reviewReadiness !== "blocked"
         ? "需本次结构化草稿"
         : reviewReadiness === "weak_confirmation_required"
-          ? "确认资料较少并采用草稿"
-          : "采用草稿";
+          ? `确认资料较少并创建${draftTargetLabel}`
+          : `创建${draftTargetLabel}`;
+  const nextActionLabels =
+    generationKind === "paper"
+      ? ["编辑", "驳回", "审核", "发布正式试卷"]
+      : ["编辑", "驳回", "审核", "发布正式题目"];
 
   return (
     <section
@@ -1810,7 +1977,7 @@ function ContentAdminReviewTraceabilityPanel({
           </h4>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-          正式发布需单独审批
+          正式发布需审核
         </span>
       </div>
 
@@ -1879,6 +2046,20 @@ function ContentAdminReviewTraceabilityPanel({
           ))}
         </div>
       </section>
+
+      <div
+        className="mt-3 flex flex-wrap gap-2"
+        data-testid="content-admin-review-next-actions"
+      >
+        {nextActionLabels.map((actionLabel) => (
+          <span
+            className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium"
+            key={actionLabel}
+          >
+            {actionLabel}
+          </span>
+        ))}
+      </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button

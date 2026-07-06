@@ -255,10 +255,10 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(generationParameters).toMatchObject({
       difficulty: "medium",
       knowledgeNode: "卷烟营销基础",
-      learningObjective: "弱项巩固",
+      learningObjective: "内容题目评审",
       level: 3,
       profession: "marketing",
-      questionCount: 10,
+      questionCount: 3,
       questionType: "single_choice",
       subject: "theory",
     });
@@ -275,10 +275,10 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(generationParameters).toMatchObject({
       difficulty: "medium",
       knowledgeNode: "覆盖薄弱知识点",
-      learningObjective: "阶段自测",
+      learningObjective: "内容试卷评审",
       level: 3,
       profession: "monopoly",
-      questionCount: 50,
+      questionCount: 30,
       questionType: null,
       subject: "theory",
     });
@@ -294,7 +294,9 @@ describe("AdminAiGenerationEntryPage", () => {
       />,
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "AI出题" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "生成待审题目草稿" }),
+    );
 
     await waitFor(() => {
       expect(
@@ -343,7 +345,9 @@ describe("AdminAiGenerationEntryPage", () => {
       />,
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "AI出题" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "生成待审题目草稿" }),
+    );
 
     await waitFor(() => {
       expect(
@@ -368,7 +372,10 @@ describe("AdminAiGenerationEntryPage", () => {
       <AdminAiGenerationEntryPage generationKind="paper" workspace="content" />,
     );
 
-    expect(await screen.findByText("内容 AI组卷")).toBeInTheDocument();
+    expect(await screen.findByText("内容 AI 辅助")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "待审试卷草稿" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("按大题模块组织")).toBeInTheDocument();
     expect(screen.getByText("生成记录")).toBeInTheDocument();
     expect(screen.queryByText(/本地 owner preview/u)).not.toBeInTheDocument();
@@ -390,7 +397,9 @@ describe("AdminAiGenerationEntryPage", () => {
       />,
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "AI出题" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "生成待审题目草稿" }),
+    );
 
     await waitFor(() => {
       expect(

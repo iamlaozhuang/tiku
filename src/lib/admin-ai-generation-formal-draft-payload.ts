@@ -80,32 +80,28 @@ export function createContentAdminFormalReviewedDraftPayload({
 
   if (
     localContractSummary.generationKind === "paper" &&
-    structuredPreview.kind === "paper_draft"
+    localContractSummary.paperAssembly?.status === "assembled"
   ) {
-    const paperSections = structuredPreview.paperSectionSummaries
+    const paperAssembly = localContractSummary.paperAssembly;
+    const paperSections = paperAssembly.container.sections
       .map((paperSection, paperSectionIndex) => {
-        const paperQuestions = paperSection.questionDrafts
-          .map((questionDraft, questionIndex) => {
-            const companionQuestionDraft = createFormalQuestionDraftPayload(
-              questionDraft,
-              generationParameters,
-            );
+        const paperQuestions = paperSection.selectedQuestions.map(
+          (selectedQuestion, questionIndex) => ({
+            questionPublicId: selectedQuestion.questionPublicId,
+            companionQuestionDraft: null,
+            score: selectedQuestion.score.toFixed(1),
+            sortOrder: questionIndex + 1,
+            questionGroup: null,
+          }),
+        );
 
-            if (companionQuestionDraft === null) {
-              return null;
-            }
-
-            return {
-              questionPublicId: null,
-              companionQuestionDraft,
-              score: "1.0",
-              sortOrder: questionIndex + 1,
-              questionGroup: null,
-            };
-          })
-          .filter((paperQuestion) => paperQuestion !== null);
-
-        if (paperQuestions.length === 0) {
+        if (
+          paperQuestions.length === 0 ||
+          paperSection.selectedQuestions.some(
+            (selectedQuestion) =>
+              selectedQuestion.sourceKind !== "platform_formal_question",
+          )
+        ) {
           return null;
         }
 
@@ -113,14 +109,17 @@ export function createContentAdminFormalReviewedDraftPayload({
           title:
             normalizeRequiredText(paperSection.title) ??
             `第${paperSectionIndex + 1}大题`,
-          description: normalizeOptionalText(paperSection.description),
+          description: null,
           sortOrder: paperSectionIndex + 1,
           paperQuestions,
         };
       })
       .filter((paperSection) => paperSection !== null);
 
-    if (paperSections.length === 0) {
+    if (
+      paperSections.length === 0 ||
+      paperAssembly.sourceDiagnostics.role !== "content_admin"
+    ) {
       return null;
     }
 
@@ -252,7 +251,7 @@ function createFillBlankAnswers(
 }
 
 function createContentAdminFormalPaperDraftName(requestedAt: string): string {
-  return `AI组卷草稿 ${requestedAt.slice(0, 16).replace("T", " ")}`;
+  return `待审试卷草稿 ${requestedAt.slice(0, 16).replace("T", " ")}`;
 }
 
 function normalizeRequiredText(
@@ -261,10 +260,4 @@ function normalizeRequiredText(
   const normalizedValue = value?.trim() ?? "";
 
   return normalizedValue.length > 0 ? normalizedValue : null;
-}
-
-function normalizeOptionalText(
-  value: string | null | undefined,
-): string | null {
-  return normalizeRequiredText(value);
 }
