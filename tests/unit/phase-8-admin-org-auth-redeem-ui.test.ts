@@ -283,7 +283,7 @@ describe("AdminOrgAuthPage", () => {
     expect(organizationDetail).not.toHaveTextContent("301");
   });
 
-  it("renders empty and error states from standard response envelopes", async () => {
+  it("renders first-create empty data and error states from standard response envelopes", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     vi.stubGlobal(
       "fetch",
@@ -308,7 +308,14 @@ describe("AdminOrgAuthPage", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    expect(await screen.findByText("暂无企业授权运营数据")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "企业授权运营" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("暂无企业授权运营数据")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("organization-tree-management-form"),
+    ).toBeVisible();
+    expect(screen.getByTestId("organization-submit-button")).toBeDisabled();
 
     cleanup();
     vi.stubGlobal(
