@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-tasks-slimming-batch-6-2026-07-06
-  updatedAt: "2026-07-06T14:42:00Z"
+  updatedByTask: active-tasks-slimming-batch-7-2026-07-06
+  updatedAt: "2026-07-06T14:49:00Z"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -18091,3 +18091,228 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: 2026-07-01T20:40:00-07:00
+  - id: ai-generation-post-adoption-closure-rerun-2026-07-02
+    phase: ai-generation-post-adoption-closure-rerun-2026-07-02
+    status: closed
+    taskKind: local_owner_preview_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T20:24:11-07:00
+  - id: ai-generation-grounded-result-adoption-closure-repair-2026-07-02
+    phase: ai-generation-grounded-result-adoption-closure-repair-2026-07-02
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounded-result-adoption-closure-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T20:04:31-07:00
+  - id: ai-generation-post-query-wording-provider-rerun-2026-07-02
+    phase: ai-generation-post-query-wording-provider-rerun-2026-07-02
+    status: closed
+    taskKind: local_real_provider_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-query-wording-provider-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-query-wording-provider-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T03:10:00-07:00
+  - id: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
+    phase: ai-generation-grounding-query-and-contract-wording-repair-2026-07-02
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-grounding-query-and-contract-wording-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T02:15:00-07:00
+  - id: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
+    phase: ai-generation-post-runtime-resource-provider-rerun-2026-07-02
+    status: closed
+    taskKind: local_real_provider_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-runtime-resource-provider-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T01:35:00-07:00
+  - id: ai-generation-resource-runtime-coverage-2026-07-02
+    phase: ai-generation-resource-runtime-coverage-2026-07-02
+    status: closed
+    taskKind: local_runtime_rag_coverage_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-resource-runtime-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-resource-runtime-coverage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T01:00:00-07:00
+  - id: ai-generation-cross-surface-closure-2026-07-02
+    phase: ai-generation-cross-surface-closure-2026-07-02
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-cross-surface-closure.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-cross-surface-closure.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T00:25:00-07:00
+  - id: ai-generation-post-repair-localhost-rerun-2026-07-01
+    phase: ai-generation-post-repair-localhost-rerun-2026-07-01
+    status: closed
+    taskKind: local_real_provider_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-post-repair-localhost-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-post-repair-localhost-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: ai-generation-admin-debug-summary-ui-repair-2026-07-01
+    phase: ai-generation-admin-debug-summary-ui-repair-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-admin-debug-summary-ui-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-admin-debug-summary-ui-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T17:45:00-07:00
+  - id: ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
+    phase: ai-generation-post-admin-debug-summary-localhost-rerun-2026-07-01
+    status: closed
+    taskKind: local_real_provider_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-post-admin-debug-summary-localhost-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-post-admin-debug-summary-localhost-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T18:20:00-07:00
+  - id: ai-generation-admin-parameters-runtime-repair-2026-07-01
+    phase: ai-generation-admin-parameters-runtime-repair-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-admin-parameters-runtime-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-admin-parameters-runtime-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T18:40:00-07:00
+  - id: ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
+    phase: ai-generation-post-admin-parameters-localhost-rerun-2026-07-01
+    status: closed
+    taskKind: local_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-post-admin-parameters-localhost-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T18:55:00-07:00
+  - id: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
+    phase: ai-generation-ordinary-ui-internal-wording-repair-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-ordinary-ui-internal-wording-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T19:20:00-07:00
+  - id: ai-generation-resource-grounding-enforcement-repair-2026-07-01
+    phase: ai-generation-resource-grounding-enforcement-repair-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-grounding-enforcement-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T19:35:00-07:00
+  - id: ai-generation-eight-role-credential-backed-rerun-2026-07-01
+    phase: ai-generation-eight-role-credential-backed-rerun-2026-07-01
+    status: closed
+    taskKind: local_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-eight-role-credential-backed-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-eight-role-credential-backed-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T19:55:00-07:00
+  - id: ai-generation-cross-role-grounding-ui-rerun-2026-07-01
+    phase: ai-generation-cross-role-grounding-ui-rerun-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-cross-role-grounding-ui-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-cross-role-grounding-ui-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T16:35:00-07:00
+  - id: ai-generation-admin-idempotency-visible-result-repair-2026-07-01
+    phase: ai-generation-admin-idempotency-visible-result-repair-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-admin-idempotency-visible-result-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-admin-idempotency-visible-result-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T16:05:00-07:00
+  - id: ai-generation-resource-grounded-provider-sample-2026-07-01
+    phase: ai-generation-resource-grounded-provider-sample-2026-07-01
+    status: closed
+    taskKind: local_resource_grounding_and_real_provider_owner_preview_sample
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-resource-grounded-provider-sample.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-resource-grounded-provider-sample.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T15:42:00-07:00
+  - id: ai-generation-post-grounding-provider-matrix-rerun-2026-07-01
+    phase: ai-generation-post-grounding-provider-matrix-rerun-2026-07-01
+    status: closed
+    taskKind: local_real_provider_owner_preview_matrix_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-post-grounding-provider-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-post-grounding-provider-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T14:07:56-07:00
+  - id: ai-generation-grounding-product-ui-repair-2026-07-01
+    phase: ai-generation-grounding-product-ui-repair-2026-07-01
+    status: closed
+    taskKind: local_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-grounding-product-ui-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-grounding-product-ui-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T13:40:33-07:00
+  - id: ai-generation-central-repair-approval-2026-07-01
+    phase: ai-generation-central-repair-approval-2026-07-01
+    status: closed
+    taskKind: docs_state_central_repair_approval
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-central-repair-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-central-repair-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T08:28:43-07:00
+  - id: ai-generation-repair-roadmap-2026-07-01
+    phase: ai-generation-repair-roadmap-2026-07-01
+    status: closed
+    taskKind: docs_state_ai_generation_repair_roadmap
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-repair-roadmap.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-repair-roadmap.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T08:12:26-07:00
+  - id: ai-generation-p0-entry-unblock-2026-07-01
+    phase: ai-generation-p0-entry-unblock-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p0-entry-unblock.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p0-entry-unblock.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T08:49:37-07:00
+  - id: ai-generation-p1-core-semantics-2026-07-01
+    phase: ai-generation-p1-core-semantics-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p1-core-semantics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p1-core-semantics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T09:11:01-07:00
+  - id: ai-generation-p2-history-ux-2026-07-01
+    phase: ai-generation-p2-history-ux-2026-07-01
+    status: closed
+    taskKind: source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-01-ai-generation-p2-history-ux.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-01-ai-generation-p2-history-ux.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-01T09:57:46-07:00
