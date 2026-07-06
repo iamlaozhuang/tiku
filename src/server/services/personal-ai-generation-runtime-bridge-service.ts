@@ -1,5 +1,10 @@
-import type { PersonalAiGenerationRuntimeBridgeDto } from "../contracts/personal-ai-generation-runtime-bridge-contract";
+import type {
+  PersonalAiGenerationRuntimeBridgeDto,
+  PersonalAiGenerationRuntimeBridgePaperAssemblyDto,
+} from "../contracts/personal-ai-generation-runtime-bridge-contract";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
+import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
+import type { AiPaperAssemblyRole } from "../contracts/ai-paper-plan-and-select-contract";
 import { createAiCallLogRedactedSnapshots } from "../models/ai-rag";
 import {
   createDefaultBlockedRouteIntegratedProviderExecutionOutcome,
@@ -13,6 +18,34 @@ import {
   materializeRouteIntegratedRedactedResult,
   type PersonalAiGenerationRouteIntegratedResultMaterializationControl,
 } from "./personal-ai-generation-route-integrated-result-materialization-service";
+import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
+
+type PersonalAiGenerationPaperAssemblyRole = Extract<
+  AiPaperAssemblyRole,
+  "personal_advanced_student" | "org_advanced_employee"
+>;
+
+export type PersonalAiGenerationPaperAssemblyResolverInput = {
+  requestFlow: PersonalAiGenerationRequestFlowDto;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  visibleGeneratedContent: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome["visibleGeneratedContent"];
+};
+
+export type PersonalAiGenerationPaperAssemblyResolver = (
+  input: PersonalAiGenerationPaperAssemblyResolverInput,
+) =>
+  | AiPaperRoutePlanSelectWiringResult
+  | Promise<AiPaperRoutePlanSelectWiringResult>;
+
+type PersonalAiGenerationPaperAssemblyResolveResult =
+  | {
+      status: "resolved" | "not_applicable";
+      paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto;
+    }
+  | {
+      status: "rejected";
+      paperAssembly: null;
+    };
 
 export type PersonalAiGenerationRuntimeBridgeControl = {
   bridgeMode: "controlled_runner";
@@ -26,6 +59,7 @@ export type PersonalAiGenerationRuntimeBridgeControl = {
     | PersonalAiGenerationRouteIntegratedResultMaterializationControl
     | null
     | Promise<PersonalAiGenerationRouteIntegratedResultMaterializationControl | null>;
+  paperAssemblyResolver?: PersonalAiGenerationPaperAssemblyResolver;
 };
 
 export type PersonalAiGenerationRuntimeBridgeOptions = {
@@ -111,6 +145,7 @@ function buildPersonalAiGenerationRuntimeBridgeDto(
     resultMaterializationSummary:
       createDefaultBlockedRouteIntegratedResultMaterializationSummary(),
     visibleGeneratedContent: null,
+    paperAssembly: null,
     blockedReasons: isControlledRunnerEnabled
       ? ["real_provider_execution_requires_fresh_approval"]
       : [
@@ -186,14 +221,21 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
       requestFlow,
       providerExecutionControl,
     );
+  const paperAssemblyResult = await resolvePersonalAiGenerationPaperAssembly({
+    executionOutcome,
+    paperAssemblyResolver: options.runtimeBridgeControl?.paperAssemblyResolver,
+    requestFlow,
+  });
   const resultMaterializationControl =
-    staticResultMaterializationControl ??
-    (createResultMaterializationControl === undefined
+    paperAssemblyResult.status === "rejected"
       ? null
-      : await createResultMaterializationControl({
-          executionOutcome,
-          requestFlow,
-        }));
+      : (staticResultMaterializationControl ??
+        (createResultMaterializationControl === undefined
+          ? null
+          : await createResultMaterializationControl({
+              executionOutcome,
+              requestFlow,
+            })));
   const resultMaterializationSummary =
     resultMaterializationControl !== null &&
     executionOutcome.providerCallExecuted &&
@@ -224,10 +266,73 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
     providerExecutionSummary: executionOutcome.executionSummary,
     resultMaterializationSummary,
     visibleGeneratedContent: executionOutcome.visibleGeneratedContent,
+    paperAssembly: paperAssemblyResult.paperAssembly,
     blockedReasons: executionOutcome.providerCallExecuted
       ? []
       : executionOutcome.executionSummary.failureCategory === null
         ? ["real_provider_execution_requires_fresh_approval"]
         : [executionOutcome.executionSummary.failureCategory],
   };
+}
+
+async function resolvePersonalAiGenerationPaperAssembly(input: {
+  executionOutcome: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome;
+  paperAssemblyResolver: PersonalAiGenerationPaperAssemblyResolver | undefined;
+  requestFlow: PersonalAiGenerationRequestFlowDto;
+}): Promise<PersonalAiGenerationPaperAssemblyResolveResult> {
+  const generationParameters = input.requestFlow.request.generationParameters;
+
+  if (
+    input.requestFlow.resultReference.taskType !== "ai_paper_generation" ||
+    generationParameters === null ||
+    input.paperAssemblyResolver === undefined ||
+    !input.executionOutcome.providerCallExecuted ||
+    input.executionOutcome.executionSummary.resultStatus !== "pass"
+  ) {
+    return {
+      status: "not_applicable",
+      paperAssembly: null,
+    };
+  }
+
+  const result = await input.paperAssemblyResolver({
+    requestFlow: input.requestFlow,
+    generationParameters,
+    visibleGeneratedContent: input.executionOutcome.visibleGeneratedContent,
+  });
+
+  if (
+    result.status === "rejected" ||
+    !isPersonalAiGenerationPaperAssemblyRole(result.sourceDiagnostics.role)
+  ) {
+    return {
+      status: "rejected",
+      paperAssembly: null,
+    };
+  }
+
+  return {
+    status: "resolved",
+    paperAssembly: {
+      status: result.status,
+      sourceDiagnostics: {
+        role: result.sourceDiagnostics.role,
+        platformQuestionCount: result.sourceDiagnostics.platformQuestionCount,
+        enterpriseQuestionCount:
+          result.sourceDiagnostics.enterpriseQuestionCount,
+        enterpriseSourceStatus: result.sourceDiagnostics.enterpriseSourceStatus,
+      },
+      container: result.assembly.container,
+      insufficiency: result.assembly.insufficiency,
+      redactionStatus: "redacted",
+    },
+  };
+}
+
+function isPersonalAiGenerationPaperAssemblyRole(
+  role: AiPaperAssemblyRole,
+): role is PersonalAiGenerationPaperAssemblyRole {
+  return (
+    role === "personal_advanced_student" || role === "org_advanced_employee"
+  );
 }

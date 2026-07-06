@@ -11,20 +11,29 @@ import type {
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type {
+  QuestionAccessRow,
+  QuestionRepository,
+} from "../repositories/question-repository";
+import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
+import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import type { SessionService } from "./session-service";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type { EffectiveAuthorizationService } from "./effective-authorization-service";
+import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
   userType: "personal",
+  employeePublicId: null,
   organizationPublicId: null,
 } as const;
 
 const employeeUserContext = {
   userPublicId: "employee_session_user_public_123",
   userType: "employee",
+  employeePublicId: "employee_public_123",
   organizationPublicId: "organization_public_123",
 } as const;
 
@@ -294,6 +303,207 @@ function createEffectiveAuthorizationService(
   };
 }
 
+function createPaperPlanProviderContent(questionCount: number) {
+  return JSON.stringify({
+    title: "redacted paper plan",
+    totalQuestionCount: questionCount,
+    paperSections: [
+      {
+        paperSectionType: "single_choice",
+        title: "redacted section",
+        questionCount,
+      },
+    ],
+    questionTypeDistribution: {
+      single_choice: questionCount,
+    },
+    knowledgeCoverage: {
+      knowledgeNodePublicIds: ["knowledge_node_public_default"],
+    },
+  });
+}
+
+function createAssembledPaperRouteResult(
+  input: {
+    role: "personal_advanced_student" | "org_advanced_employee";
+    platformQuestionCount: number;
+    enterpriseQuestionCount: number;
+  } = {
+    role: "org_advanced_employee",
+    platformQuestionCount: 2,
+    enterpriseQuestionCount: 1,
+  },
+): AiPaperRoutePlanSelectWiringResult {
+  const selectedQuestions = [
+    ...Array.from({ length: input.platformQuestionCount }, (_, index) => ({
+      questionPublicId: `platform_question_public_${index + 1}`,
+      sourceKind: "platform_formal_question" as const,
+      matchTier: "exact" as const,
+      score: 1,
+    })),
+    ...Array.from({ length: input.enterpriseQuestionCount }, (_, index) => ({
+      questionPublicId: `enterprise_question_public_${index + 1}`,
+      sourceKind: "enterprise_training_snapshot" as const,
+      matchTier: "same_scope" as const,
+      score: 1,
+    })),
+  ];
+  const selectedQuestionCount = selectedQuestions.length;
+
+  return {
+    status: "assembled",
+    sourceDiagnostics: {
+      role: input.role,
+      platformQuestionCount: input.platformQuestionCount,
+      enterpriseQuestionCount: input.enterpriseQuestionCount,
+      enterpriseSourceStatus:
+        input.role === "personal_advanced_student"
+          ? "not_applicable"
+          : "resolved",
+    },
+    assembly: {
+      status: "assembled",
+      container: {
+        title: "redacted paper container",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        requestedQuestionCount: selectedQuestionCount,
+        selectedQuestionCount,
+        sourceComposition: {
+          platformFormalQuestionCount: input.platformQuestionCount,
+          enterpriseTrainingSnapshotCount: input.enterpriseQuestionCount,
+        },
+        matchQuality: "fully_matched",
+        sections: [
+          {
+            sectionKey: "single_choice",
+            title: "redacted section",
+            questionType: "single_choice",
+            targetQuestionCount: selectedQuestionCount,
+            selectedQuestionCount,
+            selectedQuestions,
+            degradationSummary: {
+              exactCount: input.platformQuestionCount,
+              nearbyKnowledgeCount: 0,
+              sameScopeCount: input.enterpriseQuestionCount,
+            },
+          },
+        ],
+      },
+      insufficiency: null,
+    },
+    rejection: null,
+  };
+}
+
+function createRejectedPaperRouteResult(): AiPaperRoutePlanSelectWiringResult {
+  return {
+    status: "rejected",
+    sourceDiagnostics: {
+      role: "org_advanced_employee",
+      platformQuestionCount: 0,
+      enterpriseQuestionCount: 0,
+      enterpriseSourceStatus: "not_resolved",
+    },
+    assembly: null,
+    rejection: {
+      failureCategory: "provider_question_content_forbidden",
+    },
+  };
+}
+
+function createQuestionRow(
+  override: Partial<QuestionAccessRow> = {},
+): QuestionAccessRow {
+  return {
+    id: 101,
+    public_id: "platform_question_public_default",
+    question_type: "single_choice",
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    stem_rich_text: "SENSITIVE_STEM_MARKER",
+    analysis_rich_text: "SENSITIVE_ANALYSIS_MARKER",
+    standard_answer_rich_text: "SENSITIVE_ANSWER_MARKER",
+    status: "available",
+    is_locked: false,
+    locked_at: null,
+    multi_choice_rule: "all_correct_only",
+    scoring_method: "auto_match",
+    fill_blank_answers: [],
+    material_id: null,
+    material_public_id: null,
+    question_options: [
+      {
+        id: 201,
+        question_id: 101,
+        label: "A",
+        content_rich_text: "SENSITIVE_OPTION_MARKER",
+        is_correct: true,
+        sort_order: 1,
+        created_at: new Date("2026-07-06T00:00:00.000Z"),
+        updated_at: new Date("2026-07-06T00:00:00.000Z"),
+      },
+    ],
+    scoring_points: [],
+    knowledge_node_public_ids: ["knowledge_node_public_default"],
+    tag_public_ids: [],
+    created_at: new Date("2026-07-06T00:00:00.000Z"),
+    updated_at: new Date("2026-07-06T00:00:00.000Z"),
+    ...override,
+  };
+}
+
+function createTrainingVersion(
+  override: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  return {
+    publicId: "training_version_public_default",
+    draftPublicId: "training_draft_public_default",
+    versionNumber: 1,
+    organizationPublicId: "organization_public_123",
+    publishScopeSnapshot: {
+      organizationPublicIds: ["organization_public_123"],
+      capturedAt: "2026-07-06T00:00:00.000Z",
+    },
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    title: "SENSITIVE_TRAINING_TITLE",
+    description: "SENSITIVE_TRAINING_DESCRIPTION",
+    questionCount: 1,
+    totalScore: 1,
+    status: "published",
+    publishedAt: "2026-07-06T00:00:00.000Z",
+    takenDownAt: null,
+    takedownReason: null,
+    questions: [createTrainingQuestion("enterprise_question_public_default")],
+    ...override,
+  };
+}
+
+function createTrainingQuestion(publicId: string) {
+  return {
+    publicId,
+    sequenceNumber: 1,
+    questionType: "single_choice",
+    materialTitle: "SENSITIVE_ENTERPRISE_MATERIAL_TITLE",
+    materialContent: "SENSITIVE_ENTERPRISE_MATERIAL_CONTENT",
+    stem: "SENSITIVE_ENTERPRISE_STEM",
+    options: [
+      {
+        publicId: `${publicId}_option_a`,
+        label: "A",
+        content: "SENSITIVE_ENTERPRISE_OPTION",
+      },
+    ],
+    score: 1,
+  } satisfies NonNullable<
+    OrganizationTrainingPublishedVersionDto["questions"]
+  >[number];
+}
+
 describe("personal AI generation request route handlers", () => {
   it("resolves user public id from the local session runtime without exposing session material", async () => {
     const observedAuthorizationValues: Array<string | null | undefined> = [];
@@ -338,6 +548,7 @@ describe("personal AI generation request route handlers", () => {
     expect(resolvedUserContext).toEqual({
       userPublicId: "session_user_public_123",
       userType: "personal",
+      employeePublicId: null,
       organizationPublicId: null,
     });
     expect(observedAuthorizationValues).toEqual([
@@ -391,6 +602,7 @@ describe("personal AI generation request route handlers", () => {
     expect(resolvedUserContext).toEqual({
       userPublicId: "cookie_session_user_public_123",
       userType: "personal",
+      employeePublicId: null,
       organizationPublicId: null,
     });
     expect(observedAuthorizationValues).toEqual([
@@ -429,6 +641,17 @@ describe("personal AI generation request route handlers", () => {
     };
     const resolveUserContext =
       createPersonalAiGenerationRequestUserResolver(sessionService);
+    const resolvedUserContext = await resolveUserContext(
+      new Request("http://localhost/api/v1/personal-ai-generation-requests"),
+    );
+
+    expect(resolvedUserContext).toEqual({
+      userPublicId: "employee_session_user_public_123",
+      userType: "employee",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+
     const { collection } =
       createPersonalAiGenerationRequestRouteHandlers(resolveUserContext);
 
@@ -1487,6 +1710,556 @@ describe("personal AI generation request route handlers", () => {
     expect(serializedPayload).not.toContain("synthetic-test-credential");
     expect(serializedPayload).not.toContain("provider payload");
     expect(serializedPayload).not.toContain("raw prompt");
+  });
+
+  it("hands off assembled AI paper containers for organization advanced employees before result materialization", async () => {
+    const resultRepository = createResultRepository();
+    const paperAssemblyResolverCalls: string[] = [];
+    const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
+      ...sufficientGroundingContext,
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        questionCount: 3,
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        createResultPublicId: () =>
+          "personal_ai_result_public_employee_paper_container_route",
+        paperAssemblyResolver: () => {
+          paperAssemblyResolverCalls.push("called");
+
+          return createAssembledPaperRouteResult();
+        },
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => paperGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: {
+                inputTokens: 18,
+                outputTokens: 9,
+                totalTokens: 27,
+              },
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: createPaperPlanProviderContent(3),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        taskType: "ai_paper_generation",
+        generationParameters: paperGroundingContext.generationParameters,
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(paperAssemblyResolverCalls).toHaveLength(1);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        resultState: {
+          status: "succeeded",
+          resultPublicId:
+            "personal_ai_result_public_employee_paper_container_route",
+        },
+        runtimeBridge: {
+          paperAssembly: {
+            status: "assembled",
+            redactionStatus: "redacted",
+            sourceDiagnostics: {
+              role: "org_advanced_employee",
+              platformQuestionCount: 2,
+              enterpriseQuestionCount: 1,
+              enterpriseSourceStatus: "resolved",
+            },
+            container: {
+              requestedQuestionCount: 3,
+              selectedQuestionCount: 3,
+              sourceComposition: {
+                platformFormalQuestionCount: 2,
+                enterpriseTrainingSnapshotCount: 1,
+              },
+              matchQuality: "fully_matched",
+            },
+            insufficiency: null,
+          },
+          resultMaterializationSummary: {
+            materializationStatus: "created",
+          },
+        },
+      },
+    });
+    expect(resultRepository.createCalls).toHaveLength(1);
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("SENSITIVE_STEM_MARKER");
+    expect(serializedPayload).not.toContain("SENSITIVE_ENTERPRISE_STEM");
+  });
+
+  it("uses repository-backed AI paper assembly for organization advanced employee paper requests", async () => {
+    const resultRepository = createResultRepository();
+    const questionRepositoryCalls: unknown[] = [];
+    const trainingRepositoryCalls: unknown[] = [];
+    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
+      async listQuestions(query) {
+        questionRepositoryCalls.push(query);
+
+        return {
+          rows: [
+            createQuestionRow({
+              public_id: "platform_question_public_employee_a",
+            }),
+            createQuestionRow({
+              public_id: "platform_question_public_employee_b",
+            }),
+          ],
+          total: 2,
+        };
+      },
+    };
+    const organizationTrainingRepository: Pick<
+      OrganizationTrainingRepository,
+      "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+    > = {
+      async listAdminLifecycleVersions() {
+        throw new Error("admin lifecycle repository should not be called");
+      },
+      async listEmployeeVisibleVersions(input) {
+        trainingRepositoryCalls.push(input);
+
+        return [
+          createTrainingVersion({
+            questions: [
+              createTrainingQuestion("enterprise_question_public_employee_a"),
+            ],
+          }),
+        ];
+      },
+    };
+    const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
+      ...sufficientGroundingContext,
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        questionCount: 3,
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        createResultPublicId: () =>
+          "personal_ai_result_public_employee_default_paper_route",
+        questionRepository,
+        organizationTrainingRepository,
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => paperGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: createPaperPlanProviderContent(3),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        taskType: "ai_paper_generation",
+        generationParameters: paperGroundingContext.generationParameters,
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(questionRepositoryCalls).toHaveLength(1);
+    expect(trainingRepositoryCalls).toEqual([
+      {
+        employeePublicId: employeeUserContext.employeePublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+      },
+    ]);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        runtimeBridge: {
+          paperAssembly: {
+            status: "assembled",
+            sourceDiagnostics: {
+              role: "org_advanced_employee",
+              platformQuestionCount: 2,
+              enterpriseQuestionCount: 1,
+              enterpriseSourceStatus: "resolved",
+            },
+            container: {
+              requestedQuestionCount: 3,
+              selectedQuestionCount: 3,
+              sourceComposition: {
+                platformFormalQuestionCount: 2,
+                enterpriseTrainingSnapshotCount: 1,
+              },
+            },
+            insufficiency: null,
+          },
+        },
+      },
+    });
+    expect(resultRepository.createCalls).toHaveLength(1);
+    expect(serializedPayload).not.toContain("SENSITIVE_STEM_MARKER");
+    expect(serializedPayload).not.toContain("SENSITIVE_ENTERPRISE_STEM");
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+  });
+
+  it("uses only platform formal questions for personal advanced student paper assembly", async () => {
+    const resultRepository = createResultRepository();
+    const trainingRepositoryCalls: unknown[] = [];
+    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
+      async listQuestions() {
+        return {
+          rows: [
+            createQuestionRow({
+              public_id: "platform_question_public_personal_a",
+            }),
+            createQuestionRow({
+              public_id: "platform_question_public_personal_b",
+            }),
+            createQuestionRow({
+              public_id: "platform_question_public_personal_c",
+            }),
+          ],
+          total: 3,
+        };
+      },
+    };
+    const organizationTrainingRepository: Pick<
+      OrganizationTrainingRepository,
+      "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+    > = {
+      async listAdminLifecycleVersions(input) {
+        trainingRepositoryCalls.push(input);
+
+        return [];
+      },
+      async listEmployeeVisibleVersions(input) {
+        trainingRepositoryCalls.push(input);
+
+        return [];
+      },
+    };
+    const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
+      ...sufficientGroundingContext,
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        questionCount: 3,
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        createResultPublicId: () =>
+          "personal_ai_result_public_personal_default_paper_route",
+        questionRepository,
+        organizationTrainingRepository,
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => paperGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: createPaperPlanProviderContent(3),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        taskType: "ai_paper_generation",
+        generationParameters: paperGroundingContext.generationParameters,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(trainingRepositoryCalls).toHaveLength(0);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        runtimeBridge: {
+          paperAssembly: {
+            status: "assembled",
+            sourceDiagnostics: {
+              role: "personal_advanced_student",
+              platformQuestionCount: 3,
+              enterpriseQuestionCount: 0,
+              enterpriseSourceStatus: "not_applicable",
+            },
+            container: {
+              requestedQuestionCount: 3,
+              selectedQuestionCount: 3,
+              sourceComposition: {
+                platformFormalQuestionCount: 3,
+                enterpriseTrainingSnapshotCount: 0,
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(resultRepository.createCalls).toHaveLength(1);
+    expect(serializedPayload).not.toContain("SENSITIVE_STEM_MARKER");
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+  });
+
+  it("does not invoke AI paper assembly for personal AI question requests", async () => {
+    const resultRepository = createResultRepository();
+    const paperAssemblyResolverCalls: string[] = [];
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        paperAssemblyResolver: () => {
+          paperAssemblyResolverCalls.push("called");
+
+          return createAssembledPaperRouteResult();
+        },
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: JSON.stringify({
+                  questions: Array.from({ length: 10 }, (_, index) => ({
+                    stem: `redacted stem ${index + 1}`,
+                    options: ["A", "B", "C", "D"],
+                    answer: "A",
+                  })),
+                }),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        resultState: {
+          status: "succeeded",
+        },
+        runtimeBridge: {
+          paperAssembly: null,
+          resultMaterializationSummary: {
+            materializationStatus: "created",
+          },
+        },
+      },
+    });
+    expect(paperAssemblyResolverCalls).toHaveLength(0);
+    expect(resultRepository.createCalls).toHaveLength(1);
+  });
+
+  it("blocks personal paper result materialization when local paper assembly rejects the provider plan", async () => {
+    const resultRepository = createResultRepository();
+    const paperAssemblyResolverCalls: string[] = [];
+    const paperGroundingContext: AiGenerationRouteIntegratedGroundingContext = {
+      ...sufficientGroundingContext,
+      generationParameters: {
+        ...sufficientGroundingContext.generationParameters,
+        questionCount: 3,
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository: createRequestRepository(),
+        resultRepository,
+        paperAssemblyResolver: () => {
+          paperAssemblyResolverCalls.push("called");
+
+          return createRejectedPaperRouteResult();
+        },
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => paperGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async () => ({
+              requestCount: 1,
+              resultStatus: "pass",
+              failureCategory: null,
+              durationMs: 42,
+              usageSummary: null,
+              providerErrorSummary: null,
+              visibleGeneratedContent: {
+                content: createPaperPlanProviderContent(3),
+                contentVisibility: "transient_response_only",
+                persistenceStatus: "not_persisted",
+                safetyStatus: "checked",
+              },
+            }),
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        taskType: "ai_paper_generation",
+        generationParameters: paperGroundingContext.generationParameters,
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        resultState: {
+          status: "failed",
+          resultPublicId: null,
+        },
+        runtimeBridge: {
+          providerCallExecuted: true,
+          paperAssembly: null,
+          resultMaterializationSummary: {
+            materializationStatus: "not_requested",
+          },
+        },
+      },
+    });
+    expect(paperAssemblyResolverCalls).toHaveLength(1);
+    expect(resultRepository.createCalls).toHaveLength(0);
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+    expect(serializedPayload).not.toContain("provider payload");
   });
 
   it("marks malformed personal Provider output failed without materializing a draft result", async () => {

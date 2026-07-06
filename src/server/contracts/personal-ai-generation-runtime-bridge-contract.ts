@@ -4,6 +4,11 @@ import type {
   RedactedJsonObject,
 } from "../models/ai-rag";
 import type {
+  AiPaperAssemblyRole,
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperPlanAndSelectInsufficiencyDto,
+} from "./ai-paper-plan-and-select-contract";
+import type {
   PersonalAiGenerationRuntimeBridgeBlockedReason,
   PersonalAiGenerationRuntimeBridgeMode,
   PersonalAiGenerationRuntimeBridgeRunnerMode,
@@ -51,6 +56,22 @@ export type PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto = {
 export type PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto =
   AiGenerationRouteIntegratedVisibleGeneratedContent | null;
 
+export type PersonalAiGenerationRuntimeBridgePaperAssemblyDto = {
+  status: "assembled" | "insufficient";
+  sourceDiagnostics: {
+    role: Extract<
+      AiPaperAssemblyRole,
+      "personal_advanced_student" | "org_advanced_employee"
+    >;
+    platformQuestionCount: number;
+    enterpriseQuestionCount: number;
+    enterpriseSourceStatus: "not_applicable" | "resolved" | "not_resolved";
+  };
+  container: AiPaperPlanAndSelectContainerDto;
+  insufficiency: AiPaperPlanAndSelectInsufficiencyDto | null;
+  redactionStatus: "redacted";
+} | null;
+
 export type PersonalAiGenerationRuntimeBridgeDto = {
   bridgeStatus: PersonalAiGenerationRuntimeBridgeStatus;
   bridgeMode: PersonalAiGenerationRuntimeBridgeMode;
@@ -82,5 +103,6 @@ export type PersonalAiGenerationRuntimeBridgeDto = {
   providerExecutionSummary: PersonalAiGenerationRuntimeBridgeProviderExecutionSummaryDto;
   resultMaterializationSummary: PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto;
   visibleGeneratedContent: PersonalAiGenerationRuntimeBridgeVisibleGeneratedContentDto;
+  paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto;
   blockedReasons: PersonalAiGenerationRuntimeBridgeBlockedReason[];
 };

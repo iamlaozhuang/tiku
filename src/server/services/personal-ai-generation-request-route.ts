@@ -15,6 +15,8 @@ import type {
   PersonalAiGenerationRequestRepository,
 } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
+import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
+import type { QuestionRepository } from "../repositories/question-repository";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
@@ -23,14 +25,19 @@ import {
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
 import { buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute } from "./personal-ai-generation-local-browser-experience-service";
-import type { PersonalAiGenerationRuntimeBridgeControl } from "./personal-ai-generation-runtime-bridge-service";
+import type {
+  PersonalAiGenerationPaperAssemblyResolver,
+  PersonalAiGenerationRuntimeBridgeControl,
+} from "./personal-ai-generation-runtime-bridge-service";
 import { isRouteIntegratedVisibleGeneratedContentAcceptableForDraft } from "./route-integrated-provider-execution-service";
 import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import type { SessionService } from "./session-service";
+import { resolveAndAssembleAiPaperFromRoute } from "./ai-paper-route-plan-select-wiring-service";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
   userType: "personal" | "employee";
+  employeePublicId: string | null;
   organizationPublicId: string | null;
 };
 
@@ -63,6 +70,12 @@ export type PersonalAiGenerationRequestRouteDependencies = {
   resultRepository?: Pick<
     PersonalAiGenerationResultRepository,
     "createOrReuseDraftResult"
+  >;
+  paperAssemblyResolver?: PersonalAiGenerationPaperAssemblyResolver;
+  questionRepository?: Pick<QuestionRepository, "listQuestions">;
+  organizationTrainingRepository?: Pick<
+    OrganizationTrainingRepository,
+    "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
   >;
   createResultPublicId?: (
     input: PersonalAiGenerationResultPublicIdInput,
@@ -643,6 +656,7 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
   createResultPublicId: (
     publicIdInput: PersonalAiGenerationResultPublicIdInput,
   ) => string;
+  paperAssemblyResolver: PersonalAiGenerationPaperAssemblyResolver | undefined;
   resultRepository:
     | Pick<PersonalAiGenerationResultRepository, "createOrReuseDraftResult">
     | undefined;
@@ -659,6 +673,7 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
 
   return {
     ...input.runtimeBridgeControl,
+    paperAssemblyResolver: input.paperAssemblyResolver,
     createResultMaterialization: ({ executionOutcome, requestFlow }) => {
       const visibleGeneratedContent = executionOutcome.visibleGeneratedContent;
 
@@ -718,6 +733,55 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
       };
     },
   };
+}
+
+function createPersonalAiGenerationPaperAssemblyResolver(
+  dependencies: PersonalAiGenerationRequestRouteDependencies,
+  userContext: PersonalAiGenerationRequestUserContext,
+): PersonalAiGenerationPaperAssemblyResolver | undefined {
+  if (dependencies.paperAssemblyResolver !== undefined) {
+    return dependencies.paperAssemblyResolver;
+  }
+
+  if (dependencies.questionRepository === undefined) {
+    return undefined;
+  }
+
+  const questionRepository = dependencies.questionRepository;
+  const organizationTrainingRepository =
+    dependencies.organizationTrainingRepository;
+
+  return ({ generationParameters, requestFlow, visibleGeneratedContent }) =>
+    resolveAndAssembleAiPaperFromRoute({
+      role: resolvePersonalAiGenerationPaperAssemblyRole(requestFlow),
+      organizationPublicId: requestFlow.taskRequest.organizationPublicId,
+      employeePublicId:
+        resolvePersonalAiGenerationPaperAssemblyEmployeePublicId(
+          requestFlow,
+          userContext,
+        ),
+      generationParameters,
+      visibleGeneratedContent,
+      questionRepository,
+      organizationTrainingRepository,
+    });
+}
+
+function resolvePersonalAiGenerationPaperAssemblyRole(
+  requestFlow: Parameters<PersonalAiGenerationPaperAssemblyResolver>[0]["requestFlow"],
+): "personal_advanced_student" | "org_advanced_employee" {
+  return requestFlow.taskRequest.ownerType === "organization"
+    ? "org_advanced_employee"
+    : "personal_advanced_student";
+}
+
+function resolvePersonalAiGenerationPaperAssemblyEmployeePublicId(
+  requestFlow: Parameters<PersonalAiGenerationPaperAssemblyResolver>[0]["requestFlow"],
+  userContext: PersonalAiGenerationRequestUserContext,
+): string | null {
+  return requestFlow.taskRequest.ownerType === "organization"
+    ? userContext.employeePublicId
+    : null;
 }
 
 async function createRequestInputWithPersistentRequestMetadata(
@@ -780,12 +844,14 @@ export function createPersonalAiGenerationRequestUserResolver(
       return {
         userPublicId: sessionResponse.data.user.publicId,
         userType: "personal",
+        employeePublicId: null,
         organizationPublicId: null,
       };
     }
 
     if (
       sessionResponse.data.user.userType !== "employee" ||
+      sessionResponse.data.user.employeePublicId === null ||
       sessionResponse.data.user.organizationPublicId === null
     ) {
       return null;
@@ -794,6 +860,7 @@ export function createPersonalAiGenerationRequestUserResolver(
     return {
       userPublicId: sessionResponse.data.user.publicId,
       userType: "employee",
+      employeePublicId: sessionResponse.data.user.employeePublicId,
       organizationPublicId: sessionResponse.data.user.organizationPublicId,
     };
   };
@@ -805,13 +872,6 @@ export function createPersonalAiGenerationRequestRouteHandlers(
 ) {
   const requestRepository =
     dependencies.requestRepository ?? emptyRequestRepository;
-  const runtimeBridgeControl =
-    createRuntimeBridgeControlWithResultMaterialization({
-      createResultPublicId:
-        dependencies.createResultPublicId ?? createDefaultResultPublicId,
-      resultRepository: dependencies.resultRepository,
-      runtimeBridgeControl: dependencies.runtimeBridgeControl,
-    });
   const effectiveAuthorizationService =
     dependencies.effectiveAuthorizationService;
   const now = dependencies.now ?? (() => new Date());
@@ -941,6 +1001,20 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                 ),
               );
             }
+
+            const runtimeBridgeControl =
+              createRuntimeBridgeControlWithResultMaterialization({
+                createResultPublicId:
+                  dependencies.createResultPublicId ??
+                  createDefaultResultPublicId,
+                paperAssemblyResolver:
+                  createPersonalAiGenerationPaperAssemblyResolver(
+                    dependencies,
+                    userContext,
+                  ),
+                resultRepository: dependencies.resultRepository,
+                runtimeBridgeControl: dependencies.runtimeBridgeControl,
+              });
 
             return createJsonResponse(
               await buildPersonalAiGenerationLocalBrowserExperienceReadModelForRoute(
