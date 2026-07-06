@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-tasks-slimming-batch-3-2026-07-06
-  updatedAt: "2026-07-06T13:21:00Z"
+  updatedByTask: active-tasks-slimming-batch-4-2026-07-06
+  updatedAt: "2026-07-06T14:28:00Z"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -17416,3 +17416,228 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: 2026-07-03T22:35:00-07:00
+  - id: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    phase: stage-b-test-owned-fixture-provisioning-repair-2026-07-03
+    status: closed
+    taskKind: local_test_owned_fixture_provisioning_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-test-owned-fixture-provisioning-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T23:20:00-07:00
+  - id: stage-b-0-3-redacted-fixture-preflight-2026-07-03
+    phase: stage-b-0-3-redacted-fixture-preflight-2026-07-03
+    status: closed
+    taskKind: local_db_read_only_fixture_preflight
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-3-redacted-fixture-preflight.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T22:25:00-07:00
+  - id: stage-b-0-2-local-db-baseline-decision-2026-07-03
+    phase: stage-b-0-2-local-db-baseline-decision-2026-07-03
+    status: closed
+    taskKind: docs_state_decision_package
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-2-local-db-baseline-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T21:45:00-07:00
+  - id: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+    phase: stage-b-0-read-only-aggregate-local-db-inventory-2026-07-03
+    status: closed
+    taskKind: local_db_read_only_aggregate_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-read-only-aggregate-local-db-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T21:25:00-07:00
+  - id: stage-b-0-local-data-baseline-cleanup-decision-package-2026-07-03
+    phase: stage-b-0-local-data-baseline-cleanup-decision-package-2026-07-03
+    status: closed
+    taskKind: cleanup_decision_package
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-0-local-data-baseline-cleanup-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-0-local-data-baseline-cleanup-decision-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T19:15:00-07:00
+  - id: stage-b-db-provider-staging-cost-approval-package-2026-07-03
+    phase: stage-b-db-provider-staging-cost-approval-package-2026-07-03
+    status: closed
+    taskKind: approval_package
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-stage-b-db-provider-staging-cost-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T18:55:00-07:00
+  - id: source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    phase: source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair-2026-07-03
+    status: closed
+    taskKind: local_acceptance_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-after-content-harness-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: repair-content-admin-cookie-backed-acceptance-harness-2026-07-03
+    phase: repair-content-admin-cookie-backed-acceptance-harness-2026-07-03
+    status: closed
+    taskKind: acceptance_harness_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-content-admin-cookie-backed-acceptance-harness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-content-admin-cookie-backed-acceptance-harness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-8-role-credential-backed-local-acceptance-rerun-2026-07-03
+    phase: source-landing-8-role-credential-backed-local-acceptance-rerun-2026-07-03
+    status: closed
+    taskKind: local_acceptance_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-8-role-credential-backed-local-acceptance-rerun-preflight-2026-07-03
+    phase: source-landing-8-role-credential-backed-local-acceptance-rerun-preflight-2026-07-03
+    status: closed
+    taskKind: local_acceptance_preflight
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-preflight.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-local-acceptance-rerun-preflight.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: repair-8-role-credential-backed-acceptance-harness-2026-07-03
+    phase: repair-8-role-credential-backed-acceptance-harness-2026-07-03
+    status: closed
+    taskKind: acceptance_harness_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-repair-8-role-credential-backed-acceptance-harness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+    phase: source-landing-8-role-local-account-data-fixture-hardening-2026-07-03
+    status: closed
+    taskKind: local_fixture_readiness
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-account-data-fixture-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
+    phase: source-landing-8-role-credential-backed-fixture-hardening-plan-2026-07-03
+    status: closed
+    taskKind: docs_acceptance_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-credential-backed-fixture-hardening-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-8-role-acceptance-coverage-review-2026-07-03
+    phase: source-landing-8-role-acceptance-coverage-review-2026-07-03
+    status: closed
+    taskKind: docs_acceptance_review
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-acceptance-coverage-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-8-role-local-acceptance-rerun-2026-07-03
+    phase: source-landing-8-role-local-acceptance-rerun-2026-07-03
+    status: closed
+    taskKind: local_acceptance_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-8-role-local-acceptance-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-8-role-local-acceptance-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: source-landing-16-package-acceptance-prep-2026-07-03
+    phase: source-landing-16-package-acceptance-prep-2026-07-03
+    status: closed
+    taskKind: docs_acceptance_preparation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-acceptance-prep.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-acceptance-prep.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T11:26:49-07:00
+  - id: source-landing-evidence-closeout-correction-2026-07-03
+    phase: source-landing-evidence-closeout-correction-2026-07-03
+    status: closed
+    taskKind: docs_governance_correction
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-evidence-closeout-correction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-evidence-closeout-correction.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T10:16:38-07:00
+  - id: content-ai-draft-adoption-source-landing-2026-07-03
+    phase: content-ai-draft-adoption-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_service_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-content-ai-draft-adoption-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-content-ai-draft-adoption-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T09:51:45-07:00
+  - id: employee-training-answer-result-source-landing-2026-07-03
+    phase: employee-training-answer-result-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-employee-training-answer-result-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-employee-training-answer-result-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T09:26:35-07:00
+  - id: learner-ai-context-source-landing-2026-07-03
+    phase: learner-ai-context-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-learner-ai-context-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-learner-ai-context-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T09:06:26-07:00
+  - id: learner-core-experience-source-landing-2026-07-03
+    phase: learner-core-experience-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_service_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-learner-core-experience-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-learner-core-experience-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T08:46:49-07:00
+  - id: employee-transfer-session-source-landing-2026-07-03
+    phase: employee-transfer-session-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-employee-transfer-session-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-employee-transfer-session-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T08:06:32-07:00
+  - id: employee-import-password-source-landing-2026-07-03
+    phase: employee-import-password-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_service_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-employee-import-password-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-employee-import-password-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T07:42:28-07:00
+  - id: org-auth-overlap-closure-source-landing-2026-07-03
+    phase: org-auth-overlap-closure-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-org-auth-overlap-closure-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-org-auth-overlap-closure-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T07:21:52-07:00
+  - id: organization-tree-ops-workbench-source-landing-2026-07-03
+    phase: organization-tree-ops-workbench-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-tree-ops-workbench-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-tree-ops-workbench-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T06:59:45-07:00
