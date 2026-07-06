@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-tasks-slimming-batch-8-2026-07-06
-  updatedAt: "2026-07-06T15:56:00Z"
+  updatedByTask: active-tasks-slimming-batch-9-2026-07-06
+  updatedAt: "2026-07-06T15:03:00Z"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -18541,3 +18541,129 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: null
+  - id: full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
+    phase: full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-content-baseline-rerun-after-admin-flow-cookie-session-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T13:45:00-07:00
+  - id: full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
+    phase: full-chain-scenario-3-organization-tree-input-provisioning-2026-07-04
+    status: closed
+    taskKind: local_private_input_provisioning
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-input-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:00:00-07:00
+  - id: full-chain-scenario-3-organization-tree-2026-07-04
+    phase: full-chain-scenario-3-organization-tree-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_db_aggregate
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:18:00-07:00
+  - id: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+    phase: full-chain-scenario-3-organization-empty-state-create-flow-repair-2026-07-04
+    status: closed
+    taskKind: local_source_test_doc_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-empty-state-create-flow-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:31:00-07:00
+  - id: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+    phase: full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_db_aggregate_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-organization-tree-rerun-after-empty-state-create-flow-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:38:00-07:00
+  - id: full-chain-scenario-3-rerun-closeout-evidence-repair-2026-07-04
+    phase: full-chain-scenario-3-rerun-closeout-evidence-repair-2026-07-04
+    status: closed
+    taskKind: local_closeout_evidence_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-3-rerun-closeout-evidence-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-3-rerun-closeout-evidence-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:48:00-07:00
+  - id: full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+    phase: full-chain-scenario-4-standard-employee-input-provisioning-2026-07-04
+    status: closed
+    taskKind: local_private_fixture_provisioning
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-employee-input-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:59:00-07:00
+  - id: full-chain-scenario-4-standard-org-package-rerun-after-employee-input-provisioning-2026-07-04
+    phase: full-chain-scenario-4-standard-org-package-rerun-after-employee-input-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_pre_mutation_source_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-employee-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-employee-input-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T15:10:00-07:00
+  - id: full-chain-scenario-4-org-admin-create-bind-flow-repair-2026-07-04
+    phase: full-chain-scenario-4-org-admin-create-bind-flow-repair-2026-07-04
+    status: closed
+    taskKind: minimal_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-org-admin-create-bind-flow-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-org-admin-create-bind-flow-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T15:25:35-07:00
+  - id: full-chain-scenario-4-standard-org-package-rerun-after-org-admin-create-bind-flow-repair-2026-07-04
+    phase: full-chain-scenario-4-standard-org-package-rerun-after-org-admin-create-bind-flow-repair-2026-07-04
+    status: closed
+    taskKind: local_acceptance_pre_runtime_private_input_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-create-bind-flow-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package-rerun-after-org-admin-create-bind-flow-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T15:40:00-07:00
+  - id: full-chain-scenario-4-org-admin-input-provisioning-2026-07-04
+    phase: full-chain-scenario-4-org-admin-input-provisioning-2026-07-04
+    status: closed
+    taskKind: local_private_account_input_provisioning
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-org-admin-input-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-org-admin-input-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T15:49:00-07:00
+  - id: full-chain-scenario-4-standard-org-package-2026-07-04
+    phase: full-chain-scenario-4-standard-org-package-2026-07-04
+    status: closed
+    taskKind: local_acceptance_pre_mutation_private_input_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-4-standard-org-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-4-standard-org-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T14:54:00-07:00
+  - id: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+    phase: full-chain-scenario-2-paper-auth-block-closeout-sha-repair-2026-07-04
+    status: closed
+    taskKind: local_closeout_sha_checkpoint_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-2-paper-auth-block-closeout-sha-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
+    phase: full-chain-scenario-9-advanced-personal-pre-provider-2026-07-04
+    status: closed
+    taskKind: local_acceptance_pre_runtime_source_contract_block
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-9-advanced-personal-pre-provider.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-9-advanced-personal-pre-provider.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-04T20:39:00-07:00
