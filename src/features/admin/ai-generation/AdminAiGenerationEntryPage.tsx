@@ -14,10 +14,14 @@ import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-w
 import type {
   AdminAiGenerationTaskHistoryGeneratedResultDto,
   AdminAiGenerationLocalContractDto,
+  AdminAiGenerationRejectedErrorDto,
   AdminAiGenerationTaskHistoryDto,
   AdminAiGenerationTaskHistoryItemDto,
 } from "@/server/contracts/admin-ai-generation-local-contract";
-import type { ApiPagination } from "@/server/contracts/api-response";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
   OrganizationTrainingDraftDto,
@@ -80,6 +84,19 @@ const ADMIN_AI_GENERATION_DIAGNOSTIC_CONTENT_PATTERNS = [
   /本地合约/u,
   /已脱敏/u,
 ];
+const ADMIN_AI_GENERATION_REJECTION_MESSAGE_BY_REASON: Record<
+  AdminAiGenerationRejectedErrorDto["rejectionReason"],
+  string
+> = {
+  generated_output_unacceptable: "生成结果未形成可评审草稿，未创建草稿。",
+  grounding_evidence_insufficient:
+    "资料依据不足，未执行模型服务，也未创建草稿。",
+  provider_credential_unavailable:
+    "Provider 未配置或不可用，未执行模型服务，也未创建草稿。",
+  provider_execution_failed: "Provider 执行未成功，未创建草稿。",
+  provider_execution_unavailable:
+    "Provider 未启用或不可用，未执行模型服务，也未创建草稿。",
+};
 type ContentAdminReviewDecision = "approved" | "rejected";
 type ContentAdminReviewActionState =
   | "idle"
@@ -136,6 +153,40 @@ function resolveAdminAiGenerationBusinessPreview(
   )
     ? ADMIN_AI_GENERATION_BUSINESS_RESULT_PREVIEW
     : normalizedPreviewText;
+}
+
+function isAdminAiGenerationRejectedErrorData(
+  value: unknown,
+): value is AdminAiGenerationRejectedErrorDto {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const maybeRejectedError =
+    value as Partial<AdminAiGenerationRejectedErrorDto>;
+
+  return (
+    maybeRejectedError.redactionStatus === "redacted" &&
+    typeof maybeRejectedError.rejectionReason === "string" &&
+    maybeRejectedError.rejectionReason in
+      ADMIN_AI_GENERATION_REJECTION_MESSAGE_BY_REASON
+  );
+}
+
+function formatAdminAiGenerationRequestError(
+  payload: Pick<ApiResponse<unknown>, "code" | "data" | "message">,
+): string {
+  const baseMessage = formatAdminApiBusinessError(payload, "生成请求暂不可用");
+
+  if (!isAdminAiGenerationRejectedErrorData(payload.data)) {
+    return baseMessage;
+  }
+
+  return `${baseMessage}。${
+    ADMIN_AI_GENERATION_REJECTION_MESSAGE_BY_REASON[
+      payload.data.rejectionReason
+    ]
+  }`;
 }
 
 function getOrganizationAiGenerationPath(
@@ -2079,7 +2130,7 @@ export function AdminAiGenerationEntryPage({
 
       if (requestResponse.code !== 0 || requestResponse.data === null) {
         setRequestErrorMessage(
-          formatAdminApiBusinessError(requestResponse, "生成请求暂不可用"),
+          formatAdminAiGenerationRequestError(requestResponse),
         );
         setRequestState("error");
         return;

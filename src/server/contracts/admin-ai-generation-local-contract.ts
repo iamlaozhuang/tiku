@@ -83,6 +83,23 @@ export type AdminAiGenerationLocalContractRuntimeBridgeDto = {
   blockedReasons: string[];
 };
 
+export type AdminAiGenerationRejectedReason =
+  | "provider_execution_unavailable"
+  | "provider_credential_unavailable"
+  | "grounding_evidence_insufficient"
+  | "provider_execution_failed"
+  | "generated_output_unacceptable";
+
+export type AdminAiGenerationRejectedErrorDto = {
+  rejectionReason: AdminAiGenerationRejectedReason;
+  runtimeBridgeStatus: AdminAiGenerationRuntimeBridgeStatusDto;
+  providerCallExecuted: boolean;
+  envSecretAccessed: boolean;
+  providerConfigurationRead: boolean;
+  costCalibrationExecuted: false;
+  redactionStatus: "redacted";
+};
+
 export type AdminAiGenerationLocalContractFormalContentBoundaryDto = {
   questionWriteStatus: "blocked_without_follow_up_task";
   paperWriteStatus: "blocked_without_follow_up_task";

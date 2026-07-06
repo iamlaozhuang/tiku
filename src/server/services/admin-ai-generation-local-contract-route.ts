@@ -19,6 +19,8 @@ import type {
   AdminAiGenerationLocalContractOrganizationOwnedDraftBoundaryDto,
   AdminAiGenerationLocalContractRuntimeBridgeDto,
   AdminAiGenerationLocalContractTaskPersistenceDto,
+  AdminAiGenerationRejectedErrorDto,
+  AdminAiGenerationRejectedReason,
   AdminAiGenerationTaskHistoryDto,
   AdminAiGenerationTaskHistoryGeneratedResultDto,
   AdminAiGenerationTaskHistoryItemDto,
@@ -140,10 +142,11 @@ const invalidAdminAiGenerationRequestResponse = createErrorResponse(
   ADMIN_AI_GENERATION_INVALID_INPUT_CODE,
   "Invalid admin AI generation request input.",
 );
-const unacceptableAdminAiGenerationResultResponse = createErrorResponse(
-  ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE,
-  "Admin AI generation requires sufficient grounded structured output.",
-);
+
+type AdminAiGenerationLocalContractRouteResponseData =
+  | AdminAiGenerationLocalContractDto
+  | AdminAiGenerationRejectedErrorDto
+  | null;
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -577,6 +580,53 @@ function ensureProviderDisabledExecutionSummary(
   return isProviderDisabled ? executionSummary : defaultSummary;
 }
 
+function resolveAdminAiGenerationRejectedReason(
+  runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto,
+): AdminAiGenerationRejectedReason {
+  const failureCategory = runtimeBridge.executionSummary.failureCategory;
+
+  if (failureCategory === "provider_call_blocked") {
+    return "provider_execution_unavailable";
+  }
+
+  if (failureCategory === "missing_provider_credential") {
+    return "provider_credential_unavailable";
+  }
+
+  if (failureCategory === "insufficient_grounding_evidence") {
+    return "grounding_evidence_insufficient";
+  }
+
+  if (
+    failureCategory === "provider_error" ||
+    failureCategory === "timeout" ||
+    failureCategory === "redaction_violation"
+  ) {
+    return "provider_execution_failed";
+  }
+
+  return "generated_output_unacceptable";
+}
+
+function createUnacceptableAdminAiGenerationResultResponse(
+  runtimeBridge: AdminAiGenerationLocalContractRuntimeBridgeDto,
+): ApiResponse<AdminAiGenerationRejectedErrorDto> {
+  return {
+    code: ADMIN_AI_GENERATION_UNACCEPTABLE_RESULT_CODE,
+    message:
+      "Admin AI generation requires sufficient grounded structured output.",
+    data: {
+      rejectionReason: resolveAdminAiGenerationRejectedReason(runtimeBridge),
+      runtimeBridgeStatus: runtimeBridge.bridgeStatus,
+      providerCallExecuted: runtimeBridge.providerCallExecuted,
+      envSecretAccessed: runtimeBridge.envSecretAccessed,
+      providerConfigurationRead: runtimeBridge.providerConfigurationRead,
+      costCalibrationExecuted: runtimeBridge.costCalibrationExecuted,
+      redactionStatus: "redacted",
+    },
+  };
+}
+
 async function resolveAdminAiGenerationRuntimeBridge(input: {
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   runtimeBridgeInput: AdminAiGenerationRuntimeBridgeInput;
@@ -690,7 +740,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   taskPersistenceRepository: AdminAiGenerationTaskPersistenceRepository;
   resultPersistenceRepository: AdminAiGenerationResultPersistenceRepository;
   workspace: AdminAiGenerationWorkspace;
-}): Promise<ApiResponse<AdminAiGenerationLocalContractDto | null>> {
+}): Promise<ApiResponse<AdminAiGenerationLocalContractRouteResponseData>> {
   const requestedAt = input.requestClock();
   const requestPublicId = input.createRequestPublicId({
     actorPublicId: input.actor.publicId,
@@ -744,7 +794,7 @@ async function buildAdminAiGenerationLocalContract(input: {
       expectedStructuredPreviewKind,
     )
   ) {
-    return unacceptableAdminAiGenerationResultResponse;
+    return createUnacceptableAdminAiGenerationResultResponse(runtimeBridge);
   }
 
   const localContract = {

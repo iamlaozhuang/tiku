@@ -872,7 +872,15 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(payload).toMatchObject({
       code: 409015,
-      data: null,
+      data: {
+        rejectionReason: "provider_execution_unavailable",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        providerConfigurationRead: false,
+        envSecretAccessed: false,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+      },
     });
     expect(taskPersistenceRecorder.calls).toHaveLength(0);
     expect(generatedResultPersistenceRecorder.calls).toHaveLength(0);
@@ -1155,7 +1163,15 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(payload).toMatchObject({
       code: 409015,
-      data: null,
+      data: {
+        rejectionReason: "provider_execution_unavailable",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        providerConfigurationRead: false,
+        envSecretAccessed: false,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+      },
     });
     expect(runtimeBridgeInputs).toEqual([
       {
@@ -1204,8 +1220,68 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(payload).toMatchObject({
       code: 409015,
-      data: null,
+      data: {
+        rejectionReason: "provider_execution_unavailable",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        providerConfigurationRead: false,
+        envSecretAccessed: false,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+      },
     });
+  });
+
+  it("returns a redacted missing Provider credential category without persistence", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const resultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      body: {
+        generationKind: "question",
+        clientOnlyFixtureP: "OMITTED_FIXTURE_P",
+      },
+      runtimeBridgeControl: {
+        bridgeMode: "controlled_runner",
+        explicitLocalSwitchPresent: true,
+        providerExecution: {
+          executionMode: "route_integrated_provider",
+          realProviderExecutionApproved: true,
+          maxRequests: 1,
+          maxRetries: 0,
+          maxOutputTokens: 220,
+          timeoutMs: 30000,
+          readProviderCredential: () => null,
+          resolveGroundingContext: () => sufficientAdminGroundingContext,
+        },
+      },
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository: resultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 409015,
+      data: {
+        rejectionReason: "provider_credential_unavailable",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        providerConfigurationRead: true,
+        envSecretAccessed: true,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+      },
+    });
+    expect(taskPersistenceRecorder.calls).toHaveLength(0);
+    expect(resultPersistenceRecorder.calls).toHaveLength(0);
+    expect(serializedPayload).not.toContain("OMITTED_FIXTURE_P");
+    expect(serializedPayload).not.toContain("rawPrompt");
+    expect(serializedPayload).not.toContain("rawOutput");
+    expect(serializedPayload).not.toContain("providerPayload");
+    expect(serializedPayload).not.toMatch(/"id":/);
   });
 
   it.each<{
@@ -1391,7 +1467,15 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(payload).toMatchObject({
       code: 409015,
-      data: null,
+      data: {
+        rejectionReason: "grounding_evidence_insufficient",
+        runtimeBridgeStatus: "provider_call_blocked",
+        providerCallExecuted: false,
+        providerConfigurationRead: false,
+        envSecretAccessed: false,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+      },
     });
     expect(providerInputs).toHaveLength(0);
     expect(taskPersistenceRecorder.calls).toHaveLength(0);
@@ -1431,7 +1515,15 @@ describe("admin AI generation local contract route handlers", () => {
 
     expect(payload).toMatchObject({
       code: 409015,
-      data: null,
+      data: {
+        rejectionReason: "generated_output_unacceptable",
+        runtimeBridgeStatus: "provider_call_succeeded",
+        providerCallExecuted: true,
+        providerConfigurationRead: true,
+        envSecretAccessed: true,
+        costCalibrationExecuted: false,
+        redactionStatus: "redacted",
+      },
     });
     expect(providerInputs).toHaveLength(1);
     expect(taskPersistenceRecorder.calls).toHaveLength(0);

@@ -195,7 +195,10 @@ function createGeneratedContractResponse(input?: { visibleContent?: string }) {
   };
 }
 
-function mockAdminAiGenerationFetch(options?: { visibleContent?: string }) {
+function mockAdminAiGenerationFetch(options?: {
+  requestResponse?: unknown;
+  visibleContent?: string;
+}) {
   const fetchMock = vi.fn(
     async (requestInput: RequestInfo | URL, init?: RequestInit) => {
       const url =
@@ -217,7 +220,9 @@ function mockAdminAiGenerationFetch(options?: { visibleContent?: string }) {
         url === "/api/v1/content-ai-generation-requests" &&
         init?.method === "POST"
       ) {
-        return createJsonResponse(createGeneratedContractResponse(options));
+        return createJsonResponse(
+          options?.requestResponse ?? createGeneratedContractResponse(options),
+        );
       }
 
       return createJsonResponse({
@@ -311,6 +316,49 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(
       screen.queryByText("admin_ai_generation_result_public_ui_hidden"),
     ).not.toBeInTheDocument();
+  });
+
+  it("maps redacted admin AI generation rejection reasons to clear business wording", async () => {
+    mockAdminAiGenerationFetch({
+      requestResponse: {
+        code: 409015,
+        message:
+          "Admin AI generation requires sufficient grounded structured output.",
+        data: {
+          rejectionReason: "provider_credential_unavailable",
+          runtimeBridgeStatus: "provider_call_blocked",
+          providerCallExecuted: false,
+          providerConfigurationRead: true,
+          envSecretAccessed: true,
+          costCalibrationExecuted: false,
+          redactionStatus: "redacted",
+        },
+      },
+    });
+
+    render(
+      <AdminAiGenerationEntryPage
+        generationKind="question"
+        workspace="content"
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "AI出题" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-ai-generation-local-contract-error"),
+      ).toHaveTextContent("Provider 未配置或不可用");
+    });
+    expect(
+      screen.getByTestId("admin-ai-generation-local-contract-error"),
+    ).toHaveTextContent("未创建草稿");
+    expect(
+      screen.queryByText("missing_provider_credential"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("providerPayload")).not.toBeInTheDocument();
+    expect(screen.queryByText("rawPrompt")).not.toBeInTheDocument();
+    expect(screen.queryByText("rawOutput")).not.toBeInTheDocument();
   });
 
   it("uses business wording for AI paper controls instead of schema identifiers", async () => {
