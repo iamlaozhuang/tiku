@@ -12,6 +12,7 @@ import type {
   AdminAiGenerationKind,
   AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract";
+import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
 
 export type CreateAdminAiGenerationResultInput =
   AdminAiGenerationResultPersistenceInput;
@@ -104,6 +105,7 @@ export type AdminAiGenerationResultDto = {
     contentDigest: string;
     contentPreviewMasked: string;
     contentVisibility: AdminAiGenerationResultContentVisibility;
+    reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
     redactionStatus: AdminAiGenerationResultRedactionStatus;
   };
   evidenceReference: {

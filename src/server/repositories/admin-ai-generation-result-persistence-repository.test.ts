@@ -207,6 +207,72 @@ describe("admin AI generation result persistence repository", () => {
     );
   });
 
+  it("surfaces a content-admin reviewed draft snapshot for historical formal adoption", async () => {
+    const { gateway } = createGateway({
+      rows: [
+        createResultRow({
+          workspace: "content",
+          generation_kind: "question",
+          owner_type: "platform",
+          owner_public_id: "platform_content_review_pool",
+          organization_public_id: null,
+          task_type: "ai_question_generation",
+          content_redacted_snapshot: {
+            redactionStatus: "redacted",
+            formalReviewedDraft: {
+              questionType: "single_choice",
+              profession: "marketing",
+              level: 3,
+              subject: "theory",
+              stemRichText: "历史草稿题干",
+              analysisRichText: "历史草稿解析",
+              standardAnswerRichText: "A",
+              multiChoiceRule: "all_correct_only",
+              scoringMethod: "auto_match",
+              materialPublicId: null,
+              questionOptions: [
+                {
+                  label: "A",
+                  contentRichText: "历史选项 A",
+                  isCorrect: true,
+                  sortOrder: 1,
+                },
+              ],
+              scoringPoints: [],
+              fillBlankAnswers: [],
+              knowledgeNodePublicIds: [],
+              tagPublicIds: [],
+            },
+          },
+        }),
+      ],
+    });
+    const repository =
+      createAdminAiGenerationResultPersistenceRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      workspace: "content",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      generationKind: "question",
+      page: 1,
+      pageSize: 10,
+      limit: 10,
+      offset: 0,
+    });
+
+    expect(draftResults[0]?.contentReference).toMatchObject({
+      reviewedDraft: {
+        questionType: "single_choice",
+        stemRichText: "历史草稿题干",
+        standardAnswerRichText: "A",
+      },
+    });
+    expect(JSON.stringify(draftResults)).not.toContain("rawPrompt");
+    expect(JSON.stringify(draftResults)).not.toContain("rawOutput");
+    expect(JSON.stringify(draftResults)).not.toContain("providerPayload");
+  });
+
   it("filters draft result history by generation kind before pagination", async () => {
     const { gateway, listResultRows } = createGateway({
       rows: [

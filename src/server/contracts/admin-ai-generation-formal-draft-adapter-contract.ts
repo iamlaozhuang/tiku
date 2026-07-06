@@ -56,6 +56,10 @@ export type AdminAiGenerationFormalPaperDraftPayload = {
   paperSections?: AdminAiGenerationFormalPaperSectionDraftPayload[];
 };
 
+export type AdminAiGenerationFormalReviewedDraftPayload =
+  | AdminAiGenerationFormalQuestionDraftPayload
+  | AdminAiGenerationFormalPaperDraftPayload;
+
 export type AdminAiGenerationFormalPaperSectionDraftPayload = {
   title: string;
   description: string | null;

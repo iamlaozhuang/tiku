@@ -187,6 +187,7 @@ function createTaskHistoryResponse(input: {
     evidenceStatus?: "none" | "weak" | "sufficient";
     citationCount?: number;
     resultPublicId: string;
+    reviewedDraft?: unknown;
   } | null;
   taskPublicId?: string;
 }) {
@@ -208,6 +209,7 @@ function createTaskHistoryResponse(input: {
           evidenceStatus: input.generatedResult.evidenceStatus ?? "none",
           citationCount: input.generatedResult.citationCount ?? 0,
           formalAdoptionStatus: "blocked",
+          reviewedDraft: input.generatedResult.reviewedDraft ?? null,
           redactionStatus: "redacted",
         };
 
@@ -2182,6 +2184,120 @@ describe("admin AI generation entry surfaces", () => {
     ]);
     expect(document.body.textContent).not.toContain(taskPublicId);
     expect(document.body.textContent).not.toContain(resultPublicId);
+    expect(document.body.textContent).not.toContain("rawPrompt");
+    expect(document.body.textContent).not.toContain("rawOutput");
+    expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("submits content admin historical question adoption when a reviewed draft snapshot is persisted", async () => {
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_history_review_456";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const reviewedDraft = {
+      questionType: "single_choice",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      stemRichText: "synthetic historical question stem",
+      standardAnswerRichText: "A",
+      analysisRichText: "synthetic historical analysis",
+      multiChoiceRule: "all_correct_only",
+      scoringMethod: "auto_match",
+      materialPublicId: null,
+      questionOptions: [
+        {
+          label: "A",
+          contentRichText: "synthetic historical option A",
+          isCorrect: true,
+          sortOrder: 1,
+        },
+      ],
+      scoringPoints: [],
+      fillBlankAnswers: [],
+      knowledgeNodePublicIds: [],
+      tagPublicIds: [],
+    };
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for persisted review",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              reviewedDraft,
+            },
+          }),
+        );
+      }
+
+      if (path === adoptionUrl && init?.method === "POST") {
+        expect(JSON.parse(String(init.body))).toMatchObject({
+          reviewDecision: "approved",
+          reviewerConfirmed: true,
+          targetType: "question",
+          reviewedDraft,
+        });
+
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            persistenceStatus: "created",
+            adoption: {
+              redactionStatus: "redacted",
+            },
+          },
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const adoptAction = await screen.findByTestId(
+      "content-admin-review-adopt-action",
+    );
+
+    expect(adoptAction).toBeEnabled();
+    expect(adoptAction).toHaveTextContent("采用草稿");
+
+    fireEvent.click(adoptAction);
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        adoptionUrl,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+    expect(
+      await screen.findByText("草稿采用已提交；正式发布仍需单独校验。"),
+    ).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("rawOutput");
     expect(document.body.textContent).not.toContain("providerPayload");

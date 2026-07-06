@@ -13,6 +13,7 @@ import type {
   FindAdminAiGenerationResultByTaskQuery,
   InsertAdminAiGenerationDraftResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
+import type { AdminAiGenerationFormalReviewedDraftPayload } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
 
 const DEFAULT_RESULT_HISTORY_LIMIT = 20;
 const MAX_RESULT_HISTORY_LIMIT = 50;
@@ -169,6 +170,7 @@ function mapAdminAiGenerationResultRowToDto(
       contentDigest: row.content_digest,
       contentPreviewMasked: row.content_preview_masked,
       contentVisibility: "redacted_snapshot",
+      reviewedDraft: resolveFormalReviewedDraftSnapshot(row),
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -186,6 +188,91 @@ function mapAdminAiGenerationResultRowToDto(
       status: "blocked",
     },
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
+}
+
+function hasFormalQuestionDraftShape(
+  value: unknown,
+): value is AdminAiGenerationFormalReviewedDraftPayload {
+  return (
+    isRecord(value) &&
+    typeof value.questionType === "string" &&
+    typeof value.profession === "string" &&
+    typeof value.level === "number" &&
+    typeof value.subject === "string" &&
+    typeof value.stemRichText === "string" &&
+    typeof value.analysisRichText === "string" &&
+    typeof value.standardAnswerRichText === "string" &&
+    typeof value.multiChoiceRule === "string" &&
+    typeof value.scoringMethod === "string" &&
+    (typeof value.materialPublicId === "string" ||
+      value.materialPublicId === null) &&
+    Array.isArray(value.questionOptions) &&
+    Array.isArray(value.scoringPoints) &&
+    Array.isArray(value.fillBlankAnswers) &&
+    hasStringArray(value.knowledgeNodePublicIds) &&
+    hasStringArray(value.tagPublicIds)
+  );
+}
+
+function hasFormalPaperDraftShape(
+  value: unknown,
+): value is AdminAiGenerationFormalReviewedDraftPayload {
+  return (
+    isRecord(value) &&
+    typeof value.name === "string" &&
+    typeof value.profession === "string" &&
+    typeof value.level === "number" &&
+    typeof value.subject === "string" &&
+    (typeof value.paperType === "string" || value.paperType === null) &&
+    (typeof value.year === "number" || value.year === null) &&
+    (typeof value.source === "string" || value.source === null) &&
+    (typeof value.durationMinute === "number" ||
+      value.durationMinute === null) &&
+    (typeof value.totalScore === "string" || value.totalScore === null) &&
+    (value.paperSections === undefined || Array.isArray(value.paperSections))
+  );
+}
+
+function resolveFormalReviewedDraftSnapshot(
+  row: AdminAiGenerationResultPersistenceRow,
+): AdminAiGenerationFormalReviewedDraftPayload | null {
+  if (row.workspace !== "content") {
+    return null;
+  }
+
+  const snapshot = row.content_redacted_snapshot;
+
+  if (!isRecord(snapshot)) {
+    return null;
+  }
+
+  const reviewedDraft = snapshot.formalReviewedDraft;
+
+  if (
+    row.generation_kind === "question" &&
+    hasFormalQuestionDraftShape(reviewedDraft)
+  ) {
+    return reviewedDraft;
+  }
+
+  if (
+    row.generation_kind === "paper" &&
+    hasFormalPaperDraftShape(reviewedDraft)
+  ) {
+    return reviewedDraft;
+  }
+
+  return null;
 }
 
 function resolveResultHistoryLimit(limit: number | undefined): number {

@@ -43,6 +43,106 @@ validationCommands: &low_risk_validation_commands
   - git diff --check
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+activeTasks:
+  - id: content-admin-history-adoption-loop-2026-07-06
+    title: Content admin historical AI generation formal draft adoption loop
+    phase: content-admin-history-adoption-loop-2026-07-06
+    status: closed
+    result: pass_content_admin_history_adoption_loop_full_unit_green
+    priority: p0
+    taskKind: source_test_docs_content_admin_ai_generation_history_adoption_loop
+    moduleRunVersion: 2
+    dependsOn:
+      - organization-training-admin-ui-loop-2026-07-06
+    branch: codex/content-admin-history-adoption-loop-2026-07-06
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    targetClosureItem: Persist and surface content-admin AI generated reviewed draft snapshots so both current and historical AI出题 / AI组卷 results can enter formal draft review/adoption without direct publish.
+    behaviorBoundary: local_source_test_docs_only_no_runtime_db_connection_no_db_mutation_no_schema_migration_no_seed_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_browser_no_dev_server_no_e2e_no_staging_prod_cloud_deploy_no_release_final_or_production_claim_no_raw_question_material_paper_content_evidence
+    evidenceMode: redacted_task_ids_branch_file_paths_public_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
+    planPath: docs/05-execution-logs/task-plans/2026-07-06-content-admin-history-adoption-loop.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-06-content-admin-history-adoption-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-content-admin-history-adoption-loop.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-06-content-admin-history-adoption-loop.md
+      - docs/05-execution-logs/evidence/2026-07-06-content-admin-history-adoption-loop.md
+      - docs/05-execution-logs/audits-reviews/2026-07-06-content-admin-history-adoption-loop.md
+      - src/lib/admin-ai-generation-formal-draft-payload.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts
+      - src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts
+      - src/server/contracts/admin-ai-generation-local-contract.ts
+      - src/server/contracts/admin-ai-generation-result-persistence-contract.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.ts
+      - src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-content-admin-history-adoption-loop.md docs/05-execution-logs/evidence/2026-07-06-content-admin-history-adoption-loop.md docs/05-execution-logs/audits-reviews/2026-07-06-content-admin-history-adoption-loop.md src/lib/admin-ai-generation-formal-draft-payload.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts src/server/contracts/admin-ai-generation-formal-draft-adapter-contract.ts src/server/contracts/admin-ai-generation-local-contract.ts src/server/contracts/admin-ai-generation-result-persistence-contract.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-result-persistence-repository.ts src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - git diff --check
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-history-adoption-loop-2026-07-06
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-history-adoption-loop-2026-07-06 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    validationSummary:
+      status: pass_content_admin_history_adoption_loop_full_unit_green
+      redFirstTests: fail_expected_2_files_2_cases
+      focusedCombinedTests: pass_4_files_73_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      diffCheck: pass
+      fullUnit: pass_333_files_1661_tests
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass
+      providerCallExecuted: false
+      runtimeDbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationChanged: false
+      seedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
 standingApprovals:
   fullChainLocalContinuityCentralApproval20260704:
     approvedAt: "2026-07-04T10:05:10-07:00"

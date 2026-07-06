@@ -1257,7 +1257,7 @@ function AdminAiGenerationTaskHistoryPanel({
       {state === "ready" ? (
         <div className="mt-4 space-y-3">
           {items.map((taskItem) => {
-            const contentAdminReviewedDraft =
+            const currentContentAdminReviewedDraft =
               workspace === "content" &&
               taskItem.generatedResult !== null &&
               currentLocalContractSummary?.generatedResult.resultPublicId ===
@@ -1268,6 +1268,11 @@ function AdminAiGenerationTaskHistoryPanel({
                     requestedAt: taskItem.requestedAt,
                   })
                 : null;
+            const contentAdminReviewedDraft =
+              currentContentAdminReviewedDraft ??
+              (workspace === "content"
+                ? (taskItem.generatedResult?.reviewedDraft ?? null)
+                : null);
 
             return (
               <article

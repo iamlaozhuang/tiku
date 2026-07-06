@@ -473,6 +473,7 @@ function createGeneratedResultHistoryItem(input: {
   resultPublicId: string;
   taskPublicId: string;
   workspace: AdminAiGenerationWorkspace;
+  reviewedDraft?: AdminAiGenerationResultDto["contentReference"]["reviewedDraft"];
 }): AdminAiGenerationResultDto {
   const isContent = input.workspace === "content";
   const ownerPublicId = isContent
@@ -498,6 +499,7 @@ function createGeneratedResultHistoryItem(input: {
       contentDigest: "sha256:omitted-from-history-response",
       contentPreviewMasked: `redacted generated result summary for ${input.workspace} ${input.generationKind}`,
       contentVisibility: "redacted_snapshot",
+      reviewedDraft: input.reviewedDraft ?? null,
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -573,6 +575,8 @@ function createGeneratedResultPersistenceResult(
         contentDigest: input.contentDigest,
         contentPreviewMasked: input.contentPreviewMasked,
         contentVisibility: "redacted_snapshot",
+        reviewedDraft: (input.contentRedactedSnapshot.formalReviewedDraft ??
+          null) as AdminAiGenerationResultDto["contentReference"]["reviewedDraft"],
         redactionStatus: "redacted",
       },
       evidenceReference: {

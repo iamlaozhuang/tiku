@@ -12,6 +12,7 @@ import type {
   AdminAiGenerationResultStatus,
 } from "../models/admin-ai-generation-result";
 import type { EvidenceStatus } from "../models/ai-rag";
+import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
 
 export type AdminAiGenerationWorkspace = "content" | "organization";
 
@@ -136,6 +137,7 @@ export type AdminAiGenerationLocalContractGeneratedResultDto = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   formalAdoptionStatus: "blocked";
+  reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   redactionStatus: "redacted";
 };
 
@@ -154,6 +156,7 @@ export type AdminAiGenerationTaskHistoryGeneratedResultDto = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   formalAdoptionStatus: AdminAiGenerationResultFormalAdoptionStatus;
+  reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   redactionStatus: "redacted";
 };
 

@@ -332,6 +332,7 @@ function createLocalContractRouteResultPersistenceResult(
         contentDigest: input.contentDigest,
         contentPreviewMasked: input.contentPreviewMasked,
         contentVisibility: "redacted_snapshot",
+        reviewedDraft: null,
         redactionStatus: "redacted",
       },
       evidenceReference: {

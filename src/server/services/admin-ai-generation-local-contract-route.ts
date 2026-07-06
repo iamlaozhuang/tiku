@@ -1,5 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
+import { createContentAdminFormalReviewedDraftPayload } from "@/lib/admin-ai-generation-formal-draft-payload";
+
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import {
@@ -786,6 +788,7 @@ async function buildAdminAiGenerationLocalContract(input: {
         localContract,
         taskPersistence,
         createdAt: requestedAt,
+        generationParameters: input.generationParameters,
       }),
     );
 
@@ -836,6 +839,7 @@ function mapAdminAiGenerationResultPersistenceResultToLocalContractDto(
     evidenceStatus: result.result.evidenceReference.evidenceStatus,
     citationCount: result.result.evidenceReference.citationCount,
     formalAdoptionStatus: result.result.formalAdoption.status,
+    reviewedDraft: result.result.contentReference.reviewedDraft,
     redactionStatus: result.result.contentReference.redactionStatus,
   };
 }
@@ -870,13 +874,18 @@ function createAdminAiGenerationResolvedLocalContract(input: {
 }
 
 function createAdminAiGenerationLocalContractResultInput(input: {
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   localContract: AdminAiGenerationLocalContractBaseDto;
   taskPersistence: AdminAiGenerationTaskPersistenceResult;
   createdAt: Date;
 }): CreateAdminAiGenerationResultInput {
   const task = input.taskPersistence.task;
   const contentRedactedSnapshot =
-    createAdminAiGenerationLocalContractRedactedSnapshot(input.localContract);
+    createAdminAiGenerationLocalContractRedactedSnapshot({
+      createdAt: input.createdAt,
+      generationParameters: input.generationParameters,
+      localContract: input.localContract,
+    });
 
   return {
     resultPublicId: createAdminAiGenerationResultPublicId(task.taskPublicId),
@@ -914,35 +923,50 @@ function createAdminAiGenerationResultPublicId(taskPublicId: string): string {
     : `${taskPublicId}_result`;
 }
 
-function createAdminAiGenerationLocalContractRedactedSnapshot(
-  localContract: AdminAiGenerationLocalContractBaseDto,
-) {
+function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
+  createdAt: Date;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
+  localContract: AdminAiGenerationLocalContractBaseDto;
+}) {
+  const formalReviewedDraft =
+    input.generationParameters === null
+      ? null
+      : createContentAdminFormalReviewedDraftPayload({
+          generationParameters: input.generationParameters,
+          localContractSummary: input.localContract,
+          requestedAt: input.createdAt.toISOString(),
+        });
+
   return {
     redactionStatus: "redacted",
     summaryKind: "admin_ai_generation_local_contract",
-    runtimeStatus: localContract.runtimeStatus,
-    workspace: localContract.workspace,
-    generationKind: localContract.generationKind,
-    taskType: localContract.taskRequest.taskType,
-    resultKind: localContract.taskRequest.resultReference.resultKind,
-    contentVisibility: localContract.resultState.contentVisibility,
-    providerCallExecuted: localContract.runtimeBridge.providerCallExecuted,
-    runtimeBridgeStatus: localContract.runtimeBridge.bridgeStatus,
+    runtimeStatus: input.localContract.runtimeStatus,
+    workspace: input.localContract.workspace,
+    generationKind: input.localContract.generationKind,
+    taskType: input.localContract.taskRequest.taskType,
+    resultKind: input.localContract.taskRequest.resultReference.resultKind,
+    contentVisibility: input.localContract.resultState.contentVisibility,
+    providerCallExecuted:
+      input.localContract.runtimeBridge.providerCallExecuted,
+    runtimeBridgeStatus: input.localContract.runtimeBridge.bridgeStatus,
     formalQuestionWriteStatus:
-      localContract.formalContentBoundary.questionWriteStatus,
+      input.localContract.formalContentBoundary.questionWriteStatus,
     formalPaperWriteStatus:
-      localContract.formalContentBoundary.paperWriteStatus,
+      input.localContract.formalContentBoundary.paperWriteStatus,
     organizationDraftAdoptionStatus:
-      localContract.organizationOwnedDraftBoundary
+      input.localContract.organizationOwnedDraftBoundary
         .organizationDraftAdoptionStatus,
     organizationTrainingSourceStatus:
-      localContract.organizationOwnedDraftBoundary
+      input.localContract.organizationOwnedDraftBoundary
         .organizationTrainingSourceStatus,
     platformFormalDraftStatus:
-      localContract.organizationOwnedDraftBoundary.platformFormalDraftStatus,
-    publishStatus: localContract.organizationOwnedDraftBoundary.publishStatus,
+      input.localContract.organizationOwnedDraftBoundary
+        .platformFormalDraftStatus,
+    publishStatus:
+      input.localContract.organizationOwnedDraftBoundary.publishStatus,
     studentVisibleStatus:
-      localContract.organizationOwnedDraftBoundary.studentVisibleStatus,
+      input.localContract.organizationOwnedDraftBoundary.studentVisibleStatus,
+    ...(formalReviewedDraft === null ? {} : { formalReviewedDraft }),
   };
 }
 
@@ -966,6 +990,7 @@ function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
     evidenceStatus: result.evidenceReference.evidenceStatus,
     citationCount: result.evidenceReference.citationCount,
     formalAdoptionStatus: result.formalAdoption.status,
+    reviewedDraft: result.contentReference.reviewedDraft,
     redactionStatus: result.contentReference.redactionStatus,
   };
 }
