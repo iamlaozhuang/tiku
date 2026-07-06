@@ -107,16 +107,16 @@ activeTasks:
         approved: true
         approvalSource: current_user_requested_personal_standard_student_fixture_acceptance_2026_07_06
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
-        approvalSource: requires_fresh_user_approval_after_local_evidence
+        approvalSource: current_user_fresh_approval_merge_push_cleanup_2026_07_06
       push:
-        approved: false
+        approved: true
         target: origin/master
-        approvalSource: requires_fresh_user_approval_after_local_evidence
+        approvalSource: current_user_fresh_approval_merge_push_cleanup_2026_07_06
       cleanup:
-        deleteShortBranch: false
-        approvalSource: requires_fresh_user_approval_after_local_evidence
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approval_merge_push_cleanup_2026_07_06
     validationSummary:
       status: pass_personal_standard_student_fixture_acceptance_browser_backend_denial
       readGate: pass
@@ -125,6 +125,8 @@ activeTasks:
       browserPersonalStandardStudent: pass_home_entry_hidden_direct_route_unavailable_action_disabled
       authorizationContextProbe: pass_standard_contexts_present_advanced_ai_context_count_zero
       backendDirectDenial: pass_403057_before_runtime_bridge_provider
+      fastForwardMergeToMaster: pass_local_ff_feature_commit_c96d8eff9
+      closeoutFreshApproval: current_user_fresh_approval_merge_push_cleanup_2026_07_06
       sourceOrTestChanged: false
       dependencyChanged: false
       destructiveDbOperationExecuted: false

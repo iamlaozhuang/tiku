@@ -82,6 +82,18 @@
   - Direct backend local-browser generation POST is denied with `403057` before runtime bridge/Provider.
 - This does not reopen or modify previously closed source/unit tasks.
 
+## Closeout Approval
+
+- Fresh user approval for merge, push, and cleanup: current chat request on 2026-07-06.
+- Local fast-forward merge:
+  - source branch: `codex/personal-standard-student-fixture-acceptance-2026-07-06`
+  - target branch: `master`
+  - merged feature commit: `c96d8eff9`
+  - result: `pass`
+- Push target approved by fresh user request: `origin/master`.
+- Short-lived branch cleanup approved by fresh user request after successful push.
+- Push and cleanup execution results are reported in the final delivery note for this closeout.
+
 ## Non-Claims
 
 - Source/unit baseline remains inherited from the already recorded master evidence; no source/unit rerun is used here to expand the source baseline claim.
@@ -99,3 +111,4 @@
 - `git diff --check`: passed.
 - `Test-ModuleRunV2PreCommitHardening.ps1 -TaskId personal-standard-student-fixture-acceptance-2026-07-06`: passed; scanned `5` task files; Cost Calibration Gate remained blocked.
 - `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId personal-standard-student-fixture-acceptance-2026-07-06 -SkipRemoteAheadCheck`: passed; branch readiness OK; evidence/audit paths present; Cost Calibration Gate remained blocked.
+- Post-merge closeout evidence update on `master`: prepared under the same redaction boundary.
