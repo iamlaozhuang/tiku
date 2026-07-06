@@ -1,11 +1,16 @@
 import { createLocalSessionRuntime } from "@/server/auth/local-session-runtime";
 import { createPostgresPersonalAiGenerationRequestRepository } from "@/server/repositories/personal-ai-generation-request-repository";
 import { createPostgresPersonalAiGenerationResultRepository } from "@/server/repositories/personal-ai-generation-result-repository";
+import { createPostgresStudentAuthorizationRedeemRuntimeRepositories } from "@/server/repositories/student-authorization-redeem-runtime-repository";
+import { createEffectiveAuthorizationService } from "@/server/services/effective-authorization-service";
 import { createOwnerPreviewQwenPersonalRuntimeBridgeControl } from "@/server/services/owner-preview-qwen-visible-ai-runtime-control";
 import {
   createPersonalAiGenerationRequestRouteHandlers,
   createPersonalAiGenerationRequestUserResolver,
 } from "@/server/services/personal-ai-generation-request-route";
+
+const studentAuthorizationRedeemRuntimeRepositories =
+  createPostgresStudentAuthorizationRedeemRuntimeRepositories();
 
 const personalAiGenerationRequestRouteHandlers =
   createPersonalAiGenerationRequestRouteHandlers(
@@ -15,6 +20,9 @@ const personalAiGenerationRequestRouteHandlers =
       resultRepository: createPostgresPersonalAiGenerationResultRepository(),
       runtimeBridgeControl:
         createOwnerPreviewQwenPersonalRuntimeBridgeControl(),
+      effectiveAuthorizationService: createEffectiveAuthorizationService(
+        studentAuthorizationRedeemRuntimeRepositories.effectiveAuthorizationRepository,
+      ),
     },
   );
 

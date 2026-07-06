@@ -13,6 +13,8 @@ import type {
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import type { SessionService } from "./session-service";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
@@ -24,6 +26,15 @@ const employeeUserContext = {
   userPublicId: "employee_session_user_public_123",
   userType: "employee",
   organizationPublicId: "organization_public_123",
+} as const;
+
+const disabledAiCapabilities = {
+  canGenerateAiQuestion: false,
+  canGenerateAiPaper: false,
+  canCreateOrganizationTraining: false,
+  canAnswerOrganizationTraining: false,
+  canViewOrganizationTrainingSummary: false,
+  canManageAuthorizationQuota: false,
 } as const;
 
 const sufficientGroundingContext: AiGenerationRouteIntegratedGroundingContext =
@@ -259,6 +270,24 @@ function createResultRepository(): Pick<
             isBlocked: true,
             status: "blocked",
           },
+        },
+      };
+    },
+  };
+}
+
+function createEffectiveAuthorizationService(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+): Pick<EffectiveAuthorizationService, "listEffectiveAuthorizations"> {
+  return {
+    async listEffectiveAuthorizations() {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          authorizations: [],
+          effectiveAuthorizations: [],
+          authorizationContexts,
         },
       };
     },
@@ -503,6 +532,154 @@ describe("personal AI generation request route handlers", () => {
         requestedAt,
       }),
     ]);
+    expect(serializedPayload).not.toContain("stale_personal_owner_public_999");
+    expect(serializedPayload).not.toContain("stale_quota_owner_public_999");
+  });
+
+  it("rejects employee local browser POST when the server effective authorization is not advanced AI capable", async () => {
+    const requestRepository = createRequestRepository();
+    const providerExecutorCalls: unknown[] = [];
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          {
+            profession: "monopoly",
+            level: 3,
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "standard",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_standard_public_123",
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+            capabilities: disabledAiCapabilities,
+            blockedReason: null,
+          },
+        ]),
+        runtimeBridgeControl: {
+          bridgeMode: "controlled_runner",
+          explicitLocalSwitchPresent: true,
+          providerExecution: {
+            executionMode: "route_integrated_provider",
+            realProviderExecutionApproved: true,
+            maxRequests: 1,
+            maxRetries: 0,
+            maxOutputTokens: 220,
+            timeoutMs: 30000,
+            resolveGroundingContext: () => sufficientGroundingContext,
+            readProviderCredential: async () => "synthetic-test-credential",
+            executeProviderRequest: async (executionInput) => {
+              providerExecutorCalls.push(executionInput);
+
+              return {
+                requestCount: 1,
+                resultStatus: "pass",
+                failureCategory: null,
+                durationMs: 37,
+                usageSummary: null,
+                providerErrorSummary: null,
+                visibleGeneratedContent: null,
+              };
+            },
+          },
+        },
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationPublicId: "org_auth_standard_public_123",
+        authorizationSource: "org_auth",
+        ownerType: "organization",
+        ownerPublicId: employeeUserContext.organizationPublicId,
+        organizationPublicId: employeeUserContext.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(requestRepository.createCalls).toHaveLength(0);
+    expect(providerExecutorCalls).toHaveLength(0);
+    expect(serializedPayload).not.toContain("synthetic-test-credential");
+  });
+
+  it("allows advanced employee local browser POST when only production enablement is blocked", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          {
+            profession: "monopoly",
+            level: 3,
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_advanced_public_123",
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+            capabilities: {
+              ...disabledAiCapabilities,
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+            },
+            blockedReason: "production_enablement_blocked",
+          },
+        ]),
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationPublicId: "org_auth_advanced_public_123",
+        authorizationSource: "personal_auth",
+        ownerType: "personal",
+        ownerPublicId: "stale_personal_owner_public_999",
+        organizationPublicId: null,
+        quotaOwnerType: "personal",
+        quotaOwnerPublicId: "stale_quota_owner_public_999",
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        requestFlow: {
+          taskRequest: {
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_advanced_public_123",
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+          },
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toHaveLength(1);
     expect(serializedPayload).not.toContain("stale_personal_owner_public_999");
     expect(serializedPayload).not.toContain("stale_quota_owner_public_999");
   });
