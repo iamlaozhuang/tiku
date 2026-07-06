@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-tasks-slimming-2026-07-06
-  updatedAt: "2026-07-06T12:45:00Z"
+  updatedByTask: active-tasks-slimming-batch-2-2026-07-06
+  updatedAt: "2026-07-06T13:10:00Z"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -16966,3 +16966,228 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: 2026-07-05T12:34:03-07:00
+  - id: stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
+    phase: stage-c-5-provider-cost-staging-residual-risk-closeout-2026-07-05
+    status: closed
+    taskKind: docs_state_provider_cost_staging_residual_risk_closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-5-provider-cost-staging-residual-risk-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-5-provider-cost-staging-residual-risk-closeout.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T10:14:42-07:00
+  - id: stage-c-4-ai-cost-quota-decision-package-2026-07-05
+    phase: stage-c-4-ai-cost-quota-decision-package-2026-07-05
+    status: closed
+    taskKind: docs_state_ai_cost_quota_decision_package
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-4-ai-cost-quota-decision-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-4-ai-cost-quota-decision-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T10:02:27-07:00
+  - id: stage-c-3-cost-calibration-execution-2026-07-05
+    phase: stage-c-3-cost-calibration-execution-2026-07-05
+    status: closed
+    taskKind: provider_cost_calibration_execution
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T09:50:12-07:00
+  - id: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+    phase: stage-c-3-cost-calibration-execution-boundary-2026-07-05
+    status: closed
+    taskKind: docs_state_cost_calibration_boundary
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-3-cost-calibration-execution-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T09:28:23-07:00
+  - id: stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
+    phase: stage-c-1-provider-freshness-env-local-single-key-rerun-2026-07-05
+    status: closed
+    taskKind: local_provider_smoke
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-1-provider-freshness-env-local-single-key-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-1-provider-freshness-env-local-single-key-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T09:14:27-07:00
+  - id: stage-c-1-provider-freshness-bounded-smoke-rerun-2026-07-05
+    phase: stage-c-1-provider-freshness-bounded-smoke-rerun-2026-07-05
+    status: closed
+    taskKind: local_provider_smoke
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-stage-c-1-provider-freshness-bounded-smoke-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-stage-c-1-provider-freshness-bounded-smoke-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T08:58:02-07:00
+  - id: full-chain-provider-cost-staging-approval-package-2026-07-05
+    phase: full-chain-provider-cost-staging-approval-package-2026-07-05
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-provider-cost-staging-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T08:43:32-07:00
+  - id: full-chain-post-acceptance-queue-cleanup-2026-07-05
+    phase: full-chain-post-acceptance-queue-cleanup-2026-07-05
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-post-acceptance-queue-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T08:25:02-07:00
+  - id: full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    phase: full-chain-local-acceptance-rollup-and-residual-risk-ledger-2026-07-05
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-local-acceptance-rollup-and-residual-risk-ledger.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-local-acceptance-rollup-and-residual-risk-ledger.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T08:12:00-07:00
+  - id: full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
+    phase: full-chain-scenario-11-paper-source-question-count-boundary-repair-2026-07-05
+    status: closed
+    taskKind: local_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-paper-source-question-count-boundary-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T07:10:00-07:00
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair-2026-07-05
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-snapshot-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T06:50:00-07:00
+  - id: full-chain-scenario-11-enterprise-training-question-snapshot-source-repair-2026-07-05
+    phase: full-chain-scenario-11-enterprise-training-question-snapshot-source-repair-2026-07-05
+    status: closed
+    taskKind: local_source_test_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-enterprise-training-question-snapshot-source-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-enterprise-training-question-snapshot-source-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T06:35:00-07:00
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-preflight-2026-07-05
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-preflight-2026-07-05
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-preflight.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-preflight.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T06:24:00-07:00
+  - id: full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
+    phase: full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation-2026-07-05
+    status: closed
+    taskKind: local_acceptance_provisioning_preflight_read_only_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-full-chain-scenario-11-training-baseline-provisioning-preflight-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T05:26:00-07:00
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-learning-surface-route-selection-classification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T05:12:00-07:00
+  - id: full-chain-scenario-11-advanced-employee-learning-surface-gap-repair-or-provisioning-2026-07-04
+    phase: full-chain-scenario-11-advanced-employee-learning-surface-gap-repair-or-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_repair_or_provisioning_root_cause_classification
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-learning-surface-gap-repair-or-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-learning-surface-gap-repair-or-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T04:50:25-07:00
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-reconciliation-2026-07-04
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-reconciliation-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-training-baseline-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T04:27:47-07:00
+  - id: full-chain-scenario-11-training-baseline-gap-provisioning-2026-07-04
+    phase: full-chain-scenario-11-training-baseline-gap-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_provisioning_training_baseline_gap_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-training-baseline-gap-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-training-baseline-gap-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T04:06:52-07:00
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-db-target-alignment-2026-07-04
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-after-db-target-alignment-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-db-target-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-db-target-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T03:55:33-07:00
+  - id: full-chain-scenario-11-db-target-alignment-provisioning-2026-07-04
+    phase: full-chain-scenario-11-db-target-alignment-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_provisioning_db_target_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-db-target-alignment-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-db-target-alignment-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T03:41:57-07:00
+  - id: full-chain-scenario-11-advanced-employee-affected-node-rerun-2026-07-04
+    phase: full-chain-scenario-11-advanced-employee-affected-node-rerun-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_affected_node_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-affected-node-rerun.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T03:31:00-07:00
+  - id: full-chain-scenario-11-enterprise-training-baseline-provisioning-2026-07-04
+    phase: full-chain-scenario-11-enterprise-training-baseline-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_provisioning_enterprise_training_baseline
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-enterprise-training-baseline-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-enterprise-training-baseline-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T03:18:00-07:00
+  - id: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
+    phase: full-chain-scenario-11-advanced-employee-pre-provider-learning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_advanced_employee_learning_pre_provider
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-11-advanced-employee-pre-provider-learning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T02:38:00-07:00
+  - id: full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning-2026-07-04
+    phase: full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning-2026-07-04
+    status: closed
+    taskKind: local_acceptance_runtime_browser_employee_learning_pre_provider_rerun
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-marketing-3-content-provisioning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T00:45:00-07:00
+  - id: full-chain-scenario-10-practice-start-idempotency-repair-2026-07-04
+    phase: full-chain-scenario-10-practice-start-idempotency-repair-2026-07-04
+    status: closed
+    taskKind: source_repair_practice_start_resume_idempotency
+    evidencePath: docs/05-execution-logs/evidence/2026-07-04-full-chain-scenario-10-practice-start-idempotency-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-04-full-chain-scenario-10-practice-start-idempotency-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T01:10:00-07:00
