@@ -4,9 +4,9 @@ archive:
   sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: queue-and-execution-log-archive-first-batch-2026-07-02
   archivedAt: "2026-07-02T14:00:00-07:00"
-  updatedByTask: active-tasks-slimming-batch-5-2026-07-06
-  updatedAt: "2026-07-06T14:35:00Z"
-  taskCount: 125
+  updatedByTask: active-tasks-slimming-batch-6-2026-07-06
+  updatedAt: "2026-07-06T14:42:00Z"
+  taskCount: 150
 tasks:
   - id: ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
     title: AI generation bounded monopoly question Provider rerun after plaintext acceptance repair
@@ -16766,3 +16766,3088 @@ tasks:
       finalPassClaimed: false
       productionUsabilityClaimed: false
       costCalibrationExecuted: false
+
+  - id: session-cookie-contract-login-and-e2e-alignment-2026-07-02
+    title: Session cookie contract login and e2e alignment
+    phase: session-cookie-contract-login-and-e2e-alignment-2026-07-02
+    sourceStory: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+    humanApprovalBoundary: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+    targetClosureItem: Align login UI and local e2e fixtures with cookie-backed session contract before further AI acceptance
+    behaviorBoundary: local_login_session_contract_and_same_stage3_e2e_only_no_ai_provider_env_direct_db_dependency_schema_deploy_release_claim
+    taskKind: local_source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: completed_session_cookie_contract_baseline_restored
+    priority: p1
+    claimedAt: "2026-07-02T10:00:00-07:00"
+    plannedAt: "2026-07-02T10:00:00-07:00"
+    implementedAt: "2026-07-02T10:30:00-07:00"
+    validatedAt: "2026-07-02T10:30:00-07:00"
+    reviewedAt: "2026-07-02T10:30:00-07:00"
+    closedAt: "2026-07-02T10:30:00-07:00"
+    dependsOn:
+      - role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+    branch: codex/session-cookie-contract-login-and-e2e-alignment
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    allowedFiles:
+      - src/app/(auth)/login/page.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/local-full-loop-baseline-accounts-auth-db.spec.ts
+      - e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - e2e/student-practice-mock-entry.spec.ts
+      - tests/unit/student-login-ui.test.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/server/auth/session-route.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - src/server/auth/session-route.ts
+      - playwright.config.ts
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localSourceChange: approved_task_scoped_login_session_contract_only
+      focusedUnitTest: approved
+      localhostBrowserE2E: approved_same_stage3_specs_only
+      localDevServer: approved_localhost_only
+      testOwnedLoginInput: approved_existing_local_specs_only_no_evidence
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      aiFeatureAcceptanceRerun: blocked_until_session_baseline_restored
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Login UI and selected e2e helpers follow the cookie-backed session contract and no longer require response data.token.
+      - Admin role denial fixture validates current-session workspace denial without synthetic bearer tokens.
+      - The exact same stage 3 Playwright spec set is rerun after repair.
+      - Evidence contains only redacted status/count/failure-class summaries and no raw sensitive runtime material.
+      - No AI Provider, AI閸旂喕鍏樻灞炬暪, release readiness, final Pass, production usability, Cost Calibration, env, direct DB, dependency, schema, or deploy claim is made.
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts src/server/auth/session-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown src/app/(auth)/login/page.tsx src/features/student/studentRuntimeApi.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts tests/unit/student-login-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/auth/session-route.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - npm.cmd exec -- prettier --check --ignore-unknown src/app/(auth)/login/page.tsx src/features/student/studentRuntimeApi.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts tests/unit/student-login-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/auth/session-route.test.ts docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/evidence/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-session-cookie-contract-login-and-e2e-alignment.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId session-cookie-contract-login-and-e2e-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId session-cookie-contract-login-and-e2e-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId session-cookie-contract-login-and-e2e-alignment-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_session_cookie_contract_login_and_e2e_alignment_2026_07_02
+    validationSummary:
+      status: passed
+      focusedUnitFiles: 3
+      focusedUnitTests: 27
+      stage3SpecFiles: 5
+      stage3Tests: 6
+      stage3Passed: 6
+      staleLocalhostServerObservedAndRestarted: true
+      loginUiCookieBackedSessionAligned: true
+      e2eClientVisibleSessionTokenOmitted: true
+      adminWorkspaceDenialCurrentSessionValidated: true
+      personalAiSurfaceOnlyNoSubmit: true
+      organizationAiPostSubsegmentsSkipped: true
+      aiProviderCallExecuted: false
+      aiProviderConfigurationRead: false
+      aiFunctionalAcceptanceExecuted: false
+      directDatabaseActionByAgent: false
+      envSecretAccessed: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      sensitiveEvidenceRecorded: false
+      rawDomScreenshotTraceRecorded: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
+  - id: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+    title: Role workflow experience walkthrough from code baseline
+    phase: role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+    sourceStory: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+    humanApprovalBoundary: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+    targetClosureItem: Run bounded local role and workflow walkthrough from current requirement-code baseline
+    behaviorBoundary: localhost_e2e_runtime_walkthrough_only_no_source_test_provider_env_direct_db_dependency_schema_deploy_release_claim
+    taskKind: acceptance_runtime_walkthrough
+    moduleRunVersion: 2
+    status: closed
+    result: blocked_runtime_walkthrough_session_contract_mismatch
+    priority: p1
+    claimedAt: "2026-07-02T09:30:00-07:00"
+    plannedAt: "2026-07-02T09:30:00-07:00"
+    validatedAt: "2026-07-02T09:30:00-07:00"
+    reviewedAt: "2026-07-02T09:30:00-07:00"
+    closedAt: "2026-07-02T09:45:00-07:00"
+    dependsOn:
+      - requirements-code-implementation-alignment-audit-2026-07-02
+    branch: codex/role-workflow-experience-walkthrough-from-code-baseline
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - package.json
+      - playwright.config.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localhostBrowserE2E: approved
+      localDevServer: approved_if_started_by_playwright_webserver_only
+      testOwnedLoginInput: approved_existing_local_specs_only_no_evidence
+      apiWriteViaExistingLocalE2E: approved_metadata_only_no_raw_rows
+      localSourceChange: blocked
+      focusedUnitTest: approved_not_primary_gate
+      providerCall: blocked
+      providerConfigurationRead: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Existing local browser/e2e coverage exercises selected role allow/deny and workflow paths without Provider execution.
+      - Organization standard/advanced admin, employee, ops/content denial, personal AI, and student learning observations are recorded as redacted summaries.
+      - Any runtime failure is classified as a gap and does not trigger source repair in this task.
+      - No release readiness, final Pass, production usability, Cost Calibration, Provider, env, direct DB, dependency, schema, or deploy claim is made.
+    validationCommands:
+      - $env:TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER='1'; npm.cmd exec -- playwright test e2e/admin-role-denial-browser.spec.ts e2e/local-full-loop-baseline-accounts-auth-db.spec.ts e2e/personal-ai-generation-local-request.spec.ts e2e/student-practice-mock-entry.spec.ts e2e/local-full-loop-organization-training-analytics-ai-generation-role-flow.spec.ts --reporter=line
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/evidence/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md docs/05-execution-logs/audits-reviews/2026-07-02-role-workflow-experience-walkthrough-from-code-baseline.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId role-workflow-experience-walkthrough-from-code-baseline-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId role-workflow-experience-walkthrough-from-code-baseline-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_stage_3_role_workflow_experience_walkthrough_2026_07_02
+    validationSummary:
+      status: blocked
+      runtimeWalkthroughExecuted: true
+      selectedPlaywrightSpecs: 5
+      selectedPlaywrightTests: 6
+      selectedPlaywrightPassed: 0
+      setupFailurePortInUseObserved: true
+      existingLocalServerReused: true
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      providerConfigurationRead: false
+      directDatabaseActionByAgent: false
+      envSecretAccessed: false
+      sensitiveEvidenceRecorded: false
+      rawDomScreenshotTraceRecorded: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+      blockingFindings:
+        - STAGE3-01
+        - STAGE3-02
+        - STAGE3-03
+        - STAGE3-04
+  - id: requirements-code-implementation-alignment-audit-2026-07-02
+    title: Requirements code implementation alignment audit
+    phase: requirements-code-implementation-alignment-audit-2026-07-02
+    sourceStory: current_user_approved_execute_stage_2_requirements_code_implementation_alignment_audit_2026_07_02
+    humanApprovalBoundary: current_user_approved_execute_stage_2_requirements_code_implementation_alignment_audit_2026_07_02
+    targetClosureItem: Map current requirement SSOT baseline to actual repository implementation surfaces before runtime walkthrough
+    behaviorBoundary: docs_static_code_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_code_static_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: completed_requirements_code_implementation_alignment_audit
+    priority: p1
+    claimedAt: "2026-07-02T09:00:00-07:00"
+    plannedAt: "2026-07-02T09:00:00-07:00"
+    implementedAt: "2026-07-02T09:00:00-07:00"
+    validatedAt: "2026-07-02T09:00:00-07:00"
+    reviewedAt: "2026-07-02T09:00:00-07:00"
+    closedAt: "2026-07-02T09:00:00-07:00"
+    dependsOn:
+      - requirements-ssot-cross-doc-alignment-audit-2026-07-02
+    branch: codex/requirements-code-implementation-alignment-audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-requirements-code-implementation-alignment-audit.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-requirements-code-implementation-alignment-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-requirements-code-implementation-alignment-audit.md
+    allowedFiles:
+      - docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-requirements-code-implementation-alignment-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-requirements-code-implementation-alignment-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-requirements-code-implementation-alignment-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/advanced-edition-*.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/**
+      - docs/01-requirements/stories/**
+      - docs/01-requirements/advanced-edition/**
+      - docs/01-requirements/traceability/**
+      - docs/01-requirements/use-cases/**
+      - docs/superpowers/specs/*advanced-edition*.md
+      - docs/superpowers/plans/*advanced-edition*.md
+      - src/**
+      - tests/**
+      - e2e/**
+      - package.json
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      sourceStaticAuditReadOnly: approved
+      focusedUnitTest: blocked_not_needed_docs_static_alignment_only
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Current requirement SSOT baseline is mapped to actual source, route, service, repository, schema, and test surfaces.
+      - AI閸戞椽顣?and AI缂佸嫬宓?reuse is assessed against shared contracts, Provider execution, instruction, structured preview, and role adapters.
+      - Findings distinguish static implementation gaps, runtime validation gaps, future product/schema decisions, and non-current-scope items.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-requirements-code-implementation-alignment-audit.md docs/05-execution-logs/evidence/2026-07-02-requirements-code-implementation-alignment-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-requirements-code-implementation-alignment-audit.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/01-requirements/traceability/2026-07-02-requirements-code-implementation-alignment-audit.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-requirements-code-implementation-alignment-audit.md docs/05-execution-logs/evidence/2026-07-02-requirements-code-implementation-alignment-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-requirements-code-implementation-alignment-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId requirements-code-implementation-alignment-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId requirements-code-implementation-alignment-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId requirements-code-implementation-alignment-audit-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_execute_stage_2_requirements_code_implementation_alignment_audit_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_stage_2_requirements_code_implementation_alignment_audit_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_stage_2_requirements_code_implementation_alignment_audit_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_stage_2_requirements_code_implementation_alignment_audit_2026_07_02
+    validationSummary:
+      status: passed
+      staticInventoryRecorded: true
+      requirementMappingRecorded: true
+      aiGenerationReuseConfirmed: true
+      runtimeValidationSeparated: true
+      noUnresolvedDecisionRequiredItem: true
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
+  - id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
+    title: Requirements SSOT cross-doc alignment audit
+    phase: requirements-ssot-cross-doc-alignment-audit-2026-07-02
+    sourceStory: current_user_approved_requirements_ssot_cross_doc_alignment_audit_2026_07_02
+    humanApprovalBoundary: current_user_approved_requirements_ssot_cross_doc_alignment_audit_2026_07_02
+    targetClosureItem: Establish one requirement SSOT cross-document alignment baseline before code alignment or walkthrough work
+    behaviorBoundary: docs_requirement_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: completed_requirements_ssot_cross_doc_alignment_audit
+    priority: p1
+    claimedAt: "2026-07-02T08:30:00-07:00"
+    plannedAt: "2026-07-02T08:30:00-07:00"
+    implementedAt: "2026-07-02T08:30:00-07:00"
+    validatedAt: "2026-07-02T08:30:00-07:00"
+    reviewedAt: "2026-07-02T08:30:00-07:00"
+    closedAt: "2026-07-02T08:30:00-07:00"
+    dependsOn:
+      - agents-advanced-requirement-reading-rule-2026-07-02
+      - ai-generation-requirements-ssot-alignment-2026-07-02
+    branch: codex/requirements-ssot-cross-doc-alignment-audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+    allowedFiles:
+      - docs/01-requirements/traceability/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/04-agent-system/sop/advanced-edition-*.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/**
+      - docs/01-requirements/stories/**
+      - docs/01-requirements/advanced-edition/**
+      - docs/01-requirements/traceability/**
+      - docs/01-requirements/use-cases/**
+      - docs/superpowers/specs/*advanced-edition*.md
+      - docs/superpowers/plans/*advanced-edition*.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: blocked_not_needed_docs_requirement_alignment_only
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Requirement-related files are counted and classified by source family.
+      - Standard, advanced, ADR, latest traceability, catalogs, and evidence have a single authority order.
+      - Historical residuals are normalized without deleting evidence or claiming runtime pass.
+      - No unresolved docs-only product conflict remains.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/01-requirements/traceability/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md docs/05-execution-logs/evidence/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/01-requirements/traceability/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md docs/05-execution-logs/evidence/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-requirements-ssot-cross-doc-alignment-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId requirements-ssot-cross-doc-alignment-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId requirements-ssot-cross-doc-alignment-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId requirements-ssot-cross-doc-alignment-audit-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_requirements_ssot_cross_doc_alignment_audit_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_requirements_ssot_cross_doc_alignment_audit_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_requirements_ssot_cross_doc_alignment_audit_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_requirements_ssot_cross_doc_alignment_audit_2026_07_02
+    validationSummary:
+      status: passed
+      requirementCoverageManifestRecorded: true
+      sourceAuthorityOrderRecorded: true
+      conflictRegisterRecorded: true
+      noUnresolvedProductConflict: true
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
+  - id: agents-advanced-requirement-reading-rule-2026-07-02
+    title: AGENTS advanced requirement reading rule
+    phase: agents-advanced-requirement-reading-rule-2026-07-02
+    sourceStory: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+    humanApprovalBoundary: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+    targetClosureItem: Add a general advanced-edition requirement reading rule to AGENTS.md
+    behaviorBoundary: docs_governance_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: completed_agents_advanced_requirement_reading_rule
+    priority: p1
+    claimedAt: "2026-07-02T08:00:00-07:00"
+    plannedAt: "2026-07-02T08:00:00-07:00"
+    implementedAt: "2026-07-02T08:00:00-07:00"
+    validatedAt: "2026-07-02T08:00:00-07:00"
+    reviewedAt: "2026-07-02T08:00:00-07:00"
+    closedAt: "2026-07-02T08:00:00-07:00"
+    dependsOn:
+      - ai-generation-requirements-ssot-alignment-2026-07-02
+    branch: codex/agents-advanced-requirement-reading-rule
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+    allowedFiles:
+      - AGENTS.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+    readOnlyAllowedFiles:
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/role-experience-fulfillment-matrix.md
+      - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: blocked_not_needed_docs_governance_alignment_only
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - AGENTS.md has a general advanced-edition requirement reading rule.
+      - The rule covers advanced, edition, authorization, quota, organization, enterprise training, analytics, retention/log governance, role-separated, and content-admin AI draft/review work.
+      - AGENTS.md remains execution discipline and points to requirement SSOT instead of copying business requirements.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown AGENTS.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - npm.cmd exec -- prettier --check --ignore-unknown AGENTS.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/evidence/2026-07-02-agents-advanced-requirement-reading-rule.md docs/05-execution-logs/audits-reviews/2026-07-02-agents-advanced-requirement-reading-rule.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId agents-advanced-requirement-reading-rule-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId agents-advanced-requirement-reading-rule-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId agents-advanced-requirement-reading-rule-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_agents_advanced_requirement_reading_rule_2026_07_02
+    validationSummary:
+      status: passed
+      agentsAdvancedReadingRuleRecorded: true
+      businessSsotBoundaryPreserved: true
+      noUnresolvedProductConflict: true
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
+  - id: ai-generation-requirements-ssot-alignment-2026-07-02
+    title: AI generation requirements SSOT alignment
+    phase: ai-generation-requirements-ssot-alignment-2026-07-02
+    sourceStory: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    humanApprovalBoundary: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    targetClosureItem: Align AI閸戞椽顣?and AI缂佸嫬宓?requirements SSOT with the current 2026-07-02 acceptance baseline
+    behaviorBoundary: docs_requirement_alignment_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_requirement_alignment
+    moduleRunVersion: 2
+    status: closed
+    result: completed_ai_generation_requirements_ssot_alignment
+    priority: p1
+    claimedAt: "2026-07-02T07:30:00-07:00"
+    plannedAt: "2026-07-02T07:30:00-07:00"
+    implementedAt: "2026-07-02T07:30:00-07:00"
+    validatedAt: "2026-07-02T07:30:00-07:00"
+    reviewedAt: "2026-07-02T07:30:00-07:00"
+    closedAt: "2026-07-02T07:30:00-07:00"
+    dependsOn:
+      - ai-generation-acceptance-baseline-normalization-2026-07-02
+      - ai-generation-goal-completion-audit-2026-07-02
+      - ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+    branch: codex/ai-generation-requirements-ssot-alignment
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    allowedFiles:
+      - AGENTS.md
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md
+      - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+    readOnlyAllowedFiles:
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/requirement-ssot-reading-governance.md
+      - docs/01-requirements/modules/02-question-paper.md
+      - docs/01-requirements/modules/04-ai-scoring.md
+      - docs/01-requirements/modules/05-rag-knowledge.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-07-organization-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-05-formal-content-separation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-24-role-separated-mvp-requirement-alignment.md
+      - docs/01-requirements/traceability/2026-07-01-ai-generation-root-cause-and-reuse-protocol.md
+      - docs/01-requirements/traceability/2026-07-01-ai-generation-core-walkthrough-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: blocked_not_needed_docs_requirement_alignment_only
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Current AI閸戞椽顣?and AI缂佸嫬宓?requirement reading is expressed as one dated traceability overlay.
+      - Standard-only AI generation non-goal remains preserved while unified standard/advanced repair scope remains explicit.
+      - Content admin, advanced learner, advanced organization employee, and advanced organization admin AI generation boundaries are mapped to current docs.
+      - Older blocked/gap wording is marked historical or superseded where the 2026-07-02 baseline already covers it.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/01-requirements/traceability/capability-catalog.md docs/01-requirements/use-cases/use-case-catalog.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+      - npm.cmd exec -- prettier --check --ignore-unknown AGENTS.md docs/01-requirements/00-index.md docs/01-requirements/modules/06-admin-ops.md docs/01-requirements/advanced-edition/00-index.md docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md docs/01-requirements/traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/01-requirements/traceability/capability-catalog.md docs/01-requirements/use-cases/use-case-catalog.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-requirements-ssot-alignment.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-requirements-ssot-alignment.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-requirements-ssot-alignment-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_ai_generation_requirements_ssot_alignment_and_conflict_discussion_2026_07_02
+    validationSummary:
+      status: passed
+      requirementOverlayCreated: true
+      standardBaseNonGoalPreserved: true
+      unifiedAdvancedAiGenerationScopeMapped: true
+      historicalResidualSupersessionRuleRecorded: true
+      noUnresolvedProductConflict: true
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
+  - id: ai-generation-acceptance-baseline-normalization-2026-07-02
+    title: AI generation acceptance baseline normalization
+    phase: ai-generation-acceptance-baseline-normalization-2026-07-02
+    sourceStory: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    humanApprovalBoundary: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    targetClosureItem: Normalize current AI閸戞椽顣?and AI缂佸嫬宓?evidence and state into one current baseline
+    behaviorBoundary: docs_state_evidence_baseline_normalization_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_state_acceptance_baseline_normalization
+    moduleRunVersion: 2
+    status: closed
+    result: completed_single_ai_generation_acceptance_baseline
+    priority: p1
+    claimedAt: "2026-07-02T06:45:00-07:00"
+    plannedAt: "2026-07-02T06:45:00-07:00"
+    implementedAt: "2026-07-02T06:45:00-07:00"
+    validatedAt: "2026-07-02T06:45:00-07:00"
+    reviewedAt: "2026-07-02T06:45:00-07:00"
+    closedAt: "2026-07-02T06:45:00-07:00"
+    dependsOn:
+      - ai-generation-goal-completion-audit-2026-07-02
+      - ai-generation-20-fix-quick-acceptance-2026-07-02
+      - ops-admin-local-login-residual-2026-07-02
+      - owner-preview-resource-pack-addendum-2026-07-02
+      - marketing-monopoly-logistics-provider-rerun-2026-07-02
+    branch: codex/ai-generation-acceptance-baseline-normalization
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+      - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: blocked_not_needed_docs_state_only
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Current AI閸戞椽顣?and AI缂佸嫬宓?acceptance baseline is expressed as one current state.
+      - Quick acceptance ops_admin local login residual is marked closed by later local login residual evidence.
+      - Quick acceptance logistics non-covered wording is superseded for the declared AI generation acceptance scope by later resource-pack and Provider evidence, without claiming broad production/full logistics coverage.
+      - MML-RERUN-01 and MML-RERUN-02 are closed or superseded by later monopoly OCR/runtime RAG, parser, and Provider count evidence.
+      - MML-RERUN-03 remains only a diagnostic wording inconsistency outside the current Provider acceptance blocker set.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, production usability, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-acceptance-baseline-normalization.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-acceptance-baseline-normalization.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-acceptance-baseline-normalization-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_single_ai_generation_acceptance_baseline_normalization_2026_07_02
+    validationSummary:
+      status: passed
+      singleAiGenerationAcceptanceBaselineRecorded: true
+      oldOpsAdminResidualClosedByLaterEvidence: true
+      oldLogisticsNonCoveredResidualSupersededForCurrentAcceptanceScope: true
+      mmlRerun01Closed: true
+      mmlRerun02Superseded: true
+      mmlRerun03OutsideCurrentProviderBlockerSet: true
+      scopedPrettierWrite: passed
+      scopedPrettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      productionUsabilityClaimed: false
+      costCalibrationExecuted: false
+
+  - id: ai-generation-goal-completion-audit-2026-07-02
+    title: AI generation goal completion audit
+    phase: ai-generation-goal-completion-audit-2026-07-02
+    sourceStory: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+    humanApprovalBoundary: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+    targetClosureItem: Audit AI閸戞椽顣?and AI缂佸嫬宓?goal acceptance criteria and close the problem list only if every criterion has evidence
+    behaviorBoundary: docs_state_goal_completion_audit_only_no_source_test_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: docs_state_goal_completion_audit
+    moduleRunVersion: 2
+    status: closed
+    result: completed_ai_question_and_paper_generation_goal_problem_list
+    priority: p1
+    claimedAt: "2026-07-02T06:18:00-07:00"
+    plannedAt: "2026-07-02T06:18:00-07:00"
+    implementedAt: "2026-07-02T06:25:00-07:00"
+    validatedAt: "2026-07-02T06:25:00-07:00"
+    reviewedAt: "2026-07-02T06:25:00-07:00"
+    closedAt: "2026-07-02T06:25:00-07:00"
+    dependsOn:
+      - ai-generation-deterministic-acceptance-matrix-rollup-2026-07-02
+      - ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+      - ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+      - ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair-2026-07-02
+    branch: codex/ai-generation-goal-completion-audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-shared-structured-contract-goal-plan.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-deterministic-acceptance-matrix-rollup.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-monopoly-question-structured-acceptance-diagnosis.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-monopoly-question-provider-rerun-after-plaintext-acceptance-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      focusedUnitTest: approved
+      localSourceChange: blocked
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Every AI閸戞椽顣?and AI缂佸嫬宓?goal criterion maps to closed child evidence.
+      - The old AI缂佸嫬宓?total-count residual is explicitly superseded by later parser and Provider count evidence.
+      - The old monopoly AI閸戞椽顣?residual is explicitly closed by OCR/runtime RAG coverage, parser repair, and bounded Provider rerun evidence.
+      - Focused AI generation regression tests, lint, typecheck, scoped Prettier, diff check, and Module Run v2 gates pass.
+      - No source/test code, Provider/browser/DB action, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-goal-completion-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-goal-completion-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-goal-completion-audit-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_total_goal_acceptance_standards_until_all_ai_question_and_paper_generation_checks_pass_2026_07_02
+    validationSummary:
+      status: passed
+      goalCriteriaMappedToClosedEvidence: true
+      oldAiPaperQuestionCountResidualClosedByLaterEvidence: true
+      oldMonopolyAiQuestionResidualClosedByLaterEvidence: true
+      focusedUnitTests: 11_files_170_tests_passed
+      lint: passed
+      typecheck: passed
+      prettierWrite: passed
+      prettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2ModuleCloseout: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+
+  - id: ai-generation-ai-question-provider-structured-output-robustness-2026-07-02
+    title: AI generation AI question Provider structured output robustness
+    phase: ai-generation-ai-question-provider-structured-output-robustness-2026-07-02
+    sourceStory: seeded_by_bounded_provider_rerun_ai_question_residual_2026_07_02
+    humanApprovalBoundary: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    targetClosureItem: Harden AI閸戞椽顣?structured-output parsing and Provider instructions without changing evidence redaction
+    behaviorBoundary: local_source_test_shared_parser_instruction_repair_no_provider_browser_db_dependency_schema_deploy_release_claim
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: completed_ai_question_provider_structured_output_robustness
+    priority: p1
+    claimedAt: "2026-07-02T04:42:55-07:00"
+    plannedAt: "2026-07-02T04:42:55-07:00"
+    implementedAt: "2026-07-02T04:53:53-07:00"
+    validatedAt: "2026-07-02T04:53:53-07:00"
+    reviewedAt: "2026-07-02T04:53:53-07:00"
+    closedAt: "2026-07-02T04:53:53-07:00"
+    dependsOn:
+      - ai-generation-bounded-provider-rerun-after-structured-contract-2026-07-02
+    branch: codex/ai-generation-ai-question-provider-structured-output-robustness
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/route-integrated-provider-instruction-service.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+      - src/server/contracts/ai-generation-task-spec-contract.ts
+      - src/server/contracts/route-integrated-provider-execution-contract.ts
+      - src/server/services/admin-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-route-integrated-provider-execution-service.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      providerCall: blocked
+      localDevServer: blocked
+      localhostBrowser: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - AI閸戞椽顣?parser accepts strict top-level `questions` and compatible array roots without loosening exact requested count.
+      - AI閸戞椽顣?Provider instruction requires a single JSON object, top-level `questions`, exact requested count, and no Markdown/prose wrapper.
+      - Existing AI缂佸嫬宓?structured count behavior remains unchanged.
+      - Focused route/runtime tests pass for admin and personal shared Provider flows.
+      - No Provider call, browser runtime, DB access, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration claim is allowed in this task.
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md src/server/services/route-integrated-provider-execution-service.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/route-integrated-provider-instruction-service.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-ai-question-provider-structured-output-robustness-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-ai-question-provider-structured-output-robustness-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    validationSummary:
+      status: passed
+      sourceOrTestChanged: true
+      focusedUnitTests: 7_files_107_tests_passed
+      lint: passed
+      typecheck: passed
+      prettierWrite: passed
+      prettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      requirementSsotReadiness: passed
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      databaseConnectionOrMutationExecuted: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      nextRecommendedTaskId: ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+  - id: ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+    title: AI generation bounded Provider rerun after question structure repair
+    phase: ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+    sourceStory: seeded_by_ai_question_provider_structured_output_robustness_2026_07_02
+    humanApprovalBoundary: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    targetClosureItem: Rerun the previously failed content-admin AI閸戞椽顣?Provider samples after shared parser repair
+    behaviorBoundary: bounded_localhost_content_admin_provider_rerun_only_no_source_dependency_schema_deploy_release_claim
+    taskKind: bounded_provider_acceptance_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: bounded_provider_rerun_completed_with_monopoly_ai_question_residual
+    priority: p1
+    claimedAt: "2026-07-02T05:01:10-07:00"
+    plannedAt: "2026-07-02T05:01:10-07:00"
+    executedAt: "2026-07-02T05:09:37-07:00"
+    validatedAt: "2026-07-02T05:09:37-07:00"
+    reviewedAt: "2026-07-02T05:09:37-07:00"
+    closedAt: "2026-07-02T05:09:37-07:00"
+    dependsOn:
+      - ai-generation-ai-question-provider-structured-output-robustness-2026-07-02
+    branch: codex/ai-generation-bounded-provider-rerun-after-question-structure-repair
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/advanced-edition/00-index.md
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/08-organization-ai-generation.md
+      - docs/01-requirements/traceability/2026-06-23-advanced-ai-generation-scope-clarification.md
+      - docs/01-requirements/traceability/2026-06-21-content-admin-ai-generation-scope-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-structured-contract.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-ai-question-provider-structured-output-robustness.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      sourceOrTestChange: blocked
+      focusedUnitTest: approved
+      providerCall: approved_bounded_localhost_content_admin_two_attempts_zero_retry
+      localDevServer: approved_localhost_only_if_needed
+      localhostApi: approved_content_admin_acceptance_session_only
+      localhostBrowser: blocked
+      directDatabaseConnection: blocked
+      databaseMutationByAgent: blocked
+      envSecretAccessByAgent: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Provider submit attempts are at most 2 and Provider retries are 0.
+      - content_admin monopoly skill AI閸戞椽顣?returns structured preview question_set `10/10`.
+      - content_admin logistics theory AI閸戞椽顣?returns structured preview question_set `10/10`.
+      - Evidence records only redacted status/category/count/duration metadata.
+      - No source/test code, AI缂佸嫬宓?repair, direct DB action by agent, dependency, schema, deploy, release readiness, final Pass, or Cost Calibration action is allowed.
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-rerun-after-question-structure-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-bounded-provider-rerun-after-question-structure-repair-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_template_acceptance_standards_and_proceed_2026_07_02
+    validationSummary:
+      status: completed_with_residual
+      sourceOrTestChanged: false
+      providerSubmitAttempts: 2
+      providerRetries: 0
+      monopolyAiQuestion: failed_unacceptable_grounded_structured_output
+      logisticsAiQuestion: passed_question_set_10_of_10
+      focusedUnitTests: 4_files_64_tests_passed
+      lint: passed
+      typecheck: passed
+      prettierWrite: passed
+      prettierCheck: passed
+      gitDiffCheck: passed
+      moduleRunV2PreCommit: passed
+      moduleRunV2PrePush: passed_skip_remote_ahead_check
+      rawEvidenceRecorded: false
+      providerPayloadPromptRawAiOutputRecorded: false
+      credentialSessionTokenCookieRecorded: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      aiPaperRepairExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      nextRecommendedTaskId: monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
+  - id: monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
+    title: Monopoly scanned PDF OCR runtime RAG coverage
+    phase: monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
+    sourceStory: current_user_requested_monopoly_scanned_pdf_ocr_runtime_rag_coverage_2026_07_02
+    humanApprovalBoundary: current_user_requested_monopoly_scanned_pdf_ocr_runtime_rag_coverage_2026_07_02
+    targetClosureItem: OCR the two skipped monopoly scanned PDFs, refresh runtime RAG coverage, then rerun only the failed monopoly AI question sample
+    behaviorBoundary: local_private_ocr_and_runtime_rag_monopoly_only_then_single_bounded_provider_question_sample_no_ai_paper_count_preview_repair_no_source_dependency_schema_deploy_release_claim
+    taskKind: local_private_ocr_runtime_rag_provider_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: completed_ocr_runtime_rag_coverage_with_provider_structured_output_residual
+    priority: p1
+    claimedAt: "2026-07-02T01:43:30-07:00"
+    plannedAt: "2026-07-02T01:43:30-07:00"
+    implementedAt: "2026-07-02T02:13:20-07:00"
+    validatedAt: "2026-07-02T02:13:20-07:00"
+    reviewedAt: "2026-07-02T02:13:20-07:00"
+    closedAt: "2026-07-02T02:13:20-07:00"
+    dependsOn:
+      - marketing-monopoly-logistics-provider-rerun-2026-07-02
+    branch: codex/monopoly-scanned-pdf-ocr-runtime-rag-coverage
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+      - docs/05-execution-logs/evidence/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+      - D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated\**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - scripts/db/Import-OwnerPreviewResourcePackage.ps1
+      - scripts/db/Import-OwnerPreviewRuntimeRagResources.ps1
+      - src/db/owner-preview-resource-import.ts
+      - src/db/owner-preview-runtime-rag-resource-import.ts
+      - tests/unit/owner-preview-resource-import.test.ts
+      - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+      - tests/unit/local-acceptance-session-bootstrap.test.ts
+      - src/**/ai-generation*/**
+      - src/**/resource*/**
+      - src/**/knowledge*/**
+      - src/**/local-acceptance*/**
+      - D:\tiku\rawfiles\閺佹瑦娼楁稉搴ㄥ鐎规氨鍋ｇ紒鍡楀灟\娑撴挸宕犵挧鍕灐\**
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - .env.local
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: blocked
+      localPrivateFixturePackReadWrite: approved_monopoly_ocr_outputs_only
+      focusedUnitTest: approved_existing_tests_only
+      localDevServer: approved
+      localhostBrowser: approved
+      providerCall: approved_bounded_localhost_ui_only
+      providerMaxSubmitAttemptsTotal: 1
+      providerMaxSubmitAttemptsPerProfessionFunction: 1
+      providerRetries: 0
+      credentialReadForLocalhostLogin: approved_no_evidence
+      envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+      databaseConnection: approved_local_aggregate_counts_and_guarded_import_only
+      databaseMutation: approved_local_resource_import_after_dry_run_pass
+      resourceImport: approved_monopoly_only_after_dry_run_pass
+      runtimeRagImport: approved_monopoly_refresh_after_dry_run_pass
+      ocrRepair: approved_two_monopoly_scanned_pdfs_private_output_only
+      aiPaperQuestionCountPreviewRepair: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode:
+      allowed: file_count_hash_prefix_page_count_character_count_chunk_count_coverage_status_category_duration_bucket_command_result_only
+      forbidden:
+        - credentials_cookies_tokens_sessions_auth_headers
+        - env_values_connection_strings
+        - raw_db_rows_internal_ids_pii_plaintext_redeem_code
+        - provider_payload_prompt_raw_ai_input_output
+        - full_ocr_text_full_material_chunk_question_paper_content
+        - raw_dom_screenshot_trace_localStorage
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Import-OwnerPreviewResourcePackage.ps1 -PackageRoot D:\tiku-local-private\owner-facing-fixtures
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Import-OwnerPreviewRuntimeRagResources.ps1 -PackageRoot D:\tiku-local-private\owner-facing-fixtures
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Import-OwnerPreviewResourcePackage.ps1 -PackageRoot D:\tiku-local-private\owner-facing-fixtures -Execute -ConfirmOwnerPreviewResourceImport
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Import-OwnerPreviewRuntimeRagResources.ps1 -PackageRoot D:\tiku-local-private\owner-facing-fixtures -Execute -ConfirmOwnerPreviewRuntimeRagImport
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md docs/05-execution-logs/evidence/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md docs/05-execution-logs/audits-reviews/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md docs/05-execution-logs/evidence/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md docs/05-execution-logs/audits-reviews/2026-07-02-monopoly-scanned-pdf-ocr-runtime-rag-coverage.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_monopoly_scanned_pdf_ocr_runtime_rag_coverage_closeout_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_monopoly_scanned_pdf_ocr_runtime_rag_coverage_closeout_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_monopoly_scanned_pdf_ocr_runtime_rag_coverage_closeout_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_monopoly_scanned_pdf_ocr_runtime_rag_coverage_closeout_2026_07_02
+    validationSummary:
+      status: completed_with_residual
+      result: completed_ocr_runtime_rag_coverage_with_provider_structured_output_residual
+      ocrSourcePdfCount: 2
+      ocrOutputMarkdownPartCount: 26
+      ocrOutputCharacterCount: 1094686
+      sourceInventoryRowCount: 117
+      resourcePackageStatus: usable
+      resourceImportStatus: executed
+      runtimeRagImportStatus: executed
+      importedResourceCount: 69
+      importedRuntimeChunkCount: 545
+      runtimeCoverageBefore: monopoly_rag_ready_4
+      runtimeCoverageAfter: monopoly_rag_ready_30
+      sampledProfession: monopoly
+      sampledLevel: 3
+      sampledSubject: skill
+      serviceRagPreflight: sufficient_3_citations
+      providerSubmitAttempts: 1
+      providerRetries: 0
+      providerOutcomeCategory: failed_or_insufficient_safe_error
+      apiCode: 409015
+      aiPaperQuestionCountPreviewRepair: not_touched
+      focusedUnitTests: pass_3_files_16_tests
+      lint: pass
+      typecheck: pass
+      prettierWrite: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      envFileModified: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: marketing-monopoly-logistics-provider-rerun-2026-07-02
+    title: Marketing monopoly logistics Provider rerun with updated runtime RAG catalog
+    phase: marketing-monopoly-logistics-provider-rerun-2026-07-02
+    sourceStory: current_user_requested_marketing_monopoly_logistics_provider_rerun_with_updated_runtime_rag_catalog_2026_07_02
+    humanApprovalBoundary: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+    targetClosureItem: rerun marketing monopoly logistics AI question and AI paper small Provider samples using updated runtime RAG catalog
+    behaviorBoundary: local_only_updated_runtime_rag_catalog_provider_acceptance_rerun_no_source_dependency_schema_deploy_release_claim
+    taskKind: local_resource_import_and_bounded_provider_acceptance_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: completed_provider_rerun_with_monopoly_ocr_followup
+    priority: p1
+    claimedAt: "2026-07-02T06:00:00-07:00"
+    plannedAt: "2026-07-02T06:00:00-07:00"
+    implementedAt: "2026-07-02T06:15:00-07:00"
+    validatedAt: "2026-07-02T06:20:00-07:00"
+    reviewedAt: "2026-07-02T06:20:00-07:00"
+    closedAt: "2026-07-02T06:20:00-07:00"
+    dependsOn:
+      - owner-preview-resource-pack-addendum-2026-07-02
+    branch: codex/marketing-monopoly-logistics-provider-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: approved_existing_tests_only
+      localDevServer: approved
+      localhostBrowser: approved
+      providerCall: approved_bounded_localhost_ui_only
+      providerMaxSubmitAttemptsTotal: 6
+      providerMaxSubmitAttemptsPerProfessionFunction: 1
+      providerRetries: 0
+      credentialReadForLocalhostLogin: approved_no_evidence
+      envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+      databaseConnection: approved_local_aggregate_counts_and_guarded_import_only
+      databaseMutation: approved_local_resource_import_if_needed_after_dry_run_pass
+      resourceImport: approved_marketing_monopoly_logistics_only_if_needed_after_dry_run_pass
+      runtimeRagImport: approved_marketing_monopoly_logistics_execute_after_dry_run_pass
+      ocrRepair: blocked_defer_to_separate_task_if_monopoly_weak
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-logistics-provider-rerun.md docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-logistics-provider-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-logistics-provider-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId marketing-monopoly-logistics-provider-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId marketing-monopoly-logistics-provider-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_marketing_monopoly_logistics_provider_rerun_2026_07_02
+    validationSummary:
+      status: pass_with_residual_followups
+      result: completed_provider_rerun_with_monopoly_ocr_followup
+      focusedUnitTests: pass_3_files_16_tests
+      lint: pass
+      typecheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_anchor_sync
+      resourceImportDryRun: pass
+      resourceImportExecute: pass_local_loopback
+      runtimeRagImportDryRun: pass
+      runtimeRagImportExecute: pass
+      localhostDevServer: pass_http_200
+      contentAdminLocalAcceptanceSession: pass_no_credentials_recorded
+      providerAttemptCount: 6
+      providerRetryCount: 0
+      providerVisibleSuccessCount: 5
+      providerSafeFailureCount: 1
+      residualFindings:
+        - monopoly_ai_question_safe_failure_requires_ocr_followup
+        - ai_paper_structured_question_count_not_recognized
+        - runtime_rag_logistics_diagnostic_wording_inconsistent
+      sourceOrTestChanged: false
+      envFileModifiedOrValueRecorded: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      e2eRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      nextRecommendedTaskId: monopoly-scanned-pdf-ocr-runtime-rag-coverage-2026-07-02
+  - id: owner-preview-resource-pack-addendum-2026-07-02
+    title: Owner preview resource pack addendum for textbook and assessment point materials
+    phase: owner-preview-resource-pack-addendum-2026-07-02
+    status: closed
+    result: completed_owner_preview_resource_pack_addendum
+    priority: p1
+    taskKind: local_private_resource_pack_addendum
+    moduleRunVersion: 2
+    sourceStory: current_user_approved_integrating_new_textbook_assessment_point_materials_into_owner_preview_fixture_pack_2026_07_02
+    targetClosureItem: augment owner preview fixture pack with marketing monopoly logistics textbook and assessment-point sources for later AI generation validation
+    behaviorBoundary: local_private_fixture_pack_only_no_db_execute_no_provider_call_no_env_secret_no_schema_dependency_deploy_release_claim
+    dependsOn:
+      - learner-employee-ai-visible-result-closure-repair-2026-07-02
+    branch: codex/owner-preview-resource-pack-addendum
+    claimedAt: "2026-07-02T05:10:00-07:00"
+    plannedAt: "2026-07-02T05:10:00-07:00"
+    implementedAt: "2026-07-02T05:30:00-07:00"
+    validatedAt: "2026-07-02T05:40:00-07:00"
+    reviewedAt: "2026-07-02T05:45:00-07:00"
+    closedAt: "2026-07-02T05:45:00-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md
+      - docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+      - D:\tiku-local-private\owner-facing-fixtures\2026-06-28-rawfiles-curated\**
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/db/Import-OwnerPreviewResourcePackage.ps1
+      - scripts/db/Import-OwnerPreviewRuntimeRagResources.ps1
+      - src/db/owner-preview-resource-import.ts
+      - src/db/owner-preview-runtime-rag-resource-import.ts
+      - tests/unit/owner-preview-resource-import.test.ts
+      - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+      - D:\tiku\rawfiles\閺佹瑦娼楁稉搴ㄥ鐎规氨鍋ｇ紒鍡楀灟\**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localPrivateFixturePackReadWrite: approved
+      rawfilesReadOnly: approved
+      documentMetadataExtraction: approved_no_raw_content_evidence
+      pdfTextExtractabilityProbe: approved_no_raw_content_evidence
+      localResourceImportDryRun: approved
+      localRuntimeRagImportDryRun: approved
+      localResourceImportExecute: blocked
+      localRuntimeRagImportExecute: approved_after_dry_run_pass
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-owner-preview-resource-pack-addendum.md docs/05-execution-logs/evidence/2026-07-02-owner-preview-resource-pack-addendum.md docs/05-execution-logs/audits-reviews/2026-07-02-owner-preview-resource-pack-addendum.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId owner-preview-resource-pack-addendum-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId owner-preview-resource-pack-addendum-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_resource_pack_addendum_execution_2026_07_02
+    validationSummary:
+      status: pass_with_residual_followups
+      privateFixturePackUpdated: true
+      addedInventoryRowCount: 31
+      generatedMarkdownFileCount: 22
+      copiedOrConvertedDocxFileCount: 3
+      knowledgeNodeCandidateCount: 2973
+      skippedSourceCount: 2
+      resourcePackageDryRun: pass_usable
+      runtimeRagDryRun: pass
+      runtimeRagExecute: pass_local_catalog_only
+      runtimeRagImportedResourceCount: 43
+      runtimeRagImportedChunkCount: 519
+      runtimeCoverage:
+        logisticsAllRagReady: 11
+        marketingAllRagReady: 28
+        monopolyAllRagReady: 4
+      focusedUnitTests: pass_2_files_10_tests
+      prettierScoped: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      databaseConnectionOrMutationExecuted: false
+      resourcePackageDbImportExecuted: false
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      packageOrLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      browserOrE2eRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      residualFollowups:
+        - monopoly_scanned_pdf_ocr_needed_before_runtime_rag
+        - runtime_rag_logistics_coverage_label_cleanup
+        - knowledge_node_candidates_need_taxonomy_review_before_canonical_import
+      nextRecommendedTaskId: marketing-monopoly-logistics-provider-rerun-2026-07-02
+  - id: learner-employee-ai-visible-result-closure-repair-2026-07-02
+    title: Learner and employee AI visible result closure repair
+    phase: learner-employee-ai-visible-result-closure-repair-2026-07-02
+    sourceStory: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
+    humanApprovalBoundary: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
+    targetClosureItem: close personal advanced and organization advanced employee AI question and paper submit into visible current generated result
+    behaviorBoundary: local_source_test_repair_only_no_provider_call_no_env_no_db_no_resource_import_no_schema_dependency_deploy_release_claim
+    followUpNotInThisTask:
+      - monopoly_ai_paper_runtime_rag_material_coverage
+      - logistics_option_hide_or_disable_until_material_exists
+    taskKind: focused_source_test_repair
+    executionProfile: local_source_test_repair_only
+    validationPolicy: focused_unit_lint_typecheck_prettier_diff_module_run_v2
+    moduleRunVersion: 2
+    status: closed
+    result: completed_learner_employee_ai_visible_result_closure_repair
+    priority: p1
+    claimedAt: "2026-07-02T04:20:00-07:00"
+    plannedAt: "2026-07-02T04:20:00-07:00"
+    implementedAt: "2026-07-02T04:35:00-07:00"
+    validatedAt: "2026-07-02T04:40:00-07:00"
+    reviewedAt: "2026-07-02T04:40:00-07:00"
+    closedAt: "2026-07-02T04:40:00-07:00"
+    dependsOn:
+      - marketing-monopoly-provider-rerun-2026-07-02
+    branch: codex/learner-employee-ai-visible-result-closure-repair
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-local-browser-experience-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      databaseConnection: blocked
+      databaseMutation: blocked
+      resourceImport: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-local-browser-experience-service.test.ts src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-visible-result-closure-repair.md docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-visible-result-closure-repair.md docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-visible-result-closure-repair.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-employee-ai-visible-result-closure-repair-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-employee-ai-visible-result-closure-repair-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_learner_employee_visible_ai_result_closure_repair_2026_07_02
+    validationSummary:
+      status: pass
+      focusedUnitTests: pass_4_files_39_tests
+      lint: pass
+      typecheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      resourceImportExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      e2eExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      nextRecommendedTaskId: monopoly-ai-paper-runtime-rag-coverage-repair-2026-07-02
+  - id: marketing-monopoly-provider-rerun-2026-07-02
+    title: Marketing and monopoly Provider rerun after history closure
+    phase: marketing-monopoly-provider-rerun-2026-07-02
+    sourceStory: current_user_requested_marketing_monopoly_resource_provider_rerun_excluding_logistics_2026_07_02
+    humanApprovalBoundary: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+    targetClosureItem: rerun marketing and monopoly resource-backed 8-role localhost real Provider acceptance after learner employee history closure repair
+    behaviorBoundary: local_only_marketing_monopoly_resource_coverage_import_and_bounded_8_role_provider_acceptance_rerun_no_logistics_no_source_dependency_schema_deploy_release_claim
+    logisticsBoundary: excluded_until_material_exists
+    taskKind: local_resource_import_and_bounded_provider_acceptance_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: completed_acceptance_rerun_with_residual_findings
+    priority: p1
+    claimedAt: "2026-07-02T03:00:00-07:00"
+    plannedAt: "2026-07-02T03:00:00-07:00"
+    implementedAt: "2026-07-02T03:55:00-07:00"
+    validatedAt: "2026-07-02T04:05:00-07:00"
+    reviewedAt: "2026-07-02T04:05:00-07:00"
+    closedAt: "2026-07-02T04:05:00-07:00"
+    dependsOn:
+      - learner-employee-ai-history-closure-2026-07-02
+    branch: codex/marketing-monopoly-provider-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
+    blockedFiles:
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: approved_existing_tests_only
+      localDevServer: approved
+      localhostBrowser: approved
+      providerCall: approved_bounded_localhost_ui_only
+      providerMaxSubmitAttemptsTotal: 8
+      providerMaxSubmitAttemptsPerRoleRoute: 1
+      providerRetries: 0
+      credentialReadForLocalhostLogin: approved_no_evidence
+      envSecretAccess: approved_existing_runtime_config_read_only_by_app_and_import_script_no_output_no_write
+      databaseConnection: approved_local_aggregate_counts_and_guarded_import_only
+      databaseMutation: approved_local_resource_import_marketing_monopoly_only
+      resourceImport: approved_marketing_monopoly_only
+      logisticsResourceImport: blocked_material_missing
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-rerun.md docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId marketing-monopoly-provider-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId marketing-monopoly-provider-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_enter_marketing_monopoly_provider_rerun_2026_07_02
+    validationSummary:
+      status: pass_with_residual_findings
+      result: completed_acceptance_rerun_with_residual_findings
+      logisticsExcluded: true
+      focusedUnitTests: pass_3_files_16_tests
+      lint: pass
+      typecheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      resourceImportDryRun: pass
+      resourceImportExecute: pass
+      runtimeRagImportDryRun: pass
+      runtimeRagImportExecute: pass
+      localhostDevServer: pass_http_200
+      roleMatrix: completed_8_roles
+      providerAttemptCount: 8
+      providerRetryCount: 0
+      providerVisibleSuccessCount: 2
+      providerAcceptedNoVisibleResultCount: 4
+      providerInsufficientOrFailedCount: 2
+      residualFindings:
+        - learner_employee_advanced_accepts_without_visible_result
+        - monopoly_ai_paper_insufficient_runtime_rag_coverage
+        - logistics_option_visible_while_material_missing
+        - current_result_status_can_be_confused_with_historical_failure_marker
+      nextRecommendedTaskId: learner-employee-ai-visible-result-closure-repair-2026-07-02
+      sourceOrTestChanged: false
+      envFileModified: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: learner-employee-ai-history-closure-2026-07-02
+    title: Learner and employee AI generation history closure
+    phase: learner-employee-ai-history-closure-2026-07-02
+    sourceStory: current_user_approved_repair_for_learner_employee_ai_history_closure_residual_2026_07_02
+    humanApprovalBoundary: current_user_approved_plan_then_execute_and_closeout_2026_07_02
+    targetClosureItem: close learner and employee AI generation request/result history after local visible Provider submit
+    behaviorBoundary: local_source_test_repair_only_for_personal_employee_ai_request_result_history_and_redacted_materialization_no_resource_import_no_provider_call_no_env_schema_dependency_deploy
+    taskKind: focused_source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: completed_learner_employee_ai_history_closure
+    priority: p1
+    claimedAt: "2026-07-02T02:20:00-07:00"
+    plannedAt: "2026-07-02T02:20:00-07:00"
+    implementedAt: "2026-07-02T02:35:00-07:00"
+    validatedAt: "2026-07-02T02:40:00-07:00"
+    reviewedAt: "2026-07-02T02:40:00-07:00"
+    closedAt: "2026-07-02T02:40:00-07:00"
+    dependsOn:
+      - marketing-monopoly-provider-acceptance-2026-07-02
+    branch: codex/learner-employee-ai-history-closure
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md
+      - docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md
+      - src/server/models/personal-ai-generation-result-history.ts
+      - src/server/models/personal-ai-generation-result.ts
+      - src/server/validators/personal-ai-generation-result-history.ts
+      - src/server/validators/personal-ai-generation-result-persistence.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/repositories/personal-ai-generation-result-repository.test.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+      - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_exact_history_closure_scope_only
+      focusedUnitTest: approved
+      localDevServer: blocked
+      localhostBrowser: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      resourceImport: blocked
+      logisticsResourceImport: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-learner-employee-ai-history-closure.md docs/05-execution-logs/evidence/2026-07-02-learner-employee-ai-history-closure.md docs/05-execution-logs/audits-reviews/2026-07-02-learner-employee-ai-history-closure.md src/server/models/personal-ai-generation-result-history.ts src/server/models/personal-ai-generation-result.ts src/server/validators/personal-ai-generation-result-history.ts src/server/validators/personal-ai-generation-result-persistence.ts src/server/repositories/personal-ai-generation-request-repository.ts src/server/repositories/personal-ai-generation-result-repository.ts src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/repositories/personal-ai-generation-result-repository.test.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-result-route.ts src/server/services/personal-ai-generation-result-history-service.ts src/server/services/personal-ai-generation-route-integrated-result-materialization-service.ts src/server/services/personal-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-employee-ai-history-closure-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-employee-ai-history-closure-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_learner_employee_ai_history_closure
+      redTestObserved: true
+      focusedUnitTests: pass_5_files_56_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass_after_allowed_files_scope_materialization
+      moduleRunV2PrePushReadiness: pass_after_closeout_state_update
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      resourceImportExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+  - id: marketing-monopoly-provider-acceptance-2026-07-02
+    title: Marketing and monopoly resource coverage plus fuller 8-role Provider acceptance
+    phase: marketing-monopoly-provider-acceptance-2026-07-02
+    sourceStory: current_user_requested_marketing_monopoly_resource_coverage_and_fuller_8_role_provider_acceptance_2026_07_02
+    humanApprovalBoundary: current_user_approved_marketing_monopoly_resource_provider_acceptance_and_excluded_logistics_2026_07_02
+    targetClosureItem: import or verify marketing and monopoly local resources, then run fuller 8-role localhost real Provider acceptance
+    behaviorBoundary: local_only_marketing_monopoly_resource_coverage_import_and_bounded_8_role_provider_acceptance_no_logistics_no_source_dependency_schema_env_deploy_release_claim
+    logisticsBoundary: excluded_until_material_exists
+    taskKind: local_resource_import_and_bounded_provider_acceptance
+    moduleRunVersion: 2
+    status: closed
+    result: completed_with_follow_up_findings
+    priority: p1
+    claimedAt: "2026-07-02T01:45:00-07:00"
+    plannedAt: "2026-07-02T01:45:00-07:00"
+    implementedAt: "2026-07-02T02:05:00-07:00"
+    validatedAt: "2026-07-02T02:10:00-07:00"
+    reviewedAt: "2026-07-02T02:10:00-07:00"
+    closedAt: "2026-07-02T02:10:00-07:00"
+    dependsOn:
+      - ops-admin-local-login-residual-2026-07-02
+    branch: codex/marketing-monopoly-provider-acceptance
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+      - src/db/owner-preview-resource-import.ts
+      - src/db/owner-preview-runtime-rag-resource-import.ts
+      - src/db/owner-preview-empty-baseline.ts
+      - tests/unit/owner-preview-resource-import.test.ts
+      - tests/unit/owner-preview-runtime-rag-resource-import.test.ts
+      - src/**/ai-generation*/**
+      - src/**/resource*/**
+      - src/**/knowledge*/**
+      - scripts/**
+      - D:\tiku-local-private\owner-facing-fixtures\**
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - .env.local
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/owner-preview-runtime-rag-resource-import.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-marketing-monopoly-provider-acceptance.md docs/05-execution-logs/evidence/2026-07-02-marketing-monopoly-provider-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-02-marketing-monopoly-provider-acceptance.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId marketing-monopoly-provider-acceptance-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId marketing-monopoly-provider-acceptance-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: completed_with_follow_up_findings
+      resourcePackageStatus: usable
+      logisticsExcluded: true
+      catalogImportStatus: executed
+      runtimeRagImportStatus: executed
+      importedResourceCount: 62
+      importedRuntimeResourceCount: 14
+      importedRuntimeChunkCount: 375
+      runtimeCoverage: marketing_rag_ready_13_monopoly_rag_ready_1
+      roleLabelsAttempted: 8
+      browserRouteChecks: 13
+      providerSubmitAttempts: 8
+      providerRetries: 0
+      standardRoleProviderSubmits: 0
+      learnerAdvancedVisibleSubmit: true
+      organizationAdvancedVisibleSubmit: true
+      contentAdminVisibleSubmit: true
+      opsAdminLocalAcceptanceSession: pass
+      followUpFindingCount: 5
+      followUpFindings:
+        - learner_employee_visible_state_history_closure_mismatch
+        - org_advanced_employee_empty_history_after_submit
+        - logistics_option_visible_while_package_missing
+        - admin_question_generation_provider_failure_categories_present
+        - insufficient_material_and_review_state_combined_in_ui
+      focusedUnitTests: pass_3_files_16_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_state_sha_sync
+      sourceOrTestChanged: false
+      envFileModified: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ops-admin-local-login-residual-2026-07-02
+    title: ops_admin local login residual
+    phase: ops-admin-local-login-residual-2026-07-02
+    sourceStory: current_user_requested_ops_admin_login_residual_before_resource_provider_expansion_2026_07_02
+    humanApprovalBoundary: current_user_approved_ops_login_residual_first_and_marketing_monopoly_next_2026_07_02
+    targetClosureItem: resolve or classify ops_admin localhost login residual without touching AI main chain
+    behaviorBoundary: local_browser_account_role_mapping_login_helper_only_no_ai_main_chain_provider_resource_db_mutation_schema_dependency_env_deploy
+    expansionNote: later resource coverage should start with marketing_and_monopoly_only_because_logistics_material_is_currently_missing
+    taskKind: local_browser_account_role_mapping_login_helper_check
+    moduleRunVersion: 2
+    status: closed
+    result: pass_ops_admin_local_login_helper_repair
+    priority: p1
+    claimedAt: "2026-07-02T01:05:00-07:00"
+    plannedAt: "2026-07-02T01:05:00-07:00"
+    implementedAt: "2026-07-02T01:20:00-07:00"
+    validatedAt: "2026-07-02T01:25:00-07:00"
+    reviewedAt: "2026-07-02T01:25:00-07:00"
+    closedAt: "2026-07-02T01:25:00-07:00"
+    dependsOn:
+      - ai-generation-20-fix-quick-acceptance-2026-07-02
+    branch: codex/ops-admin-local-login-residual
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md
+      - docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+      - src/server/contracts/local-acceptance-session-contract.ts
+      - src/server/services/local-acceptance-session-service.ts
+      - tests/unit/local-acceptance-session-bootstrap.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - src/**/auth*/**
+      - src/**/login*/**
+      - src/**/role*/**
+      - src/**/ops*/**
+      - src/**/admin*/**
+      - tests/**
+      - scripts/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ops-admin-local-login-residual.md docs/05-execution-logs/evidence/2026-07-02-ops-admin-local-login-residual.md docs/05-execution-logs/audits-reviews/2026-07-02-ops-admin-local-login-residual.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ops-admin-local-login-residual-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ops-admin-local-login-residual-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_ops_admin_local_login_helper_repair
+      rootCause: local_acceptance_session_helper_only_allowed_content_admin
+      ordinaryOpsAdminPasswordLoginApi: pass
+      ordinaryOpsAdminBrowserFormLogin: pass
+      localAcceptanceOpsAdminBeforeRepair: blocked_invalid_request
+      localAcceptanceOpsAdminAfterRepair: pass_cookie_mode
+      redTestObserved: true
+      focusedUnitTests: pass_1_file_6_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      directDatabaseConnectionOrMutationExecuted: false
+      resourceImportExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-20-fix-quick-acceptance-2026-07-02
+    title: AI generation 20 fix quick acceptance
+    phase: ai-generation-20-fix-quick-acceptance-2026-07-02
+    sourceStory: current_user_approved_quick_acceptance_for_20_ai_generation_repairs_2026_07_02
+    humanApprovalBoundary: current_user_fresh_approved_quick_acceptance_2026_07_02
+    targetClosureItem: quick acceptance for the 20 repaired AI閸戞椽顣?/ AI缂佸嫬宓?issue classes
+    behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+    taskKind: local_browser_owner_preview_quick_acceptance
+    moduleRunVersion: 2
+    status: closed
+    result: pass_20_fix_quick_acceptance_with_ops_admin_login_residual
+    priority: p1
+    claimedAt: "2026-07-02T00:15:00-07:00"
+    plannedAt: "2026-07-02T00:15:00-07:00"
+    walkedThroughAt: "2026-07-02T00:45:00-07:00"
+    reviewedAt: "2026-07-02T00:50:00-07:00"
+    closedAt: "2026-07-02T00:50:00-07:00"
+    dependsOn:
+      - ai-generation-owner-preview-closeout-audit-2026-07-02
+    branch: codex/ai-generation-20-fix-quick-acceptance
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-20-fix-quick-acceptance.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-20-fix-quick-acceptance.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-20-fix-quick-acceptance.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-20-fix-quick-acceptance-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-20-fix-quick-acceptance-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_20_fix_quick_acceptance_with_ops_admin_login_residual
+      roleLabelsAttempted: 8
+      aiRelevantRoleLoginPassed: 7
+      opsAdminLogin: blocked_after_retry
+      routeScans: 16
+      authExpiredVisibleCount: 0
+      technicalWordingLeakRoutes: 0
+      legacyLevelRoutes: 0
+      standardAiEnabledRoutes: 0
+      providerSubmitAttempts: 8
+      providerRetries: 0
+      providerClickedSamples: 8
+      providerFailedSamples: 0
+      learnerPrematurePracticeOrRetryEnabled: false
+      adminDraftBoundaryVisible: true
+      twentyIssueClassesAccepted: true
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-owner-preview-closeout-audit-2026-07-02
+    title: AI generation owner preview closeout audit
+    phase: ai-generation-owner-preview-closeout-audit-2026-07-02
+    sourceStory: current_user_asked_remaining_task_estimate_for_ai_generation_owner_preview_goal_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: audit remaining AI閸戞椽顣?/ AI缂佸嫬宓?owner-preview task count and unclosed finding classes
+    behaviorBoundary: docs_state_only_no_runtime_source_db_provider_env_dependency_schema_e2e_deploy
+    taskKind: docs_state_closeout_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_owner_preview_closeout_audit_no_known_unclosed_repair_task
+    priority: p1
+    claimedAt: "2026-07-01T22:50:00-07:00"
+    plannedAt: "2026-07-01T22:50:00-07:00"
+    reviewedAt: "2026-07-01T23:00:00-07:00"
+    closedAt: "2026-07-01T23:00:00-07:00"
+    dependsOn:
+      - ai-generation-post-retry-repair-rerun-2026-07-02
+    branch: codex/ai-generation-owner-preview-closeout-audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-owner-preview-closeout-audit.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-owner-preview-closeout-audit.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-owner-preview-closeout-audit.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-owner-preview-closeout-audit-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-owner-preview-closeout-audit-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_owner_preview_closeout_audit_no_known_unclosed_repair_task
+      mandatoryRemainingCurrentScopeTasks: 0
+      conditionalKnownRepairTasks: 0
+      optionalBroaderAcceptanceTasks: full_logistics_resource_coverage_or_all_role_real_provider_acceptance_if_owner_expands_scope
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-post-retry-repair-rerun-2026-07-02
+    title: AI generation post retry repair rerun
+    phase: ai-generation-post-retry-repair-rerun-2026-07-02
+    sourceStory: current_goal_after_learner_retry_terminal_state_repair_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: rerun learner AI generation pending retry gate after retry terminal-state repair
+    behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+    taskKind: local_bounded_provider_owner_preview_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: pass_post_retry_repair_rerun
+    priority: p1
+    claimedAt: "2026-07-01T22:15:00-07:00"
+    plannedAt: "2026-07-01T22:15:00-07:00"
+    walkedThroughAt: "2026-07-01T22:30:00-07:00"
+    reviewedAt: "2026-07-01T22:35:00-07:00"
+    closedAt: "2026-07-01T22:35:00-07:00"
+    dependsOn:
+      - ai-generation-learner-retry-terminal-state-repair-2026-07-02
+    branch: codex/ai-generation-post-retry-repair-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-retry-repair-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-retry-repair-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-retry-repair-rerun.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    aiProviderBoundary: bounded_localhost_ui_only_max_two_submits_no_prompt_payload_raw_ai_io_evidence_no_retries
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-retry-repair-rerun.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-retry-repair-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-retry-repair-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-post-retry-repair-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-post-retry-repair-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_post_retry_repair_rerun
+      providerCallExecuted: bounded_localhost_ui_2_submits_no_retries
+      learnerPendingRetryGate: pass_retry_enabled_count_zero_start_practice_enabled_count_zero
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-learner-retry-terminal-state-repair-2026-07-02
+    title: AI generation learner retry terminal-state repair
+    phase: ai-generation-learner-retry-terminal-state-repair-2026-07-02
+    sourceStory: bounded_provider_closure_rerun_found_learner_retry_enabled_while_current_result_not_usable_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: gate learner AI generation retry action to terminal failed or insufficient current-result states
+    behaviorBoundary: local_source_focused_tests_docs_state_only_no_db_provider_env_dependency_schema_e2e_deploy
+    executionProfile: systematic_debugging_tdd_first_shared_student_ui_state_reuse
+    evidenceMode: redacted_status_count_validation_summary_only_no_credentials_no_prompt_payload_raw_ai_output_generated_content_db_rows_or_pii
+    taskKind: source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_learner_retry_terminal_state_repair
+    priority: p1
+    claimedAt: "2026-07-01T21:45:00-07:00"
+    plannedAt: "2026-07-01T21:45:00-07:00"
+    dependsOn:
+      - ai-generation-bounded-provider-closure-rerun-2026-07-02
+    branch: codex/ai-generation-learner-retry-terminal-state-repair
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+    implementedAt: "2026-07-01T22:05:00-07:00"
+    validatedAt: "2026-07-01T22:05:00-07:00"
+    reviewedAt: "2026-07-01T22:05:00-07:00"
+    closedAt: "2026-07-01T22:05:00-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    localDbBoundary: no_direct_database_connection_read_write_reset_seed_migration_schema_or_raw_row
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: no_credentials_cookies_tokens_sessions_localStorage_or_Authorization_header_access
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-learner-retry-terminal-state-repair.md src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-learner-retry-terminal-state-repair-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-learner-retry-terminal-state-repair-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_learner_retry_terminal_state_repair
+      redTestsAddedAndObservedFailing: true
+      focusedUnitTests: pass_2_files_30_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-bounded-provider-closure-rerun-2026-07-02
+    title: AI generation bounded Provider closure rerun
+    phase: ai-generation-bounded-provider-closure-rerun-2026-07-02
+    sourceStory: current_goal_after_post_application_closure_rerun_provider_sample_deferred_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: bounded localhost Provider rerun for fresh AI 閸戞椽顣?/ AI缂佸嫬宓?current-result closure after application-state repair
+    behaviorBoundary: local_dev_server_browser_bounded_provider_sample_docs_state_only_no_source_dependency_schema_env_deploy
+    executionProfile: localhost_owner_preview_bounded_provider_redacted_evidence_only
+    evidenceMode: role_route_status_count_duration_bucket_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
+    taskKind: local_bounded_provider_owner_preview_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: completed_with_findings_learner_retry_pending_state_repair_required
+    priority: p1
+    claimedAt: "2026-07-01T21:15:00-07:00"
+    plannedAt: "2026-07-01T21:15:00-07:00"
+    dependsOn:
+      - ai-generation-post-application-closure-rerun-2026-07-02
+    branch: codex/ai-generation-bounded-provider-closure-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+    walkedThroughAt: "2026-07-01T21:35:00-07:00"
+    reviewedAt: "2026-07-01T21:35:00-07:00"
+    closedAt: "2026-07-01T21:35:00-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+    readOnlyOrRuntimeAllowed:
+      - http://localhost:3000/**
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-application-closure-rerun.md
+      - src/app/**/ai-generation*/**
+      - src/features/**/ai-generation*/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    localDbBoundary: no_direct_database_connection_read_write_reset_seed_migration_schema_or_raw_row
+    aiProviderBoundary: bounded_localhost_ui_only_max_four_submits_no_prompt_payload_raw_ai_io_evidence_no_retries
+    browserBoundary: localhost_observation_and_role_navigation_only_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: credentials_may_be_read_for_localhost_login_only_not_output_not_saved_not_recorded
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    providerSampleLimit:
+      maxSubmitAttemptsTotal: 4
+      maxSubmitAttemptsPerRoleRoute: 1
+      retries: 0
+      sampledRoutes:
+        - content_admin.content_ai_question_generation
+        - content_admin.content_ai_paper_generation
+        - personal_advanced_student.student_ai_question_generation
+        - personal_advanced_student.student_ai_paper_generation
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-bounded-provider-closure-rerun.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-bounded-provider-closure-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-bounded-provider-closure-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-bounded-provider-closure-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-bounded-provider-closure-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: completed_with_findings
+      result: learner_retry_pending_state_repair_required
+      providerCallExecuted: bounded_localhost_ui_4_submits_no_retries
+      sampledRoleSurfaces: content_admin_question_paper_personal_advanced_student_question_paper
+      freshGeneratedResultClosure: completed_with_findings
+      organizationApplicationClosure: not_sampled_in_this_provider_task_previous_rerun_passed_existing_history
+      learnerPracticeClosure: fail_retry_enabled_while_current_result_not_usable
+      nextRecommendedTask: ai-generation-learner-retry-terminal-state-repair-2026-07-02
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-post-application-closure-rerun-2026-07-02
+    title: AI generation post application closure rerun
+    phase: ai-generation-post-application-closure-rerun-2026-07-02
+    sourceStory: current_goal_after_application_closure_and_mixed_state_repair_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: rerun localhost owner-preview AI 閸戞椽顣?/ AI缂佸嫬宓?after application closure and learner mixed-state repair
+    behaviorBoundary: local_dev_server_browser_role_matrix_docs_state_only_no_source_dependency_schema_env_deploy
+    executionProfile: localhost_owner_preview_rerun_redacted_evidence_only
+    evidenceMode: role_route_status_count_failure_category_only_no_credentials_no_raw_dom_no_screenshots_no_provider_payloads_no_prompt_no_ai_output_no_full_generated_or_resource_content
+    taskKind: local_owner_preview_rerun
+    moduleRunVersion: 2
+    status: closed
+    result: pass_post_application_closure_rerun_with_provider_sample_deferred
+    priority: p1
+    claimedAt: "2026-07-01T20:50:00-07:00"
+    plannedAt: "2026-07-01T20:50:00-07:00"
+    dependsOn:
+      - ai-generation-application-closure-and-mixed-state-repair-2026-07-02
+    branch: codex/ai-generation-post-application-closure-rerun
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-application-closure-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-application-closure-rerun.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-application-closure-rerun.md
+    walkedThroughAt: "2026-07-01T21:05:00-07:00"
+    reviewedAt: "2026-07-01T21:05:00-07:00"
+    closedAt: "2026-07-01T21:05:00-07:00"
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-application-closure-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-application-closure-rerun.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-application-closure-rerun.md
+    readOnlyOrRuntimeAllowed:
+      - http://localhost:3000/**
+      - D:\tiku-local-private\acceptance\role-separated-local-accounts-2026-06-23.md
+      - src/app/**/ai-generation*/**
+      - src/features/**/ai-generation*/**
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    localDbBoundary: no_direct_database_connection_read_write_reset_seed_migration_schema_or_raw_row
+    aiProviderBoundary: no_provider_call_by_default_no_provider_payload_prompt_raw_ai_io_evidence
+    browserBoundary: localhost_observation_and_role_navigation_only_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: credentials_may_be_read_for_localhost_login_only_not_output_not_saved_not_recorded
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-post-application-closure-rerun.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-application-closure-rerun.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-post-application-closure-rerun.md
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-post-application-closure-rerun-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-post-application-closure-rerun-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_post_application_closure_rerun_with_provider_sample_deferred
+      localhostServer: pass_http_200
+      sampledRoleSurfaces: pass_content_admin_question_paper_org_advanced_admin_question_paper_personal_advanced_student_ai_generation_org_advanced_employee_ai_generation
+      organizationApplicationClosure: pass_next_step_visible_on_org_admin_question_and_paper
+      learnerPracticeClosure: pass_initial_history_state_no_false_start_practice_partial_current_insufficient_state_covered_by_source_test
+      ordinaryUiTechnicalWording: pass_sampled_surfaces_zero_count
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sourceOrTestChanged: false
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+  - id: ai-generation-application-closure-and-mixed-state-repair-2026-07-02
+    title: AI generation application closure and mixed-state repair
+    phase: ai-generation-application-closure-and-mixed-state-repair-2026-07-02
+    sourceStory: current_goal_post_adoption_closure_rerun_findings_2026_07_02
+    humanApprovalBoundary: aiGenerationCentralRepairApproval20260701
+    targetClosureItem: repair organization generated-result application visibility and learner insufficient-result mixed practice state
+    behaviorBoundary: local_source_focused_tests_docs_state_only_no_db_provider_env_dependency_schema_e2e_deploy
+    executionProfile: systematic_debugging_tdd_first_shared_ui_contract_reuse
+    evidenceMode: redacted_status_count_validation_summary_only_no_credentials_no_prompt_payload_raw_ai_output_generated_content_db_rows_or_pii
+    taskKind: source_test_repair
+    moduleRunVersion: 2
+    status: closed
+    result: pass_application_closure_and_mixed_state_repair
+    priority: p1
+    claimedAt: "2026-07-01T20:35:00-07:00"
+    plannedAt: "2026-07-01T20:35:00-07:00"
+    implementedAt: "2026-07-01T20:40:00-07:00"
+    validatedAt: "2026-07-01T20:40:00-07:00"
+    reviewedAt: "2026-07-01T20:40:00-07:00"
+    closedAt: "2026-07-01T20:40:00-07:00"
+    dependsOn:
+      - ai-generation-post-adoption-closure-rerun-2026-07-02
+    branch: codex/ai-generation-application-closure-repair
+    planPath: docs/05-execution-logs/task-plans/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-02-ai-generation-post-adoption-closure-rerun.md
+      - src/app/**/ai-generation*/**
+      - src/features/**/ai-generation*/**
+      - src/server/contracts/*ai-generation*
+      - src/server/services/*ai-generation*
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+    localDbBoundary: no_direct_database_connection_read_write_reset_seed_migration_schema_or_raw_row
+    aiProviderBoundary: no_provider_call_no_provider_configuration_no_provider_credential_no_prompt_payload_no_raw_ai_io
+    browserBoundary: no_browser_runtime_no_raw_dom_no_screenshot_no_trace
+    credentialBoundary: no_credentials_cookies_tokens_sessions_localStorage_or_Authorization_header_access
+    dependencyBoundary: no_package_or_lockfile_change_no_dependency_install_update_remove
+    releaseBoundary: no_staging_prod_cloud_deploy_no_release_readiness_no_final_pass_no_cost_calibration
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md docs/05-execution-logs/evidence/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md docs/05-execution-logs/audits-reviews/2026-07-02-ai-generation-application-closure-and-mixed-state-repair.md src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-application-closure-and-mixed-state-repair-2026-07-02
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId ai-generation-application-closure-and-mixed-state-repair-2026-07-02 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    validationSummary:
+      status: pass
+      result: pass_application_closure_and_mixed_state_repair
+      redTestsAddedAndObservedFailing: true
+      focusedUnitTests: pass_4_files_53_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass
+      gitDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_update
+      sourceOrTestChanged: true
+      providerCallExecuted: false
+      envFileReadOrModified: false
+      databaseConnectionOrMutationExecuted: false
+      schemaMigrationSeedExecuted: false
+      dependencyPackageLockfileChanged: false
+      costCalibrationExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
