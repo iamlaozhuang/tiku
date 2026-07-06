@@ -39,6 +39,7 @@ describe("personal AI generation request validator", () => {
         redeemCodePublicId: "redeem_code_public_123",
         auditLogPublicId: "audit_log_public_123",
         aiCallLogPublicId: "ai_call_log_public_123",
+        generationParameters: null,
       },
     });
   });

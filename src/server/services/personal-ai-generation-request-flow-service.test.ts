@@ -93,6 +93,7 @@ describe("personal AI generation request flow service", () => {
               contextPublicId: "paper_public_119",
             },
           },
+          generationParameters: null,
           redeemCodeReference: {
             publicId: "redeem_code_public_119",
             redactionStatus: "redacted",
