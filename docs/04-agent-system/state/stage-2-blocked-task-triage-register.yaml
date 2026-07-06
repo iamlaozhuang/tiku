@@ -31,6 +31,35 @@ summary:
       - stage-1-queue-health-archive-followup-2026-06-20
     handling: record_as_stage_1_baseline_carryover_not_blocked_triage_semantics
   nonQueueGuardedProposalCount: 1
+latestUpdate:
+  taskId: non-terminal-queue-triage-2026-07-06
+  recordedAt: "2026-07-06T04:13:00-07:00"
+  sourceQueuePath: docs/04-agent-system/state/task-queue.yaml
+  mode: docs_state_triage_only
+  taskStatusOwnership: docs/04-agent-system/state/task-queue.yaml
+  semanticBoundary: >-
+    This update records current non-terminal triage outcomes after active queue slimming. It does not weaken blocked
+    gates, delete evidence, approve staging execution, or claim release readiness.
+  before:
+    blocked: 5
+    readyForCloseout: 1
+  after:
+    blocked: 1
+    readyForCloseout: 0
+  decisions:
+    closedAsSuperseded:
+      - source-landing-8-role-local-acceptance-2026-07-03
+      - full-chain-scenario-2-content-baseline-2026-07-04
+      - full-chain-scenario-2-content-baseline-rerun-after-pack-provisioning-2026-07-04
+      - full-chain-scenario-2-content-baseline-rerun-after-knowledge-baseline-provisioning-2026-07-04
+    closedAsAlreadyMerged:
+      - repair-student-practice-restart-acceptance-harness-2026-07-03
+    retainedBlocked:
+      - id: layer-3-staging-pre-release-redacted-execution-after-target-materialization-2026-06-27
+        primaryCategory: high_risk_gated
+        nextStepType: wait_for_concrete_isolated_staging_target_or_owner_decision
+        evidencePathRepaired: true
+        decisionOwner: human
 triageItems:
   - id: ap-01-qwen-one-request-post-console-remediation-retry-approval
     queueLine: 209
