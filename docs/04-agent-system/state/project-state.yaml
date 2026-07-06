@@ -1,9 +1,111 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-local-grounding-materialization-replay-2026-07-06
-updatedAt: "2026-07-06T07:20:00-07:00"
+currentPhase: 0704-local-no-provider-route-grounding-replay-2026-07-06
+updatedAt: "2026-07-06T07:25:00-07:00"
 currentTask:
+  id: 0704-local-no-provider-route-grounding-replay-2026-07-06
+  title: 0704 local no-Provider route grounding replay
+  phase: 0704-local-no-provider-route-grounding-replay-2026-07-06
+  status: closed
+  result: partial_personal_route_pass_admin_external_observability_limited_admin_bridge_pass_no_provider
+  priority: p0
+  taskKind: local_no_provider_route_grounding_replay
+  executionProfile: local_runtime_route_and_bridge_replay_no_provider_no_db_mutation_no_source_change_no_dependency_no_env_no_staging_prod_no_cost_calibration
+  validationPolicy: read_gate_task_plan_redacted_evidence_audit_localhost_route_probe_temporary_bridge_vitest_precommit
+  moduleRunVersion: 2
+  dependsOn:
+    - 0704-local-grounding-materialization-replay-2026-07-06
+  branch: codex/0704-no-provider-route-grounding-replay-2026-07-06
+  approvalBoundary: current_user_approved_0704_local_no_provider_route_grounding_replay_2026_07_06_localhost_only_no_provider_no_db_mutation_no_env_no_staging_prod_no_cost_calibration
+  plannedAt: "2026-07-06T07:16:00-07:00"
+  claimedAt: "2026-07-06T07:16:00-07:00"
+  materializedAt: "2026-07-06T07:16:00-07:00"
+  completedAt: "2026-07-06T07:25:00-07:00"
+  targetClosureItem: Replay localhost no-Provider route and bridge grounding after 0704 local runtime materialization, then classify route-level versus bridge-level evidence.
+  behaviorBoundary: docs_state_evidence_audit_only_plus_untracked_local_devserver_logs_and_temporary_removed_vitest_probe_no_product_source_persisted_no_test_source_persisted_no_dependency_no_schema_no_migration_no_env_secret_change_no_provider_call_no_db_mutation_no_browser_matrix_no_destructive_db_no_staging_prod_no_deploy_no_cost_calibration_no_release_or_production_claim
+  evidenceMode: redacted_aggregate_status_role_labels_route_labels_error_codes_failure_categories_booleans_and_command_results_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
+  planPath: docs/05-execution-logs/task-plans/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+    - docs/05-execution-logs/evidence/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+    - docs/05-execution-logs/audits-reviews/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+  blockedFiles:
+    - AGENTS.md
+    - .env*
+    - package.json
+    - package-lock.yaml
+    - package-lock.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - src/**
+    - tests/**
+    - src/db/schema/**
+    - drizzle/**
+    - migrations/**
+    - seed/**
+    - e2e/**
+    - compose.yaml
+    - playwright-report/**
+    - test-results/**
+    - .next/**
+    - .runtime/**
+    - D:/tiku-local-private/**
+    - D:\tiku-local-private\**
+  validationCommands:
+    - localhost route replay on 127.0.0.1:3100 with provider credential blanked and aggregate-only output
+    - npm.cmd exec -- vitest run src/server/services/0704-no-provider-admin-bridge-replay.temp.test.ts --reporter verbose --silent=false
+    - localhost dev server shutdown and port 3100 release check
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-0704-local-no-provider-route-grounding-replay.md docs/05-execution-logs/evidence/2026-07-06-0704-local-no-provider-route-grounding-replay.md docs/05-execution-logs/audits-reviews/2026-07-06-0704-local-no-provider-route-grounding-replay.md
+    - git diff --check
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-local-no-provider-route-grounding-replay-2026-07-06
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_approved_0704_local_no_provider_route_grounding_replay_2026_07_06
+    fastForwardMerge:
+      approved: false
+      targetBranch: master
+      approvalSource: fresh_approval_required
+    push:
+      approved: false
+      target: origin/master
+      approvalSource: fresh_approval_required
+    cleanup:
+      deleteShortBranch: false
+      approvalSource: fresh_approval_required
+  validationSummary:
+    status: partial_personal_route_pass_admin_external_observability_limited_admin_bridge_pass_no_provider
+    readGate: pass
+    taskPlanPrepared: true
+    evidencePrepared: true
+    auditPrepared: true
+    localhostServiceStarted: true
+    localhostPort: 3100
+    localhostServiceStopped: true
+    localRuntimeMaterializationPresent: true
+    personalAdvancedStudentRoute: pass_missing_provider_credential_provider_call_false
+    contentAdminExternalRoute: partial_409015_runtime_bridge_not_exposed
+    organizationAdminExternalRoute: partial_409015_runtime_bridge_not_exposed
+    contentAdminBridgeReplay: pass_missing_provider_credential_provider_call_false
+    organizationAdminBridgeReplay: pass_missing_provider_credential_provider_call_false
+    temporaryBridgeProbeRemoved: true
+    sourceBugProven: false
+    providerCallExecuted: false
+    dbMutationExecuted: false
+    browserMatrixExecuted: false
+    stagingProdExecuted: false
+    costCalibrationExecutedOrClaimed: false
+    releaseFinalProductionClaimed: false
+    productSourceChanged: false
+    dependencyChanged: false
+    envSecretChanged: false
+    destructiveDbOperationExecuted: false
+previousCurrentTaskBefore0704LocalNoProviderRouteGroundingReplay20260706:
   id: 0704-local-grounding-materialization-replay-2026-07-06
   title: 0704 local grounding materialization replay
   phase: 0704-local-grounding-materialization-replay-2026-07-06
