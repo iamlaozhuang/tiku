@@ -131,13 +131,22 @@ type StudentPersonalAiGenerationRequestDraft = {
 type StudentPersonalAiGenerationDetailControl = {
   label: string;
   kind: "number" | "select" | "text" | "textarea";
+  helperText?: string;
+  max?: number;
+  min?: number;
   placeholder?: string;
   options?: string[];
+  value?: number | string;
+  onValueChange?: (value: string) => void;
 };
 
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
+const AI_QUESTION_DEFAULT_QUESTION_COUNT = 3;
+const AI_QUESTION_MAX_QUESTION_COUNT = 10;
+const AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
+const AI_PAPER_MAX_QUESTION_COUNT = 80;
 const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
   "ai_question_generation" satisfies StudentPersonalAiGenerationTaskType;
 
@@ -150,6 +159,9 @@ const copy = {
     "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u6309\u5f53\u524d\u6388\u6743\u8303\u56f4\u5c1d\u8bd5\u751f\u6210\u8bad\u7ec3\u8349\u7a3f\u3002",
   requestButton: "AI出题：生成练习题",
   paperButton: "AI组卷：生成自测试卷",
+  questionSubmitButton: "生成练习题草稿",
+  paperSubmitButton: "生成自测试卷",
+  employeePaperSubmitButton: "生成企业自测试卷",
   loadingTitle: "\u6b63\u5728\u53d1\u8d77\u751f\u6210\u8bf7\u6c42",
   errorTitle: "\u672c\u5730 AI \u8bf7\u6c42\u5931\u8d25",
   errorDescription:
@@ -277,6 +289,7 @@ const aiQuestionDetailControls: StudentPersonalAiGenerationDetailControl[] = [
     label: "AI出题题目数量",
     kind: "number",
     placeholder: "输入题目数量",
+    helperText: "默认 3 题，最多 10 题。",
   },
   {
     label: "AI出题难度",
@@ -307,14 +320,20 @@ const aiPaperDetailControls: StudentPersonalAiGenerationDetailControl[] = [
     options: ["理论", "技能"],
   },
   {
+    label: "AI组卷题目数量",
+    kind: "number",
+    placeholder: "输入自测题量",
+    helperText: "默认 30 题，最多 80 题。",
+  },
+  {
     label: "AI组卷题型分布",
     kind: "text",
     placeholder: "例：单选、多选、判断按训练目标分配",
   },
   {
     label: "AI组卷知识点覆盖",
-    kind: "text",
-    placeholder: "输入本次自测覆盖范围",
+    kind: "select",
+    options: ["均衡覆盖", "指定知识点", "薄弱知识点优先", "综合测验"],
   },
   {
     label: "AI组卷大题结构",
@@ -337,6 +356,52 @@ const aiPaperDetailControls: StudentPersonalAiGenerationDetailControl[] = [
     placeholder: "描述本次自测目标",
   },
 ];
+
+function normalizeStudentAiQuestionCount(
+  value: number,
+  defaultValue: number,
+  maxValue: number,
+): number {
+  if (!Number.isFinite(value)) {
+    return defaultValue;
+  }
+
+  return Math.min(maxValue, Math.max(1, Math.trunc(value)));
+}
+
+function createStudentAiQuestionDetailControls(input: {
+  questionCount: number;
+  onQuestionCountChange: (value: string) => void;
+}): StudentPersonalAiGenerationDetailControl[] {
+  return aiQuestionDetailControls.map((control) =>
+    control.label === "AI出题题目数量"
+      ? {
+          ...control,
+          max: AI_QUESTION_MAX_QUESTION_COUNT,
+          min: 1,
+          onValueChange: input.onQuestionCountChange,
+          value: input.questionCount,
+        }
+      : control,
+  );
+}
+
+function createStudentAiPaperDetailControls(input: {
+  questionCount: number;
+  onQuestionCountChange: (value: string) => void;
+}): StudentPersonalAiGenerationDetailControl[] {
+  return aiPaperDetailControls.map((control) =>
+    control.label === "AI组卷题目数量"
+      ? {
+          ...control,
+          max: AI_PAPER_MAX_QUESTION_COUNT,
+          min: 1,
+          onValueChange: input.onQuestionCountChange,
+          value: input.questionCount,
+        }
+      : control,
+  );
+}
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
   {
@@ -504,6 +569,7 @@ function selectPersonalAiGenerationAuthorizationContext(
 function createStudentGenerationParameters(
   authorizationContext: EffectiveAuthorizationContextDto,
   taskType: StudentPersonalAiGenerationTaskType,
+  questionCount: number,
 ): AiGenerationRouteIntegratedGenerationParameters {
   return {
     profession: authorizationContext.profession,
@@ -519,7 +585,7 @@ function createStudentGenerationParameters(
     knowledgeNode: null,
     questionType:
       taskType === "ai_question_generation" ? "single_choice" : null,
-    questionCount: taskType === "ai_question_generation" ? 10 : 50,
+    questionCount,
     difficulty: "medium",
     learningObjective:
       taskType === "ai_question_generation" ? "弱项巩固" : "阶段自测",
@@ -792,8 +858,9 @@ function StudentPersonalAiGenerationDetailField({
         <select
           aria-label={control.label}
           disabled={disabled}
+          onChange={(event) => control.onValueChange?.(event.target.value)}
           className={baseControlClass}
-          defaultValue={control.options?.[0] ?? ""}
+          value={control.value ?? control.options?.[0] ?? ""}
         >
           {(control.options ?? []).map((optionLabel) => (
             <option key={optionLabel} value={optionLabel}>
@@ -806,10 +873,13 @@ function StudentPersonalAiGenerationDetailField({
         <input
           aria-label={control.label}
           disabled={disabled}
-          min={1}
+          max={control.max}
+          min={control.min ?? 1}
+          onChange={(event) => control.onValueChange?.(event.target.value)}
           type="number"
           inputMode="numeric"
           placeholder={control.placeholder}
+          {...(control.value === undefined ? {} : { value: control.value })}
           className={baseControlClass}
         />
       ) : null}
@@ -817,8 +887,10 @@ function StudentPersonalAiGenerationDetailField({
         <input
           aria-label={control.label}
           disabled={disabled}
+          onChange={(event) => control.onValueChange?.(event.target.value)}
           type="text"
           placeholder={control.placeholder}
+          {...(control.value === undefined ? {} : { value: control.value })}
           className={baseControlClass}
         />
       ) : null}
@@ -826,10 +898,17 @@ function StudentPersonalAiGenerationDetailField({
         <textarea
           aria-label={control.label}
           disabled={disabled}
+          onChange={(event) => control.onValueChange?.(event.target.value)}
           rows={3}
           placeholder={control.placeholder}
+          {...(control.value === undefined ? {} : { value: control.value })}
           className={baseControlClass}
         />
+      ) : null}
+      {control.helperText ? (
+        <span className="text-text-secondary text-xs leading-5">
+          {control.helperText}
+        </span>
       ) : null}
     </label>
   );
@@ -1023,6 +1102,118 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
   );
 }
 
+function StudentAiTrainingModeTabs({
+  activeTaskType,
+  disabled,
+  onSelectTaskType,
+}: {
+  activeTaskType: StudentPersonalAiGenerationTaskType;
+  disabled: boolean;
+  onSelectTaskType: (taskType: StudentPersonalAiGenerationTaskType) => void;
+}) {
+  const tabClassName =
+    "flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
+
+  return (
+    <div
+      aria-label="AI训练类型"
+      className="bg-muted grid grid-cols-2 gap-1 rounded-xl p-1"
+      role="tablist"
+    >
+      <button
+        aria-selected={activeTaskType === "ai_question_generation"}
+        className={`${tabClassName} ${
+          activeTaskType === "ai_question_generation"
+            ? "bg-surface text-text-primary shadow-sm"
+            : "text-text-secondary"
+        }`}
+        disabled={disabled}
+        onClick={() => onSelectTaskType("ai_question_generation")}
+        role="tab"
+        type="button"
+      >
+        <Sparkles className="size-4" aria-hidden="true" />
+        AI出题
+      </button>
+      <button
+        aria-selected={activeTaskType === "ai_paper_generation"}
+        className={`${tabClassName} ${
+          activeTaskType === "ai_paper_generation"
+            ? "bg-surface text-text-primary shadow-sm"
+            : "text-text-secondary"
+        }`}
+        disabled={disabled}
+        onClick={() => onSelectTaskType("ai_paper_generation")}
+        role="tab"
+        type="button"
+      >
+        <ClipboardList className="size-4" aria-hidden="true" />
+        AI组卷
+      </button>
+    </div>
+  );
+}
+
+function getStudentAiPaperSourceLabel(
+  authorizationContext: EffectiveAuthorizationContextDto | null,
+): string {
+  return authorizationContext?.ownerType === "organization"
+    ? "平台正式题库 + 本企业可用题库"
+    : "平台正式题库";
+}
+
+function StudentAiPaperSourceSummary({
+  authorizationContext,
+  disabled,
+  sourcePreference,
+  onSourcePreferenceChange,
+}: {
+  authorizationContext: EffectiveAuthorizationContextDto | null;
+  disabled: boolean;
+  sourcePreference: string;
+  onSourcePreferenceChange: (value: string) => void;
+}) {
+  const isOrganizationContext =
+    authorizationContext?.ownerType === "organization";
+
+  return (
+    <section className="border-border bg-surface rounded-lg border p-4">
+      <div className="space-y-1">
+        <h2 className="font-heading text-text-primary text-base font-semibold">
+          题源说明
+        </h2>
+        <p className="text-text-secondary text-sm leading-6">
+          AI组卷只从已发布正式题库中选题，不把 AI 临时生成内容作为正式试卷题目。
+        </p>
+      </div>
+      <div className="bg-muted mt-3 rounded-lg px-3 py-3">
+        <p className="text-text-primary text-sm font-medium">
+          {getStudentAiPaperSourceLabel(authorizationContext)}
+        </p>
+        <p className="text-text-secondary mt-1 text-sm leading-6">
+          题源不足时会自动补足邻近知识点或同专业等级科目题目，并在预览中说明匹配情况。
+        </p>
+      </div>
+      {isOrganizationContext ? (
+        <label className="text-text-secondary mt-3 flex flex-col gap-1 text-sm">
+          <span>题源偏好</span>
+          <select
+            aria-label="题源偏好"
+            className="border-border bg-background text-text-primary min-h-10 w-full rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={disabled}
+            onChange={(event) => onSourcePreferenceChange(event.target.value)}
+            value={sourcePreference}
+          >
+            <option value="均衡使用">均衡使用</option>
+            <option value="优先使用企业题">优先使用企业题</option>
+            <option value="优先使用平台题">优先使用平台题</option>
+          </select>
+        </label>
+      ) : null}
+    </section>
+  );
+}
+
 function StudentPersonalAiGenerationVisibleGeneratedContent({
   visibleGeneratedContent,
 }: {
@@ -1042,7 +1233,7 @@ function StudentPersonalAiGenerationVisibleGeneratedContent({
     visibleQuestionDrafts.length > 0
       ? "生成题目草稿"
       : visiblePaperSections.length > 0
-        ? "生成试卷草稿"
+        ? "自测试卷预览"
         : "本次生成内容";
 
   return (
@@ -1152,9 +1343,11 @@ function hasStudentVisiblePaperSectionBody(
 
 function StudentQuestionDraftList({
   questionDrafts,
+  showAnswerDetails = false,
   testId = "student-ai-question-drafts",
 }: {
   questionDrafts: StudentVisibleQuestionDraftSummary[];
+  showAnswerDetails?: boolean;
   testId?: string;
 }) {
   return (
@@ -1198,14 +1391,18 @@ function StudentQuestionDraftList({
               </ol>
             </div>
           ) : null}
-          <StudentQuestionDraftField
-            label="标准答案"
-            value={questionDraft.standardAnswer}
-          />
-          <StudentQuestionDraftField
-            label="解析"
-            value={questionDraft.analysis}
-          />
+          {showAnswerDetails ? (
+            <>
+              <StudentQuestionDraftField
+                label="标准答案"
+                value={questionDraft.standardAnswer}
+              />
+              <StudentQuestionDraftField
+                label="解析"
+                value={questionDraft.analysis}
+              />
+            </>
+          ) : null}
           {questionDraft.knowledgeNodeLabels &&
           questionDraft.knowledgeNodeLabels.length > 0 ? (
             <div className="mt-3">
@@ -1261,10 +1458,10 @@ function StudentPaperDraftList({
             value={paperSection.description}
           />
           {paperSection.questionDrafts.length > 0 ? (
-            <StudentQuestionDraftList
-              questionDrafts={paperSection.questionDrafts}
-              testId="student-ai-paper-question-drafts"
-            />
+            <p className="text-text-secondary bg-background mt-3 rounded-md px-2 py-2 text-sm leading-6">
+              已匹配 {paperSection.questionDrafts.length}{" "}
+              道可作答题目，开始作答后展示题干与选项。
+            </p>
           ) : null}
         </section>
       ))}
@@ -2291,6 +2488,16 @@ export function StudentPersonalAiGenerationPage() {
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
   const [historyTaskType, setHistoryTaskType] =
     useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
+  const [activeTaskType, setActiveTaskType] =
+    useState<StudentPersonalAiGenerationTaskType>("ai_question_generation");
+  const [aiQuestionCount, setAiQuestionCount] = useState(
+    AI_QUESTION_DEFAULT_QUESTION_COUNT,
+  );
+  const [aiPaperQuestionCount, setAiPaperQuestionCount] = useState(
+    AI_PAPER_DEFAULT_QUESTION_COUNT,
+  );
+  const [aiPaperSourcePreference, setAiPaperSourcePreference] =
+    useState("均衡使用");
   const [practiceFeedbackState, setPracticeFeedbackState] =
     useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
   const [isAiLearningSessionStarted, setIsAiLearningSessionStarted] =
@@ -2679,6 +2886,19 @@ export function StudentPersonalAiGenerationPage() {
         generationAuthorizationContext.authorizationPublicId,
       );
 
+      const generationQuestionCount =
+        taskType === "ai_question_generation"
+          ? normalizeStudentAiQuestionCount(
+              aiQuestionCount,
+              AI_QUESTION_DEFAULT_QUESTION_COUNT,
+              AI_QUESTION_MAX_QUESTION_COUNT,
+            )
+          : normalizeStudentAiQuestionCount(
+              aiPaperQuestionCount,
+              AI_PAPER_DEFAULT_QUESTION_COUNT,
+              AI_PAPER_MAX_QUESTION_COUNT,
+            );
+
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
           "/api/v1/personal-ai-generation-requests",
@@ -2695,6 +2915,7 @@ export function StudentPersonalAiGenerationPage() {
                 createStudentGenerationParameters(
                   generationAuthorizationContext,
                   taskType,
+                  generationQuestionCount,
                 ),
                 generationAuthorizationContext,
               ),
@@ -2895,6 +3116,32 @@ export function StudentPersonalAiGenerationPage() {
     void handleSubmitPersonalAiGenerationRequest(lastSubmittedTaskType);
   }
 
+  function handleSelectAiTrainingTaskType(
+    taskType: StudentPersonalAiGenerationTaskType,
+  ) {
+    setActiveTaskType(taskType);
+  }
+
+  function handleChangeAiQuestionCount(value: string) {
+    setAiQuestionCount(
+      normalizeStudentAiQuestionCount(
+        Number(value),
+        AI_QUESTION_DEFAULT_QUESTION_COUNT,
+        AI_QUESTION_MAX_QUESTION_COUNT,
+      ),
+    );
+  }
+
+  function handleChangeAiPaperQuestionCount(value: string) {
+    setAiPaperQuestionCount(
+      normalizeStudentAiQuestionCount(
+        Number(value),
+        AI_PAPER_DEFAULT_QUESTION_COUNT,
+        AI_PAPER_MAX_QUESTION_COUNT,
+      ),
+    );
+  }
+
   async function handleChangeRequestHistoryPage(page: number) {
     const sessionRequestToken = readStudentSessionRequestToken();
 
@@ -3012,6 +3259,26 @@ export function StudentPersonalAiGenerationPage() {
     !canUseGeneratedPractice
       ? "insufficient"
       : practiceFeedbackState;
+  const activeAuthorizationContext =
+    selectPersonalAiGenerationAuthorizationContext(
+      authorizationContexts,
+      activeTaskType,
+      selectedAuthorizationPublicId,
+    );
+  const activeAiQuestionDetailControls = createStudentAiQuestionDetailControls({
+    onQuestionCountChange: handleChangeAiQuestionCount,
+    questionCount: aiQuestionCount,
+  });
+  const activeAiPaperDetailControls = createStudentAiPaperDetailControls({
+    onQuestionCountChange: handleChangeAiPaperQuestionCount,
+    questionCount: aiPaperQuestionCount,
+  });
+  const activeSubmitButtonLabel =
+    activeTaskType === "ai_question_generation"
+      ? copy.questionSubmitButton
+      : activeAuthorizationContext?.ownerType === "organization"
+        ? copy.employeePaperSubmitButton
+        : copy.paperSubmitButton;
 
   async function ensureAiLearningSessionStarted(): Promise<boolean> {
     const visibleGeneratedContent =
@@ -3193,36 +3460,55 @@ export function StudentPersonalAiGenerationPage() {
         />
       ) : null}
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <button
-          type="button"
-          disabled={isAiGenerationActionDisabled}
-          onClick={() =>
-            void handleSubmitPersonalAiGenerationRequest(
-              "ai_question_generation",
-            )
-          }
-          className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {pageState === "checking" || pageState === "loading" ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      {shouldShowAiGenerationDetailControls ? (
+        <div className="grid grid-cols-1 gap-3">
+          <StudentAiTrainingModeTabs
+            activeTaskType={activeTaskType}
+            disabled={isAiGenerationActionDisabled}
+            onSelectTaskType={handleSelectAiTrainingTaskType}
+          />
+          {activeTaskType === "ai_question_generation" ? (
+            <StudentPersonalAiGenerationDetailControlGroup
+              title="AI出题参数"
+              description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
+              controls={activeAiQuestionDetailControls}
+              disabled={isAiGenerationActionDisabled}
+            />
           ) : (
-            <Sparkles className="size-4" aria-hidden="true" />
+            <>
+              <StudentAiPaperSourceSummary
+                authorizationContext={activeAuthorizationContext}
+                disabled={isAiGenerationActionDisabled}
+                onSourcePreferenceChange={setAiPaperSourcePreference}
+                sourcePreference={aiPaperSourcePreference}
+              />
+              <StudentPersonalAiGenerationDetailControlGroup
+                title="AI组卷参数"
+                description="用于个人或企业授权上下文下的自测组卷，从正式题库选题，不写入正式试卷。"
+                controls={activeAiPaperDetailControls}
+                disabled={isAiGenerationActionDisabled}
+              />
+            </>
           )}
-          {copy.requestButton}
-        </button>
-        <button
-          type="button"
-          disabled={isAiGenerationActionDisabled}
-          onClick={() =>
-            void handleSubmitPersonalAiGenerationRequest("ai_paper_generation")
-          }
-          className="border-border bg-surface text-text-secondary flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <ClipboardList className="size-4" aria-hidden="true" />
-          {copy.paperButton}
-        </button>
-      </div>
+          <button
+            type="button"
+            disabled={isAiGenerationActionDisabled}
+            onClick={() =>
+              void handleSubmitPersonalAiGenerationRequest(activeTaskType)
+            }
+            className="bg-primary text-primary-foreground flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {pageState === "loading" ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : activeTaskType === "ai_question_generation" ? (
+              <Sparkles className="size-4" aria-hidden="true" />
+            ) : (
+              <ClipboardList className="size-4" aria-hidden="true" />
+            )}
+            {activeSubmitButtonLabel}
+          </button>
+        </div>
+      ) : null}
 
       {pageState === "ready" && experience !== null ? (
         <StudentPersonalAiGenerationVisibleGeneratedContent
@@ -3230,23 +3516,6 @@ export function StudentPersonalAiGenerationPage() {
             experience.runtimeBridge.visibleGeneratedContent
           }
         />
-      ) : null}
-
-      {shouldShowAiGenerationDetailControls ? (
-        <div className="grid grid-cols-1 gap-3">
-          <StudentPersonalAiGenerationDetailControlGroup
-            title="AI出题参数"
-            description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
-            controls={aiQuestionDetailControls}
-            disabled={isAiGenerationActionDisabled}
-          />
-          <StudentPersonalAiGenerationDetailControlGroup
-            title="AI组卷参数"
-            description="用于个人或企业授权上下文下的自测组卷，不写入正式试卷。"
-            controls={aiPaperDetailControls}
-            disabled={isAiGenerationActionDisabled}
-          />
-        </div>
       ) : null}
 
       {shouldShowAiGenerationDetailControls ? (

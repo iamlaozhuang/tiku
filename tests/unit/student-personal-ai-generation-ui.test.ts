@@ -26,8 +26,10 @@ import {
 } from "@/server/validators/personal-ai-generation-learning-session";
 
 const pageTitle = "AI训练";
-const requestButtonLabel = "AI出题：生成练习题";
-const paperButtonLabel = "AI组卷：生成自测试卷";
+const aiPaperTabLabel = "AI组卷";
+const requestButtonLabel = "生成练习题草稿";
+const paperButtonLabel = "生成自测试卷";
+const employeePaperButtonLabel = "生成企业自测试卷";
 const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const unavailableTitle =
@@ -1116,11 +1118,11 @@ describe("StudentPersonalAiGenerationPage", () => {
 
       expect(await screen.findByText(unavailableTitle)).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: requestButtonLabel }),
-      ).toBeDisabled();
+        screen.queryByRole("button", { name: requestButtonLabel }),
+      ).toBeNull();
       expect(
-        screen.getByRole("button", { name: paperButtonLabel }),
-      ).toBeDisabled();
+        screen.queryByRole("button", { name: paperButtonLabel }),
+      ).toBeNull();
       expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
         "/api/v1/authorizations",
       ]);
@@ -1195,6 +1197,264 @@ describe("StudentPersonalAiGenerationPage", () => {
     ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("switches between AI出题 and AI组卷 tabs without submitting a generation request", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyServerHistoryResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+
+    expect(
+      screen.getByRole("button", { name: paperButtonLabel }),
+    ).toBeInTheDocument();
+    expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
+      "GET",
+    ]);
+  });
+
+  it("shows and submits the learner AI出题 default quantity as 3", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url) === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          submittedBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题题目数量")).toHaveValue(3);
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      taskType: "ai_question_generation",
+      generationParameters: {
+        questionCount: 3,
+      },
+    });
+  });
+
+  it("shows personal learner AI组卷 source and submits the visible default quantity as 30", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url) === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          submittedBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+
+    expect(screen.getByText("题源说明")).toBeInTheDocument();
+    expect(screen.getByText("平台正式题库")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷题目数量")).toHaveValue(30);
+
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      taskType: "ai_paper_generation",
+      generationParameters: {
+        questionCount: 30,
+      },
+    });
+  });
+
+  it("shows organization employee AI组卷 sources, preference, and enterprise submit label", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                authorizationPublicId: "org-auth-context-ui-001",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-ui-001",
+                organizationPublicId: "organization-public-ui-001",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-ui-001",
+              }),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyServerHistoryResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+
+    expect(
+      screen.getByText("平台正式题库 + 本企业可用题库"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("题源偏好")).toHaveValue("均衡使用");
+    expect(screen.getByText("优先使用企业题")).toBeInTheDocument();
+    expect(screen.getByText("优先使用平台题")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: employeePaperButtonLabel }),
+    ).toBeInTheDocument();
   });
 
   it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {
@@ -1334,7 +1594,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         profession: "monopoly",
         level: 3,
         subject: "theory",
-        questionCount: 10,
+        questionCount: 3,
       },
     });
     expect(String(fetchMock.mock.calls[6]?.[0])).toBe(
@@ -1388,7 +1648,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         learningObjective: "弱项巩固",
         level: 3,
         profession: "monopoly",
-        questionCount: 10,
+        questionCount: 3,
         questionType: "single_choice",
         subject: "theory",
       },
@@ -1626,7 +1886,10 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByLabelText("组织授权 · 高级版 · monopoly 3级"));
     expect(screen.getByText(/当前将使用组织额度/u)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(
+      screen.getByRole("button", { name: employeePaperButtonLabel }),
+    );
 
     await waitFor(() => expect(submittedBodies).toHaveLength(2));
     expect(submittedBodies[1]).toMatchObject({
@@ -1701,9 +1964,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByRole("group", { name: "AI出题参数" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("group", { name: "AI组卷参数" }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "AI组卷参数" })).toBeNull();
     expect(screen.getByLabelText("AI出题专业")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题等级")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题科目")).toBeInTheDocument();
@@ -1712,9 +1973,18 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI出题题目数量")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题难度")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题学习目标")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: requestButtonLabel }),
+    ).toBeEnabled();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    expect(
+      screen.getByRole("group", { name: "AI组卷参数" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("题源说明")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷专业")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷等级")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷科目")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷题目数量")).toHaveValue(30);
     expect(screen.getByLabelText("AI组卷题型分布")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷知识点覆盖")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷大题结构")).toBeInTheDocument();
@@ -1722,10 +1992,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI组卷时长目标")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷学习目标")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: requestButtonLabel }),
-    ).toBeEnabled();
-    expect(
-      screen.getByRole("button", { name: paperButtonLabel }),
+      screen.getByRole("button", { name: employeePaperButtonLabel }),
     ).toBeEnabled();
     expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
@@ -1821,6 +2088,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     const paperButton = screen.getByRole("button", {
       name: paperButtonLabel,
     });
@@ -2096,10 +2364,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     ).toHaveTextContent("synthetic visible learner option");
     expect(
       screen.getByTestId("student-visible-generated-content"),
-    ).toHaveTextContent("A");
+    ).not.toHaveTextContent("标准答案");
     expect(
       screen.getByTestId("student-visible-generated-content"),
-    ).toHaveTextContent("synthetic visible learner analysis");
+    ).not.toHaveTextContent("synthetic visible learner analysis");
     fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
@@ -2305,7 +2573,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       "synthetic visible employee option",
     );
     expect(visibleGeneratedContent).toHaveTextContent("A");
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee analysis",
     );
     fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
@@ -2387,8 +2655,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     ).toBeInTheDocument();
     expect(await screen.findByText(unauthorizedTitle)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: requestButtonLabel }),
-    ).toBeDisabled();
+      screen.queryByRole("button", { name: requestButtonLabel }),
+    ).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -2755,24 +3023,26 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
 
     const visibleGeneratedContent = await screen.findByTestId(
       "student-visible-generated-content",
     );
 
-    expect(visibleGeneratedContent).toHaveTextContent("生成试卷草稿");
+    expect(visibleGeneratedContent).toHaveTextContent("自测试卷预览");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic learner paper section",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible learner paper stem",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible learner paper option",
     );
-    expect(visibleGeneratedContent).toHaveTextContent("A");
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent("标准答案");
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible learner paper analysis",
     );
     expect(visibleGeneratedContent).toHaveTextContent("结构化预览");
@@ -2982,23 +3252,26 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
 
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(
+      screen.getByRole("button", { name: employeePaperButtonLabel }),
+    );
 
     const visibleGeneratedContent = await screen.findByTestId(
       "student-visible-generated-content",
     );
-    expect(visibleGeneratedContent).toHaveTextContent("生成试卷草稿");
+    expect(visibleGeneratedContent).toHaveTextContent("自测试卷预览");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic employee paper section",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee paper stem",
     );
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee paper option",
     );
-    expect(visibleGeneratedContent).toHaveTextContent("A");
-    expect(visibleGeneratedContent).toHaveTextContent(
+    expect(visibleGeneratedContent).not.toHaveTextContent("标准答案");
+    expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee paper analysis",
     );
     fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
@@ -3204,6 +3477,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       ]),
     );
 
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
 
     await waitFor(() => {
@@ -3856,12 +4130,19 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
 
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(
+      screen.getByRole("button", { name: employeePaperButtonLabel }),
+    );
+    expect(await screen.findByText("自测试卷预览")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(
+      "synthetic persisted employee paper analysis",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
     expect(
       await screen.findByText("synthetic persisted employee paper stem"),
     ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
     expect(sessionCreateBodies[0]).toMatchObject({
       sessionPublicId,
