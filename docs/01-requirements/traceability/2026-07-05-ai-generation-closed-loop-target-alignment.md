@@ -8,6 +8,19 @@
 
 This document does not claim implementation completion, release readiness, Provider readiness, staging/prod readiness, Cost Calibration, or final Pass.
 
+## Later Contract Refinement
+
+The 2026-07-06 recontract overlay
+`docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md` refines the
+AI组卷 semantics used by this closed-loop target:
+
+- AI出题 remains AI-generated complete question draft content.
+- AI组卷 is no longer interpreted as Provider directly generating final full question content for a paper.
+- AI组卷 now means AI creates a paper assembly plan, then local services select existing formal questions from the
+  allowed role-specific sources.
+- Historical runtime evidence for Provider-generated `paper_draft` previews remains baseline evidence only and must not
+  be treated as implementation proof for the new plan-and-select AI组卷 contract.
+
 ## User Closed-Loop Definition
 
 For this goal, "闭环" means generated AI content can enter a stable, complete, governed business path that supports the relevant role's review, publish, practice, and statistics needs.

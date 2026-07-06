@@ -59,6 +59,7 @@
 - [AI Generation Requirements SSOT Alignment](./traceability/2026-07-02-ai-generation-requirements-ssot-alignment.md)
 - [Phase4 Requirements Agent Baseline Alignment](./traceability/2026-07-02-phase4-requirements-agent-baseline-alignment.md)
 - [AI Generation Closed Loop Target Alignment](./traceability/2026-07-05-ai-generation-closed-loop-target-alignment.md)
+- [AI Generation Recontract Requirements Materialization](./traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md)
 - [UI/UX Requirement Design Baseline Gap Analysis](./traceability/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md)
 - [Role Auth Training Ops Decision Package](./traceability/2026-07-02-role-auth-training-ops-decision-package.md)
 - [Current Thread Requirement Reconciliation Ledger](./traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md)
@@ -79,10 +80,15 @@
 [AI Generation Closed Loop Target Alignment](./traceability/2026-07-05-ai-generation-closed-loop-target-alignment.md)，
 并按角色区分显式审核/发布/练习/统计路径，不得把闭环解释为 AI 生成后自动写入正式表。
 
+2026-07-06 起，AI组卷后续需求、UI/UX、后端或验收任务还必须读取
+[AI Generation Recontract Requirements Materialization](./traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md)。
+该合同将 AI组卷重定为“AI 生成组卷方案 + 系统从允许正式题源本地选题”，不再允许把 Provider 直接生成完整题目草稿解释为新的 AI组卷目标实现。
+
 当前口径：
 
 - 标准版基础 MVP 的“AI 出题 / 智能组卷不做”仍成立，不能被解释成标准版学员自动拥有 AI 生成能力。
 - 统一标准/高级版修复范围中，`content_admin` 的内容后台 `AI出题` / `AI组卷` 草稿评审能力、`personal_advanced_student` 和 `org_advanced_employee` 的 `AI训练`、`org_advanced_admin` 的组织后台 AI 生成能力仍属于当前需求范围。
+- AI出题生成完整题目草稿；AI组卷只生成组卷方案，最终题目必须来自角色允许的正式题源。
 - 旧文档中的 blocked/gap 行如果已被 2026-07-02 baseline 标记为 closed 或 superseded，只能作为历史证据，不得作为新的默认阻塞项。
 - 仍不声明 release readiness、final Pass、production usability、Cost Calibration、staging/prod 或广义生产全覆盖。
 
