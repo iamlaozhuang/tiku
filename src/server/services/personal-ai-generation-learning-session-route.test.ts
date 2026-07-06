@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type {
+  PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerFeedbackDto,
   PersonalAiGenerationLearningSessionDto,
   PersonalAiGenerationLearningSessionRepository,
@@ -63,6 +65,101 @@ function createVisibleGeneratedContent(): AiGenerationRouteIntegratedVisibleGene
       ],
     },
   };
+}
+
+function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
+  return {
+    title: "synthetic assembled paper",
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    requestedQuestionCount: 2,
+    selectedQuestionCount: 2,
+    sourceComposition: {
+      platformFormalQuestionCount: 1,
+      enterpriseTrainingSnapshotCount: 1,
+    },
+    matchQuality: "fully_matched",
+    sections: [
+      {
+        sectionKey: "single-choice",
+        title: "single choice section",
+        questionType: "single_choice",
+        targetQuestionCount: 2,
+        selectedQuestionCount: 2,
+        selectedQuestions: [
+          {
+            questionPublicId: "platform_formal_question_route_public_001",
+            sourceKind: "platform_formal_question",
+            matchTier: "exact",
+            score: 2,
+          },
+          {
+            questionPublicId: "enterprise_training_snapshot_route_public_001",
+            sourceKind: "enterprise_training_snapshot",
+            matchTier: "exact",
+            score: 2,
+          },
+        ],
+        degradationSummary: {
+          exactCount: 2,
+          nearbyKnowledgeCount: 0,
+          sameScopeCount: 0,
+        },
+      },
+    ],
+  };
+}
+
+function createPaperSourceQuestions(): PersonalAiGenerationLearningPaperSourceQuestionDto[] {
+  return [
+    {
+      questionPublicId: "platform_formal_question_route_public_001",
+      sourceKind: "platform_formal_question",
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["knowledge_node_route_a"],
+      questionStem: "synthetic route platform source stem",
+      questionOptions: [
+        {
+          optionLabel: "A",
+          optionText: "synthetic route platform option a",
+          isCorrect: true,
+        },
+        {
+          optionLabel: "B",
+          optionText: "synthetic route platform option b",
+          isCorrect: false,
+        },
+      ],
+      standardAnswerLabels: ["A"],
+      standardAnswerText: "A",
+      analysis: "synthetic route platform analysis",
+    },
+    {
+      questionPublicId: "enterprise_training_snapshot_route_public_001",
+      sourceKind: "enterprise_training_snapshot",
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["knowledge_node_route_b"],
+      questionStem: "synthetic route enterprise source stem",
+      questionOptions: [
+        {
+          optionLabel: "A",
+          optionText: "synthetic route enterprise option a",
+          isCorrect: false,
+        },
+        {
+          optionLabel: "B",
+          optionText: "synthetic route enterprise option b",
+          isCorrect: true,
+        },
+      ],
+      standardAnswerLabels: ["B"],
+      standardAnswerText: "B",
+      analysis: "synthetic route enterprise analysis",
+    },
+  ];
 }
 
 function createPostRequest(body: Record<string, unknown>): Request {
@@ -189,6 +286,145 @@ function getLearningSessionAnswerPostHandler(answers: unknown) {
 }
 
 describe("personal AI generation learning session route handlers", () => {
+  it("creates an AI组卷 learning session from server-resolved formal source questions and ignores client-sent source content", async () => {
+    const repository = createLearningSessionRepository();
+    const resolverCalls: AiPaperPlanAndSelectContainerDto[] = [];
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => employeeUserContext,
+        {
+          repository,
+          now: () => new Date("2026-07-06T04:00:00.000Z"),
+          paperSourceQuestionResolver: async ({ paperAssemblyContainer }) => {
+            resolverCalls.push(paperAssemblyContainer);
+            return createPaperSourceQuestions();
+          },
+        },
+      );
+
+    const response = await getLearningSessionCollectionPostHandler(collection)(
+      createPostRequest({
+        sessionPublicId: "ai_paper_learning_session_route_001",
+        sourceResultPublicId: "ai_generation_result_route_paper_001",
+        sourceTaskPublicId: "ai_generation_task_route_paper_001",
+        visibleGeneratedContent: createVisibleGeneratedContent(),
+        paperAssemblyContainer: createPaperAssemblyContainer(),
+        sourceQuestions: [
+          {
+            questionPublicId: "platform_formal_question_route_public_001",
+            sourceKind: "platform_formal_question",
+            questionStem: "client supplied source content must be ignored",
+          },
+        ],
+      }),
+    );
+    const payload = await response.json();
+
+    expect(resolverCalls).toHaveLength(1);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        status: "created",
+        blockReason: null,
+        session: {
+          sessionPublicId: "ai_paper_learning_session_route_001",
+          ownerType: "organization",
+          ownerPublicId: employeeUserContext.organizationPublicId,
+          actorPublicId: employeeUserContext.userPublicId,
+          questionCount: 2,
+        },
+      },
+    });
+    expect(repository.savedSessions[0]?.questions).toEqual([
+      expect.objectContaining({
+        questionStem: "synthetic route platform source stem",
+        standardAnswerLabels: ["A"],
+        maxScore: "2.0",
+      }),
+      expect.objectContaining({
+        questionStem: "synthetic route enterprise source stem",
+        standardAnswerLabels: ["B"],
+        maxScore: "2.0",
+      }),
+    ]);
+    expect(JSON.stringify(payload)).not.toContain(
+      "client supplied source content must be ignored",
+    );
+  });
+
+  it("blocks AI组卷 learning session route creation when the server resolver cannot supply every selected source question", async () => {
+    const repository = createLearningSessionRepository();
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        {
+          repository,
+          now: () => new Date("2026-07-06T04:01:00.000Z"),
+          paperSourceQuestionResolver: async () =>
+            createPaperSourceQuestions().slice(0, 1),
+        },
+      );
+
+    const response = await getLearningSessionCollectionPostHandler(collection)(
+      createPostRequest({
+        sessionPublicId: "ai_paper_learning_session_route_missing_source_001",
+        sourceResultPublicId:
+          "ai_generation_result_route_paper_missing_source_001",
+        sourceTaskPublicId: "ai_generation_task_route_paper_missing_source_001",
+        visibleGeneratedContent: createVisibleGeneratedContent(),
+        paperAssemblyContainer: createPaperAssemblyContainer(),
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        status: "blocked",
+        blockReason: "selected_question_source_missing",
+        session: null,
+      },
+    });
+    expect(repository.savedSessions).toHaveLength(0);
+  });
+
+  it("keeps the AI出题 learning session route from invoking the paper source resolver", async () => {
+    const repository = createLearningSessionRepository();
+    const resolverCalls: string[] = [];
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        {
+          repository,
+          now: () => new Date("2026-07-06T04:02:00.000Z"),
+          paperSourceQuestionResolver: async () => {
+            resolverCalls.push("called");
+            return [];
+          },
+        },
+      );
+
+    const response = await getLearningSessionCollectionPostHandler(collection)(
+      createPostRequest({
+        sessionPublicId: "ai_learning_session_route_question_regression_001",
+        sourceResultPublicId:
+          "ai_generation_result_route_question_regression_001",
+        sourceTaskPublicId: "ai_generation_task_route_question_regression_001",
+        visibleGeneratedContent: createVisibleGeneratedContent(),
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        status: "created",
+        session: {
+          questionCount: 1,
+        },
+      },
+    });
+    expect(resolverCalls).toHaveLength(0);
+  });
+
   it("creates a persisted learner AI session under the personal owner scope", async () => {
     const repository = createLearningSessionRepository();
     const { collection } =

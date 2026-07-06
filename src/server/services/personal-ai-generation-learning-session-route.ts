@@ -4,10 +4,13 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type {
+  PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+  PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerInputDto,
   PersonalAiGenerationLearningSessionCreationInputDto,
   PersonalAiGenerationLearningSessionRepository,
 } from "../contracts/personal-ai-generation-learning-session-contract";
+import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
 import type {
   PersonalAiGenerationResultUserContext,
@@ -21,7 +24,25 @@ import {
 
 export type PersonalAiGenerationLearningSessionRouteDependencies = {
   repository?: PersonalAiGenerationLearningSessionRepository;
+  paperSourceQuestionResolver?: PersonalAiGenerationLearningPaperSourceQuestionResolver;
   now?: () => Date;
+};
+
+export type PersonalAiGenerationLearningPaperSourceQuestionResolver = (
+  input: PersonalAiGenerationLearningPaperSourceQuestionResolverInput,
+) =>
+  | Promise<PersonalAiGenerationLearningPaperSourceQuestionDto[]>
+  | PersonalAiGenerationLearningPaperSourceQuestionDto[];
+
+export type PersonalAiGenerationLearningPaperSourceQuestionResolverInput = {
+  userContext: PersonalAiGenerationResultUserContext;
+  ownerScope: Pick<
+    PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+    "ownerType" | "ownerPublicId" | "actorPublicId"
+  >;
+  sourceResultPublicId: string;
+  sourceTaskPublicId: string;
+  paperAssemblyContainer: AiPaperPlanAndSelectContainerDto;
 };
 
 type LearningSessionRouteContext = {
@@ -186,11 +207,34 @@ function readVisibleGeneratedContent(
     : null;
 }
 
+function readPaperAssemblyContainer(
+  body: Record<string, unknown>,
+): AiPaperPlanAndSelectContainerDto | null {
+  const value = body.paperAssemblyContainer;
+
+  return isRecord(value) && Array.isArray(value.sections)
+    ? (value as AiPaperPlanAndSelectContainerDto)
+    : null;
+}
+
+type LearningSessionCreationRouteInput =
+  | {
+      kind: "generated_questions";
+      input: PersonalAiGenerationLearningSessionCreationInputDto;
+    }
+  | {
+      kind: "paper_assembly";
+      input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto;
+    };
+
 async function createLearningSessionInput(input: {
   request: Request;
   userContext: PersonalAiGenerationResultUserContext;
+  paperSourceQuestionResolver:
+    | PersonalAiGenerationLearningPaperSourceQuestionResolver
+    | undefined;
   now: () => Date;
-}): Promise<PersonalAiGenerationLearningSessionCreationInputDto | null> {
+}): Promise<LearningSessionCreationRouteInput | null> {
   const body = await readJsonObject(input.request);
 
   if (body === null) {
@@ -201,6 +245,7 @@ async function createLearningSessionInput(input: {
   const sourceResultPublicId = readRequiredString(body, "sourceResultPublicId");
   const sourceTaskPublicId = readRequiredString(body, "sourceTaskPublicId");
   const visibleGeneratedContent = readVisibleGeneratedContent(body);
+  const paperAssemblyContainer = readPaperAssemblyContainer(body);
   const ownerScope = resolveLearningSessionOwnerScope(input.userContext, body);
 
   if (
@@ -213,13 +258,45 @@ async function createLearningSessionInput(input: {
     return null;
   }
 
+  if (paperAssemblyContainer !== null) {
+    const sourceQuestions =
+      input.paperSourceQuestionResolver === undefined
+        ? []
+        : await input.paperSourceQuestionResolver({
+            userContext: input.userContext,
+            ownerScope,
+            sourceResultPublicId,
+            sourceTaskPublicId,
+            paperAssemblyContainer,
+          });
+    const groundingSummary = visibleGeneratedContent.groundingSummary;
+
+    return {
+      kind: "paper_assembly",
+      input: {
+        sessionPublicId,
+        sourceResultPublicId,
+        sourceTaskPublicId,
+        evidenceStatus: groundingSummary?.evidenceStatus ?? "none",
+        citationCount: groundingSummary?.citationCount ?? 0,
+        paperAssemblyContainer,
+        sourceQuestions,
+        createdAt: input.now(),
+        ...ownerScope,
+      },
+    };
+  }
+
   return {
-    sessionPublicId,
-    sourceResultPublicId,
-    sourceTaskPublicId,
-    visibleGeneratedContent,
-    createdAt: input.now(),
-    ...ownerScope,
+    kind: "generated_questions",
+    input: {
+      sessionPublicId,
+      sourceResultPublicId,
+      sourceTaskPublicId,
+      visibleGeneratedContent,
+      createdAt: input.now(),
+      ...ownerScope,
+    },
   };
 }
 
@@ -283,6 +360,8 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
           const creationInput = await createLearningSessionInput({
             request,
             userContext,
+            paperSourceQuestionResolver:
+              dependencies.paperSourceQuestionResolver,
             now,
           });
 
@@ -297,7 +376,13 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
 
           return createJsonResponse(
             createSuccessResponse(
-              await learningSessionService.createLearningSession(creationInput),
+              creationInput.kind === "paper_assembly"
+                ? await learningSessionService.createLearningSessionFromPaperAssembly(
+                    creationInput.input,
+                  )
+                : await learningSessionService.createLearningSession(
+                    creationInput.input,
+                  ),
             ),
           );
         },
