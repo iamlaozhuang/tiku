@@ -398,6 +398,124 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: learner-ai-training-db-persistence-loop-2026-07-05
+    title: Learner AI training DB persistence loop
+    phase: learner-ai-training-db-persistence-loop-2026-07-05
+    sourceStory: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    dependencies:
+      - learner-ai-training-attempt-stats-2026-07-05
+    status: closed
+    result: pass_learner_ai_training_db_persistence_loop_full_unit_green
+    taskKind: schema_migration_test_docs_learner_ai_training_db_persistence
+    executionProfile: local_schema_migration_generation_test_docs_no_provider_no_db_mutation
+    validationPolicy: red_first_schema_test_drizzle_migration_generation_focused_schema_unit_typecheck_lint_format_git_diff_full_unit_module_run_v2
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/learner-ai-training-db-loop-2026-07-05
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    plannedAt: "2026-07-05T20:05:30-07:00"
+    claimedAt: "2026-07-05T20:05:30-07:00"
+    materializedAt: "2026-07-05T20:05:30-07:00"
+    completedAt: "2026-07-05T20:18:10-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md
+      - docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - drizzle/**
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_runtime_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_seed_or_migrate_execution
+    migrationBoundary: drizzle_schema_and_migration_generation_allowed_for_learner_ai_learning_session_tables_only
+    credentialBoundary: env_file_read_allowed_only_by_existing_drizzle_config_if_generate_requires_database_url_no_secret_output_no_manual_secret_read
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    acceptanceStandards:
+      - Learner AI learning sessions have dedicated persisted session and answer-feedback schema definitions.
+      - Tables keep personal and organization owner context plus actor scope for personal advanced and organization employee use.
+      - Tables avoid formal practice, answer_record, exam_report, mistake_book, raw prompt, Provider payload, and raw AI I/O columns.
+      - Generated migration SQL is scoped to the new learner AI learning-session tables and indexes.
+      - No runtime DB mutation, Provider call, dependency change, browser runtime, staging/prod, or release/final claim is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/db/schema/ai-rag.test.ts
+      - npm.cmd exec -- drizzle-kit generate --name add_personal_ai_learning_session
+      - npm.cmd exec -- vitest run src/db/schema/ai-rag.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run test:unit
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts drizzle
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md src/db/schema/ai-rag.ts src/db/schema/ai-rag.test.ts drizzle
+      - git diff --check
+      - git diff --name-only -- package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-ai-training-db-persistence-loop-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-ai-training-db-persistence-loop-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_learner_ai_training_db_persistence_loop_full_unit_green
+      readGate: pass
+      taskPlanPrepared: true
+      redFirstSchemaTest: pass_missing_learning_session_tables_confirmed
+      schemaRepair: pass_added_personal_ai_learning_session_and_feedback_tables
+      drizzleMigrationGeneration: pass_generated_and_renamed_timestamp_migration
+      focusedSchemaTests: pass_1_file_32_tests
+      typecheck: pass
+      lint: pass
+      firstFullUnitTests: fail_2_unrelated_timeout_cases
+      timeoutFocusedReruns: pass_2_files_11_tests
+      fullUnitTests: pass_331_files_1643_tests
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      providerCallExecuted: false
+      envReadViaDrizzleConfig: possible_drizzle_config_read_no_secret_output
+      runtimeDbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationChanged: true
+      seedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: learner-ai-training-attempt-stats-2026-07-05
     title: Learner AI training attempt stats
     phase: learner-ai-training-attempt-stats-2026-07-05

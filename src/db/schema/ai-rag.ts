@@ -657,6 +657,102 @@ export const personalAiGenerationResult = pgTable(
   ],
 );
 
+export const personalAiLearningSession = pgTable(
+  "personal_ai_learning_session",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    personal_ai_generation_result_id: bigint(
+      "personal_ai_generation_result_id",
+      {
+        mode: "number",
+      },
+    ).notNull(),
+    source_result_public_id: text("source_result_public_id").notNull(),
+    source_task_public_id: text("source_task_public_id").notNull(),
+    content_domain: text("content_domain").notNull(),
+    owner_type: text("owner_type").notNull(),
+    owner_public_id: text("owner_public_id").notNull(),
+    actor_public_id: text("actor_public_id").notNull(),
+    evidence_status: evidenceStatusEnum("evidence_status")
+      .default("none")
+      .notNull(),
+    citation_count: integer("citation_count").default(0).notNull(),
+    question_count: integer("question_count").default(0).notNull(),
+    question_snapshot: jsonb("question_snapshot").notNull(),
+    formal_write_boundary: jsonb("formal_write_boundary").notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.personal_ai_generation_result_id],
+      foreignColumns: [personalAiGenerationResult.id],
+      name: "fk_personal_ai_learning_session_result",
+    }).onDelete("restrict"),
+    uniqueIndex("udx_personal_ai_learning_session_public_id").on(
+      table.public_id,
+    ),
+    index("idx_personal_ai_learning_session_actor_created_at").on(
+      table.actor_public_id,
+      table.created_at,
+    ),
+    index("idx_personal_ai_learning_session_owner_created_at").on(
+      table.owner_public_id,
+      table.created_at,
+    ),
+    index("idx_personal_ai_learning_session_source_result").on(
+      table.source_result_public_id,
+    ),
+  ],
+);
+
+export const personalAiLearningAnswerFeedback = pgTable(
+  "personal_ai_learning_answer_feedback",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    personal_ai_learning_session_id: bigint("personal_ai_learning_session_id", {
+      mode: "number",
+    }).notNull(),
+    learning_session_public_id: text("learning_session_public_id").notNull(),
+    session_question_public_id: text("session_question_public_id").notNull(),
+    actor_public_id: text("actor_public_id").notNull(),
+    feedback_status: text("feedback_status").notNull(),
+    selected_option_labels: jsonb("selected_option_labels").notNull(),
+    text_answer: text("text_answer"),
+    is_correct: boolean("is_correct"),
+    score: text("score"),
+    max_score: text("max_score"),
+    answer_feedback_snapshot: jsonb("answer_feedback_snapshot").notNull(),
+    formal_write_boundary: jsonb("formal_write_boundary").notNull(),
+    submitted_at: timestampColumn("submitted_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.personal_ai_learning_session_id],
+      foreignColumns: [personalAiLearningSession.id],
+      name: "fk_personal_ai_learning_feedback_session",
+    }).onDelete("cascade"),
+    uniqueIndex("udx_personal_ai_learning_answer_feedback_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_personal_ai_learning_answer_feedback_session_question").on(
+      table.learning_session_public_id,
+      table.session_question_public_id,
+    ),
+    index("idx_personal_ai_learning_answer_feedback_session").on(
+      table.learning_session_public_id,
+    ),
+    index("idx_personal_ai_learning_answer_feedback_actor_submitted_at").on(
+      table.actor_public_id,
+      table.submitted_at,
+    ),
+  ],
+);
+
 export const knowledgeBase = pgTable(
   "knowledge_base",
   {

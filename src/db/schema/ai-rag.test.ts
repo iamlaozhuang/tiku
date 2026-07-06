@@ -710,6 +710,149 @@ describe("personal learning AI generated content result schema", () => {
   });
 });
 
+describe("personal AI learning session persistence schema", () => {
+  const schemaExports = aiRagSchema as Record<string, unknown>;
+  const personalAiLearningSession = schemaExports.personalAiLearningSession as
+    | Parameters<typeof getTableConfig>[0]
+    | undefined;
+  const personalAiLearningAnswerFeedback =
+    schemaExports.personalAiLearningAnswerFeedback as
+      | Parameters<typeof getTableConfig>[0]
+      | undefined;
+
+  it("defines learner AI session and answer feedback tables separate from formal learning tables", () => {
+    expect(personalAiLearningSession).toBeDefined();
+    expect(personalAiLearningAnswerFeedback).toBeDefined();
+
+    if (
+      personalAiLearningSession === undefined ||
+      personalAiLearningAnswerFeedback === undefined
+    ) {
+      return;
+    }
+
+    expect(getTableName(personalAiLearningSession)).toBe(
+      "personal_ai_learning_session",
+    );
+    expect(getTableName(personalAiLearningAnswerFeedback)).toBe(
+      "personal_ai_learning_answer_feedback",
+    );
+    expect(getColumnNames(personalAiLearningSession)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "personal_ai_generation_result_id",
+        "source_result_public_id",
+        "source_task_public_id",
+        "content_domain",
+        "owner_type",
+        "owner_public_id",
+        "actor_public_id",
+        "evidence_status",
+        "citation_count",
+        "question_count",
+        "question_snapshot",
+        "formal_write_boundary",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getColumnNames(personalAiLearningAnswerFeedback)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "personal_ai_learning_session_id",
+        "learning_session_public_id",
+        "session_question_public_id",
+        "actor_public_id",
+        "feedback_status",
+        "selected_option_labels",
+        "text_answer",
+        "is_correct",
+        "score",
+        "max_score",
+        "answer_feedback_snapshot",
+        "formal_write_boundary",
+        "submitted_at",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+  });
+
+  it("keeps learner AI persistence away from formal and provider payload columns", () => {
+    expect(personalAiLearningSession).toBeDefined();
+    expect(personalAiLearningAnswerFeedback).toBeDefined();
+
+    if (
+      personalAiLearningSession === undefined ||
+      personalAiLearningAnswerFeedback === undefined
+    ) {
+      return;
+    }
+
+    const forbiddenColumns = [
+      "practice_id",
+      "answer_record_id",
+      "mock_exam_id",
+      "exam_report_id",
+      "mistake_book_id",
+      "prompt",
+      "provider_payload",
+      "raw_ai_input",
+      "raw_ai_output",
+    ];
+
+    expect(getColumnNames(personalAiLearningSession)).not.toEqual(
+      expect.arrayContaining(forbiddenColumns),
+    );
+    expect(getColumnNames(personalAiLearningAnswerFeedback)).not.toEqual(
+      expect.arrayContaining(forbiddenColumns),
+    );
+  });
+
+  it("adds public-id indexes and bounded foreign keys for learner AI session lookup", () => {
+    expect(personalAiLearningSession).toBeDefined();
+    expect(personalAiLearningAnswerFeedback).toBeDefined();
+
+    if (
+      personalAiLearningSession === undefined ||
+      personalAiLearningAnswerFeedback === undefined
+    ) {
+      return;
+    }
+
+    expect(getIndexNames(personalAiLearningSession)).toEqual(
+      expect.arrayContaining([
+        "udx_personal_ai_learning_session_public_id",
+        "idx_personal_ai_learning_session_actor_created_at",
+        "idx_personal_ai_learning_session_owner_created_at",
+        "idx_personal_ai_learning_session_source_result",
+      ]),
+    );
+    expect(getIndexNames(personalAiLearningAnswerFeedback)).toEqual(
+      expect.arrayContaining([
+        "udx_personal_ai_learning_answer_feedback_public_id",
+        "udx_personal_ai_learning_answer_feedback_session_question",
+        "idx_personal_ai_learning_answer_feedback_session",
+        "idx_personal_ai_learning_answer_feedback_actor_submitted_at",
+      ]),
+    );
+    expect(getForeignKeyNames(personalAiLearningSession)).toEqual(
+      expect.arrayContaining(["fk_personal_ai_learning_session_result"]),
+    );
+    expect(getForeignKeyNames(personalAiLearningAnswerFeedback)).toEqual(
+      expect.arrayContaining(["fk_personal_ai_learning_feedback_session"]),
+    );
+    expect(
+      [
+        ...getForeignKeyNames(personalAiLearningSession),
+        ...getForeignKeyNames(personalAiLearningAnswerFeedback),
+      ].every((foreignKeyName) => foreignKeyName.length <= 63),
+    ).toBe(true);
+  });
+});
+
 describe("admin AI generated content result schema", () => {
   const schemaExports = aiRagSchema as Record<string, unknown>;
   const adminAiGenerationResult = schemaExports.adminAiGenerationResult as

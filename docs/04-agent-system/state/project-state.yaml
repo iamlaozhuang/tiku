@@ -1,42 +1,41 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: learner-ai-training-attempt-stats-2026-07-05
-updatedAt: "2026-07-05T20:00:05-07:00"
+currentPhase: learner-ai-training-db-persistence-loop-2026-07-05
+updatedAt: "2026-07-05T20:18:10-07:00"
 currentTask:
-  id: learner-ai-training-attempt-stats-2026-07-05
-  phase: learner-ai-training-attempt-stats-2026-07-05
+  id: learner-ai-training-db-persistence-loop-2026-07-05
+  phase: learner-ai-training-db-persistence-loop-2026-07-05
   status: closed
-  result: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+  result: pass_learner_ai_training_db_persistence_loop_full_unit_green
   priority: p0
-  taskKind: source_test_docs_learner_ai_training_attempt_stats_contract
-  executionProfile: local_source_test_docs_only_no_provider_no_db
-  validationPolicy: red_first_service_contract_minimal_repair_focused_unit_typecheck_lint_format_git_diff_full_unit_module_run_v2
+  taskKind: schema_migration_test_docs_learner_ai_training_db_persistence
+  executionProfile: local_schema_migration_generation_test_docs_no_provider_no_db_mutation
+  validationPolicy: red_first_schema_test_drizzle_migration_generation_focused_schema_unit_typecheck_lint_format_git_diff_full_unit_module_run_v2
   moduleRunVersion: 2
-  branch: codex/learner-ai-training-attempt-stats-2026-07-05
+  branch: codex/learner-ai-training-db-loop-2026-07-05
   approvalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
-  plannedAt: "2026-07-05T19:49:30-07:00"
-  claimedAt: "2026-07-05T19:49:30-07:00"
-  materializedAt: "2026-07-05T19:49:30-07:00"
-  completedAt: "2026-07-05T20:00:05-07:00"
+  plannedAt: "2026-07-05T20:05:30-07:00"
+  claimedAt: "2026-07-05T20:05:30-07:00"
+  materializedAt: "2026-07-05T20:05:30-07:00"
+  completedAt: "2026-07-05T20:18:10-07:00"
   dependsOn:
-    - ai-generation-closed-loop-target-alignment-2026-07-05
-  targetClosureItem: Persist learner AI learning-session answer feedback and resumable statistics snapshots for personal advanced students and organization advanced employees without formal learning writes.
-  behaviorBoundary: local_source_test_docs_only_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_db_connection_no_db_mutation_no_schema_migration_seed_no_browser_no_dev_server_no_e2e_no_staging_prod_cloud_deploy_no_release_final_or_production_claim_no_raw_question_material_paper_content_evidence
+    - learner-ai-training-attempt-stats-2026-07-05
+  targetClosureItem: Add DB schema and migration foundation for persisted learner AI learning sessions and answer feedback while preserving formal write boundaries.
+  behaviorBoundary: local_schema_and_migration_generation_test_docs_only_no_provider_call_no_cost_execution_env_read_only_via_drizzle_config_no_secret_output_no_runtime_db_connection_no_db_mutation_no_cleanup_reset_seed_no_browser_no_dev_server_no_e2e_no_staging_prod_cloud_deploy_no_release_final_or_production_claim_no_raw_question_material_paper_content_evidence
   evidenceMode: redacted_task_ids_branch_file_paths_public_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
-  planPath: docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md
-    - docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
-    - docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
-    - src/server/contracts/personal-ai-generation-learning-session-contract.ts
-    - src/server/models/personal-ai-generation-learning-session.ts
-    - src/server/services/personal-ai-generation-learning-session-service.ts
-    - src/server/services/personal-ai-generation-learning-session-service.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-db-persistence-loop.md
+    - docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-db-persistence-loop.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-db-persistence-loop.md
+    - src/db/schema/ai-rag.ts
+    - src/db/schema/ai-rag.test.ts
+    - drizzle/**
   closeoutPolicy:
     localCommit:
       approved: true
@@ -53,15 +52,18 @@ currentTask:
       deleteShortBranch: true
       approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
   validationSummary:
-    status: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+    status: pass_learner_ai_training_db_persistence_loop_full_unit_green
     readGate: pass
     taskPlanPrepared: true
-    redFirstTest: pass_missing_progress_service_method_confirmed
-    sourceRepair: pass_saved_feedback_and_resumable_statistics_contract
-    focusedUnitTests: pass_1_file_6_tests
+    redFirstSchemaTest: pass_missing_learning_session_tables_confirmed
+    schemaRepair: pass_added_personal_ai_learning_session_and_feedback_tables
+    drizzleMigrationGeneration: pass_generated_and_renamed_timestamp_migration
+    focusedSchemaTests: pass_1_file_32_tests
     typecheck: pass
     lint: pass
-    fullUnitTests: pass_331_files_1640_tests
+    firstFullUnitTests: fail_2_unrelated_timeout_cases
+    timeoutFocusedReruns: pass_2_files_11_tests
+    fullUnitTests: pass_331_files_1643_tests
     scopedPrettier: pass
     gitDiffCheck: pass_no_output
     blockedPathDiffCheck: pass_no_output
@@ -69,13 +71,24 @@ currentTask:
     evidencePrepared: true
     auditPrepared: true
     providerCallExecuted: false
-    dbConnectionUsed: false
+    envReadViaDrizzleConfig: possible_drizzle_config_read_no_secret_output
+    runtimeDbConnectionUsed: false
     dbMutated: false
-    schemaMigrationSeedChanged: false
+    schemaMigrationChanged: true
+    seedChanged: false
     dependencyChanged: false
     browserRuntimeExecuted: false
     stagingProdExecuted: false
     releaseFinalProductionClaimed: false
+previousCurrentTaskBeforeLearnerAiTrainingDbPersistenceLoop20260705:
+  id: learner-ai-training-attempt-stats-2026-07-05
+  phase: learner-ai-training-attempt-stats-2026-07-05
+  status: closed
+  result: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+  branch: codex/learner-ai-training-attempt-stats-2026-07-05
+  completedAt: "2026-07-05T20:00:05-07:00"
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
 previousCurrentTaskBeforeLearnerAiTrainingAttemptStats20260705:
   id: ai-generation-closed-loop-target-alignment-2026-07-05
   phase: ai-generation-closed-loop-target-alignment-2026-07-05
