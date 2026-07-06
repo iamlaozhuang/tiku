@@ -54,3 +54,16 @@
 
 - 未将 AI 结果写入正式 `question` / `paper` / `practice` / `mock_exam` / `answer_record` / `exam_report` / `mistake_book`。
 - Evidence 未记录原题、材料、标准答案、解析、Provider payload、凭证、环境变量、会话/token、PII 或原始 DB 行。
+
+## Post-Merge Master Validation
+
+- `git merge --ff-only codex/organization-ai-training-closed-loop-2026-07-06`
+  - 通过，master 快进到 `290686bca721d3761deb55c0b37374b02da584c0`。
+- `npm.cmd run typecheck`
+  - 通过。
+- `npm.cmd run lint`
+  - 通过。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-ai-training-closed-loop-2026-07-06 -SkipRemoteAheadCheck`
+  - 通过。
+- `npm.cmd run test:unit`
+  - 通过：333 个文件，1657 个测试。
