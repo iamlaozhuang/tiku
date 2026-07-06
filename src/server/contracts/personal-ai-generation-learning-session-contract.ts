@@ -4,9 +4,12 @@ import type {
   PersonalAiGenerationLearningAnswerFeedbackStatus,
   PersonalAiGenerationLearningContentDomain,
   PersonalAiGenerationLearningFormalWriteStatus,
+  PersonalAiGenerationLearningPersistenceStatus,
+  PersonalAiGenerationLearningResumeStatus,
   PersonalAiGenerationLearningSessionCreationBlockReason,
   PersonalAiGenerationLearningSessionCreationStatus,
   PersonalAiGenerationLearningSessionOwnerType,
+  PersonalAiGenerationLearningSessionProgressStatus,
   PersonalAiGenerationLearningSessionQuestionType,
 } from "../models/personal-ai-generation-learning-session";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-contract";
@@ -115,6 +118,65 @@ export type PersonalAiGenerationLearningSessionAnswerFeedbackDto = {
   submittedAt: string;
 };
 
+export type PersonalAiGenerationLearningSessionStatisticsDto = {
+  questionCount: number;
+  submittedCount: number;
+  correctCount: number;
+  incorrectCount: number;
+  reviewRequiredCount: number;
+  completionRate: number;
+  accuracyRate: number | null;
+  score: string;
+  maxScore: string;
+  updatedAt: string;
+};
+
+export type PersonalAiGenerationLearningSessionProgressDto = {
+  sessionPublicId: string;
+  contentDomain: PersonalAiGenerationLearningContentDomain;
+  sourceResultPublicId: string | null;
+  sourceTaskPublicId: string;
+  ownerType: PersonalAiGenerationLearningSessionOwnerType;
+  ownerPublicId: string;
+  actorPublicId: string;
+  persistenceStatus: PersonalAiGenerationLearningPersistenceStatus;
+  resumeStatus: PersonalAiGenerationLearningResumeStatus;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  questionCount: number;
+  answerFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
+  statistics: PersonalAiGenerationLearningSessionStatisticsDto;
+  formalWriteBoundary: PersonalAiGenerationLearningFormalWriteBoundaryDto;
+  createdAt: string;
+};
+
+export type PersonalAiGenerationLearningSessionProgressInputDto = {
+  sessionPublicId: string;
+  actorPublicId: string;
+  viewedAt: Date;
+};
+
+export type PersonalAiGenerationLearningSessionProgressResultDto =
+  | {
+      status: Extract<
+        PersonalAiGenerationLearningSessionProgressStatus,
+        "ready"
+      >;
+      blockReason: null;
+      progress: PersonalAiGenerationLearningSessionProgressDto;
+    }
+  | {
+      status: Extract<
+        PersonalAiGenerationLearningSessionProgressStatus,
+        "blocked"
+      >;
+      blockReason: Extract<
+        PersonalAiGenerationLearningAnswerBlockReason,
+        "session_not_found" | "actor_not_allowed"
+      >;
+      progress: null;
+    };
+
 export type PersonalAiGenerationLearningSessionRepository = {
   saveSession(
     session: PersonalAiGenerationLearningSessionDto,
@@ -125,6 +187,14 @@ export type PersonalAiGenerationLearningSessionRepository = {
     | Promise<PersonalAiGenerationLearningSessionDto | null>
     | PersonalAiGenerationLearningSessionDto
     | null;
+  saveAnswerFeedback(
+    answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
+  ): Promise<void> | void;
+  listAnswerFeedbackBySessionPublicId(
+    sessionPublicId: string,
+  ):
+    | Promise<PersonalAiGenerationLearningSessionAnswerFeedbackDto[]>
+    | PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
 };
 
 export type PersonalAiGenerationLearningSessionService = {
@@ -134,4 +204,7 @@ export type PersonalAiGenerationLearningSessionService = {
   submitLearningSessionAnswer(
     input: PersonalAiGenerationLearningSessionAnswerInputDto,
   ): Promise<PersonalAiGenerationLearningSessionAnswerFeedbackDto>;
+  getLearningSessionProgress(
+    input: PersonalAiGenerationLearningSessionProgressInputDto,
+  ): Promise<PersonalAiGenerationLearningSessionProgressResultDto>;
 };

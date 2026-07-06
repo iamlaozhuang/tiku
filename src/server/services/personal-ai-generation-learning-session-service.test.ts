@@ -5,6 +5,7 @@ import type {
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type {
+  PersonalAiGenerationLearningSessionAnswerFeedbackDto,
   PersonalAiGenerationLearningSessionDto,
   PersonalAiGenerationLearningSessionRepository,
 } from "../contracts/personal-ai-generation-learning-session-contract";
@@ -12,15 +13,32 @@ import { createPersonalAiGenerationLearningSessionService } from "./personal-ai-
 
 function createInMemoryRepository(): PersonalAiGenerationLearningSessionRepository {
   const sessions = new Map<string, PersonalAiGenerationLearningSessionDto>();
+  const answerFeedbacks = new Map<
+    string,
+    PersonalAiGenerationLearningSessionAnswerFeedbackDto
+  >();
 
-  return {
+  const repository: PersonalAiGenerationLearningSessionRepository = {
     async saveSession(session) {
       sessions.set(session.sessionPublicId, session);
     },
     async findSessionByPublicId(sessionPublicId) {
       return sessions.get(sessionPublicId) ?? null;
     },
+    async saveAnswerFeedback(answerFeedback) {
+      answerFeedbacks.set(
+        `${answerFeedback.sessionPublicId}:${answerFeedback.sessionQuestionPublicId}`,
+        answerFeedback,
+      );
+    },
+    async listAnswerFeedbackBySessionPublicId(sessionPublicId) {
+      return Array.from(answerFeedbacks.values()).filter(
+        (answerFeedback) => answerFeedback.sessionPublicId === sessionPublicId,
+      );
+    },
   };
+
+  return repository;
 }
 
 function createQuestionSetPreview(): AiGenerationRouteIntegratedStructuredPreview {
@@ -212,6 +230,161 @@ describe("personal AI generation learning session service", () => {
       formalWriteBoundary: {
         mistakeBookWriteStatus: "blocked",
       },
+    });
+  });
+
+  it("persists answer feedback and returns a resumable personal statistics snapshot using latest feedback", async () => {
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    });
+    const creationResult = await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_public_progress_001",
+      sourceResultPublicId: "ai_generation_result_public_progress_001",
+      sourceTaskPublicId: "ai_generation_task_public_progress_001",
+      ownerType: "personal",
+      ownerPublicId: "student_public_progress_001",
+      actorPublicId: "student_public_progress_001",
+      visibleGeneratedContent: createVisibleGeneratedContent(
+        createQuestionSetPreview(),
+      ),
+      createdAt: new Date("2026-07-05T12:00:00.000Z"),
+    });
+
+    expect(creationResult.status).toBe("created");
+
+    await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_public_progress_001",
+      sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_1",
+      actorPublicId: "student_public_progress_001",
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-05T12:01:00.000Z"),
+    });
+    await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_public_progress_001",
+      sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
+      actorPublicId: "student_public_progress_001",
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-05T12:02:00.000Z"),
+    });
+    await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_public_progress_001",
+      sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
+      actorPublicId: "student_public_progress_001",
+      selectedOptionLabels: ["B"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-05T12:03:00.000Z"),
+    });
+
+    const progressResult = await service.getLearningSessionProgress({
+      sessionPublicId: "ai_learning_session_public_progress_001",
+      actorPublicId: "student_public_progress_001",
+      viewedAt: new Date("2026-07-05T12:04:00.000Z"),
+    });
+
+    expect(progressResult).toMatchObject({
+      status: "ready",
+      blockReason: null,
+      progress: {
+        sessionPublicId: "ai_learning_session_public_progress_001",
+        contentDomain: "personal_ai_learning",
+        persistenceStatus: "repository_persisted",
+        resumeStatus: "resumable",
+        ownerType: "personal",
+        ownerPublicId: "student_public_progress_001",
+        actorPublicId: "student_public_progress_001",
+        statistics: {
+          questionCount: 2,
+          submittedCount: 2,
+          correctCount: 2,
+          incorrectCount: 0,
+          reviewRequiredCount: 0,
+          completionRate: 1,
+          accuracyRate: 1,
+          score: "2.0",
+          maxScore: "2.0",
+          updatedAt: "2026-07-05T12:04:00.000Z",
+        },
+        formalWriteBoundary: {
+          practiceWriteStatus: "blocked",
+          answerRecordWriteStatus: "blocked",
+          examReportWriteStatus: "blocked",
+          mistakeBookWriteStatus: "blocked",
+        },
+      },
+    });
+    expect(progressResult.progress?.answerFeedbacks).toHaveLength(2);
+    expect(progressResult.progress?.answerFeedbacks[1]).toMatchObject({
+      sessionQuestionPublicId: "ai_learning_session_public_progress_001_q_2",
+      selectedOptionLabels: ["B"],
+      isCorrect: true,
+      submittedAt: "2026-07-05T12:03:00.000Z",
+    });
+  });
+
+  it("keeps organization employee learning progress actor-isolated while preserving organization ownership context", async () => {
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    });
+    const creationResult = await service.createLearningSession({
+      sessionPublicId: "ai_learning_session_public_org_progress_001",
+      sourceResultPublicId: "ai_generation_result_public_org_progress_001",
+      sourceTaskPublicId: "ai_generation_task_public_org_progress_001",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_progress_001",
+      actorPublicId: "employee_public_progress_001",
+      visibleGeneratedContent: createVisibleGeneratedContent(
+        createQuestionSetPreview(),
+      ),
+      createdAt: new Date("2026-07-05T12:00:00.000Z"),
+    });
+
+    expect(creationResult.status).toBe("created");
+
+    await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_learning_session_public_org_progress_001",
+      sessionQuestionPublicId:
+        "ai_learning_session_public_org_progress_001_q_1",
+      actorPublicId: "employee_public_progress_001",
+      selectedOptionLabels: ["B"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-05T12:01:00.000Z"),
+    });
+
+    const progressResult = await service.getLearningSessionProgress({
+      sessionPublicId: "ai_learning_session_public_org_progress_001",
+      actorPublicId: "employee_public_progress_001",
+      viewedAt: new Date("2026-07-05T12:02:00.000Z"),
+    });
+    const blockedProgressResult = await service.getLearningSessionProgress({
+      sessionPublicId: "ai_learning_session_public_org_progress_001",
+      actorPublicId: "other_employee_public_progress_001",
+      viewedAt: new Date("2026-07-05T12:02:00.000Z"),
+    });
+
+    expect(progressResult).toMatchObject({
+      status: "ready",
+      progress: {
+        ownerType: "organization",
+        ownerPublicId: "organization_public_progress_001",
+        actorPublicId: "employee_public_progress_001",
+        statistics: {
+          questionCount: 2,
+          submittedCount: 1,
+          correctCount: 0,
+          incorrectCount: 1,
+          completionRate: 0.5,
+          accuracyRate: 0,
+          score: "0.0",
+          maxScore: "2.0",
+        },
+      },
+    });
+    expect(blockedProgressResult).toEqual({
+      status: "blocked",
+      blockReason: "actor_not_allowed",
+      progress: null,
     });
   });
 

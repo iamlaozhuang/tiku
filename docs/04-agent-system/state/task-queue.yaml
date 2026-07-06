@@ -398,6 +398,123 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: learner-ai-training-attempt-stats-2026-07-05
+    title: Learner AI training attempt stats
+    phase: learner-ai-training-attempt-stats-2026-07-05
+    sourceStory: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    dependencies:
+      - ai-generation-closed-loop-target-alignment-2026-07-05
+    status: closed
+    result: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+    taskKind: source_test_docs_learner_ai_training_attempt_stats_contract
+    executionProfile: local_source_test_docs_only_no_provider_no_db
+    validationPolicy: red_first_service_contract_minimal_repair_focused_unit_typecheck_lint_format_git_diff_full_unit_module_run_v2
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/learner-ai-training-attempt-stats-2026-07-05
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    plannedAt: "2026-07-05T19:49:30-07:00"
+    claimedAt: "2026-07-05T19:49:30-07:00"
+    materializedAt: "2026-07-05T19:49:30-07:00"
+    completedAt: "2026-07-05T20:00:05-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md
+      - docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md
+      - src/server/contracts/personal-ai-generation-learning-session-contract.ts
+      - src/server/models/personal-ai-generation-learning-session.ts
+      - src/server/services/personal-ai-generation-learning-session-service.ts
+      - src/server/services/personal-ai-generation-learning-session-service.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: blocked_for_this_service_contract_task
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    acceptanceStandards:
+      - Personal advanced student learner AI sessions save answer feedback and expose a resumable statistics snapshot.
+      - Organization advanced employee learner AI sessions use the same contract under organization owner context without exposing raw content to admins.
+      - Latest saved feedback per generated question is used for statistics.
+      - Cross-actor progress reads remain blocked.
+      - Formal question, paper, practice, answer_record, exam_report, and mistake_book writes remain blocked.
+      - No Provider call, DB action, schema/migration/seed, dependency, browser runtime, staging/prod, or release/final claim is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run test:unit
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/evidence/2026-07-05-learner-ai-training-attempt-stats.md docs/05-execution-logs/audits-reviews/2026-07-05-learner-ai-training-attempt-stats.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src/db drizzle migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-ai-training-attempt-stats-2026-07-05
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-ai-training-attempt-stats-2026-07-05 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_learner_ai_training_attempt_stats_contract_full_unit_green
+      readGate: pass
+      taskPlanPrepared: true
+      redFirstTest: pass_missing_progress_service_method_confirmed
+      sourceRepair: pass_saved_feedback_and_resumable_statistics_contract
+      focusedUnitTests: pass_1_file_6_tests
+      typecheck: pass
+      lint: pass
+      fullUnitTests: pass_331_files_1640_tests
+      scopedPrettier: pass
+      gitDiffCheck: pass_no_output
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommit: pass
+      providerCallExecuted: false
+      dbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: ai-generation-closed-loop-target-alignment-2026-07-05
     title: AI generation closed-loop target alignment
     phase: ai-generation-closed-loop-target-alignment-2026-07-05

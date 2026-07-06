@@ -20,6 +20,11 @@ export type PersonalAiGenerationLearningContentDomain = "personal_ai_learning";
 
 export type PersonalAiGenerationLearningFormalWriteStatus = "blocked";
 
+export type PersonalAiGenerationLearningPersistenceStatus =
+  "repository_persisted";
+
+export type PersonalAiGenerationLearningResumeStatus = "resumable";
+
 export type PersonalAiGenerationLearningAnswerFeedbackStatus =
   | "scored"
   | "submitted_review_required"
@@ -39,3 +44,7 @@ export type PersonalAiGenerationLearningAnswerBlockReason =
   | "session_not_found"
   | "actor_not_allowed"
   | "question_not_found";
+
+export type PersonalAiGenerationLearningSessionProgressStatus =
+  | "ready"
+  | "blocked";
