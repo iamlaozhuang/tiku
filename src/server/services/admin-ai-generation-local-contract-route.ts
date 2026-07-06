@@ -84,6 +84,7 @@ type AdminAiGenerationActor = {
 
 type ServiceComputedOrganizationAiGenerationCapability =
   AdminWorkspaceCapabilitySummary & {
+    organizationAuthorizationPublicId: string;
     organizationPublicId: string;
     organizationEffectiveEdition: "advanced";
     organizationAuthorizationSource: "org_auth";
@@ -331,11 +332,15 @@ function resolveServiceComputedOrganizationAiGenerationCapability(
   actor: AdminAiGenerationActor,
 ): ServiceComputedOrganizationAiGenerationCapability | null {
   const capabilitySummary = actor.adminWorkspaceCapability;
+  const organizationAuthorizationPublicId = normalizeOptionalText(
+    capabilitySummary?.organizationAuthorizationPublicId,
+  );
 
   if (
     capabilitySummary === undefined ||
     capabilitySummary.capabilitySource !== "service_computed" ||
     capabilitySummary.organizationAuthorizationSource !== "org_auth" ||
+    organizationAuthorizationPublicId === null ||
     capabilitySummary.organizationPublicId === null ||
     capabilitySummary.organizationEffectiveEdition !== "advanced" ||
     capabilitySummary.canUseOrganizationAdvancedWorkspace !== true
@@ -343,7 +348,10 @@ function resolveServiceComputedOrganizationAiGenerationCapability(
     return null;
   }
 
-  return capabilitySummary as ServiceComputedOrganizationAiGenerationCapability;
+  return {
+    ...capabilitySummary,
+    organizationAuthorizationPublicId,
+  } as ServiceComputedOrganizationAiGenerationCapability;
 }
 
 function canUseOrganizationAdminAiGeneration(
@@ -450,21 +458,25 @@ function createAdminAiGenerationPolicyInput(input: {
     };
   }
 
-  const organizationPublicId =
-    resolveServiceComputedOrganizationAiGenerationCapability(input.actor)
-      ?.organizationPublicId ?? null;
+  const organizationCapability =
+    resolveServiceComputedOrganizationAiGenerationCapability(input.actor);
+
+  if (organizationCapability === null) {
+    return null;
+  }
 
   return {
     taskPublicId,
     taskType,
     actorPublicId: input.actor.publicId,
     authorizationSource: "org_auth",
-    authorizationPublicId: `org_auth_local_contract_${organizationPublicId}`,
+    authorizationPublicId:
+      organizationCapability.organizationAuthorizationPublicId,
     ownerType: "organization",
-    ownerPublicId: organizationPublicId,
-    organizationPublicId,
+    ownerPublicId: organizationCapability.organizationPublicId,
+    organizationPublicId: organizationCapability.organizationPublicId,
     quotaOwnerType: "organization",
-    quotaOwnerPublicId: organizationPublicId,
+    quotaOwnerPublicId: organizationCapability.organizationPublicId,
     effectiveEdition: "advanced",
     isAuthorizationActive: true,
     isScopeAllowed: true,
@@ -684,12 +696,17 @@ async function buildAdminAiGenerationLocalContract(input: {
     taskPublicId: null,
     workspace: input.workspace,
   });
-  const taskRequestResponse = buildAiGenerationTaskRequestPolicyReadModel(
-    createAdminAiGenerationPolicyInput({
-      ...input,
-      requestPublicId,
-    }),
-  );
+  const taskPolicyInput = createAdminAiGenerationPolicyInput({
+    ...input,
+    requestPublicId,
+  });
+
+  if (taskPolicyInput === null) {
+    return invalidAdminAiGenerationRequestResponse;
+  }
+
+  const taskRequestResponse =
+    buildAiGenerationTaskRequestPolicyReadModel(taskPolicyInput);
 
   if (taskRequestResponse.code !== 0 || taskRequestResponse.data === null) {
     return invalidAdminAiGenerationRequestResponse;

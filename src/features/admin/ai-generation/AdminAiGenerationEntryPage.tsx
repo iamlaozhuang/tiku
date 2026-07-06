@@ -32,6 +32,7 @@ import {
   AdminUnauthorizedState,
   AdminUpgradeRequiredState,
   fetchAdminApi,
+  formatAdminApiBusinessError,
   getStoredSessionToken,
   isAdminContext,
   isUnauthorizedResponse,
@@ -331,6 +332,24 @@ function createOrganizationAiTrainingDraftTitle(input: {
   requestedAt: string;
 }): string {
   return `${getGenerationKindLabel(input.generationKind)}训练草稿 ${formatRequestedAt(input.requestedAt)}`;
+}
+
+function normalizeOptionalPublicId(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+
+  return normalizedValue === "" ? null : normalizedValue;
+}
+
+function resolveOrganizationTrainingAuthorizationPublicId(
+  capabilitySummary: AdminWorkspaceCapabilitySummary,
+): string | null {
+  return normalizeOptionalPublicId(
+    capabilitySummary.organizationAuthorizationPublicId,
+  );
 }
 
 function formatRequestedAt(requestedAt: string): string {
@@ -1058,6 +1077,7 @@ function StructuredPreviewSummary({
 
 function AdminAiGenerationTaskHistoryPanel({
   adminWorkspaceCapabilitySummary,
+  copyActionErrorMessageByResultPublicId,
   copyActionStateByResultPublicId,
   currentLocalContractSummary,
   generationParameters,
@@ -1072,6 +1092,7 @@ function AdminAiGenerationTaskHistoryPanel({
   workspace,
 }: {
   adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
+  copyActionErrorMessageByResultPublicId: Record<string, string>;
   copyActionStateByResultPublicId: Record<
     string,
     OrganizationAiTrainingDraftCopyState
@@ -1360,6 +1381,11 @@ function AdminAiGenerationTaskHistoryPanel({
                             taskItem.generatedResult.resultPublicId
                           ] ?? "idle"
                         }
+                        actionErrorMessage={
+                          copyActionErrorMessageByResultPublicId[
+                            taskItem.generatedResult.resultPublicId
+                          ] ?? null
+                        }
                         adminWorkspaceCapabilitySummary={
                           adminWorkspaceCapabilitySummary
                         }
@@ -1381,12 +1407,14 @@ function AdminAiGenerationTaskHistoryPanel({
 
 function OrganizationAiGenerationDraftNextStepPanel({
   actionState,
+  actionErrorMessage,
   adminWorkspaceCapabilitySummary,
   generationParameters,
   taskItem,
   onCopyToTrainingDraft,
 }: {
   actionState: OrganizationAiTrainingDraftCopyState;
+  actionErrorMessage: string | null;
   adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   taskItem: AdminAiGenerationTaskHistoryItemDto;
@@ -1432,8 +1460,10 @@ function OrganizationAiGenerationDraftNextStepPanel({
       : copyReadiness === "weak_confirmation_required"
         ? "确认资料较少并创建训练草稿"
         : "创建企业训练草稿";
-  const actionMessage =
-    resolveOrganizationAiTrainingDraftCopyActionMessage(actionState);
+  const actionMessage = resolveOrganizationAiTrainingDraftCopyActionMessage(
+    actionState,
+    actionErrorMessage,
+  );
 
   return (
     <section
@@ -1516,6 +1546,7 @@ function OrganizationAiGenerationDraftNextStepPanel({
 
 function resolveOrganizationAiTrainingDraftCopyActionMessage(
   actionState: OrganizationAiTrainingDraftCopyState,
+  actionErrorMessage: string | null,
 ): string | null {
   if (actionState === "copying") {
     return "正在创建企业训练草稿";
@@ -1526,7 +1557,10 @@ function resolveOrganizationAiTrainingDraftCopyActionMessage(
   }
 
   if (actionState === "error") {
-    return "创建企业训练草稿失败，请确认企业授权和组织范围后重试。";
+    return (
+      actionErrorMessage ??
+      "创建企业训练草稿失败，请确认企业授权和组织范围后重试。"
+    );
   }
 
   return null;
@@ -1756,6 +1790,9 @@ export function AdminAiGenerationEntryPage({
     useState<AdminAiGenerationEntryLoadState>("loading");
   const [requestState, setRequestState] =
     useState<AdminAiGenerationRequestState>("idle");
+  const [requestErrorMessage, setRequestErrorMessage] = useState<string | null>(
+    null,
+  );
   const [historyState, setHistoryState] =
     useState<AdminAiGenerationHistoryState>("loading");
   const [localContractSummary, setLocalContractSummary] =
@@ -1775,6 +1812,10 @@ export function AdminAiGenerationEntryPage({
   ] = useState<Record<string, ContentAdminReviewActionState>>({});
   const [copyActionStateByResultPublicId, setCopyActionStateByResultPublicId] =
     useState<Record<string, OrganizationAiTrainingDraftCopyState>>({});
+  const [
+    copyActionErrorMessageByResultPublicId,
+    setCopyActionErrorMessageByResultPublicId,
+  ] = useState<Record<string, string>>({});
   const [adminWorkspaceCapabilitySummary, setAdminWorkspaceCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
   const pageCopy = getPageCopy(workspace, generationKind);
@@ -2000,6 +2041,7 @@ export function AdminAiGenerationEntryPage({
     const sessionToken = getStoredSessionToken();
 
     setRequestState("submitting");
+    setRequestErrorMessage(null);
     setLocalContractSummary(null);
 
     try {
@@ -2022,6 +2064,9 @@ export function AdminAiGenerationEntryPage({
       }
 
       if (requestResponse.code !== 0 || requestResponse.data === null) {
+        setRequestErrorMessage(
+          formatAdminApiBusinessError(requestResponse, "生成请求暂不可用"),
+        );
         setRequestState("error");
         return;
       }
@@ -2030,6 +2075,7 @@ export function AdminAiGenerationEntryPage({
       setRequestState("accepted");
       await refreshTaskHistory(sessionToken, ADMIN_AI_GENERATION_HISTORY_PAGE);
     } catch {
+      setRequestErrorMessage(providerExecutionCopy.error);
       setRequestState("error");
     }
   }
@@ -2119,24 +2165,40 @@ export function AdminAiGenerationEntryPage({
     }
 
     const resultPublicId = generatedResult.resultPublicId;
+    const setCopyActionError = (message: string) => {
+      setCopyActionStateByResultPublicId((currentState) => ({
+        ...currentState,
+        [resultPublicId]: "error",
+      }));
+      setCopyActionErrorMessageByResultPublicId((currentState) => ({
+        ...currentState,
+        [resultPublicId]: message,
+      }));
+    };
     const copyReadiness =
       getOrganizationAiTrainingCopyReadiness(generatedResult);
     const organizationPublicId =
       input.taskItem.organizationPublicId ??
       input.taskItem.organizationOwnedDraftBoundary.organizationPublicId;
+    const organizationAuthorizationPublicId =
+      adminWorkspaceCapabilitySummary === null
+        ? null
+        : resolveOrganizationTrainingAuthorizationPublicId(
+            adminWorkspaceCapabilitySummary,
+          );
 
     if (
       workspace !== "organization" ||
       adminWorkspaceCapabilitySummary === null ||
       organizationPublicId === null ||
+      organizationAuthorizationPublicId === null ||
       copyReadiness === "blocked" ||
       (copyReadiness === "weak_confirmation_required" &&
         input.confirmation !== "weak_confirmed")
     ) {
-      setCopyActionStateByResultPublicId((currentState) => ({
-        ...currentState,
-        [resultPublicId]: "error",
-      }));
+      setCopyActionError(
+        "创建企业训练草稿失败：当前会话缺少可校验的企业授权，请刷新后重试。",
+      );
       return;
     }
 
@@ -2146,6 +2208,11 @@ export function AdminAiGenerationEntryPage({
       ...currentState,
       [resultPublicId]: "copying",
     }));
+    setCopyActionErrorMessageByResultPublicId((currentState) => {
+      const nextState = { ...currentState };
+      delete nextState[resultPublicId];
+      return nextState;
+    });
 
     try {
       const draftTitle = createOrganizationAiTrainingDraftTitle({
@@ -2160,7 +2227,7 @@ export function AdminAiGenerationEntryPage({
       }>("/api/v1/organization-trainings", sessionToken, {
         body: JSON.stringify({
           organizationPublicId,
-          authorizationPublicId: input.taskItem.authorizationPublicId,
+          authorizationPublicId: organizationAuthorizationPublicId,
           sourceTaskPublicId: input.taskItem.taskPublicId,
           profession: generationParameters.profession,
           level: generationParameters.level,
@@ -2188,18 +2255,21 @@ export function AdminAiGenerationEntryPage({
         draft === null ||
         draft.organizationPublicId !== organizationPublicId
       ) {
-        setCopyActionStateByResultPublicId((currentState) => ({
-          ...currentState,
-          [resultPublicId]: "error",
-        }));
+        setCopyActionError(
+          draftResponse.code === 0
+            ? "创建企业训练草稿失败：接口返回的草稿不属于当前组织。"
+            : formatAdminApiBusinessError(
+                draftResponse,
+                "创建企业训练草稿失败",
+              ),
+        );
         return;
       }
 
       if (draft.sourceTaskPublicId !== input.taskItem.taskPublicId) {
-        setCopyActionStateByResultPublicId((currentState) => ({
-          ...currentState,
-          [resultPublicId]: "error",
-        }));
+        setCopyActionError(
+          "创建企业训练草稿失败：接口返回的草稿未关联当前 AI 任务。",
+        );
         return;
       }
 
@@ -2208,10 +2278,7 @@ export function AdminAiGenerationEntryPage({
         [resultPublicId]: "copied",
       }));
     } catch {
-      setCopyActionStateByResultPublicId((currentState) => ({
-        ...currentState,
-        [resultPublicId]: "error",
-      }));
+      setCopyActionError("创建企业训练草稿失败：请求未完成，请稍后重试。");
     }
   }
 
@@ -2333,7 +2400,7 @@ export function AdminAiGenerationEntryPage({
             生成请求暂不可用
           </h2>
           <p className="text-text-secondary mt-2 text-sm leading-6">
-            {providerExecutionCopy.error}
+            {requestErrorMessage ?? providerExecutionCopy.error}
           </p>
         </section>
       ) : null}
@@ -2398,6 +2465,9 @@ export function AdminAiGenerationEntryPage({
 
       <AdminAiGenerationTaskHistoryPanel
         adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
+        copyActionErrorMessageByResultPublicId={
+          copyActionErrorMessageByResultPublicId
+        }
         copyActionStateByResultPublicId={copyActionStateByResultPublicId}
         currentLocalContractSummary={localContractSummary}
         generationParameters={generationParameters}

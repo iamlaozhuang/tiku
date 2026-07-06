@@ -31,6 +31,7 @@ const ordinaryUiForbiddenTechnicalPhrases = ["合同已就绪", "本地验证证
 
 function createSessionResponse(input: {
   adminRoles: AdminRole[];
+  organizationAuthorizationPublicId?: string | null;
   organizationPublicId?: string | null;
 }) {
   const organizationPublicId = input.organizationPublicId ?? null;
@@ -42,6 +43,11 @@ function createSessionResponse(input: {
     isOrganizationAdvancedAdmin || isOrganizationStandardAdmin
       ? {
           adminRoles: input.adminRoles,
+          organizationAuthorizationPublicId:
+            input.organizationAuthorizationPublicId ??
+            (isOrganizationAdvancedAdmin && organizationPublicId !== null
+              ? "org_auth_session_public_123"
+              : null),
           organizationPublicId,
           organizationEffectiveEdition: isOrganizationAdvancedAdmin
             ? "advanced"
@@ -108,7 +114,7 @@ function createLocalContractResponse(input: {
         authorizationSource: isContent ? "admin_role" : "org_auth",
         authorizationPublicId: isContent
           ? "admin_role_content_ai_generation"
-          : "org_auth_local_contract_organization_public_123",
+          : "org_auth_session_public_123",
         actorPublicId: "admin_public_123",
         ownerType: isContent ? "platform" : "organization",
         ownerPublicId,
@@ -223,7 +229,7 @@ function createTaskHistoryResponse(input: {
         citationCount: input.generatedResult?.citationCount ?? 0,
         authorizationPublicId:
           input.workspace === "organization"
-            ? "org_auth_local_contract_organization_public_123"
+            ? "org_auth_session_public_123"
             : "admin_role_content_ai_generation",
         ownerPublicId:
           input.workspace === "organization"
@@ -288,7 +294,7 @@ function createTaskHistoryResponse(input: {
           citationCount: input.generatedResult?.citationCount ?? 0,
           authorizationPublicId:
             input.workspace === "organization"
-              ? "org_auth_local_contract_organization_public_123"
+              ? "org_auth_session_public_123"
               : "admin_role_content_ai_generation",
           ownerPublicId:
             input.workspace === "organization"
@@ -2580,8 +2586,7 @@ describe("admin AI generation entry surfaces", () => {
                 "admin_ai_generation_task_organization_question_history",
               organizationPublicId: "organization_public_123",
               authorizationSource: "org_auth",
-              authorizationPublicId:
-                "org_auth_local_contract_organization_public_123",
+              authorizationPublicId: "org_auth_session_public_123",
               profession: "marketing",
               level: 3,
               subject: "theory",
@@ -2639,7 +2644,7 @@ describe("admin AI generation entry surfaces", () => {
     );
     expect(draftBody).toMatchObject({
       organizationPublicId: "organization_public_123",
-      authorizationPublicId: "org_auth_local_contract_organization_public_123",
+      authorizationPublicId: "org_auth_session_public_123",
       sourceTaskPublicId:
         "admin_ai_generation_task_organization_question_history",
       profession: "marketing",
@@ -2659,6 +2664,75 @@ describe("admin AI generation entry surfaces", () => {
         String(url).endsWith("/source-contexts"),
       ),
     ).toBe(false);
+  });
+
+  it("shows organization training draft business error code when AI result copy is rejected", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const resultPublicId =
+      "admin_ai_generation_result_organization_question_copy_error_001";
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+      const method = init?.method ?? "GET";
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/organization-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "organization",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for organization copy error",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+          }),
+        );
+      }
+
+      if (path === "/api/v1/organization-trainings" && method === "POST") {
+        return Response.json({
+          code: 403079,
+          message: "Organization training manual draft lineage is unavailable.",
+          data: null,
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "organization",
+        generationKind: "question",
+      }),
+    );
+
+    fireEvent.click(
+      await screen.findByTestId("organization-ai-training-copy-action"),
+    );
+
+    expect(
+      await screen.findByText(
+        "创建企业训练草稿失败（code: 403079）：Organization training manual draft lineage is unavailable.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("requires explicit weak-evidence wording before copying organization AI results and blocks none evidence", async () => {
@@ -2708,8 +2782,7 @@ describe("admin AI generation entry surfaces", () => {
                 "admin_ai_generation_task_organization_question_history",
               organizationPublicId: "organization_public_123",
               authorizationSource: "org_auth",
-              authorizationPublicId:
-                "org_auth_local_contract_organization_public_123",
+              authorizationPublicId: "org_auth_session_public_123",
               profession: "marketing",
               level: 3,
               subject: "theory",

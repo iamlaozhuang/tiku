@@ -1,9 +1,72 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-formal-draft-adoption-ui-loop-2026-07-05
-updatedAt: "2026-07-05T13:39:00-07:00"
+currentPhase: organization-ai-training-auth-lineage-2026-07-05
+updatedAt: "2026-07-05T17:57:54-07:00"
 currentTask:
+  id: organization-ai-training-auth-lineage-2026-07-05
+  phase: organization-ai-training-auth-lineage-2026-07-05
+  status: closed
+  result: pass_organization_ai_training_auth_lineage_no_provider_db_formal_write
+  priority: p0
+  taskKind: source_test_docs_organization_ai_training_auth_lineage
+  executionProfile: local_source_ui_unit_test_no_provider_no_db_mutation
+  validationPolicy: red_first_source_ui_test_focused_unit_tests_typecheck_lint_format_git_diff_full_unit_audit
+  moduleRunVersion: 2
+  branch: codex/organization-ai-training-auth-lineage-2026-07-05
+  approvalBoundary: current_user_requested_fix_ai_generation_training_lineage_2026_07_05
+  plannedAt: "2026-07-05T16:42:00-07:00"
+  claimedAt: "2026-07-05T16:42:00-07:00"
+  materializedAt: "2026-07-05T16:42:00-07:00"
+  completedAt: "2026-07-05T17:57:54-07:00"
+  dependsOn:
+    - content-ai-formal-draft-adoption-ui-loop-2026-07-05
+  targetClosureItem: Fix organization AI出题 training draft copy to use real org_auth public lineage from session capability, show concrete API business error codes, and verify role AI出题/AI组卷 surfaces do not rely on placeholder authorization ids.
+  behaviorBoundary: local_source_ui_unit_test_docs_only_no_provider_call_no_cost_execution_no_secret_access_no_env_file_read_write_no_db_connection_no_db_mutation_no_schema_migration_seed_no_browser_no_dev_server_no_e2e_no_staging_prod_cloud_deploy_no_release_final_or_production_claim_no_raw_question_material_paper_content_evidence
+  evidenceMode: redacted_task_ids_branch_file_paths_public_role_labels_aggregate_counts_command_names_pass_fail_block_summary_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_content_screenshots_traces_raw_dom_private_fixture_contents
+  planPath: docs/05-execution-logs/task-plans/2026-07-05-organization-ai-training-auth-lineage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-05-organization-ai-training-auth-lineage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-organization-ai-training-auth-lineage.md
+  allowedFiles:
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/2026-07-05-organization-ai-training-auth-lineage.md
+    - docs/05-execution-logs/evidence/2026-07-05-organization-ai-training-auth-lineage.md
+    - docs/05-execution-logs/audits-reviews/2026-07-05-organization-ai-training-auth-lineage.md
+    - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+    - src/features/admin/content-admin-runtime.tsx
+    - src/server/auth/local-session-runtime.ts
+    - src/server/auth/local-session-runtime.test.ts
+    - src/server/contracts/admin-workspace-role-guard-contract.ts
+    - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+    - src/server/services/admin-ai-generation-local-contract-route.ts
+    - src/server/services/admin-ai-generation-local-contract-route.test.ts
+    - tests/unit/admin-ai-generation-entry-surface.test.ts
+  closeoutPolicy:
+    localCommit:
+      approved: true
+      approvalSource: current_user_requested_fix_ai_generation_training_lineage_2026_07_05
+  validationSummary:
+    status: pass_organization_ai_training_auth_lineage_no_provider_db_formal_write
+    readGate: pass
+    taskPlanPrepared: true
+    evidencePrepared: true
+    auditPrepared: true
+    redFirstTest: pass_missing_real_org_auth_lineage_and_business_error_visibility
+    focusedUnitTests: pass_4_files_72_tests
+    typecheck: pass
+    lint: pass
+    formatCheck: pass
+    gitDiffCheck: pass_no_output
+    fullUnitTests: fail_unrelated_existing_7_cases_documented
+    providerCallExecuted: false
+    dbConnectionUsed: false
+    dbMutated: false
+    schemaMigrationSeedChanged: false
+    dependencyChanged: false
+    stagingProdExecuted: false
+    releaseFinalProductionClaimed: false
+previousCurrentTaskBeforeOrganizationAiTrainingAuthLineage20260705:
   id: content-ai-formal-draft-adoption-ui-loop-2026-07-05
   phase: content-ai-formal-draft-adoption-ui-loop-2026-07-05
   status: closed

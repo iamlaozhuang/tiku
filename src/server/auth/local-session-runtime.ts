@@ -876,6 +876,7 @@ async function findOrganizationAdminWorkspaceCapability(input: {
 }): Promise<AdminWorkspaceCapabilitySummary | null> {
   const [row] = await input.database
     .select({
+      authorization_public_id: orgAuth.public_id,
       effective_edition: sql<"standard" | "advanced">`
         case
           when ${orgAuth.edition} = 'advanced' or ${authUpgrade.id} is not null
@@ -933,6 +934,7 @@ async function findOrganizationAdminWorkspaceCapability(input: {
 
   return {
     adminRoles,
+    organizationAuthorizationPublicId: row.authorization_public_id,
     organizationPublicId: input.authUser.organization_public_id,
     organizationEffectiveEdition: row.effective_edition,
     organizationAuthorizationSource: "org_auth",

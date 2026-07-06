@@ -561,6 +561,7 @@ describe("local session runtime", () => {
       ],
       [
         {
+          authorization_public_id: "org-auth-advanced-public-001",
           effective_edition: "advanced",
         },
       ],
@@ -586,6 +587,7 @@ describe("local session runtime", () => {
           adminRoles: ["org_advanced_admin"],
           adminWorkspaceCapability: {
             adminRoles: ["org_advanced_admin"],
+            organizationAuthorizationPublicId: "org-auth-advanced-public-001",
             organizationPublicId: "organization-advanced-public-001",
             organizationEffectiveEdition: "advanced",
             organizationAuthorizationSource: "org_auth",

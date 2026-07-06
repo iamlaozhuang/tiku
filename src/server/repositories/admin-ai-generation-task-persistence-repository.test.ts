@@ -19,6 +19,10 @@ import type {
   AdminAiGenerationLocalContractDto,
 } from "../contracts/admin-ai-generation-local-contract";
 import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
+import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedGroundingContext,
+} from "../contracts/route-integrated-provider-execution-contract";
 import type { AdminRole } from "../models/auth";
 import {
   ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
@@ -26,20 +30,103 @@ import {
 } from "./admin-ai-generation-task-persistence-repository";
 import {
   createAdminAiGenerationLocalContractRouteHandlers,
+  type AdminAiGenerationRuntimeBridgeControl,
   type AdminAiGenerationWorkspace,
 } from "../services/admin-ai-generation-local-contract-route";
 import type { SessionService } from "../services/session-service";
 
-const defaultAdminGenerationParameters = {
-  profession: "marketing",
-  level: 3,
-  subject: "theory",
-  knowledgeNode: "卷烟营销基础",
-  questionType: "single_choice",
-  questionCount: 10,
-  difficulty: "medium",
-  learningObjective: "专项练习",
-};
+const defaultAdminGenerationParameters: AiGenerationRouteIntegratedGenerationParameters =
+  {
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    knowledgeNode: "卷烟营销基础",
+    questionType: "single_choice",
+    questionCount: 10,
+    difficulty: "medium",
+    learningObjective: "专项练习",
+  };
+
+const sufficientAdminGroundingContext: AiGenerationRouteIntegratedGroundingContext =
+  {
+    evidenceStatus: "sufficient",
+    citationCount: 1,
+    generationParameters: defaultAdminGenerationParameters,
+    citations: [
+      {
+        resourceTitle: "脱敏营销资料",
+        headingPath: ["脱敏章节"],
+        chunkIndex: 0,
+        chunkText: "脱敏资料片段",
+        score: 0.91,
+      },
+    ],
+  };
+
+function createStructuredAdminProviderContent(
+  generationKind: "question" | "paper",
+): string {
+  if (generationKind === "question") {
+    return JSON.stringify({
+      questions: Array.from({ length: 10 }, () => ({
+        questionType: "single_choice",
+        difficulty: "medium",
+        knowledgeNodeLabels: ["redacted_knowledge_node"],
+      })),
+    });
+  }
+
+  return JSON.stringify({
+    totalQuestionCount: 50,
+    paperSections: [
+      {
+        paperSectionType: "single_choice",
+        questionCount: 50,
+      },
+    ],
+    questionTypeDistribution: {
+      single_choice: 50,
+    },
+    knowledgeCoverage: ["redacted_knowledge_node"],
+  });
+}
+
+function createRepositoryTestProviderRuntimeBridgeControl(): AdminAiGenerationRuntimeBridgeControl {
+  return {
+    bridgeMode: "controlled_runner",
+    explicitLocalSwitchPresent: true,
+    providerExecution: {
+      executionMode: "route_integrated_provider",
+      realProviderExecutionApproved: true,
+      maxRequests: 1,
+      maxRetries: 0,
+      maxOutputTokens: 220,
+      timeoutMs: 30000,
+      readProviderCredential: () => "synthetic-admin-provider-credential",
+      resolveGroundingContext: () => sufficientAdminGroundingContext,
+      executeProviderRequest: async (providerInput) => ({
+        requestCount: 1,
+        resultStatus: "pass",
+        failureCategory: null,
+        durationMs: 21,
+        usageSummary: {
+          promptTokens: 5,
+          completionTokens: 2,
+          totalTokens: 7,
+        },
+        providerErrorSummary: null,
+        visibleGeneratedContent: {
+          content: createStructuredAdminProviderContent(
+            providerInput.requestContext.generationKind,
+          ),
+          contentVisibility: "transient_response_only",
+          persistenceStatus: "not_persisted",
+          safetyStatus: "checked",
+        },
+      }),
+    },
+  };
+}
 
 function createDefaultAdminWorkspaceCapability(input: {
   adminRoles: AdminRole[];
@@ -57,6 +144,10 @@ function createDefaultAdminWorkspaceCapability(input: {
 
   return {
     adminRoles: input.adminRoles,
+    organizationAuthorizationPublicId:
+      isOrganizationAdvancedRole && input.organizationPublicId !== null
+        ? "org_auth_public_901"
+        : null,
     organizationPublicId: input.organizationPublicId,
     organizationEffectiveEdition: isOrganizationAdvancedRole
       ? "advanced"
@@ -140,6 +231,7 @@ async function createAcceptedLocalContract(input: {
         adminRoles: input.adminRoles,
         organizationPublicId: input.organizationPublicId,
       }),
+      runtimeBridgeControl: createRepositoryTestProviderRuntimeBridgeControl(),
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository:
         createLocalContractRouteResultPersistenceRepository(),
@@ -153,6 +245,7 @@ async function createAcceptedLocalContract(input: {
         ...defaultAdminGenerationParameters,
         questionCount: input.generationKind === "question" ? 10 : 50,
       },
+      requestedRuntimeMode: "route_integrated_provider",
       clientOnlyFixtureA: "OMITTED_CLIENT_FIXTURE_A",
       clientOnlyFixtureB: "OMITTED_CLIENT_FIXTURE_B",
       clientOnlyFixtureC: "OMITTED_CLIENT_FIXTURE_C",
@@ -201,10 +294,10 @@ function createLocalContractRouteTaskPersistenceResult(
       citationCount: 0,
       aiCallLogPublicId: null,
       runtimeStatus: "local_contract_only",
-      runtimeBridgeStatus: "provider_call_blocked",
-      providerCallExecuted: false,
-      envSecretAccessed: false,
-      providerConfigurationRead: false,
+      runtimeBridgeStatus: "provider_call_succeeded",
+      providerCallExecuted: true,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
       costCalibrationExecuted: false,
       formalContentBoundary: {
         questionWriteStatus: "blocked_without_follow_up_task",
@@ -475,10 +568,10 @@ describe("admin AI generation task persistence repository", () => {
       citationCount: 0,
       aiCallLogPublicId: null,
       runtimeStatus: "local_contract_only",
-      runtimeBridgeStatus: "provider_call_blocked",
-      providerCallExecuted: false,
-      envSecretAccessed: false,
-      providerConfigurationRead: false,
+      runtimeBridgeStatus: "provider_call_succeeded",
+      providerCallExecuted: true,
+      envSecretAccessed: true,
+      providerConfigurationRead: true,
       costCalibrationExecuted: false,
       questionWriteStatus: "blocked_without_follow_up_task",
       paperWriteStatus: "blocked_without_follow_up_task",
@@ -537,7 +630,7 @@ describe("admin AI generation task persistence repository", () => {
       workspace: "organization",
       generationKind: "paper",
       authorizationSource: "org_auth",
-      authorizationPublicId: "org_auth_local_contract_organization_public_901",
+      authorizationPublicId: "org_auth_public_901",
       ownerType: "organization",
       ownerPublicId: "organization_public_901",
       organizationPublicId: "organization_public_901",
@@ -667,7 +760,7 @@ describe("admin AI generation task persistence repository", () => {
       ...localContract,
       runtimeBridge: {
         ...localContract.runtimeBridge,
-        providerCallExecuted: true,
+        providerCallExecuted: false,
       },
     } as unknown as AdminAiGenerationLocalContractDto;
     const unsafeFormalWriteContract = {

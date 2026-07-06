@@ -126,6 +126,10 @@ function createDefaultAdminWorkspaceCapability(input: {
 
   return {
     adminRoles: input.adminRoles,
+    organizationAuthorizationPublicId:
+      isOrganizationAdvancedRole && input.organizationPublicId !== null
+        ? "org_auth_public_123"
+        : null,
     organizationPublicId: input.organizationPublicId,
     organizationEffectiveEdition: isOrganizationAdvancedRole
       ? "advanced"
@@ -435,7 +439,7 @@ function createTaskHistoryItem(input: {
     authorizationSource: isContent ? "admin_role" : "org_auth",
     authorizationPublicId: isContent
       ? "admin_role_content_ai_generation"
-      : "org_auth_local_contract_organization_public_123",
+      : "org_auth_public_123",
     actorPublicId: "admin_public_123",
     ownerType: isContent ? "platform" : "organization",
     ownerPublicId,
@@ -1432,6 +1436,54 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("rawPrompt");
     expect(serializedPayload).not.toContain("rawOutput");
     expect(serializedPayload).not.toContain("providerPayload");
+  });
+
+  it("uses service-computed org_auth public id for organization AI task persistence", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      adminWorkspaceCapability: {
+        adminRoles: ["org_advanced_admin"],
+        organizationAuthorizationPublicId: "org_auth_route_public_123",
+        organizationPublicId: "organization_public_123",
+        organizationEffectiveEdition: "advanced",
+        organizationAuthorizationSource: "org_auth",
+        capabilitySource: "service_computed",
+        canUseOrganizationAdvancedWorkspace: true,
+      },
+      organizationPublicId: "organization_public_123",
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        requestedRuntimeMode: "route_integrated_provider",
+        clientOnlyFixtureO: "OMITTED_FIXTURE_O",
+      },
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        taskRequest: {
+          authorizationSource: "org_auth",
+          authorizationPublicId: "org_auth_route_public_123",
+          organizationPublicId: "organization_public_123",
+        },
+      },
+    });
+    expect(taskPersistenceRecorder.calls).toHaveLength(1);
+    expect(
+      taskPersistenceRecorder.calls[0]?.localContract.taskRequest
+        .authorizationPublicId,
+    ).toBe("org_auth_route_public_123");
+    expect(serializedPayload).not.toContain("org_auth_local_contract");
+    expect(serializedPayload).not.toContain("OMITTED_FIXTURE_O");
   });
 
   it("denies organization advanced admin direct POST when service-computed capability is absent", async () => {

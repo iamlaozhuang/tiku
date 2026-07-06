@@ -84,6 +84,18 @@ export function isUnauthorizedResponse(payload: ApiResponse<unknown>): boolean {
   return payload.code === 401001;
 }
 
+export function formatAdminApiBusinessError(
+  payload: Pick<ApiResponse<unknown>, "code" | "message">,
+  fallbackMessage: string,
+): string {
+  const normalizedMessage =
+    typeof payload.message === "string" && payload.message.trim() !== ""
+      ? payload.message.trim()
+      : fallbackMessage;
+
+  return `${fallbackMessage}（code: ${payload.code}）：${normalizedMessage}`;
+}
+
 export function formatScope(input: {
   profession: Profession;
   level: number;

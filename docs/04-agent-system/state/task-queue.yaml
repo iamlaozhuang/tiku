@@ -398,6 +398,112 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: organization-ai-training-auth-lineage-2026-07-05
+    title: Organization AI training authorization lineage repair
+    phase: organization-ai-training-auth-lineage-2026-07-05
+    sourceStory: current_user_requested_fix_ai_generation_training_lineage_2026_07_05
+    dependencies:
+      - content-ai-formal-draft-adoption-ui-loop-2026-07-05
+    status: closed
+    result: pass_organization_ai_training_auth_lineage_no_provider_db_formal_write
+    taskKind: source_test_docs_organization_ai_training_auth_lineage
+    executionProfile: local_source_ui_unit_test_no_provider_no_db_mutation
+    validationPolicy: red_first_source_ui_test_focused_unit_tests_typecheck_lint_format_git_diff_full_unit_audit
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/organization-ai-training-auth-lineage-2026-07-05
+    humanApprovalBoundary: current_user_requested_fix_ai_generation_training_lineage_2026_07_05
+    plannedAt: "2026-07-05T16:42:00-07:00"
+    claimedAt: "2026-07-05T16:42:00-07:00"
+    materializedAt: "2026-07-05T16:42:00-07:00"
+    completedAt: "2026-07-05T17:57:54-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-organization-ai-training-auth-lineage.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-organization-ai-training-auth-lineage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-organization-ai-training-auth-lineage.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-organization-ai-training-auth-lineage.md
+      - docs/05-execution-logs/evidence/2026-07-05-organization-ai-training-auth-lineage.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-organization-ai-training-auth-lineage.md
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/content-admin-runtime.tsx
+      - src/server/auth/local-session-runtime.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/server/contracts/admin-workspace-role-guard-contract.ts
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: blocked_for_this_source_ui_unit_task
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_fix_ai_generation_training_lineage_2026_07_05
+    acceptanceStandards:
+      - Organization AI出题 copy to training drafts uses the real organization org_auth public id from workspace capability instead of a synthetic placeholder id.
+      - Organization AI generation request persistence fails closed when organization authorization lineage is unavailable.
+      - Admin AI generation surfaces show concrete API business codes and messages when available.
+      - Existing personal advanced, organization employee, organization admin, and content admin AI出题/AI组卷 loops keep using shared AI generation contracts and do not introduce duplicated role-specific paths.
+      - No Provider call, staging/prod, dependency, schema, migration, seed, DB connection, DB mutation, browser runtime, or dev server work is introduced.
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts src/server/auth/local-session-runtime.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run format:check
+      - git diff --check
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-ai-training-auth-lineage-2026-07-05
+    validationSummary:
+      status: pass_organization_ai_training_auth_lineage_no_provider_db_formal_write
+      readGate: pass
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      redFirstTest: pass_missing_real_org_auth_lineage_and_business_error_visibility
+      sourceRepair: pass
+      focusedUnitTests: pass_4_files_72_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      gitDiffCheck: pass_no_output
+      fullUnitTests: fail_unrelated_existing_7_cases_documented
+      providerCallExecuted: false
+      dbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: content-ai-formal-draft-adoption-ui-loop-2026-07-05
     title: Content AI formal draft adoption UI loop
     phase: content-ai-formal-draft-adoption-ui-loop-2026-07-05

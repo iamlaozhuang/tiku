@@ -28,6 +28,7 @@ export type AdminWorkspaceRouteAccessReason =
 
 export type AdminWorkspaceCapabilitySummary = {
   adminRoles: readonly AdminRole[];
+  organizationAuthorizationPublicId?: string | null;
   organizationPublicId: string | null;
   organizationEffectiveEdition: AuthorizationEdition | null;
   organizationAuthorizationSource: AdminWorkspaceAuthorizationSource | null;
