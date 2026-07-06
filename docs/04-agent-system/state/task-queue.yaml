@@ -141,6 +141,12 @@ activeTasks:
       providerExecutionDurationBucket: gte_60s
       visibleGeneratedContentPresent: false
       structuredPreviewPresent: false
+      masterFastForwardMerge: pass
+      masterHeadAfterMerge: b060abfcd
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeDiffCheck: pass
+      masterPostMergePrePushReadiness: pass
       sourceChanged: false
       testChanged: false
       dependencyChanged: false

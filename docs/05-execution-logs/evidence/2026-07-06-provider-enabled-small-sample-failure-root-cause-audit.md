@@ -134,3 +134,17 @@ Temporary artifacts:
 
 - Temporary source probe removed before commit.
 - Temporary `.runtime/provider-enabled-root-cause-audit` logs removed after verification.
+
+## Post-Merge Master Validation
+
+- Merge mode: fast-forward.
+- Master head after merge: `b060abfcd`.
+- Origin/master before push: `82414a8c7`.
+
+| Command                                                                                                                                                     | Result                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `git status --short --branch`                                                                                                                               | pass; `master` ahead of `origin/master` by 1 |
+| `npm.cmd run lint`                                                                                                                                          | pass                                         |
+| `npm.cmd run typecheck`                                                                                                                                     | pass                                         |
+| `git diff --check`                                                                                                                                          | pass                                         |
+| `scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId provider-enabled-small-sample-failure-root-cause-audit-2026-07-06 -SkipRemoteAheadCheck` | pass                                         |
