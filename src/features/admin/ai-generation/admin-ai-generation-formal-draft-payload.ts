@@ -184,10 +184,6 @@ function createFormalQuestionDraftPayload(
 }
 
 function normalizeQuestionType(value: string | null | undefined): QuestionType {
-  if (value === "multiple_choice") {
-    return "multi_choice";
-  }
-
   if (value === "judge") {
     return "true_false";
   }

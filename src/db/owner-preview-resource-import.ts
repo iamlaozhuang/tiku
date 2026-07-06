@@ -1705,10 +1705,6 @@ function normalizeQuestionType(
 ): OwnerPreviewResourceQuestionType | null {
   const normalizedValue = normalizeOptionalText(value);
 
-  if (normalizedValue === "multiple_choice") {
-    return "multi_choice";
-  }
-
   if (normalizedValue === "subjective") {
     return "short_answer";
   }

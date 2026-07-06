@@ -398,6 +398,108 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: paper-legacy-alias-inventory-cleanup-2026-07-05
+    title: Paper legacy alias inventory cleanup
+    phase: paper-legacy-alias-inventory-cleanup-2026-07-05
+    sourceStory: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    dependencies:
+      - admin-permission-session-contract-cleanup-2026-07-05
+    status: closed
+    result: pass_paper_legacy_alias_inventory_cleanup_remaining_full_unit_1_failure
+    taskKind: source_test_docs_paper_legacy_alias_inventory_cleanup
+    executionProfile: local_source_test_docs_only_no_provider_no_db
+    validationPolicy: red_first_existing_inventory_test_minimal_source_cleanup_focused_unit_tests_typecheck_lint_format_git_diff_full_unit_audit
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/paper-legacy-alias-cleanup-2026-07-05
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    plannedAt: "2026-07-05T19:13:15-07:00"
+    claimedAt: "2026-07-05T19:13:15-07:00"
+    materializedAt: "2026-07-05T19:13:15-07:00"
+    completedAt: "2026-07-05T19:18:50-07:00"
+    planPath: docs/05-execution-logs/task-plans/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+      - docs/05-execution-logs/evidence/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+      - src/db/owner-preview-resource-import.ts
+      - src/features/admin/ai-generation/admin-ai-generation-formal-draft-payload.ts
+      - tests/unit/paper-legacy-alias-inventory.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_direct_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_schema_migration_seed_or_drizzle_push
+    browserBoundary: blocked_for_this_source_test_task
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    acceptanceStandards:
+      - Unexpected `multiple_choice` compatibility is removed from owner preview resource import and admin AI formal draft payload paths.
+      - Canonical `multi_choice` and `short_answer` question type handling remains intact.
+      - Student snapshot/runtime legacy compatibility files remain unchanged.
+      - No Provider call, staging/prod, dependency, schema, migration, seed, DB connection, DB mutation, browser runtime, or dev server work is introduced.
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/paper-legacy-alias-inventory.test.ts
+      - npm.cmd run test:unit -- tests/unit/owner-preview-resource-import.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd run format:check
+      - git diff --check
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId paper-legacy-alias-inventory-cleanup-2026-07-05
+    validationSummary:
+      status: pass_paper_legacy_alias_inventory_cleanup_remaining_full_unit_1_failure
+      readGate: pass
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      redFirstTest: pass_existing_inventory_failure_confirmed_two_unexpected_multiple_choice_hits
+      sourceRepair: pass_removed_unexpected_multiple_choice_alias_branches
+      focusedInventoryTest: pass_1_file_2_tests
+      adjacentFocusedTests: pass_2_files_38_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      gitDiffCheck: pass_no_output
+      fullUnitTests: fail_remaining_1_case_after_paper_legacy_alias_cleanup
+      providerCallExecuted: false
+      dbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationSeedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: admin-permission-session-contract-cleanup-2026-07-05
     title: Admin permission session contract cleanup
     phase: admin-permission-session-contract-cleanup-2026-07-05
