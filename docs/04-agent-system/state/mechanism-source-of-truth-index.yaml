@@ -19,6 +19,9 @@ canonicalStateFiles:
   - id: task-history-index
     path: docs/04-agent-system/state/task-history-index.yaml
     role: lookup index for archived task queue entries
+  - id: task-queue-archive-2026-07
+    path: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    role: July 2026 archived task queue entries moved by approved active queue slimming tasks
   - id: recent-thread-governance-baseline
     path: docs/04-agent-system/state/recent-thread-governance-baseline.yaml
     role: compact navigation baseline for the latest five-thread governance and doc-slimming lessons; this reduces default recovery reading surface but does not replace project-state, task-queue, evidence, audit reviews, SOPs, or requirement SSOT

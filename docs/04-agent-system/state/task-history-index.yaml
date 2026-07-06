@@ -1,10 +1,10 @@
-﻿schemaVersion: 1
+schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: full-chain-post-acceptance-queue-cleanup-2026-07-05
-  updatedAt: "2026-07-05T08:17:35-07:00"
+  updatedByTask: active-tasks-slimming-2026-07-06
+  updatedAt: "2026-07-06T12:45:00Z"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -16876,3 +16876,93 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: "2026-07-05T07:25:00-07:00"
+  - id: ai-generation-closed-loop-target-alignment-2026-07-05
+    phase: ai-generation-closed-loop-target-alignment-2026-07-05
+    status: closed
+    taskKind: docs_requirement_alignment_ai_generation_closed_loop_target
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-ai-generation-closed-loop-target-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-ai-generation-closed-loop-target-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T19:45:05-07:00
+  - id: org-auth-ui-empty-state-contract-cleanup-2026-07-05
+    phase: org-auth-ui-empty-state-contract-cleanup-2026-07-05
+    status: closed
+    taskKind: test_contract_docs_org_auth_ui_empty_state_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-org-auth-ui-empty-state-contract-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-org-auth-ui-empty-state-contract-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T19:31:05-07:00
+  - id: paper-legacy-alias-inventory-cleanup-2026-07-05
+    phase: paper-legacy-alias-inventory-cleanup-2026-07-05
+    status: closed
+    taskKind: source_test_docs_paper_legacy_alias_inventory_cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-paper-legacy-alias-inventory-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T19:18:50-07:00
+  - id: admin-permission-session-contract-cleanup-2026-07-05
+    phase: admin-permission-session-contract-cleanup-2026-07-05
+    status: closed
+    taskKind: test_contract_docs_admin_permission_session_boundary
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-admin-permission-session-contract-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-admin-permission-session-contract-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T19:05:45-07:00
+  - id: personal-ai-generation-generation-parameters-null-contract-2026-07-05
+    phase: personal-ai-generation-generation-parameters-null-contract-2026-07-05
+    status: closed
+    taskKind: test_contract_docs_personal_ai_generation_request_null_field
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-personal-ai-generation-generation-parameters-null-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-personal-ai-generation-generation-parameters-null-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T18:52:20-07:00
+  - id: organization-ai-training-auth-lineage-2026-07-05
+    phase: organization-ai-training-auth-lineage-2026-07-05
+    status: closed
+    taskKind: source_test_docs_organization_ai_training_auth_lineage
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-organization-ai-training-auth-lineage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-organization-ai-training-auth-lineage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T17:57:54-07:00
+  - id: content-ai-formal-draft-adoption-ui-loop-2026-07-05
+    phase: content-ai-formal-draft-adoption-ui-loop-2026-07-05
+    status: closed
+    taskKind: source_test_docs_content_ai_formal_draft_adoption_ui_loop
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-content-ai-formal-draft-adoption-ui-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-content-ai-formal-draft-adoption-ui-loop.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T13:39:00-07:00
+  - id: ai-paper-learning-session-ui-loop-2026-07-05
+    phase: ai-paper-learning-session-ui-loop-2026-07-05
+    status: closed
+    taskKind: source_test_docs_student_ai_paper_learning_session_ui_loop
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-ai-paper-learning-session-ui-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-ai-paper-learning-session-ui-loop.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T13:12:07-07:00
+  - id: ai-question-learning-session-ui-loop-2026-07-05
+    phase: ai-question-learning-session-ui-loop-2026-07-05
+    status: closed
+    taskKind: source_test_docs_student_ai_question_learning_session_ui_loop
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-ai-question-learning-session-ui-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-ai-question-learning-session-ui-loop.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T12:49:02-07:00
+  - id: ai-generation-learning-session-loop-2026-07-05
+    phase: ai-generation-learning-session-loop-2026-07-05
+    status: closed
+    taskKind: source_test_docs_personal_ai_generation_learning_session_loop
+    evidencePath: docs/05-execution-logs/evidence/2026-07-05-ai-generation-learning-session-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-05-ai-generation-learning-session-loop.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-05T12:34:03-07:00
