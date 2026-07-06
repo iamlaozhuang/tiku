@@ -76,6 +76,7 @@ export const organizationTrainingRetentionStatusEnum = pgEnum(
 export const organizationTrainingSourceContextTypeValues = [
   "paper",
   "mock_exam",
+  "organization_ai_result",
 ] as const;
 
 export const organizationTrainingSourceContextTypeEnum = pgEnum(
@@ -108,6 +109,53 @@ export type OrganizationTrainingAnswerOrganizationSnapshotValue = {
   organizationPublicId: string;
   organizationName: string;
   capturedAt: string;
+};
+
+export type OrganizationTrainingQuestionOptionSnapshotValue = {
+  publicId: string;
+  label: string;
+  content: string;
+};
+
+export type OrganizationTrainingQuestionSnapshotValue = {
+  publicId: string;
+  sequenceNumber: number;
+  questionType:
+    | "single_choice"
+    | "multi_choice"
+    | "true_false"
+    | "short_answer";
+  materialTitle: string | null;
+  materialContent: string | null;
+  stem: string;
+  options: OrganizationTrainingQuestionOptionSnapshotValue[];
+  score: number;
+  standardAnswer: string;
+  analysisSummary: string;
+  evidenceStatus: "sufficient" | "weak" | "none";
+  citationCount: number;
+};
+
+export type OrganizationTrainingAnswerItemSnapshotValue = {
+  questionPublicId: string;
+  selectedOptionPublicIds: string[];
+  textAnswer: string | null;
+};
+
+export type OrganizationTrainingScoringPointResultSnapshotValue = {
+  label: string;
+  score: number;
+  maxScore: number;
+  reason: string;
+};
+
+export type OrganizationTrainingQuestionResultSnapshotValue = {
+  questionPublicId: string;
+  score: number;
+  maxScore: number;
+  standardAnswer: string | null;
+  analysis: string | null;
+  scoringPointResults: OrganizationTrainingScoringPointResultSnapshotValue[];
 };
 
 export type OrganizationTrainingSourceContextFormalUsagePolicyValue = {
@@ -314,6 +362,10 @@ export const organizationTrainingVersion = pgTable(
     question_type_summary: jsonb("question_type_summary")
       .$type<OrganizationTrainingQuestionTypeSummaryValue>()
       .notNull(),
+    question_snapshot: jsonb("question_snapshot")
+      .$type<OrganizationTrainingQuestionSnapshotValue[]>()
+      .default([])
+      .notNull(),
     version_status: organizationTrainingVersionStatusEnum("version_status")
       .default("published")
       .notNull(),
@@ -390,6 +442,14 @@ export const organizationTrainingAnswer = pgTable(
     submitted_at: nullableTimestampColumn("submitted_at"),
     answer_organization_snapshot: jsonb("answer_organization_snapshot")
       .$type<OrganizationTrainingAnswerOrganizationSnapshotValue>()
+      .notNull(),
+    answer_item_snapshot: jsonb("answer_item_snapshot")
+      .$type<OrganizationTrainingAnswerItemSnapshotValue[]>()
+      .default([])
+      .notNull(),
+    question_result_snapshot: jsonb("question_result_snapshot")
+      .$type<OrganizationTrainingQuestionResultSnapshotValue[]>()
+      .default([])
       .notNull(),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),

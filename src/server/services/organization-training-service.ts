@@ -5,7 +5,9 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type {
+  EmployeeOrganizationTrainingAnswerItemDto,
   EmployeeOrganizationTrainingAnswerDto,
+  EmployeeOrganizationTrainingQuestionResultDto,
   EmployeeOrganizationTrainingScoreSummaryDto,
   OrganizationTrainingAdminLifecycleFlowDto,
   OrganizationTrainingAdminLifecycleItemDto,
@@ -27,6 +29,7 @@ import {
   type OrganizationTrainingCopyToNewDraftInput,
   organizationTrainingQuestionTypeValues,
   type OrganizationTrainingPublishInput,
+  type OrganizationTrainingPublishQuestionInput,
   type OrganizationTrainingQuestionTypeSummary,
   type OrganizationTrainingSourceContextType,
   organizationTrainingSourceContextTypeValues,
@@ -133,7 +136,9 @@ export type OrganizationTrainingPublishBlockedReason =
   | "advanced_edition_required"
   | "org_auth_required"
   | "organization_training_capability_required"
-  | "organization_scope_denied";
+  | "organization_scope_denied"
+  | "insufficient_evidence"
+  | "weak_evidence_confirmation_required";
 
 export type OrganizationTrainingTakedownBlockedReason =
   | "invalid_takedown_input"
@@ -225,6 +230,7 @@ export type OrganizationTrainingPublishedVersionWrite = Omit<
   authorizationSource: "org_auth";
   authorizationPublicId: string;
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+  questionSnapshot: OrganizationTrainingPublishQuestionInput[];
 };
 
 export type OrganizationTrainingPersistenceLineage = {
@@ -291,6 +297,7 @@ export type OrganizationTrainingEmployeeAnswerDraftWrite = {
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
   answerStatus: "in_progress";
   answeredQuestionCount: number;
+  answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
   scoreSummary: null;
   savedAt: string;
   submittedAt: null;
@@ -305,6 +312,8 @@ export type OrganizationTrainingEmployeeAnswerSubmissionWrite = {
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
   answerStatus: "submitted";
   answeredQuestionCount: number;
+  answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
+  questionResults: EmployeeOrganizationTrainingQuestionResultDto[];
   scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
   submittedAt: string;
   formalWritePolicy: OrganizationTrainingFormalWritePolicy;
@@ -426,6 +435,7 @@ export type OrganizationTrainingEmployeeAnswerLifecycleFlowReadModelInput = {
 export type OrganizationTrainingEmployeeAnswerDraftInput = {
   trainingVersionPublicId: string;
   answeredQuestionCount: number;
+  answerItems?: EmployeeOrganizationTrainingAnswerItemDto[];
 };
 
 export type OrganizationTrainingEmployeeAnswerSubmitInput =
@@ -996,6 +1006,60 @@ function normalizeAnsweredQuestionCount(
   return answeredQuestionCount;
 }
 
+function normalizeAnswerItemList(
+  answerItems: OrganizationTrainingEmployeeAnswerDraftInput["answerItems"],
+  version: OrganizationTrainingPublishedVersionDto,
+): EmployeeOrganizationTrainingAnswerItemDto[] | null {
+  if (answerItems === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(answerItems)) {
+    return null;
+  }
+
+  const allowedQuestionPublicIds =
+    version.questions === undefined
+      ? null
+      : new Set(version.questions.map((question) => question.publicId));
+
+  const normalizedAnswerItems = answerItems.map((answerItem) => {
+    const questionPublicId = normalizeRequiredText(answerItem.questionPublicId);
+    const selectedOptionPublicIds = Array.isArray(
+      answerItem.selectedOptionPublicIds,
+    )
+      ? [
+          ...new Set(
+            answerItem.selectedOptionPublicIds
+              .map(normalizeRequiredText)
+              .filter((publicId): publicId is string => publicId !== null),
+          ),
+        ]
+      : null;
+
+    if (
+      questionPublicId === null ||
+      selectedOptionPublicIds === null ||
+      (allowedQuestionPublicIds !== null &&
+        !allowedQuestionPublicIds.has(questionPublicId))
+    ) {
+      return null;
+    }
+
+    return {
+      questionPublicId,
+      selectedOptionPublicIds,
+      textAnswer: normalizeOptionalText(answerItem.textAnswer),
+    };
+  });
+
+  if (normalizedAnswerItems.some((answerItem) => answerItem === null)) {
+    return null;
+  }
+
+  return normalizedAnswerItems as EmployeeOrganizationTrainingAnswerItemDto[];
+}
+
 function normalizeAnswerTrainingVersionPublicId(
   answerTrainingVersionPublicId: string,
   version: OrganizationTrainingPublishedVersionDto,
@@ -1186,12 +1250,68 @@ function isPublishQuestionsValid(
   return publishInput.questions.every(
     (question) =>
       normalizeRequiredText(question.publicId) !== null &&
+      isPositiveInteger(question.sequenceNumber) &&
       isOrganizationTrainingQuestionType(question.questionType) &&
+      normalizeRequiredText(question.stem) !== null &&
+      Array.isArray(question.options) &&
+      question.options.every(
+        (option) =>
+          normalizeRequiredText(option.publicId) !== null &&
+          normalizeRequiredText(option.label) !== null &&
+          normalizeRequiredText(option.content) !== null,
+      ) &&
+      (question.questionType === "short_answer" ||
+        question.options.length > 0) &&
       isPositiveInteger(question.score) &&
       normalizeRequiredText(question.standardAnswer) !== null &&
       normalizeRequiredText(question.analysisSummary) !== null &&
+      (question.evidenceStatus === "sufficient" ||
+        question.evidenceStatus === "weak" ||
+        question.evidenceStatus === "none") &&
       isNonNegativeInteger(question.citationCount),
   );
+}
+
+function hasNoEvidenceQuestion(
+  publishInput: OrganizationTrainingPublishInput,
+): boolean {
+  return publishInput.questions.some(
+    (question) => question.evidenceStatus === "none",
+  );
+}
+
+function hasUnconfirmedWeakEvidenceQuestion(
+  publishInput: OrganizationTrainingPublishInput,
+): boolean {
+  return (
+    publishInput.weakEvidenceConfirmed !== true &&
+    publishInput.questions.some(
+      (question) => question.evidenceStatus === "weak",
+    )
+  );
+}
+
+function copyPublishQuestionSnapshot(
+  question: OrganizationTrainingPublishInput["questions"][number],
+): OrganizationTrainingPublishQuestionInput {
+  return {
+    publicId: question.publicId,
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    materialTitle: normalizeOptionalText(question.materialTitle),
+    materialContent: normalizeOptionalText(question.materialContent),
+    stem: question.stem,
+    options: question.options.map((option) => ({
+      publicId: option.publicId,
+      label: option.label,
+      content: option.content,
+    })),
+    score: question.score,
+    standardAnswer: question.standardAnswer,
+    analysisSummary: question.analysisSummary,
+    evidenceStatus: question.evidenceStatus,
+    citationCount: question.citationCount,
+  };
 }
 
 function isQuestionTypeSummaryValid(
@@ -1636,6 +1756,16 @@ export function createOrganizationTrainingService(
         return createPublishBlockedResult("organization_scope_denied");
       }
 
+      if (hasNoEvidenceQuestion(publishInput)) {
+        return createPublishBlockedResult("insufficient_evidence");
+      }
+
+      if (hasUnconfirmedWeakEvidenceQuestion(publishInput)) {
+        return createPublishBlockedResult(
+          "weak_evidence_confirmation_required",
+        );
+      }
+
       const publishedAt = clock.now().toISOString();
       const versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite =
         {
@@ -1668,6 +1798,9 @@ export function createOrganizationTrainingService(
           publishedAt,
           takenDownAt: null,
           takedownReason: null,
+          questionSnapshot: publishInput.questions.map(
+            copyPublishQuestionSnapshot,
+          ),
           organizationId: normalizedPersistenceLineage.organizationId,
           orgAuthId: normalizedPersistenceLineage.orgAuthId,
         };
@@ -1886,8 +2019,16 @@ export function createOrganizationTrainingService(
         command.answerInput.answeredQuestionCount,
         command.version,
       );
+      const answerItems = normalizeAnswerItemList(
+        command.answerInput.answerItems,
+        command.version,
+      );
 
-      if (trainingVersionPublicId === null || answeredQuestionCount === null) {
+      if (
+        trainingVersionPublicId === null ||
+        answeredQuestionCount === null ||
+        answerItems === null
+      ) {
         return createEmployeeAnswerBlockedResult("invalid_answer_input");
       }
 
@@ -1907,6 +2048,7 @@ export function createOrganizationTrainingService(
           ),
           answerStatus: "in_progress",
           answeredQuestionCount,
+          answerItems,
           scoreSummary: null,
           savedAt,
           submittedAt: null,
@@ -1952,10 +2094,15 @@ export function createOrganizationTrainingService(
         command.answerInput.answeredQuestionCount,
         command.version,
       );
+      const answerItems = normalizeAnswerItemList(
+        command.answerInput.answerItems,
+        command.version,
+      );
 
       if (
         trainingVersionPublicId === null ||
         answeredQuestionCount === null ||
+        answerItems === null ||
         !isScoreSummaryValid(command.answerInput.scoreSummary, command.version)
       ) {
         return createEmployeeAnswerBlockedResult("invalid_answer_input");
@@ -1977,6 +2124,8 @@ export function createOrganizationTrainingService(
           ),
           answerStatus: "submitted",
           answeredQuestionCount,
+          answerItems,
+          questionResults: [],
           scoreSummary: {
             score: command.answerInput.scoreSummary.score,
             totalScore: command.answerInput.scoreSummary.totalScore,

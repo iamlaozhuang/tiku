@@ -2610,6 +2610,38 @@ describe("admin AI generation entry surfaces", () => {
         });
       }
 
+      if (
+        path ===
+          `/api/v1/organization-trainings/${trainingDraftPublicId}/source-contexts` &&
+        method === "POST"
+      ) {
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            context: {
+              draftPublicId: trainingDraftPublicId,
+              organizationPublicId: "organization_public_123",
+              sourceContexts: [
+                {
+                  sourceType: "organization_ai_result",
+                  sourcePublicId: resultPublicId,
+                  title: "AI出题训练草稿 2026-06-26 20:30",
+                  profession: "marketing",
+                  level: 3,
+                  subject: "theory",
+                  questionCount: 10,
+                  totalScore: 10,
+                  sourceStatus: "ai_generated_sufficient_evidence",
+                  redactionStatus: "metadata_only",
+                },
+              ],
+              redactionStatus: "metadata_only",
+            },
+          },
+        });
+      }
+
       throw new Error(`Unexpected fetch: ${path}`);
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -2659,11 +2691,41 @@ describe("admin AI generation entry surfaces", () => {
     expect(JSON.stringify(draftBody)).not.toContain("standardAnswer");
     expect(JSON.stringify(draftBody)).not.toContain("analysis");
     expect(JSON.stringify(draftBody)).not.toContain("providerPayload");
-    expect(
-      fetchMock.mock.calls.some(([url]) =>
-        String(url).endsWith("/source-contexts"),
+
+    const sourceContextBody = JSON.parse(
+      String(
+        fetchMock.mock.calls.find(([url]) =>
+          String(url).endsWith("/source-contexts"),
+        )?.[1]?.body,
       ),
-    ).toBe(false);
+    );
+    expect(sourceContextBody).toMatchObject({
+      draftPublicId: trainingDraftPublicId,
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_session_public_123",
+      profession: "marketing",
+      level: 3,
+      capabilityContext: {
+        effectiveEdition: "advanced",
+        authorizationSource: "org_auth",
+        canCreateOrganizationTraining: true,
+      },
+      sourceContexts: [
+        {
+          sourceType: "organization_ai_result",
+          sourcePublicId: resultPublicId,
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          questionCount: 10,
+          totalScore: 10,
+          sourceStatus: "ai_generated_sufficient_evidence",
+        },
+      ],
+    });
+    expect(JSON.stringify(sourceContextBody)).not.toContain("standardAnswer");
+    expect(JSON.stringify(sourceContextBody)).not.toContain("analysis");
+    expect(JSON.stringify(sourceContextBody)).not.toContain("providerPayload");
   });
 
   it("shows organization training draft business error code when AI result copy is rejected", async () => {
@@ -2801,6 +2863,37 @@ describe("admin AI generation entry surfaces", () => {
               retentionStatus: "active",
               createdAt: "2026-06-26T20:32:00.000Z",
               expiresAt: null,
+            },
+          },
+        });
+      }
+
+      if (
+        String(url) ===
+        "/api/v1/organization-trainings/organization-training-draft-ai-weak-001/source-contexts"
+      ) {
+        return Response.json({
+          code: 0,
+          message: "ok",
+          data: {
+            context: {
+              draftPublicId: "organization-training-draft-ai-weak-001",
+              organizationPublicId: "organization_public_123",
+              sourceContexts: [
+                {
+                  sourceType: "organization_ai_result",
+                  sourcePublicId: weakResultPublicId,
+                  title: "AI出题训练草稿 2026-06-26 20:30",
+                  profession: "marketing",
+                  level: 3,
+                  subject: "theory",
+                  questionCount: 10,
+                  totalScore: 10,
+                  sourceStatus: "ai_generated_weak_evidence",
+                  redactionStatus: "metadata_only",
+                },
+              ],
+              redactionStatus: "metadata_only",
             },
           },
         });

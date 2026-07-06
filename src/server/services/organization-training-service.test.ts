@@ -277,7 +277,23 @@ function createPublishInput(
     questions: [
       {
         publicId: " training_question_public_123 ",
+        sequenceNumber: 1,
         questionType: "single_choice",
+        materialTitle: " Safety material ",
+        materialContent: " Safety material body ",
+        stem: " Which option is compliant? ",
+        options: [
+          {
+            publicId: " training_question_option_a ",
+            label: " A ",
+            content: " compliant option ",
+          },
+          {
+            publicId: " training_question_option_b ",
+            label: " B ",
+            content: " distractor option ",
+          },
+        ],
         score: 2,
         standardAnswer: " A ",
         analysisSummary: " choice rationale ",
@@ -286,7 +302,12 @@ function createPublishInput(
       },
       {
         publicId: " training_question_public_456 ",
+        sequenceNumber: 2,
         questionType: "short_answer",
+        materialTitle: null,
+        materialContent: null,
+        stem: " Describe the handling rule. ",
+        options: [],
         score: 3,
         standardAnswer: " expected answer ",
         analysisSummary: " scoring rationale ",
@@ -303,6 +324,7 @@ function createPublishInput(
       authorizationSource: "org_auth",
       canCreateOrganizationTraining: true,
     },
+    weakEvidenceConfirmed: true,
   });
 
   if (!normalizedInput.success) {
@@ -1036,6 +1058,7 @@ describe("organization training service", () => {
         publishedAt: fixedNow.toISOString(),
         takenDownAt: null,
         takedownReason: null,
+        questionSnapshot: publishInput.questions,
         organizationId: 501,
         orgAuthId: 601,
       },
@@ -1128,6 +1151,53 @@ describe("organization training service", () => {
           publishScopeOrganizationPublicIds: ["organization_branch_public_456"],
         }),
         expectedReason: "organization_scope_denied",
+      },
+    ] as const;
+
+    for (const blockedCase of blockedCases) {
+      const { service, getPublishedVersions } = createServiceFixture();
+
+      const result = await service.publishVersion({
+        publishInput: blockedCase.publishInput,
+        persistenceLineage: createPersistenceLineage(),
+      });
+
+      expect(result).toEqual({
+        success: false,
+        reason: blockedCase.expectedReason,
+        message: "Organization training publish is blocked.",
+      });
+      expect(getPublishedVersions()).toEqual([]);
+    }
+  });
+
+  it("blocks AI-sourced publish when evidence is none or weak evidence is not confirmed", async () => {
+    const blockedCases = [
+      {
+        publishInput: createPublishInput({
+          questions: [
+            {
+              ...createPublishInput().questions[0],
+              evidenceStatus: "none",
+              citationCount: 0,
+            },
+          ],
+          questionCount: 1,
+          totalScore: 2,
+          questionTypeSummary: {
+            singleChoice: 1,
+            multiChoice: 0,
+            trueFalse: 0,
+            shortAnswer: 0,
+          },
+        }),
+        expectedReason: "insufficient_evidence",
+      },
+      {
+        publishInput: createPublishInput({
+          weakEvidenceConfirmed: false,
+        }),
+        expectedReason: "weak_evidence_confirmation_required",
       },
     ] as const;
 
@@ -1977,6 +2047,7 @@ describe("organization training service", () => {
         },
         answerStatus: "in_progress",
         answeredQuestionCount: 1,
+        answerItems: [],
         scoreSummary: null,
         savedAt: fixedNow.toISOString(),
         submittedAt: null,
@@ -2054,6 +2125,8 @@ describe("organization training service", () => {
         },
         answerStatus: "submitted",
         answeredQuestionCount: 2,
+        answerItems: [],
+        questionResults: [],
         scoreSummary: {
           score: 4,
           totalScore: 5,

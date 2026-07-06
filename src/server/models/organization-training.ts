@@ -40,6 +40,7 @@ export const organizationTrainingAnswerStatusValues = [
 export const organizationTrainingSourceContextTypeValues = [
   "paper",
   "mock_exam",
+  "organization_ai_result",
 ] as const;
 
 export const organizationTrainingSensitiveAdminSummaryFieldValues = [
@@ -113,9 +114,20 @@ export type OrganizationTrainingCapabilityContext = {
   canCreateOrganizationTraining: true;
 };
 
+export type OrganizationTrainingPublishQuestionOptionInput = {
+  publicId: string;
+  label: string;
+  content: string;
+};
+
 export type OrganizationTrainingPublishQuestionInput = {
   publicId: string;
+  sequenceNumber: number;
   questionType: OrganizationTrainingQuestionType;
+  materialTitle: string | null;
+  materialContent: string | null;
+  stem: string;
+  options: OrganizationTrainingPublishQuestionOptionInput[];
   score: number;
   standardAnswer: string;
   analysisSummary: string;
@@ -138,6 +150,7 @@ export type OrganizationTrainingPublishInput = {
   questionCount: number;
   totalScore: number;
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+  weakEvidenceConfirmed: boolean;
 };
 
 export type OrganizationTrainingTakedownInput = {

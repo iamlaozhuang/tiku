@@ -222,7 +222,23 @@ function createPublishInput(
     questions: [
       {
         publicId: "training_question_route_public_401",
+        sequenceNumber: 1,
         questionType: "single_choice",
+        materialTitle: "Route material",
+        materialContent: "Route material body",
+        stem: "Which route option is compliant?",
+        options: [
+          {
+            publicId: "training_question_route_option_a",
+            label: "A",
+            content: "Compliant option",
+          },
+          {
+            publicId: "training_question_route_option_b",
+            label: "B",
+            content: "Distractor option",
+          },
+        ],
         score: 5,
         standardAnswer: "A",
         analysisSummary: "Choose the compliant answer.",
@@ -244,6 +260,7 @@ function createPublishInput(
       trueFalse: 0,
       shortAnswer: 0,
     },
+    weakEvidenceConfirmed: false,
     ...overrides,
   };
 }

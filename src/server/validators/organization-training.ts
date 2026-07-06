@@ -1,6 +1,9 @@
 import { evidenceStatusValues } from "../models/ai-rag";
 import { professionValues } from "../models/auth";
-import type { EmployeeOrganizationTrainingScoreSummaryDto } from "../contracts/organization-training-contract";
+import type {
+  EmployeeOrganizationTrainingAnswerItemDto,
+  EmployeeOrganizationTrainingScoreSummaryDto,
+} from "../contracts/organization-training-contract";
 import {
   type OrganizationTrainingAuditLogReferenceInput,
   type OrganizationTrainingAuditLogTargetResourceType,
@@ -45,6 +48,7 @@ export const invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage =
 export type OrganizationTrainingEmployeeAnswerDraftRouteInput = {
   trainingVersionPublicId: string;
   answeredQuestionCount: number;
+  answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
 };
 
 export type OrganizationTrainingEmployeeAnswerSubmitRouteInput =
@@ -281,6 +285,96 @@ function normalizePublicIdList(value: unknown): string[] | null {
   return uniqueValues.length > 0 ? uniqueValues : null;
 }
 
+function normalizePublicIdArray(value: unknown): string[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .map((item) => normalizeRequiredText(item))
+        .filter((item): item is string => item !== null),
+    ),
+  );
+}
+
+function normalizeQuestionOption(value: unknown) {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const publicId = normalizeRequiredText(value.publicId);
+  const label = normalizeRequiredText(value.label);
+  const content = normalizeRequiredText(value.content);
+
+  if (publicId === null || label === null || content === null) {
+    return null;
+  }
+
+  return {
+    publicId,
+    label,
+    content,
+  };
+}
+
+function normalizeQuestionOptions(value: unknown) {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const normalizedOptions = value.map(normalizeQuestionOption);
+
+  if (normalizedOptions.some((option) => option === null)) {
+    return null;
+  }
+
+  return normalizedOptions as NonNullable<
+    OrganizationTrainingPublishQuestionInput["options"]
+  >;
+}
+
+function normalizeAnswerItem(
+  value: unknown,
+): EmployeeOrganizationTrainingAnswerItemDto | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const questionPublicId = normalizeRequiredText(value.questionPublicId);
+  const selectedOptionPublicIds = normalizePublicIdArray(
+    value.selectedOptionPublicIds,
+  );
+  const textAnswer = normalizeOptionalText(value.textAnswer);
+
+  if (questionPublicId === null || selectedOptionPublicIds === null) {
+    return null;
+  }
+
+  return {
+    questionPublicId,
+    selectedOptionPublicIds,
+    textAnswer,
+  };
+}
+
+function normalizeAnswerItems(
+  value: unknown,
+): EmployeeOrganizationTrainingAnswerItemDto[] | null {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const normalizedAnswerItems = value.map(normalizeAnswerItem);
+
+  if (normalizedAnswerItems.some((answerItem) => answerItem === null)) {
+    return null;
+  }
+
+  return normalizedAnswerItems as EmployeeOrganizationTrainingAnswerItemDto[];
+}
+
 function isProfession(
   value: unknown,
 ): value is (typeof professionValues)[number] {
@@ -424,12 +518,18 @@ function buildQuestionTypeSummary(
 
 function normalizePublishQuestion(
   value: unknown,
+  index: number,
 ): OrganizationTrainingPublishQuestionInput | null {
   if (!isRecord(value)) {
     return null;
   }
 
   const publicId = normalizeRequiredText(value.publicId);
+  const sequenceNumber = normalizePositiveInteger(value.sequenceNumber);
+  const materialTitle = normalizeOptionalText(value.materialTitle);
+  const materialContent = normalizeOptionalText(value.materialContent);
+  const stem = normalizeRequiredText(value.stem);
+  const options = normalizeQuestionOptions(value.options);
   const score = normalizePositiveInteger(value.score);
   const standardAnswer = normalizeRequiredText(value.standardAnswer);
   const analysisSummary = normalizeRequiredText(value.analysisSummary);
@@ -437,7 +537,10 @@ function normalizePublishQuestion(
 
   if (
     publicId === null ||
+    sequenceNumber === null ||
     !isOrganizationTrainingQuestionType(value.questionType) ||
+    stem === null ||
+    options === null ||
     score === null ||
     standardAnswer === null ||
     analysisSummary === null ||
@@ -447,9 +550,22 @@ function normalizePublishQuestion(
     return null;
   }
 
+  if (sequenceNumber !== index + 1) {
+    return null;
+  }
+
+  if (value.questionType !== "short_answer" && options.length === 0) {
+    return null;
+  }
+
   return {
     publicId,
+    sequenceNumber,
     questionType: value.questionType,
+    materialTitle,
+    materialContent,
+    stem,
+    options,
     score,
     standardAnswer,
     analysisSummary,
@@ -465,7 +581,9 @@ function normalizePublishQuestions(
     return null;
   }
 
-  const normalizedQuestions = value.map(normalizePublishQuestion);
+  const normalizedQuestions = value.map((item, index) =>
+    normalizePublishQuestion(item, index),
+  );
 
   if (normalizedQuestions.some((question) => question === null)) {
     return null;
@@ -499,6 +617,7 @@ export function normalizeOrganizationTrainingPublishInput(
     input.publishScopeOrganizationPublicIds,
   );
   const capabilityContext = normalizeCapabilityContext(input.capabilityContext);
+  const weakEvidenceConfirmed = input.weakEvidenceConfirmed === true;
 
   if (
     draftPublicId === null ||
@@ -540,6 +659,7 @@ export function normalizeOrganizationTrainingPublishInput(
       questionCount: questions.length,
       totalScore,
       questionTypeSummary: buildQuestionTypeSummary(questions),
+      weakEvidenceConfirmed,
     },
   };
 }
@@ -642,8 +762,13 @@ export function normalizeOrganizationTrainingEmployeeAnswerDraftInput(
   const answeredQuestionCount = normalizePositiveInteger(
     input.answeredQuestionCount,
   );
+  const answerItems = normalizeAnswerItems(input.answerItems);
 
-  if (trainingVersionPublicId === null || answeredQuestionCount === null) {
+  if (
+    trainingVersionPublicId === null ||
+    answeredQuestionCount === null ||
+    answerItems === null
+  ) {
     return {
       success: false,
       message: invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
@@ -655,6 +780,7 @@ export function normalizeOrganizationTrainingEmployeeAnswerDraftInput(
     value: {
       trainingVersionPublicId,
       answeredQuestionCount,
+      answerItems,
     },
   };
 }

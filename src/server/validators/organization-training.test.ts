@@ -53,7 +53,23 @@ describe("organization training contract and validator scaffold", () => {
         questions: [
           {
             publicId: " question_one_public_123 ",
+            sequenceNumber: 1,
             questionType: "single_choice",
+            materialTitle: " source title ",
+            materialContent: " source content ",
+            stem: " Which option is compliant? ",
+            options: [
+              {
+                publicId: " question_one_option_a ",
+                label: " A ",
+                content: " compliant option ",
+              },
+              {
+                publicId: " question_one_option_b ",
+                label: " B ",
+                content: " distractor option ",
+              },
+            ],
             score: 2,
             standardAnswer: " A ",
             analysisSummary: " option rationale ",
@@ -62,7 +78,23 @@ describe("organization training contract and validator scaffold", () => {
           },
           {
             publicId: " question_two_public_123 ",
+            sequenceNumber: 2,
             questionType: "multi_choice",
+            materialTitle: null,
+            materialContent: "",
+            stem: " Select all compliant options. ",
+            options: [
+              {
+                publicId: " question_two_option_a ",
+                label: " A ",
+                content: " first compliant option ",
+              },
+              {
+                publicId: " question_two_option_b ",
+                label: " B ",
+                content: " second compliant option ",
+              },
+            ],
             score: 3,
             standardAnswer: " A,B ",
             analysisSummary: " combination rationale ",
@@ -71,7 +103,23 @@ describe("organization training contract and validator scaffold", () => {
           },
           {
             publicId: " question_three_public_123 ",
+            sequenceNumber: 3,
             questionType: "true_false",
+            materialTitle: null,
+            materialContent: null,
+            stem: " The statement is correct. ",
+            options: [
+              {
+                publicId: " question_three_option_true ",
+                label: " A ",
+                content: " true ",
+              },
+              {
+                publicId: " question_three_option_false ",
+                label: " B ",
+                content: " false ",
+              },
+            ],
             score: 1,
             standardAnswer: " true ",
             analysisSummary: " true_false rationale ",
@@ -80,7 +128,12 @@ describe("organization training contract and validator scaffold", () => {
           },
           {
             publicId: " question_four_public_123 ",
+            sequenceNumber: 4,
             questionType: "short_answer",
+            materialTitle: null,
+            materialContent: null,
+            stem: " Describe the expected handling. ",
+            options: [],
             score: 4,
             standardAnswer: " expected answer summary ",
             analysisSummary: " scoring rationale ",
@@ -98,6 +151,7 @@ describe("organization training contract and validator scaffold", () => {
           authorizationSource: "org_auth",
           canCreateOrganizationTraining: true,
         },
+        weakEvidenceConfirmed: true,
       }),
     ).toEqual({
       success: true,
@@ -113,7 +167,23 @@ describe("organization training contract and validator scaffold", () => {
         questions: [
           {
             publicId: "question_one_public_123",
+            sequenceNumber: 1,
             questionType: "single_choice",
+            materialTitle: "source title",
+            materialContent: "source content",
+            stem: "Which option is compliant?",
+            options: [
+              {
+                publicId: "question_one_option_a",
+                label: "A",
+                content: "compliant option",
+              },
+              {
+                publicId: "question_one_option_b",
+                label: "B",
+                content: "distractor option",
+              },
+            ],
             score: 2,
             standardAnswer: "A",
             analysisSummary: "option rationale",
@@ -122,7 +192,23 @@ describe("organization training contract and validator scaffold", () => {
           },
           {
             publicId: "question_two_public_123",
+            sequenceNumber: 2,
             questionType: "multi_choice",
+            materialTitle: null,
+            materialContent: null,
+            stem: "Select all compliant options.",
+            options: [
+              {
+                publicId: "question_two_option_a",
+                label: "A",
+                content: "first compliant option",
+              },
+              {
+                publicId: "question_two_option_b",
+                label: "B",
+                content: "second compliant option",
+              },
+            ],
             score: 3,
             standardAnswer: "A,B",
             analysisSummary: "combination rationale",
@@ -131,7 +217,23 @@ describe("organization training contract and validator scaffold", () => {
           },
           {
             publicId: "question_three_public_123",
+            sequenceNumber: 3,
             questionType: "true_false",
+            materialTitle: null,
+            materialContent: null,
+            stem: "The statement is correct.",
+            options: [
+              {
+                publicId: "question_three_option_true",
+                label: "A",
+                content: "true",
+              },
+              {
+                publicId: "question_three_option_false",
+                label: "B",
+                content: "false",
+              },
+            ],
             score: 1,
             standardAnswer: "true",
             analysisSummary: "true_false rationale",
@@ -140,7 +242,12 @@ describe("organization training contract and validator scaffold", () => {
           },
           {
             publicId: "question_four_public_123",
+            sequenceNumber: 4,
             questionType: "short_answer",
+            materialTitle: null,
+            materialContent: null,
+            stem: "Describe the expected handling.",
+            options: [],
             score: 4,
             standardAnswer: "expected answer summary",
             analysisSummary: "scoring rationale",
@@ -165,6 +272,7 @@ describe("organization training contract and validator scaffold", () => {
           authorizationSource: "org_auth",
           canCreateOrganizationTraining: true,
         },
+        weakEvidenceConfirmed: true,
       },
     });
 
@@ -507,7 +615,7 @@ describe("organization training contract and validator scaffold", () => {
       "LEAK_STANDARD_ANSWER",
     );
 
-    const invalidOrganizationAiSourceContextResult =
+    expect(
       normalizeOrganizationTrainingSourceContextInput({
         draftPublicId: "training_draft_public_123",
         organizationPublicId: "organization_public_123",
@@ -530,15 +638,37 @@ describe("organization training contract and validator scaffold", () => {
             questionCount: 10,
             totalScore: 10,
             sourceStatus: "ai_generated_draft_sufficient_evidence",
-            analysis: "LEAK_ANALYSIS",
           },
         ],
-      });
-
-    expect(invalidOrganizationAiSourceContextResult.success).toBe(false);
-    expect(
-      JSON.stringify(invalidOrganizationAiSourceContextResult),
-    ).not.toContain("LEAK_ANALYSIS");
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+        sourceContexts: [
+          {
+            sourceType: "organization_ai_result",
+            sourcePublicId: "admin_ai_generation_result_public_123",
+            title: "Organization AI result reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 10,
+            sourceStatus: "ai_generated_draft_sufficient_evidence",
+          },
+        ],
+      },
+    });
   });
 
   it("normalizes employee answer draft and submit metadata while rejecting raw answer payloads", () => {
@@ -546,12 +676,36 @@ describe("organization training contract and validator scaffold", () => {
       normalizeOrganizationTrainingEmployeeAnswerDraftInput({
         trainingVersionPublicId: " training_version_public_123 ",
         answeredQuestionCount: 2,
+        answerItems: [
+          {
+            questionPublicId: " training_question_public_123 ",
+            selectedOptionPublicIds: [" option_public_a ", "option_public_a"],
+            textAnswer: "",
+          },
+          {
+            questionPublicId: " training_question_public_456 ",
+            selectedOptionPublicIds: [],
+            textAnswer: " written response ",
+          },
+        ],
       }),
     ).toEqual({
       success: true,
       value: {
         trainingVersionPublicId: "training_version_public_123",
         answeredQuestionCount: 2,
+        answerItems: [
+          {
+            questionPublicId: "training_question_public_123",
+            selectedOptionPublicIds: ["option_public_a"],
+            textAnswer: null,
+          },
+          {
+            questionPublicId: "training_question_public_456",
+            selectedOptionPublicIds: [],
+            textAnswer: "written response",
+          },
+        ],
       },
     });
 
@@ -563,12 +717,26 @@ describe("organization training contract and validator scaffold", () => {
           score: 4,
           totalScore: 5,
         },
+        answerItems: [
+          {
+            questionPublicId: " training_question_public_123 ",
+            selectedOptionPublicIds: [" option_public_a "],
+            textAnswer: null,
+          },
+        ],
       }),
     ).toEqual({
       success: true,
       value: {
         trainingVersionPublicId: "training_version_public_123",
         answeredQuestionCount: 2,
+        answerItems: [
+          {
+            questionPublicId: "training_question_public_123",
+            selectedOptionPublicIds: ["option_public_a"],
+            textAnswer: null,
+          },
+        ],
         scoreSummary: {
           score: 4,
           totalScore: 5,

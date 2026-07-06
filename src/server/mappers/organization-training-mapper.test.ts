@@ -46,6 +46,7 @@ function createVersionRow(
       trueFalse: 0,
       shortAnswer: 1,
     },
+    question_snapshot: [],
     version_status: "published",
     published_at: new Date("2026-06-15T19:20:13.000Z"),
     taken_down_at: null,

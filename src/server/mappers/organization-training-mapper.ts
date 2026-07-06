@@ -1,9 +1,17 @@
-import type { OrganizationTrainingAnswerOrganizationSnapshotValue } from "@/db/schema";
+import type {
+  OrganizationTrainingAnswerItemSnapshotValue,
+  OrganizationTrainingAnswerOrganizationSnapshotValue,
+  OrganizationTrainingQuestionResultSnapshotValue,
+  OrganizationTrainingQuestionSnapshotValue,
+} from "@/db/schema";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  EmployeeOrganizationTrainingAnswerItemDto,
+  EmployeeOrganizationTrainingQuestionResultDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
+  OrganizationTrainingQuestionSnapshotDto,
   OrganizationTrainingScopeSnapshotDto,
   OrganizationTrainingSourceContextDto,
 } from "../contracts/organization-training-contract";
@@ -41,6 +49,7 @@ export type OrganizationTrainingVersionRow = {
   question_count: number;
   total_score: number | string;
   question_type_summary: OrganizationTrainingQuestionTypeSummary;
+  question_snapshot: OrganizationTrainingQuestionSnapshotValue[];
   version_status: OrganizationTrainingVersionStatus;
   published_at: Date;
   taken_down_at: Date | null;
@@ -63,6 +72,8 @@ export type OrganizationTrainingAnswerRow = {
   total_score: number | string;
   submitted_at: Date | null;
   answer_organization_snapshot: OrganizationTrainingAnswerOrganizationSnapshotValue;
+  answer_item_snapshot: OrganizationTrainingAnswerItemSnapshotValue[];
+  question_result_snapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   created_at: Date;
   updated_at: Date;
 };
@@ -174,6 +185,8 @@ export function mapOrganizationTrainingSourceContextRowToDto(
 export function mapOrganizationTrainingVersionRowToDto(
   row: OrganizationTrainingVersionRow,
 ): OrganizationTrainingPublishedVersionDto {
+  const questions = mapQuestionSnapshots(row.question_snapshot);
+
   return {
     publicId: row.public_id,
     draftPublicId: row.draft_public_id,
@@ -191,6 +204,7 @@ export function mapOrganizationTrainingVersionRowToDto(
     publishedAt: row.published_at.toISOString(),
     takenDownAt: row.taken_down_at?.toISOString() ?? null,
     takedownReason: row.takedown_reason,
+    ...(questions.length > 0 ? { questions } : {}),
   };
 }
 
@@ -225,7 +239,84 @@ export function mapOrganizationTrainingAnswerRowToDto(
       row.organization_training_answer_status !== "in_progress" &&
       row.submitted_at !== null &&
       scoreSummary !== null,
+    answerItems: mapAnswerItemSnapshots(row.answer_item_snapshot),
+    questionResults: mapQuestionResultSnapshots(row.question_result_snapshot),
   };
+}
+
+function mapQuestionSnapshots(
+  snapshots: OrganizationTrainingQuestionSnapshotValue[] | null | undefined,
+): OrganizationTrainingQuestionSnapshotDto[] {
+  if (!Array.isArray(snapshots)) {
+    return [];
+  }
+
+  return snapshots
+    .map((snapshot) => ({
+      publicId: snapshot.publicId,
+      sequenceNumber: snapshot.sequenceNumber,
+      questionType: snapshot.questionType,
+      materialTitle: snapshot.materialTitle,
+      materialContent: snapshot.materialContent,
+      stem: snapshot.stem,
+      options: Array.isArray(snapshot.options)
+        ? snapshot.options.map((option) => ({
+            publicId: option.publicId,
+            label: option.label,
+            content: option.content,
+          }))
+        : [],
+      score: snapshot.score,
+    }))
+    .filter(
+      (question): question is OrganizationTrainingQuestionSnapshotDto =>
+        typeof question.publicId === "string" &&
+        Number.isInteger(question.sequenceNumber) &&
+        typeof question.stem === "string",
+    );
+}
+
+function mapAnswerItemSnapshots(
+  snapshots: OrganizationTrainingAnswerItemSnapshotValue[] | null | undefined,
+): EmployeeOrganizationTrainingAnswerItemDto[] {
+  if (!Array.isArray(snapshots)) {
+    return [];
+  }
+
+  return snapshots.map((snapshot) => ({
+    questionPublicId: snapshot.questionPublicId,
+    selectedOptionPublicIds: Array.isArray(snapshot.selectedOptionPublicIds)
+      ? [...snapshot.selectedOptionPublicIds]
+      : [],
+    textAnswer: snapshot.textAnswer,
+  }));
+}
+
+function mapQuestionResultSnapshots(
+  snapshots:
+    | OrganizationTrainingQuestionResultSnapshotValue[]
+    | null
+    | undefined,
+): EmployeeOrganizationTrainingQuestionResultDto[] {
+  if (!Array.isArray(snapshots)) {
+    return [];
+  }
+
+  return snapshots.map((snapshot) => ({
+    questionPublicId: snapshot.questionPublicId,
+    score: snapshot.score,
+    maxScore: snapshot.maxScore,
+    standardAnswer: snapshot.standardAnswer,
+    analysis: snapshot.analysis,
+    scoringPointResults: Array.isArray(snapshot.scoringPointResults)
+      ? snapshot.scoringPointResults.map((scoringPointResult) => ({
+          label: scoringPointResult.label,
+          score: scoringPointResult.score,
+          maxScore: scoringPointResult.maxScore,
+          reason: scoringPointResult.reason,
+        }))
+      : [],
+  }));
 }
 
 function copyScopeSnapshot(

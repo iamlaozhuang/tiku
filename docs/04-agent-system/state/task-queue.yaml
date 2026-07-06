@@ -398,6 +398,140 @@ standingApprovals:
         concrete product or authorization reason and preserves the shared domain boundary.
       currentTaskUsage: policy_record_only_no_ai_generation_implementation_in_safe_role_bootstrap_task
 tasks:
+  - id: organization-ai-training-closed-loop-2026-07-06
+    title: Organization AI training closed loop
+    phase: organization-ai-training-closed-loop-2026-07-06
+    sourceStory: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    dependencies:
+      - learner-ai-training-api-ui-loop-2026-07-06
+    status: closed
+    result: pass_organization_ai_training_closed_loop_full_unit_green
+    taskKind: source_test_docs_additive_schema_migration_organization_ai_training_closed_loop
+    executionProfile: local_source_unit_test_docs_additive_nullable_jsonb_schema_migration_no_runtime_db_connection_no_provider
+    validationPolicy: red_first_service_repository_route_ui_tests_minimal_source_repair_typecheck_lint_format_git_diff_full_unit_module_run_v2
+    moduleRunVersion: 2
+    priority: p0
+    branch: codex/organization-ai-training-closed-loop-2026-07-06
+    humanApprovalBoundary: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    plannedAt: "2026-07-06T05:20:00Z"
+    claimedAt: "2026-07-06T05:20:00Z"
+    materializedAt: "2026-07-06T05:20:00Z"
+    completedAt: "2026-07-06T05:55:00Z"
+    planPath: docs/05-execution-logs/task-plans/2026-07-06-organization-ai-training-closed-loop.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-06-organization-ai-training-closed-loop.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-organization-ai-training-closed-loop.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-06-organization-ai-training-closed-loop.md
+      - docs/05-execution-logs/evidence/2026-07-06-organization-ai-training-closed-loop.md
+      - docs/05-execution-logs/audits-reviews/2026-07-06-organization-ai-training-closed-loop.md
+      - drizzle/20260706052000_add_organization_ai_training_closed_loop.sql
+      - src/db/schema/organization-training.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/organization-training-employee-entry-surface.test.ts
+      - src/server/services/organization-analytics-service.test.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    localDbBoundary: no_runtime_db_connection_no_raw_rows_no_product_db_mutation_no_cleanup_reset_seed_or_drizzle_push_additive_sql_migration_and_schema_metadata_only
+    browserBoundary: blocked_for_this_source_unit_ui_task
+    credentialBoundary: no_secret_access_no_env_file_read_or_write_no_private_credential_files_no_tokens_cookies_sessions_localStorage_authorization_headers_phone_email_or_plaintext_redeem_code_evidence
+    providerBoundary:
+      providerExecution: blocked
+      providerCredentialAccess: blocked
+      costCalibrationExecution: blocked
+      providerReadinessClaim: blocked
+      stagingProd: blocked
+      releaseFinalProductionClaim: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_all_roles_ai_generation_closed_loop_until_complete_2026_07_05
+    acceptanceStandards:
+      - Organization AI result copy records AI-source lineage and preserves generated question snapshots for training review/publish rather than creating metadata-only empty drafts.
+      - Published AI-sourced training versions return stable question snapshots to employee practice flows.
+      - Employee answer drafts/submissions persist answer item snapshots and submitted result snapshots for review/resume.
+      - Publish blocks evidence_status none and requires explicit weak-evidence confirmation before AI-sourced weak-evidence questions can be published.
+      - Organization analytics continue to count submitted AI-sourced training answers through the normal training answer aggregation path.
+      - No Provider call, runtime DB connection, direct DB mutation, seed, dependency, browser runtime, dev server, e2e, staging/prod, or release-final claim is introduced.
+    validationCommands:
+      - npm.cmd exec -- vitest run src/server/validators/organization-training.test.ts src/server/services/organization-training-service.test.ts src/server/repositories/organization-training-repository.test.ts src/server/services/organization-training-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/services/organization-analytics-service.test.ts
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --write --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-organization-ai-training-closed-loop.md docs/05-execution-logs/evidence/2026-07-06-organization-ai-training-closed-loop.md docs/05-execution-logs/audits-reviews/2026-07-06-organization-ai-training-closed-loop.md drizzle/20260706052000_add_organization_ai_training_closed_loop.sql src/db/schema/organization-training.ts src/server/contracts/organization-training-contract.ts src/server/models/organization-training.ts src/server/validators/organization-training.ts src/server/validators/organization-training.test.ts src/server/services/organization-training-service.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts src/server/mappers/organization-training-mapper.ts src/server/mappers/organization-training-mapper.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx src/features/student/organization-training/StudentOrganizationTrainingPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/services/organization-analytics-service.test.ts src/server/repositories/organization-analytics-repository.test.ts
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-organization-ai-training-closed-loop.md docs/05-execution-logs/evidence/2026-07-06-organization-ai-training-closed-loop.md docs/05-execution-logs/audits-reviews/2026-07-06-organization-ai-training-closed-loop.md drizzle/20260706052000_add_organization_ai_training_closed_loop.sql src/db/schema/organization-training.ts src/server/contracts/organization-training-contract.ts src/server/models/organization-training.ts src/server/validators/organization-training.ts src/server/validators/organization-training.test.ts src/server/services/organization-training-service.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.ts src/server/repositories/organization-training-repository.test.ts src/server/mappers/organization-training-mapper.ts src/server/mappers/organization-training-mapper.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx src/features/student/organization-training/StudentOrganizationTrainingPage.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/services/organization-analytics-service.test.ts src/server/repositories/organization-analytics-repository.test.ts
+      - git diff --check
+      - git diff --name-only -- .env package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml migrations seed e2e compose.yaml playwright-report test-results .next .runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-ai-training-closed-loop-2026-07-06
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-ai-training-closed-loop-2026-07-06 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass
+      readGate: pass
+      taskPlanPrepared: true
+      redFirstValidatorTests: fail_expected_1_file_3_failures
+      focusedTests: pass_8_files_157_tests
+      typecheck: pass
+      lint: pass
+      formatCheck: pass
+      diffCheck: pass
+      blockedFileDiffGuard: pass
+      fullUnit: pass_333_files_1657_tests
+      moduleRunV2PreCommit: pass
+      moduleRunV2PrePush: pass_after_state_sha_baseline_update
+      providerCallExecuted: false
+      runtimeDbConnectionUsed: false
+      dbMutated: false
+      schemaMigrationChanged: additive_sql_and_schema_metadata_only
+      seedChanged: false
+      dependencyChanged: false
+      browserRuntimeExecuted: false
+      stagingProdExecuted: false
+      releaseFinalProductionClaimed: false
   - id: learner-ai-training-api-ui-loop-2026-07-06
     title: Learner AI training API UI loop
     phase: learner-ai-training-api-ui-loop-2026-07-06

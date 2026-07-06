@@ -68,6 +68,7 @@ type EmployeeAnswerPersistenceLineage = {
   organizationId: number;
   organizationName: string;
   totalScore: number;
+  questionSnapshot: OrganizationTrainingVersionInsertInput["questionSnapshot"];
 };
 
 type PaperQuestionSnapshotLookupInput = {
@@ -99,6 +100,24 @@ type EmployeeAnswerDraftUpsertInput = {
   answerStatus: "in_progress";
   score: null;
   totalScore: number;
+  answerItemSnapshot: {
+    questionPublicId: string;
+    selectedOptionPublicIds: string[];
+    textAnswer: string | null;
+  }[];
+  questionResultSnapshot: {
+    questionPublicId: string;
+    score: number;
+    maxScore: number;
+    standardAnswer: string | null;
+    analysis: string | null;
+    scoringPointResults: {
+      label: string;
+      score: number;
+      maxScore: number;
+      reason: string;
+    }[];
+  }[];
   submittedAt: null;
   savedAt: string;
 };
@@ -119,6 +138,24 @@ type EmployeeAnswerSubmissionUpsertInput = {
   answerStatus: "submitted";
   score: number;
   totalScore: number;
+  answerItemSnapshot: {
+    questionPublicId: string;
+    selectedOptionPublicIds: string[];
+    textAnswer: string | null;
+  }[];
+  questionResultSnapshot: {
+    questionPublicId: string;
+    score: number;
+    maxScore: number;
+    standardAnswer: string | null;
+    analysis: string | null;
+    scoringPointResults: {
+      label: string;
+      score: number;
+      maxScore: number;
+      reason: string;
+    }[];
+  }[];
   submittedAt: string;
 };
 
@@ -182,7 +219,7 @@ type SourceContextInsertInput = {
   orgAuthId: number;
   authorizationSource: "org_auth";
   authorizationPublicId: string;
-  sourceType: "paper" | "mock_exam";
+  sourceType: "paper" | "mock_exam" | "organization_ai_result";
   sourcePublicId: string;
   title: string;
   profession: "monopoly" | "marketing" | "logistics";
@@ -235,6 +272,47 @@ function createVersionWrite(
       trueFalse: 0,
       shortAnswer: 1,
     },
+    questionSnapshot: [
+      {
+        publicId: "training_question_public_123",
+        sequenceNumber: 1,
+        questionType: "single_choice",
+        materialTitle: "Safety material",
+        materialContent: "Safety material body",
+        stem: "Which option is compliant?",
+        options: [
+          {
+            publicId: "training_question_option_a",
+            label: "A",
+            content: "compliant option",
+          },
+          {
+            publicId: "training_question_option_b",
+            label: "B",
+            content: "distractor option",
+          },
+        ],
+        score: 2,
+        standardAnswer: "A",
+        analysisSummary: "choice rationale",
+        evidenceStatus: "sufficient",
+        citationCount: 1,
+      },
+      {
+        publicId: "training_question_public_456",
+        sequenceNumber: 2,
+        questionType: "short_answer",
+        materialTitle: null,
+        materialContent: null,
+        stem: "Describe the handling rule.",
+        options: [],
+        score: 3,
+        standardAnswer: "expected answer",
+        analysisSummary: "scoring rationale",
+        evidenceStatus: "weak",
+        citationCount: 0,
+      },
+    ],
     status: "published",
     publishedAt: "2026-06-15T19:20:13.000Z",
     takenDownAt: null,
@@ -390,6 +468,13 @@ function createEmployeeAnswerDraftWrite(
     },
     answerStatus: "in_progress",
     answeredQuestionCount: 1,
+    answerItems: [
+      {
+        questionPublicId: "training_question_public_123",
+        selectedOptionPublicIds: ["training_question_option_a"],
+        textAnswer: null,
+      },
+    ],
     scoreSummary: null,
     savedAt: "2026-06-16T09:00:00.000Z",
     submittedAt: null,
@@ -418,10 +503,23 @@ function createEmployeeAnswerSubmissionWrite(
     },
     answerStatus: "submitted",
     answeredQuestionCount: 2,
+    answerItems: [
+      {
+        questionPublicId: "training_question_public_123",
+        selectedOptionPublicIds: ["training_question_option_a"],
+        textAnswer: null,
+      },
+      {
+        questionPublicId: "training_question_public_456",
+        selectedOptionPublicIds: [],
+        textAnswer: "written response",
+      },
+    ],
     scoreSummary: {
       score: 4,
       totalScore: 5,
     },
+    questionResults: [],
     submittedAt: "2026-06-16T09:05:00.000Z",
     formalWritePolicy: {
       createPractice: false,
@@ -571,6 +669,7 @@ function createGateway(
         question_count: input.questionCount,
         total_score: String(input.totalScore),
         question_type_summary: input.questionTypeSummary,
+        question_snapshot: input.questionSnapshot,
         version_status: input.status,
         published_at: new Date(input.publishedAt),
         taken_down_at:
@@ -659,6 +758,7 @@ function createGateway(
           trueFalse: 0,
           shortAnswer: 1,
         },
+        question_snapshot: [],
         version_status: input.status,
         published_at: new Date("2026-06-15T19:20:13.000Z"),
         taken_down_at: new Date(input.takenDownAt),
@@ -720,6 +820,8 @@ function createGateway(
         total_score: String(input.totalScore),
         submitted_at: input.submittedAt,
         answer_organization_snapshot: input.answerOrganizationSnapshot,
+        answer_item_snapshot: input.answerItemSnapshot,
+        question_result_snapshot: input.questionResultSnapshot,
         created_at: new Date(input.savedAt),
         updated_at: new Date(input.savedAt),
       };
@@ -746,6 +848,8 @@ function createGateway(
         total_score: String(input.totalScore),
         submitted_at: new Date(input.submittedAt),
         answer_organization_snapshot: input.answerOrganizationSnapshot,
+        answer_item_snapshot: input.answerItemSnapshot,
+        question_result_snapshot: input.questionResultSnapshot,
         created_at: new Date(input.submittedAt),
         updated_at: new Date(input.submittedAt),
       };
@@ -842,6 +946,7 @@ function createVersionRow(
       trueFalse: 0,
       shortAnswer: 1,
     },
+    question_snapshot: [],
     version_status: "published",
     published_at: new Date("2026-06-15T19:20:13.000Z"),
     taken_down_at: null,
@@ -873,6 +978,8 @@ function createEmployeeAnswerRow(
       organizationName: "Test Organization",
       capturedAt: "2026-06-16T09:05:00.000Z",
     },
+    answer_item_snapshot: [],
+    question_result_snapshot: [],
     created_at: new Date("2026-06-16T09:00:00.000Z"),
     updated_at: new Date("2026-06-16T09:05:00.000Z"),
     ...overrides,
@@ -1447,6 +1554,7 @@ describe("organization training repository", () => {
         organizationId: 501,
         organizationName: "Test Organization",
         totalScore: 5,
+        questionSnapshot: [],
       },
     });
     const repository = createOrganizationTrainingRepository(gateway, {
@@ -1482,6 +1590,14 @@ describe("organization training repository", () => {
       answerStatus: "in_progress",
       score: null,
       totalScore: 5,
+      answerItemSnapshot: [
+        {
+          questionPublicId: "training_question_public_123",
+          selectedOptionPublicIds: ["training_question_option_a"],
+          textAnswer: null,
+        },
+      ],
+      questionResultSnapshot: [],
       submittedAt: null,
       savedAt: "2026-06-16T09:00:00.000Z",
     });
@@ -1498,6 +1614,14 @@ describe("organization training repository", () => {
       scoreSummary: null,
       submittedAt: null,
       resultSummaryVisible: false,
+      answerItems: [
+        {
+          questionPublicId: "training_question_public_123",
+          selectedOptionPublicIds: ["training_question_option_a"],
+          textAnswer: null,
+        },
+      ],
+      questionResults: [],
     });
 
     const serializedDraftInput = JSON.stringify(getEmployeeAnswerDraftInputs());
@@ -1525,6 +1649,7 @@ describe("organization training repository", () => {
         organizationId: 501,
         organizationName: "Test Organization",
         totalScore: 5,
+        questionSnapshot: createVersionWrite().questionSnapshot,
       },
     });
     const repository = createOrganizationTrainingRepository(gateway, {
@@ -1560,6 +1685,36 @@ describe("organization training repository", () => {
       answerStatus: "submitted",
       score: 4,
       totalScore: 5,
+      answerItemSnapshot: [
+        {
+          questionPublicId: "training_question_public_123",
+          selectedOptionPublicIds: ["training_question_option_a"],
+          textAnswer: null,
+        },
+        {
+          questionPublicId: "training_question_public_456",
+          selectedOptionPublicIds: [],
+          textAnswer: "written response",
+        },
+      ],
+      questionResultSnapshot: [
+        {
+          questionPublicId: "training_question_public_123",
+          score: 0,
+          maxScore: 2,
+          standardAnswer: "A",
+          analysis: "choice rationale",
+          scoringPointResults: [],
+        },
+        {
+          questionPublicId: "training_question_public_456",
+          score: 0,
+          maxScore: 3,
+          standardAnswer: "expected answer",
+          analysis: "scoring rationale",
+          scoringPointResults: [],
+        },
+      ],
       submittedAt: "2026-06-16T09:05:00.000Z",
     });
     expect(result).toEqual({
@@ -1578,6 +1733,36 @@ describe("organization training repository", () => {
       },
       submittedAt: "2026-06-16T09:05:00.000Z",
       resultSummaryVisible: true,
+      answerItems: [
+        {
+          questionPublicId: "training_question_public_123",
+          selectedOptionPublicIds: ["training_question_option_a"],
+          textAnswer: null,
+        },
+        {
+          questionPublicId: "training_question_public_456",
+          selectedOptionPublicIds: [],
+          textAnswer: "written response",
+        },
+      ],
+      questionResults: [
+        {
+          questionPublicId: "training_question_public_123",
+          score: 0,
+          maxScore: 2,
+          standardAnswer: "A",
+          analysis: "choice rationale",
+          scoringPointResults: [],
+        },
+        {
+          questionPublicId: "training_question_public_456",
+          score: 0,
+          maxScore: 3,
+          standardAnswer: "expected answer",
+          analysis: "scoring rationale",
+          scoringPointResults: [],
+        },
+      ],
     });
 
     const serializedSubmissionInput = JSON.stringify(
@@ -1675,6 +1860,8 @@ describe("organization training repository", () => {
       },
       submittedAt: "2026-06-16T09:05:00.000Z",
       resultSummaryVisible: true,
+      answerItems: [],
+      questionResults: [],
     });
   });
 

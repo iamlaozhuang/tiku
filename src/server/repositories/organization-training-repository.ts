@@ -4,7 +4,10 @@ import {
   admin,
   adminOrganization,
   employee,
+  type OrganizationTrainingAnswerItemSnapshotValue,
   type OrganizationTrainingAnswerOrganizationSnapshotValue,
+  type OrganizationTrainingQuestionResultSnapshotValue,
+  type OrganizationTrainingQuestionSnapshotValue,
   orgAuth,
   orgAuthOrganization,
   organization,
@@ -200,6 +203,7 @@ export type OrganizationTrainingEmployeeAnswerPersistenceLineage = {
   organizationId: number;
   organizationName: string;
   totalScore: number;
+  questionSnapshot: OrganizationTrainingQuestionSnapshotValue[];
 };
 
 export type OrganizationTrainingEmployeeAnswerDraftUpsertInput = {
@@ -214,6 +218,8 @@ export type OrganizationTrainingEmployeeAnswerDraftUpsertInput = {
   answerStatus: "in_progress";
   score: null;
   totalScore: number;
+  answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
+  questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   submittedAt: null;
   savedAt: string;
 };
@@ -230,6 +236,8 @@ export type OrganizationTrainingEmployeeAnswerSubmissionUpsertInput = {
   answerStatus: "submitted";
   score: number;
   totalScore: number;
+  answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
+  questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   submittedAt: string;
 };
 
@@ -240,6 +248,8 @@ type NormalizedOrganizationTrainingEmployeeAnswerDraftInput = {
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
   answerStatus: "in_progress";
   score: null;
+  answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
+  questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   submittedAt: null;
   savedAt: string;
 };
@@ -252,6 +262,8 @@ type NormalizedOrganizationTrainingEmployeeAnswerSubmissionInput = {
   answerStatus: "submitted";
   score: number;
   totalScore: number;
+  answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
+  questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   submittedAt: string;
 };
 
@@ -384,6 +396,7 @@ const organizationTrainingVersionSelection = {
   question_count: organizationTrainingVersion.question_count,
   total_score: organizationTrainingVersion.total_score,
   question_type_summary: organizationTrainingVersion.question_type_summary,
+  question_snapshot: organizationTrainingVersion.question_snapshot,
   version_status: organizationTrainingVersion.version_status,
   published_at: organizationTrainingVersion.published_at,
   taken_down_at: organizationTrainingVersion.taken_down_at,
@@ -410,6 +423,8 @@ const organizationTrainingAnswerSelection = {
   submitted_at: organizationTrainingAnswer.submitted_at,
   answer_organization_snapshot:
     organizationTrainingAnswer.answer_organization_snapshot,
+  answer_item_snapshot: organizationTrainingAnswer.answer_item_snapshot,
+  question_result_snapshot: organizationTrainingAnswer.question_result_snapshot,
   created_at: organizationTrainingAnswer.created_at,
   updated_at: organizationTrainingAnswer.updated_at,
 };
@@ -910,6 +925,7 @@ export function createPostgresOrganizationTrainingRepository(
           question_count: input.questionCount,
           total_score: String(input.totalScore),
           question_type_summary: input.questionTypeSummary,
+          question_snapshot: input.questionSnapshot,
           version_status: input.status,
           published_at: new Date(input.publishedAt),
           taken_down_at:
@@ -940,6 +956,8 @@ export function createPostgresOrganizationTrainingRepository(
           total_score: String(input.totalScore),
           submitted_at: input.submittedAt,
           answer_organization_snapshot: input.answerOrganizationSnapshot,
+          answer_item_snapshot: input.answerItemSnapshot,
+          question_result_snapshot: input.questionResultSnapshot,
           created_at: savedAt,
           updated_at: savedAt,
         })
@@ -956,6 +974,8 @@ export function createPostgresOrganizationTrainingRepository(
             total_score: String(input.totalScore),
             submitted_at: input.submittedAt,
             answer_organization_snapshot: input.answerOrganizationSnapshot,
+            answer_item_snapshot: input.answerItemSnapshot,
+            question_result_snapshot: input.questionResultSnapshot,
             updated_at: savedAt,
           },
         })
@@ -981,6 +1001,8 @@ export function createPostgresOrganizationTrainingRepository(
           total_score: String(input.totalScore),
           submitted_at: submittedAt,
           answer_organization_snapshot: input.answerOrganizationSnapshot,
+          answer_item_snapshot: input.answerItemSnapshot,
+          question_result_snapshot: input.questionResultSnapshot,
           created_at: submittedAt,
           updated_at: submittedAt,
         })
@@ -997,6 +1019,8 @@ export function createPostgresOrganizationTrainingRepository(
             total_score: String(input.totalScore),
             submitted_at: submittedAt,
             answer_organization_snapshot: input.answerOrganizationSnapshot,
+            answer_item_snapshot: input.answerItemSnapshot,
+            question_result_snapshot: input.questionResultSnapshot,
             updated_at: submittedAt,
           },
         })
@@ -1032,6 +1056,16 @@ export function createPostgresOrganizationTrainingRepository(
 }
 
 function normalizeRequiredText(value: string): string | null {
+  const trimmedValue = value.trim();
+
+  return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function normalizeOptionalText(value: string | null): string | null {
+  if (value === null) {
+    return null;
+  }
+
   const trimmedValue = value.trim();
 
   return trimmedValue.length > 0 ? trimmedValue : null;
@@ -1697,6 +1731,10 @@ function createVersionInsertInput(
       trueFalse: input.questionTypeSummary.trueFalse,
       shortAnswer: input.questionTypeSummary.shortAnswer,
     },
+    questionSnapshot: input.questionSnapshot.map((question) => ({
+      ...question,
+      options: question.options.map((option) => ({ ...option })),
+    })),
   };
 }
 
@@ -1763,6 +1801,8 @@ async function createEmployeeAnswerDraftUpsertInput(
     ),
     answerStatus: normalizedInput.answerStatus,
     score: normalizedInput.score,
+    answerItemSnapshot: normalizedInput.answerItemSnapshot,
+    questionResultSnapshot: normalizedInput.questionResultSnapshot,
     submittedAt: normalizedInput.submittedAt,
     savedAt: normalizedInput.savedAt,
     organizationTrainingVersionId: lineage.organizationTrainingVersionId,
@@ -1810,6 +1850,11 @@ async function createEmployeeAnswerSubmissionUpsertInput(
     answerStatus: normalizedInput.answerStatus,
     score: normalizedInput.score,
     totalScore: normalizedInput.totalScore,
+    answerItemSnapshot: normalizedInput.answerItemSnapshot,
+    questionResultSnapshot: createQuestionResultSnapshot(
+      normalizedInput.answerItemSnapshot,
+      lineage.questionSnapshot,
+    ),
     submittedAt: normalizedInput.submittedAt,
     organizationTrainingVersionId: lineage.organizationTrainingVersionId,
     employeeId: lineage.employeeId,
@@ -1830,6 +1875,7 @@ function normalizeEmployeeAnswerDraftPersistenceInput(
   const answerOrganizationSnapshot = normalizeOrganizationTrainingScopeSnapshot(
     input.answerOrganizationSnapshot,
   );
+  const answerItemSnapshot = normalizeAnswerItemSnapshot(input.answerItems);
   const savedAt = normalizeRequiredText(input.savedAt);
 
   if (
@@ -1842,6 +1888,7 @@ function normalizeEmployeeAnswerDraftPersistenceInput(
     employeePublicId === null ||
     organizationPublicId === null ||
     answerOrganizationSnapshot === null ||
+    answerItemSnapshot === null ||
     savedAt === null
   ) {
     return null;
@@ -1854,6 +1901,8 @@ function normalizeEmployeeAnswerDraftPersistenceInput(
     answerOrganizationSnapshot,
     answerStatus: input.answerStatus,
     score: null,
+    answerItemSnapshot,
+    questionResultSnapshot: [],
     submittedAt: null,
     savedAt,
   };
@@ -1872,6 +1921,7 @@ function normalizeEmployeeAnswerSubmissionPersistenceInput(
   const answerOrganizationSnapshot = normalizeOrganizationTrainingScopeSnapshot(
     input.answerOrganizationSnapshot,
   );
+  const answerItemSnapshot = normalizeAnswerItemSnapshot(input.answerItems);
   const submittedAt = normalizeRequiredText(input.submittedAt);
   const score = normalizeNonNegativeScore(input.scoreSummary.score);
   const totalScore = normalizeNonNegativeScore(input.scoreSummary.totalScore);
@@ -1884,6 +1934,7 @@ function normalizeEmployeeAnswerSubmissionPersistenceInput(
     employeePublicId === null ||
     organizationPublicId === null ||
     answerOrganizationSnapshot === null ||
+    answerItemSnapshot === null ||
     submittedAt === null ||
     score === null ||
     totalScore === null
@@ -1899,8 +1950,69 @@ function normalizeEmployeeAnswerSubmissionPersistenceInput(
     answerStatus: input.answerStatus,
     score,
     totalScore,
+    answerItemSnapshot,
+    questionResultSnapshot: [],
     submittedAt,
   };
+}
+
+function normalizeAnswerItemSnapshot(
+  answerItems: OrganizationTrainingEmployeeAnswerDraftPersistenceInput["answerItems"],
+): OrganizationTrainingAnswerItemSnapshotValue[] | null {
+  if (!Array.isArray(answerItems)) {
+    return null;
+  }
+
+  const normalizedAnswerItems = answerItems.map((answerItem) => {
+    const questionPublicId = normalizeRequiredText(answerItem.questionPublicId);
+    const selectedOptionPublicIds = Array.isArray(
+      answerItem.selectedOptionPublicIds,
+    )
+      ? [
+          ...new Set(
+            answerItem.selectedOptionPublicIds
+              .map(normalizeRequiredText)
+              .filter((publicId): publicId is string => publicId !== null),
+          ),
+        ]
+      : null;
+
+    if (questionPublicId === null || selectedOptionPublicIds === null) {
+      return null;
+    }
+
+    return {
+      questionPublicId,
+      selectedOptionPublicIds,
+      textAnswer: normalizeOptionalText(answerItem.textAnswer),
+    };
+  });
+
+  if (normalizedAnswerItems.some((answerItem) => answerItem === null)) {
+    return null;
+  }
+
+  return normalizedAnswerItems as OrganizationTrainingAnswerItemSnapshotValue[];
+}
+
+function createQuestionResultSnapshot(
+  answerItems: readonly OrganizationTrainingAnswerItemSnapshotValue[],
+  questionSnapshot: readonly OrganizationTrainingQuestionSnapshotValue[],
+): OrganizationTrainingQuestionResultSnapshotValue[] {
+  const answeredQuestionPublicIds = new Set(
+    answerItems.map((answerItem) => answerItem.questionPublicId),
+  );
+
+  return questionSnapshot
+    .filter((question) => answeredQuestionPublicIds.has(question.publicId))
+    .map((question) => ({
+      questionPublicId: question.publicId,
+      score: 0,
+      maxScore: question.score,
+      standardAnswer: question.standardAnswer,
+      analysis: question.analysisSummary,
+      scoringPointResults: [],
+    }));
 }
 
 function normalizeEmployeeAnswerPersistenceLineage(
@@ -1931,6 +2043,9 @@ function normalizeEmployeeAnswerPersistenceLineage(
     organizationId: lineage.organizationId,
     organizationName,
     totalScore,
+    questionSnapshot: Array.isArray(lineage.questionSnapshot)
+      ? lineage.questionSnapshot
+      : [],
   };
 }
 
@@ -2391,6 +2506,7 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
       organization_id: organization.id,
       organization_name: organization.name,
       total_score: organizationTrainingVersion.total_score,
+      question_snapshot: organizationTrainingVersion.question_snapshot,
     })
     .from(organizationTrainingVersion)
     .innerJoin(employee, eq(employee.public_id, input.employeePublicId))
@@ -2417,6 +2533,7 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
     organizationId: row.organization_id,
     organizationName: row.organization_name,
     totalScore: Number(row.total_score),
+    questionSnapshot: row.question_snapshot,
   };
 }
 
