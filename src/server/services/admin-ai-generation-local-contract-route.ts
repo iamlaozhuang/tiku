@@ -46,7 +46,10 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
-import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
+import {
+  resolveAndAssembleAiPaperFromRoute,
+  type AiPaperRoutePlanSelectWiringResult,
+} from "./ai-paper-route-plan-select-wiring-service";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceDto,
@@ -57,6 +60,14 @@ import type { AdminRole } from "../models/auth";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
+import {
+  createPostgresOrganizationTrainingRepository,
+  type OrganizationTrainingRepository,
+} from "../repositories/organization-training-repository";
+import {
+  createPostgresQuestionRepository,
+  type QuestionRepository,
+} from "../repositories/question-repository";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
 import {
   buildAdminAiGenerationRuntimeBridgeReadModel,
@@ -79,6 +90,8 @@ export type AdminAiGenerationLocalContractRouteOptions = {
   sessionService?: Pick<SessionService, "getCurrentSession">;
   runtimeBridgeControl?: AdminAiGenerationRuntimeBridgeControl;
   paperAssemblyResolver?: AdminAiGenerationPaperAssemblyResolver;
+  questionRepository?: AdminAiGenerationPaperAssemblyQuestionRepository;
+  organizationTrainingRepository?: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 };
@@ -114,6 +127,16 @@ type AdminAiGenerationProviderDisabledRuntimeBridgeOutcome = {
   executionSummary?: AdminAiGenerationRuntimeBridgeExecutionSummaryDto;
 };
 
+type AdminAiGenerationPaperAssemblyQuestionRepository = Pick<
+  QuestionRepository,
+  "listQuestions"
+>;
+
+type AdminAiGenerationPaperAssemblyOrganizationTrainingRepository = Pick<
+  OrganizationTrainingRepository,
+  "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+>;
+
 type AdminAiGenerationPaperAssemblyResolverInput = {
   actor: AdminAiGenerationActor;
   generationKind: AdminAiGenerationKind;
@@ -130,6 +153,28 @@ export type AdminAiGenerationPaperAssemblyResolver = (
 ) =>
   | AiPaperRoutePlanSelectWiringResult
   | Promise<AiPaperRoutePlanSelectWiringResult>;
+
+function createDefaultAdminAiGenerationPaperAssemblyResolver(input: {
+  organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+  questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
+}): AdminAiGenerationPaperAssemblyResolver {
+  return (resolverInput) =>
+    resolveAndAssembleAiPaperFromRoute({
+      role: resolveAdminAiGenerationPaperAssemblyRole(resolverInput.workspace),
+      organizationPublicId: resolverInput.taskRequest.organizationPublicId,
+      generationParameters: resolverInput.generationParameters,
+      visibleGeneratedContent:
+        resolverInput.runtimeBridge.visibleGeneratedContent,
+      questionRepository: input.questionRepository,
+      organizationTrainingRepository: input.organizationTrainingRepository,
+    });
+}
+
+function resolveAdminAiGenerationPaperAssemblyRole(
+  workspace: AdminAiGenerationWorkspace,
+) {
+  return workspace === "content" ? "content_admin" : "org_advanced_admin";
+}
 
 export type AdminAiGenerationRuntimeBridgeControl = {
   bridgeMode?: "controlled_runner";
@@ -1338,6 +1383,15 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
   const resultPersistenceRepository =
     options.resultPersistenceRepository ??
     createPostgresAdminAiGenerationResultPersistenceRepository();
+  const paperAssemblyResolver =
+    options.paperAssemblyResolver ??
+    createDefaultAdminAiGenerationPaperAssemblyResolver({
+      questionRepository:
+        options.questionRepository ?? createPostgresQuestionRepository(),
+      organizationTrainingRepository:
+        options.organizationTrainingRepository ??
+        createPostgresOrganizationTrainingRepository(),
+    });
 
   return createRouteHandlersWithErrorEnvelope({
     collection: {
@@ -1408,7 +1462,7 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             createRequestPublicId,
             generationKind,
             generationParameters,
-            paperAssemblyResolver: options.paperAssemblyResolver,
+            paperAssemblyResolver,
             requestClock,
             resultPersistenceRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,

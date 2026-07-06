@@ -24,6 +24,7 @@ import type {
   AiGenerationRouteIntegratedGroundingContext,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type { AiPaperRoutePlanSelectWiringResult } from "./ai-paper-route-plan-select-wiring-service";
+import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type {
   AdminAiGenerationTaskHistoryQuery,
   AdminAiGenerationTaskPersistenceRepository,
@@ -32,6 +33,11 @@ import type {
   CreateOrReuseAdminAiGenerationTaskInput,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
+import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
+import type {
+  QuestionAccessRow,
+  QuestionRepository,
+} from "../repositories/question-repository";
 import type { SessionService } from "./session-service";
 
 const providerDisabledExecutionSummary: AdminAiGenerationRuntimeBridgeExecutionSummaryDto =
@@ -245,6 +251,11 @@ async function postLocalContractRequest(input: {
   paperAssemblyResolver?: () =>
     | AiPaperRoutePlanSelectWiringResult
     | Promise<AiPaperRoutePlanSelectWiringResult>;
+  questionRepository?: Pick<QuestionRepository, "listQuestions">;
+  organizationTrainingRepository?: Pick<
+    OrganizationTrainingRepository,
+    "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+  >;
   resultPersistenceRepository?: AdminAiGenerationResultPersistenceRepository;
   taskPersistenceRepository?: AdminAiGenerationTaskPersistenceRepository;
 }) {
@@ -254,6 +265,18 @@ async function postLocalContractRequest(input: {
   const resultPersistence =
     input.resultPersistenceRepository ??
     createGeneratedResultPersistenceRecorder().repository;
+  const questionRepository =
+    input.questionRepository ??
+    createQuestionRepository([
+      createQuestionRow({ public_id: "platform_question_public_default_a" }),
+      createQuestionRow({ public_id: "platform_question_public_default_b" }),
+    ]);
+  const organizationTrainingRepository =
+    input.organizationTrainingRepository ??
+    createOrganizationTrainingRepository({
+      organizationPublicId:
+        input.organizationPublicId ?? "organization_public_123",
+    });
   const routeOptions = {
     sessionService: createAdminSessionService({
       adminRoles: input.adminRoles,
@@ -272,6 +295,8 @@ async function postLocalContractRequest(input: {
     ...(input.paperAssemblyResolver
       ? { paperAssemblyResolver: input.paperAssemblyResolver }
       : {}),
+    questionRepository,
+    organizationTrainingRepository,
   } as unknown as Parameters<
     typeof createAdminAiGenerationLocalContractRouteHandlers
   >[1];
@@ -331,6 +356,133 @@ function createFakeProviderRuntimeBridgeControl(
       },
     },
   };
+}
+
+function createQuestionRow(
+  override: Partial<QuestionAccessRow> = {},
+): QuestionAccessRow {
+  return {
+    id: 101,
+    public_id: "platform_question_public_default",
+    question_type: "single_choice",
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    stem_rich_text: "SENSITIVE_STEM_MARKER",
+    analysis_rich_text: "SENSITIVE_ANALYSIS_MARKER",
+    standard_answer_rich_text: "SENSITIVE_ANSWER_MARKER",
+    status: "available",
+    is_locked: false,
+    locked_at: null,
+    multi_choice_rule: "all_correct_only",
+    scoring_method: "auto_match",
+    fill_blank_answers: [],
+    material_id: null,
+    material_public_id: null,
+    question_options: [
+      {
+        id: 201,
+        question_id: 101,
+        label: "A",
+        content_rich_text: "SENSITIVE_OPTION_MARKER",
+        is_correct: true,
+        sort_order: 1,
+        created_at: new Date("2026-07-06T00:00:00.000Z"),
+        updated_at: new Date("2026-07-06T00:00:00.000Z"),
+      },
+    ],
+    scoring_points: [],
+    knowledge_node_public_ids: ["knowledge_node_public_default"],
+    tag_public_ids: [],
+    created_at: new Date("2026-07-06T00:00:00.000Z"),
+    updated_at: new Date("2026-07-06T00:00:00.000Z"),
+    ...override,
+  };
+}
+
+function createQuestionRepository(
+  questionRows: readonly QuestionAccessRow[],
+): Pick<QuestionRepository, "listQuestions"> {
+  return {
+    async listQuestions() {
+      return {
+        rows: [...questionRows],
+        total: questionRows.length,
+      };
+    },
+  };
+}
+
+function createOrganizationTrainingRepository(input: {
+  organizationPublicId: string;
+}): Pick<
+  OrganizationTrainingRepository,
+  "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+> {
+  return {
+    async listAdminLifecycleVersions() {
+      return [
+        createTrainingVersion({
+          organizationPublicId: input.organizationPublicId,
+          questions: [
+            createTrainingQuestion("enterprise_question_public_default"),
+          ],
+        }),
+      ];
+    },
+    async listEmployeeVisibleVersions() {
+      throw new Error("employee training repository should not be called");
+    },
+  };
+}
+
+function createTrainingVersion(
+  override: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  return {
+    publicId: "training_version_public_default",
+    draftPublicId: "training_draft_public_default",
+    versionNumber: 1,
+    organizationPublicId: "organization_public_123",
+    publishScopeSnapshot: {
+      organizationPublicIds: ["organization_public_123"],
+      capturedAt: "2026-07-06T00:00:00.000Z",
+    },
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    title: "SENSITIVE_TRAINING_TITLE",
+    description: "SENSITIVE_TRAINING_DESCRIPTION",
+    questionCount: 1,
+    totalScore: 1,
+    status: "published",
+    publishedAt: "2026-07-06T00:00:00.000Z",
+    takenDownAt: null,
+    takedownReason: null,
+    questions: [createTrainingQuestion("enterprise_question_public_default")],
+    ...override,
+  };
+}
+
+function createTrainingQuestion(publicId: string) {
+  return {
+    publicId,
+    sequenceNumber: 1,
+    questionType: "single_choice",
+    materialTitle: "SENSITIVE_ENTERPRISE_MATERIAL_TITLE",
+    materialContent: "SENSITIVE_ENTERPRISE_MATERIAL_CONTENT",
+    stem: "SENSITIVE_ENTERPRISE_STEM",
+    options: [
+      {
+        publicId: `${publicId}_option_a`,
+        label: "A",
+        content: "SENSITIVE_ENTERPRISE_OPTION",
+      },
+    ],
+    score: 1,
+  } satisfies NonNullable<
+    OrganizationTrainingPublishedVersionDto["questions"]
+  >[number];
 }
 
 async function getLocalContractHistory(input: {
@@ -1219,6 +1371,113 @@ describe("admin AI generation local contract route handlers", () => {
       "OMITTED_FIXTURE_PAPER_ASSEMBLY",
     );
     expect(JSON.stringify(payload)).not.toMatch(/"id":/);
+    expect(providerInputs).toHaveLength(1);
+  });
+
+  it("uses repository-backed paper assembly by default for organization advanced admin paper requests", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const questionRepositoryCalls: unknown[] = [];
+    const trainingRepositoryCalls: unknown[] = [];
+    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
+      async listQuestions(query) {
+        questionRepositoryCalls.push(query);
+
+        return {
+          rows: [
+            createQuestionRow({
+              public_id: "platform_question_public_route_a",
+            }),
+            createQuestionRow({
+              public_id: "platform_question_public_route_b",
+            }),
+          ],
+          total: 2,
+        };
+      },
+    };
+    const organizationTrainingRepository: Pick<
+      OrganizationTrainingRepository,
+      "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+    > = {
+      async listAdminLifecycleVersions(input) {
+        trainingRepositoryCalls.push(input);
+
+        return [
+          createTrainingVersion({
+            organizationPublicId: "organization_public_123",
+            questions: [
+              createTrainingQuestion("enterprise_question_public_route_a"),
+            ],
+          }),
+        ];
+      },
+      async listEmployeeVisibleVersions() {
+        throw new Error("employee training repository should not be called");
+      },
+    };
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      questionRepository,
+      organizationTrainingRepository,
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
+        providerInputs,
+        {
+          content: JSON.stringify({
+            totalQuestionCount: 3,
+            paperSections: [
+              {
+                paperSectionType: "single_choice",
+                questionCount: 3,
+              },
+            ],
+            questionTypeDistribution: {
+              single_choice: 3,
+            },
+            knowledgeCoverage: ["redacted_knowledge_node"],
+          }),
+        },
+      ),
+      body: {
+        generationKind: "paper",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 3,
+        },
+      },
+    });
+    const payload = await response.json();
+
+    expect(questionRepositoryCalls).toHaveLength(1);
+    expect(trainingRepositoryCalls).toHaveLength(1);
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        paperAssembly: {
+          status: "assembled",
+          redactionStatus: "redacted",
+          sourceDiagnostics: {
+            role: "org_advanced_admin",
+            platformQuestionCount: 2,
+            enterpriseQuestionCount: 1,
+            enterpriseSourceStatus: "resolved",
+          },
+          container: {
+            requestedQuestionCount: 3,
+            selectedQuestionCount: 3,
+            sourceComposition: {
+              platformFormalQuestionCount: 2,
+              enterpriseTrainingSnapshotCount: 1,
+            },
+          },
+          insufficiency: null,
+        },
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain("SENSITIVE_STEM_MARKER");
+    expect(JSON.stringify(payload)).not.toContain("SENSITIVE_ENTERPRISE_STEM");
     expect(providerInputs).toHaveLength(1);
   });
 
