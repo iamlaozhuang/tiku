@@ -3,8 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
-  updatedByTask: active-tasks-slimming-batch-4-2026-07-06
-  updatedAt: "2026-07-06T14:28:00Z"
+  updatedByTask: active-tasks-slimming-batch-5-2026-07-06
+  updatedAt: "2026-07-06T14:35:00Z"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -17641,3 +17641,228 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
     commitSha: null
     completedAt: 2026-07-03T06:59:45-07:00
+  - id: organization-workspace-role-boundary-source-landing-2026-07-03
+    phase: organization-workspace-role-boundary-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-workspace-role-boundary-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-workspace-role-boundary-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T06:40:49-07:00
+  - id: system-admin-user-management-source-landing-2026-07-03
+    phase: system-admin-user-management-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-system-admin-user-management-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-system-admin-user-management-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T06:16:56-07:00
+  - id: source-landing-16-package-recovery-2026-07-03
+    phase: source-landing-16-package-recovery-2026-07-03
+    status: closed
+    taskKind: docs_governance_recovery
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-source-landing-16-package-recovery.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-source-landing-16-package-recovery.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T05:46:15-07:00
+  - id: admin-model-prompt-log-governance-source-landing-2026-07-03
+    phase: admin-model-prompt-log-governance-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-admin-model-prompt-log-governance-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T05:28:54-07:00
+  - id: organization-ai-post-actions-source-landing-2026-07-03
+    phase: organization-ai-post-actions-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-ai-post-actions-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-ai-post-actions-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T04:41:55-07:00
+  - id: organization-analytics-source-landing-2026-07-03
+    phase: organization-analytics-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-analytics-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-analytics-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T03:52:41-07:00
+  - id: organization-training-source-landing-2026-07-03
+    phase: organization-training-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-organization-training-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-organization-training-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T03:19:17-07:00
+  - id: ops-authorization-source-landing-2026-07-03
+    phase: ops-authorization-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_contract_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-ops-authorization-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-ops-authorization-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-03T02:25:00-07:00
+  - id: content-resource-management-source-landing-2026-07-03
+    phase: content-resource-management-source-landing-2026-07-03
+    status: closed
+    taskKind: source_ui_auth_landing
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-content-resource-management-source-landing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-content-resource-management-source-landing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: ui-ux-contract-packages-detailed-audit-2026-07-03
+    phase: ui-ux-contract-packages-detailed-audit-2026-07-03
+    status: closed
+    taskKind: docs_requirement_contract_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-packages-detailed-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+    phase: ui-ux-contract-evidence-post-closeout-normalization-2026-07-03
+    status: closed
+    taskKind: docs_governance_evidence_normalization
+    evidencePath: docs/05-execution-logs/evidence/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-03-ui-ux-contract-evidence-post-closeout-normalization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: ops-authorization-ui-ux-contract-2026-07-02
+    phase: ops-authorization-ui-ux-contract-2026-07-02
+    status: closed
+    taskKind: docs_ui_ux_requirement_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ops-authorization-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ops-authorization-ui-ux-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: organization-training-ui-ux-contract-2026-07-02
+    phase: organization-training-ui-ux-contract-2026-07-02
+    status: closed
+    taskKind: docs_ui_ux_requirement_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-organization-training-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-organization-training-ui-ux-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: organization-analytics-ui-ux-contract-2026-07-02
+    phase: organization-analytics-ui-ux-contract-2026-07-02
+    status: closed
+    taskKind: docs_ui_ux_requirement_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-organization-analytics-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-organization-analytics-ui-ux-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: organization-ai-post-actions-ui-ux-contract-2026-07-02
+    phase: organization-ai-post-actions-ui-ux-contract-2026-07-02
+    status: closed
+    taskKind: docs_ui_ux_requirement_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-organization-ai-post-actions-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-organization-ai-post-actions-ui-ux-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: admin-model-prompt-log-governance-ui-ux-contract-2026-07-02
+    phase: admin-model-prompt-log-governance-ui-ux-contract-2026-07-02
+    status: closed
+    taskKind: docs_ui_ux_requirement_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-admin-model-prompt-log-governance-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-admin-model-prompt-log-governance-ui-ux-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: content-resource-management-ui-ux-contract-2026-07-02
+    phase: content-resource-management-ui-ux-contract-2026-07-02
+    status: closed
+    taskKind: docs_ui_ux_requirement_contract
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-content-resource-management-ui-ux-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-content-resource-management-ui-ux-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: current-thread-decision-package-closeout-2026-07-02
+    phase: current-thread-decision-package-closeout-2026-07-02
+    status: closed
+    taskKind: docs_requirement_decision_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-current-thread-decision-package-closure-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-current-thread-decision-package-closure-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: null
+  - id: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+    phase: redeem-code-edition-plaintext-decision-doc-update-2026-07-02
+    status: closed
+    taskKind: docs_requirement_decision_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-redeem-code-edition-plaintext-decision-doc-update.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T16:55:00-07:00
+  - id: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+    phase: ui-ux-requirement-design-baseline-gap-analysis-2026-07-02
+    status: closed
+    taskKind: docs_requirement_ui_ux_design_baseline
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-ui-ux-requirement-design-baseline-gap-analysis.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T16:00:00-07:00
+  - id: post-archive-recovery-smoke-2026-07-02
+    phase: post-archive-recovery-smoke-2026-07-02
+    status: closed
+    taskKind: docs_archive_recovery_smoke
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-post-archive-recovery-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-post-archive-recovery-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T15:00:00-07:00
+  - id: queue-and-execution-log-archive-first-batch-2026-07-02
+    phase: queue-and-execution-log-archive-first-batch-2026-07-02
+    status: closed
+    taskKind: docs_archive_index_movement
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-first-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-first-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T14:00:00-07:00
+  - id: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+    phase: queue-and-execution-log-archive-dry-run-inventory-2026-07-02
+    status: closed
+    taskKind: docs_archive_dry_run_inventory
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-queue-and-execution-log-archive-dry-run-inventory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T13:00:00-07:00
+  - id: recent-thread-governance-and-doc-slimming-2026-07-02
+    phase: recent-thread-governance-and-doc-slimming-2026-07-02
+    status: closed
+    taskKind: docs_governance_read_surface_slimming_baseline
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-recent-thread-governance-and-doc-slimming.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-recent-thread-governance-and-doc-slimming.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T12:00:00-07:00
+  - id: phase4-requirements-agent-baseline-alignment-2026-07-02
+    phase: phase4-requirements-agent-baseline-alignment-2026-07-02
+    status: closed
+    taskKind: docs_requirement_agent_baseline_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-02-phase4-requirements-agent-baseline-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-07.yaml
+    commitSha: null
+    completedAt: 2026-07-02T11:00:00-07:00
