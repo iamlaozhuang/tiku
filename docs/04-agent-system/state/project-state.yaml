@@ -1,47 +1,47 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-paper-personal-route-container-contract-2026-07-06
-updatedAt: "2026-07-06T13:43:00-07:00"
+currentPhase: ai-paper-learning-session-handoff-contract-2026-07-06
+updatedAt: "2026-07-06T13:55:09-07:00"
 currentTask:
-  id: ai-paper-personal-route-container-contract-2026-07-06
-  title: AI paper personal route container contract
+  id: ai-paper-learning-session-handoff-contract-2026-07-06
+  title: AI paper learning session handoff contract
   phase: ai-generation-recontract-local-repair-goal-2026-07-06
   status: closed
-  result: pass_personal_employee_route_paper_container_contract_unit_gates
+  result: pass_learning_session_handoff_contract_unit_gates
   priority: p0
-  taskKind: source_test_personal_employee_route_paper_container_contract
-  executionProfile: local_source_and_focused_unit_personal_employee_route_paper_container_contract_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
+  taskKind: source_test_ai_paper_learning_session_handoff_contract
+  executionProfile: local_source_and_focused_unit_ai_paper_learning_session_handoff_contract_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
   validationPolicy: read_gate_task_plan_tdd_red_green_focused_unit_lint_typecheck_precommit_redacted_evidence_audit
   moduleRunVersion: 2
   dependsOn:
-    - ai-paper-admin-route-repository-wiring-2026-07-06
-  branch: codex/ai-paper-personal-route-container-contract-2026-07-06
+    - ai-paper-personal-route-container-contract-2026-07-06
+  branch: codex/ai-paper-learning-session-handoff-contract-2026-07-06
   approvalBoundary: active_parent_goal_continuation_local_source_only_no_remote_closeout_2026_07_06
-  plannedAt: "2026-07-06T13:32:00-07:00"
-  claimedAt: "2026-07-06T13:32:00-07:00"
-  materializedAt: "2026-07-06T13:32:00-07:00"
-  completedAt: "2026-07-06T13:43:00-07:00"
-  targetClosureItem: Expose a redacted AI组卷 paper assembly container handoff in personal advanced student and organization advanced employee local route/runtime contracts, using local formal question source selection before result materialization.
+  plannedAt: "2026-07-06T13:52:00-07:00"
+  claimedAt: "2026-07-06T13:52:00-07:00"
+  materializedAt: "2026-07-06T13:52:00-07:00"
+  completedAt: "2026-07-06T13:55:09-07:00"
+  targetClosureItem: Add a backend learning-session handoff contract that creates answerable personal/employee AI learning sessions from locally assembled AI组卷 paper containers and server-side formal question source content.
   behaviorBoundary: source_test_docs_state_evidence_audit_only_no_dependency_no_package_lockfile_no_schema_migration_seed_no_env_secret_no_direct_db_runtime_no_provider_call_no_browser_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
   evidenceMode: redacted_file_paths_test_names_command_statuses_role_labels_source_categories_counts_and_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-paper-personal-route-container-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-personal-route-container-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-personal-route-container-contract.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-paper-learning-session-handoff-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-learning-session-handoff-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-learning-session-handoff-contract.md
   requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-06-ai-paper-personal-route-container-contract.md
-    - docs/05-execution-logs/evidence/2026-07-06-ai-paper-personal-route-container-contract.md
-    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-personal-route-container-contract.md
-    - src/app/api/v1/personal-ai-generation-requests/route.ts
-    - src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts
-    - src/server/services/personal-ai-generation-local-browser-experience-service.ts
-    - src/server/services/personal-ai-generation-request-route.ts
-    - src/server/services/personal-ai-generation-request-route.test.ts
-    - src/server/services/personal-ai-generation-runtime-bridge-service.ts
-    - src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
+    - docs/05-execution-logs/task-plans/2026-07-06-ai-paper-learning-session-handoff-contract.md
+    - docs/05-execution-logs/evidence/2026-07-06-ai-paper-learning-session-handoff-contract.md
+    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-learning-session-handoff-contract.md
+    - src/server/contracts/personal-ai-generation-learning-session-contract.ts
+    - src/server/models/personal-ai-generation-learning-session.ts
+    - src/server/services/personal-ai-generation-learning-session-service.ts
+    - src/server/services/personal-ai-generation-learning-session-service.test.ts
+    - src/server/services/personal-ai-generation-learning-session-route.ts
+    - src/server/services/personal-ai-generation-learning-session-route.test.ts
+    - src/server/validators/personal-ai-generation-learning-session.ts
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -63,13 +63,13 @@ currentTask:
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
   validationCommands:
-    - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
-    - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts src/server/services/ai-paper-source-adapter-service.test.ts
+    - npm.cmd run test:unit -- src/server/services/personal-ai-generation-learning-session-service.test.ts src/server/services/personal-ai-generation-learning-session-route.test.ts
+    - npm.cmd run test:unit -- src/server/services/personal-ai-generation-learning-session-service.test.ts src/server/services/personal-ai-generation-learning-session-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts
     - git diff --check
     - npm.cmd run typecheck
     - npm.cmd run lint
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-paper-personal-route-container-contract.md docs/05-execution-logs/evidence/2026-07-06-ai-paper-personal-route-container-contract.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-personal-route-container-contract.md src/app/api/v1/personal-ai-generation-requests/route.ts src/server/contracts/personal-ai-generation-runtime-bridge-contract.ts src/server/services/personal-ai-generation-local-browser-experience-service.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-paper-personal-route-container-contract-2026-07-06
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-paper-learning-session-handoff-contract.md docs/05-execution-logs/evidence/2026-07-06-ai-paper-learning-session-handoff-contract.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-learning-session-handoff-contract.md src/server/contracts/personal-ai-generation-learning-session-contract.ts src/server/models/personal-ai-generation-learning-session.ts src/server/services/personal-ai-generation-learning-session-service.ts src/server/services/personal-ai-generation-learning-session-service.test.ts src/server/services/personal-ai-generation-learning-session-route.ts src/server/services/personal-ai-generation-learning-session-route.test.ts src/server/validators/personal-ai-generation-learning-session.ts
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-paper-learning-session-handoff-contract-2026-07-06
   closeoutPolicy:
     localCommit:
       approved: true
@@ -86,18 +86,18 @@ currentTask:
       deleteShortBranch: false
       approvalSource: fresh_approval_required
   validationSummary:
-    status: pass_personal_employee_route_paper_container_contract_unit_gates
+    status: pass
     readGate: pass
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
-    tddRedObserved: pass_missing_personal_employee_paper_assembly_contract
-    unit: pass_2_files_40_tests
-    focusedUnit: pass_7_files_61_tests
+    tddRedObserved: pass
+    unit: pass
+    focusedUnit: pass
     gitDiffCheck: pass
     typecheck: pass
     lint: pass
-    scopedPrettierCheck: pass_after_scoped_source_format_write
+    scopedPrettierCheck: pass
     moduleRunV2PreCommitHardening: pass
     sourceChanged: true
     testChanged: true
@@ -113,6 +113,14 @@ currentTask:
     productionUsability: not_claimed
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
+previousCurrentTaskBeforeAiPaperLearningSessionHandoffContract20260706:
+  id: ai-paper-personal-route-container-contract-2026-07-06
+  status: closed
+  result: pass_personal_employee_route_paper_container_contract_unit_gates
+  branch: codex/ai-paper-personal-route-container-contract-2026-07-06
+  commit: acd5f927c
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-paper-personal-route-container-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-paper-personal-route-container-contract.md
 previousCurrentTaskBeforeAiPaperPersonalRouteContainerContract20260706:
   id: ai-paper-admin-route-repository-wiring-2026-07-06
   status: closed

@@ -1,15 +1,28 @@
 import { describe, expect, it } from "vitest";
 
+import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type {
   AiGenerationRouteIntegratedStructuredPreview,
   AiGenerationRouteIntegratedVisibleGeneratedContent,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type {
+  PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+  PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerFeedbackDto,
   PersonalAiGenerationLearningSessionDto,
   PersonalAiGenerationLearningSessionRepository,
+  PersonalAiGenerationLearningSessionService,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import { createPersonalAiGenerationLearningSessionService } from "./personal-ai-generation-learning-session-service";
+
+type PaperAssemblyLearningSessionService =
+  PersonalAiGenerationLearningSessionService & {
+    createLearningSessionFromPaperAssembly(
+      input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+    ): ReturnType<
+      PersonalAiGenerationLearningSessionService["createLearningSession"]
+    >;
+  };
 
 function createInMemoryRepository(): PersonalAiGenerationLearningSessionRepository {
   const sessions = new Map<string, PersonalAiGenerationLearningSessionDto>();
@@ -119,7 +132,276 @@ function createVisibleGeneratedContent(
   };
 }
 
+function createPaperAssemblyContainer(): AiPaperPlanAndSelectContainerDto {
+  return {
+    title: "synthetic assembled paper",
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    requestedQuestionCount: 3,
+    selectedQuestionCount: 3,
+    sourceComposition: {
+      platformFormalQuestionCount: 2,
+      enterpriseTrainingSnapshotCount: 1,
+    },
+    matchQuality: "fully_matched",
+    sections: [
+      {
+        sectionKey: "single-choice",
+        title: "single choice section",
+        questionType: "single_choice",
+        targetQuestionCount: 2,
+        selectedQuestionCount: 2,
+        selectedQuestions: [
+          {
+            questionPublicId: "platform_formal_question_public_001",
+            sourceKind: "platform_formal_question",
+            matchTier: "exact",
+            score: 2,
+          },
+          {
+            questionPublicId: "enterprise_training_snapshot_public_001",
+            sourceKind: "enterprise_training_snapshot",
+            matchTier: "exact",
+            score: 2,
+          },
+        ],
+        degradationSummary: {
+          exactCount: 2,
+          nearbyKnowledgeCount: 0,
+          sameScopeCount: 0,
+        },
+      },
+      {
+        sectionKey: "true-false",
+        title: "true false section",
+        questionType: "true_false",
+        targetQuestionCount: 1,
+        selectedQuestionCount: 1,
+        selectedQuestions: [
+          {
+            questionPublicId: "platform_formal_question_public_002",
+            sourceKind: "platform_formal_question",
+            matchTier: "exact",
+            score: 1,
+          },
+        ],
+        degradationSummary: {
+          exactCount: 1,
+          nearbyKnowledgeCount: 0,
+          sameScopeCount: 0,
+        },
+      },
+    ],
+  };
+}
+
+function createPaperAssemblySourceQuestions(): PersonalAiGenerationLearningPaperSourceQuestionDto[] {
+  return [
+    {
+      questionPublicId: "platform_formal_question_public_001",
+      sourceKind: "platform_formal_question",
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["knowledge_node_a"],
+      questionStem: "synthetic platform source stem one",
+      questionOptions: [
+        {
+          optionLabel: "A",
+          optionText: "synthetic platform source option a",
+          isCorrect: true,
+        },
+        {
+          optionLabel: "B",
+          optionText: "synthetic platform source option b",
+          isCorrect: false,
+        },
+      ],
+      standardAnswerLabels: ["A"],
+      standardAnswerText: "A",
+      analysis: "synthetic platform source analysis one",
+    },
+    {
+      questionPublicId: "enterprise_training_snapshot_public_001",
+      sourceKind: "enterprise_training_snapshot",
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["knowledge_node_b"],
+      questionStem: "synthetic enterprise source stem one",
+      questionOptions: [
+        {
+          optionLabel: "A",
+          optionText: "synthetic enterprise source option a",
+          isCorrect: false,
+        },
+        {
+          optionLabel: "B",
+          optionText: "synthetic enterprise source option b",
+          isCorrect: true,
+        },
+      ],
+      standardAnswerLabels: ["B"],
+      standardAnswerText: "B",
+      analysis: "synthetic enterprise source analysis one",
+    },
+    {
+      questionPublicId: "platform_formal_question_public_002",
+      sourceKind: "platform_formal_question",
+      questionType: "true_false",
+      difficulty: "easy",
+      knowledgeNodeLabels: ["knowledge_node_c"],
+      questionStem: "synthetic platform source stem two",
+      questionOptions: [
+        {
+          optionLabel: "A",
+          optionText: "synthetic true option",
+          isCorrect: false,
+        },
+        {
+          optionLabel: "B",
+          optionText: "synthetic false option",
+          isCorrect: true,
+        },
+      ],
+      standardAnswerLabels: ["B"],
+      standardAnswerText: "B",
+      analysis: "synthetic platform source analysis two",
+    },
+  ];
+}
+
 describe("personal AI generation learning session service", () => {
+  it("creates answerable learner sessions from locally selected paper assemblies and formal source question content", async () => {
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository: createInMemoryRepository(),
+    }) as PaperAssemblyLearningSessionService;
+
+    expect(service.createLearningSessionFromPaperAssembly).toEqual(
+      expect.any(Function),
+    );
+
+    const result = await service.createLearningSessionFromPaperAssembly({
+      sessionPublicId: "ai_paper_learning_session_public_001",
+      sourceResultPublicId: "ai_generation_result_public_paper_001",
+      sourceTaskPublicId: "ai_generation_task_public_paper_001",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_paper_001",
+      actorPublicId: "employee_public_paper_001",
+      evidenceStatus: "sufficient",
+      citationCount: 3,
+      paperAssemblyContainer: createPaperAssemblyContainer(),
+      sourceQuestions: createPaperAssemblySourceQuestions(),
+      createdAt: new Date("2026-07-06T12:00:00.000Z"),
+    });
+
+    expect(result).toMatchObject({
+      status: "created",
+      blockReason: null,
+      session: {
+        sessionPublicId: "ai_paper_learning_session_public_001",
+        sourceResultPublicId: "ai_generation_result_public_paper_001",
+        sourceTaskPublicId: "ai_generation_task_public_paper_001",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_paper_001",
+        actorPublicId: "employee_public_paper_001",
+        evidenceStatus: "sufficient",
+        citationCount: 3,
+        questionCount: 3,
+        formalWriteBoundary: {
+          questionWriteStatus: "blocked",
+          paperWriteStatus: "blocked",
+          practiceWriteStatus: "blocked",
+          answerRecordWriteStatus: "blocked",
+          examReportWriteStatus: "blocked",
+          mistakeBookWriteStatus: "blocked",
+        },
+      },
+    });
+    expect(result.session?.questions).toEqual([
+      expect.objectContaining({
+        sessionQuestionPublicId: "ai_paper_learning_session_public_001_q_1",
+        sourceDraftNumber: 1,
+        questionType: "single_choice",
+        questionStem: "synthetic platform source stem one",
+        standardAnswerLabels: ["A"],
+        maxScore: "2.0",
+      }),
+      expect.objectContaining({
+        sessionQuestionPublicId: "ai_paper_learning_session_public_001_q_2",
+        sourceDraftNumber: 2,
+        questionType: "single_choice",
+        questionStem: "synthetic enterprise source stem one",
+        standardAnswerLabels: ["B"],
+        maxScore: "2.0",
+      }),
+      expect.objectContaining({
+        sessionQuestionPublicId: "ai_paper_learning_session_public_001_q_3",
+        sourceDraftNumber: 3,
+        questionType: "true_false",
+        questionStem: "synthetic platform source stem two",
+        standardAnswerLabels: ["B"],
+        maxScore: "1.0",
+      }),
+    ]);
+
+    const answerResult = await service.submitLearningSessionAnswer({
+      sessionPublicId: "ai_paper_learning_session_public_001",
+      sessionQuestionPublicId: "ai_paper_learning_session_public_001_q_1",
+      actorPublicId: "employee_public_paper_001",
+      selectedOptionLabels: ["A"],
+      textAnswer: null,
+      submittedAt: new Date("2026-07-06T12:01:00.000Z"),
+    });
+
+    expect(answerResult).toMatchObject({
+      status: "scored",
+      isCorrect: true,
+      score: "2.0",
+      mistakeBookPublicId: null,
+      formalWriteBoundary: {
+        answerRecordWriteStatus: "blocked",
+        mistakeBookWriteStatus: "blocked",
+      },
+    });
+  });
+
+  it("blocks paper assembly handoff when selected formal source content is missing", async () => {
+    const repository = createInMemoryRepository();
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    }) as PaperAssemblyLearningSessionService;
+
+    expect(service.createLearningSessionFromPaperAssembly).toEqual(
+      expect.any(Function),
+    );
+
+    const result = await service.createLearningSessionFromPaperAssembly({
+      sessionPublicId: "ai_paper_learning_session_public_missing_source_001",
+      sourceResultPublicId:
+        "ai_generation_result_public_paper_missing_source_001",
+      sourceTaskPublicId: "ai_generation_task_public_paper_missing_source_001",
+      ownerType: "personal",
+      ownerPublicId: "student_public_paper_missing_source_001",
+      actorPublicId: "student_public_paper_missing_source_001",
+      evidenceStatus: "sufficient",
+      citationCount: 3,
+      paperAssemblyContainer: createPaperAssemblyContainer(),
+      sourceQuestions: createPaperAssemblySourceQuestions().slice(0, 2),
+      createdAt: new Date("2026-07-06T12:00:00.000Z"),
+    });
+
+    expect(result).toEqual({
+      status: "blocked",
+      blockReason: "selected_question_source_missing",
+      session: null,
+    });
+    await expect(
+      repository.findSessionByPublicId(
+        "ai_paper_learning_session_public_missing_source_001",
+      ),
+    ).resolves.toBeNull();
+  });
+
   it("creates an isolated learning session from sufficiently grounded parsed question drafts without formal writes", async () => {
     const repository = createInMemoryRepository();
     const service = createPersonalAiGenerationLearningSessionService({

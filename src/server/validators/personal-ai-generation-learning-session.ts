@@ -4,6 +4,7 @@ import type {
   AiGenerationRouteIntegratedStructuredPreview,
 } from "../contracts/route-integrated-provider-execution-contract";
 import type {
+  PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningFormalWriteBoundaryDto,
   PersonalAiGenerationLearningSessionQuestionDto,
   PersonalAiGenerationLearningSessionQuestionOptionDto,
@@ -111,8 +112,67 @@ export function createPersonalAiLearningSessionQuestion(input: {
   };
 }
 
+export function createPersonalAiLearningSessionQuestionFromPaperSource(input: {
+  sessionPublicId: string;
+  usableQuestionIndex: number;
+  sourceQuestion: PersonalAiGenerationLearningPaperSourceQuestionDto;
+  selectedScore: number;
+}): PersonalAiGenerationLearningSessionQuestionDto | null {
+  const questionType = normalizePersonalAiLearningQuestionType(
+    input.sourceQuestion.questionType,
+  );
+  const questionStem = normalizeNullableText(input.sourceQuestion.questionStem);
+
+  if (questionType === null || questionStem === null) {
+    return null;
+  }
+
+  const questionOptions = normalizeLearningQuestionOptions(
+    input.sourceQuestion.questionOptions,
+  );
+  const standardAnswerText = normalizeNullableText(
+    input.sourceQuestion.standardAnswerText,
+  );
+  const normalizedStandardAnswerLabels = normalizePersonalAiLearningLabels(
+    input.sourceQuestion.standardAnswerLabels,
+  );
+
+  return {
+    sessionQuestionPublicId: `${input.sessionPublicId}_q_${input.usableQuestionIndex}`,
+    sourceDraftNumber: input.usableQuestionIndex,
+    questionType,
+    difficulty: normalizeNullableText(input.sourceQuestion.difficulty),
+    knowledgeNodeLabels: normalizeKnowledgeNodeLabels(
+      input.sourceQuestion.knowledgeNodeLabels,
+    ),
+    questionStem,
+    questionOptions,
+    standardAnswerLabels:
+      normalizedStandardAnswerLabels.length > 0
+        ? normalizedStandardAnswerLabels
+        : resolveStandardAnswerLabels({
+            questionOptions,
+            standardAnswerText,
+          }),
+    standardAnswerText,
+    analysis: normalizeNullableText(input.sourceQuestion.analysis),
+    maxScore: formatSelectedPaperScore(input.selectedScore),
+    reviewStatus: "draft_review_required",
+  };
+}
+
 function normalizeQuestionOptions(
   questionOptions: AiGenerationRouteIntegratedQuestionOptionDraft[],
+): PersonalAiGenerationLearningSessionQuestionOptionDto[] {
+  return normalizeLearningQuestionOptions(questionOptions);
+}
+
+function normalizeLearningQuestionOptions(
+  questionOptions: {
+    optionLabel: string | null | undefined;
+    optionText: string | null | undefined;
+    isCorrect?: boolean | null | undefined;
+  }[],
 ): PersonalAiGenerationLearningSessionQuestionOptionDto[] {
   return questionOptions
     .map((questionOption) => {
@@ -135,6 +195,10 @@ function normalizeQuestionOptions(
       ): questionOption is PersonalAiGenerationLearningSessionQuestionOptionDto =>
         questionOption !== null,
     );
+}
+
+function formatSelectedPaperScore(score: number): string {
+  return Number.isFinite(score) ? score.toFixed(1) : "0.0";
 }
 
 function resolveStandardAnswerLabels(input: {

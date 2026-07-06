@@ -1,5 +1,9 @@
 import type { EvidenceStatus } from "../models/ai-rag";
 import type {
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperQuestionSourceKind,
+} from "./ai-paper-plan-and-select-contract";
+import type {
   PersonalAiGenerationLearningAnswerBlockReason,
   PersonalAiGenerationLearningAnswerFeedbackStatus,
   PersonalAiGenerationLearningContentDomain,
@@ -13,6 +17,11 @@ import type {
   PersonalAiGenerationLearningSessionQuestionType,
 } from "../models/personal-ai-generation-learning-session";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "./route-integrated-provider-execution-contract";
+
+export type PersonalAiGenerationLearningPaperQuestionSourceKind = Exclude<
+  AiPaperQuestionSourceKind,
+  "ai_generated_draft"
+>;
 
 export type PersonalAiGenerationLearningFormalWriteBoundaryDto = {
   questionWriteStatus: PersonalAiGenerationLearningFormalWriteStatus;
@@ -44,6 +53,19 @@ export type PersonalAiGenerationLearningSessionQuestionDto = {
   reviewStatus: "draft_review_required";
 };
 
+export type PersonalAiGenerationLearningPaperSourceQuestionDto = {
+  questionPublicId: string;
+  sourceKind: PersonalAiGenerationLearningPaperQuestionSourceKind;
+  questionType: PersonalAiGenerationLearningSessionQuestionType;
+  difficulty: string | null;
+  knowledgeNodeLabels: string[];
+  questionStem: string;
+  questionOptions: PersonalAiGenerationLearningSessionQuestionOptionDto[];
+  standardAnswerLabels: string[];
+  standardAnswerText: string | null;
+  analysis: string | null;
+};
+
 export type PersonalAiGenerationLearningSessionDto = {
   sessionPublicId: string;
   contentDomain: PersonalAiGenerationLearningContentDomain;
@@ -68,6 +90,20 @@ export type PersonalAiGenerationLearningSessionCreationInputDto = {
   ownerPublicId: string;
   actorPublicId: string;
   visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent;
+  createdAt: Date;
+};
+
+export type PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto = {
+  sessionPublicId: string;
+  sourceResultPublicId: string | null;
+  sourceTaskPublicId: string;
+  ownerType: PersonalAiGenerationLearningSessionOwnerType;
+  ownerPublicId: string;
+  actorPublicId: string;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  paperAssemblyContainer: AiPaperPlanAndSelectContainerDto;
+  sourceQuestions: PersonalAiGenerationLearningPaperSourceQuestionDto[];
   createdAt: Date;
 };
 
@@ -215,6 +251,9 @@ export type PersonalAiGenerationLearningSessionRepository = {
 export type PersonalAiGenerationLearningSessionService = {
   createLearningSession(
     input: PersonalAiGenerationLearningSessionCreationInputDto,
+  ): Promise<PersonalAiGenerationLearningSessionCreationResultDto>;
+  createLearningSessionFromPaperAssembly(
+    input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
   ): Promise<PersonalAiGenerationLearningSessionCreationResultDto>;
   submitLearningSessionAnswer(
     input: PersonalAiGenerationLearningSessionAnswerInputDto,

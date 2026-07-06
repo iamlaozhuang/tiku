@@ -1,4 +1,6 @@
 import type {
+  PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+  PersonalAiGenerationLearningPaperSourceQuestionDto,
   PersonalAiGenerationLearningSessionAnswerFeedbackDto,
   PersonalAiGenerationLearningSessionAnswerInputDto,
   PersonalAiGenerationLearningSessionCreationInputDto,
@@ -14,6 +16,7 @@ import {
   collectPersonalAiLearningQuestionDrafts,
   createBlockedPersonalAiLearningFormalWriteBoundary,
   createPersonalAiLearningSessionQuestion,
+  createPersonalAiLearningSessionQuestionFromPaperSource,
   normalizePersonalAiLearningLabels,
 } from "../validators/personal-ai-generation-learning-session";
 
@@ -23,6 +26,8 @@ export function createPersonalAiGenerationLearningSessionService(input: {
   return {
     createLearningSession: (creationInput) =>
       createLearningSession(input.repository, creationInput),
+    createLearningSessionFromPaperAssembly: (creationInput) =>
+      createLearningSessionFromPaperAssembly(input.repository, creationInput),
     submitLearningSessionAnswer: (answerInput) =>
       submitLearningSessionAnswer(input.repository, answerInput),
     getLearningSessionProgress: (progressInput) =>
@@ -106,6 +111,104 @@ async function createLearningSession(
     blockReason: null,
     session,
   };
+}
+
+async function createLearningSessionFromPaperAssembly(
+  repository: PersonalAiGenerationLearningSessionRepository,
+  input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+): Promise<PersonalAiGenerationLearningSessionCreationResultDto> {
+  if (input.evidenceStatus !== "sufficient") {
+    return blockCreation("insufficient_grounding_evidence");
+  }
+
+  if (input.sourceResultPublicId === null) {
+    return blockCreation("source_result_required");
+  }
+
+  const questions = createPaperAssemblySessionQuestions(input);
+
+  if (questions === null) {
+    return blockCreation("selected_question_source_missing");
+  }
+
+  if (questions.length === 0) {
+    return blockCreation("no_usable_selected_questions");
+  }
+
+  const session: PersonalAiGenerationLearningSessionDto = {
+    sessionPublicId: input.sessionPublicId,
+    contentDomain: "personal_ai_learning",
+    sourceResultPublicId: input.sourceResultPublicId,
+    sourceTaskPublicId: input.sourceTaskPublicId,
+    ownerType: input.ownerType,
+    ownerPublicId: input.ownerPublicId,
+    actorPublicId: input.actorPublicId,
+    evidenceStatus: input.evidenceStatus,
+    citationCount: input.citationCount,
+    questionCount: questions.length,
+    questions,
+    formalWriteBoundary: createBlockedPersonalAiLearningFormalWriteBoundary(),
+    createdAt: input.createdAt.toISOString(),
+  };
+
+  const saveResult = await repository.saveSession(session);
+
+  if (saveResult.status === "blocked") {
+    return blockCreation(saveResult.blockReason);
+  }
+
+  return {
+    status: "created",
+    blockReason: null,
+    session,
+  };
+}
+
+function createPaperAssemblySessionQuestions(
+  input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
+): PersonalAiGenerationLearningSessionQuestionDto[] | null {
+  const sourceQuestionByKey = new Map(
+    input.sourceQuestions.map((sourceQuestion) => [
+      createPaperSourceQuestionKey(sourceQuestion),
+      sourceQuestion,
+    ]),
+  );
+  const questions: PersonalAiGenerationLearningSessionQuestionDto[] = [];
+
+  for (const selectedQuestion of input.paperAssemblyContainer.sections.flatMap(
+    (section) => section.selectedQuestions,
+  )) {
+    const sourceQuestion = sourceQuestionByKey.get(
+      createPaperSourceQuestionKey(selectedQuestion),
+    );
+
+    if (sourceQuestion === undefined) {
+      return null;
+    }
+
+    const sessionQuestion =
+      createPersonalAiLearningSessionQuestionFromPaperSource({
+        sessionPublicId: input.sessionPublicId,
+        usableQuestionIndex: questions.length + 1,
+        sourceQuestion,
+        selectedScore: selectedQuestion.score,
+      });
+
+    if (sessionQuestion === null) {
+      return null;
+    }
+
+    questions.push(sessionQuestion);
+  }
+
+  return questions;
+}
+
+function createPaperSourceQuestionKey(input: {
+  questionPublicId: string;
+  sourceKind: PersonalAiGenerationLearningPaperSourceQuestionDto["sourceKind"];
+}): string {
+  return `${input.sourceKind}:${input.questionPublicId}`;
 }
 
 async function submitLearningSessionAnswer(
