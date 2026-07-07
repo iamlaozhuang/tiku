@@ -434,6 +434,7 @@ export function AdminKnowledgeNodeManagement() {
       </header>
 
       <ContentOpsStagingRoleArrangement />
+      <KnowledgeNodeLifecycleContextBand knowledgeNodes={knowledgeNodes} />
 
       <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
@@ -547,6 +548,60 @@ export function AdminKnowledgeNodeManagement() {
       {toastMessage === null ? null : (
         <KnowledgeNodeToast message={toastMessage} />
       )}
+    </section>
+  );
+}
+
+function KnowledgeNodeLifecycleContextBand({
+  knowledgeNodes,
+}: {
+  knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
+}) {
+  const activeCount = knowledgeNodes.filter(
+    (knowledgeNode) => knowledgeNode.knStatus === "active",
+  ).length;
+  const disabledCount = knowledgeNodes.filter(
+    (knowledgeNode) => knowledgeNode.knStatus === "disabled",
+  ).length;
+  const recommendableCount = knowledgeNodes.filter(
+    (knowledgeNode) => knowledgeNode.isRecommendable,
+  ).length;
+  const linkedQuestionCount = knowledgeNodes.reduce(
+    (questionCount, knowledgeNode) =>
+      questionCount + knowledgeNode.questionCount,
+    0,
+  );
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-4 shadow-sm"
+      data-testid="knowledge-node-lifecycle-context-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            知识点生命周期
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            路径、推荐绑定与检索新鲜度
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            路径变更需复核题目绑定和推荐绑定；检索新鲜度由资料状态页承接，本页只展示业务标识。
+          </p>
+        </div>
+        <dl className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+          <KnowledgeLifecycleMetric label="可用" value={activeCount} />
+          <KnowledgeLifecycleMetric label="已停用" value={disabledCount} />
+          <KnowledgeLifecycleMetric
+            label="推荐绑定"
+            value={recommendableCount}
+          />
+          <KnowledgeLifecycleMetric
+            label="绑定题目"
+            value={linkedQuestionCount}
+          />
+        </dl>
+      </div>
     </section>
   );
 }
@@ -986,6 +1041,23 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
     <div className="border-border bg-surface rounded-md border px-4 py-3 shadow-sm">
       <p className="text-text-muted text-xs font-medium">{label}</p>
       <p className="text-text-primary mt-1 text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function KnowledgeLifecycleMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="bg-muted/40 border-border rounded-md border px-3 py-2">
+      <dt className="text-text-secondary">{label}</dt>
+      <dd className="text-text-primary mt-1 font-semibold">
+        {label} {value}
+      </dd>
     </div>
   );
 }

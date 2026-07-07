@@ -576,6 +576,16 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.getByRole("tab", { name: "材料" })).toHaveClass(
       "active:scale-[0.98]",
     );
+    const lifecycleBand = screen.getByTestId(
+      "question-material-lifecycle-context-band",
+    );
+
+    expect(lifecycleBand).toHaveTextContent("内容生命周期");
+    expect(lifecycleBand).toHaveTextContent("题库题目");
+    expect(lifecycleBand).toHaveTextContent("可编辑 1");
+    expect(lifecycleBand).toHaveTextContent("已停用 1");
+    expect(lifecycleBand).toHaveTextContent("锁定 1");
+    expect(lifecycleBand).toHaveTextContent("待审 AI 题目需先创建内容草稿");
     expect(screen.getByRole("button", { name: "新建题目" })).toBeEnabled();
     expect(
       screen.getByTestId("content-action-runtime-ready"),
@@ -843,6 +853,15 @@ describe("AdminQuestionMaterialManagement", () => {
       "aria-selected",
       "true",
     );
+    const lifecycleBand = screen.getByTestId(
+      "question-material-lifecycle-context-band",
+    );
+
+    expect(lifecycleBand).toHaveTextContent("材料库生命周期");
+    expect(lifecycleBand).toHaveTextContent("可编辑 1");
+    expect(lifecycleBand).toHaveTextContent("已停用 0");
+    expect(lifecycleBand).toHaveTextContent("锁定 1");
+    expect(lifecycleBand).toHaveTextContent("锁定材料只能复制新材料");
     expect(screen.getByRole("button", { name: "新建材料" })).toBeEnabled();
     expect(
       screen.getByTestId("content-action-runtime-ready"),

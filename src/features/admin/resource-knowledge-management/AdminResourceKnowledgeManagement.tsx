@@ -1174,6 +1174,7 @@ export function AdminResourceKnowledgeManagement() {
           onChange={setUploadState}
           onSubmit={handleUploadResource}
         />
+        <ResourceStateMachineContextBand resources={resources} />
         <AdminEmptyState
           description="当前还没有资料。可先上传 Markdown 或文本文件生成解析草稿。"
           title="暂无资料与知识库数据"
@@ -1191,6 +1192,7 @@ export function AdminResourceKnowledgeManagement() {
         onChange={setUploadState}
         onSubmit={handleUploadResource}
       />
+      <ResourceStateMachineContextBand resources={resources} />
 
       <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
@@ -1403,6 +1405,65 @@ export function AdminResourceKnowledgeManagement() {
       {toastMessage === null ? null : (
         <AdminResourceToast message={toastMessage} />
       )}
+    </section>
+  );
+}
+
+function ResourceStateMachineContextBand({
+  resources,
+}: {
+  resources: AdminResourceOpsSummaryDto[];
+}) {
+  const countByStatus = (status: ResourceStatus) =>
+    resources.filter((resource) => resource.resourceStatus === status).length;
+  const staleResourceCount = resources.filter(
+    (resource) => resource.isVectorStale,
+  ).length;
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-4 shadow-sm"
+      data-testid="resource-state-machine-context-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">资源状态机</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            上传、解析、发布与检索新鲜度
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            内容后台只展示资料生命周期摘要；检索新鲜度用于提示是否需要重建索引，不展示原文片段。
+          </p>
+        </div>
+        <dl className="grid gap-2 text-xs sm:grid-cols-2 xl:grid-cols-6">
+          <ResourceLifecycleMetric
+            label="上传待解析"
+            value={countByStatus("uploaded") + countByStatus("converting")}
+          />
+          <ResourceLifecycleMetric
+            label="解析草稿"
+            value={countByStatus("draft")}
+          />
+          <ResourceLifecycleMetric
+            label="已发布待索引"
+            value={countByStatus("published") + countByStatus("indexing")}
+          />
+          <ResourceLifecycleMetric
+            label="检索可用"
+            value={countByStatus("rag_ready")}
+          />
+          <ResourceLifecycleMetric
+            label="索引失败"
+            value={
+              countByStatus("index_failed") + countByStatus("conversion_failed")
+            }
+          />
+          <ResourceLifecycleMetric
+            label="检索新鲜度"
+            value={staleResourceCount}
+          />
+        </dl>
+      </div>
     </section>
   );
 }
@@ -1620,6 +1681,23 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
     <div className="border-border bg-surface rounded-md border px-4 py-3 shadow-sm">
       <p className="text-text-muted text-xs font-medium">{label}</p>
       <p className="text-text-primary mt-1 text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function ResourceLifecycleMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="bg-muted/40 border-border rounded-md border px-3 py-2">
+      <dt className="text-text-secondary">{label}</dt>
+      <dd className="text-text-primary mt-1 font-semibold">
+        {label} {value}
+      </dd>
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 const adminResourceKnowledgeSourcePath =
   "src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx";
+const adminKnowledgeNodeSourcePath =
+  "src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx";
 const contentResourcePagePath = "src/app/(admin)/content/resources/page.tsx";
 const opsResourcePagePath = "src/app/(admin)/ops/resources/page.tsx";
 const adminResourceModalShellClass =
@@ -33,5 +35,29 @@ describe("admin resource knowledge UI layout", () => {
     expect(contentPageSource).toContain("AdminResourceKnowledgeManagement");
     expect(opsPageSource).toContain('redirect("/content/resources")');
     expect(opsPageSource).not.toContain("<AdminResourceKnowledgeManagement");
+  });
+
+  it("keeps resource and knowledge node lifecycle context visible in source", () => {
+    const resourceSource = readSourceFile(adminResourceKnowledgeSourcePath);
+    const knowledgeNodeSource = readSourceFile(adminKnowledgeNodeSourcePath);
+
+    expect(resourceSource).toContain(
+      'data-testid="resource-state-machine-context-band"',
+    );
+    expect(resourceSource).toContain("资源状态机");
+    expect(resourceSource).toContain("上传待解析");
+    expect(resourceSource).toContain("解析草稿");
+    expect(resourceSource).toContain("已发布待索引");
+    expect(resourceSource).toContain("检索可用");
+    expect(resourceSource).toContain("索引失败");
+    expect(resourceSource).toContain("检索新鲜度");
+
+    expect(knowledgeNodeSource).toContain(
+      'data-testid="knowledge-node-lifecycle-context-band"',
+    );
+    expect(knowledgeNodeSource).toContain("知识点生命周期");
+    expect(knowledgeNodeSource).toContain("检索新鲜度");
+    expect(knowledgeNodeSource).toContain("推荐绑定");
+    expect(knowledgeNodeSource).toContain("路径变更需复核");
   });
 });

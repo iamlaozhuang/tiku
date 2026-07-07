@@ -373,6 +373,14 @@ describe("AdminPaperManagement", () => {
     expect(
       await screen.findByRole("heading", { name: "试卷管理" }),
     ).toBeInTheDocument();
+    const lifecycleBand = screen.getByTestId("paper-lifecycle-context-band");
+
+    expect(lifecycleBand).toHaveTextContent("内容生命周期");
+    expect(lifecycleBand).toHaveTextContent("草稿 1");
+    expect(lifecycleBand).toHaveTextContent("已发布 1");
+    expect(lifecycleBand).toHaveTextContent("已下架 0");
+    expect(lifecycleBand).toHaveTextContent("发布校验待处理 1");
+    expect(lifecycleBand).toHaveTextContent("AI 草稿采用需先进入待审试卷草稿");
     expect(screen.getByRole("button", { name: "新建草稿" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: "组卷" })).toBeNull();
     expect(screen.queryByRole("button", { name: "发布" })).toBeNull();

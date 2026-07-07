@@ -1125,6 +1125,11 @@ export function AdminQuestionMaterialManagement({
       </header>
 
       <ContentOpsStagingRoleArrangement />
+      <QuestionMaterialLifecycleContextBand
+        activeView={activeView}
+        materials={materials}
+        questions={questions}
+      />
 
       <FilterPanel
         activeView={activeView}
@@ -1301,6 +1306,48 @@ export function AdminQuestionMaterialManagement({
   );
 }
 
+function QuestionMaterialLifecycleContextBand({
+  activeView,
+  materials,
+  questions,
+}: {
+  activeView: ViewMode;
+  materials: MaterialDto[];
+  questions: QuestionDto[];
+}) {
+  const rows = activeView === "questions" ? questions : materials;
+  const editableCount = rows.filter(
+    (row) => row.status === "available" && !row.isLocked,
+  ).length;
+  const disabledCount = rows.filter((row) => row.status === "disabled").length;
+  const lockedCount = rows.filter((row) => row.isLocked).length;
+  const title = activeView === "questions" ? "题库题目" : "材料库生命周期";
+  const description =
+    activeView === "questions"
+      ? "待审 AI 题目需先创建内容草稿，不直接写入正式题库；锁定后复制新题再编辑。"
+      : "材料复用与锁定先审查；锁定材料只能复制新材料，不能直接覆盖已发布试卷引用。";
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-4 shadow-sm"
+      data-testid="question-material-lifecycle-context-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">内容生命周期</p>
+          <h2 className="text-text-primary text-base font-semibold">{title}</h2>
+          <p className="text-text-secondary text-sm leading-6">{description}</p>
+        </div>
+        <dl className="grid gap-2 text-xs sm:grid-cols-3">
+          <LifecycleMetric label="可编辑" value={editableCount} />
+          <LifecycleMetric label="已停用" value={disabledCount} />
+          <LifecycleMetric label="锁定" value={lockedCount} />
+        </dl>
+      </div>
+    </section>
+  );
+}
+
 function sortItemsByUpdatedAt<TItem extends { updatedAt: string }>(
   items: TItem[],
   sortOrder: AdminCommonSortOrder,
@@ -1348,6 +1395,17 @@ function AdminCommonListControls({
         ，筛选变更会自动刷新当前结果。
       </p>
     </section>
+  );
+}
+
+function LifecycleMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-muted/40 border-border rounded-md border px-3 py-2">
+      <dt className="text-text-secondary">{label}</dt>
+      <dd className="text-text-primary mt-1 font-semibold">
+        {label} {value}
+      </dd>
+    </div>
   );
 }
 

@@ -845,6 +845,7 @@ export function AdminPaperManagement() {
       </header>
 
       <ContentOpsStagingRoleArrangement />
+      <PaperLifecycleContextBand papers={papers} />
 
       <FilterPanel
         keyword={keyword}
@@ -971,6 +972,57 @@ export function AdminPaperManagement() {
           onConfirm={() => void handleConfirmPendingPaperAction()}
         />
       )}
+    </section>
+  );
+}
+
+function PaperLifecycleContextBand({
+  papers,
+}: {
+  papers: AdminPaperOpsSummaryDto[];
+}) {
+  const draftCount = papers.filter(
+    (paper) => paper.paperStatus === "draft",
+  ).length;
+  const publishedCount = papers.filter(
+    (paper) => paper.paperStatus === "published",
+  ).length;
+  const archivedCount = papers.filter(
+    (paper) => paper.paperStatus === "archived",
+  ).length;
+  const publishValidationPendingCount = papers.filter(
+    (paper) =>
+      paper.paperStatus === "draft" &&
+      (paper.publishValidationSummary === null ||
+        paper.publishValidationSummary !== "发布校验已通过"),
+  ).length;
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-4 shadow-sm"
+      data-testid="paper-lifecycle-context-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">内容生命周期</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            正式试卷草稿与发布校验
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            AI
+            草稿采用需先进入待审试卷草稿；本页只处理正式试卷草稿、发布校验、下架和复制闭环。
+          </p>
+        </div>
+        <dl className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+          <LifecycleMetric label="草稿" value={draftCount} />
+          <LifecycleMetric label="已发布" value={publishedCount} />
+          <LifecycleMetric label="已下架" value={archivedCount} />
+          <LifecycleMetric
+            label="发布校验待处理"
+            value={publishValidationPendingCount}
+          />
+        </dl>
+      </div>
     </section>
   );
 }
@@ -1596,6 +1648,17 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
     <div className="border-border bg-surface rounded-md border px-4 py-3 shadow-sm">
       <p className="text-text-muted text-xs font-medium">{label}</p>
       <p className="text-text-primary mt-1 text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function LifecycleMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-muted/40 border-border rounded-md border px-3 py-2">
+      <dt className="text-text-secondary">{label}</dt>
+      <dd className="text-text-primary mt-1 font-semibold">
+        {label} {value}
+      </dd>
     </div>
   );
 }

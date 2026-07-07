@@ -758,6 +758,14 @@ describe("admin AI generation entry surfaces", () => {
     expect(screen.getByLabelText("题目数量")).toHaveDisplayValue("30");
     expect(screen.getByLabelText("题目数量")).toHaveAttribute("max", "80");
     expect(screen.getByLabelText("知识点覆盖")).toHaveDisplayValue("均衡覆盖");
+    const adoptionBand = screen.getByTestId(
+      "content-ai-adoption-lifecycle-band",
+    );
+
+    expect(adoptionBand).toHaveTextContent(
+      "计划生成 -> 本地选题 -> 待审试卷草稿 -> 人工审阅",
+    );
+    expect(adoptionBand).toHaveTextContent("不直接发布正式试卷");
     expect(detailControls).toHaveTextContent("平台正式题库");
     expect(detailControls).not.toHaveTextContent("本企业已发布训练题");
     expect(detailControls).not.toHaveTextContent("优先使用企业题");
@@ -766,7 +774,7 @@ describe("admin AI generation entry surfaces", () => {
       "生成待审试卷草稿",
     );
     expect(document.body).toHaveTextContent(
-      "待审试卷草稿仍需编辑、驳回、审核和发布正式试卷",
+      "待审试卷草稿仍需编辑、驳回、审核和发布校验",
     );
     expect(document.body).not.toHaveTextContent("内容 AI组卷");
     expect(document.body).not.toHaveTextContent("Provider");

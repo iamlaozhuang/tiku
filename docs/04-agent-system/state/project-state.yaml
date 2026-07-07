@@ -1,8 +1,35 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-admin-training-ai-cleanup-2026-07-07
-updatedAt: "2026-07-07T11:40:00-07:00"
+currentPhase: content-lifecycle-ai-adoption-2026-07-07
+updatedAt: "2026-07-07T12:01:24-07:00"
+latestContentLifecycleAiAdoption:
+  id: content-lifecycle-ai-adoption-2026-07-07
+  status: in_progress
+  result: branch_local_validation_and_module_run_v2_checks_passed
+  branch: codex/content-lifecycle-ai-adoption-2026-07-07
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-content-lifecycle-ai-adoption.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-content-lifecycle-ai-adoption-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-content-lifecycle-ai-adoption-adversarial-audit.md
+  conclusionBuckets:
+    branchSpecificReadGate: pass
+    lifecycleContextBand: pass
+    contentAiReviewAdoption: pass
+    resourceStateMachine: pass
+    knowledgeNodeFreshness: pass
+    sourceCodeChanged: true
+    testsChanged: true
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
+    preCommitHardening: pass
+    prePushReadiness: pass
+    currentTaskPointerCorrectedForCommitHook: true
 latestOrganizationAdminTrainingAiCleanup:
   id: organization-admin-training-ai-cleanup-2026-07-07
   status: closed
@@ -448,43 +475,40 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: organization-admin-training-ai-cleanup-2026-07-07
-  title: Organization admin training and AI cleanup
-  phase: organization-admin-training-ai-cleanup-2026-07-07
-  status: closed
-  result: pass_branch4_merged_master_gates_ready_for_push_cleanup
+  id: content-lifecycle-ai-adoption-2026-07-07
+  title: Content lifecycle and AI adoption
+  phase: content-lifecycle-ai-adoption-2026-07-07
+  status: in_progress
+  result: branch_local_validation_and_module_run_v2_checks_passed
   priority: p1
   taskKind: implementation
-  branch: codex/organization-admin-training-ai-cleanup-2026-07-07
+  branch: codex/content-lifecycle-ai-adoption-2026-07-07
   humanApprovalBoundary: current_user_approved_full_role_uiux_7_branch_control_matrix_and_branches_2_to_8_serial_closeout_2026_07_07
-  plannedAt: "2026-07-07T11:20:00-07:00"
-  claimedAt: "2026-07-07T11:20:00-07:00"
-  completedAt: "2026-07-07T11:35:00-07:00"
-  targetClosureItem: Branch 4 - clean organization admin training, analytics, and AI UI while preserving org standard/advanced boundaries.
+  plannedAt: "2026-07-07T11:46:13-07:00"
+  claimedAt: "2026-07-07T11:46:13-07:00"
+  targetClosureItem: Branch 5 - align content lifecycle, resource state, and content AI adoption surfaces.
   behaviorBoundary: low_risk_local_ui_source_test_docs_evidence_audit_only_no_db_no_provider_no_env_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_screenshot_trace_raw_dom_no_e2e_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
   evidenceMode: redacted_command_status_file_labels_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_screenshot_pixels_or_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-organization-admin-training-ai-cleanup.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-organization-admin-training-ai-cleanup-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-organization-admin-training-ai-cleanup-adversarial-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-content-lifecycle-ai-adoption.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-content-lifecycle-ai-adoption-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-content-lifecycle-ai-adoption-adversarial-audit.md
   validationSummary:
-    status: pass_branch4_merged_master_gates_ready_for_push_cleanup
+    status: in_progress_branch_local_validation_and_module_run_v2_checks_passed
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
     branchSpecificReadGate: pass
-    redFocusedTests: expected_fail_4_files_9_tests
-    focusedTests: pass_4_files_57_tests
+    redFocusedTests: fail_expected_4_files_5_failed_70_passed
+    focusedTests: pass_4_files_75_tests
     eslint: pass
     typecheck: pass
     prettierCheck: pass
-    fullUnit: pass_342_files_1723_tests
+    fullUnit: pass_342_files_1724_tests
+    fullUnitInitialTimeout: timeout_184s_no_failure_output_then_passed_on_rerun
     diffCheck: pass
     preCommitHardening: pass
-    prePushReadiness: pass_skip_remote_ahead_check
-    mergedToMaster: true
-    masterPostMergeLint: pass
-    masterPostMergeTypecheck: pass
-    masterPostMergeFullUnit: pass_342_files_1723_tests
+    prePushReadiness: pass
+    currentTaskPointerCorrectedForCommitHook: true
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
@@ -30679,8 +30703,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b62d64a752768559a78781d98720f79531ed8bd1
-  lastKnownOriginMasterSha: b62d64a752768559a78781d98720f79531ed8bd1
+  lastKnownMasterSha: a7f0691e05f5b785b86d576285f889a2249c64f4
+  lastKnownOriginMasterSha: a7f0691e05f5b785b86d576285f889a2249c64f4
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

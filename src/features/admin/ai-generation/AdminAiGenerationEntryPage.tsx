@@ -932,9 +932,9 @@ function AdminAiGenerationDetailControls({
         {isOrganizationQuestion
           ? "这些题目还未发布，员工暂时看不到。"
           : workspace === "content" && generationKind === "paper"
-            ? "待审试卷草稿仍需编辑、驳回、审核和发布正式试卷；系统只从平台正式题库选题。"
+            ? "待审试卷草稿仍需编辑、驳回、审核和发布校验；系统只从平台正式题库选题。"
             : workspace === "content" && generationKind === "question"
-              ? "待审题目草稿仍需编辑、驳回、审核和发布正式题目。"
+              ? "待审题目草稿仍需编辑、驳回、审核和发布校验。"
               : `当前准备生成条件和${draftBoundaryLabel}入口；只生成待评审草稿，不触发正式题库写入。`}
       </p>
     </section>
@@ -1054,7 +1054,7 @@ function AdminPaperAssemblyContainer({
   const nextActionLabels =
     workspace === "organization"
       ? ["编辑试卷", "调整题目", "预览员工视角", "保存草稿", "发布训练"]
-      : ["编辑", "驳回", "审核", "发布正式试卷"];
+      : ["编辑草稿", "驳回草稿", "审核通过", "进入发布校验"];
 
   return (
     <div
@@ -1984,8 +1984,8 @@ function ContentAdminReviewTraceabilityPanel({
           : `创建${draftTargetLabel}`;
   const nextActionLabels =
     generationKind === "paper"
-      ? ["编辑", "驳回", "审核", "发布正式试卷"]
-      : ["编辑", "驳回", "审核", "发布正式题目"];
+      ? ["编辑草稿", "驳回草稿", "审核通过", "进入发布校验"]
+      : ["编辑草稿", "驳回草稿", "审核通过", "进入发布校验"];
 
   return (
     <section
@@ -2135,6 +2135,65 @@ function ContentAdminReviewTraceabilityPanel({
         </p>
       )}
     </section>
+  );
+}
+
+function ContentAiAdoptionLifecycleBand({
+  generationKind,
+}: {
+  generationKind: AdminAiGenerationKind;
+}) {
+  const isPaperGeneration = generationKind === "paper";
+  const flowLabel = isPaperGeneration
+    ? "计划生成 -> 本地选题 -> 待审试卷草稿 -> 人工审阅"
+    : "生成草稿 -> 待审题目草稿 -> 人工审阅 -> 发布校验";
+  const publishBoundaryLabel = isPaperGeneration
+    ? "不直接发布正式试卷"
+    : "不直接发布正式题目";
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-4 shadow-sm"
+      data-testid="content-ai-adoption-lifecycle-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            内容 AI 采纳链路
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            {flowLabel}
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            {publishBoundaryLabel}
+            ；资料不足时不创建草稿，采用后仍需人工审核和发布校验。
+          </p>
+        </div>
+        <dl className="grid gap-2 text-xs sm:grid-cols-3">
+          <ContentAiLifecycleMetric label="来源" value="内容评审池" />
+          <ContentAiLifecycleMetric
+            label="题源"
+            value={isPaperGeneration ? "平台正式题库" : "待审题目草稿"}
+          />
+          <ContentAiLifecycleMetric label="闭环" value="编辑 / 驳回 / 审核" />
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+function ContentAiLifecycleMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="bg-muted/40 border-border rounded-md border px-3 py-2">
+      <dt className="text-text-secondary">{label}</dt>
+      <dd className="text-text-primary mt-1 font-semibold">{value}</dd>
+    </div>
   );
 }
 
@@ -2781,6 +2840,10 @@ export function AdminAiGenerationEntryPage({
             : "内容 AI 结果只进入内容评审闭环，发布前仍需审核和正式发布校验。"}
         </p>
       </section>
+
+      {workspace === "content" ? (
+        <ContentAiAdoptionLifecycleBand generationKind={generationKind} />
+      ) : null}
 
       <section
         className="grid gap-4 lg:grid-cols-[2fr_1fr]"
