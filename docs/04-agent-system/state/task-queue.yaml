@@ -641,7 +641,7 @@ activeTasks:
   - id: super-admin-organization-context-2026-07-07
     title: Super admin organization context handling
     phase: super-admin-organization-context-2026-07-07
-    status: pending
+    status: in_progress
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_super_admin_org_context
@@ -678,6 +678,29 @@ activeTasks:
       - playwright-report/**
       - test-results/**
     capabilities: *low_risk_capabilities
+    validationSummary:
+      status: pass_branch_validation_pending_merge
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      branchSpecificReadGate: pass
+      redFocusedTests: fail_expected_1_file_1_failed
+      focusedTests: pass_4_files_19_tests
+      eslint: pass
+      typecheck: pass
+      fullUnit: pass_343_files_1730_tests
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pending
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      browserRuntimeExecuted: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
   - id: full-role-uiux-consistency-closeout-2026-07-07
     title: Full role UIUX consistency closeout
     phase: full-role-uiux-consistency-closeout-2026-07-07

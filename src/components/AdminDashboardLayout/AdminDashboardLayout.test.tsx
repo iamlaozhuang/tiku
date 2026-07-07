@@ -147,6 +147,29 @@ describe("AdminDashboardLayout shared admin state templates", () => {
     expect(screen.getByText("ops page body")).toBeInTheDocument();
   });
 
+  it("does not present organization workspace as an ordinary switch target for super admin without organization context", async () => {
+    mockSessionResponse(
+      createAdminSessionResponse({
+        adminRoles: ["super_admin"],
+      }),
+    );
+
+    render(
+      <AdminDashboardLayout>
+        <div>ops page body</div>
+      </AdminDashboardLayout>,
+    );
+
+    expect(await screen.findByText("ops page body")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "切换到组织后台" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("需要选择组织上下文")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "返回运营后台处理组织与授权" }),
+    ).toHaveAttribute("href", "/ops/organizations");
+  });
+
   it("blocks standard organization admins from advanced organization routes before page content renders", async () => {
     mockedPathname = "/organization/ai-question-generation";
     mockSessionResponse(

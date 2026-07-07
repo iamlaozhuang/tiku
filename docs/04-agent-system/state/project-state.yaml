@@ -1,8 +1,31 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: operations-summary-first-workbench-2026-07-07
-updatedAt: "2026-07-07T12:39:37-07:00"
+currentPhase: super-admin-organization-context-2026-07-07
+updatedAt: "2026-07-07T12:45:40-07:00"
+latestSuperAdminOrganizationContext:
+  id: super-admin-organization-context-2026-07-07
+  status: in_progress
+  result: pass_branch_validation_pending_merge
+  branch: codex/super-admin-organization-context-2026-07-07
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-super-admin-organization-context.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-super-admin-organization-context-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-super-admin-organization-context-adversarial-audit.md
+  conclusionBuckets:
+    branchSpecificReadGate: pass
+    superAdminMissingOrganizationContext: pass
+    workspaceSwitcherContextGate: pass
+    organizationProxyAuthorityGranted: false
+    sourceCodeChanged: true
+    testsChanged: true
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestOperationsSummaryFirstWorkbench:
   id: operations-summary-first-workbench-2026-07-07
   status: closed
@@ -512,43 +535,43 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: operations-summary-first-workbench-2026-07-07
-  title: Operations summary-first workbench
-  phase: operations-summary-first-workbench-2026-07-07
-  status: closed
-  result: pass_branch6_merged_master_gates_ready_for_push_cleanup
+  id: super-admin-organization-context-2026-07-07
+  title: Super admin organization context handling
+  phase: super-admin-organization-context-2026-07-07
+  status: in_progress
+  result: pass_branch_validation_pending_merge
   priority: p1
   taskKind: implementation
-  branch: codex/operations-summary-first-workbench-2026-07-07
+  branch: codex/super-admin-organization-context-2026-07-07
   humanApprovalBoundary: current_user_approved_full_role_uiux_7_branch_control_matrix_and_branches_2_to_8_serial_closeout_2026_07_07
-  plannedAt: "2026-07-07T12:17:40-07:00"
-  claimedAt: "2026-07-07T12:17:40-07:00"
-  targetClosureItem: Branch 6 - restructure operations pages toward summary-first scanability while preserving card plaintext product UI exception.
+  plannedAt: "2026-07-07T12:45:40-07:00"
+  claimedAt: "2026-07-07T12:45:40-07:00"
+  targetClosureItem: Branch 7 - resolve super_admin organization context entry and missing-context copy without granting implicit organization proxy authority.
   behaviorBoundary: low_risk_local_ui_source_test_docs_evidence_audit_only_no_db_no_provider_no_env_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_screenshot_trace_raw_dom_no_e2e_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
   evidenceMode: redacted_command_status_file_labels_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_screenshot_pixels_or_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-operations-summary-first-workbench.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-operations-summary-first-workbench-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-operations-summary-first-workbench-adversarial-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-super-admin-organization-context.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-super-admin-organization-context-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-super-admin-organization-context-adversarial-audit.md
   validationSummary:
-    status: pass_branch6_merged_master_gates_ready_for_push_cleanup
+    status: pass_branch_validation_pending_merge
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
     branchSpecificReadGate: pass
-    redFocusedTests: fail_expected_1_file_5_failed
-    focusedTests: pass_8_files_52_tests
+    redFocusedTests: fail_expected_1_file_1_failed
+    focusedTests: pass_4_files_19_tests
     eslint: pass
     typecheck: pass
     prettierCheck: pass
-    fullUnit: pass_343_files_1729_tests
+    fullUnit: pass_343_files_1730_tests
     diffCheck: pass
     preCommitHardening: pass
-    prePushReadiness: pass
-    mergedToMaster: true
-    featureCommitSha: 353b4bdcff88139f997d7b8b69dd18b307dd9321
-    masterPostMergeLint: pass
-    masterPostMergeTypecheck: pass
-    masterPostMergeFullUnit: pass_343_files_1729_tests
+    prePushReadiness: pending
+    mergedToMaster: false
+    featureCommitSha: pending
+    masterPostMergeLint: pending
+    masterPostMergeTypecheck: pending
+    masterPostMergeFullUnit: pending
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false

@@ -53,6 +53,9 @@ interface WorkspaceSwitchItem {
   label: string;
   workspace: AdminWorkspace;
   Icon: LucideIcon;
+  fallbackHref?: string;
+  fallbackLabel?: string;
+  requiresOrganizationContext?: boolean;
 }
 
 const CONTENT_MENU: MenuItem[] = [
@@ -119,6 +122,7 @@ type AdminDashboardAuthState = {
   pathname: string | null;
   adminRoles: readonly string[];
   canUseOrganizationAdvancedWorkspace: boolean;
+  hasOrganizationWorkspaceContext: boolean;
   accessDecision: AdminWorkspaceRouteAccessDecision | null;
 };
 type WorkspaceReturnAction = {
@@ -231,6 +235,7 @@ function getWorkspaceCapabilityLabel(
 
 function getWorkspaceSwitchItems(
   adminRoles: readonly string[],
+  hasOrganizationWorkspaceContext: boolean,
 ): WorkspaceSwitchItem[] {
   if (adminRoles.includes("super_admin")) {
     return [
@@ -247,10 +252,15 @@ function getWorkspaceSwitchItems(
         Icon: BookOpenText,
       },
       {
-        href: "/organization/portal",
+        href: hasOrganizationWorkspaceContext
+          ? "/organization/portal"
+          : "/ops/organizations",
         label: "组织后台",
         workspace: "organization",
         Icon: Building2,
+        fallbackHref: "/ops/organizations",
+        fallbackLabel: "返回运营后台处理组织与授权",
+        requiresOrganizationContext: !hasOrganizationWorkspaceContext,
       },
     ];
   }
@@ -456,6 +466,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     pathname: null,
     adminRoles: [],
     canUseOrganizationAdvancedWorkspace: false,
+    hasOrganizationWorkspaceContext: false,
     accessDecision: null,
   });
   const status =
@@ -465,6 +476,10 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   const canUseOrganizationAdvancedWorkspace =
     authState.pathname === pathname
       ? authState.canUseOrganizationAdvancedWorkspace
+      : false;
+  const hasOrganizationWorkspaceContext =
+    authState.pathname === pathname
+      ? authState.hasOrganizationWorkspaceContext
       : false;
   const accessDecision =
     authState.pathname === pathname ? authState.accessDecision : null;
@@ -481,7 +496,10 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     workspace === "organization"
       ? menuItems.filter((item) => item.advancedOrganizationOnly === true)
       : [];
-  const workspaceSwitchItems = getWorkspaceSwitchItems(adminRoles);
+  const workspaceSwitchItems = getWorkspaceSwitchItems(
+    adminRoles,
+    hasOrganizationWorkspaceContext,
+  );
 
   useEffect(() => {
     let isCurrentCheck = true;
@@ -512,6 +530,8 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
             adminRoles: sessionResponse.data.user.adminRoles ?? [],
             canUseOrganizationAdvancedWorkspace:
               canUseOrganizationAdvancedWorkspaceCapability(capabilitySummary),
+            hasOrganizationWorkspaceContext:
+              capabilitySummary.organizationPublicId !== null,
             accessDecision,
           });
           return;
@@ -523,6 +543,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           pathname,
           adminRoles: [],
           canUseOrganizationAdvancedWorkspace: false,
+          hasOrganizationWorkspaceContext: false,
           accessDecision: null,
         });
         router.replace("/login");
@@ -538,6 +559,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           pathname,
           adminRoles: [],
           canUseOrganizationAdvancedWorkspace: false,
+          hasOrganizationWorkspaceContext: false,
           accessDecision: null,
         });
         router.replace("/login");
@@ -562,6 +584,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         pathname,
         adminRoles: [],
         canUseOrganizationAdvancedWorkspace: false,
+        hasOrganizationWorkspaceContext: false,
         accessDecision: null,
       });
       router.replace("/login");
@@ -610,24 +633,53 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
               {workspaceSwitchItems.map((item) => {
                 const isActiveWorkspace = item.workspace === workspace;
                 const Icon = item.Icon;
+                const isContextGated =
+                  item.requiresOrganizationContext === true &&
+                  !isActiveWorkspace;
 
                 return (
                   <li key={item.workspace}>
-                    <Link
-                      href={item.href}
-                      aria-current={isActiveWorkspace ? "page" : undefined}
-                      aria-label={`${
-                        isActiveWorkspace ? "当前" : "切换到"
-                      }${item.label}`}
-                      className={`rounded-radius-md flex items-center gap-2 px-3 py-2 text-sm transition-transform active:scale-[0.98] ${
-                        isActiveWorkspace
-                          ? "bg-secondary text-brand-primary font-medium"
-                          : "text-text-secondary hover:bg-muted hover:text-text-primary"
-                      }`}
-                    >
-                      <Icon aria-hidden="true" className="size-4" />
-                      <span>{item.label}</span>
-                    </Link>
+                    {isContextGated ? (
+                      <div
+                        aria-disabled="true"
+                        aria-label={`${item.label}需要选择组织上下文`}
+                        className="border-border bg-muted/60 rounded-radius-md grid gap-2 border px-3 py-2 text-sm"
+                        role="group"
+                      >
+                        <div className="text-text-muted flex items-center gap-2">
+                          <Icon aria-hidden="true" className="size-4" />
+                          <span>{item.label}</span>
+                        </div>
+                        <p className="text-text-secondary text-xs leading-5">
+                          需要选择组织上下文
+                        </p>
+                        {item.fallbackHref !== undefined &&
+                        item.fallbackLabel !== undefined ? (
+                          <Link
+                            className="text-brand-primary text-xs font-medium transition-transform active:scale-[0.98]"
+                            href={item.fallbackHref}
+                          >
+                            {item.fallbackLabel}
+                          </Link>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        aria-current={isActiveWorkspace ? "page" : undefined}
+                        aria-label={`${
+                          isActiveWorkspace ? "当前" : "切换到"
+                        }${item.label}`}
+                        className={`rounded-radius-md flex items-center gap-2 px-3 py-2 text-sm transition-transform active:scale-[0.98] ${
+                          isActiveWorkspace
+                            ? "bg-secondary text-brand-primary font-medium"
+                            : "text-text-secondary hover:bg-muted hover:text-text-primary"
+                        }`}
+                      >
+                        <Icon aria-hidden="true" className="size-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    )}
                   </li>
                 );
               })}
