@@ -4,7 +4,7 @@ Task id: `learner-ai-five-zone-workbench-2026-07-07`
 
 Branch: `codex/learner-ai-five-zone-workbench-2026-07-07`
 
-Evidence status: branch validation complete; ready for commit and master merge.
+Evidence status: closed on master after post-merge gates; push cleanup pending.
 
 ## Requirement Mapping Result
 
@@ -33,6 +33,9 @@ Evidence will record command names, exit status, safe counts, and file labels on
 | `git diff --check`                                                                                                                                                                            | pass   | No whitespace or conflict-marker issues.                                                  |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-ai-five-zone-workbench-2026-07-07`                     | pass   | Module Run v2 pre-commit hardening passed.                                                |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-ai-five-zone-workbench-2026-07-07 -SkipRemoteAheadCheck` | pass   | Module Run v2 pre-push readiness passed against current master/origin checkpoint.         |
+| master post-merge `npm run lint`                                                                                                                                                              | pass   | ESLint completed successfully on master after fast-forward merge.                         |
+| master post-merge `npm run typecheck`                                                                                                                                                         | pass   | `tsc --noEmit` completed successfully on master after fast-forward merge.                 |
+| master post-merge `npm run test:unit`                                                                                                                                                         | pass   | Full unit suite passed on master: 342 files / 1723 tests.                                 |
 
 ## Changed Files
 

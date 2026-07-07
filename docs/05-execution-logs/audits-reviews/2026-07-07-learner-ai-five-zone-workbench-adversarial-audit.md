@@ -25,6 +25,7 @@ Adversarial review for branch 3 learner AI `AI训练` page presentation, five-zo
 - Organization context and quota use remain explicit through the existing authorization selector.
 - The boundary zone states no formal question or formal paper write and uses product wording without Provider/config claims.
 - `git diff --check`, Module Run v2 pre-commit hardening, and Module Run v2 pre-push readiness passed before commit.
+- After fast-forward merge to `master`, `npm run lint`, `npm run typecheck`, and full `npm run test:unit` passed.
 - No Provider, DB, env, dependency, package/lockfile, schema/migration/seed, fixture, screenshot, raw DOM, e2e, staging/prod/deploy, release readiness, production usability, or Cost Calibration action was performed.
 
 ## Non-Claims
