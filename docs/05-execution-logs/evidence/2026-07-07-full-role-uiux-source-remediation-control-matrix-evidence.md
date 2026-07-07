@@ -4,7 +4,7 @@ Task id: `full-role-uiux-source-remediation-control-matrix-2026-07-07`
 
 Branch: `codex/full-role-uiux-control-matrix-2026-07-07`
 
-Evidence status: pass, pre-push readiness pending closeout check.
+Evidence status: pass.
 
 ## Scope
 
@@ -43,14 +43,14 @@ No product source, tests, DB, Provider, env, dependency, package/lockfile, schem
 
 ## Validation Results
 
-| Command                           | Status                 | Redacted summary                                                                                                                   |
-| --------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| scoped Prettier write/check       | pass                   | Matrix docs and state/queue files use project formatting.                                                                          |
-| `git diff --check`                | pass                   | No whitespace errors.                                                                                                              |
-| forbidden-path diff check         | pass                   | No forbidden source, test, dependency, env, DB, migration, seed, e2e artifact, runtime artifact, or package/lockfile path changed. |
-| branch registration self-check    | pass                   | 7 branch tasks present, matrix rows present, no blocked-files alias remains in new branch registrations.                           |
-| Module Run v2 precommit hardening | pass                   | SSOT list, requirement mapping, scope scan, sensitive evidence scan, and terminology scan passed.                                  |
-| Module Run v2 prepush readiness   | pending closeout check | Runs after ready-for-closeout state is written and before push.                                                                    |
+| Command                           | Status | Redacted summary                                                                                                                   |
+| --------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| scoped Prettier write/check       | pass   | Matrix docs and state/queue files use project formatting.                                                                          |
+| `git diff --check`                | pass   | No whitespace errors.                                                                                                              |
+| forbidden-path diff check         | pass   | No forbidden source, test, dependency, env, DB, migration, seed, e2e artifact, runtime artifact, or package/lockfile path changed. |
+| branch registration self-check    | pass   | 7 branch tasks present, matrix rows present, no blocked-files alias remains in new branch registrations.                           |
+| Module Run v2 precommit hardening | pass   | SSOT list, requirement mapping, scope scan, sensitive evidence scan, and terminology scan passed.                                  |
+| Module Run v2 prepush readiness   | pass   | Ran on `master` after fast-forward merge, with remote-ahead check skipped by task policy.                                          |
 
 ## Safety Statements
 

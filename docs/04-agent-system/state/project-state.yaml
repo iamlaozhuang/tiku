@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: full-role-uiux-source-remediation-control-matrix-2026-07-07
-updatedAt: "2026-07-07T10:16:48-07:00"
+updatedAt: "2026-07-07T10:24:38-07:00"
 latestFullRoleUiuxSourceRemediationControlMatrix:
   id: full-role-uiux-source-remediation-control-matrix-2026-07-07
-  status: ready_for_closeout
+  status: closed
   result: pass_control_matrix_and_branch_registration
   branch: codex/full-role-uiux-control-matrix-2026-07-07
   planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-source-remediation-control-matrix.md
@@ -18,6 +18,7 @@ latestFullRoleUiuxSourceRemediationControlMatrix:
     nextBranch: learner_desktop_readable_shell_2026_07_07
     forcedSelfReview: pass
     preCommitHardening: pass
+    prePushReadiness: pass
     sourceCodeChanged: false
     testsChanged: false
     dbMutationExecuted: false
@@ -368,7 +369,7 @@ currentTask:
   id: full-role-uiux-source-remediation-control-matrix-2026-07-07
   title: Full role UIUX source remediation control matrix
   phase: full-role-uiux-source-remediation-control-matrix-2026-07-07
-  status: ready_for_closeout
+  status: closed
   result: pass_control_matrix_and_branch_registration
   priority: p2
   taskKind: docs_only
@@ -376,7 +377,7 @@ currentTask:
   humanApprovalBoundary: current_user_approved_full_role_uiux_7_branch_control_matrix_and_branches_2_to_8_serial_closeout_2026_07_07
   plannedAt: "2026-07-07T10:10:07-07:00"
   claimedAt: "2026-07-07T10:10:07-07:00"
-  completedAt: "2026-07-07T10:16:48-07:00"
+  completedAt: "2026-07-07T10:24:38-07:00"
   targetClosureItem: Build the 7-branch source remediation control matrix and register branches 2-8 before entering learner desktop shell implementation.
   behaviorBoundary: docs_state_evidence_audit_queue_matrix_only_no_source_test_db_provider_env_dependency_package_lockfile_schema_migration_seed_fixture_screenshot_trace_raw_dom_staging_prod_deploy_cost_calibration_release_or_production_claim
   evidenceMode: redacted_doc_paths_role_page_labels_source_file_labels_command_status_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_or_screenshot_pixels
@@ -384,7 +385,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-source-remediation-control-matrix-evidence.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-source-remediation-control-matrix-audit.md
   validationSummary:
-    status: pass_pre_push_pending
+    status: pass
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
@@ -396,7 +397,7 @@ currentTask:
     diffCheck: pass
     forbiddenPathDiffCheck: pass
     preCommitHardening: pass
-    prePushReadiness: pending_after_commit_or_closeout_check
+    prePushReadiness: pass
     sourceCodeChanged: false
     testsChanged: false
     packageLockfileChanged: false
