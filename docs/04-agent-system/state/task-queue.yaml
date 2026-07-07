@@ -477,8 +477,8 @@ activeTasks:
   - id: content-lifecycle-ai-adoption-2026-07-07
     title: Content lifecycle and AI adoption
     phase: content-lifecycle-ai-adoption-2026-07-07
-    status: in_progress
-    result: branch_local_validation_and_module_run_v2_checks_passed
+    status: closed
+    result: pass_branch5_merged_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_content_lifecycle
@@ -535,7 +535,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-lifecycle-ai-adoption-2026-07-07 -SkipRemoteAheadCheck
     closeoutPolicy: *low_risk_closeout_policy
     validationSummary:
-      status: in_progress_branch_local_validation_and_module_run_v2_checks_passed
+      status: pass_branch5_merged_master_gates_ready_for_push_cleanup
       taskPlanPrepared: true
       evidencePrepared: true
       auditPrepared: true
@@ -551,6 +551,11 @@ activeTasks:
       preCommitHardening: pass
       prePushReadiness: pass
       currentTaskPointerCorrectedForCommitHook: true
+      mergedToMaster: true
+      featureCommitSha: ebd828cf5eefdfa7720596a3586bf3f6cc2e5aaf
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeFullUnit: pass_342_files_1724_tests
       sourceCodeChanged: true
       testsChanged: true
       packageLockfileChanged: false

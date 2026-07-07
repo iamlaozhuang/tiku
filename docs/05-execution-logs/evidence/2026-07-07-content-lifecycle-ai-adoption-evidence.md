@@ -60,10 +60,14 @@ This evidence records only branch labels, file labels, command names, statuses, 
 | Module Run v2 precommit hardening                        | pass   | first run found missing mapping headings; plan/evidence/audit structure was corrected     |
 | Module Run v2 prepush readiness                          | pass   | readiness passed with remote-ahead check skipped per local closeout policy                |
 | commit hook current task check                           | pass   | first commit attempt used prior task pointer; `currentTask` was corrected and hook passed |
+| feature commit                                           | pass   | `ebd828cf5eefdfa7720596a3586bf3f6cc2e5aaf`                                                |
+| fast-forward merge to `master`                           | pass   | `master` advanced to feature commit                                                       |
+| master `npm run lint`                                    | pass   | eslint completed after merge                                                              |
+| master `npm run typecheck`                               | pass   | `tsc --noEmit` completed after merge                                                      |
+| master full `vitest run`                                 | pass   | 342 files passed, 1724 tests passed                                                       |
 
 ## Pending Closeout Fields
 
 To be completed after implementation:
 
-- commit SHA;
 - merge/push/cleanup result.
