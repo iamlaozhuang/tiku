@@ -759,7 +759,7 @@ export function AdminOrganizationTrainingPage() {
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">企业后台</p>
+          <p className="text-brand-primary text-sm font-medium">组织后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             企业训练
           </h1>

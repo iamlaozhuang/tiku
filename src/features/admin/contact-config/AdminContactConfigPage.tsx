@@ -238,9 +238,7 @@ export function AdminContactConfigPage() {
         </div>
         <div className="border-border bg-surface flex items-center gap-2 rounded-md border px-3 py-2 text-sm shadow-sm">
           <ShieldCheck aria-hidden="true" className="size-4" />
-          <span className="text-text-secondary">
-            配置业务标识：{contactConfig.publicId}
-          </span>
+          <span className="text-text-secondary">受保护配置</span>
         </div>
       </header>
 

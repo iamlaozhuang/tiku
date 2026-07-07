@@ -709,13 +709,15 @@ activeTasks:
   - id: full-role-uiux-consistency-closeout-2026-07-07
     title: Full role UIUX consistency closeout
     phase: full-role-uiux-consistency-closeout-2026-07-07
-    status: pending
+    status: in_progress
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_full_role_closeout
     validationPolicy: task_plan_evidence_audit_focused_tests_full_unit_precommit_prepush
     moduleRunVersion: 2
     branch: codex/full-role-uiux-consistency-closeout-2026-07-07
+    plannedAt: "2026-07-07T13:10:00-07:00"
+    claimedAt: "2026-07-07T13:10:00-07:00"
     dependsOn:
       - super-admin-organization-context-2026-07-07
     targetClosureItem: Branch 8 - close cross-role UIUX consistency across branches 2-7 with no deferred source fixes.
@@ -750,6 +752,31 @@ activeTasks:
       - playwright-report/**
       - test-results/**
     capabilities: *low_risk_capabilities
+    validationSummary:
+      status: pass_branch_precommit_pending_merge
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      branchSpecificReadGate: pass
+      branch2To7EvidenceReviewed: pass
+      designBoardReviewed: pass_redacted_paths_only
+      redFocusedTests: fail_expected_1_file_2_failed
+      targetedTests: pass_1_file_2_tests
+      focusedTests: pass_16_files_170_tests
+      eslint: pass
+      typecheck: pass
+      prettierCheck: pass
+      fullUnit: pass_344_files_1732_tests
+      diffCheck: pass
+      preCommitHardening: pass_after_task_plan_ssot_heading_fix
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
   - id: shared-ui-state-context-bands-2026-07-07
     title: Shared UI state templates and context bands
     phase: shared-ui-state-context-bands-2026-07-07
