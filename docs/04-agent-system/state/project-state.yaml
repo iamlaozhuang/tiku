@@ -1,8 +1,25 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
-updatedAt: "2026-07-07T01:44:11-07:00"
+currentPhase: full-db-backed-local-runtime-replay-2026-07-07
+updatedAt: "2026-07-07T02:07:31-07:00"
+latestFullDbBackedLocalRuntimeReplay:
+  id: full-db-backed-local-runtime-replay-2026-07-07
+  status: closed
+  result: pass_bounded_explicit_20260704_db_direct_runtime_default_localhost_db_target_not_claimed
+  branch: codex/full-db-backed-local-runtime-replay-2026-07-07
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-db-backed-local-runtime-replay.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-db-backed-local-runtime-replay.md
+  conclusionBuckets:
+    explicit20260704DbBackedDirectRuntime: pass
+    defaultLocalhostDbTarget: partial
+    browser: not_tested
+    providerDisabled: not_tested
+    providerEnabledSmallSample: not_tested
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestPostRecontractAcceptanceConsolidation:
   id: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
   status: closed
@@ -21,6 +38,36 @@ latestPostRecontractAcceptanceConsolidation:
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
 currentTask:
+  id: full-db-backed-local-runtime-replay-2026-07-07
+  title: Full DB-backed local runtime replay
+  phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-07
+  status: closed
+  result: pass_bounded_explicit_20260704_db_direct_runtime_default_localhost_db_target_not_claimed
+  priority: p0
+  taskKind: db_backed_local_runtime_replay
+  branch: codex/full-db-backed-local-runtime-replay-2026-07-07
+  plannedAt: "2026-07-07T01:58:31-07:00"
+  completedAt: "2026-07-07T02:07:31-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-db-backed-local-runtime-replay.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-db-backed-local-runtime-replay.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-db-backed-local-runtime-replay.md
+  validationSummary:
+    status: pass_with_default_localhost_db_target_partial
+    readGate: pass
+    taskPlanPrepared: true
+    evidencePrepared: true
+    auditPrepared: true
+    explicit20260704DbBackedDirectRuntime: pass_1_file_4_tests
+    defaultLocalhostDbTarget: partial_not_20260704_label
+    sourceUnit: pass_7_files_54_tests
+    lint: pass
+    typecheck: pass
+    mechanismDiagnostics: pass
+    releaseFinalProductionClaimed: false
+    productionUsabilityClaimed: false
+    stagingProdDeployExecuted: false
+    costCalibrationExecutedOrClaimed: false
+previousCurrentTaskBeforeFullDbBackedLocalRuntimeReplay20260707:
   id: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
   title: Post-recontract local adversarial acceptance consolidation
   phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-07
