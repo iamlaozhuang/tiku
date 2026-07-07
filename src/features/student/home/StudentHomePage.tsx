@@ -250,6 +250,32 @@ function formatScopeLabel(scope: StudentHomeScopeSelection): string {
   return `${professionLabels[scope.profession]} ${scope.level}级`;
 }
 
+function formatAuthorizationSourceLabel(
+  authorizationSource: EffectiveAuthorizationContextDto["authorizationSource"],
+): string {
+  return authorizationSource === "org_auth" ? "组织授权" : "个人授权";
+}
+
+function formatEffectiveEditionLabel(
+  effectiveEdition: EffectiveAuthorizationContextDto["effectiveEdition"],
+): string {
+  return effectiveEdition === "advanced" ? "高级版" : "标准版";
+}
+
+function formatQuotaOwnerLabel(
+  quotaOwnerType: EffectiveAuthorizationContextDto["quotaOwnerType"],
+): string {
+  if (quotaOwnerType === "organization") {
+    return "组织额度";
+  }
+
+  if (quotaOwnerType === "platform") {
+    return "平台额度";
+  }
+
+  return "个人额度";
+}
+
 function formatPublishedAt(publishedAt: string | null): string {
   if (publishedAt === null) {
     return "发布时间待定";
@@ -467,6 +493,23 @@ function canShowOrganizationTraining(
   );
 }
 
+function selectAuthorizationContextForScope(
+  authorizationContexts: EffectiveAuthorizationContextDto[],
+  selectedScope: StudentPaperScopeDto | null,
+): EffectiveAuthorizationContextDto | null {
+  if (selectedScope === null) {
+    return null;
+  }
+
+  return (
+    authorizationContexts.find(
+      (authorizationContext) =>
+        authorizationContext.profession === selectedScope.profession &&
+        authorizationContext.level === selectedScope.level,
+    ) ?? null
+  );
+}
+
 function StudentHomeStatusMessage({
   title,
   description,
@@ -625,6 +668,58 @@ function AuthExpiryReminderBanner({
   );
 }
 
+function StudentHomeContextBand({
+  selectedScope,
+  authorizationContext,
+}: {
+  selectedScope: StudentPaperScopeDto | null;
+  authorizationContext: EffectiveAuthorizationContextDto | null;
+}) {
+  const scopeLabel =
+    selectedScope === null ? "未选择授权范围" : formatScopeLabel(selectedScope);
+
+  return (
+    <section
+      data-testid="student-home-context-band"
+      aria-label="当前学习上下文"
+      className="bg-surface ring-border grid gap-3 rounded-xl p-4 shadow-sm ring-1 sm:grid-cols-4"
+    >
+      <div className="min-w-0 space-y-1">
+        <p className="text-text-muted text-xs font-medium">当前学习上下文</p>
+        <p className="text-text-primary text-sm font-semibold">{scopeLabel}</p>
+      </div>
+      <div className="min-w-0 space-y-1">
+        <p className="text-text-muted text-xs font-medium">授权来源</p>
+        <p className="text-text-primary text-sm font-semibold">
+          {authorizationContext === null
+            ? "授权上下文待同步"
+            : formatAuthorizationSourceLabel(
+                authorizationContext.authorizationSource,
+              )}
+        </p>
+      </div>
+      <div className="min-w-0 space-y-1">
+        <p className="text-text-muted text-xs font-medium">版本</p>
+        <p className="text-text-primary text-sm font-semibold">
+          {authorizationContext === null
+            ? "版本待确认"
+            : formatEffectiveEditionLabel(
+                authorizationContext.effectiveEdition,
+              )}
+        </p>
+      </div>
+      <div className="min-w-0 space-y-1">
+        <p className="text-text-muted text-xs font-medium">额度归属</p>
+        <p className="text-text-primary text-sm font-semibold">
+          {authorizationContext === null
+            ? "额度待确认"
+            : formatQuotaOwnerLabel(authorizationContext.quotaOwnerType)}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export function StudentHomePage({
   state = "ready",
   scopes,
@@ -679,6 +774,14 @@ export function StudentHomePage({
   const authExpiryReminder = selectAuthExpiryReminder(
     displayScopes,
     authExpiryReminderDismissals,
+  );
+  const selectedAuthorizationContext = useMemo(
+    () =>
+      selectAuthorizationContextForScope(
+        displayAuthorizationContexts,
+        selectedScope,
+      ),
+    [displayAuthorizationContexts, selectedScope],
   );
 
   useEffect(() => {
@@ -933,6 +1036,11 @@ export function StudentHomePage({
           </Link>
         </nav>
       </div>
+
+      <StudentHomeContextBand
+        selectedScope={selectedScope}
+        authorizationContext={selectedAuthorizationContext}
+      />
 
       {authExpiryReminder === null ? null : (
         <AuthExpiryReminderBanner

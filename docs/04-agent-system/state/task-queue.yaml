@@ -215,16 +215,22 @@ activeTasks:
   - id: learner-desktop-readable-shell-2026-07-07
     title: Learner desktop readable shell
     phase: learner-desktop-readable-shell-2026-07-07
-    status: pending
+    status: in_progress
+    result: pass_branch_validation_ready_for_commit_merge_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_learner_shell
     validationPolicy: task_plan_evidence_audit_focused_tests_full_unit_precommit_prepush
     moduleRunVersion: 2
     branch: codex/learner-desktop-readable-shell-2026-07-07
+    humanApprovalBoundary: current_user_approved_full_role_uiux_7_branch_control_matrix_and_branches_2_to_8_serial_closeout_2026_07_07
+    plannedAt: "2026-07-07T10:36:00-07:00"
+    claimedAt: "2026-07-07T10:36:00-07:00"
     dependsOn:
       - full-role-uiux-source-remediation-control-matrix-2026-07-07
-    targetClosureItem: Branch 2 - improve learner desktop-readable shell across personal students and organization employees without changing authorization semantics.
+    targetClosureItem: Branch 2 - improve learner desktop-readable shell, navigation, title, context, empty/error/disabled states without changing authorization semantics.
+    behaviorBoundary: low_risk_local_ui_source_test_docs_evidence_audit_only_no_db_no_provider_no_env_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_screenshot_trace_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_command_status_file_labels_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_screenshot_pixels_or_private_fixture_values
     planPath: docs/05-execution-logs/task-plans/2026-07-07-learner-desktop-readable-shell.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-07-learner-desktop-readable-shell-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-learner-desktop-readable-shell-adversarial-audit.md
@@ -256,6 +262,43 @@ activeTasks:
       - playwright-report/**
       - test-results/**
     capabilities: *low_risk_capabilities
+    validationCommands:
+      - .\node_modules\.bin\vitest.cmd run src/components/StudentAppLayout/StudentAppLayout.test.tsx tests/unit/student-home-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
+      - .\node_modules\.bin\eslint.cmd src/components/StudentAppLayout/StudentAppLayout.tsx src/components/StudentAppLayout/StudentAppLayout.test.tsx src/features/student/home/StudentHomePage.tsx tests/unit/student-home-ui.test.ts
+      - .\node_modules\.bin\tsc.cmd --noEmit
+      - .\node_modules\.bin\prettier.cmd --check src/components/StudentAppLayout/StudentAppLayout.tsx src/components/StudentAppLayout/StudentAppLayout.test.tsx src/features/student/home/StudentHomePage.tsx tests/unit/student-home-ui.test.ts docs/05-execution-logs/task-plans/2026-07-07-learner-desktop-readable-shell.md docs/05-execution-logs/evidence/2026-07-07-learner-desktop-readable-shell-evidence.md docs/05-execution-logs/audits-reviews/2026-07-07-learner-desktop-readable-shell-adversarial-audit.md
+      - .\node_modules\.bin\vitest.cmd run
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId learner-desktop-readable-shell-2026-07-07
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-desktop-readable-shell-2026-07-07 -SkipRemoteAheadCheck
+    closeoutPolicy: *low_risk_closeout_policy
+    validationSummary:
+      status: pass_branch_validation_ready_for_commit_merge_push_cleanup
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      branchSpecificReadGate: pass
+      redFocusedTests: pass_expected_red
+      focusedTests: pass_6_files_82_tests
+      eslint: pass
+      typecheck: pass
+      prettierCheck: pass
+      fullUnit: pass_342_files_1722_tests
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass_after_repository_checkpoint_alignment
+      sourceCodeChanged: true
+      testsChanged: true
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      browserRuntimeExecuted: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
   - id: learner-ai-five-zone-workbench-2026-07-07
     title: Learner AI five-zone workbench
     phase: learner-ai-five-zone-workbench-2026-07-07

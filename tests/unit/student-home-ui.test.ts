@@ -156,6 +156,49 @@ describe("StudentHomePage", () => {
     );
   });
 
+  it("shows a compact learner context band without exposing raw authorization identifiers", () => {
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+        authorizationContexts: [
+          createAuthorizationContext({
+            effectiveEdition: "advanced",
+            edition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org-auth-context-band-ui-001",
+            ownerType: "organization",
+            ownerPublicId: "organization-context-band-ui-001",
+            organizationPublicId: "organization-context-band-ui-001",
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: "organization-context-band-ui-001",
+            capabilities: {
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+              canAnswerOrganizationTraining: true,
+            },
+          }),
+        ],
+      } satisfies StudentHomePagePropsWithAuthorizationContexts),
+    );
+
+    const contextBand = screen.getByTestId("student-home-context-band");
+
+    expect(contextBand).toHaveTextContent("当前学习上下文");
+    expect(contextBand).toHaveTextContent("营销 3级");
+    expect(contextBand).toHaveTextContent("组织授权");
+    expect(contextBand).toHaveTextContent("高级版");
+    expect(contextBand).toHaveTextContent("组织额度");
+    expect(contextBand).not.toHaveTextContent("org-auth-context-band-ui-001");
+    expect(contextBand).not.toHaveTextContent(
+      "organization-context-band-ui-001",
+    );
+  });
+
   it("hides advanced learner home entries when authorization capabilities are absent", () => {
     render(
       createElement(StudentHomePage, {
