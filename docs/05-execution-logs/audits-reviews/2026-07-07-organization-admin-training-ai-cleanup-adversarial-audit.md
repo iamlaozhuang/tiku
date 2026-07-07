@@ -30,6 +30,7 @@ Adversarial review for branch 4 organization admin portal, enterprise training, 
 - Organization training request bodies keep the existing API shape; only UI context sourcing changed from visible manual fields to session capability summary.
 - Organization analytics still uses the scoped organization value for API calls, but does not render it as primary user-facing copy.
 - Module Run v2 pre-commit hardening and pre-push readiness passed before local commit.
+- Master post-merge lint, typecheck, and full unit gates passed after fast-forward merge.
 
 ## Non-Claims
 

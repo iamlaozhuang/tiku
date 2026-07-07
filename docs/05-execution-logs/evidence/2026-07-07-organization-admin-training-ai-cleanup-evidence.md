@@ -4,7 +4,7 @@ Task id: `organization-admin-training-ai-cleanup-2026-07-07`
 
 Branch: `codex/organization-admin-training-ai-cleanup-2026-07-07`
 
-Evidence status: validated on branch; master post-merge gates pending.
+Evidence status: closed on master after post-merge gates; push cleanup pending.
 
 ## Requirement Mapping Result
 
@@ -35,6 +35,9 @@ Evidence will record command names, exit status, safe counts, and file labels on
 | forbidden diff check                                       | pass          | No diff in package/lockfile, env, schema, migration, seed, or drizzle paths.                                                  |
 | Module Run v2 pre-commit hardening                         | pass          | Module Run v2 pre-commit hardening passed.                                                                                    |
 | Module Run v2 pre-push readiness                           | pass          | Module Run v2 pre-push readiness passed against current master/origin checkpoint.                                             |
+| master post-merge `npm run lint`                           | pass          | ESLint completed successfully on master after fast-forward merge.                                                             |
+| master post-merge `npm run typecheck`                      | pass          | `tsc --noEmit` completed successfully on master after fast-forward merge.                                                     |
+| master post-merge full `vitest run`                        | pass          | Full unit suite passed on master: 342 files / 1723 tests.                                                                     |
 
 ## Changed Files
 

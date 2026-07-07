@@ -2,11 +2,11 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: organization-admin-training-ai-cleanup-2026-07-07
-updatedAt: "2026-07-07T11:31:00-07:00"
+updatedAt: "2026-07-07T11:40:00-07:00"
 latestOrganizationAdminTrainingAiCleanup:
   id: organization-admin-training-ai-cleanup-2026-07-07
   status: closed
-  result: pass_branch4_validated_ready_for_master_merge
+  result: pass_branch4_merged_master_gates_ready_for_push_cleanup
   branch: codex/organization-admin-training-ai-cleanup-2026-07-07
   planPath: docs/05-execution-logs/task-plans/2026-07-07-organization-admin-training-ai-cleanup.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-07-organization-admin-training-ai-cleanup-evidence.md
@@ -27,6 +27,10 @@ latestOrganizationAdminTrainingAiCleanup:
     productionUsability: not_claimed
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
+    mergedToMaster: true
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeFullUnit: pass_342_files_1723_tests
 latestLearnerAiFiveZoneWorkbench:
   id: learner-ai-five-zone-workbench-2026-07-07
   status: closed
@@ -448,7 +452,7 @@ currentTask:
   title: Organization admin training and AI cleanup
   phase: organization-admin-training-ai-cleanup-2026-07-07
   status: closed
-  result: pass_branch4_validated_ready_for_master_merge
+  result: pass_branch4_merged_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/organization-admin-training-ai-cleanup-2026-07-07
@@ -463,7 +467,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-07-organization-admin-training-ai-cleanup-evidence.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-organization-admin-training-ai-cleanup-adversarial-audit.md
   validationSummary:
-    status: pass_branch4_validated_ready_for_master_merge
+    status: pass_branch4_merged_master_gates_ready_for_push_cleanup
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
@@ -477,6 +481,10 @@ currentTask:
     diffCheck: pass
     preCommitHardening: pass
     prePushReadiness: pass_skip_remote_ahead_check
+    mergedToMaster: true
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeFullUnit: pass_342_files_1723_tests
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
