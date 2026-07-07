@@ -1,8 +1,26 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-db-local-fixture-supplement-2026-07-07
-updatedAt: "2026-07-07T05:10:00-07:00"
+currentPhase: full-role-ui-remediation-baseline-2026-07-07
+updatedAt: "2026-07-07T06:30:47-07:00"
+latestFullRoleUiRemediationBaseline:
+  id: full-role-ui-remediation-baseline-2026-07-07
+  status: closed
+  result: pass_docs_only_all_role_screenshot_baseline_prepared
+  branch: codex/full-role-ui-remediation-baseline-2026-07-07
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-ui-remediation-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-ui-remediation-baseline.md
+  conclusionBuckets:
+    privateScreenshotInventory: pass_68_page_png_9_contact_sheets_manifest_68
+    allRoleBaseline: pass_prepared
+    superAdminOrganizationWorkspaceMismatch: p1_candidate_root_cause_not_fixed
+    studentDesktopShell: p1_p2_candidate
+    contentClosureUi: p2_candidate
+    sourceCodeIssueConfirmed: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latest0704DbLocalFixtureSupplement:
   id: 0704-db-local-fixture-supplement-2026-07-07
   status: closed
@@ -105,51 +123,35 @@ latestPostRecontractAcceptanceConsolidation:
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
 currentTask:
-  id: 0704-db-local-fixture-supplement-2026-07-07
-  title: 0704 DB local fixture supplement
-  phase: 0704-db-local-fixture-supplement-2026-07-07
+  id: full-role-ui-remediation-baseline-2026-07-07
+  title: Full role UI remediation baseline
+  phase: full-role-ui-remediation-baseline-2026-07-07
   status: closed
-  result: pass_two_role_direct_login_fixture_material_closed
-  priority: p0
-  taskKind: local_0704_fixture_supplement
-  branch: codex/0704-db-local-manual-role-acceptance-prep-2026-07-07
-  humanApprovalBoundary: current_user_approved_local_0704_fixture_supplement_merge_push_cleanup_2026_07_07
-  plannedAt: "2026-07-07T05:00:00-07:00"
-  claimedAt: "2026-07-07T05:00:00-07:00"
-  materializedAt: "2026-07-07T05:08:00-07:00"
-  completedAt: "2026-07-07T05:10:00-07:00"
-  targetClosureItem: Close explicit 20260704 direct-login material gaps for personal_standard_student and org_advanced_employee using approved local non-destructive fixture/account supplement.
-  behaviorBoundary: docs_state_evidence_audit_plus_approved_local_0704_non_destructive_fixture_account_upsert_and_private_account_file_update_only_no_env_file_change_no_source_change_no_dependency_no_package_lockfile_no_schema_migration_seed_no_destructive_db_operation_no_provider_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
-  evidenceMode: redacted_command_names_exit_status_route_label_host_label_counts_safe_failure_category_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-0704-db-local-fixture-supplement.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-0704-db-local-fixture-supplement.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-0704-db-local-fixture-supplement.md
+  result: pass_docs_only_all_role_screenshot_baseline_prepared
+  priority: p1
+  taskKind: docs_only_local_ui_acceptance_baseline
+  branch: codex/full-role-ui-remediation-baseline-2026-07-07
+  humanApprovalBoundary: current_user_requested_full_role_screenshot_analysis_no_code_2026_07_07
+  plannedAt: "2026-07-07T06:00:00-07:00"
+  claimedAt: "2026-07-07T06:00:00-07:00"
+  completedAt: "2026-07-07T06:30:47-07:00"
+  targetClosureItem: Supplement remaining role and super_admin screenshots, analyze all-role UI remediation baseline, and defer code changes.
+  behaviorBoundary: docs_state_evidence_audit_plus_localhost_browser_screenshots_to_private_dir_only_no_repo_screenshots_no_source_test_package_env_schema_migration_seed_db_mutation_provider_staging_prod_deploy_cost_calibration_release_or_production_claim
+  evidenceMode: redacted_role_page_labels_counts_safe_ui_observation_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_repo_screenshots_raw_dom_private_fixture_values
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-ui-remediation-baseline.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-ui-remediation-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-ui-remediation-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-ui-remediation-baseline.md
   validationSummary:
-    status: pass
-    approvedFixtureSupplement: pass
-    personalStandardStudentLogin: pass
-    personalStandardStudentStandardOnlyAuth: pass
-    orgAdvancedEmployeeLogin: pass
-    orgAdvancedEmployeeAdvancedAuth: pass
-    orgAdvancedEmployeeTrainingVisibleList: pass_nonzero
-    roleInventory: pass_all_seven_manual_materials_ready
-    manualChecklist: updated
-    sourceCodeIssueConfirmed: false
-    focusedUnit: pass_2_files_7_tests
-    lint: pass
-    typecheck: pass
-    gitDiffCheck: pass
-    scopedPrettierWrite: pass
-    scopedPrettierCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
-    dependencyChanged: false
+    status: pass_docs_ready_commit_block_resolved_by_task_materialization
+    privateScreenshotsPrepared: pass_68_page_png_9_contact_sheets_manifest_68
+    baselinePrepared: true
+    evidencePrepared: true
+    auditPrepared: true
+    sourceCodeChanged: false
     packageLockfileChanged: false
     envFileChanged: false
-    privateFixtureFileChanged: true
-    dbReadWriteExecuted: true
-    dbMutationBoundary: non_destructive_local_fixture_account_upsert_only
-    destructiveDbOperationExecuted: false
+    dbMutationExecuted: false
     providerCallExecuted: false
     stagingProdDeployExecuted: false
     costCalibrationExecutedOrClaimed: false
