@@ -275,10 +275,13 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(screen.getByRole("heading", { name: "AI训练" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "AI出题：生成练习题" }),
+      screen.getByRole("button", { name: "生成练习题草稿" }),
     ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "AI组卷" }));
+
     expect(
-      screen.getByRole("button", { name: "AI组卷：生成自测试卷" }),
+      screen.getByRole("button", { name: "生成自测试卷" }),
     ).toBeInTheDocument();
   });
 

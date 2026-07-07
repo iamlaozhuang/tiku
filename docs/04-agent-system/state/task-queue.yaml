@@ -96,6 +96,73 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: fix-student-ai-button-tab-test-2026-07-07
+    title: Fix student AI button tab test
+    phase: fix-student-ai-button-tab-test-2026-07-07
+    status: closed
+    result: pass_test_contract_aligned
+    priority: p2
+    taskKind: low_risk_test_contract_fix
+    executionProfile: local_low_risk_test_only_contract_alignment
+    validationPolicy: task_plan_evidence_audit_focused_tests_full_unit_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/fix-student-ai-button-accessible-name-2026-07-07
+    humanApprovalBoundary: current_user_approved_issue_fix_when_current_code_problem_confirmed_and_separate_fix_branch_required_2026_07_07
+    plannedAt: "2026-07-07T09:29:00-07:00"
+    claimedAt: "2026-07-07T09:29:00-07:00"
+    completedAt: "2026-07-07T09:35:00-07:00"
+    targetClosureItem: Align the stale learner AI colocated component test with the current tabbed submit-button flow so full unit verification can unblock branch 1 closeout.
+    behaviorBoundary: test_evidence_audit_only_no_runtime_source_behavior_change_no_db_no_provider_no_env_no_dependency_no_package_lockfile_no_schema_migration_seed_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_command_status_file_labels_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content
+    planPath: docs/05-execution-logs/task-plans/2026-07-07-fix-student-ai-button-accessible-name.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-07-fix-student-ai-button-tab-test-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-fix-student-ai-button-tab-test-adversarial-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-07-fix-student-ai-button-accessible-name.md
+      - docs/05-execution-logs/evidence/2026-07-07-fix-student-ai-button-tab-test-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-07-fix-student-ai-button-tab-test-adversarial-audit.md
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    capabilities: *low_risk_capabilities
+    validationCommands:
+      - .\node_modules\.bin\vitest.cmd run src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts
+      - .\node_modules\.bin\eslint.cmd src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - .\node_modules\.bin\prettier.cmd --check src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx docs/05-execution-logs/task-plans/2026-07-07-fix-student-ai-button-accessible-name.md
+      - .\node_modules\.bin\vitest.cmd run
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-student-ai-button-tab-test-2026-07-07
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-student-ai-button-tab-test-2026-07-07 -SkipRemoteAheadCheck
+    closeoutPolicy: *low_risk_closeout_policy
+    validationSummary:
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      focusedTests: pass_2_files_41_tests
+      fullUnit: pass_340_files_1715_tests
+      eslint: pass
+      prettierCheck: pass
+      sourceCodeChanged: false
+      runtimeSourceChanged: false
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
   - id: full-role-uiux-source-implementation-entry-freeze-2026-07-07
     title: Full role UI/UX source implementation entry freeze
     phase: full-role-uiux-source-implementation-entry-freeze-2026-07-07
