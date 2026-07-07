@@ -99,7 +99,7 @@ activeTasks:
   - id: full-role-uiux-local-browser-acceptance-2026-07-07
     title: Full role UIUX local browser acceptance package
     phase: full-role-uiux-local-browser-acceptance-2026-07-07
-    status: active
+    status: closed
     priority: p1
     taskKind: docs_runtime_acceptance
     executionProfile: local_browser_acceptance_package_no_source_changes
@@ -109,6 +109,7 @@ activeTasks:
     humanApprovalBoundary: current_user_approved_localhost_only_browser_acceptance_no_screenshot_raw_dom_session_cookie_token_localstorage_env_db_provider_2026_07_07
     plannedAt: "2026-07-07T15:08:00-07:00"
     claimedAt: "2026-07-07T15:08:00-07:00"
+    completedAt: "2026-07-07T15:31:00-07:00"
     dependsOn:
       - full-role-uiux-acceptance-confirmation-package-2026-07-07
     targetClosureItem: Run a redacted localhost-only browser acceptance package for the completed full-role UIUX source remediation series.
@@ -162,7 +163,7 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked_requires_separate_fresh_approval
     validationSummary:
-      status: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+      status: pass_localhost_browser_acceptance_package_merged_master_gates_ready_for_push_cleanup
       localhostOnly: pass
       existingLocalServerUsed: pass_127001_3000
       browserRuntimeExecuted: pass_constrained_route_shell_probe
@@ -179,6 +180,11 @@ activeTasks:
       prettierCheck: pass_after_format
       diffCheck: pass
       preCommitHardening: pass
+      mergedToMaster: true
+      packageCommitSha: 6df55ac718106922ecef06bff9bac04a2c5b4460
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeFullUnit: pass_344_files_1732_tests
       screenshotRawDomCaptured: false
       sessionCookieTokenLocalStorageRecorded: false
       envRead: false

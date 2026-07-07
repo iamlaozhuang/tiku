@@ -2,11 +2,11 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: full-role-uiux-local-browser-acceptance-2026-07-07
-updatedAt: "2026-07-07T15:08:00-07:00"
+updatedAt: "2026-07-07T15:31:00-07:00"
 latestFullRoleUiuxLocalBrowserAcceptance:
   id: full-role-uiux-local-browser-acceptance-2026-07-07
-  status: active
-  result: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+  status: closed
+  result: pass_localhost_browser_acceptance_package_merged_master_gates_ready_for_push_cleanup
   branch: codex/full-role-uiux-local-browser-acceptance-2026-07-07
   planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-local-browser-acceptance.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-browser-acceptance.md
@@ -29,6 +29,11 @@ latestFullRoleUiuxLocalBrowserAcceptance:
     scopedPrettierCheck: pass_after_format
     diffCheck: pass
     preCommitHardening: pass
+    mergedToMaster: true
+    packageCommitSha: 6df55ac718106922ecef06bff9bac04a2c5b4460
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeFullUnit: pass_344_files_1732_tests
     screenshotRawDomCaptured: false
     sessionCookieTokenLocalStorageRecorded: false
     envRead: false
@@ -652,8 +657,8 @@ currentTask:
   id: full-role-uiux-local-browser-acceptance-2026-07-07
   title: Full role UIUX local browser acceptance package
   phase: full-role-uiux-local-browser-acceptance-2026-07-07
-  status: active
-  result: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+  status: closed
+  result: pass_localhost_browser_acceptance_package_merged_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: docs_runtime_acceptance
   branch: codex/full-role-uiux-local-browser-acceptance-2026-07-07
@@ -667,7 +672,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-browser-acceptance.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-browser-acceptance-adversarial-audit.md
   validationSummary:
-    status: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+    status: pass_localhost_browser_acceptance_package_merged_master_gates_ready_for_push_cleanup
     localhostOnly: pass
     existingLocalServerUsed: pass_127001_3000
     browserRuntimeExecuted: pass_constrained_route_shell_probe
@@ -684,6 +689,11 @@ currentTask:
     prettierCheck: pass_after_format
     diffCheck: pass
     preCommitHardening: pass
+    mergedToMaster: true
+    packageCommitSha: 6df55ac718106922ecef06bff9bac04a2c5b4460
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeFullUnit: pass_344_files_1732_tests
     productSourceChanged: false
     testsChanged: false
     packageLockfileChanged: false
