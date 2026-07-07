@@ -284,6 +284,30 @@ describe("AdminAiGenerationEntryPage", () => {
     });
   });
 
+  it("bounds preserved admin question counts by generation kind", () => {
+    expect(
+      resolveAdminAiGenerationParameters("question", "content", {
+        generationKind: "question",
+        parameters: {
+          questionCount: 99,
+        },
+      } as never),
+    ).toMatchObject({
+      questionCount: 10,
+    });
+
+    expect(
+      resolveAdminAiGenerationParameters("paper", "organization", {
+        generationKind: "paper",
+        parameters: {
+          questionCount: 99,
+        },
+      } as never),
+    ).toMatchObject({
+      questionCount: 80,
+    });
+  });
+
   it("shows generated draft content with business wording and hides governance implementation terms", async () => {
     mockAdminAiGenerationFetch();
 

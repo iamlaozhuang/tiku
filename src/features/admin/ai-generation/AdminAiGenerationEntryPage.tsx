@@ -496,6 +496,19 @@ const adminDifficultyValueByLabel = Object.fromEntries(
   ]),
 ) as Record<string, string>;
 
+const ADMIN_AI_QUESTION_DEFAULT_QUESTION_COUNT = 3;
+const ADMIN_AI_QUESTION_MAX_QUESTION_COUNT = 10;
+const ADMIN_AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
+const ADMIN_AI_PAPER_MAX_QUESTION_COUNT = 80;
+
+function getAdminAiGenerationQuestionCountLimit(
+  generationKind: AdminAiGenerationKind,
+): number {
+  return generationKind === "question"
+    ? ADMIN_AI_QUESTION_MAX_QUESTION_COUNT
+    : ADMIN_AI_PAPER_MAX_QUESTION_COUNT;
+}
+
 function createDefaultAdminGenerationParameters(
   generationKind: AdminAiGenerationKind,
   workspace: AdminAiGenerationWorkspace,
@@ -513,7 +526,10 @@ function createDefaultAdminGenerationParameters(
           ? "均衡覆盖"
           : "覆盖薄弱知识点",
     questionType: generationKind === "question" ? "single_choice" : null,
-    questionCount: generationKind === "question" ? 3 : 30,
+    questionCount:
+      generationKind === "question"
+        ? ADMIN_AI_QUESTION_DEFAULT_QUESTION_COUNT
+        : ADMIN_AI_PAPER_DEFAULT_QUESTION_COUNT,
     difficulty: "medium",
     learningObjective:
       workspace === "organization"
@@ -540,11 +556,15 @@ function parseLevelLabel(
     : 3;
 }
 
-function parsePositiveCount(value: string, fallbackValue: number): number {
+function parsePositiveCount(
+  value: string,
+  fallbackValue: number,
+  maxValue: number,
+): number {
   const parsedCount = Number(value);
 
   return Number.isInteger(parsedCount) && parsedCount > 0
-    ? parsedCount
+    ? Math.min(parsedCount, maxValue)
     : fallbackValue;
 }
 
@@ -599,6 +619,8 @@ export function resolveAdminAiGenerationParameters(
     generationKind,
     workspace,
   );
+  const maxQuestionCount =
+    getAdminAiGenerationQuestionCountLimit(generationKind);
 
   if (
     generationParameterState?.generationKind !== generationKind ||
@@ -633,6 +655,7 @@ export function resolveAdminAiGenerationParameters(
         ? parsePositiveCount(
             String(persistedQuestionCount),
             defaultParameters.questionCount,
+            maxQuestionCount,
           )
         : defaultParameters.questionCount,
     difficulty: resolveNullableText(
@@ -697,7 +720,7 @@ function getAiGenerationDetailControls(
       {
         inputMode: "number",
         label: "出题数量",
-        max: 10,
+        max: ADMIN_AI_QUESTION_MAX_QUESTION_COUNT,
         value: String(generationParameters.questionCount),
       },
       {
@@ -724,7 +747,7 @@ function getAiGenerationDetailControls(
     {
       inputMode: "number",
       label: "题目数量",
-      max: 80,
+      max: ADMIN_AI_PAPER_MAX_QUESTION_COUNT,
       value: String(generationParameters.questionCount),
     },
   ] satisfies readonly AdminAiGenerationDetailControl[];
@@ -2245,6 +2268,7 @@ export function AdminAiGenerationEntryPage({
               questionCount: parsePositiveCount(
                 value,
                 currentParameters.questionCount,
+                getAdminAiGenerationQuestionCountLimit(generationKind),
               ),
             },
           };

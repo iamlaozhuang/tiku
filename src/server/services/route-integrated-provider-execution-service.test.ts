@@ -56,6 +56,8 @@ describe("shared route-integrated Provider execution primitives", () => {
       label: "AI出题",
       structuredPreviewKind: "question_set",
       countSemantic: "exact_requested_question_count",
+      defaultQuestionCount: 3,
+      maxQuestionCount: 10,
       redactionCategory: "question_draft_summary_only",
     });
     expect(
@@ -68,6 +70,7 @@ describe("shared route-integrated Provider execution primitives", () => {
       structuredPreviewKind: "paper_draft",
       countSemantic: "requested_total_question_count",
       defaultQuestionCount: 30,
+      maxQuestionCount: 80,
       redactionCategory: "paper_plan_summary_only",
     });
     expect(
@@ -484,7 +487,7 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
-  it("derives question-set preview counts from task generation parameters", () => {
+  it("derives bounded question-set preview counts from task generation parameters", () => {
     expect(
       createRouteIntegratedStructuredPreviewOptionsForTask(
         "ai_question_generation",
@@ -510,11 +513,11 @@ describe("shared route-integrated Provider execution primitives", () => {
       ),
     ).toEqual({
       kind: "question_set",
-      requestedQuestionCount: 20,
+      requestedQuestionCount: 10,
     });
   });
 
-  it("carries paper requested question counts from task generation parameters", () => {
+  it("carries bounded paper requested question counts from task generation parameters", () => {
     expect(
       createRouteIntegratedStructuredPreviewOptionsForTask(
         "ai_paper_generation",
@@ -527,6 +530,20 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toEqual({
       kind: "paper_draft",
       requestedQuestionCount: 20,
+    });
+
+    expect(
+      createRouteIntegratedStructuredPreviewOptionsForTask(
+        "ai_paper_generation",
+        {
+          generationParameters: {
+            questionCount: 99,
+          },
+        },
+      ),
+    ).toEqual({
+      kind: "paper_draft",
+      requestedQuestionCount: 80,
     });
   });
 

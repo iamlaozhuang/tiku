@@ -18,6 +18,10 @@ import type { PersonalAiGenerationResultRepository } from "../repositories/perso
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import type { QuestionRepository } from "../repositories/question-repository";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
+import {
+  getAiGenerationSharedTaskSpec,
+  type AiGenerationSharedTaskType,
+} from "../contracts/ai-generation-task-spec-contract";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
 import {
@@ -64,6 +68,13 @@ type PersonalAiGenerationRequestOwnerScope = {
 type PersonalAiGenerationResultPublicIdInput = {
   taskPublicId: string;
 };
+
+const INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_CODE = 400011;
+const INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_MESSAGE =
+  "Invalid personal AI generation request input.";
+const INVALID_PERSONAL_AI_GENERATION_REQUEST_FLOW_INPUT_CODE = 400015;
+const INVALID_PERSONAL_AI_GENERATION_REQUEST_FLOW_INPUT_MESSAGE =
+  "Invalid personal AI generation request flow input.";
 
 export type PersonalAiGenerationRequestRouteDependencies = {
   requestRepository?: PersonalAiGenerationRequestRouteRepository;
@@ -186,6 +197,14 @@ function normalizePersonalAiGenerationTaskType(
     : null;
 }
 
+function normalizeRouteIntegratedTaskType(
+  value: unknown,
+): AiGenerationSharedTaskType | null {
+  return value === "ai_question_generation" || value === "ai_paper_generation"
+    ? value
+    : null;
+}
+
 function normalizePositiveInteger(
   value: string | null,
   fallbackValue: number,
@@ -247,6 +266,70 @@ function normalizeRequiredText(value: unknown): string | null {
   const text = value.trim();
 
   return text.length === 0 ? null : text;
+}
+
+function isRouteIntegratedQuestionCountWithinProductContract(input: {
+  taskType: AiGenerationSharedTaskType;
+  questionCount: unknown;
+}): boolean {
+  const parsedQuestionCount =
+    typeof input.questionCount === "number"
+      ? input.questionCount
+      : typeof input.questionCount === "string"
+        ? Number(input.questionCount)
+        : null;
+  const maxQuestionCount = getAiGenerationSharedTaskSpec(
+    input.taskType,
+  ).maxQuestionCount;
+
+  return (
+    parsedQuestionCount !== null &&
+    Number.isInteger(parsedQuestionCount) &&
+    parsedQuestionCount > 0 &&
+    parsedQuestionCount <= maxQuestionCount
+  );
+}
+
+function isRouteIntegratedGenerationQuantityAllowed(
+  requestInput: Record<string, unknown>,
+): boolean {
+  const taskType = normalizeRouteIntegratedTaskType(requestInput.taskType);
+  const generationParameters = requestInput.generationParameters;
+
+  if (taskType === null || generationParameters === null) {
+    return true;
+  }
+
+  if (generationParameters === undefined) {
+    return true;
+  }
+
+  if (!isRecord(generationParameters)) {
+    return false;
+  }
+
+  return isRouteIntegratedQuestionCountWithinProductContract({
+    taskType,
+    questionCount: generationParameters.questionCount,
+  });
+}
+
+function createInvalidRouteIntegratedQuantityResponse(
+  requestInput: Record<string, unknown>,
+): ApiResponse<null> | null {
+  if (isRouteIntegratedGenerationQuantityAllowed(requestInput)) {
+    return null;
+  }
+
+  return shouldReturnLocalBrowserExperience(requestInput)
+    ? createErrorResponse(
+        INVALID_PERSONAL_AI_GENERATION_REQUEST_FLOW_INPUT_CODE,
+        INVALID_PERSONAL_AI_GENERATION_REQUEST_FLOW_INPUT_MESSAGE,
+      )
+    : createErrorResponse(
+        INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_CODE,
+        INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_MESSAGE,
+      );
 }
 
 function normalizeOptionalText(value: unknown): string | null {
@@ -959,6 +1042,12 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             await readRequestJson(request),
             userContext,
           );
+          const quantityValidationResponse =
+            createInvalidRouteIntegratedQuantityResponse(requestInput);
+
+          if (quantityValidationResponse !== null) {
+            return createJsonResponse(quantityValidationResponse);
+          }
 
           if (shouldReturnLocalBrowserExperience(requestInput)) {
             const authorizationContext =

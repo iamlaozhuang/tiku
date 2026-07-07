@@ -179,12 +179,28 @@ function createLocalContractResponse(input: {
   };
 }
 
-function createContentPaperAssembly() {
+function createContentPaperAssembly(
+  input: {
+    matchQuality?:
+      | "fully_matched"
+      | "supplemented_from_nearby_knowledge"
+      | "supplemented_from_same_scope"
+      | "insufficient";
+    requestedQuestionCount?: number;
+    selectedQuestionCount?: number;
+    insufficiency?: { missingQuestionCount: number } | null;
+  } = {},
+) {
+  const requestedQuestionCount = input.requestedQuestionCount ?? 2;
+  const selectedQuestionCount =
+    input.selectedQuestionCount ?? requestedQuestionCount;
+  const matchQuality = input.matchQuality ?? "fully_matched";
+
   return {
-    status: "assembled",
+    status: matchQuality === "insufficient" ? "insufficient" : "assembled",
     sourceDiagnostics: {
       role: "content_admin",
-      platformQuestionCount: 2,
+      platformQuestionCount: selectedQuestionCount,
       enterpriseQuestionCount: 0,
       enterpriseSourceStatus: "not_applicable",
     },
@@ -193,20 +209,20 @@ function createContentPaperAssembly() {
       profession: "marketing",
       level: 3,
       subject: "theory",
-      requestedQuestionCount: 2,
-      selectedQuestionCount: 2,
+      requestedQuestionCount,
+      selectedQuestionCount,
       sourceComposition: {
-        platformFormalQuestionCount: 2,
+        platformFormalQuestionCount: selectedQuestionCount,
         enterpriseTrainingSnapshotCount: 0,
       },
-      matchQuality: "fully_matched",
+      matchQuality,
       sections: [
         {
           sectionKey: "single_choice",
           title: "单选题",
           questionType: "single_choice",
-          targetQuestionCount: 2,
-          selectedQuestionCount: 2,
+          targetQuestionCount: requestedQuestionCount,
+          selectedQuestionCount,
           selectedQuestions: [
             {
               questionPublicId: "platform_formal_question_public_a",
@@ -222,14 +238,21 @@ function createContentPaperAssembly() {
             },
           ],
           degradationSummary: {
-            exactCount: 1,
-            nearbyKnowledgeCount: 1,
-            sameScopeCount: 0,
+            exactCount:
+              matchQuality === "fully_matched" ? selectedQuestionCount : 0,
+            nearbyKnowledgeCount:
+              matchQuality === "supplemented_from_nearby_knowledge"
+                ? selectedQuestionCount
+                : 0,
+            sameScopeCount:
+              matchQuality === "supplemented_from_same_scope"
+                ? selectedQuestionCount
+                : 0,
           },
         },
       ],
     },
-    insufficiency: null,
+    insufficiency: input.insufficiency ?? null,
     redactionStatus: "redacted",
   };
 }
@@ -1221,6 +1244,118 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("providerPayload");
+  });
+
+  it("renders paper assembly degradation and insufficiency as Chinese product wording", async () => {
+    const cases = [
+      {
+        matchQuality: "supplemented_from_nearby_knowledge" as const,
+        expectedText: "已从相近知识点自动补足",
+        forbiddenText: "supplemented_from_nearby_knowledge",
+        selectedQuestionCount: 2,
+        insufficiency: null,
+      },
+      {
+        matchQuality: "supplemented_from_same_scope" as const,
+        expectedText: "已从同范围题目自动补足",
+        forbiddenText: "supplemented_from_same_scope",
+        selectedQuestionCount: 2,
+        insufficiency: null,
+      },
+      {
+        matchQuality: "insufficient" as const,
+        expectedText: "题源不足，需调整条件",
+        forbiddenText: "insufficient_formal_question_source",
+        selectedQuestionCount: 1,
+        insufficiency: { missingQuestionCount: 1 },
+      },
+    ];
+
+    for (const testCase of cases) {
+      cleanup();
+      vi.unstubAllGlobals();
+      const blockedResponse = createLocalContractResponse({
+        workspace: "content",
+        generationKind: "paper",
+      });
+      const providerVisibleResponse = {
+        ...blockedResponse,
+        data: {
+          ...blockedResponse.data,
+          runtimeBridge: {
+            ...blockedResponse.data.runtimeBridge,
+            bridgeStatus: "provider_call_succeeded",
+            providerCallExecuted: true,
+            visibleGeneratedContent: {
+              content: "后台本次生成草稿：只展示安全摘要。",
+              contentVisibility: "transient_response_only",
+              persistenceStatus: "not_persisted",
+              safetyStatus: "checked",
+            },
+            redactionStatus: "redacted",
+          },
+          paperAssembly: createContentPaperAssembly({
+            matchQuality: testCase.matchQuality,
+            requestedQuestionCount: 2,
+            selectedQuestionCount: testCase.selectedQuestionCount,
+            insufficiency: testCase.insufficiency,
+          }),
+        },
+      };
+      const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/sessions") {
+          return Response.json(
+            createSessionResponse({ adminRoles: ["content_admin"] }),
+          );
+        }
+
+        if (
+          isAdminAiGenerationPostRequest(
+            url,
+            "/api/v1/content-ai-generation-requests",
+            init,
+          )
+        ) {
+          return Response.json(providerVisibleResponse);
+        }
+
+        if (
+          isAdminAiGenerationHistoryRequest(
+            url,
+            "/api/v1/content-ai-generation-requests",
+            init,
+          )
+        ) {
+          return Response.json(createEmptyTaskHistoryResponse("content"));
+        }
+
+        throw new Error(`Unexpected fetch: ${String(url)}`);
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(
+        createElement(AdminAiGenerationEntryPage, {
+          workspace: "content",
+          generationKind: "paper",
+        }),
+      );
+
+      fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
+
+      const visibleContent = await screen.findByTestId(
+        "admin-visible-generated-content",
+      );
+      expect(visibleContent).toHaveTextContent(testCase.expectedText);
+      expect(visibleContent).not.toHaveTextContent(testCase.forbiddenText);
+      expect(visibleContent).not.toHaveTextContent("fallback");
+      expect(visibleContent).not.toHaveTextContent("matchQuality");
+
+      if (testCase.insufficiency !== null) {
+        expect(visibleContent).toHaveTextContent(
+          "仍缺 1 题，请调整知识点、题型或题量。",
+        );
+      }
+    }
   });
 
   it("renders organization advanced admin AI paper drafts on the same structured surface", async () => {

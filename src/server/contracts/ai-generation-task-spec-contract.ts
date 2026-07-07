@@ -27,6 +27,7 @@ export type AiGenerationSharedTaskSpec = {
   structuredPreviewKind: AiGenerationSharedStructuredPreviewKind;
   countSemantic: AiGenerationSharedTaskCountSemantic;
   defaultQuestionCount: number;
+  maxQuestionCount: number;
   allowedOutputFields: readonly string[];
   redactionCategory: AiGenerationSharedTaskRedactionCategory;
 };
@@ -44,7 +45,8 @@ export const aiGenerationSharedTaskSpecs = {
     label: "AI出题",
     structuredPreviewKind: "question_set",
     countSemantic: "exact_requested_question_count",
-    defaultQuestionCount: 10,
+    defaultQuestionCount: 3,
+    maxQuestionCount: 10,
     allowedOutputFields: ["questions", "questionDrafts", "question_drafts"],
     redactionCategory: "question_draft_summary_only",
   },
@@ -54,6 +56,7 @@ export const aiGenerationSharedTaskSpecs = {
     structuredPreviewKind: "paper_draft",
     countSemantic: "requested_total_question_count",
     defaultQuestionCount: 30,
+    maxQuestionCount: 80,
     allowedOutputFields: [
       "title",
       "targetQuestionCount",
@@ -75,15 +78,42 @@ export function getAiGenerationSharedTaskSpec(
   return aiGenerationSharedTaskSpecs[taskType];
 }
 
+export function isAiGenerationSharedQuestionCountInRange(
+  taskType: AiGenerationSharedTaskType,
+  questionCount: number,
+): boolean {
+  const taskSpec = getAiGenerationSharedTaskSpec(taskType);
+
+  return (
+    Number.isInteger(questionCount) &&
+    questionCount > 0 &&
+    questionCount <= taskSpec.maxQuestionCount
+  );
+}
+
+export function resolveAiGenerationSharedRequestedQuestionCount(
+  taskType: AiGenerationSharedTaskType,
+  questionCount: number | undefined,
+): number {
+  const taskSpec = getAiGenerationSharedTaskSpec(taskType);
+
+  return typeof questionCount === "number" &&
+    Number.isInteger(questionCount) &&
+    questionCount > 0
+    ? Math.min(questionCount, taskSpec.maxQuestionCount)
+    : taskSpec.defaultQuestionCount;
+}
+
 export function createAiGenerationSharedTaskStructuredPreviewOptions(
   taskType: AiGenerationSharedTaskType,
   input: AiGenerationSharedTaskPreviewOptionsInput = {},
 ): AiGenerationRouteIntegratedStructuredPreviewOptions {
   const taskSpec = getAiGenerationSharedTaskSpec(taskType);
-  const requestedQuestionCount = resolveRequestedQuestionCount(
-    input.generationParameters?.questionCount,
-    taskSpec.defaultQuestionCount,
-  );
+  const requestedQuestionCount =
+    resolveAiGenerationSharedRequestedQuestionCount(
+      taskType,
+      input.generationParameters?.questionCount,
+    );
 
   return taskSpec.structuredPreviewKind === "question_set"
     ? {
@@ -94,15 +124,4 @@ export function createAiGenerationSharedTaskStructuredPreviewOptions(
         kind: "paper_draft",
         requestedQuestionCount,
       };
-}
-
-function resolveRequestedQuestionCount(
-  questionCount: number | undefined,
-  defaultQuestionCount: number,
-): number {
-  return typeof questionCount === "number" &&
-    Number.isInteger(questionCount) &&
-    questionCount > 0
-    ? questionCount
-    : defaultQuestionCount;
 }

@@ -47,6 +47,10 @@ import type {
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
 import {
+  getAiGenerationSharedTaskSpec,
+  type AiGenerationSharedTaskType,
+} from "../contracts/ai-generation-task-spec-contract";
+import {
   resolveAndAssembleAiPaperFromRoute,
   type AiPaperRoutePlanSelectWiringResult,
 } from "./ai-paper-route-plan-select-wiring-service";
@@ -57,7 +61,6 @@ import type {
   AdminAiGenerationTaskPersistenceResult,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
-import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import {
@@ -295,24 +298,30 @@ function normalizeRouteIntegratedLevel(
     : null;
 }
 
-function normalizeRouteIntegratedQuestionCount(value: unknown): number | null {
+function normalizeRouteIntegratedQuestionCount(
+  value: unknown,
+  taskType: AiGenerationSharedTaskType,
+): number | null {
   const parsedCount =
     typeof value === "number"
       ? value
       : typeof value === "string"
         ? Number(value)
         : null;
+  const maxQuestionCount =
+    getAiGenerationSharedTaskSpec(taskType).maxQuestionCount;
 
   return parsedCount !== null &&
     Number.isInteger(parsedCount) &&
     parsedCount > 0 &&
-    parsedCount <= 100
+    parsedCount <= maxQuestionCount
     ? parsedCount
     : null;
 }
 
 function normalizeRouteIntegratedGenerationParameters(
   value: unknown,
+  taskType: AiGenerationSharedTaskType,
 ): AiGenerationRouteIntegratedGenerationParameters | null {
   if (!isRecord(value)) {
     return null;
@@ -323,6 +332,7 @@ function normalizeRouteIntegratedGenerationParameters(
   const subject = normalizeRouteIntegratedSubject(value.subject);
   const questionCount = normalizeRouteIntegratedQuestionCount(
     value.questionCount,
+    taskType,
   );
 
   if (
@@ -446,7 +456,7 @@ function canUseAdminAiGeneration(
 
 function resolveTaskType(
   generationKind: AdminAiGenerationKind,
-): AiGenerationTaskType {
+): AiGenerationSharedTaskType {
   return generationKind === "question"
     ? "ai_question_generation"
     : "ai_paper_generation";
@@ -1444,9 +1454,12 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
           isRecord(body) ? body.generationKind : null,
         );
         const generationParameters =
-          normalizeRouteIntegratedGenerationParameters(
-            isRecord(body) ? body.generationParameters : null,
-          );
+          generationKind === null
+            ? null
+            : normalizeRouteIntegratedGenerationParameters(
+                isRecord(body) ? body.generationParameters : null,
+                resolveTaskType(generationKind),
+              );
 
         if (generationKind === null || generationParameters === null) {
           return createJsonResponse(invalidAdminAiGenerationRequestResponse);

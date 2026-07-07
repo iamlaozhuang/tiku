@@ -1274,6 +1274,55 @@ describe("personal AI generation request route handlers", () => {
     });
   });
 
+  it("rejects personal AI generation question counts above the product contract before persistence", async () => {
+    const questionRequestRepository = createRequestRepository();
+    const { collection: questionCollection } =
+      createPersonalAiGenerationRequestRouteHandlers(async () => userContext, {
+        requestRepository: questionRequestRepository,
+      });
+
+    const questionResponse = await questionCollection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        generationParameters: {
+          ...sufficientGroundingContext.generationParameters,
+          questionCount: 11,
+        },
+      }),
+    );
+
+    await expect(questionResponse.json()).resolves.toEqual({
+      code: 400015,
+      message: "Invalid personal AI generation request flow input.",
+      data: null,
+    });
+    expect(questionRequestRepository.createCalls).toEqual([]);
+
+    const paperRequestRepository = createRequestRepository();
+    const { collection: paperCollection } =
+      createPersonalAiGenerationRequestRouteHandlers(async () => userContext, {
+        requestRepository: paperRequestRepository,
+      });
+
+    const paperResponse = await paperCollection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        taskType: "ai_paper_generation",
+        generationParameters: {
+          ...sufficientGroundingContext.generationParameters,
+          questionCount: 81,
+        },
+      }),
+    );
+
+    await expect(paperResponse.json()).resolves.toEqual({
+      code: 400015,
+      message: "Invalid personal AI generation request flow input.",
+      data: null,
+    });
+    expect(paperRequestRepository.createCalls).toEqual([]);
+  });
+
   it("does not allow the client request body to enable the runtime bridge", async () => {
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,

@@ -44,6 +44,129 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 activeTasks:
+  - id: ai-training-quantity-validation-degradation-alignment-2026-07-06
+    title: AI training quantity validation and degradation alignment
+    phase: ai-generation-recontract-local-repair-goal-2026-07-06
+    status: closed
+    result: pass_quantity_validation_degradation_alignment_unit_gates
+    priority: p0
+    taskKind: source_test_quantity_validation_degradation_alignment
+    executionProfile: local_source_and_focused_unit_quantity_validation_degradation_alignment_no_dependency_no_schema_no_migration_no_db_runtime_no_provider_no_browser_no_staging_prod_no_cost_calibration
+    validationPolicy: read_gate_task_plan_tdd_red_green_focused_unit_lint_typecheck_precommit_redacted_evidence_audit
+    moduleRunVersion: 2
+    dependsOn:
+      - ai-training-content-admin-ui-recontract-2026-07-06
+    branch: codex/ai-training-quantity-validation-degradation-alignment-2026-07-06
+    humanApprovalBoundary: active_parent_goal_continuation_local_source_only_no_remote_closeout_2026_07_06
+    plannedAt: "2026-07-06T18:39:00-07:00"
+    claimedAt: "2026-07-06T18:39:00-07:00"
+    materializedAt: "2026-07-06T18:39:00-07:00"
+    completedAt: "2026-07-06T18:49:58-07:00"
+    targetClosureItem: Align AI出题 and AI组卷 quantity defaults, maximum validation, backend request rejection, shared structured preview limits, and Chinese product wording for paper-source insufficiency/degradation.
+    behaviorBoundary: source_test_docs_state_evidence_audit_only_no_dependency_no_package_lockfile_no_schema_migration_seed_no_env_secret_no_direct_db_runtime_no_provider_call_no_browser_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_file_paths_test_names_command_statuses_role_labels_source_categories_counts_and_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
+    planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-training-quantity-validation-degradation-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-training-quantity-validation-degradation-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-training-quantity-validation-degradation-alignment.md
+    requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-06-ai-training-quantity-validation-degradation-alignment.md
+      - docs/05-execution-logs/evidence/2026-07-06-ai-training-quantity-validation-degradation-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-07-06-ai-training-quantity-validation-degradation-alignment.md
+      - src/server/contracts/ai-generation-task-spec-contract.ts
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/admin-ai-generation-local-contract-route.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/admin-ai-generation-local-contract-route.test.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
+      - src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
+      - tests/unit/admin-ai-generation-entry-surface.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      schemaMigration: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      browserRuntime: blocked
+      devServer: blocked
+      e2eRuntime: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx -t "bounded|above the product contract|bounds preserved"
+      - npm.cmd run test:unit -- tests/unit/admin-ai-generation-entry-surface.test.ts -t "degradation and insufficiency"
+      - npm.cmd run test:unit -- src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - git diff --check
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-training-quantity-validation-degradation-alignment.md docs/05-execution-logs/evidence/2026-07-06-ai-training-quantity-validation-degradation-alignment.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-training-quantity-validation-degradation-alignment.md src/server/contracts/ai-generation-task-spec-contract.ts src/server/services/route-integrated-provider-instruction-service.ts src/server/services/admin-ai-generation-local-contract-route.ts src/server/services/personal-ai-generation-request-route.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-training-quantity-validation-degradation-alignment-2026-07-06
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: active_parent_goal_continuation_local_source_only_no_remote_closeout_2026_07_06
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_approval_required
+    validationSummary:
+      status: pass
+      readGate: pass
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      tddRedObserved: pass_5_expected_failures_quantity_contract
+      focusedUnit: pass_6_files_149_tests
+      gitDiffCheck: pass
+      typecheck: pass
+      lint: pass
+      scopedPrettierCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      sourceChanged: true
+      testChanged: true
+      dependencyChanged: false
+      schemaMigrationSeedChanged: false
+      dbMutationExecuted: false
+      providerCallExecuted: false
+      browserRuntimeExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
   - id: ai-training-content-admin-ui-recontract-2026-07-06
     title: AI training content admin UI recontract
     phase: ai-generation-recontract-local-repair-goal-2026-07-06

@@ -1,6 +1,6 @@
 import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/route-integrated-provider-execution-contract";
 import {
-  getAiGenerationSharedTaskSpec,
+  resolveAiGenerationSharedRequestedQuestionCount,
   type AiGenerationSharedTaskType,
 } from "../contracts/ai-generation-task-spec-contract";
 
@@ -14,10 +14,11 @@ export type RouteIntegratedProviderInstructionInput = {
 export function createRouteIntegratedProviderInstruction(
   input: RouteIntegratedProviderInstructionInput,
 ): string {
-  const taskSpec = getAiGenerationSharedTaskSpec(input.taskType);
   const requestedQuestionCount =
-    input.groundingContext?.generationParameters.questionCount ??
-    taskSpec.defaultQuestionCount;
+    resolveAiGenerationSharedRequestedQuestionCount(
+      input.taskType,
+      input.groundingContext?.generationParameters.questionCount,
+    );
 
   return [
     "为题库系统生成简短中文草稿内容。",

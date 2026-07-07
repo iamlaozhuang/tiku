@@ -2230,6 +2230,50 @@ describe("admin AI generation local contract route handlers", () => {
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_H");
   });
 
+  it("rejects admin AI generation question counts above the product contract before persistence", async () => {
+    const questionTaskPersistenceRecorder = createTaskPersistenceRecorder();
+    const questionResponse = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      taskPersistenceRepository: questionTaskPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 11,
+        },
+      },
+    });
+
+    await expect(questionResponse.json()).resolves.toEqual({
+      code: 400013,
+      message: "Invalid admin AI generation request input.",
+      data: null,
+    });
+    expect(questionTaskPersistenceRecorder.calls).toEqual([]);
+
+    const paperTaskPersistenceRecorder = createTaskPersistenceRecorder();
+    const paperResponse = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      taskPersistenceRepository: paperTaskPersistenceRecorder.repository,
+      body: {
+        generationKind: "paper",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 81,
+        },
+      },
+    });
+
+    await expect(paperResponse.json()).resolves.toEqual({
+      code: 400013,
+      message: "Invalid admin AI generation request input.",
+      data: null,
+    });
+    expect(paperTaskPersistenceRecorder.calls).toEqual([]);
+  });
+
   it("returns content admin metadata-only task history scoped to the content review workspace", async () => {
     const taskPersistenceRecorder = createTaskPersistenceRecorder({
       taskHistoryItems: [
