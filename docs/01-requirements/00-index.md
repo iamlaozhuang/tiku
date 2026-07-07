@@ -106,6 +106,10 @@
 为避免重复讨论、遗漏本轮决策或把已实现/未实现状态混入需求语义，后续涉及上述范围的 UI/UX、需求或实现任务还应读取
 [Current Thread Requirement Reconciliation Ledger](./traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md)，并在任务计划中引用相关 `CT-REQ-*` 行。
 
+2026-07-07 起，后续任何涉及角色导航、页面布局、状态模板、AI 页面、内容生命周期、组织工作区、学员壳层、运营后台或 `super_admin` 工作区行为的源码任务，还必须先读取
+[Full-role UI/UX Source Implementation Entry](./traceability/2026-07-07-full-role-uiux-source-implementation-entry.md)。
+该入口把全角色 UI 整改汇总、六批 UI/UX 基线、仓库外本地设计板与复核结论固化为后续源码实现的必读门禁；源码分支必须在任务计划中引用实际实施的 P1/P2/P3 项、相关角色/页面族、设计板方向、明确延期项和边界防护。
+
 这些 traceability 文件只记录设计基线、缺口、决策和对账口径，不批准产品源码、测试、数据库、Provider、Prompt 编辑后台、浏览器验收、部署、Cost Calibration、release readiness 或 final Pass。
 
 ---
@@ -243,6 +247,9 @@ Minimum reading entry:
   or authorization task.
 - Read `advanced-edition/edition-aware-authorization-requirements.md` for `authorization`, `personal_auth`, `org_auth`,
   `redeem_code`, `effectiveEdition`, `edition`, or `auth_upgrade` work.
+- Read `traceability/2026-07-07-full-role-uiux-source-implementation-entry.md` for every UI/UX source task that touches
+  role navigation, page layout, state templates, AI pages, content lifecycle, organization workspaces, learner shell,
+  operations pages, or `super_admin` workspace behavior.
 - Read the latest relevant traceability decision or matrix before using execution logs as evidence.
 
 `docs/05-execution-logs/` remains valid evidence and history, but it is not sufficient as requirement SSOT by itself.

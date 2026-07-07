@@ -55,6 +55,12 @@ For context-bloat recovery, duplicate-work prevention, and row-level follow-up p
 `docs/01-requirements/traceability/2026-07-02-current-thread-requirement-reconciliation-ledger.md` and cite relevant
 `CT-REQ-*` row ids in future task plans.
 
+For source implementation of the 2026-07-07 full-role UI/UX remediation baseline, read
+`docs/01-requirements/traceability/2026-07-07-full-role-uiux-source-implementation-entry.md` before editing code. That
+entry binds future branches to the all-role UI summary, six UI/UX batch baselines, repository-external local design
+board, and baseline/design-board review. Task plans must cite exact affected P1/P2/P3 items and preserve role,
+authorization, edition, AI, content lifecycle, and redaction boundaries.
+
 These files record the current docs-only baseline, decision register, and reconciliation ledger. They do not approve
 source implementation, schema, Provider execution, Prompt editing UI, runtime acceptance, release readiness, final Pass,
 production usability, or Cost Calibration.
