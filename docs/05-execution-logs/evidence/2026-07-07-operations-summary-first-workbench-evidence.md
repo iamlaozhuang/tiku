@@ -39,6 +39,10 @@
 | Forbidden-file diff check                                                                                               | pass: no diff under package/lockfile/env/schema/migration/seed paths.                                 |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1` | pass: task-scoped scope, SSOT, requirement mapping, sensitive evidence, and terminology gates passed. |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1`   | pass: git readiness, evidence path, audit path, and accepted-ancestor checkpoint checks passed.       |
+| `git merge --ff-only codex/operations-summary-first-workbench-2026-07-07` on `master`                                   | pass: fast-forward to `353b4bdcf`.                                                                    |
+| `npm run lint` on `master` after merge                                                                                  | pass.                                                                                                 |
+| `npm run typecheck` on `master` after merge                                                                             | pass.                                                                                                 |
+| `npm run test:unit` on `master` after merge                                                                             | pass: 343 files, 1729 tests.                                                                          |
 
 ## Redaction Notes
 
@@ -47,4 +51,4 @@
 
 ## Result
 
-Branch 6 implementation validation is green locally and ready for feature commit.
+Branch 6 implementation merged to `master` by fast-forward. Master post-merge gates are green locally. Push and branch cleanup remain.

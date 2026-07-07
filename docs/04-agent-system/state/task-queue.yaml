@@ -571,7 +571,7 @@ activeTasks:
   - id: operations-summary-first-workbench-2026-07-07
     title: Operations summary-first workbench
     phase: operations-summary-first-workbench-2026-07-07
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_operations
@@ -611,7 +611,7 @@ activeTasks:
       - test-results/**
     capabilities: *low_risk_capabilities
     validationSummary:
-      status: pass_feature_validation_ready_for_commit
+      status: pass_branch6_merged_master_gates_ready_for_push_cleanup
       taskPlanPrepared: true
       evidencePrepared: true
       auditPrepared: true
@@ -625,6 +625,11 @@ activeTasks:
       diffCheck: pass
       preCommitHardening: pass
       prePushReadiness: pass
+      mergedToMaster: true
+      featureCommitSha: 353b4bdcff88139f997d7b8b69dd18b307dd9321
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeFullUnit: pass_343_files_1729_tests
       packageLockfileChanged: false
       envFileChanged: false
       schemaMigrationSeedChanged: false
