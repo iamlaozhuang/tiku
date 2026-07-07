@@ -1,8 +1,29 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-role-uiux-batch-5-content-admin-cross-role-closure-2026-07-07
-updatedAt: "2026-07-07T08:24:16-07:00"
+currentPhase: full-role-uiux-local-design-board-materialization-2026-07-07
+updatedAt: "2026-07-07T08:49:12-07:00"
+latestFullRoleUiuxLocalDesignBoardMaterialization:
+  id: full-role-uiux-local-design-board-materialization-2026-07-07
+  status: closed
+  result: pass_repository_external_local_design_board_materialized
+  branch: codex/full-role-uiux-local-design-board-materialization-2026-07-07
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-local-design-board-materialization.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-design-board-materialization.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-design-board-materialization.md
+  repositoryExternalOutput: D:/tiku-local-private/acceptance/design-boards/2026-07-07-full-role-uiux
+  conclusionBuckets:
+    localDesignBoard: pass_index_page_matrix_readme_manifest
+    pageMatrix: pass_68_sanitized_cards
+    screenshotEmbedding: pass_none_embedded
+    artifactRedactionScan: pass
+    sourceCodeChanged: false
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestFullRoleUiuxBatch5ContentAdminCrossRoleClosure:
   id: full-role-uiux-batch-5-content-admin-cross-role-closure-2026-07-07
   status: closed
@@ -273,38 +294,37 @@ latestPostRecontractAcceptanceConsolidation:
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
 currentTask:
-  id: full-role-uiux-batch-5-content-admin-cross-role-closure-2026-07-07
-  title: Full role UI/UX batch 5 content admin and cross-role closure
+  id: full-role-uiux-local-design-board-materialization-2026-07-07
+  title: Full role UI/UX local design board materialization
   phase: full-role-uiux-remediation-series-2026-07-07
   status: closed
-  result: pass_docs_only_content_admin_cross_role_uiux_baseline_prepared
-  priority: p1
-  taskKind: docs_only_uiux_baseline_batch
-  branch: codex/full-role-uiux-batch-5-content-admin-cross-role-closure-2026-07-07
-  humanApprovalBoundary: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
-  plannedAt: "2026-07-07T08:11:00-07:00"
-  claimedAt: "2026-07-07T08:11:00-07:00"
-  completedAt: "2026-07-07T08:24:16-07:00"
-  targetClosureItem: Converge UI/UX baseline for content draft/review loop and cross-role final terminology, menu, copy, and state consistency.
-  behaviorBoundary: docs_state_evidence_audit_only_no_repo_screenshots_no_source_test_package_env_schema_migration_seed_db_mutation_provider_staging_prod_deploy_cost_calibration_release_or_production_claim
+  result: pass_repository_external_local_design_board_materialized
+  priority: p2
+  taskKind: repository_external_local_design_board
+  branch: codex/full-role-uiux-local-design-board-materialization-2026-07-07
+  humanApprovalBoundary: current_user_approved_after_batches_0_to_5_single_repository_external_local_design_board_task_2026_07_07
+  plannedAt: "2026-07-07T08:31:00-07:00"
+  claimedAt: "2026-07-07T08:31:00-07:00"
+  completedAt: "2026-07-07T08:49:12-07:00"
+  targetClosureItem: Materialize a repository-external local design board after all six docs baselines converge.
+  behaviorBoundary: repository_external_local_design_artifacts_plus_docs_state_evidence_audit_only_no_repo_screenshots_no_source_test_package_env_schema_migration_seed_db_mutation_provider_staging_prod_deploy_cost_calibration_release_or_production_claim
   evidenceMode: redacted_role_page_labels_counts_safe_ui_observation_command_status_only_no_sensitive_values_no_raw_rows_no_internal_ids_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
+  repositoryExternalOutput: D:/tiku-local-private/acceptance/design-boards/2026-07-07-full-role-uiux
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-local-design-board-materialization.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-local-design-board-materialization.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-design-board-materialization.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-design-board-materialization.md
   validationSummary:
     status: pass
     taskPlanPrepared: true
     baselinePrepared: true
     evidencePrepared: true
     auditPrepared: true
-    screenshotInventoryReviewed: pass_content_admin_7_super_admin_content_pages_7
-    contentAdminBaseline: prepared
-    aiPaperPlanAndSelectAlignment: p1_candidate_root_cause_not_fixed
-    aiDraftAdoptionReviewPath: p1_candidate_root_cause_not_fixed
-    contentListDetailDensity: p1_candidate_root_cause_not_fixed
-    resourceKnowledgeStateMachines: p1_candidate_root_cause_not_fixed
-    superAdminContentLifecycleParity: p1_candidate_root_cause_not_fixed
+    localDesignBoardPrepared: pass
+    artifactFiles: pass_4
+    pageMatrix: pass_68_sanitized_cards
+    screenshotEmbedding: pass_none_embedded
+    artifactRedactionScan: pass
     selfReview: pass
     redactionScan: pass_added_lines_no_sensitive_values
     gitDiffCheck: pass
