@@ -1,9 +1,56 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: provider-enabled-bounded-smoke-2026-07-07
-updatedAt: "2026-07-07T01:19:55-07:00"
+currentPhase: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
+updatedAt: "2026-07-07T01:44:11-07:00"
+latestPostRecontractAcceptanceConsolidation:
+  id: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
+  status: closed
+  result: pass_source_unit_partial_runtime_partial_browser_bounded_provider_disabled_and_enabled_non_release
+  branch: codex/post-recontract-local-acceptance-consolidation-2026-07-07
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+  conclusionBuckets:
+    sourceUnit: pass
+    dbBackedRuntime: partial
+    browser: partial
+    providerDisabled: pass_bounded_local
+    providerEnabledSmallSample: pass_bounded_local
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 currentTask:
+  id: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
+  title: Post-recontract local adversarial acceptance consolidation
+  phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-07
+  status: closed
+  result: pass_source_unit_partial_runtime_partial_browser_bounded_provider_disabled_and_enabled_non_release
+  priority: p0
+  taskKind: local_acceptance_consolidation
+  branch: codex/post-recontract-local-acceptance-consolidation-2026-07-07
+  plannedAt: "2026-07-07T01:44:11-07:00"
+  completedAt: "2026-07-07T01:44:11-07:00"
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+  validationSummary:
+    status: pass_with_partial_runtime_and_browser
+    sourceUnit: pass_20_files_286_tests
+    dbBackedRuntime: partial
+    browser: partial
+    providerDisabled: pass_bounded_local
+    providerEnabledSmallSample: pass_bounded_local
+    lint: pass
+    typecheck: pass
+    gitDiffCheck: pass
+    scopedPrettierCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    releaseFinalProductionClaimed: false
+    productionUsabilityClaimed: false
+    stagingProdDeployExecuted: false
+    costCalibrationExecutedOrClaimed: false
+previousCurrentTaskBeforePostRecontractLocalAcceptanceConsolidation20260707:
   id: provider-enabled-bounded-smoke-2026-07-07
   title: Provider-enabled bounded smoke
   phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-06

@@ -44,6 +44,122 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 activeTasks:
+  - id: post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
+    title: Post-recontract local adversarial acceptance consolidation
+    phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-07
+    status: closed
+    result: pass_source_unit_partial_runtime_partial_browser_bounded_provider_disabled_and_enabled_non_release
+    priority: p0
+    taskKind: local_acceptance_consolidation
+    executionProfile: docs_state_evidence_audit_consolidation_with_fresh_source_unit_no_db_provider_browser_reexecution_no_staging_prod_no_cost_calibration
+    validationPolicy: read_gate_task_plan_current_source_unit_mechanism_diagnostics_redacted_evidence_audit_lint_typecheck_precommit
+    moduleRunVersion: 2
+    dependsOn:
+      - provider-enabled-bounded-smoke-2026-07-07
+      - 0704-local-org-enterprise-fixture-materialization-replay-2026-07-06
+      - ai-generation-credential-backed-role-matrix-replay-2026-07-06
+      - post-fix-provider-disabled-localhost-replay-2026-07-06
+    branch: codex/post-recontract-local-acceptance-consolidation-2026-07-07
+    humanApprovalBoundary: user_requested_post_recontract_local_adversarial_acceptance_consolidation_2026_07_07
+    plannedAt: "2026-07-07T01:44:11-07:00"
+    claimedAt: "2026-07-07T01:44:11-07:00"
+    materializedAt: "2026-07-07T01:44:11-07:00"
+    completedAt: "2026-07-07T01:44:11-07:00"
+    targetClosureItem: Consolidate current post-recontract local evidence across DB-backed replay, Provider-disabled replay, Provider-enabled bounded smoke, browser role matrix, and fresh source/unit gates into final classification buckets without release, production, staging, or Cost Calibration claims.
+    behaviorBoundary: docs_state_evidence_audit_only_no_source_test_change_no_dependency_no_package_lockfile_no_schema_migration_seed_no_new_db_runtime_no_browser_replay_no_provider_call_no_env_secret_readout_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_document_paths_command_names_exit_status_test_counts_role_labels_workflow_labels_aggregate_categories_and_conclusion_buckets_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values_employee_raw_answers
+    planPath: docs/05-execution-logs/task-plans/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+    requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+      - docs/05-execution-logs/evidence/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+      - docs/05-execution-logs/audits-reviews/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      localDevServer: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerEnabledSmallSample: blocked_requires_separate_fresh_approval
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- src/server/services/ai-paper-plan-and-select-service.test.ts src/server/services/ai-paper-source-adapter-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts src/server/repositories/organization-training-repository.test.ts src/server/services/personal-ai-generation-learning-session-route.test.ts src/server/services/personal-ai-generation-learning-session-service.test.ts src/server/services/personal-ai-generation-runtime-bridge-service.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/student-personal-ai-generation-ui.test.ts tests/unit/student-home-ui.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts
+      - git diff --check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md docs/05-execution-logs/evidence/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md docs/05-execution-logs/audits-reviews/2026-07-07-post-recontract-local-adversarial-acceptance-consolidation.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId post-recontract-local-adversarial-acceptance-consolidation-2026-07-07
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_requested_post_recontract_local_adversarial_acceptance_consolidation_2026_07_07
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_approval_required
+    validationSummary:
+      status: pass_with_partial_runtime_and_browser
+      readGate: pass
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      sourceUnit: pass_20_files_286_tests
+      dbBackedRuntime: partial
+      browser: partial
+      providerDisabled: pass_bounded_local
+      providerEnabledSmallSample: pass_bounded_local
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      scopedPrettierCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      mechanismDiagnostics: pass
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
   - id: provider-enabled-bounded-smoke-2026-07-07
     title: Provider-enabled bounded smoke
     phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-06
