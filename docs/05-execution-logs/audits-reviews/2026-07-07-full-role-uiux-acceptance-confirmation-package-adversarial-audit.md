@@ -4,7 +4,7 @@ Task id: `full-role-uiux-acceptance-confirmation-package-2026-07-07`
 
 Branch: `codex/full-role-uiux-acceptance-confirmation-package-2026-07-07`
 
-Audit status: pass local source-level confirmation and precommit; browser/runtime acceptance not executed in this package.
+Audit status: pass local source-level confirmation, precommit, merge, master gates, and prepush; browser/runtime acceptance not executed in this package.
 
 ## Scope Audited
 
@@ -40,5 +40,7 @@ series or weakens the repository safety boundaries.
 The package is fit as a source-level acceptance confirmation artifact. It consolidates the branch 2-8 closure evidence,
 current local validation gates, and a safe manual-browser acceptance checklist without expanding scope or weakening
 sensitive-evidence boundaries.
+
+Post-merge master lint, typecheck, and full unit gates also pass before push readiness.
 
 Cost Calibration Gate remains blocked.
