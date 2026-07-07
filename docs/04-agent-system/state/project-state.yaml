@@ -1,41 +1,43 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: ai-generation-local-db-schema-materialization-alignment-2026-07-06
-updatedAt: "2026-07-06T22:20:00-07:00"
+currentPhase: ai-generation-drizzle-journal-drift-replay-2026-07-06
+updatedAt: "2026-07-06T22:57:42-07:00"
 currentTask:
-  id: ai-generation-local-db-schema-materialization-alignment-2026-07-06
-  title: AI generation local DB schema/materialization alignment
+  id: ai-generation-drizzle-journal-drift-replay-2026-07-06
+  title: AI generation Drizzle journal drift replay
   phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-06
   status: closed
-  result: partial_local_db_schema_materialized_targeted_db_replay_pass_migration_journal_drift_and_admin_enterprise_source_gap_remaining
+  result: pass_drizzle_journal_snapshot_aligned_clean_migration_baseline_db_replay_pass_with_minimal_fixture
   priority: p0
-  taskKind: local_db_schema_materialization_alignment
-  executionProfile: local_db_schema_alignment_and_db_backed_replay_no_provider_no_env_secret_no_staging_prod_no_cost_calibration
-  validationPolicy: read_gate_task_plan_local_db_metadata_materialization_replay_redacted_evidence_audit_lint_typecheck_precommit
+  taskKind: migration_metadata_repair_and_clean_db_replay
+  executionProfile: local_drizzle_metadata_fix_clean_migration_baseline_db_replay_no_provider_no_env_secret_no_staging_prod_no_cost_calibration
+  validationPolicy: read_gate_task_plan_migration_metadata_clean_db_replay_redacted_evidence_audit_lint_typecheck_precommit
   moduleRunVersion: 2
   dependsOn:
-    - ai-generation-db-backed-local-runtime-replay-2026-07-06
-  branch: codex/ai-generation-local-db-schema-materialization-alignment-2026-07-06
-  approvalBoundary: user_approved_local_db_schema_materialization_alignment_and_db_replay_2026_07_06
-  plannedAt: "2026-07-06T22:00:00-07:00"
-  claimedAt: "2026-07-06T22:00:00-07:00"
-  materializedAt: "2026-07-06T22:00:00-07:00"
-  completedAt: "2026-07-06T22:20:00-07:00"
-  targetClosureItem: Confirm whether the 0704 local DB needs non-destructive schema/materialization update or fixture refresh, apply only safe local materialization if needed, then rerun DB-backed replay for prior blockers.
-  behaviorBoundary: docs_state_evidence_audit_plus_local_db_metadata_diagnostic_existing_non_destructive_materialization_and_bounded_db_backed_replay_only_no_source_change_no_dependency_no_package_lockfile_no_schema_source_or_migration_metadata_change_no_destructive_db_action_no_env_secret_readout_no_provider_enabled_call_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim_no_remote_closeout
+    - ai-generation-local-db-schema-materialization-alignment-2026-07-06
+  branch: codex/ai-generation-drizzle-journal-drift-replay-2026-07-06
+  approvalBoundary: user_approved_drizzle_journal_drift_repair_clean_baseline_replay_2026_07_06
+  plannedAt: "2026-07-06T22:33:00-07:00"
+  claimedAt: "2026-07-06T22:33:00-07:00"
+  materializedAt: "2026-07-06T22:33:00-07:00"
+  completedAt: "2026-07-06T22:57:42-07:00"
+  targetClosureItem: Repair/align Drizzle migration journal drift for organization AI training closed-loop migration, decide org admin enterprise-source fixture need, and rerun clean migration baseline DB-backed replay.
+  behaviorBoundary: docs_state_evidence_audit_plus_drizzle_metadata_fix_clean_local_database_migration_baseline_and_minimal_redacted_fixture_replay_only_no_runtime_source_change_no_dependency_no_package_lockfile_no_existing_acceptance_db_destructive_operation_no_env_secret_readout_no_provider_enabled_call_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim_no_remote_closeout
   evidenceMode: redacted_document_paths_role_labels_route_workflow_labels_command_statuses_aggregate_categories_counts_safe_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-generation-drizzle-journal-drift-replay.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-generation-drizzle-journal-drift-replay.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-drizzle-journal-drift-replay.md
   requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
-    - docs/05-execution-logs/evidence/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
-    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
+    - drizzle/meta/_journal.json
+    - drizzle/meta/20260706052000_snapshot.json
+    - docs/05-execution-logs/task-plans/2026-07-06-ai-generation-drizzle-journal-drift-replay.md
+    - docs/05-execution-logs/evidence/2026-07-06-ai-generation-drizzle-journal-drift-replay.md
+    - docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-drizzle-journal-drift-replay.md
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -48,7 +50,11 @@ currentTask:
     - tests/**
     - e2e/**
     - src/db/schema/**
-    - drizzle/**
+    - drizzle/*.sql
+    - drizzle/meta/0*_snapshot.json
+    - drizzle/meta/202605*_snapshot.json
+    - drizzle/meta/202606*_snapshot.json
+    - drizzle/meta/20260706031000_snapshot.json
     - migrations/**
     - seed/**
     - compose.yaml
@@ -59,17 +65,17 @@ currentTask:
     - D:/tiku-local-private/**
     - D:\tiku-local-private\**
   capabilities:
-    localSourceChange: blocked
+    localSourceChange: approved_migration_metadata_only
     focusedUnitTest: approved
-    browserRuntime: approved_localhost_only_no_screenshot_no_dom_capture
-    localDevServer: approved_reuse_existing_or_start_localhost_only_no_env_secret_change
-    directDatabaseConnection: approved_existing_local_runtime_config_no_connection_details_or_raw_rows_recorded
-    databaseMutation: approved_non_destructive_local_schema_materialization_and_replay_only
+    browserRuntime: blocked
+    localDevServer: blocked
+    directDatabaseConnection: approved_local_clean_baseline_only_no_connection_details_or_raw_rows_recorded
+    databaseMutation: approved_create_clean_local_baseline_and_minimal_redacted_fixture_only_no_existing_acceptance_db_destructive_operation
     providerCall: blocked
     providerEnabledSmallSample: blocked_requires_separate_fresh_approval
     envSecretAccess: blocked
     dependencyIntroduction: blocked
-    schemaMigration: approved_local_db_only_existing_repository_migration_and_idempotent_sql_no_source_migration_change
+    schemaMigration: approved_drizzle_metadata_alignment_and_local_clean_migrate_only
     stagingProdDeploy: blocked
     forcePush: blocked
     pr: blocked
@@ -78,13 +84,14 @@ currentTask:
     - npm.cmd run lint
     - npm.cmd run typecheck
     - git diff --check
+    - npm.cmd exec -- drizzle-kit generate --dialect postgresql --schema ./src/db/schema/index.ts --out ./drizzle --name journal_drift_check
     - npm.cmd exec -- vitest run src/db/schema/ai-rag.test.ts src/db/schema/organization-training.test.ts src/server/repositories/personal-ai-generation-learning-session-repository.test.ts src/server/repositories/organization-training-repository.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/personal-ai-generation-learning-session-service.test.ts --reporter=dot
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md docs/05-execution-logs/evidence/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-local-db-schema-materialization-alignment.md
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-local-db-schema-materialization-alignment-2026-07-06
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-generation-drizzle-journal-drift-replay.md docs/05-execution-logs/evidence/2026-07-06-ai-generation-drizzle-journal-drift-replay.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-drizzle-journal-drift-replay.md drizzle/meta/_journal.json drizzle/meta/20260706052000_snapshot.json
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-drizzle-journal-drift-replay-2026-07-06
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_approved_local_db_schema_materialization_alignment_and_db_replay_2026_07_06
+      approvalSource: user_approved_drizzle_journal_drift_repair_clean_baseline_replay_2026_07_06
     fastForwardMerge:
       approved: false
       targetBranch: master
@@ -97,33 +104,34 @@ currentTask:
       deleteShortBranch: false
       approvalSource: fresh_approval_required
   validationSummary:
-    status: partial
+    status: pass
     readGate: pass
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
-    localDbMetadataDiagnosticBeforeAfter: pass
-    localDbSchemaMaterialized: true
-    drizzleMigrate: pass
-    existingIdempotentOrganizationSqlApplied: pass
+    drizzleJournalDriftReproduced: true
+    drizzleJournalAligned: true
+    drizzleSnapshotAligned: true
+    drizzleGenerateNoSchemaChanges: pass
+    cleanMigrationBaselineCreated: true
+    cleanMigrationBaselineMigrate: pass
+    cleanMigrationBaselineAppliedMigrationCount: 21
     lint: pass
     typecheck: pass
     focusedUnit: pass_7_files_91_tests
-    temporaryDbReplayHarness: pass_2_files_3_tests_then_removed
-    sourceChanged: false
+    temporaryDbReplayHarness: pass_1_file_2_tests_then_removed
+    sourceChanged: true_migration_metadata_only
     testChanged: false
     dependencyChanged: false
-    schemaSourceMigrationMetadataChanged: false
+    schemaSourceMigrationMetadataChanged: true_drizzle_journal_and_snapshot_only
     temporaryHarnessCommitted: false
     dbBackedRuntimeReplayExecuted: true
-    dbBackedTargetedReplayResult: pass
-    previousSchemaRelationMissingBlocker: resolved_for_current_local_db
-    previousSchemaColumnMissingBlocker: resolved_for_current_local_db
-    aiPaperPlanSelectBoundedReplay: pass_four_advanced_roles_one_question_local_db_only
-    adminEnterpriseSourceCoverage: not_proven_enterprise_source_count_0
-    migrationJournalDrift: present_requires_separate_fix
+    cleanBaselineDbBackedReplayResult: pass
+    previousMigrationJournalDrift: fixed
+    orgAdminEnterpriseSourceCoverage: pass_with_minimal_redacted_published_training_snapshot_fixture
+    fixtureMaterializationNeed: required_for_clean_baseline_business_replay_not_a_code_defect
     directDbRuntimeExecuted: true_via_existing_local_repositories_no_raw_rows_recorded
-    databaseMutation: non_destructive_local_schema_materialization_and_replay_only
+    databaseMutation: clean_local_baseline_create_and_minimal_redacted_fixture_only_existing_acceptance_db_not_destructively_modified
     providerEnabledCallExecuted: false
     providerEnabledBoundedSmoke: not_executed_requires_separate_fresh_approval
     providerPayloadRawPromptRawAiOutputRecorded: false

@@ -141,6 +141,13 @@
       "when": 1783307366697,
       "tag": "20260706031000_add_personal_ai_learning_session",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1783315200000,
+      "tag": "20260706052000_add_organization_ai_training_closed_loop",
+      "breakpoints": true
     }
   ]
 }
