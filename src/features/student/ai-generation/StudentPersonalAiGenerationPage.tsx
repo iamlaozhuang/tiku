@@ -1214,6 +1214,41 @@ function StudentAiPaperSourceSummary({
   );
 }
 
+function StudentAiGenerationBoundarySummary({
+  authorizationContext,
+}: {
+  authorizationContext: EffectiveAuthorizationContextDto | null;
+}) {
+  const sourceLabel = getStudentAiPaperSourceLabel(authorizationContext);
+  const contextLabel =
+    authorizationContext?.ownerType === "organization"
+      ? "组织授权上下文用于企业自测，组织额度只在已选中组织授权后使用。"
+      : "个人授权上下文用于个人自练，不自动切换到组织额度。";
+
+  return (
+    <section
+      data-testid="student-ai-zone-boundary"
+      className="border-border bg-surface rounded-xl border p-4"
+    >
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <ShieldAlert className="size-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 space-y-2">
+          <h2 className="font-heading text-text-primary text-base font-semibold">
+            生成边界
+          </h2>
+          <ul className="text-text-secondary space-y-1 text-sm leading-6">
+            <li>AI出题生成练习题草稿，不写入正式题目。</li>
+            <li>AI组卷从{sourceLabel}选题生成自测试卷，不写入正式试卷。</li>
+            <li>{contextLabel}</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function StudentPersonalAiGenerationVisibleGeneratedContent({
   visibleGeneratedContent,
 }: {
@@ -3443,153 +3478,215 @@ export function StudentPersonalAiGenerationPage() {
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
-      <div className="space-y-2">
-        <p className="text-brand-primary text-sm font-medium">个人 AI 训练</p>
-        <h1 className="font-heading text-text-primary text-2xl font-semibold">
-          {copy.title}
-        </h1>
-        <p className="text-text-secondary text-sm leading-6">{copy.subtitle}</p>
-      </div>
-
-      {shouldShowAuthorizationContextSelector ? (
-        <StudentPersonalAiGenerationAuthorizationContextSelector
-          authorizationContexts={authorizationContexts}
-          disabled={isAiGenerationActionDisabled}
-          onSelectAuthorizationContext={setSelectedAuthorizationPublicId}
-          selectedAuthorizationPublicId={selectedAuthorizationPublicId}
-        />
-      ) : null}
-
-      {shouldShowAiGenerationDetailControls ? (
-        <div className="grid grid-cols-1 gap-3">
-          <StudentAiTrainingModeTabs
-            activeTaskType={activeTaskType}
-            disabled={isAiGenerationActionDisabled}
-            onSelectTaskType={handleSelectAiTrainingTaskType}
-          />
-          {activeTaskType === "ai_question_generation" ? (
-            <StudentPersonalAiGenerationDetailControlGroup
-              title="AI出题参数"
-              description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
-              controls={activeAiQuestionDetailControls}
-              disabled={isAiGenerationActionDisabled}
-            />
-          ) : (
-            <>
-              <StudentAiPaperSourceSummary
-                authorizationContext={activeAuthorizationContext}
-                disabled={isAiGenerationActionDisabled}
-                onSourcePreferenceChange={setAiPaperSourcePreference}
-                sourcePreference={aiPaperSourcePreference}
-              />
-              <StudentPersonalAiGenerationDetailControlGroup
-                title="AI组卷参数"
-                description="用于个人或企业授权上下文下的自测组卷，从正式题库选题，不写入正式试卷。"
-                controls={activeAiPaperDetailControls}
-                disabled={isAiGenerationActionDisabled}
-              />
-            </>
-          )}
-          <button
-            type="button"
-            disabled={isAiGenerationActionDisabled}
-            onClick={() =>
-              void handleSubmitPersonalAiGenerationRequest(activeTaskType)
-            }
-            className="bg-primary text-primary-foreground flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {pageState === "loading" ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            ) : activeTaskType === "ai_question_generation" ? (
-              <Sparkles className="size-4" aria-hidden="true" />
-            ) : (
-              <ClipboardList className="size-4" aria-hidden="true" />
-            )}
-            {activeSubmitButtonLabel}
-          </button>
+      <section data-testid="student-ai-zone-context" className="space-y-5">
+        <div className="space-y-2">
+          <p className="text-brand-primary text-sm font-medium">个人 AI 训练</p>
+          <h1 className="font-heading text-text-primary text-2xl font-semibold">
+            {copy.title}
+          </h1>
+          <p className="text-text-secondary text-sm leading-6">
+            {copy.subtitle}
+          </p>
         </div>
-      ) : null}
 
-      {pageState === "ready" && experience !== null ? (
-        <StudentPersonalAiGenerationVisibleGeneratedContent
-          visibleGeneratedContent={
-            experience.runtimeBridge.visibleGeneratedContent
-          }
-        />
-      ) : null}
+        {shouldShowAuthorizationContextSelector ? (
+          <StudentPersonalAiGenerationAuthorizationContextSelector
+            authorizationContexts={authorizationContexts}
+            disabled={isAiGenerationActionDisabled}
+            onSelectAuthorizationContext={setSelectedAuthorizationPublicId}
+            selectedAuthorizationPublicId={selectedAuthorizationPublicId}
+          />
+        ) : null}
+      </section>
 
       {shouldShowAiGenerationDetailControls ? (
-        <StudentPersonalAiGenerationPracticeFeedbackActions
-          canUseGeneratedPractice={canUseGeneratedPractice}
-          isRetryDisabled={isRetryGenerationDisabled}
-          practiceFeedbackState={practiceFeedbackStateForCurrentResult}
-          onStartPractice={() => void handleStartAiLearningSession()}
-          onSubmitAnswer={() => void handleSubmitAiLearningAnswer()}
-          onViewFeedback={() => void handleViewAiLearningFeedback()}
-          onRetryGeneration={handleRetryPersonalAiGenerationRequest}
-        />
-      ) : null}
-
-      {isAiLearningSessionStarted && aiLearningSessionQuestions.length > 0 ? (
-        <StudentAiLearningSessionPanel
-          answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
-          onSelectOptionLabel={(question, optionLabel) => {
-            setSelectedAiLearningAnswerLabelsByQuestion(
-              (currentSelectedLabels) => {
-                const currentQuestionLabels =
-                  currentSelectedLabels[question.sessionQuestionPublicId] ?? [];
-                const nextQuestionLabels =
-                  question.questionType === "multi_choice"
-                    ? currentQuestionLabels.includes(optionLabel)
-                      ? currentQuestionLabels.filter(
-                          (currentLabel) => currentLabel !== optionLabel,
-                        )
-                      : [...currentQuestionLabels, optionLabel]
-                    : [optionLabel];
-
-                return {
-                  ...currentSelectedLabels,
-                  [question.sessionQuestionPublicId]: nextQuestionLabels,
-                };
-              },
-            );
-            setAiLearningAnswerFeedbackByQuestion({});
-          }}
-          questions={aiLearningSessionQuestions}
-          selectedOptionLabelsByQuestion={
-            selectedAiLearningAnswerLabelsByQuestion
-          }
-        />
-      ) : null}
-
-      {pageState === "loading" ? (
-        <section
-          className="border-border bg-surface rounded-xl border p-4"
-          aria-busy="true"
-        >
-          <div className="flex items-center gap-3">
-            <Loader2
-              className="text-brand-primary size-5 animate-spin"
-              aria-hidden="true"
+        <>
+          <section data-testid="student-ai-zone-mode">
+            <StudentAiTrainingModeTabs
+              activeTaskType={activeTaskType}
+              disabled={isAiGenerationActionDisabled}
+              onSelectTaskType={handleSelectAiTrainingTaskType}
             />
-            <p className="text-text-primary text-sm font-medium">
-              {copy.loadingTitle}
-            </p>
-          </div>
-        </section>
+          </section>
+
+          <section
+            data-testid="student-ai-zone-parameters"
+            className="grid grid-cols-1 gap-3"
+          >
+            {activeTaskType === "ai_question_generation" ? (
+              <StudentPersonalAiGenerationDetailControlGroup
+                title="AI出题参数"
+                description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
+                controls={activeAiQuestionDetailControls}
+                disabled={isAiGenerationActionDisabled}
+              />
+            ) : (
+              <>
+                <StudentAiPaperSourceSummary
+                  authorizationContext={activeAuthorizationContext}
+                  disabled={isAiGenerationActionDisabled}
+                  onSourcePreferenceChange={setAiPaperSourcePreference}
+                  sourcePreference={aiPaperSourcePreference}
+                />
+                <StudentPersonalAiGenerationDetailControlGroup
+                  title="AI组卷参数"
+                  description="用于个人或企业授权上下文下的自测组卷，从正式题库选题，不写入正式试卷。"
+                  controls={activeAiPaperDetailControls}
+                  disabled={isAiGenerationActionDisabled}
+                />
+              </>
+            )}
+            <button
+              type="button"
+              disabled={isAiGenerationActionDisabled}
+              onClick={() =>
+                void handleSubmitPersonalAiGenerationRequest(activeTaskType)
+              }
+              className="bg-primary text-primary-foreground flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pageState === "loading" ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : activeTaskType === "ai_question_generation" ? (
+                <Sparkles className="size-4" aria-hidden="true" />
+              ) : (
+                <ClipboardList className="size-4" aria-hidden="true" />
+              )}
+              {activeSubmitButtonLabel}
+            </button>
+          </section>
+
+          <StudentAiGenerationBoundarySummary
+            authorizationContext={activeAuthorizationContext}
+          />
+
+          <section
+            data-testid="student-ai-zone-result-history"
+            className="flex flex-col gap-5"
+          >
+            {pageState === "ready" && experience !== null ? (
+              <StudentPersonalAiGenerationVisibleGeneratedContent
+                visibleGeneratedContent={
+                  experience.runtimeBridge.visibleGeneratedContent
+                }
+              />
+            ) : null}
+
+            <StudentPersonalAiGenerationPracticeFeedbackActions
+              canUseGeneratedPractice={canUseGeneratedPractice}
+              isRetryDisabled={isRetryGenerationDisabled}
+              practiceFeedbackState={practiceFeedbackStateForCurrentResult}
+              onStartPractice={() => void handleStartAiLearningSession()}
+              onSubmitAnswer={() => void handleSubmitAiLearningAnswer()}
+              onViewFeedback={() => void handleViewAiLearningFeedback()}
+              onRetryGeneration={handleRetryPersonalAiGenerationRequest}
+            />
+
+            {isAiLearningSessionStarted &&
+            aiLearningSessionQuestions.length > 0 ? (
+              <StudentAiLearningSessionPanel
+                answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
+                onSelectOptionLabel={(question, optionLabel) => {
+                  setSelectedAiLearningAnswerLabelsByQuestion(
+                    (currentSelectedLabels) => {
+                      const currentQuestionLabels =
+                        currentSelectedLabels[
+                          question.sessionQuestionPublicId
+                        ] ?? [];
+                      const nextQuestionLabels =
+                        question.questionType === "multi_choice"
+                          ? currentQuestionLabels.includes(optionLabel)
+                            ? currentQuestionLabels.filter(
+                                (currentLabel) => currentLabel !== optionLabel,
+                              )
+                            : [...currentQuestionLabels, optionLabel]
+                          : [optionLabel];
+
+                      return {
+                        ...currentSelectedLabels,
+                        [question.sessionQuestionPublicId]: nextQuestionLabels,
+                      };
+                    },
+                  );
+                  setAiLearningAnswerFeedbackByQuestion({});
+                }}
+                questions={aiLearningSessionQuestions}
+                selectedOptionLabelsByQuestion={
+                  selectedAiLearningAnswerLabelsByQuestion
+                }
+              />
+            ) : null}
+
+            {pageState === "loading" ? (
+              <section
+                className="border-border bg-surface rounded-xl border p-4"
+                aria-busy="true"
+              >
+                <div className="flex items-center gap-3">
+                  <Loader2
+                    className="text-brand-primary size-5 animate-spin"
+                    aria-hidden="true"
+                  />
+                  <p className="text-text-primary text-sm font-medium">
+                    {copy.loadingTitle}
+                  </p>
+                </div>
+              </section>
+            ) : null}
+
+            {pageState === "empty" ? (
+              <StudentPersonalAiGenerationStateMessage
+                title={copy.emptyTitle}
+                description={copy.emptyDescription}
+              />
+            ) : null}
+
+            {pageState === "error" ? (
+              <StudentPersonalAiGenerationStateMessage
+                title={copy.errorTitle}
+                description={copy.errorDescription}
+                tone="warning"
+              />
+            ) : null}
+
+            {pageState === "ready" && experience !== null ? (
+              <StudentPersonalAiGenerationContractSummary
+                experience={experience}
+              />
+            ) : null}
+
+            <StudentPersonalAiGenerationHistorySummary
+              historyState={historyState}
+              historyRows={requestHistory}
+              onChangePage={(page) => void handleChangeRequestHistoryPage(page)}
+              pagination={requestHistoryPagination}
+              taskType={historyTaskType}
+            />
+
+            <StudentPersonalAiGenerationResultHistorySummary
+              historyTaskType={historyTaskType}
+              onChangePage={(page) => void handleChangeResultHistoryPage(page)}
+              pagination={resultHistoryPagination}
+              resultHistoryState={resultHistoryState}
+              resultHistory={resultHistory}
+              isResultDetailLoading={resultDetailState === "loading"}
+              onOpenResultDetail={(resultPublicId) =>
+                void handleOpenPersonalAiGenerationResultDetail(resultPublicId)
+              }
+              selectedResultPublicId={selectedResultPublicId}
+            />
+
+            <StudentPersonalAiGenerationResultDetailSummary
+              resultDetailState={resultDetailState}
+              resultDetail={resultDetail}
+            />
+          </section>
+        </>
       ) : null}
 
       {pageState === "checking" ? (
         <StudentPersonalAiGenerationStateMessage
           title={copy.checkingTitle}
           description={copy.unauthorizedDescription}
-        />
-      ) : null}
-
-      {pageState === "empty" ? (
-        <StudentPersonalAiGenerationStateMessage
-          title={copy.emptyTitle}
-          description={copy.emptyDescription}
         />
       ) : null}
 
@@ -3609,43 +3706,13 @@ export function StudentPersonalAiGenerationPage() {
         />
       ) : null}
 
-      {pageState === "error" ? (
+      {!shouldShowAiGenerationDetailControls && pageState === "error" ? (
         <StudentPersonalAiGenerationStateMessage
           title={copy.errorTitle}
           description={copy.errorDescription}
           tone="warning"
         />
       ) : null}
-
-      {pageState === "ready" && experience !== null ? (
-        <StudentPersonalAiGenerationContractSummary experience={experience} />
-      ) : null}
-
-      <StudentPersonalAiGenerationHistorySummary
-        historyState={historyState}
-        historyRows={requestHistory}
-        onChangePage={(page) => void handleChangeRequestHistoryPage(page)}
-        pagination={requestHistoryPagination}
-        taskType={historyTaskType}
-      />
-
-      <StudentPersonalAiGenerationResultHistorySummary
-        historyTaskType={historyTaskType}
-        onChangePage={(page) => void handleChangeResultHistoryPage(page)}
-        pagination={resultHistoryPagination}
-        resultHistoryState={resultHistoryState}
-        resultHistory={resultHistory}
-        isResultDetailLoading={resultDetailState === "loading"}
-        onOpenResultDetail={(resultPublicId) =>
-          void handleOpenPersonalAiGenerationResultDetail(resultPublicId)
-        }
-        selectedResultPublicId={selectedResultPublicId}
-      />
-
-      <StudentPersonalAiGenerationResultDetailSummary
-        resultDetailState={resultDetailState}
-        resultDetail={resultDetail}
-      />
     </section>
   );
 }

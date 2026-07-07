@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -35,6 +36,7 @@ const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const unavailableTitle =
   "\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e AI \u8bad\u7ec3";
 const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
+const resultHistoryTitle = "\u8fd1\u671f AI \u7ed3\u679c\u5386\u53f2";
 const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
 const localSessionUserPublicId = "user-dev-student";
@@ -1123,6 +1125,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       expect(
         screen.queryByRole("button", { name: paperButtonLabel }),
       ).toBeNull();
+      expect(screen.queryByRole("tablist", { name: "AI训练类型" })).toBeNull();
+      expect(screen.queryByText(historyTitle)).toBeNull();
+      expect(screen.queryByText(resultHistoryTitle)).toBeNull();
       expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
         "/api/v1/authorizations",
       ]);
@@ -1251,6 +1256,77 @@ describe("StudentPersonalAiGenerationPage", () => {
       "GET",
       "GET",
     ]);
+  });
+
+  it("renders advanced learner AI as five accountable zones without provider terminology", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/authorizations") {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => createAdvancedAuthorizationListResponse(),
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-requests")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyServerHistoryResponse,
+          };
+        }
+
+        if (String(url).startsWith("/api/v1/personal-ai-generation-results")) {
+          expect(init?.method).toBe("GET");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    const contextZone = screen.getByTestId("student-ai-zone-context");
+    const modeZone = screen.getByTestId("student-ai-zone-mode");
+    const parametersZone = screen.getByTestId("student-ai-zone-parameters");
+    const boundaryZone = screen.getByTestId("student-ai-zone-boundary");
+    const resultHistoryZone = screen.getByTestId(
+      "student-ai-zone-result-history",
+    );
+
+    expect(within(contextZone).getByText("授权上下文")).toBeInTheDocument();
+    expect(
+      within(modeZone).getByRole("tab", { name: "AI出题" }),
+    ).toHaveAttribute("aria-selected", "true");
+    expect(
+      within(parametersZone).getByRole("group", { name: "AI出题参数" }),
+    ).toBeInTheDocument();
+    expect(boundaryZone).toHaveTextContent("不写入正式题目");
+    expect(boundaryZone).toHaveTextContent("不写入正式试卷");
+    expect(
+      within(resultHistoryZone).getByText(historyTitle),
+    ).toBeInTheDocument();
+    expect(
+      within(resultHistoryZone).getByText(resultHistoryTitle),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("Provider");
+    expect(document.body.textContent).not.toContain("payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
   });
 
   it("shows and submits the learner AI出题 default quantity as 3", async () => {
