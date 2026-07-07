@@ -44,6 +44,127 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 activeTasks:
+  - id: ai-generation-db-backed-local-runtime-replay-2026-07-06
+    title: AI generation DB-backed local runtime replay
+    phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-06
+    status: closed
+    result: partial_db_backed_runtime_replay_ai_question_result_persistence_pass_ai_paper_and_learning_session_blocked_by_local_db_schema_materialization
+    priority: p0
+    taskKind: local_runtime_acceptance_replay
+    executionProfile: local_db_backed_runtime_replay_controlled_local_executor_no_provider_no_env_secret_no_staging_prod_no_cost_calibration
+    validationPolicy: read_gate_task_plan_localhost_db_replay_redacted_evidence_audit_lint_typecheck_precommit
+    moduleRunVersion: 2
+    dependsOn:
+      - ai-generation-db-provider-next-decision-2026-07-06
+    branch: codex/ai-generation-db-backed-local-runtime-replay-2026-07-06
+    humanApprovalBoundary: user_approved_db_backed_local_runtime_replay_only_2026_07_06
+    plannedAt: "2026-07-06T21:42:04-07:00"
+    claimedAt: "2026-07-06T21:42:04-07:00"
+    materializedAt: "2026-07-06T21:42:04-07:00"
+    completedAt: "2026-07-06T21:57:57-07:00"
+    targetClosureItem: Replay post-recontract AI出题 / AI组卷 DB-backed local runtime behavior using localhost/local DB and controlled local execution, without Provider, env/secret, staging/prod, or Cost Calibration.
+    behaviorBoundary: docs_state_evidence_audit_plus_localhost_local_db_runtime_replay_with_controlled_local_executor_only_no_source_change_no_dependency_no_package_lockfile_no_schema_migration_seed_no_destructive_db_action_no_env_secret_no_provider_enabled_call_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim_no_remote_closeout
+    evidenceMode: redacted_document_paths_role_labels_route_workflow_labels_command_statuses_aggregate_categories_counts_safe_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
+    planPath: docs/05-execution-logs/task-plans/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+    requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
+    requirementAlignmentPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+      - docs/05-execution-logs/evidence/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+      - docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: approved
+      browserRuntime: approved_localhost_only_no_screenshot_no_dom_capture
+      localDevServer: approved_reuse_existing_or_start_localhost_only_no_env_secret_change
+      directDatabaseConnection: blocked_unless_existing_local_app_runtime_uses_configured_db_without_printing_connection_details
+      databaseMutation: approved_non_destructive_product_actions_only
+      providerCall: blocked
+      providerEnabledSmallSample: blocked_requires_separate_fresh_approval
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-ai-generation-db-backed-local-runtime-replay.md docs/05-execution-logs/evidence/2026-07-06-ai-generation-db-backed-local-runtime-replay.md docs/05-execution-logs/audits-reviews/2026-07-06-ai-generation-db-backed-local-runtime-replay.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId ai-generation-db-backed-local-runtime-replay-2026-07-06
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: user_approved_db_backed_local_runtime_replay_only_2026_07_06
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+        approvalSource: fresh_approval_required
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_approval_required
+      cleanup:
+        deleteShortBranch: false
+        approvalSource: fresh_approval_required
+    validationSummary:
+      status: partial
+      readGate: pass
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      localhostLoginCheck: pass
+      lint: pass
+      typecheck: pass
+      focusedUnit: pass_5_files_83_tests
+      mechanismDiagnostics: pass_current_task_closeout_recommended_queue_clean_cost_calibration_blocked
+      sourceChanged: false
+      testChanged: false
+      dependencyChanged: false
+      schemaMigrationSeedChanged: false
+      temporaryHarnessCommitted: false
+      dbBackedRuntimeReplayExecuted: true
+      dbBackedRuntimeReplayResult: partial
+      aiQuestionResultPersistence: pass_all_replayed_advanced_roles
+      aiPaperResultPersistence: partial_personal_and_content_pass_org_employee_and_org_admin_blocked_by_db_schema_column_missing
+      learningSessionHandoff: blocked_by_db_schema_relation_missing
+      directDbRuntimeExecuted: true_via_existing_local_repositories_no_raw_rows_recorded
+      databaseMutation: non_destructive_product_draft_result_learning_attempts_only
+      providerEnabledCallExecuted: false
+      providerEnabledBoundedSmoke: not_executed_requires_separate_fresh_approval
+      providerPayloadRawPromptRawAiOutputRecorded: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
   - id: ai-generation-db-provider-next-decision-2026-07-06
     title: AI generation DB-backed runtime replay vs Provider-enabled bounded smoke next decision
     phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-06
