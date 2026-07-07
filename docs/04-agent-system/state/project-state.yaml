@@ -1,8 +1,30 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-role-uiux-batch-2-org-admin-workspace-2026-07-07
-updatedAt: "2026-07-07T07:46:00-07:00"
+currentPhase: full-role-uiux-batch-3-org-employee-workspace-2026-07-07
+updatedAt: "2026-07-07T07:56:04-07:00"
+latestFullRoleUiuxBatch3OrgEmployeeWorkspace:
+  id: full-role-uiux-batch-3-org-employee-workspace-2026-07-07
+  status: closed
+  result: pass_docs_only_org_employee_workspace_uiux_baseline_prepared
+  branch: codex/full-role-uiux-batch-3-org-employee-workspace-2026-07-07
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
+  conclusionBuckets:
+    organizationEmployeeBaseline: pass
+    screenshotInventoryReviewed: pass_org_standard_employee_9_org_advanced_employee_3
+    standardEmployeeAdvancedUnavailableState: p1_candidate_root_cause_not_fixed
+    employeeAiContextNaming: p1_candidate_root_cause_not_fixed
+    enterpriseTrainingListDetailFlow: p1_candidate_root_cause_not_fixed
+    learnerDesktopShell: p1_candidate_root_cause_not_fixed
+    sourceCodeChanged: false
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestFullRoleUiuxBatch2OrgAdminWorkspace:
   id: full-role-uiux-batch-2-org-admin-workspace-2026-07-07
   status: closed
@@ -205,37 +227,37 @@ latestPostRecontractAcceptanceConsolidation:
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
 currentTask:
-  id: full-role-uiux-batch-2-org-admin-workspace-2026-07-07
-  title: Full role UI/UX batch 2 organization admin workspace
+  id: full-role-uiux-batch-3-org-employee-workspace-2026-07-07
+  title: Full role UI/UX batch 3 organization employee workspace
   phase: full-role-uiux-remediation-series-2026-07-07
   status: closed
-  result: pass_docs_only_org_admin_workspace_uiux_baseline_prepared
+  result: pass_docs_only_org_employee_workspace_uiux_baseline_prepared
   priority: p1
   taskKind: docs_only_uiux_baseline_batch
-  branch: codex/full-role-uiux-batch-2-org-admin-workspace-2026-07-07
+  branch: codex/full-role-uiux-batch-3-org-employee-workspace-2026-07-07
   humanApprovalBoundary: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
-  plannedAt: "2026-07-07T07:40:58-07:00"
-  claimedAt: "2026-07-07T07:40:58-07:00"
-  completedAt: "2026-07-07T07:46:00-07:00"
-  targetClosureItem: Converge UI/UX baseline for organization admin dashboard, employees, authorization, and training management workflows.
+  plannedAt: "2026-07-07T07:51:16-07:00"
+  claimedAt: "2026-07-07T07:51:16-07:00"
+  completedAt: "2026-07-07T07:56:04-07:00"
+  targetClosureItem: Converge UI/UX baseline for organization employee learning, AI entry visibility, refusal states, and advanced-edition working-state messages.
   behaviorBoundary: docs_state_evidence_audit_only_no_repo_screenshots_no_source_test_package_env_schema_migration_seed_db_mutation_provider_staging_prod_deploy_cost_calibration_release_or_production_claim
   evidenceMode: redacted_role_page_labels_counts_safe_ui_observation_command_status_only_no_sensitive_values_no_raw_rows_no_internal_ids_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-2-org-admin-workspace.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-2-org-admin-workspace.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-2-org-admin-workspace.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-2-org-admin-workspace.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-3-org-employee-workspace.md
   validationSummary:
     status: pass
     taskPlanPrepared: true
     baselinePrepared: true
     evidencePrepared: true
     auditPrepared: true
-    screenshotInventoryReviewed: pass_org_standard_admin_5_org_advanced_admin_5
-    organizationAdminBaseline: prepared
-    standardUnavailableTemplate: proposed
-    organizationContextDisplay: p1_candidate_root_cause_not_fixed
-    organizationTrainingWizardSeparation: p1_candidate_root_cause_not_fixed
-    organizationAiToTrainingHandoff: p1_candidate_root_cause_not_fixed
+    screenshotInventoryReviewed: pass_org_standard_employee_9_org_advanced_employee_3
+    organizationEmployeeBaseline: prepared
+    standardEmployeeAdvancedUnavailableState: p1_candidate_root_cause_not_fixed
+    employeeAiContextNaming: p1_candidate_root_cause_not_fixed
+    enterpriseTrainingListDetailFlow: p1_candidate_root_cause_not_fixed
+    learnerDesktopShell: p1_candidate_root_cause_not_fixed
     selfReview: pass
     redactionScan: pass_added_lines_no_sensitive_values
     gitDiffCheck: pass
