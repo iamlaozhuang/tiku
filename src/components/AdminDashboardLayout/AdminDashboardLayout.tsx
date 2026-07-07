@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  AlertCircle,
   BarChart3,
   BookOpenText,
   BookOpenCheck,
@@ -14,7 +13,6 @@ import {
   FileText,
   FolderOpen,
   KeyRound,
-  LoaderCircle,
   LogOut,
   Network,
   ScrollText,
@@ -29,6 +27,12 @@ import {
   canUseOrganizationAdvancedWorkspaceCapability,
   getAdminWorkspaceCapabilitySummary,
 } from "@/features/admin/organization-workspace/admin-organization-workspace-access";
+import {
+  AdminStateTemplate,
+  AdminWorkspaceContextBand,
+} from "@/components/admin/AdminStateTemplate";
+import type { AdminWorkspaceRouteAccessDecision } from "@/server/contracts/admin-workspace-role-guard-contract";
+import { resolveAdminWorkspaceRouteAccess } from "@/server/services/admin-workspace-role-guard-service";
 
 /**
  * 后台管理端布局
@@ -105,13 +109,17 @@ type AdminDashboardLayoutStatus =
   | "checking"
   | "authorized"
   | "unauthorized"
-  | "forbidden";
+  | "forbidden"
+  | "missing-organization-context"
+  | "standard-unavailable";
 type AdminWorkspace = "ops" | "content" | "organization";
 type AdminDashboardAuthState = {
   status: AdminDashboardLayoutStatus;
   workspace: AdminWorkspace | null;
+  pathname: string | null;
   adminRoles: readonly string[];
   canUseOrganizationAdvancedWorkspace: boolean;
+  accessDecision: AdminWorkspaceRouteAccessDecision | null;
 };
 type WorkspaceReturnAction = {
   href: string;
@@ -119,6 +127,13 @@ type WorkspaceReturnAction = {
 };
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
+const ADMIN_ROLE_LABELS: Record<string, string> = {
+  content_admin: "内容管理员",
+  ops_admin: "运营管理员",
+  org_advanced_admin: "高级版组织管理员",
+  org_standard_admin: "标准版组织管理员",
+  super_admin: "超级管理员",
+};
 
 function getWorkspaceFromPath(pathname: string): AdminWorkspace {
   if (pathname.startsWith("/content")) {
@@ -166,6 +181,52 @@ function getWorkspacePresentation(
     menuItems: OPS_MENU,
     portalName: "运营后台",
   };
+}
+
+function getWorkspaceScopeLabel(workspace: AdminWorkspace): string {
+  if (workspace === "content") {
+    return "题库、材料、试卷、资源与内容 AI 草稿归属于内容后台。";
+  }
+
+  if (workspace === "organization") {
+    return "组织后台只处理当前组织上下文内的员工、训练、统计和组织 AI。";
+  }
+
+  return "用户、企业、授权、卡密与审计治理归属于运营后台。";
+}
+
+function formatAdminRoleLabel(adminRoles: readonly string[]): string {
+  const labels = adminRoles
+    .map((role) => ADMIN_ROLE_LABELS[role])
+    .filter((label): label is string => label !== undefined);
+
+  if (labels.length === 0) {
+    return "后台管理员";
+  }
+
+  return Array.from(new Set(labels)).join(" / ");
+}
+
+function getWorkspaceCapabilityLabel(
+  workspace: AdminWorkspace,
+  adminRoles: readonly string[],
+  canUseOrganizationAdvancedWorkspace: boolean,
+): string {
+  if (workspace === "content") {
+    return adminRoles.includes("super_admin")
+      ? "当前为超级管理员监督视角，内容草稿、待审、发布闭环仍按内容后台规则执行。"
+      : "当前内容能力不绕过草稿、待审、发布闭环。";
+  }
+
+  if (workspace === "organization") {
+    return canUseOrganizationAdvancedWorkspace
+      ? "高级版组织能力已开放：企业训练、统计摘要和组织 AI。"
+      : "标准版组织能力仅覆盖员工名单、员工状态和授权状态查看。";
+  }
+
+  return adminRoles.includes("super_admin")
+    ? "当前为超级管理员监督视角，仍按运营后台的治理边界操作。"
+    : "当前运营能力不承接正式内容维护或组织训练执行。";
 }
 
 function getWorkspaceSwitchItems(
@@ -255,37 +316,46 @@ function getForbiddenWorkspaceReturnAction(
   return null;
 }
 
+function getReturnActionLabel(href: string): string {
+  if (href.startsWith("/organization")) {
+    return "返回组织概览";
+  }
+
+  if (href.startsWith("/content")) {
+    return "返回内容后台";
+  }
+
+  if (href.startsWith("/ops")) {
+    return "返回运营后台";
+  }
+
+  return "前往登录";
+}
+
+function mapAccessDecisionToStatus(
+  decision: AdminWorkspaceRouteAccessDecision,
+): AdminDashboardLayoutStatus {
+  if (decision.status === "allowed") {
+    return "authorized";
+  }
+
+  if (decision.status === "standard_unavailable") {
+    return "standard-unavailable";
+  }
+
+  if (decision.reason === "organization_context_required") {
+    return "missing-organization-context";
+  }
+
+  return "forbidden";
+}
+
 function isAdminContext(authContext: AuthContextDto): boolean {
   return (
     authContext.user.adminPublicId !== null &&
     authContext.user.adminPublicId !== undefined &&
     (authContext.user.adminRoles?.length ?? 0) > 0
   );
-}
-
-function canAccessWorkspace(
-  authContext: AuthContextDto,
-  workspace: AdminWorkspace,
-): boolean {
-  const adminRoles = (authContext.user.adminRoles ?? []) as readonly string[];
-
-  if (adminRoles.includes("super_admin")) {
-    return true;
-  }
-
-  if (hasOrganizationAdminRole(adminRoles)) {
-    return workspace === "organization";
-  }
-
-  if (workspace === "ops") {
-    return adminRoles.includes("ops_admin");
-  }
-
-  if (workspace === "content") {
-    return adminRoles.includes("content_admin");
-  }
-
-  return false;
 }
 
 async function fetchAdminAuthContext(): Promise<
@@ -299,53 +369,80 @@ async function fetchAdminAuthContext(): Promise<
 }
 
 function AdminDashboardStatus({
+  accessDecision,
+  adminRoles,
   returnAction,
   status,
 }: {
+  accessDecision?: AdminWorkspaceRouteAccessDecision | null;
+  adminRoles: readonly string[];
   returnAction?: WorkspaceReturnAction | null;
   status: Exclude<AdminDashboardLayoutStatus, "authorized">;
 }) {
-  const isChecking = status === "checking";
-  const isForbidden = status === "forbidden";
+  if (status === "checking") {
+    return (
+      <AdminStateTemplate
+        description="系统正在确认当前管理员会话和后台工作区。"
+        title="正在校验后台权限"
+        variant="loading"
+      />
+    );
+  }
+
+  if (status === "unauthorized") {
+    return (
+      <AdminStateTemplate
+        action={{ href: "/login", label: "前往登录" }}
+        description="当前页面需要有效管理员会话，登录后再进入对应后台。"
+        title="请先登录后台"
+        variant="unauthorized"
+      />
+    );
+  }
+
+  const fallbackAction = getForbiddenWorkspaceReturnAction(adminRoles);
+  const decisionAction =
+    accessDecision?.returnPath !== undefined
+      ? {
+          href: accessDecision.returnPath,
+          label: getReturnActionLabel(accessDecision.returnPath),
+        }
+      : null;
+  const action = returnAction ?? decisionAction ?? fallbackAction;
+
+  if (status === "missing-organization-context") {
+    return (
+      <AdminStateTemplate
+        action={action}
+        description="当前管理员会话有效，但组织后台需要已绑定或已选择的组织上下文。请先回到允许的工作区确认组织绑定，再进入组织后台。"
+        details={[
+          "不会把登录失效误报为组织后台权限问题。",
+          "不会展示内部组织标识或原始授权记录。",
+        ]}
+        title="需要选择组织上下文"
+        variant="missing-context"
+      />
+    );
+  }
+
+  if (status === "standard-unavailable") {
+    return (
+      <AdminStateTemplate
+        action={action}
+        description="当前组织上下文仅具备标准版能力，高级版企业训练、统计摘要和组织 AI 需要由运营管理员维护高级版企业授权。"
+        title="标准版暂不可用"
+        variant="standard-unavailable"
+      />
+    );
+  }
 
   return (
-    <main className="bg-background flex min-h-screen items-center justify-center px-6">
-      <section
-        aria-live={isChecking ? "polite" : "assertive"}
-        className="mx-auto flex max-w-sm flex-col items-center gap-3 text-center"
-        role={isChecking ? "status" : "alert"}
-      >
-        <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
-          {isChecking ? (
-            <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
-          ) : (
-            <AlertCircle aria-hidden="true" className="size-5" />
-          )}
-        </div>
-        <h1 className="font-heading text-text-primary text-lg font-semibold">
-          {isChecking
-            ? "正在校验后台权限"
-            : isForbidden
-              ? "无权访问此后台工作区"
-              : "请先登录后台"}
-        </h1>
-        <p className="text-text-secondary text-sm leading-6">
-          {isChecking
-            ? "系统正在确认当前管理员会话。"
-            : isForbidden
-              ? "当前管理员角色不能进入该后台工作区。"
-              : "当前页面需要有效管理员会话，正在前往登录页。"}
-        </p>
-        {isForbidden && returnAction !== null && returnAction !== undefined ? (
-          <Link
-            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
-            href={returnAction.href}
-          >
-            {returnAction.label}
-          </Link>
-        ) : null}
-      </section>
-    </main>
+    <AdminStateTemplate
+      action={action}
+      description="当前管理员角色不能进入该后台工作区，请返回已授权的后台入口。"
+      title="无权访问此后台工作区"
+      variant="forbidden"
+    />
   );
 }
 
@@ -356,17 +453,21 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AdminDashboardAuthState>({
     status: "checking",
     workspace: null,
+    pathname: null,
     adminRoles: [],
     canUseOrganizationAdvancedWorkspace: false,
+    accessDecision: null,
   });
   const status =
-    authState.workspace === workspace ? authState.status : "checking";
+    authState.pathname === pathname ? authState.status : "checking";
   const adminRoles =
-    authState.workspace === workspace ? authState.adminRoles : [];
+    authState.pathname === pathname ? authState.adminRoles : [];
   const canUseOrganizationAdvancedWorkspace =
-    authState.workspace === workspace
+    authState.pathname === pathname
       ? authState.canUseOrganizationAdvancedWorkspace
       : false;
+  const accessDecision =
+    authState.pathname === pathname ? authState.accessDecision : null;
   const { menuItems, portalName } = getWorkspacePresentation(
     workspace,
     adminRoles,
@@ -399,15 +500,19 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           const capabilitySummary = getAdminWorkspaceCapabilitySummary(
             sessionResponse.data,
           );
+          const accessDecision = resolveAdminWorkspaceRouteAccess({
+            capabilitySummary,
+            pathname,
+          });
 
           setAuthState({
-            status: canAccessWorkspace(sessionResponse.data, workspace)
-              ? "authorized"
-              : "forbidden",
+            status: mapAccessDecisionToStatus(accessDecision),
             workspace,
+            pathname,
             adminRoles: sessionResponse.data.user.adminRoles ?? [],
             canUseOrganizationAdvancedWorkspace:
               canUseOrganizationAdvancedWorkspaceCapability(capabilitySummary),
+            accessDecision,
           });
           return;
         }
@@ -415,8 +520,10 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         setAuthState({
           status: "unauthorized",
           workspace,
+          pathname,
           adminRoles: [],
           canUseOrganizationAdvancedWorkspace: false,
+          accessDecision: null,
         });
         router.replace("/login");
       })
@@ -428,8 +535,10 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         setAuthState({
           status: "unauthorized",
           workspace,
+          pathname,
           adminRoles: [],
           canUseOrganizationAdvancedWorkspace: false,
+          accessDecision: null,
         });
         router.replace("/login");
       });
@@ -437,7 +546,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     return () => {
       isCurrentCheck = false;
     };
-  }, [router, workspace]);
+  }, [pathname, router, workspace]);
 
   async function handleLogoutClick() {
     try {
@@ -450,8 +559,10 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
       setAuthState({
         status: "unauthorized",
         workspace,
+        pathname,
         adminRoles: [],
         canUseOrganizationAdvancedWorkspace: false,
+        accessDecision: null,
       });
       router.replace("/login");
     }
@@ -460,6 +571,8 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   if (status !== "authorized") {
     return (
       <AdminDashboardStatus
+        accessDecision={accessDecision}
+        adminRoles={adminRoles}
         returnAction={
           status === "forbidden"
             ? getForbiddenWorkspaceReturnAction(adminRoles)
@@ -610,7 +723,19 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          <AdminWorkspaceContextBand
+            capabilityLabel={getWorkspaceCapabilityLabel(
+              workspace,
+              adminRoles,
+              canUseOrganizationAdvancedWorkspace,
+            )}
+            roleLabel={formatAdminRoleLabel(adminRoles)}
+            scopeLabel={getWorkspaceScopeLabel(workspace)}
+            workspaceLabel={portalName}
+          />
+          {children}
+        </main>
       </div>
     </div>
   );
