@@ -641,7 +641,7 @@ activeTasks:
   - id: super-admin-organization-context-2026-07-07
     title: Super admin organization context handling
     phase: super-admin-organization-context-2026-07-07
-    status: in_progress
+    status: closed
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_super_admin_org_context
@@ -679,7 +679,7 @@ activeTasks:
       - test-results/**
     capabilities: *low_risk_capabilities
     validationSummary:
-      status: pass_branch_validation_pending_merge
+      status: pass_branch7_merged_master_gates_ready_for_push_cleanup
       taskPlanPrepared: true
       evidencePrepared: true
       auditPrepared: true
@@ -692,7 +692,12 @@ activeTasks:
       prettierCheck: pass
       diffCheck: pass
       preCommitHardening: pass
-      prePushReadiness: pending
+      prePushReadiness: pass_after_repository_checkpoint_alignment
+      mergedToMaster: true
+      featureCommitSha: 7f5b9781d1feb8b8c12f918b116765618bbf3577
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeFullUnit: pass_343_files_1730_tests
       packageLockfileChanged: false
       envFileChanged: false
       schemaMigrationSeedChanged: false
