@@ -1,41 +1,41 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-local-org-enterprise-fixture-materialization-replay-2026-07-06
-updatedAt: "2026-07-06T23:51:52-07:00"
+currentPhase: provider-enabled-bounded-smoke-2026-07-07
+updatedAt: "2026-07-07T01:19:55-07:00"
 currentTask:
-  id: 0704-local-org-enterprise-fixture-materialization-replay-2026-07-06
-  title: 0704 local org enterprise fixture materialization replay
+  id: provider-enabled-bounded-smoke-2026-07-07
+  title: Provider-enabled bounded smoke
   phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-06
   status: closed
-  result: pass_0704_org_enterprise_fixture_materialization_replay
+  result: pass_provider_enabled_bounded_smoke
   priority: p0
-  taskKind: local_0704_org_enterprise_fixture_materialization_replay
-  executionProfile: local_0704_non_destructive_enterprise_fixture_materialization_and_org_replay_no_provider_no_env_secret_no_staging_prod_no_cost_calibration
-  validationPolicy: read_gate_task_plan_non_destructive_0704_db_fixture_materialization_org_replay_redacted_evidence_audit_lint_typecheck_precommit
+  taskKind: provider_enabled_bounded_smoke
+  executionProfile: local_provider_enabled_bounded_smoke_no_cost_calibration_no_staging_prod_no_deploy_no_raw_provider_artifacts
+  validationPolicy: read_gate_task_plan_bounded_provider_smoke_redacted_evidence_audit_lint_typecheck_precommit
   moduleRunVersion: 2
   dependsOn:
-    - 0704-local-db-backed-replay-after-clean-migration-baseline-2026-07-06
-  branch: codex/0704-local-org-enterprise-fixture-materialization-replay-2026-07-06
-  approvalBoundary: user_approved_0704_local_org_enterprise_fixture_materialization_replay_2026_07_06
-  plannedAt: "2026-07-06T23:42:00-07:00"
-  claimedAt: "2026-07-06T23:42:00-07:00"
-  materializedAt: "2026-07-06T23:42:00-07:00"
-  completedAt: "2026-07-06T23:51:52-07:00"
-  targetClosureItem: Non-destructively materialize or reuse configured 0704 local organization enterprise-source fixture, then rerun org employee/admin DB-backed replay.
-  behaviorBoundary: docs_state_evidence_audit_plus_configured_0704_local_db_non_destructive_fixture_materialization_and_bounded_org_db_backed_replay_only_no_runtime_source_change_no_dependency_no_package_lockfile_no_destructive_db_operation_no_env_secret_readout_no_provider_enabled_call_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim_no_remote_closeout
-  evidenceMode: redacted_document_paths_role_labels_route_workflow_labels_command_statuses_aggregate_categories_counts_safe_error_categories_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values_employee_raw_answers
-  planPath: docs/05-execution-logs/task-plans/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
+    - 0704-local-org-enterprise-fixture-materialization-replay-2026-07-06
+  branch: codex/provider-enabled-bounded-smoke-2026-07-07
+  approvalBoundary: user_approved_provider_enabled_bounded_smoke_2026_07_07
+  plannedAt: "2026-07-07T00:45:00-07:00"
+  claimedAt: "2026-07-07T00:45:00-07:00"
+  materializedAt: "2026-07-07T00:45:00-07:00"
+  completedAt: "2026-07-07T01:19:55-07:00"
+  targetClosureItem: Execute a local-only Provider-enabled bounded smoke across selected post-recontract AI出题/AI组卷 surfaces, recording only redacted aggregate outcomes.
+  behaviorBoundary: docs_state_evidence_audit_plus_temporary_local_provider_harness_only_max_4_provider_submits_stop_on_first_unsafe_or_infrastructure_failure_no_source_commit_no_dependency_no_package_lockfile_no_schema_migration_seed_no_destructive_db_operation_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_full_generated_content_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim_no_remote_closeout
+  evidenceMode: redacted_document_paths_role_labels_workflow_labels_grounding_status_citation_counts_request_count_result_status_safe_failure_category_duration_bucket_structured_preview_parse_status_count_categories_usage_presence_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values_employee_raw_answers
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-provider-enabled-bounded-smoke.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-provider-enabled-bounded-smoke.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-provider-enabled-bounded-smoke.md
   requirementOverlayPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   requirementAlignmentPath: docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md
   allowedFiles:
     - docs/04-agent-system/state/project-state.yaml
     - docs/04-agent-system/state/task-queue.yaml
-    - docs/05-execution-logs/task-plans/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
-    - docs/05-execution-logs/evidence/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
-    - docs/05-execution-logs/audits-reviews/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
+    - docs/05-execution-logs/task-plans/2026-07-07-provider-enabled-bounded-smoke.md
+    - docs/05-execution-logs/evidence/2026-07-07-provider-enabled-bounded-smoke.md
+    - docs/05-execution-logs/audits-reviews/2026-07-07-provider-enabled-bounded-smoke.md
   blockedFiles:
     - AGENTS.md
     - .env*
@@ -63,11 +63,11 @@ currentTask:
     focusedUnitTest: approved
     browserRuntime: blocked
     localDevServer: blocked
-    directDatabaseConnection: approved_configured_0704_local_db_only_no_connection_details_or_raw_rows_recorded
-    databaseMutation: approved_non_destructive_local_0704_fixture_materialization_and_bounded_replay_side_effects_only_no_destructive_db_operation
-    providerCall: blocked
-    providerEnabledSmallSample: blocked_requires_separate_fresh_approval
-    envSecretAccess: blocked
+    directDatabaseConnection: blocked
+    databaseMutation: blocked
+    providerCall: approved_local_bounded_max_4_submit_attempts
+    providerEnabledSmallSample: approved_local_bounded_smoke_only_no_cost_calibration
+    envSecretAccess: approved_runtime_process_only_value_not_recorded
     dependencyIntroduction: blocked
     schemaMigration: blocked
     stagingProdDeploy: blocked
@@ -77,14 +77,14 @@ currentTask:
   validationCommands:
     - npm.cmd run lint
     - npm.cmd run typecheck
-    - npm.cmd exec -- vitest run src/db/schema/ai-rag.test.ts src/db/schema/organization-training.test.ts src/server/repositories/personal-ai-generation-learning-session-repository.test.ts src/server/repositories/organization-training-repository.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/personal-ai-generation-learning-session-service.test.ts --reporter=dot
+    - npm.cmd run test:unit -- src/server/services/admin-ai-generation-runtime-bridge-service.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts
     - git diff --check
-    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md docs/05-execution-logs/evidence/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md docs/05-execution-logs/audits-reviews/2026-07-06-0704-local-org-enterprise-fixture-materialization-replay.md
-    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-local-org-enterprise-fixture-materialization-replay-2026-07-06
+    - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-07-provider-enabled-bounded-smoke.md docs/05-execution-logs/evidence/2026-07-07-provider-enabled-bounded-smoke.md docs/05-execution-logs/audits-reviews/2026-07-07-provider-enabled-bounded-smoke.md
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId provider-enabled-bounded-smoke-2026-07-07
   closeoutPolicy:
     localCommit:
       approved: true
-      approvalSource: user_approved_0704_local_org_enterprise_fixture_materialization_replay_2026_07_06
+      approvalSource: user_approved_provider_enabled_bounded_smoke_2026_07_07
     fastForwardMerge:
       approved: false
       targetBranch: master
@@ -102,32 +102,30 @@ currentTask:
     taskPlanPrepared: true
     evidencePrepared: true
     auditPrepared: true
-    configured0704OrgEnterpriseReplay: pass
-    configured0704FixtureMaterialization: pass_non_destructive_idempotent_created_or_reused
-    orgAdvancedEmployeeAiPaperAssembly: pass_enterprise_source_selected
-    orgAdvancedAdminAiPaperAssembly: pass_enterprise_source_selected
-    orgAdvancedEmployeeLearningSessionReplay: pass_answer_feedback_progress_ready
-    orgEmployeeAnswerSubmissionReadback: pass
+    providerEnabledBoundedSmoke: pass_4_attempts_4_rows_all_parsed_redacted
+    providerAttemptLimit: pass_max_4
+    providerEnabledRolesCovered:
+      - personal_advanced_student_ai_question_generation
+      - personal_advanced_student_ai_paper_generation
+      - org_advanced_admin_ai_paper_generation
+      - content_admin_ai_question_generation
+    providerEnabledGrounding: pass_all_sufficient_citation_count_3
+    structuredPreviewParsing: pass_question_set_and_paper_draft
     lint: pass
     typecheck: pass
-    focusedUnit: pass_7_files_91_tests
+    focusedUnit: pass_3_files_49_tests
     gitDiffCheck: pass
-    scopedPrettierWrite: pass_unchanged
+    scopedPrettierWrite: pass_evidence_format_adjusted
     scopedPrettierCheck: pass
     moduleRunV2PreCommitHardening: pass
+    providerPayloadRawPromptRawAiOutputRecorded: false
+    costCalibrationExecutedOrClaimed: false
     sourceChanged: false
     testChanged: false
     dependencyChanged: false
-    schemaSourceMigrationMetadataChanged: false
-    temporaryHarnessCommitted: false
-    dbBackedRuntimeReplayExecuted: true_org_side_bounded_replay
-    directDbRuntimeExecuted: true_configured_0704_local_db_only_no_raw_rows_recorded
-    databaseMutation: non_destructive_local_0704_fixture_materialization_and_bounded_replay_side_effects_only
-    providerEnabledCallExecuted: false
-    providerEnabledBoundedSmoke: not_executed_requires_separate_fresh_approval
-    providerPayloadRawPromptRawAiOutputRecorded: false
+    schemaMigrationSeedChanged: false
+    directDbRuntimeExecuted: false
     stagingProdDeployExecuted: false
-    costCalibrationExecutedOrClaimed: false
     releaseFinalProductionClaimed: false
     productionUsabilityClaimed: false
 previousCurrentTaskBeforeAiGenerationFinalLocalGoalRollupAudit20260706:
