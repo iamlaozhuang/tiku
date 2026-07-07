@@ -315,15 +315,20 @@ activeTasks:
   - id: full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
     title: Full role UI/UX batch 1 operations and super admin
     phase: full-role-uiux-remediation-series-2026-07-07
-    status: pending
+    status: closed
+    result: pass_docs_only_operations_super_admin_uiux_baseline_prepared
     dependsOn:
       - full-role-uiux-batch-0-global-foundation-2026-07-07
     priority: p1
     taskKind: docs_only_uiux_baseline_batch
     branch: codex/full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
     humanApprovalBoundary: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
+    plannedAt: "2026-07-07T07:26:34-07:00"
+    claimedAt: "2026-07-07T07:26:34-07:00"
+    completedAt: "2026-07-07T07:32:33-07:00"
     targetClosureItem: Converge UI/UX baseline for operations admin and super admin pages, including role context, console IA, table density, and high-risk action states.
     behaviorBoundary: docs_state_evidence_audit_only_no_code_no_db_no_provider_no_env_no_dependency_no_deploy
+    evidenceMode: redacted_role_page_labels_counts_safe_ui_observation_command_status_only_no_sensitive_values_no_raw_rows_no_internal_ids_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material
     planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
     requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
@@ -335,9 +340,62 @@ activeTasks:
       - docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
       - docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
       - docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
-    blockedFiles: *docs_only_uiux_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
     capabilities: *docs_only_uiux_capabilities
+    validationCommands:
+      - git diff --check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId full-role-uiux-batch-1-operations-and-super-admin-2026-07-07 -SkipRemoteAheadCheck
     closeoutPolicy: *docs_only_uiux_closeout_policy
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      baselinePrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      screenshotInventoryReviewed: pass_ops_admin_4_super_admin_operations_5_plus_workspace_context
+      operationsIaBaseline: prepared
+      superAdminWorkspaceStrategy: p1_candidate_root_cause_not_fixed
+      plaintextRedeemCodeProductRequirementPreserved: true
+      selfReview: pass
+      redactionScan: pass_policy_terms_only_no_sensitive_values
+      gitDiffCheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+      lint: pass
+      typecheck: pass
+      sourceCodeChanged: false
+      packageLockfileChanged: false
+      envFileChanged: false
+      dbMutationExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
   - id: full-role-uiux-batch-2-org-admin-workspace-2026-07-07
     title: Full role UI/UX batch 2 organization admin workspace
     phase: full-role-uiux-remediation-series-2026-07-07

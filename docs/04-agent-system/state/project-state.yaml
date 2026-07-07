@@ -1,8 +1,28 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-role-uiux-batch-0-global-foundation-2026-07-07
-updatedAt: "2026-07-07T07:16:57-07:00"
+currentPhase: full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
+updatedAt: "2026-07-07T07:26:34-07:00"
+latestFullRoleUiuxBatch1OperationsAndSuperAdmin:
+  id: full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
+  status: closed
+  result: pass_docs_only_operations_super_admin_uiux_baseline_prepared
+  branch: codex/full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+  conclusionBuckets:
+    operationsSuperAdminBaseline: pass
+    screenshotInventoryReviewed: pass_ops_admin_4_super_admin_operations_5_plus_workspace_context
+    plaintextRedeemCodeProductRequirementPreserved: pass
+    superAdminOrganizationWorkspaceMismatch: p1_candidate_root_cause_not_fixed
+    sourceCodeChanged: false
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestFullRoleUiuxBatch0GlobalFoundation:
   id: full-role-uiux-batch-0-global-foundation-2026-07-07
   status: closed
@@ -163,36 +183,43 @@ latestPostRecontractAcceptanceConsolidation:
     staging: not_executed_requires_fresh_approval
     costCalibration: not_executed_requires_fresh_approval
 currentTask:
-  id: full-role-uiux-batch-0-global-foundation-2026-07-07
-  title: Full role UI/UX batch 0 global foundation
+  id: full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
+  title: Full role UI/UX batch 1 operations and super admin
   phase: full-role-uiux-remediation-series-2026-07-07
   status: closed
-  result: pass_docs_only_global_uiux_foundation_baseline_prepared
+  result: pass_docs_only_operations_super_admin_uiux_baseline_prepared
   priority: p1
   taskKind: docs_only_uiux_baseline_batch
-  branch: codex/full-role-uiux-batch-0-global-foundation-2026-07-07
+  branch: codex/full-role-uiux-batch-1-operations-and-super-admin-2026-07-07
   humanApprovalBoundary: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
-  plannedAt: "2026-07-07T07:16:57-07:00"
-  claimedAt: "2026-07-07T07:16:57-07:00"
-  completedAt: "2026-07-07T07:16:57-07:00"
-  targetClosureItem: Establish shared UI/UX remediation principles for menus, information architecture, layout density, copy, prompts, button states, empty/error/refusal states, and role-context clarity.
+  plannedAt: "2026-07-07T07:26:34-07:00"
+  claimedAt: "2026-07-07T07:26:34-07:00"
+  completedAt: "2026-07-07T07:32:33-07:00"
+  targetClosureItem: Converge UI/UX baseline for operations admin and super admin pages, including role context, console IA, table density, and high-risk action states.
   behaviorBoundary: docs_state_evidence_audit_only_no_repo_screenshots_no_source_test_package_env_schema_migration_seed_db_mutation_provider_staging_prod_deploy_cost_calibration_release_or_production_claim
   evidenceMode: redacted_role_page_labels_counts_safe_ui_observation_command_status_only_no_sensitive_values_no_raw_rows_no_internal_ids_no_provider_payload_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-0-global-foundation.md
-  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-0-global-foundation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-0-global-foundation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-0-global-foundation.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+  requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-1-operations-and-super-admin.md
   validationSummary:
     status: pass
     taskPlanPrepared: true
     baselinePrepared: true
     evidencePrepared: true
     auditPrepared: true
-    screenshotInventoryReviewed: pass_68_page_png_9_contact_sheets_manifest_68
-    sharedStateTemplates: pass
-    sharedButtonHierarchy: pass
-    sharedIaAndCopyRules: pass
+    screenshotInventoryReviewed: pass_ops_admin_4_super_admin_operations_5_plus_workspace_context
+    operationsIaBaseline: prepared
+    superAdminWorkspaceStrategy: p1_candidate_root_cause_not_fixed
+    plaintextRedeemCodeProductRequirementPreserved: true
     selfReview: pass
+    redactionScan: pass_policy_terms_only_no_sensitive_values
+    gitDiffCheck: pass
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+    lint: pass
+    typecheck: pass
     sourceCodeChanged: false
     packageLockfileChanged: false
     envFileChanged: false
