@@ -44,6 +44,122 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 activeTasks:
+  - id: login-dev-origin-readiness-fix-2026-07-07
+    title: Login dev origin readiness fix
+    phase: local-login-dev-origin-readiness-2026-07-07
+    status: closed
+    result: pass_127_loopback_login_button_interactivity_restored
+    priority: p0
+    taskKind: source_repair
+    executionProfile: local_source_test_dev_origin_config_repair_no_db_no_provider_no_staging_prod_no_cost_calibration
+    validationPolicy: read_gate_task_plan_redacted_browser_repro_focused_unit_lint_typecheck_precommit
+    moduleRunVersion: 2
+    branch: codex/login-dev-origin-readiness-fix-2026-07-07
+    humanApprovalBoundary: current_user_requested_fix_merge_push_cleanup_2026_07_07
+    plannedAt: "2026-07-07T03:16:00-07:00"
+    claimedAt: "2026-07-07T03:16:00-07:00"
+    materializedAt: "2026-07-07T03:22:00-07:00"
+    completedAt: "2026-07-07T03:25:00-07:00"
+    targetClosureItem: Restore login button interactivity for localhost browser validation when the page is opened through the 127.0.0.1 loopback host.
+    behaviorBoundary: local_source_test_docs_state_evidence_audit_plus_local_dev_server_restart_only_no_db_read_write_no_dependency_no_package_lockfile_no_schema_migration_seed_no_provider_no_env_file_change_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_command_names_exit_status_route_label_host_label_counts_safe_failure_category_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
+    planPath: docs/05-execution-logs/task-plans/2026-07-07-login-dev-origin-readiness-fix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-07-login-dev-origin-readiness-fix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-login-dev-origin-readiness-fix.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-07-login-dev-origin-readiness-fix.md
+      - docs/05-execution-logs/evidence/2026-07-07-login-dev-origin-readiness-fix.md
+      - docs/05-execution-logs/audits-reviews/2026-07-07-login-dev-origin-readiness-fix.md
+      - next.config.ts
+      - tests/unit/next-dev-origin-config.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      browserRuntime: approved_localhost_bounded_no_submit
+      localDevServer: approved_localhost_3000_restart
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      providerEnabledSmallSample: blocked_requires_separate_fresh_approval
+      envSecretAccess: approved_runtime_process_only_value_not_recorded_for_0704_service_restart
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/next-dev-origin-config.test.ts tests/unit/ui-input-contract.test.ts tests/unit/student-login-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-07-login-dev-origin-readiness-fix.md docs/05-execution-logs/evidence/2026-07-07-login-dev-origin-readiness-fix.md docs/05-execution-logs/audits-reviews/2026-07-07-login-dev-origin-readiness-fix.md next.config.ts tests/unit/next-dev-origin-config.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId login-dev-origin-readiness-fix-2026-07-07
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId login-dev-origin-readiness-fix-2026-07-07 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_fix_merge_push_cleanup_2026_07_07
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_fix_merge_push_cleanup_2026_07_07
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_fix_merge_push_cleanup_2026_07_07
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_fix_merge_push_cleanup_2026_07_07
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      rootCause: pass_dev_origin_mismatch_not_shared_input
+      redTestObserved: pass_config_test_failed_before_fix
+      configRepair: pass_allowed_127_loopback_dev_origin
+      focusedUnit: pass_3_files_14_tests
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      browserReproBeforeFix: fail_expected_127_loopback_submit_disabled
+      browserVerificationAfterFix: pass_127_loopback_submit_enabled_no_submit
+      consoleHealthAfterFix: pass_no_error_or_warn
+      localhostDevServerRestart: pass
+      dependencyChanged: false
+      packageLockfileChanged: false
+      envFileChanged: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
   - id: explicit-20260704-localhost-browser-replay-2026-07-07
     title: Explicit 20260704 localhost browser replay
     phase: ai-generation-post-recontract-acceptance-sequencing-2026-07-07
