@@ -96,6 +96,99 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: full-role-uiux-local-browser-acceptance-2026-07-07
+    title: Full role UIUX local browser acceptance package
+    phase: full-role-uiux-local-browser-acceptance-2026-07-07
+    status: active
+    priority: p1
+    taskKind: docs_runtime_acceptance
+    executionProfile: local_browser_acceptance_package_no_source_changes
+    validationPolicy: task_plan_evidence_audit_localhost_browser_probe_targeted_role_matrix_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/full-role-uiux-local-browser-acceptance-2026-07-07
+    humanApprovalBoundary: current_user_approved_localhost_only_browser_acceptance_no_screenshot_raw_dom_session_cookie_token_localstorage_env_db_provider_2026_07_07
+    plannedAt: "2026-07-07T15:08:00-07:00"
+    claimedAt: "2026-07-07T15:08:00-07:00"
+    dependsOn:
+      - full-role-uiux-acceptance-confirmation-package-2026-07-07
+    targetClosureItem: Run a redacted localhost-only browser acceptance package for the completed full-role UIUX source remediation series.
+    behaviorBoundary: localhost_127001_only_existing_local_server_no_screenshot_no_raw_dom_no_session_cookie_token_localstorage_recording_no_env_read_no_db_no_provider_no_source_no_test_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_route_labels_status_booleans_command_status_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_screenshot_pixels_raw_dom_or_browser_storage
+    planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-local-browser-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-browser-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-browser-acceptance-adversarial-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-local-browser-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-browser-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-browser-acceptance-adversarial-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: blocked
+      localValidationCommands: approved
+      browserRuntime: approved_localhost_only_no_screenshot_no_raw_dom_no_storage_or_session_capture
+      devServer: blocked_start_use_existing_localhost_only
+      privateScreenshotRead: blocked_not_needed
+      privateScreenshotWrite: blocked
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationSummary:
+      status: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+      localhostOnly: pass
+      existingLocalServerUsed: pass_127001_3000
+      browserRuntimeExecuted: pass_constrained_route_shell_probe
+      devServerStarted: false
+      routeLabelsProbed: 30
+      routesStatusLt500: 30
+      routesRetainedLocalhost: 30
+      routesWithUiSignal: 30
+      apiRequestsBlocked: 27
+      focusedTests: pass_16_files_170_tests
+      fullUnit: pass_344_files_1732_tests
+      eslint: pass
+      typecheck: pass
+      prettierCheck: pass_after_format
+      diffCheck: pass
+      preCommitHardening: pass
+      screenshotRawDomCaptured: false
+      sessionCookieTokenLocalStorageRecorded: false
+      envRead: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      productSourceChanged: false
+      testsChanged: false
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
   - id: full-role-uiux-acceptance-confirmation-package-2026-07-07
     title: Full role UIUX acceptance confirmation package
     phase: full-role-uiux-acceptance-confirmation-package-2026-07-07

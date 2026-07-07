@@ -1,8 +1,47 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: full-role-uiux-acceptance-confirmation-package-2026-07-07
-updatedAt: "2026-07-07T14:57:00-07:00"
+currentPhase: full-role-uiux-local-browser-acceptance-2026-07-07
+updatedAt: "2026-07-07T15:08:00-07:00"
+latestFullRoleUiuxLocalBrowserAcceptance:
+  id: full-role-uiux-local-browser-acceptance-2026-07-07
+  status: active
+  result: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+  branch: codex/full-role-uiux-local-browser-acceptance-2026-07-07
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-local-browser-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-browser-acceptance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-browser-acceptance-adversarial-audit.md
+  approvalBoundary: current_user_approved_localhost_only_browser_acceptance_no_screenshot_raw_dom_session_cookie_token_localstorage_env_db_provider_2026_07_07
+  conclusionBuckets:
+    localhostOnly: pass
+    existingLocalServerUsed: pass_127001_3000
+    devServerStarted: false
+    browserRuntimeExecuted: pass_constrained_route_shell_probe
+    routeLabelsProbed: 30
+    routesStatusLt500: 30
+    routesRetainedLocalhost: 30
+    routesWithUiSignal: 30
+    apiRequestsBlocked: 27
+    focusedRoleMatrix: pass_16_files_170_tests
+    fullUnit: pass_344_files_1732_tests
+    lint: pass
+    typecheck: pass
+    scopedPrettierCheck: pass_after_format
+    diffCheck: pass
+    preCommitHardening: pass
+    screenshotRawDomCaptured: false
+    sessionCookieTokenLocalStorageRecorded: false
+    envRead: false
+    dbReadWriteExecuted: false
+    providerCallExecuted: false
+    productSourceChanged: false
+    testsChanged: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestFullRoleUiuxAcceptanceConfirmationPackage:
   id: full-role-uiux-acceptance-confirmation-package-2026-07-07
   status: closed
@@ -610,49 +649,48 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: full-role-uiux-acceptance-confirmation-package-2026-07-07
-  title: Full role UIUX acceptance confirmation package
-  phase: full-role-uiux-acceptance-confirmation-package-2026-07-07
-  status: closed
-  result: pass_acceptance_confirmation_package_merged_master_gates_ready_for_push_cleanup
+  id: full-role-uiux-local-browser-acceptance-2026-07-07
+  title: Full role UIUX local browser acceptance package
+  phase: full-role-uiux-local-browser-acceptance-2026-07-07
+  status: active
+  result: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
   priority: p1
-  taskKind: docs_only
-  branch: codex/full-role-uiux-acceptance-confirmation-package-2026-07-07
-  humanApprovalBoundary: current_user_approved_full_role_uiux_acceptance_confirmation_package_2026_07_07
-  plannedAt: "2026-07-07T14:39:05-07:00"
-  claimedAt: "2026-07-07T14:39:05-07:00"
-  targetClosureItem: Create the redacted acceptance confirmation package for branches 2-8 after full-role UIUX source closeout.
-  behaviorBoundary: docs_state_evidence_audit_local_validation_only_no_source_no_test_no_db_no_provider_no_env_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_screenshot_trace_raw_dom_no_browser_storage_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
-  evidenceMode: redacted_command_status_file_labels_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_screenshot_pixels_or_private_fixture_values
-  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-acceptance-confirmation-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-acceptance-confirmation-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-acceptance-confirmation-package-adversarial-audit.md
+  taskKind: docs_runtime_acceptance
+  branch: codex/full-role-uiux-local-browser-acceptance-2026-07-07
+  humanApprovalBoundary: current_user_approved_localhost_only_browser_acceptance_no_screenshot_raw_dom_session_cookie_token_localstorage_env_db_provider_2026_07_07
+  plannedAt: "2026-07-07T15:08:00-07:00"
+  claimedAt: "2026-07-07T15:08:00-07:00"
+  targetClosureItem: Run a redacted localhost-only browser acceptance package for the completed full-role UIUX source remediation series.
+  behaviorBoundary: localhost_127001_only_existing_local_server_no_screenshot_no_raw_dom_no_session_cookie_token_localstorage_recording_no_env_read_no_db_no_provider_no_source_no_test_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+  evidenceMode: redacted_route_labels_status_booleans_command_status_test_counts_only_no_credentials_tokens_sessions_cookies_env_values_db_url_raw_rows_internal_ids_provider_payload_raw_prompt_raw_ai_output_plaintext_redeem_code_full_content_screenshot_pixels_raw_dom_or_browser_storage
+  planPath: docs/05-execution-logs/task-plans/2026-07-07-full-role-uiux-local-browser-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-local-browser-acceptance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-local-browser-acceptance-adversarial-audit.md
   validationSummary:
-    status: pass_acceptance_confirmation_package_merged_master_gates_ready_for_push_cleanup
-    taskPlanPrepared: true
-    evidencePrepared: true
-    auditPrepared: true
-    branch2To8EvidenceReviewed: pass
-    roleAcceptanceChecklist: pass
+    status: pass_localhost_browser_acceptance_and_local_validation_pending_git_closeout
+    localhostOnly: pass
+    existingLocalServerUsed: pass_127001_3000
+    browserRuntimeExecuted: pass_constrained_route_shell_probe
+    devServerStarted: false
+    routeLabelsProbed: 30
+    routesStatusLt500: 30
+    routesRetainedLocalhost: 30
+    routesWithUiSignal: 30
+    apiRequestsBlocked: 27
     focusedTests: pass_16_files_170_tests
+    fullUnit: pass_344_files_1732_tests
     eslint: pass
     typecheck: pass
-    prettierCheck: pass
-    fullUnit: pass_344_files_1732_tests
+    prettierCheck: pass_after_format
     diffCheck: pass
     preCommitHardening: pass
-    prePushReadiness: pass_after_repository_checkpoint_alignment
-    mergedToMaster: true
-    packageCommitSha: a5561b7d8cd7c8325819924f210e4990288a364b
-    masterPostMergeLint: pass
-    masterPostMergeTypecheck: pass
-    masterPostMergeFullUnit: pass_344_files_1732_tests
     productSourceChanged: false
     testsChanged: false
     packageLockfileChanged: false
     envFileChanged: false
     schemaMigrationSeedChanged: false
-    browserRuntimeExecuted: false
+    screenshotRawDomCaptured: false
+    sessionCookieTokenLocalStorageRecorded: false
     dbReadWriteExecuted: false
     providerCallExecuted: false
     stagingProdDeployExecuted: false
