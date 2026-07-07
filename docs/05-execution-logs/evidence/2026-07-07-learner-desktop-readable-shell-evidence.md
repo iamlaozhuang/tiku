@@ -52,4 +52,14 @@ Evidence will record file labels, command names, exit status, and safe counts on
 - Screenshot, raw DOM, staging/prod/deploy, release readiness, production usability, Cost Calibration: none claimed or executed.
 - Sensitive evidence: command names, file labels, and safe counts only; no credentials, sessions, cookies, tokens, env values, DB URL/raw rows, internal ids, Provider payload, raw prompt/output, or full question/paper/material/resource content recorded.
 
+## Post-Merge Master Gate
+
+| Command                                                               | Status   | Redacted summary                                                                                                               |
+| --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `git merge --ff-only codex/learner-desktop-readable-shell-2026-07-07` | pass     | Master fast-forwarded to the branch 2 implementation commit.                                                                   |
+| `npm run lint` on `master`                                            | pass     | ESLint completed successfully after merge.                                                                                     |
+| `npm run typecheck` on `master`                                       | pass     | `tsc --noEmit` completed successfully after merge.                                                                             |
+| `npm run test:unit` on `master`                                       | pass     | Full unit suite passed: 342 files / 1722 tests.                                                                                |
+| `powershell.exe ... Test-ModuleRunV2PrePushReadiness.ps1` on `master` | repaired | First run detected expected post-merge master checkpoint drift; task was moved to closeout state for ancestry-based readiness. |
+
 Cost Calibration Gate remains blocked.

@@ -215,8 +215,8 @@ activeTasks:
   - id: learner-desktop-readable-shell-2026-07-07
     title: Learner desktop readable shell
     phase: learner-desktop-readable-shell-2026-07-07
-    status: in_progress
-    result: pass_branch_validation_ready_for_commit_merge_push_cleanup
+    status: closed
+    result: pass_branch2_merged_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_learner_shell
@@ -273,7 +273,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId learner-desktop-readable-shell-2026-07-07 -SkipRemoteAheadCheck
     closeoutPolicy: *low_risk_closeout_policy
     validationSummary:
-      status: pass_branch_validation_ready_for_commit_merge_push_cleanup
+      status: pass_branch2_merged_master_gates_ready_for_push_cleanup
       taskPlanPrepared: true
       evidencePrepared: true
       auditPrepared: true
@@ -287,6 +287,9 @@ activeTasks:
       diffCheck: pass
       preCommitHardening: pass
       prePushReadiness: pass_after_repository_checkpoint_alignment
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeFullUnit: pass_342_files_1722_tests
       sourceCodeChanged: true
       testsChanged: true
       packageLockfileChanged: false
