@@ -244,6 +244,8 @@ export function AdminContactConfigPage() {
         </div>
       </header>
 
+      <OperationsContactConfigSummaryFirstBand contactConfig={contactConfig} />
+
       {toastMessage !== null ? (
         <div
           className="border-border bg-surface rounded-md border px-3 py-2 text-sm shadow-sm"
@@ -428,5 +430,56 @@ export function AdminContactConfigPage() {
         </aside>
       </section>
     </main>
+  );
+}
+
+function OperationsContactConfigSummaryFirstBand({
+  contactConfig,
+}: {
+  contactConfig: PurchaseGuidanceContactConfigDto;
+}) {
+  return (
+    <section
+      aria-label="购买联系方式摘要优先"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="ops-contact-config-summary-first-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            购买配置 summary-first
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            购买引导总览
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            标准版与高级版购买入口共用这组运营配置；保存只更新购买引导文案和渠道元数据，不改变授权版本、额度或升级判定。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          {contactConfig.channels.length} 个渠道
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="border-border bg-background rounded-md border p-3">
+          <p className="text-text-muted text-xs">当前标题</p>
+          <p className="text-text-primary mt-2 text-sm font-medium">
+            {contactConfig.title}
+          </p>
+        </div>
+        <div className="border-border bg-background rounded-md border p-3">
+          <p className="text-text-muted text-xs">安全边界</p>
+          <p className="text-text-primary mt-2 text-sm leading-6">
+            错误态提示刷新或重新登录；禁用态由保存中状态控制。
+          </p>
+        </div>
+        <div className="border-border bg-background rounded-md border p-3">
+          <p className="text-text-muted text-xs">版本边界</p>
+          <p className="text-text-primary mt-2 text-sm leading-6">
+            只说明标准版和高级版购买联系路径，不生成卡密、不写授权。
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -849,6 +849,8 @@ export function AdminOpsManagement() {
         </div>
       </header>
 
+      <OperationsSummaryFirstBand data={data} />
+
       <section
         aria-label="运营筛选"
         className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
@@ -1175,6 +1177,69 @@ export function AdminOpsManagement() {
 
       {toastMessage === null ? null : <AdminOpsToast message={toastMessage} />}
     </main>
+  );
+}
+
+function OperationsSummaryFirstBand({ data }: { data: AdminOpsData }) {
+  const visibleRoleLabels = data.currentAdminRoles
+    .map((role) => adminRoleLabels[role] ?? role)
+    .join("、");
+  const disabledUserCount = data.users.filter(
+    (user) => user.status === "disabled",
+  ).length;
+  const unusedRedeemCodeCount = data.redeemCodes.filter(
+    (redeemCode) => redeemCode.status === "unused",
+  ).length;
+  const failedAiCallCount = data.aiCallLogs.filter(
+    (aiCallLog) => aiCallLog.callStatus === "failed",
+  ).length;
+  const summaryItems = [
+    ["角色边界", visibleRoleLabels || "后台角色未同步"],
+    [
+      "summary-first",
+      `用户 ${data.users.length} / 企业 ${data.organizations.length} / 卡密 ${data.redeemCodes.length}`,
+    ],
+    ["权限与版本", "运营管理员管理运营闭环；授权版本不在此页重新判定。"],
+    [
+      "状态核对",
+      `空态、错误态、禁用态均保留；停用用户 ${disabledUserCount}，未用卡密 ${unusedRedeemCodeCount}，失败 AI 调用 ${failedAiCallCount}。`,
+    ],
+  ] as const;
+
+  return (
+    <section
+      aria-label="运营摘要优先"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="ops-summary-first-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            运营 summary-first
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            运营后台总览
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            先核对账号家族、授权版本边界和红线状态，再进入筛选、账号创建、卡密或日志明细。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          运营管理员
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {summaryItems.map(([label, value]) => (
+          <div
+            key={label}
+            className="border-border bg-background rounded-md border p-3"
+          >
+            <p className="text-text-muted text-xs">{label}</p>
+            <p className="text-text-primary mt-2 text-sm leading-6">{value}</p>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

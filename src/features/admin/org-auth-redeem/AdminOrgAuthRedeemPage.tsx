@@ -1327,6 +1327,144 @@ function SummaryTile({
   );
 }
 
+function OperationsOrgAuthSummaryFirstBand({
+  employees,
+  organizations,
+  orgAuths,
+}: {
+  employees: AdminOrgAuthData["employees"];
+  organizations: AdminOrgAuthData["organizations"];
+  orgAuths: AdminOrgAuthData["orgAuths"];
+}) {
+  const totalEmployeeCount = employees.length;
+  const activeStandardCount = orgAuths.filter((orgAuth) => {
+    const editionView = readEditionAwareOrgAuthView(orgAuth);
+
+    return (
+      orgAuth.status === "active" &&
+      (editionView.effectiveEdition ?? editionView.edition ?? "standard") ===
+        "standard"
+    );
+  }).length;
+  const activeAdvancedCount = orgAuths.filter((orgAuth) => {
+    const editionView = readEditionAwareOrgAuthView(orgAuth);
+
+    return (
+      orgAuth.status === "active" &&
+      (editionView.effectiveEdition ?? editionView.edition ?? "standard") ===
+        "advanced"
+    );
+  }).length;
+  const disabledOrganizationCount = organizations.filter(
+    (organization) => organization.status === "disabled",
+  ).length;
+
+  return (
+    <section
+      aria-label="企业授权摘要优先"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="ops-org-auth-summary-first-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            企业授权 summary-first
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            企业授权总览
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            先查看组织、授权、员工和标准版/高级版分布，再进入新增、导入、解绑或停用操作；系统不会自动升级、续费、扩容或合并重叠授权。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          运营管理员
+        </span>
+      </div>
+      <div className="mt-4 grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
+        <SummaryTile
+          icon={<Building2 className="size-4" aria-hidden="true" />}
+          label="企业组织"
+          value={`${organizations.length}`}
+        />
+        <SummaryTile
+          icon={<ShieldCheck className="size-4" aria-hidden="true" />}
+          label="标准版 / 高级版"
+          value={`${activeStandardCount} / ${activeAdvancedCount}`}
+        />
+        <SummaryTile
+          icon={<UsersRound className="size-4" aria-hidden="true" />}
+          label="组织员工"
+          value={`${totalEmployeeCount}`}
+        />
+      </div>
+      <p className="text-text-muted mt-3 text-xs leading-5">
+        空态、错误态和禁用态保持可见；当前禁用态组织 {disabledOrganizationCount}{" "}
+        个，新增授权按钮只提交公开编号和版本字段。
+      </p>
+    </section>
+  );
+}
+
+function OperationsRedeemCodeSummaryFirstBand({
+  hasUnavailablePlainTextCode,
+  redeemCodes,
+}: {
+  hasUnavailablePlainTextCode: boolean;
+  redeemCodes: AdminRedeemCodeData["redeemCodes"];
+}) {
+  const unusedCount = redeemCodes.filter(
+    (redeemCode) => redeemCode.status === "unused",
+  ).length;
+  const consumedOrExpiredCount = redeemCodes.length - unusedCount;
+
+  return (
+    <section
+      aria-label="卡密摘要优先"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="ops-redeem-code-summary-first-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            卡密 summary-first
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            卡密分发总览
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            明文仅限有权运营界面复制；证据和审计只记录脱敏命令状态、数量和路径，不记录卡密明文、哈希或内部标识。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          二次确认
+        </span>
+      </div>
+      <div className="mt-4 grid gap-4 xl:grid-cols-3" aria-label="卡密摘要">
+        <SummaryTile
+          icon={<KeyRound className="size-4" aria-hidden="true" />}
+          label="卡密总数"
+          value={`${redeemCodes.length}`}
+        />
+        <SummaryTile
+          icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
+          label="未使用"
+          value={`${unusedCount}`}
+        />
+        <SummaryTile
+          icon={<Clock3 className="size-4" aria-hidden="true" />}
+          label="已使用或过期"
+          value={`${consumedOrExpiredCount}`}
+        />
+      </div>
+      <p className="text-text-muted mt-3 text-xs leading-5">
+        空态、错误态和禁用态保持可见；明文不可见记录{" "}
+        {hasUnavailablePlainTextCode ? "需要提示" : "当前无"}。
+      </p>
+    </section>
+  );
+}
+
 function AdminPanel({
   children,
   title,
@@ -4069,15 +4207,6 @@ export function AdminOrgAuthPage() {
   const [selectedOrgAuthDetail, setSelectedOrgAuthDetail] =
     useState<OrgAuthDetailDto | null>(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
-  const totalEmployeeCount = useMemo(
-    () =>
-      data.organizations.reduce(
-        (employeeCount, organization) =>
-          employeeCount + organization.employeeCount,
-        0,
-      ),
-    [data.organizations],
-  );
   const employeeImportPreview = useMemo(
     () =>
       buildEmployeeImportPreview(
@@ -4521,6 +4650,12 @@ export function AdminOrgAuthPage() {
         icon={<Building2 className="size-5" aria-hidden="true" />}
       />
 
+      <OperationsOrgAuthSummaryFirstBand
+        employees={data.employees}
+        organizations={data.organizations}
+        orgAuths={data.orgAuths}
+      />
+
       <SystemOpsRequiredRoleEntry
         actionHref="#org-auth-create-panel"
         actionLabel="新增企业授权"
@@ -4597,24 +4732,6 @@ export function AdminOrgAuthPage() {
         organizations={data.organizations}
         orgAuths={data.orgAuths}
       />
-
-      <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
-        <SummaryTile
-          icon={<Building2 className="size-4" aria-hidden="true" />}
-          label="企业组织"
-          value={`${data.organizations.length}`}
-        />
-        <SummaryTile
-          icon={<ShieldCheck className="size-4" aria-hidden="true" />}
-          label="企业授权"
-          value={`${data.orgAuths.length}`}
-        />
-        <SummaryTile
-          icon={<UsersRound className="size-4" aria-hidden="true" />}
-          label="组织员工"
-          value={`${totalEmployeeCount}`}
-        />
-      </section>
 
       <section className="grid gap-4 xl:grid-cols-3">
         <OrganizationList
@@ -4901,6 +5018,11 @@ export function AdminRedeemCodePage() {
         icon={<Ticket className="size-5" aria-hidden="true" />}
       />
 
+      <OperationsRedeemCodeSummaryFirstBand
+        hasUnavailablePlainTextCode={hasUnavailablePlainTextCode}
+        redeemCodes={data.redeemCodes}
+      />
+
       <SystemOpsRequiredRoleEntry
         actionHref="#redeem-code-generate-panel"
         actionLabel="生成卡密"
@@ -4937,32 +5059,6 @@ export function AdminRedeemCodePage() {
       {hasUnavailablePlainTextCode ? (
         <RedeemCodePlainTextUnavailableNotice />
       ) : null}
-
-      <section className="grid gap-4 xl:grid-cols-3" aria-label="卡密摘要">
-        <SummaryTile
-          icon={<KeyRound className="size-4" aria-hidden="true" />}
-          label="卡密总数"
-          value={`${data.redeemCodes.length}`}
-        />
-        <SummaryTile
-          icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
-          label="未使用"
-          value={`${
-            data.redeemCodes.filter(
-              (redeemCode) => redeemCode.status === "unused",
-            ).length
-          }`}
-        />
-        <SummaryTile
-          icon={<Clock3 className="size-4" aria-hidden="true" />}
-          label="已使用或过期"
-          value={`${
-            data.redeemCodes.filter(
-              (redeemCode) => redeemCode.status !== "unused",
-            ).length
-          }`}
-        />
-      </section>
 
       {selectedRedeemCodePublicId !== null &&
       selectedRedeemCodeDetail === null ? (

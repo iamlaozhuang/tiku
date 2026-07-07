@@ -571,7 +571,7 @@ activeTasks:
   - id: operations-summary-first-workbench-2026-07-07
     title: Operations summary-first workbench
     phase: operations-summary-first-workbench-2026-07-07
-    status: pending
+    status: in_progress
     priority: p1
     taskKind: implementation
     executionProfile: local_low_risk_ui_source_operations
@@ -610,6 +610,29 @@ activeTasks:
       - playwright-report/**
       - test-results/**
     capabilities: *low_risk_capabilities
+    validationSummary:
+      status: pass_feature_validation_ready_for_commit
+      taskPlanPrepared: true
+      evidencePrepared: true
+      auditPrepared: true
+      branchSpecificReadGate: pass
+      redFocusedTests: fail_expected_1_file_5_failed
+      focusedTests: pass_8_files_52_tests
+      eslint: pass
+      typecheck: pass
+      fullUnit: pass_343_files_1729_tests
+      prettierCheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      browserRuntimeExecuted: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
   - id: super-admin-organization-context-2026-07-07
     title: Super admin organization context handling
     phase: super-admin-organization-context-2026-07-07

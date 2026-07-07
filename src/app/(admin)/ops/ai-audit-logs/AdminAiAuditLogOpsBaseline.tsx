@@ -403,6 +403,11 @@ export function AdminAiAuditLogOpsBaseline({
         </p>
       </header>
 
+      <AdminAiAuditSummaryFirstBand
+        currentRole={currentRole}
+        runtimeData={runtimeData}
+      />
+
       <AdminModelConfigManagement
         key={managementKey}
         initialModelConfigs={runtimeData.modelConfigs}
@@ -498,6 +503,86 @@ export function AdminAiAuditLogOpsBaseline({
         <AdminAuditLogDetailPanel auditLog={selectedAuditLog} />
         <AdminAiCallLogDetailPanel aiCallLog={selectedAiCallLog} />
       </div>
+    </div>
+  );
+}
+
+function AdminAiAuditSummaryFirstBand({
+  currentRole,
+  runtimeData,
+}: {
+  currentRole: AdminAiAuditLogOpsRoleMode;
+  runtimeData: AdminAiAuditRuntimeData;
+}) {
+  const failedAiCallCount = runtimeData.aiCallLogs.filter(
+    (aiCallLog) => aiCallLog.callStatus === "failed",
+  ).length;
+  const roleBoundary =
+    currentRole === "super_admin"
+      ? "超级管理员可维护模型配置并查看受控 Prompt 元数据。"
+      : "运营管理员只读日志、成本汇总和脱敏元数据。";
+  const roleLabel = currentRole === "super_admin" ? "超级管理员" : "运营管理员";
+
+  return (
+    <section
+      aria-label="AI 与日志摘要优先"
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="ops-ai-audit-summary-first-band"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            AI 日志 summary-first
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">
+            AI 与日志总览
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            {roleBoundary} Provider 不在页面执行；原始 Prompt、Provider
+            payload、原始输出、会话和凭证不展示。
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          {roleLabel}
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <AdminAiAuditSummaryTile
+          label="模型配置"
+          value={`${runtimeData.modelConfigs.length}`}
+        />
+        <AdminAiAuditSummaryTile
+          label="审计日志"
+          value={`${runtimeData.auditLogs.length}`}
+        />
+        <AdminAiAuditSummaryTile
+          label="AI 调用"
+          value={`${runtimeData.aiCallLogs.length}`}
+        />
+        <AdminAiAuditSummaryTile
+          label="失败调用"
+          value={`${failedAiCallCount}`}
+        />
+      </div>
+      <p className="text-text-muted mt-3 text-xs leading-5">
+        空态、错误态和禁用态保持可见；成本汇总仅用于本地运营观察，不声明 Cost
+        Calibration。
+      </p>
+    </section>
+  );
+}
+
+function AdminAiAuditSummaryTile({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="border-border bg-background rounded-md border p-3">
+      <p className="text-text-muted text-xs">{label}</p>
+      <p className="text-text-primary mt-2 text-2xl font-semibold">{value}</p>
     </div>
   );
 }
