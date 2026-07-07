@@ -44,11 +44,132 @@ validationCommands: &low_risk_validation_commands
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
   - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
 activeTasks:
+  - id: 0704-db-local-fixture-supplement-2026-07-07
+    title: 0704 DB local fixture supplement
+    phase: 0704-db-local-fixture-supplement-2026-07-07
+    status: closed
+    result: pass_two_role_direct_login_fixture_material_closed
+    priority: p0
+    taskKind: local_0704_fixture_supplement
+    executionProfile: approved_local_0704_non_destructive_fixture_account_upsert_no_provider_no_staging_prod_no_cost_calibration
+    validationPolicy: read_gate_task_plan_redacted_fixture_supplement_login_authorization_probe_lint_typecheck_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/0704-db-local-manual-role-acceptance-prep-2026-07-07
+    humanApprovalBoundary: current_user_approved_local_0704_fixture_supplement_merge_push_cleanup_2026_07_07
+    plannedAt: "2026-07-07T05:00:00-07:00"
+    claimedAt: "2026-07-07T05:00:00-07:00"
+    materializedAt: "2026-07-07T05:08:00-07:00"
+    completedAt: "2026-07-07T05:10:00-07:00"
+    targetClosureItem: Close explicit 20260704 direct-login material gaps for personal_standard_student and org_advanced_employee using approved local non-destructive fixture/account supplement.
+    behaviorBoundary: docs_state_evidence_audit_plus_approved_local_0704_non_destructive_fixture_account_upsert_and_private_account_file_update_only_no_env_file_change_no_source_change_no_dependency_no_package_lockfile_no_schema_migration_seed_no_destructive_db_operation_no_provider_no_staging_prod_deploy_no_cost_calibration_no_release_or_production_claim
+    evidenceMode: redacted_command_names_exit_status_route_label_host_label_counts_safe_failure_category_only_no_credentials_tokens_sessions_cookies_headers_env_values_connection_strings_raw_db_rows_internal_ids_pii_phone_email_password_plaintext_redeem_code_provider_payload_raw_prompt_raw_ai_io_full_material_question_answer_paper_resource_chunk_content_screenshots_traces_raw_dom_private_fixture_values
+    planPath: docs/05-execution-logs/task-plans/2026-07-07-0704-db-local-fixture-supplement.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-07-0704-db-local-fixture-supplement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-0704-db-local-fixture-supplement.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-07-0704-db-local-fixture-supplement.md
+      - docs/05-execution-logs/evidence/2026-07-07-0704-db-local-fixture-supplement.md
+      - docs/05-execution-logs/audits-reviews/2026-07-07-0704-db-local-fixture-supplement.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: approved_existing_regression_only
+      browserRuntime: approved_localhost_bounded_no_screenshot_no_dom
+      localDevServer: approved_existing_localhost_3000_process_only_0704_db_override
+      directDatabaseConnection: approved_local_0704_fixture_supplement
+      databaseMutation: approved_non_destructive_local_0704_fixture_account_upsert_only
+      privateFixtureFileWrite: approved_current_user_2026_07_07
+      providerCall: blocked
+      providerEnabledSmallSample: blocked_requires_separate_fresh_approval
+      envSecretAccess: approved_runtime_process_only_value_not_recorded_for_0704_service_restart
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/next-dev-origin-config.test.ts tests/unit/local-acceptance-session-bootstrap.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-07-0704-db-local-fixture-supplement.md docs/05-execution-logs/evidence/2026-07-07-0704-db-local-fixture-supplement.md docs/05-execution-logs/audits-reviews/2026-07-07-0704-db-local-fixture-supplement.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-db-local-fixture-supplement-2026-07-07
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-db-local-fixture-supplement-2026-07-07 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_local_0704_fixture_supplement_merge_push_cleanup_2026_07_07
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_local_0704_fixture_supplement_merge_push_cleanup_2026_07_07
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_local_0704_fixture_supplement_merge_push_cleanup_2026_07_07
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_local_0704_fixture_supplement_merge_push_cleanup_2026_07_07
+    validationSummary:
+      status: pass
+      taskPlanPrepared: true
+      approvedFixtureSupplement: pass
+      personalStandardStudentLogin: pass
+      personalStandardStudentStandardOnlyAuth: pass
+      orgAdvancedEmployeeLogin: pass
+      orgAdvancedEmployeeAdvancedAuth: pass
+      orgAdvancedEmployeeTrainingVisibleList: pass_nonzero
+      roleInventory: pass_all_seven_manual_materials_ready
+      manualChecklist: updated
+      sourceCodeIssueConfirmed: false
+      focusedUnit: pass_2_files_7_tests
+      lint: pass
+      typecheck: pass
+      gitDiffCheck: pass
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      dependencyChanged: false
+      packageLockfileChanged: false
+      envFileChanged: false
+      privateFixtureFileChanged: true
+      dbReadWriteExecuted: true
+      dbMutationBoundary: non_destructive_local_fixture_account_upsert_only
+      destructiveDbOperationExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
   - id: 0704-db-local-manual-role-acceptance-prep-2026-07-07
     title: 0704 DB local manual role acceptance prep
     phase: 0704-db-local-manual-role-acceptance-prep-2026-07-07
-    status: blocked_pending_human_approval_for_fixture_supplement
-    result: service_ready_five_roles_ready_two_fixture_supplements_require_approval
+    status: supplemented_by_0704_db_local_fixture_supplement_2026_07_07
+    result: service_ready_fixture_gaps_closed_by_later_supplement
     priority: p0
     taskKind: local_0704_manual_role_acceptance_prep
     executionProfile: local_0704_process_override_manual_acceptance_prep_no_fixture_write_no_provider_no_staging_prod_no_cost_calibration
@@ -98,8 +219,8 @@ activeTasks:
       browserRuntime: approved_localhost_bounded_no_submit_no_screenshot_no_dom
       localDevServer: approved_localhost_3000_restart_process_only_0704_db_override
       directDatabaseConnection: approved_readonly_0704_target_label_check_only
-      databaseMutation: blocked_requires_fresh_approval_for_fixture_supplement
-      privateFixtureFileWrite: blocked_requires_fresh_approval
+      databaseMutation: superseded_by_0704_db_local_fixture_supplement_2026_07_07
+      privateFixtureFileWrite: superseded_by_0704_db_local_fixture_supplement_2026_07_07
       providerCall: blocked
       providerEnabledSmallSample: blocked_requires_separate_fresh_approval
       envSecretAccess: approved_runtime_process_only_value_not_recorded_for_0704_service_restart
@@ -139,7 +260,7 @@ activeTasks:
       readonlyDbLabelCheck: pass
       loginRouteHttp200: pass
       loginDevOriginReadiness: pass
-      roleInventory: partial_two_fixture_supplements_require_approval
+      roleInventory: pass_after_fixture_supplement
       manualChecklist: prepared
       sourceCodeIssueConfirmed: false
       focusedUnit: pass_2_files_7_tests
