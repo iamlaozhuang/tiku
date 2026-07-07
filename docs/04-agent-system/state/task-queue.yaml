@@ -658,7 +658,8 @@ activeTasks:
   - id: full-role-uiux-batch-5-content-admin-cross-role-closure-2026-07-07
     title: Full role UI/UX batch 5 content admin and cross-role closure
     phase: full-role-uiux-remediation-series-2026-07-07
-    status: pending
+    status: closed
+    result: pass_docs_only_content_admin_cross_role_uiux_baseline_prepared
     dependsOn:
       - full-role-uiux-batch-4-personal-students-2026-07-07
     priority: p1
@@ -671,6 +672,7 @@ activeTasks:
     requirementAlignmentPath: docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
+    completedAt: "2026-07-07T08:24:16-07:00"
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -678,13 +680,38 @@ activeTasks:
       - docs/01-requirements/traceability/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
       - docs/05-execution-logs/evidence/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
       - docs/05-execution-logs/audits-reviews/2026-07-07-full-role-uiux-batch-5-content-admin-cross-role-closure.md
-    blockedFiles: *docs_only_uiux_blocked_files
+    blockedFiles:
+      - src/**
+      - tests/**
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - yarn.lock
+      - .env*
+      - db/**
+      - migrations/**
+      - prisma/**
+      - drizzle/**
+      - supabase/**
+      - public/**
+      - assets/**
+      - screenshots/**
+      - .github/**
+    validationCommands:
+      - scoped_prettier_write_allowed_files
+      - scoped_prettier_check_allowed_files
+      - git_diff_check
+      - added_line_redaction_scan
+      - module_run_v2_precommit_hardening_explicit_task_id
+      - npm_run_lint
+      - npm_run_typecheck
+      - module_run_v2_prepush_readiness_explicit_task_id_after_master_merge
     capabilities: *docs_only_uiux_capabilities
     closeoutPolicy: *docs_only_uiux_closeout_policy
   - id: full-role-uiux-local-design-board-materialization-2026-07-07
     title: Full role UI/UX local design board materialization
     phase: full-role-uiux-remediation-series-2026-07-07
-    status: pending_after_batch_5
+    status: pending
     dependsOn:
       - full-role-uiux-batch-5-content-admin-cross-role-closure-2026-07-07
     priority: p2
