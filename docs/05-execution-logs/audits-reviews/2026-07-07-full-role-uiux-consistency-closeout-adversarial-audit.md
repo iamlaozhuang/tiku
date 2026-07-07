@@ -4,7 +4,7 @@ Task id: `full-role-uiux-consistency-closeout-2026-07-07`
 
 Branch: `codex/full-role-uiux-consistency-closeout-2026-07-07`
 
-Audit status: pass branch validation and precommit, pending merge closeout.
+Audit status: pass branch validation, precommit, merge, master gates, and prepush.
 
 ## Scope Audited
 
@@ -42,5 +42,7 @@ This audit reviews Branch 8 source closeout across the branch 2-7 learner, organ
 Branch 8 closes the current cross-role UIUX source inconsistencies found after branches 2-7. The fixes stay within
 presentation and targeted-test scope and do not alter role, edition, authorization, organization context, content
 lifecycle, Provider, DB, env, dependency, schema/migration/seed, or fixture behavior.
+
+Post-merge master lint, typecheck, and full unit gates also pass before push readiness.
 
 Cost Calibration Gate remains blocked.
