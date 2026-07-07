@@ -287,9 +287,15 @@ function createManualDraftInput(
   values: DraftFormValues,
   capabilitySummary: AdminWorkspaceCapabilitySummary,
 ) {
+  const organizationPublicId =
+    capabilitySummary.organizationPublicId ?? values.organizationPublicId;
+  const authorizationPublicId =
+    capabilitySummary.organizationAuthorizationPublicId ??
+    values.authorizationPublicId;
+
   return {
-    organizationPublicId: values.organizationPublicId,
-    authorizationPublicId: values.authorizationPublicId,
+    organizationPublicId,
+    authorizationPublicId,
     profession: values.profession,
     level: Number(values.level),
     subject: values.subject,
@@ -459,6 +465,17 @@ export function AdminOrganizationTrainingPage() {
         );
 
         setCapabilitySummary(accessState.capabilitySummary);
+        if (accessState.loadState === "ready") {
+          setDraftFormValues((currentValues) => ({
+            ...currentValues,
+            authorizationPublicId:
+              accessState.capabilitySummary.organizationAuthorizationPublicId ??
+              currentValues.authorizationPublicId,
+            organizationPublicId:
+              accessState.capabilitySummary.organizationPublicId ??
+              currentValues.organizationPublicId,
+          }));
+        }
         setLoadState(accessState.loadState);
       } catch {
         if (isActive) {
@@ -1109,6 +1126,10 @@ function DraftForm({
   onChange: (values: DraftFormValues) => void;
   onSubmit: (values: DraftFormValues) => void;
 }) {
+  const hasRequiredAuthorizationContext =
+    values.organizationPublicId.trim().length > 0 &&
+    values.authorizationPublicId.trim().length > 0;
+
   return (
     <form
       aria-label="企业训练配置表单"
@@ -1122,20 +1143,16 @@ function DraftForm({
         icon={<FilePlus2 aria-hidden="true" className="size-4" />}
         title="训练配置"
       />
-      <TextField
-        label="组织节点"
-        value={values.organizationPublicId}
-        onChange={(value) =>
-          onChange({ ...values, organizationPublicId: value })
-        }
-      />
-      <TextField
-        label="企业授权"
-        value={values.authorizationPublicId}
-        onChange={(value) =>
-          onChange({ ...values, authorizationPublicId: value })
-        }
-      />
+      <div className="bg-muted text-text-secondary grid gap-2 rounded-md p-3 text-sm leading-6">
+        <p className="text-text-primary font-medium">会话授权上下文</p>
+        <p>组织范围由当前会话授权带入</p>
+        <p>企业授权由服务端校验</p>
+        {hasRequiredAuthorizationContext ? null : (
+          <p className="text-destructive" role="status">
+            当前会话缺少组织授权上下文，暂不能创建企业训练草稿。
+          </p>
+        )}
+      </div>
       <TextField
         label="训练标题"
         value={values.title}
@@ -1147,7 +1164,10 @@ function DraftForm({
         onChange={(value) => onChange({ ...values, description: value })}
       />
       <ScopeFields values={values} onChange={onChange} />
-      <Button disabled={isSubmitting} type="submit">
+      <Button
+        disabled={isSubmitting || !hasRequiredAuthorizationContext}
+        type="submit"
+      >
         {isSubmitting ? "创建中" : "创建企业训练草稿"}
       </Button>
     </form>

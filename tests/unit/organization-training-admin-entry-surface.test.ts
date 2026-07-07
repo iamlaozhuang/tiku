@@ -38,6 +38,7 @@ const adminSessionPayload = {
       adminRoles: ["org_advanced_admin"],
       adminWorkspaceCapability: {
         adminRoles: ["org_advanced_admin"],
+        organizationAuthorizationPublicId: "org-auth-admin-scope-001",
         organizationPublicId: "organization-admin-scope-001",
         organizationEffectiveEdition: "advanced",
         organizationAuthorizationSource: "org_auth",
@@ -359,12 +360,12 @@ describe("AdminOrganizationTrainingPage", () => {
     const draftForm = within(
       screen.getByRole("form", { name: "企业训练配置表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织节点"), {
-      target: { value: "organization-admin-scope-001" },
-    });
-    fireEvent.change(draftForm.getByLabelText("企业授权"), {
-      target: { value: "org-auth-admin-scope-001" },
-    });
+    expect(draftForm.queryByLabelText("组织节点")).toBeNull();
+    expect(draftForm.queryByLabelText("企业授权")).toBeNull();
+    expect(
+      draftForm.getByText("组织范围由当前会话授权带入"),
+    ).toBeInTheDocument();
+    expect(draftForm.getByText("企业授权由服务端校验")).toBeInTheDocument();
     fireEvent.change(draftForm.getByLabelText("训练标题"), {
       target: { value: "门店服务训练" },
     });
@@ -704,12 +705,8 @@ describe("AdminOrganizationTrainingPage", () => {
     const draftForm = within(
       screen.getByRole("form", { name: "企业训练配置表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织节点"), {
-      target: { value: "organization-admin-scope-001" },
-    });
-    fireEvent.change(draftForm.getByLabelText("企业授权"), {
-      target: { value: "org-auth-admin-scope-001" },
-    });
+    expect(draftForm.queryByLabelText("组织节点")).toBeNull();
+    expect(draftForm.queryByLabelText("企业授权")).toBeNull();
     fireEvent.change(draftForm.getByLabelText("训练标题"), {
       target: { value: "门店服务训练" },
     });
@@ -762,12 +759,8 @@ describe("AdminOrganizationTrainingPage", () => {
     const draftForm = within(
       screen.getByRole("form", { name: "企业训练配置表单" }),
     );
-    fireEvent.change(draftForm.getByLabelText("组织节点"), {
-      target: { value: "organization-admin-scope-001" },
-    });
-    fireEvent.change(draftForm.getByLabelText("企业授权"), {
-      target: { value: "org-auth-admin-scope-001" },
-    });
+    expect(draftForm.queryByLabelText("组织节点")).toBeNull();
+    expect(draftForm.queryByLabelText("企业授权")).toBeNull();
     fireEvent.change(draftForm.getByLabelText("训练标题"), {
       target: { value: "门店服务训练" },
     });

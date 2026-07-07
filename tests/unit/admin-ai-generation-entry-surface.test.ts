@@ -807,6 +807,21 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByRole("heading", { name: "训练题草稿" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-context"),
+    ).toHaveTextContent("企业 AI 训练内容");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-mode"),
+    ).toHaveTextContent("AI出题");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-parameters"),
+    ).toHaveTextContent("专业");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).toHaveTextContent("只进入企业训练草稿");
+    expect(
+      await screen.findByTestId("admin-ai-generation-zone-result-history"),
+    ).toHaveTextContent("组织草稿池暂无任务记录");
     expect(screen.getByLabelText("出题数量")).toHaveDisplayValue("3");
     expect(screen.getByLabelText("出题数量")).toHaveAttribute("max", "10");
     expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
@@ -884,6 +899,18 @@ describe("admin AI generation entry surfaces", () => {
     expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
       "生成训练试卷草稿",
     );
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-context"),
+    ).toHaveTextContent("企业 AI 训练内容");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-mode"),
+    ).toHaveTextContent("AI组卷");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-parameters"),
+    ).toHaveTextContent("题源偏好");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).toHaveTextContent("只进入企业训练草稿");
 
     const nextStep = await screen.findByTestId(
       "organization-ai-generation-draft-next-step",

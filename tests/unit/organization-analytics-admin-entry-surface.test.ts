@@ -391,7 +391,13 @@ describe("AdminOrganizationAnalyticsPage", () => {
 
     expect(
       await screen.findByTestId("organization-analytics-scope-context"),
-    ).toHaveTextContent("organization-analytics-scope-001");
+    ).toHaveTextContent("当前组织及下级");
+    expect(
+      screen.getByTestId("organization-analytics-scope-context"),
+    ).toHaveTextContent("范围由会话授权自动带入");
+    expect(
+      screen.getByTestId("organization-analytics-scope-context"),
+    ).not.toHaveTextContent("organization-analytics-scope-001");
     expect(
       await screen.findByTestId(
         "organization-analytics-summary-organization-analytics-scope-001",
@@ -446,7 +452,11 @@ describe("AdminOrganizationAnalyticsPage", () => {
     const scopeContext = await screen.findByTestId(
       "organization-analytics-scope-context",
     );
-    expect(scopeContext).toHaveTextContent("organization-analytics-scope-001");
+    expect(scopeContext).toHaveTextContent("当前组织及下级");
+    expect(scopeContext).toHaveTextContent("范围由会话授权自动带入");
+    expect(scopeContext).not.toHaveTextContent(
+      "organization-analytics-scope-001",
+    );
     expect(
       screen.queryByDisplayValue("organization-analytics-scope-001"),
     ).toBeNull();

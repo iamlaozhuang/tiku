@@ -2747,7 +2747,10 @@ export function AdminAiGenerationEntryPage({
 
   return (
     <section className="space-y-6" data-testid="admin-ai-generation-entry">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <header
+        className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"
+        data-testid="admin-ai-generation-zone-context"
+      >
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">
             {pageCopy.eyebrow}
@@ -2764,14 +2767,31 @@ export function AdminAiGenerationEntryPage({
         </div>
       </header>
 
-      <AdminAiGenerationDetailControls
-        generationParameters={generationParameters}
-        generationKind={generationKind}
-        onChange={handleGenerationParameterChange}
-        workspace={workspace}
-      />
+      <section
+        className="bg-surface border-border rounded-md border p-4 shadow-sm"
+        data-testid="admin-ai-generation-zone-mode"
+      >
+        <p className="text-brand-primary text-xs font-medium">当前模式</p>
+        <h2 className="text-text-primary mt-1 text-base font-semibold">
+          {getGenerationKindLabel(generationKind)}
+        </h2>
+        <p className="text-text-secondary mt-2 text-sm leading-6">
+          {workspace === "organization"
+            ? "组织 AI 结果只进入企业训练草稿闭环，发布前仍需编辑、预览和范围确认。"
+            : "内容 AI 结果只进入内容评审闭环，发布前仍需审核和正式发布校验。"}
+        </p>
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <section
+        className="grid gap-4 lg:grid-cols-[2fr_1fr]"
+        data-testid="admin-ai-generation-zone-parameters"
+      >
+        <AdminAiGenerationDetailControls
+          generationParameters={generationParameters}
+          generationKind={generationKind}
+          onChange={handleGenerationParameterChange}
+          workspace={workspace}
+        />
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
           <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <WandSparkles aria-hidden="true" className="size-4" />
@@ -2790,7 +2810,12 @@ export function AdminAiGenerationEntryPage({
             {requestState === "submitting" ? "提交中" : pageCopy.actionLabel}
           </button>
         </section>
+      </section>
 
+      <section
+        className="grid gap-4 lg:grid-cols-2"
+        data-testid="admin-ai-generation-zone-boundary"
+      >
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
           <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <FileText aria-hidden="true" className="size-4" />
@@ -2810,101 +2835,106 @@ export function AdminAiGenerationEntryPage({
             生成前需要匹配本地资料；资料不足时不生成草稿。
           </p>
         </section>
-      </div>
+      </section>
 
-      {requestState === "error" ? (
-        <section
-          className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
-          data-testid="admin-ai-generation-local-contract-error"
-          role="alert"
-        >
-          <h2 className="text-text-primary text-sm font-semibold">
-            生成请求暂不可用
-          </h2>
-          <p className="text-text-secondary mt-2 text-sm leading-6">
-            {requestErrorMessage ?? providerExecutionCopy.error}
-          </p>
-        </section>
-      ) : null}
+      <section
+        className="space-y-4"
+        data-testid="admin-ai-generation-zone-result-history"
+      >
+        {requestState === "error" ? (
+          <section
+            className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
+            data-testid="admin-ai-generation-local-contract-error"
+            role="alert"
+          >
+            <h2 className="text-text-primary text-sm font-semibold">
+              生成请求暂不可用
+            </h2>
+            <p className="text-text-secondary mt-2 text-sm leading-6">
+              {requestErrorMessage ?? providerExecutionCopy.error}
+            </p>
+          </section>
+        ) : null}
 
-      {localContractSummary !== null ? (
-        <section
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-testid="admin-ai-generation-local-contract-summary"
-        >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-brand-primary text-xs font-medium">
-                草稿已提交
-              </p>
-              <h2 className="text-text-primary mt-1 text-base font-semibold">
-                {getTaskStatusLabel(localContractSummary.resultState.status)}
-              </h2>
+        {localContractSummary !== null ? (
+          <section
+            className="bg-surface border-border rounded-md border p-4 shadow-sm"
+            data-testid="admin-ai-generation-local-contract-summary"
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-brand-primary text-xs font-medium">
+                  草稿已提交
+                </p>
+                <h2 className="text-text-primary mt-1 text-base font-semibold">
+                  {getTaskStatusLabel(localContractSummary.resultState.status)}
+                </h2>
+              </div>
             </div>
-          </div>
 
-          <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <dt className="text-text-secondary">任务状态</dt>
-              <dd className="text-text-primary mt-1">
-                {getTaskStatusLabel(localContractSummary.resultState.status)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-text-secondary">结果内容</dt>
-              <dd className="text-text-primary mt-1">
-                {localContractSummary.resultState.resultPublicId === null
-                  ? "暂无生成结果"
-                  : "已产生结果引用"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-text-secondary">资料依据</dt>
-              <dd className="text-text-primary mt-1">
-                {localContractSummary.resultState.evidenceStatus ===
-                "sufficient"
-                  ? "资料充足"
-                  : "资料不足"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-text-secondary">
-                {providerExecutionCopy.label}
-              </dt>
-              <dd className="text-text-primary mt-1">
-                {localContractSummary.runtimeBridge.providerCallExecuted
-                  ? "已执行"
-                  : providerExecutionCopy.blocked}
-              </dd>
-            </div>
-          </dl>
+            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <dt className="text-text-secondary">任务状态</dt>
+                <dd className="text-text-primary mt-1">
+                  {getTaskStatusLabel(localContractSummary.resultState.status)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-secondary">结果内容</dt>
+                <dd className="text-text-primary mt-1">
+                  {localContractSummary.resultState.resultPublicId === null
+                    ? "暂无生成结果"
+                    : "已产生结果引用"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-secondary">资料依据</dt>
+                <dd className="text-text-primary mt-1">
+                  {localContractSummary.resultState.evidenceStatus ===
+                  "sufficient"
+                    ? "资料充足"
+                    : "资料不足"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-secondary">
+                  {providerExecutionCopy.label}
+                </dt>
+                <dd className="text-text-primary mt-1">
+                  {localContractSummary.runtimeBridge.providerCallExecuted
+                    ? "已执行"
+                    : providerExecutionCopy.blocked}
+                </dd>
+              </div>
+            </dl>
 
-          <AdminAiGenerationVisibleGeneratedContent
-            localContractSummary={localContractSummary}
-          />
-        </section>
-      ) : null}
+            <AdminAiGenerationVisibleGeneratedContent
+              localContractSummary={localContractSummary}
+            />
+          </section>
+        ) : null}
 
-      <AdminAiGenerationTaskHistoryPanel
-        adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
-        copyActionErrorMessageByResultPublicId={
-          copyActionErrorMessageByResultPublicId
-        }
-        copyActionStateByResultPublicId={copyActionStateByResultPublicId}
-        currentLocalContractSummary={localContractSummary}
-        generationParameters={generationParameters}
-        generationKind={generationKind}
-        onCopyToTrainingDraft={(input) =>
-          void handleCopyOrganizationAiResultToTrainingDraft(input)
-        }
-        onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
-        pagination={taskHistoryPagination}
-        reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}
-        state={historyState}
-        taskHistory={taskHistory}
-        workspace={workspace}
-        onReviewContentDraft={(input) => void handleReviewContentDraft(input)}
-      />
+        <AdminAiGenerationTaskHistoryPanel
+          adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
+          copyActionErrorMessageByResultPublicId={
+            copyActionErrorMessageByResultPublicId
+          }
+          copyActionStateByResultPublicId={copyActionStateByResultPublicId}
+          currentLocalContractSummary={localContractSummary}
+          generationParameters={generationParameters}
+          generationKind={generationKind}
+          onCopyToTrainingDraft={(input) =>
+            void handleCopyOrganizationAiResultToTrainingDraft(input)
+          }
+          onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
+          pagination={taskHistoryPagination}
+          reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}
+          state={historyState}
+          taskHistory={taskHistory}
+          workspace={workspace}
+          onReviewContentDraft={(input) => void handleReviewContentDraft(input)}
+        />
+      </section>
     </section>
   );
 }

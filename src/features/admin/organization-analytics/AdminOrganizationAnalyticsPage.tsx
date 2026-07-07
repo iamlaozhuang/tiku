@@ -497,7 +497,7 @@ function DashboardSummaryForm({
               当前组织及下级
             </span>
             <span className="text-text-secondary text-xs">
-              {values.organizationPublicId}
+              范围由会话授权自动带入
             </span>
           </div>
         ) : (

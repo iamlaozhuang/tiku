@@ -177,7 +177,15 @@ export function AdminOrganizationPortalPage() {
   const hasAdvancedAccess =
     capabilitySummary !== null &&
     canUseOrganizationAdvancedWorkspaceCapability(capabilitySummary);
-  const organizationPublicId = capabilitySummary?.organizationPublicId ?? null;
+  const hasOrganizationContext =
+    capabilitySummary?.organizationPublicId !== null &&
+    capabilitySummary?.organizationPublicId !== undefined;
+  const organizationContextLabel = hasOrganizationContext
+    ? "当前组织范围"
+    : "暂未绑定组织范围";
+  const organizationEditionLabel = hasAdvancedAccess
+    ? "高级版组织后台"
+    : "标准版组织后台";
 
   return (
     <section className="space-y-6" data-testid="organization-portal-shell">
@@ -207,12 +215,12 @@ export function AdminOrganizationPortalPage() {
                 组织范围
               </h2>
               <p className="text-text-secondary text-sm">
-                {organizationPublicId ?? "暂未绑定组织范围"}
+                {organizationContextLabel}
               </p>
             </div>
           </div>
           <span className="bg-success/10 text-success rounded-md px-3 py-1 text-xs font-medium">
-            本地组织工作区
+            {organizationEditionLabel}
           </span>
         </div>
         <p className="text-text-secondary mt-3 text-sm leading-6">

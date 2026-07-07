@@ -167,7 +167,9 @@ describe("AdminOrganizationPortalPage", () => {
     expect(portalShell).toHaveTextContent("员工名单与状态");
     expect(portalShell).toHaveTextContent("不提供新增、导入、调动或解绑入口");
     expect(portalShell).toHaveTextContent("授权状态");
-    expect(portalShell).toHaveTextContent("organization-portal-scope-001");
+    expect(portalShell).toHaveTextContent("当前组织范围");
+    expect(portalShell).toHaveTextContent("高级版组织后台");
+    expect(portalShell).not.toHaveTextContent("organization-portal-scope-001");
     expect(portalShell).toHaveTextContent("高级版组织授权已生效");
     expect(portalShell).toHaveTextContent("训练、统计和智能草稿入口已开放");
     expect(portalShell).not.toHaveTextContent("/ops/organizations");
@@ -205,7 +207,11 @@ describe("AdminOrganizationPortalPage", () => {
     ).toBeInTheDocument();
 
     const portalShell = screen.getByTestId("organization-portal-shell");
-    expect(portalShell).toHaveTextContent("organization-standard-scope-001");
+    expect(portalShell).toHaveTextContent("当前组织范围");
+    expect(portalShell).toHaveTextContent("标准版组织后台");
+    expect(portalShell).not.toHaveTextContent(
+      "organization-standard-scope-001",
+    );
     expect(portalShell).toHaveTextContent("员工名单与状态");
     expect(portalShell).toHaveTextContent("授权状态");
     expect(portalShell).toHaveTextContent("标准版暂不可用");
