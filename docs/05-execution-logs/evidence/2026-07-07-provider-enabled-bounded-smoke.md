@@ -6,7 +6,9 @@
 - Branch: `codex/provider-enabled-bounded-smoke-2026-07-07`
 - Mode: local-only Provider-enabled bounded smoke.
 - Approval boundary: user approved this bounded smoke on 2026-07-07.
+- result: pass
 - Explicit non-claims: no Cost Calibration, no release readiness, no production usability, no staging/prod/deploy.
+- Cost Calibration Gate remains blocked.
 
 ## Read Gate
 
@@ -134,3 +136,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 - This evidence is a bounded smoke only. It cannot be extrapolated to cost, throughput, retry behavior, full role matrix coverage, staging, production, or release readiness.
 - The temporary Provider smoke harness was removed before commit.
+
+## Module Run v2 Closeout Anchors
+
+- Batch range: provider-enabled bounded smoke single-task batch.
+- RED: prior Provider-enabled small sample remained unclaimed before fresh approval; provider-count/timeout evidence required a bounded follow-up instead of Cost Calibration.
+- GREEN: bounded Provider smoke passed with 4 approved submit attempts, redacted aggregate evidence, and no raw Provider artifacts recorded.
+- Commit: `c8603ca15`
+- localFullLoopGate: lint, typecheck, focused unit, diff check, scoped Prettier, and Module Run v2 pre-commit hardening recorded above.
+- blocked remainder: release readiness, production usability, staging, and Cost Calibration remain blocked / not claimed.
+- threadRolloverGate: no thread rollover required by this task.
+- nextModuleRunCandidate: `ai-paper-plan-and-select-backend-contract`.
