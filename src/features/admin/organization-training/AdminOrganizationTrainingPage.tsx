@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   CheckCircle2,
   ClipboardList,
@@ -22,6 +22,8 @@ import type {
   OrganizationTrainingAdminLifecycleContentKind,
   OrganizationTrainingAdminLifecycleItemDto,
   OrganizationTrainingAdminLifecycleSourceKind,
+  OrganizationTrainingAdminDetailDto,
+  OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "@/server/contracts/organization-training-contract";
@@ -54,6 +56,8 @@ type AdminOrganizationTrainingLoadState =
   | "error";
 
 type OrganizationTrainingListState = "loading" | "ready" | "error";
+
+type OrganizationTrainingDetailState = "idle" | "loading" | "ready" | "error";
 
 type OrganizationTrainingLifecycleStatusFilter =
   | "all"
@@ -285,6 +289,10 @@ function createAdminLifecycleListPath({
   return `/api/v1/organization-trainings?${searchParams.toString()}`;
 }
 
+function createAdminTrainingDetailPath(publicId: string) {
+  return `/api/v1/organization-trainings/${encodeURIComponent(publicId)}`;
+}
+
 function createLifecycleItemFromDraft(
   draft: OrganizationTrainingDraftDto,
 ): OrganizationTrainingAdminLifecycleItemDto {
@@ -406,7 +414,9 @@ function resolveTrainingContentShapeLabel(shape: TrainingContentShape) {
 }
 
 function resolvePublishQuestionTypeLabel(
-  questionType: PublishQuestionFormValue["questionType"],
+  questionType:
+    | PublishQuestionFormValue["questionType"]
+    | OrganizationTrainingAdminQuestionDetailDto["questionType"],
 ) {
   if (questionType === "single_choice") {
     return "单选题";
@@ -421,6 +431,20 @@ function resolvePublishQuestionTypeLabel(
   }
 
   return "简答题";
+}
+
+function resolveEvidenceStatusLabel(
+  evidenceStatus: OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"],
+) {
+  if (evidenceStatus === "sufficient") {
+    return "依据充分";
+  }
+
+  if (evidenceStatus === "weak") {
+    return "依据较弱";
+  }
+
+  return "暂无依据";
 }
 
 function resolveSourceChoiceShape(choice: SourceChoiceTitle) {
@@ -1128,6 +1152,14 @@ export function AdminOrganizationTrainingPage() {
     }
   }
 
+  function handleConfigureDraft(
+    draft: OrganizationTrainingAdminLifecycleItemDto,
+  ) {
+    setIsCreateWizardOpen(true);
+    setSelectedPublishDraft(draft);
+    setPublishFormValues(createPublishFormValuesForDraft(draft));
+  }
+
   async function handlePublishTraining(values: PublishFormValues) {
     const sessionToken = getStoredSessionToken();
 
@@ -1252,11 +1284,8 @@ export function AdminOrganizationTrainingPage() {
           setSelectedLifecyclePage(1);
         }}
         onCopyVersionToDraft={handleCopyVersionToNewDraft}
-        onPublishDraft={(draft) => {
-          setIsCreateWizardOpen(true);
-          setSelectedPublishDraft(draft);
-          setPublishFormValues(createPublishFormValuesForDraft(draft));
-        }}
+        onContinueDraft={handleConfigureDraft}
+        onPublishDraft={handleConfigureDraft}
         onTakeDownVersion={handleTakeDownVersion}
       />
 
@@ -1340,6 +1369,7 @@ function TrainingListPanel({
   selectedSourceKindFilter,
   selectedStatusFilter,
   onCreateTraining,
+  onContinueDraft,
   onCopyVersionToDraft,
   onSelectContentKindFilter,
   onSelectPage,
@@ -1360,6 +1390,7 @@ function TrainingListPanel({
   selectedSourceKindFilter: OrganizationTrainingLifecycleSourceKindFilter;
   selectedStatusFilter: OrganizationTrainingLifecycleStatusFilter;
   onCreateTraining: () => void;
+  onContinueDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
@@ -1379,6 +1410,12 @@ function TrainingListPanel({
   const [selectedDetailPublicId, setSelectedDetailPublicId] = useState<
     string | null
   >(null);
+  const [selectedDetail, setSelectedDetail] =
+    useState<OrganizationTrainingAdminDetailDto | null>(null);
+  const [detailState, setDetailState] =
+    useState<OrganizationTrainingDetailState>("idle");
+  const [detailMessage, setDetailMessage] = useState<string | null>(null);
+  const detailRequestSerial = useRef(0);
   const visibleItems =
     lastDraft === null
       ? items
@@ -1416,6 +1453,58 @@ function TrainingListPanel({
     selectedContentKindFilter !== "all";
   const shouldShowLifecycleControls =
     visibleItems.length > 0 || hasActiveLifecycleFilter;
+
+  function clearSelectedDetail() {
+    detailRequestSerial.current += 1;
+    setSelectedDetailPublicId(null);
+    setSelectedDetail(null);
+    setDetailState("idle");
+    setDetailMessage(null);
+  }
+
+  function handleContinueDraft(
+    item: OrganizationTrainingAdminLifecycleItemDto,
+  ) {
+    clearSelectedDetail();
+    onContinueDraft(item);
+  }
+
+  async function handleViewItem(
+    item: OrganizationTrainingAdminLifecycleItemDto,
+  ) {
+    const requestSerial = detailRequestSerial.current + 1;
+    detailRequestSerial.current = requestSerial;
+    setSelectedDetailPublicId(item.publicId);
+    setSelectedDetail(null);
+    setDetailMessage(null);
+    setDetailState("loading");
+
+    try {
+      const response =
+        await fetchAdminOrganizationTrainingApi<OrganizationTrainingAdminDetailDto>(
+          createAdminTrainingDetailPath(item.publicId),
+          getStoredSessionToken(),
+        );
+
+      if (detailRequestSerial.current !== requestSerial) {
+        return;
+      }
+
+      if (response.code !== 0 || response.data === null) {
+        setDetailState("error");
+        setDetailMessage(createApiErrorMessage("训练详情加载失败", response));
+        return;
+      }
+
+      setSelectedDetail(response.data);
+      setDetailState("ready");
+    } catch {
+      if (detailRequestSerial.current === requestSerial) {
+        setDetailState("error");
+        setDetailMessage("训练详情加载失败");
+      }
+    }
+  }
 
   return (
     <section
@@ -1457,7 +1546,7 @@ function TrainingListPanel({
               key={filter.value}
               onClick={() => {
                 onSelectStatusFilter(filter.value);
-                setSelectedDetailPublicId(null);
+                clearSelectedDetail();
               }}
               type="button"
             >
@@ -1483,7 +1572,7 @@ function TrainingListPanel({
               key={filter.value}
               onClick={() => {
                 onSelectSourceKindFilter(filter.value);
-                setSelectedDetailPublicId(null);
+                clearSelectedDetail();
               }}
               type="button"
             >
@@ -1509,7 +1598,7 @@ function TrainingListPanel({
               key={filter.value}
               onClick={() => {
                 onSelectContentKindFilter(filter.value);
-                setSelectedDetailPublicId(null);
+                clearSelectedDetail();
               }}
               type="button"
             >
@@ -1549,7 +1638,8 @@ function TrainingListPanel({
                 onCopyVersionToDraft={onCopyVersionToDraft}
                 onPublishDraft={onPublishDraft}
                 onTakeDownVersion={onTakeDownVersion}
-                onViewItem={setSelectedDetailPublicId}
+                onContinueDraft={handleContinueDraft}
+                onViewItem={handleViewItem}
               />
             ))}
           </div>
@@ -1571,7 +1661,7 @@ function TrainingListPanel({
             <Button
               disabled={clampedSelectedPage <= 1}
               onClick={() => {
-                setSelectedDetailPublicId(null);
+                clearSelectedDetail();
                 onSelectPage(Math.max(1, clampedSelectedPage - 1));
               }}
               type="button"
@@ -1582,7 +1672,7 @@ function TrainingListPanel({
             <Button
               disabled={clampedSelectedPage >= totalPageCount}
               onClick={() => {
-                setSelectedDetailPublicId(null);
+                clearSelectedDetail();
                 onSelectPage(Math.min(totalPageCount, clampedSelectedPage + 1));
               }}
               type="button"
@@ -1594,7 +1684,12 @@ function TrainingListPanel({
         </div>
       ) : null}
       {selectedDetailItem === null ? null : (
-        <TrainingLifecycleDetailPanel item={selectedDetailItem} />
+        <TrainingLifecycleDetailPanel
+          detail={selectedDetail}
+          detailMessage={detailMessage}
+          detailState={detailState}
+          item={selectedDetailItem}
+        />
       )}
     </section>
   );
@@ -1603,6 +1698,7 @@ function TrainingListPanel({
 function TrainingLifecycleItemCard({
   isSubmitting,
   item,
+  onContinueDraft,
   onCopyVersionToDraft,
   onPublishDraft,
   onTakeDownVersion,
@@ -1610,12 +1706,13 @@ function TrainingLifecycleItemCard({
 }: {
   isSubmitting: boolean;
   item: OrganizationTrainingAdminLifecycleItemDto;
+  onContinueDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
   onPublishDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
   onTakeDownVersion: (item: OrganizationTrainingAdminLifecycleItemDto) => void;
-  onViewItem: (publicId: string) => void;
+  onViewItem: (item: OrganizationTrainingAdminLifecycleItemDto) => void;
 }) {
   const isDraft = item.resourceType === "organization_training_draft";
   const statusLabel = resolveLifecycleStatusLabel(item);
@@ -1652,7 +1749,14 @@ function TrainingLifecycleItemCard({
         </span>
         <Button
           disabled={isSubmitting}
-          onClick={() => onViewItem(item.publicId)}
+          onClick={() => {
+            if (isDraft) {
+              onContinueDraft(item);
+              return;
+            }
+
+            onViewItem(item);
+          }}
           type="button"
           variant="outline"
         >
@@ -1693,12 +1797,29 @@ function TrainingLifecycleItemCard({
 }
 
 function TrainingLifecycleDetailPanel({
+  detail,
+  detailMessage,
+  detailState,
   item,
 }: {
+  detail: OrganizationTrainingAdminDetailDto | null;
+  detailMessage: string | null;
+  detailState: OrganizationTrainingDetailState;
   item: OrganizationTrainingAdminLifecycleItemDto;
 }) {
-  const isDraft = item.resourceType === "organization_training_draft";
   const canCopyToDraft = item.availableActions.includes("copy_to_new_draft");
+  const isDetailAvailable =
+    detailState === "ready" &&
+    detail !== null &&
+    detail.detailAvailability === "available";
+  const sourceKind = isDetailAvailable ? detail.sourceKind : item.sourceKind;
+  const contentKind = isDetailAvailable ? detail.contentKind : item.contentKind;
+  const questionCount = isDetailAvailable
+    ? detail.structure.questionCount
+    : (item.questionCount ?? 0);
+  const totalScore = isDetailAvailable
+    ? detail.structure.totalScore
+    : (item.totalScore ?? 0);
 
   return (
     <aside
@@ -1715,34 +1836,28 @@ function TrainingLifecycleDetailPanel({
         </span>
       </div>
       <p className="text-text-secondary mt-3 text-sm">
-        {isDraft
-          ? "草稿可继续配置，确认题目内容后再发布给员工。"
-          : "已发布版本为只读；如需调整内容，请复制为新草稿后再发布。"}
+        已发布版本为只读；如需调整内容，请复制为新草稿后再发布。
       </p>
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">来源</dt>
           <dd className="text-text-primary font-medium">
-            {resolveLifecycleSourceKindLabel(item.sourceKind)}
+            {resolveLifecycleSourceKindLabel(sourceKind)}
           </dd>
         </div>
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">形态</dt>
           <dd className="text-text-primary font-medium">
-            {resolveLifecycleContentKindLabel(item.contentKind)}
+            {resolveLifecycleContentKindLabel(contentKind)}
           </dd>
         </div>
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">题量</dt>
-          <dd className="text-text-primary font-medium">
-            {item.questionCount ?? 0}
-          </dd>
+          <dd className="text-text-primary font-medium">{questionCount}</dd>
         </div>
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">总分</dt>
-          <dd className="text-text-primary font-medium">
-            {item.totalScore ?? 0}
-          </dd>
+          <dd className="text-text-primary font-medium">{totalScore}</dd>
         </div>
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">操作建议</dt>
@@ -1751,7 +1866,167 @@ function TrainingLifecycleDetailPanel({
           </dd>
         </div>
       </dl>
+      <TrainingLifecycleDetailBody
+        detail={detail}
+        detailMessage={detailMessage}
+        detailState={detailState}
+      />
     </aside>
+  );
+}
+
+function TrainingLifecycleDetailBody({
+  detail,
+  detailMessage,
+  detailState,
+}: {
+  detail: OrganizationTrainingAdminDetailDto | null;
+  detailMessage: string | null;
+  detailState: OrganizationTrainingDetailState;
+}) {
+  if (detailState === "loading") {
+    return (
+      <div className="bg-surface mt-4 rounded-md p-4 text-sm">
+        <p className="text-text-secondary">正在加载训练详情</p>
+      </div>
+    );
+  }
+
+  if (detailState === "error") {
+    return (
+      <div className="bg-destructive/10 text-destructive mt-4 rounded-md p-4 text-sm">
+        {detailMessage ?? "训练详情加载失败"}
+      </div>
+    );
+  }
+
+  if (detailState !== "ready" || detail === null) {
+    return null;
+  }
+
+  if (detail.detailAvailability === "unavailable") {
+    return (
+      <div className="bg-surface mt-4 rounded-md p-4 text-sm">
+        <p className="text-text-primary font-medium">详情暂不可用</p>
+        <p className="text-text-secondary mt-1">
+          当前草稿还没有可展示的结构化快照，请继续配置后再预览发布。
+        </p>
+      </div>
+    );
+  }
+
+  const questionTypeSummary = detail.structure.questionTypeSummary;
+
+  return (
+    <div className="mt-4 space-y-4">
+      <section className="bg-surface rounded-md p-4">
+        <h4 className="text-text-primary text-sm font-semibold">结构摘要</h4>
+        <p className="text-text-secondary mt-2 text-sm">
+          单选 {questionTypeSummary.singleChoice} · 多选{" "}
+          {questionTypeSummary.multiChoice} · 判断{" "}
+          {questionTypeSummary.trueFalse} · 简答{" "}
+          {questionTypeSummary.shortAnswer}
+        </p>
+      </section>
+      {detail.questions.length === 0 ? (
+        <div className="bg-surface rounded-md p-4 text-sm">
+          <p className="text-text-secondary">暂无可展示题目详情</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <h4 className="text-text-primary text-sm font-semibold">
+            {detail.contentKind === "paper_training" ? "试卷详情" : "题目详情"}
+          </h4>
+          {detail.questions.map((question) => (
+            <TrainingQuestionDetailCard
+              key={`${question.sequenceNumber}-${question.stem}`}
+              question={question}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TrainingQuestionDetailCard({
+  question,
+}: {
+  question: OrganizationTrainingAdminQuestionDetailDto;
+}) {
+  return (
+    <article className="border-border bg-surface rounded-md border p-4 text-sm">
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
+          <h5 className="text-text-primary font-semibold">
+            第 {question.sequenceNumber} 题 ·{" "}
+            {resolvePublishQuestionTypeLabel(question.questionType)}
+          </h5>
+          <p className="text-text-secondary">
+            分值 {question.score} ·{" "}
+            {resolveEvidenceStatusLabel(
+              question.evidenceSummary.evidenceStatus,
+            )}{" "}
+            · 引用 {question.evidenceSummary.citationCount} 条
+          </p>
+        </div>
+        {question.materialTitle === null ? null : (
+          <span className="bg-muted text-text-secondary inline-flex min-h-7 items-center rounded-md px-2 text-xs">
+            材料：{question.materialTitle}
+          </span>
+        )}
+      </div>
+      <p className="text-text-primary mt-3 leading-6">{question.stem}</p>
+      {question.options.length === 0 ? null : (
+        <ul className="mt-3 grid gap-2">
+          {question.options.map((option) => (
+            <li
+              className="bg-muted/60 text-text-primary rounded-md px-3 py-2"
+              key={`${question.sequenceNumber}-${option.label}`}
+            >
+              {option.label}. {option.content}
+            </li>
+          ))}
+        </ul>
+      )}
+      <AnswerAnalysisDisclosure question={question} />
+    </article>
+  );
+}
+
+function AnswerAnalysisDisclosure({
+  question,
+}: {
+  question: OrganizationTrainingAdminQuestionDetailDto;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="mt-3">
+      <Button
+        onClick={() => setIsExpanded((currentValue) => !currentValue)}
+        type="button"
+        variant="outline"
+      >
+        {isExpanded ? "收起答案与解析" : "展开答案与解析"}
+      </Button>
+      {isExpanded ? (
+        <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="bg-muted rounded-md p-3">
+            <dt className="text-text-secondary">答案</dt>
+            <dd className="text-text-primary mt-1">
+              {question.answerAndAnalysis.standardAnswer ?? "未提供"}
+            </dd>
+          </div>
+          <div className="bg-muted rounded-md p-3">
+            <dt className="text-text-secondary">解析</dt>
+            <dd className="text-text-primary mt-1">
+              {question.answerAndAnalysis.analysis ?? "未提供"}
+            </dd>
+          </div>
+        </dl>
+      ) : null}
+    </div>
   );
 }
 

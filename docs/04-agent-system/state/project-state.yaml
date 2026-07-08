@@ -1,8 +1,35 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-admin-detail-read-model-2026-07-08
-updatedAt: "2026-07-08T15:56:00-07:00"
+currentPhase: organization-training-admin-detail-ui-2026-07-08
+updatedAt: "2026-07-08T16:38:32-07:00"
+latestOrganizationTrainingAdminDetailUi:
+  id: organization-training-admin-detail-ui-2026-07-08
+  status: ready_for_commit_merge_push_cleanup
+  result: pass_source_browser_validation_ready_for_precommit
+  branch: codex/org-training-admin-detail-ui
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-ui-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-ui-audit.md
+  approvalBoundary: current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
+  boundary:
+    scope: organization_training_admin_detail_ui_only
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    formalContentWriteExecuted: false
+  validationSummary:
+    tddRed: pass_expected_missing_detail_ui_states_failure
+    targetedOrganizationTrainingUiUnit: pass_1_file_15_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass_scoped
+    diffCheck: pass
+    localhostBrowser: pass_view_detail_disclosure_continue_config_no_console_errors
+    moduleRunV2PreCommitHardening: pass
+    sourceCodeChanged: true
+    testsChanged: true
 latestOrganizationTrainingAdminDetailReadModel:
   id: organization-training-admin-detail-read-model-2026-07-08
   status: ready_for_closeout
@@ -1404,39 +1431,34 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: organization-training-admin-detail-read-model-2026-07-08
-  title: Organization training admin detail read model
-  phase: organization-training-admin-detail-read-model-2026-07-08
-  status: ready_for_closeout
-  result: pass_master_gates_ready_for_push_cleanup
+  id: organization-training-admin-detail-ui-2026-07-08
+  title: Organization training admin detail UI
+  phase: organization-training-admin-detail-ui-2026-07-08
+  status: ready_for_commit_merge_push_cleanup
+  result: pass_source_browser_validation_ready_for_precommit
   priority: p1
   taskKind: implementation
-  branch: codex/org-training-admin-detail-read-model
+  branch: codex/org-training-admin-detail-ui
   humanApprovalBoundary: current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
-  plannedAt: "2026-07-08T15:34:00-07:00"
-  claimedAt: "2026-07-08T15:34:00-07:00"
-  completedAt: "2026-07-08T15:56:00-07:00"
-  targetClosureItem: Organization admins can read safe published enterprise training detail through a dedicated admin detail read model; drafts without structured snapshots return an explicit unavailable state.
-  behaviorBoundary: local_organization_training_admin_readonly_detail_api_dto_read_model_only_no_ui_no_write_interface_no_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write
-  evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-read-model.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-read-model-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-read-model-audit.md
+  plannedAt: "2026-07-08T16:22:00-07:00"
+  claimedAt: "2026-07-08T16:22:00-07:00"
+  completedAt: "2026-07-08T16:35:33-07:00"
+  targetClosureItem: Organization advanced admins can click published training view to see real safe question or paper detail while draft continue actions open configuration semantics.
+  behaviorBoundary: local_organization_training_admin_detail_ui_only_no_api_dto_service_repository_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write
+  evidenceMode: redacted_code_symbol_test_status_browser_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content_no_screenshots_in_repo
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-ui-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-ui-audit.md
   validationSummary:
-    status: pass_master_gates_ready_for_push_cleanup
-    tddRed: pass_expected_missing_admin_detail_read_model_and_route_failure
-    targetedOrganizationTrainingServiceRouteRepositoryUnit: pass_3_files_104_tests
+    status: pass_source_browser_validation_ready_for_precommit
+    tddRed: pass_expected_missing_detail_ui_states_failure
+    targetedOrganizationTrainingUiUnit: pass_1_file_15_tests
     lint: pass
     typecheck: pass
     prettierCheck: pass_scoped
     diffCheck: pass
+    localhostBrowser: pass_view_detail_disclosure_continue_config_no_console_errors
     moduleRunV2PreCommitHardening: pass
-    masterPostMergeTargetedTests: pass_3_files_104_tests
-    masterPostMergeLint: pass
-    masterPostMergeTypecheck: pass
-    masterPostMergePrettierCheck: pass_scoped
-    masterPostMergeDiffCheck: pass
-    repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false

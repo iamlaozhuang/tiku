@@ -276,6 +276,71 @@ describe("AdminOrganizationTrainingPage", () => {
         return createJsonResponse(adminSessionPayload);
       }
 
+      if (
+        getRequestPath(url) ===
+        "/api/v1/organization-trainings/organization-training-version-published-ui-001"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            publicId: "organization-training-version-published-ui-001",
+            resourceType: "organization_training_version",
+            detailAvailability: "available",
+            organizationPublicId: "organization-admin-scope-001",
+            title: "已发布训练",
+            description: "员工可见训练",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            status: "published",
+            sourceKind: "ai_paper",
+            contentKind: "paper_training",
+            structure: {
+              questionCount: 1,
+              totalScore: 5,
+              questionTypeSummary: {
+                singleChoice: 1,
+                multiChoice: 0,
+                trueFalse: 0,
+                shortAnswer: 0,
+              },
+            },
+            questions: [
+              {
+                publicId: "organization-training-question-detail-ui-001",
+                sequenceNumber: 1,
+                questionType: "single_choice",
+                materialTitle: "安全示例材料",
+                materialContent: null,
+                stem: "安全示例题干",
+                options: [
+                  {
+                    label: "A",
+                    content: "安全示例选项 A",
+                  },
+                  {
+                    label: "B",
+                    content: "安全示例选项 B",
+                  },
+                ],
+                score: 5,
+                evidenceSummary: {
+                  evidenceStatus: "sufficient",
+                  citationCount: 2,
+                },
+                answerAndAnalysis: {
+                  visibility: "collapsed_by_default",
+                  standardAnswer: "安全示例答案",
+                  analysis: "安全示例解析",
+                },
+              },
+            ],
+            redactionStatus: "admin_safe_detail",
+          },
+        });
+      }
+
       if (isOrganizationTrainingListGet(url)) {
         return createJsonResponse({
           code: 0,
@@ -401,13 +466,27 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.click(
       within(publishedCard).getByRole("button", { name: "查看" }),
     );
-    const detailPanel = screen.getByRole("complementary", {
+    const detailPanel = await screen.findByRole("complementary", {
       name: "训练详情",
     });
     expect(detailPanel).toHaveTextContent("已发布版本为只读");
     expect(detailPanel).toHaveTextContent("复制为新草稿");
+    expect(detailPanel).toHaveTextContent("安全示例题干");
+    expect(detailPanel).toHaveTextContent("安全示例选项 A");
+    expect(detailPanel).toHaveTextContent("分值 5");
+    expect(detailPanel).toHaveTextContent("依据充分");
+    expect(detailPanel).toHaveTextContent("试卷训练");
+    expect(detailPanel).not.toHaveTextContent("安全示例答案");
+    fireEvent.click(
+      within(detailPanel).getByRole("button", { name: "展开答案与解析" }),
+    );
+    expect(detailPanel).toHaveTextContent("安全示例答案");
+    expect(detailPanel).toHaveTextContent("安全示例解析");
     expect(detailPanel.textContent).not.toContain(
       "organization-training-version-published-ui-001",
+    );
+    expect(detailPanel.textContent).not.toContain(
+      "organization-training-question-detail-ui-001",
     );
 
     fireEvent.click(within(filterGroup).getByRole("button", { name: "草稿" }));
@@ -428,6 +507,126 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(await screen.findByText("已下架训练")).toBeInTheDocument();
     expect(screen.queryByText("列表草稿")).toBeNull();
     expect(screen.queryByText("已发布训练")).toBeNull();
+  });
+
+  it("shows explicit organization training detail empty and error states", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (isOrganizationTrainingListGet(url)) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            items: [
+              {
+                publicId: "organization-training-version-empty-detail-ui-001",
+                resourceType: "organization_training_version",
+                organizationPublicId: "organization-admin-scope-001",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "空详情训练",
+                description: "无题目详情",
+                questionCount: 0,
+                totalScore: 0,
+                status: "published",
+                sourceKind: "manual_group",
+                contentKind: "question_training",
+                availableActions: ["copy_to_new_draft"],
+              },
+              {
+                publicId: "organization-training-version-error-detail-ui-001",
+                resourceType: "organization_training_version",
+                organizationPublicId: "organization-admin-scope-001",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "错误详情训练",
+                description: "详情加载失败",
+                questionCount: 1,
+                totalScore: 5,
+                status: "published",
+                sourceKind: "manual_group",
+                contentKind: "question_training",
+                availableActions: ["copy_to_new_draft"],
+              },
+            ],
+            redactionStatus: "metadata_only",
+          },
+        });
+      }
+
+      if (
+        getRequestPath(url) ===
+        "/api/v1/organization-trainings/organization-training-version-empty-detail-ui-001"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            publicId: "organization-training-version-empty-detail-ui-001",
+            resourceType: "organization_training_version",
+            detailAvailability: "available",
+            organizationPublicId: "organization-admin-scope-001",
+            title: "空详情训练",
+            description: "无题目详情",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            status: "published",
+            sourceKind: "manual_group",
+            contentKind: "question_training",
+            structure: {
+              questionCount: 0,
+              totalScore: 0,
+              questionTypeSummary: {
+                singleChoice: 0,
+                multiChoice: 0,
+                trueFalse: 0,
+                shortAnswer: 0,
+              },
+            },
+            questions: [],
+            redactionStatus: "admin_safe_detail",
+          },
+        });
+      }
+
+      if (
+        getRequestPath(url) ===
+        "/api/v1/organization-trainings/organization-training-version-error-detail-ui-001"
+      ) {
+        return createJsonResponse({
+          code: 500090,
+          message: "detail failed",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const emptyCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-version-empty-detail-ui-001",
+    );
+    fireEvent.click(within(emptyCard).getByRole("button", { name: "查看" }));
+    expect(await screen.findByText("暂无可展示题目详情")).toBeInTheDocument();
+
+    const errorCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-version-error-detail-ui-001",
+    );
+    fireEvent.click(within(errorCard).getByRole("button", { name: "查看" }));
+    expect(await screen.findByText(/训练详情加载失败/)).toBeInTheDocument();
   });
 
   it("shows organization training source and content-kind filters backed by lifecycle query parameters", async () => {
@@ -660,13 +859,17 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "继续配置" })[0]);
 
     expect(
-      screen.getByRole("complementary", { name: "训练详情" }),
+      await screen.findByRole("form", { name: "企业训练配置表单" }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("complementary", { name: "训练详情" }),
+    ).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "下一页" }));
 
+    const listPanel = screen.getByRole("region", { name: "企业训练列表" });
     expect(await screen.findByText("分页训练 11")).toBeInTheDocument();
-    expect(screen.queryByText("分页训练 01")).toBeNull();
+    expect(within(listPanel).queryByText("分页训练 01")).toBeNull();
     expect(
       screen.queryByRole("complementary", { name: "训练详情" }),
     ).toBeNull();
@@ -676,7 +879,7 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "上一页" }));
 
     expect(await screen.findByText("分页训练 01")).toBeInTheDocument();
-    expect(screen.queryByText("分页训练 11")).toBeNull();
+    expect(within(listPanel).queryByText("分页训练 11")).toBeNull();
     expect(screen.getByRole("button", { name: "上一页" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "已发布" }));
