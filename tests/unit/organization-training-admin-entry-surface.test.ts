@@ -345,6 +345,25 @@ describe("AdminOrganizationTrainingPage", () => {
       within(filterGroup).getByRole("button", { name: "已下架" }),
     ).toBeInTheDocument();
 
+    const draftCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-draft-list-ui-001",
+    );
+    expect(
+      within(draftCard).getByRole("button", { name: "继续配置" }),
+    ).toBeInTheDocument();
+    expect(
+      within(draftCard).getByRole("button", { name: "发布" }),
+    ).toBeInTheDocument();
+    expect(
+      within(draftCard).queryByRole("button", { name: "复制为新草稿" }),
+    ).toBeNull();
+    expect(
+      within(draftCard).queryByRole("button", { name: "下架" }),
+    ).toBeNull();
+    expect(
+      within(draftCard).queryByRole("button", { name: "查看" }),
+    ).toBeNull();
+
     const publishedCard = await screen.findByTestId(
       "organization-training-lifecycle-organization-training-version-published-ui-001",
     );
@@ -446,7 +465,7 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(screen.getByText("第 1 / 2 页")).toBeInTheDocument();
     expect(screen.queryByText("分页训练 11")).toBeNull();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "查看" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "继续配置" })[0]);
 
     expect(
       screen.getByRole("complementary", { name: "训练详情" }),

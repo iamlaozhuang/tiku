@@ -1325,7 +1325,7 @@ function TrainingLifecycleItemCard({
           type="button"
           variant="outline"
         >
-          查看
+          {isDraft ? "继续配置" : "查看"}
         </Button>
         {canPublish ? (
           <Button
