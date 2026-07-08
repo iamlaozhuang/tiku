@@ -298,6 +298,9 @@ test.describe("edition-aware authorization local flow", () => {
 
     await page.goto("/profile");
 
+    await expect(page.locator("body")).toContainText("当前权益");
+    await expect(page.getByRole("heading", { name: "版本授权" })).toBeHidden();
+    await page.getByRole("button", { name: "查看授权详情" }).click();
     await expect(page.getByRole("heading", { name: "版本授权" })).toBeVisible();
     await expectPersonalContext(page, {
       publicId: "personal-auth-standard-context",

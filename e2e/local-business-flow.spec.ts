@@ -222,7 +222,9 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   });
 
   await page.goto("/profile");
-  await expect(page.locator("body")).toContainText("有效授权");
+  await expect(page.locator("body")).toContainText("当前权益");
+  await expect(page.locator("body")).not.toContainText("个人授权记录");
+  await page.getByRole("button", { name: "查看授权详情" }).click();
   await expect(page.locator("body")).toContainText("个人授权记录");
   await expect(page.locator("body")).not.toContainText(studentToken ?? "");
   await testInfo.attach("student-profile", {

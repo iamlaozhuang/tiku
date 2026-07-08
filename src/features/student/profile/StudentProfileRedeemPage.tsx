@@ -92,11 +92,31 @@ function formatDate(value: string | null): string {
   return value === null ? "未设置" : value.slice(0, 10);
 }
 
+function maskPhoneForDisplay(phone: string): string {
+  const normalizedPhone = phone.trim();
+
+  if (/^\d{11}$/u.test(normalizedPhone)) {
+    return `${normalizedPhone.slice(0, 3)}****${normalizedPhone.slice(-4)}`;
+  }
+
+  return "登录账号已绑定";
+}
+
 function formatScopeLabel(input: {
   profession: Profession;
   level: number;
 }): string {
   return `${professionLabels[input.profession]} ${input.level}级`;
+}
+
+function formatQuotaOwnerLabel(
+  quotaOwnerType: EditionAwareAuthorizationContextDto["quotaOwnerType"],
+): string {
+  return `${quotaOwnerTypeLabels[quotaOwnerType]}额度`;
+}
+
+function isEmployeeUser(authContext: AuthContextDto): boolean {
+  return authContext.user.userType === "employee";
 }
 
 function readEditionAwareAuthorizationContexts(
@@ -202,7 +222,7 @@ function ProfileHeader({
               {authContext.user.name}
             </h1>
             <p className="text-text-secondary text-sm">
-              {authContext.user.phone}
+              {maskPhoneForDisplay(authContext.user.phone)}
             </p>
           </div>
           <Button
@@ -217,10 +237,100 @@ function ProfileHeader({
           </Button>
         </div>
       </div>
-      <div className="text-text-secondary flex items-center gap-2 text-sm">
-        <Clock3 className="size-4" aria-hidden="true" />
-        会话有效期至 {formatDate(authContext.session.expiresAt)}
+    </section>
+  );
+}
+
+function ProfileCurrentAuthorization({
+  authorizationContexts,
+  effectiveAuthorizations,
+}: {
+  authorizationContexts: EditionAwareAuthorizationContextDto[];
+  effectiveAuthorizations: EffectiveAuthorizationDto[];
+}) {
+  const primaryAuthorizationContext = authorizationContexts[0] ?? null;
+  const primaryEffectiveAuthorization = effectiveAuthorizations[0] ?? null;
+
+  if (
+    primaryAuthorizationContext === null &&
+    primaryEffectiveAuthorization === null
+  ) {
+    return (
+      <section
+        className="border-border text-text-secondary rounded-xl border border-dashed p-4 text-sm"
+        data-testid="student-profile-current-authorization"
+      >
+        暂无有效授权
+      </section>
+    );
+  }
+
+  const sourceLabel =
+    primaryAuthorizationContext === null
+      ? primaryEffectiveAuthorization?.authorizationTypes
+          .map(
+            (authorizationType) => authorizationTypeLabels[authorizationType],
+          )
+          .join("、")
+      : authorizationTypeLabels[
+          primaryAuthorizationContext.authorizationSource
+        ];
+  const scopeLabel =
+    primaryAuthorizationContext === null
+      ? formatScopeLabel(primaryEffectiveAuthorization)
+      : formatScopeLabel(primaryAuthorizationContext);
+  const editionLabel =
+    primaryAuthorizationContext === null
+      ? "版本待同步"
+      : editionLabels[primaryAuthorizationContext.effectiveEdition];
+  const quotaOwnerLabel =
+    primaryAuthorizationContext === null
+      ? "额度待同步"
+      : formatQuotaOwnerLabel(primaryAuthorizationContext.quotaOwnerType);
+  const expiresAt =
+    primaryAuthorizationContext?.expiresAt ??
+    primaryEffectiveAuthorization?.expiresAt ??
+    null;
+
+  return (
+    <section
+      className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1"
+      data-testid="student-profile-current-authorization"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 gap-3">
+          <div className="bg-success/10 text-success flex size-10 shrink-0 items-center justify-center rounded-full">
+            <ShieldCheck className="size-5" aria-hidden="true" />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <p className="text-brand-primary text-sm font-medium">当前权益</p>
+            <h2 className="font-heading text-text-primary text-xl font-semibold">
+              {scopeLabel}
+            </h2>
+          </div>
+        </div>
+        <span className="bg-secondary text-secondary-foreground shrink-0 rounded-lg px-2 py-1 text-xs font-medium">
+          {editionLabel}
+        </span>
       </div>
+      <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+        <div className="bg-background rounded-lg px-3 py-2">
+          <dt className="text-text-muted">来源</dt>
+          <dd className="text-text-primary font-medium">
+            {sourceLabel ?? "授权待同步"}
+          </dd>
+        </div>
+        <div className="bg-background rounded-lg px-3 py-2">
+          <dt className="text-text-muted">到期</dt>
+          <dd className="text-text-primary font-medium">
+            {formatDate(expiresAt)}
+          </dd>
+        </div>
+        <div className="bg-background rounded-lg px-3 py-2">
+          <dt className="text-text-muted">额度</dt>
+          <dd className="text-text-primary font-medium">{quotaOwnerLabel}</dd>
+        </div>
+      </dl>
     </section>
   );
 }
@@ -410,22 +520,27 @@ function EditionAwareAuthorizationContextList({
   );
 }
 
-function ProfileNavLinks() {
+function ProfileNavLinks({ showRedeemLink }: { showRedeemLink: boolean }) {
   return (
-    <nav className="grid grid-cols-2 gap-2" aria-label="学员个人中心导航">
+    <nav
+      className={showRedeemLink ? "grid grid-cols-2 gap-2" : "grid gap-2"}
+      aria-label="学员个人中心导航"
+    >
       <Link
         href="/home"
         className="border-border text-text-primary hover:bg-muted flex h-10 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
       >
         返回首页
       </Link>
-      <Link
-        href="/redeem-code"
-        className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
-      >
-        <Ticket className="size-4" aria-hidden="true" />
-        兑换卡密
-      </Link>
+      {showRedeemLink ? (
+        <Link
+          href="/redeem-code"
+          className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+        >
+          <Ticket className="size-4" aria-hidden="true" />
+          兑换卡密
+        </Link>
+      ) : null}
     </nav>
   );
 }
@@ -468,6 +583,138 @@ function AccountSupportNotice() {
           </p>
         </div>
       </div>
+    </section>
+  );
+}
+
+function AccountSupportDisclosure({
+  authContext,
+  showRedeemLink,
+}: {
+  authContext: AuthContextDto;
+  showRedeemLink: boolean;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <section className="space-y-3">
+      <Button
+        aria-expanded={isExpanded}
+        className="w-full active:scale-[0.98]"
+        onClick={() => setIsExpanded((currentValue) => !currentValue)}
+        type="button"
+        variant="outline"
+      >
+        账号帮助
+      </Button>
+      {isExpanded ? (
+        <div className="space-y-3">
+          <section className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1">
+            <div className="text-text-secondary flex items-center gap-2 text-sm">
+              <Clock3 className="size-4" aria-hidden="true" />
+              会话有效期至 {formatDate(authContext.session.expiresAt)}
+            </div>
+          </section>
+          <AccountSupportNotice />
+          {showRedeemLink ? (
+            <Link
+              href="/redeem-code"
+              className="border-border text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+            >
+              <Ticket className="size-4" aria-hidden="true" />
+              个人卡密兑换
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function ProfileAuthorizationDetails({
+  authorizations,
+  authorizationContexts,
+  effectiveAuthorizations,
+  personalAuths,
+  showPersonalRedeemPreparation,
+}: {
+  authorizations: AuthorizationListItemDto[];
+  authorizationContexts: EditionAwareAuthorizationContextDto[];
+  effectiveAuthorizations: EffectiveAuthorizationDto[];
+  personalAuths: PersonalAuthDto[];
+  showPersonalRedeemPreparation: boolean;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <section className="space-y-3">
+      <Button
+        aria-expanded={isExpanded}
+        className="w-full active:scale-[0.98]"
+        onClick={() => setIsExpanded((currentValue) => !currentValue)}
+        type="button"
+        variant="outline"
+      >
+        {isExpanded ? "收起授权详情" : "查看授权详情"}
+      </Button>
+      {isExpanded ? (
+        <div className="space-y-5">
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck
+                className="text-brand-primary size-5"
+                aria-hidden="true"
+              />
+              <h2 className="font-heading text-text-primary text-lg font-semibold">
+                有效授权
+              </h2>
+            </div>
+            <EffectiveAuthorizationList
+              effectiveAuthorizations={effectiveAuthorizations}
+            />
+          </section>
+
+          <EditionAwareAuthorizationContextList
+            authorizationContexts={authorizationContexts}
+          />
+
+          {showPersonalRedeemPreparation ? (
+            <RedeemCodePreparationNotice />
+          ) : null}
+
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-heading text-text-primary text-lg font-semibold">
+                授权明细
+              </h2>
+              <span className="text-text-secondary text-sm">
+                {authorizations.length} 条
+              </span>
+            </div>
+            {authorizations.length === 0 ? (
+              <div className="border-border text-text-secondary rounded-xl border border-dashed p-4 text-sm">
+                暂无授权明细
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {authorizations.map((authorization) => (
+                  <AuthorizationCard
+                    key={authorization.publicId}
+                    authorization={authorization}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="font-heading text-text-primary text-lg font-semibold">
+              个人授权记录
+            </h2>
+            <PersonalAuthList personalAuths={personalAuths} />
+          </section>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -639,64 +886,29 @@ export function StudentProfilePage() {
     );
   }
 
+  const showPrimaryRedeemLink = !isEmployeeUser(authContext);
+  const showPersonalRedeemPreparation =
+    showPrimaryRedeemLink && personalAuths.length === 0;
+
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
       <ProfileHeader authContext={authContext} onLogout={handleLogout} />
-      <ProfileNavLinks />
-      <AccountSupportNotice />
-
-      <section className="space-y-3">
-        <div className="flex items-center gap-2">
-          <ShieldCheck
-            className="text-brand-primary size-5"
-            aria-hidden="true"
-          />
-          <h2 className="font-heading text-text-primary text-lg font-semibold">
-            有效授权
-          </h2>
-        </div>
-        <EffectiveAuthorizationList
-          effectiveAuthorizations={effectiveAuthorizations}
-        />
-      </section>
-
-      <EditionAwareAuthorizationContextList
+      <ProfileCurrentAuthorization
         authorizationContexts={authorizationContexts}
+        effectiveAuthorizations={effectiveAuthorizations}
       />
-
-      {personalAuths.length === 0 ? <RedeemCodePreparationNotice /> : null}
-
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-text-primary text-lg font-semibold">
-            授权明细
-          </h2>
-          <span className="text-text-secondary text-sm">
-            {authorizations.length} 条
-          </span>
-        </div>
-        {authorizations.length === 0 ? (
-          <div className="border-border text-text-secondary rounded-xl border border-dashed p-4 text-sm">
-            暂无授权明细
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {authorizations.map((authorization) => (
-              <AuthorizationCard
-                key={authorization.publicId}
-                authorization={authorization}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-heading text-text-primary text-lg font-semibold">
-          个人授权记录
-        </h2>
-        <PersonalAuthList personalAuths={personalAuths} />
-      </section>
+      <ProfileNavLinks showRedeemLink={showPrimaryRedeemLink} />
+      <ProfileAuthorizationDetails
+        authorizations={authorizations}
+        authorizationContexts={authorizationContexts}
+        effectiveAuthorizations={effectiveAuthorizations}
+        personalAuths={personalAuths}
+        showPersonalRedeemPreparation={showPersonalRedeemPreparation}
+      />
+      <AccountSupportDisclosure
+        authContext={authContext}
+        showRedeemLink={!showPrimaryRedeemLink}
+      />
     </main>
   );
 }
