@@ -30,7 +30,7 @@
 - `npm.cmd run typecheck`: pass.
 - `npm.cmd exec -- prettier --check --ignore-unknown <touched files>`: pass.
 - `git diff --check`: pass.
-- Repository checkpoint aligned for pre-push readiness: pending final pre-push rerun.
+- Repository checkpoint aligned for pre-push readiness: pass using accepted ancestor checkpoint.
 
 ## Requirement Mapping Result
 

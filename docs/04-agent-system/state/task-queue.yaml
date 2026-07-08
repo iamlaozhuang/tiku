@@ -99,8 +99,8 @@ activeTasks:
   - id: organization-training-admin-detail-read-model-2026-07-08
     title: Organization training admin detail read model
     phase: organization-training-admin-detail-read-model-2026-07-08
-    status: ready_for_commit_merge_push_cleanup
-    result: pass_source_test_ready_for_commit_merge_push_cleanup
+    status: ready_for_closeout
+    result: pass_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_no_browser_required
@@ -117,7 +117,7 @@ activeTasks:
     evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-read-model-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-read-model-audit.md
     validationSummary:
-      status: pass_source_test_ready_for_commit_merge_push_cleanup
+      status: pass_master_gates_ready_for_push_cleanup
       tddRed: pass_expected_missing_admin_detail_read_model_and_route_failure
       targetedOrganizationTrainingServiceRouteRepositoryUnit: pass_3_files_104_tests
       lint: pass
@@ -130,7 +130,7 @@ activeTasks:
       masterPostMergeTypecheck: pass
       masterPostMergePrettierCheck: pass_scoped
       masterPostMergeDiffCheck: pass
-      repositoryCheckpointAlignedForPrePush: pending
+      repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
       sourceCodeChanged: true
       testsChanged: true
       packageLockfileChanged: false

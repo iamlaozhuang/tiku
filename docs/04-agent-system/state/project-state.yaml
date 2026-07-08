@@ -5,8 +5,8 @@ currentPhase: organization-training-admin-detail-read-model-2026-07-08
 updatedAt: "2026-07-08T15:56:00-07:00"
 latestOrganizationTrainingAdminDetailReadModel:
   id: organization-training-admin-detail-read-model-2026-07-08
-  status: ready_for_commit_merge_push_cleanup
-  result: pass_source_test_ready_for_commit_merge_push_cleanup
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   branch: codex/org-training-admin-detail-read-model
   planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-read-model.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-read-model-evidence.md
@@ -32,7 +32,7 @@ latestOrganizationTrainingAdminDetailReadModel:
     masterPostMergeTypecheck: pass
     masterPostMergePrettierCheck: pass_scoped
     masterPostMergeDiffCheck: pass
-    repositoryCheckpointAlignedForPrePush: pending
+    repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
     sourceCodeChanged: true
     testsChanged: true
 latestOrganizationTrainingFilterEmptyState:
@@ -1407,8 +1407,8 @@ currentTask:
   id: organization-training-admin-detail-read-model-2026-07-08
   title: Organization training admin detail read model
   phase: organization-training-admin-detail-read-model-2026-07-08
-  status: ready_for_commit_merge_push_cleanup
-  result: pass_source_test_ready_for_commit_merge_push_cleanup
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/org-training-admin-detail-read-model
@@ -1423,7 +1423,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-read-model-evidence.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-read-model-audit.md
   validationSummary:
-    status: pass_source_test_ready_for_commit_merge_push_cleanup
+    status: pass_master_gates_ready_for_push_cleanup
     tddRed: pass_expected_missing_admin_detail_read_model_and_route_failure
     targetedOrganizationTrainingServiceRouteRepositoryUnit: pass_3_files_104_tests
     lint: pass
@@ -1431,6 +1431,12 @@ currentTask:
     prettierCheck: pass_scoped
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
+    masterPostMergeTargetedTests: pass_3_files_104_tests
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergePrettierCheck: pass_scoped
+    masterPostMergeDiffCheck: pass
+    repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
