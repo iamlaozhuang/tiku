@@ -131,6 +131,7 @@ type EnableState =
 
 type UploadState = {
   file: File | null;
+  knowledgeNodePublicIdsText: string;
   level: string;
   profession: Profession;
   resourceType: ResourceType;
@@ -365,6 +366,17 @@ function matchesLevelFilter(value: number | null, expected: LevelFilter) {
   return value === Number(expected);
 }
 
+function parseKnowledgeNodePublicIdsText(value: string) {
+  return Array.from(
+    new Set(
+      value
+        .split(/[,\s]+/u)
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    ),
+  );
+}
+
 function readResourceDateValue(
   resource: AdminResourceOpsSummaryDto,
   sortBy: ResourceSortField,
@@ -517,6 +529,11 @@ async function postLocalResourceUpload(
   formData.set("resourceType", uploadState.resourceType);
   formData.set("fileName", uploadState.file.name);
   formData.set("file", uploadState.file);
+  parseKnowledgeNodePublicIdsText(
+    uploadState.knowledgeNodePublicIdsText,
+  ).forEach((knowledgeNodePublicId) => {
+    formData.append("knowledgeNodePublicIds", knowledgeNodePublicId);
+  });
 
   const response = await fetch("/api/v1/resources", {
     body: formData,
@@ -712,6 +729,7 @@ export function AdminResourceKnowledgeManagement() {
     });
   const [uploadState, setUploadState] = useState<UploadState>({
     file: null,
+    knowledgeNodePublicIdsText: "",
     level: "3",
     profession: "marketing",
     resourceType: "knowledge_doc",
@@ -1496,7 +1514,7 @@ function ResourceUploadPanel({
 }) {
   return (
     <section className="border-border bg-surface rounded-md border p-4 shadow-sm">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px_160px_160px_auto] lg:items-end">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px_160px_160px] lg:items-end">
         <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">资料名称</span>
           <Input
@@ -1551,6 +1569,21 @@ function ResourceUploadPanel({
             onChange({ ...uploadState, resourceType: value as ResourceType })
           }
         />
+        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
+          <span className="text-text-secondary">知识点业务标识</span>
+          <textarea
+            aria-label="知识点业务标识"
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-2.5 py-2 text-sm outline-none focus-visible:ring-3"
+            placeholder="多个 public id 可用空格、逗号或换行分隔"
+            value={uploadState.knowledgeNodePublicIdsText}
+            onChange={(event) =>
+              onChange({
+                ...uploadState,
+                knowledgeNodePublicIdsText: event.target.value,
+              })
+            }
+          />
+        </label>
         <div className="flex flex-col gap-2">
           <label className="text-text-secondary text-sm font-medium">
             资料文件
@@ -1757,6 +1790,10 @@ function ResourceList({
                 <MetricBadge
                   label="检索索引"
                   value={resource.isVectorStale ? "待重建" : "已同步"}
+                />
+                <MetricBadge
+                  label="知识点绑定"
+                  value={`${resource.knowledgeNodePublicIds.length} 个`}
                 />
               </div>
             </div>

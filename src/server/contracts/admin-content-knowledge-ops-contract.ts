@@ -102,6 +102,7 @@ export type AdminResourceOpsSummaryDto = {
   resourceStatus: ResourceStatus;
   profession: Profession;
   level: number | null;
+  knowledgeNodePublicIds: string[];
   originalFileName: string | null;
   downloadAvailable: boolean;
   markdownPreviewAvailable: boolean;

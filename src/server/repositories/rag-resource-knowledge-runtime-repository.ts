@@ -639,6 +639,7 @@ function mapResourceOpsRow(
     resourceStatus: row.resource_status,
     profession: row.profession,
     level: row.level,
+    knowledgeNodePublicIds: [],
     originalFileName: row.original_file_name,
     downloadAvailable: row.object_storage_path !== null,
     markdownPreviewAvailable: row.markdown_content_hash !== null,

@@ -131,6 +131,10 @@ const resourcePayload = {
         indexingErrorSummary: null,
         uploadedAt: "2026-05-19T08:00:00.000Z",
         updatedAt: "2026-05-20T12:00:00.000Z",
+        knowledgeNodePublicIds: [
+          "knowledge-node-public-001",
+          "knowledge-node-public-002",
+        ],
         id: 801,
         objectStoragePath: "dev/resources/marketing/raw.pdf",
         embedding: [0.1, 0.2],
@@ -150,6 +154,7 @@ const resourcePayload = {
         indexingErrorSummary: null,
         uploadedAt: "2026-05-18T08:00:00.000Z",
         updatedAt: "2026-05-20T13:00:00.000Z",
+        knowledgeNodePublicIds: [],
         id: 802,
       },
     ],
@@ -333,6 +338,7 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
               indexingErrorSummary: null,
               uploadedAt: "2026-05-25T08:00:00.000Z",
               updatedAt: "2026-05-25T08:00:00.000Z",
+              knowledgeNodePublicIds: ["knowledge-node-public-001"],
             },
             localResource: {
               parserMode: "local_only",
@@ -1077,6 +1083,11 @@ describe("admin content and knowledge ops baseline", () => {
     expect(
       await screen.findByRole("heading", { name: "资料与知识库管理" }),
     ).toBeInTheDocument();
+    expect(
+      within(
+        await screen.findByTestId("resource-row-resource-public-001"),
+      ).getByText("知识点绑定 2 个"),
+    ).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("资料文件"), {
       target: {
@@ -1085,6 +1096,11 @@ describe("admin content and knowledge ops baseline", () => {
             type: "text/markdown",
           }),
         ],
+      },
+    });
+    fireEvent.change(screen.getByLabelText("知识点业务标识"), {
+      target: {
+        value: "knowledge-node-public-001\nknowledge-node-public-002",
       },
     });
     fireEvent.click(screen.getByRole("button", { name: "上传资料并生成草稿" }));
@@ -1099,6 +1115,15 @@ describe("admin content and knowledge ops baseline", () => {
         method: "POST",
       }),
     );
+    const uploadCall = fetchMock.mock.calls.find(
+      ([path, init]) => path === "/api/v1/resources" && init?.method === "POST",
+    );
+    const uploadBody = uploadCall?.[1]?.body;
+    expect(uploadBody).toBeInstanceOf(FormData);
+    expect((uploadBody as FormData).getAll("knowledgeNodePublicIds")).toEqual([
+      "knowledge-node-public-001",
+      "knowledge-node-public-002",
+    ]);
 
     const firstResource = screen.getByTestId(
       "resource-row-resource-public-001",

@@ -527,6 +527,7 @@ function mapLocalResourceEntry(
     resourceStatus: entry.resourceStatus,
     profession: entry.profession,
     level: entry.level,
+    knowledgeNodePublicIds: [...entry.knowledgeNodePublicIds],
     originalFileName: entry.originalFileName,
     downloadAvailable: true,
     markdownPreviewAvailable: entry.markdownContentHash !== null,

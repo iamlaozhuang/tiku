@@ -131,6 +131,7 @@ const sampleResources: AdminResourceOpsListDto["resources"] = [
     resourceStatus: "rag_ready",
     profession: "marketing",
     level: 3,
+    knowledgeNodePublicIds: ["knowledge-node-public-001"],
     originalFileName: "marketing-note.pdf",
     downloadAvailable: true,
     markdownPreviewAvailable: true,
