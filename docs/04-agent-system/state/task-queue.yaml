@@ -127,6 +127,8 @@ activeTasks:
       diffCheck: pass
       browserRuntime: blocked_current_browser_session_not_advanced_admin_no_storage_or_credential_access
       preCommitHardening: pass
+      postMergeMasterGates: pass
+      prePushReadiness: pass_skip_remote_ahead_check
       sourceCodeChanged: true
       testsChanged: true
       packageLockfileChanged: false

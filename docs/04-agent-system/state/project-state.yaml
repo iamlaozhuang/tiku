@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: organization-training-filter-empty-state-2026-07-08
-updatedAt: "2026-07-08T15:24:48-07:00"
+updatedAt: "2026-07-08T15:28:27-07:00"
 latestOrganizationTrainingFilterEmptyState:
   id: organization-training-filter-empty-state-2026-07-08
   status: closed
@@ -28,6 +28,8 @@ latestOrganizationTrainingFilterEmptyState:
     diffCheck: pass
     browserRuntime: blocked_current_browser_session_not_advanced_admin_no_storage_or_credential_access
     preCommitHardening: pass
+    postMergeMasterGates: pass
+    prePushReadiness: pass_skip_remote_ahead_check
     sourceCodeChanged: true
     testsChanged: true
     mergePushApproval: granted_current_user_approved_filter_empty_state_closeout_then_readonly_detail_research_2026_07_08

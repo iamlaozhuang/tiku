@@ -66,3 +66,20 @@
 - Fresh closeout approval:
   - User approval received after local commit: close out this filter empty-state branch, then continue read-only enterprise training detail capability research.
   - Scope remains unchanged: merge/push/cleanup only; no new source, test, package, DB, Provider, schema, migration, seed, or fixture change.
+
+## Post-Merge Master Gates
+
+- Fast-forward merge target: `master`.
+- Command: `npm.cmd exec -- vitest run tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot`
+  - Result: pass, `1` file, `14` tests.
+- Command: `npm.cmd run lint`
+  - Result: pass.
+- Command: `npm.cmd run typecheck`
+  - Result: pass.
+- Command: `npm.cmd exec -- prettier --check <scoped task files>`
+  - Result: pass.
+- Command: `git diff --check`
+  - Result: pass.
+- Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId organization-training-filter-empty-state-2026-07-08 -SkipRemoteAheadCheck`
+  - Result: pass.
+- Remote action pending at evidence write time: push `master` to `origin/master`, then delete local short branch after successful push.

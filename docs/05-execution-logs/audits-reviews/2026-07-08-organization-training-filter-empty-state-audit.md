@@ -43,3 +43,4 @@
 
 - Fresh approval received for merge, push, and cleanup.
 - Closeout scope remains this branch only; no additional product behavior is added during closeout.
+- Post-merge master gates passed before push.
