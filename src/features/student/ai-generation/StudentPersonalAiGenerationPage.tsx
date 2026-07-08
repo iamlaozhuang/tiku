@@ -41,7 +41,11 @@ import type {
   PersonalAiGenerationLearningSessionQuestionDto,
 } from "@/server/contracts/personal-ai-generation-learning-session-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
-import type { AiGenerationRouteIntegratedGenerationParameters } from "@/server/contracts/route-integrated-provider-execution-contract";
+import type {
+  AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedKnowledgeNodeMode,
+  AiGenerationRouteIntegratedSourcePreference,
+} from "@/server/contracts/route-integrated-provider-execution-contract";
 import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 import { createPersonalAiLearningSessionQuestion } from "@/server/validators/personal-ai-generation-learning-session";
@@ -141,6 +145,19 @@ type StudentPersonalAiGenerationDetailControl = {
   onValueChange?: (value: string) => void;
 };
 
+type StudentAiKnowledgeScopeFormState = {
+  knowledgeNodeMode: AiGenerationRouteIntegratedKnowledgeNodeMode;
+  knowledgeNodePublicIds: string[];
+  includeDescendants: boolean;
+  knowledgeNodeSupplement: string;
+};
+
+type StudentAiKnowledgeNodeOption = {
+  publicId: string;
+  label: string;
+  description: string;
+};
+
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
@@ -150,6 +167,17 @@ const AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
 const AI_PAPER_MAX_QUESTION_COUNT = 80;
 const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
   "ai_question_generation" satisfies StudentPersonalAiGenerationTaskType;
+const emptyStudentAiKnowledgeNodeOptions: StudentAiKnowledgeNodeOption[] = [];
+
+const knowledgeNodeModeOptions: {
+  value: AiGenerationRouteIntegratedKnowledgeNodeMode;
+  label: string;
+}[] = [
+  { value: "balanced", label: "均衡覆盖" },
+  { value: "selected", label: "指定知识点" },
+  { value: "weak_point_priority", label: "薄弱知识点优先" },
+  { value: "comprehensive", label: "综合测验" },
+];
 
 const copy = {
   title: "AI训练",
@@ -277,11 +305,6 @@ const aiQuestionDetailControls: StudentPersonalAiGenerationDetailControl[] = [
     options: ["理论", "技能"],
   },
   {
-    label: "AI出题知识点",
-    kind: "text",
-    placeholder: "输入或选择当前授权知识点",
-  },
-  {
     label: "AI出题题型",
     kind: "select",
     options: ["单选题", "多选题", "判断题", "主观题"],
@@ -330,11 +353,6 @@ const aiPaperDetailControls: StudentPersonalAiGenerationDetailControl[] = [
     label: "AI组卷题型分布",
     kind: "text",
     placeholder: "例：单选、多选、判断按训练目标分配",
-  },
-  {
-    label: "AI组卷知识点覆盖",
-    kind: "select",
-    options: ["均衡覆盖", "指定知识点", "薄弱知识点优先", "综合测验"],
   },
   {
     label: "AI组卷大题结构",
@@ -402,6 +420,79 @@ function createStudentAiPaperDetailControls(input: {
         }
       : control,
   );
+}
+
+function createDefaultStudentAiKnowledgeScopeState(): StudentAiKnowledgeScopeFormState {
+  return {
+    knowledgeNodeMode: "balanced",
+    knowledgeNodePublicIds: [],
+    includeDescendants: true,
+    knowledgeNodeSupplement: "",
+  };
+}
+
+function normalizeKnowledgeNodeSupplement(value: string): string | null {
+  const normalizedValue = value.trim();
+
+  return normalizedValue.length > 0 ? normalizedValue : null;
+}
+
+function getStudentAiKnowledgeScopeBlockedReason(
+  knowledgeScopeState: StudentAiKnowledgeScopeFormState,
+  knowledgeNodeOptions: StudentAiKnowledgeNodeOption[],
+): string | null {
+  if (knowledgeScopeState.knowledgeNodeMode !== "selected") {
+    return null;
+  }
+
+  if (knowledgeNodeOptions.length === 0) {
+    return "当前授权范围暂无可选知识点，请改用均衡覆盖或联系内容管理员维护知识点。";
+  }
+
+  if (knowledgeScopeState.knowledgeNodePublicIds.length === 0) {
+    return "请选择至少一个知识点后再提交。";
+  }
+
+  return null;
+}
+
+function createStudentGenerationKnowledgeScope(
+  knowledgeScopeState: StudentAiKnowledgeScopeFormState,
+  sourcePreference: AiGenerationRouteIntegratedSourcePreference | null,
+) {
+  const knowledgeNodeSupplement = normalizeKnowledgeNodeSupplement(
+    knowledgeScopeState.knowledgeNodeSupplement,
+  );
+
+  return createDefaultAiGenerationRouteIntegratedKnowledgeScope({
+    knowledgeNode: knowledgeNodeSupplement,
+    knowledgeNodeMode: knowledgeScopeState.knowledgeNodeMode,
+    knowledgeNodePublicIds: knowledgeScopeState.knowledgeNodePublicIds,
+    includeDescendants:
+      knowledgeScopeState.knowledgeNodePublicIds.length > 0 &&
+      knowledgeScopeState.includeDescendants,
+    knowledgeNodeSupplement,
+    sourcePreference,
+  });
+}
+
+function mapStudentAiPaperSourcePreference(
+  value: string,
+  authorizationContext: EffectiveAuthorizationContextDto,
+): AiGenerationRouteIntegratedSourcePreference | null {
+  if (authorizationContext.ownerType !== "organization") {
+    return null;
+  }
+
+  if (value === "优先使用企业题") {
+    return "prefer_enterprise";
+  }
+
+  if (value === "优先使用平台题") {
+    return "prefer_platform";
+  }
+
+  return "balanced";
 }
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
@@ -571,6 +662,8 @@ function createStudentGenerationParameters(
   authorizationContext: EffectiveAuthorizationContextDto,
   taskType: StudentPersonalAiGenerationTaskType,
   questionCount: number,
+  knowledgeScopeState: StudentAiKnowledgeScopeFormState,
+  sourcePreference: AiGenerationRouteIntegratedSourcePreference | null,
 ): AiGenerationRouteIntegratedGenerationParameters {
   return {
     profession: authorizationContext.profession,
@@ -583,7 +676,10 @@ function createStudentGenerationParameters(
         ? authorizationContext.level
         : 3,
     subject: "theory",
-    ...createDefaultAiGenerationRouteIntegratedKnowledgeScope(),
+    ...createStudentGenerationKnowledgeScope(
+      knowledgeScopeState,
+      sourcePreference,
+    ),
     questionType:
       taskType === "ai_question_generation" ? "single_choice" : null,
     questionCount,
@@ -1212,6 +1308,184 @@ function StudentAiPaperSourceSummary({
         </label>
       ) : null}
     </section>
+  );
+}
+
+function StudentAiKnowledgeScopePanel({
+  disabled,
+  knowledgeNodeOptions,
+  knowledgeScopeState,
+  onKnowledgeScopeChange,
+  titlePrefix,
+}: {
+  disabled: boolean;
+  knowledgeNodeOptions: StudentAiKnowledgeNodeOption[];
+  knowledgeScopeState: StudentAiKnowledgeScopeFormState;
+  onKnowledgeScopeChange: (
+    updater: (
+      currentState: StudentAiKnowledgeScopeFormState,
+    ) => StudentAiKnowledgeScopeFormState,
+  ) => void;
+  titlePrefix: "AI出题" | "AI组卷";
+}) {
+  const blockedReason = getStudentAiKnowledgeScopeBlockedReason(
+    knowledgeScopeState,
+    knowledgeNodeOptions,
+  );
+  const hasSelectedKnowledgeNode =
+    knowledgeScopeState.knowledgeNodePublicIds.length > 0;
+
+  return (
+    <fieldset className="border-border bg-surface rounded-lg border p-4">
+      <legend className="font-heading text-text-primary px-1 text-base font-semibold">
+        知识点范围
+      </legend>
+      <div className="mt-1 space-y-1">
+        <p className="text-text-secondary text-sm leading-6">
+          先选择覆盖方式；补充说明只作为软约束，不替代知识点选择。
+        </p>
+        {blockedReason !== null ? (
+          <p className="text-destructive text-sm leading-6">{blockedReason}</p>
+        ) : null}
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label className="text-text-secondary flex flex-col gap-1 text-sm">
+          <span>{titlePrefix}知识点覆盖</span>
+          <select
+            aria-label={`${titlePrefix}知识点覆盖`}
+            className="border-border bg-background text-text-primary min-h-10 w-full rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={disabled}
+            onChange={(event) => {
+              const nextKnowledgeNodeMode = event.target
+                .value as AiGenerationRouteIntegratedKnowledgeNodeMode;
+
+              onKnowledgeScopeChange((currentState) => ({
+                ...currentState,
+                knowledgeNodeMode: nextKnowledgeNodeMode,
+                knowledgeNodePublicIds:
+                  nextKnowledgeNodeMode === "selected"
+                    ? currentState.knowledgeNodePublicIds
+                    : [],
+              }));
+            }}
+            value={knowledgeScopeState.knowledgeNodeMode}
+          >
+            {knowledgeNodeModeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="text-text-secondary flex flex-col gap-1 text-sm">
+          <span>包含下级知识点</span>
+          <select
+            aria-label={`${titlePrefix}包含下级知识点`}
+            className="border-border bg-background text-text-primary min-h-10 w-full rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={disabled || !hasSelectedKnowledgeNode}
+            onChange={(event) => {
+              onKnowledgeScopeChange((currentState) => ({
+                ...currentState,
+                includeDescendants: event.target.value === "true",
+              }));
+            }}
+            value={String(
+              hasSelectedKnowledgeNode
+                ? knowledgeScopeState.includeDescendants
+                : false,
+            )}
+          >
+            <option value="true">包含</option>
+            <option value="false">不包含</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="mt-3">
+        {knowledgeNodeOptions.length === 0 ? (
+          <div className="border-border bg-muted rounded-lg border px-3 py-3">
+            <p className="text-text-primary text-sm font-medium">
+              当前授权范围暂无可选知识点
+            </p>
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              可以继续使用均衡覆盖，或填写补充说明作为本次生成的软约束。
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-2">
+            {knowledgeNodeOptions.map((knowledgeNodeOption) => {
+              const isChecked =
+                knowledgeScopeState.knowledgeNodePublicIds.includes(
+                  knowledgeNodeOption.publicId,
+                );
+
+              return (
+                <label
+                  className="border-border bg-background flex items-start gap-3 rounded-lg border p-3 text-sm has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+                  key={knowledgeNodeOption.publicId}
+                >
+                  <input
+                    aria-label={knowledgeNodeOption.label}
+                    checked={isChecked}
+                    className="mt-1 size-4 accent-current"
+                    disabled={
+                      disabled ||
+                      knowledgeScopeState.knowledgeNodeMode !== "selected"
+                    }
+                    onChange={() => {
+                      onKnowledgeScopeChange((currentState) => ({
+                        ...currentState,
+                        knowledgeNodePublicIds: isChecked
+                          ? currentState.knowledgeNodePublicIds.filter(
+                              (publicId) =>
+                                publicId !== knowledgeNodeOption.publicId,
+                            )
+                          : [
+                              ...currentState.knowledgeNodePublicIds,
+                              knowledgeNodeOption.publicId,
+                            ],
+                      }));
+                    }}
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="text-text-primary block font-medium">
+                      {knowledgeNodeOption.label}
+                    </span>
+                    <span className="text-text-secondary mt-1 block leading-6">
+                      {knowledgeNodeOption.description}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <label className="text-text-secondary mt-3 flex flex-col gap-1 text-sm">
+        <span>{titlePrefix}知识点补充说明</span>
+        <textarea
+          aria-label={`${titlePrefix}知识点补充说明`}
+          className="border-border bg-background text-text-primary min-h-24 w-full rounded-lg border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={disabled}
+          onChange={(event) => {
+            onKnowledgeScopeChange((currentState) => ({
+              ...currentState,
+              knowledgeNodeSupplement: event.target.value,
+            }));
+          }}
+          placeholder="可填写希望覆盖的知识点方向"
+          rows={3}
+          value={knowledgeScopeState.knowledgeNodeSupplement}
+        />
+        <span className="text-text-secondary text-xs leading-5">
+          补充说明不会替代知识点树选择，也不会扩大当前授权范围。
+        </span>
+      </label>
+    </fieldset>
   );
 }
 
@@ -2532,6 +2806,12 @@ export function StudentPersonalAiGenerationPage() {
   const [aiPaperQuestionCount, setAiPaperQuestionCount] = useState(
     AI_PAPER_DEFAULT_QUESTION_COUNT,
   );
+  const [aiQuestionKnowledgeScope, setAiQuestionKnowledgeScope] = useState(
+    createDefaultStudentAiKnowledgeScopeState,
+  );
+  const [aiPaperKnowledgeScope, setAiPaperKnowledgeScope] = useState(
+    createDefaultStudentAiKnowledgeScopeState,
+  );
   const [aiPaperSourcePreference, setAiPaperSourcePreference] =
     useState("均衡使用");
   const [practiceFeedbackState, setPracticeFeedbackState] =
@@ -2934,6 +3214,17 @@ export function StudentPersonalAiGenerationPage() {
               AI_PAPER_DEFAULT_QUESTION_COUNT,
               AI_PAPER_MAX_QUESTION_COUNT,
             );
+      const generationKnowledgeScopeState =
+        taskType === "ai_question_generation"
+          ? aiQuestionKnowledgeScope
+          : aiPaperKnowledgeScope;
+      const generationSourcePreference =
+        taskType === "ai_paper_generation"
+          ? mapStudentAiPaperSourcePreference(
+              aiPaperSourcePreference,
+              generationAuthorizationContext,
+            )
+          : null;
 
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
@@ -2952,6 +3243,8 @@ export function StudentPersonalAiGenerationPage() {
                   generationAuthorizationContext,
                   taskType,
                   generationQuestionCount,
+                  generationKnowledgeScopeState,
+                  generationSourcePreference,
                 ),
                 generationAuthorizationContext,
               ),
@@ -3246,7 +3539,7 @@ export function StudentPersonalAiGenerationPage() {
     }
   }
 
-  const isAiGenerationActionDisabled =
+  const isAiGenerationBaseActionDisabled =
     !hasSessionToken ||
     pageState === "checking" ||
     pageState === "loading" ||
@@ -3284,10 +3577,6 @@ export function StudentPersonalAiGenerationPage() {
   const canUseGeneratedPractice =
     hasLocalAiGenerationExperience &&
     canUseCurrentGeneratedPractice(experience);
-  const isRetryGenerationDisabled =
-    isAiGenerationActionDisabled ||
-    !hasLocalAiGenerationExperience ||
-    !canRetryCurrentGeneratedPractice(experience);
   const practiceFeedbackStateForCurrentResult =
     hasLocalAiGenerationExperience &&
     experience.flowStatus === "accepted" &&
@@ -3300,6 +3589,15 @@ export function StudentPersonalAiGenerationPage() {
       authorizationContexts,
       activeTaskType,
       selectedAuthorizationPublicId,
+    );
+  const activeKnowledgeScopeState =
+    activeTaskType === "ai_question_generation"
+      ? aiQuestionKnowledgeScope
+      : aiPaperKnowledgeScope;
+  const activeKnowledgeScopeBlockedReason =
+    getStudentAiKnowledgeScopeBlockedReason(
+      activeKnowledgeScopeState,
+      emptyStudentAiKnowledgeNodeOptions,
     );
   const activeAiQuestionDetailControls = createStudentAiQuestionDetailControls({
     onQuestionCountChange: handleChangeAiQuestionCount,
@@ -3315,6 +3613,14 @@ export function StudentPersonalAiGenerationPage() {
       : activeAuthorizationContext?.ownerType === "organization"
         ? copy.employeePaperSubmitButton
         : copy.paperSubmitButton;
+  const isActiveKnowledgeScopeBlocked =
+    activeKnowledgeScopeBlockedReason !== null;
+  const isAiGenerationActionDisabled =
+    isAiGenerationBaseActionDisabled || isActiveKnowledgeScopeBlocked;
+  const isRetryGenerationDisabled =
+    isAiGenerationActionDisabled ||
+    !hasLocalAiGenerationExperience ||
+    !canRetryCurrentGeneratedPractice(experience);
 
   async function ensureAiLearningSessionStarted(): Promise<boolean> {
     const visibleGeneratedContent =
@@ -3515,19 +3821,35 @@ export function StudentPersonalAiGenerationPage() {
             className="grid grid-cols-1 gap-3"
           >
             {activeTaskType === "ai_question_generation" ? (
-              <StudentPersonalAiGenerationDetailControlGroup
-                title="AI出题参数"
-                description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
-                controls={activeAiQuestionDetailControls}
-                disabled={isAiGenerationActionDisabled}
-              />
+              <>
+                <StudentAiKnowledgeScopePanel
+                  disabled={isAiGenerationBaseActionDisabled}
+                  knowledgeNodeOptions={emptyStudentAiKnowledgeNodeOptions}
+                  knowledgeScopeState={aiQuestionKnowledgeScope}
+                  onKnowledgeScopeChange={setAiQuestionKnowledgeScope}
+                  titlePrefix="AI出题"
+                />
+                <StudentPersonalAiGenerationDetailControlGroup
+                  title="AI出题参数"
+                  description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
+                  controls={activeAiQuestionDetailControls}
+                  disabled={isAiGenerationActionDisabled}
+                />
+              </>
             ) : (
               <>
                 <StudentAiPaperSourceSummary
                   authorizationContext={activeAuthorizationContext}
-                  disabled={isAiGenerationActionDisabled}
+                  disabled={isAiGenerationBaseActionDisabled}
                   onSourcePreferenceChange={setAiPaperSourcePreference}
                   sourcePreference={aiPaperSourcePreference}
+                />
+                <StudentAiKnowledgeScopePanel
+                  disabled={isAiGenerationBaseActionDisabled}
+                  knowledgeNodeOptions={emptyStudentAiKnowledgeNodeOptions}
+                  knowledgeScopeState={aiPaperKnowledgeScope}
+                  onKnowledgeScopeChange={setAiPaperKnowledgeScope}
+                  titlePrefix="AI组卷"
                 />
                 <StudentPersonalAiGenerationDetailControlGroup
                   title="AI组卷参数"

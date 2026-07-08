@@ -1392,9 +1392,82 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(submittedBodies[0]).toMatchObject({
       taskType: "ai_question_generation",
       generationParameters: {
+        includeDescendants: false,
+        knowledgeNode: null,
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        knowledgeNodeSupplement: null,
         questionCount: 3,
+        sourcePreference: null,
       },
     });
+  });
+
+  it("submits learner AI knowledge supplement as a structured soft constraint", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = createPersonalAiGenerationFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("AI出题知识点补充说明"), {
+      target: { value: "synthetic focus area" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(
+          (call) =>
+            String(call[0]) === "/api/v1/personal-ai-generation-requests" &&
+            call[1]?.method === "POST",
+        ),
+      ).toBe(true);
+    });
+
+    const postCall = fetchMock.mock.calls.find(
+      (call) =>
+        String(call[0]) === "/api/v1/personal-ai-generation-requests" &&
+        call[1]?.method === "POST",
+    );
+    const requestBody = JSON.parse(String(postCall?.[1]?.body)) as {
+      generationParameters?: Record<string, unknown>;
+    };
+
+    expect(requestBody.generationParameters).toMatchObject({
+      includeDescendants: false,
+      knowledgeNode: "synthetic focus area",
+      knowledgeNodeMode: "balanced",
+      knowledgeNodePublicIds: [],
+      knowledgeNodeSupplement: "synthetic focus area",
+      sourcePreference: null,
+    });
+  });
+
+  it("disables learner AI submit when selected knowledge-node mode has no selectable nodes", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = createPersonalAiGenerationFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("AI出题知识点覆盖"), {
+      target: { value: "selected" },
+    });
+
+    expect(
+      screen.getByText(
+        "当前授权范围暂无可选知识点，请改用均衡覆盖或联系内容管理员维护知识点。",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: requestButtonLabel }),
+    ).toBeDisabled();
+    expect(
+      fetchMock.mock.calls.some((call) => call[1]?.method === "POST"),
+    ).toBe(false);
   });
 
   it("shows personal learner AI组卷 source and submits the visible default quantity as 30", async () => {
@@ -1466,7 +1539,13 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(submittedBodies[0]).toMatchObject({
       taskType: "ai_paper_generation",
       generationParameters: {
+        includeDescendants: false,
+        knowledgeNode: null,
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        knowledgeNodeSupplement: null,
         questionCount: 30,
+        sourcePreference: null,
       },
     });
   });
@@ -1720,12 +1799,17 @@ describe("StudentPersonalAiGenerationPage", () => {
       existingTaskStatus: null,
       generationParameters: {
         difficulty: "medium",
+        includeDescendants: false,
         knowledgeNode: null,
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        knowledgeNodeSupplement: null,
         learningObjective: "弱项巩固",
         level: 3,
         profession: "monopoly",
         questionCount: 3,
         questionType: "single_choice",
+        sourcePreference: null,
         subject: "theory",
       },
       resultPublicId: null,
@@ -1963,6 +2047,9 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByLabelText("组织授权 · 高级版 · monopoly 3级"));
     expect(screen.getByText(/当前将使用组织额度/u)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.change(screen.getByLabelText("题源偏好"), {
+      target: { value: "优先使用企业题" },
+    });
     fireEvent.click(
       screen.getByRole("button", { name: employeePaperButtonLabel }),
     );
@@ -1977,6 +2064,11 @@ describe("StudentPersonalAiGenerationPage", () => {
       quotaOwnerType: "organization",
       quotaOwnerPublicId: "organization-public-123",
       taskType: "ai_paper_generation",
+      generationParameters: {
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        sourcePreference: "prefer_enterprise",
+      },
     });
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("provider payload");
@@ -2044,7 +2136,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI出题专业")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题等级")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题科目")).toBeInTheDocument();
-    expect(screen.getByLabelText("AI出题知识点")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI出题知识点覆盖")).toHaveValue("balanced");
+    expect(screen.getByLabelText("AI出题包含下级知识点")).toBeDisabled();
+    expect(screen.getByLabelText("AI出题知识点补充说明")).toBeInTheDocument();
+    expect(screen.getByText("当前授权范围暂无可选知识点")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题题型")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题题目数量")).toBeInTheDocument();
     expect(screen.getByLabelText("AI出题难度")).toBeInTheDocument();
@@ -2062,7 +2157,9 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI组卷科目")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷题目数量")).toHaveValue(30);
     expect(screen.getByLabelText("AI组卷题型分布")).toBeInTheDocument();
-    expect(screen.getByLabelText("AI组卷知识点覆盖")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷知识点覆盖")).toHaveValue("balanced");
+    expect(screen.getByLabelText("AI组卷包含下级知识点")).toBeDisabled();
+    expect(screen.getByLabelText("AI组卷知识点补充说明")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷大题结构")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷难度")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷时长目标")).toBeInTheDocument();
