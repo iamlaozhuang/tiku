@@ -257,6 +257,70 @@ describe("AI组卷 route plan select wiring", () => {
       enterpriseQuestionCount: 0,
     });
   });
+
+  it("does not fill selected knowledge-node paper plans from unrelated same-scope questions", async () => {
+    const selectedGenerationParameters: AiGenerationRouteIntegratedGenerationParameters =
+      {
+        ...generationParameters,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge_node_public_a"],
+        includeDescendants: false,
+        questionCount: 1,
+      };
+    const selectedRoutePlanContent = JSON.stringify({
+      title: "自测组卷方案",
+      targetQuestionCount: 1,
+      sections: [
+        {
+          sectionKey: "single-choice",
+          title: "单选题",
+          questionType: "single_choice",
+          targetQuestionCount: 1,
+          targetScore: 2,
+          knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          difficulty: "medium",
+        },
+      ],
+    });
+
+    const result = await resolveAndAssembleAiPaperFromRoute({
+      role: "content_admin",
+      organizationPublicId: null,
+      employeePublicId: null,
+      generationParameters: selectedGenerationParameters,
+      visibleGeneratedContent: createRouteIntegratedVisibleGeneratedContent(
+        selectedRoutePlanContent,
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+          },
+        },
+      ),
+      questionRepository: createQuestionRepository([
+        createQuestionRow({
+          public_id: "platform_question_unrelated_knowledge",
+          knowledge_node_public_ids: ["knowledge_node_public_unrelated"],
+        }),
+      ]),
+      organizationTrainingRepository:
+        createThrowingOrganizationTrainingRepository(),
+      difficultyByQuestionPublicId: {
+        platform_question_unrelated_knowledge: "medium",
+      },
+    });
+
+    expect(result.status).toBe("insufficient");
+    expect(result.sourceDiagnostics).toMatchObject({
+      role: "content_admin",
+      platformQuestionCount: 0,
+      enterpriseQuestionCount: 0,
+    });
+    expect(result.assembly?.container).toMatchObject({
+      requestedQuestionCount: 1,
+      selectedQuestionCount: 0,
+    });
+  });
 });
 
 function createParsedVisiblePlan() {

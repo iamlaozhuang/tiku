@@ -5,7 +5,10 @@ import type {
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "../contracts/route-integrated-provider-execution-contract";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
-import type { QuestionRepository } from "../repositories/question-repository";
+import type {
+  QuestionAccessRow,
+  QuestionRepository,
+} from "../repositories/question-repository";
 import type { NormalizedQuestionListInput } from "../validators/question";
 import {
   mapOrganizationTrainingVersionsToAiPaperEnterpriseQuestions,
@@ -78,12 +81,12 @@ export async function resolveAiPaperRouteQuestionSources(
     );
   }
 
-  const platformQuestionListResult =
-    await input.questionRepository.listQuestions(
-      createPlatformFormalQuestionQuery(input),
-    );
+  const platformQuestionListResult = await listPlatformQuestionRows(input);
   const platformQuestions = mapPlatformQuestionRowsToAiPaperQuestions({
-    questionRows: platformQuestionListResult.rows,
+    questionRows: filterQuestionRowsBySelectedKnowledgeScope(
+      platformQuestionListResult,
+      input,
+    ),
     knowledgeNodeParentPublicIdsByPublicId:
       input.knowledgeNodeParentPublicIdsByPublicId,
     difficultyByQuestionPublicId: input.difficultyByQuestionPublicId,
@@ -117,10 +120,27 @@ export async function resolveAiPaperRouteQuestionSources(
   });
 }
 
-function createPlatformFormalQuestionQuery(
+async function listPlatformQuestionRows(
   input: AiPaperRouteSourceResolutionInput,
-): NormalizedQuestionListInput {
-  return {
+): Promise<QuestionAccessRow[]> {
+  const queries = createPlatformFormalQuestionQueries(input);
+  const rows = await Promise.all(
+    queries.map(async (query) => {
+      const result = await input.questionRepository.listQuestions(query);
+
+      return result.rows;
+    }),
+  );
+
+  return dedupeQuestionRowsByPublicId(rows.flat());
+}
+
+function createPlatformFormalQuestionQueries(
+  input: AiPaperRouteSourceResolutionInput,
+): NormalizedQuestionListInput[] {
+  const selectedKnowledgeNodePublicIds =
+    getSelectedKnowledgeNodePublicIds(input);
+  const baseQuery: NormalizedQuestionListInput = {
     page: 1,
     pageSize: normalizePlatformPageSize(input.platformPageSize),
     sortBy: "updatedAt",
@@ -134,6 +154,104 @@ function createPlatformFormalQuestionQuery(
     knowledgeNodePublicId: null,
     tagPublicId: null,
   };
+
+  if (selectedKnowledgeNodePublicIds.length === 0) {
+    return [baseQuery];
+  }
+
+  if (input.generationParameters.includeDescendants) {
+    return [baseQuery];
+  }
+
+  return selectedKnowledgeNodePublicIds.map((knowledgeNodePublicId) => ({
+    ...baseQuery,
+    knowledgeNodePublicId,
+  }));
+}
+
+function filterQuestionRowsBySelectedKnowledgeScope(
+  questionRows: readonly QuestionAccessRow[],
+  input: AiPaperRouteSourceResolutionInput,
+): QuestionAccessRow[] {
+  const selectedKnowledgeNodePublicIds =
+    getSelectedKnowledgeNodePublicIds(input);
+
+  if (selectedKnowledgeNodePublicIds.length === 0) {
+    return [...questionRows];
+  }
+
+  const selectedKnowledgeNodePublicIdSet = new Set(
+    selectedKnowledgeNodePublicIds,
+  );
+
+  return questionRows.filter((questionRow) =>
+    questionRow.knowledge_node_public_ids.some((knowledgeNodePublicId) =>
+      isWithinSelectedKnowledgeScope({
+        includeDescendants: input.generationParameters.includeDescendants,
+        knowledgeNodeParentPublicIdsByPublicId:
+          input.knowledgeNodeParentPublicIdsByPublicId ?? {},
+        knowledgeNodePublicId,
+        selectedKnowledgeNodePublicIdSet,
+      }),
+    ),
+  );
+}
+
+function getSelectedKnowledgeNodePublicIds(
+  input: AiPaperRouteSourceResolutionInput,
+): string[] {
+  return input.generationParameters.knowledgeNodeMode === "selected"
+    ? [...input.generationParameters.knowledgeNodePublicIds]
+    : [];
+}
+
+function isWithinSelectedKnowledgeScope(input: {
+  includeDescendants: boolean;
+  knowledgeNodeParentPublicIdsByPublicId: Readonly<
+    Record<string, string | null>
+  >;
+  knowledgeNodePublicId: string;
+  selectedKnowledgeNodePublicIdSet: ReadonlySet<string>;
+}): boolean {
+  if (input.selectedKnowledgeNodePublicIdSet.has(input.knowledgeNodePublicId)) {
+    return true;
+  }
+
+  if (!input.includeDescendants) {
+    return false;
+  }
+
+  const visitedPublicIds = new Set<string>();
+  let currentPublicId: string | null =
+    input.knowledgeNodeParentPublicIdsByPublicId[input.knowledgeNodePublicId] ??
+    null;
+
+  while (currentPublicId !== null && !visitedPublicIds.has(currentPublicId)) {
+    if (input.selectedKnowledgeNodePublicIdSet.has(currentPublicId)) {
+      return true;
+    }
+
+    visitedPublicIds.add(currentPublicId);
+    currentPublicId =
+      input.knowledgeNodeParentPublicIdsByPublicId[currentPublicId] ?? null;
+  }
+
+  return false;
+}
+
+function dedupeQuestionRowsByPublicId(
+  questionRows: readonly QuestionAccessRow[],
+): QuestionAccessRow[] {
+  const seenPublicIds = new Set<string>();
+
+  return questionRows.filter((questionRow) => {
+    if (seenPublicIds.has(questionRow.public_id)) {
+      return false;
+    }
+
+    seenPublicIds.add(questionRow.public_id);
+    return true;
+  });
 }
 
 async function listEnterpriseTrainingVersions(

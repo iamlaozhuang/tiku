@@ -139,6 +139,10 @@ describe("AI组卷 route source resolution", () => {
             rows: [
               createQuestionRow(),
               createQuestionRow({
+                public_id: "platform_question_unrelated_knowledge",
+                knowledge_node_public_ids: ["knowledge_node_public_unrelated"],
+              }),
+              createQuestionRow({
                 public_id: "platform_question_disabled",
                 status: "disabled",
               }),
@@ -193,6 +197,81 @@ describe("AI组卷 route source resolution", () => {
       ]);
     },
   );
+
+  it("queries each selected platform knowledge node when descendants are not requested", async () => {
+    let capturedQuestionQueries: NormalizedQuestionListInput[] = [];
+    const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
+      async listQuestions(query) {
+        capturedQuestionQueries = [...capturedQuestionQueries, query];
+
+        if (query.knowledgeNodePublicId === "knowledge_node_public_child") {
+          return {
+            rows: [
+              createQuestionRow({
+                public_id: "platform_question_child",
+                knowledge_node_public_ids: ["knowledge_node_public_child"],
+              }),
+              createQuestionRow({
+                public_id: "platform_question_duplicate",
+                knowledge_node_public_ids: ["knowledge_node_public_child"],
+              }),
+            ],
+            total: 2,
+          };
+        }
+
+        if (query.knowledgeNodePublicId === "knowledge_node_public_sibling") {
+          return {
+            rows: [
+              createQuestionRow({
+                public_id: "platform_question_sibling",
+                knowledge_node_public_ids: ["knowledge_node_public_sibling"],
+              }),
+              createQuestionRow({
+                public_id: "platform_question_duplicate",
+                knowledge_node_public_ids: ["knowledge_node_public_sibling"],
+              }),
+            ],
+            total: 2,
+          };
+        }
+
+        return {
+          rows: [],
+          total: 0,
+        };
+      },
+    };
+
+    const result = await resolveAiPaperRouteQuestionSources({
+      role: "content_admin",
+      organizationPublicId: null,
+      employeePublicId: null,
+      generationParameters: {
+        ...generationParameters,
+        includeDescendants: false,
+        knowledgeNodePublicIds: [
+          "knowledge_node_public_child",
+          "knowledge_node_public_sibling",
+        ],
+      },
+      questionRepository,
+      organizationTrainingRepository:
+        createThrowingOrganizationTrainingRepository(),
+    });
+
+    expect(result.status).toBe("resolved");
+    expect(
+      result.platformQuestions.map((question) => question.publicId),
+    ).toEqual([
+      "platform_question_child",
+      "platform_question_duplicate",
+      "platform_question_sibling",
+    ]);
+    expect(
+      capturedQuestionQueries.map((query) => query.knowledgeNodePublicId),
+    ).toEqual(["knowledge_node_public_child", "knowledge_node_public_sibling"]);
+  });
 
   it("resolves organization admin sources from platform questions and admin-visible training snapshots", async () => {
     let capturedAdminLifecycleInputs: OrganizationTrainingAdminLifecycleListInput[] =
