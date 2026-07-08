@@ -24,6 +24,8 @@ import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminPublishedVersionDetailDto,
+  OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingQuestionOptionSnapshotDto,
@@ -41,6 +43,7 @@ import type {
   OrganizationTrainingVersionCopyToNewDraftWrite,
   OrganizationTrainingVersionTakedownWrite,
 } from "../services/organization-training-service";
+import { evidenceStatusValues } from "../models/ai-rag";
 import {
   mapOrganizationTrainingAnswerRowToDto,
   mapOrganizationTrainingDraftRowToDto,
@@ -365,6 +368,9 @@ export type OrganizationTrainingRepository = {
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingPublishedVersionDto | null>;
+  findAdminPublishedVersionDetailByPublicId(
+    input: OrganizationTrainingVersionLookupInput,
+  ): Promise<OrganizationTrainingAdminPublishedVersionDetailDto | null>;
   findEmployeeAnswerByVersion(
     input: OrganizationTrainingEmployeeAnswerLookupInput,
   ): Promise<EmployeeOrganizationTrainingAnswerDto | null>;
@@ -653,6 +659,20 @@ export function createOrganizationTrainingRepository(
       );
 
       return version ?? null;
+    },
+
+    async findAdminPublishedVersionDetailByPublicId(input) {
+      const normalizedInput = normalizeVersionLookupInput(input);
+
+      if (normalizedInput === null) {
+        return null;
+      }
+
+      const row = await gateway.findPublishedVersionByPublicId(normalizedInput);
+
+      return row === null
+        ? null
+        : mapOrganizationTrainingVersionRowToAdminDetailDto(row, gateway);
     },
 
     async findEmployeeAnswerByVersion(input) {
@@ -1248,6 +1268,38 @@ async function attachPaperSourceQuestionSnapshotsToVersions(
   });
 }
 
+async function mapOrganizationTrainingVersionRowToAdminDetailDto(
+  row: OrganizationTrainingVersionRow,
+  gateway: Pick<
+    OrganizationTrainingVersionGateway,
+    "listPaperQuestionSnapshotsForTrainingDrafts"
+  >,
+): Promise<OrganizationTrainingAdminPublishedVersionDetailDto> {
+  const version = mapOrganizationTrainingVersionRowToDto(row);
+  const persistedQuestions = mapQuestionSnapshotsToAdminDetail(
+    Array.isArray(row.question_snapshot) ? row.question_snapshot : [],
+  );
+
+  if (persistedQuestions.length > 0) {
+    return {
+      ...version,
+      questions: persistedQuestions,
+    };
+  }
+
+  const sourceRows = await gateway.listPaperQuestionSnapshotsForTrainingDrafts({
+    draftPublicIds: [version.draftPublicId],
+  });
+
+  return {
+    ...version,
+    questions: mapPaperQuestionSnapshotRowsToAdminDetail(
+      sourceRows,
+      version.questionCount,
+    ),
+  };
+}
+
 function mapPaperQuestionSnapshotRowsToDto(
   rows: readonly OrganizationTrainingPaperQuestionSnapshotRow[],
   maxQuestionCount: number,
@@ -1321,6 +1373,69 @@ function mapPaperQuestionSnapshotRowToDto(
     options: mapQuestionOptionSnapshots(snapshot, publicId),
     score: getNonNegativeNumber(row.score ?? snapshot.score),
   };
+}
+
+function mapPaperQuestionSnapshotRowToAdminDetail(
+  row: OrganizationTrainingPaperQuestionSnapshotRow,
+  sequenceNumber: number,
+): OrganizationTrainingAdminQuestionDetailDto | null {
+  const snapshot = asRecord(row.questionSnapshot);
+  const materialSnapshot =
+    row.materialSnapshot === null ? null : asRecord(row.materialSnapshot);
+  const detailSnapshot = {
+    ...snapshot,
+    publicId:
+      normalizeRequiredText(row.paperQuestionPublicId) ??
+      getFirstStringField(snapshot, [
+        "paperQuestionPublicId",
+        "questionPublicId",
+      ]),
+    sequenceNumber,
+    materialTitle:
+      materialSnapshot === null
+        ? snapshot.materialTitle
+        : (getFirstStringField(materialSnapshot, ["title", "name"]) ??
+          snapshot.materialTitle),
+    materialContent:
+      materialSnapshot === null
+        ? snapshot.materialContent
+        : (getFirstStringField(materialSnapshot, [
+            "contentRichText",
+            "content",
+            "bodyRichText",
+          ]) ?? snapshot.materialContent),
+    score: row.score ?? snapshot.score,
+  };
+
+  return mapQuestionSnapshotRecordToAdminDetail(detailSnapshot, sequenceNumber);
+}
+
+function mapPaperQuestionSnapshotRowsToAdminDetail(
+  rows: readonly OrganizationTrainingPaperQuestionSnapshotRow[],
+  maxQuestionCount: number,
+): OrganizationTrainingAdminQuestionDetailDto[] {
+  if (!Number.isInteger(maxQuestionCount) || maxQuestionCount < 1) {
+    return [];
+  }
+
+  return [...rows]
+    .sort((left, right) => {
+      if (left.sortOrder !== right.sortOrder) {
+        return left.sortOrder - right.sortOrder;
+      }
+
+      return left.paperQuestionPublicId.localeCompare(
+        right.paperQuestionPublicId,
+      );
+    })
+    .map((row, index) =>
+      mapPaperQuestionSnapshotRowToAdminDetail(row, index + 1),
+    )
+    .filter(
+      (question): question is OrganizationTrainingAdminQuestionDetailDto =>
+        question !== null,
+    )
+    .slice(0, maxQuestionCount);
 }
 
 function mapQuestionOptionSnapshots(
@@ -1397,6 +1512,88 @@ function getNonNegativeNumber(value: unknown): number {
         : 0;
 
   return Number.isFinite(numberValue) && numberValue >= 0 ? numberValue : 0;
+}
+
+function getEvidenceStatus(
+  value: unknown,
+): OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"] {
+  return typeof value === "string" &&
+    (evidenceStatusValues as readonly string[]).includes(value)
+    ? (value as OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"])
+    : "none";
+}
+
+function getNullableStringField(
+  value: Record<string, unknown>,
+  keys: readonly string[],
+): string | null {
+  return getFirstStringField(value, keys);
+}
+
+function mapQuestionSnapshotRecordToAdminDetail(
+  snapshot: Record<string, unknown>,
+  fallbackSequenceNumber: number,
+): OrganizationTrainingAdminQuestionDetailDto | null {
+  const publicId = getFirstStringField(snapshot, [
+    "publicId",
+    "questionPublicId",
+    "paperQuestionPublicId",
+  ]);
+  const questionType = getOrganizationTrainingQuestionType(
+    snapshot.questionType,
+  );
+  const stem = getFirstStringField(snapshot, [
+    "stem",
+    "stemRichText",
+    "questionStem",
+  ]);
+
+  if (publicId === null || questionType === null || stem === null) {
+    return null;
+  }
+
+  const sequenceNumber = Number.isInteger(snapshot.sequenceNumber)
+    ? Number(snapshot.sequenceNumber)
+    : fallbackSequenceNumber;
+
+  return {
+    publicId,
+    sequenceNumber,
+    questionType,
+    materialTitle: getNullableStringField(snapshot, ["materialTitle"]),
+    materialContent: getNullableStringField(snapshot, ["materialContent"]),
+    stem,
+    options: mapQuestionOptionSnapshots(snapshot, publicId),
+    score: getNonNegativeNumber(snapshot.score),
+    evidenceSummary: {
+      evidenceStatus: getEvidenceStatus(snapshot.evidenceStatus),
+      citationCount: getNonNegativeNumber(snapshot.citationCount),
+    },
+    answerAndAnalysis: {
+      visibility: "collapsed_by_default",
+      standardAnswer: getNullableStringField(snapshot, [
+        "standardAnswer",
+        "standard_answer",
+      ]),
+      analysis: getNullableStringField(snapshot, [
+        "analysisSummary",
+        "analysis",
+      ]),
+    },
+  };
+}
+
+function mapQuestionSnapshotsToAdminDetail(
+  snapshots: readonly unknown[],
+): OrganizationTrainingAdminQuestionDetailDto[] {
+  return snapshots
+    .map((snapshot, index) =>
+      mapQuestionSnapshotRecordToAdminDetail(asRecord(snapshot), index + 1),
+    )
+    .filter(
+      (question): question is OrganizationTrainingAdminQuestionDetailDto =>
+        question !== null,
+    );
 }
 
 function normalizeTrustedPersistenceLineageLookupInput(

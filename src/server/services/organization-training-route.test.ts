@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GET as adminDetailRouteGet } from "@/app/api/v1/organization-trainings/[publicId]/route";
 import {
   GET as adminLifecycleRouteGet,
   POST as manualDraftRoutePost,
@@ -21,6 +22,7 @@ import type {
 } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -68,6 +70,10 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
   findPublishedVersionByPublicId: vi.fn(
     async (): Promise<OrganizationTrainingPublishedVersionDto | null> =>
       createEmployeeVisibleVersion(),
+  ),
+  findAdminPublishedVersionDetailByPublicId: vi.fn(
+    async (): Promise<OrganizationTrainingAdminPublishedVersionDetailDto | null> =>
+      createAdminDetailVersion(),
   ),
   findEmployeeAnswerByVersion: vi.fn(
     async (): Promise<EmployeeOrganizationTrainingAnswerDto | null> => null,
@@ -392,6 +398,44 @@ function createEmployeeVisibleVersion(
   });
 }
 
+function createAdminDetailVersion(
+  overrides: Partial<OrganizationTrainingAdminPublishedVersionDetailDto> = {},
+): OrganizationTrainingAdminPublishedVersionDetailDto {
+  return {
+    ...createEmployeeVisibleVersion(),
+    questionCount: 1,
+    totalScore: 5,
+    questions: [
+      {
+        publicId: "training_question_route_public_401",
+        sequenceNumber: 1,
+        questionType: "single_choice",
+        materialTitle: "Route material",
+        materialContent: "Route material body",
+        stem: "Which route option is compliant?",
+        options: [
+          {
+            publicId: "training_question_route_option_a",
+            label: "A",
+            content: "Compliant option",
+          },
+        ],
+        score: 5,
+        evidenceSummary: {
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
+        answerAndAnalysis: {
+          visibility: "collapsed_by_default",
+          standardAnswer: "A",
+          analysis: "Choose the compliant answer.",
+        },
+      },
+    ],
+    ...overrides,
+  };
+}
+
 function createTakedownInput(
   overrides: Partial<OrganizationTrainingTakedownInput> = {},
 ): OrganizationTrainingTakedownInput {
@@ -616,6 +660,19 @@ function createCopyToNewDraftRequest(
   );
 }
 
+function createAdminDetailRequest(
+  publicId = takeDownPathPublicId,
+  init: Omit<RequestInit, "method"> = {},
+): Request {
+  return new Request(
+    `http://localhost/api/v1/organization-trainings/${publicId}`,
+    {
+      ...init,
+      method: "GET",
+    },
+  );
+}
+
 function createSourceContextRequest(
   body: unknown,
   init: Omit<RequestInit, "body" | "method"> = {},
@@ -830,6 +887,7 @@ describe("organization training draft source-context route handlers", () => {
 
   it("exports thin App Router entrypoints for manual draft, copy-to-new-draft, and source-context attachment", () => {
     expect(adminLifecycleRouteGet).toEqual(expect.any(Function));
+    expect(adminDetailRouteGet).toEqual(expect.any(Function));
     expect(manualDraftRoutePost).toEqual(expect.any(Function));
     expect(copyToNewDraftRoutePost).toEqual(expect.any(Function));
     expect(sourceContextRoutePost).toEqual(expect.any(Function));
@@ -1016,6 +1074,151 @@ describe("organization training draft source-context route handlers", () => {
         "organization_training_draft_unknown_route_401",
       ],
     });
+  });
+
+  it("returns an admin-safe published training detail through the runtime route", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId.mockClear();
+    runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId.mockResolvedValue(
+      createAdminDetailVersion(),
+    );
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockClear();
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockResolvedValue([
+      {
+        draftPublicId: publishPathPublicId,
+        sourceTaskPublicId: null,
+        sourceVersionPublicId: null,
+        sourceType: "organization_ai_result",
+        generationKind: "paper",
+        redactionStatus: "metadata_only",
+      },
+    ]);
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.adminDetail.GET(
+      createAdminDetailRequest(takeDownPathPublicId, {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(takeDownPathPublicId),
+    );
+    const payload = await resolveJsonPayload(response);
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: takeDownPathPublicId,
+        resourceType: "organization_training_version",
+        detailAvailability: "available",
+        sourceKind: "ai_paper",
+        contentKind: "paper_training",
+        structure: {
+          questionCount: 1,
+          totalScore: 5,
+        },
+        questions: [
+          {
+            publicId: "training_question_route_public_401",
+            stem: "Which route option is compliant?",
+            evidenceSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 1,
+            },
+            answerAndAnalysis: {
+              visibility: "collapsed_by_default",
+              standardAnswer: "A",
+              analysis: "Choose the compliant answer.",
+            },
+          },
+        ],
+        redactionStatus: "admin_safe_detail",
+      },
+    });
+    expect(
+      runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId,
+    ).toHaveBeenCalledWith({
+      trainingVersionPublicId: takeDownPathPublicId,
+    });
+    expect(
+      runtimeRepositoryMock.listAdminLifecycleSourceMetadata,
+    ).toHaveBeenCalledWith({
+      draftPublicIds: [publishPathPublicId],
+    });
+    expect(serializedPayload).not.toMatch(/providerPayload|rawPrompt|"id":/u);
+  });
+
+  it("returns a draft detail unavailable state instead of inventing question content", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId.mockResolvedValueOnce(
+      null,
+    );
+    runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValueOnce([
+      createManualDraftDto(),
+    ]);
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.adminDetail.GET(
+      createAdminDetailRequest(publishPathPublicId, {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(publishPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: publishPathPublicId,
+        resourceType: "organization_training_draft",
+        detailAvailability: "unavailable",
+        unavailableReason: "draft_snapshot_unavailable",
+        recommendedAction: "continue_configuration",
+        redactionStatus: "metadata_only",
+      },
+    });
+  });
+
+  it("does not return admin detail when organization-admin context is unavailable", async () => {
+    runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId.mockClear();
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      async resolveOrganizationAdminContext() {
+        return null;
+      },
+    });
+
+    const response = await handlers.adminDetail.GET(
+      createAdminDetailRequest(takeDownPathPublicId),
+      createRouteContext(takeDownPathPublicId),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403092,
+      message:
+        "Organization training detail organization-admin actor context is unavailable.",
+      data: null,
+    });
+    expect(
+      runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId,
+    ).not.toHaveBeenCalled();
   });
 
   it("creates a manual draft through the runtime route with a standard envelope", async () => {

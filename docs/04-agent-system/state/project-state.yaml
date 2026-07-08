@@ -1,8 +1,34 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-filter-empty-state-2026-07-08
-updatedAt: "2026-07-08T15:28:27-07:00"
+currentPhase: organization-training-admin-detail-read-model-2026-07-08
+updatedAt: "2026-07-08T15:56:00-07:00"
+latestOrganizationTrainingAdminDetailReadModel:
+  id: organization-training-admin-detail-read-model-2026-07-08
+  status: ready_for_commit_merge_push_cleanup
+  result: pass_source_test_ready_for_commit_merge_push_cleanup
+  branch: codex/org-training-admin-detail-read-model
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-read-model.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-read-model-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-read-model-audit.md
+  approvalBoundary: current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
+  boundary:
+    scope: organization_training_admin_readonly_detail_api_dto_read_model_only
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    browserRuntimeExecuted: false
+  validationSummary:
+    tddRed: pass_expected_missing_admin_detail_read_model_and_route_failure
+    targetedOrganizationTrainingServiceRouteRepositoryUnit: pass_3_files_104_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass_scoped
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    sourceCodeChanged: true
+    testsChanged: true
 latestOrganizationTrainingFilterEmptyState:
   id: organization-training-filter-empty-state-2026-07-08
   status: closed
@@ -1372,34 +1398,33 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: organization-training-filter-empty-state-2026-07-08
-  title: Organization training filter empty state
-  phase: organization-training-filter-empty-state-2026-07-08
-  status: closed
-  result: pass_source_test_ready_for_local_commit_waiting_for_merge_push_approval
+  id: organization-training-admin-detail-read-model-2026-07-08
+  title: Organization training admin detail read model
+  phase: organization-training-admin-detail-read-model-2026-07-08
+  status: ready_for_commit_merge_push_cleanup
+  result: pass_source_test_ready_for_commit_merge_push_cleanup
   priority: p1
   taskKind: implementation
-  branch: codex/org-training-filter-empty-state
-  humanApprovalBoundary: current_user_reported_org_training_filter_empty_state_bug_2026_07_08_local_commit_only_no_push_approval
-  plannedAt: "2026-07-08T15:04:41-07:00"
-  claimedAt: "2026-07-08T15:04:41-07:00"
-  completedAt: "2026-07-08T15:11:40-07:00"
-  targetClosureItem: Organization training list keeps filters and recoverable empty state when server-side filters return no rows.
-  behaviorBoundary: local_organization_training_list_filter_empty_state_ui_and_unit_test_only_no_api_dto_service_repository_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
+  branch: codex/org-training-admin-detail-read-model
+  humanApprovalBoundary: current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
+  plannedAt: "2026-07-08T15:34:00-07:00"
+  claimedAt: "2026-07-08T15:34:00-07:00"
+  completedAt: "2026-07-08T15:56:00-07:00"
+  targetClosureItem: Organization admins can read safe published enterprise training detail through a dedicated admin detail read model; drafts without structured snapshots return an explicit unavailable state.
+  behaviorBoundary: local_organization_training_admin_readonly_detail_api_dto_read_model_only_no_ui_no_write_interface_no_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write
   evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-filter-empty-state.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-filter-empty-state-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-filter-empty-state-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-read-model.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-read-model-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-read-model-audit.md
   validationSummary:
-    status: pass_source_test_ready_for_local_commit_waiting_for_merge_push_approval
-    tddRed: pass_expected_filtered_empty_controls_missing_failure
-    targetedOrganizationTrainingUnit: pass_1_file_14_tests
+    status: pass_source_test_ready_for_commit_merge_push_cleanup
+    tddRed: pass_expected_missing_admin_detail_read_model_and_route_failure
+    targetedOrganizationTrainingServiceRouteRepositoryUnit: pass_3_files_104_tests
     lint: pass
     typecheck: pass
     prettierCheck: pass_scoped
     diffCheck: pass
-    browserRuntime: blocked_current_browser_session_not_advanced_admin_no_storage_or_credential_access
-    preCommitHardening: pass
+    moduleRunV2PreCommitHardening: pass
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
@@ -1411,7 +1436,7 @@ currentTask:
     costCalibrationExecutedOrClaimed: false
     releaseFinalProductionClaimed: false
     productionUsabilityClaimed: false
-    mergePushApproval: not_granted
+    mergePushApproval: granted_current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
 previousCurrentTaskBeforeOrganizationTrainingCreateSourceUx20260708:
   id: organization-training-list-management-2026-07-08
   title: Organization training list management UX

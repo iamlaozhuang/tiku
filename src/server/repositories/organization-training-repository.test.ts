@@ -565,6 +565,7 @@ function createGateway(
     sourceContextInsertResult?: "rows" | "empty";
     takedownUpdateResult?: "row" | "null";
     paperQuestionSnapshotRows?: PaperQuestionSnapshotRow[];
+    publishedVersionRow?: OrganizationTrainingVersionRow | null;
   } = {},
 ) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
@@ -616,9 +617,12 @@ function createGateway(
     ): Promise<OrganizationTrainingVersionRow | null> => {
       versionLookupInputs = [...versionLookupInputs, input];
 
-      return createVersionRow({
-        public_id: input.trainingVersionPublicId,
-      });
+      return (
+        options.publishedVersionRow ??
+        createVersionRow({
+          public_id: input.trainingVersionPublicId,
+        })
+      );
     },
   );
   const listPaperQuestionSnapshotsForTrainingDrafts = vi.fn(
@@ -1919,6 +1923,79 @@ describe("organization training repository", () => {
     ]);
     expect(JSON.stringify(versions)).not.toContain('"id"');
     expect(JSON.stringify(version)).not.toContain('"id"');
+  });
+
+  it("returns admin-safe published version detail without changing employee-visible version redaction", async () => {
+    const questionSnapshot = createVersionWrite().questionSnapshot;
+    const { gateway } = createGateway({
+      publishedVersionRow: createVersionRow({
+        question_snapshot: questionSnapshot,
+      }),
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const employeeVersion = await repository.findPublishedVersionByPublicId({
+      trainingVersionPublicId: "training_version_public_123",
+    });
+    const adminDetail =
+      await repository.findAdminPublishedVersionDetailByPublicId({
+        trainingVersionPublicId: "training_version_public_123",
+      });
+
+    expect(employeeVersion?.questions?.[0]).toEqual({
+      publicId: "training_question_public_123",
+      sequenceNumber: 1,
+      questionType: "single_choice",
+      materialTitle: "Safety material",
+      materialContent: "Safety material body",
+      stem: "Which option is compliant?",
+      options: [
+        {
+          publicId: "training_question_option_a",
+          label: "A",
+          content: "compliant option",
+        },
+        {
+          publicId: "training_question_option_b",
+          label: "B",
+          content: "distractor option",
+        },
+      ],
+      score: 2,
+    });
+    expect(adminDetail?.questions[0]).toEqual({
+      publicId: "training_question_public_123",
+      sequenceNumber: 1,
+      questionType: "single_choice",
+      materialTitle: "Safety material",
+      materialContent: "Safety material body",
+      stem: "Which option is compliant?",
+      options: [
+        {
+          publicId: "training_question_option_a",
+          label: "A",
+          content: "compliant option",
+        },
+        {
+          publicId: "training_question_option_b",
+          label: "B",
+          content: "distractor option",
+        },
+      ],
+      score: 2,
+      evidenceSummary: {
+        evidenceStatus: "sufficient",
+        citationCount: 1,
+      },
+      answerAndAnalysis: {
+        visibility: "collapsed_by_default",
+        standardAnswer: "A",
+        analysis: "choice rationale",
+      },
+    });
+    expect(JSON.stringify(employeeVersion)).not.toContain("standardAnswer");
+    expect(JSON.stringify(employeeVersion)).not.toContain("analysisSummary");
+    expect(JSON.stringify(adminDetail)).not.toMatch(/"id":|"orgAuthId":/u);
   });
 
   it("lists server-only employee visible question snapshots for AI paper source", async () => {

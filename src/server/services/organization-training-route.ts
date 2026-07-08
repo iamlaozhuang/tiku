@@ -10,6 +10,7 @@ import type {
 } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -47,6 +48,7 @@ import {
   type OrganizationTrainingSourceContextRouteInput,
 } from "../validators/organization-training";
 import {
+  buildOrganizationTrainingAdminDetailReadModel,
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
   createOrganizationTrainingService,
   organizationTrainingEmployeeAnswerBlockedMessage,
@@ -145,6 +147,7 @@ export type OrganizationTrainingRouteOptions = {
   resolveSourceVersion?: OrganizationTrainingSourceVersionResolver;
   resolveVersionOrganizationPublicId?: OrganizationTrainingVersionOrganizationPublicIdResolver;
   resolveVersionQuestionTypeSummary?: OrganizationTrainingVersionQuestionTypeSummaryResolver;
+  resolveAdminDetailVersion?: OrganizationTrainingAdminDetailVersionResolver;
 };
 
 export type OrganizationTrainingVersionOrganizationPublicIdResolverInput = {
@@ -163,6 +166,7 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   | "listAdminLifecycleDrafts"
   | "listAdminLifecycleSourceMetadata"
   | "listAdminLifecycleVersions"
+  | "resolveAdminDetailVersion"
   | "listEmployeeVisibleVersions"
   | "resolveEmployeeAnswer"
   | "resolveEmployeeContext"
@@ -230,6 +234,16 @@ export type OrganizationTrainingPublishedVersionResolverInput = {
 export type OrganizationTrainingPublishedVersionResolver = (
   input: OrganizationTrainingPublishedVersionResolverInput,
 ) => Promise<OrganizationTrainingPublishedVersionDto | null>;
+
+export type OrganizationTrainingAdminDetailVersionResolverInput = {
+  request: Request;
+  trainingVersionPublicId: string;
+  adminContext: OrganizationTrainingAdminContext;
+};
+
+export type OrganizationTrainingAdminDetailVersionResolver = (
+  input: OrganizationTrainingAdminDetailVersionResolverInput,
+) => Promise<OrganizationTrainingAdminPublishedVersionDetailDto | null>;
 
 export type OrganizationTrainingSourceVersionResolverInput = {
   request: Request;
@@ -314,6 +328,8 @@ const sourceContextDraftPublicIdMismatchCode = 400088;
 const sourceContextAdminContextUnavailableCode = 403089;
 const sourceContextLineageUnavailableCode = 403090;
 const sourceContextBlockedCode = 409091;
+const adminDetailAdminContextUnavailableCode = 403092;
+const adminDetailUnavailableCode = 404093;
 
 const draftPublicIdMismatchMessage =
   "Organization training publish path public id must match request body.";
@@ -371,6 +387,12 @@ const sourceContextAdminContextUnavailableMessage =
 
 const sourceContextLineageUnavailableMessage =
   "Organization training source context lineage is unavailable.";
+
+const adminDetailAdminContextUnavailableMessage =
+  "Organization training detail organization-admin actor context is unavailable.";
+
+const adminDetailUnavailableMessage =
+  "Organization training detail is unavailable.";
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -443,6 +465,10 @@ async function defaultListEmployeeVisibleVersions(): Promise<
 }
 
 async function defaultResolvePublishedVersion(): Promise<null> {
+  return null;
+}
+
+async function defaultResolveAdminDetailVersion(): Promise<null> {
   return null;
 }
 
@@ -953,6 +979,18 @@ function createRepositoryBackedPublishedVersionResolver(
     });
 }
 
+function createRepositoryBackedAdminDetailVersionResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "findAdminPublishedVersionDetailByPublicId"
+  >,
+): OrganizationTrainingAdminDetailVersionResolver {
+  return async ({ trainingVersionPublicId }) =>
+    repository.findAdminPublishedVersionDetailByPublicId({
+      trainingVersionPublicId,
+    });
+}
+
 function createRepositoryBackedSourceVersionResolver(
   repository: Pick<
     OrganizationTrainingRepository,
@@ -1172,6 +1210,20 @@ function createSourceContextLineageUnavailableResponse(): ApiResponse<null> {
   );
 }
 
+function createAdminDetailAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    adminDetailAdminContextUnavailableCode,
+    adminDetailAdminContextUnavailableMessage,
+  );
+}
+
+function createAdminDetailUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    adminDetailUnavailableCode,
+    adminDetailUnavailableMessage,
+  );
+}
+
 function createPublishBlockedResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishBlockedCode,
@@ -1327,6 +1379,8 @@ export function createOrganizationTrainingRouteHandlers(
     defaultResolveVersionOrganizationPublicId;
   const resolvePublishedVersion =
     options.resolvePublishedVersion ?? defaultResolvePublishedVersion;
+  const resolveAdminDetailVersion =
+    options.resolveAdminDetailVersion ?? defaultResolveAdminDetailVersion;
   const resolveSourceVersion =
     options.resolveSourceVersion ?? defaultResolveSourceVersion;
   const resolveVersionQuestionTypeSummary =
@@ -1334,6 +1388,72 @@ export function createOrganizationTrainingRouteHandlers(
     defaultResolveVersionQuestionTypeSummary;
 
   return createRouteHandlersWithErrorEnvelope({
+    adminDetail: {
+      async GET(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const pathPublicId = await resolvePathPublicId(context);
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createAdminDetailAdminContextUnavailableResponse(),
+          );
+        }
+
+        const version = await resolveAdminDetailVersion({
+          request,
+          trainingVersionPublicId: pathPublicId,
+          adminContext,
+        });
+
+        if (version !== null) {
+          const [sourceMetadata] = await listAdminLifecycleSourceMetadata({
+            request,
+            adminContext,
+            draftPublicIds: [version.draftPublicId],
+          });
+
+          return createJsonResponse(
+            buildOrganizationTrainingAdminDetailReadModel({
+              adminContext,
+              version,
+              sourceMetadata: sourceMetadata ?? null,
+            }),
+          );
+        }
+
+        const drafts = await listAdminLifecycleDrafts({
+          request,
+          adminContext,
+        });
+        const draft =
+          drafts.find((candidate) => candidate.publicId === pathPublicId) ??
+          null;
+
+        if (draft === null) {
+          return createJsonResponse(createAdminDetailUnavailableResponse());
+        }
+
+        const [sourceMetadata] = await listAdminLifecycleSourceMetadata({
+          request,
+          adminContext,
+          draftPublicIds: [draft.publicId],
+        });
+
+        return createJsonResponse(
+          buildOrganizationTrainingAdminDetailReadModel({
+            adminContext,
+            draft,
+            sourceMetadata: sourceMetadata ?? null,
+          }),
+        );
+      },
+    },
     manualDraft: {
       async GET(request: Request): Promise<Response> {
         const adminContext = await resolveOrganizationAdminContext({
@@ -2022,6 +2142,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const resolvePublishedVersion =
     options.resolvePublishedVersion ??
     createRepositoryBackedPublishedVersionResolver(repository);
+  const resolveAdminDetailVersion =
+    options.resolveAdminDetailVersion ??
+    createRepositoryBackedAdminDetailVersionResolver(repository);
   const resolveSourceVersion =
     options.resolveSourceVersion ??
     createRepositoryBackedSourceVersionResolver(repository);
@@ -2044,6 +2167,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       listAdminLifecycleVersions,
       listAdminLifecycleSourceMetadata,
       listEmployeeVisibleVersions,
+      resolveAdminDetailVersion,
       resolvePublishedVersion,
       resolveSourceVersion,
       resolveVersionQuestionTypeSummary,

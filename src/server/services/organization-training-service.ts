@@ -10,9 +10,11 @@ import type {
   EmployeeOrganizationTrainingAnswerDto,
   EmployeeOrganizationTrainingQuestionResultDto,
   EmployeeOrganizationTrainingScoreSummaryDto,
+  OrganizationTrainingAdminDetailDto,
   OrganizationTrainingAdminLifecycleFlowDto,
   OrganizationTrainingAdminLifecycleContentKind,
   OrganizationTrainingAdminLifecycleItemDto,
+  OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceKind,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingAuditLogRedactedReferencePolicyDto,
@@ -64,6 +66,10 @@ export const organizationTrainingSourceContextBlockedMessage =
   "Organization training source context is blocked.";
 
 const INVALID_ORGANIZATION_TRAINING_AUDIT_LOG_REFERENCE_INPUT_CODE = 400184;
+const ORGANIZATION_TRAINING_ADMIN_DETAIL_SCOPE_DENIED_CODE = 403092;
+
+const organizationTrainingAdminDetailScopeDeniedMessage =
+  "Organization training detail organization scope is denied.";
 
 function mapOrganizationTrainingAuditLogReferenceToDto(
   input: OrganizationTrainingAuditLogReferenceInput,
@@ -206,6 +212,18 @@ export type OrganizationTrainingAdminLifecycleFlowReadModelInput = {
   sourceMetadata?: readonly OrganizationTrainingAdminLifecycleSourceMetadataDto[];
   query?: OrganizationTrainingAdminLifecycleQuery;
 };
+
+export type OrganizationTrainingAdminDetailReadModelInput =
+  | {
+      adminContext: OrganizationTrainingAdminContext;
+      version: OrganizationTrainingAdminPublishedVersionDetailDto;
+      sourceMetadata?: OrganizationTrainingAdminLifecycleSourceMetadataDto | null;
+    }
+  | {
+      adminContext: OrganizationTrainingAdminContext;
+      draft: OrganizationTrainingDraftDto;
+      sourceMetadata?: OrganizationTrainingAdminLifecycleSourceMetadataDto | null;
+    };
 
 export const organizationTrainingAdminLifecycleStatusFilterValues = [
   "all",
@@ -866,6 +884,125 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
       sortOrder: "desc",
     },
   );
+}
+
+function buildQuestionTypeSummaryFromAdminDetailQuestions(
+  questions: readonly OrganizationTrainingAdminPublishedVersionDetailDto["questions"][number][],
+): OrganizationTrainingQuestionTypeSummary {
+  return questions.reduce((summary, question) => {
+    if (question.questionType === "single_choice") {
+      return { ...summary, singleChoice: summary.singleChoice + 1 };
+    }
+
+    if (question.questionType === "multi_choice") {
+      return { ...summary, multiChoice: summary.multiChoice + 1 };
+    }
+
+    if (question.questionType === "true_false") {
+      return { ...summary, trueFalse: summary.trueFalse + 1 };
+    }
+
+    if (question.questionType === "short_answer") {
+      return { ...summary, shortAnswer: summary.shortAnswer + 1 };
+    }
+
+    return summary;
+  }, createEmptyQuestionTypeSummary());
+}
+
+function copyAdminDetailQuestions(
+  questions: readonly OrganizationTrainingAdminPublishedVersionDetailDto["questions"][number][],
+): OrganizationTrainingAdminPublishedVersionDetailDto["questions"] {
+  return questions.map((question) => ({
+    publicId: question.publicId,
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    materialTitle: question.materialTitle,
+    materialContent: question.materialContent,
+    stem: question.stem,
+    options: question.options.map((option) => ({ ...option })),
+    score: question.score,
+    evidenceSummary: {
+      evidenceStatus: question.evidenceSummary.evidenceStatus,
+      citationCount: question.evidenceSummary.citationCount,
+    },
+    answerAndAnalysis: {
+      visibility: "collapsed_by_default",
+      standardAnswer: question.answerAndAnalysis.standardAnswer,
+      analysis: question.answerAndAnalysis.analysis,
+    },
+  }));
+}
+
+export function buildOrganizationTrainingAdminDetailReadModel(
+  input: OrganizationTrainingAdminDetailReadModelInput,
+): ApiResponse<OrganizationTrainingAdminDetailDto | null> {
+  const organizationPublicId =
+    "version" in input
+      ? input.version.organizationPublicId
+      : input.draft.organizationPublicId;
+
+  if (!isOrganizationVisibleToAdmin(organizationPublicId, input.adminContext)) {
+    return createErrorResponse(
+      ORGANIZATION_TRAINING_ADMIN_DETAIL_SCOPE_DENIED_CODE,
+      organizationTrainingAdminDetailScopeDeniedMessage,
+    );
+  }
+
+  if ("draft" in input) {
+    const kind = resolveLifecycleSourceAndContentKind(
+      input.sourceMetadata ?? null,
+      input.draft.sourceTaskPublicId,
+    );
+
+    return createSuccessResponse({
+      publicId: input.draft.publicId,
+      resourceType: "organization_training_draft",
+      detailAvailability: "unavailable",
+      unavailableReason: "draft_snapshot_unavailable",
+      organizationPublicId: input.draft.organizationPublicId,
+      title: input.draft.title,
+      description: input.draft.description,
+      profession: input.draft.profession,
+      level: input.draft.level,
+      subject: input.draft.subject,
+      status: "draft",
+      sourceKind: kind.sourceKind,
+      contentKind: kind.contentKind,
+      recommendedAction: "continue_configuration",
+      redactionStatus: "metadata_only",
+    });
+  }
+
+  const kind = resolveLifecycleSourceAndContentKind(
+    input.sourceMetadata ?? null,
+    null,
+    { allowManualFallback: false },
+  );
+  const questions = copyAdminDetailQuestions(input.version.questions);
+
+  return createSuccessResponse({
+    publicId: input.version.publicId,
+    resourceType: "organization_training_version",
+    detailAvailability: "available",
+    organizationPublicId: input.version.organizationPublicId,
+    title: input.version.title,
+    description: input.version.description,
+    profession: input.version.profession,
+    level: input.version.level,
+    subject: input.version.subject,
+    status: input.version.status,
+    sourceKind: kind.sourceKind,
+    contentKind: kind.contentKind,
+    structure: {
+      questionCount: input.version.questionCount,
+      totalScore: input.version.totalScore,
+      questionTypeSummary:
+        buildQuestionTypeSummaryFromAdminDetailQuestions(questions),
+    },
+    questions,
+    redactionStatus: "admin_safe_detail",
+  });
 }
 
 type JsonRecord = Record<string, unknown>;

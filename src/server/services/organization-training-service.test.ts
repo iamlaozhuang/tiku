@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
 import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
 import {
+  buildOrganizationTrainingAdminDetailReadModel,
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
   buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel,
   buildOrganizationTrainingAuditLogReferenceReadModel,
@@ -792,6 +794,204 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain(analysis);
     expect(serializedResult).not.toContain(protectedPayloadMarker);
     expect(serializedResult).not.toContain(privateRowData);
+  });
+
+  it("builds an admin-safe published training detail with collapsed answer and evidence summaries", () => {
+    const protectedPayloadKey = ["provider", "Payload"].join("");
+    const protectedPayloadMarker = ["PROVIDER", "PAY", "LOAD", "BODY"].join(
+      "-",
+    );
+    const rawPromptKey = ["raw", "Prompt"].join("");
+    const rawPromptMarker = ["RAW", "PROMPT", "BODY"].join("-");
+    const version: OrganizationTrainingAdminPublishedVersionDetailDto = {
+      ...createPublishedVersion({
+        questionCount: 1,
+        totalScore: 2,
+      }),
+      questions: [
+        {
+          publicId: "training_question_public_123",
+          sequenceNumber: 1,
+          questionType: "single_choice" as const,
+          materialTitle: "Safety material",
+          materialContent: "Safety material body",
+          stem: "Which option is compliant?",
+          options: [
+            {
+              publicId: "training_question_option_a",
+              label: "A",
+              content: "Compliant option",
+            },
+          ],
+          score: 2,
+          evidenceSummary: {
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+          },
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "A",
+            analysis: "Choose the compliant answer.",
+          },
+          [protectedPayloadKey]: protectedPayloadMarker,
+          [rawPromptKey]: rawPromptMarker,
+        },
+      ],
+    };
+
+    const result = buildOrganizationTrainingAdminDetailReadModel({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      version,
+      sourceMetadata: {
+        draftPublicId: "training_draft_public_123",
+        sourceTaskPublicId: null,
+        sourceVersionPublicId: null,
+        sourceType: "paper",
+        generationKind: null,
+        redactionStatus: "metadata_only",
+      },
+    });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: "training_version_public_123",
+        resourceType: "organization_training_version",
+        detailAvailability: "available",
+        organizationPublicId: "organization_public_123",
+        title: "Safety training",
+        description: null,
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        status: "published",
+        sourceKind: "platform_paper",
+        contentKind: "paper_training",
+        structure: {
+          questionCount: 1,
+          totalScore: 2,
+          questionTypeSummary: {
+            singleChoice: 1,
+            multiChoice: 0,
+            trueFalse: 0,
+            shortAnswer: 0,
+          },
+        },
+        questions: [
+          {
+            publicId: "training_question_public_123",
+            sequenceNumber: 1,
+            questionType: "single_choice",
+            materialTitle: "Safety material",
+            materialContent: "Safety material body",
+            stem: "Which option is compliant?",
+            options: [
+              {
+                publicId: "training_question_option_a",
+                label: "A",
+                content: "Compliant option",
+              },
+            ],
+            score: 2,
+            evidenceSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 1,
+            },
+            answerAndAnalysis: {
+              visibility: "collapsed_by_default",
+              standardAnswer: "A",
+              analysis: "Choose the compliant answer.",
+            },
+          },
+        ],
+        redactionStatus: "admin_safe_detail",
+      },
+    });
+    expect(serializedResult).not.toContain(protectedPayloadMarker);
+    expect(serializedResult).not.toContain(rawPromptMarker);
+    expect(serializedResult).not.toMatch(/"id":|"organizationId":/u);
+  });
+
+  it("returns an explicit unavailable admin detail for drafts without structured snapshots", () => {
+    const result = buildOrganizationTrainingAdminDetailReadModel({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      draft: {
+        publicId: "training_draft_public_123",
+        sourceTaskPublicId: null,
+        organizationPublicId: "organization_public_123",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training draft",
+        description: null,
+        questionCount: 0,
+        totalScore: 0,
+        questionTypeSummary: {
+          singleChoice: 0,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        evidenceStatus: "none",
+        validationStatus: "needs_review",
+        retentionStatus: "active",
+        createdAt: fixedNow.toISOString(),
+        expiresAt: null,
+      },
+    });
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: "training_draft_public_123",
+        resourceType: "organization_training_draft",
+        detailAvailability: "unavailable",
+        unavailableReason: "draft_snapshot_unavailable",
+        organizationPublicId: "organization_public_123",
+        title: "Safety training draft",
+        description: null,
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        status: "draft",
+        sourceKind: "manual_group",
+        contentKind: "question_training",
+        recommendedAction: "continue_configuration",
+        redactionStatus: "metadata_only",
+      },
+    });
+  });
+
+  it("denies admin detail outside the visible organization scope", () => {
+    expect(
+      buildOrganizationTrainingAdminDetailReadModel({
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: ["organization_public_123"],
+        },
+        version: {
+          ...createPublishedVersion({
+            organizationPublicId: "organization_other_public_999",
+          }),
+          questions: [],
+        },
+      }),
+    ).toEqual({
+      code: 403092,
+      message: "Organization training detail organization scope is denied.",
+      data: null,
+    });
   });
 
   it("blocks manual draft creation when advanced org_auth capability gates fail", async () => {

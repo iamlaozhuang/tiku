@@ -201,6 +201,79 @@ export type OrganizationTrainingAdminLifecycleFlowDto = {
   redactionStatus: "metadata_only";
 };
 
+export type OrganizationTrainingAdminQuestionDetailDto = {
+  publicId: string;
+  sequenceNumber: number;
+  questionType: OrganizationTrainingQuestionType;
+  materialTitle: string | null;
+  materialContent: string | null;
+  stem: string;
+  options: OrganizationTrainingQuestionOptionSnapshotDto[];
+  score: number;
+  evidenceSummary: {
+    evidenceStatus: EvidenceStatus;
+    citationCount: number;
+  };
+  answerAndAnalysis: {
+    visibility: "collapsed_by_default";
+    standardAnswer: string | null;
+    analysis: string | null;
+  };
+};
+
+export type OrganizationTrainingAdminPublishedVersionDetailDto = Omit<
+  OrganizationTrainingPublishedVersionDto,
+  "questions"
+> & {
+  questions: OrganizationTrainingAdminQuestionDetailDto[];
+};
+
+export type OrganizationTrainingAdminDetailStructureDto = {
+  questionCount: number;
+  totalScore: number;
+  questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+};
+
+export type OrganizationTrainingAdminAvailableDetailDto = {
+  publicId: string;
+  resourceType: "organization_training_version";
+  detailAvailability: "available";
+  organizationPublicId: string;
+  title: string;
+  description: string | null;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  status: OrganizationTrainingVersionStatus;
+  sourceKind: OrganizationTrainingAdminLifecycleSourceKind;
+  contentKind: OrganizationTrainingAdminLifecycleContentKind;
+  structure: OrganizationTrainingAdminDetailStructureDto;
+  questions: OrganizationTrainingAdminQuestionDetailDto[];
+  redactionStatus: "admin_safe_detail";
+};
+
+export type OrganizationTrainingAdminUnavailableDetailDto = {
+  publicId: string;
+  resourceType: "organization_training_draft";
+  detailAvailability: "unavailable";
+  unavailableReason: "draft_snapshot_unavailable";
+  organizationPublicId: string;
+  title: string;
+  description: string | null;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  status: "draft";
+  sourceKind: OrganizationTrainingAdminLifecycleSourceKind;
+  contentKind: OrganizationTrainingAdminLifecycleContentKind;
+  recommendedAction: "continue_configuration";
+  redactionStatus: "metadata_only";
+};
+
+export type OrganizationTrainingAdminDetailDto =
+  | OrganizationTrainingAdminAvailableDetailDto
+  | OrganizationTrainingAdminUnavailableDetailDto;
+
 export type OrganizationTrainingEmployeeAnswerLifecycleAction =
   | "start_answer"
   | "continue_answer"
