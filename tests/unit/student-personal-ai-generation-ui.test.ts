@@ -97,6 +97,50 @@ const emptyResultHistoryResponse = {
   },
 };
 
+const emptyAiKnowledgeNodeOptionsResponse = {
+  code: 0,
+  message: "ok",
+  data: {
+    knowledgeNodes: [],
+  },
+  pagination: {
+    page: 1,
+    pageSize: 100,
+    total: 0,
+    sortBy: "sortOrder",
+    sortOrder: "asc",
+  },
+};
+
+const marketingAiKnowledgeNodeOptionsResponse = {
+  code: 0,
+  message: "ok",
+  data: {
+    knowledgeNodes: [
+      {
+        publicId: "knowledge-node-public-marketing-3",
+        parentKnowledgeNodePublicId: null,
+        profession: "marketing",
+        levelList: [3],
+        name: "市场调研",
+        pathName: "营销/基础知识/市场调研",
+        sortOrder: 10,
+        knStatus: "active",
+        questionCount: 0,
+        isRecommendable: true,
+        updatedAt: "2026-07-08T10:00:00.000Z",
+      },
+    ],
+  },
+  pagination: {
+    page: 1,
+    pageSize: 100,
+    total: 1,
+    sortBy: "sortOrder",
+    sortOrder: "asc",
+  },
+};
+
 const localExperienceResponse = {
   code: 0,
   message: "ok",
@@ -444,6 +488,19 @@ function createPersonalAiGenerationFetchMock(
         ok: true,
         status: 200,
         json: async () => createAdvancedAuthorizationListResponse(),
+      };
+    }
+
+    if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => emptyAiKnowledgeNodeOptionsResponse,
       };
     }
 
@@ -1458,7 +1515,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     });
 
     expect(
-      screen.getByText(
+      await screen.findByText(
         "当前授权范围暂无可选知识点，请改用均衡覆盖或联系内容管理员维护知识点。",
       ),
     ).toBeInTheDocument();
@@ -1468,6 +1525,101 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       fetchMock.mock.calls.some((call) => call[1]?.method === "POST"),
     ).toBe(false);
+  });
+
+  it("loads learner AI knowledge-node options and submits selected public ids", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                profession: "marketing",
+              }),
+          };
+        }
+
+        if (path === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+          expect(path).toContain("profession=marketing");
+          expect(path).toContain("level=3");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => marketingAiKnowledgeNodeOptionsResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          submittedBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("AI出题知识点覆盖"), {
+      target: { value: "selected" },
+    });
+    fireEvent.click(await screen.findByLabelText("营销/基础知识/市场调研"));
+    fireEvent.change(screen.getByLabelText("AI出题包含下级知识点"), {
+      target: { value: "true" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      taskType: "ai_question_generation",
+      generationParameters: {
+        includeDescendants: true,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
+      },
+    });
   });
 
   it("shows personal learner AI组卷 source and submits the visible default quantity as 30", async () => {
@@ -1610,6 +1762,106 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByRole("button", { name: employeePaperButtonLabel }),
     ).toBeInTheDocument();
+  });
+
+  it("submits organization employee AI组卷 selected knowledge-node public ids", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/authorizations") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createAdvancedAuthorizationListResponse({
+                authorizationSource: "org_auth",
+                authorizationPublicId: "org-auth-context-ui-001",
+                ownerType: "organization",
+                ownerPublicId: "organization-public-ui-001",
+                organizationPublicId: "organization-public-ui-001",
+                quotaOwnerType: "organization",
+                quotaOwnerPublicId: "organization-public-ui-001",
+                profession: "marketing",
+              }),
+          };
+        }
+
+        if (path === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => employeeSessionResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+          expect(init?.method).toBe("GET");
+          expect(path).toContain("profession=marketing");
+          expect(path).toContain("level=3");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => marketingAiKnowledgeNodeOptionsResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          submittedBodies.push(JSON.parse(String(init?.body)));
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${path}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.change(screen.getByLabelText("AI组卷知识点覆盖"), {
+      target: { value: "selected" },
+    });
+    fireEvent.click(await screen.findByLabelText("营销/基础知识/市场调研"));
+    fireEvent.click(
+      screen.getByRole("button", { name: employeePaperButtonLabel }),
+    );
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(submittedBodies[0]).toMatchObject({
+      taskType: "ai_paper_generation",
+      authorizationSource: "org_auth",
+      generationParameters: {
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
+        sourcePreference: "balanced",
+      },
+    });
   });
 
   it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {

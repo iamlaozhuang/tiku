@@ -445,6 +445,37 @@ function createEmptyTaskHistoryResponse(workspace: "content" | "organization") {
   };
 }
 
+function createAiKnowledgeNodeOptionsResponse() {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      knowledgeNodes: [
+        {
+          publicId: "knowledge-node-public-marketing-3",
+          parentKnowledgeNodePublicId: null,
+          profession: "marketing",
+          levelList: [3],
+          name: "市场调研",
+          pathName: "营销/基础知识/市场调研",
+          sortOrder: 10,
+          knStatus: "active",
+          questionCount: 0,
+          isRecommendable: true,
+          updatedAt: "2026-07-08T10:00:00.000Z",
+        },
+      ],
+    },
+    pagination: {
+      page: 1,
+      pageSize: 100,
+      total: 1,
+      sortBy: "sortOrder",
+      sortOrder: "asc",
+    },
+  };
+}
+
 function isAdminAiGenerationHistoryRequest(
   url: string | URL,
   path: string,
@@ -1145,6 +1176,182 @@ describe("admin AI generation entry surfaces", () => {
     expect(document.body.textContent).not.toContain("OMITTED_UI_FIXTURE_B");
     expect(document.body.textContent).not.toContain("已脱敏");
     expect(document.body.textContent).not.toContain("contentVisibility");
+  });
+
+  it("submits admin AI selected knowledge-node public ids from the options route", async () => {
+    globalThis.localStorage?.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token",
+    );
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        path ===
+        "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10"
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("content"));
+      }
+
+      if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+        expect(init?.method).toBe("GET");
+        expect(path).toContain("profession=marketing");
+        expect(path).toContain("level=3");
+
+        return Response.json(createAiKnowledgeNodeOptionsResponse());
+      }
+
+      if (path === "/api/v1/content-ai-generation-requests") {
+        expect(init?.method).toBe("POST");
+
+        return Response.json(
+          createLocalContractResponse({
+            workspace: "content",
+            generationKind: "question",
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        generationKind: "question",
+        workspace: "content",
+      }),
+    );
+
+    expect(await screen.findByText("最近任务")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("知识点覆盖"), {
+      target: { value: "指定知识点" },
+    });
+    fireEvent.click(
+      await screen.findByLabelText("选择知识点 营销/基础知识/市场调研"),
+    );
+    fireEvent.change(screen.getByLabelText("包含下级知识点"), {
+      target: { value: "包含" },
+    });
+    fireEvent.click(screen.getByTestId("admin-ai-generation-submit"));
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(
+          ([url, init]) =>
+            String(url) === "/api/v1/content-ai-generation-requests" &&
+            init?.method === "POST",
+        ),
+      ).toBe(true),
+    );
+    const requestInit = fetchMock.mock.calls.find(
+      ([url, init]) =>
+        String(url) === "/api/v1/content-ai-generation-requests" &&
+        init?.method === "POST",
+    )?.[1] as RequestInit;
+
+    expect(JSON.parse(String(requestInit.body))).toMatchObject({
+      generationKind: "question",
+      generationParameters: {
+        includeDescendants: true,
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
+      },
+    });
+  });
+
+  it("submits organization admin AI组卷 selected knowledge-node public ids", async () => {
+    globalThis.localStorage?.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token",
+    );
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({
+            adminRoles: ["org_advanced_admin"],
+            organizationPublicId: "organization_public_123",
+          }),
+        );
+      }
+
+      if (
+        path ===
+        "/api/v1/organization-ai-generation-requests?generationKind=paper&page=1&pageSize=10"
+      ) {
+        return Response.json(createEmptyTaskHistoryResponse("organization"));
+      }
+
+      if (path.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+        expect(init?.method).toBe("GET");
+        expect(path).toContain("profession=marketing");
+        expect(path).toContain("level=3");
+
+        return Response.json(createAiKnowledgeNodeOptionsResponse());
+      }
+
+      if (path === "/api/v1/organization-ai-generation-requests") {
+        expect(init?.method).toBe("POST");
+
+        return Response.json(
+          createLocalContractResponse({
+            workspace: "organization",
+            generationKind: "paper",
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        generationKind: "paper",
+        workspace: "organization",
+      }),
+    );
+
+    expect(await screen.findByText("最近任务")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("知识点覆盖"), {
+      target: { value: "指定知识点" },
+    });
+    fireEvent.click(
+      await screen.findByLabelText("选择知识点 营销/基础知识/市场调研"),
+    );
+    fireEvent.click(screen.getByTestId("admin-ai-generation-submit"));
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(
+          ([url, init]) =>
+            String(url) === "/api/v1/organization-ai-generation-requests" &&
+            init?.method === "POST",
+        ),
+      ).toBe(true),
+    );
+    const requestInit = fetchMock.mock.calls.find(
+      ([url, init]) =>
+        String(url) === "/api/v1/organization-ai-generation-requests" &&
+        init?.method === "POST",
+    )?.[1] as RequestInit;
+
+    expect(JSON.parse(String(requestInit.body))).toMatchObject({
+      generationKind: "paper",
+      generationParameters: {
+        knowledgeNodeMode: "selected",
+        knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
+        sourcePreference: "balanced",
+      },
+    });
   });
 
   it("renders transient visible generated content for provider-enabled admin responses", async () => {

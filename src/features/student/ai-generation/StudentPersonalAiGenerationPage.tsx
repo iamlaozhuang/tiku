@@ -14,7 +14,7 @@ import {
   Sparkles,
   ShieldAlert,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   fetchCurrentStudentSession,
@@ -41,6 +41,10 @@ import type {
   PersonalAiGenerationLearningSessionQuestionDto,
 } from "@/server/contracts/personal-ai-generation-learning-session-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
+import type {
+  AdminKnowledgeNodeOpsListDto,
+  AdminKnowledgeNodeOpsSummaryDto,
+} from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedKnowledgeNodeMode,
@@ -158,6 +162,13 @@ type StudentAiKnowledgeNodeOption = {
   description: string;
 };
 
+type StudentAiKnowledgeNodeLoadState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "empty"
+  | "error";
+
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
@@ -167,7 +178,6 @@ const AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
 const AI_PAPER_MAX_QUESTION_COUNT = 80;
 const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
   "ai_question_generation" satisfies StudentPersonalAiGenerationTaskType;
-const emptyStudentAiKnowledgeNodeOptions: StudentAiKnowledgeNodeOption[] = [];
 
 const knowledgeNodeModeOptions: {
   value: AiGenerationRouteIntegratedKnowledgeNodeMode;
@@ -440,13 +450,39 @@ function normalizeKnowledgeNodeSupplement(value: string): string | null {
 function getStudentAiKnowledgeScopeBlockedReason(
   knowledgeScopeState: StudentAiKnowledgeScopeFormState,
   knowledgeNodeOptions: StudentAiKnowledgeNodeOption[],
+  knowledgeNodeLoadState: StudentAiKnowledgeNodeLoadState,
 ): string | null {
   if (knowledgeScopeState.knowledgeNodeMode !== "selected") {
     return null;
   }
 
+  if (
+    knowledgeNodeLoadState === "idle" ||
+    knowledgeNodeLoadState === "loading"
+  ) {
+    return "知识点列表加载中，请稍后选择。";
+  }
+
+  if (knowledgeNodeLoadState === "error") {
+    return "知识点列表暂不可用，请改用均衡覆盖或稍后重试。";
+  }
+
   if (knowledgeNodeOptions.length === 0) {
     return "当前授权范围暂无可选知识点，请改用均衡覆盖或联系内容管理员维护知识点。";
+  }
+
+  const knowledgeNodeOptionPublicIds = new Set(
+    knowledgeNodeOptions.map((knowledgeNodeOption) => {
+      return knowledgeNodeOption.publicId;
+    }),
+  );
+
+  if (
+    knowledgeScopeState.knowledgeNodePublicIds.some(
+      (publicId) => !knowledgeNodeOptionPublicIds.has(publicId),
+    )
+  ) {
+    return "已选知识点不在当前授权范围内，请重新选择。";
   }
 
   if (knowledgeScopeState.knowledgeNodePublicIds.length === 0) {
@@ -454,6 +490,45 @@ function getStudentAiKnowledgeScopeBlockedReason(
   }
 
   return null;
+}
+
+function createStudentAiKnowledgeNodeOptionsPath(
+  authorizationContext: EffectiveAuthorizationContextDto,
+) {
+  const searchParams = new URLSearchParams({
+    page: "1",
+    pageSize: "100",
+    sortBy: "sortOrder",
+    sortOrder: "asc",
+    status: "active",
+    profession: authorizationContext.profession,
+    level: String(authorizationContext.level),
+  });
+
+  return `/api/v1/ai-generation/knowledge-nodes?${searchParams.toString()}`;
+}
+
+function isStudentAiKnowledgeNodeVisibleForAuthorizationContext(
+  knowledgeNode: AdminKnowledgeNodeOpsSummaryDto,
+  authorizationContext: EffectiveAuthorizationContextDto,
+): boolean {
+  return (
+    knowledgeNode.knStatus === "active" &&
+    knowledgeNode.isRecommendable &&
+    knowledgeNode.profession === authorizationContext.profession &&
+    (knowledgeNode.levelList.length === 0 ||
+      knowledgeNode.levelList.includes(authorizationContext.level))
+  );
+}
+
+function mapStudentAiKnowledgeNodeOption(
+  knowledgeNode: AdminKnowledgeNodeOpsSummaryDto,
+): StudentAiKnowledgeNodeOption {
+  return {
+    publicId: knowledgeNode.publicId,
+    label: knowledgeNode.pathName,
+    description: `${knowledgeNode.profession} / ${knowledgeNode.levelList.join(", ") || "全等级"}`,
+  };
 }
 
 function createStudentGenerationKnowledgeScope(
@@ -1313,12 +1388,14 @@ function StudentAiPaperSourceSummary({
 
 function StudentAiKnowledgeScopePanel({
   disabled,
+  knowledgeNodeLoadState,
   knowledgeNodeOptions,
   knowledgeScopeState,
   onKnowledgeScopeChange,
   titlePrefix,
 }: {
   disabled: boolean;
+  knowledgeNodeLoadState: StudentAiKnowledgeNodeLoadState;
   knowledgeNodeOptions: StudentAiKnowledgeNodeOption[];
   knowledgeScopeState: StudentAiKnowledgeScopeFormState;
   onKnowledgeScopeChange: (
@@ -1331,6 +1408,7 @@ function StudentAiKnowledgeScopePanel({
   const blockedReason = getStudentAiKnowledgeScopeBlockedReason(
     knowledgeScopeState,
     knowledgeNodeOptions,
+    knowledgeNodeLoadState,
   );
   const hasSelectedKnowledgeNode =
     knowledgeScopeState.knowledgeNodePublicIds.length > 0;
@@ -1404,7 +1482,25 @@ function StudentAiKnowledgeScopePanel({
       </div>
 
       <div className="mt-3">
-        {knowledgeNodeOptions.length === 0 ? (
+        {knowledgeNodeLoadState === "loading" ? (
+          <div className="border-border bg-muted rounded-lg border px-3 py-3">
+            <p className="text-text-primary text-sm font-medium">
+              知识点列表加载中
+            </p>
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              正在按当前授权范围读取可选知识点。
+            </p>
+          </div>
+        ) : knowledgeNodeLoadState === "error" ? (
+          <div className="border-border bg-muted rounded-lg border px-3 py-3">
+            <p className="text-text-primary text-sm font-medium">
+              知识点列表暂不可用
+            </p>
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              可以改用均衡覆盖，或稍后重试。
+            </p>
+          </div>
+        ) : knowledgeNodeOptions.length === 0 ? (
           <div className="border-border bg-muted rounded-lg border px-3 py-3">
             <p className="text-text-primary text-sm font-medium">
               当前授权范围暂无可选知识点
@@ -2831,6 +2927,10 @@ export function StudentPersonalAiGenerationPage() {
   >([]);
   const [selectedAuthorizationPublicId, setSelectedAuthorizationPublicId] =
     useState<string | null>(null);
+  const [studentAiKnowledgeNodeOptions, setStudentAiKnowledgeNodeOptions] =
+    useState<StudentAiKnowledgeNodeOption[]>([]);
+  const [studentAiKnowledgeNodeLoadState, setStudentAiKnowledgeNodeLoadState] =
+    useState<StudentAiKnowledgeNodeLoadState>("idle");
 
   useEffect(() => {
     const sessionRequestToken = readStudentSessionRequestToken();
@@ -3451,6 +3551,20 @@ export function StudentPersonalAiGenerationPage() {
     setActiveTaskType(taskType);
   }
 
+  function handleSelectAuthorizationContext(authorizationPublicId: string) {
+    setSelectedAuthorizationPublicId(authorizationPublicId);
+    setAiQuestionKnowledgeScope((currentState) => ({
+      ...currentState,
+      includeDescendants: false,
+      knowledgeNodePublicIds: [],
+    }));
+    setAiPaperKnowledgeScope((currentState) => ({
+      ...currentState,
+      includeDescendants: false,
+      knowledgeNodePublicIds: [],
+    }));
+  }
+
   function handleChangeAiQuestionCount(value: string) {
     setAiQuestionCount(
       normalizeStudentAiQuestionCount(
@@ -3594,10 +3708,98 @@ export function StudentPersonalAiGenerationPage() {
     activeTaskType === "ai_question_generation"
       ? aiQuestionKnowledgeScope
       : aiPaperKnowledgeScope;
+  const activeKnowledgeNodeOptions = useMemo(() => {
+    return activeKnowledgeScopeState.knowledgeNodeMode === "selected"
+      ? studentAiKnowledgeNodeOptions
+      : [];
+  }, [
+    activeKnowledgeScopeState.knowledgeNodeMode,
+    studentAiKnowledgeNodeOptions,
+  ]);
+  const activeKnowledgeNodeLoadState: StudentAiKnowledgeNodeLoadState =
+    activeKnowledgeScopeState.knowledgeNodeMode === "selected"
+      ? studentAiKnowledgeNodeLoadState
+      : "idle";
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (
+      !shouldShowAiGenerationDetailControls ||
+      activeAuthorizationContext === null ||
+      activeKnowledgeScopeState.knowledgeNodeMode !== "selected"
+    ) {
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    const knowledgeNodeAuthorizationContext = activeAuthorizationContext;
+
+    async function loadKnowledgeNodeOptions() {
+      setStudentAiKnowledgeNodeOptions([]);
+      setStudentAiKnowledgeNodeLoadState("loading");
+
+      try {
+        const response = await fetchStudentApi<AdminKnowledgeNodeOpsListDto>(
+          createStudentAiKnowledgeNodeOptionsPath(
+            knowledgeNodeAuthorizationContext,
+          ),
+          readStudentSessionRequestToken(),
+          { method: "GET" },
+        );
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (
+          isStudentUnauthorizedResponse(response) ||
+          response.code !== 0 ||
+          response.data === null
+        ) {
+          setStudentAiKnowledgeNodeOptions([]);
+          setStudentAiKnowledgeNodeLoadState("error");
+          return;
+        }
+
+        const options = response.data.knowledgeNodes
+          .filter((knowledgeNode) =>
+            isStudentAiKnowledgeNodeVisibleForAuthorizationContext(
+              knowledgeNode,
+              knowledgeNodeAuthorizationContext,
+            ),
+          )
+          .map(mapStudentAiKnowledgeNodeOption);
+
+        setStudentAiKnowledgeNodeOptions(options);
+        setStudentAiKnowledgeNodeLoadState(
+          options.length === 0 ? "empty" : "ready",
+        );
+      } catch {
+        if (!isCancelled) {
+          setStudentAiKnowledgeNodeOptions([]);
+          setStudentAiKnowledgeNodeLoadState("error");
+        }
+      }
+    }
+
+    void loadKnowledgeNodeOptions();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    activeAuthorizationContext,
+    activeKnowledgeScopeState.knowledgeNodeMode,
+    shouldShowAiGenerationDetailControls,
+  ]);
+
   const activeKnowledgeScopeBlockedReason =
     getStudentAiKnowledgeScopeBlockedReason(
       activeKnowledgeScopeState,
-      emptyStudentAiKnowledgeNodeOptions,
+      activeKnowledgeNodeOptions,
+      activeKnowledgeNodeLoadState,
     );
   const activeAiQuestionDetailControls = createStudentAiQuestionDetailControls({
     onQuestionCountChange: handleChangeAiQuestionCount,
@@ -3800,7 +4002,7 @@ export function StudentPersonalAiGenerationPage() {
           <StudentPersonalAiGenerationAuthorizationContextSelector
             authorizationContexts={authorizationContexts}
             disabled={isAiGenerationActionDisabled}
-            onSelectAuthorizationContext={setSelectedAuthorizationPublicId}
+            onSelectAuthorizationContext={handleSelectAuthorizationContext}
             selectedAuthorizationPublicId={selectedAuthorizationPublicId}
           />
         ) : null}
@@ -3824,7 +4026,8 @@ export function StudentPersonalAiGenerationPage() {
               <>
                 <StudentAiKnowledgeScopePanel
                   disabled={isAiGenerationBaseActionDisabled}
-                  knowledgeNodeOptions={emptyStudentAiKnowledgeNodeOptions}
+                  knowledgeNodeLoadState={activeKnowledgeNodeLoadState}
+                  knowledgeNodeOptions={activeKnowledgeNodeOptions}
                   knowledgeScopeState={aiQuestionKnowledgeScope}
                   onKnowledgeScopeChange={setAiQuestionKnowledgeScope}
                   titlePrefix="AI出题"
@@ -3846,7 +4049,8 @@ export function StudentPersonalAiGenerationPage() {
                 />
                 <StudentAiKnowledgeScopePanel
                   disabled={isAiGenerationBaseActionDisabled}
-                  knowledgeNodeOptions={emptyStudentAiKnowledgeNodeOptions}
+                  knowledgeNodeLoadState={activeKnowledgeNodeLoadState}
+                  knowledgeNodeOptions={activeKnowledgeNodeOptions}
                   knowledgeScopeState={aiPaperKnowledgeScope}
                   onKnowledgeScopeChange={setAiPaperKnowledgeScope}
                   titlePrefix="AI组卷"

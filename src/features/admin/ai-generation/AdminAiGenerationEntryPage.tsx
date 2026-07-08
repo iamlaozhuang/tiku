@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   FileText,
@@ -22,6 +22,10 @@ import type {
   ApiPagination,
   ApiResponse,
 } from "@/server/contracts/api-response";
+import type {
+  AdminKnowledgeNodeOpsListDto,
+  AdminKnowledgeNodeOpsSummaryDto,
+} from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
   OrganizationTrainingDraftDto,
@@ -74,6 +78,17 @@ type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
 type AdminAiGenerationParameterState = {
   generationKind?: AdminAiGenerationKind;
   parameters?: Partial<AiGenerationRouteIntegratedGenerationParameters> | null;
+};
+type AdminAiKnowledgeNodeLoadState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "empty"
+  | "error";
+type AdminAiKnowledgeNodeOption = {
+  publicId: string;
+  label: string;
+  description: string;
 };
 const ADMIN_AI_GENERATION_HISTORY_PAGE = 1;
 const ADMIN_AI_GENERATION_HISTORY_PAGE_SIZE = 10;
@@ -133,6 +148,7 @@ type AdminAiGenerationDetailControl = {
 };
 
 type AdminAiGenerationDetailControlChange = {
+  checked?: boolean;
   label: string;
   value: string;
 };
@@ -606,6 +622,49 @@ function parsePositiveCount(
     : fallbackValue;
 }
 
+function createAdminAiKnowledgeNodeOptionsPath(input: {
+  level: AiGenerationRouteIntegratedGenerationParameters["level"];
+  profession: AiGenerationRouteIntegratedGenerationParameters["profession"];
+}) {
+  const searchParams = new URLSearchParams({
+    page: "1",
+    pageSize: "100",
+    sortBy: "sortOrder",
+    sortOrder: "asc",
+    status: "active",
+    profession: input.profession,
+    level: String(input.level),
+  });
+
+  return `/api/v1/ai-generation/knowledge-nodes?${searchParams.toString()}`;
+}
+
+function isAdminAiKnowledgeNodeVisibleForGenerationParameters(
+  knowledgeNode: AdminKnowledgeNodeOpsSummaryDto,
+  input: {
+    level: AiGenerationRouteIntegratedGenerationParameters["level"];
+    profession: AiGenerationRouteIntegratedGenerationParameters["profession"];
+  },
+): boolean {
+  return (
+    knowledgeNode.knStatus === "active" &&
+    knowledgeNode.isRecommendable &&
+    knowledgeNode.profession === input.profession &&
+    (knowledgeNode.levelList.length === 0 ||
+      knowledgeNode.levelList.includes(input.level))
+  );
+}
+
+function mapAdminAiKnowledgeNodeOption(
+  knowledgeNode: AdminKnowledgeNodeOpsSummaryDto,
+): AdminAiKnowledgeNodeOption {
+  return {
+    publicId: knowledgeNode.publicId,
+    label: knowledgeNode.pathName,
+    description: `${knowledgeNode.profession} / ${knowledgeNode.levelList.join(", ") || "全等级"}`,
+  };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -908,12 +967,44 @@ function getAiGenerationDetailControls(
 
 function getAdminAiKnowledgeScopeBlockedReason(
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+  knowledgeNodeOptions: AdminAiKnowledgeNodeOption[],
+  knowledgeNodeLoadState: AdminAiKnowledgeNodeLoadState,
 ): string | null {
+  if (generationParameters.knowledgeNodeMode !== "selected") {
+    return null;
+  }
+
   if (
-    generationParameters.knowledgeNodeMode === "selected" &&
-    generationParameters.knowledgeNodePublicIds.length === 0
+    knowledgeNodeLoadState === "idle" ||
+    knowledgeNodeLoadState === "loading"
   ) {
+    return "知识点列表加载中，请稍后选择。";
+  }
+
+  if (knowledgeNodeLoadState === "error") {
+    return "知识点列表暂不可用，请改用均衡覆盖或稍后重试。";
+  }
+
+  if (knowledgeNodeOptions.length === 0) {
     return "当前范围没有可直接选择的知识点，不能使用指定知识点模式。请改用均衡覆盖、薄弱知识点优先或填写补充说明。";
+  }
+
+  const knowledgeNodeOptionPublicIds = new Set(
+    knowledgeNodeOptions.map((knowledgeNodeOption) => {
+      return knowledgeNodeOption.publicId;
+    }),
+  );
+
+  if (
+    generationParameters.knowledgeNodePublicIds.some(
+      (publicId) => !knowledgeNodeOptionPublicIds.has(publicId),
+    )
+  ) {
+    return "已选知识点不在当前范围内，请重新选择。";
+  }
+
+  if (generationParameters.knowledgeNodePublicIds.length === 0) {
+    return "请选择至少一个知识点后再提交。";
   }
 
   return null;
@@ -921,15 +1012,23 @@ function getAdminAiKnowledgeScopeBlockedReason(
 
 function AdminAiKnowledgeScopePanel({
   generationParameters,
+  knowledgeNodeLoadState,
+  knowledgeNodeOptions,
   onChange,
 }: {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  knowledgeNodeLoadState: AdminAiKnowledgeNodeLoadState;
+  knowledgeNodeOptions: AdminAiKnowledgeNodeOption[];
   onChange: (change: AdminAiGenerationDetailControlChange) => void;
 }) {
-  const blockedReason =
-    getAdminAiKnowledgeScopeBlockedReason(generationParameters);
+  const blockedReason = getAdminAiKnowledgeScopeBlockedReason(
+    generationParameters,
+    knowledgeNodeOptions,
+    knowledgeNodeLoadState,
+  );
   const selectedKnowledgeNodeCount =
     generationParameters.knowledgeNodePublicIds.length;
+  const isSelectedMode = generationParameters.knowledgeNodeMode === "selected";
 
   return (
     <section
@@ -988,7 +1087,7 @@ function AdminAiKnowledgeScopePanel({
           <select
             aria-label="包含下级知识点"
             className={aiGenerationDetailControlClassName}
-            disabled={generationParameters.knowledgeNodeMode !== "selected"}
+            disabled={!isSelectedMode || selectedKnowledgeNodeCount === 0}
             value={generationParameters.includeDescendants ? "包含" : "不包含"}
             onChange={(event) =>
               onChange({
@@ -1022,9 +1121,65 @@ function AdminAiKnowledgeScopePanel({
         </label>
       </div>
 
-      {blockedReason === null ? (
+      {isSelectedMode && knowledgeNodeLoadState === "loading" ? (
+        <div className="border-border bg-background mt-3 rounded-md border px-3 py-3">
+          <p className="text-text-primary text-xs font-medium">
+            知识点列表加载中
+          </p>
+          <p className="text-text-secondary mt-1 text-xs leading-5">
+            正在按当前专业和等级读取可选知识点。
+          </p>
+        </div>
+      ) : isSelectedMode && knowledgeNodeLoadState === "error" ? (
+        <div className="border-border bg-background mt-3 rounded-md border px-3 py-3">
+          <p className="text-text-primary text-xs font-medium">
+            知识点列表暂不可用
+          </p>
+          <p className="text-text-secondary mt-1 text-xs leading-5">
+            可以改用均衡覆盖，或稍后重试。
+          </p>
+        </div>
+      ) : isSelectedMode && knowledgeNodeOptions.length > 0 ? (
+        <div className="mt-3 grid gap-2">
+          {knowledgeNodeOptions.map((knowledgeNodeOption) => {
+            const isChecked =
+              generationParameters.knowledgeNodePublicIds.includes(
+                knowledgeNodeOption.publicId,
+              );
+
+            return (
+              <label
+                className="border-border bg-background flex items-start gap-3 rounded-md border p-3 text-xs"
+                key={knowledgeNodeOption.publicId}
+              >
+                <input
+                  aria-label={`选择知识点 ${knowledgeNodeOption.label}`}
+                  checked={isChecked}
+                  className="mt-1 size-4 accent-current"
+                  onChange={(event) =>
+                    onChange({
+                      checked: event.currentTarget.checked,
+                      label: "知识点节点",
+                      value: knowledgeNodeOption.publicId,
+                    })
+                  }
+                  type="checkbox"
+                />
+                <span>
+                  <span className="text-text-primary block font-medium">
+                    {knowledgeNodeOption.label}
+                  </span>
+                  <span className="text-text-secondary mt-1 block leading-5">
+                    {knowledgeNodeOption.description}
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      ) : blockedReason === null ? (
         <p className="text-text-secondary mt-3 text-xs leading-5">
-          当前范围暂无可直接选择的知识点；均衡覆盖、薄弱优先和综合测验会按专业、等级、科目继续收敛。
+          均衡覆盖、薄弱优先和综合测验会按专业、等级、科目继续收敛。
         </p>
       ) : (
         <p
@@ -1042,11 +1197,15 @@ function AdminAiKnowledgeScopePanel({
 function AdminAiGenerationDetailControls({
   generationParameters,
   generationKind,
+  knowledgeNodeLoadState,
+  knowledgeNodeOptions,
   onChange,
   workspace,
 }: {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   generationKind: AdminAiGenerationKind;
+  knowledgeNodeLoadState: AdminAiKnowledgeNodeLoadState;
+  knowledgeNodeOptions: AdminAiKnowledgeNodeOption[];
   onChange: (change: AdminAiGenerationDetailControlChange) => void;
   workspace: AdminAiGenerationWorkspace;
 }) {
@@ -1140,6 +1299,8 @@ function AdminAiGenerationDetailControls({
 
       <AdminAiKnowledgeScopePanel
         generationParameters={generationParameters}
+        knowledgeNodeLoadState={knowledgeNodeLoadState}
+        knowledgeNodeOptions={knowledgeNodeOptions}
         onChange={onChange}
       />
 
@@ -2476,6 +2637,10 @@ export function AdminAiGenerationEntryPage({
   ] = useState<Record<string, string>>({});
   const [adminWorkspaceCapabilitySummary, setAdminWorkspaceCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
+  const [adminAiKnowledgeNodeOptions, setAdminAiKnowledgeNodeOptions] =
+    useState<AdminAiKnowledgeNodeOption[]>([]);
+  const [adminAiKnowledgeNodeLoadState, setAdminAiKnowledgeNodeLoadState] =
+    useState<AdminAiKnowledgeNodeLoadState>("idle");
   const pageCopy = getPageCopy(workspace, generationKind);
   const providerExecutionCopy =
     workspace === "organization"
@@ -2496,12 +2661,25 @@ export function AdminAiGenerationEntryPage({
     workspace,
     generationParameterState,
   );
-  const knowledgeScopeBlockedReason =
-    getAdminAiKnowledgeScopeBlockedReason(generationParameters);
+  const activeAdminAiKnowledgeNodeOptions = useMemo(() => {
+    return generationParameters.knowledgeNodeMode === "selected"
+      ? adminAiKnowledgeNodeOptions
+      : [];
+  }, [adminAiKnowledgeNodeOptions, generationParameters.knowledgeNodeMode]);
+  const activeAdminAiKnowledgeNodeLoadState: AdminAiKnowledgeNodeLoadState =
+    generationParameters.knowledgeNodeMode === "selected"
+      ? adminAiKnowledgeNodeLoadState
+      : "idle";
+  const knowledgeScopeBlockedReason = getAdminAiKnowledgeScopeBlockedReason(
+    generationParameters,
+    activeAdminAiKnowledgeNodeOptions,
+    activeAdminAiKnowledgeNodeLoadState,
+  );
   const isSubmitDisabled =
     requestState === "submitting" || knowledgeScopeBlockedReason !== null;
 
   function handleGenerationParameterChange({
+    checked,
     label,
     value,
   }: AdminAiGenerationDetailControlChange) {
@@ -2521,6 +2699,8 @@ export function AdminAiGenerationEntryPage({
               profession:
                 adminProfessionValueByLabel[value] ??
                 currentParameters.profession,
+              includeDescendants: false,
+              knowledgeNodePublicIds: [],
             },
           };
         case "等级":
@@ -2529,6 +2709,8 @@ export function AdminAiGenerationEntryPage({
             parameters: {
               ...currentParameters,
               level: parseLevelLabel(value),
+              includeDescendants: false,
+              knowledgeNodePublicIds: [],
             },
           };
         case "科目":
@@ -2579,6 +2761,27 @@ export function AdminAiGenerationEntryPage({
                 value.trim().length === 0 ? null : value.trim(),
             },
           };
+        case "知识点节点": {
+          const knowledgeNodePublicIds =
+            checked === true
+              ? Array.from(
+                  new Set([...currentParameters.knowledgeNodePublicIds, value]),
+                )
+              : currentParameters.knowledgeNodePublicIds.filter(
+                  (publicId) => publicId !== value,
+                );
+
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              includeDescendants:
+                knowledgeNodePublicIds.length > 0 &&
+                currentParameters.includeDescendants,
+              knowledgeNodePublicIds,
+            },
+          };
+        }
         case "题源偏好":
           return {
             generationKind,
@@ -2672,6 +2875,84 @@ export function AdminAiGenerationEntryPage({
     },
     [generationKind, workspace],
   );
+
+  useEffect(() => {
+    let isActive = true;
+    const requestLevel = generationParameters.level;
+    const requestProfession = generationParameters.profession;
+
+    if (
+      loadState !== "ready" ||
+      generationParameters.knowledgeNodeMode !== "selected"
+    ) {
+      return () => {
+        isActive = false;
+      };
+    }
+
+    async function loadKnowledgeNodeOptions() {
+      setAdminAiKnowledgeNodeOptions([]);
+      setAdminAiKnowledgeNodeLoadState("loading");
+
+      try {
+        const response = await fetchAdminApi<AdminKnowledgeNodeOpsListDto>(
+          createAdminAiKnowledgeNodeOptionsPath({
+            level: requestLevel,
+            profession: requestProfession,
+          }),
+          getStoredSessionToken(),
+          { method: "GET" },
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (
+          isUnauthorizedResponse(response) ||
+          response.code !== 0 ||
+          response.data === null
+        ) {
+          setAdminAiKnowledgeNodeOptions([]);
+          setAdminAiKnowledgeNodeLoadState("error");
+          return;
+        }
+
+        const options = response.data.knowledgeNodes
+          .filter((knowledgeNode) =>
+            isAdminAiKnowledgeNodeVisibleForGenerationParameters(
+              knowledgeNode,
+              {
+                level: requestLevel,
+                profession: requestProfession,
+              },
+            ),
+          )
+          .map(mapAdminAiKnowledgeNodeOption);
+
+        setAdminAiKnowledgeNodeOptions(options);
+        setAdminAiKnowledgeNodeLoadState(
+          options.length === 0 ? "empty" : "ready",
+        );
+      } catch {
+        if (isActive) {
+          setAdminAiKnowledgeNodeOptions([]);
+          setAdminAiKnowledgeNodeLoadState("error");
+        }
+      }
+    }
+
+    void loadKnowledgeNodeOptions();
+
+    return () => {
+      isActive = false;
+    };
+  }, [
+    generationParameters.knowledgeNodeMode,
+    generationParameters.profession,
+    generationParameters.level,
+    loadState,
+  ]);
 
   useEffect(() => {
     let isActive = true;
@@ -3135,6 +3416,8 @@ export function AdminAiGenerationEntryPage({
         <AdminAiGenerationDetailControls
           generationParameters={generationParameters}
           generationKind={generationKind}
+          knowledgeNodeLoadState={activeAdminAiKnowledgeNodeLoadState}
+          knowledgeNodeOptions={activeAdminAiKnowledgeNodeOptions}
           onChange={handleGenerationParameterChange}
           workspace={workspace}
         />
