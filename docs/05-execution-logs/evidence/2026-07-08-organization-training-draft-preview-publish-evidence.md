@@ -67,3 +67,24 @@
   - First run: blocked by stale repository checkpoint SHA in `project-state.yaml`.
   - Remediation: aligned `lastKnownMasterSha` and `lastKnownOriginMasterSha` to the current matching local `master` and `origin/master` checkpoint.
   - Final result: pass.
+
+## Post-Merge Master Evidence
+
+- Fast-forward merge target: local `master`.
+- Merged commit: `ea907d5ff`.
+- `npm.cmd exec -- vitest run tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts --reporter=dot`
+  - Result: pass
+  - Files/tests: 2 files, 19 tests
+- `npm.cmd exec -- vitest run src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts --reporter=dot`
+  - Result: pass
+  - Files/tests: 3 files, 112 tests
+- `npm.cmd run lint`
+  - Result: pass
+- `npm.cmd run typecheck`
+  - Result: pass
+- `npm.cmd run test:unit -- --reporter=dot`
+  - First master run: 348 files passed, 1 unrelated student-experience layering test timed out.
+  - Focused reproduction command: `npm.cmd exec -- vitest run tests/unit/student-experience/student-experience-layering-mistake-book.test.ts --reporter=dot`
+  - Focused reproduction result: pass, 1 file, 6 tests.
+  - Second master run result: pass, 349 files, 1778 tests.
+  - No source change was made for the transient timeout.
