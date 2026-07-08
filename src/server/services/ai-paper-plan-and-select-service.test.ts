@@ -312,4 +312,46 @@ describe("AI组卷 plan-and-select 后端合同", () => {
       failureCategory: "insufficient_formal_question_source",
     });
   });
+
+  it("知识点范围为空时不把同题型同范围题目记为 exact 命中", () => {
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 1,
+          sections: [
+            {
+              ...basePlan.sections[0],
+              targetQuestionCount: 1,
+              knowledgeNodePublicIds: [],
+              parentKnowledgeNodePublicIds: [],
+            },
+          ],
+          knowledgeCoverage: {
+            targetKnowledgeNodePublicIds: [],
+            targetParentKnowledgeNodePublicIds: [],
+          },
+        },
+        platformQuestions: [
+          createQuestion({ publicId: "question_same_scope_only" }),
+        ],
+      }),
+    );
+
+    expect(result.status).toBe("assembled");
+    expect(result.container.matchQuality).toBe("supplemented_from_same_scope");
+    expect(result.container.sections[0]?.degradationSummary).toEqual({
+      exactCount: 0,
+      nearbyKnowledgeCount: 0,
+      sameScopeCount: 1,
+    });
+    expect(result.container.sections[0]?.selectedQuestions).toEqual([
+      {
+        questionPublicId: "question_same_scope_only",
+        sourceKind: "platform_formal_question",
+        matchTier: "same_scope",
+        score: 2,
+      },
+    ]);
+  });
 });

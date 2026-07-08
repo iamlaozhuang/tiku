@@ -243,4 +243,67 @@ describe("AI组卷 route-visible plan local assembly", () => {
       failureCategory: "insufficient_formal_question_source",
     });
   });
+
+  it("uses submitted knowledge scope when the route plan omits section public ids", () => {
+    const scopedGenerationParameters = {
+      ...generationParameters,
+      knowledgeNode: "synthetic selected node",
+      knowledgeNodeMode: "selected" as const,
+      knowledgeNodePublicIds: ["knowledge_node_public_selected"],
+      includeDescendants: true,
+      knowledgeNodeSupplement: "synthetic selected node",
+    };
+    const visiblePlanWithoutPublicIds =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          title: "知识点组卷方案",
+          targetQuestionCount: 1,
+          difficultyGoal: "medium",
+          sections: [
+            {
+              sectionKey: "single-choice",
+              title: "单选题",
+              questionType: "single_choice",
+              targetQuestionCount: 1,
+              targetScore: 2,
+              difficulty: "medium",
+            },
+          ],
+        }),
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 1,
+          },
+        },
+      );
+    const result = assembleAiPaperFromRouteVisiblePlan({
+      role: "personal_advanced_student",
+      organizationPublicId: null,
+      generationParameters: scopedGenerationParameters,
+      visibleGeneratedContent: visiblePlanWithoutPublicIds,
+      platformQuestions: [
+        createQuestion({
+          publicId: "platform_question_other_scope",
+          knowledgeNodePublicIds: ["knowledge_node_public_other"],
+        }),
+        createQuestion({
+          publicId: "platform_question_selected_scope",
+          knowledgeNodePublicIds: ["knowledge_node_public_selected"],
+        }),
+      ],
+      enterpriseQuestions: [],
+    });
+
+    expect(result.status).toBe("assembled");
+    expect(result.assembly?.container.matchQuality).toBe("fully_matched");
+    expect(result.assembly?.container.sections[0]?.selectedQuestions).toEqual([
+      {
+        questionPublicId: "platform_question_selected_scope",
+        sourceKind: "platform_formal_question",
+        matchTier: "exact",
+        score: 2,
+      },
+    ]);
+  });
 });

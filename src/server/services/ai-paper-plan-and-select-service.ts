@@ -353,7 +353,7 @@ function countMatchTier(
 
 function intersects(left: string[], right: string[]): boolean {
   if (right.length === 0) {
-    return true;
+    return false;
   }
 
   const rightSet = new Set(right);

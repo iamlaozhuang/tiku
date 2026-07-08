@@ -157,7 +157,7 @@ function normalizeRoutePlan(
       generationParameters.difficulty,
     sourcePreference: readSourcePreference(planContent),
     sections: normalizedSections,
-    knowledgeCoverage: readKnowledgeCoverage(planContent),
+    knowledgeCoverage: readKnowledgeCoverage(planContent, generationParameters),
   };
 }
 
@@ -191,6 +191,11 @@ function normalizeRoutePlanSection(
     return null;
   }
 
+  const knowledgeNodePublicIds = readStringArray(section, [
+    "knowledgeNodePublicIds",
+    "knowledge_node_public_ids",
+  ]);
+
   return {
     sectionKey:
       readNonEmptyString(section, ["sectionKey", "section_key", "key"]) ??
@@ -201,10 +206,10 @@ function normalizeRoutePlanSection(
     questionType,
     targetQuestionCount,
     targetScore,
-    knowledgeNodePublicIds: readStringArray(section, [
-      "knowledgeNodePublicIds",
-      "knowledge_node_public_ids",
-    ]),
+    knowledgeNodePublicIds:
+      knowledgeNodePublicIds.length > 0
+        ? knowledgeNodePublicIds
+        : [...generationParameters.knowledgeNodePublicIds],
     parentKnowledgeNodePublicIds: readStringArray(section, [
       "parentKnowledgeNodePublicIds",
       "parent_knowledge_node_public_ids",
@@ -217,6 +222,7 @@ function normalizeRoutePlanSection(
 
 function readKnowledgeCoverage(
   planContent: Record<string, unknown>,
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
 ): AiPaperAssemblyPlanDto["knowledgeCoverage"] {
   const knowledgeCoverage = readRecordProperty(planContent, [
     "knowledgeCoverage",
@@ -225,17 +231,24 @@ function readKnowledgeCoverage(
 
   if (knowledgeCoverage === null) {
     return {
-      targetKnowledgeNodePublicIds: [],
+      targetKnowledgeNodePublicIds: [
+        ...generationParameters.knowledgeNodePublicIds,
+      ],
       targetParentKnowledgeNodePublicIds: [],
     };
   }
 
+  const targetKnowledgeNodePublicIds = readStringArray(knowledgeCoverage, [
+    "targetKnowledgeNodePublicIds",
+    "knowledgeNodePublicIds",
+    "knowledge_node_public_ids",
+  ]);
+
   return {
-    targetKnowledgeNodePublicIds: readStringArray(knowledgeCoverage, [
-      "targetKnowledgeNodePublicIds",
-      "knowledgeNodePublicIds",
-      "knowledge_node_public_ids",
-    ]),
+    targetKnowledgeNodePublicIds:
+      targetKnowledgeNodePublicIds.length > 0
+        ? targetKnowledgeNodePublicIds
+        : [...generationParameters.knowledgeNodePublicIds],
     targetParentKnowledgeNodePublicIds: readStringArray(knowledgeCoverage, [
       "targetParentKnowledgeNodePublicIds",
       "parentKnowledgeNodePublicIds",
