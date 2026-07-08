@@ -52,6 +52,12 @@ type AdminOrganizationTrainingLoadState =
 
 type OrganizationTrainingListState = "loading" | "ready" | "error";
 
+type OrganizationTrainingLifecycleStatusFilter =
+  | "all"
+  | "draft"
+  | "published"
+  | "taken_down";
+
 type DraftFormValues = {
   authorizationPublicId: string;
   description: string;
@@ -134,6 +140,16 @@ const sourceChoices = [
 type SourceChoiceTitle = (typeof sourceChoices)[number]["title"];
 
 const wizardSteps = ["选择来源", "配置训练", "设置范围", "预览发布"] as const;
+
+const lifecycleStatusFilters: {
+  label: string;
+  value: OrganizationTrainingLifecycleStatusFilter;
+}[] = [
+  { label: "全部", value: "all" },
+  { label: "草稿", value: "draft" },
+  { label: "已发布", value: "published" },
+  { label: "已下架", value: "taken_down" },
+];
 
 function resolveOrganizationTrainingLoadState(authContext: AuthContextDto): {
   capabilitySummary: AdminWorkspaceCapabilitySummary;
@@ -231,6 +247,41 @@ function createLifecycleItemFromVersion(
         ? ["take_down", "copy_to_new_draft"]
         : ["copy_to_new_draft"],
   };
+}
+
+function resolveLifecycleStatusLabel(
+  item: OrganizationTrainingAdminLifecycleItemDto,
+) {
+  if (item.resourceType === "organization_training_draft") {
+    return "草稿";
+  }
+
+  return item.status === "published" ? "已发布" : "已下架";
+}
+
+function matchesLifecycleStatusFilter(
+  item: OrganizationTrainingAdminLifecycleItemDto,
+  filter: OrganizationTrainingLifecycleStatusFilter,
+) {
+  if (filter === "all") {
+    return true;
+  }
+
+  if (filter === "draft") {
+    return item.resourceType === "organization_training_draft";
+  }
+
+  return item.resourceType === "organization_training_version"
+    ? item.status === filter
+    : false;
+}
+
+function createDefaultCopyDraftTitle(title: string) {
+  const normalizedTitle = title.trim();
+
+  return normalizedTitle.length === 0
+    ? "复训草稿"
+    : `${normalizedTitle} 复训草稿`;
 }
 
 function upsertLifecycleItem(
@@ -663,7 +714,9 @@ export function AdminOrganizationTrainingPage() {
   async function handleCopyToNewDraft(values: CopyFormValues) {
     const sessionToken = getStoredSessionToken();
     const authorizationPublicId =
-      lastDraft?.authorizationPublicId ?? draftFormValues.authorizationPublicId;
+      lastDraft?.authorizationPublicId ??
+      capabilitySummary?.organizationAuthorizationPublicId ??
+      draftFormValues.authorizationPublicId;
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -695,6 +748,75 @@ export function AdminOrganizationTrainingPage() {
       setMessage("已复制为新的企业训练草稿");
     } catch {
       setErrorMessage("企业训练复制失败");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleCopyVersionToNewDraft(
+    item: OrganizationTrainingAdminLifecycleItemDto,
+  ) {
+    await handleCopyToNewDraft({
+      sourceVersionPublicId: item.publicId,
+      newDraftTitle: createDefaultCopyDraftTitle(item.title),
+    });
+  }
+
+  async function handleTakeDownVersion(
+    item: OrganizationTrainingAdminLifecycleItemDto,
+  ) {
+    setErrorMessage(null);
+    setMessage(null);
+
+    const isConfirmed = window.confirm(
+      "确认下架该企业训练？下架后员工端不再展示该训练。",
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    const rawReason = window.prompt("请输入下架原因", "内容已过期");
+    const takedownReason = rawReason?.trim() ?? "";
+
+    if (takedownReason.length === 0) {
+      setErrorMessage("请输入下架原因");
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await mutateAdminOrganizationTrainingApi<{
+        version: OrganizationTrainingPublishedVersionDto;
+      }>(
+        `/api/v1/organization-trainings/${item.publicId}/take-down`,
+        sessionToken,
+        {
+          versionPublicId: item.publicId,
+          takedownReason,
+        },
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setErrorMessage(createApiErrorMessage("企业训练下架失败", response));
+        return;
+      }
+
+      const takenDownVersion = response.data.version;
+
+      setTrainingItems((currentItems) =>
+        replaceLifecycleItem(
+          currentItems,
+          item.publicId,
+          createLifecycleItemFromVersion(takenDownVersion),
+        ),
+      );
+      setMessage("企业训练已下架");
+    } catch {
+      setErrorMessage("企业训练下架失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -795,6 +917,8 @@ export function AdminOrganizationTrainingPage() {
         lastDraft={lastDraft}
         listMessage={trainingListMessage}
         listState={trainingListState}
+        isSubmitting={isSubmitting}
+        onCopyVersionToDraft={handleCopyVersionToNewDraft}
         onPublishDraft={(draft) => {
           setSelectedPublishDraft(draft);
           setPublishFormValues({
@@ -802,6 +926,7 @@ export function AdminOrganizationTrainingPage() {
             publishScopeOrganizationPublicIds: draft.organizationPublicId,
           });
         }}
+        onTakeDownVersion={handleTakeDownVersion}
       />
 
       <section
@@ -865,21 +990,43 @@ export function AdminOrganizationTrainingPage() {
 
 function TrainingListPanel({
   items,
+  isSubmitting,
   lastDraft,
   listMessage,
   listState,
+  onCopyVersionToDraft,
   onPublishDraft,
+  onTakeDownVersion,
 }: {
   items: OrganizationTrainingAdminLifecycleItemDto[];
+  isSubmitting: boolean;
   lastDraft: OrganizationTrainingDraftDto | null;
   listMessage: string | null;
   listState: OrganizationTrainingListState;
+  onCopyVersionToDraft: (
+    item: OrganizationTrainingAdminLifecycleItemDto,
+  ) => void;
   onPublishDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
+  onTakeDownVersion: (item: OrganizationTrainingAdminLifecycleItemDto) => void;
 }) {
+  const [selectedStatusFilter, setSelectedStatusFilter] =
+    useState<OrganizationTrainingLifecycleStatusFilter>("all");
+  const [selectedDetailPublicId, setSelectedDetailPublicId] = useState<
+    string | null
+  >(null);
   const visibleItems =
     lastDraft === null
       ? items
       : upsertLifecycleItem(items, createLifecycleItemFromDraft(lastDraft));
+  const filteredItems = visibleItems.filter((item) =>
+    matchesLifecycleStatusFilter(item, selectedStatusFilter),
+  );
+  const selectedDetailItem =
+    selectedDetailPublicId === null
+      ? null
+      : (visibleItems.find(
+          (item) => item.publicId === selectedDetailPublicId,
+        ) ?? null);
 
   return (
     <section
@@ -902,6 +1049,32 @@ function TrainingListPanel({
           新建企业训练
         </a>
       </div>
+      {visibleItems.length === 0 ? null : (
+        <div
+          aria-label="企业训练状态筛选"
+          className="mt-4 flex flex-wrap gap-2"
+          role="group"
+        >
+          {lifecycleStatusFilters.map((filter) => (
+            <button
+              aria-pressed={selectedStatusFilter === filter.value}
+              className={`border-border h-8 rounded-md border px-3 text-sm transition-colors ${
+                selectedStatusFilter === filter.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-surface text-text-secondary hover:bg-muted hover:text-text-primary"
+              }`}
+              key={filter.value}
+              onClick={() => {
+                setSelectedStatusFilter(filter.value);
+                setSelectedDetailPublicId(null);
+              }}
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="border-border mt-4 rounded-md border">
         {listState === "loading" ? (
           <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
@@ -917,37 +1090,58 @@ function TrainingListPanel({
           <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
             <p className="text-text-secondary text-sm">暂无可展示的企业训练</p>
           </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
+            <p className="text-text-secondary text-sm">
+              当前筛选下暂无企业训练
+            </p>
+          </div>
         ) : (
           <div className="divide-border divide-y">
-            {visibleItems.map((item) => (
+            {filteredItems.map((item) => (
               <TrainingLifecycleItemCard
+                isSubmitting={isSubmitting}
                 item={item}
                 key={item.publicId}
+                onCopyVersionToDraft={onCopyVersionToDraft}
                 onPublishDraft={onPublishDraft}
+                onTakeDownVersion={onTakeDownVersion}
+                onViewItem={setSelectedDetailPublicId}
               />
             ))}
           </div>
         )}
       </div>
+      {selectedDetailItem === null ? null : (
+        <TrainingLifecycleDetailPanel item={selectedDetailItem} />
+      )}
     </section>
   );
 }
 
 function TrainingLifecycleItemCard({
+  isSubmitting,
   item,
+  onCopyVersionToDraft,
   onPublishDraft,
+  onTakeDownVersion,
+  onViewItem,
 }: {
+  isSubmitting: boolean;
   item: OrganizationTrainingAdminLifecycleItemDto;
+  onCopyVersionToDraft: (
+    item: OrganizationTrainingAdminLifecycleItemDto,
+  ) => void;
   onPublishDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
+  onTakeDownVersion: (item: OrganizationTrainingAdminLifecycleItemDto) => void;
+  onViewItem: (publicId: string) => void;
 }) {
   const isDraft = item.resourceType === "organization_training_draft";
-  const statusLabel = isDraft
-    ? "草稿"
-    : item.status === "published"
-      ? "已发布"
-      : "已下架";
+  const statusLabel = resolveLifecycleStatusLabel(item);
   const actionLabel = isDraft ? "待发布" : "可复训";
   const canPublish = item.availableActions.includes("publish");
+  const canCopyToDraft = item.availableActions.includes("copy_to_new_draft");
+  const canTakeDown = item.availableActions.includes("take_down");
 
   return (
     <article
@@ -974,13 +1168,96 @@ function TrainingLifecycleItemCard({
         <span className="bg-warning/10 text-warning inline-flex h-7 items-center rounded-md px-2 text-xs font-medium">
           {statusLabel}
         </span>
+        <Button
+          disabled={isSubmitting}
+          onClick={() => onViewItem(item.publicId)}
+          type="button"
+          variant="outline"
+        >
+          查看
+        </Button>
         {canPublish ? (
-          <Button type="button" onClick={() => onPublishDraft(item)}>
+          <Button
+            disabled={isSubmitting}
+            type="button"
+            onClick={() => onPublishDraft(item)}
+          >
             发布
+          </Button>
+        ) : null}
+        {canCopyToDraft ? (
+          <Button
+            disabled={isSubmitting}
+            onClick={() => onCopyVersionToDraft(item)}
+            type="button"
+            variant="secondary"
+          >
+            复制为新草稿
+          </Button>
+        ) : null}
+        {canTakeDown ? (
+          <Button
+            disabled={isSubmitting}
+            onClick={() => onTakeDownVersion(item)}
+            type="button"
+            variant="destructive"
+          >
+            下架
           </Button>
         ) : null}
       </div>
     </article>
+  );
+}
+
+function TrainingLifecycleDetailPanel({
+  item,
+}: {
+  item: OrganizationTrainingAdminLifecycleItemDto;
+}) {
+  const isDraft = item.resourceType === "organization_training_draft";
+  const canCopyToDraft = item.availableActions.includes("copy_to_new_draft");
+
+  return (
+    <aside
+      aria-label="训练详情"
+      className="border-border bg-muted/30 mt-4 rounded-md border p-4"
+    >
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-1">
+          <h3 className="text-text-primary text-sm font-semibold">训练详情</h3>
+          <p className="text-text-secondary text-sm">{item.title}</p>
+        </div>
+        <span className="bg-surface text-text-secondary border-border inline-flex h-7 items-center rounded-md border px-2 text-xs font-medium">
+          {resolveLifecycleStatusLabel(item)}
+        </span>
+      </div>
+      <p className="text-text-secondary mt-3 text-sm">
+        {isDraft
+          ? "草稿可继续配置，确认题目快照后再发布给员工。"
+          : "已发布版本为只读；如需调整内容，请复制为新草稿后再发布。"}
+      </p>
+      <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+        <div className="bg-surface rounded-md p-3">
+          <dt className="text-text-secondary">题量</dt>
+          <dd className="text-text-primary font-medium">
+            {item.questionCount ?? 0}
+          </dd>
+        </div>
+        <div className="bg-surface rounded-md p-3">
+          <dt className="text-text-secondary">总分</dt>
+          <dd className="text-text-primary font-medium">
+            {item.totalScore ?? 0}
+          </dd>
+        </div>
+        <div className="bg-surface rounded-md p-3">
+          <dt className="text-text-secondary">操作建议</dt>
+          <dd className="text-text-primary font-medium">
+            {canCopyToDraft ? "复制为新草稿" : "继续发布流程"}
+          </dd>
+        </div>
+      </dl>
+    </aside>
   );
 }
 

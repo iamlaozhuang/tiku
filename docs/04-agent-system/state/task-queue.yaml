@@ -96,6 +96,111 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: organization-training-list-management-2026-07-08
+    title: Organization training list management UX
+    phase: organization-training-list-management-2026-07-08
+    status: closed
+    result: pass_source_test_ready_for_commit_merge_push_cleanup
+    priority: p1
+    taskKind: implementation
+    executionProfile: local_source_targeted_unit_and_localhost_browser_screenshot
+    validationPolicy: tdd_red_green_targeted_unit_adjacent_unit_lint_typecheck_full_unit_precommit
+    moduleRunVersion: 2
+    branch: codex/org-training-list-management
+    humanApprovalBoundary: current_user_approved_staged_short_branch_org_training_ux_fix_merge_push_cleanup_2026_07_08
+    plannedAt: "2026-07-08T10:40:00-07:00"
+    claimedAt: "2026-07-08T10:40:00-07:00"
+    completedAt: "2026-07-08T11:02:00-07:00"
+    targetClosureItem: Organization advanced admin enterprise-training list shows lifecycle filters and safe read-only published-version actions.
+    behaviorBoundary: local_organization_training_admin_list_surface_only_no_operations_new_write_endpoint_no_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
+    evidenceMode: redacted_code_symbol_test_status_localhost_screenshot_path_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
+    planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-list-management.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-list-management-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-list-management-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-08-organization-training-list-management.md
+      - docs/05-execution-logs/evidence/2026-07-08-organization-training-list-management-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-list-management-audit.md
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - rawfiles/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: approved_organization_training_admin_list_surface_only
+      focusedUnitTest: approved
+      browserRuntime: approved_localhost_redacted_screenshot_only
+      devServer: approved_existing_localhost_only_no_env_file_write
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd exec -- vitest run tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot
+      - npm.cmd exec -- vitest run tests/unit/organization-training-admin-entry-surface.test.ts src/server/services/organization-training-route.test.ts --reporter=dot
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check touched_files
+      - git diff --check
+      - npm.cmd run test:unit -- --reporter=dot
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-list-management-2026-07-08
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_staged_short_branch_org_training_ux_fix_merge_push_cleanup_2026_07_08
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_staged_short_branch_org_training_ux_fix_merge_push_cleanup_2026_07_08
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_staged_short_branch_org_training_ux_fix_merge_push_cleanup_2026_07_08
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_staged_short_branch_org_training_ux_fix_merge_push_cleanup_2026_07_08
+    closureEvidence:
+      tddRed: pass_expected_lifecycle_filter_and_action_visibility_failures
+      targetedOrganizationTrainingUnit: pass_1_file_11_tests
+      adjacentOrganizationTrainingRouteUnit: pass_2_files_51_tests
+      fullUnit: pass_349_files_1774_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass_touched_files
+      diffCheck: pass
+      browserRuntime: localhost_redacted_screenshot_paths_only
+      preCommitHardening: pass_after_current_task_pointer_sync
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
   - id: organization-portal-employee-summary-date-param-2026-07-08
     title: Organization portal employee summary Date parameter fix
     phase: organization-portal-employee-summary-date-param-2026-07-08

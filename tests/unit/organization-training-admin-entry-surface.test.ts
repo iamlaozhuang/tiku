@@ -248,6 +248,295 @@ describe("AdminOrganizationTrainingPage", () => {
     ]);
   });
 
+  it("filters organization training lifecycle rows and exposes read-only published actions", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (String(url) === "/api/v1/organization-trainings") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            items: [
+              {
+                publicId: "organization-training-draft-list-ui-001",
+                resourceType: "organization_training_draft",
+                organizationPublicId: "organization-admin-scope-001",
+                authorizationPublicId: "org-auth-admin-scope-001",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "列表草稿",
+                description: "待发布训练",
+                questionCount: 1,
+                totalScore: 5,
+                questionTypeSummary: {
+                  singleChoice: 1,
+                  multiChoice: 0,
+                  trueFalse: 0,
+                  shortAnswer: 0,
+                },
+                status: "draft",
+                availableActions: ["publish"],
+              },
+              {
+                publicId: "organization-training-version-published-ui-001",
+                resourceType: "organization_training_version",
+                organizationPublicId: "organization-admin-scope-001",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "已发布训练",
+                description: "员工可见训练",
+                questionCount: 2,
+                totalScore: 10,
+                status: "published",
+                availableActions: ["take_down", "copy_to_new_draft"],
+              },
+              {
+                publicId: "organization-training-version-taken-down-ui-001",
+                resourceType: "organization_training_version",
+                organizationPublicId: "organization-admin-scope-001",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "已下架训练",
+                description: "历史训练",
+                questionCount: 3,
+                totalScore: 15,
+                status: "taken_down",
+                availableActions: ["copy_to_new_draft"],
+              },
+            ],
+            redactionStatus: "metadata_only",
+          },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const filterGroup = await screen.findByRole("group", {
+      name: "企业训练状态筛选",
+    });
+    expect(
+      within(filterGroup).getByRole("button", { name: "全部" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      within(filterGroup).getByRole("button", { name: "草稿" }),
+    ).toBeInTheDocument();
+    expect(
+      within(filterGroup).getByRole("button", { name: "已发布" }),
+    ).toBeInTheDocument();
+    expect(
+      within(filterGroup).getByRole("button", { name: "已下架" }),
+    ).toBeInTheDocument();
+
+    const publishedCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-version-published-ui-001",
+    );
+    expect(
+      within(publishedCard).getByRole("button", { name: "查看" }),
+    ).toBeInTheDocument();
+    expect(
+      within(publishedCard).getByRole("button", { name: "复制为新草稿" }),
+    ).toBeInTheDocument();
+    expect(
+      within(publishedCard).getByRole("button", { name: "下架" }),
+    ).toBeInTheDocument();
+    expect(
+      within(publishedCard).queryByRole("button", { name: "发布" }),
+    ).toBeNull();
+
+    fireEvent.click(
+      within(publishedCard).getByRole("button", { name: "查看" }),
+    );
+    const detailPanel = screen.getByRole("complementary", {
+      name: "训练详情",
+    });
+    expect(detailPanel).toHaveTextContent("已发布版本为只读");
+    expect(detailPanel).toHaveTextContent("复制为新草稿");
+    expect(detailPanel.textContent).not.toContain(
+      "organization-training-version-published-ui-001",
+    );
+
+    fireEvent.click(within(filterGroup).getByRole("button", { name: "草稿" }));
+    expect(screen.getByText("列表草稿")).toBeInTheDocument();
+    expect(screen.queryByText("已发布训练")).toBeNull();
+    expect(screen.queryByText("已下架训练")).toBeNull();
+
+    fireEvent.click(
+      within(filterGroup).getByRole("button", { name: "已发布" }),
+    );
+    expect(screen.getByText("已发布训练")).toBeInTheDocument();
+    expect(screen.queryByText("列表草稿")).toBeNull();
+    expect(screen.queryByText("已下架训练")).toBeNull();
+
+    fireEvent.click(
+      within(filterGroup).getByRole("button", { name: "已下架" }),
+    );
+    expect(screen.getByText("已下架训练")).toBeInTheDocument();
+    expect(screen.queryByText("列表草稿")).toBeNull();
+    expect(screen.queryByText("已发布训练")).toBeNull();
+  });
+
+  it("takes down and copies published training versions from list actions through existing metadata-only routes", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    const promptSpy = vi.spyOn(window, "prompt").mockReturnValue("内容已过期");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+        const method = init?.method ?? "GET";
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (path === "/api/v1/organization-trainings" && method === "GET") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              items: [
+                {
+                  publicId: "organization-training-version-published-ui-002",
+                  resourceType: "organization_training_version",
+                  organizationPublicId: "organization-admin-scope-001",
+                  profession: "marketing",
+                  level: 3,
+                  subject: "theory",
+                  title: "发布训练",
+                  description: "可复训训练",
+                  questionCount: 2,
+                  totalScore: 10,
+                  status: "published",
+                  availableActions: ["take_down", "copy_to_new_draft"],
+                },
+              ],
+              redactionStatus: "metadata_only",
+            },
+          });
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-version-published-ui-002/copy-to-new-draft" &&
+          method === "POST"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              draft: {
+                ...createdDraft,
+                publicId: "organization-training-draft-copy-ui-002",
+                title: "发布训练 复训草稿",
+                questionCount: 2,
+                totalScore: 10,
+              },
+            },
+          });
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-version-published-ui-002/take-down" &&
+          method === "POST"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              version: {
+                publicId: "organization-training-version-published-ui-002",
+                draftPublicId: "organization-training-draft-list-ui-002",
+                versionNumber: 1,
+                organizationPublicId: "organization-admin-scope-001",
+                publishScopeSnapshot: {
+                  organizationPublicIds: ["organization-admin-scope-001"],
+                  capturedAt: "2026-07-06T06:20:00.000Z",
+                },
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                title: "发布训练",
+                description: "可复训训练",
+                questionCount: 2,
+                totalScore: 10,
+                status: "taken_down",
+                publishedAt: "2026-07-06T06:20:00.000Z",
+                takenDownAt: "2026-07-06T07:20:00.000Z",
+                takedownReason: "内容已过期",
+              },
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const publishedCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-version-published-ui-002",
+    );
+    fireEvent.click(
+      within(publishedCard).getByRole("button", { name: "复制为新草稿" }),
+    );
+
+    expect(
+      await screen.findByText("已复制为新的企业训练草稿"),
+    ).toBeInTheDocument();
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/organization-trainings/organization-training-version-published-ui-002/copy-to-new-draft",
+        "POST",
+      ),
+    ).toMatchObject({
+      sourceVersionPublicId: "organization-training-version-published-ui-002",
+      authorizationPublicId: "org-auth-admin-scope-001",
+      newDraftTitle: "发布训练 复训草稿",
+    });
+
+    fireEvent.click(
+      within(publishedCard).getByRole("button", { name: "下架" }),
+    );
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "企业训练已下架",
+    );
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/organization-trainings/organization-training-version-published-ui-002/take-down",
+        "POST",
+      ),
+    ).toMatchObject({
+      versionPublicId: "organization-training-version-published-ui-002",
+      takedownReason: "内容已过期",
+    });
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(promptSpy).toHaveBeenCalledTimes(1);
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
   it("creates draft, attaches source context with the runtime context response key, and copies a version through metadata-only API calls", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(
