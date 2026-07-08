@@ -156,6 +156,27 @@ export type OrganizationTrainingAdminLifecycleAction =
   | "take_down"
   | "copy_to_new_draft";
 
+export type OrganizationTrainingAdminLifecycleSourceKind =
+  | "ai_question"
+  | "ai_paper"
+  | "platform_paper"
+  | "manual_group"
+  | "unknown";
+
+export type OrganizationTrainingAdminLifecycleContentKind =
+  | "question_training"
+  | "paper_training"
+  | "unknown";
+
+export type OrganizationTrainingAdminLifecycleSourceMetadataDto = {
+  draftPublicId: string;
+  sourceTaskPublicId: string | null;
+  sourceVersionPublicId: string | null;
+  sourceType: OrganizationTrainingSourceContextType | null;
+  generationKind: "question" | "paper" | null;
+  redactionStatus: "metadata_only";
+};
+
 export type OrganizationTrainingAdminLifecycleItemDto = {
   publicId: string;
   resourceType: "organization_training_draft" | "organization_training_version";
@@ -170,6 +191,8 @@ export type OrganizationTrainingAdminLifecycleItemDto = {
   totalScore?: number;
   questionTypeSummary?: OrganizationTrainingQuestionTypeSummary;
   status: "draft" | OrganizationTrainingVersionStatus;
+  sourceKind: OrganizationTrainingAdminLifecycleSourceKind;
+  contentKind: OrganizationTrainingAdminLifecycleContentKind;
   availableActions: OrganizationTrainingAdminLifecycleAction[];
 };
 

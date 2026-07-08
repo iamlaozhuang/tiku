@@ -21,6 +21,24 @@ function readSourceFile(sourcePath: string) {
   return readFileSync(join(process.cwd(), sourcePath), "utf8");
 }
 
+function getRequestPath(url: RequestInfo | URL): string {
+  return new URL(String(url), "http://localhost").pathname;
+}
+
+function getRequestSearchParams(url: RequestInfo | URL): URLSearchParams {
+  return new URL(String(url), "http://localhost").searchParams;
+}
+
+function isOrganizationTrainingListGet(
+  url: RequestInfo | URL,
+  init?: RequestInit,
+): boolean {
+  return (
+    getRequestPath(url) === "/api/v1/organization-trainings" &&
+    (init?.method ?? "GET") === "GET"
+  );
+}
+
 const adminSessionPayload = {
   code: 0,
   message: "ok",
@@ -258,7 +276,7 @@ describe("AdminOrganizationTrainingPage", () => {
         return createJsonResponse(adminSessionPayload);
       }
 
-      if (String(url) === "/api/v1/organization-trainings") {
+      if (isOrganizationTrainingListGet(url)) {
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -393,23 +411,171 @@ describe("AdminOrganizationTrainingPage", () => {
     );
 
     fireEvent.click(within(filterGroup).getByRole("button", { name: "草稿" }));
-    expect(screen.getByText("列表草稿")).toBeInTheDocument();
+    expect(await screen.findByText("列表草稿")).toBeInTheDocument();
     expect(screen.queryByText("已发布训练")).toBeNull();
     expect(screen.queryByText("已下架训练")).toBeNull();
 
     fireEvent.click(
       within(filterGroup).getByRole("button", { name: "已发布" }),
     );
-    expect(screen.getByText("已发布训练")).toBeInTheDocument();
+    expect(await screen.findByText("已发布训练")).toBeInTheDocument();
     expect(screen.queryByText("列表草稿")).toBeNull();
     expect(screen.queryByText("已下架训练")).toBeNull();
 
     fireEvent.click(
       within(filterGroup).getByRole("button", { name: "已下架" }),
     );
-    expect(screen.getByText("已下架训练")).toBeInTheDocument();
+    expect(await screen.findByText("已下架训练")).toBeInTheDocument();
     expect(screen.queryByText("列表草稿")).toBeNull();
     expect(screen.queryByText("已发布训练")).toBeNull();
+  });
+
+  it("shows organization training source and content-kind filters backed by lifecycle query parameters", async () => {
+    const lifecycleItems = [
+      {
+        publicId: "organization-training-draft-ai-question-ui-001",
+        resourceType: "organization_training_draft",
+        organizationPublicId: "organization-admin-scope-001",
+        authorizationPublicId: "org-auth-admin-scope-001",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        title: "AI出题草稿",
+        description: "题目训练草稿",
+        questionCount: 2,
+        totalScore: 10,
+        questionTypeSummary: {
+          singleChoice: 2,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        status: "draft",
+        sourceKind: "ai_question",
+        contentKind: "question_training",
+        availableActions: ["publish"],
+      },
+      {
+        publicId: "organization-training-draft-ai-paper-ui-001",
+        resourceType: "organization_training_draft",
+        organizationPublicId: "organization-admin-scope-001",
+        authorizationPublicId: "org-auth-admin-scope-001",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        title: "AI组卷草稿",
+        description: "试卷训练草稿",
+        questionCount: 5,
+        totalScore: 25,
+        questionTypeSummary: {
+          singleChoice: 5,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        status: "draft",
+        sourceKind: "ai_paper",
+        contentKind: "paper_training",
+        availableActions: ["publish"],
+      },
+    ];
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (isOrganizationTrainingListGet(url)) {
+        const searchParams = getRequestSearchParams(url);
+        const sourceKind = searchParams.get("sourceKind") ?? "all";
+        const contentKind = searchParams.get("contentKind") ?? "all";
+        const filteredItems = lifecycleItems.filter(
+          (item) =>
+            (sourceKind === "all" || item.sourceKind === sourceKind) &&
+            (contentKind === "all" || item.contentKind === contentKind),
+        );
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            items: filteredItems,
+            redactionStatus: "metadata_only",
+          },
+          pagination: {
+            page: Number.parseInt(searchParams.get("page") ?? "1", 10),
+            pageSize: 10,
+            total: filteredItems.length,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const sourceFilterGroup = await screen.findByRole("group", {
+      name: "企业训练来源筛选",
+    });
+    const contentFilterGroup = await screen.findByRole("group", {
+      name: "企业训练形态筛选",
+    });
+    expect(
+      within(sourceFilterGroup).getByRole("button", { name: "AI出题" }),
+    ).toBeInTheDocument();
+    expect(
+      within(sourceFilterGroup).getByRole("button", { name: "AI组卷" }),
+    ).toBeInTheDocument();
+    expect(
+      within(contentFilterGroup).getByRole("button", { name: "题目训练" }),
+    ).toBeInTheDocument();
+    expect(
+      within(contentFilterGroup).getByRole("button", { name: "试卷训练" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("AI出题草稿")).toBeInTheDocument();
+    expect(screen.getByText("AI组卷草稿")).toBeInTheDocument();
+
+    fireEvent.click(
+      within(sourceFilterGroup).getByRole("button", { name: "AI组卷" }),
+    );
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(
+          ([url]) =>
+            getRequestPath(url) === "/api/v1/organization-trainings" &&
+            getRequestSearchParams(url).get("sourceKind") === "ai_paper",
+        ),
+      ).toBe(true),
+    );
+    expect(screen.getByText("AI组卷草稿")).toBeInTheDocument();
+    expect(screen.queryByText("AI出题草稿")).toBeNull();
+
+    fireEvent.click(
+      within(sourceFilterGroup).getByRole("button", { name: "全部来源" }),
+    );
+    fireEvent.click(
+      within(contentFilterGroup).getByRole("button", { name: "试卷训练" }),
+    );
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(
+          ([url]) =>
+            getRequestPath(url) === "/api/v1/organization-trainings" &&
+            getRequestSearchParams(url).get("contentKind") === "paper_training",
+        ),
+      ).toBe(true),
+    );
+    expect(screen.getByText("AI组卷草稿")).toBeInTheDocument();
+    expect(screen.queryByText("AI出题草稿")).toBeNull();
   });
 
   it("paginates organization training lifecycle rows near the active filter", async () => {
@@ -439,7 +605,7 @@ describe("AdminOrganizationTrainingPage", () => {
         return createJsonResponse(adminSessionPayload);
       }
 
-      if (String(url) === "/api/v1/organization-trainings") {
+      if (isOrganizationTrainingListGet(url)) {
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -473,7 +639,7 @@ describe("AdminOrganizationTrainingPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "下一页" }));
 
-    expect(screen.getByText("分页训练 11")).toBeInTheDocument();
+    expect(await screen.findByText("分页训练 11")).toBeInTheDocument();
     expect(screen.queryByText("分页训练 01")).toBeNull();
     expect(
       screen.queryByRole("complementary", { name: "训练详情" }),
@@ -483,13 +649,15 @@ describe("AdminOrganizationTrainingPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "上一页" }));
 
-    expect(screen.getByText("分页训练 01")).toBeInTheDocument();
+    expect(await screen.findByText("分页训练 01")).toBeInTheDocument();
     expect(screen.queryByText("分页训练 11")).toBeNull();
     expect(screen.getByRole("button", { name: "上一页" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "已发布" }));
 
-    expect(screen.getByText("当前筛选下暂无企业训练")).toBeInTheDocument();
+    expect(
+      await screen.findByText("当前筛选下暂无企业训练"),
+    ).toBeInTheDocument();
     expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
   });
 
@@ -499,7 +667,7 @@ describe("AdminOrganizationTrainingPage", () => {
         return createJsonResponse(adminSessionPayload);
       }
 
-      if (String(url) === "/api/v1/organization-trainings") {
+      if (isOrganizationTrainingListGet(url)) {
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -587,7 +755,7 @@ describe("AdminOrganizationTrainingPage", () => {
           return createJsonResponse(adminSessionPayload);
         }
 
-        if (path === "/api/v1/organization-trainings" && method === "GET") {
+        if (isOrganizationTrainingListGet(url, init)) {
           return createJsonResponse({
             code: 0,
             message: "ok",
@@ -733,7 +901,7 @@ describe("AdminOrganizationTrainingPage", () => {
           return createJsonResponse(adminSessionPayload);
         }
 
-        if (path === "/api/v1/organization-trainings" && method === "GET") {
+        if (isOrganizationTrainingListGet(url, init)) {
           return createJsonResponse({
             code: 0,
             message: "ok",
@@ -997,7 +1165,7 @@ describe("AdminOrganizationTrainingPage", () => {
           return createJsonResponse(adminSessionPayload);
         }
 
-        if (path === "/api/v1/organization-trainings" && method === "GET") {
+        if (isOrganizationTrainingListGet(url, init)) {
           return createJsonResponse({
             code: 0,
             message: "ok",

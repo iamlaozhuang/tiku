@@ -21,6 +21,7 @@ import type {
 } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingSourceContextAttachmentDto,
@@ -80,6 +81,11 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
     async (): Promise<OrganizationTrainingPublishedVersionDto[]> => [
       createEmployeeVisibleVersion(),
     ],
+  ),
+  listAdminLifecycleSourceMetadata: vi.fn(
+    async (): Promise<
+      OrganizationTrainingAdminLifecycleSourceMetadataDto[]
+    > => [],
   ),
   lookupVersionQuestionTypeSummary: vi.fn(
     async (): Promise<OrganizationTrainingQuestionTypeSummary | null> => ({
@@ -793,6 +799,10 @@ describe("organization training draft source-context route handlers", () => {
     runtimeRepositoryMock.listAdminLifecycleVersions.mockResolvedValue([
       createEmployeeVisibleVersion(),
     ]);
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockClear();
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockResolvedValue(
+      [],
+    );
     runtimeRepositoryMock.createManualDraft.mockClear();
     runtimeRepositoryMock.createManualDraft.mockResolvedValue(
       createManualDraftDto(),
@@ -886,6 +896,125 @@ describe("organization training draft source-context route handlers", () => {
       runtimeRepositoryMock.listAdminLifecycleVersions,
     ).toHaveBeenCalledWith({
       visibleOrganizationPublicIds: ["organization_route_public_401"],
+    });
+  });
+
+  it("filters and paginates organization training lifecycle read model by source and content kind", async () => {
+    runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValue([
+      createManualDraftDto({
+        publicId: "organization_training_draft_ai_question_route_401",
+        title: "AI question training draft",
+      }),
+      createManualDraftDto({
+        publicId: "organization_training_draft_ai_paper_route_401",
+        title: "AI paper training draft",
+      }),
+      createManualDraftDto({
+        publicId: "organization_training_draft_platform_route_401",
+        title: "Platform paper training draft",
+      }),
+      createManualDraftDto({
+        publicId: "organization_training_draft_manual_route_401",
+        title: "Manual group training draft",
+      }),
+    ]);
+    runtimeRepositoryMock.listAdminLifecycleVersions.mockResolvedValue([
+      createEmployeeVisibleVersion({
+        publicId: "organization_training_version_unknown_route_401",
+        draftPublicId: "organization_training_draft_unknown_route_401",
+      }),
+    ]);
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockResolvedValue([
+      {
+        draftPublicId: "organization_training_draft_ai_question_route_401",
+        sourceTaskPublicId: "admin_ai_generation_task_org_question_401",
+        sourceVersionPublicId: null,
+        sourceType: "organization_ai_result",
+        generationKind: "question",
+        redactionStatus: "metadata_only",
+      },
+      {
+        draftPublicId: "organization_training_draft_ai_paper_route_401",
+        sourceTaskPublicId: "admin_ai_generation_task_org_paper_401",
+        sourceVersionPublicId: null,
+        sourceType: "organization_ai_result",
+        generationKind: "paper",
+        redactionStatus: "metadata_only",
+      },
+      {
+        draftPublicId: "organization_training_draft_platform_route_401",
+        sourceTaskPublicId: null,
+        sourceVersionPublicId: null,
+        sourceType: "paper",
+        generationKind: null,
+        redactionStatus: "metadata_only",
+      },
+      {
+        draftPublicId: "organization_training_draft_manual_route_401",
+        sourceTaskPublicId: null,
+        sourceVersionPublicId: null,
+        sourceType: null,
+        generationKind: null,
+        redactionStatus: "metadata_only",
+      },
+    ]);
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.manualDraft.GET(
+      new Request(
+        "http://localhost/api/v1/organization-trainings?sourceKind=ai_paper&contentKind=paper_training&page=1&pageSize=2",
+        {
+          headers: {
+            authorization: "Bearer organization_training_route_session_401",
+          },
+        },
+      ),
+    );
+
+    const payload = await resolveJsonPayload(response);
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      pagination: {
+        page: 1,
+        pageSize: 2,
+        total: 1,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+      },
+      data: {
+        redactionStatus: "metadata_only",
+        items: [
+          {
+            publicId: "organization_training_draft_ai_paper_route_401",
+            sourceKind: "ai_paper",
+            contentKind: "paper_training",
+            status: "draft",
+          },
+        ],
+      },
+    });
+    expect(JSON.stringify(payload)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
+    expect(
+      runtimeRepositoryMock.listAdminLifecycleSourceMetadata,
+    ).toHaveBeenCalledWith({
+      draftPublicIds: [
+        "organization_training_draft_ai_question_route_401",
+        "organization_training_draft_ai_paper_route_401",
+        "organization_training_draft_platform_route_401",
+        "organization_training_draft_manual_route_401",
+        "organization_training_draft_unknown_route_401",
+      ],
     });
   });
 

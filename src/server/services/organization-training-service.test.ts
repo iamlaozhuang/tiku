@@ -739,6 +739,8 @@ describe("organization training service", () => {
               shortAnswer: 0,
             },
             status: "draft",
+            sourceKind: "manual_group",
+            contentKind: "question_training",
             availableActions: ["publish"],
           },
           {
@@ -753,6 +755,8 @@ describe("organization training service", () => {
             questionCount: 2,
             totalScore: 5,
             status: "published",
+            sourceKind: "unknown",
+            contentKind: "unknown",
             availableActions: ["take_down", "copy_to_new_draft"],
           },
           {
@@ -767,10 +771,19 @@ describe("organization training service", () => {
             questionCount: 2,
             totalScore: 5,
             status: "taken_down",
+            sourceKind: "unknown",
+            contentKind: "unknown",
             availableActions: ["copy_to_new_draft"],
           },
         ],
         redactionStatus: "metadata_only",
+      },
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 3,
+        sortBy: "createdAt",
+        sortOrder: "desc",
       },
     });
     expect(serializedResult).not.toContain("training_version_invisible");

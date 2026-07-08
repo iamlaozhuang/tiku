@@ -10,6 +10,7 @@ import type {
 } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
@@ -54,7 +55,14 @@ import {
   organizationTrainingPublishBlockedMessage,
   organizationTrainingSourceContextBlockedMessage,
   organizationTrainingTakedownBlockedMessage,
+  organizationTrainingAdminLifecycleContentKindFilterValues,
+  organizationTrainingAdminLifecycleSourceKindFilterValues,
+  organizationTrainingAdminLifecycleStatusFilterValues,
   type OrganizationTrainingAdminContext,
+  type OrganizationTrainingAdminLifecycleContentKindFilter,
+  type OrganizationTrainingAdminLifecycleQuery,
+  type OrganizationTrainingAdminLifecycleSourceKindFilter,
+  type OrganizationTrainingAdminLifecycleStatusFilter,
   type OrganizationTrainingEmployeeContext,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingService,
@@ -125,6 +133,7 @@ export type OrganizationTrainingVisibleOrganizationScopeResolver = (
 
 export type OrganizationTrainingRouteOptions = {
   listAdminLifecycleDrafts?: OrganizationTrainingAdminLifecycleDraftsReader;
+  listAdminLifecycleSourceMetadata?: OrganizationTrainingAdminLifecycleSourceMetadataReader;
   listAdminLifecycleVersions?: OrganizationTrainingAdminLifecycleVersionsReader;
   listEmployeeVisibleVersions?: OrganizationTrainingEmployeeVisibleVersionsReader;
   lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
@@ -152,6 +161,7 @@ export type OrganizationTrainingVersionOrganizationPublicIdResolver = (
 export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
   | "listAdminLifecycleDrafts"
+  | "listAdminLifecycleSourceMetadata"
   | "listAdminLifecycleVersions"
   | "listEmployeeVisibleVersions"
   | "resolveEmployeeAnswer"
@@ -180,6 +190,12 @@ export type OrganizationTrainingAdminLifecycleReaderInput = {
   adminContext: OrganizationTrainingAdminContext;
 };
 
+export type OrganizationTrainingAdminLifecycleSourceMetadataReaderInput = {
+  request: Request;
+  adminContext: OrganizationTrainingAdminContext;
+  draftPublicIds: readonly string[];
+};
+
 export type OrganizationTrainingAdminLifecycleDraftsReader = (
   input: OrganizationTrainingAdminLifecycleReaderInput,
 ) => Promise<OrganizationTrainingDraftDto[]>;
@@ -187,6 +203,10 @@ export type OrganizationTrainingAdminLifecycleDraftsReader = (
 export type OrganizationTrainingAdminLifecycleVersionsReader = (
   input: OrganizationTrainingAdminLifecycleReaderInput,
 ) => Promise<OrganizationTrainingPublishedVersionDto[]>;
+
+export type OrganizationTrainingAdminLifecycleSourceMetadataReader = (
+  input: OrganizationTrainingAdminLifecycleSourceMetadataReaderInput,
+) => Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]>;
 
 export type OrganizationTrainingEmployeeContextResolver = (
   input: OrganizationTrainingEmployeeContextResolverInput,
@@ -410,6 +430,12 @@ async function defaultListAdminLifecycleVersions(): Promise<
   return [];
 }
 
+async function defaultListAdminLifecycleSourceMetadata(): Promise<
+  OrganizationTrainingAdminLifecycleSourceMetadataDto[]
+> {
+  return [];
+}
+
 async function defaultListEmployeeVisibleVersions(): Promise<
   OrganizationTrainingPublishedVersionDto[]
 > {
@@ -422,6 +448,74 @@ async function defaultResolvePublishedVersion(): Promise<null> {
 
 async function defaultResolveSourceVersion(): Promise<null> {
   return null;
+}
+
+function normalizePositiveIntegerQueryParam(
+  value: string | null,
+  fallback: number,
+): number {
+  if (value === null) {
+    return fallback;
+  }
+
+  const parsedValue = Number.parseInt(value, 10);
+
+  if (!Number.isFinite(parsedValue) || parsedValue < 1) {
+    return fallback;
+  }
+
+  return parsedValue;
+}
+
+function normalizeAdminLifecycleStatusFilter(
+  value: string | null,
+): OrganizationTrainingAdminLifecycleStatusFilter {
+  return organizationTrainingAdminLifecycleStatusFilterValues.includes(
+    value as OrganizationTrainingAdminLifecycleStatusFilter,
+  )
+    ? (value as OrganizationTrainingAdminLifecycleStatusFilter)
+    : "all";
+}
+
+function normalizeAdminLifecycleSourceKindFilter(
+  value: string | null,
+): OrganizationTrainingAdminLifecycleSourceKindFilter {
+  return organizationTrainingAdminLifecycleSourceKindFilterValues.includes(
+    value as OrganizationTrainingAdminLifecycleSourceKindFilter,
+  )
+    ? (value as OrganizationTrainingAdminLifecycleSourceKindFilter)
+    : "all";
+}
+
+function normalizeAdminLifecycleContentKindFilter(
+  value: string | null,
+): OrganizationTrainingAdminLifecycleContentKindFilter {
+  return organizationTrainingAdminLifecycleContentKindFilterValues.includes(
+    value as OrganizationTrainingAdminLifecycleContentKindFilter,
+  )
+    ? (value as OrganizationTrainingAdminLifecycleContentKindFilter)
+    : "all";
+}
+
+function normalizeAdminLifecycleQuery(
+  request: Request,
+): OrganizationTrainingAdminLifecycleQuery {
+  const searchParams = new URL(request.url).searchParams;
+
+  return {
+    page: normalizePositiveIntegerQueryParam(searchParams.get("page"), 1),
+    pageSize: Math.min(
+      50,
+      normalizePositiveIntegerQueryParam(searchParams.get("pageSize"), 10),
+    ),
+    status: normalizeAdminLifecycleStatusFilter(searchParams.get("status")),
+    sourceKind: normalizeAdminLifecycleSourceKindFilter(
+      searchParams.get("sourceKind"),
+    ),
+    contentKind: normalizeAdminLifecycleContentKindFilter(
+      searchParams.get("contentKind"),
+    ),
+  };
 }
 
 async function defaultResolveVersionQuestionTypeSummary(): Promise<null> {
@@ -835,6 +929,18 @@ function createRepositoryBackedAdminLifecycleVersionsReader(
     });
 }
 
+function createRepositoryBackedAdminLifecycleSourceMetadataReader(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "listAdminLifecycleSourceMetadata"
+  >,
+): OrganizationTrainingAdminLifecycleSourceMetadataReader {
+  return async ({ draftPublicIds }) =>
+    repository.listAdminLifecycleSourceMetadata({
+      draftPublicIds,
+    });
+}
+
 function createRepositoryBackedPublishedVersionResolver(
   repository: Pick<
     OrganizationTrainingRepository,
@@ -1197,6 +1303,9 @@ export function createOrganizationTrainingRouteHandlers(
     options.listAdminLifecycleDrafts ?? defaultListAdminLifecycleDrafts;
   const listAdminLifecycleVersions =
     options.listAdminLifecycleVersions ?? defaultListAdminLifecycleVersions;
+  const listAdminLifecycleSourceMetadata =
+    options.listAdminLifecycleSourceMetadata ??
+    defaultListAdminLifecycleSourceMetadata;
   const listEmployeeVisibleVersions =
     options.listEmployeeVisibleVersions ?? defaultListEmployeeVisibleVersions;
   const resolveEmployeeAnswer =
@@ -1238,17 +1347,36 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        const query = normalizeAdminLifecycleQuery(request);
+        const [drafts, versions] = await Promise.all([
+          listAdminLifecycleDrafts({
+            request,
+            adminContext,
+          }),
+          listAdminLifecycleVersions({
+            request,
+            adminContext,
+          }),
+        ]);
+        const draftPublicIds = [
+          ...new Set([
+            ...drafts.map((draft) => draft.publicId),
+            ...versions.map((version) => version.draftPublicId),
+          ]),
+        ];
+        const sourceMetadata = await listAdminLifecycleSourceMetadata({
+          request,
+          adminContext,
+          draftPublicIds,
+        });
+
         return createJsonResponse(
           buildOrganizationTrainingAdminLifecycleFlowReadModel({
             adminContext,
-            drafts: await listAdminLifecycleDrafts({
-              request,
-              adminContext,
-            }),
-            versions: await listAdminLifecycleVersions({
-              request,
-              adminContext,
-            }),
+            drafts,
+            versions,
+            sourceMetadata,
+            query,
           }),
         );
       },
@@ -1885,6 +2013,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const listAdminLifecycleVersions =
     options.listAdminLifecycleVersions ??
     createRepositoryBackedAdminLifecycleVersionsReader(repository);
+  const listAdminLifecycleSourceMetadata =
+    options.listAdminLifecycleSourceMetadata ??
+    createRepositoryBackedAdminLifecycleSourceMetadataReader(repository);
   const listEmployeeVisibleVersions =
     options.listEmployeeVisibleVersions ??
     createRepositoryBackedEmployeeVisibleVersionsReader(repository);
@@ -1911,6 +2042,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       resolveEmployeeContext,
       listAdminLifecycleDrafts,
       listAdminLifecycleVersions,
+      listAdminLifecycleSourceMetadata,
       listEmployeeVisibleVersions,
       resolvePublishedVersion,
       resolveSourceVersion,

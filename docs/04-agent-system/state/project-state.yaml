@@ -1,8 +1,43 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-list-management-stage1-closure-2026-07-08
-updatedAt: "2026-07-08T12:06:18-07:00"
+currentPhase: organization-training-read-model-kind-2026-07-08
+updatedAt: "2026-07-08T12:58:00-07:00"
+latestOrganizationTrainingReadModelKind:
+  id: organization-training-read-model-kind-2026-07-08
+  status: closed
+  result: pass_source_test_ready_for_commit_merge_push_cleanup
+  branch: codex/org-training-read-model-kind
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-read-model-kind.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-read-model-kind-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-read-model-kind-audit.md
+  approvalBoundary: current_user_approved_four_stage_org_training_repair_until_complete_2026_07_08
+  conclusionBuckets:
+    branchSpecificReadGate: pass
+    target:
+      sourceKind: ai_question_ai_paper_platform_paper_manual_group_unknown
+      contentKind: question_training_paper_training_unknown
+      serverPagination: required
+      serverFilters: lifecycle_source_kind_content_kind
+    tddRed: pass_expected_source_content_pagination_filter_gap
+    targetedOrganizationTrainingServiceRouteUiUnit: pass_3_files_87_tests
+    adjacentAiGenerationUnit: pass_1_file_39_tests
+    lint: pass
+    typecheck: pass
+    fullUnit: pass_349_files_1778_tests
+    prettierCheck: pass_scoped
+    diffCheck: pass
+    preCommitHardening: pass
+    sourceCodeChanged: true
+    testsChanged: true
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestOrganizationTrainingListManagementStage1Closure:
   id: organization-training-list-management-stage1-closure-2026-07-08
   status: closed
@@ -1186,35 +1221,34 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: organization-training-list-management-stage1-closure-2026-07-08
-  title: Organization training list management stage 1 closure
-  phase: organization-training-list-management-stage1-closure-2026-07-08
+  id: organization-training-read-model-kind-2026-07-08
+  title: Organization training source and content kind read model
+  phase: organization-training-read-model-kind-2026-07-08
   status: closed
   result: pass_source_test_ready_for_commit_merge_push_cleanup
   priority: p1
   taskKind: implementation
-  branch: codex/org-training-list-management
+  branch: codex/org-training-read-model-kind
   humanApprovalBoundary: current_user_approved_four_stage_org_training_repair_until_complete_2026_07_08
-  plannedAt: "2026-07-08T12:06:18-07:00"
-  claimedAt: "2026-07-08T12:06:18-07:00"
-  completedAt: "2026-07-08T12:20:18-07:00"
-  targetClosureItem: Organization advanced admin enterprise-training draft rows show continue-configuration action while adopting existing lifecycle filters and safe version actions.
-  behaviorBoundary: local_organization_training_admin_list_action_label_only_no_api_dto_service_repository_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
+  plannedAt: "2026-07-08T12:26:55-07:00"
+  claimedAt: "2026-07-08T12:26:55-07:00"
+  completedAt: "2026-07-08T12:58:00-07:00"
+  targetClosureItem: Organization training lifecycle read model exposes sourceKind/contentKind plus server-side pagination and filters.
+  behaviorBoundary: local_organization_training_readonly_lifecycle_dto_route_service_repository_ui_filters_only_no_write_interface_change_no_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
   evidenceMode: redacted_code_symbol_test_status_localhost_screenshot_path_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-list-management-stage1-closure.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-list-management-stage1-closure-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-list-management-stage1-closure-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-read-model-kind.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-read-model-kind-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-read-model-kind-audit.md
   validationSummary:
     status: pass_source_test_ready_for_commit_merge_push_cleanup
-    adoptedPriorWork: lifecycle_filters_published_actions_taken_down_actions_standard_unavailable_and_pagination_adopted_from_master
-    rootCause: confirmed_draft_lifecycle_row_used_generic_view_label_instead_of_continue_configuration
-    tddRed: pass_expected_draft_continue_configuration_label_missing
-    targetedOrganizationTrainingUnit: pass_1_file_13_tests
-    adjacentOrganizationTrainingRouteUnit: pass_2_files_53_tests
-    fullUnit: pass_349_files_1776_tests
+    rootCause: confirmed_lifecycle_read_model_lacked_source_content_kind_and_server_filters
+    tddRed: pass_expected_source_content_pagination_filter_gap
+    targetedOrganizationTrainingServiceRouteUiUnit: pass_3_files_87_tests
+    adjacentAiGenerationUnit: pass_1_file_39_tests
+    fullUnit: pass_349_files_1778_tests
     lint: pass
     typecheck: pass
-    prettierCheck: pass_touched_files
+    prettierCheck: pass_scoped
     diffCheck: pass
     preCommitHardening: pass
     sourceCodeChanged: true

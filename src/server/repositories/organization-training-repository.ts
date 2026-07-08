@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import {
   admin,
+  adminAiGenerationTaskMetadata,
   adminOrganization,
   employee,
   type OrganizationTrainingAnswerItemSnapshotValue,
@@ -22,6 +23,7 @@ import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingQuestionOptionSnapshotDto,
@@ -86,6 +88,10 @@ export type OrganizationTrainingVersionOrganizationLookupInput = {
 
 export type OrganizationTrainingAdminLifecycleListInput = {
   visibleOrganizationPublicIds: readonly string[];
+};
+
+export type OrganizationTrainingAdminLifecycleSourceMetadataListInput = {
+  draftPublicIds: readonly string[];
 };
 
 export type OrganizationTrainingVersionTakedownPersistenceInput =
@@ -314,6 +320,9 @@ export type OrganizationTrainingVersionGateway = {
   listAdminLifecycleVersions(
     input: OrganizationTrainingAdminLifecycleListInput,
   ): Promise<OrganizationTrainingVersionRow[]>;
+  listAdminLifecycleSourceMetadata(
+    input: OrganizationTrainingAdminLifecycleSourceMetadataListInput,
+  ): Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]>;
   insertManualDraft(
     input: OrganizationTrainingDraftInsertInput,
   ): Promise<OrganizationTrainingDraftRow | null>;
@@ -365,6 +374,9 @@ export type OrganizationTrainingRepository = {
   listAdminLifecycleVersions(
     input: OrganizationTrainingAdminLifecycleListInput,
   ): Promise<OrganizationTrainingPublishedVersionDto[]>;
+  listAdminLifecycleSourceMetadata(
+    input: OrganizationTrainingAdminLifecycleSourceMetadataListInput,
+  ): Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]>;
   publishVersion(
     input: OrganizationTrainingPublishedVersionPersistenceInput,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
@@ -688,6 +700,20 @@ export function createOrganizationTrainingRepository(
       return rows.map(mapOrganizationTrainingVersionRowToDto);
     },
 
+    async listAdminLifecycleSourceMetadata(input) {
+      const normalizedDraftPublicIds = normalizePublicIdList(
+        input.draftPublicIds,
+      );
+
+      if (normalizedDraftPublicIds.length === 0) {
+        return [];
+      }
+
+      return gateway.listAdminLifecycleSourceMetadata({
+        draftPublicIds: normalizedDraftPublicIds,
+      });
+    },
+
     async publishVersion(input) {
       const latestVersionNumber =
         await gateway.findLatestVersionNumberByDraftPublicId(
@@ -906,6 +932,9 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async listAdminLifecycleVersions(input) {
       return listAdminLifecycleVersions(getDatabase(), input);
+    },
+    async listAdminLifecycleSourceMetadata(input) {
+      return listAdminLifecycleSourceMetadata(getDatabase(), input);
     },
     async insertManualDraft(input) {
       const createdAt = new Date(input.createdAt);
@@ -1672,6 +1701,12 @@ function normalizeAdminLifecycleListInput(
   return normalizedVisibleOrganizationPublicIds.length === 0
     ? null
     : normalizedVisibleOrganizationPublicIds;
+}
+
+function normalizePublicIdList(values: readonly string[]): string[] {
+  return [...new Set(normalizeTextList(values))].filter(
+    (value): value is string => value !== null,
+  );
 }
 
 function normalizeVersionLookupInput(
@@ -2609,8 +2644,7 @@ async function listAdminLifecycleDrafts(
         eq(organizationTrainingDraft.retention_status, "active"),
       ),
     )
-    .orderBy(desc(organizationTrainingDraft.created_at))
-    .limit(100);
+    .orderBy(desc(organizationTrainingDraft.created_at));
 
   return rows as OrganizationTrainingDraftRow[];
 }
@@ -2631,10 +2665,104 @@ async function listAdminLifecycleVersions(
         ...input.visibleOrganizationPublicIds,
       ]),
     )
-    .orderBy(desc(organizationTrainingVersion.published_at))
-    .limit(100);
+    .orderBy(desc(organizationTrainingVersion.published_at));
 
   return rows as OrganizationTrainingVersionRow[];
+}
+
+async function listAdminLifecycleSourceMetadata(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingAdminLifecycleSourceMetadataListInput,
+): Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]> {
+  const draftPublicIds = normalizePublicIdList(input.draftPublicIds);
+
+  if (draftPublicIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select({
+      draft_public_id: organizationTrainingDraft.public_id,
+      source_task_public_id: organizationTrainingDraft.source_task_public_id,
+      source_version_public_id:
+        organizationTrainingDraft.source_version_public_id,
+      source_type: organizationTrainingSourceContext.source_type,
+      generation_kind: adminAiGenerationTaskMetadata.generation_kind,
+      workspace: adminAiGenerationTaskMetadata.workspace,
+    })
+    .from(organizationTrainingDraft)
+    .leftJoin(
+      organizationTrainingSourceContext,
+      eq(
+        organizationTrainingSourceContext.organization_training_draft_public_id,
+        organizationTrainingDraft.public_id,
+      ),
+    )
+    .leftJoin(
+      adminAiGenerationTaskMetadata,
+      eq(
+        adminAiGenerationTaskMetadata.task_public_id,
+        organizationTrainingDraft.source_task_public_id,
+      ),
+    )
+    .where(inArray(organizationTrainingDraft.public_id, draftPublicIds));
+  const metadataByDraftPublicId = new Map<
+    string,
+    OrganizationTrainingAdminLifecycleSourceMetadataDto
+  >();
+
+  for (const row of rows) {
+    const metadata: OrganizationTrainingAdminLifecycleSourceMetadataDto = {
+      draftPublicId: row.draft_public_id,
+      sourceTaskPublicId: row.source_task_public_id,
+      sourceVersionPublicId: row.source_version_public_id,
+      sourceType: row.source_type ?? null,
+      generationKind:
+        row.workspace === "organization" &&
+        (row.generation_kind === "question" || row.generation_kind === "paper")
+          ? row.generation_kind
+          : null,
+      redactionStatus: "metadata_only",
+    };
+    const existingMetadata = metadataByDraftPublicId.get(
+      metadata.draftPublicId,
+    );
+
+    if (
+      existingMetadata === undefined ||
+      getLifecycleSourceMetadataPriority(metadata) >
+        getLifecycleSourceMetadataPriority(existingMetadata)
+    ) {
+      metadataByDraftPublicId.set(metadata.draftPublicId, metadata);
+    }
+  }
+
+  return [...metadataByDraftPublicId.values()];
+}
+
+function getLifecycleSourceMetadataPriority(
+  metadata: OrganizationTrainingAdminLifecycleSourceMetadataDto,
+): number {
+  if (
+    metadata.sourceType === "organization_ai_result" &&
+    metadata.generationKind !== null
+  ) {
+    return 4;
+  }
+
+  if (metadata.sourceType === "paper") {
+    return 3;
+  }
+
+  if (
+    metadata.sourceType === null &&
+    metadata.sourceTaskPublicId === null &&
+    metadata.sourceVersionPublicId === null
+  ) {
+    return 2;
+  }
+
+  return 1;
 }
 
 async function findEmployeeAnswerPersistenceLineageByPublicIds(

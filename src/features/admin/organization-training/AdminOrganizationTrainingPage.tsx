@@ -13,11 +13,16 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { ApiResponse } from "@/server/contracts/api-response";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
+  OrganizationTrainingAdminLifecycleContentKind,
   OrganizationTrainingAdminLifecycleItemDto,
+  OrganizationTrainingAdminLifecycleSourceKind,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingSourceContextAttachmentDto,
@@ -57,6 +62,14 @@ type OrganizationTrainingLifecycleStatusFilter =
   | "draft"
   | "published"
   | "taken_down";
+
+type OrganizationTrainingLifecycleSourceKindFilter =
+  | "all"
+  | OrganizationTrainingAdminLifecycleSourceKind;
+
+type OrganizationTrainingLifecycleContentKindFilter =
+  | "all"
+  | OrganizationTrainingAdminLifecycleContentKind;
 
 type TrainingContentShape = "question_set" | "paper_like";
 
@@ -189,6 +202,28 @@ const lifecycleStatusFilters: {
   { label: "已下架", value: "taken_down" },
 ];
 
+const lifecycleSourceKindFilters: {
+  label: string;
+  value: OrganizationTrainingLifecycleSourceKindFilter;
+}[] = [
+  { label: "全部来源", value: "all" },
+  { label: "AI出题", value: "ai_question" },
+  { label: "AI组卷", value: "ai_paper" },
+  { label: "平台试卷", value: "platform_paper" },
+  { label: "手动题组", value: "manual_group" },
+  { label: "未知来源", value: "unknown" },
+];
+
+const lifecycleContentKindFilters: {
+  label: string;
+  value: OrganizationTrainingLifecycleContentKindFilter;
+}[] = [
+  { label: "全部形态", value: "all" },
+  { label: "题目训练", value: "question_training" },
+  { label: "试卷训练", value: "paper_training" },
+  { label: "未知形态", value: "unknown" },
+];
+
 const organizationTrainingListPageSize = 10;
 
 function resolveOrganizationTrainingLoadState(authContext: AuthContextDto): {
@@ -246,9 +281,33 @@ function createApiErrorMessage(
     : `${fallbackMessage}（code: ${response.code}）`;
 }
 
+function createAdminLifecycleListPath({
+  contentKind,
+  page,
+  sourceKind,
+  status,
+}: {
+  contentKind: OrganizationTrainingLifecycleContentKindFilter;
+  page: number;
+  sourceKind: OrganizationTrainingLifecycleSourceKindFilter;
+  status: OrganizationTrainingLifecycleStatusFilter;
+}) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    pageSize: String(organizationTrainingListPageSize),
+    status,
+    sourceKind,
+    contentKind,
+  });
+
+  return `/api/v1/organization-trainings?${searchParams.toString()}`;
+}
+
 function createLifecycleItemFromDraft(
   draft: OrganizationTrainingDraftDto,
 ): OrganizationTrainingAdminLifecycleItemDto {
+  const isManualDraft = draft.sourceTaskPublicId === null;
+
   return {
     publicId: draft.publicId,
     resourceType: "organization_training_draft",
@@ -263,6 +322,8 @@ function createLifecycleItemFromDraft(
     totalScore: draft.totalScore,
     questionTypeSummary: draft.questionTypeSummary,
     status: "draft",
+    sourceKind: isManualDraft ? "manual_group" : "unknown",
+    contentKind: isManualDraft ? "question_training" : "unknown",
     availableActions: ["publish"],
   };
 }
@@ -282,6 +343,8 @@ function createLifecycleItemFromVersion(
     questionCount: version.questionCount,
     totalScore: version.totalScore,
     status: version.status,
+    sourceKind: "unknown",
+    contentKind: "unknown",
     availableActions:
       version.status === "published"
         ? ["take_down", "copy_to_new_draft"]
@@ -314,6 +377,38 @@ function matchesLifecycleStatusFilter(
   return item.resourceType === "organization_training_version"
     ? item.status === filter
     : false;
+}
+
+function resolveLifecycleSourceKindLabel(
+  sourceKind: OrganizationTrainingAdminLifecycleSourceKind,
+) {
+  return (
+    lifecycleSourceKindFilters.find((filter) => filter.value === sourceKind)
+      ?.label ?? "未知来源"
+  );
+}
+
+function resolveLifecycleContentKindLabel(
+  contentKind: OrganizationTrainingAdminLifecycleContentKind,
+) {
+  return (
+    lifecycleContentKindFilters.find((filter) => filter.value === contentKind)
+      ?.label ?? "未知形态"
+  );
+}
+
+function matchesLifecycleSourceKindFilter(
+  item: OrganizationTrainingAdminLifecycleItemDto,
+  filter: OrganizationTrainingLifecycleSourceKindFilter,
+) {
+  return filter === "all" || item.sourceKind === filter;
+}
+
+function matchesLifecycleContentKindFilter(
+  item: OrganizationTrainingAdminLifecycleItemDto,
+  filter: OrganizationTrainingLifecycleContentKindFilter,
+) {
+  return filter === "all" || item.contentKind === filter;
 }
 
 function createDefaultCopyDraftTitle(title: string) {
@@ -532,6 +627,19 @@ export function AdminOrganizationTrainingPage() {
   const [trainingItems, setTrainingItems] = useState<
     OrganizationTrainingAdminLifecycleItemDto[]
   >([]);
+  const [trainingPagination, setTrainingPagination] =
+    useState<ApiPagination | null>(null);
+  const [selectedLifecycleStatusFilter, setSelectedLifecycleStatusFilter] =
+    useState<OrganizationTrainingLifecycleStatusFilter>("all");
+  const [
+    selectedLifecycleSourceKindFilter,
+    setSelectedLifecycleSourceKindFilter,
+  ] = useState<OrganizationTrainingLifecycleSourceKindFilter>("all");
+  const [
+    selectedLifecycleContentKindFilter,
+    setSelectedLifecycleContentKindFilter,
+  ] = useState<OrganizationTrainingLifecycleContentKindFilter>("all");
+  const [selectedLifecyclePage, setSelectedLifecyclePage] = useState(1);
   const [selectedPublishDraft, setSelectedPublishDraft] =
     useState<OrganizationTrainingAdminLifecycleItemDto | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -612,7 +720,15 @@ export function AdminOrganizationTrainingPage() {
         const response = await fetchAdminOrganizationTrainingApi<{
           items: OrganizationTrainingAdminLifecycleItemDto[];
           redactionStatus: "metadata_only";
-        }>("/api/v1/organization-trainings", sessionToken);
+        }>(
+          createAdminLifecycleListPath({
+            contentKind: selectedLifecycleContentKindFilter,
+            page: selectedLifecyclePage,
+            sourceKind: selectedLifecycleSourceKindFilter,
+            status: selectedLifecycleStatusFilter,
+          }),
+          sessionToken,
+        );
 
         if (!isActive) {
           return;
@@ -620,6 +736,7 @@ export function AdminOrganizationTrainingPage() {
 
         if (response.code !== 0 || response.data === null) {
           setTrainingItems([]);
+          setTrainingPagination(null);
           setTrainingListMessage(
             createApiErrorMessage("企业训练列表加载失败", response),
           );
@@ -628,10 +745,12 @@ export function AdminOrganizationTrainingPage() {
         }
 
         setTrainingItems(response.data.items);
+        setTrainingPagination(response.pagination ?? null);
         setTrainingListState("ready");
       } catch {
         if (isActive) {
           setTrainingItems([]);
+          setTrainingPagination(null);
           setTrainingListMessage("企业训练列表加载失败");
           setTrainingListState("error");
         }
@@ -643,7 +762,13 @@ export function AdminOrganizationTrainingPage() {
     return () => {
       isActive = false;
     };
-  }, [loadState]);
+  }, [
+    loadState,
+    selectedLifecycleContentKindFilter,
+    selectedLifecyclePage,
+    selectedLifecycleSourceKindFilter,
+    selectedLifecycleStatusFilter,
+  ]);
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载企业训练" />;
@@ -991,9 +1116,27 @@ export function AdminOrganizationTrainingPage() {
         lastDraft={lastDraft}
         listMessage={trainingListMessage}
         listState={trainingListState}
+        pagination={trainingPagination}
+        selectedContentKindFilter={selectedLifecycleContentKindFilter}
+        selectedPage={selectedLifecyclePage}
+        selectedSourceKindFilter={selectedLifecycleSourceKindFilter}
+        selectedStatusFilter={selectedLifecycleStatusFilter}
         isSubmitting={isSubmitting}
         isCreateWizardOpen={isCreateWizardOpen}
         onCreateTraining={() => setIsCreateWizardOpen(true)}
+        onSelectContentKindFilter={(filter) => {
+          setSelectedLifecycleContentKindFilter(filter);
+          setSelectedLifecyclePage(1);
+        }}
+        onSelectPage={setSelectedLifecyclePage}
+        onSelectSourceKindFilter={(filter) => {
+          setSelectedLifecycleSourceKindFilter(filter);
+          setSelectedLifecyclePage(1);
+        }}
+        onSelectStatusFilter={(filter) => {
+          setSelectedLifecycleStatusFilter(filter);
+          setSelectedLifecyclePage(1);
+        }}
         onCopyVersionToDraft={handleCopyVersionToNewDraft}
         onPublishDraft={(draft) => {
           setIsCreateWizardOpen(true);
@@ -1087,8 +1230,17 @@ function TrainingListPanel({
   lastDraft,
   listMessage,
   listState,
+  pagination,
+  selectedContentKindFilter,
+  selectedPage,
+  selectedSourceKindFilter,
+  selectedStatusFilter,
   onCreateTraining,
   onCopyVersionToDraft,
+  onSelectContentKindFilter,
+  onSelectPage,
+  onSelectSourceKindFilter,
+  onSelectStatusFilter,
   onPublishDraft,
   onTakeDownVersion,
 }: {
@@ -1098,37 +1250,56 @@ function TrainingListPanel({
   lastDraft: OrganizationTrainingDraftDto | null;
   listMessage: string | null;
   listState: OrganizationTrainingListState;
+  pagination: ApiPagination | null;
+  selectedContentKindFilter: OrganizationTrainingLifecycleContentKindFilter;
+  selectedPage: number;
+  selectedSourceKindFilter: OrganizationTrainingLifecycleSourceKindFilter;
+  selectedStatusFilter: OrganizationTrainingLifecycleStatusFilter;
   onCreateTraining: () => void;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
+  onSelectContentKindFilter: (
+    filter: OrganizationTrainingLifecycleContentKindFilter,
+  ) => void;
+  onSelectPage: (page: number) => void;
+  onSelectSourceKindFilter: (
+    filter: OrganizationTrainingLifecycleSourceKindFilter,
+  ) => void;
+  onSelectStatusFilter: (
+    filter: OrganizationTrainingLifecycleStatusFilter,
+  ) => void;
   onPublishDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
   onTakeDownVersion: (item: OrganizationTrainingAdminLifecycleItemDto) => void;
 }) {
-  const [selectedStatusFilter, setSelectedStatusFilter] =
-    useState<OrganizationTrainingLifecycleStatusFilter>("all");
   const [selectedDetailPublicId, setSelectedDetailPublicId] = useState<
     string | null
   >(null);
-  const [selectedPage, setSelectedPage] = useState(1);
   const visibleItems =
     lastDraft === null
       ? items
       : upsertLifecycleItem(items, createLifecycleItemFromDraft(lastDraft));
-  const filteredItems = visibleItems.filter((item) =>
-    matchesLifecycleStatusFilter(item, selectedStatusFilter),
+  const filteredItems = visibleItems.filter(
+    (item) =>
+      matchesLifecycleStatusFilter(item, selectedStatusFilter) &&
+      matchesLifecycleSourceKindFilter(item, selectedSourceKindFilter) &&
+      matchesLifecycleContentKindFilter(item, selectedContentKindFilter),
   );
+  const totalItemCount = pagination?.total ?? filteredItems.length;
   const totalPageCount = Math.max(
     1,
-    Math.ceil(filteredItems.length / organizationTrainingListPageSize),
+    Math.ceil(totalItemCount / organizationTrainingListPageSize),
   );
   const clampedSelectedPage = Math.min(selectedPage, totalPageCount);
   const firstVisibleItemIndex =
     (clampedSelectedPage - 1) * organizationTrainingListPageSize;
-  const paginatedItems = filteredItems.slice(
-    firstVisibleItemIndex,
-    firstVisibleItemIndex + organizationTrainingListPageSize,
-  );
+  const paginatedItems =
+    pagination === null
+      ? filteredItems.slice(
+          firstVisibleItemIndex,
+          firstVisibleItemIndex + organizationTrainingListPageSize,
+        )
+      : filteredItems;
   const selectedDetailItem =
     selectedDetailPublicId === null
       ? null
@@ -1175,9 +1346,60 @@ function TrainingListPanel({
               }`}
               key={filter.value}
               onClick={() => {
-                setSelectedStatusFilter(filter.value);
+                onSelectStatusFilter(filter.value);
                 setSelectedDetailPublicId(null);
-                setSelectedPage(1);
+              }}
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {visibleItems.length === 0 ? null : (
+        <div
+          aria-label="企业训练来源筛选"
+          className="mt-3 flex flex-wrap gap-2"
+          role="group"
+        >
+          {lifecycleSourceKindFilters.map((filter) => (
+            <button
+              aria-pressed={selectedSourceKindFilter === filter.value}
+              className={`border-border h-8 rounded-md border px-3 text-sm transition-colors ${
+                selectedSourceKindFilter === filter.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-surface text-text-secondary hover:bg-muted hover:text-text-primary"
+              }`}
+              key={filter.value}
+              onClick={() => {
+                onSelectSourceKindFilter(filter.value);
+                setSelectedDetailPublicId(null);
+              }}
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {visibleItems.length === 0 ? null : (
+        <div
+          aria-label="企业训练形态筛选"
+          className="mt-3 flex flex-wrap gap-2"
+          role="group"
+        >
+          {lifecycleContentKindFilters.map((filter) => (
+            <button
+              aria-pressed={selectedContentKindFilter === filter.value}
+              className={`border-border h-8 rounded-md border px-3 text-sm transition-colors ${
+                selectedContentKindFilter === filter.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-surface text-text-secondary hover:bg-muted hover:text-text-primary"
+              }`}
+              key={filter.value}
+              onClick={() => {
+                onSelectContentKindFilter(filter.value);
+                setSelectedDetailPublicId(null);
               }}
               type="button"
             >
@@ -1230,7 +1452,7 @@ function TrainingListPanel({
           role="navigation"
         >
           <div className="flex flex-wrap gap-3">
-            <span>共 {filteredItems.length} 条</span>
+            <span>共 {totalItemCount} 条</span>
             <span>
               第 {clampedSelectedPage} / {totalPageCount} 页
             </span>
@@ -1240,7 +1462,7 @@ function TrainingListPanel({
               disabled={clampedSelectedPage <= 1}
               onClick={() => {
                 setSelectedDetailPublicId(null);
-                setSelectedPage((currentPage) => Math.max(1, currentPage - 1));
+                onSelectPage(Math.max(1, clampedSelectedPage - 1));
               }}
               type="button"
               variant="outline"
@@ -1251,9 +1473,7 @@ function TrainingListPanel({
               disabled={clampedSelectedPage >= totalPageCount}
               onClick={() => {
                 setSelectedDetailPublicId(null);
-                setSelectedPage((currentPage) =>
-                  Math.min(totalPageCount, currentPage + 1),
-                );
+                onSelectPage(Math.min(totalPageCount, clampedSelectedPage + 1));
               }}
               type="button"
               variant="outline"
@@ -1311,8 +1531,9 @@ function TrainingLifecycleItemCard({
           {item.subject === undefined ? "科目" : subjectLabels[item.subject]}
         </p>
         <p className="text-text-secondary text-xs">
-          {actionLabel} · 题量 {item.questionCount ?? 0} · 总分{" "}
-          {item.totalScore ?? 0}
+          {actionLabel} · {resolveLifecycleSourceKindLabel(item.sourceKind)} ·{" "}
+          {resolveLifecycleContentKindLabel(item.contentKind)} · 题量{" "}
+          {item.questionCount ?? 0} · 总分 {item.totalScore ?? 0}
         </p>
       </div>
       <div className="flex items-center gap-2 md:justify-end">
@@ -1389,6 +1610,18 @@ function TrainingLifecycleDetailPanel({
           : "已发布版本为只读；如需调整内容，请复制为新草稿后再发布。"}
       </p>
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+        <div className="bg-surface rounded-md p-3">
+          <dt className="text-text-secondary">来源</dt>
+          <dd className="text-text-primary font-medium">
+            {resolveLifecycleSourceKindLabel(item.sourceKind)}
+          </dd>
+        </div>
+        <div className="bg-surface rounded-md p-3">
+          <dt className="text-text-secondary">形态</dt>
+          <dd className="text-text-primary font-medium">
+            {resolveLifecycleContentKindLabel(item.contentKind)}
+          </dd>
+        </div>
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">题量</dt>
           <dd className="text-text-primary font-medium">

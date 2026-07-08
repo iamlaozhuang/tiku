@@ -1,6 +1,7 @@
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import {
   createErrorResponse,
+  createPaginatedResponse,
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
@@ -10,7 +11,10 @@ import type {
   EmployeeOrganizationTrainingQuestionResultDto,
   EmployeeOrganizationTrainingScoreSummaryDto,
   OrganizationTrainingAdminLifecycleFlowDto,
+  OrganizationTrainingAdminLifecycleContentKind,
   OrganizationTrainingAdminLifecycleItemDto,
+  OrganizationTrainingAdminLifecycleSourceKind,
+  OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingAuditLogRedactedReferencePolicyDto,
   OrganizationTrainingEmployeeAnswerLifecycleFlowDto,
   OrganizationTrainingEmployeeAnswerLifecycleItemDto,
@@ -199,6 +203,48 @@ export type OrganizationTrainingAdminLifecycleFlowReadModelInput = {
   adminContext: OrganizationTrainingAdminContext;
   drafts: readonly OrganizationTrainingDraftDto[];
   versions: readonly OrganizationTrainingPublishedVersionDto[];
+  sourceMetadata?: readonly OrganizationTrainingAdminLifecycleSourceMetadataDto[];
+  query?: OrganizationTrainingAdminLifecycleQuery;
+};
+
+export const organizationTrainingAdminLifecycleStatusFilterValues = [
+  "all",
+  "draft",
+  "published",
+  "taken_down",
+] as const;
+
+export const organizationTrainingAdminLifecycleSourceKindFilterValues = [
+  "all",
+  "ai_question",
+  "ai_paper",
+  "platform_paper",
+  "manual_group",
+  "unknown",
+] as const;
+
+export const organizationTrainingAdminLifecycleContentKindFilterValues = [
+  "all",
+  "question_training",
+  "paper_training",
+  "unknown",
+] as const;
+
+export type OrganizationTrainingAdminLifecycleStatusFilter =
+  (typeof organizationTrainingAdminLifecycleStatusFilterValues)[number];
+
+export type OrganizationTrainingAdminLifecycleSourceKindFilter =
+  (typeof organizationTrainingAdminLifecycleSourceKindFilterValues)[number];
+
+export type OrganizationTrainingAdminLifecycleContentKindFilter =
+  (typeof organizationTrainingAdminLifecycleContentKindFilterValues)[number];
+
+export type OrganizationTrainingAdminLifecycleQuery = {
+  page: number;
+  pageSize: number;
+  status: OrganizationTrainingAdminLifecycleStatusFilter;
+  sourceKind: OrganizationTrainingAdminLifecycleSourceKindFilter;
+  contentKind: OrganizationTrainingAdminLifecycleContentKindFilter;
 };
 
 export type OrganizationTrainingManualDraftWrite = Omit<
@@ -635,9 +681,84 @@ function createSourceContextBlockedResult(
   };
 }
 
+function normalizeAdminLifecycleQuery(
+  query: OrganizationTrainingAdminLifecycleQuery | undefined,
+): OrganizationTrainingAdminLifecycleQuery {
+  return {
+    page: Math.max(1, Math.floor(query?.page ?? 1)),
+    pageSize: Math.min(50, Math.max(1, Math.floor(query?.pageSize ?? 10))),
+    status: query?.status ?? "all",
+    sourceKind: query?.sourceKind ?? "all",
+    contentKind: query?.contentKind ?? "all",
+  };
+}
+
+function buildSourceMetadataMap(
+  sourceMetadata:
+    | readonly OrganizationTrainingAdminLifecycleSourceMetadataDto[]
+    | undefined,
+): Map<string, OrganizationTrainingAdminLifecycleSourceMetadataDto> {
+  return new Map(
+    (sourceMetadata ?? []).map((metadata) => [
+      metadata.draftPublicId,
+      metadata,
+    ]),
+  );
+}
+
+function resolveLifecycleSourceAndContentKind(
+  metadata: OrganizationTrainingAdminLifecycleSourceMetadataDto | null,
+  fallbackSourceTaskPublicId: string | null,
+  options: { allowManualFallback: boolean } = { allowManualFallback: true },
+): {
+  sourceKind: OrganizationTrainingAdminLifecycleSourceKind;
+  contentKind: OrganizationTrainingAdminLifecycleContentKind;
+} {
+  if (metadata === null) {
+    return options.allowManualFallback && fallbackSourceTaskPublicId === null
+      ? { sourceKind: "manual_group", contentKind: "question_training" }
+      : { sourceKind: "unknown", contentKind: "unknown" };
+  }
+
+  if (metadata.sourceType === "organization_ai_result") {
+    if (metadata.generationKind === "question") {
+      return { sourceKind: "ai_question", contentKind: "question_training" };
+    }
+
+    if (metadata.generationKind === "paper") {
+      return { sourceKind: "ai_paper", contentKind: "paper_training" };
+    }
+
+    return { sourceKind: "unknown", contentKind: "unknown" };
+  }
+
+  if (metadata.sourceType === "paper") {
+    return { sourceKind: "platform_paper", contentKind: "paper_training" };
+  }
+
+  if (
+    metadata.sourceType === null &&
+    metadata.sourceTaskPublicId === null &&
+    metadata.sourceVersionPublicId === null
+  ) {
+    return { sourceKind: "manual_group", contentKind: "question_training" };
+  }
+
+  return { sourceKind: "unknown", contentKind: "unknown" };
+}
+
 function buildDraftLifecycleItem(
   draft: OrganizationTrainingDraftDto,
+  sourceMetadataMap: ReadonlyMap<
+    string,
+    OrganizationTrainingAdminLifecycleSourceMetadataDto
+  >,
 ): OrganizationTrainingAdminLifecycleItemDto {
+  const kind = resolveLifecycleSourceAndContentKind(
+    sourceMetadataMap.get(draft.publicId) ?? null,
+    draft.sourceTaskPublicId,
+  );
+
   return {
     publicId: draft.publicId,
     resourceType: "organization_training_draft",
@@ -652,17 +773,28 @@ function buildDraftLifecycleItem(
     totalScore: draft.totalScore,
     questionTypeSummary: copyQuestionTypeSummary(draft.questionTypeSummary),
     status: "draft",
+    sourceKind: kind.sourceKind,
+    contentKind: kind.contentKind,
     availableActions: ["publish"],
   };
 }
 
 function buildVersionLifecycleItem(
   version: OrganizationTrainingPublishedVersionDto,
+  sourceMetadataMap: ReadonlyMap<
+    string,
+    OrganizationTrainingAdminLifecycleSourceMetadataDto
+  >,
 ): OrganizationTrainingAdminLifecycleItemDto {
   const availableActions =
     version.status === "published"
       ? (["take_down", "copy_to_new_draft"] as const)
       : (["copy_to_new_draft"] as const);
+  const kind = resolveLifecycleSourceAndContentKind(
+    sourceMetadataMap.get(version.draftPublicId) ?? null,
+    null,
+    { allowManualFallback: false },
+  );
 
   return {
     publicId: version.publicId,
@@ -676,13 +808,30 @@ function buildVersionLifecycleItem(
     questionCount: version.questionCount,
     totalScore: version.totalScore,
     status: version.status,
+    sourceKind: kind.sourceKind,
+    contentKind: kind.contentKind,
     availableActions: [...availableActions],
   };
+}
+
+function matchesAdminLifecycleQuery(
+  item: OrganizationTrainingAdminLifecycleItemDto,
+  query: OrganizationTrainingAdminLifecycleQuery,
+): boolean {
+  const statusMatches = query.status === "all" || item.status === query.status;
+  const sourceMatches =
+    query.sourceKind === "all" || item.sourceKind === query.sourceKind;
+  const contentMatches =
+    query.contentKind === "all" || item.contentKind === query.contentKind;
+
+  return statusMatches && sourceMatches && contentMatches;
 }
 
 export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
   input: OrganizationTrainingAdminLifecycleFlowReadModelInput,
 ): ApiResponse<OrganizationTrainingAdminLifecycleFlowDto> {
+  const query = normalizeAdminLifecycleQuery(input.query);
+  const sourceMetadataMap = buildSourceMetadataMap(input.sourceMetadata);
   const draftItems = input.drafts
     .filter((draft) =>
       isOrganizationVisibleToAdmin(
@@ -690,7 +839,7 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
         input.adminContext,
       ),
     )
-    .map(buildDraftLifecycleItem);
+    .map((draft) => buildDraftLifecycleItem(draft, sourceMetadataMap));
   const versionItems = input.versions
     .filter((version) =>
       isOrganizationVisibleToAdmin(
@@ -698,12 +847,25 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
         input.adminContext,
       ),
     )
-    .map(buildVersionLifecycleItem);
+    .map((version) => buildVersionLifecycleItem(version, sourceMetadataMap));
+  const filteredItems = [...draftItems, ...versionItems].filter((item) =>
+    matchesAdminLifecycleQuery(item, query),
+  );
+  const startIndex = (query.page - 1) * query.pageSize;
 
-  return createSuccessResponse({
-    items: [...draftItems, ...versionItems],
-    redactionStatus: "metadata_only",
-  });
+  return createPaginatedResponse(
+    {
+      items: filteredItems.slice(startIndex, startIndex + query.pageSize),
+      redactionStatus: "metadata_only",
+    },
+    {
+      page: query.page,
+      pageSize: query.pageSize,
+      total: filteredItems.length,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    },
+  );
 }
 
 type JsonRecord = Record<string, unknown>;
