@@ -108,6 +108,36 @@ function isServiceComputedOrganizationPortalCapability(
   );
 }
 
+function resolveServiceComputedOrganizationPortalAdminContext(input: {
+  adminPublicId: string;
+  adminRoles: readonly AdminRole[];
+  capabilitySummary: AdminWorkspaceCapabilitySummary | undefined;
+}): OrganizationPortalOverviewAdminContext | null {
+  const { adminPublicId, adminRoles, capabilitySummary } = input;
+
+  if (!isServiceComputedOrganizationPortalCapability(capabilitySummary)) {
+    return null;
+  }
+
+  const organizationPublicId = normalizeRequiredText(
+    capabilitySummary.organizationPublicId,
+  );
+
+  if (organizationPublicId === null) {
+    return null;
+  }
+
+  return {
+    adminPublicId,
+    adminRoles,
+    authorizationPublicId:
+      capabilitySummary.organizationAuthorizationPublicId ?? null,
+    authorizationSource: "org_auth",
+    effectiveEdition: capabilitySummary.organizationEffectiveEdition,
+    organizationPublicId,
+  };
+}
+
 function createRepositoryBackedOverviewReader(
   repository: OrganizationPortalOverviewRepository,
   readNow: () => Date,
@@ -141,22 +171,36 @@ function createSessionBackedOrganizationPortalAdminContextResolver(
     const capabilitySummary =
       sessionResponse.data.user.adminWorkspaceCapability;
 
-    if (
-      adminPublicId === null ||
-      !hasOrganizationPortalAdminRole(adminRoles) ||
-      !isServiceComputedOrganizationPortalCapability(capabilitySummary)
-    ) {
+    if (adminPublicId === null || !hasOrganizationPortalAdminRole(adminRoles)) {
+      return null;
+    }
+
+    const serviceComputedAdminContext =
+      resolveServiceComputedOrganizationPortalAdminContext({
+        adminPublicId,
+        adminRoles,
+        capabilitySummary,
+      });
+
+    if (serviceComputedAdminContext !== null) {
+      return serviceComputedAdminContext;
+    }
+
+    const organizationPublicId = normalizeRequiredText(
+      sessionResponse.data.user.organizationPublicId,
+    );
+
+    if (organizationPublicId === null) {
       return null;
     }
 
     return {
       adminPublicId,
       adminRoles,
-      authorizationPublicId:
-        capabilitySummary.organizationAuthorizationPublicId ?? null,
+      authorizationPublicId: null,
       authorizationSource: "org_auth",
-      effectiveEdition: capabilitySummary.organizationEffectiveEdition,
-      organizationPublicId: capabilitySummary.organizationPublicId,
+      effectiveEdition: "standard",
+      organizationPublicId,
     };
   };
 }

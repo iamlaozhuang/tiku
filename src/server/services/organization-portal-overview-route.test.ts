@@ -205,11 +205,70 @@ describe("organization portal overview route", () => {
     expect(JSON.stringify(payload.data)).not.toContain("Prompt");
   });
 
-  it("denies sessions without organization-admin capability before reading data", async () => {
+  it("allows readonly overview for organization admins with organization context fallback", async () => {
+    const observedInputs: OrganizationPortalOverviewReaderInput[] = [];
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(
+        createOrganizationAdminAuthContext({
+          adminWorkspaceCapability: undefined,
+          organizationPublicId: "organization_scope_public_003",
+        }),
+      ),
+    );
+    const readOverview = vi.fn(
+      async (input: OrganizationPortalOverviewReaderInput) => {
+        observedInputs.push(input);
+
+        return createOverviewResponse();
+      },
+    );
+    const { overview } = createOrganizationPortalOverviewRuntimeRouteHandlers({
+      readOverview,
+      sessionService,
+    });
+
+    const response = await overview.GET(createOverviewRequest());
+    const payload = await response.json();
+
+    expect(payload.code).toBe(0);
+    expect(observedInputs).toHaveLength(1);
+    expect(observedInputs[0].adminContext).toMatchObject({
+      adminPublicId: "organization_portal_admin_public_001",
+      authorizationPublicId: null,
+      effectiveEdition: "standard",
+      organizationPublicId: "organization_scope_public_003",
+    });
+    expect(payload.data.authorization.effectiveEdition).toBe("standard");
+  });
+
+  it("denies sessions without organization-admin role before reading data", async () => {
     const sessionService = createCurrentSessionService(
       createSuccessResponse(
         createOrganizationAdminAuthContext({
           adminRoles: ["content_admin"],
+          adminWorkspaceCapability: undefined,
+          organizationPublicId: null,
+        }),
+      ),
+    );
+    const readOverview = vi.fn();
+    const { overview } = createOrganizationPortalOverviewRuntimeRouteHandlers({
+      readOverview,
+      sessionService,
+    });
+
+    const response = await overview.GET(createOverviewRequest());
+    const payload = await response.json();
+
+    expect(payload.code).toBe(403189);
+    expect(payload.data).toBeNull();
+    expect(readOverview).not.toHaveBeenCalled();
+  });
+
+  it("denies organization admins without organization context before reading data", async () => {
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(
+        createOrganizationAdminAuthContext({
           adminWorkspaceCapability: undefined,
           organizationPublicId: null,
         }),
