@@ -96,6 +96,111 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: knowledge-node-ai-closure-plan-2026-07-08
+    title: Knowledge node resource AI closure plan and control matrix
+    phase: knowledge-node-ai-closure-plan-2026-07-08
+    status: closed
+    priority: p0
+    taskKind: docs_requirement_alignment
+    executionProfile: docs_only_requirement_materialization_no_runtime
+    validationPolicy: task_plan_matrix_traceability_evidence_audit_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/knowledge-node-ai-closure-plan-2026-07-08
+    humanApprovalBoundary: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+    plannedAt: "2026-07-08T00:32:00-07:00"
+    claimedAt: "2026-07-08T00:32:00-07:00"
+    completedAt: "2026-07-08T00:48:00-07:00"
+    dependsOn:
+      - full-role-uiux-local-browser-acceptance-2026-07-07
+    targetClosureItem: Materialize the knowledge_node, resource, question, and four-role AI generation knowledge parameter closure plan before implementation branches.
+    behaviorBoundary: docs_only_plan_matrix_requirement_evidence_audit_no_product_source_no_tests_no_db_no_provider_no_env_no_dependency_no_package_lockfile_no_schema_migration_seed_no_fixture_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
+    evidenceMode: redacted_paths_counts_statuses_and_code_symbol_findings_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
+    planPath: docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-ai-closure-plan.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-08-knowledge-node-ai-closure-plan-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-knowledge-node-ai-closure-plan-adversarial-audit.md
+    requirementPath: docs/01-requirements/traceability/2026-07-08-knowledge-node-resource-ai-closure-plan.md
+    matrixPath: docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-ai-closure-control-matrix.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/01-requirements/traceability/2026-07-08-knowledge-node-resource-ai-closure-plan.md
+      - docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-ai-closure-plan.md
+      - docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-ai-closure-control-matrix.md
+      - docs/05-execution-logs/evidence/2026-07-08-knowledge-node-ai-closure-plan-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-knowledge-node-ai-closure-plan-adversarial-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - rawfiles/**
+    capabilities:
+      localSourceChange: blocked
+      localValidationCommands: approved
+      browserRuntime: blocked
+      devServer: blocked
+      privateScreenshotRead: blocked_not_needed
+      privateScreenshotWrite: blocked
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/01-requirements/traceability/2026-07-08-knowledge-node-resource-ai-closure-plan.md docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-ai-closure-plan.md docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-ai-closure-control-matrix.md docs/05-execution-logs/evidence/2026-07-08-knowledge-node-ai-closure-plan-evidence.md docs/05-execution-logs/audits-reviews/2026-07-08-knowledge-node-ai-closure-plan-adversarial-audit.md
+      - git diff --check
+      - git diff --name-only -- AGENTS.md .env* package.json package-lock.yaml package-lock.json pnpm-lock.yaml pnpm-workspace.yaml src tests e2e src/db/schema drizzle migrations seed compose.yaml playwright-report test-results .next .runtime rawfiles
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId knowledge-node-ai-closure-plan-2026-07-08
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId knowledge-node-ai-closure-plan-2026-07-08 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+    validationSummary:
+      status: pass_plan_matrix_requirement_materialization_ready_for_commit_merge_push_cleanup
+      ssotRecovered: pass
+      sourceCodeReviewed: pass_static_symbol_review
+      rawfilesReviewedRedacted: pass_paths_counts_only
+      planMaterialized: pass
+      controlMatrixMaterialized: pass
+      threeRoundAdversarialReview: pass
+      prettierCheck: pass
+      diffCheck: pass
+      forbiddenScopeDiffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
   - id: full-role-uiux-local-browser-acceptance-2026-07-07
     title: Full role UIUX local browser acceptance package
     phase: full-role-uiux-local-browser-acceptance-2026-07-07
