@@ -123,8 +123,11 @@ type OwnerPreviewResourceImportDataset = {
   validation: OwnerPreviewResourcePackageValidation;
 };
 
-type OwnerPreviewResourceProfession = "logistics" | "marketing" | "monopoly";
-type OwnerPreviewResourceSubject = "skill" | "theory";
+export type OwnerPreviewResourceProfession =
+  | "logistics"
+  | "marketing"
+  | "monopoly";
+export type OwnerPreviewResourceSubject = "skill" | "theory";
 type OwnerPreviewResourceQuestionType =
   | "case_analysis"
   | "calculation"
@@ -141,6 +144,19 @@ type OwnerPreviewResourceType =
   | "textbook";
 
 type CsvRecord = Record<string, string>;
+
+export type OwnerPreviewResourceKnowledgeNodeResolutionResource = {
+  levels: number[];
+  profession: OwnerPreviewResourceProfession;
+  subject: OwnerPreviewResourceSubject | null;
+};
+
+export type OwnerPreviewResourceKnowledgeNodeReference = {
+  id: number;
+  levels: number[];
+  profession: OwnerPreviewResourceProfession;
+  subjects: OwnerPreviewResourceSubject[];
+};
 
 type QueryableSql = {
   <Row extends Record<string, unknown> = Record<string, unknown>>(
@@ -1172,6 +1188,11 @@ async function upsertResources(
   knowledgeNodeIdsByKey: Map<string, number>,
 ) {
   let resourceCount = 0;
+  const knowledgeNodeReferences =
+    createOwnerPreviewResourceKnowledgeNodeReferences({
+      knowledgeNodeIdsByKey,
+      nodeInputs: uniqueKnowledgeNodeInputs(dataset),
+    });
 
   for (const [index, row] of dataset.inventoryRows.entries()) {
     const knowledgeBaseId = knowledgeBaseIdsByProfession.get(row.profession);
@@ -1217,12 +1238,12 @@ async function upsertResources(
       RETURNING id
     `;
     const resourceId = Number(rows[0].id);
-    const knowledgeNodeId = resolveKnowledgeNodeForResource(
-      row,
-      knowledgeNodeIdsByKey,
-    );
+    const knowledgeNodeIds = resolveOwnerPreviewResourceKnowledgeNodeIds({
+      knowledgeNodes: knowledgeNodeReferences,
+      resource: row,
+    });
 
-    if (knowledgeNodeId !== null) {
+    for (const knowledgeNodeId of knowledgeNodeIds) {
       await sql`
         INSERT INTO knowledge_node_resource (
           knowledge_node_id,
@@ -1479,19 +1500,6 @@ async function upsertPapers(
   return { paperCount, paperQuestionCount };
 }
 
-function resolveKnowledgeNodeForResource(
-  row: OwnerPreviewResourceInventoryRow,
-  knowledgeNodeIdsByKey: Map<string, number>,
-) {
-  for (const [key, knowledgeNodeId] of knowledgeNodeIdsByKey.entries()) {
-    if (key.startsWith(`${row.profession}:`)) {
-      return knowledgeNodeId;
-    }
-  }
-
-  return null;
-}
-
 function renderResourceLevelLabel(row: OwnerPreviewResourceInventoryRow) {
   if (row.level !== null) {
     return `L${row.level}`;
@@ -1506,6 +1514,7 @@ function renderResourceLevelLabel(row: OwnerPreviewResourceInventoryRow) {
 
 function uniqueKnowledgeNodeInputs(dataset: OwnerPreviewResourceImportDataset) {
   const levelsByNode = new Map<string, Set<number>>();
+  const subjectsByNode = new Map<string, Set<OwnerPreviewResourceSubject>>();
   const namesByKey = new Map<
     string,
     { name: string; profession: OwnerPreviewResourceProfession }
@@ -1516,6 +1525,7 @@ function uniqueKnowledgeNodeInputs(dataset: OwnerPreviewResourceImportDataset) {
 
     if (!levelsByNode.has(key)) {
       levelsByNode.set(key, new Set());
+      subjectsByNode.set(key, new Set());
       namesByKey.set(key, {
         name: row.knowledgeNode,
         profession: row.profession,
@@ -1523,6 +1533,7 @@ function uniqueKnowledgeNodeInputs(dataset: OwnerPreviewResourceImportDataset) {
     }
 
     levelsByNode.get(key)?.add(row.level);
+    subjectsByNode.get(key)?.add(row.subject);
   }
 
   return Array.from(namesByKey.entries()).map(([key, value], index) => ({
@@ -1531,7 +1542,69 @@ function uniqueKnowledgeNodeInputs(dataset: OwnerPreviewResourceImportDataset) {
     name: value.name,
     profession: value.profession,
     sortOrder: index + 1,
+    subjects: Array.from(subjectsByNode.get(key) ?? []).sort(),
   }));
+}
+
+function createOwnerPreviewResourceKnowledgeNodeReferences(input: {
+  knowledgeNodeIdsByKey: Map<string, number>;
+  nodeInputs: ReturnType<typeof uniqueKnowledgeNodeInputs>;
+}): OwnerPreviewResourceKnowledgeNodeReference[] {
+  return input.nodeInputs.flatMap((nodeInput) => {
+    const knowledgeNodeId = input.knowledgeNodeIdsByKey.get(nodeInput.key);
+
+    return knowledgeNodeId === undefined
+      ? []
+      : [
+          {
+            id: knowledgeNodeId,
+            levels: nodeInput.levels,
+            profession: nodeInput.profession,
+            subjects: nodeInput.subjects,
+          },
+        ];
+  });
+}
+
+export function resolveOwnerPreviewResourceKnowledgeNodeIds(input: {
+  knowledgeNodes: OwnerPreviewResourceKnowledgeNodeReference[];
+  resource: OwnerPreviewResourceKnowledgeNodeResolutionResource;
+}): number[] {
+  const sameProfessionNodes = input.knowledgeNodes.filter(
+    (knowledgeNode) => knowledgeNode.profession === input.resource.profession,
+  );
+  const sameLevelNodes =
+    input.resource.levels.length === 0
+      ? sameProfessionNodes
+      : sameProfessionNodes.filter(
+          (knowledgeNode) =>
+            knowledgeNode.levels.length === 0 ||
+            hasSharedNumberValue(knowledgeNode.levels, input.resource.levels),
+        );
+  if (input.resource.subject === null) {
+    return uniqueSortedNumberValues(
+      sameLevelNodes.map((knowledgeNode) => knowledgeNode.id),
+    );
+  }
+
+  const resourceSubject = input.resource.subject;
+  const matchingNodes = sameLevelNodes.filter((knowledgeNode) =>
+    knowledgeNode.subjects.includes(resourceSubject),
+  );
+
+  return uniqueSortedNumberValues(
+    matchingNodes.map((knowledgeNode) => knowledgeNode.id),
+  );
+}
+
+function hasSharedNumberValue(left: number[], right: number[]) {
+  const rightValues = new Set(right);
+
+  return left.some((value) => rightValues.has(value));
+}
+
+function uniqueSortedNumberValues(values: number[]) {
+  return Array.from(new Set(values)).sort((left, right) => left - right);
 }
 
 function uniqueQuestionGroups(rows: OwnerPreviewResourceQuestionRow[]) {

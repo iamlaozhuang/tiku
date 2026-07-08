@@ -108,6 +108,7 @@ type LocalResourceCatalogEntry = {
   chunkCount: number;
   textHashes: string[];
   headingPaths: string[][];
+  knowledgeNodePublicIds: string[];
   activeMarkdownContentHash: string | null;
   activeChunkSnapshot: LocalResourceVectorChunkSnapshot[];
 };
@@ -153,6 +154,7 @@ export type LocalResourceRagRetrievalInput = {
   profession: Profession;
   level: number | null;
   authorizedResourcePublicIds?: string[];
+  knowledgeNodePublicIds?: string[];
 };
 
 const adminSessionRequiredResponse = createErrorResponse(
@@ -394,6 +396,7 @@ function normalizeLocalResourceCatalogEntry(
 
   return {
     ...entry,
+    knowledgeNodePublicIds: normalizeStringArray(entry.knowledgeNodePublicIds),
     activeMarkdownContentHash:
       typeof entry.activeMarkdownContentHash === "string"
         ? entry.activeMarkdownContentHash
@@ -487,6 +490,31 @@ function parseLocalResourceLevel(value: FormDataEntryValue | null) {
   const level = Number(value);
 
   return Number.isInteger(level) && level > 0 ? level : null;
+}
+
+function parseLocalResourceKnowledgeNodePublicIds(formData: FormData) {
+  return normalizeStringArray(
+    formData
+      .getAll("knowledgeNodePublicIds")
+      .flatMap((value) =>
+        typeof value === "string" ? value.split(/[,\s]+/u) : [],
+      ),
+  );
+}
+
+function normalizeStringArray(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter((item) => item !== ""),
+    ),
+  );
 }
 
 function mapLocalResourceEntry(
@@ -776,6 +804,7 @@ async function uploadLocalResource(input: {
     chunkCount: 0,
     textHashes: [],
     headingPaths: parsedResource?.headingPaths ?? [],
+    knowledgeNodePublicIds: parseLocalResourceKnowledgeNodePublicIds(formData),
     activeMarkdownContentHash: null,
     activeChunkSnapshot: [],
   };
@@ -1107,12 +1136,14 @@ async function enableLocalResource(input: {
 
 export async function buildLocalResourceRagRetrievalResult({
   authorizedResourcePublicIds,
+  knowledgeNodePublicIds,
   level,
   profession,
   query,
   storageRoot = defaultLocalUploadStorageRoot,
 }: LocalResourceRagRetrievalInput): Promise<RagRetrievalResultDto> {
   const catalog = await readLocalResourceCatalog(storageRoot);
+  const knowledgeNodePublicIdScope = new Set(knowledgeNodePublicIds ?? []);
   const eligibleResources = catalog.resources.filter(
     (resource) =>
       resource.resourceStatus === "rag_ready" &&
@@ -1120,7 +1151,11 @@ export async function buildLocalResourceRagRetrievalResult({
         (resource.markdownContent !== null &&
           resource.markdownContentHash !== null)) &&
       resource.profession === profession &&
-      (level === null || resource.level === null || resource.level === level),
+      (level === null || resource.level === null || resource.level === level) &&
+      matchesLocalResourceKnowledgeNodeScope(
+        resource,
+        knowledgeNodePublicIdScope,
+      ),
   );
   const authorizedPublicIds =
     authorizedResourcePublicIds ??
@@ -1136,6 +1171,19 @@ export async function buildLocalResourceRagRetrievalResult({
     authorizedResourcePublicIds: authorizedPublicIds,
     chunks,
   });
+}
+
+function matchesLocalResourceKnowledgeNodeScope(
+  resource: LocalResourceCatalogEntry,
+  knowledgeNodePublicIdScope: ReadonlySet<string>,
+) {
+  if (knowledgeNodePublicIdScope.size === 0) {
+    return true;
+  }
+
+  return resource.knowledgeNodePublicIds.some((knowledgeNodePublicId) =>
+    knowledgeNodePublicIdScope.has(knowledgeNodePublicId),
+  );
 }
 
 function createLocalRetrievalChunks(resource: LocalResourceCatalogEntry) {

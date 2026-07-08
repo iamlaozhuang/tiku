@@ -8,6 +8,7 @@ import {
   containsForbiddenOwnerPreviewResourceImportEvidenceText,
   createOwnerPreviewResourceImportDryRunSummary,
   renderOwnerPreviewResourceImportSummary,
+  resolveOwnerPreviewResourceKnowledgeNodeIds,
   runOwnerPreviewResourceImport,
   validateOwnerPreviewResourcePackage,
 } from "@/db/owner-preview-resource-import";
@@ -162,6 +163,56 @@ afterEach(() => {
 });
 
 describe("owner preview resource import contract", () => {
+  it("resolves resource knowledge nodes by profession level and subject without profession-only fallback", () => {
+    expect(
+      resolveOwnerPreviewResourceKnowledgeNodeIds({
+        knowledgeNodes: [
+          {
+            id: 101,
+            levels: [1],
+            profession: "monopoly",
+            subjects: ["theory"],
+          },
+          {
+            id: 202,
+            levels: [2],
+            profession: "marketing",
+            subjects: ["skill"],
+          },
+          {
+            id: 203,
+            levels: [2],
+            profession: "marketing",
+            subjects: ["theory"],
+          },
+        ],
+        resource: {
+          levels: [2],
+          profession: "marketing",
+          subject: "skill",
+        },
+      }),
+    ).toEqual([202]);
+
+    expect(
+      resolveOwnerPreviewResourceKnowledgeNodeIds({
+        knowledgeNodes: [
+          {
+            id: 202,
+            levels: [2],
+            profession: "marketing",
+            subjects: ["skill"],
+          },
+        ],
+        resource: {
+          levels: [5],
+          profession: "marketing",
+          subject: "skill",
+        },
+      }),
+    ).toEqual([]);
+  });
+
   it("validates a package and reports only aggregate coverage counts", async () => {
     const packageRoot = createSyntheticResourcePackage();
     const validation = await validateOwnerPreviewResourcePackage(packageRoot);

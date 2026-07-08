@@ -691,6 +691,104 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
     });
   });
 
+  it("filters local RAG retrieval by declared knowledge node scope", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-local-rag-kn-"));
+    const catalogDir = join(storageRoot, "dev", "resource");
+    const catalogPath = join(catalogDir, "catalog.json");
+
+    await mkdir(catalogDir, { recursive: true });
+    await writeFile(
+      catalogPath,
+      JSON.stringify(
+        {
+          resources: [
+            {
+              publicId: "resource-local-retail-rule",
+              title: "Retail Rule Resource",
+              resourceType: "knowledge_doc",
+              resourceStatus: "rag_ready",
+              profession: "marketing",
+              level: 3,
+              originalFileName: "retail-rule.md",
+              objectKey: "dev/resource/marketing/202605/retail-rule.md",
+              contentType: "text/markdown",
+              fileSizeByte: 180,
+              fileHash: "retail-rule-file-hash",
+              markdownContent:
+                "marketing scoped keyword retail rule explanation",
+              markdownContentHash: "retail-rule-markdown-hash",
+              indexingErrorMessage: null,
+              isVectorStale: false,
+              publishedAt: "2026-05-25T08:00:00.000Z",
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+              disabledFromStatus: null,
+              chunkCount: 1,
+              textHashes: ["retail-rule-text-hash"],
+              headingPaths: [["Retail Rule"]],
+              knowledgeNodePublicIds: ["knowledge-node-retail-rule"],
+            },
+            {
+              publicId: "resource-local-unrelated",
+              title: "Unrelated Resource",
+              resourceType: "knowledge_doc",
+              resourceStatus: "rag_ready",
+              profession: "marketing",
+              level: 3,
+              originalFileName: "unrelated.md",
+              objectKey: "dev/resource/marketing/202605/unrelated.md",
+              contentType: "text/markdown",
+              fileSizeByte: 180,
+              fileHash: "unrelated-file-hash",
+              markdownContent: "marketing scoped keyword unrelated explanation",
+              markdownContentHash: "unrelated-markdown-hash",
+              indexingErrorMessage: null,
+              isVectorStale: false,
+              publishedAt: "2026-05-25T08:00:00.000Z",
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+              disabledFromStatus: null,
+              chunkCount: 1,
+              textHashes: ["unrelated-text-hash"],
+              headingPaths: [["Unrelated"]],
+              knowledgeNodePublicIds: ["knowledge-node-unrelated"],
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const scopedResult = await buildLocalResourceRagRetrievalResult({
+      storageRoot,
+      query: "marketing scoped keyword",
+      profession: "marketing",
+      level: 3,
+      knowledgeNodePublicIds: ["knowledge-node-retail-rule"],
+    });
+
+    expect(scopedResult.evidenceStatus).toBe("weak");
+    expect(scopedResult.citations).toEqual([
+      expect.objectContaining({
+        resourcePublicId: "resource-local-retail-rule",
+      }),
+    ]);
+
+    await expect(
+      buildLocalResourceRagRetrievalResult({
+        storageRoot,
+        query: "marketing scoped keyword",
+        profession: "marketing",
+        level: 3,
+        knowledgeNodePublicIds: ["knowledge-node-missing"],
+      }),
+    ).resolves.toMatchObject({
+      evidenceStatus: "none",
+      citations: [],
+    });
+  });
+
   it("marks DOCX PPTX and PDF local resource uploads as conversion failed without converter dependencies", async () => {
     const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-formats-"));
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({

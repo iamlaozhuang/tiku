@@ -96,6 +96,103 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: knowledge-node-resource-link-resolver-2026-07-08
+    title: Knowledge node resource link resolver
+    phase: knowledge-node-resource-link-resolver-2026-07-08
+    status: closed
+    priority: p0
+    taskKind: implementation
+    executionProfile: source_and_targeted_tests_no_runtime
+    validationPolicy: targeted_tests_lint_typecheck_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/knowledge-node-resource-link-resolver-2026-07-08
+    humanApprovalBoundary: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+    plannedAt: "2026-07-08T01:09:00-07:00"
+    claimedAt: "2026-07-08T01:09:00-07:00"
+    completedAt: "2026-07-08T01:24:00-07:00"
+    dependsOn:
+      - knowledge-node-ai-closure-plan-2026-07-08
+    targetClosureItem: Replace profession-only resource knowledge_node linking with deterministic profession/level/subject matching and add knowledge_node scope filtering for local resource RAG retrieval.
+    behaviorBoundary: limited_source_and_test_change_no_schema_no_migration_no_seed_no_fixture_no_db_execution_no_provider_no_env_no_dependency_no_package_lockfile_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
+    evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
+    planPath: docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-resource-link-resolver.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-08-knowledge-node-resource-link-resolver-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-knowledge-node-resource-link-resolver-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-08-knowledge-node-resource-link-resolver.md
+      - docs/05-execution-logs/evidence/2026-07-08-knowledge-node-resource-link-resolver-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-knowledge-node-resource-link-resolver-audit.md
+      - src/db/owner-preview-resource-import.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - tests/unit/owner-preview-resource-import.test.ts
+      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - rawfiles/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      devServer: blocked
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd exec -- vitest run tests/unit/owner-preview-resource-import.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId knowledge-node-resource-link-resolver-2026-07-08
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId knowledge-node-resource-link-resolver-2026-07-08 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_requested_goal_until_complete_knowledge_node_ai_closure_2026_07_08
+    validationSummary:
+      status: pass_source_implementation_ready_for_commit_merge_push_cleanup
+      branchSpecificReadGate: pass
+      targetedTests: pass_2_files_14_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      preCommitHardening: pass
+      prePushReadiness: pass
   - id: knowledge-node-ai-closure-plan-2026-07-08
     title: Knowledge node resource AI closure plan and control matrix
     phase: knowledge-node-ai-closure-plan-2026-07-08
