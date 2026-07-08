@@ -128,6 +128,7 @@ async function readEmployeeSummary(
     organizationId: number;
   },
 ): Promise<OrganizationPortalOverviewDto["employeeSummary"]> {
+  const lockedComparisonTimestamp = input.now.toISOString();
   const [row] = await database
     .select({
       total: count(),
@@ -140,7 +141,7 @@ async function readEmployeeSummary(
       locked: sql<number>`
         count(*) filter (
           where ${user.locked_until_at} is not null
-            and ${user.locked_until_at} > ${input.now}
+            and ${user.locked_until_at} > ${lockedComparisonTimestamp}::timestamptz
         )::int
       `,
     })

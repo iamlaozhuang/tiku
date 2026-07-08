@@ -4,6 +4,7 @@ import { createSuccessResponse } from "../contracts/api-response";
 import type { ApiResponse } from "../contracts/api-response";
 import type { OrganizationPortalOverviewDto } from "../contracts/organization-portal-overview-contract";
 import type { AdminRole } from "../models/auth";
+import { createPostgresOrganizationPortalOverviewRepository } from "../repositories/organization-portal-overview-repository";
 import type { SessionService } from "./session-service";
 import {
   createOrganizationPortalOverviewRuntimeRouteHandlers,
@@ -124,6 +125,55 @@ function createOverviewResponse(): ApiResponse<OrganizationPortalOverviewDto> {
     },
     updatedAt: "2026-07-08T10:00:00.000Z",
   });
+}
+
+function collectSqlChunkValues(value: unknown): unknown[] {
+  if (value === null || value === undefined) {
+    return [];
+  }
+
+  if (value instanceof Date) {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectSqlChunkValues(item));
+  }
+
+  if (typeof value !== "object") {
+    return [value];
+  }
+
+  if ("queryChunks" in value) {
+    return collectSqlChunkValues(
+      (value as { queryChunks: readonly unknown[] }).queryChunks,
+    );
+  }
+
+  return [];
+}
+
+function createThenableQuery(rows: unknown[]) {
+  const query = {
+    from: vi.fn(() => query),
+    innerJoin: vi.fn(() => query),
+    leftJoin: vi.fn(() => query),
+    where: vi.fn(() => query),
+    orderBy: vi.fn(() => query),
+    limit: vi.fn(async () => rows),
+    then<TResult1 = unknown[], TResult2 = never>(
+      onfulfilled?:
+        | ((value: unknown[]) => TResult1 | PromiseLike<TResult1>)
+        | null,
+      onrejected?:
+        | ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+        | null,
+    ) {
+      return Promise.resolve(rows).then(onfulfilled, onrejected);
+    },
+  };
+
+  return query;
 }
 
 describe("organization portal overview route", () => {
@@ -286,5 +336,80 @@ describe("organization portal overview route", () => {
     expect(payload.code).toBe(403189);
     expect(payload.data).toBeNull();
     expect(readOverview).not.toHaveBeenCalled();
+  });
+
+  it("passes a driver-safe timestamp string into the employee locked summary query", async () => {
+    const observedLockedSqlValues: unknown[] = [];
+    const fakeDatabase = {
+      select: vi.fn((selection: Record<string, unknown>) => {
+        if ("display_name" in selection) {
+          return createThenableQuery([
+            {
+              id: 1,
+              display_name: "组织概览",
+              org_tier: "city",
+              status: "active",
+            },
+          ]);
+        }
+
+        if ("locked" in selection) {
+          observedLockedSqlValues.push(
+            ...collectSqlChunkValues(selection.locked),
+          );
+
+          return createThenableQuery([
+            {
+              total: 1,
+              active: 1,
+              disabled: 0,
+              locked: 0,
+            },
+          ]);
+        }
+
+        if ("phone" in selection) {
+          return createThenableQuery([]);
+        }
+
+        if ("auth_scope_type" in selection) {
+          return createThenableQuery([
+            {
+              id: 2,
+              name: "组织授权",
+              auth_scope_type: "specified_nodes",
+              source_edition: "standard",
+              effective_edition: "advanced",
+              profession: "marketing",
+              level: 3,
+              account_quota: 10,
+              used_quota: 2,
+              starts_at: new Date("2026-07-01T00:00:00.000Z"),
+              expires_at: new Date("2027-07-01T00:00:00.000Z"),
+              status: "active",
+              upgrade_status: "active",
+            },
+          ]);
+        }
+
+        return createThenableQuery([{ value: 1 }]);
+      }),
+    };
+    const repository = createPostgresOrganizationPortalOverviewRepository({
+      createDatabase: () => fakeDatabase as never,
+    });
+
+    const overview = await repository.readOverview({
+      authorizationPublicId: null,
+      now: new Date("2026-07-08T10:00:00.000Z"),
+      organizationPublicId: "organization_scope_public_001",
+      updatedAt: "2026-07-08T10:00:00.000Z",
+    });
+
+    expect(overview?.employeeSummary.locked).toBe(0);
+    expect(observedLockedSqlValues.some((value) => value instanceof Date)).toBe(
+      false,
+    );
+    expect(observedLockedSqlValues).toContain("2026-07-08T10:00:00.000Z");
   });
 });
