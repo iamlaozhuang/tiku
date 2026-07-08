@@ -144,11 +144,11 @@ describe("owner preview Qwen visible AI runtime control", () => {
           profession: "marketing",
           level: 3,
           subject: "theory",
-          knowledgeNode: "卷烟营销基础",
-          knowledgeNodeMode: "balanced",
-          knowledgeNodePublicIds: [],
-          includeDescendants: false,
-          knowledgeNodeSupplement: "卷烟营销基础",
+          knowledgeNode: "synthetic knowledge scope",
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: ["knowledge_node_public_runtime_scope"],
+          includeDescendants: true,
+          knowledgeNodeSupplement: "synthetic knowledge scope",
           sourcePreference: null,
           questionType:
             taskType === "ai_question_generation" ? "single_choice" : null,
@@ -181,6 +181,11 @@ describe("owner preview Qwen visible AI runtime control", () => {
       expect(retrievalInput.query).not.toContain("3级");
       expect(retrievalInput.query).not.toContain("single_choice");
       expect(retrievalInput.query).not.toContain("medium");
+      expect(retrievalInput.knowledgeNodePublicIds).toEqual(
+        taskType === "ai_question_generation"
+          ? ["knowledge_node_public_runtime_scope"]
+          : undefined,
+      );
     },
   );
 });

@@ -92,14 +92,19 @@ async function resolveOwnerPreviewGroundingContext(input: {
     return createInsufficientGroundingContext(generationParameters);
   }
 
+  const taskType = resolveTaskType(input.requestContext);
   const retrievalResult = await buildLocalResourceRagRetrievalResult({
     storageRoot: defaultLocalUploadStorageRoot,
     query: createGroundingRetrievalQuery({
       generationParameters,
-      taskType: resolveTaskType(input.requestContext),
+      taskType,
     }),
     profession: generationParameters.profession,
     level: generationParameters.level,
+    knowledgeNodePublicIds:
+      taskType === "ai_question_generation"
+        ? [...generationParameters.knowledgeNodePublicIds]
+        : undefined,
   });
 
   return {
