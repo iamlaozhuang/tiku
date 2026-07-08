@@ -29,7 +29,9 @@ import type {
 } from "@/server/contracts/organization-training-contract";
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
+  AiGenerationRouteIntegratedKnowledgeNodeMode,
   AiGenerationRouteIntegratedProfession,
+  AiGenerationRouteIntegratedSourcePreference,
   AiGenerationRouteIntegratedSubject,
 } from "@/server/contracts/route-integrated-provider-execution-contract";
 import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
@@ -497,6 +499,39 @@ const adminDifficultyValueByLabel = Object.fromEntries(
   ]),
 ) as Record<string, string>;
 
+const adminKnowledgeNodeModeLabelByValue = {
+  balanced: "均衡覆盖",
+  comprehensive: "综合测验",
+  selected: "指定知识点",
+  weak_point_priority: "薄弱知识点优先",
+} as const satisfies Record<
+  AiGenerationRouteIntegratedKnowledgeNodeMode,
+  string
+>;
+
+const adminKnowledgeNodeModeValueByLabel = Object.fromEntries(
+  Object.entries(adminKnowledgeNodeModeLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, AiGenerationRouteIntegratedKnowledgeNodeMode>;
+
+const adminSourcePreferenceLabelByValue = {
+  balanced: "均衡使用",
+  prefer_enterprise: "优先使用企业题",
+  prefer_platform: "优先使用平台题",
+} as const satisfies Record<
+  AiGenerationRouteIntegratedSourcePreference,
+  string
+>;
+
+const adminSourcePreferenceValueByLabel = Object.fromEntries(
+  Object.entries(adminSourcePreferenceLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, AiGenerationRouteIntegratedSourcePreference>;
+
 const ADMIN_AI_QUESTION_DEFAULT_QUESTION_COUNT = 3;
 const ADMIN_AI_QUESTION_MAX_QUESTION_COUNT = 10;
 const ADMIN_AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
@@ -521,12 +556,12 @@ function createDefaultAdminGenerationParameters(
     level: 3,
     subject: "theory",
     ...createDefaultAiGenerationRouteIntegratedKnowledgeScope({
-      knowledgeNode:
-        generationKind === "question"
-          ? "卷烟营销基础"
-          : isOrganizationWorkspace
-            ? "均衡覆盖"
-            : "覆盖薄弱知识点",
+      sourcePreference:
+        generationKind === "paper"
+          ? isOrganizationWorkspace
+            ? "balanced"
+            : "prefer_platform"
+          : null,
     }),
     questionType: generationKind === "question" ? "single_choice" : null,
     questionCount:
@@ -681,6 +716,14 @@ export function resolveAdminAiGenerationParameters(
 
   const persistedParameters = generationParameterState.parameters;
   const persistedQuestionCount = persistedParameters.questionCount;
+  const resolvedKnowledgeNode = resolveNullableText(
+    persistedParameters.knowledgeNode,
+    defaultParameters.knowledgeNode,
+  );
+  const resolvedKnowledgeNodeSupplement = resolveNullableText(
+    persistedParameters.knowledgeNodeSupplement,
+    resolvedKnowledgeNode,
+  );
 
   return {
     profession: isAdminAiGenerationProfession(persistedParameters.profession)
@@ -692,10 +735,7 @@ export function resolveAdminAiGenerationParameters(
     subject: isAdminAiGenerationSubject(persistedParameters.subject)
       ? persistedParameters.subject
       : defaultParameters.subject,
-    knowledgeNode: resolveNullableText(
-      persistedParameters.knowledgeNode,
-      defaultParameters.knowledgeNode,
-    ),
+    knowledgeNode: resolvedKnowledgeNodeSupplement ?? resolvedKnowledgeNode,
     knowledgeNodeMode: resolveKnowledgeNodeMode(
       persistedParameters.knowledgeNodeMode,
       defaultParameters.knowledgeNodeMode,
@@ -708,10 +748,7 @@ export function resolveAdminAiGenerationParameters(
       persistedParameters.includeDescendants,
       defaultParameters.includeDescendants,
     ),
-    knowledgeNodeSupplement: resolveNullableText(
-      persistedParameters.knowledgeNodeSupplement,
-      defaultParameters.knowledgeNodeSupplement,
-    ),
+    knowledgeNodeSupplement: resolvedKnowledgeNodeSupplement,
     sourcePreference: resolveSourcePreference(
       persistedParameters.sourcePreference,
       defaultParameters.sourcePreference,
@@ -772,11 +809,6 @@ function getAiGenerationDetailControls(
     return [
       ...baseControls,
       {
-        inputMode: "text",
-        label: "知识点",
-        value: generationParameters.knowledgeNode ?? "",
-      },
-      {
         inputMode: "select",
         label: "题型",
         options: ["单选题", "多选题", "判断题", "案例分析题"],
@@ -829,7 +861,10 @@ function getAiGenerationDetailControls(
             inputMode: "select",
             label: "题源偏好",
             options: ["均衡使用", "优先使用企业题", "优先使用平台题"],
-            value: "均衡使用",
+            value:
+              adminSourcePreferenceLabelByValue[
+                generationParameters.sourcePreference ?? "balanced"
+              ],
           },
         ] satisfies readonly AdminAiGenerationDetailControl[])
       : paperControls;
@@ -859,12 +894,6 @@ function getAiGenerationDetailControls(
     },
     {
       inputMode: "select",
-      label: "知识点覆盖",
-      options: ["均衡覆盖", "指定知识点", "薄弱知识点优先", "综合测验"],
-      value: generationParameters.knowledgeNode ?? "均衡覆盖",
-    },
-    {
-      inputMode: "select",
       label: "试卷结构",
       options: ["按大题模块组织", "按知识点模块组织"],
       value: "按大题模块组织",
@@ -875,6 +904,139 @@ function getAiGenerationDetailControls(
       value: generationParameters.learningObjective ?? "",
     },
   ] satisfies readonly AdminAiGenerationDetailControl[];
+}
+
+function getAdminAiKnowledgeScopeBlockedReason(
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+): string | null {
+  if (
+    generationParameters.knowledgeNodeMode === "selected" &&
+    generationParameters.knowledgeNodePublicIds.length === 0
+  ) {
+    return "当前范围没有可直接选择的知识点，不能使用指定知识点模式。请改用均衡覆盖、薄弱知识点优先或填写补充说明。";
+  }
+
+  return null;
+}
+
+function AdminAiKnowledgeScopePanel({
+  generationParameters,
+  onChange,
+}: {
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  onChange: (change: AdminAiGenerationDetailControlChange) => void;
+}) {
+  const blockedReason =
+    getAdminAiKnowledgeScopeBlockedReason(generationParameters);
+  const selectedKnowledgeNodeCount =
+    generationParameters.knowledgeNodePublicIds.length;
+
+  return (
+    <section
+      className="border-border bg-muted/40 mt-4 rounded-md border p-3"
+      data-testid="admin-ai-knowledge-scope-panel"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">知识点范围</p>
+          <h3 className="text-text-primary text-sm font-semibold">
+            结构化覆盖条件
+          </h3>
+          <p className="text-text-secondary text-xs leading-5">
+            指定知识点使用已选择的知识点范围；补充说明只作为软约束，不替代知识点树绑定。
+          </p>
+        </div>
+        <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          已选 {selectedKnowledgeNodeCount} 个
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <label className="block">
+          <span className="text-text-secondary text-xs font-medium">
+            知识点覆盖
+          </span>
+          <select
+            aria-label="知识点覆盖"
+            className={aiGenerationDetailControlClassName}
+            value={
+              adminKnowledgeNodeModeLabelByValue[
+                generationParameters.knowledgeNodeMode
+              ]
+            }
+            onChange={(event) =>
+              onChange({
+                label: "知识点覆盖",
+                value: event.currentTarget.value,
+              })
+            }
+          >
+            {Object.values(adminKnowledgeNodeModeLabelByValue).map(
+              (optionLabel) => (
+                <option key={optionLabel} value={optionLabel}>
+                  {optionLabel}
+                </option>
+              ),
+            )}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="text-text-secondary text-xs font-medium">
+            包含下级知识点
+          </span>
+          <select
+            aria-label="包含下级知识点"
+            className={aiGenerationDetailControlClassName}
+            disabled={generationParameters.knowledgeNodeMode !== "selected"}
+            value={generationParameters.includeDescendants ? "包含" : "不包含"}
+            onChange={(event) =>
+              onChange({
+                label: "包含下级知识点",
+                value: event.currentTarget.value,
+              })
+            }
+          >
+            <option value="不包含">不包含</option>
+            <option value="包含">包含</option>
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="text-text-secondary text-xs font-medium">
+            知识点补充说明
+          </span>
+          <input
+            aria-label="知识点补充说明"
+            className={aiGenerationDetailControlClassName}
+            placeholder="可填写中文软约束"
+            type="text"
+            value={generationParameters.knowledgeNodeSupplement ?? ""}
+            onChange={(event) =>
+              onChange({
+                label: "知识点补充说明",
+                value: event.currentTarget.value,
+              })
+            }
+          />
+        </label>
+      </div>
+
+      {blockedReason === null ? (
+        <p className="text-text-secondary mt-3 text-xs leading-5">
+          当前范围暂无可直接选择的知识点；均衡覆盖、薄弱优先和综合测验会按专业、等级、科目继续收敛。
+        </p>
+      ) : (
+        <p
+          className="text-destructive mt-3 text-xs leading-5"
+          data-testid="admin-ai-knowledge-scope-disabled-reason"
+          role="status"
+        >
+          {blockedReason}
+        </p>
+      )}
+    </section>
+  );
 }
 
 function AdminAiGenerationDetailControls({
@@ -975,6 +1137,11 @@ function AdminAiGenerationDetailControls({
           </label>
         ))}
       </div>
+
+      <AdminAiKnowledgeScopePanel
+        generationParameters={generationParameters}
+        onChange={onChange}
+      />
 
       {isOrganizationPaper || isContentPaper ? (
         <section className="border-border bg-muted/40 mt-4 rounded-md border p-3">
@@ -2329,6 +2496,10 @@ export function AdminAiGenerationEntryPage({
     workspace,
     generationParameterState,
   );
+  const knowledgeScopeBlockedReason =
+    getAdminAiKnowledgeScopeBlockedReason(generationParameters);
+  const isSubmitDisabled =
+    requestState === "submitting" || knowledgeScopeBlockedReason !== null;
 
   function handleGenerationParameterChange({
     label,
@@ -2369,13 +2540,53 @@ export function AdminAiGenerationEntryPage({
                 adminSubjectValueByLabel[value] ?? currentParameters.subject,
             },
           };
-        case "知识点":
-        case "知识点覆盖":
+        case "知识点覆盖": {
+          const knowledgeNodeMode =
+            adminKnowledgeNodeModeValueByLabel[value] ??
+            currentParameters.knowledgeNodeMode;
+
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              knowledgeNodeMode,
+              knowledgeNodePublicIds:
+                knowledgeNodeMode === "selected"
+                  ? currentParameters.knowledgeNodePublicIds
+                  : [],
+              includeDescendants:
+                knowledgeNodeMode === "selected"
+                  ? currentParameters.includeDescendants
+                  : false,
+            },
+          };
+        }
+        case "包含下级知识点":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              includeDescendants: value === "包含",
+            },
+          };
+        case "知识点补充说明":
           return {
             generationKind,
             parameters: {
               ...currentParameters,
               knowledgeNode: value.trim().length === 0 ? null : value.trim(),
+              knowledgeNodeSupplement:
+                value.trim().length === 0 ? null : value.trim(),
+            },
+          };
+        case "题源偏好":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              sourcePreference:
+                adminSourcePreferenceValueByLabel[value] ??
+                currentParameters.sourcePreference,
             },
           };
         case "题型":
@@ -2412,6 +2623,8 @@ export function AdminAiGenerationEntryPage({
             },
           };
         case "学习目标":
+        case "训练目标":
+        case "评审目标":
         case "组卷目标":
           return {
             generationKind,
@@ -2931,12 +3144,13 @@ export function AdminAiGenerationEntryPage({
             <h2>{pageCopy.actionLabel}</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            生成入口已就绪，资料充足时可生成预览草稿。
+            {knowledgeScopeBlockedReason ??
+              "生成入口已就绪，资料充足时可生成预览草稿。"}
           </p>
           <button
             className="bg-primary text-primary-foreground mt-4 inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             data-testid="admin-ai-generation-submit"
-            disabled={requestState === "submitting"}
+            disabled={isSubmitDisabled}
             type="button"
             onClick={handleSubmitLocalContractRequest}
           >

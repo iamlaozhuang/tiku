@@ -254,7 +254,11 @@ describe("AdminAiGenerationEntryPage", () => {
 
     expect(generationParameters).toMatchObject({
       difficulty: "medium",
-      knowledgeNode: "卷烟营销基础",
+      includeDescendants: false,
+      knowledgeNode: null,
+      knowledgeNodeMode: "balanced",
+      knowledgeNodePublicIds: [],
+      knowledgeNodeSupplement: null,
       learningObjective: "内容题目评审",
       level: 3,
       profession: "marketing",
@@ -274,12 +278,17 @@ describe("AdminAiGenerationEntryPage", () => {
 
     expect(generationParameters).toMatchObject({
       difficulty: "medium",
-      knowledgeNode: "覆盖薄弱知识点",
+      includeDescendants: false,
+      knowledgeNode: null,
+      knowledgeNodeMode: "balanced",
+      knowledgeNodePublicIds: [],
+      knowledgeNodeSupplement: null,
       learningObjective: "内容试卷评审",
       level: 3,
       profession: "monopoly",
       questionCount: 30,
       questionType: null,
+      sourcePreference: "prefer_platform",
       subject: "theory",
     });
   });
@@ -342,6 +351,69 @@ describe("AdminAiGenerationEntryPage", () => {
     expect(
       screen.queryByText("admin_ai_generation_result_public_ui_hidden"),
     ).not.toBeInTheDocument();
+  });
+
+  it("maps admin knowledge supplement into structured generation parameters", async () => {
+    mockAdminAiGenerationFetch();
+
+    render(
+      <AdminAiGenerationEntryPage
+        generationKind="question"
+        workspace="content"
+      />,
+    );
+
+    fireEvent.change(await screen.findByLabelText("知识点补充说明"), {
+      target: { value: "围绕营销基础与客户沟通" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "生成待审题目草稿" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/v1/content-ai-generation-requests",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+    const submitCall = vi
+      .mocked(fetch)
+      .mock.calls.find(
+        ([url, init]) =>
+          String(url) === "/api/v1/content-ai-generation-requests" &&
+          init?.method === "POST",
+      );
+    const submitBody = JSON.parse(
+      String((submitCall?.[1] as RequestInit | undefined)?.body),
+    );
+
+    expect(submitBody.generationParameters).toMatchObject({
+      includeDescendants: false,
+      knowledgeNode: "围绕营销基础与客户沟通",
+      knowledgeNodeMode: "balanced",
+      knowledgeNodePublicIds: [],
+      knowledgeNodeSupplement: "围绕营销基础与客户沟通",
+      sourcePreference: null,
+    });
+  });
+
+  it("blocks admin submit when selected knowledge node mode has no selectable public ids", async () => {
+    mockAdminAiGenerationFetch();
+
+    render(
+      <AdminAiGenerationEntryPage generationKind="paper" workspace="content" />,
+    );
+
+    fireEvent.change(await screen.findByLabelText("知识点覆盖"), {
+      target: { value: "指定知识点" },
+    });
+
+    expect(screen.getByTestId("admin-ai-generation-submit")).toBeDisabled();
+    expect(
+      screen.getByTestId("admin-ai-knowledge-scope-disabled-reason"),
+    ).toHaveTextContent("当前范围没有可直接选择的知识点");
+    expect(fetch).not.toHaveBeenCalledWith(
+      "/api/v1/content-ai-generation-requests",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 
   it("maps redacted admin AI generation rejection reasons to clear business wording", async () => {

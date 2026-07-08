@@ -625,7 +625,9 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).toHaveTextContent("专业");
     expect(detailControls).toHaveTextContent("等级");
     expect(detailControls).toHaveTextContent("科目");
-    expect(detailControls).toHaveTextContent("知识点");
+    expect(detailControls).toHaveTextContent("知识点覆盖");
+    expect(detailControls).toHaveTextContent("包含下级知识点");
+    expect(detailControls).toHaveTextContent("知识点补充说明");
     expect(detailControls).toHaveTextContent("题型");
     expect(detailControls).toHaveTextContent("出题数量");
     expect(detailControls).toHaveTextContent("难度");
@@ -642,6 +644,10 @@ describe("admin AI generation entry surfaces", () => {
     expect(screen.getByLabelText("题型")).toHaveDisplayValue("单选题");
     expect(screen.getByLabelText("出题数量")).toHaveDisplayValue("3");
     expect(screen.getByLabelText("出题数量")).toHaveAttribute("max", "10");
+    expect(screen.getByLabelText("知识点覆盖")).toHaveDisplayValue("均衡覆盖");
+    expect(screen.getByLabelText("包含下级知识点")).toHaveDisplayValue(
+      "不包含",
+    );
     expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
       "生成待审题目草稿",
     );
@@ -1109,7 +1115,12 @@ describe("admin AI generation entry surfaces", () => {
         profession: "marketing",
         level: 3,
         subject: "theory",
-        knowledgeNode: "卷烟营销基础",
+        includeDescendants: false,
+        knowledgeNode: null,
+        knowledgeNodeMode: "balanced",
+        knowledgeNodePublicIds: [],
+        knowledgeNodeSupplement: null,
+        sourcePreference: null,
         questionType: "single_choice",
         questionCount: 3,
       },
