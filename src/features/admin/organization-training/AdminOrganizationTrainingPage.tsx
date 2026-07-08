@@ -58,6 +58,10 @@ type OrganizationTrainingLifecycleStatusFilter =
   | "published"
   | "taken_down";
 
+type TrainingContentShape = "question_set" | "paper_like";
+
+type OrganizationTrainingAiResultKind = "question_draft" | "paper_plan";
+
 type DraftFormValues = {
   authorizationPublicId: string;
   description: string;
@@ -125,21 +129,55 @@ const defaultPublishFormValues: PublishFormValues = {
 const sourceChoices = [
   {
     title: "平台试卷快照",
-    description: "选择已发布试卷，发布前预览题目、答案和解析。",
+    description: "按试卷结构复制平台试卷快照，发布前预览题目、答案和解析。",
   },
   {
     title: "企业 AI 结果",
-    description: "把同授权范围内的 AI 出题或组卷结果复制为可编辑草稿。",
+    description: "把 AI出题或 AI组卷结果复制为企业训练草稿。",
   },
   {
     title: "手动题组",
-    description: "由企业管理员维护企业私有题组后再发布给当前或下级组织。",
+    description: "按题目集合维护企业私有题组后再发布。",
   },
 ] as const;
 
 type SourceChoiceTitle = (typeof sourceChoices)[number]["title"];
 
 const wizardSteps = ["选择来源", "配置训练", "设置范围", "预览发布"] as const;
+
+const trainingContentShapeOptions: {
+  description: string;
+  label: string;
+  value: TrainingContentShape;
+}[] = [
+  {
+    label: "试卷训练",
+    value: "paper_like",
+    description: "保留试卷结构，适合平台试卷快照或 AI组卷结果。",
+  },
+  {
+    label: "题目训练",
+    value: "question_set",
+    description: "按题目集合发布，适合 AI出题结果或手动题组。",
+  },
+];
+
+const organizationAiResultKindOptions: {
+  description: string;
+  label: string;
+  value: OrganizationTrainingAiResultKind;
+}[] = [
+  {
+    label: "AI出题结果",
+    value: "question_draft",
+    description: "生成题目草稿，进入题目训练草稿继续审核。",
+  },
+  {
+    label: "AI组卷结果",
+    value: "paper_plan",
+    description: "生成组卷计划并本地选题，进入试卷训练草稿继续审核。",
+  },
+];
 
 const lifecycleStatusFilters: {
   label: string;
@@ -282,6 +320,14 @@ function createDefaultCopyDraftTitle(title: string) {
   return normalizedTitle.length === 0
     ? "复训草稿"
     : `${normalizedTitle} 复训草稿`;
+}
+
+function resolveTrainingContentShapeLabel(shape: TrainingContentShape) {
+  return shape === "paper_like" ? "试卷训练" : "题目训练";
+}
+
+function resolveShapeFromAiResultKind(kind: OrganizationTrainingAiResultKind) {
+  return kind === "paper_plan" ? "paper_like" : "question_set";
 }
 
 function upsertLifecycleItem(
@@ -467,6 +513,11 @@ export function AdminOrganizationTrainingPage() {
   );
   const [selectedSourceChoice, setSelectedSourceChoice] =
     useState<SourceChoiceTitle>("平台试卷快照");
+  const [trainingContentShape, setTrainingContentShape] =
+    useState<TrainingContentShape>("paper_like");
+  const [selectedAiResultKind, setSelectedAiResultKind] =
+    useState<OrganizationTrainingAiResultKind>("paper_plan");
+  const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [capabilitySummary, setCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
   const [lastDraft, setLastDraft] =
@@ -618,6 +669,27 @@ export function AdminOrganizationTrainingPage() {
         description="请刷新页面，或重新登录后再进入企业训练。"
       />
     );
+  }
+
+  function handleSelectSourceChoice(value: SourceChoiceTitle) {
+    setSelectedSourceChoice(value);
+
+    if (value === "平台试卷快照") {
+      setTrainingContentShape("paper_like");
+      return;
+    }
+
+    if (value === "手动题组") {
+      setTrainingContentShape("question_set");
+      return;
+    }
+
+    setTrainingContentShape(resolveShapeFromAiResultKind(selectedAiResultKind));
+  }
+
+  function handleSelectAiResultKind(value: OrganizationTrainingAiResultKind) {
+    setSelectedAiResultKind(value);
+    setTrainingContentShape(resolveShapeFromAiResultKind(value));
   }
 
   async function handleCreateDraft(values: DraftFormValues) {
@@ -918,8 +990,11 @@ export function AdminOrganizationTrainingPage() {
         listMessage={trainingListMessage}
         listState={trainingListState}
         isSubmitting={isSubmitting}
+        isCreateWizardOpen={isCreateWizardOpen}
+        onCreateTraining={() => setIsCreateWizardOpen(true)}
         onCopyVersionToDraft={handleCopyVersionToNewDraft}
         onPublishDraft={(draft) => {
+          setIsCreateWizardOpen(true);
           setSelectedPublishDraft(draft);
           setPublishFormValues({
             ...defaultPublishFormValues,
@@ -929,61 +1004,76 @@ export function AdminOrganizationTrainingPage() {
         onTakeDownVersion={handleTakeDownVersion}
       />
 
-      <section
-        aria-label="新建企业训练四步向导"
-        className="space-y-4"
-        id="organization-training-create"
-      >
-        <WizardHeader />
-        <div className="grid gap-4 xl:grid-cols-4">
-          <WizardStepCard step={1} title="选择来源">
-            <SourceChoiceList
-              selectedSourceChoice={selectedSourceChoice}
-              onSelect={setSelectedSourceChoice}
-            />
-          </WizardStepCard>
-          <WizardStepCard step={2} title="配置训练">
-            <DraftForm
-              isSubmitting={isSubmitting}
-              values={draftFormValues}
-              onChange={setDraftFormValues}
-              onSubmit={handleCreateDraft}
-            />
-          </WizardStepCard>
-          <WizardStepCard step={3} title="设置范围">
-            <PublishScopePreview />
-            {selectedSourceChoice === "平台试卷快照" ? (
-              <SourceContextForm
-                disabled={lastDraft === null}
-                isSubmitting={isSubmitting}
-                values={sourceContextFormValues}
-                onChange={setSourceContextFormValues}
-                onSubmit={handleAttachSourceContext}
+      {isCreateWizardOpen ? (
+        <section
+          aria-label="新建企业训练四步向导"
+          className="space-y-4"
+          id="organization-training-create"
+        >
+          <WizardHeader />
+          <div className="grid gap-4 xl:grid-cols-4">
+            <WizardStepCard step={1} title="选择来源">
+              <TrainingShapeSelector
+                selectedTrainingContentShape={trainingContentShape}
+                onSelect={setTrainingContentShape}
               />
-            ) : (
-              <DeferredSourceNotice sourceChoice={selectedSourceChoice} />
-            )}
-          </WizardStepCard>
-          <WizardStepCard step={4} title="预览发布">
-            <PublishReadinessPanel hasDraft={lastDraft !== null} />
-            {selectedPublishDraft === null ? null : (
-              <PublishTrainingForm
-                draft={selectedPublishDraft}
-                isSubmitting={isSubmitting}
-                values={publishFormValues}
-                onChange={setPublishFormValues}
-                onSubmit={handlePublishTraining}
+              <SourceChoiceList
+                selectedSourceChoice={selectedSourceChoice}
+                onSelect={handleSelectSourceChoice}
               />
-            )}
-            <CopyToDraftForm
-              isSubmitting={isSubmitting}
-              values={copyFormValues}
-              onChange={setCopyFormValues}
-              onSubmit={handleCopyToNewDraft}
-            />
-          </WizardStepCard>
-        </div>
-      </section>
+            </WizardStepCard>
+            <WizardStepCard step={2} title="配置训练">
+              <DraftForm
+                isSubmitting={isSubmitting}
+                trainingContentShape={trainingContentShape}
+                values={draftFormValues}
+                onChange={setDraftFormValues}
+                onSubmit={handleCreateDraft}
+              />
+            </WizardStepCard>
+            <WizardStepCard step={3} title="设置范围">
+              <PublishScopePreview />
+              {selectedSourceChoice === "平台试卷快照" ? (
+                <SourceContextForm
+                  disabled={lastDraft === null}
+                  isSubmitting={isSubmitting}
+                  values={sourceContextFormValues}
+                  onChange={setSourceContextFormValues}
+                  onSubmit={handleAttachSourceContext}
+                />
+              ) : (
+                <DeferredSourceNotice
+                  selectedAiResultKind={selectedAiResultKind}
+                  sourceChoice={selectedSourceChoice}
+                  trainingContentShape={trainingContentShape}
+                  onSelectAiResultKind={handleSelectAiResultKind}
+                />
+              )}
+            </WizardStepCard>
+            <WizardStepCard step={4} title="预览发布">
+              <PublishReadinessPanel
+                hasDraft={lastDraft !== null}
+                trainingContentShape={trainingContentShape}
+              />
+              {selectedPublishDraft === null ? null : (
+                <PublishTrainingForm
+                  draft={selectedPublishDraft}
+                  isSubmitting={isSubmitting}
+                  values={publishFormValues}
+                  onChange={setPublishFormValues}
+                  onSubmit={handlePublishTraining}
+                />
+              )}
+              <CopyToDraftForm
+                isSubmitting={isSubmitting}
+                values={copyFormValues}
+                onChange={setCopyFormValues}
+                onSubmit={handleCopyToNewDraft}
+              />
+            </WizardStepCard>
+          </div>
+        </section>
+      ) : null}
     </section>
   );
 }
@@ -991,18 +1081,22 @@ export function AdminOrganizationTrainingPage() {
 function TrainingListPanel({
   items,
   isSubmitting,
+  isCreateWizardOpen,
   lastDraft,
   listMessage,
   listState,
+  onCreateTraining,
   onCopyVersionToDraft,
   onPublishDraft,
   onTakeDownVersion,
 }: {
   items: OrganizationTrainingAdminLifecycleItemDto[];
   isSubmitting: boolean;
+  isCreateWizardOpen: boolean;
   lastDraft: OrganizationTrainingDraftDto | null;
   listMessage: string | null;
   listState: OrganizationTrainingListState;
+  onCreateTraining: () => void;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
@@ -1042,12 +1136,14 @@ function TrainingListPanel({
             草稿、已发布、已下架和已作废训练在这里统一管理。
           </p>
         </div>
-        <a
-          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium"
-          href="#organization-training-create"
+        <Button
+          aria-controls="organization-training-create"
+          aria-expanded={isCreateWizardOpen}
+          onClick={onCreateTraining}
+          type="button"
         >
           新建企业训练
-        </a>
+        </Button>
       </div>
       {visibleItems.length === 0 ? null : (
         <div
@@ -1319,7 +1415,8 @@ function SourceChoiceList({
         return (
           <button
             aria-checked={isSelected}
-            className="border-border bg-surface hover:bg-muted grid w-full gap-1 rounded-md border p-3 text-left text-sm"
+            aria-label={choice.title}
+            className="border-border bg-surface hover:bg-muted grid w-full gap-1 rounded-md border p-3 text-left text-sm active:scale-[0.98]"
             key={choice.title}
             role="radio"
             type="button"
@@ -1346,6 +1443,41 @@ function SourceChoiceList({
   );
 }
 
+function TrainingShapeSelector({
+  selectedTrainingContentShape,
+  onSelect,
+}: {
+  selectedTrainingContentShape: TrainingContentShape;
+  onSelect: (value: TrainingContentShape) => void;
+}) {
+  return (
+    <div className="space-y-2" role="radiogroup" aria-label="训练形态">
+      {trainingContentShapeOptions.map((option) => {
+        const isSelected = option.value === selectedTrainingContentShape;
+
+        return (
+          <button
+            aria-checked={isSelected}
+            aria-label={option.label}
+            className={`border-border grid w-full gap-1 rounded-md border p-3 text-left text-sm active:scale-[0.98] ${
+              isSelected
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-surface text-text-secondary hover:bg-muted hover:text-text-primary"
+            }`}
+            key={option.value}
+            onClick={() => onSelect(option.value)}
+            role="radio"
+            type="button"
+          >
+            <span className="font-medium">{option.label}</span>
+            <span className="leading-5">{option.description}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function PublishScopePreview() {
   return (
     <div className="bg-muted text-text-secondary space-y-2 rounded-md p-3 text-sm">
@@ -1359,7 +1491,13 @@ function PublishScopePreview() {
   );
 }
 
-function PublishReadinessPanel({ hasDraft }: { hasDraft: boolean }) {
+function PublishReadinessPanel({
+  hasDraft,
+  trainingContentShape,
+}: {
+  hasDraft: boolean;
+  trainingContentShape: TrainingContentShape;
+}) {
   return (
     <div className="bg-muted text-text-secondary space-y-2 rounded-md p-3 text-sm">
       <div className="text-text-primary flex items-center gap-2 font-medium">
@@ -1371,34 +1509,90 @@ function PublishReadinessPanel({ hasDraft }: { hasDraft: boolean }) {
           ? "草稿已创建，发布前需完成题目快照、答案解析和佐证状态检查。"
           : "创建草稿后再预览题目、答案解析、范围和佐证状态。"}
       </p>
+      <p>当前形态：{resolveTrainingContentShapeLabel(trainingContentShape)}</p>
     </div>
   );
 }
 
 function DeferredSourceNotice({
+  selectedAiResultKind,
   sourceChoice,
+  trainingContentShape,
+  onSelectAiResultKind,
 }: {
+  selectedAiResultKind: OrganizationTrainingAiResultKind;
   sourceChoice: SourceChoiceTitle;
+  trainingContentShape: TrainingContentShape;
+  onSelectAiResultKind: (value: OrganizationTrainingAiResultKind) => void;
 }) {
-  const description =
-    sourceChoice === "企业 AI 结果"
-      ? "企业 AI 结果在 AI 出题或组卷完成后复制到企业训练草稿，不额外消耗 AI 额度。"
-      : "手动题组先在草稿中维护企业私有题目，再按四步流程预览发布。";
+  if (sourceChoice === "企业 AI 结果") {
+    return (
+      <div className="bg-muted text-text-secondary space-y-3 rounded-md p-3 text-sm leading-6">
+        <div aria-label="AI 结果类型" className="grid gap-2" role="radiogroup">
+          {organizationAiResultKindOptions.map((option) => {
+            const isSelected = option.value === selectedAiResultKind;
+
+            return (
+              <button
+                aria-checked={isSelected}
+                aria-label={option.label}
+                className={`border-border rounded-md border p-3 text-left active:scale-[0.98] ${
+                  isSelected
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-surface text-text-secondary hover:bg-muted hover:text-text-primary"
+                }`}
+                key={option.value}
+                onClick={() => onSelectAiResultKind(option.value)}
+                role="radio"
+                type="button"
+              >
+                <span className="block font-medium">{option.label}</span>
+                <span className="block">{option.description}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a
+            className="border-border bg-surface text-text-primary hover:bg-muted inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium active:scale-[0.98]"
+            href="/organization/ai-question-generation"
+          >
+            前往 AI出题
+          </a>
+          <a
+            className="border-border bg-surface text-text-primary hover:bg-muted inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium active:scale-[0.98]"
+            href="/organization/ai-paper-generation"
+          >
+            前往 AI组卷
+          </a>
+        </div>
+        <p>
+          AI 结果只进入企业训练草稿，不写入平台正式题库、正式试卷或模拟考试。
+        </p>
+        <p>
+          当前形态：{resolveTrainingContentShapeLabel(trainingContentShape)}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-muted text-text-secondary rounded-md p-3 text-sm leading-6">
-      {description}
+      手动题组先在草稿中维护企业私有题目，再按四步流程预览发布。当前形态：
+      {resolveTrainingContentShapeLabel(trainingContentShape)}。
     </div>
   );
 }
 
 function DraftForm({
   isSubmitting,
+  trainingContentShape,
   values,
   onChange,
   onSubmit,
 }: {
   isSubmitting: boolean;
+  trainingContentShape: TrainingContentShape;
   values: DraftFormValues;
   onChange: (values: DraftFormValues) => void;
   onSubmit: (values: DraftFormValues) => void;
@@ -1420,6 +1614,10 @@ function DraftForm({
         icon={<FilePlus2 aria-hidden="true" className="size-4" />}
         title="训练配置"
       />
+      <div className="bg-muted text-text-secondary rounded-md p-3 text-sm leading-6">
+        当前按 {resolveTrainingContentShapeLabel(trainingContentShape)}{" "}
+        创建企业训练草稿。
+      </div>
       <div className="bg-muted text-text-secondary grid gap-2 rounded-md p-3 text-sm leading-6">
         <p className="text-text-primary font-medium">会话授权上下文</p>
         <p>组织范围由当前会话授权带入</p>

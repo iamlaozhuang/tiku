@@ -154,6 +154,10 @@ function readJsonRequestBody(
   return JSON.parse(String(requestBody)) as Record<string, unknown>;
 }
 
+function openCreateWizard() {
+  fireEvent.click(screen.getByRole("button", { name: "新建企业训练" }));
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -387,6 +391,87 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(screen.getByText("已下架训练")).toBeInTheDocument();
     expect(screen.queryByText("列表草稿")).toBeNull();
     expect(screen.queryByText("已发布训练")).toBeNull();
+  });
+
+  it("keeps the create wizard behind an explicit entry and distinguishes training shape plus organization AI result kind", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (String(url) === "/api/v1/organization-trainings") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            items: [],
+            redactionStatus: "metadata_only",
+          },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(
+      await screen.findByRole("heading", { name: "企业训练" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
+
+    openCreateWizard();
+
+    expect(
+      screen.getByRole("form", { name: "企业训练配置表单" }),
+    ).toBeInTheDocument();
+    const shapeGroup = screen.getByRole("radiogroup", { name: "训练形态" });
+    expect(
+      within(shapeGroup).getByRole("radio", { name: "试卷训练" }),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(
+      within(shapeGroup).getByRole("radio", { name: "题目训练" }),
+    ).toHaveAttribute("aria-checked", "false");
+
+    fireEvent.click(screen.getByRole("radio", { name: "企业 AI 结果" }));
+
+    const aiResultGroup = screen.getByRole("radiogroup", {
+      name: "AI 结果类型",
+    });
+    expect(
+      within(aiResultGroup).getByRole("radio", { name: "AI出题结果" }),
+    ).toBeInTheDocument();
+    expect(
+      within(aiResultGroup).getByRole("radio", { name: "AI组卷结果" }),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("link", { name: "前往 AI出题" })).toHaveAttribute(
+      "href",
+      "/organization/ai-question-generation",
+    );
+    expect(screen.getByRole("link", { name: "前往 AI组卷" })).toHaveAttribute(
+      "href",
+      "/organization/ai-paper-generation",
+    );
+    expect(screen.getByText(/只进入企业训练草稿/u)).toBeInTheDocument();
+
+    fireEvent.click(
+      within(aiResultGroup).getByRole("radio", { name: "AI出题结果" }),
+    );
+    expect(
+      within(shapeGroup).getByRole("radio", { name: "题目训练" }),
+    ).toHaveAttribute("aria-checked", "true");
+
+    fireEvent.click(
+      within(aiResultGroup).getByRole("radio", { name: "AI组卷结果" }),
+    );
+    expect(
+      within(shapeGroup).getByRole("radio", { name: "试卷训练" }),
+    ).toHaveAttribute("aria-checked", "true");
   });
 
   it("takes down and copies published training versions from list actions through existing metadata-only routes", async () => {
@@ -635,9 +720,16 @@ describe("AdminOrganizationTrainingPage", () => {
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
     expect(screen.getByText("企业训练列表")).toBeInTheDocument();
-    expect(screen.getAllByText("新建企业训练").length).toBeGreaterThanOrEqual(
-      1,
-    );
+    expect(
+      screen.getByRole("button", { name: "新建企业训练" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
+
+    openCreateWizard();
+
+    expect(
+      screen.getByRole("button", { name: "新建企业训练" }),
+    ).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("平台试卷快照")).toBeInTheDocument();
     expect(screen.getByText("企业 AI 结果")).toBeInTheDocument();
     expect(screen.getByText("手动题组")).toBeInTheDocument();
@@ -781,13 +873,17 @@ describe("AdminOrganizationTrainingPage", () => {
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("radio", { name: /企业 AI 结果/u }));
+    openCreateWizard();
+    fireEvent.click(screen.getByRole("radio", { name: "企业 AI 结果" }));
 
     expect(screen.queryByRole("form", { name: "企业训练来源表单" })).toBeNull();
+    expect(screen.getByText(/AI 结果只进入企业训练草稿/u)).toBeInTheDocument();
     expect(
-      screen.getByText(/企业 AI 结果在 AI 出题或组卷完成后复制到企业训练草稿/u),
+      screen.getByRole("radio", { name: "AI出题结果" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/不额外消耗 AI 额度/u)).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: "AI组卷结果" }),
+    ).toBeInTheDocument();
   });
 
   it("loads persisted AI-created drafts and publishes reviewed question snapshots through the existing organization training API", async () => {
@@ -991,6 +1087,8 @@ describe("AdminOrganizationTrainingPage", () => {
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
 
+    openCreateWizard();
+
     const draftForm = within(
       screen.getByRole("form", { name: "企业训练配置表单" }),
     );
@@ -1044,6 +1142,8 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
+
+    openCreateWizard();
 
     const draftForm = within(
       screen.getByRole("form", { name: "企业训练配置表单" }),
