@@ -97,16 +97,189 @@ export type AiGenerationRouteIntegratedProfession =
 
 export type AiGenerationRouteIntegratedSubject = "theory" | "skill";
 
+export type AiGenerationRouteIntegratedKnowledgeNodeMode =
+  | "balanced"
+  | "selected"
+  | "weak_point_priority"
+  | "comprehensive";
+
+export type AiGenerationRouteIntegratedSourcePreference =
+  | "balanced"
+  | "prefer_platform"
+  | "prefer_enterprise";
+
+export type AiGenerationRouteIntegratedKnowledgeScope = {
+  knowledgeNode: string | null;
+  knowledgeNodeMode: AiGenerationRouteIntegratedKnowledgeNodeMode;
+  knowledgeNodePublicIds: readonly string[];
+  includeDescendants: boolean;
+  knowledgeNodeSupplement: string | null;
+  sourcePreference: AiGenerationRouteIntegratedSourcePreference | null;
+};
+
 export type AiGenerationRouteIntegratedGenerationParameters = {
   profession: AiGenerationRouteIntegratedProfession;
   level: 1 | 2 | 3 | 4 | 5;
   subject: AiGenerationRouteIntegratedSubject;
-  knowledgeNode: string | null;
   questionType: string | null;
   questionCount: number;
   difficulty: string | null;
   learningObjective: string | null;
-};
+} & AiGenerationRouteIntegratedKnowledgeScope;
+
+const knowledgeNodeModeValues = [
+  "balanced",
+  "selected",
+  "weak_point_priority",
+  "comprehensive",
+] as const satisfies readonly AiGenerationRouteIntegratedKnowledgeNodeMode[];
+const sourcePreferenceValues = [
+  "balanced",
+  "prefer_platform",
+  "prefer_enterprise",
+] as const satisfies readonly AiGenerationRouteIntegratedSourcePreference[];
+
+export function createDefaultAiGenerationRouteIntegratedKnowledgeScope(
+  input: Partial<AiGenerationRouteIntegratedKnowledgeScope> = {},
+): AiGenerationRouteIntegratedKnowledgeScope {
+  return {
+    knowledgeNode: input.knowledgeNode ?? null,
+    knowledgeNodeMode: input.knowledgeNodeMode ?? "balanced",
+    knowledgeNodePublicIds: input.knowledgeNodePublicIds ?? [],
+    includeDescendants: input.includeDescendants ?? false,
+    knowledgeNodeSupplement: input.knowledgeNodeSupplement ?? null,
+    sourcePreference: input.sourcePreference ?? null,
+  };
+}
+
+export function normalizeAiGenerationRouteIntegratedKnowledgeScope(input: {
+  includeDescendants?: unknown;
+  knowledgeNode?: unknown;
+  knowledgeNodeMode?: unknown;
+  knowledgeNodePublicIds?: unknown;
+  knowledgeNodeSupplement?: unknown;
+  sourcePreference?: unknown;
+}): AiGenerationRouteIntegratedKnowledgeScope | null {
+  const knowledgeNode = normalizeRouteIntegratedOptionalText(
+    input.knowledgeNode,
+  );
+  const knowledgeNodePublicIds = normalizeRouteIntegratedPublicIdList(
+    input.knowledgeNodePublicIds,
+  );
+
+  if (knowledgeNodePublicIds === null) {
+    return null;
+  }
+
+  const knowledgeNodeMode = normalizeRouteIntegratedKnowledgeNodeMode(
+    input.knowledgeNodeMode,
+    knowledgeNodePublicIds,
+  );
+  const includeDescendants = normalizeRouteIntegratedIncludeDescendants(
+    input.includeDescendants,
+    knowledgeNodePublicIds,
+  );
+  const sourcePreference = normalizeRouteIntegratedSourcePreference(
+    input.sourcePreference,
+  );
+
+  if (
+    knowledgeNodeMode === null ||
+    includeDescendants === null ||
+    sourcePreference === "invalid"
+  ) {
+    return null;
+  }
+
+  return {
+    knowledgeNode,
+    knowledgeNodeMode,
+    knowledgeNodePublicIds,
+    includeDescendants,
+    knowledgeNodeSupplement:
+      normalizeRouteIntegratedOptionalText(input.knowledgeNodeSupplement) ??
+      knowledgeNode,
+    sourcePreference,
+  };
+}
+
+function normalizeRouteIntegratedKnowledgeNodeMode(
+  value: unknown,
+  knowledgeNodePublicIds: string[],
+): AiGenerationRouteIntegratedKnowledgeNodeMode | null {
+  if (value === null || value === undefined || value === "") {
+    return knowledgeNodePublicIds.length > 0 ? "selected" : "balanced";
+  }
+
+  return typeof value === "string" &&
+    knowledgeNodeModeValues.includes(
+      value as AiGenerationRouteIntegratedKnowledgeNodeMode,
+    )
+    ? (value as AiGenerationRouteIntegratedKnowledgeNodeMode)
+    : null;
+}
+
+function normalizeRouteIntegratedIncludeDescendants(
+  value: unknown,
+  knowledgeNodePublicIds: string[],
+) {
+  if (value === null || value === undefined) {
+    return knowledgeNodePublicIds.length > 0;
+  }
+
+  return typeof value === "boolean" ? value : null;
+}
+
+function normalizeRouteIntegratedSourcePreference(
+  value: unknown,
+): AiGenerationRouteIntegratedSourcePreference | null | "invalid" {
+  const text = normalizeRouteIntegratedOptionalText(value);
+
+  if (text === null) {
+    return null;
+  }
+
+  return sourcePreferenceValues.includes(
+    text as AiGenerationRouteIntegratedSourcePreference,
+  )
+    ? (text as AiGenerationRouteIntegratedSourcePreference)
+    : "invalid";
+}
+
+function normalizeRouteIntegratedPublicIdList(value: unknown): string[] | null {
+  if (value === null || value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const publicIds = value.map((item) =>
+    typeof item === "string" ? item.trim() : null,
+  );
+
+  if (
+    publicIds.some(
+      (publicId) =>
+        publicId === null ||
+        publicId === "" ||
+        !/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/u.test(publicId),
+    )
+  ) {
+    return null;
+  }
+
+  return Array.from(new Set(publicIds as string[]));
+}
+
+function normalizeRouteIntegratedOptionalText(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
+}
 
 export type AiGenerationRouteIntegratedGroundingCitation = {
   resourceTitle: string;

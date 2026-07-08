@@ -145,6 +145,11 @@ describe("owner preview Qwen visible AI runtime control", () => {
           level: 3,
           subject: "theory",
           knowledgeNode: "卷烟营销基础",
+          knowledgeNodeMode: "balanced",
+          knowledgeNodePublicIds: [],
+          includeDescendants: false,
+          knowledgeNodeSupplement: "卷烟营销基础",
+          sourcePreference: null,
           questionType:
             taskType === "ai_question_generation" ? "single_choice" : null,
           questionCount: taskType === "ai_question_generation" ? 10 : 50,

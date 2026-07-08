@@ -73,4 +73,70 @@ describe("personal AI generation request validator", () => {
       message: "Invalid personal AI generation request input.",
     });
   });
+
+  it("normalizes structured route generation knowledge scope", () => {
+    expect(
+      normalizePersonalAiGenerationRequestInput({
+        userPublicId: "user_public_123",
+        authorizationPublicId: "personal_auth_public_123",
+        aiFuncType: "hint",
+        questionPublicId: "question_public_123",
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: "legacy marketing label",
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: [
+            "knowledge_node_public_a",
+            "knowledge_node_public_a",
+          ],
+          includeDescendants: true,
+          knowledgeNodeSupplement: "manual supplement",
+          sourcePreference: "prefer_platform",
+          questionType: "single_choice",
+          questionCount: 3,
+          difficulty: "medium",
+          learningObjective: "redacted objective",
+        },
+      }),
+    ).toMatchObject({
+      success: true,
+      value: {
+        generationParameters: {
+          knowledgeNode: "legacy marketing label",
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          includeDescendants: true,
+          knowledgeNodeSupplement: "manual supplement",
+          sourcePreference: "prefer_platform",
+        },
+      },
+    });
+  });
+
+  it("rejects malformed generation knowledge node public ids", () => {
+    expect(
+      normalizePersonalAiGenerationRequestInput({
+        userPublicId: "user_public_123",
+        authorizationPublicId: "personal_auth_public_123",
+        aiFuncType: "hint",
+        questionPublicId: "question_public_123",
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodePublicIds: ["not a public id"],
+          questionType: "single_choice",
+          questionCount: 3,
+          difficulty: "medium",
+          learningObjective: "redacted objective",
+        },
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid personal AI generation request input.",
+    });
+  });
 });

@@ -12,6 +12,7 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { normalizeAiGenerationRouteIntegratedKnowledgeScope } from "../contracts/route-integrated-provider-execution-contract";
 
 export type PersonalAiGenerationRequestValidationResult =
   | {
@@ -158,12 +159,21 @@ function normalizeGenerationParameters(
   const level = normalizeLevel(value.level);
   const subject = normalizeSubject(value.subject);
   const questionCount = normalizePositiveCount(value.questionCount);
+  const knowledgeScope = normalizeAiGenerationRouteIntegratedKnowledgeScope({
+    includeDescendants: value.includeDescendants,
+    knowledgeNode: value.knowledgeNode,
+    knowledgeNodeMode: value.knowledgeNodeMode,
+    knowledgeNodePublicIds: value.knowledgeNodePublicIds,
+    knowledgeNodeSupplement: value.knowledgeNodeSupplement,
+    sourcePreference: value.sourcePreference,
+  });
 
   if (
     profession === null ||
     level === null ||
     subject === null ||
-    questionCount === null
+    questionCount === null ||
+    knowledgeScope === null
   ) {
     return null;
   }
@@ -172,7 +182,7 @@ function normalizeGenerationParameters(
     profession,
     level,
     subject,
-    knowledgeNode: normalizeOptionalText(value.knowledgeNode),
+    ...knowledgeScope,
     questionType: normalizeOptionalText(value.questionType),
     questionCount,
     difficulty: normalizeOptionalText(value.difficulty),
@@ -264,6 +274,10 @@ export function normalizePersonalAiGenerationRequestInput(
   const generationParameters = normalizeGenerationParameters(
     input.generationParameters,
   );
+  const hasInvalidExplicitGenerationParameters =
+    input.generationParameters !== null &&
+    input.generationParameters !== undefined &&
+    generationParameters === null;
 
   if (
     userPublicId === null ||
@@ -274,7 +288,8 @@ export function normalizePersonalAiGenerationRequestInput(
     quotaOwnerType === null ||
     quotaOwnerPublicId === null ||
     aiFuncType === null ||
-    questionPublicId === null
+    questionPublicId === null ||
+    hasInvalidExplicitGenerationParameters
   ) {
     return {
       success: false,

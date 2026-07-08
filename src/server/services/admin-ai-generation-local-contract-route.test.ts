@@ -57,6 +57,11 @@ const defaultAdminGenerationParameters: AiGenerationRouteIntegratedGenerationPar
     level: 3,
     subject: "theory",
     knowledgeNode: "卷烟营销基础",
+    knowledgeNodeMode: "balanced",
+    knowledgeNodePublicIds: [],
+    includeDescendants: false,
+    knowledgeNodeSupplement: "卷烟营销基础",
+    sourcePreference: null,
     questionType: "single_choice",
     questionCount: 10,
     difficulty: "medium",
@@ -2228,6 +2233,75 @@ describe("admin AI generation local contract route handlers", () => {
     });
     expect(taskPersistenceRecorder.calls).toEqual([]);
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_H");
+  });
+
+  it("passes structured knowledge scope through admin AI generation local contracts", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        requestedRuntimeMode: "route_integrated_provider",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          knowledgeNodeMode: "selected",
+          knowledgeNodePublicIds: ["knowledge_node_public_admin"],
+          includeDescendants: true,
+          knowledgeNodeSupplement: "admin supplement",
+          sourcePreference: "prefer_platform",
+        },
+      },
+    });
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        taskRequest: {
+          taskType: "ai_question_generation",
+        },
+      },
+    });
+    expect(
+      providerInputs[0]?.requestContext.generationParameters,
+    ).toMatchObject({
+      knowledgeNodeMode: "selected",
+      knowledgeNodePublicIds: ["knowledge_node_public_admin"],
+      includeDescendants: true,
+      knowledgeNodeSupplement: "admin supplement",
+      sourcePreference: "prefer_platform",
+    });
+    expect(
+      taskPersistenceRecorder.calls[0]?.localContract.taskRequest.taskType,
+    ).toBe("ai_question_generation");
+  });
+
+  it("rejects malformed admin AI generation knowledge node public ids", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          knowledgeNodePublicIds: ["invalid public id"],
+        },
+      },
+    });
+
+    await expect(response.json()).resolves.toEqual({
+      code: 400013,
+      message: "Invalid admin AI generation request input.",
+      data: null,
+    });
+    expect(taskPersistenceRecorder.calls).toEqual([]);
   });
 
   it("rejects admin AI generation question counts above the product contract before persistence", async () => {

@@ -7,6 +7,7 @@ import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedGroundingContext,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "../contracts/route-integrated-provider-execution-contract";
 
 type RuntimeEnv = Partial<
   Pick<NodeJS.ProcessEnv, "ALIBABA_API_KEY" | "NODE_ENV">
@@ -35,7 +36,7 @@ function createFallbackGenerationParameters(): AiGenerationRouteIntegratedGenera
     profession: "marketing",
     level: 3,
     subject: "theory",
-    knowledgeNode: null,
+    ...createDefaultAiGenerationRouteIntegratedKnowledgeScope(),
     questionType: null,
     questionCount: 10,
     difficulty: "medium",

@@ -46,6 +46,7 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
+import { normalizeAiGenerationRouteIntegratedKnowledgeScope } from "../contracts/route-integrated-provider-execution-contract";
 import {
   getAiGenerationSharedTaskSpec,
   type AiGenerationSharedTaskType,
@@ -334,12 +335,21 @@ function normalizeRouteIntegratedGenerationParameters(
     value.questionCount,
     taskType,
   );
+  const knowledgeScope = normalizeAiGenerationRouteIntegratedKnowledgeScope({
+    includeDescendants: value.includeDescendants,
+    knowledgeNode: value.knowledgeNode,
+    knowledgeNodeMode: value.knowledgeNodeMode,
+    knowledgeNodePublicIds: value.knowledgeNodePublicIds,
+    knowledgeNodeSupplement: value.knowledgeNodeSupplement,
+    sourcePreference: value.sourcePreference,
+  });
 
   if (
     profession === null ||
     level === null ||
     subject === null ||
-    questionCount === null
+    questionCount === null ||
+    knowledgeScope === null
   ) {
     return null;
   }
@@ -348,7 +358,7 @@ function normalizeRouteIntegratedGenerationParameters(
     profession,
     level,
     subject,
-    knowledgeNode: normalizeOptionalText(value.knowledgeNode),
+    ...knowledgeScope,
     questionType: normalizeOptionalText(value.questionType),
     questionCount,
     difficulty: normalizeOptionalText(value.difficulty),

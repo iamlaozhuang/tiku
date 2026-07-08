@@ -42,6 +42,7 @@ import type {
 } from "@/server/contracts/personal-ai-generation-learning-session-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AiGenerationRouteIntegratedGenerationParameters } from "@/server/contracts/route-integrated-provider-execution-contract";
+import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 import { createPersonalAiLearningSessionQuestion } from "@/server/validators/personal-ai-generation-learning-session";
 
@@ -582,7 +583,7 @@ function createStudentGenerationParameters(
         ? authorizationContext.level
         : 3,
     subject: "theory",
-    knowledgeNode: null,
+    ...createDefaultAiGenerationRouteIntegratedKnowledgeScope(),
     questionType:
       taskType === "ai_question_generation" ? "single_choice" : null,
     questionCount,

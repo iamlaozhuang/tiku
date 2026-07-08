@@ -32,6 +32,7 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "@/server/contracts/route-integrated-provider-execution-contract";
+import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "@/server/contracts/route-integrated-provider-execution-contract";
 
 import {
   AdminLoadingState,
@@ -519,12 +520,14 @@ function createDefaultAdminGenerationParameters(
     profession: "marketing",
     level: 3,
     subject: "theory",
-    knowledgeNode:
-      generationKind === "question"
-        ? "卷烟营销基础"
-        : isOrganizationWorkspace
-          ? "均衡覆盖"
-          : "覆盖薄弱知识点",
+    ...createDefaultAiGenerationRouteIntegratedKnowledgeScope({
+      knowledgeNode:
+        generationKind === "question"
+          ? "卷烟营销基础"
+          : isOrganizationWorkspace
+            ? "均衡覆盖"
+            : "覆盖薄弱知识点",
+    }),
     questionType: generationKind === "question" ? "single_choice" : null,
     questionCount:
       generationKind === "question"
@@ -599,6 +602,53 @@ function resolveNullableText(
   return typeof value === "string" || value === null ? value : fallbackValue;
 }
 
+function resolveBooleanValue(value: unknown, fallbackValue: boolean) {
+  return typeof value === "boolean" ? value : fallbackValue;
+}
+
+function resolvePublicIdList(value: unknown, fallbackValue: readonly string[]) {
+  if (!Array.isArray(value)) {
+    return fallbackValue;
+  }
+
+  const publicIds = value.map((item) =>
+    typeof item === "string" ? item.trim() : null,
+  );
+
+  return publicIds.some(
+    (publicId) =>
+      publicId === null ||
+      publicId === "" ||
+      !/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/u.test(publicId),
+  )
+    ? fallbackValue
+    : Array.from(new Set(publicIds as string[]));
+}
+
+function resolveKnowledgeNodeMode(
+  value: unknown,
+  fallbackValue: AiGenerationRouteIntegratedGenerationParameters["knowledgeNodeMode"],
+) {
+  return value === "balanced" ||
+    value === "selected" ||
+    value === "weak_point_priority" ||
+    value === "comprehensive"
+    ? value
+    : fallbackValue;
+}
+
+function resolveSourcePreference(
+  value: unknown,
+  fallbackValue: AiGenerationRouteIntegratedGenerationParameters["sourcePreference"],
+) {
+  return value === null ||
+    value === "balanced" ||
+    value === "prefer_platform" ||
+    value === "prefer_enterprise"
+    ? value
+    : fallbackValue;
+}
+
 export function resolveAdminAiGenerationParameters(
   generationKind: AdminAiGenerationKind,
   workspaceOrGenerationParameterState?:
@@ -645,6 +695,26 @@ export function resolveAdminAiGenerationParameters(
     knowledgeNode: resolveNullableText(
       persistedParameters.knowledgeNode,
       defaultParameters.knowledgeNode,
+    ),
+    knowledgeNodeMode: resolveKnowledgeNodeMode(
+      persistedParameters.knowledgeNodeMode,
+      defaultParameters.knowledgeNodeMode,
+    ),
+    knowledgeNodePublicIds: resolvePublicIdList(
+      persistedParameters.knowledgeNodePublicIds,
+      defaultParameters.knowledgeNodePublicIds,
+    ),
+    includeDescendants: resolveBooleanValue(
+      persistedParameters.includeDescendants,
+      defaultParameters.includeDescendants,
+    ),
+    knowledgeNodeSupplement: resolveNullableText(
+      persistedParameters.knowledgeNodeSupplement,
+      defaultParameters.knowledgeNodeSupplement,
+    ),
+    sourcePreference: resolveSourcePreference(
+      persistedParameters.sourcePreference,
+      defaultParameters.sourcePreference,
     ),
     questionType: resolveNullableText(
       persistedParameters.questionType,
