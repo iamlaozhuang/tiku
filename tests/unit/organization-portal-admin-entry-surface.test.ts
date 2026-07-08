@@ -65,6 +65,115 @@ const standardAdminSessionPayload = {
   },
 };
 
+const advancedOrganizationPortalOverviewPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    organization: {
+      displayName: "华东营销中心",
+      orgTier: "city",
+      status: "active",
+    },
+    employeeSummary: {
+      total: 3,
+      active: 2,
+      disabled: 1,
+      locked: 0,
+    },
+    employees: [
+      {
+        employeeDisplayName: "员工甲",
+        phoneMasked: "139****0001",
+        status: "active",
+      },
+      {
+        employeeDisplayName: "员工乙",
+        phoneMasked: "139****0002",
+        status: "disabled",
+      },
+    ],
+    authorization: {
+      packageName: "营销专套组织授权",
+      sourceEdition: "standard",
+      effectiveEdition: "advanced",
+      status: "active",
+      startsAt: "2026-07-01T00:00:00.000Z",
+      expiresAt: "2027-07-01T00:00:00.000Z",
+      accountQuota: 30,
+      usedQuota: 12,
+      availableQuota: 18,
+      authScopeType: "specified_nodes",
+      scopes: [
+        {
+          profession: "marketing",
+          level: 3,
+          subject: null,
+          organizationCount: 1,
+        },
+      ],
+      upgradeStatus: "active",
+    },
+    boundary: {
+      isReadonly: true,
+      mutationOwnerLabel: "平台运营",
+      redactionStatus: "summary_only",
+    },
+    updatedAt: "2026-07-08T10:00:00.000Z",
+  },
+};
+
+const standardOrganizationPortalOverviewPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    organization: {
+      displayName: "华南营销中心",
+      orgTier: "city",
+      status: "active",
+    },
+    employeeSummary: {
+      total: 2,
+      active: 2,
+      disabled: 0,
+      locked: 0,
+    },
+    employees: [
+      {
+        employeeDisplayName: "员工丙",
+        phoneMasked: "138****0003",
+        status: "active",
+      },
+    ],
+    authorization: {
+      packageName: "标准组织授权",
+      sourceEdition: "standard",
+      effectiveEdition: "standard",
+      status: "active",
+      startsAt: "2026-07-01T00:00:00.000Z",
+      expiresAt: "2027-07-01T00:00:00.000Z",
+      accountQuota: 10,
+      usedQuota: 2,
+      availableQuota: 8,
+      authScopeType: "specified_nodes",
+      scopes: [
+        {
+          profession: "marketing",
+          level: 3,
+          subject: null,
+          organizationCount: 1,
+        },
+      ],
+      upgradeStatus: "none",
+    },
+    boundary: {
+      isReadonly: true,
+      mutationOwnerLabel: "平台运营",
+      redactionStatus: "summary_only",
+    },
+    updatedAt: "2026-07-08T10:00:00.000Z",
+  },
+};
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -124,6 +233,10 @@ describe("AdminOrganizationPortalPage", () => {
         return createJsonResponse(adminSessionPayload);
       }
 
+      if (String(url) === "/api/v1/organization-portal-overviews") {
+        return createJsonResponse(advancedOrganizationPortalOverviewPayload);
+      }
+
       return createJsonResponse({
         code: 404001,
         message: "missing",
@@ -165,8 +278,18 @@ describe("AdminOrganizationPortalPage", () => {
       },
     ]);
     expect(portalShell).toHaveTextContent("员工名单与状态");
-    expect(portalShell).toHaveTextContent("不提供新增、导入、调动或解绑入口");
+    expect(portalShell).toHaveTextContent("华东营销中心");
+    expect(portalShell).toHaveTextContent("共 3 人");
+    expect(portalShell).toHaveTextContent("正常 2");
+    expect(portalShell).toHaveTextContent("停用 1");
+    expect(portalShell).toHaveTextContent("员工甲");
+    expect(portalShell).toHaveTextContent("139****0001");
     expect(portalShell).toHaveTextContent("授权状态");
+    expect(portalShell).toHaveTextContent("营销专套组织授权");
+    expect(portalShell).toHaveTextContent("高级版");
+    expect(portalShell).toHaveTextContent("额度 12/30");
+    expect(portalShell).toHaveTextContent("剩余 18");
+    expect(portalShell).toHaveTextContent("营销 3级");
     expect(portalShell).toHaveTextContent("当前组织范围");
     expect(portalShell).toHaveTextContent("高级版组织后台");
     expect(portalShell).not.toHaveTextContent("organization-portal-scope-001");
@@ -178,10 +301,12 @@ describe("AdminOrganizationPortalPage", () => {
     expect(portalShell).not.toHaveTextContent("local shell");
     expect(portalShell).not.toHaveTextContent("Provider");
     expect(portalShell).not.toHaveTextContent("Payment");
+    expect(portalShell).not.toHaveTextContent("org_auth");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
 
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
+      "/api/v1/organization-portal-overviews",
     ]);
   });
 
@@ -190,6 +315,10 @@ describe("AdminOrganizationPortalPage", () => {
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       if (String(url) === "/api/v1/sessions") {
         return createJsonResponse(standardAdminSessionPayload);
+      }
+
+      if (String(url) === "/api/v1/organization-portal-overviews") {
+        return createJsonResponse(standardOrganizationPortalOverviewPayload);
       }
 
       return createJsonResponse({
@@ -213,7 +342,16 @@ describe("AdminOrganizationPortalPage", () => {
       "organization-standard-scope-001",
     );
     expect(portalShell).toHaveTextContent("员工名单与状态");
+    expect(portalShell).toHaveTextContent("华南营销中心");
+    expect(portalShell).toHaveTextContent("共 2 人");
+    expect(portalShell).toHaveTextContent("正常 2");
+    expect(portalShell).toHaveTextContent("员工丙");
+    expect(portalShell).toHaveTextContent("138****0003");
     expect(portalShell).toHaveTextContent("授权状态");
+    expect(portalShell).toHaveTextContent("标准组织授权");
+    expect(portalShell).toHaveTextContent("标准版");
+    expect(portalShell).toHaveTextContent("额度 2/10");
+    expect(portalShell).toHaveTextContent("剩余 8");
     expect(portalShell).toHaveTextContent("标准版暂不可用");
     expect(portalShell).toHaveTextContent(
       "当前组织仅开放员工名单、员工状态和授权状态查看",
@@ -234,6 +372,7 @@ describe("AdminOrganizationPortalPage", () => {
     expect(within(portalShell).queryAllByRole("link")).toEqual([]);
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
+      "/api/v1/organization-portal-overviews",
     ]);
   });
 });
