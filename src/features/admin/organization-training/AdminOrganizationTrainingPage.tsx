@@ -1410,6 +1410,12 @@ function TrainingListPanel({
       : (visibleItems.find(
           (item) => item.publicId === selectedDetailPublicId,
         ) ?? null);
+  const hasActiveLifecycleFilter =
+    selectedStatusFilter !== "all" ||
+    selectedSourceKindFilter !== "all" ||
+    selectedContentKindFilter !== "all";
+  const shouldShowLifecycleControls =
+    visibleItems.length > 0 || hasActiveLifecycleFilter;
 
   return (
     <section
@@ -1434,7 +1440,7 @@ function TrainingListPanel({
           新建企业训练
         </Button>
       </div>
-      {visibleItems.length === 0 ? null : (
+      {shouldShowLifecycleControls ? (
         <div
           aria-label="企业训练状态筛选"
           className="mt-4 flex flex-wrap gap-2"
@@ -1459,8 +1465,8 @@ function TrainingListPanel({
             </button>
           ))}
         </div>
-      )}
-      {visibleItems.length === 0 ? null : (
+      ) : null}
+      {shouldShowLifecycleControls ? (
         <div
           aria-label="企业训练来源筛选"
           className="mt-3 flex flex-wrap gap-2"
@@ -1485,8 +1491,8 @@ function TrainingListPanel({
             </button>
           ))}
         </div>
-      )}
-      {visibleItems.length === 0 ? null : (
+      ) : null}
+      {shouldShowLifecycleControls ? (
         <div
           aria-label="企业训练形态筛选"
           className="mt-3 flex flex-wrap gap-2"
@@ -1511,7 +1517,7 @@ function TrainingListPanel({
             </button>
           ))}
         </div>
-      )}
+      ) : null}
       <div className="border-border mt-4 rounded-md border">
         {listState === "loading" ? (
           <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
@@ -1523,7 +1529,7 @@ function TrainingListPanel({
               {listMessage ?? "企业训练列表加载失败"}
             </p>
           </div>
-        ) : visibleItems.length === 0 ? (
+        ) : visibleItems.length === 0 && !hasActiveLifecycleFilter ? (
           <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
             <p className="text-text-secondary text-sm">暂无可展示的企业训练</p>
           </div>
@@ -1549,7 +1555,7 @@ function TrainingListPanel({
           </div>
         )}
       </div>
-      {visibleItems.length === 0 ? null : (
+      {shouldShowLifecycleControls ? (
         <div
           aria-label="企业训练分页"
           className="text-text-secondary mt-3 flex flex-col gap-2 text-sm md:flex-row md:items-center md:justify-between"
@@ -1586,7 +1592,7 @@ function TrainingListPanel({
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
       {selectedDetailItem === null ? null : (
         <TrainingLifecycleDetailPanel item={selectedDetailItem} />
       )}

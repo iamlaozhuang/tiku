@@ -576,6 +576,32 @@ describe("AdminOrganizationTrainingPage", () => {
     );
     expect(screen.getByText("AI组卷草稿")).toBeInTheDocument();
     expect(screen.queryByText("AI出题草稿")).toBeNull();
+
+    fireEvent.click(
+      within(sourceFilterGroup).getByRole("button", { name: "未知来源" }),
+    );
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(
+          ([url]) =>
+            getRequestPath(url) === "/api/v1/organization-trainings" &&
+            getRequestSearchParams(url).get("sourceKind") === "unknown",
+        ),
+      ).toBe(true),
+    );
+    expect(
+      await screen.findByText("当前筛选下暂无企业训练"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "企业训练状态筛选" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "企业训练来源筛选" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "企业训练形态筛选" }),
+    ).toBeInTheDocument();
   });
 
   it("paginates organization training lifecycle rows near the active filter", async () => {

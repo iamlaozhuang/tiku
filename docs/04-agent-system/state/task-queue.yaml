@@ -96,6 +96,113 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: organization-training-filter-empty-state-2026-07-08
+    title: Organization training filter empty state
+    phase: organization-training-filter-empty-state-2026-07-08
+    status: closed
+    result: pass_source_test_ready_for_merge_push_cleanup
+    priority: p1
+    taskKind: implementation
+    executionProfile: local_source_targeted_unit_with_optional_localhost_browser_validation
+    validationPolicy: tdd_red_green_targeted_ui_lint_typecheck_prettier_diff_browser_if_available_precommit_closeout_after_fresh_approval
+    moduleRunVersion: 2
+    branch: codex/org-training-filter-empty-state
+    humanApprovalBoundary: current_user_approved_filter_empty_state_closeout_then_readonly_detail_research_2026_07_08
+    plannedAt: "2026-07-08T15:04:41-07:00"
+    claimedAt: "2026-07-08T15:04:41-07:00"
+    completedAt: "2026-07-08T15:11:40-07:00"
+    targetClosureItem: Organization training list keeps filters and recoverable empty state when server-side filters return no rows.
+    behaviorBoundary: local_organization_training_list_filter_empty_state_ui_and_unit_test_only_no_api_dto_service_repository_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
+    evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
+    planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-filter-empty-state.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-filter-empty-state-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-filter-empty-state-audit.md
+    validationSummary:
+      status: pass_source_test_ready_for_merge_push_cleanup
+      tddRed: pass_expected_filtered_empty_controls_missing_failure
+      targetedOrganizationTrainingUnit: pass_1_file_14_tests
+      lint: pass
+      typecheck: pass
+      prettierCheck: pass_scoped
+      diffCheck: pass
+      browserRuntime: blocked_current_browser_session_not_advanced_admin_no_storage_or_credential_access
+      preCommitHardening: pass
+      sourceCodeChanged: true
+      testsChanged: true
+      packageLockfileChanged: false
+      envFileChanged: false
+      schemaMigrationSeedChanged: false
+      dbReadWriteExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
+      costCalibrationExecutedOrClaimed: false
+      releaseFinalProductionClaimed: false
+      productionUsabilityClaimed: false
+      mergePushApproval: granted_current_user_approved_filter_empty_state_closeout_then_readonly_detail_research_2026_07_08
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-08-organization-training-filter-empty-state.md
+      - docs/05-execution-logs/evidence/2026-07-08-organization-training-filter-empty-state-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-filter-empty-state-audit.md
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - rawfiles/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: approved_organization_training_list_empty_state_ui_only
+      focusedUnitTest: approved
+      browserRuntime: approved_localhost_redacted_visibility_check_only
+      devServer: approved_localhost_only_if_needed
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - npm.cmd exec -- vitest run tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-08-organization-training-filter-empty-state.md docs/05-execution-logs/evidence/2026-07-08-organization-training-filter-empty-state-evidence.md docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-filter-empty-state-audit.md src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx tests/unit/organization-training-admin-entry-surface.test.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-filter-empty-state-2026-07-08
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_reported_org_training_filter_empty_state_bug_2026_07_08
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_filter_empty_state_closeout_then_readonly_detail_research_2026_07_08
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_filter_empty_state_closeout_then_readonly_detail_research_2026_07_08
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_filter_empty_state_closeout_then_readonly_detail_research_2026_07_08
   - id: organization-training-create-guide-dedup-2026-07-08
     title: Organization training create guide dedup
     phase: organization-training-create-guide-dedup-2026-07-08
