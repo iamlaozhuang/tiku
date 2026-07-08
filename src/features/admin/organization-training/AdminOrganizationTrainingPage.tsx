@@ -7,7 +7,6 @@ import {
   Copy,
   FilePlus2,
   FileText,
-  Link2,
   ShieldCheck,
 } from "lucide-react";
 
@@ -25,7 +24,6 @@ import type {
   OrganizationTrainingAdminLifecycleSourceKind,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
-  OrganizationTrainingSourceContextAttachmentDto,
 } from "@/server/contracts/organization-training-contract";
 import type { OrganizationTrainingPublishInput } from "@/server/models/organization-training";
 import type { Profession, Subject } from "@/server/models/paper";
@@ -73,8 +71,6 @@ type OrganizationTrainingLifecycleContentKindFilter =
 
 type TrainingContentShape = "question_set" | "paper_like";
 
-type OrganizationTrainingAiResultKind = "question_draft" | "paper_plan";
-
 type DraftFormValues = {
   authorizationPublicId: string;
   description: string;
@@ -83,17 +79,6 @@ type DraftFormValues = {
   profession: Profession;
   subject: Subject;
   title: string;
-};
-
-type SourceContextFormValues = {
-  level: string;
-  questionCount: string;
-  sourcePublicId: string;
-  sourceStatus: string;
-  sourceType: "paper";
-  subject: Subject;
-  title: string;
-  totalScore: string;
 };
 
 type CopyFormValues = {
@@ -117,17 +102,6 @@ const defaultDraftFormValues: DraftFormValues = {
   title: "",
 };
 
-const defaultSourceContextFormValues: SourceContextFormValues = {
-  level: "3",
-  questionCount: "1",
-  sourcePublicId: "",
-  sourceStatus: "published",
-  sourceType: "paper",
-  subject: "theory",
-  title: "",
-  totalScore: "1",
-};
-
 const defaultCopyFormValues: CopyFormValues = {
   newDraftTitle: "",
   sourceVersionPublicId: "",
@@ -141,16 +115,24 @@ const defaultPublishFormValues: PublishFormValues = {
 
 const sourceChoices = [
   {
-    title: "平台试卷快照",
-    description: "按试卷结构复制平台试卷快照，发布前预览题目、答案和解析。",
+    title: "AI组卷结果",
+    description: "生成企业训练试卷草稿，本地选题后继续预览发布。",
+    trainingContentShape: "paper_like",
   },
   {
-    title: "企业 AI 结果",
-    description: "把 AI出题或 AI组卷结果复制为企业训练草稿。",
+    title: "平台试卷快照",
+    description: "从平台试卷列表选择快照，保留试卷结构进入训练草稿。",
+    trainingContentShape: "paper_like",
+  },
+  {
+    title: "AI出题结果",
+    description: "生成训练题草稿，审核后进入题目训练草稿。",
+    trainingContentShape: "question_set",
   },
   {
     title: "手动题组",
     description: "按题目集合维护企业私有题组后再发布。",
+    trainingContentShape: "question_set",
   },
 ] as const;
 
@@ -164,31 +146,14 @@ const trainingContentShapeOptions: {
   value: TrainingContentShape;
 }[] = [
   {
-    label: "试卷训练",
+    label: "新建试卷训练",
     value: "paper_like",
     description: "保留试卷结构，适合平台试卷快照或 AI组卷结果。",
   },
   {
-    label: "题目训练",
+    label: "新建题目训练",
     value: "question_set",
     description: "按题目集合发布，适合 AI出题结果或手动题组。",
-  },
-];
-
-const organizationAiResultKindOptions: {
-  description: string;
-  label: string;
-  value: OrganizationTrainingAiResultKind;
-}[] = [
-  {
-    label: "AI出题结果",
-    value: "question_draft",
-    description: "生成题目草稿，进入题目训练草稿继续审核。",
-  },
-  {
-    label: "AI组卷结果",
-    value: "paper_plan",
-    description: "生成组卷计划并本地选题，进入试卷训练草稿继续审核。",
   },
 ];
 
@@ -423,8 +388,22 @@ function resolveTrainingContentShapeLabel(shape: TrainingContentShape) {
   return shape === "paper_like" ? "试卷训练" : "题目训练";
 }
 
-function resolveShapeFromAiResultKind(kind: OrganizationTrainingAiResultKind) {
-  return kind === "paper_plan" ? "paper_like" : "question_set";
+function resolveSourceChoiceShape(choice: SourceChoiceTitle) {
+  return sourceChoices.find((sourceChoice) => sourceChoice.title === choice)
+    ?.trainingContentShape;
+}
+
+function getDefaultSourceChoiceForShape(
+  shape: TrainingContentShape,
+): SourceChoiceTitle {
+  return shape === "paper_like" ? "平台试卷快照" : "AI出题结果";
+}
+
+function isSourceChoiceAllowedForShape(
+  choice: SourceChoiceTitle,
+  shape: TrainingContentShape,
+) {
+  return resolveSourceChoiceShape(choice) === shape;
 }
 
 function upsertLifecycleItem(
@@ -501,41 +480,6 @@ function createManualDraftInput(
   };
 }
 
-function createSourceContextInput({
-  capabilitySummary,
-  draft,
-  draftValues,
-  sourceValues,
-}: {
-  draft: OrganizationTrainingDraftDto;
-  draftValues: DraftFormValues;
-  capabilitySummary: AdminWorkspaceCapabilitySummary;
-  sourceValues: SourceContextFormValues;
-}) {
-  return {
-    draftPublicId: draft.publicId,
-    organizationPublicId: draft.organizationPublicId,
-    authorizationPublicId: draft.authorizationPublicId,
-    profession: draft.profession,
-    level: draft.level,
-    capabilityContext:
-      createOrganizationTrainingCapabilityContext(capabilitySummary),
-    sourceContexts: [
-      {
-        sourceType: sourceValues.sourceType,
-        sourcePublicId: sourceValues.sourcePublicId,
-        title: sourceValues.title,
-        profession: draftValues.profession,
-        level: Number(sourceValues.level),
-        subject: sourceValues.subject,
-        questionCount: Number(sourceValues.questionCount),
-        totalScore: Number(sourceValues.totalScore),
-        sourceStatus: sourceValues.sourceStatus,
-      },
-    ],
-  };
-}
-
 function createCopyToDraftInput(
   values: CopyFormValues,
   authorizationPublicId: string,
@@ -601,9 +545,6 @@ export function AdminOrganizationTrainingPage() {
   const [draftFormValues, setDraftFormValues] = useState(
     defaultDraftFormValues,
   );
-  const [sourceContextFormValues, setSourceContextFormValues] = useState(
-    defaultSourceContextFormValues,
-  );
   const [copyFormValues, setCopyFormValues] = useState(defaultCopyFormValues);
   const [publishFormValues, setPublishFormValues] = useState(
     defaultPublishFormValues,
@@ -612,8 +553,6 @@ export function AdminOrganizationTrainingPage() {
     useState<SourceChoiceTitle>("平台试卷快照");
   const [trainingContentShape, setTrainingContentShape] =
     useState<TrainingContentShape>("paper_like");
-  const [selectedAiResultKind, setSelectedAiResultKind] =
-    useState<OrganizationTrainingAiResultKind>("paper_plan");
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [capabilitySummary, setCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
@@ -800,23 +739,16 @@ export function AdminOrganizationTrainingPage() {
 
   function handleSelectSourceChoice(value: SourceChoiceTitle) {
     setSelectedSourceChoice(value);
-
-    if (value === "平台试卷快照") {
-      setTrainingContentShape("paper_like");
-      return;
-    }
-
-    if (value === "手动题组") {
-      setTrainingContentShape("question_set");
-      return;
-    }
-
-    setTrainingContentShape(resolveShapeFromAiResultKind(selectedAiResultKind));
+    setTrainingContentShape(resolveSourceChoiceShape(value) ?? "paper_like");
   }
 
-  function handleSelectAiResultKind(value: OrganizationTrainingAiResultKind) {
-    setSelectedAiResultKind(value);
-    setTrainingContentShape(resolveShapeFromAiResultKind(value));
+  function handleSelectTrainingContentShape(value: TrainingContentShape) {
+    setTrainingContentShape(value);
+    setSelectedSourceChoice((currentValue) =>
+      isSourceChoiceAllowedForShape(currentValue, value)
+        ? currentValue
+        : getDefaultSourceChoiceForShape(value),
+    );
   }
 
   async function handleCreateDraft(values: DraftFormValues) {
@@ -859,52 +791,6 @@ export function AdminOrganizationTrainingPage() {
       setMessage("企业训练草稿已创建");
     } catch {
       setErrorMessage("企业训练草稿创建失败");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function handleAttachSourceContext(values: SourceContextFormValues) {
-    const sessionToken = getStoredSessionToken();
-
-    if (lastDraft === null) {
-      setErrorMessage("请先创建企业训练草稿");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    setMessage(null);
-
-    try {
-      if (capabilitySummary === null) {
-        setErrorMessage("企业训练权限上下文缺失");
-        return;
-      }
-
-      const response = await mutateAdminOrganizationTrainingApi<{
-        context: OrganizationTrainingSourceContextAttachmentDto;
-      }>(
-        `/api/v1/organization-trainings/${lastDraft.publicId}/source-contexts`,
-        sessionToken,
-        createSourceContextInput({
-          draft: lastDraft,
-          draftValues: draftFormValues,
-          capabilitySummary,
-          sourceValues: values,
-        }),
-      );
-
-      if (response.code !== 0 || response.data === null) {
-        setErrorMessage(
-          createApiErrorMessage("企业训练来源绑定失败", response),
-        );
-        return;
-      }
-
-      setMessage("来源已绑定到企业训练草稿");
-    } catch {
-      setErrorMessage("企业训练来源绑定失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -1085,8 +971,8 @@ export function AdminOrganizationTrainingPage() {
             企业训练
           </h1>
           <p className="text-text-secondary max-w-2xl text-sm leading-6">
-            从试卷快照、企业 AI
-            结果或手动题组创建训练，发布给当前组织或下级组织。
+            从
+            AI出题结果、AI组卷结果、平台试卷快照或手动题组创建训练，发布给当前组织或下级组织。
           </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-md">
@@ -1160,10 +1046,11 @@ export function AdminOrganizationTrainingPage() {
             <WizardStepCard step={1} title="选择来源">
               <TrainingShapeSelector
                 selectedTrainingContentShape={trainingContentShape}
-                onSelect={setTrainingContentShape}
+                onSelect={handleSelectTrainingContentShape}
               />
               <SourceChoiceList
                 selectedSourceChoice={selectedSourceChoice}
+                trainingContentShape={trainingContentShape}
                 onSelect={handleSelectSourceChoice}
               />
             </WizardStepCard>
@@ -1178,22 +1065,11 @@ export function AdminOrganizationTrainingPage() {
             </WizardStepCard>
             <WizardStepCard step={3} title="设置范围">
               <PublishScopePreview />
-              {selectedSourceChoice === "平台试卷快照" ? (
-                <SourceContextForm
-                  disabled={lastDraft === null}
-                  isSubmitting={isSubmitting}
-                  values={sourceContextFormValues}
-                  onChange={setSourceContextFormValues}
-                  onSubmit={handleAttachSourceContext}
-                />
-              ) : (
-                <DeferredSourceNotice
-                  selectedAiResultKind={selectedAiResultKind}
-                  sourceChoice={selectedSourceChoice}
-                  trainingContentShape={trainingContentShape}
-                  onSelectAiResultKind={handleSelectAiResultKind}
-                />
-              )}
+              <SourceHandoffNotice
+                hasDraft={lastDraft !== null}
+                sourceChoice={selectedSourceChoice}
+                trainingContentShape={trainingContentShape}
+              />
             </WizardStepCard>
             <WizardStepCard step={4} title="预览发布">
               <PublishReadinessPanel
@@ -1690,14 +1566,20 @@ function WizardStepCard({
 
 function SourceChoiceList({
   selectedSourceChoice,
+  trainingContentShape,
   onSelect,
 }: {
   selectedSourceChoice: SourceChoiceTitle;
+  trainingContentShape: TrainingContentShape;
   onSelect: (value: SourceChoiceTitle) => void;
 }) {
+  const visibleSourceChoices = sourceChoices.filter(
+    (choice) => choice.trainingContentShape === trainingContentShape,
+  );
+
   return (
     <div className="space-y-2" role="radiogroup" aria-label="企业训练来源">
-      {sourceChoices.map((choice) => {
+      {visibleSourceChoices.map((choice) => {
         const isSelected = choice.title === selectedSourceChoice;
 
         return (
@@ -1725,7 +1607,7 @@ function SourceChoiceList({
         );
       })}
       <p className="text-text-secondary text-xs leading-5">
-        模拟考试不作为企业训练来源入口。
+        模拟考试不是企业训练来源入口。
       </p>
     </div>
   );
@@ -1739,7 +1621,7 @@ function TrainingShapeSelector({
   onSelect: (value: TrainingContentShape) => void;
 }) {
   return (
-    <div className="space-y-2" role="radiogroup" aria-label="训练形态">
+    <div className="space-y-2" role="radiogroup" aria-label="业务意图">
       {trainingContentShapeOptions.map((option) => {
         const isSelected = option.value === selectedTrainingContentShape;
 
@@ -1802,44 +1684,18 @@ function PublishReadinessPanel({
   );
 }
 
-function DeferredSourceNotice({
-  selectedAiResultKind,
+function SourceHandoffNotice({
+  hasDraft,
   sourceChoice,
   trainingContentShape,
-  onSelectAiResultKind,
 }: {
-  selectedAiResultKind: OrganizationTrainingAiResultKind;
+  hasDraft: boolean;
   sourceChoice: SourceChoiceTitle;
   trainingContentShape: TrainingContentShape;
-  onSelectAiResultKind: (value: OrganizationTrainingAiResultKind) => void;
 }) {
-  if (sourceChoice === "企业 AI 结果") {
+  if (sourceChoice === "AI出题结果") {
     return (
       <div className="bg-muted text-text-secondary space-y-3 rounded-md p-3 text-sm leading-6">
-        <div aria-label="AI 结果类型" className="grid gap-2" role="radiogroup">
-          {organizationAiResultKindOptions.map((option) => {
-            const isSelected = option.value === selectedAiResultKind;
-
-            return (
-              <button
-                aria-checked={isSelected}
-                aria-label={option.label}
-                className={`border-border rounded-md border p-3 text-left active:scale-[0.98] ${
-                  isSelected
-                    ? "bg-secondary text-secondary-foreground"
-                    : "bg-surface text-text-secondary hover:bg-muted hover:text-text-primary"
-                }`}
-                key={option.value}
-                onClick={() => onSelectAiResultKind(option.value)}
-                role="radio"
-                type="button"
-              >
-                <span className="block font-medium">{option.label}</span>
-                <span className="block">{option.description}</span>
-              </button>
-            );
-          })}
-        </div>
         <div className="flex flex-wrap gap-2">
           <a
             className="border-border bg-surface text-text-primary hover:bg-muted inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium active:scale-[0.98]"
@@ -1847,6 +1703,19 @@ function DeferredSourceNotice({
           >
             前往 AI出题
           </a>
+        </div>
+        <p>AI出题结果会进入题目训练草稿；这些题目还未发布，员工暂时看不到。</p>
+        <p>
+          当前形态：{resolveTrainingContentShapeLabel(trainingContentShape)}
+        </p>
+      </div>
+    );
+  }
+
+  if (sourceChoice === "AI组卷结果") {
+    return (
+      <div className="bg-muted text-text-secondary space-y-3 rounded-md p-3 text-sm leading-6">
+        <div className="flex flex-wrap gap-2">
           <a
             className="border-border bg-surface text-text-primary hover:bg-muted inline-flex h-8 items-center rounded-md border px-3 text-sm font-medium active:scale-[0.98]"
             href="/organization/ai-paper-generation"
@@ -1854,12 +1723,24 @@ function DeferredSourceNotice({
             前往 AI组卷
           </a>
         </div>
-        <p>
-          AI 结果只进入企业训练草稿，不写入平台正式题库、正式试卷或模拟考试。
-        </p>
+        <p>AI组卷生成组卷计划，系统本地选题后进入企业训练草稿。</p>
+        <p>不会直接写入平台正式题库、正式试卷或模拟考试。</p>
         <p>
           当前形态：{resolveTrainingContentShapeLabel(trainingContentShape)}
         </p>
+      </div>
+    );
+  }
+
+  if (sourceChoice === "平台试卷快照") {
+    return (
+      <div className="bg-muted text-text-secondary rounded-md p-3 text-sm leading-6">
+        {hasDraft
+          ? "草稿已创建；创建草稿后从试卷列表选择平台试卷快照，不需要手填内部标识。"
+          : "创建草稿后从试卷列表选择平台试卷快照，不需要手填内部标识。"}
+        <span className="block">
+          当前形态：{resolveTrainingContentShapeLabel(trainingContentShape)}。
+        </span>
       </div>
     );
   }
@@ -1932,64 +1813,6 @@ function DraftForm({
         type="submit"
       >
         {isSubmitting ? "创建中" : "创建企业训练草稿"}
-      </Button>
-    </form>
-  );
-}
-
-function SourceContextForm({
-  disabled,
-  isSubmitting,
-  values,
-  onChange,
-  onSubmit,
-}: {
-  disabled: boolean;
-  isSubmitting: boolean;
-  values: SourceContextFormValues;
-  onChange: (values: SourceContextFormValues) => void;
-  onSubmit: (values: SourceContextFormValues) => void;
-}) {
-  return (
-    <form
-      aria-label="企业训练来源表单"
-      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSubmit(values);
-      }}
-    >
-      <PanelHeader
-        icon={<Link2 aria-hidden="true" className="size-4" />}
-        title="试卷快照"
-      />
-      {disabled ? (
-        <p className="text-text-secondary text-sm leading-6">
-          创建草稿后再选择平台试卷快照；发布前需要预览题目、答案和解析。
-        </p>
-      ) : null}
-      <TextField
-        label="试卷快照"
-        value={values.sourcePublicId}
-        onChange={(value) => onChange({ ...values, sourcePublicId: value })}
-      />
-      <TextField
-        label="来源标题"
-        value={values.title}
-        onChange={(value) => onChange({ ...values, title: value })}
-      />
-      <NumberField
-        label="来源题数"
-        value={values.questionCount}
-        onChange={(value) => onChange({ ...values, questionCount: value })}
-      />
-      <NumberField
-        label="来源总分"
-        value={values.totalScore}
-        onChange={(value) => onChange({ ...values, totalScore: value })}
-      />
-      <Button disabled={disabled || isSubmitting} type="submit">
-        {isSubmitting ? "绑定中" : "绑定试卷快照"}
       </Button>
     </form>
   );
