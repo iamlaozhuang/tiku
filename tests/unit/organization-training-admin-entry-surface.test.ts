@@ -393,6 +393,87 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(screen.queryByText("已发布训练")).toBeNull();
   });
 
+  it("paginates organization training lifecycle rows near the active filter", async () => {
+    const lifecycleItems = Array.from({ length: 12 }, (_, index) => ({
+      publicId: `organization-training-draft-page-ui-${index + 1}`,
+      resourceType: "organization_training_draft",
+      organizationPublicId: "organization-admin-scope-001",
+      authorizationPublicId: "org-auth-admin-scope-001",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      title: `分页训练 ${String(index + 1).padStart(2, "0")}`,
+      description: "分页训练",
+      questionCount: 1,
+      totalScore: 5,
+      questionTypeSummary: {
+        singleChoice: 1,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 0,
+      },
+      status: "draft",
+      availableActions: ["publish"],
+    }));
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (String(url) === "/api/v1/organization-trainings") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            items: lifecycleItems,
+            redactionStatus: "metadata_only",
+          },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(await screen.findByText("分页训练 01")).toBeInTheDocument();
+    expect(screen.getByText("共 12 条")).toBeInTheDocument();
+    expect(screen.getByText("第 1 / 2 页")).toBeInTheDocument();
+    expect(screen.queryByText("分页训练 11")).toBeNull();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "查看" })[0]);
+
+    expect(
+      screen.getByRole("complementary", { name: "训练详情" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+
+    expect(screen.getByText("分页训练 11")).toBeInTheDocument();
+    expect(screen.queryByText("分页训练 01")).toBeNull();
+    expect(
+      screen.queryByRole("complementary", { name: "训练详情" }),
+    ).toBeNull();
+    expect(screen.getByText("第 2 / 2 页")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "下一页" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "上一页" }));
+
+    expect(screen.getByText("分页训练 01")).toBeInTheDocument();
+    expect(screen.queryByText("分页训练 11")).toBeNull();
+    expect(screen.getByRole("button", { name: "上一页" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "已发布" }));
+
+    expect(screen.getByText("当前筛选下暂无企业训练")).toBeInTheDocument();
+    expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
+  });
+
   it("keeps the create wizard behind an explicit entry and distinguishes training shape plus organization AI result kind", async () => {
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       if (String(url) === "/api/v1/sessions") {

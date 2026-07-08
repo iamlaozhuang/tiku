@@ -189,6 +189,8 @@ const lifecycleStatusFilters: {
   { label: "已下架", value: "taken_down" },
 ];
 
+const organizationTrainingListPageSize = 10;
+
 function resolveOrganizationTrainingLoadState(authContext: AuthContextDto): {
   capabilitySummary: AdminWorkspaceCapabilitySummary;
   loadState: AdminOrganizationTrainingLoadState;
@@ -1108,12 +1110,24 @@ function TrainingListPanel({
   const [selectedDetailPublicId, setSelectedDetailPublicId] = useState<
     string | null
   >(null);
+  const [selectedPage, setSelectedPage] = useState(1);
   const visibleItems =
     lastDraft === null
       ? items
       : upsertLifecycleItem(items, createLifecycleItemFromDraft(lastDraft));
   const filteredItems = visibleItems.filter((item) =>
     matchesLifecycleStatusFilter(item, selectedStatusFilter),
+  );
+  const totalPageCount = Math.max(
+    1,
+    Math.ceil(filteredItems.length / organizationTrainingListPageSize),
+  );
+  const clampedSelectedPage = Math.min(selectedPage, totalPageCount);
+  const firstVisibleItemIndex =
+    (clampedSelectedPage - 1) * organizationTrainingListPageSize;
+  const paginatedItems = filteredItems.slice(
+    firstVisibleItemIndex,
+    firstVisibleItemIndex + organizationTrainingListPageSize,
   );
   const selectedDetailItem =
     selectedDetailPublicId === null
@@ -1163,6 +1177,7 @@ function TrainingListPanel({
               onClick={() => {
                 setSelectedStatusFilter(filter.value);
                 setSelectedDetailPublicId(null);
+                setSelectedPage(1);
               }}
               type="button"
             >
@@ -1194,7 +1209,7 @@ function TrainingListPanel({
           </div>
         ) : (
           <div className="divide-border divide-y">
-            {filteredItems.map((item) => (
+            {paginatedItems.map((item) => (
               <TrainingLifecycleItemCard
                 isSubmitting={isSubmitting}
                 item={item}
@@ -1208,6 +1223,46 @@ function TrainingListPanel({
           </div>
         )}
       </div>
+      {visibleItems.length === 0 ? null : (
+        <div
+          aria-label="企业训练分页"
+          className="text-text-secondary mt-3 flex flex-col gap-2 text-sm md:flex-row md:items-center md:justify-between"
+          role="navigation"
+        >
+          <div className="flex flex-wrap gap-3">
+            <span>共 {filteredItems.length} 条</span>
+            <span>
+              第 {clampedSelectedPage} / {totalPageCount} 页
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              disabled={clampedSelectedPage <= 1}
+              onClick={() => {
+                setSelectedDetailPublicId(null);
+                setSelectedPage((currentPage) => Math.max(1, currentPage - 1));
+              }}
+              type="button"
+              variant="outline"
+            >
+              上一页
+            </Button>
+            <Button
+              disabled={clampedSelectedPage >= totalPageCount}
+              onClick={() => {
+                setSelectedDetailPublicId(null);
+                setSelectedPage((currentPage) =>
+                  Math.min(totalPageCount, currentPage + 1),
+                );
+              }}
+              type="button"
+              variant="outline"
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
+      )}
       {selectedDetailItem === null ? null : (
         <TrainingLifecycleDetailPanel item={selectedDetailItem} />
       )}
