@@ -22,6 +22,16 @@
 - `git diff --check`: pass.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-detail-read-model-2026-07-08`: pass.
 
+## Master Post-Merge Validation
+
+- Fast-forward merged `codex/org-training-admin-detail-read-model` into `master`: pass.
+- `npm.cmd exec -- vitest run src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts --reporter=dot`: pass, 3 files, 104 tests.
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: pass.
+- `npm.cmd exec -- prettier --check --ignore-unknown <touched files>`: pass.
+- `git diff --check`: pass.
+- Repository checkpoint aligned for pre-push readiness: pending final pre-push rerun.
+
 ## Requirement Mapping Result
 
 - `CT-REQ-016`: covered by the admin-only detail read model for enterprise training review.
