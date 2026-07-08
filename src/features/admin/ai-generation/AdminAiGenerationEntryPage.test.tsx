@@ -216,6 +216,19 @@ function mockAdminAiGenerationFetch(options?: {
         return createJsonResponse(createEmptyHistoryResponse());
       }
 
+      if (url.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: { knowledgeNodes: [] },
+          pagination: {
+            page: 1,
+            pageSize: 100,
+            total: 0,
+          },
+        });
+      }
+
       if (
         url === "/api/v1/content-ai-generation-requests" &&
         init?.method === "POST"
@@ -408,7 +421,7 @@ describe("AdminAiGenerationEntryPage", () => {
 
     expect(screen.getByTestId("admin-ai-generation-submit")).toBeDisabled();
     expect(
-      screen.getByTestId("admin-ai-knowledge-scope-disabled-reason"),
+      await screen.findByTestId("admin-ai-knowledge-scope-disabled-reason"),
     ).toHaveTextContent("当前范围没有可直接选择的知识点");
     expect(fetch).not.toHaveBeenCalledWith(
       "/api/v1/content-ai-generation-requests",
