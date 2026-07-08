@@ -182,7 +182,7 @@ function createFormalQuestionDraftPayload(
       questionType === "fill_blank"
         ? createFillBlankAnswers(standardAnswerRichText)
         : [],
-    knowledgeNodePublicIds: [],
+    knowledgeNodePublicIds: [...generationParameters.knowledgeNodePublicIds],
     tagPublicIds: [],
   };
 }
