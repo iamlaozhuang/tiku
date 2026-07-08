@@ -1,8 +1,60 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-create-entry-2026-07-08
-updatedAt: "2026-07-08T13:27:00-07:00"
+currentPhase: organization-training-draft-preview-publish-2026-07-08
+updatedAt: "2026-07-08T14:01:16-07:00"
+latestOrganizationTrainingDraftPreviewPublish:
+  id: organization-training-draft-preview-publish-2026-07-08
+  status: closed
+  result: pass_source_test_ready_for_commit_merge_push_cleanup
+  branch: codex/org-training-draft-preview-publish
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-draft-preview-publish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-draft-preview-publish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-draft-preview-publish-audit.md
+  approvalBoundary: current_user_approved_four_stage_org_training_repair_until_complete_2026_07_08
+  adoptionBaseline:
+    stage1ListManagement: adopted_after_current_targeted_tests_passed
+    stage2ReadModelKind: adopted_after_current_targeted_tests_passed
+    stage3CreateEntry: adopted_after_current_targeted_tests_passed
+    employeeAnswerLoop: adopted_after_current_targeted_tests_passed
+    backendPublishGate: adopted_after_current_targeted_tests_passed
+  boundary:
+    scope: organization_training_admin_draft_preview_publish_ui_and_unit_tests_only
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    browserRuntimeExecuted: false
+  conclusionBuckets:
+    branchSpecificReadGate: pass
+    adoptedPriorStages:
+      stage1ListManagement: pass_current_targeted_adoption
+      stage2ReadModelKind: pass_current_targeted_adoption
+      stage3CreateEntry: pass_current_targeted_adoption
+    adoptedEmployeeAnswerLoop: pass_current_targeted_adoption
+    adoptedBackendPublishGate: pass_current_targeted_adoption
+    targetedOrganizationTrainingUnit: pass_1_file_14_tests
+    targetedOrganizationTrainingEmployeeUnit: pass_2_files_19_tests
+    targetedOrganizationTrainingServiceRouteUnit: pass_2_files_73_tests
+    adjacentAiGenerationUnit: pass_1_file_39_tests
+    lint: pass
+    typecheck: pass
+    fullUnit: pass_349_files_1778_tests
+    prettierCheck: pass_scoped
+    diffCheck: pass
+    preCommitHardening: pass_after_requirement_mapping_result_alignment
+    prePushReadiness: pass_after_repository_checkpoint_alignment
+    sourceCodeChanged: true
+    testsChanged: true
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    browserRuntimeExecuted: false
+    releaseReadiness: not_claimed
+    productionUsability: not_claimed
+    staging: not_executed_requires_fresh_approval
+    costCalibration: not_executed_requires_fresh_approval
 latestOrganizationTrainingCreateEntry:
   id: organization-training-create-entry-2026-07-08
   status: closed
@@ -1264,37 +1316,41 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: organization-training-create-entry-2026-07-08
-  title: Organization training create entry source and shape split
-  phase: organization-training-create-entry-2026-07-08
+  id: organization-training-draft-preview-publish-2026-07-08
+  title: Organization training draft preview publish
+  phase: organization-training-draft-preview-publish-2026-07-08
   status: closed
   result: pass_source_test_ready_for_commit_merge_push_cleanup
   priority: p1
   taskKind: implementation
-  branch: codex/org-training-create-entry
+  branch: codex/org-training-draft-preview-publish
   humanApprovalBoundary: current_user_approved_four_stage_org_training_repair_until_complete_2026_07_08
-  plannedAt: "2026-07-08T13:09:00-07:00"
-  claimedAt: "2026-07-08T13:09:00-07:00"
-  completedAt: "2026-07-08T13:27:00-07:00"
-  targetClosureItem: Organization training create entry first separates question-training versus paper-training intent and then presents only matching non-ambiguous source choices.
-  behaviorBoundary: local_organization_training_create_entry_ui_and_unit_tests_only_no_api_write_redesign_no_ai_page_rewrite_no_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
+  plannedAt: "2026-07-08T13:39:46-07:00"
+  claimedAt: "2026-07-08T13:39:46-07:00"
+  completedAt: "2026-07-08T14:01:16-07:00"
+  targetClosureItem: Organization training admin publish path replaces raw JSON snapshot input with structured draft preview, employee-view preview, and explicit evidence blockers.
+  behaviorBoundary: local_organization_training_admin_draft_preview_publish_ui_and_unit_tests_only_no_api_write_redesign_no_ai_page_rewrite_no_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write_no_employee_answer_flow_rewrite
   evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-create-entry.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-create-entry-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-create-entry-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-draft-preview-publish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-draft-preview-publish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-draft-preview-publish-audit.md
   validationSummary:
     status: pass_source_test_ready_for_commit_merge_push_cleanup
     adoptedPriorStages: pass_current_targeted_adoption
-    tddRed: pass_expected_create_entry_intent_source_gap
+    adoptedEmployeeAnswerLoop: pass_current_targeted_adoption
+    adoptedBackendPublishGate: pass_current_targeted_adoption
+    tddRed: pass_expected_raw_snapshot_input_gap
     targetedOrganizationTrainingUnit: pass_1_file_14_tests
-    targetedOrganizationTrainingServiceRouteUiUnit: pass_3_files_87_tests
+    targetedOrganizationTrainingEmployeeUnit: pass_2_files_19_tests
+    targetedOrganizationTrainingServiceRouteUnit: pass_2_files_73_tests
     adjacentAiGenerationUnit: pass_1_file_39_tests
     fullUnit: pass_349_files_1778_tests
     lint: pass
     typecheck: pass
     prettierCheck: pass_scoped
     diffCheck: pass
-    preCommitHardening: pass
+    preCommitHardening: pass_after_requirement_mapping_result_alignment
+    prePushReadiness: pass_after_repository_checkpoint_alignment
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
@@ -31907,8 +31963,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b2eb2b7b706ba8908db3fe06713738703374d9ba
-  lastKnownOriginMasterSha: b2eb2b7b706ba8908db3fe06713738703374d9ba
+  lastKnownMasterSha: 5e9fc7f0e0d1a5aac686f9b41998d36755361f13
+  lastKnownOriginMasterSha: 5e9fc7f0e0d1a5aac686f9b41998d36755361f13
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

@@ -86,9 +86,26 @@ type CopyFormValues = {
   sourceVersionPublicId: string;
 };
 
+type PublishQuestionFormValue = {
+  sequenceNumber: number;
+  questionType: OrganizationTrainingPublishInput["questions"][number]["questionType"];
+  materialTitle: string;
+  materialContent: string;
+  stem: string;
+  options: {
+    label: string;
+    content: string;
+  }[];
+  score: string;
+  standardAnswer: string;
+  analysisSummary: string;
+  evidenceStatus: OrganizationTrainingPublishInput["questions"][number]["evidenceStatus"];
+  citationCount: string;
+};
+
 type PublishFormValues = {
   publishScopeOrganizationPublicIds: string;
-  questionSnapshotJson: string;
+  questions: PublishQuestionFormValue[];
   weakEvidenceConfirmed: boolean;
 };
 
@@ -109,7 +126,7 @@ const defaultCopyFormValues: CopyFormValues = {
 
 const defaultPublishFormValues: PublishFormValues = {
   publishScopeOrganizationPublicIds: "",
-  questionSnapshotJson: "[]",
+  questions: [],
   weakEvidenceConfirmed: false,
 };
 
@@ -388,6 +405,24 @@ function resolveTrainingContentShapeLabel(shape: TrainingContentShape) {
   return shape === "paper_like" ? "试卷训练" : "题目训练";
 }
 
+function resolvePublishQuestionTypeLabel(
+  questionType: PublishQuestionFormValue["questionType"],
+) {
+  if (questionType === "single_choice") {
+    return "单选题";
+  }
+
+  if (questionType === "multi_choice") {
+    return "多选题";
+  }
+
+  if (questionType === "true_false") {
+    return "判断题";
+  }
+
+  return "简答题";
+}
+
 function resolveSourceChoiceShape(choice: SourceChoiceTitle) {
   return sourceChoices.find((sourceChoice) => sourceChoice.title === choice)
     ?.trainingContentShape;
@@ -431,20 +466,6 @@ function replaceLifecycleItem(
   );
 }
 
-function parseQuestionSnapshotJson(
-  value: string,
-): OrganizationTrainingPublishInput["questions"] | null {
-  try {
-    const parsedValue = JSON.parse(value) as unknown;
-
-    return Array.isArray(parsedValue)
-      ? (parsedValue as OrganizationTrainingPublishInput["questions"])
-      : null;
-  } catch {
-    return null;
-  }
-}
-
 function normalizePublishScope(rawValue: string, organizationPublicId: string) {
   const normalizedValues = rawValue
     .split(",")
@@ -454,6 +475,204 @@ function normalizePublishScope(rawValue: string, organizationPublicId: string) {
   return normalizedValues.length === 0
     ? [organizationPublicId]
     : [...new Set(normalizedValues)];
+}
+
+function createDefaultPublishQuestionFormValue(
+  sequenceNumber: number,
+  score: number,
+): PublishQuestionFormValue {
+  return {
+    sequenceNumber,
+    questionType: "single_choice",
+    materialTitle: "",
+    materialContent: "",
+    stem: "",
+    options: [
+      { label: "A", content: "" },
+      { label: "B", content: "" },
+    ],
+    score: String(Math.max(1, score)),
+    standardAnswer: "",
+    analysisSummary: "",
+    evidenceStatus: "none",
+    citationCount: "1",
+  };
+}
+
+function createPublishFormValuesForDraft(
+  draft: OrganizationTrainingAdminLifecycleItemDto,
+): PublishFormValues {
+  const questionCount = Math.max(1, draft.questionCount ?? 1);
+  const averageScore =
+    draft.totalScore === undefined || questionCount === 0
+      ? 5
+      : Math.max(1, Math.floor(draft.totalScore / questionCount));
+
+  return {
+    publishScopeOrganizationPublicIds: draft.organizationPublicId,
+    questions: Array.from({ length: questionCount }, (_, index) =>
+      createDefaultPublishQuestionFormValue(index + 1, averageScore),
+    ),
+    weakEvidenceConfirmed: false,
+  };
+}
+
+function normalizeOptionalPreviewText(value: string): string | null {
+  const trimmedValue = value.trim();
+
+  return trimmedValue.length === 0 ? null : trimmedValue;
+}
+
+function normalizePositiveIntegerInput(value: string): number | null {
+  const numberValue = Number(value);
+
+  return Number.isInteger(numberValue) && numberValue > 0 ? numberValue : null;
+}
+
+function normalizeNonNegativeIntegerInput(value: string): number | null {
+  const numberValue = Number(value);
+
+  return Number.isInteger(numberValue) && numberValue >= 0 ? numberValue : null;
+}
+
+function createQuestionPublicId(sequenceNumber: number) {
+  return `organization-training-question-preview-${sequenceNumber}`;
+}
+
+function createQuestionOptionPublicId(sequenceNumber: number, label: string) {
+  return `${createQuestionPublicId(sequenceNumber)}-option-${label.toLowerCase()}`;
+}
+
+function normalizePublishQuestionFormValue(
+  question: PublishQuestionFormValue,
+): OrganizationTrainingPublishInput["questions"][number] | null {
+  const stem = question.stem.trim();
+  const score = normalizePositiveIntegerInput(question.score);
+  const citationCount = normalizeNonNegativeIntegerInput(
+    question.citationCount,
+  );
+  const standardAnswer = question.standardAnswer.trim();
+  const analysisSummary = question.analysisSummary.trim();
+  const options =
+    question.questionType === "short_answer"
+      ? []
+      : question.options
+          .map((option) => ({
+            label: option.label.trim(),
+            content: option.content.trim(),
+          }))
+          .filter(
+            (option) => option.label.length > 0 && option.content.length > 0,
+          );
+
+  if (
+    stem.length === 0 ||
+    score === null ||
+    citationCount === null ||
+    standardAnswer.length === 0 ||
+    analysisSummary.length === 0 ||
+    (question.questionType !== "short_answer" && options.length === 0)
+  ) {
+    return null;
+  }
+
+  return {
+    publicId: createQuestionPublicId(question.sequenceNumber),
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    materialTitle: normalizeOptionalPreviewText(question.materialTitle),
+    materialContent: normalizeOptionalPreviewText(question.materialContent),
+    stem,
+    options: options.map((option) => ({
+      publicId: createQuestionOptionPublicId(
+        question.sequenceNumber,
+        option.label,
+      ),
+      label: option.label,
+      content: option.content,
+    })),
+    score,
+    standardAnswer,
+    analysisSummary,
+    evidenceStatus: question.evidenceStatus,
+    citationCount,
+  };
+}
+
+function normalizePublishQuestionFormValues(
+  questions: PublishQuestionFormValue[],
+): OrganizationTrainingPublishInput["questions"] | null {
+  const normalizedQuestions = questions.map(normalizePublishQuestionFormValue);
+
+  if (
+    normalizedQuestions.length === 0 ||
+    normalizedQuestions.some((question) => question === null)
+  ) {
+    return null;
+  }
+
+  return normalizedQuestions as OrganizationTrainingPublishInput["questions"];
+}
+
+function createQuestionTypeSummaryFromQuestions(
+  questions: OrganizationTrainingPublishInput["questions"],
+): OrganizationTrainingPublishInput["questionTypeSummary"] {
+  return questions.reduce<
+    OrganizationTrainingPublishInput["questionTypeSummary"]
+  >(
+    (summary, question) => {
+      if (question.questionType === "single_choice") {
+        return { ...summary, singleChoice: summary.singleChoice + 1 };
+      }
+
+      if (question.questionType === "multi_choice") {
+        return { ...summary, multiChoice: summary.multiChoice + 1 };
+      }
+
+      if (question.questionType === "true_false") {
+        return { ...summary, trueFalse: summary.trueFalse + 1 };
+      }
+
+      return { ...summary, shortAnswer: summary.shortAnswer + 1 };
+    },
+    {
+      singleChoice: 0,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 0,
+    },
+  );
+}
+
+function hasNoEvidenceQuestion(questions: PublishQuestionFormValue[]): boolean {
+  return questions.some((question) => question.evidenceStatus === "none");
+}
+
+function hasWeakEvidenceQuestion(
+  questions: PublishQuestionFormValue[],
+): boolean {
+  return questions.some((question) => question.evidenceStatus === "weak");
+}
+
+function resolvePublishBlockMessage(values: PublishFormValues): string | null {
+  const questions = normalizePublishQuestionFormValues(values.questions);
+
+  if (questions === null) {
+    return "请先补全发布前题目预览。";
+  }
+
+  if (hasNoEvidenceQuestion(values.questions)) {
+    return "当前草稿缺少必要内容或依据，暂不能发布。";
+  }
+
+  if (
+    hasWeakEvidenceQuestion(values.questions) &&
+    values.weakEvidenceConfirmed !== true
+  ) {
+    return "资料依据较弱，发布前需要确认适用范围和员工可见内容。";
+  }
+
+  return null;
 }
 
 function createManualDraftInput(
@@ -500,21 +719,23 @@ function createPublishTrainingInput({
   draft: OrganizationTrainingAdminLifecycleItemDto;
   values: PublishFormValues;
 }): OrganizationTrainingPublishInput | null {
-  const questions = parseQuestionSnapshotJson(values.questionSnapshotJson);
+  const questions = normalizePublishQuestionFormValues(values.questions);
 
   if (
     draft.authorizationPublicId === undefined ||
     draft.profession === undefined ||
     draft.level === undefined ||
     draft.subject === undefined ||
-    draft.questionCount === undefined ||
-    draft.totalScore === undefined ||
-    draft.questionTypeSummary === undefined ||
     questions === null ||
     questions.length === 0
   ) {
     return null;
   }
+
+  const totalScore = questions.reduce(
+    (scoreTotal, question) => scoreTotal + question.score,
+    0,
+  );
 
   return {
     draftPublicId: draft.publicId,
@@ -532,9 +753,9 @@ function createPublishTrainingInput({
     ),
     capabilityContext:
       createOrganizationTrainingCapabilityContext(capabilitySummary),
-    questionCount: draft.questionCount,
-    totalScore: draft.totalScore,
-    questionTypeSummary: draft.questionTypeSummary,
+    questionCount: questions.length,
+    totalScore,
+    questionTypeSummary: createQuestionTypeSummaryFromQuestions(questions),
     weakEvidenceConfirmed: values.weakEvidenceConfirmed,
   };
 }
@@ -920,6 +1141,13 @@ export function AdminOrganizationTrainingPage() {
         return;
       }
 
+      const publishBlockMessage = resolvePublishBlockMessage(values);
+
+      if (publishBlockMessage !== null) {
+        setErrorMessage(publishBlockMessage);
+        return;
+      }
+
       const publishInput = createPublishTrainingInput({
         capabilitySummary,
         draft: selectedPublishDraft,
@@ -1027,10 +1255,7 @@ export function AdminOrganizationTrainingPage() {
         onPublishDraft={(draft) => {
           setIsCreateWizardOpen(true);
           setSelectedPublishDraft(draft);
-          setPublishFormValues({
-            ...defaultPublishFormValues,
-            publishScopeOrganizationPublicIds: draft.organizationPublicId,
-          });
+          setPublishFormValues(createPublishFormValuesForDraft(draft));
         }}
         onTakeDownVersion={handleTakeDownVersion}
       />
@@ -1482,7 +1707,7 @@ function TrainingLifecycleDetailPanel({
       </div>
       <p className="text-text-secondary mt-3 text-sm">
         {isDraft
-          ? "草稿可继续配置，确认题目快照后再发布给员工。"
+          ? "草稿可继续配置，确认题目内容后再发布给员工。"
           : "已发布版本为只读；如需调整内容，请复制为新草稿后再发布。"}
       </p>
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
@@ -1676,7 +1901,7 @@ function PublishReadinessPanel({
       </div>
       <p>
         {hasDraft
-          ? "草稿已创建，发布前需完成题目快照、答案解析和佐证状态检查。"
+          ? "草稿已创建，发布前需完成题目预览、答案解析和佐证状态检查。"
           : "创建草稿后再预览题目、答案解析、范围和佐证状态。"}
       </p>
       <p>当前形态：{resolveTrainingContentShapeLabel(trainingContentShape)}</p>
@@ -1831,6 +2056,23 @@ function PublishTrainingForm({
   onChange: (values: PublishFormValues) => void;
   onSubmit: (values: PublishFormValues) => void;
 }) {
+  const [isEmployeePreviewVisible, setIsEmployeePreviewVisible] =
+    useState(false);
+  const [isAnswerAnalysisVisible, setIsAnswerAnalysisVisible] = useState(false);
+  const hasWeakEvidence = hasWeakEvidenceQuestion(values.questions);
+
+  function updateQuestion(
+    index: number,
+    updater: (question: PublishQuestionFormValue) => PublishQuestionFormValue,
+  ) {
+    onChange({
+      ...values,
+      questions: values.questions.map((question, questionIndex) =>
+        questionIndex === index ? updater(question) : question,
+      ),
+    });
+  }
+
   return (
     <form
       aria-label="企业训练发布表单"
@@ -1854,32 +2096,257 @@ function PublishTrainingForm({
           onChange({ ...values, publishScopeOrganizationPublicIds: value })
         }
       />
-      <TextAreaField
-        label="题目快照"
-        value={values.questionSnapshotJson}
-        onChange={(value) =>
-          onChange({ ...values, questionSnapshotJson: value })
-        }
-      />
-      <label className="text-text-secondary flex items-center gap-2 text-sm">
-        <input
-          aria-label="确认弱佐证"
-          checked={values.weakEvidenceConfirmed}
-          className="border-input size-4 rounded"
-          type="checkbox"
-          onChange={(event) =>
-            onChange({
-              ...values,
-              weakEvidenceConfirmed: event.target.checked,
-            })
-          }
-        />
-        确认弱佐证
-      </label>
+      <section className="grid gap-3" aria-label="发布前题目预览">
+        <div className="space-y-1">
+          <h3 className="text-text-primary text-sm font-semibold">
+            发布前题目预览
+          </h3>
+          <p className="text-text-secondary text-sm">
+            管理员只确认员工可见内容、答案解析和依据状态，不需要填写
+            结构化文本或技术标识。
+          </p>
+        </div>
+        {values.questions.map((question, index) => (
+          <PublishQuestionPreviewEditor
+            key={question.sequenceNumber}
+            question={question}
+            questionIndex={index}
+            onChange={updateQuestion}
+          />
+        ))}
+      </section>
+      <section className="bg-muted text-text-secondary space-y-3 rounded-md p-3 text-sm">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-text-primary font-semibold">员工视角预览</h3>
+            <p>发布前确认员工看到的题干、选项、分值和范围。</p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsEmployeePreviewVisible((visible) => !visible)}
+          >
+            预览员工视角
+          </Button>
+        </div>
+        {isEmployeePreviewVisible ? (
+          <div className="bg-surface border-border space-y-3 rounded-md border p-3">
+            <p className="text-text-primary font-medium">员工可见预览</p>
+            {values.questions.map((question) => (
+              <EmployeePreviewQuestion
+                key={question.sequenceNumber}
+                question={question}
+              />
+            ))}
+          </div>
+        ) : null}
+      </section>
+      {hasWeakEvidence ? (
+        <label className="border-warning/30 bg-warning/10 text-text-secondary flex items-start gap-2 rounded-md border p-3 text-sm">
+          <input
+            aria-label="确认弱依据后发布"
+            checked={values.weakEvidenceConfirmed}
+            className="border-input mt-1 size-4 rounded"
+            type="checkbox"
+            onChange={(event) =>
+              onChange({
+                ...values,
+                weakEvidenceConfirmed: event.target.checked,
+              })
+            }
+          />
+          <span>资料依据较弱，发布前需要确认适用范围和员工可见内容。</span>
+        </label>
+      ) : null}
+      <div className="bg-muted text-text-secondary space-y-2 rounded-md p-3 text-sm">
+        <button
+          className="text-text-primary font-medium active:scale-[0.98]"
+          type="button"
+          onClick={() => setIsAnswerAnalysisVisible((isVisible) => !isVisible)}
+        >
+          查看答案解析
+        </button>
+        {isAnswerAnalysisVisible ? (
+          <div className="space-y-2">
+            {values.questions.map((question) => (
+              <div
+                className="bg-surface rounded-md p-3"
+                key={question.sequenceNumber}
+              >
+                <p className="text-text-primary">
+                  第 {question.sequenceNumber} 题标准答案：
+                  {question.standardAnswer}
+                </p>
+                <p className="text-text-primary">
+                  解析：{question.analysisSummary}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
       <Button disabled={isSubmitting} type="submit">
         {isSubmitting ? "发布中" : "发布训练"}
       </Button>
     </form>
+  );
+}
+
+function PublishQuestionPreviewEditor({
+  onChange,
+  question,
+  questionIndex,
+}: {
+  onChange: (
+    index: number,
+    updater: (question: PublishQuestionFormValue) => PublishQuestionFormValue,
+  ) => void;
+  question: PublishQuestionFormValue;
+  questionIndex: number;
+}) {
+  const questionLabel = `第 ${question.sequenceNumber} 题`;
+
+  return (
+    <fieldset className="border-border bg-muted/40 grid gap-3 rounded-md border p-3">
+      <legend className="text-text-primary px-1 text-sm font-semibold">
+        {questionLabel}
+      </legend>
+      <TextField
+        label={`${questionLabel}题干`}
+        value={question.stem}
+        onChange={(value) =>
+          onChange(questionIndex, (currentQuestion) => ({
+            ...currentQuestion,
+            stem: value,
+          }))
+        }
+      />
+      <div className="grid gap-3 md:grid-cols-3">
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">{questionLabel}题型</span>
+          <select
+            aria-label={`${questionLabel}题型`}
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+            value={question.questionType}
+            onChange={(event) =>
+              onChange(questionIndex, (currentQuestion) => ({
+                ...currentQuestion,
+                questionType: event.target
+                  .value as PublishQuestionFormValue["questionType"],
+              }))
+            }
+          >
+            <option value="single_choice">单选题</option>
+            <option value="multi_choice">多选题</option>
+            <option value="true_false">判断题</option>
+            <option value="short_answer">简答题</option>
+          </select>
+        </label>
+        <NumberField
+          label={`${questionLabel}分值`}
+          value={question.score}
+          onChange={(value) =>
+            onChange(questionIndex, (currentQuestion) => ({
+              ...currentQuestion,
+              score: value,
+            }))
+          }
+        />
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">{questionLabel}依据状态</span>
+          <select
+            aria-label={`${questionLabel}依据状态`}
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+            value={question.evidenceStatus}
+            onChange={(event) =>
+              onChange(questionIndex, (currentQuestion) => ({
+                ...currentQuestion,
+                evidenceStatus: event.target
+                  .value as PublishQuestionFormValue["evidenceStatus"],
+              }))
+            }
+          >
+            <option value="none">缺少依据</option>
+            <option value="weak">依据较弱</option>
+            <option value="sufficient">依据充分</option>
+          </select>
+        </label>
+      </div>
+      {question.questionType === "short_answer" ? null : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {question.options.map((option, optionIndex) => (
+            <TextField
+              key={option.label}
+              label={`${questionLabel}选项 ${option.label}`}
+              value={option.content}
+              onChange={(value) =>
+                onChange(questionIndex, (currentQuestion) => ({
+                  ...currentQuestion,
+                  options: currentQuestion.options.map(
+                    (currentOption, currentOptionIndex) =>
+                      currentOptionIndex === optionIndex
+                        ? { ...currentOption, content: value }
+                        : currentOption,
+                  ),
+                }))
+              }
+            />
+          ))}
+        </div>
+      )}
+      <TextField
+        label={`${questionLabel}标准答案`}
+        value={question.standardAnswer}
+        onChange={(value) =>
+          onChange(questionIndex, (currentQuestion) => ({
+            ...currentQuestion,
+            standardAnswer: value,
+          }))
+        }
+      />
+      <TextField
+        label={`${questionLabel}解析`}
+        value={question.analysisSummary}
+        onChange={(value) =>
+          onChange(questionIndex, (currentQuestion) => ({
+            ...currentQuestion,
+            analysisSummary: value,
+          }))
+        }
+      />
+    </fieldset>
+  );
+}
+
+function EmployeePreviewQuestion({
+  question,
+}: {
+  question: PublishQuestionFormValue;
+}) {
+  return (
+    <div className="border-border rounded-md border p-3">
+      <p className="text-text-primary text-sm font-medium">
+        第 {question.sequenceNumber} 题 ·{" "}
+        {resolvePublishQuestionTypeLabel(question.questionType)} ·{" "}
+        {question.score} 分
+      </p>
+      <p className="text-text-primary mt-2 text-sm leading-6">
+        {question.stem}
+      </p>
+      {question.questionType === "short_answer" ? (
+        <p className="text-text-secondary mt-2 text-sm">员工填写文字作答。</p>
+      ) : (
+        <ul className="text-text-secondary mt-2 space-y-1 text-sm">
+          {question.options
+            .filter((option) => option.content.trim().length > 0)
+            .map((option) => (
+              <li key={option.label}>
+                {option.label}. {option.content}
+              </li>
+            ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -2013,28 +2480,6 @@ function TextField({
       <span className="text-text-secondary">{label}</span>
       <Input
         aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
-  );
-}
-
-function TextAreaField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-2 text-sm font-medium">
-      <span className="text-text-secondary">{label}</span>
-      <textarea
-        aria-label={label}
-        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-32 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />

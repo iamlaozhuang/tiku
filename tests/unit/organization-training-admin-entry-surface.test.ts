@@ -1167,7 +1167,7 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(screen.getByText(/本地选题后进入企业训练草稿/u)).toBeInTheDocument();
   });
 
-  it("loads persisted AI-created drafts and publishes reviewed question snapshots through the existing organization training API", async () => {
+  it("loads persisted AI-created drafts and publishes structured reviewed previews without raw JSON input", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -1265,37 +1265,74 @@ describe("AdminOrganizationTrainingPage", () => {
     const publishForm = within(
       screen.getByRole("form", { name: "企业训练发布表单" }),
     );
-    fireEvent.change(publishForm.getByLabelText("题目快照"), {
-      target: {
-        value: JSON.stringify([
-          {
-            publicId: "organization-training-question-ai-ui-001",
-            sequenceNumber: 1,
-            questionType: "single_choice",
-            materialTitle: null,
-            materialContent: null,
-            stem: "synthetic reviewed organization training stem",
-            options: [
-              {
-                publicId: "organization-training-question-option-ai-ui-a",
-                label: "A",
-                content: "synthetic reviewed option A",
-              },
-              {
-                publicId: "organization-training-question-option-ai-ui-b",
-                label: "B",
-                content: "synthetic reviewed option B",
-              },
-            ],
-            score: 5,
-            standardAnswer: "A",
-            analysisSummary: "synthetic reviewed analysis",
-            evidenceStatus: "sufficient",
-            citationCount: 1,
-          },
-        ]),
-      },
+    expect(publishForm.queryByLabelText("题目快照")).toBeNull();
+    expect(publishForm.getByText("发布前题目预览")).toBeInTheDocument();
+    expect(publishForm.getByText("员工视角预览")).toBeInTheDocument();
+
+    fireEvent.change(publishForm.getByLabelText("第 1 题题干"), {
+      target: { value: "synthetic reviewed organization training stem" },
     });
+    fireEvent.change(publishForm.getByLabelText("第 1 题题型"), {
+      target: { value: "single_choice" },
+    });
+    fireEvent.change(publishForm.getByLabelText("第 1 题分值"), {
+      target: { value: "5" },
+    });
+    fireEvent.change(publishForm.getByLabelText("第 1 题选项 A"), {
+      target: { value: "synthetic reviewed option A" },
+    });
+    fireEvent.change(publishForm.getByLabelText("第 1 题选项 B"), {
+      target: { value: "synthetic reviewed option B" },
+    });
+    fireEvent.change(publishForm.getByLabelText("第 1 题标准答案"), {
+      target: { value: "A" },
+    });
+    fireEvent.change(publishForm.getByLabelText("第 1 题解析"), {
+      target: { value: "synthetic reviewed analysis" },
+    });
+
+    fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "当前草稿缺少必要内容或依据，暂不能发布",
+    );
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-ui-001/publish" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
+
+    fireEvent.change(publishForm.getByLabelText("第 1 题依据状态"), {
+      target: { value: "weak" },
+    });
+    fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "资料依据较弱，发布前需要确认适用范围和员工可见内容",
+    );
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-ui-001/publish" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
+
+    fireEvent.click(publishForm.getByLabelText("确认弱依据后发布"));
+    fireEvent.click(publishForm.getByRole("button", { name: "预览员工视角" }));
+    expect(publishForm.getByText("员工可见预览")).toBeInTheDocument();
+    expect(
+      publishForm.getByText("synthetic reviewed organization training stem"),
+    ).toBeInTheDocument();
+    expect(publishForm.queryByText("synthetic reviewed analysis")).toBeNull();
+
+    fireEvent.click(publishForm.getByRole("button", { name: "查看答案解析" }));
+    expect(
+      publishForm.getByText("解析：synthetic reviewed analysis"),
+    ).toBeInTheDocument();
+
     fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
@@ -1328,7 +1365,29 @@ describe("AdminOrganizationTrainingPage", () => {
         authorizationSource: "org_auth",
         canCreateOrganizationTraining: true,
       },
-      weakEvidenceConfirmed: false,
+      weakEvidenceConfirmed: true,
+      questions: [
+        {
+          sequenceNumber: 1,
+          questionType: "single_choice",
+          stem: "synthetic reviewed organization training stem",
+          options: [
+            {
+              label: "A",
+              content: "synthetic reviewed option A",
+            },
+            {
+              label: "B",
+              content: "synthetic reviewed option B",
+            },
+          ],
+          score: 5,
+          standardAnswer: "A",
+          analysisSummary: "synthetic reviewed analysis",
+          evidenceStatus: "weak",
+          citationCount: 1,
+        },
+      ],
     });
     expect(JSON.stringify(publishBody)).not.toContain("rawPrompt");
     expect(JSON.stringify(publishBody)).not.toContain("providerPayload");
