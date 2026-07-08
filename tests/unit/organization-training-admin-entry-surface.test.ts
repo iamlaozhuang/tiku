@@ -1028,6 +1028,17 @@ describe("AdminOrganizationTrainingPage", () => {
 
     openCreateWizard();
 
+    const createRegion = within(
+      screen.getByRole("region", { name: /新建企业训练/u }),
+    );
+    for (const stepLabel of ["选择来源", "配置训练", "设置范围", "预览发布"]) {
+      expect(createRegion.getAllByText(stepLabel)).toHaveLength(1);
+    }
+    expect(createRegion.getByText("来源类型")).toBeInTheDocument();
+    expect(createRegion.getByText("训练配置")).toBeInTheDocument();
+    expect(createRegion.getByText("发布范围")).toBeInTheDocument();
+    expect(createRegion.getByText("发布检查")).toBeInTheDocument();
+
     expect(
       screen.getByRole("button", { name: "新建企业训练" }),
     ).toHaveAttribute("aria-expanded", "true");

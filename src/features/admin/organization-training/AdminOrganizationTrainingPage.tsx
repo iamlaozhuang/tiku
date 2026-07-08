@@ -1262,13 +1262,16 @@ export function AdminOrganizationTrainingPage() {
 
       {isCreateWizardOpen ? (
         <section
-          aria-label="新建企业训练四步向导"
+          aria-label="新建企业训练"
           className="space-y-4"
           id="organization-training-create"
         >
           <WizardHeader />
           <div className="grid gap-4 xl:grid-cols-4">
-            <WizardStepCard step={1} title="选择来源">
+            <WizardStepCard>
+              <h3 className="text-text-primary text-sm font-semibold">
+                来源类型
+              </h3>
               <TrainingShapeSelector
                 selectedTrainingContentShape={trainingContentShape}
                 onSelect={handleSelectTrainingContentShape}
@@ -1279,7 +1282,7 @@ export function AdminOrganizationTrainingPage() {
                 onSelect={handleSelectSourceChoice}
               />
             </WizardStepCard>
-            <WizardStepCard step={2} title="配置训练">
+            <WizardStepCard>
               <DraftForm
                 isSubmitting={isSubmitting}
                 trainingContentShape={trainingContentShape}
@@ -1288,7 +1291,7 @@ export function AdminOrganizationTrainingPage() {
                 onSubmit={handleCreateDraft}
               />
             </WizardStepCard>
-            <WizardStepCard step={3} title="设置范围">
+            <WizardStepCard>
               <PublishScopePreview />
               <SourceHandoffNotice
                 hasDraft={lastDraft !== null}
@@ -1296,7 +1299,7 @@ export function AdminOrganizationTrainingPage() {
                 trainingContentShape={trainingContentShape}
               />
             </WizardStepCard>
-            <WizardStepCard step={4} title="预览发布">
+            <WizardStepCard>
               <PublishReadinessPanel
                 hasDraft={lastDraft !== null}
                 trainingContentShape={trainingContentShape}
@@ -1767,26 +1770,8 @@ function WizardHeader() {
   );
 }
 
-function WizardStepCard({
-  children,
-  step,
-  title,
-}: {
-  children: React.ReactNode;
-  step: number;
-  title: string;
-}) {
-  return (
-    <section className="space-y-3">
-      <div className="text-text-primary flex items-center gap-2 text-sm font-semibold">
-        <span className="bg-secondary text-secondary-foreground flex size-6 items-center justify-center rounded-full text-xs">
-          {step}
-        </span>
-        {title}
-      </div>
-      {children}
-    </section>
-  );
+function WizardStepCard({ children }: { children: React.ReactNode }) {
+  return <section className="space-y-3">{children}</section>;
 }
 
 function SourceChoiceList({
