@@ -43,6 +43,20 @@
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId organization-training-admin-detail-ui-2026-07-08`
   - Result: pass.
 
+## Master Post-Merge Validation
+
+- Fast-forward merge to `master`: pass.
+- `npm.cmd exec -- vitest run tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot`
+  - Result: pass, 1 file, 15 tests.
+- `npm.cmd run lint`
+  - Result: pass.
+- `npm.cmd run typecheck`
+  - Result: pass.
+- Scoped Prettier check:
+  - Result: pass.
+- `git diff --check`
+  - Result: pass.
+
 ## Localhost Browser Verification
 
 - Target: `http://127.0.0.1:3000/organization/organization-training`.

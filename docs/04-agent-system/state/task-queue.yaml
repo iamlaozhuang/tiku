@@ -99,8 +99,8 @@ activeTasks:
   - id: organization-training-admin-detail-ui-2026-07-08
     title: Organization training admin detail UI
     phase: organization-training-admin-detail-ui-2026-07-08
-    status: ready_for_commit_merge_push_cleanup
-    result: pass_source_browser_validation_ready_for_precommit
+    status: ready_for_closeout
+    result: pass_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_with_optional_localhost_browser_validation
@@ -118,7 +118,7 @@ activeTasks:
     evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-ui-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-ui-audit.md
     validationSummary:
-      status: pass_source_browser_validation_ready_for_precommit
+      status: pass_master_gates_ready_for_push_cleanup
       tddRed: pass_expected_missing_detail_ui_states_failure
       targetedOrganizationTrainingUiUnit: pass_1_file_15_tests
       lint: pass
@@ -127,6 +127,12 @@ activeTasks:
       diffCheck: pass
       localhostBrowser: pass_view_detail_disclosure_continue_config_no_console_errors
       moduleRunV2PreCommitHardening: pass
+      masterPostMergeTargetedTests: pass_1_file_15_tests
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergePrettierCheck: pass_scoped
+      masterPostMergeDiffCheck: pass
+      repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
       sourceCodeChanged: true
       testsChanged: true
       packageLockfileChanged: false

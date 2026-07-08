@@ -2,11 +2,11 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: organization-training-admin-detail-ui-2026-07-08
-updatedAt: "2026-07-08T16:38:32-07:00"
+updatedAt: "2026-07-08T16:42:49-07:00"
 latestOrganizationTrainingAdminDetailUi:
   id: organization-training-admin-detail-ui-2026-07-08
-  status: ready_for_commit_merge_push_cleanup
-  result: pass_source_browser_validation_ready_for_precommit
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   branch: codex/org-training-admin-detail-ui
   planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-ui.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-ui-evidence.md
@@ -28,6 +28,12 @@ latestOrganizationTrainingAdminDetailUi:
     diffCheck: pass
     localhostBrowser: pass_view_detail_disclosure_continue_config_no_console_errors
     moduleRunV2PreCommitHardening: pass
+    masterPostMergeTargetedTests: pass_1_file_15_tests
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergePrettierCheck: pass_scoped
+    masterPostMergeDiffCheck: pass
+    repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
     sourceCodeChanged: true
     testsChanged: true
 latestOrganizationTrainingAdminDetailReadModel:
@@ -1434,8 +1440,8 @@ currentTask:
   id: organization-training-admin-detail-ui-2026-07-08
   title: Organization training admin detail UI
   phase: organization-training-admin-detail-ui-2026-07-08
-  status: ready_for_commit_merge_push_cleanup
-  result: pass_source_browser_validation_ready_for_precommit
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/org-training-admin-detail-ui
@@ -1450,7 +1456,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-ui-evidence.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-ui-audit.md
   validationSummary:
-    status: pass_source_browser_validation_ready_for_precommit
+    status: pass_master_gates_ready_for_push_cleanup
     tddRed: pass_expected_missing_detail_ui_states_failure
     targetedOrganizationTrainingUiUnit: pass_1_file_15_tests
     lint: pass
@@ -1459,6 +1465,12 @@ currentTask:
     diffCheck: pass
     localhostBrowser: pass_view_detail_disclosure_continue_config_no_console_errors
     moduleRunV2PreCommitHardening: pass
+    masterPostMergeTargetedTests: pass_1_file_15_tests
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergePrettierCheck: pass_scoped
+    masterPostMergeDiffCheck: pass
+    repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
@@ -32071,8 +32083,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 530dd127b99fa84979a2ff034152112d3fa89972
-  lastKnownOriginMasterSha: 4d8ee6f0cd46be564ba9ae0da5968e221b7b97c0
+  lastKnownMasterSha: 12a64bdb9f48b7388582ae60a2aec1522d193475
+  lastKnownOriginMasterSha: 370ba4431007760dd5059357cd1ee4ca8dbee245
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

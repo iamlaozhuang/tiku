@@ -31,8 +31,9 @@
 - Diff check: pass.
 - Localhost browser verification: pass with no console errors.
 - Module Run v2 pre-commit hardening: pass.
+- Master post-merge targeted unit, lint, typecheck, scoped Prettier, and diff check: pass.
 
 ## Closeout Position
 
-- Ready for Module Run v2 pre-commit hardening.
-- Ready for local commit, fast-forward merge to `master`, post-merge gates, push, and short-branch cleanup under the approved closeout boundary.
+- Ready for Module Run v2 pre-push readiness.
+- Ready for push and short-branch cleanup under the approved closeout boundary.
