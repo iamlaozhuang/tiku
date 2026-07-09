@@ -37,6 +37,21 @@
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-traceability-summary-panel-2026-07-09 -SkipRemoteAheadCheck`
   - Result: initial run failed only because the accepted ancestor repository checkpoint still referenced the pre-paper-loop closeout SHA; after aligning the checkpoint to current local `master` / `origin/master`, rerun passed.
 
+## Master Post-Merge Validation
+
+- Fast-forward merge target: `master`.
+- Code commit: `4765008e2`.
+- `corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-generation-entry-surface.test.ts --reporter=dot`
+  - Result: pass, 1 file, 42 tests.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/organization-training-route.test.ts tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot`
+  - Result: pass, 5 files, 151 tests.
+- `corepack pnpm@10.26.1 run typecheck`
+  - Result: pass.
+- `corepack pnpm@10.26.1 run lint`
+  - Result: pass.
+- `git diff --check`
+  - Result: pass.
+
 ## Sensitive Boundary
 
 - Provider execution: not executed.
