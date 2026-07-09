@@ -1,8 +1,45 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-0704-question-publish-replay-2026-07-09
-updatedAt: "2026-07-09T10:55:00-07:00"
+currentPhase: content-ai-0704-paper-publish-replay-2026-07-09
+updatedAt: "2026-07-09T06:28:00-07:00"
+latestContentAi0704PaperPublishReplay:
+  id: content-ai-0704-paper-publish-replay-2026-07-09
+  status: closed
+  result: pass_content_ai_paper_publish_replay_no_provider
+  branch: codex/content-ai-0704-paper-publish-replay
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-paper-publish-replay.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-paper-publish-replay.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-paper-publish-replay-audit.md
+  dependsOn:
+    - content-ai-0704-fixture-history-refresh-2026-07-09
+    - content-ai-0704-question-publish-replay-2026-07-09
+    - content-ai-paper-formal-publish-loop-2026-07-09
+  boundary:
+    sourceCodeChangePlanned: false
+    testsChangePlanned: false
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallAllowed: false
+    productRouteWriteAllowed: true
+    localAccountFixtureViaProductRouteAllowed: true
+    directDatabaseMutationAllowed: false
+    destructiveDatabaseOperationAllowed: false
+    screenshotsOrRawDomAllowed: false
+    privateCredentialValuesOutputAllowed: false
+    evidenceRedactionRequired: true
+  validationSummary:
+    localhostPaperPublishReplay: pass_draft_to_published_target_student_visible
+    localAccountFixtureViaProductRoute: pass_created_matching_personal_auth_fixture
+    targetedContentAiPaperRegression: pass_6_files_116_tests
+    targetedPersonalLearnerAiRegression: pass_4_files_96_tests
+    targetedOrganizationRegression: pass_6_files_119_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    scopedPrettierCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 latestContentAi0704QuestionPublishReplay:
   id: content-ai-0704-question-publish-replay-2026-07-09
   status: closed
@@ -2493,31 +2530,33 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-ai-0704-question-publish-replay-2026-07-09
-  title: Content AI 0704 question publish replay
-  phase: content-ai-0704-question-publish-replay-2026-07-09
+  id: content-ai-0704-paper-publish-replay-2026-07-09
+  title: Content AI 0704 paper publish replay
+  phase: content-ai-0704-paper-publish-replay-2026-07-09
   status: closed
-  result: pass_content_ai_question_publish_replay_no_provider
+  result: pass_content_ai_paper_publish_replay_no_provider
   priority: p1
   taskKind: local_acceptance_publish_replay
-  branch: codex/content-ai-0704-question-publish-replay
+  branch: codex/content-ai-0704-paper-publish-replay
   humanApprovalBoundary:
     closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+    localAccountFixture: current_user_preapproved_create_local_0704_accounts_if_missing_2026_07_09
     providerExecution: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-09T10:55:00-07:00"
-  claimedAt: "2026-07-09T10:55:00-07:00"
-  targetClosureItem: Replay content AI出题 from accepted formal question draft to available formal question and user-visible use surface.
-  behaviorBoundary: local_0704_localhost_question_publish_replay_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_screenshot_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation
+  plannedAt: "2026-07-09T06:28:00-07:00"
+  claimedAt: "2026-07-09T06:28:00-07:00"
+  targetClosureItem: Replay content AI组卷 from accepted formal paper draft to published formal paper and authorized user-visible paper surface.
+  behaviorBoundary: local_0704_localhost_paper_publish_replay_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_screenshot_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation
   evidenceMode: redacted_role_label_route_label_status_category_aggregate_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-question-publish-replay.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-question-publish-replay.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-question-publish-replay-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-paper-publish-replay.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-paper-publish-replay.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-paper-publish-replay-audit.md
   validationSummary:
-    localhostQuestionPublishReplay: pass_disabled_to_available_target_visible
-    targetedContentAiRegression: pass_4_files_118_tests
+    localhostPaperPublishReplay: pass_draft_to_published_target_student_visible
+    localAccountFixtureViaProductRoute: pass_created_matching_personal_auth_fixture
+    targetedContentAiPaperRegression: pass_6_files_116_tests
     targetedPersonalLearnerAiRegression: pass_4_files_96_tests
     targetedOrganizationRegression: pass_6_files_119_tests
     lint: pass
