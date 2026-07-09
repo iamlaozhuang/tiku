@@ -99,8 +99,8 @@ activeTasks:
   - id: content-ai-paper-formal-publish-loop-2026-07-09
     title: Content AI paper formal publish loop
     phase: content-ai-paper-formal-publish-loop-2026-07-09
-    status: ready_for_closeout
-    result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+    status: closed
+    result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_pushed_cleaned
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_no_provider_no_db
@@ -213,9 +213,10 @@ activeTasks:
         approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
     closeout:
       mergedToMaster: true
-      pushedToOriginMaster: pending
-      shortBranchDeleted: pending
+      pushedToOriginMaster: true
+      shortBranchDeleted: true
       codeCommitSha: 42f467b37
+      finalSha: 5fb40e209
       approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
   - id: content-ai-question-formal-publish-loop-2026-07-09
     title: Content AI question formal publish loop

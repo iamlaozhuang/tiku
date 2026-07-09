@@ -99,8 +99,8 @@ latestContentAiQuestionFormalPublishLoop:
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestContentAiPaperFormalPublishLoop:
   id: content-ai-paper-formal-publish-loop-2026-07-09
-  status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+  status: closed
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_pushed_cleaned
   branch: codex/content-ai-paper-formal-publish-loop
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-paper-formal-publish-loop.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-paper-formal-publish-loop.md
@@ -135,9 +135,10 @@ latestContentAiPaperFormalPublishLoop:
     masterPostMergeDiffCheck: pass
   closeout:
     mergedToMaster: true
-    pushedToOriginMaster: pending
-    shortBranchDeleted: pending
+    pushedToOriginMaster: true
+    shortBranchDeleted: true
     codeCommitSha: 42f467b37
+    finalSha: 5fb40e209
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestOrgAiPaperSectionContractValidation:
   id: org-ai-paper-section-contract-validation-2026-07-09
@@ -1922,8 +1923,8 @@ currentTask:
   id: content-ai-paper-formal-publish-loop-2026-07-09
   title: Content AI paper formal publish loop
   phase: content-ai-paper-formal-publish-loop-2026-07-09
-  status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+  status: closed
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_pushed_cleaned
   priority: p1
   taskKind: implementation
   branch: codex/content-ai-paper-formal-publish-loop

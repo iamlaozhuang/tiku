@@ -45,4 +45,4 @@
 
 ## Remaining Work
 
-- Push `origin/master`, delete short branch, confirm clean/aligned, then claim the next serial branch.
+- Confirm clean/aligned, then claim the next serial branch.
