@@ -58,6 +58,7 @@ function createRepository(): PersonalAiGenerationResultRepository {
           isBlocked: true as const,
           status: "blocked" as const,
         },
+        paperAssembly: input.paperAssemblyRedactedSnapshot ?? null,
       },
     })),
   };
@@ -103,6 +104,7 @@ describe("personal AI generation result persistence service", () => {
             isBlocked: true,
             status: "blocked",
           },
+          paperAssembly: null,
         },
       },
     });

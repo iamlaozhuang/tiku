@@ -90,6 +90,7 @@ function mapPersonalAiGenerationResultHistoryItem(
       isBlocked: true,
       status: "blocked",
     },
+    paperAssembly: result.paperAssembly,
   };
 }
 

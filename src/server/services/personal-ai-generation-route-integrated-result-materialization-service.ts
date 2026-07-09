@@ -1,6 +1,9 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { PersonalAiGenerationRequestFlowDto } from "../contracts/personal-ai-generation-request-flow-contract";
-import type { PersonalAiGenerationResultPersistenceDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type {
+  PersonalAiGenerationResultPaperAssemblySnapshotDto,
+  PersonalAiGenerationResultPersistenceDto,
+} from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { PersonalAiGenerationRuntimeBridgeResultMaterializationSummaryDto } from "../contracts/personal-ai-generation-runtime-bridge-contract";
 import type { EvidenceStatus, RedactedJsonObject } from "../models/ai-rag";
 import {
@@ -14,6 +17,7 @@ export type PersonalAiGenerationRouteIntegratedResultMaterializationControl = {
   resultPublicId: string;
   contentDigest: string;
   contentPreviewMasked: string;
+  paperAssemblyRedactedSnapshot?: PersonalAiGenerationResultPaperAssemblySnapshotDto | null;
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   citationRedactedSnapshot?: RedactedJsonObject | null;
@@ -88,6 +92,8 @@ export async function materializeRouteIntegratedRedactedResult(
     ),
     contentDigest: control.contentDigest,
     contentPreviewMasked: control.contentPreviewMasked,
+    paperAssemblyRedactedSnapshot:
+      control.paperAssemblyRedactedSnapshot ?? null,
     citationRedactedSnapshot:
       control.citationRedactedSnapshot ??
       createEmptyCitationRedactedSnapshot(control),
@@ -189,6 +195,7 @@ function createContentRedactedSnapshot(
     evidenceStatus: control.evidenceStatus,
     citationCount: control.citationCount,
     providerOutputIncluded: false,
+    paperAssembly: control.paperAssemblyRedactedSnapshot ?? null,
   };
 }
 

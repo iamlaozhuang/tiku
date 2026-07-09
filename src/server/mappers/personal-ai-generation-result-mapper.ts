@@ -1,4 +1,7 @@
-import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type {
+  PersonalAiGenerationResultDto,
+  PersonalAiGenerationResultPaperAssemblySnapshotDto,
+} from "../contracts/personal-ai-generation-result-persistence-contract";
 import type { AiGenerationTaskType } from "../models/ai-generation-task";
 import type { EvidenceStatus, RedactedJsonObject } from "../models/ai-rag";
 import type { PersonalAiGenerationResultStatus } from "../models/personal-ai-generation-result";
@@ -51,5 +54,34 @@ export function mapPersonalAiGenerationResultRowToDto(
       isBlocked: true,
       status: "blocked",
     },
+    paperAssembly: readPersonalAiGenerationResultPaperAssemblySnapshot(
+      row.content_redacted_snapshot,
+    ),
   };
+}
+
+function readPersonalAiGenerationResultPaperAssemblySnapshot(
+  contentRedactedSnapshot: RedactedJsonObject,
+): PersonalAiGenerationResultPaperAssemblySnapshotDto | null {
+  const paperAssembly = contentRedactedSnapshot.paperAssembly;
+
+  if (!isRecord(paperAssembly)) {
+    return null;
+  }
+
+  if (
+    paperAssembly.redactionStatus !== "redacted" ||
+    (paperAssembly.status !== "assembled" &&
+      paperAssembly.status !== "insufficient") ||
+    !isRecord(paperAssembly.sourceDiagnostics) ||
+    !isRecord(paperAssembly.container)
+  ) {
+    return null;
+  }
+
+  return paperAssembly as PersonalAiGenerationResultPaperAssemblySnapshotDto;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

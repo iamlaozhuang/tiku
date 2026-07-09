@@ -9,6 +9,8 @@ import {
 } from "../contracts/api-response";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
+import type { PersonalAiGenerationResultPaperAssemblySnapshotDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type { PersonalAiGenerationRuntimeBridgePaperAssemblyDto } from "../contracts/personal-ai-generation-runtime-bridge-contract";
 import type {
   CreatePersonalAiGenerationRequestInput,
   PersonalAiGenerationRequestOwnerType,
@@ -698,15 +700,49 @@ function createPersistentRequestInput(
 
 function createVisibleContentDigest(
   visibleGeneratedContent: AiGenerationRouteIntegratedVisibleGeneratedContent,
+  paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto,
 ): string {
   return `sha256:${createHash("sha256")
     .update(
       JSON.stringify({
         content: visibleGeneratedContent.content,
         structuredPreview: visibleGeneratedContent.structuredPreview ?? null,
+        paperAssembly:
+          createPersonalAiGenerationPaperAssemblyRedactedSnapshot(
+            paperAssembly,
+          ),
       }),
     )
     .digest("hex")}`;
+}
+
+function createPersonalAiGenerationPaperAssemblyRedactedSnapshot(
+  paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto,
+): PersonalAiGenerationResultPaperAssemblySnapshotDto | null {
+  if (paperAssembly === null) {
+    return null;
+  }
+
+  return {
+    status: paperAssembly.status,
+    sourceDiagnostics: { ...paperAssembly.sourceDiagnostics },
+    container: {
+      ...paperAssembly.container,
+      sourceComposition: { ...paperAssembly.container.sourceComposition },
+      sections: paperAssembly.container.sections.map((paperSection) => ({
+        ...paperSection,
+        selectedQuestions: paperSection.selectedQuestions.map(
+          (selectedQuestion) => ({ ...selectedQuestion }),
+        ),
+        degradationSummary: { ...paperSection.degradationSummary },
+      })),
+    },
+    insufficiency:
+      paperAssembly.insufficiency === null
+        ? null
+        : { ...paperAssembly.insufficiency },
+    redactionStatus: "redacted",
+  };
 }
 
 function createVisibleContentPreviewMasked(
@@ -757,7 +793,11 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
   return {
     ...input.runtimeBridgeControl,
     paperAssemblyResolver: input.paperAssemblyResolver,
-    createResultMaterialization: ({ executionOutcome, requestFlow }) => {
+    createResultMaterialization: ({
+      executionOutcome,
+      paperAssembly,
+      requestFlow,
+    }) => {
       const visibleGeneratedContent = executionOutcome.visibleGeneratedContent;
 
       if (
@@ -791,10 +831,17 @@ function createRuntimeBridgeControlWithResultMaterialization(input: {
       return {
         materializationMode: "fake_sanitized_in_memory_output",
         resultPublicId,
-        contentDigest: createVisibleContentDigest(visibleGeneratedContent),
+        contentDigest: createVisibleContentDigest(
+          visibleGeneratedContent,
+          paperAssembly,
+        ),
         contentPreviewMasked: createVisibleContentPreviewMasked(
           visibleGeneratedContent,
         ),
+        paperAssemblyRedactedSnapshot:
+          createPersonalAiGenerationPaperAssemblyRedactedSnapshot(
+            paperAssembly,
+          ),
         evidenceStatus:
           groundingSummary?.evidenceStatus ??
           requestFlow.resultReference.resultReference.evidenceStatus,

@@ -1,4 +1,8 @@
 import type {
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperPlanAndSelectInsufficiencyDto,
+} from "./ai-paper-plan-and-select-contract";
+import type {
   PersonalAiGenerationResultContentVisibility,
   PersonalAiGenerationResultFormalAdoptionStatus,
   PersonalAiGenerationResultRedactionStatus,
@@ -6,6 +10,19 @@ import type {
   PersonalAiGenerationResultTaskType,
 } from "../models/personal-ai-generation-result";
 import type { EvidenceStatus } from "../models/ai-rag";
+
+export type PersonalAiGenerationResultPaperAssemblySnapshotDto = {
+  status: "assembled" | "insufficient";
+  sourceDiagnostics: {
+    role: "personal_advanced_student" | "org_advanced_employee";
+    platformQuestionCount: number;
+    enterpriseQuestionCount: number;
+    enterpriseSourceStatus: "not_applicable" | "resolved" | "not_resolved";
+  };
+  container: AiPaperPlanAndSelectContainerDto;
+  insufficiency: AiPaperPlanAndSelectInsufficiencyDto | null;
+  redactionStatus: "redacted";
+};
 
 export type PersonalAiGenerationResultDto = {
   resultPublicId: string;
@@ -30,6 +47,7 @@ export type PersonalAiGenerationResultDto = {
     isBlocked: true;
     status: PersonalAiGenerationResultFormalAdoptionStatus;
   };
+  paperAssembly: PersonalAiGenerationResultPaperAssemblySnapshotDto | null;
 };
 
 export type PersonalAiGenerationResultPersistenceDto = {

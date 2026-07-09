@@ -1,6 +1,7 @@
 import type { AiGenerationTaskType } from "./ai-generation-task";
 import type { AiGenerationTaskRequestOwnerType } from "./ai-generation-task-request";
 import type { EvidenceStatus, RedactedJsonObject } from "./ai-rag";
+import type { PersonalAiGenerationResultPaperAssemblySnapshotDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 
 export const personalAiGenerationResultStatusValues = [
   "draft",
@@ -36,6 +37,7 @@ export type PersonalAiGenerationResultPersistenceInput = {
   contentRedactedSnapshot: RedactedJsonObject;
   contentDigest: string;
   contentPreviewMasked: string;
+  paperAssemblyRedactedSnapshot?: PersonalAiGenerationResultPaperAssemblySnapshotDto | null;
   citationRedactedSnapshot: RedactedJsonObject | null;
   evidenceStatus: EvidenceStatus;
   citationCount: number;

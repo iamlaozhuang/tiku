@@ -286,6 +286,7 @@ function createResultRepository(): Pick<
             isBlocked: true,
             status: "blocked",
           },
+          paperAssembly: input.paperAssemblyRedactedSnapshot ?? null,
         },
       };
     },
@@ -1890,10 +1891,61 @@ describe("personal AI generation request route handlers", () => {
       },
     });
     expect(resultRepository.createCalls).toHaveLength(1);
+    expect(
+      resultRepository.createCalls[0]?.paperAssemblyRedactedSnapshot,
+    ).toMatchObject({
+      status: "assembled",
+      redactionStatus: "redacted",
+      sourceDiagnostics: {
+        role: "org_advanced_employee",
+        platformQuestionCount: 2,
+        enterpriseQuestionCount: 1,
+      },
+      container: {
+        selectedQuestionCount: 3,
+        sourceComposition: {
+          platformFormalQuestionCount: 2,
+          enterpriseTrainingSnapshotCount: 1,
+        },
+        sections: [
+          {
+            selectedQuestionCount: 3,
+            selectedQuestions: [
+              {
+                questionPublicId: "platform_question_public_1",
+                sourceKind: "platform_formal_question",
+              },
+              {
+                questionPublicId: "platform_question_public_2",
+                sourceKind: "platform_formal_question",
+              },
+              {
+                questionPublicId: "enterprise_question_public_1",
+                sourceKind: "enterprise_training_snapshot",
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(
+      resultRepository.createCalls[0]?.contentRedactedSnapshot.paperAssembly,
+    ).toMatchObject({
+      redactionStatus: "redacted",
+      container: {
+        selectedQuestionCount: 3,
+      },
+    });
     expect(serializedPayload).not.toContain("synthetic-test-credential");
     expect(serializedPayload).not.toContain("provider payload");
     expect(serializedPayload).not.toContain("SENSITIVE_STEM_MARKER");
     expect(serializedPayload).not.toContain("SENSITIVE_ENTERPRISE_STEM");
+    expect(JSON.stringify(resultRepository.createCalls[0])).not.toContain(
+      "SENSITIVE_STEM_MARKER",
+    );
+    expect(JSON.stringify(resultRepository.createCalls[0])).not.toContain(
+      "SENSITIVE_ENTERPRISE_STEM",
+    );
   });
 
   it("uses repository-backed AI paper assembly for organization advanced employee paper requests", async () => {
@@ -2533,6 +2585,7 @@ describe("personal AI generation request route handlers", () => {
                       isBlocked: true,
                       status: "blocked",
                     },
+                    paperAssembly: null,
                   },
                 },
               };

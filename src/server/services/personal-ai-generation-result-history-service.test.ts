@@ -31,6 +31,7 @@ function createResult(
       isBlocked: true,
       status: "blocked",
     },
+    paperAssembly: null,
     ...overrides,
   };
 }
@@ -253,6 +254,7 @@ describe("personal AI generation result history service", () => {
             isBlocked: true,
             status: "blocked",
           },
+          paperAssembly: null,
         },
       },
     });
@@ -266,6 +268,106 @@ describe("personal AI generation result history service", () => {
     });
     expect(serializedResponse).not.toContain(generatedContentKey);
     expect(serializedResponse).not.toContain(omittedGeneratedFixture);
+  });
+
+  it("returns redacted AI paper assembly snapshots without question bodies", async () => {
+    const repository = createRepository([
+      createResult({
+        resultPublicId: "personal_ai_result_public_paper_history",
+        taskType: "ai_paper_generation",
+        paperAssembly: {
+          status: "assembled",
+          sourceDiagnostics: {
+            role: "org_advanced_employee",
+            platformQuestionCount: 1,
+            enterpriseQuestionCount: 1,
+            enterpriseSourceStatus: "resolved",
+          },
+          container: {
+            title: "redacted paper container",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            requestedQuestionCount: 2,
+            selectedQuestionCount: 2,
+            sourceComposition: {
+              platformFormalQuestionCount: 1,
+              enterpriseTrainingSnapshotCount: 1,
+            },
+            matchQuality: "fully_matched",
+            sections: [
+              {
+                sectionKey: "single_choice",
+                title: "redacted paper section",
+                questionType: "single_choice",
+                targetQuestionCount: 2,
+                selectedQuestionCount: 2,
+                selectedQuestions: [
+                  {
+                    questionPublicId: "platform_question_public_history_1",
+                    sourceKind: "platform_formal_question",
+                    matchTier: "exact",
+                    score: 1,
+                  },
+                  {
+                    questionPublicId: "enterprise_question_public_history_1",
+                    sourceKind: "enterprise_training_snapshot",
+                    matchTier: "same_scope",
+                    score: 1,
+                  },
+                ],
+                degradationSummary: {
+                  exactCount: 1,
+                  nearbyKnowledgeCount: 0,
+                  sameScopeCount: 1,
+                },
+              },
+            ],
+          },
+          insufficiency: null,
+          redactionStatus: "redacted",
+        },
+      }),
+    ]);
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    const response = await service.getDraftResultDetail({
+      ownerPublicId: "student_public_200",
+      resultPublicId: "personal_ai_result_public_paper_history",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(response.data?.result.paperAssembly).toMatchObject({
+      status: "assembled",
+      redactionStatus: "redacted",
+      container: {
+        selectedQuestionCount: 2,
+        sourceComposition: {
+          platformFormalQuestionCount: 1,
+          enterpriseTrainingSnapshotCount: 1,
+        },
+        sections: [
+          {
+            selectedQuestionCount: 2,
+            selectedQuestions: [
+              {
+                questionPublicId: "platform_question_public_history_1",
+                sourceKind: "platform_formal_question",
+              },
+              {
+                questionPublicId: "enterprise_question_public_history_1",
+                sourceKind: "enterprise_training_snapshot",
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(serializedResponse).not.toContain("questionStem");
+    expect(serializedResponse).not.toContain("standardAnswer");
+    expect(serializedResponse).not.toContain("analysis");
+    expect(serializedResponse).not.toContain("providerPayload");
+    expect(serializedResponse).not.toContain("rawPrompt");
   });
 
   it("returns not found when owner-scoped detail lookup misses", async () => {

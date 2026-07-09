@@ -200,6 +200,7 @@ describe("personal AI generation runtime bridge service", () => {
                   isBlocked: true,
                   status: "blocked",
                 },
+                paperAssembly: null,
               },
             },
           };
@@ -389,6 +390,7 @@ describe("personal AI generation runtime bridge service", () => {
                         isBlocked: true,
                         status: "blocked",
                       },
+                      paperAssembly: null,
                     },
                   },
                 };

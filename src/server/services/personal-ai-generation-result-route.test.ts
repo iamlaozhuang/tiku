@@ -68,6 +68,7 @@ function createResult(
       isBlocked: true,
       status: "blocked",
     },
+    paperAssembly: null,
     ...overrides,
   };
 }
@@ -379,6 +380,7 @@ describe("personal AI generation result route handlers", () => {
               isBlocked: true,
               status: "blocked",
             },
+            paperAssembly: null,
           },
         ],
       },
@@ -603,6 +605,7 @@ describe("personal AI generation result route handlers", () => {
             isBlocked: true,
             status: "blocked",
           },
+          paperAssembly: null,
         },
       },
     });

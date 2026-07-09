@@ -54,6 +54,7 @@ export type PersonalAiGenerationRuntimeBridgeControl = {
   resultMaterialization?: PersonalAiGenerationRouteIntegratedResultMaterializationControl;
   createResultMaterialization?: (input: {
     executionOutcome: PersonalAiGenerationRouteIntegratedProviderExecutionOutcome;
+    paperAssembly: PersonalAiGenerationRuntimeBridgePaperAssemblyDto;
     requestFlow: PersonalAiGenerationRequestFlowDto;
   }) =>
     | PersonalAiGenerationRouteIntegratedResultMaterializationControl
@@ -234,6 +235,7 @@ export async function buildPersonalAiGenerationRuntimeBridgeReadModelForRoute(
           ? null
           : await createResultMaterializationControl({
               executionOutcome,
+              paperAssembly: paperAssemblyResult.paperAssembly,
               requestFlow,
             })));
   const resultMaterializationSummary =

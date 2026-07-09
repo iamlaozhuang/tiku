@@ -86,6 +86,7 @@ function createControl(
             isBlocked: true,
             status: "blocked",
           },
+          paperAssembly: null,
         },
       },
     }),
