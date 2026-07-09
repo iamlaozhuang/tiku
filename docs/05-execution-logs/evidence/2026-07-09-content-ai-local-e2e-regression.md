@@ -78,3 +78,24 @@
 ## Sensitive Boundary
 
 - Evidence contains no credentials, session/cookie/token/localStorage/Auth header values, env values, DB URL, DB rows, internal numeric ids, Provider payload, raw prompt, raw AI output, complete question text, complete paper text, material text, resource text, chunk content, screenshots, traces, or raw DOM.
+
+## Closeout State Correction
+
+- Correction branch: `codex/content-ai-local-e2e-closeout-state`.
+- Scope: documentation/state metadata only for the already completed local e2e regression closeout.
+- Corrected state:
+  - `pushedToOriginMaster`: `true`.
+  - `shortBranchDeleted`: `true`.
+  - `finalSha`: `06ea9c289`.
+  - repository checkpoint: `master` and `origin/master` aligned to `06ea9c289efa679011cd6064210c6bfe0e56d6d9`.
+- `git diff --check`
+  - Result: pass.
+- `corepack pnpm@10.26.1 run typecheck`
+  - Result: pass.
+- `corepack pnpm@10.26.1 run lint`
+  - Result: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-local-e2e-regression-2026-07-09`
+  - Result: pass, 5 changed files scanned.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-local-e2e-regression-2026-07-09 -SkipRemoteAheadCheck`
+  - Result: pass. Branch, master, origin/master, state checkpoint, evidence, and audit readiness passed.
+- No source, test, package, lockfile, schema, migration, seed, browser, Provider, env, secret, DB access, staging/prod, deploy, or Cost Calibration action was executed for this correction.

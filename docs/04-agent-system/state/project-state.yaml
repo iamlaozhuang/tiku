@@ -6,7 +6,7 @@ updatedAt: "2026-07-09T04:10:00-07:00"
 latestContentAiLocalE2eRegression:
   id: content-ai-local-e2e-regression-2026-07-09
   status: closed
-  result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_ready_for_push_cleanup
+  result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_pushed_cleaned
   branch: codex/content-ai-local-e2e-regression
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-local-e2e-regression.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-local-e2e-regression.md
@@ -27,7 +27,7 @@ latestContentAiLocalE2eRegression:
     stagingProdDeployExecuted: false
     costCalibrationExecutedOrClaimed: false
   validationSummary:
-    status: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+    status: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_pushed_cleaned
     contentAiUiAndFormalContentRegression: pass_3_files_80_tests
     contentAiFormalDraftAndPaperServiceRegression: pass_4_files_67_tests
     personalLearnerAiRegression: pass_4_files_96_tests
@@ -48,9 +48,10 @@ latestContentAiLocalE2eRegression:
     masterPostMergeDiffCheck: pass
   closeout:
     mergedToMaster: true
-    pushedToOriginMaster: pending_local_closeout_push
-    shortBranchDeleted: pending_local_closeout_cleanup
+    pushedToOriginMaster: true
+    shortBranchDeleted: true
     codeCommitSha: 75b44b720
+    finalSha: 06ea9c289
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestContentAiTraceabilitySummaryPanel:
   id: content-ai-traceability-summary-panel-2026-07-09
@@ -2016,7 +2017,7 @@ currentTask:
   title: Content AI local e2e regression
   phase: content-ai-local-e2e-regression-2026-07-09
   status: closed
-  result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_ready_for_push_cleanup
+  result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_pushed_cleaned
   priority: p1
   taskKind: local_acceptance_regression
   branch: codex/content-ai-local-e2e-regression
@@ -2030,7 +2031,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-local-e2e-regression.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-local-e2e-regression-audit.md
   validationSummary:
-    status: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+    status: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_pushed_cleaned
     sourceCodeChanged: false
     testsChanged: false
     contentAiUiAndFormalContentRegression: pass_3_files_80_tests
@@ -2058,6 +2059,13 @@ currentTask:
     costCalibrationExecutedOrClaimed: false
     releaseFinalProductionClaimed: false
     productionUsabilityClaimed: false
+  closeout:
+    mergedToMaster: true
+    pushedToOriginMaster: true
+    shortBranchDeleted: true
+    codeCommitSha: 75b44b720
+    finalSha: 06ea9c289
+    approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
@@ -32748,8 +32756,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 476379dbd946381a81016901421af1ed17b056e7
-  lastKnownOriginMasterSha: 476379dbd946381a81016901421af1ed17b056e7
+  lastKnownMasterSha: 06ea9c289efa679011cd6064210c6bfe0e56d6d9
+  lastKnownOriginMasterSha: 06ea9c289efa679011cd6064210c6bfe0e56d6d9
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

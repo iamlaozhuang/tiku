@@ -100,7 +100,7 @@ activeTasks:
     title: Content AI local e2e regression
     phase: content-ai-local-e2e-regression-2026-07-09
     status: closed
-    result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_ready_for_push_cleanup
+    result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_pushed_cleaned
     priority: p1
     taskKind: local_acceptance_regression
     executionProfile: local_source_and_localhost_acceptance_no_provider_no_db
@@ -205,7 +205,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-local-e2e-regression-2026-07-09
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-local-e2e-regression-2026-07-09 -SkipRemoteAheadCheck
     validationSummary:
-      status: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+      status: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_pushed_cleaned
       sourceCodeChanged: false
       testsChanged: false
       contentAiUiAndFormalContentRegression: pass_3_files_80_tests
@@ -230,9 +230,10 @@ activeTasks:
       schemaMigrationSeedChanged: false
     closeout:
       mergedToMaster: true
-      pushedToOriginMaster: pending_local_closeout_push
-      shortBranchDeleted: pending_local_closeout_cleanup
+      pushedToOriginMaster: true
+      shortBranchDeleted: true
       codeCommitSha: 75b44b720
+      finalSha: 06ea9c289
       approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
     closeoutPolicy:
       localCommit:

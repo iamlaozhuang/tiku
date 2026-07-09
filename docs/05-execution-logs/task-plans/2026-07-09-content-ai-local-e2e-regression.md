@@ -94,3 +94,10 @@
 - Domain boundary: content-admin formal draft review/publish remains separate from organization training draft/publish and learner AI training.
 - Regression boundary: shared AI generation parameter/RAG/plan validation changes are not weakened.
 - Release boundary: no release readiness, production usability, staging/prod, Provider-enabled, or Cost Calibration claim.
+
+## Closeout State Correction Addendum
+
+- Correction branch: `codex/content-ai-local-e2e-closeout-state`.
+- Purpose: align the already completed local e2e regression task state with the confirmed pushed master and deleted short branch.
+- Scope: documentation/state metadata only. No source, tests, package, lockfile, schema, migration, seed, browser, Provider, env, secret, or DB access.
+- Required checks: `git diff --check`, Module Run v2 pre-commit hardening, Module Run v2 pre-push readiness, master clean/aligned verification.
