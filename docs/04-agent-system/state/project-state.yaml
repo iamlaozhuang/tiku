@@ -100,7 +100,7 @@ latestContentAiQuestionFormalPublishLoop:
 latestContentAiPaperFormalPublishLoop:
   id: content-ai-paper-formal-publish-loop-2026-07-09
   status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
   branch: codex/content-ai-paper-formal-publish-loop
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-paper-formal-publish-loop.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-paper-formal-publish-loop.md
@@ -128,10 +128,16 @@ latestContentAiPaperFormalPublishLoop:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    masterPostMergeTargetedTests: pass_5_files_78_tests
+    masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_151_tests
+    masterPostMergeTypecheck: pass
+    masterPostMergeLint: pass
+    masterPostMergeDiffCheck: pass
   closeout:
-    mergedToMaster: pending
+    mergedToMaster: true
     pushedToOriginMaster: pending
     shortBranchDeleted: pending
+    codeCommitSha: 42f467b37
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestOrgAiPaperSectionContractValidation:
   id: org-ai-paper-section-contract-validation-2026-07-09
@@ -1917,7 +1923,7 @@ currentTask:
   title: Content AI paper formal publish loop
   phase: content-ai-paper-formal-publish-loop-2026-07-09
   status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/content-ai-paper-formal-publish-loop
@@ -1931,7 +1937,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-paper-formal-publish-loop.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-paper-formal-publish-loop-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
+    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
     sourceCodeChanged: true
     testsChanged: true
     tddRed: pass_expected_adapter_companion_question_rejection_failure_before_implementation
@@ -1942,6 +1948,11 @@ currentTask:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    masterPostMergeTargetedTests: pass_5_files_78_tests
+    masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_151_tests
+    masterPostMergeTypecheck: pass
+    masterPostMergeLint: pass
+    masterPostMergeDiffCheck: pass
     packageLockfileChanged: false
     envFileChanged: false
     schemaMigrationSeedChanged: false

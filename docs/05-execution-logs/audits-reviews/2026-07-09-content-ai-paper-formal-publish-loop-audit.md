@@ -37,8 +37,12 @@
 - Diff check: pass.
 - Module Run v2 precommit hardening: pass.
 - Module Run v2 prepush readiness: pass.
+- Master post-merge targeted tests: pass, 5 files, 78 tests.
+- Master post-merge adjacent role boundary tests: pass, 5 files, 151 tests.
+- Master post-merge typecheck: pass.
+- Master post-merge lint: pass.
+- Master post-merge diff check: pass.
 
 ## Remaining Work
 
-- Run Module Run v2 precommit and prepush gates.
-- Commit, fast-forward merge to `master`, rerun master gates, push `origin/master`, delete short branch, then claim the next serial branch.
+- Push `origin/master`, delete short branch, confirm clean/aligned, then claim the next serial branch.

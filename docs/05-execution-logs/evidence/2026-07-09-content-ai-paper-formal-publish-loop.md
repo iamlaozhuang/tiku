@@ -64,3 +64,21 @@
 - Package and lockfile changes: none.
 - Schema, migration, seed, staging, production, deploy, and Cost Calibration actions: not executed.
 - Evidence redaction: no raw Provider payload, raw prompt, raw AI output, raw DB row, internal numeric id, complete question text, complete paper text, material text, or chunk content recorded.
+
+## Master Post-Merge Validation
+
+- Fast-forward merge:
+  - Source branch: `codex/content-ai-paper-formal-publish-loop`
+  - Target branch: `master`
+  - Code commit: `42f467b37`
+  - Result: pass.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/lib/admin-ai-generation-formal-draft-payload.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/admin-paper-ui.test.ts src/server/services/paper-draft-service.test.ts --reporter=dot`
+  - Result: pass, 5 files, 78 tests.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/organization-training-route.test.ts tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot`
+  - Result: pass, 5 files, 151 tests.
+- `corepack pnpm@10.26.1 run typecheck`
+  - Result: pass.
+- `corepack pnpm@10.26.1 run lint`
+  - Result: pass.
+- `git diff --check`
+  - Result: pass.
