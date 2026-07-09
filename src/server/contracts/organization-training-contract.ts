@@ -221,11 +221,22 @@ export type OrganizationTrainingAdminQuestionDetailDto = {
   };
 };
 
+export type OrganizationTrainingAdminPaperSectionDetailDto = {
+  sectionKey: string;
+  title: string;
+  questionType: OrganizationTrainingQuestionType;
+  targetQuestionCount: number;
+  selectedQuestionCount: number;
+  totalScore: number;
+  questions: OrganizationTrainingAdminQuestionDetailDto[];
+};
+
 export type OrganizationTrainingAdminPublishedVersionDetailDto = Omit<
   OrganizationTrainingPublishedVersionDto,
   "questions"
 > & {
   questions: OrganizationTrainingAdminQuestionDetailDto[];
+  paperSections?: OrganizationTrainingAdminPaperSectionDetailDto[];
 };
 
 export type OrganizationTrainingAdminDetailStructureDto = {
@@ -249,6 +260,7 @@ export type OrganizationTrainingAdminAvailableDetailDto = {
   contentKind: OrganizationTrainingAdminLifecycleContentKind;
   structure: OrganizationTrainingAdminDetailStructureDto;
   questions: OrganizationTrainingAdminQuestionDetailDto[];
+  paperSections?: OrganizationTrainingAdminPaperSectionDetailDto[];
   redactionStatus: "admin_safe_detail";
 };
 

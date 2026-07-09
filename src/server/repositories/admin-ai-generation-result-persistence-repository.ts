@@ -9,13 +9,18 @@ import type {
   AdminAiGenerationResultPersistenceResult,
   AdminAiGenerationResultPersistenceRow,
   AdminAiGenerationResultTaskRow,
+  AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload,
+  AdminAiGenerationOrganizationTrainingPaperDraftPayload,
   AdminAiGenerationOrganizationTrainingQuestionDraftPayload,
   CreateAdminAiGenerationResultInput,
   FindAdminAiGenerationResultByTaskQuery,
   InsertAdminAiGenerationDraftResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
-import type { OrganizationTrainingAdminQuestionDetailDto } from "../contracts/organization-training-contract";
+import type {
+  OrganizationTrainingAdminPaperSectionDetailDto,
+  OrganizationTrainingAdminQuestionDetailDto,
+} from "../contracts/organization-training-contract";
 
 const DEFAULT_RESULT_HISTORY_LIMIT = 20;
 const MAX_RESULT_HISTORY_LIMIT = 50;
@@ -180,6 +185,8 @@ function mapAdminAiGenerationResultRowToDto(
       reviewedDraft: resolveFormalReviewedDraftSnapshot(row),
       organizationTrainingDraft:
         resolveOrganizationTrainingQuestionDraftSnapshot(row),
+      organizationTrainingPaperDraft:
+        resolveOrganizationTrainingPaperDraftSnapshot(row),
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -207,6 +214,16 @@ const organizationTrainingQuestionTypes = [
 ] as const;
 
 const evidenceStatuses = ["sufficient", "weak", "none"] as const;
+const paperMatchQualities = [
+  "fully_matched",
+  "supplemented_from_nearby_knowledge",
+  "supplemented_from_same_scope",
+  "insufficient",
+] as const;
+const paperSourceKinds = [
+  "platform_formal_question",
+  "enterprise_training_snapshot",
+] as const;
 
 function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === "string";
@@ -225,6 +242,22 @@ function isEvidenceStatus(
 ): value is OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"] {
   return evidenceStatuses.includes(
     value as OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"],
+  );
+}
+
+function isPaperMatchQuality(
+  value: unknown,
+): value is AdminAiGenerationOrganizationTrainingPaperDraftPayload["matchQuality"] {
+  return paperMatchQualities.includes(
+    value as AdminAiGenerationOrganizationTrainingPaperDraftPayload["matchQuality"],
+  );
+}
+
+function isPaperSourceKind(
+  value: unknown,
+): value is AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"][number]["sourceKind"] {
+  return paperSourceKinds.includes(
+    value as AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"][number]["sourceKind"],
   );
 }
 
@@ -347,6 +380,222 @@ function resolveOrganizationTrainingQuestionDraftSnapshot(
   return {
     questions:
       normalizedQuestions as OrganizationTrainingAdminQuestionDetailDto[],
+  };
+}
+
+function normalizeSelectedPaperQuestion(
+  value: unknown,
+):
+  | AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"][number]
+  | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    typeof value.questionPublicId !== "string" ||
+    !isPaperSourceKind(value.sourceKind) ||
+    typeof value.matchTier !== "string" ||
+    typeof value.score !== "number"
+  ) {
+    return null;
+  }
+
+  return {
+    questionPublicId: value.questionPublicId,
+    sourceKind: value.sourceKind,
+    matchTier:
+      value.matchTier === "nearby_knowledge" || value.matchTier === "same_scope"
+        ? value.matchTier
+        : "exact",
+    score: value.score,
+  };
+}
+
+function normalizeOrganizationTrainingPaperAssemblySection(
+  value: unknown,
+): AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    typeof value.sectionKey !== "string" ||
+    typeof value.title !== "string" ||
+    !isOrganizationTrainingQuestionType(value.questionType) ||
+    typeof value.targetQuestionCount !== "number" ||
+    !Number.isInteger(value.targetQuestionCount) ||
+    value.targetQuestionCount < 1 ||
+    typeof value.selectedQuestionCount !== "number" ||
+    !Number.isInteger(value.selectedQuestionCount) ||
+    value.selectedQuestionCount < 1 ||
+    !Array.isArray(value.selectedQuestions)
+  ) {
+    return null;
+  }
+
+  const selectedQuestions = value.selectedQuestions.map(
+    normalizeSelectedPaperQuestion,
+  );
+
+  if (selectedQuestions.some((question) => question === null)) {
+    return null;
+  }
+
+  return {
+    sectionKey: value.sectionKey,
+    title: value.title,
+    questionType: value.questionType,
+    targetQuestionCount: value.targetQuestionCount,
+    selectedQuestionCount: value.selectedQuestionCount,
+    selectedQuestions:
+      selectedQuestions as AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload["selectedQuestions"],
+  };
+}
+
+function normalizeOrganizationTrainingPaperSectionDetail(
+  value: unknown,
+): OrganizationTrainingAdminPaperSectionDetailDto | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    typeof value.sectionKey !== "string" ||
+    typeof value.title !== "string" ||
+    !isOrganizationTrainingQuestionType(value.questionType) ||
+    typeof value.targetQuestionCount !== "number" ||
+    !Number.isInteger(value.targetQuestionCount) ||
+    value.targetQuestionCount < 1 ||
+    typeof value.selectedQuestionCount !== "number" ||
+    !Number.isInteger(value.selectedQuestionCount) ||
+    value.selectedQuestionCount < 1 ||
+    typeof value.totalScore !== "number" ||
+    !Array.isArray(value.questions)
+  ) {
+    return null;
+  }
+
+  const questions = value.questions.map(
+    normalizeOrganizationTrainingQuestionDetail,
+  );
+
+  if (questions.some((question) => question === null)) {
+    return null;
+  }
+
+  return {
+    sectionKey: value.sectionKey,
+    title: value.title,
+    questionType: value.questionType,
+    targetQuestionCount: value.targetQuestionCount,
+    selectedQuestionCount: value.selectedQuestionCount,
+    totalScore: value.totalScore,
+    questions: questions as OrganizationTrainingAdminQuestionDetailDto[],
+  };
+}
+
+function resolveOrganizationTrainingPaperDraftSnapshot(
+  row: AdminAiGenerationResultPersistenceRow,
+): AdminAiGenerationOrganizationTrainingPaperDraftPayload | null {
+  if (row.workspace !== "organization" || row.generation_kind !== "paper") {
+    return null;
+  }
+
+  const snapshot = row.content_redacted_snapshot;
+
+  if (!isRecord(snapshot)) {
+    return null;
+  }
+
+  const paperDraftSnapshot = snapshot.organizationTrainingPaperDraft;
+
+  if (!isRecord(paperDraftSnapshot)) {
+    return null;
+  }
+
+  const sourceComposition = paperDraftSnapshot.sourceComposition;
+
+  if (
+    typeof paperDraftSnapshot.paperTitle !== "string" ||
+    typeof paperDraftSnapshot.requestedQuestionCount !== "number" ||
+    !Number.isInteger(paperDraftSnapshot.requestedQuestionCount) ||
+    paperDraftSnapshot.requestedQuestionCount < 1 ||
+    typeof paperDraftSnapshot.selectedQuestionCount !== "number" ||
+    !Number.isInteger(paperDraftSnapshot.selectedQuestionCount) ||
+    paperDraftSnapshot.selectedQuestionCount < 1 ||
+    !isRecord(sourceComposition) ||
+    typeof sourceComposition.platformFormalQuestionCount !== "number" ||
+    typeof sourceComposition.enterpriseTrainingSnapshotCount !== "number" ||
+    !isPaperMatchQuality(paperDraftSnapshot.matchQuality) ||
+    paperDraftSnapshot.redactionStatus !== "admin_safe_detail"
+  ) {
+    return null;
+  }
+
+  const assemblySections = Array.isArray(paperDraftSnapshot.assemblySections)
+    ? paperDraftSnapshot.assemblySections.map(
+        normalizeOrganizationTrainingPaperAssemblySection,
+      )
+    : [];
+
+  if (assemblySections.some((section) => section === null)) {
+    return null;
+  }
+
+  const paperSections = Array.isArray(paperDraftSnapshot.paperSections)
+    ? paperDraftSnapshot.paperSections.map(
+        normalizeOrganizationTrainingPaperSectionDetail,
+      )
+    : [];
+
+  if (paperSections.some((section) => section === null)) {
+    return null;
+  }
+
+  const questions = Array.isArray(paperDraftSnapshot.questions)
+    ? paperDraftSnapshot.questions.map(
+        normalizeOrganizationTrainingQuestionDetail,
+      )
+    : [];
+
+  if (questions.some((question) => question === null)) {
+    return null;
+  }
+
+  if (assemblySections.length === 0 && paperSections.length === 0) {
+    return null;
+  }
+
+  return {
+    paperTitle: paperDraftSnapshot.paperTitle,
+    requestedQuestionCount: paperDraftSnapshot.requestedQuestionCount,
+    selectedQuestionCount: paperDraftSnapshot.selectedQuestionCount,
+    sourceComposition: {
+      platformFormalQuestionCount:
+        sourceComposition.platformFormalQuestionCount,
+      enterpriseTrainingSnapshotCount:
+        sourceComposition.enterpriseTrainingSnapshotCount,
+    },
+    matchQuality: paperDraftSnapshot.matchQuality,
+    ...(assemblySections.length === 0
+      ? {}
+      : {
+          assemblySections:
+            assemblySections as AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload[],
+        }),
+    ...(paperSections.length === 0
+      ? {}
+      : {
+          paperSections:
+            paperSections as OrganizationTrainingAdminPaperSectionDetailDto[],
+        }),
+    ...(questions.length === 0
+      ? {}
+      : {
+          questions: questions as OrganizationTrainingAdminQuestionDetailDto[],
+        }),
+    redactionStatus: "admin_safe_detail",
   };
 }
 

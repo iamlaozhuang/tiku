@@ -47,7 +47,14 @@ import type {
   AiGenerationRouteIntegratedQuestionDraftSummary,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
-import type { OrganizationTrainingAdminQuestionDetailDto } from "../contracts/organization-training-contract";
+import type {
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperSelectedQuestionDto,
+} from "../contracts/ai-paper-plan-and-select-contract";
+import type {
+  OrganizationTrainingAdminPaperSectionDetailDto,
+  OrganizationTrainingAdminQuestionDetailDto,
+} from "../contracts/organization-training-contract";
 import {
   normalizeAiGenerationRouteIntegratedKnowledgeScope,
   normalizeAiGenerationRouteIntegratedPaperStructure,
@@ -68,6 +75,7 @@ import type {
   AdminAiGenerationTaskPersistenceResult,
 } from "../contracts/admin-ai-generation-task-persistence-contract";
 import type { AdminRole } from "../models/auth";
+import type { NormalizedQuestionListInput } from "../validators/question";
 import { createPostgresAdminAiGenerationTaskPersistenceRepository } from "../repositories/admin-ai-generation-task-persistence-db-adapter";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import {
@@ -76,6 +84,7 @@ import {
 } from "../repositories/organization-training-repository";
 import {
   createPostgresQuestionRepository,
+  type QuestionAccessRow,
   type QuestionRepository,
 } from "../repositories/question-repository";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
@@ -144,8 +153,29 @@ type AdminAiGenerationPaperAssemblyQuestionRepository = Pick<
 
 type AdminAiGenerationPaperAssemblyOrganizationTrainingRepository = Pick<
   OrganizationTrainingRepository,
-  "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+  | "listAdminLifecycleVersions"
+  | "listAdminVisibleQuestionSnapshotsForAiPaperSource"
+  | "listEmployeeVisibleVersions"
 >;
+
+type OrganizationTrainingPaperDraftDetailSnapshot = {
+  paperSections: OrganizationTrainingAdminPaperSectionDetailDto[];
+  questions: OrganizationTrainingAdminQuestionDetailDto[];
+};
+
+type OrganizationTrainingPaperSourceQuestionDetail = {
+  questionPublicId: string;
+  sourceKind: AiPaperSelectedQuestionDto["sourceKind"];
+  questionType: OrganizationTrainingAdminQuestionDetailDto["questionType"];
+  materialTitle: string | null;
+  materialContent: string | null;
+  stem: string;
+  options: OrganizationTrainingAdminQuestionDetailDto["options"];
+  standardAnswer: string | null;
+  analysis: string | null;
+  evidenceStatus: OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"];
+  citationCount: number;
+};
 
 type AdminAiGenerationPaperAssemblyResolverInput = {
   actor: AdminAiGenerationActor;
@@ -843,6 +873,8 @@ async function buildAdminAiGenerationLocalContract(input: {
   ) => string;
   generationKind: AdminAiGenerationKind;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
+  organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+  questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
   requestClock: () => Date;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
   paperAssemblyResolver: AdminAiGenerationPaperAssemblyResolver | undefined;
@@ -958,6 +990,12 @@ async function buildAdminAiGenerationLocalContract(input: {
       requestPublicId,
       requestedAt,
     });
+  const organizationTrainingPaperDraftDetail =
+    await resolveOrganizationTrainingPaperDraftDetailSnapshot({
+      localContractSummary: localContract,
+      organizationTrainingRepository: input.organizationTrainingRepository,
+      questionRepository: input.questionRepository,
+    });
   const generatedResult =
     await input.resultPersistenceRepository.createOrReuseDraftResult(
       createAdminAiGenerationLocalContractResultInput({
@@ -965,6 +1003,7 @@ async function buildAdminAiGenerationLocalContract(input: {
         taskPersistence,
         createdAt: requestedAt,
         generationParameters: input.generationParameters,
+        organizationTrainingPaperDraftDetail,
       }),
     );
 
@@ -1114,6 +1153,7 @@ function createAdminAiGenerationResolvedLocalContract(input: {
 function createAdminAiGenerationLocalContractResultInput(input: {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   localContract: AdminAiGenerationLocalContractBaseDto;
+  organizationTrainingPaperDraftDetail: OrganizationTrainingPaperDraftDetailSnapshot | null;
   taskPersistence: AdminAiGenerationTaskPersistenceResult;
   createdAt: Date;
 }): CreateAdminAiGenerationResultInput {
@@ -1123,6 +1163,8 @@ function createAdminAiGenerationLocalContractResultInput(input: {
       createdAt: input.createdAt,
       generationParameters: input.generationParameters,
       localContract: input.localContract,
+      organizationTrainingPaperDraftDetail:
+        input.organizationTrainingPaperDraftDetail,
     });
 
   return {
@@ -1165,6 +1207,7 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
   createdAt: Date;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   localContract: AdminAiGenerationLocalContractBaseDto;
+  organizationTrainingPaperDraftDetail: OrganizationTrainingPaperDraftDetailSnapshot | null;
 }) {
   const formalReviewedDraft =
     input.generationParameters === null
@@ -1180,6 +1223,13 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
       : createOrganizationTrainingQuestionDraftSnapshot({
           generationParameters: input.generationParameters,
           localContractSummary: input.localContract,
+        });
+  const organizationTrainingPaperDraft =
+    input.generationParameters === null
+      ? null
+      : createOrganizationTrainingPaperDraftSnapshot({
+          localContractSummary: input.localContract,
+          paperDraftDetail: input.organizationTrainingPaperDraftDetail,
         });
 
   return {
@@ -1222,6 +1272,9 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
     ...(organizationTrainingQuestionDraft === null
       ? {}
       : { organizationTrainingQuestionDraft }),
+    ...(organizationTrainingPaperDraft === null
+      ? {}
+      : { organizationTrainingPaperDraft }),
   };
 }
 
@@ -1367,12 +1420,373 @@ function createOrganizationTrainingQuestionOptions(input: {
     );
 }
 
+const organizationTrainingQuestionTypes = new Set<
+  OrganizationTrainingAdminQuestionDetailDto["questionType"]
+>(["single_choice", "multi_choice", "true_false", "short_answer"]);
+
+async function resolveOrganizationTrainingPaperDraftDetailSnapshot(input: {
+  localContractSummary: AdminAiGenerationLocalContractBaseDto;
+  organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+  questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
+}): Promise<OrganizationTrainingPaperDraftDetailSnapshot | null> {
+  const paperAssembly = input.localContractSummary.paperAssembly;
+
+  if (
+    input.localContractSummary.workspace !== "organization" ||
+    input.localContractSummary.generationKind !== "paper" ||
+    paperAssembly === null ||
+    paperAssembly.status !== "assembled" ||
+    paperAssembly.container.selectedQuestionCount < 1
+  ) {
+    return null;
+  }
+
+  const sourceQuestionDetails =
+    await resolveOrganizationTrainingPaperSourceQuestionDetails({
+      container: paperAssembly.container,
+      organizationPublicId:
+        input.localContractSummary.taskRequest.organizationPublicId,
+      organizationTrainingRepository: input.organizationTrainingRepository,
+      questionRepository: input.questionRepository,
+    });
+  const sourceQuestionByKey = new Map(
+    sourceQuestionDetails.map((sourceQuestion) => [
+      createSelectedPaperQuestionKey(sourceQuestion),
+      sourceQuestion,
+    ]),
+  );
+  let sequenceNumber = 1;
+  const paperSections: OrganizationTrainingAdminPaperSectionDetailDto[] = [];
+
+  for (const paperSection of paperAssembly.container.sections) {
+    const sectionQuestionType = normalizeOrganizationTrainingQuestionType(
+      paperSection.questionType,
+    );
+    const sectionQuestions: OrganizationTrainingAdminQuestionDetailDto[] = [];
+
+    if (sectionQuestionType === null) {
+      return null;
+    }
+
+    for (const selectedQuestion of paperSection.selectedQuestions) {
+      const sourceQuestion = sourceQuestionByKey.get(
+        createSelectedPaperQuestionKey(selectedQuestion),
+      );
+
+      if (sourceQuestion === undefined) {
+        return null;
+      }
+
+      sectionQuestions.push(
+        createOrganizationTrainingPaperQuestionDetail({
+          selectedQuestion,
+          sequenceNumber,
+          sourceQuestion,
+        }),
+      );
+      sequenceNumber += 1;
+    }
+
+    paperSections.push({
+      sectionKey: paperSection.sectionKey,
+      title: paperSection.title,
+      questionType: sectionQuestionType,
+      targetQuestionCount: paperSection.targetQuestionCount,
+      selectedQuestionCount: paperSection.selectedQuestionCount,
+      totalScore: sectionQuestions.reduce(
+        (totalScore, question) => totalScore + question.score,
+        0,
+      ),
+      questions: sectionQuestions,
+    });
+  }
+
+  const questions = paperSections.flatMap(
+    (paperSection) => paperSection.questions,
+  );
+
+  return questions.length === paperAssembly.container.selectedQuestionCount
+    ? { paperSections, questions }
+    : null;
+}
+
+async function resolveOrganizationTrainingPaperSourceQuestionDetails(input: {
+  container: AiPaperPlanAndSelectContainerDto;
+  organizationPublicId: string | null;
+  organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+  questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
+}): Promise<OrganizationTrainingPaperSourceQuestionDetail[]> {
+  const selectedPlatformQuestionIds = collectSelectedPaperQuestionIdsBySource(
+    input.container,
+    "platform_formal_question",
+  );
+  const selectedEnterpriseQuestionIds = collectSelectedPaperQuestionIdsBySource(
+    input.container,
+    "enterprise_training_snapshot",
+  );
+  const [platformQuestions, enterpriseQuestions] = await Promise.all([
+    resolvePlatformPaperSourceQuestionDetails({
+      container: input.container,
+      questionRepository: input.questionRepository,
+      selectedQuestionIds: selectedPlatformQuestionIds,
+    }),
+    resolveEnterprisePaperSourceQuestionDetails({
+      organizationPublicId: input.organizationPublicId,
+      organizationTrainingRepository: input.organizationTrainingRepository,
+      selectedQuestionIds: selectedEnterpriseQuestionIds,
+    }),
+  ]);
+
+  return [...platformQuestions, ...enterpriseQuestions];
+}
+
+async function resolvePlatformPaperSourceQuestionDetails(input: {
+  container: AiPaperPlanAndSelectContainerDto;
+  questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
+  selectedQuestionIds: ReadonlySet<string>;
+}): Promise<OrganizationTrainingPaperSourceQuestionDetail[]> {
+  if (input.selectedQuestionIds.size === 0) {
+    return [];
+  }
+
+  const result = await input.questionRepository.listQuestions(
+    createPaperSourceQuestionListQuery(input.container),
+  );
+
+  return result.rows
+    .filter(
+      (questionRow) =>
+        input.selectedQuestionIds.has(questionRow.public_id) &&
+        questionRow.status === "available",
+    )
+    .map(mapPlatformQuestionRowToPaperSourceDetail)
+    .filter(
+      (
+        sourceQuestion,
+      ): sourceQuestion is OrganizationTrainingPaperSourceQuestionDetail =>
+        sourceQuestion !== null,
+    );
+}
+
+async function resolveEnterprisePaperSourceQuestionDetails(input: {
+  organizationPublicId: string | null;
+  organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+  selectedQuestionIds: ReadonlySet<string>;
+}): Promise<OrganizationTrainingPaperSourceQuestionDetail[]> {
+  if (
+    input.selectedQuestionIds.size === 0 ||
+    input.organizationPublicId === null
+  ) {
+    return [];
+  }
+
+  const snapshots =
+    await input.organizationTrainingRepository.listAdminVisibleQuestionSnapshotsForAiPaperSource(
+      {
+        visibleOrganizationPublicIds: [input.organizationPublicId],
+      },
+    );
+
+  return snapshots
+    .filter((snapshot) => input.selectedQuestionIds.has(snapshot.publicId))
+    .map(mapEnterpriseQuestionSnapshotToPaperSourceDetail)
+    .filter(
+      (
+        sourceQuestion,
+      ): sourceQuestion is OrganizationTrainingPaperSourceQuestionDetail =>
+        sourceQuestion !== null,
+    );
+}
+
+function createPaperSourceQuestionListQuery(
+  container: AiPaperPlanAndSelectContainerDto,
+): NormalizedQuestionListInput {
+  return {
+    page: 1,
+    pageSize: 100,
+    sortBy: "updatedAt",
+    sortOrder: "desc",
+    profession: container.profession,
+    level: container.level,
+    subject: container.subject,
+    questionType: null,
+    status: "available",
+    keyword: null,
+    knowledgeNodePublicId: null,
+    tagPublicId: null,
+  };
+}
+
+function mapPlatformQuestionRowToPaperSourceDetail(
+  questionRow: QuestionAccessRow,
+): OrganizationTrainingPaperSourceQuestionDetail | null {
+  const questionType = normalizeOrganizationTrainingQuestionType(
+    questionRow.question_type,
+  );
+
+  if (questionType === null) {
+    return null;
+  }
+
+  return {
+    questionPublicId: questionRow.public_id,
+    sourceKind: "platform_formal_question",
+    questionType,
+    materialTitle: null,
+    materialContent: null,
+    stem: questionRow.stem_rich_text,
+    options: questionRow.question_options.map((questionOption) => ({
+      publicId: `${questionRow.public_id}_option_${questionOption.label.toLowerCase()}`,
+      label: questionOption.label,
+      content: questionOption.content_rich_text,
+    })),
+    standardAnswer: normalizeRequiredText(
+      questionRow.standard_answer_rich_text,
+    ),
+    analysis: normalizeRequiredText(questionRow.analysis_rich_text),
+    evidenceStatus: "sufficient",
+    citationCount: questionRow.knowledge_node_public_ids.length,
+  };
+}
+
+function mapEnterpriseQuestionSnapshotToPaperSourceDetail(
+  snapshot: Awaited<
+    ReturnType<
+      AdminAiGenerationPaperAssemblyOrganizationTrainingRepository["listAdminVisibleQuestionSnapshotsForAiPaperSource"]
+    >
+  >[number],
+): OrganizationTrainingPaperSourceQuestionDetail | null {
+  const questionType = normalizeOrganizationTrainingQuestionType(
+    snapshot.questionType,
+  );
+
+  if (questionType === null) {
+    return null;
+  }
+
+  return {
+    questionPublicId: snapshot.publicId,
+    sourceKind: "enterprise_training_snapshot",
+    questionType,
+    materialTitle: snapshot.materialTitle,
+    materialContent: snapshot.materialContent,
+    stem: snapshot.stem,
+    options: snapshot.options.map((option) => ({ ...option })),
+    standardAnswer: normalizeRequiredText(snapshot.standardAnswer),
+    analysis: normalizeRequiredText(snapshot.analysisSummary),
+    evidenceStatus: snapshot.evidenceStatus,
+    citationCount: snapshot.citationCount,
+  };
+}
+
+function createOrganizationTrainingPaperQuestionDetail(input: {
+  selectedQuestion: AiPaperSelectedQuestionDto;
+  sequenceNumber: number;
+  sourceQuestion: OrganizationTrainingPaperSourceQuestionDetail;
+}): OrganizationTrainingAdminQuestionDetailDto {
+  return {
+    publicId: input.sourceQuestion.questionPublicId,
+    sequenceNumber: input.sequenceNumber,
+    questionType: input.sourceQuestion.questionType,
+    materialTitle: input.sourceQuestion.materialTitle,
+    materialContent: input.sourceQuestion.materialContent,
+    stem: input.sourceQuestion.stem,
+    options: input.sourceQuestion.options.map((option) => ({ ...option })),
+    score: input.selectedQuestion.score,
+    evidenceSummary: {
+      evidenceStatus: input.sourceQuestion.evidenceStatus,
+      citationCount: input.sourceQuestion.citationCount,
+    },
+    answerAndAnalysis: {
+      visibility: "collapsed_by_default",
+      standardAnswer: input.sourceQuestion.standardAnswer,
+      analysis: input.sourceQuestion.analysis,
+    },
+  };
+}
+
+function collectSelectedPaperQuestionIdsBySource(
+  container: AiPaperPlanAndSelectContainerDto,
+  sourceKind: AiPaperSelectedQuestionDto["sourceKind"],
+): Set<string> {
+  return new Set(
+    container.sections
+      .flatMap((paperSection) => paperSection.selectedQuestions)
+      .filter((selectedQuestion) => selectedQuestion.sourceKind === sourceKind)
+      .map((selectedQuestion) => selectedQuestion.questionPublicId),
+  );
+}
+
+function createSelectedPaperQuestionKey(input: {
+  questionPublicId: string;
+  sourceKind: AiPaperSelectedQuestionDto["sourceKind"];
+}): string {
+  return `${input.sourceKind}:${input.questionPublicId}`;
+}
+
+function normalizeOrganizationTrainingQuestionType(
+  value: string,
+): OrganizationTrainingAdminQuestionDetailDto["questionType"] | null {
+  return organizationTrainingQuestionTypes.has(
+    value as OrganizationTrainingAdminQuestionDetailDto["questionType"],
+  )
+    ? (value as OrganizationTrainingAdminQuestionDetailDto["questionType"])
+    : null;
+}
+
 function normalizeRequiredText(
   value: string | null | undefined,
 ): string | null {
   const normalizedValue = value?.trim() ?? "";
 
   return normalizedValue.length > 0 ? normalizedValue : null;
+}
+
+function createOrganizationTrainingPaperDraftSnapshot(input: {
+  localContractSummary: AdminAiGenerationLocalContractBaseDto;
+  paperDraftDetail: OrganizationTrainingPaperDraftDetailSnapshot | null;
+}) {
+  const paperAssembly = input.localContractSummary.paperAssembly;
+
+  if (
+    input.localContractSummary.workspace !== "organization" ||
+    input.localContractSummary.generationKind !== "paper" ||
+    paperAssembly === null ||
+    paperAssembly.status !== "assembled" ||
+    paperAssembly.container.selectedQuestionCount < 1
+  ) {
+    return null;
+  }
+
+  return {
+    paperTitle: paperAssembly.container.title,
+    requestedQuestionCount: paperAssembly.container.requestedQuestionCount,
+    selectedQuestionCount: paperAssembly.container.selectedQuestionCount,
+    sourceComposition: paperAssembly.container.sourceComposition,
+    matchQuality: paperAssembly.container.matchQuality,
+    assemblySections: paperAssembly.container.sections.map((paperSection) => ({
+      sectionKey: paperSection.sectionKey,
+      title: paperSection.title,
+      questionType: paperSection.questionType,
+      targetQuestionCount: paperSection.targetQuestionCount,
+      selectedQuestionCount: paperSection.selectedQuestionCount,
+      selectedQuestions: paperSection.selectedQuestions.map(
+        (selectedQuestion) => ({
+          questionPublicId: selectedQuestion.questionPublicId,
+          sourceKind: selectedQuestion.sourceKind,
+          matchTier: selectedQuestion.matchTier,
+          score: selectedQuestion.score,
+        }),
+      ),
+    })),
+    ...(input.paperDraftDetail === null
+      ? {}
+      : {
+          paperSections: input.paperDraftDetail.paperSections,
+          questions: input.paperDraftDetail.questions,
+        }),
+    redactionStatus: "admin_safe_detail",
+  };
 }
 
 function createAdminAiGenerationPaperAssemblyRedactedSnapshot(
@@ -1586,14 +2000,16 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
   const resultPersistenceRepository =
     options.resultPersistenceRepository ??
     createPostgresAdminAiGenerationResultPersistenceRepository();
+  const questionRepository =
+    options.questionRepository ?? createPostgresQuestionRepository();
+  const organizationTrainingRepository =
+    options.organizationTrainingRepository ??
+    createPostgresOrganizationTrainingRepository();
   const paperAssemblyResolver =
     options.paperAssemblyResolver ??
     createDefaultAdminAiGenerationPaperAssemblyResolver({
-      questionRepository:
-        options.questionRepository ?? createPostgresQuestionRepository(),
-      organizationTrainingRepository:
-        options.organizationTrainingRepository ??
-        createPostgresOrganizationTrainingRepository(),
+      questionRepository,
+      organizationTrainingRepository,
     });
 
   return createRouteHandlersWithErrorEnvelope({
@@ -1668,7 +2084,9 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             createRequestPublicId,
             generationKind,
             generationParameters,
+            organizationTrainingRepository,
             paperAssemblyResolver,
+            questionRepository,
             requestClock,
             resultPersistenceRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,

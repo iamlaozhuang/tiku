@@ -357,6 +357,138 @@ describe("admin AI generation result persistence repository", () => {
     );
   });
 
+  it("surfaces organization AI paper results as enterprise training paper draft snapshots", async () => {
+    const { gateway } = createGateway({
+      rows: [
+        createResultRow({
+          workspace: "organization",
+          generation_kind: "paper",
+          task_type: "ai_paper_generation",
+          evidence_status: "sufficient",
+          citation_count: 2,
+          content_redacted_snapshot: {
+            redactionStatus: "redacted",
+            organizationTrainingPaperDraft: {
+              paperTitle: "Synthetic enterprise training paper",
+              requestedQuestionCount: 1,
+              selectedQuestionCount: 1,
+              sourceComposition: {
+                platformFormalQuestionCount: 1,
+                enterpriseTrainingSnapshotCount: 0,
+              },
+              matchQuality: "fully_matched",
+              paperSections: [
+                {
+                  sectionKey: "single_choice",
+                  title: "Single choice section",
+                  questionType: "single_choice",
+                  targetQuestionCount: 1,
+                  selectedQuestionCount: 1,
+                  totalScore: 5,
+                  questions: [
+                    {
+                      publicId: "organization_training_ai_paper_question_001",
+                      sequenceNumber: 1,
+                      questionType: "single_choice",
+                      materialTitle: null,
+                      materialContent: null,
+                      stem: "Synthetic paper source stem",
+                      options: [
+                        {
+                          publicId:
+                            "organization_training_ai_paper_question_001_option_a",
+                          label: "A",
+                          content: "Synthetic option A",
+                        },
+                      ],
+                      score: 5,
+                      evidenceSummary: {
+                        evidenceStatus: "sufficient",
+                        citationCount: 2,
+                      },
+                      answerAndAnalysis: {
+                        visibility: "collapsed_by_default",
+                        standardAnswer: "A",
+                        analysis: "Synthetic paper analysis",
+                      },
+                    },
+                  ],
+                },
+              ],
+              questions: [
+                {
+                  publicId: "organization_training_ai_paper_question_001",
+                  sequenceNumber: 1,
+                  questionType: "single_choice",
+                  materialTitle: null,
+                  materialContent: null,
+                  stem: "Synthetic paper source stem",
+                  options: [
+                    {
+                      publicId:
+                        "organization_training_ai_paper_question_001_option_a",
+                      label: "A",
+                      content: "Synthetic option A",
+                    },
+                  ],
+                  score: 5,
+                  evidenceSummary: {
+                    evidenceStatus: "sufficient",
+                    citationCount: 2,
+                  },
+                  answerAndAnalysis: {
+                    visibility: "collapsed_by_default",
+                    standardAnswer: "A",
+                    analysis: "Synthetic paper analysis",
+                  },
+                },
+              ],
+              redactionStatus: "admin_safe_detail",
+            },
+          },
+        }),
+      ],
+    });
+    const repository =
+      createAdminAiGenerationResultPersistenceRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "paper",
+      page: 1,
+      pageSize: 10,
+      limit: 10,
+      offset: 0,
+    });
+
+    expect(
+      draftResults[0]?.contentReference.organizationTrainingPaperDraft,
+    ).toMatchObject({
+      paperTitle: "Synthetic enterprise training paper",
+      selectedQuestionCount: 1,
+      paperSections: [
+        {
+          title: "Single choice section",
+          questions: [
+            {
+              stem: "Synthetic paper source stem",
+              answerAndAnalysis: {
+                visibility: "collapsed_by_default",
+                standardAnswer: "A",
+              },
+            },
+          ],
+        },
+      ],
+      redactionStatus: "admin_safe_detail",
+    });
+    expect(JSON.stringify(draftResults)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
+  });
+
   it("filters draft result history by generation kind before pagination", async () => {
     const { gateway, listResultRows } = createGateway({
       rows: [

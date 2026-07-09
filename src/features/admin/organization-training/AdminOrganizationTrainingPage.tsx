@@ -1192,7 +1192,7 @@ export function AdminOrganizationTrainingPage() {
 
   async function handleConfigureDraft(
     draft: OrganizationTrainingAdminLifecycleItemDto,
-  ): Promise<void> {
+  ): Promise<OrganizationTrainingAdminDetailDto | null> {
     setIsCreateWizardOpen(true);
     setSelectedPublishDraft(draft);
     setPublishFormValues(createPublishFormValuesForDraft(draft));
@@ -1205,7 +1205,7 @@ export function AdminOrganizationTrainingPage() {
         );
 
       if (response.code !== 0 || response.data === null) {
-        return;
+        return null;
       }
 
       const values = createPublishFormValuesFromAdminDetail(response.data);
@@ -1213,8 +1213,10 @@ export function AdminOrganizationTrainingPage() {
       if (values !== null) {
         setPublishFormValues(values);
       }
+
+      return response.data;
     } catch {
-      return;
+      return null;
     }
   }
 
@@ -1450,7 +1452,7 @@ function TrainingListPanel({
   onCreateTraining: () => void;
   onContinueDraft: (
     draft: OrganizationTrainingAdminLifecycleItemDto,
-  ) => Promise<void> | void;
+  ) => Promise<OrganizationTrainingAdminDetailDto | null>;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
@@ -1522,11 +1524,21 @@ function TrainingListPanel({
     setDetailMessage(null);
   }
 
-  function handleContinueDraft(
+  async function handleContinueDraft(
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) {
     clearSelectedDetail();
-    void onContinueDraft(item);
+    const detail = await onContinueDraft(item);
+
+    if (detail === null) {
+      return;
+    }
+
+    detailRequestSerial.current += 1;
+    setSelectedDetailPublicId(item.publicId);
+    setSelectedDetail(detail);
+    setDetailMessage(null);
+    setDetailState("ready");
   }
 
   async function handleViewItem(
@@ -1978,6 +1990,7 @@ function TrainingLifecycleDetailBody({
   }
 
   const questionTypeSummary = detail.structure.questionTypeSummary;
+  const paperSections = detail.paperSections ?? [];
 
   return (
     <div className="mt-4 space-y-4">
@@ -1990,7 +2003,37 @@ function TrainingLifecycleDetailBody({
           {questionTypeSummary.shortAnswer}
         </p>
       </section>
-      {detail.questions.length === 0 ? (
+      {paperSections.length > 0 ? (
+        <div className="space-y-3">
+          <h4 className="text-text-primary text-sm font-semibold">试卷详情</h4>
+          {paperSections.map((paperSection) => (
+            <section
+              className="border-border bg-surface rounded-md border p-4"
+              key={paperSection.sectionKey}
+            >
+              <div className="space-y-1">
+                <h5 className="text-text-primary text-sm font-semibold">
+                  {paperSection.title}
+                </h5>
+                <p className="text-text-secondary text-sm">
+                  {resolvePublishQuestionTypeLabel(paperSection.questionType)} ·
+                  题量 {paperSection.selectedQuestionCount}/
+                  {paperSection.targetQuestionCount} · 总分{" "}
+                  {paperSection.totalScore}
+                </p>
+              </div>
+              <div className="mt-3 space-y-3">
+                {paperSection.questions.map((question) => (
+                  <TrainingQuestionDetailCard
+                    key={`${paperSection.sectionKey}-${question.sequenceNumber}-${question.stem}`}
+                    question={question}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : detail.questions.length === 0 ? (
         <div className="bg-surface rounded-md p-4 text-sm">
           <p className="text-text-secondary">暂无可展示题目详情</p>
         </div>

@@ -435,7 +435,9 @@ function createOrganizationTrainingRepository(input: {
   organizationPublicId: string;
 }): Pick<
   OrganizationTrainingRepository,
-  "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+  | "listAdminLifecycleVersions"
+  | "listAdminVisibleQuestionSnapshotsForAiPaperSource"
+  | "listEmployeeVisibleVersions"
 > {
   return {
     async listAdminLifecycleVersions() {
@@ -446,6 +448,17 @@ function createOrganizationTrainingRepository(input: {
             createTrainingQuestion("enterprise_question_public_default"),
           ],
         }),
+      ];
+    },
+    async listAdminVisibleQuestionSnapshotsForAiPaperSource() {
+      return [
+        {
+          ...createTrainingQuestion("enterprise_question_public_default"),
+          standardAnswer: "A",
+          analysisSummary: "SENSITIVE_ENTERPRISE_ANALYSIS",
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
       ];
     },
     async listEmployeeVisibleVersions() {
@@ -678,6 +691,7 @@ function createGeneratedResultHistoryItem(input: {
       contentVisibility: "redacted_snapshot",
       reviewedDraft: input.reviewedDraft ?? null,
       organizationTrainingDraft: null,
+      organizationTrainingPaperDraft: null,
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -758,6 +772,9 @@ function createGeneratedResultPersistenceResult(
         organizationTrainingDraft: (input.contentRedactedSnapshot
           .organizationTrainingQuestionDraft ??
           null) as AdminAiGenerationResultDto["contentReference"]["organizationTrainingDraft"],
+        organizationTrainingPaperDraft: (input.contentRedactedSnapshot
+          .organizationTrainingPaperDraft ??
+          null) as AdminAiGenerationResultDto["contentReference"]["organizationTrainingPaperDraft"],
         redactionStatus: "redacted",
       },
       evidenceReference: {
@@ -1457,6 +1474,41 @@ describe("admin AI generation local contract route handlers", () => {
           enterpriseTrainingSnapshotCount: 1,
         },
       },
+      organizationTrainingPaperDraft: {
+        paperTitle: "redacted paper container",
+        selectedQuestionCount: 3,
+        sourceComposition: {
+          platformFormalQuestionCount: 2,
+          enterpriseTrainingSnapshotCount: 1,
+        },
+        matchQuality: "fully_matched",
+        assemblySections: [
+          {
+            sectionKey: "single_choice",
+            title: "redacted section",
+            questionType: "single_choice",
+            selectedQuestionCount: 3,
+            selectedQuestions: [
+              {
+                questionPublicId: "platform_question_public_a",
+                sourceKind: "platform_formal_question",
+                score: 1,
+              },
+              {
+                questionPublicId: "platform_question_public_b",
+                sourceKind: "platform_formal_question",
+                score: 1,
+              },
+              {
+                questionPublicId: "enterprise_question_public_a",
+                sourceKind: "enterprise_training_snapshot",
+                score: 1,
+              },
+            ],
+          },
+        ],
+        redactionStatus: "admin_safe_detail",
+      },
     });
     expect(payload).toMatchObject({
       code: 0,
@@ -1489,6 +1541,8 @@ describe("admin AI generation local contract route handlers", () => {
   it("uses repository-backed paper assembly by default for organization advanced admin paper requests", async () => {
     const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
       [];
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
     const questionRepositoryCalls: unknown[] = [];
     const trainingRepositoryCalls: unknown[] = [];
     const questionRepository: Pick<QuestionRepository, "listQuestions"> = {
@@ -1510,7 +1564,9 @@ describe("admin AI generation local contract route handlers", () => {
     };
     const organizationTrainingRepository: Pick<
       OrganizationTrainingRepository,
-      "listAdminLifecycleVersions" | "listEmployeeVisibleVersions"
+      | "listAdminLifecycleVersions"
+      | "listAdminVisibleQuestionSnapshotsForAiPaperSource"
+      | "listEmployeeVisibleVersions"
     > = {
       async listAdminLifecycleVersions(input) {
         trainingRepositoryCalls.push(input);
@@ -1524,6 +1580,17 @@ describe("admin AI generation local contract route handlers", () => {
           }),
         ];
       },
+      async listAdminVisibleQuestionSnapshotsForAiPaperSource() {
+        return [
+          {
+            ...createTrainingQuestion("enterprise_question_public_route_a"),
+            standardAnswer: "A",
+            analysisSummary: "SENSITIVE_ENTERPRISE_ANALYSIS",
+            evidenceStatus: "sufficient",
+            citationCount: 1,
+          },
+        ];
+      },
       async listEmployeeVisibleVersions() {
         throw new Error("employee training repository should not be called");
       },
@@ -1534,6 +1601,8 @@ describe("admin AI generation local contract route handlers", () => {
       organizationPublicId: "organization_public_123",
       questionRepository,
       organizationTrainingRepository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
       runtimeBridgeControl:
         createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
@@ -1546,7 +1615,7 @@ describe("admin AI generation local contract route handlers", () => {
     });
     const payload = await response.json();
 
-    expect(questionRepositoryCalls).toHaveLength(1);
+    expect(questionRepositoryCalls).toHaveLength(2);
     expect(trainingRepositoryCalls).toHaveLength(1);
     expect(payload).toMatchObject({
       code: 0,
@@ -1572,6 +1641,46 @@ describe("admin AI generation local contract route handlers", () => {
         },
       },
     });
+    const paperDraftSnapshot = (
+      generatedResultPersistenceRecorder.calls[0]?.contentRedactedSnapshot as {
+        organizationTrainingPaperDraft?: {
+          paperSections?: unknown[];
+          questions?: unknown[];
+        };
+      }
+    ).organizationTrainingPaperDraft;
+
+    expect(paperDraftSnapshot).toMatchObject({
+      paperTitle: "AI组卷方案",
+      selectedQuestionCount: 3,
+      redactionStatus: "admin_safe_detail",
+    });
+    expect(paperDraftSnapshot?.paperSections).toHaveLength(1);
+    expect(paperDraftSnapshot?.paperSections?.[0]).toMatchObject({
+      selectedQuestionCount: 3,
+      questions: [
+        {
+          stem: "SENSITIVE_STEM_MARKER",
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "SENSITIVE_ANSWER_MARKER",
+            analysis: "SENSITIVE_ANALYSIS_MARKER",
+          },
+        },
+        {
+          stem: "SENSITIVE_STEM_MARKER",
+        },
+        {
+          stem: "SENSITIVE_ENTERPRISE_STEM",
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "A",
+            analysis: "SENSITIVE_ENTERPRISE_ANALYSIS",
+          },
+        },
+      ],
+    });
+    expect(paperDraftSnapshot?.questions).toHaveLength(3);
     expect(JSON.stringify(payload)).not.toContain("SENSITIVE_STEM_MARKER");
     expect(JSON.stringify(payload)).not.toContain("SENSITIVE_ENTERPRISE_STEM");
     expect(providerInputs).toHaveLength(1);

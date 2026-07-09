@@ -17,6 +17,7 @@ import type {
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceKind,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingAuditLogRedactedReferencePolicyDto,
   OrganizationTrainingEmployeeAnswerLifecycleFlowDto,
@@ -224,6 +225,7 @@ export type OrganizationTrainingAdminDetailReadModelInput =
       adminContext: OrganizationTrainingAdminContext;
       draft: OrganizationTrainingDraftDto;
       draftQuestions?: readonly OrganizationTrainingAdminQuestionDetailDto[];
+      draftPaperSections?: readonly OrganizationTrainingAdminPaperSectionDetailDto[];
       sourceMetadata?: OrganizationTrainingAdminLifecycleSourceMetadataDto | null;
     };
 
@@ -936,6 +938,22 @@ function copyAdminDetailQuestions(
   }));
 }
 
+function copyAdminPaperSections(
+  paperSections:
+    | readonly OrganizationTrainingAdminPaperSectionDetailDto[]
+    | undefined,
+): OrganizationTrainingAdminPaperSectionDetailDto[] {
+  return (paperSections ?? []).map((paperSection) => ({
+    sectionKey: paperSection.sectionKey,
+    title: paperSection.title,
+    questionType: paperSection.questionType,
+    targetQuestionCount: paperSection.targetQuestionCount,
+    selectedQuestionCount: paperSection.selectedQuestionCount,
+    totalScore: paperSection.totalScore,
+    questions: copyAdminDetailQuestions(paperSection.questions),
+  }));
+}
+
 export function buildOrganizationTrainingAdminDetailReadModel(
   input: OrganizationTrainingAdminDetailReadModelInput,
 ): ApiResponse<OrganizationTrainingAdminDetailDto | null> {
@@ -960,6 +978,7 @@ export function buildOrganizationTrainingAdminDetailReadModel(
       input.draftQuestions === undefined
         ? []
         : copyAdminDetailQuestions(input.draftQuestions);
+    const draftPaperSections = copyAdminPaperSections(input.draftPaperSections);
 
     if (draftQuestions.length > 0) {
       return createSuccessResponse({
@@ -985,6 +1004,9 @@ export function buildOrganizationTrainingAdminDetailReadModel(
             buildQuestionTypeSummaryFromAdminDetailQuestions(draftQuestions),
         },
         questions: draftQuestions,
+        ...(draftPaperSections.length === 0
+          ? {}
+          : { paperSections: draftPaperSections }),
         redactionStatus: "admin_safe_detail",
       });
     }
@@ -1014,6 +1036,7 @@ export function buildOrganizationTrainingAdminDetailReadModel(
     { allowManualFallback: false },
   );
   const questions = copyAdminDetailQuestions(input.version.questions);
+  const paperSections = copyAdminPaperSections(input.version.paperSections);
 
   return createSuccessResponse({
     publicId: input.version.publicId,
@@ -1035,6 +1058,7 @@ export function buildOrganizationTrainingAdminDetailReadModel(
         buildQuestionTypeSummaryFromAdminDetailQuestions(questions),
     },
     questions,
+    ...(paperSections.length === 0 ? {} : { paperSections }),
     redactionStatus: "admin_safe_detail",
   });
 }

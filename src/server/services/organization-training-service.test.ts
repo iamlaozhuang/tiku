@@ -17,6 +17,7 @@ import {
   buildOrganizationTrainingAuditLogRedactedReferencePolicyReadModel,
   buildOrganizationTrainingSourceContextUsageReadModel,
   createOrganizationTrainingService,
+  type OrganizationTrainingAdminDetailReadModelInput,
   type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
   type OrganizationTrainingPersistenceLineage,
@@ -1075,6 +1076,146 @@ describe("organization training service", () => {
           },
         ],
         redactionStatus: "admin_safe_detail",
+      },
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
+  });
+
+  it("returns admin-safe paper sections for organization AI paper training drafts with structured snapshots", () => {
+    const result = buildOrganizationTrainingAdminDetailReadModel({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      draft: {
+        publicId: "training_draft_ai_paper_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_org_paper_123",
+        organizationPublicId: "organization_public_123",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        title: "AI paper training draft",
+        description: null,
+        questionCount: 1,
+        totalScore: 5,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        evidenceStatus: "sufficient",
+        validationStatus: "needs_review",
+        retentionStatus: "active",
+        createdAt: fixedNow.toISOString(),
+        expiresAt: null,
+      },
+      sourceMetadata: {
+        draftPublicId: "training_draft_ai_paper_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_org_paper_123",
+        sourceVersionPublicId: null,
+        sourceType: "organization_ai_result",
+        generationKind: "paper",
+        redactionStatus: "metadata_only",
+      },
+      draftQuestions: [
+        {
+          publicId: "organization_training_ai_paper_question_001",
+          sequenceNumber: 1,
+          questionType: "single_choice",
+          materialTitle: null,
+          materialContent: null,
+          stem: "Synthetic paper source stem",
+          options: [
+            {
+              publicId: "organization_training_ai_paper_question_001_option_a",
+              label: "A",
+              content: "Synthetic option A",
+            },
+          ],
+          score: 5,
+          evidenceSummary: {
+            evidenceStatus: "sufficient",
+            citationCount: 2,
+          },
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "A",
+            analysis: "Synthetic paper analysis",
+          },
+        },
+      ],
+      draftPaperSections: [
+        {
+          sectionKey: "single_choice",
+          title: "Single choice section",
+          questionType: "single_choice",
+          targetQuestionCount: 1,
+          selectedQuestionCount: 1,
+          totalScore: 5,
+          questions: [
+            {
+              publicId: "organization_training_ai_paper_question_001",
+              sequenceNumber: 1,
+              questionType: "single_choice",
+              materialTitle: null,
+              materialContent: null,
+              stem: "Synthetic paper source stem",
+              options: [
+                {
+                  publicId:
+                    "organization_training_ai_paper_question_001_option_a",
+                  label: "A",
+                  content: "Synthetic option A",
+                },
+              ],
+              score: 5,
+              evidenceSummary: {
+                evidenceStatus: "sufficient",
+                citationCount: 2,
+              },
+              answerAndAnalysis: {
+                visibility: "collapsed_by_default",
+                standardAnswer: "A",
+                analysis: "Synthetic paper analysis",
+              },
+            },
+          ],
+        },
+      ],
+    } satisfies OrganizationTrainingAdminDetailReadModelInput);
+
+    expect(result).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: "training_draft_ai_paper_public_123",
+        resourceType: "organization_training_draft",
+        detailAvailability: "available",
+        sourceKind: "ai_paper",
+        contentKind: "paper_training",
+        structure: {
+          questionCount: 1,
+          totalScore: 5,
+        },
+        paperSections: [
+          {
+            title: "Single choice section",
+            questions: [
+              {
+                stem: "Synthetic paper source stem",
+                answerAndAnalysis: {
+                  visibility: "collapsed_by_default",
+                  standardAnswer: "A",
+                },
+              },
+            ],
+          },
+        ],
       },
     });
     expect(JSON.stringify(result)).not.toMatch(

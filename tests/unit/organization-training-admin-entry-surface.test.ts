@@ -1554,6 +1554,190 @@ describe("AdminOrganizationTrainingPage", () => {
     );
   });
 
+  it("shows organization AI paper draft sections and prefills publish form when continuing configuration", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = getRequestPath(url);
+        const method = init?.method ?? "GET";
+
+        if (String(url) === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (isOrganizationTrainingListGet(url, init)) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              items: [
+                {
+                  publicId: "organization-training-draft-ai-paper-ui-001",
+                  resourceType: "organization_training_draft",
+                  organizationPublicId: persistedAiDraft.organizationPublicId,
+                  authorizationPublicId: persistedAiDraft.authorizationPublicId,
+                  profession: persistedAiDraft.profession,
+                  level: persistedAiDraft.level,
+                  subject: persistedAiDraft.subject,
+                  title: "AI组卷训练草稿",
+                  description: "来自 AI 组卷结果",
+                  questionCount: 1,
+                  totalScore: 5,
+                  questionTypeSummary: persistedAiDraft.questionTypeSummary,
+                  status: "draft",
+                  sourceKind: "ai_paper",
+                  contentKind: "paper_training",
+                  availableActions: ["publish"],
+                },
+              ],
+              redactionStatus: "metadata_only",
+            },
+          });
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001" &&
+          method === "GET"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              publicId: "organization-training-draft-ai-paper-ui-001",
+              resourceType: "organization_training_draft",
+              detailAvailability: "available",
+              organizationPublicId: persistedAiDraft.organizationPublicId,
+              title: "AI组卷训练草稿",
+              description: "来自 AI 组卷结果",
+              profession: persistedAiDraft.profession,
+              level: persistedAiDraft.level,
+              subject: persistedAiDraft.subject,
+              status: "draft",
+              sourceKind: "ai_paper",
+              contentKind: "paper_training",
+              structure: {
+                questionCount: 1,
+                totalScore: 5,
+                questionTypeSummary: persistedAiDraft.questionTypeSummary,
+              },
+              paperSections: [
+                {
+                  sectionKey: "single_choice",
+                  title: "单选题部分",
+                  questionType: "single_choice",
+                  targetQuestionCount: 1,
+                  selectedQuestionCount: 1,
+                  totalScore: 5,
+                  questions: [
+                    {
+                      publicId: "organization-training-ai-paper-ui-001",
+                      sequenceNumber: 1,
+                      questionType: "single_choice",
+                      materialTitle: null,
+                      materialContent: null,
+                      stem: "synthetic AI paper source stem",
+                      options: [
+                        {
+                          publicId:
+                            "organization-training-ai-paper-ui-001-option-a",
+                          label: "A",
+                          content: "synthetic AI paper option A",
+                        },
+                      ],
+                      score: 5,
+                      evidenceSummary: {
+                        evidenceStatus: "sufficient",
+                        citationCount: 2,
+                      },
+                      answerAndAnalysis: {
+                        visibility: "collapsed_by_default",
+                        standardAnswer: "A",
+                        analysis: "synthetic AI paper analysis",
+                      },
+                    },
+                  ],
+                },
+              ],
+              questions: [
+                {
+                  publicId: "organization-training-ai-paper-ui-001",
+                  sequenceNumber: 1,
+                  questionType: "single_choice",
+                  materialTitle: null,
+                  materialContent: null,
+                  stem: "synthetic AI paper source stem",
+                  options: [
+                    {
+                      publicId:
+                        "organization-training-ai-paper-ui-001-option-a",
+                      label: "A",
+                      content: "synthetic AI paper option A",
+                    },
+                  ],
+                  score: 5,
+                  evidenceSummary: {
+                    evidenceStatus: "sufficient",
+                    citationCount: 2,
+                  },
+                  answerAndAnalysis: {
+                    visibility: "collapsed_by_default",
+                    standardAnswer: "A",
+                    analysis: "synthetic AI paper analysis",
+                  },
+                },
+              ],
+              redactionStatus: "admin_safe_detail",
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const persistedDraftCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-draft-ai-paper-ui-001",
+    );
+    fireEvent.click(
+      within(persistedDraftCard).getByRole("button", { name: "继续配置" }),
+    );
+
+    const detailPanel = await screen.findByRole("complementary", {
+      name: "训练详情",
+    });
+    expect(detailPanel).toHaveTextContent("试卷训练");
+    expect(detailPanel).toHaveTextContent("单选题部分");
+    expect(detailPanel).toHaveTextContent("synthetic AI paper source stem");
+    expect(detailPanel).not.toHaveTextContent("synthetic AI paper analysis");
+
+    const publishForm = within(
+      await screen.findByRole("form", { name: "企业训练发布表单" }),
+    );
+    await waitFor(() =>
+      expect(publishForm.getByLabelText("第 1 题题干")).toHaveValue(
+        "synthetic AI paper source stem",
+      ),
+    );
+    expect(publishForm.getByLabelText("第 1 题选项 A")).toHaveValue(
+      "synthetic AI paper option A",
+    );
+    expect(publishForm.getByLabelText("第 1 题标准答案")).toHaveValue("A");
+    expect(publishForm.getByLabelText("第 1 题解析")).toHaveValue(
+      "synthetic AI paper analysis",
+    );
+    expect(JSON.stringify(fetchMock.mock.calls)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput/u,
+    );
+  });
+
   it("loads persisted AI-created drafts and publishes structured reviewed previews without raw JSON input", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(

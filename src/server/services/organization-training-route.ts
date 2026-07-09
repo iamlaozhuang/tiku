@@ -10,6 +10,7 @@ import type {
 } from "../contracts/effective-authorization-contract";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
+  OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingAdminQuestionDetailDto,
@@ -261,9 +262,17 @@ export type OrganizationTrainingAdminDraftDetailQuestionsResolverInput = {
   adminContext: OrganizationTrainingAdminContext;
 };
 
+export type OrganizationTrainingAdminDraftDetailSnapshotDto = {
+  questions: OrganizationTrainingAdminQuestionDetailDto[];
+  paperSections?: OrganizationTrainingAdminPaperSectionDetailDto[];
+};
+
 export type OrganizationTrainingAdminDraftDetailQuestionsResolver = (
   input: OrganizationTrainingAdminDraftDetailQuestionsResolverInput,
-) => Promise<OrganizationTrainingAdminQuestionDetailDto[]>;
+) => Promise<
+  | OrganizationTrainingAdminQuestionDetailDto[]
+  | OrganizationTrainingAdminDraftDetailSnapshotDto
+>;
 
 export type OrganizationTrainingSourceVersionResolverInput = {
   request: Request;
@@ -492,10 +501,8 @@ async function defaultResolveAdminDetailVersion(): Promise<null> {
   return null;
 }
 
-async function defaultResolveAdminDraftDetailQuestions(): Promise<
-  OrganizationTrainingAdminQuestionDetailDto[]
-> {
-  return [];
+async function defaultResolveAdminDraftDetailQuestions(): Promise<OrganizationTrainingAdminDraftDetailSnapshotDto> {
+  return { questions: [] };
 }
 
 async function defaultResolveSourceVersion(): Promise<null> {
@@ -1017,6 +1024,14 @@ function createRepositoryBackedAdminDetailVersionResolver(
     });
 }
 
+function normalizeAdminDraftDetailSnapshot(
+  value:
+    | OrganizationTrainingAdminQuestionDetailDto[]
+    | OrganizationTrainingAdminDraftDetailSnapshotDto,
+): OrganizationTrainingAdminDraftDetailSnapshotDto {
+  return Array.isArray(value) ? { questions: value } : value;
+}
+
 function createRepositoryBackedAdminDraftDetailQuestionsResolver(
   repository: Pick<
     AdminAiGenerationResultPersistenceRepository,
@@ -1026,10 +1041,9 @@ function createRepositoryBackedAdminDraftDetailQuestionsResolver(
   return async ({ draft, sourceMetadata }) => {
     if (
       draft.sourceTaskPublicId === null ||
-      sourceMetadata?.sourceType !== "organization_ai_result" ||
-      sourceMetadata.generationKind !== "question"
+      sourceMetadata?.sourceType !== "organization_ai_result"
     ) {
-      return [];
+      return { questions: [] };
     }
 
     const result = await repository.findDraftResultByTaskPublicId({
@@ -1039,7 +1053,24 @@ function createRepositoryBackedAdminDraftDetailQuestionsResolver(
       taskPublicId: draft.sourceTaskPublicId,
     });
 
-    return result?.contentReference.organizationTrainingDraft?.questions ?? [];
+    if (sourceMetadata.generationKind === "question") {
+      return {
+        questions:
+          result?.contentReference.organizationTrainingDraft?.questions ?? [],
+      };
+    }
+
+    if (sourceMetadata.generationKind === "paper") {
+      const paperDraft =
+        result?.contentReference.organizationTrainingPaperDraft ?? null;
+
+      return {
+        questions: paperDraft?.questions ?? [],
+        paperSections: paperDraft?.paperSections,
+      };
+    }
+
+    return { questions: [] };
   };
 }
 
@@ -1499,18 +1530,21 @@ export function createOrganizationTrainingRouteHandlers(
           adminContext,
           draftPublicIds: [draft.publicId],
         });
-        const draftQuestions = await resolveAdminDraftDetailQuestions({
-          request,
-          draft,
-          sourceMetadata: sourceMetadata ?? null,
-          adminContext,
-        });
+        const draftDetailSnapshot = normalizeAdminDraftDetailSnapshot(
+          await resolveAdminDraftDetailQuestions({
+            request,
+            draft,
+            sourceMetadata: sourceMetadata ?? null,
+            adminContext,
+          }),
+        );
 
         return createJsonResponse(
           buildOrganizationTrainingAdminDetailReadModel({
             adminContext,
             draft,
-            draftQuestions,
+            draftQuestions: draftDetailSnapshot.questions,
+            draftPaperSections: draftDetailSnapshot.paperSections,
             sourceMetadata: sourceMetadata ?? null,
           }),
         );

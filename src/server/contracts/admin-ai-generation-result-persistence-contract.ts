@@ -13,10 +13,41 @@ import type {
   AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
-import type { OrganizationTrainingAdminQuestionDetailDto } from "./organization-training-contract";
+import type {
+  OrganizationTrainingAdminPaperSectionDetailDto,
+  OrganizationTrainingAdminQuestionDetailDto,
+} from "./organization-training-contract";
+import type {
+  AiPaperMatchQuality,
+  AiPaperSelectedQuestionDto,
+} from "./ai-paper-plan-and-select-contract";
 
 export type AdminAiGenerationOrganizationTrainingQuestionDraftPayload = {
   questions: OrganizationTrainingAdminQuestionDetailDto[];
+};
+
+export type AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload = {
+  sectionKey: string;
+  title: string;
+  questionType: OrganizationTrainingAdminPaperSectionDetailDto["questionType"];
+  targetQuestionCount: number;
+  selectedQuestionCount: number;
+  selectedQuestions: AiPaperSelectedQuestionDto[];
+};
+
+export type AdminAiGenerationOrganizationTrainingPaperDraftPayload = {
+  paperTitle: string;
+  requestedQuestionCount: number;
+  selectedQuestionCount: number;
+  sourceComposition: {
+    platformFormalQuestionCount: number;
+    enterpriseTrainingSnapshotCount: number;
+  };
+  matchQuality: AiPaperMatchQuality;
+  assemblySections?: AdminAiGenerationOrganizationTrainingPaperAssemblySectionPayload[];
+  paperSections?: OrganizationTrainingAdminPaperSectionDetailDto[];
+  questions?: OrganizationTrainingAdminQuestionDetailDto[];
+  redactionStatus: "admin_safe_detail";
 };
 
 export type CreateAdminAiGenerationResultInput =
@@ -112,6 +143,7 @@ export type AdminAiGenerationResultDto = {
     contentVisibility: AdminAiGenerationResultContentVisibility;
     reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
     organizationTrainingDraft: AdminAiGenerationOrganizationTrainingQuestionDraftPayload | null;
+    organizationTrainingPaperDraft: AdminAiGenerationOrganizationTrainingPaperDraftPayload | null;
     redactionStatus: AdminAiGenerationResultRedactionStatus;
   };
   evidenceReference: {

@@ -21,6 +21,10 @@ import type {
   EffectiveAuthorizationContextDto,
 } from "../contracts/effective-authorization-contract";
 import type {
+  AdminAiGenerationResultPersistenceRepository,
+  AdminAiGenerationResultDto,
+} from "../contracts/admin-ai-generation-result-persistence-contract";
+import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
@@ -1312,6 +1316,215 @@ describe("organization training draft source-context route handlers", () => {
           },
         ],
         redactionStatus: "admin_safe_detail",
+      },
+    });
+    expect(JSON.stringify(payload)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
+  });
+
+  it("returns organization AI paper draft details from the task-linked safe snapshot", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const adminAiGenerationResultRepository = {
+      findDraftResultByTaskPublicId: vi.fn(
+        async () =>
+          ({
+            resultPublicId: "admin_ai_generation_result_org_paper_route_401",
+            taskPublicId: "admin_ai_generation_task_org_paper_route_401",
+            requestPublicId: "admin_ai_generation_request_org_paper_route_401",
+            workspace: "organization",
+            generationKind: "paper",
+            ownerType: "organization",
+            ownerPublicId: "organization_route_public_401",
+            organizationPublicId: "organization_route_public_401",
+            taskType: "ai_paper_generation",
+            status: "draft",
+            persistedAt: "2026-07-08T08:00:00.000Z",
+            contentReference: {
+              contentDigest: "sha256:paper-draft",
+              contentPreviewMasked: "masked",
+              contentVisibility: "redacted_snapshot",
+              reviewedDraft: null,
+              organizationTrainingDraft: null,
+              organizationTrainingPaperDraft: {
+                paperTitle: "Route AI paper training draft",
+                requestedQuestionCount: 1,
+                selectedQuestionCount: 1,
+                sourceComposition: {
+                  platformFormalQuestionCount: 1,
+                  enterpriseTrainingSnapshotCount: 0,
+                },
+                matchQuality: "fully_matched",
+                paperSections: [
+                  {
+                    sectionKey: "single_choice",
+                    title: "Single choice section",
+                    questionType: "single_choice",
+                    targetQuestionCount: 1,
+                    selectedQuestionCount: 1,
+                    totalScore: 5,
+                    questions: [
+                      {
+                        publicId: "organization_training_ai_paper_route_001",
+                        sequenceNumber: 1,
+                        questionType: "single_choice",
+                        materialTitle: null,
+                        materialContent: null,
+                        stem: "Synthetic route paper source stem",
+                        options: [
+                          {
+                            publicId:
+                              "organization_training_ai_paper_route_001_option_a",
+                            label: "A",
+                            content: "Synthetic route paper option A",
+                          },
+                        ],
+                        score: 5,
+                        evidenceSummary: {
+                          evidenceStatus: "sufficient",
+                          citationCount: 2,
+                        },
+                        answerAndAnalysis: {
+                          visibility: "collapsed_by_default",
+                          standardAnswer: "A",
+                          analysis: "Synthetic route paper analysis",
+                        },
+                      },
+                    ],
+                  },
+                ],
+                questions: [
+                  {
+                    publicId: "organization_training_ai_paper_route_001",
+                    sequenceNumber: 1,
+                    questionType: "single_choice",
+                    materialTitle: null,
+                    materialContent: null,
+                    stem: "Synthetic route paper source stem",
+                    options: [
+                      {
+                        publicId:
+                          "organization_training_ai_paper_route_001_option_a",
+                        label: "A",
+                        content: "Synthetic route paper option A",
+                      },
+                    ],
+                    score: 5,
+                    evidenceSummary: {
+                      evidenceStatus: "sufficient",
+                      citationCount: 2,
+                    },
+                    answerAndAnalysis: {
+                      visibility: "collapsed_by_default",
+                      standardAnswer: "A",
+                      analysis: "Synthetic route paper analysis",
+                    },
+                  },
+                ],
+                redactionStatus: "admin_safe_detail",
+              },
+              redactionStatus: "redacted",
+            },
+            evidenceReference: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              aiCallLogPublicId: null,
+              redactionStatus: "redacted",
+            },
+            sourceReference: {
+              sourceQuestionPublicId: null,
+              sourcePaperPublicId: null,
+            },
+            formalAdoption: {
+              isBlocked: true,
+              status: "blocked",
+            },
+          }) satisfies AdminAiGenerationResultDto,
+      ),
+    } satisfies Pick<
+      AdminAiGenerationResultPersistenceRepository,
+      "findDraftResultByTaskPublicId"
+    >;
+    runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId.mockResolvedValueOnce(
+      null,
+    );
+    runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValueOnce([
+      createManualDraftDto({
+        sourceTaskPublicId: "admin_ai_generation_task_org_paper_route_401",
+        questionCount: 1,
+        totalScore: 5,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        evidenceStatus: "sufficient",
+      }),
+    ]);
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockResolvedValueOnce(
+      [
+        {
+          draftPublicId: publishPathPublicId,
+          sourceTaskPublicId: "admin_ai_generation_task_org_paper_route_401",
+          sourceVersionPublicId: null,
+          sourceType: "organization_ai_result",
+          generationKind: "paper",
+          redactionStatus: "metadata_only",
+        },
+      ],
+    );
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+      adminAiGenerationResultRepository,
+    });
+
+    const response = await handlers.adminDetail.GET(
+      createAdminDetailRequest(publishPathPublicId, {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(publishPathPublicId),
+    );
+
+    const payload = await resolveJsonPayload(response);
+    expect(
+      adminAiGenerationResultRepository.findDraftResultByTaskPublicId,
+    ).toHaveBeenCalledWith({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_route_public_401",
+      taskPublicId: "admin_ai_generation_task_org_paper_route_401",
+    });
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: publishPathPublicId,
+        resourceType: "organization_training_draft",
+        detailAvailability: "available",
+        sourceKind: "ai_paper",
+        contentKind: "paper_training",
+        paperSections: [
+          {
+            title: "Single choice section",
+            questions: [
+              {
+                stem: "Synthetic route paper source stem",
+                answerAndAnalysis: {
+                  visibility: "collapsed_by_default",
+                  standardAnswer: "A",
+                },
+              },
+            ],
+          },
+        ],
       },
     });
     expect(JSON.stringify(payload)).not.toMatch(

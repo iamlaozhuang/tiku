@@ -365,6 +365,9 @@ export type OrganizationTrainingRepository = {
   listEmployeeVisibleQuestionSnapshotsForAiPaperSource(
     input: OrganizationTrainingEmployeeVisibleQuestionSnapshotSourceInput,
   ): Promise<OrganizationTrainingQuestionSnapshotValue[]>;
+  listAdminVisibleQuestionSnapshotsForAiPaperSource(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingQuestionSnapshotValue[]>;
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingPublishedVersionDto | null>;
@@ -628,6 +631,30 @@ export function createOrganizationTrainingRepository(
         await gateway.listPublishedVersionsForEmployeeOrganization(
           normalizedInput,
         );
+
+      return rows.flatMap((row) => {
+        if (row.version_status !== "published" || row.taken_down_at !== null) {
+          return [];
+        }
+
+        return Array.isArray(row.question_snapshot)
+          ? row.question_snapshot
+          : [];
+      });
+    },
+
+    async listAdminVisibleQuestionSnapshotsForAiPaperSource(input) {
+      const normalizedInput = normalizeAdminLifecycleListInput(
+        input.visibleOrganizationPublicIds,
+      );
+
+      if (normalizedInput === null) {
+        return [];
+      }
+
+      const rows = await gateway.listAdminLifecycleVersions({
+        visibleOrganizationPublicIds: normalizedInput,
+      });
 
       return rows.flatMap((row) => {
         if (row.version_status !== "published" || row.taken_down_at !== null) {
