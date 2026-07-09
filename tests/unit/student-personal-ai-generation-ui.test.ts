@@ -4146,12 +4146,12 @@ describe("StudentPersonalAiGenerationPage", () => {
     const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
     const learningSessionQuestion = createLearningSessionQuestion({
       sessionPublicId,
-      questionStem: "synthetic persisted personal learner stem",
+      questionStem: "synthetic server personal learner stem",
       correctOptionLabel: "A",
-      correctOptionText: "synthetic persisted personal correct option",
+      correctOptionText: "synthetic server personal correct option",
       wrongOptionLabel: "B",
-      wrongOptionText: "synthetic persisted personal distractor",
-      analysis: "synthetic persisted personal analysis",
+      wrongOptionText: "synthetic server personal distractor",
+      analysis: "synthetic server personal analysis",
     });
     const visibleResponse = {
       ...localExperienceResponse,
@@ -4343,6 +4343,15 @@ describe("StudentPersonalAiGenerationPage", () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
+    const learningSession = await screen.findByTestId(
+      "student-ai-learning-session",
+    );
+    expect(learningSession).toHaveTextContent(
+      "synthetic server personal learner stem",
+    );
+    expect(learningSession).not.toHaveTextContent(
+      "synthetic persisted personal learner stem",
+    );
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
     expect(sessionCreateBodies[0]).toMatchObject({
       sessionPublicId,
@@ -4354,7 +4363,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(
       screen.getByRole("radio", {
-        name: /A synthetic persisted personal correct option/,
+        name: /A synthetic server personal correct option/,
       }),
     );
     fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
@@ -4580,12 +4589,12 @@ describe("StudentPersonalAiGenerationPage", () => {
     });
     const learningSessionQuestion = createLearningSessionQuestion({
       sessionPublicId,
-      questionStem: "synthetic persisted employee paper stem",
+      questionStem: "synthetic server employee paper stem",
       correctOptionLabel: "A",
-      correctOptionText: "synthetic persisted employee paper correct option",
+      correctOptionText: "synthetic server employee paper correct option",
       wrongOptionLabel: "B",
-      wrongOptionText: "synthetic persisted employee paper distractor",
-      analysis: "synthetic persisted employee paper analysis",
+      wrongOptionText: "synthetic server employee paper distractor",
+      analysis: "synthetic server employee paper analysis",
     });
     const visibleResponse = {
       ...localExperienceResponse,
@@ -4804,8 +4813,17 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
+    const learningSession = await screen.findByTestId(
+      "student-ai-learning-session",
+    );
+    expect(learningSession).toHaveTextContent(
+      "synthetic server employee paper stem",
+    );
+    expect(learningSession).not.toHaveTextContent(
+      "synthetic persisted employee paper stem",
+    );
     expect(
-      await screen.findByText("synthetic persisted employee paper stem"),
+      await screen.findByText("synthetic server employee paper stem"),
     ).toBeInTheDocument();
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
     expect(sessionCreateBodies[0]).toMatchObject({
@@ -4835,7 +4853,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(
       screen.getByRole("radio", {
-        name: /B synthetic persisted employee paper distractor/,
+        name: /B synthetic server employee paper distractor/,
       }),
     );
     fireEvent.click(screen.getByRole("button", { name: "提交作答" }));
