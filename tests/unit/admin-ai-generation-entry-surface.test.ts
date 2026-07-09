@@ -1860,7 +1860,7 @@ describe("admin AI generation entry surfaces", () => {
     const visibleGeneratedContent = await screen.findByTestId(
       "admin-visible-generated-content",
     );
-    expect(visibleGeneratedContent).toHaveTextContent("生成题目草稿");
+    expect(visibleGeneratedContent).toHaveTextContent("待审题目草稿列表");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible admin question stem",
     );
@@ -2232,7 +2232,10 @@ describe("admin AI generation entry surfaces", () => {
       await screen.findByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent(businessAdminGeneratedResultFallback);
     const historyPanel = screen.getByTestId("admin-ai-generation-task-history");
+    expect(historyPanel).toHaveTextContent("内容评审摘要");
     expect(historyPanel).toHaveTextContent("草稿快照");
+    expect(historyPanel).toHaveTextContent("采用依据状态");
+    expect(historyPanel).toHaveTextContent("内容采纳");
     expect(historyPanel).toHaveTextContent("需审核后采用");
     expect(historyPanel).not.toHaveTextContent("已阻断");
     expect(document.body.textContent).not.toContain(
@@ -2506,7 +2509,25 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("生成题目草稿");
+    ).toHaveTextContent("待审题目草稿列表");
+    const visibleGeneratedContent = screen.getByTestId(
+      "admin-visible-generated-content",
+    );
+    expect(visibleGeneratedContent).toHaveTextContent("待审题目草稿");
+    expect(visibleGeneratedContent).toHaveTextContent("第 1 题");
+    expect(visibleGeneratedContent).toHaveTextContent("单选题");
+    expect(visibleGeneratedContent).toHaveTextContent("中等");
+    expect(visibleGeneratedContent).not.toHaveTextContent("single_choice");
+    expect(visibleGeneratedContent).not.toHaveTextContent("medium");
+    expect(
+      screen.getByTestId("content-admin-review-traceability"),
+    ).toHaveTextContent("审阅、采纳与驳回");
+    expect(
+      screen.getByTestId("content-admin-review-traceability"),
+    ).toHaveTextContent("发布前校验");
+    expect(
+      screen.getByTestId("content-admin-review-next-actions"),
+    ).toHaveTextContent("采用到内容草稿");
     fireEvent.click(
       await screen.findByTestId("content-admin-review-adopt-action"),
     );
@@ -2806,10 +2827,10 @@ describe("admin AI generation entry surfaces", () => {
       "content-admin-review-traceability",
     );
 
-    expect(traceabilityPanel).toHaveTextContent("单次结果可追溯");
+    expect(traceabilityPanel).toHaveTextContent("审阅、采纳与驳回");
     expect(traceabilityPanel).toHaveTextContent("待评审");
     expect(traceabilityPanel).toHaveTextContent("正式发布需审核");
-    expect(traceabilityPanel).toHaveTextContent("未执行");
+    expect(traceabilityPanel).toHaveTextContent("不直接发布");
     expect(traceabilityPanel).not.toHaveTextContent("single_result_traceable");
     expect(traceabilityPanel).not.toHaveTextContent("awaiting_metadata_review");
     expect(traceabilityPanel).not.toHaveTextContent(
@@ -2819,13 +2840,13 @@ describe("admin AI generation entry surfaces", () => {
     const localValidationPanel = await screen.findByTestId(
       "content-admin-review-batch-retry-diff-history-local-validation",
     );
-    expect(localValidationPanel).toHaveTextContent("批量选择预览");
-    expect(localValidationPanel).toHaveTextContent("失败重试状态");
-    expect(localValidationPanel).toHaveTextContent("结果差异查看");
-    expect(localValidationPanel).toHaveTextContent("采用历史查看");
-    expect(localValidationPanel).toHaveTextContent("仅提交请求");
-    expect(localValidationPanel).toHaveTextContent("只读查看");
-    expect(localValidationPanel).toHaveTextContent("未执行");
+    expect(localValidationPanel).toHaveTextContent("来源与重复检查");
+    expect(localValidationPanel).toHaveTextContent("资料依据复核");
+    expect(localValidationPanel).toHaveTextContent("审阅记录");
+    expect(localValidationPanel).toHaveTextContent("发布前校验");
+    expect(localValidationPanel).toHaveTextContent("人工确认");
+    expect(localValidationPanel).toHaveTextContent("只读留痕");
+    expect(localValidationPanel).toHaveTextContent("正式内容不自动写入");
     expect(localValidationPanel).not.toHaveTextContent(
       "batch_selection_preview",
     );
@@ -2961,7 +2982,7 @@ describe("admin AI generation entry surfaces", () => {
     );
 
     expect(adoptAction).toBeEnabled();
-    expect(adoptAction).toHaveTextContent("创建待审题目草稿");
+    expect(adoptAction).toHaveTextContent("采用到待审题目草稿");
 
     fireEvent.click(adoptAction);
 
@@ -3215,7 +3236,7 @@ describe("admin AI generation entry surfaces", () => {
     fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
-    ).toHaveTextContent("生成题目草稿");
+    ).toHaveTextContent("待审题目草稿列表");
 
     const traceabilityPanel = await screen.findByTestId(
       "content-admin-review-traceability",
@@ -3227,7 +3248,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(traceabilityPanel).toHaveTextContent("资料较少");
     expect(traceabilityPanel).toHaveTextContent("需人工确认");
     expect(adoptAction).toBeEnabled();
-    expect(adoptAction).toHaveTextContent("确认资料较少并创建待审题目草稿");
+    expect(adoptAction).toHaveTextContent("确认资料较少并采用到待审题目草稿");
 
     fireEvent.click(adoptAction);
 

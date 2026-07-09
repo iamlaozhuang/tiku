@@ -451,24 +451,24 @@ function formatRequestedAt(requestedAt: string): string {
 
 const contentAdminReviewLocalValidationItems = [
   {
-    boundaryStatus: "批量采用未执行",
-    contractStatus: "批量选择预览",
-    validationMode: "仅预览",
+    boundaryStatus: "不直接发布",
+    contractStatus: "来源与重复检查",
+    validationMode: "发布前校验",
   },
   {
-    boundaryStatus: "重试操作未执行",
-    contractStatus: "失败重试状态",
-    validationMode: "仅提交请求",
+    boundaryStatus: "不足时不可采用",
+    contractStatus: "资料依据复核",
+    validationMode: "人工确认",
   },
   {
-    boundaryStatus: "不展示原始载荷",
-    contractStatus: "结果差异查看",
-    validationMode: "只读查看",
+    boundaryStatus: "不展示原始内容",
+    contractStatus: "审阅记录",
+    validationMode: "只读留痕",
   },
   {
-    boundaryStatus: "历史记录不改写",
-    contractStatus: "采用历史查看",
-    validationMode: "只读查看",
+    boundaryStatus: "正式内容不自动写入",
+    contractStatus: "发布前校验",
+    validationMode: "进入发布流程",
   },
 ] as const;
 
@@ -1377,12 +1377,16 @@ function AdminAiGenerationVisibleGeneratedContent({
       : visibleQuestionDrafts.length > 0
         ? workspace === "organization"
           ? "企业训练题草稿列表"
-          : "生成题目草稿"
+          : "待审题目草稿列表"
         : visiblePaperSections.length > 0
-          ? "生成试卷草稿"
+          ? workspace === "content"
+            ? "待审试卷草稿结构"
+            : "生成试卷草稿"
           : "临时展示内容";
   const visibleGeneratedContentStatusLabel =
-    workspace === "organization" ? "发布前不可见" : "待评审草稿";
+    workspace === "organization" ? "发布前不可见" : "待人工评审";
+  const visibleGeneratedContentEyebrow =
+    workspace === "content" ? "本次待审结果" : "本次生成草稿";
 
   return (
     <section
@@ -1391,7 +1395,9 @@ function AdminAiGenerationVisibleGeneratedContent({
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-brand-primary text-xs font-medium">本次生成草稿</p>
+          <p className="text-brand-primary text-xs font-medium">
+            {visibleGeneratedContentEyebrow}
+          </p>
           <h3 className="text-text-primary mt-1 text-sm font-semibold">
             {visibleGeneratedContentTitle}
           </h3>
@@ -1644,6 +1650,8 @@ function AdminQuestionDraftList({
   workspace?: AdminAiGenerationWorkspace;
 }) {
   const isOrganizationDraft = workspace === "organization";
+  const isContentReviewDraft = workspace === "content";
+  const usesBusinessDraftCard = isOrganizationDraft || isContentReviewDraft;
 
   return (
     <div className="mt-3 space-y-3" data-testid={testId}>
@@ -1655,7 +1663,7 @@ function AdminQuestionDraftList({
           questionDraft.difficulty,
         );
         const knowledgeNodeCount = questionDraft.knowledgeNodeCount ?? 0;
-        const metaLabels = isOrganizationDraft
+        const metaLabels = usesBusinessDraftCard
           ? [
               questionTypeLabel,
               difficultyLabel,
@@ -1672,10 +1680,10 @@ function AdminQuestionDraftList({
             key={questionDraft.draftNumber}
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              {isOrganizationDraft ? (
+              {usesBusinessDraftCard ? (
                 <div>
                   <p className="text-brand-primary text-xs font-medium">
-                    企业训练题草稿
+                    {isOrganizationDraft ? "企业训练题草稿" : "待审题目草稿"}
                   </p>
                   <h4 className="text-text-primary mt-1 text-sm font-semibold">
                     第 {questionDraft.draftNumber} 题
@@ -1688,7 +1696,7 @@ function AdminQuestionDraftList({
               )}
               <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
                 {metaLabels.join(" / ") ||
-                  (isOrganizationDraft ? "待检查" : "待评审")}
+                  (usesBusinessDraftCard ? "待检查" : "待评审")}
               </span>
             </div>
             <QuestionDraftField
@@ -2169,7 +2177,7 @@ function AdminAiGenerationTaskHistoryPanel({
                   </div>
                   <div>
                     <dt className="text-text-secondary">
-                      {workspace === "organization" ? "训练草稿" : "正式内容"}
+                      {workspace === "organization" ? "训练草稿" : "采纳状态"}
                     </dt>
                     <dd className="text-text-primary mt-1">
                       {boundaryCopy.formalStatus}
@@ -2182,7 +2190,7 @@ function AdminAiGenerationTaskHistoryPanel({
                     <p className="text-brand-primary text-xs font-medium">
                       {workspace === "organization"
                         ? "训练草稿摘要"
-                        : "历史草稿摘要"}
+                        : "内容评审摘要"}
                     </p>
                     <p className="text-text-primary mt-2 text-sm leading-6">
                       {resolveAdminAiGenerationBusinessPreview(
@@ -2202,7 +2210,7 @@ function AdminAiGenerationTaskHistoryPanel({
                         <dt className="text-text-secondary">
                           {workspace === "organization"
                             ? "依据资料状态"
-                            : "资料依据"}
+                            : "采用依据状态"}
                         </dt>
                         <dd className="text-text-primary mt-1">
                           {getEvidenceStatusLabel(taskItem.generatedResult)}
@@ -2222,7 +2230,7 @@ function AdminAiGenerationTaskHistoryPanel({
                         <dt className="text-text-secondary">
                           {workspace === "organization"
                             ? "训练草稿"
-                            : "正式采用"}
+                            : "内容采纳"}
                         </dt>
                         <dd className="text-text-primary mt-1">
                           {workspace === "organization"
@@ -2537,12 +2545,12 @@ function ContentAdminReviewTraceabilityPanel({
       : !hasReviewedDraft && reviewReadiness !== "blocked"
         ? "需本次结构化草稿"
         : reviewReadiness === "weak_confirmation_required"
-          ? `确认资料较少并创建${draftTargetLabel}`
-          : `创建${draftTargetLabel}`;
+          ? `确认资料较少并采用到${draftTargetLabel}`
+          : `采用到${draftTargetLabel}`;
   const nextActionLabels =
     generationKind === "paper"
-      ? ["编辑草稿", "驳回草稿", "审核通过", "进入发布校验"]
-      : ["编辑草稿", "驳回草稿", "审核通过", "进入发布校验"];
+      ? ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"]
+      : ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"];
 
   return (
     <section
@@ -2553,7 +2561,7 @@ function ContentAdminReviewTraceabilityPanel({
         <div>
           <p className="text-brand-primary text-xs font-medium">评审留痕</p>
           <h4 className="text-text-primary mt-1 text-sm font-semibold">
-            单次结果可追溯
+            审阅、采纳与驳回
           </h4>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
@@ -2575,7 +2583,7 @@ function ContentAdminReviewTraceabilityPanel({
           <dd className="text-text-primary mt-1">{evidenceLabel}</dd>
         </div>
         <div>
-          <dt className="text-text-secondary">采用要求</dt>
+          <dt className="text-text-secondary">下一步处理</dt>
           <dd className="text-text-primary mt-1">{adoptionRequirementLabel}</dd>
         </div>
       </dl>
@@ -2586,15 +2594,13 @@ function ContentAdminReviewTraceabilityPanel({
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-brand-primary text-xs font-medium">
-              批量、重试和历史校验
-            </p>
+            <p className="text-brand-primary text-xs font-medium">发布前校验</p>
             <h5 className="text-text-primary mt-1 text-sm font-semibold">
-              流程已就绪
+              先完成审阅，再进入发布校验
             </h5>
           </div>
           <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-            待人工复核
+            不直接发布
           </span>
         </div>
 
@@ -2605,13 +2611,13 @@ function ContentAdminReviewTraceabilityPanel({
               key={item.contractStatus}
             >
               <div>
-                <dt className="text-text-secondary">校验项</dt>
+                <dt className="text-text-secondary">检查项</dt>
                 <dd className="text-text-primary mt-1">
                   {item.contractStatus}
                 </dd>
               </div>
               <div className="mt-2">
-                <dt className="text-text-secondary">校验方式</dt>
+                <dt className="text-text-secondary">处理方式</dt>
                 <dd className="text-text-primary mt-1">
                   {item.validationMode}
                 </dd>
