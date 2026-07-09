@@ -1,12 +1,48 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-traceability-summary-panel-2026-07-09
-updatedAt: "2026-07-09T03:55:00-07:00"
+currentPhase: content-ai-local-e2e-regression-2026-07-09
+updatedAt: "2026-07-09T04:10:00-07:00"
+latestContentAiLocalE2eRegression:
+  id: content-ai-local-e2e-regression-2026-07-09
+  status: ready_for_closeout
+  result: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+  branch: codex/content-ai-local-e2e-regression
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-local-e2e-regression.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-local-e2e-regression.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-local-e2e-regression-audit.md
+  approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+  branchBase:
+    originMasterSha: 476379dbd
+    branchHeadSha: 476379dbd
+  boundary:
+    scope: localhost_content_ai_closed_loop_and_adjacent_role_regression
+    sourceCodeChanged: false
+    dbMutationExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    screenshotsOrRawDomCaptured: false
+    stagingProdDeployExecuted: false
+    costCalibrationExecutedOrClaimed: false
+  validationSummary:
+    status: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+    contentAiUiAndFormalContentRegression: pass_3_files_80_tests
+    contentAiFormalDraftAndPaperServiceRegression: pass_4_files_67_tests
+    personalLearnerAiRegression: pass_4_files_96_tests
+    organizationTrainingAndRoleNavigationRegression: pass_6_files_119_tests
+    typecheck: pass
+    lint: pass
+    diffCheck: pass
+    browserRuntime: pass_readonly_localhost_current_content_admin_session_no_screenshot_no_raw_dom_no_storage
+    providerExecution: not_executed
+    dbAccessOrMutation: not_executed
+    browserWriteActions: not_executed_db_target_not_confirmed
 latestContentAiTraceabilitySummaryPanel:
   id: content-ai-traceability-summary-panel-2026-07-09
   status: closed
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_pushed_cleaned
   branch: codex/content-ai-traceability-summary-panel
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-traceability-summary-panel.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-traceability-summary-panel.md
@@ -41,9 +77,10 @@ latestContentAiTraceabilitySummaryPanel:
     masterPostMergeDiffCheck: pass
   closeout:
     mergedToMaster: true
-    pushedToOriginMaster: pending_local_closeout_push
-    shortBranchDeleted: pending_local_closeout_cleanup
+    pushedToOriginMaster: true
+    shortBranchDeleted: true
     codeCommitSha: 4765008e2
+    finalSha: 476379dbd
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestContentAiAdoptionReadModel:
   id: content-ai-adoption-read-model-2026-07-09
@@ -1962,40 +1999,36 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-ai-traceability-summary-panel-2026-07-09
-  title: Content AI traceability summary panel
-  phase: content-ai-traceability-summary-panel-2026-07-09
-  status: closed
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+  id: content-ai-local-e2e-regression-2026-07-09
+  title: Content AI local e2e regression
+  phase: content-ai-local-e2e-regression-2026-07-09
+  status: ready_for_closeout
+  result: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
   priority: p1
-  taskKind: implementation
-  branch: codex/content-ai-traceability-summary-panel
+  taskKind: local_acceptance_regression
+  branch: codex/content-ai-local-e2e-regression
   humanApprovalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
-  plannedAt: "2026-07-09T03:35:00-07:00"
-  claimedAt: "2026-07-09T03:35:00-07:00"
-  targetClosureItem: Content-admin AI generation history shows a redacted field-level summary for generation parameters, RAG scope, evidence status, and paper assembly structure.
-  behaviorBoundary: content_ai_traceability_summary_panel_only_no_adoption_publish_logic_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
-  evidenceMode: redacted_code_symbol_test_status_field_label_and_aggregate_count_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-traceability-summary-panel.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-traceability-summary-panel.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-traceability-summary-panel-audit.md
+  plannedAt: "2026-07-09T04:10:00-07:00"
+  claimedAt: "2026-07-09T04:10:00-07:00"
+  targetClosureItem: Localhost-only regression for content-admin AI出题/AI组卷 closed loops, enterprise training boundaries, learner AI training boundaries, and standard/advanced role denial.
+  behaviorBoundary: localhost_acceptance_regression_only_no_source_repair_unless_separate_branch_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_screenshot_or_raw_dom_without_fresh_approval_no_staging_prod_deploy_no_cost_calibration
+  evidenceMode: redacted_visible_state_route_label_command_status_and_aggregate_count_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-local-e2e-regression.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-local-e2e-regression.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-local-e2e-regression-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
-    sourceCodeChanged: true
-    testsChanged: true
-    tddRed: pass_expected_traceability_summary_absent_failures_before_implementation
-    targetedContentAiTraceabilityUi: pass_1_file_42_tests
-    adjacentRoleBoundaryTests: pass_5_files_151_tests
+    status: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+    sourceCodeChanged: false
+    testsChanged: false
+    contentAiUiAndFormalContentRegression: pass_3_files_80_tests
+    contentAiFormalDraftAndPaperServiceRegression: pass_4_files_67_tests
+    personalLearnerAiRegression: pass_4_files_96_tests
+    organizationTrainingAndRoleNavigationRegression: pass_6_files_119_tests
     typecheck: pass
     lint: pass
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
-    masterPostMergeTargetedTests: pass_1_file_42_tests
-    masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_151_tests
-    masterPostMergeTypecheck: pass
-    masterPostMergeLint: pass
-    masterPostMergeDiffCheck: pass
+    browserRuntime: pass_readonly_localhost_current_content_admin_session_no_screenshot_no_raw_dom_no_storage
+    browserWriteActions: not_executed_db_target_not_confirmed
     packageLockfileChanged: false
     envFileChanged: false
     schemaMigrationSeedChanged: false
@@ -32695,8 +32728,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cd869b1f111baab1096ed522810debe8a26de068
-  lastKnownOriginMasterSha: cd869b1f111baab1096ed522810debe8a26de068
+  lastKnownMasterSha: 476379dbd946381a81016901421af1ed17b056e7
+  lastKnownOriginMasterSha: 476379dbd946381a81016901421af1ed17b056e7
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
