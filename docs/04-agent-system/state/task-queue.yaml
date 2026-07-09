@@ -99,8 +99,8 @@ activeTasks:
   - id: org-ai-generation-parameter-contract-2026-07-08
     title: Organization admin AI generation parameter contract
     phase: org-ai-generation-parameter-contract-2026-07-08
-    status: ready_for_commit_merge_push_cleanup
-    result: pass_source_test_ready_for_precommit
+    status: ready_for_closeout
+    result: pass_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_no_provider_no_db
@@ -118,7 +118,7 @@ activeTasks:
     evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-parameter-contract.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-generation-parameter-contract-audit.md
     validationSummary:
-      status: pass_source_test_ready_for_precommit
+      status: pass_master_gates_ready_for_push_cleanup
       targetedAdminAiGenerationUiUnit: pass_1_file_39_tests
       targetedAdminAiGenerationRouteUnit: pass_1_file_36_tests
       targetedProviderInstructionUnit: pass_1_file_4_tests
@@ -133,7 +133,7 @@ activeTasks:
       diffCheck: pass
       sensitiveDiffScan: pass
       masterPostMergeDiffCheck: pass
-      prePushReadiness: pending_after_audit_and_checkpoint_update
+      prePushReadiness: pending_after_accepted_ancestor_checkpoint_update
       sourceCodeChanged: true
       testsChanged: true
     allowedFiles:

@@ -5,8 +5,8 @@ currentPhase: org-ai-generation-parameter-contract-2026-07-08
 updatedAt: "2026-07-08T19:25:00-07:00"
 latestOrgAiGenerationParameterContract:
   id: org-ai-generation-parameter-contract-2026-07-08
-  status: ready_for_commit_merge_push_cleanup
-  result: pass_source_test_ready_for_precommit
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   branch: codex/org-ai-generation-parameter-contract
   planPath: docs/05-execution-logs/task-plans/2026-07-08-org-ai-generation-parameter-contract.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-parameter-contract.md
@@ -36,7 +36,7 @@ latestOrgAiGenerationParameterContract:
     diffCheck: pass
     sensitiveDiffScan: pass
     masterPostMergeDiffCheck: pass
-    prePushReadiness: pending_after_audit_and_checkpoint_update
+    prePushReadiness: pending_after_accepted_ancestor_checkpoint_update
     sourceCodeChanged: true
     testsChanged: true
 latestLearnerAiTrainingResultUx:
@@ -1557,8 +1557,8 @@ currentTask:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
   phase: org-ai-generation-parameter-contract-2026-07-08
-  status: ready_for_commit_merge_push_cleanup
-  result: pass_source_test_ready_for_precommit
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/org-ai-generation-parameter-contract
@@ -1573,7 +1573,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-parameter-contract.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-generation-parameter-contract-audit.md
   validationSummary:
-    status: pass_source_test_ready_for_precommit
+    status: pass_master_gates_ready_for_push_cleanup
     targetedAdminAiGenerationUiUnit: pass_1_file_39_tests
     targetedAdminAiGenerationRouteUnit: pass_1_file_36_tests
     targetedProviderInstructionUnit: pass_1_file_4_tests
@@ -1588,7 +1588,7 @@ currentTask:
     diffCheck: pass
     sensitiveDiffScan: pass
     masterPostMergeDiffCheck: pass
-    prePushReadiness: pending_after_audit_and_checkpoint_update
+    prePushReadiness: pending_after_accepted_ancestor_checkpoint_update
     moduleRunV2PreCommitHardening: pass
     sourceCodeChanged: true
     testsChanged: true
@@ -32243,7 +32243,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: aaa7ad408a8871ca37d42c1dd25f9684d7c30986
+  lastKnownMasterSha: a9cf6b02c45cf63ee68a01f0b6c6e8aac55203da
   lastKnownOriginMasterSha: ae38ed77a8a5b0219645ae9caec5d1d789775143
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
