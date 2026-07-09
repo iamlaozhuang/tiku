@@ -35,8 +35,8 @@ const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const unavailableTitle =
   "\u5f53\u524d\u6388\u6743\u6682\u672a\u5f00\u653e AI \u8bad\u7ec3";
-const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
-const resultHistoryTitle = "\u8fd1\u671f AI \u7ed3\u679c\u5386\u53f2";
+const historyTitle = "\u751f\u6210\u8bf7\u6c42\u5386\u53f2\u8bb0\u5f55";
+const resultHistoryTitle = "\u8bad\u7ec3\u7ed3\u679c\u5386\u53f2\u8bb0\u5f55";
 const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
 const localSessionUserPublicId = "user-dev-student";
@@ -1249,7 +1249,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("请求时间")).toBeInTheDocument();
     expect(screen.queryByText("脱敏状态")).not.toBeInTheDocument();
     expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
-    expect(screen.getByText("资料充足")).toBeInTheDocument();
+    expect(screen.getByText("依据充足")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
     expectRenderedTextToHideValues([
       serverHistoryResponse.data[0].requestPublicId,
@@ -1968,12 +1968,15 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getAllByText("已完成").length).toBeGreaterThan(0);
     expect(screen.queryByText("仅摘要")).not.toBeInTheDocument();
     expect(screen.queryByText("是否阻断正式入库")).not.toBeInTheDocument();
-    expect(screen.getByText("需审核后采用")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
+    expect(document.body).not.toHaveTextContent("正式采用");
+    expect(document.body).not.toHaveTextContent("需审核后采用");
+    expect(document.body).not.toHaveTextContent("可采用");
+    expect(screen.getAllByText("依据资料状态").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "开始作答" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "查看解析" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeEnabled();
-    expect(screen.getByText("资料不足时请重试生成")).toBeInTheDocument();
+    expect(screen.getByText("依据不足时请重试生成")).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
@@ -2103,12 +2106,12 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
     expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "开始作答" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "查看解析" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeDisabled();
     expect(
-      screen.getByText("生成后可进入练习、提交作答并查看学习反馈"),
+      screen.getByText("生成后可进入作答、提交答案并查看解析"),
     ).toBeInTheDocument();
   });
 
@@ -2419,9 +2422,9 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByRole("button", { name: employeePaperButtonLabel }),
     ).toBeEnabled();
-    expect(screen.getByRole("button", { name: "开始练习" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "开始作答" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "查看学习反馈" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "查看解析" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeDisabled();
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
@@ -2648,7 +2651,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       await screen.findByText("2026-06-12T12:30:00.000Z"),
     ).toBeInTheDocument();
     expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("资料不足").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("依据不足").length).toBeGreaterThan(0);
     expect(screen.getAllByText("0").length).toBeGreaterThan(0);
     expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
     expectRenderedTextToHideValues([
@@ -2793,7 +2796,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByTestId("student-visible-generated-content"),
     ).not.toHaveTextContent("synthetic visible learner analysis");
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
     );
@@ -3001,7 +3004,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee analysis",
     );
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
     );
@@ -3257,8 +3260,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
     expect(screen.queryByText("内容可见性")).not.toBeInTheDocument();
     expect(screen.queryByText("仅摘要")).not.toBeInTheDocument();
-    expect(screen.getAllByText("资料依据").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("资料充足").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("依据资料状态").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("依据充足").length).toBeGreaterThan(0);
     expect(screen.getAllByText("依据数量").length).toBeGreaterThan(0);
     expect(screen.queryByText("引用脱敏状态")).not.toBeInTheDocument();
     expectRenderedTextToHideValues([
@@ -3323,7 +3326,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       "student-visible-generated-content",
     );
     const practiceFeedbackHeading = screen.getByText(
-      "\u751f\u6210\u7ec3\u4e60\u4e0e\u5b66\u4e60\u53cd\u9988",
+      "\u4f5c\u7b54\u4e0e\u89e3\u6790",
     );
 
     expect(
@@ -3474,7 +3477,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).toHaveTextContent("大题模块 2");
     expect(visibleGeneratedContent).toHaveTextContent("题量 50");
     expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
     );
@@ -3699,7 +3702,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee paper analysis",
     );
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",
     );
@@ -3801,7 +3804,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.queryByText("resultPublicId")).not.toBeInTheDocument();
     expect(screen.queryByText("aiCallLogPublicId")).not.toBeInTheDocument();
     expect(screen.getByText("请求时间")).toBeInTheDocument();
-    expect(screen.getAllByText("资料较少").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("依据较少").length).toBeGreaterThan(0);
     expect(screen.getAllByText("3").length).toBeGreaterThan(0);
     expect(screen.queryByText("已脱敏")).not.toBeInTheDocument();
     expectRenderedTextToHideValues([
@@ -4120,7 +4123,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       await screen.findByText("synthetic persisted personal learner stem"),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
     expect(sessionCreateBodies[0]).toMatchObject({
       sessionPublicId,
@@ -4144,7 +4147,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     });
     expect(await screen.findByText("回答正确")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "查看学习反馈" }));
+    fireEvent.click(screen.getByRole("button", { name: "查看解析" }));
     await waitFor(() =>
       expect(progressUrls).toEqual([
         `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
@@ -4330,7 +4333,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       ),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
     expect(sessionCreateBodies[0]).toMatchObject({
       sessionPublicId,
@@ -4564,7 +4567,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       "synthetic persisted employee paper analysis",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "开始练习" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     expect(
       await screen.findByText("synthetic persisted employee paper stem"),
     ).toBeInTheDocument();

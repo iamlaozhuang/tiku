@@ -349,7 +349,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       await screen.findByText("2026-06-14T09:00:00.000Z"),
     ).toBeInTheDocument();
     expect(screen.getByText("已完成")).toBeInTheDocument();
-    expect(screen.getByText("资料较少")).toBeInTheDocument();
+    expect(screen.getByText("依据较少")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_request_history_public_ui_701"),
     ).not.toBeInTheDocument();
@@ -426,7 +426,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.queryByText("formalAdoptionStatus")).not.toBeInTheDocument();
     expect(screen.queryByText("redactionStatus")).not.toBeInTheDocument();
     expect(screen.getAllByText("暂不可用").length).toBeGreaterThan(0);
-    expect(screen.getByText("需审核后采用")).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("正式采用");
+    expect(document.body).not.toHaveTextContent("需审核后采用");
+    expect(document.body).not.toHaveTextContent("可采用");
+    expect(screen.getAllByText("依据资料状态").length).toBeGreaterThan(0);
     expect(screen.getByText("masked preview detail 501")).toBeInTheDocument();
     expect(
       screen.queryByText("personal_ai_result_public_ui_501"),
@@ -488,7 +491,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(
       await screen.findByText(
-        "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8349\u7a3f",
+        "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8bad\u7ec3\u5185\u5bb9",
       ),
     ).toBeInTheDocument();
   });

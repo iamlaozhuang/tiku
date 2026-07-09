@@ -192,7 +192,7 @@ const knowledgeNodeModeOptions: {
 const copy = {
   title: "AI训练",
   subtitle:
-    "面向高级授权学员的 AI出题 和 AI组卷入口；资料充足时可生成本次训练草稿。",
+    "面向高级授权学习者的 AI出题 和 AI组卷入口；依据资料充足时可生成本次训练内容。",
   emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u751f\u6210\u8bf7\u6c42",
   emptyDescription:
     "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u6309\u5f53\u524d\u6388\u6743\u8303\u56f4\u5c1d\u8bd5\u751f\u6210\u8bad\u7ec3\u8349\u7a3f\u3002",
@@ -215,13 +215,13 @@ const copy = {
     "\u8bf7\u786e\u8ba4\u5df2\u9009\u62e9\u6709\u6548\u7684\u9ad8\u7ea7\u6388\u6743\u8303\u56f4\u3002",
   blockedTitle: "\u8bf7\u6c42\u5df2\u963b\u65ad",
   contractTitle: "\u751f\u6210\u4efb\u52a1\u5df2\u53d7\u7406",
-  historyTitle: "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2",
+  historyTitle: "\u751f\u6210\u8bf7\u6c42\u5386\u53f2\u8bb0\u5f55",
   historyEmptyTitle: "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42",
   historyLoadingTitle: "\u5386\u53f2\u8bf7\u6c42\u540c\u6b65\u4e2d",
   historyErrorTitle: "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528",
   historyUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u8bf7\u6c42\u5386\u53f2",
-  resultHistoryTitle: "\u8fd1\u671f AI \u7ed3\u679c\u5386\u53f2",
+  resultHistoryTitle: "\u8bad\u7ec3\u7ed3\u679c\u5386\u53f2\u8bb0\u5f55",
   resultHistoryEmptyTitle: "\u6682\u65e0\u5386\u53f2\u7ed3\u679c",
   resultHistoryLoadingTitle: "\u7ed3\u679c\u5386\u53f2\u540c\u6b65\u4e2d",
   resultHistoryErrorTitle: "\u7ed3\u679c\u5386\u53f2\u6682\u4e0d\u53ef\u7528",
@@ -231,25 +231,24 @@ const copy = {
   resultDetailButton: "\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
   resultDetailLoadingTitle: "\u7ed3\u679c\u8be6\u60c5\u540c\u6b65\u4e2d",
   resultDetailEmptyTitle:
-    "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8349\u7a3f",
+    "\u7ed3\u679c\u8be6\u60c5\u6682\u65e0\u53ef\u7528\u8bad\u7ec3\u5185\u5bb9",
   resultDetailErrorTitle: "\u7ed3\u679c\u8be6\u60c5\u6682\u4e0d\u53ef\u7528",
   resultDetailUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u7ed3\u679c\u8be6\u60c5",
-  practiceFeedbackTitle:
-    "\u751f\u6210\u7ec3\u4e60\u4e0e\u5b66\u4e60\u53cd\u9988",
+  practiceFeedbackTitle: "\u4f5c\u7b54\u4e0e\u89e3\u6790",
   practiceFeedbackDescription:
-    "\u751f\u6210\u4efb\u52a1\u53d7\u7406\u540e\uff0c\u53ef\u4ee5\u8fdb\u5165\u7ec3\u4e60\u3001\u63d0\u4ea4\u4f5c\u7b54\u5e76\u67e5\u770b\u5b66\u4e60\u53cd\u9988\uff1b\u4e0d\u5199\u5165\u6b63\u5f0f\u9898\u76ee\u6216\u8bd5\u5377\u3002",
+    "\u751f\u6210\u5185\u5bb9\u5c31\u7eea\u540e\uff0c\u53ef\u4ee5\u5f00\u59cb\u4f5c\u7b54\u3001\u63d0\u4ea4\u7b54\u6848\u5e76\u67e5\u770b\u89e3\u6790\uff1b\u4e0d\u5199\u5165\u6b63\u5f0f\u9898\u76ee\u6216\u8bd5\u5377\u3002",
 };
 
 const contractFieldLabelMap: Record<string, string> = {
   citationCount: "依据数量",
-  contentPreviewMasked: "草稿摘要",
-  evidenceStatus: "资料依据",
+  contentPreviewMasked: "生成内容摘要",
+  evidenceStatus: "依据资料状态",
   experienceSurface: "体验入口",
   flowStatus: "流程状态",
-  formalAdoptionStatus: "正式采用",
-  formalAdoptionWriteStatus: "正式采用",
-  isFormalAdoptionBlocked: "正式采用",
+  formalAdoptionStatus: "学习内容边界",
+  formalAdoptionWriteStatus: "学习内容边界",
+  isFormalAdoptionBlocked: "学习闭环限制",
   authorizationSource: "授权来源",
   ownerType: "使用上下文",
   quotaOwnerType: "额度上下文",
@@ -267,11 +266,11 @@ const contractValueLabelMap: Record<string, string> = {
   ai_question_generation: "AI出题",
   blocked: "暂不可用",
   blocked_without_follow_up_task: "需后续审批",
-  draft: "草稿",
-  false: "可采用",
+  draft: "生成内容",
+  false: "可继续学习",
   local_contract_only: "任务已受理",
   metadata_only: "基础信息",
-  none: "资料不足",
+  none: "依据不足",
   org_auth: "组织授权",
   organization: "组织上下文",
   pending: "处理中",
@@ -281,21 +280,21 @@ const contractValueLabelMap: Record<string, string> = {
   ready: "就绪",
   student_local_browser: "AI训练页",
   succeeded: "已完成",
-  sufficient: "资料充足",
-  true: "需审核后采用",
+  sufficient: "依据充足",
+  true: "保持学习域",
   unknown: "未知原因",
-  weak: "资料较少",
+  weak: "依据较少",
 };
 
 const practiceFeedbackStatusLabelMap: Record<
   StudentPersonalAiGenerationPracticeFeedbackState,
   string
 > = {
-  waiting: "生成后可进入练习、提交作答并查看学习反馈",
-  insufficient: "资料不足时请重试生成",
-  practice_ready: "生成练习已就绪",
+  waiting: "生成后可进入作答、提交答案并查看解析",
+  insufficient: "依据不足时请重试生成",
+  practice_ready: "练习内容已就绪",
   answer_submitted: "作答已提交",
-  feedback_ready: "学习反馈可查看",
+  feedback_ready: "解析可查看",
 };
 
 const aiQuestionDetailControls: StudentPersonalAiGenerationDetailControl[] = [
@@ -1987,19 +1986,19 @@ function StudentPersonalAiGenerationContractSummary({
           </dd>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <dt className="text-text-secondary text-sm">资料依据</dt>
+          <dt className="text-text-secondary text-sm">依据资料状态</dt>
           <dd className="text-text-primary text-sm font-medium">
             {experience.resultState.evidenceStatus === "sufficient"
-              ? "资料充足"
-              : "资料不足"}
+              ? "依据充足"
+              : "依据不足"}
           </dd>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <dt className="text-text-secondary text-sm">正式内容</dt>
+          <dt className="text-text-secondary text-sm">学习内容边界</dt>
           <dd className="text-text-primary text-sm font-medium">
             {experience.resultState.isFormalAdoptionBlocked
-              ? "需审核后采用"
-              : "可采用"}
+              ? "保持在学习训练中"
+              : "可继续学习"}
           </dd>
         </div>
       </dl>
@@ -2050,7 +2049,7 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
           className={generatedPracticeActionClassName}
         >
           <BookOpen className="size-4" aria-hidden="true" />
-          开始练习
+          开始作答
         </button>
         <button
           type="button"
@@ -2068,7 +2067,7 @@ function StudentPersonalAiGenerationPracticeFeedbackActions({
           className={generatedPracticeActionClassName}
         >
           <MessageCircle className="size-4" aria-hidden="true" />
-          查看学习反馈
+          查看解析
         </button>
         <button
           type="button"
@@ -2516,7 +2515,7 @@ function StudentPersonalAiGenerationHistorySummary({
               <ContractField label="状态" value={historyRow.status} />
               <ContractField label="请求时间" value={historyRow.requestedAt} />
               <ContractField
-                label="资料依据"
+                label="依据资料状态"
                 value={historyRow.evidenceStatus}
               />
               <ContractField
@@ -2663,11 +2662,11 @@ function StudentPersonalAiGenerationResultHistorySummary({
               <ContractField label="状态" value={resultRow.status} />
               <ContractField label="生成时间" value={resultRow.persistedAt} />
               <ContractField
-                label="草稿摘要"
+                label="生成内容摘要"
                 value={resultRow.contentReference.contentPreviewMasked}
               />
               <ContractField
-                label="资料依据"
+                label="依据资料状态"
                 value={resultRow.evidenceReference.evidenceStatus}
               />
               <ContractField
@@ -2675,7 +2674,7 @@ function StudentPersonalAiGenerationResultHistorySummary({
                 value={String(resultRow.evidenceReference.citationCount)}
               />
               <ContractField
-                label="正式采用"
+                label="学习内容边界"
                 value={resultRow.formalAdoption.status}
               />
             </dl>
@@ -2819,11 +2818,11 @@ function StudentPersonalAiGenerationResultDetailSummary({
           value={resultDetail.result.persistedAt}
         />
         <ContractField
-          label="草稿摘要"
+          label="生成内容摘要"
           value={resultDetail.result.contentReference.contentPreviewMasked}
         />
         <ContractField
-          label="资料依据"
+          label="依据资料状态"
           value={resultDetail.result.evidenceReference.evidenceStatus}
         />
         <ContractField
@@ -2831,11 +2830,11 @@ function StudentPersonalAiGenerationResultDetailSummary({
           value={String(resultDetail.result.evidenceReference.citationCount)}
         />
         <ContractField
-          label="正式采用"
+          label="学习内容边界"
           value={resultDetail.result.formalAdoption.status}
         />
         <ContractField
-          label="采用限制"
+          label="学习闭环限制"
           value={String(resultDetail.result.formalAdoption.isBlocked)}
         />
       </dl>
