@@ -174,6 +174,9 @@ type StudentAiPaperQuestionTypeDistribution = NonNullable<
 type StudentAiPaperStructure = NonNullable<
   AiGenerationRouteIntegratedGenerationParameters["paperStructure"]
 >;
+type StudentAiPaperAssemblyContainer = NonNullable<
+  PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["paperAssembly"]
+>["container"];
 
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
@@ -1010,6 +1013,7 @@ async function fetchCreatePersonalAiLearningSession(
     visibleGeneratedContent: NonNullable<
       PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["visibleGeneratedContent"]
     >;
+    paperAssemblyContainer?: StudentAiPaperAssemblyContainer;
   },
 ): Promise<{
   code: number;
@@ -2497,6 +2501,28 @@ function getStudentAiLearningSessionQuestions(
   }, []);
 }
 
+function isStudentAiPaperGenerationExperience(
+  experience: PersonalAiGenerationLocalBrowserExperienceDto,
+): boolean {
+  return (
+    experience.requestFlow.resultReference.taskType === "ai_paper_generation"
+  );
+}
+
+function getStudentAiPaperAssemblyContainer(
+  experience: PersonalAiGenerationLocalBrowserExperienceDto,
+): StudentAiPaperAssemblyContainer | null {
+  const paperAssembly = experience.runtimeBridge.paperAssembly;
+
+  if (paperAssembly == null || paperAssembly.status !== "assembled") {
+    return null;
+  }
+
+  return paperAssembly.container.selectedQuestionCount > 0
+    ? paperAssembly.container
+    : null;
+}
+
 function mapLearningAnswerFeedbackToStudentFeedback(
   answerFeedback: PersonalAiGenerationLearningSessionAnswerFeedbackDto,
 ): StudentAiLearningAnswerFeedback {
@@ -2524,10 +2550,12 @@ function canUseCurrentGeneratedPractice(
     experience.resultState.status === "succeeded" &&
     experience.resultState.evidenceStatus === "sufficient" &&
     experience.resultState.citationCount > 0 &&
-    getStudentAiLearningSessionQuestions(
-      experience,
-      createStudentAiLearningSessionPublicId(resultPublicId),
-    ).length > 0
+    (isStudentAiPaperGenerationExperience(experience)
+      ? getStudentAiPaperAssemblyContainer(experience) !== null
+      : getStudentAiLearningSessionQuestions(
+          experience,
+          createStudentAiLearningSessionPublicId(resultPublicId),
+        ).length > 0)
   );
 }
 
@@ -3984,10 +4012,15 @@ export function StudentPersonalAiGenerationPage() {
   async function ensureAiLearningSessionStarted(): Promise<boolean> {
     const visibleGeneratedContent =
       experience?.runtimeBridge.visibleGeneratedContent ?? null;
+    const paperAssemblyContainer =
+      experience === null
+        ? null
+        : getStudentAiPaperAssemblyContainer(experience);
 
     if (
       !canUseGeneratedPractice ||
-      aiLearningSessionQuestions.length === 0 ||
+      (aiLearningSessionQuestions.length === 0 &&
+        paperAssemblyContainer === null) ||
       currentAiLearningSessionPublicId === null ||
       experience === null ||
       experience.resultState.resultPublicId === null ||
@@ -4009,6 +4042,9 @@ export function StudentPersonalAiGenerationPage() {
           sourceTaskPublicId: experience.resultState.taskPublicId,
           ...(aiLearningSessionOwnerScope ?? {}),
           visibleGeneratedContent,
+          ...(paperAssemblyContainer === null
+            ? {}
+            : { paperAssemblyContainer }),
         },
       );
 

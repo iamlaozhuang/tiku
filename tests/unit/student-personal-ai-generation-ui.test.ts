@@ -12,6 +12,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { StudentPersonalAiGenerationPage } from "@/features/student/ai-generation/StudentPersonalAiGenerationPage";
 import { COOKIE_BACKED_SESSION_MARKER } from "@/features/student/studentRuntimeApi";
 import type {
+  AiPaperPlanAndSelectContainerDto,
+  AiPaperQuestionSourceKind,
+} from "@/server/contracts/ai-paper-plan-and-select-contract";
+import type {
   EffectiveAuthorizationCapabilitiesDto,
   EffectiveAuthorizationContextDto,
 } from "@/server/contracts/effective-authorization-contract";
@@ -655,6 +659,59 @@ function createLearningSessionFormalWriteBoundary(): PersonalAiGenerationLearnin
     answerRecordWriteStatus: "blocked",
     examReportWriteStatus: "blocked",
     mistakeBookWriteStatus: "blocked",
+  };
+}
+
+function createLearnerAiPaperAssemblyContainer(input: {
+  selectedQuestionCount: number;
+  sourceKind?: Exclude<AiPaperQuestionSourceKind, "ai_generated_draft">;
+  enterpriseTrainingSnapshotCount?: number;
+}): AiPaperPlanAndSelectContainerDto {
+  const selectedQuestions = Array.from(
+    { length: input.selectedQuestionCount },
+    (_, index) => ({
+      questionPublicId: `formal-question-public-${index + 1}`,
+      sourceKind: input.sourceKind ?? "platform_formal_question",
+      matchTier: "exact" as const,
+      score: 1,
+    }),
+  );
+
+  return {
+    title: "synthetic assembled learner paper",
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    requestedQuestionCount: input.selectedQuestionCount,
+    selectedQuestionCount: input.selectedQuestionCount,
+    sourceComposition: {
+      platformFormalQuestionCount:
+        input.sourceKind === "enterprise_training_snapshot"
+          ? 0
+          : input.selectedQuestionCount,
+      enterpriseTrainingSnapshotCount:
+        input.enterpriseTrainingSnapshotCount ??
+        (input.sourceKind === "enterprise_training_snapshot"
+          ? input.selectedQuestionCount
+          : 0),
+    },
+    matchQuality:
+      input.selectedQuestionCount > 0 ? "fully_matched" : "insufficient",
+    sections: [
+      {
+        sectionKey: "single_choice",
+        title: "synthetic assembled paper section",
+        questionType: "single_choice",
+        targetQuestionCount: input.selectedQuestionCount,
+        selectedQuestionCount: input.selectedQuestionCount,
+        selectedQuestions,
+        degradationSummary: {
+          exactCount: input.selectedQuestionCount,
+          nearbyKnowledgeCount: 0,
+          sameScopeCount: 0,
+        },
+      },
+    ],
   };
 }
 
@@ -3360,6 +3417,9 @@ describe("StudentPersonalAiGenerationPage", () => {
 
   it("renders transient AI paper draft preview counts and multi-question self-test from the learner paper action", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const paperAssemblyContainer = createLearnerAiPaperAssemblyContainer({
+      selectedQuestionCount: 2,
+    });
     const paperVisibleResponse = {
       ...localExperienceResponse,
       data: {
@@ -3457,6 +3517,18 @@ describe("StudentPersonalAiGenerationPage", () => {
               reviewStatus: "draft_review_required",
             },
           },
+          paperAssembly: {
+            status: "assembled",
+            sourceDiagnostics: {
+              role: "personal_advanced_student",
+              platformQuestionCount: 2,
+              enterpriseQuestionCount: 0,
+              enterpriseSourceStatus: "not_applicable",
+            },
+            container: paperAssemblyContainer,
+            insufficiency: null,
+            redactionStatus: "redacted",
+          },
         },
       },
     };
@@ -3532,8 +3604,123 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("blocks learner AI paper practice when formal source assembly is insufficient", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const paperVisibleResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        flowStatus: "accepted",
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          resultPublicId: "ai-generation-result-insufficient-paper-learner-001",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          resultReference: {
+            ...localExperienceResponse.data.requestFlow.resultReference,
+            taskType: "ai_paper_generation",
+          },
+        },
+        runtimeBridge: {
+          ...localExperienceResponse.data.runtimeBridge,
+          bridgeStatus: "provider_call_succeeded",
+          providerCallExecuted: true,
+          visibleGeneratedContent: {
+            content: "本次自测试卷草稿摘要",
+            contentVisibility: "transient_response_only",
+            persistenceStatus: "not_persisted",
+            safetyStatus: "checked",
+            structuredPreview: {
+              kind: "paper_draft",
+              parseStatus: "parsed",
+              paperSectionCount: 1,
+              questionCount: 1,
+              questionTypeDistributionCount: 1,
+              knowledgeCoverageCount: 1,
+              paperSectionSummaries: [
+                {
+                  sectionNumber: 1,
+                  paperSectionType: "single_choice",
+                  title: "synthetic insufficient paper section",
+                  questionCount: 1,
+                  questionDrafts: [
+                    {
+                      draftNumber: 1,
+                      questionType: "single_choice",
+                      difficulty: "medium",
+                      knowledgeNodeCount: 1,
+                      questionStem: "synthetic blocked preview stem",
+                      questionOptions: [
+                        {
+                          optionLabel: "A",
+                          optionText: "synthetic blocked preview option",
+                          isCorrect: true,
+                        },
+                      ],
+                      standardAnswer: "A",
+                      analysis: "synthetic blocked preview analysis",
+                      reviewStatus: "draft_review_required",
+                    },
+                  ],
+                },
+              ],
+              reviewStatus: "draft_review_required",
+            },
+          },
+          paperAssembly: {
+            status: "insufficient",
+            sourceDiagnostics: {
+              role: "personal_advanced_student",
+              platformQuestionCount: 0,
+              enterpriseQuestionCount: 0,
+              enterpriseSourceStatus: "not_applicable",
+            },
+            container: createLearnerAiPaperAssemblyContainer({
+              selectedQuestionCount: 0,
+            }),
+            insufficiency: {
+              requestedQuestionCount: 1,
+              selectedQuestionCount: 0,
+              missingQuestionCount: 1,
+              failureCategory: "insufficient_formal_question_source",
+            },
+            redactionStatus: "redacted",
+          },
+        },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      createPersonalAiGenerationFetchMockWithHistorySequence(
+        [emptyServerHistoryResponse, emptyServerHistoryResponse],
+        paperVisibleResponse,
+      ),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
+
+    expect(await screen.findByText("自测试卷预览")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "开始作答" })).toBeDisabled();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
+  });
+
   it("renders organization employee AI paper drafts from org authorization context", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const paperAssemblyContainer = createLearnerAiPaperAssemblyContainer({
+      selectedQuestionCount: 1,
+      sourceKind: "enterprise_training_snapshot",
+      enterpriseTrainingSnapshotCount: 1,
+    });
     const paperVisibleResponse = {
       ...localExperienceResponse,
       data: {
@@ -3604,6 +3791,18 @@ describe("StudentPersonalAiGenerationPage", () => {
               ],
               reviewStatus: "draft_review_required",
             },
+          },
+          paperAssembly: {
+            status: "assembled",
+            sourceDiagnostics: {
+              role: "org_advanced_employee",
+              platformQuestionCount: 0,
+              enterpriseQuestionCount: 1,
+              enterpriseSourceStatus: "resolved",
+            },
+            container: paperAssemblyContainer,
+            insufficiency: null,
+            redactionStatus: "redacted",
           },
         },
       },
@@ -4374,6 +4573,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     const sourceTaskPublicId =
       "ai-generation-task-visible-employee-paper-api-001";
     const sessionPublicId = `ai_learning_session_${sourceResultPublicId}`;
+    const paperAssemblyContainer = createLearnerAiPaperAssemblyContainer({
+      selectedQuestionCount: 1,
+      sourceKind: "enterprise_training_snapshot",
+      enterpriseTrainingSnapshotCount: 1,
+    });
     const learningSessionQuestion = createLearningSessionQuestion({
       sessionPublicId,
       questionStem: "synthetic persisted employee paper stem",
@@ -4472,6 +4676,18 @@ describe("StudentPersonalAiGenerationPage", () => {
                 },
               ],
             },
+          },
+          paperAssembly: {
+            status: "assembled",
+            sourceDiagnostics: {
+              role: "org_advanced_employee",
+              platformQuestionCount: 0,
+              enterpriseQuestionCount: 1,
+              enterpriseSourceStatus: "resolved",
+            },
+            container: paperAssemblyContainer,
+            insufficiency: null,
+            redactionStatus: "redacted",
           },
           blockedReasons: [],
         },
@@ -4598,6 +4814,23 @@ describe("StudentPersonalAiGenerationPage", () => {
       sourceTaskPublicId,
       ownerType: "organization",
       ownerPublicId: "organization-public-123",
+      paperAssemblyContainer: {
+        selectedQuestionCount: 1,
+        sourceComposition: {
+          enterpriseTrainingSnapshotCount: 1,
+          platformFormalQuestionCount: 0,
+        },
+        sections: [
+          {
+            selectedQuestionCount: 1,
+            selectedQuestions: [
+              {
+                sourceKind: "enterprise_training_snapshot",
+              },
+            ],
+          },
+        ],
+      },
     });
 
     fireEvent.click(
