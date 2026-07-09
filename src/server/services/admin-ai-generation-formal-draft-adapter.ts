@@ -202,17 +202,9 @@ function isPaperQuestionDraftPayload(
     return false;
   }
 
-  const hasExistingQuestionReference = isRequiredString(value.questionPublicId);
-  const hasCompanionQuestionDraft = isQuestionDraftPayload(
-    value.companionQuestionDraft,
-  );
-
   return (
-    (hasExistingQuestionReference !== hasCompanionQuestionDraft ||
-      (value.questionPublicId === null && hasCompanionQuestionDraft)) &&
-    (typeof value.questionPublicId === "string" ||
-      value.questionPublicId === null) &&
-    (value.companionQuestionDraft === null || hasCompanionQuestionDraft) &&
+    isRequiredString(value.questionPublicId) &&
+    value.companionQuestionDraft === null &&
     isRequiredString(value.score) &&
     typeof value.sortOrder === "number" &&
     isQuestionGroupDraftPayload(value.questionGroup)
@@ -379,8 +371,6 @@ function resolveWriterContext(
 
 async function createFormalPaperQuestionReference(input: {
   paperQuestion: AdminAiGenerationFormalPaperQuestionDraftPayload;
-  questionWriter: AdminAiGenerationFormalDraftQuestionWriter;
-  writerContext: { actorPublicId: string };
 }): Promise<
   | {
       status: "ok";
@@ -391,32 +381,10 @@ async function createFormalPaperQuestionReference(input: {
       status: "failed";
     }
 > {
-  if (input.paperQuestion.questionPublicId !== null) {
-    return {
-      status: "ok",
-      questionPublicId: input.paperQuestion.questionPublicId,
-      companionQuestionDraftCreated: false,
-    };
-  }
-
-  if (input.paperQuestion.companionQuestionDraft === null) {
-    return { status: "failed" };
-  }
-
-  const questionResponse = await input.questionWriter.createQuestion(
-    sanitizeQuestionDraftPayload(input.paperQuestion.companionQuestionDraft),
-    input.writerContext,
-  );
-  const questionPublicId = questionResponse.data?.question.publicId ?? null;
-
-  if (questionResponse.code !== 0 || questionPublicId === null) {
-    return { status: "failed" };
-  }
-
   return {
     status: "ok",
-    questionPublicId,
-    companionQuestionDraftCreated: true,
+    questionPublicId: input.paperQuestion.questionPublicId,
+    companionQuestionDraftCreated: false,
   };
 }
 
@@ -424,8 +392,6 @@ async function composePaperQuestions(input: {
   paperPublicId: string;
   paperPayload: AdminAiGenerationFormalPaperDraftPayload;
   paperWriter: AdminAiGenerationFormalDraftPaperWriter;
-  questionWriter: AdminAiGenerationFormalDraftQuestionWriter;
-  writerContext: { actorPublicId: string };
 }): Promise<
   | {
       status: "ok";
@@ -459,8 +425,6 @@ async function composePaperQuestions(input: {
     for (const paperQuestion of paperSection.paperQuestions) {
       const questionReference = await createFormalPaperQuestionReference({
         paperQuestion,
-        questionWriter: input.questionWriter,
-        writerContext: input.writerContext,
       });
 
       if (questionReference.status === "failed") {
@@ -553,13 +517,10 @@ export function createAdminAiGenerationFormalDraftAdapterService(
         return createWriterFailedResponse();
       }
 
-      const writerContext = resolveWriterContext(input);
       const compositionResult = await composePaperQuestions({
         paperPublicId,
         paperPayload: input.reviewedDraft,
         paperWriter: writers.paperWriter,
-        questionWriter: writers.questionWriter,
-        writerContext,
       });
 
       if (compositionResult.status === "failed") {

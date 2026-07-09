@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-question-formal-publish-loop-2026-07-09
-updatedAt: "2026-07-09T02:25:00-07:00"
+currentPhase: content-ai-paper-formal-publish-loop-2026-07-09
+updatedAt: "2026-07-09T03:15:00-07:00"
 latestContentAiAdoptionReadModel:
   id: content-ai-adoption-read-model-2026-07-09
   status: ready_for_closeout
@@ -59,8 +59,8 @@ latestContentAiFormalDraftDetailEntry:
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestContentAiQuestionFormalPublishLoop:
   id: content-ai-question-formal-publish-loop-2026-07-09
-  status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+  status: closed
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_pushed_cleaned
   branch: codex/content-ai-question-formal-publish-loop
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-question-formal-publish-loop.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-question-formal-publish-loop.md
@@ -92,9 +92,46 @@ latestContentAiQuestionFormalPublishLoop:
     masterPostMergeDiffCheck: pass
   closeout:
     mergedToMaster: true
+    pushedToOriginMaster: true
+    shortBranchDeleted: true
+    codeCommitSha: d9bb5a2c6
+    finalSha: ab9882913
+    approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+latestContentAiPaperFormalPublishLoop:
+  id: content-ai-paper-formal-publish-loop-2026-07-09
+  status: ready_for_closeout
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
+  branch: codex/content-ai-paper-formal-publish-loop
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-paper-formal-publish-loop.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-paper-formal-publish-loop.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-paper-formal-publish-loop-audit.md
+  approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+  branchBase:
+    originMasterSha: ab9882913
+    branchHeadSha: ab9882913
+  boundary:
+    scope: content_ai_paper_formal_publish_loop_only
+    dbMutationExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    questionFormalPublishLoopChanged: false
+    orgAdminEmployeePersonalAiBoundaryChanged: false
+  validationSummary:
+    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
+    tddRed: pass_expected_adapter_companion_question_rejection_failure_before_implementation
+    targetedPaperFormalPublishUnit: pass_5_files_78_tests
+    adjacentRoleBoundaryTests: pass_5_files_151_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  closeout:
+    mergedToMaster: pending
     pushedToOriginMaster: pending
     shortBranchDeleted: pending
-    codeCommitSha: d9bb5a2c6
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestOrgAiPaperSectionContractValidation:
   id: org-ai-paper-section-contract-validation-2026-07-09
@@ -1876,40 +1913,35 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-ai-question-formal-publish-loop-2026-07-09
-  title: Content AI question formal publish loop
-  phase: content-ai-question-formal-publish-loop-2026-07-09
+  id: content-ai-paper-formal-publish-loop-2026-07-09
+  title: Content AI paper formal publish loop
+  phase: content-ai-paper-formal-publish-loop-2026-07-09
   status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
   priority: p1
   taskKind: implementation
-  branch: codex/content-ai-question-formal-publish-loop
+  branch: codex/content-ai-paper-formal-publish-loop
   humanApprovalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
-  plannedAt: "2026-07-09T02:25:00-07:00"
-  claimedAt: "2026-07-09T02:25:00-07:00"
-  targetClosureItem: Content-admin AI question adoption lands as a non-user-usable formal question draft first, then content staff explicitly publishes it through the existing question detail edit path.
-  behaviorBoundary: content_ai_question_formal_publish_loop_only_no_paper_publish_loop_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
+  plannedAt: "2026-07-09T03:15:00-07:00"
+  claimedAt: "2026-07-09T03:15:00-07:00"
+  targetClosureItem: Content-admin AI paper generation lands as a formal paper draft composed from selected platform formal question references, then content staff publishes through the existing paper draft detail and validation path.
+  behaviorBoundary: content_ai_paper_formal_publish_loop_only_no_question_publish_loop_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
   evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-question-formal-publish-loop.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-question-formal-publish-loop.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-question-formal-publish-loop-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-paper-formal-publish-loop.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-paper-formal-publish-loop.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-paper-formal-publish-loop-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
     sourceCodeChanged: true
     testsChanged: true
-    tddRed: pass_expected_3_files_4_assertions_failed_before_implementation
-    targetedQuestionFormalPublishUnit: pass_3_files_46_tests
-    adjacentRoleBoundaryTests: pass_6_files_160_tests
+    tddRed: pass_expected_adapter_companion_question_rejection_failure_before_implementation
+    targetedPaperFormalPublishUnit: pass_5_files_78_tests
+    adjacentRoleBoundaryTests: pass_5_files_151_tests
     typecheck: pass
     lint: pass
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_after_requirement_mapping_result_anchor
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
-    masterPostMergeTargetedTests: pass_3_files_46_tests
-    masterPostMergeAdjacentRoleBoundaryTests: pass_6_files_160_tests
-    masterPostMergeTypecheck: pass
-    masterPostMergeLint: pass
-    masterPostMergeDiffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     packageLockfileChanged: false
     envFileChanged: false
     schemaMigrationSeedChanged: false

@@ -75,8 +75,8 @@ export type AdminAiGenerationFormalQuestionGroupDraftPayload = {
 };
 
 export type AdminAiGenerationFormalPaperQuestionDraftPayload = {
-  questionPublicId: string | null;
-  companionQuestionDraft: AdminAiGenerationFormalQuestionDraftPayload | null;
+  questionPublicId: string;
+  companionQuestionDraft: null;
   score: string;
   sortOrder: number;
   questionGroup: AdminAiGenerationFormalQuestionGroupDraftPayload | null;

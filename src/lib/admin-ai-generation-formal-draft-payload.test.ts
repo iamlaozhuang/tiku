@@ -62,6 +62,75 @@ function createContentQuestionContract(): AdminAiGenerationLocalContractDto {
   } as unknown as AdminAiGenerationLocalContractDto;
 }
 
+function createContentPaperContract(
+  sourceKind:
+    | "platform_formal_question"
+    | "organization_training_snapshot" = "platform_formal_question",
+): AdminAiGenerationLocalContractDto {
+  return {
+    workspace: "content",
+    generationKind: "paper",
+    runtimeBridge: {
+      visibleGeneratedContent: {
+        structuredPreview: {
+          kind: "paper_draft",
+          parseStatus: "parsed",
+        },
+      },
+    },
+    paperAssembly: {
+      status: "assembled",
+      sourceDiagnostics: {
+        role: "content_admin",
+        platformQuestionCount:
+          sourceKind === "platform_formal_question" ? 1 : 0,
+        enterpriseQuestionCount:
+          sourceKind === "organization_training_snapshot" ? 1 : 0,
+        enterpriseSourceStatus: "not_applicable",
+      },
+      container: {
+        title: "待审试卷草稿",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        requestedQuestionCount: 1,
+        selectedQuestionCount: 1,
+        sourceComposition: {
+          platformFormalQuestionCount:
+            sourceKind === "platform_formal_question" ? 1 : 0,
+          enterpriseTrainingSnapshotCount:
+            sourceKind === "organization_training_snapshot" ? 1 : 0,
+        },
+        matchQuality: "fully_matched",
+        sections: [
+          {
+            sectionKey: "single_choice",
+            title: "单选题",
+            questionType: "single_choice",
+            targetQuestionCount: 1,
+            selectedQuestionCount: 1,
+            selectedQuestions: [
+              {
+                questionPublicId: "platform_formal_question_public_a",
+                sourceKind,
+                matchTier: "exact",
+                score: 1,
+              },
+            ],
+            degradationSummary: {
+              exactCount: 1,
+              nearbyKnowledgeCount: 0,
+              sameScopeCount: 0,
+              missingCount: 0,
+            },
+          },
+        ],
+      },
+      insufficiency: null,
+    },
+  } as unknown as AdminAiGenerationLocalContractDto;
+}
+
 describe("content admin formal reviewed draft payload", () => {
   it("carries selected knowledge node public ids into formal question drafts", () => {
     const payload = createContentAdminFormalReviewedDraftPayload({
@@ -101,5 +170,49 @@ describe("content admin formal reviewed draft payload", () => {
     expect(payload).toMatchObject({
       knowledgeNodePublicIds: [],
     });
+  });
+
+  it("creates a formal paper draft payload from selected platform question references", () => {
+    const payload = createContentAdminFormalReviewedDraftPayload({
+      localContractSummary: createContentPaperContract(),
+      generationParameters,
+      requestedAt: "2026-07-09T10:00:00.000Z",
+    });
+
+    expect(payload).toMatchObject({
+      name: "待审试卷草稿 2026-07-09 10:00",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      paperType: "mock_paper",
+      source: "content_ai_generation",
+      paperSections: [
+        {
+          title: "单选题",
+          sortOrder: 1,
+          paperQuestions: [
+            {
+              questionPublicId: "platform_formal_question_public_a",
+              companionQuestionDraft: null,
+              score: "1.0",
+              sortOrder: 1,
+              questionGroup: null,
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("does not create a content paper payload from non-platform question sources", () => {
+    const payload = createContentAdminFormalReviewedDraftPayload({
+      localContractSummary: createContentPaperContract(
+        "organization_training_snapshot",
+      ),
+      generationParameters,
+      requestedAt: "2026-07-09T10:00:00.000Z",
+    });
+
+    expect(payload).toBeNull();
   });
 });

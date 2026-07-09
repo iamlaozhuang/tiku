@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { AdminAiGenerationFormalAdoptionDto } from "../contracts/admin-ai-generation-formal-adoption-contract";
-import type {
-  AdminAiGenerationFormalDraftPaperWriter,
-  AdminAiGenerationFormalDraftQuestionWriter,
+import {
+  ADMIN_AI_GENERATION_FORMAL_DRAFT_ADAPTER_ERROR_CODES,
+  type AdminAiGenerationFormalDraftPaperWriter,
+  type AdminAiGenerationFormalDraftQuestionWriter,
 } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
 import type {
   PaperDraftResultDto,
@@ -413,19 +414,9 @@ describe("admin AI generation formal draft adapter service", () => {
     );
   });
 
-  it("creates companion formal question drafts before attaching them to the composed formal paper draft", async () => {
+  it("rejects companion question drafts for content AI paper formal adoption", async () => {
     const questionWriter = createQuestionWriter();
     const paperWriter = createPaperWriter();
-    vi.mocked(paperWriter.addQuestionToDraftPaper!).mockResolvedValueOnce({
-      code: 0,
-      message: "ok",
-      data: {
-        paperQuestion: {
-          publicId: "paper_question_companion_377",
-          sourceQuestionPublicId: "question_formal_draft_377",
-        },
-      } as PaperQuestionResultDto,
-    });
     const service = createAdminAiGenerationFormalDraftAdapterService({
       paperWriter,
       questionWriter,
@@ -447,55 +438,14 @@ describe("admin AI generation formal draft adapter service", () => {
       reviewedDraft,
       targetType: "paper",
     });
-    const serializedResponse = JSON.stringify(response);
 
-    expect(questionWriter.createQuestion).toHaveBeenCalledWith(
-      {
-        questionType: "single_choice",
-        profession: "monopoly",
-        level: 3,
-        subject: "theory",
-        stemRichText: "Reviewed formal question stem",
-        analysisRichText: "Reviewed formal analysis",
-        standardAnswerRichText: "A",
-        multiChoiceRule: "all_correct_only",
-        scoringMethod: "auto_match",
-        materialPublicId: null,
-        questionOptions:
-          reviewedDraft.paperSections[0]?.paperQuestions[0]
-            ?.companionQuestionDraft?.questionOptions,
-        scoringPoints: [],
-        fillBlankAnswers: [],
-        knowledgeNodePublicIds: [],
-        tagPublicIds: [],
-      },
-      {
-        actorPublicId: "admin_content_public_377",
-      },
-    );
-    expect(paperWriter.addQuestionToDraftPaper).toHaveBeenCalledWith(
-      "paper_formal_draft_377",
-      {
-        questionPublicId: "question_formal_draft_377",
-        score: "10.0",
-        sortOrder: 1,
-        paperSection: {
-          title: "Reviewed companion paper_section",
-          description: "Reviewed section description",
-          sortOrder: 1,
-        },
-        questionGroup: null,
-      },
-    );
-    expect(response.data).toMatchObject({
-      paperCompositionStatus: "composed",
-      paperSectionCount: 1,
-      paperQuestionCount: 1,
-      companionQuestionDraftCount: 1,
+    expect(response).toMatchObject({
+      code: ADMIN_AI_GENERATION_FORMAL_DRAFT_ADAPTER_ERROR_CODES.invalidInput,
+      data: null,
     });
-    expect(serializedResponse).not.toContain(
-      "RAW GENERATED CONTENT MUST NOT REACH WRITER",
-    );
+    expect(paperWriter.createPaper).not.toHaveBeenCalled();
+    expect(questionWriter.createQuestion).not.toHaveBeenCalled();
+    expect(paperWriter.addQuestionToDraftPaper).not.toHaveBeenCalled();
   });
 
   it("does not claim paper draft creation when paper_question composition fails", async () => {
