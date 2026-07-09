@@ -31,7 +31,7 @@ latestContentAiAdoptionReadModel:
 latestContentAiFormalDraftDetailEntry:
   id: content-ai-formal-draft-detail-entry-2026-07-09
   status: ready_for_closeout
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
   branch: codex/content-ai-formal-draft-detail-entry
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-formal-draft-detail-entry.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-formal-draft-detail-entry.md
@@ -45,10 +45,16 @@ latestContentAiFormalDraftDetailEntry:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    masterPostMergeTargetedTests: pass_4_files_88_tests
+    masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_150_tests
+    masterPostMergeTypecheck: pass
+    masterPostMergeLint: pass
+    masterPostMergeDiffCheck: pass
   closeout:
-    mergedToMaster: pending
+    mergedToMaster: true
     pushedToOriginMaster: pending
     shortBranchDeleted: pending
+    codeCommitSha: 3ed198545
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestOrgAiPaperSectionContractValidation:
   id: org-ai-paper-section-contract-validation-2026-07-09
@@ -1847,7 +1853,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-formal-draft-detail-entry.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-formal-draft-detail-entry-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
     sourceCodeChanged: true
     testsChanged: true
     aiHistoryEntryTests: pass_2_files_51_tests
@@ -1858,6 +1864,11 @@ currentTask:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    masterPostMergeTargetedTests: pass_4_files_88_tests
+    masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_150_tests
+    masterPostMergeTypecheck: pass
+    masterPostMergeLint: pass
+    masterPostMergeDiffCheck: pass
     packageLockfileChanged: false
     envFileChanged: false
     schemaMigrationSeedChanged: false

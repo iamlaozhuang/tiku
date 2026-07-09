@@ -31,3 +31,6 @@
 - Diff check: pass.
 - Module Run v2 precommit hardening: pass.
 - Module Run v2 prepush readiness: pass.
+- Master post-merge targeted tests: pass.
+- Master post-merge adjacent role-boundary tests: pass.
+- Master post-merge typecheck/lint/diff check: pass.

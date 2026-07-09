@@ -54,3 +54,18 @@
 - No DB access or mutation executed.
 - No Provider-enabled execution.
 - No dependency/package/lockfile change.
+
+## Master Post-Merge Validation
+
+- Merge mode: fast-forward into `master`.
+- Code commit: `3ed198545`.
+- `corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-generation-entry-surface.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts --reporter=dot`
+  - Result: pass, 4 files / 88 tests.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/server/services/organization-training-route.test.ts tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot`
+  - Result: pass, 5 files / 150 tests.
+- `corepack pnpm@10.26.1 run typecheck`
+  - Result: pass.
+- `corepack pnpm@10.26.1 run lint`
+  - Result: pass.
+- `git diff --check`
+  - Result: pass.

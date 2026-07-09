@@ -100,7 +100,7 @@ activeTasks:
     title: Content AI formal draft detail entry
     phase: content-ai-formal-draft-detail-entry-2026-07-09
     status: ready_for_closeout
-    result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+    result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_no_provider_no_db
@@ -151,7 +151,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-formal-draft-detail-entry-2026-07-09
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-formal-draft-detail-entry-2026-07-09 -SkipRemoteAheadCheck
     validationSummary:
-      status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+      status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
       aiHistoryEntryTests: pass_2_files_51_tests
       destinationEntryTests: pass_3_files_79_tests
       adjacentRoleBoundaryTests: pass_5_files_150_tests
@@ -160,6 +160,11 @@ activeTasks:
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      masterPostMergeTargetedTests: pass_4_files_88_tests
+      masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_150_tests
+      masterPostMergeTypecheck: pass
+      masterPostMergeLint: pass
+      masterPostMergeDiffCheck: pass
       browserRuntime: not_executed_not_required_for_source_entry_task_no_screenshot_approval
       dbAccessOrMutation: not_executed
       providerExecution: not_executed
