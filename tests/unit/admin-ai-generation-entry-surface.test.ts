@@ -2565,6 +2565,22 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("content-admin-review-traceability"),
     ).toHaveTextContent("发布前校验");
+    const traceabilitySummary = screen.getByTestId(
+      "content-admin-generation-traceability-summary",
+    );
+    expect(traceabilitySummary).toHaveTextContent("参数与依据追溯");
+    expect(traceabilitySummary).toHaveTextContent(/题型\s*单选题/u);
+    expect(traceabilitySummary).toHaveTextContent(/题量\s*1\/3/u);
+    expect(traceabilitySummary).toHaveTextContent(/知识点范围\s*均衡覆盖/u);
+    expect(traceabilitySummary).toHaveTextContent(/已选知识点\s*0 个/u);
+    expect(traceabilitySummary).toHaveTextContent(/依据状态\s*资料充足/u);
+    expect(traceabilitySummary).toHaveTextContent(/依据数量\s*2/u);
+    expect(traceabilitySummary).not.toHaveTextContent("rawPrompt");
+    expect(traceabilitySummary).not.toHaveTextContent("rawOutput");
+    expect(traceabilitySummary).not.toHaveTextContent("providerPayload");
+    expect(traceabilitySummary).not.toHaveTextContent(
+      "synthetic reviewed question stem",
+    );
     expect(
       screen.getByTestId("content-admin-review-next-actions"),
     ).toHaveTextContent("采用到内容草稿");
@@ -3039,11 +3055,39 @@ describe("admin AI generation entry surfaces", () => {
       }),
     );
 
+    fireEvent.change(await screen.findByLabelText("题目数量"), {
+      target: { value: "2" },
+    });
     fireEvent.click(await screen.findByTestId("admin-ai-generation-submit"));
 
     expect(
       await screen.findByTestId("admin-visible-generated-content"),
     ).toHaveTextContent("待审试卷草稿");
+    const traceabilitySummary = await screen.findByTestId(
+      "content-admin-generation-traceability-summary",
+    );
+    expect(traceabilitySummary).toHaveTextContent("参数与依据追溯");
+    expect(traceabilitySummary).toHaveTextContent(
+      /题型分布\s*单选 40% \/ 多选 30% \/ 判断 30%/u,
+    );
+    expect(traceabilitySummary).toHaveTextContent(/试卷结构\s*按大题模块组织/u);
+    expect(traceabilitySummary).toHaveTextContent(/题量\s*2\/2/u);
+    expect(traceabilitySummary).toHaveTextContent(/大题数\s*1\/1/u);
+    expect(traceabilitySummary).toHaveTextContent(/题源\s*平台正式题库 2 题/u);
+    expect(traceabilitySummary).toHaveTextContent(/知识点范围\s*均衡覆盖/u);
+    expect(traceabilitySummary).toHaveTextContent(/依据状态\s*资料充足/u);
+    expect(traceabilitySummary).not.toHaveTextContent(
+      "synthetic reviewed paper question stem",
+    );
+    expect(traceabilitySummary).not.toHaveTextContent(
+      "synthetic reviewed paper analysis",
+    );
+    expect(traceabilitySummary).not.toHaveTextContent(
+      "platform_formal_question_public_a",
+    );
+    expect(traceabilitySummary).not.toHaveTextContent("rawPrompt");
+    expect(traceabilitySummary).not.toHaveTextContent("rawOutput");
+    expect(traceabilitySummary).not.toHaveTextContent("providerPayload");
     fireEvent.click(
       await screen.findByTestId("content-admin-review-adopt-action"),
     );

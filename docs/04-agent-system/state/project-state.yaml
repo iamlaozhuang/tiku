@@ -1,8 +1,39 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-paper-formal-publish-loop-2026-07-09
-updatedAt: "2026-07-09T03:15:00-07:00"
+currentPhase: content-ai-traceability-summary-panel-2026-07-09
+updatedAt: "2026-07-09T03:35:00-07:00"
+latestContentAiTraceabilitySummaryPanel:
+  id: content-ai-traceability-summary-panel-2026-07-09
+  status: in_progress
+  result: pending
+  branch: codex/content-ai-traceability-summary-panel
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-traceability-summary-panel.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-traceability-summary-panel.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-traceability-summary-panel-audit.md
+  approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+  branchBase:
+    originMasterSha: cd869b1f1
+    branchHeadSha: cd869b1f1
+  boundary:
+    scope: content_ai_traceability_summary_panel_only
+    dbMutationExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    adoptionPublishLoopChanged: false
+    orgAdminEmployeePersonalAiBoundaryChanged: false
+  validationSummary:
+    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
+    tddRed: pass_expected_traceability_summary_absent_failures_before_implementation
+    targetedContentAiTraceabilityUi: pass_1_file_42_tests
+    adjacentRoleBoundaryTests: pass_5_files_151_tests
+    typecheck: pass
+    lint: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
 latestContentAiAdoptionReadModel:
   id: content-ai-adoption-read-model-2026-07-09
   status: ready_for_closeout
@@ -138,7 +169,7 @@ latestContentAiPaperFormalPublishLoop:
     pushedToOriginMaster: true
     shortBranchDeleted: true
     codeCommitSha: 42f467b37
-    finalSha: 5fb40e209
+    finalSha: cd869b1f1
     approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 latestOrgAiPaperSectionContractValidation:
   id: org-ai-paper-section-contract-validation-2026-07-09
@@ -1920,40 +1951,35 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-ai-paper-formal-publish-loop-2026-07-09
-  title: Content AI paper formal publish loop
-  phase: content-ai-paper-formal-publish-loop-2026-07-09
-  status: closed
-  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_pushed_cleaned
+  id: content-ai-traceability-summary-panel-2026-07-09
+  title: Content AI traceability summary panel
+  phase: content-ai-traceability-summary-panel-2026-07-09
+  status: in_progress
+  result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit
   priority: p1
   taskKind: implementation
-  branch: codex/content-ai-paper-formal-publish-loop
+  branch: codex/content-ai-traceability-summary-panel
   humanApprovalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
-  plannedAt: "2026-07-09T03:15:00-07:00"
-  claimedAt: "2026-07-09T03:15:00-07:00"
-  targetClosureItem: Content-admin AI paper generation lands as a formal paper draft composed from selected platform formal question references, then content staff publishes through the existing paper draft detail and validation path.
-  behaviorBoundary: content_ai_paper_formal_publish_loop_only_no_question_publish_loop_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
-  evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-paper-formal-publish-loop.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-paper-formal-publish-loop.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-paper-formal-publish-loop-audit.md
+  plannedAt: "2026-07-09T03:35:00-07:00"
+  claimedAt: "2026-07-09T03:35:00-07:00"
+  targetClosureItem: Content-admin AI generation history shows a redacted field-level summary for generation parameters, RAG scope, evidence status, and paper assembly structure.
+  behaviorBoundary: content_ai_traceability_summary_panel_only_no_adoption_publish_logic_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
+  evidenceMode: redacted_code_symbol_test_status_field_label_and_aggregate_count_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-traceability-summary-panel.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-traceability-summary-panel.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-traceability-summary-panel-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
+    status: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_ready_for_precommit_prepush
     sourceCodeChanged: true
     testsChanged: true
-    tddRed: pass_expected_adapter_companion_question_rejection_failure_before_implementation
-    targetedPaperFormalPublishUnit: pass_5_files_78_tests
+    tddRed: pass_expected_traceability_summary_absent_failures_before_implementation
+    targetedContentAiTraceabilityUi: pass_1_file_42_tests
     adjacentRoleBoundaryTests: pass_5_files_151_tests
     typecheck: pass
     lint: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    masterPostMergeTargetedTests: pass_5_files_78_tests
-    masterPostMergeAdjacentRoleBoundaryTests: pass_5_files_151_tests
-    masterPostMergeTypecheck: pass
-    masterPostMergeLint: pass
-    masterPostMergeDiffCheck: pass
+    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
     packageLockfileChanged: false
     envFileChanged: false
     schemaMigrationSeedChanged: false
@@ -32653,8 +32679,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cceb67f0f61e73933ccb70ebd3b31e4a8660d2f8
-  lastKnownOriginMasterSha: cceb67f0f61e73933ccb70ebd3b31e4a8660d2f8
+  lastKnownMasterSha: cd869b1f111baab1096ed522810debe8a26de068
+  lastKnownOriginMasterSha: cd869b1f111baab1096ed522810debe8a26de068
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

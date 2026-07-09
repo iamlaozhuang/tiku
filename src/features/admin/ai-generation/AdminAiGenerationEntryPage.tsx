@@ -2087,6 +2087,195 @@ function StructuredPreviewSummary({
   );
 }
 
+type ContentAdminGenerationTraceabilityItem = {
+  label: string;
+  value: string;
+};
+
+type ContentAdminGenerationTraceabilitySummary = {
+  items: ContentAdminGenerationTraceabilityItem[];
+};
+
+function formatContentAdminGenerationRatio(
+  actualCount: number | null | undefined,
+  requestedCount: number,
+): string {
+  return `${actualCount ?? 0}/${requestedCount}`;
+}
+
+function createContentAdminGenerationTraceabilitySummary({
+  generatedResult,
+  generationParameters,
+  localContractSummary,
+}: {
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  localContractSummary: AdminAiGenerationLocalContractDto;
+}): ContentAdminGenerationTraceabilitySummary | null {
+  const visibleGeneratedContent =
+    localContractSummary.runtimeBridge.visibleGeneratedContent;
+  const structuredPreview = visibleGeneratedContent?.structuredPreview ?? null;
+  const baseItems: ContentAdminGenerationTraceabilityItem[] = [
+    {
+      label: "知识点范围",
+      value:
+        adminKnowledgeNodeModeLabelByValue[
+          generationParameters.knowledgeNodeMode
+        ],
+    },
+    {
+      label: "已选知识点",
+      value: `${generationParameters.knowledgeNodePublicIds.length} 个`,
+    },
+    {
+      label: "子级范围",
+      value: generationParameters.includeDescendants ? "包含" : "不包含",
+    },
+    {
+      label: "依据状态",
+      value: getEvidenceStatusLabel(generatedResult),
+    },
+    {
+      label: "依据数量",
+      value: String(generatedResult.citationCount),
+    },
+  ];
+
+  if (localContractSummary.generationKind === "question") {
+    const questionPreview =
+      structuredPreview?.kind === "question_set" &&
+      structuredPreview.parseStatus === "parsed"
+        ? structuredPreview
+        : null;
+
+    return {
+      items: [
+        {
+          label: "题型",
+          value:
+            generationParameters.questionType === null
+              ? "未指定"
+              : (adminQuestionTypeLabelByValue[
+                  generationParameters.questionType as keyof typeof adminQuestionTypeLabelByValue
+                ] ?? "未指定"),
+        },
+        {
+          label: "题量",
+          value: formatContentAdminGenerationRatio(
+            questionPreview?.actualQuestionCount,
+            generationParameters.questionCount,
+          ),
+        },
+        ...baseItems,
+      ],
+    };
+  }
+
+  const paperAssembly = localContractSummary.paperAssembly;
+  const paperPreview =
+    structuredPreview?.kind === "paper_draft" &&
+    structuredPreview.parseStatus === "parsed"
+      ? structuredPreview
+      : null;
+  const selectedQuestionCount =
+    paperAssembly?.container.selectedQuestionCount ??
+    paperPreview?.questionCount;
+  const requestedQuestionCount =
+    paperAssembly?.container.requestedQuestionCount ??
+    generationParameters.questionCount;
+  const actualPaperSectionCount =
+    paperAssembly?.container.sections.length ?? paperPreview?.paperSectionCount;
+  const expectedPaperSectionCount =
+    paperPreview?.paperSectionCount ?? actualPaperSectionCount ?? 0;
+  const platformSourceCount =
+    paperAssembly?.container.sourceComposition.platformFormalQuestionCount ?? 0;
+  const enterpriseSourceCount =
+    paperAssembly?.container.sourceComposition
+      .enterpriseTrainingSnapshotCount ?? 0;
+  const sourceLabels = [
+    platformSourceCount > 0 ? `平台正式题库 ${platformSourceCount} 题` : null,
+    enterpriseSourceCount > 0
+      ? `本企业已发布训练题 ${enterpriseSourceCount} 题`
+      : null,
+  ].filter((sourceLabel) => sourceLabel !== null);
+
+  return {
+    items: [
+      {
+        label: "题型分布",
+        value:
+          adminQuestionTypeDistributionLabelByValue[
+            generationParameters.questionTypeDistribution ?? "balanced_40_30_30"
+          ],
+      },
+      {
+        label: "试卷结构",
+        value:
+          adminPaperStructureLabelByValue[
+            generationParameters.paperStructure ?? "by_question_type"
+          ],
+      },
+      {
+        label: "题量",
+        value: formatContentAdminGenerationRatio(
+          selectedQuestionCount,
+          requestedQuestionCount,
+        ),
+      },
+      {
+        label: "大题数",
+        value: formatContentAdminGenerationRatio(
+          actualPaperSectionCount,
+          expectedPaperSectionCount,
+        ),
+      },
+      {
+        label: "题源",
+        value: sourceLabels.join("，") || "题源不足",
+      },
+      ...baseItems,
+    ],
+  };
+}
+
+function ContentAdminGenerationTraceabilitySummaryPanel({
+  summary,
+}: {
+  summary: ContentAdminGenerationTraceabilitySummary;
+}) {
+  return (
+    <section
+      className="border-border bg-muted/40 mt-3 rounded-md border p-3"
+      data-testid="content-admin-generation-traceability-summary"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">
+            参数与依据追溯
+          </p>
+          <h5 className="text-text-primary mt-1 text-sm font-semibold">
+            本次生成执行摘要
+          </h5>
+        </div>
+        <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+          脱敏摘要
+        </span>
+      </div>
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+        {summary.items.map((item) => (
+          <div
+            className="border-border bg-background rounded-md border p-2"
+            key={item.label}
+          >
+            <dt className="text-text-secondary">{item.label}</dt>
+            <dd className="text-text-primary mt-1">{item.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 function AdminAiGenerationTaskHistoryPanel({
   adminWorkspaceCapabilitySummary,
   copyActionErrorMessageByResultPublicId,
@@ -2276,6 +2465,17 @@ function AdminAiGenerationTaskHistoryPanel({
               (workspace === "content"
                 ? (taskItem.generatedResult?.reviewedDraft ?? null)
                 : null);
+            const currentContentAdminTraceabilitySummary =
+              workspace === "content" &&
+              taskItem.generatedResult !== null &&
+              currentLocalContractSummary?.generatedResult.resultPublicId ===
+                taskItem.generatedResult.resultPublicId
+                ? createContentAdminGenerationTraceabilitySummary({
+                    generatedResult: taskItem.generatedResult,
+                    generationParameters,
+                    localContractSummary: currentLocalContractSummary,
+                  })
+                : null;
 
             return (
               <article
@@ -2398,6 +2598,9 @@ function AdminAiGenerationTaskHistoryPanel({
                         generatedResult={taskItem.generatedResult}
                         reviewedDraft={contentAdminReviewedDraft}
                         resultPublicId={taskItem.generatedResult.resultPublicId}
+                        traceabilitySummary={
+                          currentContentAdminTraceabilitySummary
+                        }
                         onReviewContentDraft={onReviewContentDraft}
                       />
                     ) : null}
@@ -2646,6 +2849,7 @@ function ContentAdminReviewTraceabilityPanel({
   generatedResult,
   reviewedDraft,
   resultPublicId,
+  traceabilitySummary,
   onReviewContentDraft,
 }: {
   actionState: ContentAdminReviewActionState;
@@ -2653,6 +2857,7 @@ function ContentAdminReviewTraceabilityPanel({
   generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto;
   reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   resultPublicId: string;
+  traceabilitySummary: ContentAdminGenerationTraceabilitySummary | null;
   onReviewContentDraft: (input: ContentAdminReviewActionInput) => void;
 }) {
   const isSubmitting =
@@ -2774,6 +2979,12 @@ function ContentAdminReviewTraceabilityPanel({
           <dd className="text-text-primary mt-1">{adoptionRequirementLabel}</dd>
         </div>
       </dl>
+
+      {traceabilitySummary === null ? null : (
+        <ContentAdminGenerationTraceabilitySummaryPanel
+          summary={traceabilitySummary}
+        />
+      )}
 
       <section
         className="border-border bg-muted/40 mt-3 rounded-md border p-3"
