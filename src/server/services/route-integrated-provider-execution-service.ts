@@ -672,6 +672,9 @@ function createPaperDraftStructuredPreview(
   const paperContractFailure = findPaperDraftContractFailure(
     parsedContent,
     options.generationParameters ?? null,
+    paperSections,
+    questionCount,
+    requestedQuestionCount,
   );
 
   if (paperContractFailure !== null) {
@@ -706,6 +709,9 @@ function findPaperDraftContractFailure(
     AiGenerationRouteIntegratedStructuredPreviewOptions,
     { kind: "paper_draft" }
   >["generationParameters"],
+  paperSections: readonly unknown[],
+  questionCount: number | null,
+  requestedQuestionCount: number | null,
 ):
   | "source_preference_mismatch"
   | "question_type_distribution_mismatch"
@@ -754,7 +760,276 @@ function findPaperDraftContractFailure(
     return "paper_structure_mismatch";
   }
 
+  if (
+    expectedPaperStructure !== null &&
+    expectedPaperStructure !== undefined &&
+    !arePaperSectionsCompatibleWithStructure(
+      paperSections,
+      expectedPaperStructure,
+    )
+  ) {
+    return "paper_structure_mismatch";
+  }
+
+  if (
+    expectedQuestionTypeDistribution !== null &&
+    expectedQuestionTypeDistribution !== undefined &&
+    !arePaperSectionsCompatibleWithQuestionTypeDistribution(
+      paperSections,
+      expectedQuestionTypeDistribution,
+      questionCount ?? requestedQuestionCount,
+    )
+  ) {
+    return "question_type_distribution_mismatch";
+  }
+
   return null;
+}
+
+function arePaperSectionsCompatibleWithQuestionTypeDistribution(
+  paperSections: readonly unknown[],
+  questionTypeDistribution: NonNullable<
+    Extract<
+      AiGenerationRouteIntegratedStructuredPreviewOptions,
+      { kind: "paper_draft" }
+    >["generationParameters"]
+  >["questionTypeDistribution"],
+  questionCount: number | null,
+): boolean {
+  if (
+    questionTypeDistribution === null ||
+    questionTypeDistribution === undefined ||
+    questionTypeDistribution === "weak_point_priority"
+  ) {
+    return true;
+  }
+
+  if (questionCount === null) {
+    return true;
+  }
+
+  const expectedCounts = createExpectedPaperQuestionTypeCounts(
+    questionTypeDistribution,
+    questionCount,
+  );
+
+  if (expectedCounts === null) {
+    return true;
+  }
+
+  const actualCounts = readPaperSectionQuestionTypeCounts(paperSections);
+
+  if (actualCounts === null) {
+    return true;
+  }
+
+  for (const [questionType, expectedCount] of expectedCounts) {
+    if ((actualCounts.get(questionType) ?? 0) !== expectedCount) {
+      return false;
+    }
+  }
+
+  for (const [questionType, actualCount] of actualCounts) {
+    if (!expectedCounts.has(questionType) && actualCount > 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function createExpectedPaperQuestionTypeCounts(
+  questionTypeDistribution: NonNullable<
+    Extract<
+      AiGenerationRouteIntegratedStructuredPreviewOptions,
+      { kind: "paper_draft" }
+    >["generationParameters"]
+  >["questionTypeDistribution"],
+  questionCount: number,
+): Map<string, number> | null {
+  const ratios: Array<readonly [string, number]> | null =
+    questionTypeDistribution === "balanced_40_30_30"
+      ? [
+          ["single_choice", 40],
+          ["multi_choice", 30],
+          ["true_false", 30],
+        ]
+      : questionTypeDistribution === "single_50_multi_25_true_false_25"
+        ? [
+            ["single_choice", 50],
+            ["multi_choice", 25],
+            ["true_false", 25],
+          ]
+        : null;
+
+  if (ratios === null) {
+    return null;
+  }
+
+  const ratioTotal = ratios.reduce((total, [, ratio]) => total + ratio, 0);
+  const counts = ratios.map(([questionType, ratio], index) => {
+    const exactCount = (questionCount * ratio) / ratioTotal;
+
+    return {
+      questionType,
+      count: Math.floor(exactCount),
+      remainder: exactCount - Math.floor(exactCount),
+      index,
+    };
+  });
+  let remainingCount =
+    questionCount - counts.reduce((total, item) => total + item.count, 0);
+
+  for (const item of [...counts].sort(
+    (first, second) =>
+      second.remainder - first.remainder || first.index - second.index,
+  )) {
+    if (remainingCount <= 0) {
+      break;
+    }
+
+    item.count += 1;
+    remainingCount -= 1;
+  }
+
+  return new Map(counts.map((item) => [item.questionType, item.count]));
+}
+
+function readPaperSectionQuestionTypeCounts(
+  paperSections: readonly unknown[],
+): Map<string, number> | null {
+  const counts = new Map<string, number>();
+
+  for (const paperSection of paperSections) {
+    if (!isRecord(paperSection)) {
+      return null;
+    }
+
+    const questionType = readPaperSectionQuestionType(paperSection);
+    const questionCount = normalizeQuestionCount(
+      paperSection.questionCount ??
+        paperSection.question_count ??
+        paperSection.targetQuestionCount ??
+        paperSection.target_question_count,
+    );
+
+    if (questionType === null || questionCount === null) {
+      return null;
+    }
+
+    counts.set(questionType, (counts.get(questionType) ?? 0) + questionCount);
+  }
+
+  return counts;
+}
+
+function arePaperSectionsCompatibleWithStructure(
+  paperSections: readonly unknown[],
+  paperStructure: NonNullable<
+    Extract<
+      AiGenerationRouteIntegratedStructuredPreviewOptions,
+      { kind: "paper_draft" }
+    >["generationParameters"]
+  >["paperStructure"],
+): boolean {
+  if (paperStructure === null || paperStructure === undefined) {
+    return true;
+  }
+
+  if (paperStructure === "by_question_type") {
+    return paperSections.every((paperSection) => {
+      if (!isRecord(paperSection)) {
+        return false;
+      }
+
+      const questionType = readPaperSectionQuestionType(paperSection);
+      const questionTypes = readPaperSectionQuestionTypes(paperSection);
+
+      return (
+        questionType !== null &&
+        questionTypes.length <= 1 &&
+        (questionTypes.length === 0 || questionTypes[0] === questionType)
+      );
+    });
+  }
+
+  if (paperStructure === "by_knowledge_node") {
+    return paperSections.every(
+      (paperSection) =>
+        isRecord(paperSection) && hasPaperSectionKnowledgeScope(paperSection),
+    );
+  }
+
+  return true;
+}
+
+function readPaperSectionQuestionType(
+  paperSection: Record<string, unknown>,
+): string | null {
+  return normalizePaperSectionQuestionType(
+    readSafeLabel(paperSection, [
+      "questionType",
+      "question_type",
+      "paperSectionType",
+      "paper_section_type",
+      "type",
+    ]),
+  );
+}
+
+function readPaperSectionQuestionTypes(
+  paperSection: Record<string, unknown>,
+): string[] {
+  const questionTypes = readStringArray(paperSection, [
+    "questionTypes",
+    "question_types",
+    "questionTypeList",
+    "question_type_list",
+  ])
+    .map(normalizePaperSectionQuestionType)
+    .filter((questionType): questionType is string => questionType !== null);
+
+  return Array.from(new Set(questionTypes));
+}
+
+function normalizePaperSectionQuestionType(
+  value: string | null,
+): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+  const questionTypeAliases: Record<string, string> = {
+    judge: "true_false",
+    true_false: "true_false",
+    判断: "true_false",
+    判断题: "true_false",
+    multi_choice: "multi_choice",
+    multiple_choice: "multi_choice",
+    多选: "multi_choice",
+    多选题: "multi_choice",
+    single_choice: "single_choice",
+    单选: "single_choice",
+    单选题: "single_choice",
+  };
+
+  return questionTypeAliases[normalizedValue] ?? null;
+}
+
+function hasPaperSectionKnowledgeScope(
+  paperSection: Record<string, unknown>,
+): boolean {
+  return (
+    readStringArray(paperSection, [
+      "knowledgeNodePublicIds",
+      "knowledge_node_public_ids",
+      "knowledgeNodeLabels",
+      "knowledge_node_labels",
+      "knowledgeNodes",
+      "knowledge_nodes",
+    ]).length > 0
+  );
 }
 
 function createPaperSectionDraftSummary(

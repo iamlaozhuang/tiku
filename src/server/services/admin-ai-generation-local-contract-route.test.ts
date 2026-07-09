@@ -111,23 +111,116 @@ function createStructuredAdminProviderContent(
     });
   }
 
+  const questionTypeDistribution =
+    resolvedGenerationParameters.questionTypeDistribution ??
+    "balanced_40_30_30";
+  const paperStructure =
+    resolvedGenerationParameters.paperStructure ?? "by_question_type";
+
   return JSON.stringify({
     totalQuestionCount: resolvedGenerationParameters.questionCount,
     sourcePreference:
       resolvedGenerationParameters.sourcePreference ?? "balanced",
-    questionTypeDistribution:
-      resolvedGenerationParameters.questionTypeDistribution ??
-      "balanced_40_30_30",
-    paperStructure:
-      resolvedGenerationParameters.paperStructure ?? "by_question_type",
-    paperSections: [
-      {
-        paperSectionType: "single_choice",
-        questionCount: resolvedGenerationParameters.questionCount,
-      },
-    ],
+    questionTypeDistribution,
+    paperStructure,
+    paperSections: createStructuredAdminProviderPaperSections(
+      resolvedGenerationParameters,
+      questionTypeDistribution,
+      paperStructure,
+    ),
     knowledgeCoverage: ["redacted_knowledge_node"],
   });
+}
+
+function createStructuredAdminProviderPaperSections(
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+  questionTypeDistribution: NonNullable<
+    AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"]
+  >,
+  paperStructure: NonNullable<
+    AiGenerationRouteIntegratedGenerationParameters["paperStructure"]
+  >,
+) {
+  const questionTypeCounts = createStructuredAdminProviderQuestionTypeCounts(
+    questionTypeDistribution,
+    generationParameters.questionCount,
+  );
+  const knowledgeNodePublicIds =
+    generationParameters.knowledgeNodePublicIds.length > 0
+      ? generationParameters.knowledgeNodePublicIds
+      : ["knowledge_node_public_default"];
+
+  return Array.from(questionTypeCounts.entries()).map(
+    ([paperSectionType, questionCount], index) => ({
+      paperSectionType,
+      questionCount,
+      ...(paperStructure === "by_knowledge_node"
+        ? {
+            knowledgeNodePublicIds,
+            title: `脱敏知识点模块 ${index + 1}`,
+          }
+        : {}),
+    }),
+  );
+}
+
+function createStructuredAdminProviderQuestionTypeCounts(
+  questionTypeDistribution: NonNullable<
+    AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"]
+  >,
+  questionCount: number,
+): Map<string, number> {
+  const ratios: Array<readonly [string, number]> =
+    questionTypeDistribution === "single_50_multi_25_true_false_25"
+      ? [
+          ["single_choice", 50],
+          ["multi_choice", 25],
+          ["true_false", 25],
+        ]
+      : questionTypeDistribution === "balanced_40_30_30"
+        ? [
+            ["single_choice", 40],
+            ["multi_choice", 30],
+            ["true_false", 30],
+          ]
+        : [
+            [
+              defaultAdminGenerationParameters.questionType ?? "single_choice",
+              100,
+            ],
+          ];
+
+  const ratioTotal = ratios.reduce((total, [, ratio]) => total + ratio, 0);
+  const counts = ratios.map(([questionType, ratio], index) => {
+    const exactCount = (questionCount * ratio) / ratioTotal;
+
+    return {
+      questionType,
+      count: Math.floor(exactCount),
+      remainder: exactCount - Math.floor(exactCount),
+      index,
+    };
+  });
+  let remainingCount =
+    questionCount - counts.reduce((total, item) => total + item.count, 0);
+
+  for (const item of [...counts].sort(
+    (first, second) =>
+      second.remainder - first.remainder || first.index - second.index,
+  )) {
+    if (remainingCount <= 0) {
+      break;
+    }
+
+    item.count += 1;
+    remainingCount -= 1;
+  }
+
+  return new Map(
+    counts
+      .filter((item) => item.count > 0)
+      .map((item) => [item.questionType, item.count]),
+  );
 }
 
 function scopedAdminAiGenerationPublicId(prefix: string) {
@@ -495,7 +588,12 @@ function createTrainingVersion(
   };
 }
 
-function createTrainingQuestion(publicId: string) {
+function createTrainingQuestion(
+  publicId: string,
+  override: Partial<
+    NonNullable<OrganizationTrainingPublishedVersionDto["questions"]>[number]
+  > = {},
+) {
   return {
     publicId,
     sequenceNumber: 1,
@@ -511,6 +609,7 @@ function createTrainingQuestion(publicId: string) {
       },
     ],
     score: 1,
+    ...override,
   } satisfies NonNullable<
     OrganizationTrainingPublishedVersionDto["questions"]
   >[number];
@@ -1553,9 +1652,11 @@ describe("admin AI generation local contract route handlers", () => {
           rows: [
             createQuestionRow({
               public_id: "platform_question_public_route_a",
+              question_type: "single_choice",
             }),
             createQuestionRow({
               public_id: "platform_question_public_route_b",
+              question_type: "multi_choice",
             }),
           ],
           total: 2,
@@ -1575,7 +1676,9 @@ describe("admin AI generation local contract route handlers", () => {
           createTrainingVersion({
             organizationPublicId: "organization_public_123",
             questions: [
-              createTrainingQuestion("enterprise_question_public_route_a"),
+              createTrainingQuestion("enterprise_question_public_route_a", {
+                questionType: "true_false",
+              }),
             ],
           }),
         ];
@@ -1583,7 +1686,9 @@ describe("admin AI generation local contract route handlers", () => {
       async listAdminVisibleQuestionSnapshotsForAiPaperSource() {
         return [
           {
-            ...createTrainingQuestion("enterprise_question_public_route_a"),
+            ...createTrainingQuestion("enterprise_question_public_route_a", {
+              questionType: "true_false",
+            }),
             standardAnswer: "A",
             analysisSummary: "SENSITIVE_ENTERPRISE_ANALYSIS",
             evidenceStatus: "sufficient",
@@ -1655,31 +1760,37 @@ describe("admin AI generation local contract route handlers", () => {
       selectedQuestionCount: 3,
       redactionStatus: "admin_safe_detail",
     });
-    expect(paperDraftSnapshot?.paperSections).toHaveLength(1);
-    expect(paperDraftSnapshot?.paperSections?.[0]).toMatchObject({
-      selectedQuestionCount: 3,
-      questions: [
-        {
-          stem: "SENSITIVE_STEM_MARKER",
-          answerAndAnalysis: {
-            visibility: "collapsed_by_default",
-            standardAnswer: "SENSITIVE_ANSWER_MARKER",
-            analysis: "SENSITIVE_ANALYSIS_MARKER",
-          },
-        },
-        {
-          stem: "SENSITIVE_STEM_MARKER",
-        },
-        {
-          stem: "SENSITIVE_ENTERPRISE_STEM",
-          answerAndAnalysis: {
-            visibility: "collapsed_by_default",
-            standardAnswer: "A",
-            analysis: "SENSITIVE_ENTERPRISE_ANALYSIS",
-          },
-        },
-      ],
-    });
+    expect(paperDraftSnapshot?.paperSections).toHaveLength(3);
+    expect(paperDraftSnapshot?.paperSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          selectedQuestionCount: 1,
+          questions: [
+            expect.objectContaining({
+              stem: "SENSITIVE_STEM_MARKER",
+              answerAndAnalysis: {
+                visibility: "collapsed_by_default",
+                standardAnswer: "SENSITIVE_ANSWER_MARKER",
+                analysis: "SENSITIVE_ANALYSIS_MARKER",
+              },
+            }),
+          ],
+        }),
+        expect.objectContaining({
+          selectedQuestionCount: 1,
+          questions: [
+            expect.objectContaining({
+              stem: "SENSITIVE_ENTERPRISE_STEM",
+              answerAndAnalysis: {
+                visibility: "collapsed_by_default",
+                standardAnswer: "A",
+                analysis: "SENSITIVE_ENTERPRISE_ANALYSIS",
+              },
+            }),
+          ],
+        }),
+      ]),
+    );
     expect(paperDraftSnapshot?.questions).toHaveLength(3);
     expect(JSON.stringify(payload)).not.toContain("SENSITIVE_STEM_MARKER");
     expect(JSON.stringify(payload)).not.toContain("SENSITIVE_ENTERPRISE_STEM");

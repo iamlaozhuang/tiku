@@ -799,6 +799,118 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
+  it("rejects paper structured previews when section counts do not match the requested question type distribution", () => {
+    const content = JSON.stringify({
+      title: "synthetic paper plan title",
+      targetQuestionCount: 30,
+      sourcePreference: "prefer_platform",
+      questionTypeDistribution: "balanced_40_30_30",
+      paperStructure: "by_question_type",
+      sections: [
+        {
+          paperSectionType: "single_choice",
+          questionCount: 30,
+        },
+      ],
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 30,
+          generationParameters: {
+            sourcePreference: "prefer_platform",
+            questionTypeDistribution: "balanced_40_30_30",
+            paperStructure: "by_question_type",
+          },
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "question_type_distribution_mismatch",
+      },
+    });
+  });
+
+  it("rejects paper structured previews when sections do not match the requested paper structure", () => {
+    const mixedQuestionTypeSection = JSON.stringify({
+      title: "synthetic paper plan title",
+      targetQuestionCount: 30,
+      sourcePreference: "prefer_platform",
+      questionTypeDistribution: "weak_point_priority",
+      paperStructure: "by_question_type",
+      sections: [
+        {
+          paperSectionType: "综合题",
+          questionTypes: ["single_choice", "multi_choice"],
+          questionCount: 30,
+        },
+      ],
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+    const missingKnowledgeNodeSection = JSON.stringify({
+      title: "synthetic paper plan title",
+      targetQuestionCount: 30,
+      sourcePreference: "prefer_platform",
+      questionTypeDistribution: "weak_point_priority",
+      paperStructure: "by_knowledge_node",
+      sections: [
+        {
+          paperSectionType: "single_choice",
+          questionCount: 30,
+        },
+      ],
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(mixedQuestionTypeSection, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 30,
+          generationParameters: {
+            sourcePreference: "prefer_platform",
+            questionTypeDistribution: "weak_point_priority",
+            paperStructure: "by_question_type",
+          },
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "paper_structure_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        missingKnowledgeNodeSection,
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 30,
+            generationParameters: {
+              sourcePreference: "prefer_platform",
+              questionTypeDistribution: "weak_point_priority",
+              paperStructure: "by_knowledge_node",
+            },
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "paper_structure_mismatch",
+      },
+    });
+  });
+
   it.each([
     [
       "top-level questionCount",

@@ -289,6 +289,115 @@ describe("AI组卷 route-visible plan local assembly", () => {
     });
   });
 
+  it("rejects route plans whose sections do not match the requested question type distribution", () => {
+    const invalidVisiblePlan = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        title: "自测组卷方案",
+        targetQuestionCount: 30,
+        sourcePreference: "prefer_platform",
+        questionTypeDistribution: "balanced_40_30_30",
+        paperStructure: "by_question_type",
+        sections: [
+          {
+            sectionKey: "single-choice",
+            title: "单选题",
+            questionType: "single_choice",
+            targetQuestionCount: 30,
+            targetScore: 2,
+            knowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+        ],
+        knowledgeCoverage: {
+          targetKnowledgeNodePublicIds: ["knowledge_node_public_a"],
+        },
+      }),
+      {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 30,
+        },
+      },
+    );
+
+    expect(
+      assembleAiPaperFromRouteVisiblePlan({
+        role: "org_advanced_admin",
+        organizationPublicId: "organization_public_a",
+        generationParameters: {
+          ...generationParameters,
+          questionCount: 30,
+          sourcePreference: "prefer_platform",
+          questionTypeDistribution: "balanced_40_30_30",
+          paperStructure: "by_question_type",
+        },
+        visibleGeneratedContent: invalidVisiblePlan,
+        platformQuestions: [
+          createQuestion({ publicId: "platform_question_public_a" }),
+        ],
+        enterpriseQuestions: [],
+      }),
+    ).toEqual({
+      status: "rejected",
+      assembly: null,
+      rejection: {
+        failureCategory: "invalid_plan_shape",
+      },
+    });
+  });
+
+  it("rejects route plans whose sections do not match the requested paper structure", () => {
+    const invalidVisiblePlan = createRouteIntegratedVisibleGeneratedContent(
+      JSON.stringify({
+        title: "知识点组卷方案",
+        targetQuestionCount: 2,
+        sourcePreference: "prefer_platform",
+        questionTypeDistribution: "weak_point_priority",
+        paperStructure: "by_knowledge_node",
+        sections: [
+          {
+            sectionKey: "single-choice",
+            title: "单选题",
+            questionType: "single_choice",
+            targetQuestionCount: 2,
+            targetScore: 2,
+          },
+        ],
+      }),
+      {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 2,
+        },
+      },
+    );
+
+    expect(
+      assembleAiPaperFromRouteVisiblePlan({
+        role: "personal_advanced_student",
+        organizationPublicId: null,
+        generationParameters: {
+          ...generationParameters,
+          questionCount: 2,
+          sourcePreference: "prefer_platform",
+          questionTypeDistribution: "weak_point_priority",
+          paperStructure: "by_knowledge_node",
+        },
+        visibleGeneratedContent: invalidVisiblePlan,
+        platformQuestions: [
+          createQuestion({ publicId: "platform_question_public_a" }),
+          createQuestion({ publicId: "platform_question_public_b" }),
+        ],
+        enterpriseQuestions: [],
+      }),
+    ).toEqual({
+      status: "rejected",
+      assembly: null,
+      rejection: {
+        failureCategory: "invalid_plan_shape",
+      },
+    });
+  });
+
   it("returns insufficiency when eligible formal sources cannot satisfy the parsed plan", () => {
     const result = assembleAiPaperFromRouteVisiblePlan({
       role: "content_admin",

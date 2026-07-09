@@ -85,10 +85,24 @@ export function assembleAiPaperFromRouteVisiblePlan(
   const parsedPlanContent = parseRoutePlanObject(
     input.visibleGeneratedContent.content,
   );
-  const normalizedPlan =
-    parsedPlanContent === null
-      ? null
-      : normalizeRoutePlan(parsedPlanContent, input.generationParameters);
+
+  if (parsedPlanContent === null) {
+    return createRejectedRouteAssemblyResult("invalid_plan_shape");
+  }
+
+  if (
+    !isRoutePlanSectionContractCompatible(
+      parsedPlanContent,
+      input.generationParameters,
+    )
+  ) {
+    return createRejectedRouteAssemblyResult("invalid_plan_shape");
+  }
+
+  const normalizedPlan = normalizeRoutePlan(
+    parsedPlanContent,
+    input.generationParameters,
+  );
 
   if (normalizedPlan === null) {
     return createRejectedRouteAssemblyResult("invalid_plan_shape");
@@ -222,6 +236,245 @@ function normalizeRoutePlanSection(
   };
 }
 
+function isRoutePlanSectionContractCompatible(
+  planContent: Record<string, unknown>,
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters,
+): boolean {
+  const sections = readArrayProperty(planContent, [
+    "sections",
+    "paperSections",
+    "paper_sections",
+  ]);
+
+  if (sections === null || sections.length === 0) {
+    return false;
+  }
+
+  const targetQuestionCount =
+    readPositiveInteger(planContent, [
+      "targetQuestionCount",
+      "totalQuestionCount",
+      "questionCount",
+    ]) ?? generationParameters.questionCount;
+
+  return (
+    areRoutePlanSectionsCompatibleWithStructure(
+      sections,
+      generationParameters.paperStructure ?? null,
+    ) &&
+    areRoutePlanSectionsCompatibleWithQuestionTypeDistribution(
+      sections,
+      generationParameters.questionTypeDistribution ?? null,
+      targetQuestionCount,
+    )
+  );
+}
+
+function areRoutePlanSectionsCompatibleWithQuestionTypeDistribution(
+  sections: readonly unknown[],
+  questionTypeDistribution:
+    | AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"]
+    | null,
+  questionCount: number,
+): boolean {
+  if (
+    questionTypeDistribution === null ||
+    questionTypeDistribution === undefined ||
+    questionTypeDistribution === "weak_point_priority"
+  ) {
+    return true;
+  }
+
+  const expectedCounts = createExpectedRoutePlanQuestionTypeCounts(
+    questionTypeDistribution,
+    questionCount,
+  );
+
+  if (expectedCounts === null) {
+    return true;
+  }
+
+  const actualCounts = readRoutePlanSectionQuestionTypeCounts(sections);
+
+  if (actualCounts === null) {
+    return true;
+  }
+
+  for (const [questionType, expectedCount] of expectedCounts) {
+    if ((actualCounts.get(questionType) ?? 0) !== expectedCount) {
+      return false;
+    }
+  }
+
+  for (const [questionType, actualCount] of actualCounts) {
+    if (!expectedCounts.has(questionType) && actualCount > 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function createExpectedRoutePlanQuestionTypeCounts(
+  questionTypeDistribution: NonNullable<
+    AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"]
+  >,
+  questionCount: number,
+): Map<QuestionType, number> | null {
+  const ratios: Array<readonly [QuestionType, number]> | null =
+    questionTypeDistribution === "balanced_40_30_30"
+      ? [
+          ["single_choice", 40],
+          ["multi_choice", 30],
+          ["true_false", 30],
+        ]
+      : questionTypeDistribution === "single_50_multi_25_true_false_25"
+        ? [
+            ["single_choice", 50],
+            ["multi_choice", 25],
+            ["true_false", 25],
+          ]
+        : null;
+
+  if (ratios === null) {
+    return null;
+  }
+
+  const ratioTotal = ratios.reduce((total, [, ratio]) => total + ratio, 0);
+  const counts = ratios.map(([questionType, ratio], index) => {
+    const exactCount = (questionCount * ratio) / ratioTotal;
+
+    return {
+      questionType: questionType as QuestionType,
+      count: Math.floor(exactCount),
+      remainder: exactCount - Math.floor(exactCount),
+      index,
+    };
+  });
+  let remainingCount =
+    questionCount - counts.reduce((total, item) => total + item.count, 0);
+
+  for (const item of [...counts].sort(
+    (first, second) =>
+      second.remainder - first.remainder || first.index - second.index,
+  )) {
+    if (remainingCount <= 0) {
+      break;
+    }
+
+    item.count += 1;
+    remainingCount -= 1;
+  }
+
+  return new Map(counts.map((item) => [item.questionType, item.count]));
+}
+
+function readRoutePlanSectionQuestionTypeCounts(
+  sections: readonly unknown[],
+): Map<QuestionType, number> | null {
+  const counts = new Map<QuestionType, number>();
+
+  for (const section of sections) {
+    if (!isRecord(section)) {
+      return null;
+    }
+
+    const questionType = readRoutePlanSectionQuestionType(section);
+    const questionCount = readPositiveInteger(section, [
+      "targetQuestionCount",
+      "questionCount",
+      "question_count",
+    ]);
+
+    if (questionType === null || questionCount === null) {
+      return null;
+    }
+
+    counts.set(questionType, (counts.get(questionType) ?? 0) + questionCount);
+  }
+
+  return counts;
+}
+
+function areRoutePlanSectionsCompatibleWithStructure(
+  sections: readonly unknown[],
+  paperStructure:
+    | AiGenerationRouteIntegratedGenerationParameters["paperStructure"]
+    | null,
+): boolean {
+  if (paperStructure === null || paperStructure === undefined) {
+    return true;
+  }
+
+  if (paperStructure === "by_question_type") {
+    return sections.every((section) => {
+      if (!isRecord(section)) {
+        return false;
+      }
+
+      const questionType = readRoutePlanSectionQuestionType(section);
+      const questionTypes = readRoutePlanSectionQuestionTypes(section);
+
+      return (
+        questionType !== null &&
+        questionTypes.length <= 1 &&
+        (questionTypes.length === 0 || questionTypes[0] === questionType)
+      );
+    });
+  }
+
+  if (paperStructure === "by_knowledge_node") {
+    return sections.every(
+      (section) =>
+        isRecord(section) && hasExplicitRoutePlanSectionKnowledgeScope(section),
+    );
+  }
+
+  return true;
+}
+
+function readRoutePlanSectionQuestionType(
+  section: Record<string, unknown>,
+): QuestionType | null {
+  return normalizeQuestionType(
+    readNonEmptyString(section, [
+      "questionType",
+      "question_type",
+      "paperSectionType",
+      "paper_section_type",
+      "type",
+    ]),
+  );
+}
+
+function readRoutePlanSectionQuestionTypes(
+  section: Record<string, unknown>,
+): QuestionType[] {
+  const questionTypes = readStringArray(section, [
+    "questionTypes",
+    "question_types",
+    "questionTypeList",
+    "question_type_list",
+  ])
+    .map(normalizeQuestionType)
+    .filter(
+      (questionType): questionType is QuestionType => questionType !== null,
+    );
+
+  return Array.from(new Set(questionTypes));
+}
+
+function hasExplicitRoutePlanSectionKnowledgeScope(
+  section: Record<string, unknown>,
+): boolean {
+  return (
+    readStringArray(section, [
+      "knowledgeNodePublicIds",
+      "knowledge_node_public_ids",
+    ]).length > 0
+  );
+}
+
 function readKnowledgeCoverage(
   planContent: Record<string, unknown>,
   generationParameters: AiGenerationRouteIntegratedGenerationParameters,
@@ -275,7 +528,12 @@ function readSourcePreference(
 }
 
 function normalizeQuestionType(value: string | null): QuestionType | null {
-  const normalizedValue = value === "judge" ? "true_false" : value;
+  const normalizedValue =
+    value === "judge"
+      ? "true_false"
+      : value === "multiple_choice"
+        ? "multi_choice"
+        : value;
 
   return normalizedValue !== null && allowedQuestionTypes.has(normalizedValue)
     ? (normalizedValue as QuestionType)
