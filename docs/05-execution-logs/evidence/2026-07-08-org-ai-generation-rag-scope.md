@@ -93,6 +93,42 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 Status: pass.
 
+## Master Post-Merge Evidence
+
+Command:
+
+```text
+corepack pnpm@10.26.1 exec vitest run src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts
+```
+
+Status: pass.
+
+Summary: 6 files / 90 tests passed on `master` after fast-forward merge.
+
+Command:
+
+```text
+corepack pnpm@10.26.1 run lint
+```
+
+Status: pass on `master` after fast-forward merge.
+
+Command:
+
+```text
+corepack pnpm@10.26.1 run typecheck
+```
+
+Status: pass on `master` after fast-forward merge.
+
+Command:
+
+```text
+git diff --check
+```
+
+Status: pass on `master` after fast-forward merge.
+
 ## Boundary Evidence
 
 - Provider call executed: no.

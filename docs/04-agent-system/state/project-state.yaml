@@ -5,8 +5,8 @@ currentPhase: org-ai-generation-rag-scope-2026-07-08
 updatedAt: "2026-07-08T19:45:00-07:00"
 latestOrgAiGenerationRagScope:
   id: org-ai-generation-rag-scope-2026-07-08
-  status: ready_for_commit
-  result: pass_source_test_precommit_ready_for_commit_merge_push_cleanup
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   branch: codex/org-ai-generation-rag-scope
   planPath: docs/05-execution-logs/task-plans/2026-07-08-org-ai-generation-rag-scope.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-rag-scope.md
@@ -30,6 +30,11 @@ latestOrgAiGenerationRagScope:
     typecheck: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
+    masterPostMergeTargetedTests: pass_6_files_90_tests
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeDiffCheck: pass
+    prePushReadiness: pending_after_master_post_merge_gate
     sourceCodeChanged: true
     testsChanged: true
 latestOrgAiGenerationParameterContract:
@@ -1586,15 +1591,15 @@ currentTask:
   id: org-ai-generation-rag-scope-2026-07-08
   title: Organization admin AI generation RAG scope resolution
   phase: org-ai-generation-rag-scope-2026-07-08
-  status: ready_for_commit
-  result: pass_source_test_precommit_ready_for_commit_merge_push_cleanup
+  status: ready_for_closeout
+  result: pass_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/org-ai-generation-rag-scope
   humanApprovalBoundary: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
   plannedAt: "2026-07-08T19:35:00-07:00"
   claimedAt: "2026-07-08T19:35:00-07:00"
-  completedAt: null
+  completedAt: "2026-07-08T19:55:00-07:00"
   targetClosureItem: Enterprise advanced admin AI question and AI paper generation local owner-preview RAG grounding carries subject, selected knowledge-node public ids, and include-descendants scope into local resource retrieval without executing Provider, reading DB, changing schema, or changing organization training publish.
   behaviorBoundary: local_owner_preview_rag_scope_resolution_only_no_provider_execution_no_db_connection_mutation_no_training_publish_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_formal_content_write
   evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_resource_or_chunk_content_no_screenshots_in_repo
@@ -1602,7 +1607,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-rag-scope.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-generation-rag-scope-audit.md
   validationSummary:
-    status: pass_source_test_precommit_ready_for_commit_merge_push_cleanup
+    status: pass_master_gates_ready_for_push_cleanup
     redTargetedRagScopeTests: pass_expected_scope_failures_before_implementation
     targetedOwnerPreviewAndRagResourceUnit: pass_2_files_13_tests
     targetedAdjacentAiGenerationUnit: pass_4_files_77_tests
@@ -1611,6 +1616,11 @@ currentTask:
     typecheck: pass
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
+    masterPostMergeTargetedTests: pass_6_files_90_tests
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeDiffCheck: pass
+    prePushReadiness: pending_after_master_post_merge_gate
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
