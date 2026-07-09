@@ -132,6 +132,7 @@ export function normalizePersonalAiGenerationResultPersistenceInput(
   const taskPublicId = normalizeRequiredText(input.taskPublicId);
   const ownerType = normalizeOwnerType(input.ownerType);
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const actorPublicId = normalizeRequiredText(input.actorPublicId);
   const taskType = normalizeTaskType(input.taskType);
   const contentRedactedSnapshot = normalizeRedactedSnapshot(
     input.contentRedactedSnapshot,
@@ -152,6 +153,7 @@ export function normalizePersonalAiGenerationResultPersistenceInput(
     taskPublicId === null ||
     ownerType === null ||
     ownerPublicId === null ||
+    actorPublicId === null ||
     taskType === null ||
     contentRedactedSnapshot === null ||
     contentDigest === null ||
@@ -173,6 +175,7 @@ export function normalizePersonalAiGenerationResultPersistenceInput(
       taskPublicId,
       ownerType,
       ownerPublicId,
+      actorPublicId,
       taskType,
       contentRedactedSnapshot,
       contentDigest,

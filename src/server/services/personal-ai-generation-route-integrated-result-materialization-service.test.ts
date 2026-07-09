@@ -125,6 +125,7 @@ describe("personal AI route-integrated result materialization service", () => {
         resultPublicId: "ai_generation_result_public_materialization_121",
         taskPublicId: "ai_generation_task_public_materialization_121",
         ownerPublicId: "student_public_materialization_121",
+        actorPublicId: "student_public_materialization_121",
         taskType: "ai_question_generation",
         contentDigest: "sha256:materialization_digest_121",
         contentPreviewMasked: "masked materialized preview",

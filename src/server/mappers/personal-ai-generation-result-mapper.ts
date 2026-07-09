@@ -10,6 +10,7 @@ export type PersonalAiGenerationResultPersistenceRow = {
   task_public_id: string;
   request_public_id: string;
   owner_public_id: string;
+  actor_public_id?: string;
   task_type: Exclude<AiGenerationTaskType, "organization_training_generation">;
   result_status: PersonalAiGenerationResultStatus;
   content_redacted_snapshot: RedactedJsonObject;

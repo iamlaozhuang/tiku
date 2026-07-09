@@ -46,6 +46,14 @@ function normalizeRequiredText(value: unknown): string | null {
   return text.length === 0 ? null : text;
 }
 
+function normalizeOptionalText(value: unknown): string | undefined | null {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  return normalizeRequiredText(value);
+}
+
 function normalizeLimit(value: unknown): number | undefined | null {
   if (value === undefined || value === null) {
     return undefined;
@@ -99,6 +107,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
   }
 
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const actorPublicId = normalizeOptionalText(input.actorPublicId);
   const ownerType = normalizeOwnerType(input.ownerType);
   const taskType = normalizeTaskType(input.taskType);
   const page = normalizeLimit(input.page);
@@ -108,6 +117,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
 
   if (
     ownerPublicId === null ||
+    actorPublicId === null ||
     ownerType === null ||
     taskType === null ||
     page === null ||
@@ -126,6 +136,7 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
     value: {
       ownerType,
       ownerPublicId,
+      actorPublicId,
       taskType,
       page,
       pageSize,
@@ -146,10 +157,16 @@ export function normalizePersonalAiGenerationResultDetailQuery(
   }
 
   const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const actorPublicId = normalizeOptionalText(input.actorPublicId);
   const ownerType = normalizeOwnerType(input.ownerType);
   const resultPublicId = normalizeRequiredText(input.resultPublicId);
 
-  if (ownerPublicId === null || ownerType === null || resultPublicId === null) {
+  if (
+    ownerPublicId === null ||
+    actorPublicId === null ||
+    ownerType === null ||
+    resultPublicId === null
+  ) {
     return {
       success: false,
       message: INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_MESSAGE,
@@ -161,6 +178,7 @@ export function normalizePersonalAiGenerationResultDetailQuery(
     value: {
       ownerType,
       ownerPublicId,
+      actorPublicId,
       resultPublicId,
     },
   };

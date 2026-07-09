@@ -14,6 +14,7 @@ export type PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus =
 export type PersonalAiGenerationResultHistoryQuery = {
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
+  actorPublicId?: string;
   taskType?: PersonalAiGenerationResultTaskType;
   page?: number;
   pageSize?: number;
@@ -24,6 +25,7 @@ export type PersonalAiGenerationResultHistoryQuery = {
 export type PersonalAiGenerationResultDetailQuery = {
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
+  actorPublicId?: string;
   resultPublicId: string;
 };
 

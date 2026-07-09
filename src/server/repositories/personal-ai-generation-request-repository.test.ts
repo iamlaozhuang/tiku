@@ -42,6 +42,8 @@ function createPersistenceRow(
     evidence_status: "none",
     citation_count: 0,
     ai_call_log_public_id: null,
+    owner_public_id: "student_public_301",
+    actor_public_id: "student_public_301",
     ...overrides,
   };
 }
@@ -51,6 +53,7 @@ function createGateway(
 ): PersonalAiGenerationRequestTaskGateway & {
   listQueries: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: string;
     page: number;
     pageSize: number;
@@ -59,12 +62,14 @@ function createGateway(
   }>;
   idempotencyQueries: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     idempotencyKeyHash: string;
   }>;
   insertInputs: unknown[];
 } {
   const listQueries: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: string;
     page: number;
     pageSize: number;
@@ -73,6 +78,7 @@ function createGateway(
   }> = [];
   const idempotencyQueries: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     idempotencyKeyHash: string;
   }> = [];
   const insertInputs: unknown[] = [];
@@ -88,6 +94,8 @@ function createGateway(
         .filter(
           (row) =>
             row.owner_public_id === query.ownerPublicId &&
+            (query.actorPublicId === undefined ||
+              row.actor_public_id === query.actorPublicId) &&
             (query.taskType === undefined || row.task_type === query.taskType),
         )
         .sort(
@@ -104,6 +112,8 @@ function createGateway(
         rows.find(
           (row) =>
             row.owner_public_id === query.ownerPublicId &&
+            (query.actorPublicId === undefined ||
+              row.actor_public_id === query.actorPublicId) &&
             row.idempotency_key_hash === query.idempotencyKeyHash,
         ) ?? null
       );
@@ -119,6 +129,7 @@ function createGateway(
         requested_at: input.requestedAt,
         idempotency_key_hash: input.idempotencyKeyHash,
         owner_public_id: input.ownerPublicId,
+        actor_public_id: input.actorPublicId,
       });
     },
   };
@@ -140,6 +151,20 @@ describe("personal AI generation request repository", () => {
     );
   });
 
+  it("builds actor-scoped organization request history conditions", () => {
+    const condition = createPersonalAiGenerationRequestHistoryCondition({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_301",
+      actorPublicId: "employee_user_public_301",
+    });
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "owner_public_id")).toBe(true);
+    expect(containsText(condition, "organization_public_301")).toBe(true);
+    expect(containsText(condition, "actor_public_id")).toBe(true);
+    expect(containsText(condition, "employee_user_public_301")).toBe(true);
+  });
+
   it("builds owner-scoped idempotency conditions", () => {
     const condition = createPersonalAiGenerationRequestIdempotencyCondition({
       ownerPublicId: "student_public_302",
@@ -153,6 +178,21 @@ describe("personal AI generation request repository", () => {
     expect(containsText(condition, "sha256:personal_ai_generation_302")).toBe(
       true,
     );
+  });
+
+  it("builds actor-scoped organization idempotency conditions", () => {
+    const condition = createPersonalAiGenerationRequestIdempotencyCondition({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_302",
+      actorPublicId: "employee_user_public_302",
+      idempotencyKeyHash: "sha256:personal_ai_generation_302",
+    });
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "owner_public_id")).toBe(true);
+    expect(containsText(condition, "organization_public_302")).toBe(true);
+    expect(containsText(condition, "actor_public_id")).toBe(true);
+    expect(containsText(condition, "employee_user_public_302")).toBe(true);
   });
 
   it("lists session-owned history newest first without exposing internal ids", async () => {
@@ -199,6 +239,46 @@ describe("personal AI generation request repository", () => {
     ]);
     expect(JSON.stringify(history)).not.toMatch(/"id":/);
     expect(JSON.stringify(history)).not.toContain("owner_public_id");
+  });
+
+  it("filters same-organization request history by actor public id", async () => {
+    const gateway = createGateway([
+      createPersistenceRow({
+        public_id: "ai_generation_task_employee_a",
+        request_public_id: "personal_ai_request_employee_a",
+        owner_public_id: "organization_public_303",
+        actor_public_id: "employee_user_public_a",
+      }),
+      createPersistenceRow({
+        public_id: "ai_generation_task_employee_b",
+        request_public_id: "personal_ai_request_employee_b",
+        owner_public_id: "organization_public_303",
+        actor_public_id: "employee_user_public_b",
+      }),
+    ]);
+    const repository = createPersonalAiGenerationRequestRepository(gateway);
+
+    const history = await repository.listRequestHistory({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_303",
+      actorPublicId: "employee_user_public_a",
+      limit: 20,
+    });
+
+    expect(gateway.listQueries).toEqual([
+      {
+        ownerType: "organization",
+        ownerPublicId: "organization_public_303",
+        actorPublicId: "employee_user_public_a",
+        page: 1,
+        pageSize: 20,
+        limit: 20,
+        offset: 0,
+      },
+    ]);
+    expect(history.map((row) => row.requestPublicId)).toEqual([
+      "personal_ai_request_employee_a",
+    ]);
   });
 
   it("filters request history by task type before applying descending pagination", async () => {
@@ -262,6 +342,7 @@ describe("personal AI generation request repository", () => {
         task_status: "running",
         idempotency_key_hash: "sha256:personal_ai_generation_existing",
         owner_public_id: "student_public_304",
+        actor_public_id: "student_public_304",
       }),
     ]);
     const repository = createPersonalAiGenerationRequestRepository(gateway);

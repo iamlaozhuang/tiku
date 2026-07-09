@@ -990,6 +990,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             const history = await requestRepository.listRequestHistory({
               ownerType: ownerScope.ownerType,
               ownerPublicId: ownerScope.ownerPublicId,
+              actorPublicId: userContext.userPublicId,
               taskType: historyQuery.taskType,
               page: historyQuery.page,
               pageSize: historyQuery.pageSize,
@@ -1002,6 +1003,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                 : await requestRepository.countRequestHistory({
                     ownerType: ownerScope.ownerType,
                     ownerPublicId: ownerScope.ownerPublicId,
+                    actorPublicId: userContext.userPublicId,
                     taskType: historyQuery.taskType,
                   });
 

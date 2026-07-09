@@ -16,6 +16,7 @@ export type PersonalAiGenerationRequestPersistenceRow = {
   citation_count: number;
   ai_call_log_public_id: string | null;
   owner_public_id?: string;
+  actor_public_id?: string;
   idempotency_key_hash?: string;
 };
 

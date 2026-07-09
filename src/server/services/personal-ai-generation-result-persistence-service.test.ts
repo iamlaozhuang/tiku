@@ -12,6 +12,7 @@ function createBaseInput() {
     resultPublicId: "personal_ai_result_public_180",
     taskPublicId: "ai_generation_task_public_180",
     ownerPublicId: "student_public_180",
+    actorPublicId: "student_public_180",
     taskType: "ai_question_generation",
     contentRedactedSnapshot: {
       redactionStatus: "redacted",

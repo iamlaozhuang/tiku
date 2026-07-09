@@ -128,6 +128,9 @@ async function listDraftResults(
   return repository.listDraftResults({
     ownerType: query.ownerType,
     ownerPublicId: query.ownerPublicId,
+    ...(query.actorPublicId === undefined
+      ? {}
+      : { actorPublicId: query.actorPublicId }),
     taskType: query.taskType,
     page: query.page,
     pageSize: query.pageSize,
@@ -143,6 +146,9 @@ async function findDraftResultDetail(
   const draftResults = await listDraftResults(repository, {
     ownerType: query.ownerType,
     ownerPublicId: query.ownerPublicId,
+    ...(query.actorPublicId === undefined
+      ? {}
+      : { actorPublicId: query.actorPublicId }),
   });
 
   return (
@@ -178,6 +184,9 @@ export function createPersonalAiGenerationResultHistoryService(
             : await repository.countDraftResults({
                 ownerType: normalizedQuery.value.ownerType,
                 ownerPublicId: normalizedQuery.value.ownerPublicId,
+                ...(normalizedQuery.value.actorPublicId === undefined
+                  ? {}
+                  : { actorPublicId: normalizedQuery.value.actorPublicId }),
                 taskType: normalizedQuery.value.taskType,
               });
         const page = normalizedQuery.value.page ?? 1;

@@ -38,6 +38,7 @@ function createPersistenceRow(
     task_public_id: "ai_generation_task_public_170",
     request_public_id: "personal_ai_request_public_170",
     owner_public_id: "student_public_170",
+    actor_public_id: "student_public_170",
     task_type: "ai_question_generation",
     result_status: "draft",
     content_redacted_snapshot: {
@@ -75,6 +76,8 @@ function createGateway(
       .filter(
         (row) =>
           row.owner_public_id === query.ownerPublicId &&
+          (query.actorPublicId === undefined ||
+            row.actor_public_id === query.actorPublicId) &&
           row.result_status === "draft" &&
           (query.taskType === undefined || row.task_type === query.taskType),
       )
@@ -124,6 +127,19 @@ describe("personal AI generation result repository", () => {
     expect(containsText(condition, "draft")).toBe(true);
   });
 
+  it("builds actor-scoped organization result history conditions", () => {
+    const condition = createPersonalAiGenerationResultHistoryCondition({
+      ownerPublicId: "organization_public_170",
+      actorPublicId: "employee_user_public_170",
+    });
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "owner_public_id")).toBe(true);
+    expect(containsText(condition, "organization_public_170")).toBe(true);
+    expect(containsText(condition, "actor_public_id")).toBe(true);
+    expect(containsText(condition, "employee_user_public_170")).toBe(true);
+  });
+
   it("builds owner-scoped result lookup by task public id", () => {
     const condition = createPersonalAiGenerationResultByTaskCondition({
       ownerPublicId: "student_public_171",
@@ -135,6 +151,20 @@ describe("personal AI generation result repository", () => {
     expect(containsText(condition, "student_public_171")).toBe(true);
     expect(containsText(condition, "task_public_id")).toBe(true);
     expect(containsText(condition, "ai_generation_task_public_171")).toBe(true);
+  });
+
+  it("builds actor-scoped result lookup by task public id", () => {
+    const condition = createPersonalAiGenerationResultByTaskCondition({
+      ownerPublicId: "organization_public_171",
+      actorPublicId: "employee_user_public_171",
+      taskPublicId: "ai_generation_task_public_171",
+    });
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "owner_public_id")).toBe(true);
+    expect(containsText(condition, "organization_public_171")).toBe(true);
+    expect(containsText(condition, "actor_public_id")).toBe(true);
+    expect(containsText(condition, "employee_user_public_171")).toBe(true);
   });
 
   it("lists owner draft results newest first without exposing internal ids or snapshots", async () => {
@@ -183,6 +213,47 @@ describe("personal AI generation result repository", () => {
     expect(JSON.stringify(draftResults)).not.toContain(
       "content_redacted_snapshot",
     );
+  });
+
+  it("filters same-organization draft results by actor public id", async () => {
+    const { gateway, listResultRows } = createGateway({
+      rows: [
+        createPersistenceRow({
+          public_id: "personal_ai_result_employee_a",
+          owner_public_id: "organization_public_172",
+          actor_public_id: "employee_user_public_a",
+        }),
+        createPersistenceRow({
+          public_id: "personal_ai_result_employee_b",
+          owner_public_id: "organization_public_172",
+          actor_public_id: "employee_user_public_b",
+        }),
+      ],
+    });
+    const repository = createPersonalAiGenerationResultRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_172",
+      actorPublicId: "employee_user_public_a",
+      page: 1,
+      pageSize: 20,
+      limit: 20,
+      offset: 0,
+    });
+
+    expect(listResultRows).toHaveBeenCalledWith({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_172",
+      actorPublicId: "employee_user_public_a",
+      page: 1,
+      pageSize: 20,
+      limit: 20,
+      offset: 0,
+    });
+    expect(draftResults.map((row) => row.resultPublicId)).toEqual([
+      "personal_ai_result_employee_a",
+    ]);
   });
 
   it("filters owner draft results by task type before pagination", async () => {
@@ -248,6 +319,7 @@ describe("personal AI generation result repository", () => {
       taskPublicId: "ai_generation_task_public_existing",
       ownerType: "personal",
       ownerPublicId: "student_public_173",
+      actorPublicId: "student_public_173",
       taskType: "ai_question_generation",
       contentRedactedSnapshot: { redactionStatus: "redacted" },
       contentDigest: "sha256:new",
@@ -298,6 +370,7 @@ describe("personal AI generation result repository", () => {
       taskPublicId: "ai_generation_task_public_created",
       ownerType: "personal",
       ownerPublicId: "student_public_174",
+      actorPublicId: "student_public_174",
       taskType: "ai_question_generation",
       contentRedactedSnapshot: {
         redactionStatus: "redacted",
@@ -315,6 +388,7 @@ describe("personal AI generation result repository", () => {
     expect(findTaskByPublicId).toHaveBeenCalledWith({
       ownerType: "personal",
       ownerPublicId: "student_public_174",
+      actorPublicId: "student_public_174",
       taskPublicId: "ai_generation_task_public_created",
     });
     expect(insertDraftResult).toHaveBeenCalledWith(
@@ -328,6 +402,7 @@ describe("personal AI generation result repository", () => {
     expect(attachResultToTask).toHaveBeenCalledWith({
       ownerType: "personal",
       ownerPublicId: "student_public_174",
+      actorPublicId: "student_public_174",
       taskPublicId: "ai_generation_task_public_created",
       resultPublicId: "personal_ai_result_public_created",
       evidenceStatus: "sufficient",

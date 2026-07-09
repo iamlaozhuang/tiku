@@ -80,6 +80,7 @@ export async function materializeRouteIntegratedRedactedResult(
     taskPublicId: requestFlow.resultReference.taskPublicId,
     ownerType,
     ownerPublicId: requestFlow.taskRequest.ownerPublicId,
+    actorPublicId: requestFlow.taskRequest.actorPublicId,
     taskType: requestFlow.resultReference.taskType,
     contentRedactedSnapshot: createContentRedactedSnapshot(
       requestFlow,

@@ -144,19 +144,33 @@ function createGateway(
 ): PersonalAiGenerationLearningSessionGateway & {
   insertedSessions: PersonalAiGenerationLearningSessionDto[];
   upsertedFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[];
+  sourceResultQueries: Array<{
+    sourceResultPublicId: string;
+    ownerPublicId: string;
+    actorPublicId: string;
+  }>;
 } {
   const insertedSessions: PersonalAiGenerationLearningSessionDto[] = [];
   const upsertedFeedbacks: PersonalAiGenerationLearningSessionAnswerFeedbackDto[] =
     [];
+  const sourceResultQueries: Array<{
+    sourceResultPublicId: string;
+    ownerPublicId: string;
+    actorPublicId: string;
+  }> = [];
 
   return {
     insertedSessions,
     upsertedFeedbacks,
-    async findSourceResultRowByPublicId() {
+    sourceResultQueries,
+    async findSourceResultRowByPublicId(query) {
+      sourceResultQueries.push(query);
+
       return {
         id: 17,
         public_id: "personal_ai_result_public_repo_001",
         owner_public_id: "student_public_repo_001",
+        actor_public_id: "student_public_repo_001",
       };
     },
     async insertOrReuseSessionRow(input) {
@@ -200,9 +214,16 @@ describe("personal AI generation learning session repository", () => {
         mistakeBookWriteStatus: "blocked",
       },
     });
+    expect(gateway.sourceResultQueries).toEqual([
+      {
+        sourceResultPublicId: "personal_ai_result_public_repo_001",
+        ownerPublicId: "student_public_repo_001",
+        actorPublicId: "student_public_repo_001",
+      },
+    ]);
   });
 
-  it("fails closed when the source generation result is missing", async () => {
+  it("fails closed when the source generation result is missing or actor-mismatched", async () => {
     const repository = createPersonalAiGenerationLearningSessionRepository(
       createGateway({
         async findSourceResultRowByPublicId() {
@@ -215,6 +236,46 @@ describe("personal AI generation learning session repository", () => {
       status: "blocked",
       blockReason: "source_result_not_found",
     });
+  });
+
+  it("fails closed when an organization-owned source result belongs to another employee actor", async () => {
+    const gateway = createGateway({
+      async findSourceResultRowByPublicId(query) {
+        gateway.sourceResultQueries.push(query);
+
+        return query.actorPublicId === "employee_user_public_owner"
+          ? {
+              id: 17,
+              public_id: query.sourceResultPublicId,
+              owner_public_id: query.ownerPublicId,
+              actor_public_id: query.actorPublicId,
+            }
+          : null;
+      },
+    });
+    const repository =
+      createPersonalAiGenerationLearningSessionRepository(gateway);
+
+    await expect(
+      repository.saveSession(
+        createSession({
+          ownerType: "organization",
+          ownerPublicId: "organization_public_repo_001",
+          actorPublicId: "employee_user_public_other",
+        }),
+      ),
+    ).resolves.toEqual({
+      status: "blocked",
+      blockReason: "source_result_not_found",
+    });
+    expect(gateway.insertedSessions).toEqual([]);
+    expect(gateway.sourceResultQueries).toEqual([
+      {
+        sourceResultPublicId: "personal_ai_result_public_repo_001",
+        ownerPublicId: "organization_public_repo_001",
+        actorPublicId: "employee_user_public_other",
+      },
+    ]);
   });
 
   it("returns persisted session and latest answer feedback snapshots", async () => {

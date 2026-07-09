@@ -31,6 +31,7 @@ export type PersonalAiGenerationResultTaskRow = {
 export type ListPersonalAiGenerationResultQuery = {
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
+  actorPublicId?: string;
   taskType?: PersonalAiGenerationResultTaskType;
   page?: number;
   pageSize?: number;
@@ -52,6 +53,7 @@ export type InsertPersonalAiGenerationDraftResultInput =
 export type AttachPersonalAiGenerationResultToTaskInput = {
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
+  actorPublicId?: string;
   taskPublicId: string;
   resultPublicId: string;
   evidenceStatus: EvidenceStatus;
@@ -78,6 +80,7 @@ export type PersonalAiGenerationResultTaskGateway = {
   listResultRows(query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: PersonalAiGenerationResultTaskType;
     page: number;
     pageSize: number;
@@ -87,16 +90,19 @@ export type PersonalAiGenerationResultTaskGateway = {
   countResultRows?(query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: PersonalAiGenerationResultTaskType;
   }): Promise<number>;
   findResultByTaskPublicId(query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
     ownerPublicId: string;
+    actorPublicId?: string;
     taskPublicId: string;
   }): Promise<PersonalAiGenerationResultPersistenceRow | null>;
   findTaskByPublicId(query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
     ownerPublicId: string;
+    actorPublicId?: string;
     taskPublicId: string;
   }): Promise<PersonalAiGenerationResultTaskRow | null>;
   insertDraftResult(
@@ -140,9 +146,10 @@ const personalAiGenerationResultSelection = {
 
 export function createPersonalAiGenerationResultHistoryCondition(query: {
   ownerPublicId: string;
+  actorPublicId?: string;
   taskType?: PersonalAiGenerationResultTaskType;
 }): SQL {
-  return and(
+  const conditions = [
     eq(personalAiGenerationResult.owner_public_id, query.ownerPublicId),
     query.taskType === undefined
       ? inArray(
@@ -151,17 +158,30 @@ export function createPersonalAiGenerationResultHistoryCondition(query: {
         )
       : eq(personalAiGenerationResult.task_type, query.taskType),
     eq(personalAiGenerationResult.result_status, "draft"),
-  ) as SQL;
+  ];
+
+  if (query.actorPublicId !== undefined) {
+    conditions.push(eq(aiGenerationTask.actor_public_id, query.actorPublicId));
+  }
+
+  return and(...conditions) as SQL;
 }
 
 export function createPersonalAiGenerationResultByTaskCondition(query: {
   ownerPublicId: string;
+  actorPublicId?: string;
   taskPublicId: string;
 }): SQL {
-  return and(
+  const conditions = [
     eq(personalAiGenerationResult.owner_public_id, query.ownerPublicId),
     eq(personalAiGenerationResult.task_public_id, query.taskPublicId),
-  ) as SQL;
+  ];
+
+  if (query.actorPublicId !== undefined) {
+    conditions.push(eq(aiGenerationTask.actor_public_id, query.actorPublicId));
+  }
+
+  return and(...conditions) as SQL;
 }
 
 export function createPersonalAiGenerationResultRepository(
@@ -174,6 +194,9 @@ export function createPersonalAiGenerationResultRepository(
       const rows = await gateway.listResultRows({
         ownerType: query.ownerType,
         ownerPublicId: query.ownerPublicId,
+        ...(query.actorPublicId === undefined
+          ? {}
+          : { actorPublicId: query.actorPublicId }),
         taskType: query.taskType,
         page,
         pageSize,
@@ -189,6 +212,7 @@ export function createPersonalAiGenerationResultRepository(
       const existingRow = await gateway.findResultByTaskPublicId({
         ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
+        actorPublicId: input.actorPublicId,
         taskPublicId: input.taskPublicId,
       });
 
@@ -202,6 +226,7 @@ export function createPersonalAiGenerationResultRepository(
       const taskRow = await gateway.findTaskByPublicId({
         ownerType: input.ownerType,
         ownerPublicId: input.ownerPublicId,
+        actorPublicId: input.actorPublicId,
         taskPublicId: input.taskPublicId,
       });
 
@@ -217,6 +242,7 @@ export function createPersonalAiGenerationResultRepository(
         (await gateway.findResultByTaskPublicId({
           ownerType: input.ownerType,
           ownerPublicId: input.ownerPublicId,
+          actorPublicId: input.actorPublicId,
           taskPublicId: input.taskPublicId,
         }));
 
@@ -228,6 +254,7 @@ export function createPersonalAiGenerationResultRepository(
         await gateway.attachResultToTask({
           ownerType: input.ownerType,
           ownerPublicId: input.ownerPublicId,
+          actorPublicId: input.actorPublicId,
           taskPublicId: input.taskPublicId,
           resultPublicId: input.resultPublicId,
           evidenceStatus: input.evidenceStatus,
@@ -248,6 +275,9 @@ export function createPersonalAiGenerationResultRepository(
             gateway.countResultRows?.({
               ownerType: query.ownerType,
               ownerPublicId: query.ownerPublicId,
+              ...(query.actorPublicId === undefined
+                ? {}
+                : { actorPublicId: query.actorPublicId }),
               taskType: query.taskType,
             }) ?? 0,
   };
@@ -266,9 +296,17 @@ export function createPostgresPersonalAiGenerationResultRepository(
       const rows = await getDatabase()
         .select(personalAiGenerationResultSelection)
         .from(personalAiGenerationResult)
+        .innerJoin(
+          aiGenerationTask,
+          eq(
+            personalAiGenerationResult.ai_generation_task_id,
+            aiGenerationTask.id,
+          ),
+        )
         .where(
           createPersonalAiGenerationResultHistoryCondition({
             ownerPublicId: query.ownerPublicId,
+            actorPublicId: query.actorPublicId,
             taskType: query.taskType,
           }),
         )
@@ -285,9 +323,17 @@ export function createPostgresPersonalAiGenerationResultRepository(
       const [totalRow] = await getDatabase()
         .select({ value: count() })
         .from(personalAiGenerationResult)
+        .innerJoin(
+          aiGenerationTask,
+          eq(
+            personalAiGenerationResult.ai_generation_task_id,
+            aiGenerationTask.id,
+          ),
+        )
         .where(
           createPersonalAiGenerationResultHistoryCondition({
             ownerPublicId: query.ownerPublicId,
+            actorPublicId: query.actorPublicId,
             taskType: query.taskType,
           }),
         );
@@ -356,6 +402,7 @@ export function createPostgresPersonalAiGenerationResultRepository(
           createPersonalAiGenerationTaskLookupCondition({
             ownerType: input.ownerType,
             ownerPublicId: input.ownerPublicId,
+            actorPublicId: input.actorPublicId,
             taskPublicId: input.taskPublicId,
           }),
         );
@@ -381,12 +428,17 @@ async function findResultByTaskPublicId(
   query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
     ownerPublicId: string;
+    actorPublicId?: string;
     taskPublicId: string;
   },
 ): Promise<PersonalAiGenerationResultPersistenceRow | null> {
   const [row] = await database
     .select(personalAiGenerationResultSelection)
     .from(personalAiGenerationResult)
+    .innerJoin(
+      aiGenerationTask,
+      eq(personalAiGenerationResult.ai_generation_task_id, aiGenerationTask.id),
+    )
     .where(createPersonalAiGenerationResultByTaskCondition(query))
     .limit(1);
 
@@ -396,9 +448,10 @@ async function findResultByTaskPublicId(
 function createPersonalAiGenerationTaskLookupCondition(query: {
   ownerType?: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
+  actorPublicId?: string;
   taskPublicId: string;
 }): SQL {
-  return and(
+  const conditions = [
     eq(aiGenerationTask.owner_type, query.ownerType ?? "personal"),
     eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
     eq(aiGenerationTask.public_id, query.taskPublicId),
@@ -406,7 +459,13 @@ function createPersonalAiGenerationTaskLookupCondition(query: {
       aiGenerationTask.task_type,
       PERSONAL_AI_GENERATION_RESULT_TASK_TYPES,
     ),
-  ) as SQL;
+  ];
+
+  if (query.actorPublicId !== undefined) {
+    conditions.push(eq(aiGenerationTask.actor_public_id, query.actorPublicId));
+  }
+
+  return and(...conditions) as SQL;
 }
 
 function resolveResultHistoryLimit(limit: number | undefined): number {

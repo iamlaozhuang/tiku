@@ -31,6 +31,7 @@ export type PersonalAiGenerationResultPersistenceInput = {
   taskPublicId: string;
   ownerType: PersonalAiGenerationResultOwnerType;
   ownerPublicId: string;
+  actorPublicId: string;
   taskType: PersonalAiGenerationResultTaskType;
   contentRedactedSnapshot: RedactedJsonObject;
   contentDigest: string;

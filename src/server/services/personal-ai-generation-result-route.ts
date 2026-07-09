@@ -147,6 +147,7 @@ function createResultHistoryQuery(
   return {
     ownerType: ownerScope.ownerType,
     ownerPublicId: ownerScope.ownerPublicId,
+    actorPublicId: userContext.userPublicId,
     taskType: readTaskTypeInput(searchParams),
     page,
     pageSize,
@@ -168,6 +169,7 @@ async function createResultDetailQuery(
   return {
     ownerType: ownerScope.ownerType,
     ownerPublicId: ownerScope.ownerPublicId,
+    actorPublicId: userContext.userPublicId,
     resultPublicId: publicId,
   };
 }

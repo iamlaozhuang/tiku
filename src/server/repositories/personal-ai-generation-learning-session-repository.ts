@@ -1,4 +1,5 @@
 import {
+  aiGenerationTask,
   personalAiGenerationResult,
   personalAiLearningAnswerFeedback,
   personalAiLearningSession,
@@ -35,6 +36,7 @@ export type PersonalAiGenerationLearningSessionSourceResultRow = {
   id: number;
   public_id: string;
   owner_public_id: string;
+  actor_public_id: string;
 };
 
 export type PersonalAiGenerationLearningSessionRow = {
@@ -80,6 +82,7 @@ export type PersonalAiGenerationLearningSessionGateway = {
   findSourceResultRowByPublicId(query: {
     sourceResultPublicId: string;
     ownerPublicId: string;
+    actorPublicId: string;
   }): Promise<PersonalAiGenerationLearningSessionSourceResultRow | null>;
   insertOrReuseSessionRow(input: {
     sourceResultId: number;
@@ -146,6 +149,7 @@ const personalAiLearningSourceResultSelection = {
   id: personalAiGenerationResult.id,
   public_id: personalAiGenerationResult.public_id,
   owner_public_id: personalAiGenerationResult.owner_public_id,
+  actor_public_id: aiGenerationTask.actor_public_id,
 };
 
 export function createPersonalAiGenerationLearningSessionRepository(
@@ -163,6 +167,7 @@ export function createPersonalAiGenerationLearningSessionRepository(
       const sourceResult = await gateway.findSourceResultRowByPublicId({
         sourceResultPublicId: session.sourceResultPublicId,
         ownerPublicId: session.ownerPublicId,
+        actorPublicId: session.actorPublicId,
       });
 
       if (sourceResult === null) {
@@ -223,6 +228,13 @@ export function createPostgresPersonalAiGenerationLearningSessionRepository(
       const [row] = await getDatabase()
         .select(personalAiLearningSourceResultSelection)
         .from(personalAiGenerationResult)
+        .innerJoin(
+          aiGenerationTask,
+          eq(
+            personalAiGenerationResult.ai_generation_task_id,
+            aiGenerationTask.id,
+          ),
+        )
         .where(
           and(
             eq(
@@ -230,6 +242,7 @@ export function createPostgresPersonalAiGenerationLearningSessionRepository(
               query.sourceResultPublicId,
             ),
             eq(personalAiGenerationResult.owner_public_id, query.ownerPublicId),
+            eq(aiGenerationTask.actor_public_id, query.actorPublicId),
           ),
         )
         .limit(1);

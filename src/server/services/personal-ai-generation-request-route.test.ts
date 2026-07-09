@@ -188,6 +188,7 @@ function createRequestRepository(
 > & {
   calls: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: string;
     page?: number;
     pageSize?: number;
@@ -198,6 +199,7 @@ function createRequestRepository(
 } {
   const calls: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: string;
     page?: number;
     pageSize?: number;
@@ -1028,6 +1030,7 @@ describe("personal AI generation request route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: undefined,
         page: 1,
         pageSize: 10,
@@ -1074,6 +1077,7 @@ describe("personal AI generation request route handlers", () => {
       {
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
+        actorPublicId: employeeUserContext.userPublicId,
         taskType: "ai_question_generation",
         page: 2,
         pageSize: 5,
@@ -1102,6 +1106,7 @@ describe("personal AI generation request route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: "ai_paper_generation",
         page: 2,
         pageSize: 5,
@@ -1179,6 +1184,7 @@ describe("personal AI generation request route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: undefined,
         page: 1,
         pageSize: 10,
@@ -2571,6 +2577,7 @@ describe("personal AI generation request route handlers", () => {
         resultPublicId: "ai_generation_result_public_route_123",
         taskPublicId: "ai_generation_task_public_route_123",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: "ai_question_generation",
         contentDigest: "sha256:route_materialized_digest_123",
         contentPreviewMasked: "masked route result preview",

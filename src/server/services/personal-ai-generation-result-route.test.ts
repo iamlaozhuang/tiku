@@ -80,6 +80,7 @@ function createResultRepository(
 ): Pick<PersonalAiGenerationResultRepository, "listDraftResults"> & {
   calls: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: string;
     page?: number;
     pageSize?: number;
@@ -89,6 +90,7 @@ function createResultRepository(
 } {
   const calls: Array<{
     ownerPublicId: string;
+    actorPublicId?: string;
     taskType?: string;
     page?: number;
     pageSize?: number;
@@ -392,6 +394,7 @@ describe("personal AI generation result route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: undefined,
         page: undefined,
         pageSize: undefined,
@@ -437,6 +440,7 @@ describe("personal AI generation result route handlers", () => {
       {
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
+        actorPublicId: employeeUserContext.userPublicId,
         taskType: "ai_paper_generation",
         page: 2,
         pageSize: 5,
@@ -465,6 +469,7 @@ describe("personal AI generation result route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: "ai_paper_generation",
         page: 2,
         pageSize: 5,
@@ -605,6 +610,7 @@ describe("personal AI generation result route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: undefined,
         page: undefined,
         pageSize: undefined,
@@ -654,6 +660,7 @@ describe("personal AI generation result route handlers", () => {
       {
         ownerType: "organization",
         ownerPublicId: employeeUserContext.organizationPublicId,
+        actorPublicId: employeeUserContext.userPublicId,
         taskType: undefined,
         page: undefined,
         pageSize: undefined,
@@ -715,6 +722,7 @@ describe("personal AI generation result route handlers", () => {
       {
         ownerType: "personal",
         ownerPublicId: userContext.userPublicId,
+        actorPublicId: userContext.userPublicId,
         taskType: undefined,
         page: undefined,
         pageSize: undefined,
