@@ -1743,7 +1743,7 @@ currentTask:
   id: content-ai-adoption-read-model-2026-07-09
   title: Content AI adoption read model
   phase: content-ai-adoption-read-model-2026-07-09
-  status: ready_for_push_cleanup
+  status: ready_for_closeout
   result: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
