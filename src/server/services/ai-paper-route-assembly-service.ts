@@ -155,7 +155,9 @@ function normalizeRoutePlan(
     difficultyGoal:
       readNonEmptyString(planContent, ["difficultyGoal", "difficulty"]) ??
       generationParameters.difficulty,
-    sourcePreference: readSourcePreference(planContent),
+    sourcePreference:
+      readSourcePreference(planContent) ??
+      generationParameters.sourcePreference,
     sections: normalizedSections,
     knowledgeCoverage: readKnowledgeCoverage(planContent, generationParameters),
   };

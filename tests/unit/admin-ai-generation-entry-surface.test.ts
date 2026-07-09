@@ -1347,6 +1347,12 @@ describe("admin AI generation entry surfaces", () => {
     fireEvent.click(
       await screen.findByLabelText("选择知识点 营销/基础知识/市场调研"),
     );
+    fireEvent.change(screen.getByLabelText("题型分布"), {
+      target: { value: "单选 50% / 多选 25% / 判断 25%" },
+    });
+    fireEvent.change(screen.getByLabelText("试卷结构"), {
+      target: { value: "按知识点模块组织" },
+    });
     fireEvent.click(screen.getByTestId("admin-ai-generation-submit"));
 
     await waitFor(() =>
@@ -1370,6 +1376,8 @@ describe("admin AI generation entry surfaces", () => {
         knowledgeNodeMode: "selected",
         knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
         sourcePreference: "balanced",
+        questionTypeDistribution: "single_50_multi_25_true_false_25",
+        paperStructure: "by_knowledge_node",
       },
     });
   });

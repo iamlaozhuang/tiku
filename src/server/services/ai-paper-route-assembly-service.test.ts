@@ -183,6 +183,71 @@ describe("AI组卷 route-visible plan local assembly", () => {
     });
   });
 
+  it("falls back to submitted source preference when the route plan omits it", () => {
+    const visiblePlanWithoutSourcePreference =
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          title: "自测组卷方案",
+          targetQuestionCount: 2,
+          sections: [
+            {
+              sectionKey: "single-choice",
+              title: "单选题",
+              questionType: "single_choice",
+              targetQuestionCount: 2,
+              targetScore: 2,
+              knowledgeNodePublicIds: ["knowledge_node_public_a"],
+            },
+          ],
+          knowledgeCoverage: {
+            targetKnowledgeNodePublicIds: ["knowledge_node_public_a"],
+          },
+        }),
+        {
+          structuredPreview: {
+            kind: "paper_draft",
+            requestedQuestionCount: 2,
+          },
+        },
+      );
+
+    const result = assembleAiPaperFromRouteVisiblePlan({
+      role: "org_advanced_admin",
+      organizationPublicId: "organization_public_a",
+      generationParameters: {
+        ...generationParameters,
+        questionCount: 2,
+        sourcePreference: "prefer_enterprise",
+      },
+      visibleGeneratedContent: visiblePlanWithoutSourcePreference,
+      platformQuestions: [
+        createQuestion({ publicId: "platform_question_public_a" }),
+        createQuestion({ publicId: "platform_question_public_b" }),
+      ],
+      enterpriseQuestions: [
+        createQuestion({
+          publicId: "enterprise_question_public_a",
+          sourceKind: "enterprise_training_snapshot",
+          organizationPublicId: "organization_public_a",
+          status: "published",
+        }),
+        createQuestion({
+          publicId: "enterprise_question_public_b",
+          sourceKind: "enterprise_training_snapshot",
+          organizationPublicId: "organization_public_a",
+          status: "published",
+        }),
+      ],
+    });
+
+    expect(result.status).toBe("assembled");
+    expect(
+      result.assembly?.container.sections[0]?.selectedQuestions.map(
+        (question) => question.questionPublicId,
+      ),
+    ).toEqual(["enterprise_question_public_a", "enterprise_question_public_b"]);
+  });
+
   it("rejects failed structured preview or nested Provider question content before local selection", () => {
     const forbiddenVisibleContent =
       createRouteIntegratedVisibleGeneratedContent(

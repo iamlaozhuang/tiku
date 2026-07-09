@@ -380,6 +380,23 @@ function createQuestionSetStructuredPreview(
     };
   }
 
+  const questionContractFailure = findQuestionSetContractFailure(
+    questions,
+    options.generationParameters ?? null,
+  );
+
+  if (questionContractFailure !== null) {
+    return {
+      kind: "question_set",
+      parseStatus: "failed",
+      requestedQuestionCount: options.requestedQuestionCount,
+      actualQuestionCount: questions.length,
+      failureCategory: questionContractFailure,
+      draftCount: 0,
+      draftSummaries: [],
+    };
+  }
+
   return {
     kind: "question_set",
     parseStatus: "parsed",
@@ -390,6 +407,47 @@ function createQuestionSetStructuredPreview(
       createQuestionDraftSummary(questionDraft, index),
     ),
   };
+}
+
+function findQuestionSetContractFailure(
+  questions: unknown[],
+  generationParameters: Extract<
+    AiGenerationRouteIntegratedStructuredPreviewOptions,
+    { kind: "question_set" }
+  >["generationParameters"],
+): "question_type_mismatch" | "difficulty_mismatch" | null {
+  const expectedQuestionType = normalizeQuestionTypeContractValue(
+    generationParameters?.questionType,
+  );
+  const expectedDifficulty = normalizeDifficultyContractValue(
+    generationParameters?.difficulty,
+  );
+
+  for (const questionDraft of questions) {
+    const questionDraftObject = isRecord(questionDraft) ? questionDraft : {};
+    const actualQuestionType = normalizeQuestionTypeContractValue(
+      readSafeLabel(questionDraftObject, ["questionType", "question_type"]),
+    );
+    const actualDifficulty = normalizeDifficultyContractValue(
+      readSafeLabel(questionDraftObject, ["difficulty"]),
+    );
+
+    if (
+      expectedQuestionType !== null &&
+      actualQuestionType !== expectedQuestionType
+    ) {
+      return "question_type_mismatch";
+    }
+
+    if (
+      expectedDifficulty !== null &&
+      actualDifficulty !== expectedDifficulty
+    ) {
+      return "difficulty_mismatch";
+    }
+  }
+
+  return null;
 }
 
 function createQuestionDraftSummary(
@@ -611,6 +669,25 @@ function createPaperDraftStructuredPreview(
     };
   }
 
+  const paperContractFailure = findPaperDraftContractFailure(
+    parsedContent,
+    options.generationParameters ?? null,
+  );
+
+  if (paperContractFailure !== null) {
+    return {
+      kind: "paper_draft",
+      parseStatus: "failed",
+      failureCategory: paperContractFailure,
+      requestedQuestionCount,
+      paperSectionCount: paperSections.length,
+      questionCount,
+      questionTypeDistributionCount,
+      knowledgeCoverageCount,
+      reviewStatus: "structured_parse_failed",
+    };
+  }
+
   return {
     kind: "paper_draft",
     parseStatus: "parsed",
@@ -621,6 +698,63 @@ function createPaperDraftStructuredPreview(
     paperSectionSummaries,
     reviewStatus: "draft_review_required",
   };
+}
+
+function findPaperDraftContractFailure(
+  parsedContent: Record<string, unknown>,
+  generationParameters: Extract<
+    AiGenerationRouteIntegratedStructuredPreviewOptions,
+    { kind: "paper_draft" }
+  >["generationParameters"],
+):
+  | "source_preference_mismatch"
+  | "question_type_distribution_mismatch"
+  | "paper_structure_mismatch"
+  | null {
+  const expectedSourcePreference = generationParameters?.sourcePreference;
+  const actualSourcePreference = readSafeLabel(parsedContent, [
+    "sourcePreference",
+    "source_preference",
+  ]);
+
+  if (
+    expectedSourcePreference !== null &&
+    expectedSourcePreference !== undefined &&
+    actualSourcePreference !== expectedSourcePreference
+  ) {
+    return "source_preference_mismatch";
+  }
+
+  const expectedQuestionTypeDistribution =
+    generationParameters?.questionTypeDistribution;
+  const actualQuestionTypeDistribution = readSafeLabel(parsedContent, [
+    "questionTypeDistribution",
+    "question_type_distribution",
+  ]);
+
+  if (
+    expectedQuestionTypeDistribution !== null &&
+    expectedQuestionTypeDistribution !== undefined &&
+    actualQuestionTypeDistribution !== expectedQuestionTypeDistribution
+  ) {
+    return "question_type_distribution_mismatch";
+  }
+
+  const expectedPaperStructure = generationParameters?.paperStructure;
+  const actualPaperStructure = readSafeLabel(parsedContent, [
+    "paperStructure",
+    "paper_structure",
+  ]);
+
+  if (
+    expectedPaperStructure !== null &&
+    expectedPaperStructure !== undefined &&
+    actualPaperStructure !== expectedPaperStructure
+  ) {
+    return "paper_structure_mismatch";
+  }
+
+  return null;
 }
 
 function createPaperSectionDraftSummary(
@@ -798,6 +932,50 @@ function readArrayProperty(
   }
 
   return null;
+}
+
+function normalizeQuestionTypeContractValue(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+  const questionTypeAliases: Record<string, string> = {
+    case_analysis: "case_analysis",
+    案例分析: "case_analysis",
+    案例分析题: "case_analysis",
+    judge: "judge",
+    true_false: "judge",
+    判断: "judge",
+    判断题: "judge",
+    multiple_choice: "multiple_choice",
+    多选: "multiple_choice",
+    多选题: "multiple_choice",
+    single_choice: "single_choice",
+    单选: "single_choice",
+    单选题: "single_choice",
+  };
+
+  return questionTypeAliases[normalizedValue] ?? normalizedValue;
+}
+
+function normalizeDifficultyContractValue(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+  const difficultyAliases: Record<string, string> = {
+    basic: "easy",
+    easy: "easy",
+    基础: "easy",
+    hard: "hard",
+    进阶: "hard",
+    medium: "medium",
+    中等: "medium",
+  };
+
+  return difficultyAliases[normalizedValue] ?? normalizedValue;
 }
 
 function readSafeLabel(

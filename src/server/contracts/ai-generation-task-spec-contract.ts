@@ -33,9 +33,16 @@ export type AiGenerationSharedTaskSpec = {
 };
 
 export type AiGenerationSharedTaskPreviewOptionsInput = {
-  generationParameters?: Pick<
-    AiGenerationRouteIntegratedGenerationParameters,
-    "questionCount"
+  generationParameters?: Partial<
+    Pick<
+      AiGenerationRouteIntegratedGenerationParameters,
+      | "questionCount"
+      | "questionType"
+      | "difficulty"
+      | "sourcePreference"
+      | "questionTypeDistribution"
+      | "paperStructure"
+    >
   > | null;
 };
 
@@ -62,6 +69,8 @@ export const aiGenerationSharedTaskSpecs = {
       "targetQuestionCount",
       "difficultyGoal",
       "sourcePreference",
+      "questionTypeDistribution",
+      "paperStructure",
       "sections",
       "knowledgeCoverage",
     ],
@@ -119,9 +128,11 @@ export function createAiGenerationSharedTaskStructuredPreviewOptions(
     ? {
         kind: "question_set",
         requestedQuestionCount,
+        generationParameters: input.generationParameters ?? null,
       }
     : {
         kind: "paper_draft",
         requestedQuestionCount,
+        generationParameters: input.generationParameters ?? null,
       };
 }

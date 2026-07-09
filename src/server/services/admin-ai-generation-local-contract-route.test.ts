@@ -92,28 +92,40 @@ const insufficientAdminGroundingContext: AiGenerationRouteIntegratedGroundingCon
 
 function createStructuredAdminProviderContent(
   generationKind: "question" | "paper",
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null = defaultAdminGenerationParameters,
 ): string {
+  const resolvedGenerationParameters =
+    generationParameters ?? defaultAdminGenerationParameters;
+
   if (generationKind === "question") {
     return JSON.stringify({
-      questions: Array.from({ length: 10 }, () => ({
-        questionType: "single_choice",
-        difficulty: "medium",
-        knowledgeNodeLabels: ["redacted_knowledge_node"],
-      })),
+      questions: Array.from(
+        { length: resolvedGenerationParameters.questionCount },
+        () => ({
+          questionType:
+            resolvedGenerationParameters.questionType ?? "single_choice",
+          difficulty: resolvedGenerationParameters.difficulty ?? "medium",
+          knowledgeNodeLabels: ["redacted_knowledge_node"],
+        }),
+      ),
     });
   }
 
   return JSON.stringify({
-    totalQuestionCount: 50,
+    totalQuestionCount: resolvedGenerationParameters.questionCount,
+    sourcePreference:
+      resolvedGenerationParameters.sourcePreference ?? "balanced",
+    questionTypeDistribution:
+      resolvedGenerationParameters.questionTypeDistribution ??
+      "balanced_40_30_30",
+    paperStructure:
+      resolvedGenerationParameters.paperStructure ?? "by_question_type",
     paperSections: [
       {
         paperSectionType: "single_choice",
-        questionCount: 50,
+        questionCount: resolvedGenerationParameters.questionCount,
       },
     ],
-    questionTypeDistribution: {
-      single_choice: 50,
-    },
     knowledgeCoverage: ["redacted_knowledge_node"],
   });
 }
@@ -352,6 +364,7 @@ function createFakeProviderRuntimeBridgeControl(
               input.content ??
               createStructuredAdminProviderContent(
                 providerInput.requestContext.generationKind,
+                providerInput.requestContext.generationParameters,
               ),
             contentVisibility: "transient_response_only",
             persistenceStatus: "not_persisted",
@@ -1286,24 +1299,8 @@ describe("admin AI generation local contract route handlers", () => {
 
         return createAssembledPaperRouteResult();
       },
-      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
-        providerInputs,
-        {
-          content: JSON.stringify({
-            totalQuestionCount: 3,
-            paperSections: [
-              {
-                paperSectionType: "single_choice",
-                questionCount: 3,
-              },
-            ],
-            questionTypeDistribution: {
-              single_choice: 3,
-            },
-            knowledgeCoverage: ["redacted_knowledge_node"],
-          }),
-        },
-      ),
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
         generationParameters: {
@@ -1427,24 +1424,8 @@ describe("admin AI generation local contract route handlers", () => {
       organizationPublicId: "organization_public_123",
       questionRepository,
       organizationTrainingRepository,
-      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
-        providerInputs,
-        {
-          content: JSON.stringify({
-            totalQuestionCount: 3,
-            paperSections: [
-              {
-                paperSectionType: "single_choice",
-                questionCount: 3,
-              },
-            ],
-            questionTypeDistribution: {
-              single_choice: 3,
-            },
-            knowledgeCoverage: ["redacted_knowledge_node"],
-          }),
-        },
-      ),
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
         generationParameters: {
@@ -1536,24 +1517,8 @@ describe("admin AI generation local contract route handlers", () => {
 
         return createRejectedPaperRouteResult();
       },
-      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
-        providerInputs,
-        {
-          content: JSON.stringify({
-            totalQuestionCount: 3,
-            paperSections: [
-              {
-                paperSectionType: "single_choice",
-                questionCount: 3,
-              },
-            ],
-            questionTypeDistribution: {
-              single_choice: 3,
-            },
-            knowledgeCoverage: ["redacted_knowledge_node"],
-          }),
-        },
-      ),
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
       body: {
         generationKind: "paper",
         generationParameters: {
@@ -1736,6 +1701,8 @@ describe("admin AI generation local contract route handlers", () => {
         generationParameters: {
           ...defaultAdminGenerationParameters,
           questionCount: 50,
+          questionTypeDistribution: "balanced_40_30_30",
+          paperStructure: "by_question_type",
         },
         requestPublicId: "admin_ai_generation_request_public_route_test",
         taskPublicId: scopedAdminAiGenerationPublicId(
@@ -2281,6 +2248,48 @@ describe("admin AI generation local contract route handlers", () => {
     ).toBe("ai_question_generation");
   });
 
+  it("passes organization AI paper distribution and structure parameters through local contracts", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      runtimeBridgeControl:
+        createFakeProviderRuntimeBridgeControl(providerInputs),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "paper",
+        requestedRuntimeMode: "route_integrated_provider",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 30,
+          sourcePreference: "prefer_platform",
+          questionTypeDistribution: "single_50_multi_25_true_false_25",
+          paperStructure: "by_knowledge_node",
+        },
+      },
+    });
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        taskRequest: {
+          taskType: "ai_paper_generation",
+        },
+      },
+    });
+    expect(
+      providerInputs[0]?.requestContext.generationParameters,
+    ).toMatchObject({
+      questionCount: 30,
+      sourcePreference: "prefer_platform",
+      questionTypeDistribution: "single_50_multi_25_true_false_25",
+      paperStructure: "by_knowledge_node",
+    });
+  });
+
   it("rejects malformed admin AI generation knowledge node public ids", async () => {
     const taskPersistenceRecorder = createTaskPersistenceRecorder();
     const response = await postLocalContractRequest({
@@ -2292,6 +2301,31 @@ describe("admin AI generation local contract route handlers", () => {
         generationParameters: {
           ...defaultAdminGenerationParameters,
           knowledgeNodePublicIds: ["invalid public id"],
+        },
+      },
+    });
+
+    await expect(response.json()).resolves.toEqual({
+      code: 400013,
+      message: "Invalid admin AI generation request input.",
+      data: null,
+    });
+    expect(taskPersistenceRecorder.calls).toEqual([]);
+  });
+
+  it("rejects malformed organization AI paper parameter enum values", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "paper",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionTypeDistribution: "unsupported_distribution",
+          paperStructure: "unsupported_structure",
         },
       },
     });

@@ -46,7 +46,11 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
-import { normalizeAiGenerationRouteIntegratedKnowledgeScope } from "../contracts/route-integrated-provider-execution-contract";
+import {
+  normalizeAiGenerationRouteIntegratedKnowledgeScope,
+  normalizeAiGenerationRouteIntegratedPaperStructure,
+  normalizeAiGenerationRouteIntegratedQuestionTypeDistribution,
+} from "../contracts/route-integrated-provider-execution-contract";
 import {
   getAiGenerationSharedTaskSpec,
   type AiGenerationSharedTaskType,
@@ -343,13 +347,22 @@ function normalizeRouteIntegratedGenerationParameters(
     knowledgeNodeSupplement: value.knowledgeNodeSupplement,
     sourcePreference: value.sourcePreference,
   });
+  const questionTypeDistribution =
+    normalizeAiGenerationRouteIntegratedQuestionTypeDistribution(
+      value.questionTypeDistribution,
+    );
+  const paperStructure = normalizeAiGenerationRouteIntegratedPaperStructure(
+    value.paperStructure,
+  );
 
   if (
     profession === null ||
     level === null ||
     subject === null ||
     questionCount === null ||
-    knowledgeScope === null
+    knowledgeScope === null ||
+    questionTypeDistribution === "invalid" ||
+    paperStructure === "invalid"
   ) {
     return null;
   }
@@ -363,6 +376,14 @@ function normalizeRouteIntegratedGenerationParameters(
     questionCount,
     difficulty: normalizeOptionalText(value.difficulty),
     learningObjective: normalizeOptionalText(value.learningObjective),
+    questionTypeDistribution:
+      taskType === "ai_paper_generation"
+        ? (questionTypeDistribution ?? "balanced_40_30_30")
+        : null,
+    paperStructure:
+      taskType === "ai_paper_generation"
+        ? (paperStructure ?? "by_question_type")
+        : null,
   };
 }
 

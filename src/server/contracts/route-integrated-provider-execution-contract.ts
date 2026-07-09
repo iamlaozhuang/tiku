@@ -108,6 +108,15 @@ export type AiGenerationRouteIntegratedSourcePreference =
   | "prefer_platform"
   | "prefer_enterprise";
 
+export type AiGenerationRouteIntegratedQuestionTypeDistribution =
+  | "balanced_40_30_30"
+  | "single_50_multi_25_true_false_25"
+  | "weak_point_priority";
+
+export type AiGenerationRouteIntegratedPaperStructure =
+  | "by_question_type"
+  | "by_knowledge_node";
+
 export type AiGenerationRouteIntegratedKnowledgeScope = {
   knowledgeNode: string | null;
   knowledgeNodeMode: AiGenerationRouteIntegratedKnowledgeNodeMode;
@@ -125,6 +134,8 @@ export type AiGenerationRouteIntegratedGenerationParameters = {
   questionCount: number;
   difficulty: string | null;
   learningObjective: string | null;
+  questionTypeDistribution?: AiGenerationRouteIntegratedQuestionTypeDistribution | null;
+  paperStructure?: AiGenerationRouteIntegratedPaperStructure | null;
 } & AiGenerationRouteIntegratedKnowledgeScope;
 
 const knowledgeNodeModeValues = [
@@ -138,6 +149,15 @@ const sourcePreferenceValues = [
   "prefer_platform",
   "prefer_enterprise",
 ] as const satisfies readonly AiGenerationRouteIntegratedSourcePreference[];
+const questionTypeDistributionValues = [
+  "balanced_40_30_30",
+  "single_50_multi_25_true_false_25",
+  "weak_point_priority",
+] as const satisfies readonly AiGenerationRouteIntegratedQuestionTypeDistribution[];
+const paperStructureValues = [
+  "by_question_type",
+  "by_knowledge_node",
+] as const satisfies readonly AiGenerationRouteIntegratedPaperStructure[];
 
 export function createDefaultAiGenerationRouteIntegratedKnowledgeScope(
   input: Partial<AiGenerationRouteIntegratedKnowledgeScope> = {},
@@ -246,6 +266,38 @@ function normalizeRouteIntegratedSourcePreference(
     : "invalid";
 }
 
+export function normalizeAiGenerationRouteIntegratedQuestionTypeDistribution(
+  value: unknown,
+): AiGenerationRouteIntegratedQuestionTypeDistribution | null | "invalid" {
+  const text = normalizeRouteIntegratedOptionalText(value);
+
+  if (text === null) {
+    return null;
+  }
+
+  return questionTypeDistributionValues.includes(
+    text as AiGenerationRouteIntegratedQuestionTypeDistribution,
+  )
+    ? (text as AiGenerationRouteIntegratedQuestionTypeDistribution)
+    : "invalid";
+}
+
+export function normalizeAiGenerationRouteIntegratedPaperStructure(
+  value: unknown,
+): AiGenerationRouteIntegratedPaperStructure | null | "invalid" {
+  const text = normalizeRouteIntegratedOptionalText(value);
+
+  if (text === null) {
+    return null;
+  }
+
+  return paperStructureValues.includes(
+    text as AiGenerationRouteIntegratedPaperStructure,
+  )
+    ? (text as AiGenerationRouteIntegratedPaperStructure)
+    : "invalid";
+}
+
 function normalizeRouteIntegratedPublicIdList(value: unknown): string[] | null {
   if (value === null || value === undefined) {
     return [];
@@ -304,10 +356,22 @@ export type AiGenerationRouteIntegratedStructuredPreviewOptions =
   | {
       kind: "question_set";
       requestedQuestionCount: number;
+      generationParameters?: Partial<
+        Pick<
+          AiGenerationRouteIntegratedGenerationParameters,
+          "questionType" | "difficulty"
+        >
+      > | null;
     }
   | {
       kind: "paper_draft";
       requestedQuestionCount?: number | null;
+      generationParameters?: Partial<
+        Pick<
+          AiGenerationRouteIntegratedGenerationParameters,
+          "sourcePreference" | "questionTypeDistribution" | "paperStructure"
+        >
+      > | null;
     };
 
 export type AiGenerationRouteIntegratedQuestionDraftSummary = {
@@ -355,7 +419,9 @@ export type AiGenerationRouteIntegratedStructuredPreview =
       failureCategory:
         | "invalid_json"
         | "missing_questions"
-        | "question_count_mismatch";
+        | "question_count_mismatch"
+        | "question_type_mismatch"
+        | "difficulty_mismatch";
       draftCount: 0;
       draftSummaries: [];
     }
@@ -377,6 +443,9 @@ export type AiGenerationRouteIntegratedStructuredPreview =
         | "missing_paper_sections"
         | "missing_question_count"
         | "question_count_mismatch"
+        | "source_preference_mismatch"
+        | "question_type_distribution_mismatch"
+        | "paper_structure_mismatch"
         | "provider_question_content_forbidden";
       requestedQuestionCount?: number | null;
       paperSectionCount: number;

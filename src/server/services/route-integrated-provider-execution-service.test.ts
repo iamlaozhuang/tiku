@@ -80,6 +80,8 @@ describe("shared route-integrated Provider execution primitives", () => {
       "targetQuestionCount",
       "difficultyGoal",
       "sourcePreference",
+      "questionTypeDistribution",
+      "paperStructure",
       "sections",
       "knowledgeCoverage",
     ]);
@@ -331,6 +333,66 @@ describe("shared route-integrated Provider execution primitives", () => {
     });
   });
 
+  it("rejects question-set previews when generated question parameters mismatch the request", () => {
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          questions: [
+            {
+              questionType: "multiple_choice",
+              difficulty: "medium",
+            },
+          ],
+        }),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 1,
+            generationParameters: {
+              questionType: "single_choice",
+              difficulty: "medium",
+            },
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        failureCategory: "question_type_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(
+        JSON.stringify({
+          questions: [
+            {
+              questionType: "单选题",
+              difficulty: "基础",
+            },
+          ],
+        }),
+        {
+          structuredPreview: {
+            kind: "question_set",
+            requestedQuestionCount: 1,
+            generationParameters: {
+              questionType: "single_choice",
+              difficulty: "medium",
+            },
+          },
+        },
+      ),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "question_set",
+        parseStatus: "failed",
+        failureCategory: "difficulty_mismatch",
+      },
+    });
+  });
+
   it("builds a parsed question-set structured preview from exact numbered plaintext drafts", () => {
     const visibleGeneratedContent =
       createRouteIntegratedVisibleGeneratedContent(
@@ -500,6 +562,9 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toEqual({
       kind: "question_set",
       requestedQuestionCount: 5,
+      generationParameters: {
+        questionCount: 5,
+      },
     });
 
     expect(
@@ -514,6 +579,9 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toEqual({
       kind: "question_set",
       requestedQuestionCount: 10,
+      generationParameters: {
+        questionCount: 20,
+      },
     });
   });
 
@@ -530,6 +598,9 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toEqual({
       kind: "paper_draft",
       requestedQuestionCount: 20,
+      generationParameters: {
+        questionCount: 20,
+      },
     });
 
     expect(
@@ -544,6 +615,9 @@ describe("shared route-integrated Provider execution primitives", () => {
     ).toEqual({
       kind: "paper_draft",
       requestedQuestionCount: 80,
+      generationParameters: {
+        questionCount: 99,
+      },
     });
   });
 
@@ -644,6 +718,83 @@ describe("shared route-integrated Provider execution primitives", () => {
         paperSectionCount: 1,
         questionCount: 1,
         reviewStatus: "structured_parse_failed",
+      },
+    });
+  });
+
+  it("rejects paper structured previews when plan parameters mismatch the request", () => {
+    const content = JSON.stringify({
+      title: "synthetic paper plan title",
+      targetQuestionCount: 30,
+      sourcePreference: "prefer_platform",
+      questionTypeDistribution: "balanced_40_30_30",
+      paperStructure: "by_question_type",
+      sections: [
+        {
+          paperSectionType: "single_choice",
+          questionCount: 30,
+        },
+      ],
+      knowledgeCoverage: ["redacted_knowledge_node_a"],
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 30,
+          generationParameters: {
+            sourcePreference: "prefer_enterprise",
+            questionTypeDistribution: "balanced_40_30_30",
+            paperStructure: "by_question_type",
+          },
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "source_preference_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 30,
+          generationParameters: {
+            sourcePreference: "prefer_platform",
+            questionTypeDistribution: "weak_point_priority",
+            paperStructure: "by_question_type",
+          },
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "question_type_distribution_mismatch",
+      },
+    });
+
+    expect(
+      createRouteIntegratedVisibleGeneratedContent(content, {
+        structuredPreview: {
+          kind: "paper_draft",
+          requestedQuestionCount: 30,
+          generationParameters: {
+            sourcePreference: "prefer_platform",
+            questionTypeDistribution: "balanced_40_30_30",
+            paperStructure: "by_knowledge_node",
+          },
+        },
+      }),
+    ).toMatchObject({
+      structuredPreview: {
+        kind: "paper_draft",
+        parseStatus: "failed",
+        failureCategory: "paper_structure_mismatch",
       },
     });
   });

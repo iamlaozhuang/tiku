@@ -34,7 +34,9 @@ import type {
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedKnowledgeNodeMode,
+  AiGenerationRouteIntegratedPaperStructure,
   AiGenerationRouteIntegratedProfession,
+  AiGenerationRouteIntegratedQuestionTypeDistribution,
   AiGenerationRouteIntegratedSourcePreference,
   AiGenerationRouteIntegratedSubject,
 } from "@/server/contracts/route-integrated-provider-execution-contract";
@@ -557,6 +559,33 @@ const adminSourcePreferenceValueByLabel = Object.fromEntries(
   ]),
 ) as Record<string, AiGenerationRouteIntegratedSourcePreference>;
 
+const adminQuestionTypeDistributionLabelByValue = {
+  balanced_40_30_30: "单选 40% / 多选 30% / 判断 30%",
+  single_50_multi_25_true_false_25: "单选 50% / 多选 25% / 判断 25%",
+  weak_point_priority: "按薄弱项动态分配",
+} as const satisfies Record<
+  AiGenerationRouteIntegratedQuestionTypeDistribution,
+  string
+>;
+
+const adminQuestionTypeDistributionValueByLabel = Object.fromEntries(
+  Object.entries(adminQuestionTypeDistributionLabelByValue).map(
+    ([value, label]) => [label, value],
+  ),
+) as Record<string, AiGenerationRouteIntegratedQuestionTypeDistribution>;
+
+const adminPaperStructureLabelByValue = {
+  by_knowledge_node: "按知识点模块组织",
+  by_question_type: "按大题模块组织",
+} as const satisfies Record<AiGenerationRouteIntegratedPaperStructure, string>;
+
+const adminPaperStructureValueByLabel = Object.fromEntries(
+  Object.entries(adminPaperStructureLabelByValue).map(([value, label]) => [
+    label,
+    value,
+  ]),
+) as Record<string, AiGenerationRouteIntegratedPaperStructure>;
+
 const ADMIN_AI_QUESTION_DEFAULT_QUESTION_COUNT = 3;
 const ADMIN_AI_QUESTION_MAX_QUESTION_COUNT = 10;
 const ADMIN_AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
@@ -602,6 +631,9 @@ function createDefaultAdminGenerationParameters(
         : generationKind === "question"
           ? "内容题目评审"
           : "内容试卷评审",
+    questionTypeDistribution:
+      generationKind === "paper" ? "balanced_40_30_30" : null,
+    paperStructure: generationKind === "paper" ? "by_question_type" : null,
   };
 }
 
@@ -752,6 +784,29 @@ function resolveSourcePreference(
     : fallbackValue;
 }
 
+function resolveQuestionTypeDistribution(
+  value: unknown,
+  fallbackValue: AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"],
+) {
+  return value === null ||
+    value === "balanced_40_30_30" ||
+    value === "single_50_multi_25_true_false_25" ||
+    value === "weak_point_priority"
+    ? value
+    : fallbackValue;
+}
+
+function resolvePaperStructure(
+  value: unknown,
+  fallbackValue: AiGenerationRouteIntegratedGenerationParameters["paperStructure"],
+) {
+  return value === null ||
+    value === "by_question_type" ||
+    value === "by_knowledge_node"
+    ? value
+    : fallbackValue;
+}
+
 export function resolveAdminAiGenerationParameters(
   generationKind: AdminAiGenerationKind,
   workspaceOrGenerationParameterState?:
@@ -841,6 +896,20 @@ export function resolveAdminAiGenerationParameters(
       persistedParameters.learningObjective,
       defaultParameters.learningObjective,
     ),
+    questionTypeDistribution:
+      generationKind === "paper"
+        ? resolveQuestionTypeDistribution(
+            persistedParameters.questionTypeDistribution,
+            defaultParameters.questionTypeDistribution,
+          )
+        : null,
+    paperStructure:
+      generationKind === "paper"
+        ? resolvePaperStructure(
+            persistedParameters.paperStructure,
+            defaultParameters.paperStructure,
+          )
+        : null,
   };
 }
 
@@ -947,7 +1016,10 @@ function getAiGenerationDetailControls(
         "单选 50% / 多选 25% / 判断 25%",
         "按薄弱项动态分配",
       ],
-      value: "单选 40% / 多选 30% / 判断 30%",
+      value:
+        adminQuestionTypeDistributionLabelByValue[
+          generationParameters.questionTypeDistribution ?? "balanced_40_30_30"
+        ],
     },
     {
       inputMode: "select",
@@ -964,7 +1036,10 @@ function getAiGenerationDetailControls(
       inputMode: "select",
       label: "试卷结构",
       options: ["按大题模块组织", "按知识点模块组织"],
-      value: "按大题模块组织",
+      value:
+        adminPaperStructureLabelByValue[
+          generationParameters.paperStructure ?? "by_question_type"
+        ],
     },
     {
       inputMode: "text",
@@ -2957,6 +3032,16 @@ export function AdminAiGenerationEntryPage({
                 currentParameters.sourcePreference,
             },
           };
+        case "题型分布":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              questionTypeDistribution:
+                adminQuestionTypeDistributionValueByLabel[value] ??
+                currentParameters.questionTypeDistribution,
+            },
+          };
         case "题型":
           return {
             generationKind,
@@ -2988,6 +3073,16 @@ export function AdminAiGenerationEntryPage({
               difficulty:
                 adminDifficultyValueByLabel[value] ??
                 currentParameters.difficulty,
+            },
+          };
+        case "试卷结构":
+          return {
+            generationKind,
+            parameters: {
+              ...currentParameters,
+              paperStructure:
+                adminPaperStructureValueByLabel[value] ??
+                currentParameters.paperStructure,
             },
           };
         case "学习目标":

@@ -5,6 +5,9 @@ import type { AiGenerationRouteIntegratedGroundingContext } from "../contracts/r
 
 function createGroundingContext(
   questionCount: number,
+  generationParameterOverrides: Partial<
+    AiGenerationRouteIntegratedGroundingContext["generationParameters"]
+  > = {},
 ): AiGenerationRouteIntegratedGroundingContext {
   return {
     generationParameters: {
@@ -21,6 +24,9 @@ function createGroundingContext(
       questionCount,
       difficulty: "medium",
       learningObjective: "synthetic learning objective",
+      questionTypeDistribution: null,
+      paperStructure: null,
+      ...generationParameterOverrides,
     },
     evidenceStatus: "sufficient",
     citationCount: 1,
@@ -66,6 +72,11 @@ describe("route-integrated Provider instruction service", () => {
       expect(readOutputContractLine(instruction)).toContain("questionOptions");
       expect(readOutputContractLine(instruction)).toContain("standardAnswer");
       expect(readOutputContractLine(instruction)).toContain("analysis");
+      expect(readOutputContractLine(instruction)).toContain("single_choice");
+      expect(readOutputContractLine(instruction)).toContain("medium");
+      expect(instruction).toContain("题型要求：single_choice");
+      expect(instruction).toContain("难度要求：medium");
+      expect(instruction).toContain("训练目标：synthetic learning objective");
       expect(readOutputContractLine(instruction)).not.toContain(
         "redactedDraftSummary",
       );
@@ -89,7 +100,11 @@ describe("route-integrated Provider instruction service", () => {
       taskType: "ai_paper_generation",
       sceneLabel: "个人训练 AI组卷",
       draftInstruction: "输出可读的组卷方案摘要。",
-      groundingContext: createGroundingContext(50),
+      groundingContext: createGroundingContext(50, {
+        paperStructure: "by_knowledge_node",
+        questionTypeDistribution: "single_50_multi_25_true_false_25",
+        sourcePreference: "prefer_platform",
+      }),
     });
 
     expect(instruction).toContain("个人训练 AI组卷");
@@ -99,6 +114,15 @@ describe("route-integrated Provider instruction service", () => {
     );
     expect(readOutputContractLine(instruction)).toContain("knowledgeCoverage");
     expect(readOutputContractLine(instruction)).toContain("sourcePreference");
+    expect(readOutputContractLine(instruction)).toContain(
+      "questionTypeDistribution",
+    );
+    expect(readOutputContractLine(instruction)).toContain("paperStructure");
+    expect(readOutputContractLine(instruction)).toContain("prefer_platform");
+    expect(readOutputContractLine(instruction)).toContain(
+      "single_50_multi_25_true_false_25",
+    );
+    expect(readOutputContractLine(instruction)).toContain("by_knowledge_node");
     expect(readOutputContractLine(instruction)).toContain("50");
     expect(readOutputContractLine(instruction)).not.toContain("questions");
     expect(readOutputContractLine(instruction)).not.toContain("questionStem");
