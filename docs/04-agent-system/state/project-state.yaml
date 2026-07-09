@@ -1,8 +1,46 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-0704-next-proof-approval-package-2026-07-09
-updatedAt: "2026-07-09T09:20:00-07:00"
+currentPhase: content-ai-0704-fixture-history-refresh-2026-07-09
+updatedAt: "2026-07-09T10:40:00-07:00"
+latestContentAi0704FixtureHistoryRefresh:
+  id: content-ai-0704-fixture-history-refresh-2026-07-09
+  status: closed
+  result: pass_local_0704_non_destructive_fixture_history_refresh_ready_for_no_provider_publish_replay
+  branch: codex/content-ai-0704-fixture-history-refresh
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-fixture-history-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-fixture-history-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-fixture-history-refresh-audit.md
+  approvalBoundary:
+    fixtureHistoryRefresh: current_user_approved_option_b_local_0704_non_destructive_fixture_history_refresh_2026_07_09
+    providerExecution: blocked
+    credentialMaterialOutput: blocked
+    closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+  boundary:
+    sourceCodeChangePlanned: false
+    testsChangePlanned: false
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallAllowed: false
+    directDatabaseConnectionAllowed: true
+    nonDestructiveDatabaseMutationAllowed: true
+    destructiveDatabaseOperationAllowed: false
+    screenshotsOrRawDomAllowed: false
+    privateCredentialValuesOutputAllowed: false
+    evidenceRedactionRequired: true
+  validationSummary:
+    target0704Confirmation: pass
+    fixtureHistoryRefresh: pass_question_target_ready_paper_publish_preconditions_ready
+    localhostReadProbe: pass_question_and_paper_target_ready_counts_visible
+    targetedContentAiRegression: pass_7_files_147_tests
+    targetedPersonalLearnerAiRegression: pass_4_files_96_tests
+    targetedOrganizationRegression: pass_6_files_119_tests
+    lint: pass
+    typecheck: pass
+    scopedPrettierCheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 latestContentAi0704NextProofApprovalPackage:
   id: content-ai-0704-next-proof-approval-package-2026-07-09
   status: closed
@@ -2422,40 +2460,40 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-ai-0704-next-proof-approval-package-2026-07-09
-  title: Content AI 0704 next proof approval package
-  phase: content-ai-0704-next-proof-approval-package-2026-07-09
-  status: closed
-  result: pass_next_proof_approval_package_prepared_no_execution_full_goal_waits_for_fresh_approval
+  id: content-ai-0704-fixture-history-refresh-2026-07-09
+  title: Content AI 0704 fixture history refresh
+  phase: content-ai-0704-fixture-history-refresh-2026-07-09
+  status: in_progress
+  result: pending_local_0704_non_destructive_fixture_history_refresh
   priority: p1
-  taskKind: approval_package
-  branch: codex/content-ai-0704-next-proof-approval-package
+  taskKind: local_fixture_history_refresh
+  branch: codex/content-ai-0704-fixture-history-refresh
   humanApprovalBoundary:
     closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
-    providerExecution: blocked_requires_future_option_a_fresh_approval
-    directDbAccessOrMutation: blocked_requires_future_option_b_fresh_approval
+    fixtureHistoryRefresh: current_user_approved_option_b_local_0704_non_destructive_fixture_history_refresh_2026_07_09
+    providerExecution: blocked
+    directDbAccessOrMutation: approved_local_0704_non_destructive_only
     credentialMaterialOutput: blocked
-    browserRuntime: blocked
-  plannedAt: "2026-07-09T09:20:00-07:00"
-  claimedAt: "2026-07-09T09:20:00-07:00"
-  validatedAt: "2026-07-09T09:20:00-07:00"
-  reviewedAt: "2026-07-09T09:20:00-07:00"
-  targetClosureItem: Prepare a redacted approval package for the next executable proof path needed to complete content backend AI question/paper localhost closed-loop acceptance.
-  behaviorBoundary: docs_state_approval_package_only_no_source_test_package_lockfile_schema_migration_seed_env_file_change_no_provider_no_browser_no_screenshot_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation_no_direct_db_operation
+    browserRuntime: blocked_no_screenshot_no_raw_dom
+  plannedAt: "2026-07-09T10:05:00-07:00"
+  claimedAt: "2026-07-09T10:05:00-07:00"
+  targetClosureItem: Non-destructively refresh local 0704 content AI question/paper acceptance history so the next publish replay branch has publishable proof targets.
+  behaviorBoundary: local_0704_non_destructive_fixture_history_refresh_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_screenshot_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation
   evidenceMode: redacted_role_label_route_label_status_category_aggregate_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-next-proof-approval-package.md
-  approvalPackagePath: docs/05-execution-logs/acceptance/2026-07-09-content-ai-0704-next-proof-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-next-proof-approval-package.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-next-proof-approval-package-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-fixture-history-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-fixture-history-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-fixture-history-refresh-audit.md
   validationSummary:
-    scopedPrettierWrite: pass
-    scopedPrettierCheck: pass
-    diffCheck: pass
-    lint: pass
-    typecheck: pass
-    targetedTest: not_applicable_docs_state_only
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    target0704Confirmation: pending
+    fixtureHistoryRefresh: pending
+    targetedContentAiRegression: pending
+    targetedPersonalLearnerAiRegression: pending
+    targetedOrganizationRegression: pending
+    lint: pending
+    typecheck: pending
+    diffCheck: pending
+    moduleRunV2PreCommitHardening: pending
+    moduleRunV2PrePushReadiness: pending
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
