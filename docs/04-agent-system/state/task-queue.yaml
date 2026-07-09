@@ -96,6 +96,109 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: org-ai-training-loop-regression-2026-07-08
+    title: Organization AI generation to organization training loop regression
+    phase: org-ai-training-loop-regression-2026-07-08
+    status: ready_for_closeout
+    result: pass_source_test_precommit_prepush_ready_for_commit_merge_push_cleanup
+    priority: p1
+    taskKind: read_only_audit
+    executionProfile: local_regression_targeted_unit_no_provider_no_db
+    validationPolicy: targeted_unit_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/org-ai-training-loop-regression
+    humanApprovalBoundary: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
+    plannedAt: "2026-07-08T21:20:00-07:00"
+    claimedAt: "2026-07-08T21:20:00-07:00"
+    targetClosureItem: Regression evidence and adversarial review for AI出题完整闭环, AI组卷完整闭环, organization standard admin denial, and advanced employee published-training visibility after stages 1 through 4.
+    behaviorBoundary: regression_and_adversarial_review_only_no_source_feature_change_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_formal_content_write_no_browser_runtime_unless_separately_approved
+    evidenceMode: redacted_command_status_and_boundary_summary_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_resource_or_chunk_content_no_screenshots_in_repo
+    planPath: docs/05-execution-logs/task-plans/2026-07-08-org-ai-training-loop-regression.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-training-loop-regression.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-training-loop-regression-audit.md
+    validationSummary:
+      status: pass_source_test_precommit_prepush_ready_for_commit_merge_push_cleanup
+      sourceCodeChanged: false
+      testsChanged: false
+      parameterContractAdminAiGenerationGroup: pass_5_files_121_tests
+      ragScopeResourceIndexGroup: pass_3_files_15_tests
+      orgAiTrainingDraftMaterializationGroup: pass_5_files_146_tests
+      aiPaperPlanSelectAdjacentGroup: pass_5_files_26_tests
+      roleBoundaryLearnerEmployeeGroup: pass_5_files_77_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      splitRegressionRepair: personal_ai_question_result_fixture_contract_merged_pushed_cleaned
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-08-org-ai-training-loop-regression.md
+      - docs/05-execution-logs/evidence/2026-07-08-org-ai-training-loop-regression.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-training-loop-regression-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - rawfiles/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: blocked_regression_evidence_only
+      focusedUnitTest: approved
+      browserRuntime: blocked_not_required_for_this_branch
+      devServer: blocked_not_required_for_this_branch
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked_requires_separate_fresh_approval
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-generation-entry-surface.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts tests/unit/organization-training-admin-entry-surface.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts src/server/services/ai-paper-source-adapter-service.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/server/services/personal-ai-generation-learning-session-service.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId org-ai-training-loop-regression-2026-07-08
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-ai-training-loop-regression-2026-07-08 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
   - id: personal-ai-question-result-fixture-contract-2026-07-08
     title: Personal AI question route test fixture contract alignment
     phase: personal-ai-question-result-fixture-contract-2026-07-08
