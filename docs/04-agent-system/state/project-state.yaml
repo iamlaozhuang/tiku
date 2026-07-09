@@ -1743,8 +1743,8 @@ currentTask:
   id: content-ai-adoption-read-model-2026-07-09
   title: Content AI adoption read model
   phase: content-ai-adoption-read-model-2026-07-09
-  status: ready_for_closeout
-  result: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_ready_for_merge_push_cleanup
+  status: ready_for_push_cleanup
+  result: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
   priority: p1
   taskKind: implementation
   branch: codex/content-ai-adoption-read-model
@@ -1758,7 +1758,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-adoption-read-model.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-adoption-read-model-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_ready_for_merge_push_cleanup
+    status: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
     tddRed: pass_expected_adoption_read_model_failures
     sourceCodeChanged: true
     testsChanged: true
@@ -1777,6 +1777,10 @@ currentTask:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    masterPostMergeTargetedTests: pass_7_files_154_tests
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08

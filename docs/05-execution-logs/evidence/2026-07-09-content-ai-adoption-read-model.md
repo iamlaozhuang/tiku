@@ -38,6 +38,17 @@
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-adoption-read-model-2026-07-09 -SkipRemoteAheadCheck`
   - Result: passed.
 
+## Master Post-Merge Verification
+
+- `corepack pnpm@10.26.1 exec vitest run src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/repositories/admin-ai-generation-result-persistence-db-adapter.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts src/server/services/organization-training-route.test.ts --reporter=dot`
+  - Result: 7 files passed, 154 tests passed.
+- `corepack pnpm@10.26.1 typecheck`
+  - Result: passed.
+- `corepack pnpm@10.26.1 lint`
+  - Result: passed.
+- `git diff --check`
+  - Result: passed.
+
 ## Sensitive Data Review
 
 - Evidence contains no credentials, session/cookie/token/localStorage values, DB URL, DB raw rows, internal numeric ids, Provider payload, raw prompt, raw AI output, or complete question/paper/material content.
