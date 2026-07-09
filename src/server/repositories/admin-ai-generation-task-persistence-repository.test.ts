@@ -83,15 +83,23 @@ function createStructuredAdminProviderContent(
 
   return JSON.stringify({
     totalQuestionCount: 50,
+    sourcePreference: "balanced",
+    questionTypeDistribution: "balanced_40_30_30",
+    paperStructure: "by_question_type",
     paperSections: [
       {
         paperSectionType: "single_choice",
-        questionCount: 50,
+        questionCount: 20,
+      },
+      {
+        paperSectionType: "multi_choice",
+        questionCount: 15,
+      },
+      {
+        paperSectionType: "true_false",
+        questionCount: 15,
       },
     ],
-    questionTypeDistribution: {
-      single_choice: 50,
-    },
     knowledgeCoverage: ["redacted_knowledge_node"],
   });
 }
@@ -355,6 +363,11 @@ function createLocalContractRouteResultPersistenceResult(
       formalAdoption: {
         isBlocked: true,
         status: "blocked",
+        reviewStatus: null,
+        formalTargetWriteStatus: null,
+        formalQuestionPublicId: null,
+        formalPaperPublicId: null,
+        reviewedAt: null,
       },
     },
   };

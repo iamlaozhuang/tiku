@@ -1442,6 +1442,11 @@ describe("organization training draft source-context route handlers", () => {
             formalAdoption: {
               isBlocked: true,
               status: "blocked",
+              reviewStatus: null,
+              formalTargetWriteStatus: null,
+              formalQuestionPublicId: null,
+              formalPaperPublicId: null,
+              reviewedAt: null,
             },
           }) satisfies AdminAiGenerationResultDto,
       ),

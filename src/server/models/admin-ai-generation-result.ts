@@ -28,7 +28,11 @@ export type AdminAiGenerationResultContentVisibility = "redacted_snapshot";
 
 export type AdminAiGenerationResultRedactionStatus = "redacted";
 
-export type AdminAiGenerationResultFormalAdoptionStatus = "blocked";
+export type AdminAiGenerationResultFormalAdoptionStatus =
+  | "blocked"
+  | "approved_for_formal_adoption"
+  | "draft_created"
+  | "rejected";
 
 export type AdminAiGenerationResultPersistenceInput = {
   resultPublicId: string;

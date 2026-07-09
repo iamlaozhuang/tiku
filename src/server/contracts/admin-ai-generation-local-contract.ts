@@ -18,6 +18,10 @@ import type {
 } from "../models/admin-ai-generation-result";
 import type { EvidenceStatus } from "../models/ai-rag";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
+import type {
+  AdminAiGenerationFormalAdoptionReviewStatus,
+  AdminAiGenerationFormalTargetWriteStatus,
+} from "../models/admin-ai-generation-formal-adoption";
 
 export type AdminAiGenerationWorkspace = "content" | "organization";
 
@@ -172,7 +176,12 @@ export type AdminAiGenerationLocalContractGeneratedResultDto = {
   contentVisibility: "redacted_snapshot";
   evidenceStatus: EvidenceStatus;
   citationCount: number;
-  formalAdoptionStatus: "blocked";
+  formalAdoptionStatus: AdminAiGenerationResultFormalAdoptionStatus;
+  formalAdoptionReviewStatus: AdminAiGenerationFormalAdoptionReviewStatus | null;
+  formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus | null;
+  formalQuestionPublicId: string | null;
+  formalPaperPublicId: string | null;
+  formalAdoptionReviewedAt: string | null;
   reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   redactionStatus: "redacted";
 };
@@ -192,6 +201,11 @@ export type AdminAiGenerationTaskHistoryGeneratedResultDto = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   formalAdoptionStatus: AdminAiGenerationResultFormalAdoptionStatus;
+  formalAdoptionReviewStatus: AdminAiGenerationFormalAdoptionReviewStatus | null;
+  formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus | null;
+  formalQuestionPublicId: string | null;
+  formalPaperPublicId: string | null;
+  formalAdoptionReviewedAt: string | null;
   reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
   redactionStatus: "redacted";
 };

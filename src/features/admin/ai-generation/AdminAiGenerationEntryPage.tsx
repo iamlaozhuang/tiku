@@ -341,6 +341,9 @@ function getFormalAdoptionStatusLabel(
 ): string {
   const labels = {
     blocked: "需审核后采用",
+    approved_for_formal_adoption: "已审核待创建草稿",
+    draft_created: "已创建待审草稿",
+    rejected: "已驳回",
   } satisfies Record<
     AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
     string
@@ -354,6 +357,9 @@ function getOrganizationDraftUsageStatusLabel(
 ): string {
   const labels = {
     blocked: "未关联训练草稿",
+    approved_for_formal_adoption: "已关联训练草稿",
+    draft_created: "已关联训练草稿",
+    rejected: "已驳回",
   } satisfies Record<
     AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
     string
@@ -2588,10 +2594,27 @@ function ContentAdminReviewTraceabilityPanel({
 }) {
   const isSubmitting =
     actionState === "adopting" || actionState === "rejecting";
-  const isCompleted = actionState === "adopted" || actionState === "rejected";
-  const actionMessage = resolveContentAdminReviewActionMessage(actionState);
   const reviewReadiness = getContentAdminReviewReadiness(generatedResult);
   const hasReviewedDraft = reviewedDraft !== null;
+  const isPersistedAdopted =
+    generatedResult.formalAdoptionStatus === "draft_created" ||
+    generatedResult.formalAdoptionStatus === "approved_for_formal_adoption";
+  const isPersistedRejected =
+    generatedResult.formalAdoptionStatus === "rejected";
+  const isCompleted =
+    actionState === "adopted" ||
+    actionState === "rejected" ||
+    isPersistedAdopted ||
+    isPersistedRejected;
+  const actionMessage =
+    resolveContentAdminReviewActionMessage(actionState) ??
+    (isPersistedAdopted
+      ? generatedResult.formalAdoptionStatus === "draft_created"
+        ? "待审草稿已创建；正式发布仍需审核和发布校验。"
+        : "草稿已审核采用；待审草稿创建仍需后续处理。"
+      : isPersistedRejected
+        ? "草稿驳回已提交；生成结果不会写入正式内容。"
+        : null);
   const isAdoptActionDisabled =
     isSubmitting ||
     isCompleted ||
@@ -2604,24 +2627,40 @@ function ContentAdminReviewTraceabilityPanel({
       : reviewReadiness === "weak_confirmation_required"
         ? "资料较少"
         : "资料不足";
+  const persistedAdoptionRequirementLabel = isPersistedAdopted
+    ? generatedResult.formalAdoptionStatus === "draft_created"
+      ? "已创建待审草稿"
+      : "已审核待创建草稿"
+    : isPersistedRejected
+      ? "已驳回"
+      : null;
   const adoptionRequirementLabel =
-    !hasReviewedDraft && reviewReadiness !== "blocked"
+    persistedAdoptionRequirementLabel ??
+    (!hasReviewedDraft && reviewReadiness !== "blocked"
       ? "需本次结构化草稿"
       : reviewReadiness === "ready"
         ? "可创建待审草稿"
         : reviewReadiness === "weak_confirmation_required"
           ? "需人工确认"
-          : "不可采用";
+          : "不可采用");
   const draftTargetLabel =
     generationKind === "paper" ? "待审试卷草稿" : "待审题目草稿";
+  const persistedAdoptActionLabel =
+    isPersistedAdopted &&
+    generatedResult.formalAdoptionStatus === "draft_created"
+      ? `已创建${draftTargetLabel}`
+      : isPersistedAdopted
+        ? `已审核${draftTargetLabel}`
+        : null;
   const adoptActionLabel =
-    actionState === "adopted"
+    persistedAdoptActionLabel ??
+    (actionState === "adopted"
       ? `已创建${draftTargetLabel}`
       : !hasReviewedDraft && reviewReadiness !== "blocked"
         ? "需本次结构化草稿"
         : reviewReadiness === "weak_confirmation_required"
           ? `确认资料较少并采用到${draftTargetLabel}`
-          : `采用到${draftTargetLabel}`;
+          : `采用到${draftTargetLabel}`);
   const nextActionLabels =
     generationKind === "paper"
       ? ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"]
@@ -2647,7 +2686,13 @@ function ContentAdminReviewTraceabilityPanel({
       <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-text-secondary">评审状态</dt>
-          <dd className="text-text-primary mt-1">待评审</dd>
+          <dd className="text-text-primary mt-1">
+            {isPersistedAdopted
+              ? "已采用"
+              : isPersistedRejected
+                ? "已驳回"
+                : "待评审"}
+          </dd>
         </div>
         <div>
           <dt className="text-text-secondary">结果范围</dt>
@@ -2756,7 +2801,9 @@ function ContentAdminReviewTraceabilityPanel({
             })
           }
         >
-          {actionState === "rejected" ? "已提交驳回" : "驳回草稿"}
+          {actionState === "rejected" || isPersistedRejected
+            ? "已提交驳回"
+            : "驳回草稿"}
         </button>
       </div>
       {actionMessage === null ? null : (

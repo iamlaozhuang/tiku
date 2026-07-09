@@ -14,6 +14,10 @@ import type {
 } from "./admin-ai-generation-local-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
 import type {
+  AdminAiGenerationFormalAdoptionReviewStatus,
+  AdminAiGenerationFormalTargetWriteStatus,
+} from "../models/admin-ai-generation-formal-adoption";
+import type {
   OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
 } from "./organization-training-contract";
@@ -76,6 +80,11 @@ export type AdminAiGenerationResultPersistenceRow = {
   source_question_public_id: string | null;
   source_paper_public_id: string | null;
   is_formal_adoption_blocked: boolean;
+  formal_adoption_review_status: AdminAiGenerationFormalAdoptionReviewStatus | null;
+  formal_adoption_target_write_status: AdminAiGenerationFormalTargetWriteStatus | null;
+  formal_adoption_question_public_id: string | null;
+  formal_adoption_paper_public_id: string | null;
+  formal_adoption_reviewed_at: Date | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -159,6 +168,11 @@ export type AdminAiGenerationResultDto = {
   formalAdoption: {
     isBlocked: true;
     status: AdminAiGenerationResultFormalAdoptionStatus;
+    reviewStatus: AdminAiGenerationFormalAdoptionReviewStatus | null;
+    formalTargetWriteStatus: AdminAiGenerationFormalTargetWriteStatus | null;
+    formalQuestionPublicId: string | null;
+    formalPaperPublicId: string | null;
+    reviewedAt: string | null;
   };
 };
 

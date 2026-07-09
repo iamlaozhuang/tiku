@@ -266,6 +266,22 @@ function createTaskHistoryResponse(input: {
     contentVisibility?: "redacted_snapshot";
     evidenceStatus?: "none" | "weak" | "sufficient";
     citationCount?: number;
+    formalAdoptionStatus?:
+      | "blocked"
+      | "approved_for_formal_adoption"
+      | "draft_created"
+      | "rejected";
+    formalAdoptionReviewStatus?:
+      | "approved_for_formal_adoption"
+      | "rejected"
+      | null;
+    formalQuestionPublicId?: string | null;
+    formalPaperPublicId?: string | null;
+    formalTargetWriteStatus?:
+      | "blocked_without_follow_up_task"
+      | "draft_created"
+      | null;
+    formalAdoptionReviewedAt?: string | null;
     resultPublicId: string;
     reviewedDraft?: unknown;
   } | null;
@@ -288,7 +304,18 @@ function createTaskHistoryResponse(input: {
             input.generatedResult.contentVisibility ?? "redacted_snapshot",
           evidenceStatus: input.generatedResult.evidenceStatus ?? "none",
           citationCount: input.generatedResult.citationCount ?? 0,
-          formalAdoptionStatus: "blocked",
+          formalAdoptionStatus:
+            input.generatedResult.formalAdoptionStatus ?? "blocked",
+          formalAdoptionReviewStatus:
+            input.generatedResult.formalAdoptionReviewStatus ?? null,
+          formalTargetWriteStatus:
+            input.generatedResult.formalTargetWriteStatus ?? null,
+          formalQuestionPublicId:
+            input.generatedResult.formalQuestionPublicId ?? null,
+          formalPaperPublicId:
+            input.generatedResult.formalPaperPublicId ?? null,
+          formalAdoptionReviewedAt:
+            input.generatedResult.formalAdoptionReviewedAt ?? null,
           reviewedDraft: input.generatedResult.reviewedDraft ?? null,
           redactionStatus: "redacted",
         };
@@ -2347,6 +2374,11 @@ describe("admin AI generation entry surfaces", () => {
           evidenceStatus: "sufficient",
           citationCount: 2,
           formalAdoptionStatus: "blocked",
+          formalAdoptionReviewStatus: null,
+          formalTargetWriteStatus: null,
+          formalQuestionPublicId: null,
+          formalPaperPublicId: null,
+          formalAdoptionReviewedAt: null,
           redactionStatus: "redacted",
         },
         runtimeBridge: {
@@ -2551,6 +2583,102 @@ describe("admin AI generation entry surfaces", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders persisted content admin adoption status as completed in history", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_reviewed_history";
+    const adoptionUrl = `/api/v1/content-ai-generation-results/${resultPublicId}/formal-adoptions`;
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated result summary for adopted history",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              formalAdoptionStatus: "draft_created",
+              formalTargetWriteStatus: "draft_created",
+              formalQuestionPublicId: "formal_question_public_reviewed",
+              formalAdoptionReviewedAt: "2026-06-26T21:12:00.000Z",
+              reviewedDraft: {
+                questionType: "single_choice",
+                profession: "marketing",
+                level: 3,
+                subject: "theory",
+                stemRichText: "synthetic reviewed question stem",
+                standardAnswerRichText: "A",
+                analysisRichText: "synthetic reviewed analysis",
+                multiChoiceRule: "all_correct_only",
+                scoringMethod: "auto_match",
+                materialPublicId: null,
+                questionOptions: [],
+                scoringPoints: [],
+                fillBlankAnswers: [],
+                knowledgeNodePublicIds: [],
+                tagPublicIds: [],
+              },
+            },
+          }),
+        );
+      }
+
+      if (path === adoptionUrl && init?.method === "POST") {
+        return Response.json({
+          code: 500001,
+          message: "unexpected adoption request",
+          data: null,
+        });
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const historyPanel = await screen.findByTestId(
+      "admin-ai-generation-task-history",
+    );
+    const adoptAction = await screen.findByTestId(
+      "content-admin-review-adopt-action",
+    );
+    const rejectAction = await screen.findByTestId(
+      "content-admin-review-reject-action",
+    );
+
+    expect(historyPanel).toHaveTextContent("已创建待审草稿");
+    expect(adoptAction).toBeDisabled();
+    expect(adoptAction).toHaveTextContent("已创建待审题目草稿");
+    expect(rejectAction).toBeDisabled();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      adoptionUrl,
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
   it("submits content admin current paper review adoption with selected platform formal questions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const resultPublicId =
@@ -2585,6 +2713,11 @@ describe("admin AI generation entry surfaces", () => {
           evidenceStatus: "sufficient",
           citationCount: 2,
           formalAdoptionStatus: "blocked",
+          formalAdoptionReviewStatus: null,
+          formalTargetWriteStatus: null,
+          formalQuestionPublicId: null,
+          formalPaperPublicId: null,
+          formalAdoptionReviewedAt: null,
           redactionStatus: "redacted",
         },
         runtimeBridge: {
@@ -3108,6 +3241,11 @@ describe("admin AI generation entry surfaces", () => {
           evidenceStatus: "weak",
           citationCount: 1,
           formalAdoptionStatus: "blocked",
+          formalAdoptionReviewStatus: null,
+          formalTargetWriteStatus: null,
+          formalQuestionPublicId: null,
+          formalPaperPublicId: null,
+          formalAdoptionReviewedAt: null,
           redactionStatus: "redacted",
         },
         runtimeBridge: {

@@ -1116,6 +1116,12 @@ function mapAdminAiGenerationResultPersistenceResultToLocalContractDto(
     evidenceStatus: result.result.evidenceReference.evidenceStatus,
     citationCount: result.result.evidenceReference.citationCount,
     formalAdoptionStatus: result.result.formalAdoption.status,
+    formalAdoptionReviewStatus: result.result.formalAdoption.reviewStatus,
+    formalTargetWriteStatus:
+      result.result.formalAdoption.formalTargetWriteStatus,
+    formalQuestionPublicId: result.result.formalAdoption.formalQuestionPublicId,
+    formalPaperPublicId: result.result.formalAdoption.formalPaperPublicId,
+    formalAdoptionReviewedAt: result.result.formalAdoption.reviewedAt,
     reviewedDraft: result.result.contentReference.reviewedDraft,
     redactionStatus: result.result.contentReference.redactionStatus,
   };
@@ -1824,6 +1830,11 @@ function mapAdminAiGenerationResultDtoToHistoryGeneratedResult(
     evidenceStatus: result.evidenceReference.evidenceStatus,
     citationCount: result.evidenceReference.citationCount,
     formalAdoptionStatus: result.formalAdoption.status,
+    formalAdoptionReviewStatus: result.formalAdoption.reviewStatus,
+    formalTargetWriteStatus: result.formalAdoption.formalTargetWriteStatus,
+    formalQuestionPublicId: result.formalAdoption.formalQuestionPublicId,
+    formalPaperPublicId: result.formalAdoption.formalPaperPublicId,
+    formalAdoptionReviewedAt: result.formalAdoption.reviewedAt,
     reviewedDraft: result.contentReference.reviewedDraft,
     redactionStatus: result.contentReference.redactionStatus,
   };

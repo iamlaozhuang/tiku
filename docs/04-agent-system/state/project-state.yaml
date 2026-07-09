@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: org-ai-paper-section-contract-validation-2026-07-09
+currentPhase: content-ai-adoption-read-model-2026-07-09
 updatedAt: "2026-07-09T00:00:00-07:00"
 latestOrgAiPaperSectionContractValidation:
   id: org-ai-paper-section-contract-validation-2026-07-09
@@ -1740,26 +1740,26 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: org-ai-paper-section-contract-validation-2026-07-09
-  title: Organization AI paper section contract validation
-  phase: org-ai-paper-section-contract-validation-2026-07-09
+  id: content-ai-adoption-read-model-2026-07-09
+  title: Content AI adoption read model
+  phase: content-ai-adoption-read-model-2026-07-09
   status: ready_for_closeout
-  result: pass_tdd_targeted_tests_adjacent_tests_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+  result: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_ready_for_merge_push_cleanup
   priority: p1
   taskKind: implementation
-  branch: codex/org-ai-paper-section-contract-validation
-  humanApprovalBoundary: current_user_approved_immediate_org_ai_paper_section_contract_validation_merge_push_cleanup_2026_07_09
-  plannedAt: "2026-07-09T00:00:00-07:00"
-  claimedAt: "2026-07-09T00:00:00-07:00"
-  targetClosureItem: Strengthen AI组卷 paper plan section validation so questionTypeDistribution and paperStructure cannot be satisfied only by matching top-level fields.
-  behaviorBoundary: only_ai_paper_plan_section_contract_validation_and_tests_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_formal_content_write_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
+  branch: codex/content-ai-adoption-read-model
+  humanApprovalBoundary: current_user_approved_step1_content_ai_adoption_read_model_2026_07_09
+  plannedAt: "2026-07-09T00:30:00-07:00"
+  claimedAt: "2026-07-09T00:30:00-07:00"
+  targetClosureItem: Surface persisted content-admin AI generation formal adoption status in history/API/UI without changing formal publish behavior.
+  behaviorBoundary: content_ai_adoption_read_model_only_no_provider_execution_no_db_connection_mutation_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_formal_publish_no_browser_runtime_no_staging_prod_deploy_no_cost_calibration
   evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-org-ai-paper-section-contract-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-org-ai-paper-section-contract-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-org-ai-paper-section-contract-validation-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-adoption-read-model.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-adoption-read-model.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-adoption-read-model-audit.md
   validationSummary:
-    status: pass_tdd_targeted_tests_adjacent_tests_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
-    tddRed: pass_expected_section_contract_failures
+    status: pass_tdd_targeted_tests_typecheck_lint_diff_precommit_ready_for_merge_push_cleanup
+    tddRed: pass_expected_adoption_read_model_failures
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
@@ -1771,15 +1771,13 @@ currentTask:
     costCalibrationExecutedOrClaimed: false
     releaseFinalProductionClaimed: false
     productionUsabilityClaimed: false
-    targetedStructuredPreviewAndAssemblyUnit: pass_2_files_45_tests
-    adjacentAiPaperAndAdminRouteUnit: pass_6_files_65_tests
+    targetedAdoptionReadModelUnit: pass_7_files_154_tests
     lint: pass
     typecheck: pass
     diffCheck: pass
-    prettierCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
-    mergePushApproval: granted_current_user_approved_immediate_org_ai_paper_section_contract_validation_merge_push_cleanup_2026_07_09
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract

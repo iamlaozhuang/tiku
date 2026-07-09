@@ -17,6 +17,7 @@ import type {
   InsertAdminAiGenerationDraftResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
+import type { AdminAiGenerationResultFormalAdoptionStatus } from "../models/admin-ai-generation-result";
 import type {
   OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
@@ -201,9 +202,32 @@ function mapAdminAiGenerationResultRowToDto(
     },
     formalAdoption: {
       isBlocked: true,
-      status: "blocked",
+      status: resolveFormalAdoptionStatus(row),
+      reviewStatus: row.formal_adoption_review_status,
+      formalTargetWriteStatus: row.formal_adoption_target_write_status,
+      formalQuestionPublicId: row.formal_adoption_question_public_id,
+      formalPaperPublicId: row.formal_adoption_paper_public_id,
+      reviewedAt: row.formal_adoption_reviewed_at?.toISOString() ?? null,
     },
   };
+}
+
+function resolveFormalAdoptionStatus(
+  row: AdminAiGenerationResultPersistenceRow,
+): AdminAiGenerationResultFormalAdoptionStatus {
+  if (row.formal_adoption_review_status === null) {
+    return "blocked";
+  }
+
+  if (row.formal_adoption_review_status === "rejected") {
+    return "rejected";
+  }
+
+  if (row.formal_adoption_target_write_status === "draft_created") {
+    return "draft_created";
+  }
+
+  return "approved_for_formal_adoption";
 }
 
 const organizationTrainingQuestionTypes = [

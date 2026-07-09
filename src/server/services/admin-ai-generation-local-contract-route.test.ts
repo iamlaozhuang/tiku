@@ -762,6 +762,13 @@ function createGeneratedResultHistoryItem(input: {
   resultPublicId: string;
   taskPublicId: string;
   workspace: AdminAiGenerationWorkspace;
+  formalAdoption?: AdminAiGenerationResultDto["formalAdoption"] & {
+    formalPaperPublicId?: string | null;
+    formalQuestionPublicId?: string | null;
+    formalTargetWriteStatus?: string | null;
+    reviewStatus?: string | null;
+    reviewedAt?: string | null;
+  };
   reviewedDraft?: AdminAiGenerationResultDto["contentReference"]["reviewedDraft"];
 }): AdminAiGenerationResultDto {
   const isContent = input.workspace === "content";
@@ -806,6 +813,12 @@ function createGeneratedResultHistoryItem(input: {
     formalAdoption: {
       isBlocked: true,
       status: "blocked",
+      reviewStatus: null,
+      formalTargetWriteStatus: null,
+      formalQuestionPublicId: null,
+      formalPaperPublicId: null,
+      reviewedAt: null,
+      ...input.formalAdoption,
     },
   };
 }
@@ -889,6 +902,11 @@ function createGeneratedResultPersistenceResult(
       formalAdoption: {
         isBlocked: true,
         status: "blocked",
+        reviewStatus: null,
+        formalTargetWriteStatus: null,
+        formalQuestionPublicId: null,
+        formalPaperPublicId: null,
+        reviewedAt: null,
       },
     },
   };
@@ -2927,6 +2945,79 @@ describe("admin AI generation local contract route handlers", () => {
     });
     expect(serializedPayload).not.toContain("contentDigest");
     expect(serializedPayload).not.toContain("contentRedactedSnapshot");
+    expect(serializedPayload).not.toContain("aiCallLogPublicId");
+    expect(serializedPayload).not.toContain("rawPrompt");
+    expect(serializedPayload).not.toContain("rawOutput");
+    expect(serializedPayload).not.toContain("providerPayload");
+    expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("returns content admin persisted formal adoption status in generated result history", async () => {
+    const taskPublicId =
+      "admin_ai_generation_task_content_question_adopted_history";
+    const resultPublicId =
+      "admin_ai_generation_result_content_question_adopted_history";
+    const taskPersistenceRecorder = createTaskPersistenceRecorder({
+      taskHistoryItems: [
+        createTaskHistoryItem({
+          workspace: "content",
+          generationKind: "question",
+          taskPublicId,
+          resultPublicId,
+          status: "succeeded",
+          requestedAt: "2026-06-26T21:10:00.000Z",
+        }),
+      ],
+    });
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder({
+        draftResults: [
+          createGeneratedResultHistoryItem({
+            workspace: "content",
+            generationKind: "question",
+            taskPublicId,
+            resultPublicId,
+            persistedAt: "2026-06-26T21:11:00.000Z",
+            formalAdoption: {
+              isBlocked: true,
+              status: "draft_created",
+              reviewStatus: "approved_for_formal_adoption",
+              formalTargetWriteStatus: "draft_created",
+              formalQuestionPublicId: "formal_question_public_adopted",
+              formalPaperPublicId: null,
+              reviewedAt: "2026-06-26T21:12:00.000Z",
+            } as unknown as AdminAiGenerationResultDto["formalAdoption"],
+          }),
+        ],
+      });
+    const response = await getLocalContractHistory({
+      workspace: "content",
+      adminRoles: ["content_admin"],
+      searchParams: "?generationKind=question&page=1&pageSize=10",
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+    });
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        latestTask: {
+          taskPublicId,
+          generatedResult: {
+            resultPublicId,
+            formalAdoptionStatus: "draft_created",
+            formalTargetWriteStatus: "draft_created",
+            formalQuestionPublicId: "formal_question_public_adopted",
+            formalPaperPublicId: null,
+            formalAdoptionReviewedAt: "2026-06-26T21:12:00.000Z",
+          },
+        },
+      },
+    });
+    expect(serializedPayload).not.toContain("contentDigest");
     expect(serializedPayload).not.toContain("aiCallLogPublicId");
     expect(serializedPayload).not.toContain("rawPrompt");
     expect(serializedPayload).not.toContain("rawOutput");

@@ -57,6 +57,11 @@ function createResultRow(
     source_question_public_id: null,
     source_paper_public_id: null,
     is_formal_adoption_blocked: true,
+    formal_adoption_review_status: null,
+    formal_adoption_target_write_status: null,
+    formal_adoption_question_public_id: null,
+    formal_adoption_paper_public_id: null,
+    formal_adoption_reviewed_at: null,
     created_at: new Date("2026-06-26T20:00:00.000Z"),
     updated_at: new Date("2026-06-26T20:00:00.000Z"),
     ...overrides,
@@ -271,6 +276,51 @@ describe("admin AI generation result persistence repository", () => {
     expect(JSON.stringify(draftResults)).not.toContain("rawPrompt");
     expect(JSON.stringify(draftResults)).not.toContain("rawOutput");
     expect(JSON.stringify(draftResults)).not.toContain("providerPayload");
+  });
+
+  it("surfaces persisted formal adoption draft status for content-admin history", async () => {
+    const { gateway } = createGateway({
+      rows: [
+        createResultRow({
+          workspace: "content",
+          generation_kind: "question",
+          owner_type: "platform",
+          owner_public_id: "platform_content_review_pool",
+          organization_public_id: null,
+          task_type: "ai_question_generation",
+          formal_adoption_review_status: "approved_for_formal_adoption",
+          formal_adoption_target_write_status: "draft_created",
+          formal_adoption_question_public_id: "formal_question_public_reviewed",
+          formal_adoption_reviewed_at: new Date("2026-06-26T21:00:00.000Z"),
+        }),
+      ],
+    });
+    const repository =
+      createAdminAiGenerationResultPersistenceRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      workspace: "content",
+      ownerType: "platform",
+      ownerPublicId: "platform_content_review_pool",
+      generationKind: "question",
+      page: 1,
+      pageSize: 10,
+      limit: 10,
+      offset: 0,
+    });
+
+    expect(draftResults[0]?.formalAdoption).toEqual({
+      isBlocked: true,
+      status: "draft_created",
+      reviewStatus: "approved_for_formal_adoption",
+      formalTargetWriteStatus: "draft_created",
+      formalQuestionPublicId: "formal_question_public_reviewed",
+      formalPaperPublicId: null,
+      reviewedAt: "2026-06-26T21:00:00.000Z",
+    });
+    expect(JSON.stringify(draftResults)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
   });
 
   it("surfaces organization AI question results as enterprise training draft snapshots", async () => {

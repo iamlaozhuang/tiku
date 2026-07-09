@@ -1,4 +1,5 @@
 import {
+  adminAiGenerationFormalAdoption,
   adminAiGenerationResult,
   adminAiGenerationTaskMetadata,
   aiGenerationTask,
@@ -24,6 +25,10 @@ import type {
   AdminAiGenerationResultStatus,
   AdminAiGenerationResultTaskType,
 } from "../models/admin-ai-generation-result";
+import type {
+  AdminAiGenerationFormalAdoptionReviewStatus,
+  AdminAiGenerationFormalTargetWriteStatus,
+} from "../models/admin-ai-generation-formal-adoption";
 import type { EvidenceStatus, RedactedJsonObject } from "../models/ai-rag";
 import {
   createAdminAiGenerationResultByTaskCondition,
@@ -72,6 +77,11 @@ export type AdminAiGenerationResultPersistenceDbRow = {
   source_question_public_id: string | null;
   source_paper_public_id: string | null;
   is_formal_adoption_blocked: boolean;
+  formal_adoption_review_status: string | null;
+  formal_adoption_target_write_status: string | null;
+  formal_adoption_question_public_id: string | null;
+  formal_adoption_paper_public_id: string | null;
+  formal_adoption_reviewed_at: Date | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -119,6 +129,22 @@ const adminAiGenerationResultSelection = {
     adminAiGenerationResult.is_formal_adoption_blocked,
   created_at: adminAiGenerationResult.created_at,
   updated_at: adminAiGenerationResult.updated_at,
+};
+
+const adminAiGenerationResultFormalAdoptionReadSelection = {
+  formal_adoption_review_status: adminAiGenerationFormalAdoption.review_status,
+  formal_adoption_target_write_status:
+    adminAiGenerationFormalAdoption.formal_target_write_status,
+  formal_adoption_question_public_id:
+    adminAiGenerationFormalAdoption.formal_question_public_id,
+  formal_adoption_paper_public_id:
+    adminAiGenerationFormalAdoption.formal_paper_public_id,
+  formal_adoption_reviewed_at: adminAiGenerationFormalAdoption.reviewed_at,
+};
+
+const adminAiGenerationResultWithFormalAdoptionSelection = {
+  ...adminAiGenerationResultSelection,
+  ...adminAiGenerationResultFormalAdoptionReadSelection,
 };
 
 const adminAiGenerationResultTaskSelection = {
@@ -193,8 +219,12 @@ export function createPostgresAdminAiGenerationResultPersistenceGateway(
   return {
     async listResultRows(query) {
       const rows = await getDatabase()
-        .select(adminAiGenerationResultSelection)
+        .select(adminAiGenerationResultWithFormalAdoptionSelection)
         .from(adminAiGenerationResult)
+        .leftJoin(
+          adminAiGenerationFormalAdoption,
+          createAdminAiGenerationFormalAdoptionReadCondition(),
+        )
         .where(createAdminAiGenerationResultHistoryCondition(query))
         .orderBy(
           desc(adminAiGenerationResult.created_at),
@@ -244,7 +274,9 @@ export function createPostgresAdminAiGenerationResultPersistenceGateway(
       return row === undefined
         ? null
         : mapAdminAiGenerationResultDbRowToRow(
-            normalizeAdminAiGenerationResultDbRow(row),
+            normalizeAdminAiGenerationResultDbRow(
+              createAdminAiGenerationResultDbRowWithoutFormalAdoption(row),
+            ),
           );
     },
     async attachResultToTask(input) {
@@ -298,6 +330,15 @@ export function mapAdminAiGenerationResultDbRowToRow(
     source_question_public_id: row.source_question_public_id,
     source_paper_public_id: row.source_paper_public_id,
     is_formal_adoption_blocked: true,
+    formal_adoption_review_status: toFormalAdoptionReviewStatus(
+      row.formal_adoption_review_status,
+    ),
+    formal_adoption_target_write_status: toFormalTargetWriteStatus(
+      row.formal_adoption_target_write_status,
+    ),
+    formal_adoption_question_public_id: row.formal_adoption_question_public_id,
+    formal_adoption_paper_public_id: row.formal_adoption_paper_public_id,
+    formal_adoption_reviewed_at: row.formal_adoption_reviewed_at,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -308,8 +349,12 @@ async function findResultByTaskPublicId(
   query: FindAdminAiGenerationResultByTaskQuery,
 ): Promise<AdminAiGenerationResultPersistenceRow | null> {
   const [row] = await database
-    .select(adminAiGenerationResultSelection)
+    .select(adminAiGenerationResultWithFormalAdoptionSelection)
     .from(adminAiGenerationResult)
+    .leftJoin(
+      adminAiGenerationFormalAdoption,
+      createAdminAiGenerationFormalAdoptionReadCondition(),
+    )
     .where(createAdminAiGenerationResultByTaskCondition(query))
     .limit(1);
 
@@ -329,6 +374,23 @@ function createAdminAiGenerationTaskLookupCondition(
     eq(aiGenerationTask.owner_public_id, query.ownerPublicId),
     eq(aiGenerationTask.public_id, query.taskPublicId),
     inArray(aiGenerationTask.task_type, ADMIN_AI_GENERATION_RESULT_TASK_TYPES),
+  ) as SQL;
+}
+
+function createAdminAiGenerationFormalAdoptionReadCondition(): SQL {
+  return and(
+    eq(
+      adminAiGenerationFormalAdoption.source_result_public_id,
+      adminAiGenerationResult.public_id,
+    ),
+    eq(
+      adminAiGenerationFormalAdoption.target_type,
+      adminAiGenerationResult.generation_kind,
+    ),
+    eq(
+      adminAiGenerationFormalAdoption.target_domain,
+      "platform_formal_content",
+    ),
   ) as SQL;
 }
 
@@ -366,6 +428,26 @@ function normalizeAdminAiGenerationResultDbRow(
   row: unknown,
 ): AdminAiGenerationResultPersistenceDbRow {
   return row as AdminAiGenerationResultPersistenceDbRow;
+}
+
+function createAdminAiGenerationResultDbRowWithoutFormalAdoption(
+  row: Omit<
+    AdminAiGenerationResultPersistenceDbRow,
+    | "formal_adoption_paper_public_id"
+    | "formal_adoption_question_public_id"
+    | "formal_adoption_review_status"
+    | "formal_adoption_reviewed_at"
+    | "formal_adoption_target_write_status"
+  >,
+): AdminAiGenerationResultPersistenceDbRow {
+  return {
+    ...row,
+    formal_adoption_review_status: null,
+    formal_adoption_target_write_status: null,
+    formal_adoption_question_public_id: null,
+    formal_adoption_paper_public_id: null,
+    formal_adoption_reviewed_at: null,
+  };
 }
 
 function normalizeAdminAiGenerationResultTaskDbRow(
@@ -447,6 +529,34 @@ function toEvidenceStatus(value: string): EvidenceStatus {
   }
 
   throw new Error("invalid evidence status.");
+}
+
+function toFormalAdoptionReviewStatus(
+  value: string | null,
+): AdminAiGenerationFormalAdoptionReviewStatus | null {
+  if (value === null) {
+    return null;
+  }
+
+  if (value === "approved_for_formal_adoption" || value === "rejected") {
+    return value;
+  }
+
+  throw new Error("invalid admin AI generation formal adoption review status.");
+}
+
+function toFormalTargetWriteStatus(
+  value: string | null,
+): AdminAiGenerationFormalTargetWriteStatus | null {
+  if (value === null) {
+    return null;
+  }
+
+  if (value === "blocked_without_follow_up_task" || value === "draft_created") {
+    return value;
+  }
+
+  throw new Error("invalid admin AI generation formal target write status.");
 }
 
 function toRedactedJsonObject(value: unknown): RedactedJsonObject {
