@@ -1696,7 +1696,11 @@ describe("StudentPersonalAiGenerationPage", () => {
         knowledgeNodeMode: "balanced",
         knowledgeNodePublicIds: [],
         knowledgeNodeSupplement: null,
+        difficulty: "medium",
+        learningObjective: "阶段自测",
+        paperStructure: "by_question_type",
         questionCount: 30,
+        questionTypeDistribution: "balanced_40_30_30",
         sourcePreference: null,
       },
     });
@@ -1844,6 +1848,18 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
+    fireEvent.change(screen.getByLabelText("AI组卷题型分布"), {
+      target: { value: "单选50% / 多选25% / 判断25%" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷大题结构"), {
+      target: { value: "按知识点分大题" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷难度"), {
+      target: { value: "提高" },
+    });
+    fireEvent.change(screen.getByLabelText("AI组卷学习目标"), {
+      target: { value: "企业薄弱点自测" },
+    });
     fireEvent.change(screen.getByLabelText("AI组卷知识点覆盖"), {
       target: { value: "selected" },
     });
@@ -1857,8 +1873,12 @@ describe("StudentPersonalAiGenerationPage", () => {
       taskType: "ai_paper_generation",
       authorizationSource: "org_auth",
       generationParameters: {
+        difficulty: "hard",
         knowledgeNodeMode: "selected",
         knowledgeNodePublicIds: ["knowledge-node-public-marketing-3"],
+        learningObjective: "企业薄弱点自测",
+        paperStructure: "by_knowledge_node",
+        questionTypeDistribution: "single_50_multi_25_true_false_25",
         sourcePreference: "balanced",
       },
     });
@@ -2411,14 +2431,14 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByLabelText("AI组卷等级")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷科目")).toBeInTheDocument();
     expect(screen.getByLabelText("AI组卷题目数量")).toHaveValue(30);
-    expect(screen.getByLabelText("AI组卷题型分布")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷题型分布")).toHaveValue("均衡分布");
     expect(screen.getByLabelText("AI组卷知识点覆盖")).toHaveValue("balanced");
     expect(screen.getByLabelText("AI组卷包含下级知识点")).toBeDisabled();
     expect(screen.getByLabelText("AI组卷知识点补充说明")).toBeInTheDocument();
-    expect(screen.getByLabelText("AI组卷大题结构")).toBeInTheDocument();
-    expect(screen.getByLabelText("AI组卷难度")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷大题结构")).toHaveValue("按题型分大题");
+    expect(screen.getByLabelText("AI组卷难度")).toHaveValue("中等");
     expect(screen.getByLabelText("AI组卷时长目标")).toBeInTheDocument();
-    expect(screen.getByLabelText("AI组卷学习目标")).toBeInTheDocument();
+    expect(screen.getByLabelText("AI组卷学习目标")).toHaveValue("阶段自测");
     expect(
       screen.getByRole("button", { name: employeePaperButtonLabel }),
     ).toBeEnabled();

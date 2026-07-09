@@ -12,7 +12,11 @@ import type {
   AiGenerationRouteIntegratedProfession,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
-import { normalizeAiGenerationRouteIntegratedKnowledgeScope } from "../contracts/route-integrated-provider-execution-contract";
+import {
+  normalizeAiGenerationRouteIntegratedKnowledgeScope,
+  normalizeAiGenerationRouteIntegratedPaperStructure,
+  normalizeAiGenerationRouteIntegratedQuestionTypeDistribution,
+} from "../contracts/route-integrated-provider-execution-contract";
 
 export type PersonalAiGenerationRequestValidationResult =
   | {
@@ -159,6 +163,13 @@ function normalizeGenerationParameters(
   const level = normalizeLevel(value.level);
   const subject = normalizeSubject(value.subject);
   const questionCount = normalizePositiveCount(value.questionCount);
+  const questionTypeDistribution =
+    normalizeAiGenerationRouteIntegratedQuestionTypeDistribution(
+      value.questionTypeDistribution,
+    );
+  const paperStructure = normalizeAiGenerationRouteIntegratedPaperStructure(
+    value.paperStructure,
+  );
   const knowledgeScope = normalizeAiGenerationRouteIntegratedKnowledgeScope({
     includeDescendants: value.includeDescendants,
     knowledgeNode: value.knowledgeNode,
@@ -173,7 +184,9 @@ function normalizeGenerationParameters(
     level === null ||
     subject === null ||
     questionCount === null ||
-    knowledgeScope === null
+    knowledgeScope === null ||
+    questionTypeDistribution === "invalid" ||
+    paperStructure === "invalid"
   ) {
     return null;
   }
@@ -187,6 +200,8 @@ function normalizeGenerationParameters(
     questionCount,
     difficulty: normalizeOptionalText(value.difficulty),
     learningObjective: normalizeOptionalText(value.learningObjective),
+    ...(questionTypeDistribution === null ? {} : { questionTypeDistribution }),
+    ...(paperStructure === null ? {} : { paperStructure }),
   };
 }
 

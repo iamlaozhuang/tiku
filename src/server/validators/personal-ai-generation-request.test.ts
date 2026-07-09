@@ -98,6 +98,8 @@ describe("personal AI generation request validator", () => {
           questionCount: 3,
           difficulty: "medium",
           learningObjective: "redacted objective",
+          questionTypeDistribution: "balanced_40_30_30",
+          paperStructure: "by_question_type",
         },
       }),
     ).toMatchObject({
@@ -110,8 +112,62 @@ describe("personal AI generation request validator", () => {
           includeDescendants: true,
           knowledgeNodeSupplement: "manual supplement",
           sourcePreference: "prefer_platform",
+          questionTypeDistribution: "balanced_40_30_30",
+          paperStructure: "by_question_type",
         },
       },
+    });
+  });
+
+  it("rejects malformed AI paper generation parameter enums", () => {
+    expect(
+      normalizePersonalAiGenerationRequestInput({
+        userPublicId: "user_public_123",
+        authorizationPublicId: "personal_auth_public_123",
+        aiFuncType: "hint",
+        questionPublicId: "question_public_123",
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodePublicIds: [],
+          questionType: null,
+          questionCount: 30,
+          difficulty: "medium",
+          learningObjective: "redacted objective",
+          questionTypeDistribution: "unsupported_distribution",
+          paperStructure: "by_question_type",
+        },
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid personal AI generation request input.",
+    });
+
+    expect(
+      normalizePersonalAiGenerationRequestInput({
+        userPublicId: "user_public_123",
+        authorizationPublicId: "personal_auth_public_123",
+        aiFuncType: "hint",
+        questionPublicId: "question_public_123",
+        generationParameters: {
+          profession: "marketing",
+          level: 3,
+          subject: "theory",
+          knowledgeNode: null,
+          knowledgeNodePublicIds: [],
+          questionType: null,
+          questionCount: 30,
+          difficulty: "medium",
+          learningObjective: "redacted objective",
+          questionTypeDistribution: "balanced_40_30_30",
+          paperStructure: "unsupported_structure",
+        },
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid personal AI generation request input.",
     });
   });
 

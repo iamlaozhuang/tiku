@@ -168,6 +168,12 @@ type StudentAiKnowledgeNodeLoadState =
   | "ready"
   | "empty"
   | "error";
+type StudentAiPaperQuestionTypeDistribution = NonNullable<
+  AiGenerationRouteIntegratedGenerationParameters["questionTypeDistribution"]
+>;
+type StudentAiPaperStructure = NonNullable<
+  AiGenerationRouteIntegratedGenerationParameters["paperStructure"]
+>;
 
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
@@ -178,6 +184,15 @@ const AI_PAPER_DEFAULT_QUESTION_COUNT = 30;
 const AI_PAPER_MAX_QUESTION_COUNT = 80;
 const DEFAULT_STUDENT_AI_GENERATION_HISTORY_TASK_TYPE =
   "ai_question_generation" satisfies StudentPersonalAiGenerationTaskType;
+const studentAiPaperQuestionTypeDistributionOptions = [
+  "均衡分布",
+  "单选50% / 多选25% / 判断25%",
+  "薄弱点优先",
+] as const;
+const studentAiPaperStructureOptions = [
+  "按题型分大题",
+  "按知识点分大题",
+] as const;
 
 const knowledgeNodeModeOptions: {
   value: AiGenerationRouteIntegratedKnowledgeNodeMode;
@@ -360,13 +375,13 @@ const aiPaperDetailControls: StudentPersonalAiGenerationDetailControl[] = [
   },
   {
     label: "AI组卷题型分布",
-    kind: "text",
-    placeholder: "例：单选、多选、判断按训练目标分配",
+    kind: "select",
+    options: [...studentAiPaperQuestionTypeDistributionOptions],
   },
   {
     label: "AI组卷大题结构",
-    kind: "text",
-    placeholder: "按大题结构规划题量与顺序",
+    kind: "select",
+    options: [...studentAiPaperStructureOptions],
   },
   {
     label: "AI组卷难度",
@@ -417,18 +432,60 @@ function createStudentAiQuestionDetailControls(input: {
 function createStudentAiPaperDetailControls(input: {
   questionCount: number;
   onQuestionCountChange: (value: string) => void;
+  questionTypeDistribution: string;
+  onQuestionTypeDistributionChange: (value: string) => void;
+  paperStructure: string;
+  onPaperStructureChange: (value: string) => void;
+  difficulty: string;
+  onDifficultyChange: (value: string) => void;
+  learningObjective: string;
+  onLearningObjectiveChange: (value: string) => void;
 }): StudentPersonalAiGenerationDetailControl[] {
-  return aiPaperDetailControls.map((control) =>
-    control.label === "AI组卷题目数量"
-      ? {
-          ...control,
-          max: AI_PAPER_MAX_QUESTION_COUNT,
-          min: 1,
-          onValueChange: input.onQuestionCountChange,
-          value: input.questionCount,
-        }
-      : control,
-  );
+  return aiPaperDetailControls.map((control) => {
+    if (control.label === "AI组卷题目数量") {
+      return {
+        ...control,
+        max: AI_PAPER_MAX_QUESTION_COUNT,
+        min: 1,
+        onValueChange: input.onQuestionCountChange,
+        value: input.questionCount,
+      };
+    }
+
+    if (control.label === "AI组卷题型分布") {
+      return {
+        ...control,
+        onValueChange: input.onQuestionTypeDistributionChange,
+        value: input.questionTypeDistribution,
+      };
+    }
+
+    if (control.label === "AI组卷大题结构") {
+      return {
+        ...control,
+        onValueChange: input.onPaperStructureChange,
+        value: input.paperStructure,
+      };
+    }
+
+    if (control.label === "AI组卷难度") {
+      return {
+        ...control,
+        onValueChange: input.onDifficultyChange,
+        value: input.difficulty,
+      };
+    }
+
+    if (control.label === "AI组卷学习目标") {
+      return {
+        ...control,
+        onValueChange: input.onLearningObjectiveChange,
+        value: input.learningObjective,
+      };
+    }
+
+    return control;
+  });
 }
 
 function createDefaultStudentAiKnowledgeScopeState(): StudentAiKnowledgeScopeFormState {
@@ -567,6 +624,36 @@ function mapStudentAiPaperSourcePreference(
   }
 
   return "balanced";
+}
+
+function mapStudentAiPaperQuestionTypeDistribution(
+  value: string,
+): StudentAiPaperQuestionTypeDistribution {
+  if (value === "单选50% / 多选25% / 判断25%") {
+    return "single_50_multi_25_true_false_25";
+  }
+
+  if (value === "薄弱点优先") {
+    return "weak_point_priority";
+  }
+
+  return "balanced_40_30_30";
+}
+
+function mapStudentAiPaperStructure(value: string): StudentAiPaperStructure {
+  return value === "按知识点分大题" ? "by_knowledge_node" : "by_question_type";
+}
+
+function mapStudentAiDifficulty(value: string): string {
+  if (value === "基础") {
+    return "easy";
+  }
+
+  if (value === "提高") {
+    return "hard";
+  }
+
+  return "medium";
 }
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
@@ -738,8 +825,14 @@ function createStudentGenerationParameters(
   questionCount: number,
   knowledgeScopeState: StudentAiKnowledgeScopeFormState,
   sourcePreference: AiGenerationRouteIntegratedSourcePreference | null,
+  paperParameters?: {
+    questionTypeDistribution: StudentAiPaperQuestionTypeDistribution;
+    paperStructure: StudentAiPaperStructure;
+    difficulty: string | null;
+    learningObjective: string | null;
+  },
 ): AiGenerationRouteIntegratedGenerationParameters {
-  return {
+  const baseParameters: AiGenerationRouteIntegratedGenerationParameters = {
     profession: authorizationContext.profession,
     level:
       authorizationContext.level === 1 ||
@@ -757,10 +850,23 @@ function createStudentGenerationParameters(
     questionType:
       taskType === "ai_question_generation" ? "single_choice" : null,
     questionCount,
-    difficulty: "medium",
+    difficulty:
+      taskType === "ai_paper_generation"
+        ? (paperParameters?.difficulty ?? null)
+        : "medium",
     learningObjective:
-      taskType === "ai_question_generation" ? "弱项巩固" : "阶段自测",
+      taskType === "ai_paper_generation"
+        ? (paperParameters?.learningObjective ?? null)
+        : "弱项巩固",
   };
+
+  return taskType === "ai_paper_generation" && paperParameters !== undefined
+    ? {
+        ...baseParameters,
+        questionTypeDistribution: paperParameters.questionTypeDistribution,
+        paperStructure: paperParameters.paperStructure,
+      }
+    : baseParameters;
 }
 
 async function fetchPersonalAiGenerationAuthorizationContexts(
@@ -2909,6 +3015,15 @@ export function StudentPersonalAiGenerationPage() {
   );
   const [aiPaperSourcePreference, setAiPaperSourcePreference] =
     useState("均衡使用");
+  const [aiPaperQuestionTypeDistribution, setAiPaperQuestionTypeDistribution] =
+    useState<(typeof studentAiPaperQuestionTypeDistributionOptions)[number]>(
+      "均衡分布",
+    );
+  const [aiPaperStructure, setAiPaperStructure] =
+    useState<(typeof studentAiPaperStructureOptions)[number]>("按题型分大题");
+  const [aiPaperDifficulty, setAiPaperDifficulty] = useState("中等");
+  const [aiPaperLearningObjective, setAiPaperLearningObjective] =
+    useState("阶段自测");
   const [practiceFeedbackState, setPracticeFeedbackState] =
     useState<StudentPersonalAiGenerationPracticeFeedbackState>("waiting");
   const [isAiLearningSessionStarted, setIsAiLearningSessionStarted] =
@@ -3344,6 +3459,20 @@ export function StudentPersonalAiGenerationPage() {
                   generationQuestionCount,
                   generationKnowledgeScopeState,
                   generationSourcePreference,
+                  taskType === "ai_paper_generation"
+                    ? {
+                        questionTypeDistribution:
+                          mapStudentAiPaperQuestionTypeDistribution(
+                            aiPaperQuestionTypeDistribution,
+                          ),
+                        paperStructure:
+                          mapStudentAiPaperStructure(aiPaperStructure),
+                        difficulty: mapStudentAiDifficulty(aiPaperDifficulty),
+                        learningObjective: normalizeKnowledgeNodeSupplement(
+                          aiPaperLearningObjective,
+                        ),
+                      }
+                    : undefined,
                 ),
                 generationAuthorizationContext,
               ),
@@ -3584,6 +3713,26 @@ export function StudentPersonalAiGenerationPage() {
     );
   }
 
+  function handleChangeAiPaperQuestionTypeDistribution(value: string) {
+    setAiPaperQuestionTypeDistribution(
+      studentAiPaperQuestionTypeDistributionOptions.includes(
+        value as (typeof studentAiPaperQuestionTypeDistributionOptions)[number],
+      )
+        ? (value as (typeof studentAiPaperQuestionTypeDistributionOptions)[number])
+        : "均衡分布",
+    );
+  }
+
+  function handleChangeAiPaperStructure(value: string) {
+    setAiPaperStructure(
+      studentAiPaperStructureOptions.includes(
+        value as (typeof studentAiPaperStructureOptions)[number],
+      )
+        ? (value as (typeof studentAiPaperStructureOptions)[number])
+        : "按题型分大题",
+    );
+  }
+
   async function handleChangeRequestHistoryPage(page: number) {
     const sessionRequestToken = readStudentSessionRequestToken();
 
@@ -3805,8 +3954,17 @@ export function StudentPersonalAiGenerationPage() {
     questionCount: aiQuestionCount,
   });
   const activeAiPaperDetailControls = createStudentAiPaperDetailControls({
+    difficulty: aiPaperDifficulty,
+    learningObjective: aiPaperLearningObjective,
+    onDifficultyChange: setAiPaperDifficulty,
+    onLearningObjectiveChange: setAiPaperLearningObjective,
+    onPaperStructureChange: handleChangeAiPaperStructure,
     onQuestionCountChange: handleChangeAiPaperQuestionCount,
+    onQuestionTypeDistributionChange:
+      handleChangeAiPaperQuestionTypeDistribution,
+    paperStructure: aiPaperStructure,
     questionCount: aiPaperQuestionCount,
+    questionTypeDistribution: aiPaperQuestionTypeDistribution,
   });
   const activeSubmitButtonLabel =
     activeTaskType === "ai_question_generation"
