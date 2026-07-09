@@ -126,6 +126,11 @@ activeTasks:
       prettierCheck: pass_scoped
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass
+      masterPostMergeTargetedTests: pass_6_files_181_tests
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeDiffCheck: pass
+      prePushReadiness: pass_skip_remote_ahead_check
       sourceCodeChanged: true
       testsChanged: true
     allowedFiles:

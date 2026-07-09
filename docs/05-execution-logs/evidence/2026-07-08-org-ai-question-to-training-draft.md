@@ -122,6 +122,40 @@ After materializing `org-ai-question-to-training-draft-2026-07-08` with scoped a
 
 Result: passed.
 
+## Master Post-Merge Verification
+
+After fast-forward merge into `master`, the following gates were rerun:
+
+```bash
+corepack pnpm@10.26.1 exec vitest run src/server/repositories/admin-ai-generation-result-persistence-repository.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts --reporter=dot
+```
+
+Result: 6 test files passed, 181 tests passed.
+
+```bash
+corepack pnpm@10.26.1 run lint
+```
+
+Result: passed.
+
+```bash
+corepack pnpm@10.26.1 run typecheck
+```
+
+Result: passed.
+
+```bash
+git diff --check
+```
+
+Result: passed.
+
+```bash
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-ai-question-to-training-draft-2026-07-08 -SkipRemoteAheadCheck
+```
+
+Result: passed.
+
 ## Adversarial Review
 
 - Role boundary: organization AI question snapshot is only resolved for `workspace = organization`, `ownerType = organization`, and source metadata `organization_ai_result/question`.
