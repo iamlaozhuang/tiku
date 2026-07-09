@@ -1407,6 +1407,153 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(screen.getByText(/本地选题后进入企业训练草稿/u)).toBeInTheDocument();
   });
 
+  it("prefills the publish form from organization AI question draft details when continuing configuration", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = getRequestPath(url);
+        const method = init?.method ?? "GET";
+
+        if (String(url) === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+
+        if (isOrganizationTrainingListGet(url, init)) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              items: [
+                {
+                  publicId: persistedAiDraft.publicId,
+                  resourceType: "organization_training_draft",
+                  organizationPublicId: persistedAiDraft.organizationPublicId,
+                  authorizationPublicId: persistedAiDraft.authorizationPublicId,
+                  profession: persistedAiDraft.profession,
+                  level: persistedAiDraft.level,
+                  subject: persistedAiDraft.subject,
+                  title: persistedAiDraft.title,
+                  description: persistedAiDraft.description,
+                  questionCount: persistedAiDraft.questionCount,
+                  totalScore: persistedAiDraft.totalScore,
+                  questionTypeSummary: persistedAiDraft.questionTypeSummary,
+                  status: "draft",
+                  sourceKind: "ai_question",
+                  contentKind: "question_training",
+                  availableActions: ["publish"],
+                },
+              ],
+              redactionStatus: "metadata_only",
+            },
+          });
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-ui-001" &&
+          method === "GET"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              publicId: persistedAiDraft.publicId,
+              resourceType: "organization_training_draft",
+              detailAvailability: "available",
+              organizationPublicId: persistedAiDraft.organizationPublicId,
+              title: persistedAiDraft.title,
+              description: persistedAiDraft.description,
+              profession: persistedAiDraft.profession,
+              level: persistedAiDraft.level,
+              subject: persistedAiDraft.subject,
+              status: "draft",
+              sourceKind: "ai_question",
+              contentKind: "question_training",
+              structure: {
+                questionCount: 1,
+                totalScore: 5,
+                questionTypeSummary: persistedAiDraft.questionTypeSummary,
+              },
+              questions: [
+                {
+                  publicId: "organization-training-ai-question-ui-001",
+                  sequenceNumber: 1,
+                  questionType: "single_choice",
+                  materialTitle: null,
+                  materialContent: null,
+                  stem: "synthetic AI question draft stem",
+                  options: [
+                    {
+                      publicId:
+                        "organization-training-ai-question-ui-001-option-a",
+                      label: "A",
+                      content: "synthetic AI option A",
+                    },
+                    {
+                      publicId:
+                        "organization-training-ai-question-ui-001-option-b",
+                      label: "B",
+                      content: "synthetic AI option B",
+                    },
+                  ],
+                  score: 5,
+                  evidenceSummary: {
+                    evidenceStatus: "sufficient",
+                    citationCount: 2,
+                  },
+                  answerAndAnalysis: {
+                    visibility: "collapsed_by_default",
+                    standardAnswer: "A",
+                    analysis: "synthetic AI analysis",
+                  },
+                },
+              ],
+              redactionStatus: "admin_safe_detail",
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    const persistedDraftCard = await screen.findByTestId(
+      "organization-training-lifecycle-organization-training-draft-ai-ui-001",
+    );
+    fireEvent.click(
+      within(persistedDraftCard).getByRole("button", { name: "继续配置" }),
+    );
+
+    const publishForm = within(
+      await screen.findByRole("form", { name: "企业训练发布表单" }),
+    );
+    await waitFor(() =>
+      expect(publishForm.getByLabelText("第 1 题题干")).toHaveValue(
+        "synthetic AI question draft stem",
+      ),
+    );
+    expect(publishForm.getByLabelText("第 1 题选项 A")).toHaveValue(
+      "synthetic AI option A",
+    );
+    expect(publishForm.getByLabelText("第 1 题标准答案")).toHaveValue("A");
+    expect(publishForm.getByLabelText("第 1 题解析")).toHaveValue(
+      "synthetic AI analysis",
+    );
+    expect(publishForm.getByLabelText("第 1 题依据状态")).toHaveValue(
+      "sufficient",
+    );
+    expect(JSON.stringify(fetchMock.mock.calls)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput/u,
+    );
+  });
+
   it("loads persisted AI-created drafts and publishes structured reviewed previews without raw JSON input", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(

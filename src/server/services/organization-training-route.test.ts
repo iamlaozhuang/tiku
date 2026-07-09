@@ -23,6 +23,7 @@ import type {
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
+  OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -1195,6 +1196,127 @@ describe("organization training draft source-context route handlers", () => {
         redactionStatus: "metadata_only",
       },
     });
+  });
+
+  it("returns organization AI question draft details from the task-linked safe snapshot", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const resolveAdminDraftDetailQuestions = vi.fn(
+      async (): Promise<OrganizationTrainingAdminQuestionDetailDto[]> => [
+        {
+          publicId: "organization_training_ai_question_route_001",
+          sequenceNumber: 1,
+          questionType: "single_choice",
+          materialTitle: null,
+          materialContent: null,
+          stem: "Synthetic route organization training stem",
+          options: [
+            {
+              publicId: "organization_training_ai_question_route_001_option_a",
+              label: "A",
+              content: "Synthetic route option A",
+            },
+          ],
+          score: 1,
+          evidenceSummary: {
+            evidenceStatus: "sufficient",
+            citationCount: 2,
+          },
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "A",
+            analysis: "Synthetic route analysis",
+          },
+        },
+      ],
+    );
+    runtimeRepositoryMock.findAdminPublishedVersionDetailByPublicId.mockResolvedValueOnce(
+      null,
+    );
+    runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValueOnce([
+      createManualDraftDto({
+        sourceTaskPublicId: "admin_ai_generation_task_org_question_route_401",
+        questionCount: 1,
+        totalScore: 1,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        evidenceStatus: "sufficient",
+      }),
+    ]);
+    runtimeRepositoryMock.listAdminLifecycleSourceMetadata.mockResolvedValueOnce(
+      [
+        {
+          draftPublicId: publishPathPublicId,
+          sourceTaskPublicId: "admin_ai_generation_task_org_question_route_401",
+          sourceVersionPublicId: null,
+          sourceType: "organization_ai_result",
+          generationKind: "question",
+          redactionStatus: "metadata_only",
+        },
+      ],
+    );
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+      resolveAdminDraftDetailQuestions,
+    });
+
+    const response = await handlers.adminDetail.GET(
+      createAdminDetailRequest(publishPathPublicId, {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(publishPathPublicId),
+    );
+
+    const payload = await resolveJsonPayload(response);
+    expect(resolveAdminDraftDetailQuestions).toHaveBeenCalledWith({
+      request: expect.any(Request),
+      draft: expect.objectContaining({
+        publicId: publishPathPublicId,
+        sourceTaskPublicId: "admin_ai_generation_task_org_question_route_401",
+      }),
+      sourceMetadata: expect.objectContaining({
+        sourceType: "organization_ai_result",
+        generationKind: "question",
+      }),
+      adminContext: expect.objectContaining({
+        visibleOrganizationPublicIds: ["organization_route_public_401"],
+      }),
+    });
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: publishPathPublicId,
+        resourceType: "organization_training_draft",
+        detailAvailability: "available",
+        sourceKind: "ai_question",
+        contentKind: "question_training",
+        questions: [
+          {
+            stem: "Synthetic route organization training stem",
+            answerAndAnalysis: {
+              visibility: "collapsed_by_default",
+              standardAnswer: "A",
+              analysis: "Synthetic route analysis",
+            },
+          },
+        ],
+        redactionStatus: "admin_safe_detail",
+      },
+    });
+    expect(JSON.stringify(payload)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
   });
 
   it("does not return admin detail when organization-admin context is unavailable", async () => {

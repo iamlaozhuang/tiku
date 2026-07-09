@@ -13,6 +13,11 @@ import type {
   AdminAiGenerationWorkspace,
 } from "./admin-ai-generation-local-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "./admin-ai-generation-formal-draft-adapter-contract";
+import type { OrganizationTrainingAdminQuestionDetailDto } from "./organization-training-contract";
+
+export type AdminAiGenerationOrganizationTrainingQuestionDraftPayload = {
+  questions: OrganizationTrainingAdminQuestionDetailDto[];
+};
 
 export type CreateAdminAiGenerationResultInput =
   AdminAiGenerationResultPersistenceInput;
@@ -106,6 +111,7 @@ export type AdminAiGenerationResultDto = {
     contentPreviewMasked: string;
     contentVisibility: AdminAiGenerationResultContentVisibility;
     reviewedDraft: AdminAiGenerationFormalReviewedDraftPayload | null;
+    organizationTrainingDraft: AdminAiGenerationOrganizationTrainingQuestionDraftPayload | null;
     redactionStatus: AdminAiGenerationResultRedactionStatus;
   };
   evidenceReference: {
@@ -151,6 +157,9 @@ export type AdminAiGenerationResultPersistenceRepository = {
   listDraftResults(
     query: AdminAiGenerationResultHistoryQuery,
   ): Promise<AdminAiGenerationResultDto[]>;
+  findDraftResultByTaskPublicId(
+    query: FindAdminAiGenerationResultByTaskQuery,
+  ): Promise<AdminAiGenerationResultDto | null>;
   createOrReuseDraftResult(
     input: CreateAdminAiGenerationResultInput,
   ): Promise<AdminAiGenerationResultPersistenceResult>;

@@ -236,7 +236,7 @@ export type OrganizationTrainingAdminDetailStructureDto = {
 
 export type OrganizationTrainingAdminAvailableDetailDto = {
   publicId: string;
-  resourceType: "organization_training_version";
+  resourceType: "organization_training_draft" | "organization_training_version";
   detailAvailability: "available";
   organizationPublicId: string;
   title: string;
@@ -244,7 +244,7 @@ export type OrganizationTrainingAdminAvailableDetailDto = {
   profession: Profession;
   level: number;
   subject: Subject;
-  status: OrganizationTrainingVersionStatus;
+  status: "draft" | OrganizationTrainingVersionStatus;
   sourceKind: OrganizationTrainingAdminLifecycleSourceKind;
   contentKind: OrganizationTrainingAdminLifecycleContentKind;
   structure: OrganizationTrainingAdminDetailStructureDto;

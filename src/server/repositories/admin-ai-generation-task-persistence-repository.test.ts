@@ -338,6 +338,7 @@ function createLocalContractRouteResultPersistenceResult(
         contentPreviewMasked: input.contentPreviewMasked,
         contentVisibility: "redacted_snapshot",
         reviewedDraft: null,
+        organizationTrainingDraft: null,
         redactionStatus: "redacted",
       },
       evidenceReference: {
@@ -365,6 +366,9 @@ function createLocalContractRouteResultPersistenceRepository(): AdminAiGeneratio
     },
     async listDraftResults() {
       return [];
+    },
+    async findDraftResultByTaskPublicId() {
+      return null;
     },
   };
 }

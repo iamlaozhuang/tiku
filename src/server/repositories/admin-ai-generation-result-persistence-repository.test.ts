@@ -273,6 +273,90 @@ describe("admin AI generation result persistence repository", () => {
     expect(JSON.stringify(draftResults)).not.toContain("providerPayload");
   });
 
+  it("surfaces organization AI question results as enterprise training draft snapshots", async () => {
+    const { gateway } = createGateway({
+      rows: [
+        createResultRow({
+          workspace: "organization",
+          generation_kind: "question",
+          task_type: "ai_question_generation",
+          evidence_status: "sufficient",
+          citation_count: 2,
+          content_redacted_snapshot: {
+            redactionStatus: "redacted",
+            organizationTrainingQuestionDraft: {
+              questions: [
+                {
+                  publicId: "organization_training_ai_question_draft_001",
+                  sequenceNumber: 1,
+                  questionType: "single_choice",
+                  materialTitle: null,
+                  materialContent: null,
+                  stem: "Synthetic organization training stem",
+                  options: [
+                    {
+                      publicId:
+                        "organization_training_ai_question_draft_001_option_a",
+                      label: "A",
+                      content: "Synthetic option A",
+                    },
+                  ],
+                  score: 1,
+                  evidenceSummary: {
+                    evidenceStatus: "sufficient",
+                    citationCount: 2,
+                  },
+                  answerAndAnalysis: {
+                    visibility: "collapsed_by_default",
+                    standardAnswer: "A",
+                    analysis: "Synthetic analysis",
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      ],
+    });
+    const repository =
+      createAdminAiGenerationResultPersistenceRepository(gateway);
+
+    const draftResults = await repository.listDraftResults({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: "organization_public_901",
+      generationKind: "question",
+      page: 1,
+      pageSize: 10,
+      limit: 10,
+      offset: 0,
+    });
+
+    expect(
+      draftResults[0]?.contentReference.organizationTrainingDraft,
+    ).toMatchObject({
+      questions: [
+        {
+          sequenceNumber: 1,
+          questionType: "single_choice",
+          stem: "Synthetic organization training stem",
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "A",
+            analysis: "Synthetic analysis",
+          },
+          evidenceSummary: {
+            evidenceStatus: "sufficient",
+            citationCount: 2,
+          },
+        },
+      ],
+    });
+    expect(JSON.stringify(draftResults)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
+  });
+
   it("filters draft result history by generation kind before pagination", async () => {
     const { gateway, listResultRows } = createGateway({
       rows: [

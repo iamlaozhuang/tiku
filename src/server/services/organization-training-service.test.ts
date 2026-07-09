@@ -973,6 +973,115 @@ describe("organization training service", () => {
     });
   });
 
+  it("returns admin-safe question details for organization AI question training drafts with structured snapshots", () => {
+    const result = buildOrganizationTrainingAdminDetailReadModel({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      draft: {
+        publicId: "training_draft_ai_question_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_org_question_123",
+        organizationPublicId: "organization_public_123",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        title: "AI question training draft",
+        description: null,
+        questionCount: 1,
+        totalScore: 1,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 0,
+        },
+        evidenceStatus: "sufficient",
+        validationStatus: "needs_review",
+        retentionStatus: "active",
+        createdAt: fixedNow.toISOString(),
+        expiresAt: null,
+      },
+      sourceMetadata: {
+        draftPublicId: "training_draft_ai_question_public_123",
+        sourceTaskPublicId: "admin_ai_generation_task_org_question_123",
+        sourceVersionPublicId: null,
+        sourceType: "organization_ai_result",
+        generationKind: "question",
+        redactionStatus: "metadata_only",
+      },
+      draftQuestions: [
+        {
+          publicId: "organization_training_ai_question_draft_001",
+          sequenceNumber: 1,
+          questionType: "single_choice",
+          materialTitle: null,
+          materialContent: null,
+          stem: "Synthetic organization training stem",
+          options: [
+            {
+              publicId: "organization_training_ai_question_draft_001_option_a",
+              label: "A",
+              content: "Synthetic option A",
+            },
+          ],
+          score: 1,
+          evidenceSummary: {
+            evidenceStatus: "sufficient",
+            citationCount: 2,
+          },
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default",
+            standardAnswer: "A",
+            analysis: "Synthetic analysis",
+          },
+        },
+      ],
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        publicId: "training_draft_ai_question_public_123",
+        resourceType: "organization_training_draft",
+        detailAvailability: "available",
+        sourceKind: "ai_question",
+        contentKind: "question_training",
+        structure: {
+          questionCount: 1,
+          totalScore: 1,
+          questionTypeSummary: {
+            singleChoice: 1,
+            multiChoice: 0,
+            trueFalse: 0,
+            shortAnswer: 0,
+          },
+        },
+        questions: [
+          {
+            stem: "Synthetic organization training stem",
+            evidenceSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+            },
+            answerAndAnalysis: {
+              visibility: "collapsed_by_default",
+              standardAnswer: "A",
+              analysis: "Synthetic analysis",
+            },
+          },
+        ],
+        redactionStatus: "admin_safe_detail",
+      },
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /providerPayload|rawPrompt|rawOutput|"id":/u,
+    );
+  });
+
   it("denies admin detail outside the visible organization scope", () => {
     expect(
       buildOrganizationTrainingAdminDetailReadModel({

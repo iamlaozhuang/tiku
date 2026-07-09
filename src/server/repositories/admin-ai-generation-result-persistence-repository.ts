@@ -9,11 +9,13 @@ import type {
   AdminAiGenerationResultPersistenceResult,
   AdminAiGenerationResultPersistenceRow,
   AdminAiGenerationResultTaskRow,
+  AdminAiGenerationOrganizationTrainingQuestionDraftPayload,
   CreateAdminAiGenerationResultInput,
   FindAdminAiGenerationResultByTaskQuery,
   InsertAdminAiGenerationDraftResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
 import type { AdminAiGenerationFormalReviewedDraftPayload } from "../contracts/admin-ai-generation-formal-draft-adapter-contract";
+import type { OrganizationTrainingAdminQuestionDetailDto } from "../contracts/organization-training-contract";
 
 const DEFAULT_RESULT_HISTORY_LIMIT = 20;
 const MAX_RESULT_HISTORY_LIMIT = 50;
@@ -63,6 +65,11 @@ export function createAdminAiGenerationResultPersistenceRepository(
       return [...rows]
         .sort(compareAdminAiGenerationResultRows)
         .map(mapAdminAiGenerationResultRowToDto);
+    },
+    async findDraftResultByTaskPublicId(query) {
+      const row = await gateway.findResultByTaskPublicId(query);
+
+      return row === null ? null : mapAdminAiGenerationResultRowToDto(row);
     },
     async createOrReuseDraftResult(input) {
       const lookupQuery = {
@@ -171,6 +178,8 @@ function mapAdminAiGenerationResultRowToDto(
       contentPreviewMasked: row.content_preview_masked,
       contentVisibility: "redacted_snapshot",
       reviewedDraft: resolveFormalReviewedDraftSnapshot(row),
+      organizationTrainingDraft:
+        resolveOrganizationTrainingQuestionDraftSnapshot(row),
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -187,6 +196,157 @@ function mapAdminAiGenerationResultRowToDto(
       isBlocked: true,
       status: "blocked",
     },
+  };
+}
+
+const organizationTrainingQuestionTypes = [
+  "single_choice",
+  "multi_choice",
+  "true_false",
+  "short_answer",
+] as const;
+
+const evidenceStatuses = ["sufficient", "weak", "none"] as const;
+
+function isNullableString(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
+function isOrganizationTrainingQuestionType(
+  value: unknown,
+): value is OrganizationTrainingAdminQuestionDetailDto["questionType"] {
+  return organizationTrainingQuestionTypes.includes(
+    value as OrganizationTrainingAdminQuestionDetailDto["questionType"],
+  );
+}
+
+function isEvidenceStatus(
+  value: unknown,
+): value is OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"] {
+  return evidenceStatuses.includes(
+    value as OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"],
+  );
+}
+
+function normalizeQuestionOptionSnapshot(
+  value: unknown,
+): OrganizationTrainingAdminQuestionDetailDto["options"][number] | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    typeof value.publicId !== "string" ||
+    typeof value.label !== "string" ||
+    typeof value.content !== "string"
+  ) {
+    return null;
+  }
+
+  return {
+    publicId: value.publicId,
+    label: value.label,
+    content: value.content,
+  };
+}
+
+function normalizeOrganizationTrainingQuestionDetail(
+  value: unknown,
+): OrganizationTrainingAdminQuestionDetailDto | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const evidenceSummary = value.evidenceSummary;
+  const answerAndAnalysis = value.answerAndAnalysis;
+
+  if (
+    typeof value.publicId !== "string" ||
+    typeof value.sequenceNumber !== "number" ||
+    !Number.isInteger(value.sequenceNumber) ||
+    value.sequenceNumber < 1 ||
+    !isOrganizationTrainingQuestionType(value.questionType) ||
+    !isNullableString(value.materialTitle) ||
+    !isNullableString(value.materialContent) ||
+    typeof value.stem !== "string" ||
+    !Array.isArray(value.options) ||
+    typeof value.score !== "number" ||
+    !isRecord(evidenceSummary) ||
+    !isEvidenceStatus(evidenceSummary.evidenceStatus) ||
+    typeof evidenceSummary.citationCount !== "number" ||
+    !Number.isInteger(evidenceSummary.citationCount) ||
+    evidenceSummary.citationCount < 0 ||
+    !isRecord(answerAndAnalysis) ||
+    answerAndAnalysis.visibility !== "collapsed_by_default" ||
+    !isNullableString(answerAndAnalysis.standardAnswer) ||
+    !isNullableString(answerAndAnalysis.analysis)
+  ) {
+    return null;
+  }
+
+  const options = value.options.map(normalizeQuestionOptionSnapshot);
+
+  if (options.some((option) => option === null)) {
+    return null;
+  }
+
+  return {
+    publicId: value.publicId,
+    sequenceNumber: value.sequenceNumber,
+    questionType: value.questionType,
+    materialTitle: value.materialTitle,
+    materialContent: value.materialContent,
+    stem: value.stem,
+    options: options as OrganizationTrainingAdminQuestionDetailDto["options"],
+    score: value.score,
+    evidenceSummary: {
+      evidenceStatus: evidenceSummary.evidenceStatus,
+      citationCount: evidenceSummary.citationCount,
+    },
+    answerAndAnalysis: {
+      visibility: "collapsed_by_default",
+      standardAnswer: answerAndAnalysis.standardAnswer,
+      analysis: answerAndAnalysis.analysis,
+    },
+  };
+}
+
+function resolveOrganizationTrainingQuestionDraftSnapshot(
+  row: AdminAiGenerationResultPersistenceRow,
+): AdminAiGenerationOrganizationTrainingQuestionDraftPayload | null {
+  if (row.workspace !== "organization" || row.generation_kind !== "question") {
+    return null;
+  }
+
+  const snapshot = row.content_redacted_snapshot;
+
+  if (!isRecord(snapshot)) {
+    return null;
+  }
+
+  const trainingDraftSnapshot = snapshot.organizationTrainingQuestionDraft;
+
+  if (!isRecord(trainingDraftSnapshot)) {
+    return null;
+  }
+
+  const questions = trainingDraftSnapshot.questions;
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return null;
+  }
+
+  const normalizedQuestions = questions.map(
+    normalizeOrganizationTrainingQuestionDetail,
+  );
+
+  if (normalizedQuestions.some((question) => question === null)) {
+    return null;
+  }
+
+  return {
+    questions:
+      normalizedQuestions as OrganizationTrainingAdminQuestionDetailDto[],
   };
 }
 

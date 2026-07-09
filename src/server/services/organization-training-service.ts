@@ -17,6 +17,7 @@ import type {
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceKind,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingAuditLogRedactedReferencePolicyDto,
   OrganizationTrainingEmployeeAnswerLifecycleFlowDto,
   OrganizationTrainingEmployeeAnswerLifecycleItemDto,
@@ -222,6 +223,7 @@ export type OrganizationTrainingAdminDetailReadModelInput =
   | {
       adminContext: OrganizationTrainingAdminContext;
       draft: OrganizationTrainingDraftDto;
+      draftQuestions?: readonly OrganizationTrainingAdminQuestionDetailDto[];
       sourceMetadata?: OrganizationTrainingAdminLifecycleSourceMetadataDto | null;
     };
 
@@ -954,6 +956,38 @@ export function buildOrganizationTrainingAdminDetailReadModel(
       input.sourceMetadata ?? null,
       input.draft.sourceTaskPublicId,
     );
+    const draftQuestions =
+      input.draftQuestions === undefined
+        ? []
+        : copyAdminDetailQuestions(input.draftQuestions);
+
+    if (draftQuestions.length > 0) {
+      return createSuccessResponse({
+        publicId: input.draft.publicId,
+        resourceType: "organization_training_draft",
+        detailAvailability: "available",
+        organizationPublicId: input.draft.organizationPublicId,
+        title: input.draft.title,
+        description: input.draft.description,
+        profession: input.draft.profession,
+        level: input.draft.level,
+        subject: input.draft.subject,
+        status: "draft",
+        sourceKind: kind.sourceKind,
+        contentKind: kind.contentKind,
+        structure: {
+          questionCount: draftQuestions.length,
+          totalScore: draftQuestions.reduce(
+            (totalScore, question) => totalScore + question.score,
+            0,
+          ),
+          questionTypeSummary:
+            buildQuestionTypeSummaryFromAdminDetailQuestions(draftQuestions),
+        },
+        questions: draftQuestions,
+        redactionStatus: "admin_safe_detail",
+      });
+    }
 
     return createSuccessResponse({
       publicId: input.draft.publicId,

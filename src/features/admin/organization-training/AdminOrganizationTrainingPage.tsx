@@ -541,6 +541,44 @@ function createPublishFormValuesForDraft(
   };
 }
 
+function createPublishQuestionFormValueFromDetail(
+  question: OrganizationTrainingAdminQuestionDetailDto,
+): PublishQuestionFormValue {
+  return {
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    materialTitle: question.materialTitle ?? "",
+    materialContent: question.materialContent ?? "",
+    stem: question.stem,
+    options: question.options.map((option) => ({
+      label: option.label,
+      content: option.content,
+    })),
+    score: String(question.score),
+    standardAnswer: question.answerAndAnalysis.standardAnswer ?? "",
+    analysisSummary: question.answerAndAnalysis.analysis ?? "",
+    evidenceStatus: question.evidenceSummary.evidenceStatus,
+    citationCount: String(question.evidenceSummary.citationCount),
+  };
+}
+
+function createPublishFormValuesFromAdminDetail(
+  detail: OrganizationTrainingAdminDetailDto,
+): PublishFormValues | null {
+  if (
+    detail.detailAvailability !== "available" ||
+    detail.resourceType !== "organization_training_draft"
+  ) {
+    return null;
+  }
+
+  return {
+    publishScopeOrganizationPublicIds: detail.organizationPublicId,
+    questions: detail.questions.map(createPublishQuestionFormValueFromDetail),
+    weakEvidenceConfirmed: false,
+  };
+}
+
 function normalizeOptionalPreviewText(value: string): string | null {
   const trimmedValue = value.trim();
 
@@ -1152,12 +1190,32 @@ export function AdminOrganizationTrainingPage() {
     }
   }
 
-  function handleConfigureDraft(
+  async function handleConfigureDraft(
     draft: OrganizationTrainingAdminLifecycleItemDto,
-  ) {
+  ): Promise<void> {
     setIsCreateWizardOpen(true);
     setSelectedPublishDraft(draft);
     setPublishFormValues(createPublishFormValuesForDraft(draft));
+
+    try {
+      const response =
+        await fetchAdminOrganizationTrainingApi<OrganizationTrainingAdminDetailDto>(
+          createAdminTrainingDetailPath(draft.publicId),
+          getStoredSessionToken(),
+        );
+
+      if (response.code !== 0 || response.data === null) {
+        return;
+      }
+
+      const values = createPublishFormValuesFromAdminDetail(response.data);
+
+      if (values !== null) {
+        setPublishFormValues(values);
+      }
+    } catch {
+      return;
+    }
   }
 
   async function handlePublishTraining(values: PublishFormValues) {
@@ -1390,7 +1448,9 @@ function TrainingListPanel({
   selectedSourceKindFilter: OrganizationTrainingLifecycleSourceKindFilter;
   selectedStatusFilter: OrganizationTrainingLifecycleStatusFilter;
   onCreateTraining: () => void;
-  onContinueDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
+  onContinueDraft: (
+    draft: OrganizationTrainingAdminLifecycleItemDto,
+  ) => Promise<void> | void;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
@@ -1466,7 +1526,7 @@ function TrainingListPanel({
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) {
     clearSelectedDetail();
-    onContinueDraft(item);
+    void onContinueDraft(item);
   }
 
   async function handleViewItem(
@@ -1706,7 +1766,9 @@ function TrainingLifecycleItemCard({
 }: {
   isSubmitting: boolean;
   item: OrganizationTrainingAdminLifecycleItemDto;
-  onContinueDraft: (draft: OrganizationTrainingAdminLifecycleItemDto) => void;
+  onContinueDraft: (
+    draft: OrganizationTrainingAdminLifecycleItemDto,
+  ) => Promise<void> | void;
   onCopyVersionToDraft: (
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) => void;
@@ -1751,7 +1813,7 @@ function TrainingLifecycleItemCard({
           disabled={isSubmitting}
           onClick={() => {
             if (isDraft) {
-              onContinueDraft(item);
+              void onContinueDraft(item);
               return;
             }
 

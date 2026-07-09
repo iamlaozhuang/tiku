@@ -677,6 +677,7 @@ function createGeneratedResultHistoryItem(input: {
       contentPreviewMasked: `redacted generated result summary for ${input.workspace} ${input.generationKind}`,
       contentVisibility: "redacted_snapshot",
       reviewedDraft: input.reviewedDraft ?? null,
+      organizationTrainingDraft: null,
       redactionStatus: "redacted",
     },
     evidenceReference: {
@@ -754,6 +755,9 @@ function createGeneratedResultPersistenceResult(
         contentVisibility: "redacted_snapshot",
         reviewedDraft: (input.contentRedactedSnapshot.formalReviewedDraft ??
           null) as AdminAiGenerationResultDto["contentReference"]["reviewedDraft"],
+        organizationTrainingDraft: (input.contentRedactedSnapshot
+          .organizationTrainingQuestionDraft ??
+          null) as AdminAiGenerationResultDto["contentReference"]["organizationTrainingDraft"],
         redactionStatus: "redacted",
       },
       evidenceReference: {
@@ -795,6 +799,9 @@ function createGeneratedResultPersistenceRecorder(
         historyQueries.push(query);
 
         return input.draftResults ?? [];
+      },
+      async findDraftResultByTaskPublicId() {
+        return null;
       },
       async createOrReuseDraftResult(createInput) {
         calls.push(createInput);
@@ -1277,6 +1284,109 @@ describe("admin AI generation local contract route handlers", () => {
     });
     expect(JSON.stringify(payload)).not.toContain("OMITTED_FIXTURE_J");
     expect(providerInputs).toHaveLength(1);
+  });
+
+  it("persists organization AI question results with enterprise training question draft snapshots", async () => {
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const generatedResultPersistenceRecorder =
+      createGeneratedResultPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      requestPublicId: "admin_ai_generation_request_public_org_question_123",
+      taskPersistenceRepository: createTaskPersistenceRecorder().repository,
+      resultPersistenceRepository:
+        generatedResultPersistenceRecorder.repository,
+      runtimeBridgeControl: createFakeProviderRuntimeBridgeControl(
+        providerInputs,
+        {
+          content: JSON.stringify({
+            questions: [
+              {
+                questionType: "single_choice",
+                difficulty: "medium",
+                knowledgeNodeLabels: ["synthetic_node"],
+                questionStem: "Synthetic organization training stem",
+                questionOptions: [
+                  {
+                    optionLabel: "A",
+                    optionText: "Synthetic option A",
+                    isCorrect: true,
+                  },
+                  {
+                    optionLabel: "B",
+                    optionText: "Synthetic option B",
+                    isCorrect: false,
+                  },
+                ],
+                standardAnswer: "A",
+                analysis: "Synthetic analysis",
+              },
+            ],
+          }),
+        },
+      ),
+      body: {
+        generationKind: "question",
+        generationParameters: {
+          ...defaultAdminGenerationParameters,
+          questionCount: 1,
+          questionType: "single_choice",
+        },
+        clientOnlyFixtureQuestionSnapshot: "OMITTED_FIXTURE_QUESTION_SNAPSHOT",
+      },
+    });
+    const payload = await response.json();
+
+    expect(generatedResultPersistenceRecorder.calls).toHaveLength(1);
+    expect(
+      generatedResultPersistenceRecorder.calls[0]?.contentRedactedSnapshot,
+    ).toMatchObject({
+      organizationTrainingQuestionDraft: {
+        questions: [
+          {
+            sequenceNumber: 1,
+            questionType: "single_choice",
+            stem: "Synthetic organization training stem",
+            options: [
+              {
+                label: "A",
+                content: "Synthetic option A",
+              },
+              {
+                label: "B",
+                content: "Synthetic option B",
+              },
+            ],
+            score: 1,
+            evidenceSummary: {
+              evidenceStatus: "sufficient",
+              citationCount: 1,
+            },
+            answerAndAnalysis: {
+              visibility: "collapsed_by_default",
+              standardAnswer: "A",
+              analysis: "Synthetic analysis",
+            },
+          },
+        ],
+      },
+    });
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        generatedResult: {
+          formalAdoptionStatus: "blocked",
+          redactionStatus: "redacted",
+        },
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain(
+      "OMITTED_FIXTURE_QUESTION_SNAPSHOT",
+    );
+    expect(JSON.stringify(payload)).not.toContain("providerPayload");
   });
 
   it("hands off assembled AI paper containers in organization advanced admin local contracts before persistence", async () => {

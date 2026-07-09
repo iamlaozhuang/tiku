@@ -12,9 +12,11 @@ import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
+import type { AdminAiGenerationResultPersistenceRepository } from "../contracts/admin-ai-generation-result-persistence-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type {
@@ -27,6 +29,7 @@ import {
   createPostgresOrganizationTrainingRepository,
   type OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
+import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
 import { createPostgresStudentAuthorizationRedeemRuntimeRepositories } from "../repositories/student-authorization-redeem-runtime-repository";
 import {
   invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
@@ -148,6 +151,7 @@ export type OrganizationTrainingRouteOptions = {
   resolveVersionOrganizationPublicId?: OrganizationTrainingVersionOrganizationPublicIdResolver;
   resolveVersionQuestionTypeSummary?: OrganizationTrainingVersionQuestionTypeSummaryResolver;
   resolveAdminDetailVersion?: OrganizationTrainingAdminDetailVersionResolver;
+  resolveAdminDraftDetailQuestions?: OrganizationTrainingAdminDraftDetailQuestionsResolver;
 };
 
 export type OrganizationTrainingVersionOrganizationPublicIdResolverInput = {
@@ -167,6 +171,7 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   | "listAdminLifecycleSourceMetadata"
   | "listAdminLifecycleVersions"
   | "resolveAdminDetailVersion"
+  | "resolveAdminDraftDetailQuestions"
   | "listEmployeeVisibleVersions"
   | "resolveEmployeeAnswer"
   | "resolveEmployeeContext"
@@ -176,6 +181,10 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   | "resolveVersionOrganizationPublicId"
   | "resolveVersionQuestionTypeSummary"
 > & {
+  adminAiGenerationResultRepository?: Pick<
+    AdminAiGenerationResultPersistenceRepository,
+    "findDraftResultByTaskPublicId"
+  >;
   effectiveAuthorizationService?: Pick<
     EffectiveAuthorizationService,
     "listEffectiveAuthorizations"
@@ -244,6 +253,17 @@ export type OrganizationTrainingAdminDetailVersionResolverInput = {
 export type OrganizationTrainingAdminDetailVersionResolver = (
   input: OrganizationTrainingAdminDetailVersionResolverInput,
 ) => Promise<OrganizationTrainingAdminPublishedVersionDetailDto | null>;
+
+export type OrganizationTrainingAdminDraftDetailQuestionsResolverInput = {
+  request: Request;
+  draft: OrganizationTrainingDraftDto;
+  sourceMetadata: OrganizationTrainingAdminLifecycleSourceMetadataDto | null;
+  adminContext: OrganizationTrainingAdminContext;
+};
+
+export type OrganizationTrainingAdminDraftDetailQuestionsResolver = (
+  input: OrganizationTrainingAdminDraftDetailQuestionsResolverInput,
+) => Promise<OrganizationTrainingAdminQuestionDetailDto[]>;
 
 export type OrganizationTrainingSourceVersionResolverInput = {
   request: Request;
@@ -470,6 +490,12 @@ async function defaultResolvePublishedVersion(): Promise<null> {
 
 async function defaultResolveAdminDetailVersion(): Promise<null> {
   return null;
+}
+
+async function defaultResolveAdminDraftDetailQuestions(): Promise<
+  OrganizationTrainingAdminQuestionDetailDto[]
+> {
+  return [];
 }
 
 async function defaultResolveSourceVersion(): Promise<null> {
@@ -991,6 +1017,32 @@ function createRepositoryBackedAdminDetailVersionResolver(
     });
 }
 
+function createRepositoryBackedAdminDraftDetailQuestionsResolver(
+  repository: Pick<
+    AdminAiGenerationResultPersistenceRepository,
+    "findDraftResultByTaskPublicId"
+  >,
+): OrganizationTrainingAdminDraftDetailQuestionsResolver {
+  return async ({ draft, sourceMetadata }) => {
+    if (
+      draft.sourceTaskPublicId === null ||
+      sourceMetadata?.sourceType !== "organization_ai_result" ||
+      sourceMetadata.generationKind !== "question"
+    ) {
+      return [];
+    }
+
+    const result = await repository.findDraftResultByTaskPublicId({
+      workspace: "organization",
+      ownerType: "organization",
+      ownerPublicId: draft.organizationPublicId,
+      taskPublicId: draft.sourceTaskPublicId,
+    });
+
+    return result?.contentReference.organizationTrainingDraft?.questions ?? [];
+  };
+}
+
 function createRepositoryBackedSourceVersionResolver(
   repository: Pick<
     OrganizationTrainingRepository,
@@ -1381,6 +1433,9 @@ export function createOrganizationTrainingRouteHandlers(
     options.resolvePublishedVersion ?? defaultResolvePublishedVersion;
   const resolveAdminDetailVersion =
     options.resolveAdminDetailVersion ?? defaultResolveAdminDetailVersion;
+  const resolveAdminDraftDetailQuestions =
+    options.resolveAdminDraftDetailQuestions ??
+    defaultResolveAdminDraftDetailQuestions;
   const resolveSourceVersion =
     options.resolveSourceVersion ?? defaultResolveSourceVersion;
   const resolveVersionQuestionTypeSummary =
@@ -1444,11 +1499,18 @@ export function createOrganizationTrainingRouteHandlers(
           adminContext,
           draftPublicIds: [draft.publicId],
         });
+        const draftQuestions = await resolveAdminDraftDetailQuestions({
+          request,
+          draft,
+          sourceMetadata: sourceMetadata ?? null,
+          adminContext,
+        });
 
         return createJsonResponse(
           buildOrganizationTrainingAdminDetailReadModel({
             adminContext,
             draft,
+            draftQuestions,
             sourceMetadata: sourceMetadata ?? null,
           }),
         );
@@ -2102,6 +2164,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   options: OrganizationTrainingRuntimeRouteOptions = {},
 ) {
   const repository = createPostgresOrganizationTrainingRepository();
+  const adminAiGenerationResultRepository =
+    options.adminAiGenerationResultRepository ??
+    createPostgresAdminAiGenerationResultPersistenceRepository();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
   const effectiveAuthorizationService =
     options.effectiveAuthorizationService ??
@@ -2145,6 +2210,11 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const resolveAdminDetailVersion =
     options.resolveAdminDetailVersion ??
     createRepositoryBackedAdminDetailVersionResolver(repository);
+  const resolveAdminDraftDetailQuestions =
+    options.resolveAdminDraftDetailQuestions ??
+    createRepositoryBackedAdminDraftDetailQuestionsResolver(
+      adminAiGenerationResultRepository,
+    );
   const resolveSourceVersion =
     options.resolveSourceVersion ??
     createRepositoryBackedSourceVersionResolver(repository);
@@ -2168,6 +2238,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       listAdminLifecycleSourceMetadata,
       listEmployeeVisibleVersions,
       resolveAdminDetailVersion,
+      resolveAdminDraftDetailQuestions,
       resolvePublishedVersion,
       resolveSourceVersion,
       resolveVersionQuestionTypeSummary,

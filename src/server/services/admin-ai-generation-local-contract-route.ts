@@ -44,8 +44,10 @@ import type {
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedProfession,
+  AiGenerationRouteIntegratedQuestionDraftSummary,
   AiGenerationRouteIntegratedSubject,
 } from "../contracts/route-integrated-provider-execution-contract";
+import type { OrganizationTrainingAdminQuestionDetailDto } from "../contracts/organization-training-contract";
 import {
   normalizeAiGenerationRouteIntegratedKnowledgeScope,
   normalizeAiGenerationRouteIntegratedPaperStructure,
@@ -1172,6 +1174,13 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
           localContractSummary: input.localContract,
           requestedAt: input.createdAt.toISOString(),
         });
+  const organizationTrainingQuestionDraft =
+    input.generationParameters === null
+      ? null
+      : createOrganizationTrainingQuestionDraftSnapshot({
+          generationParameters: input.generationParameters,
+          localContractSummary: input.localContract,
+        });
 
   return {
     redactionStatus: "redacted",
@@ -1210,7 +1219,160 @@ function createAdminAiGenerationLocalContractRedactedSnapshot(input: {
           ),
         }),
     ...(formalReviewedDraft === null ? {} : { formalReviewedDraft }),
+    ...(organizationTrainingQuestionDraft === null
+      ? {}
+      : { organizationTrainingQuestionDraft }),
   };
+}
+
+const organizationTrainingQuestionTypeByAiType = {
+  case_analysis: "short_answer",
+  judge: "true_false",
+  multiple_choice: "multi_choice",
+  single_choice: "single_choice",
+} as const satisfies Record<
+  string,
+  OrganizationTrainingAdminQuestionDetailDto["questionType"]
+>;
+
+function createOrganizationTrainingQuestionDraftSnapshot(input: {
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  localContractSummary: AdminAiGenerationLocalContractBaseDto;
+}): { questions: OrganizationTrainingAdminQuestionDetailDto[] } | null {
+  if (
+    input.localContractSummary.workspace !== "organization" ||
+    input.localContractSummary.generationKind !== "question"
+  ) {
+    return null;
+  }
+
+  const visibleGeneratedContent =
+    input.localContractSummary.runtimeBridge.visibleGeneratedContent;
+  const structuredPreview = visibleGeneratedContent?.structuredPreview;
+
+  if (
+    structuredPreview?.kind !== "question_set" ||
+    structuredPreview.parseStatus !== "parsed"
+  ) {
+    return null;
+  }
+
+  const questions = structuredPreview.draftSummaries
+    .map((questionDraft) =>
+      createOrganizationTrainingQuestionDetailFromDraft({
+        citationCount:
+          visibleGeneratedContent?.groundingSummary?.citationCount ??
+          input.localContractSummary.resultState.citationCount,
+        evidenceStatus:
+          visibleGeneratedContent?.groundingSummary?.evidenceStatus ??
+          input.localContractSummary.resultState.evidenceStatus,
+        generationParameters: input.generationParameters,
+        questionDraft,
+        taskPublicId: input.localContractSummary.taskRequest.taskPublicId,
+      }),
+    )
+    .filter(
+      (question): question is OrganizationTrainingAdminQuestionDetailDto =>
+        question !== null,
+    );
+
+  return questions.length === 0 ? null : { questions };
+}
+
+function createOrganizationTrainingQuestionDetailFromDraft(input: {
+  citationCount: number;
+  evidenceStatus: OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"];
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  questionDraft: AiGenerationRouteIntegratedQuestionDraftSummary;
+  taskPublicId: string;
+}): OrganizationTrainingAdminQuestionDetailDto | null {
+  const stem = normalizeRequiredText(input.questionDraft.questionStem ?? null);
+  const standardAnswer = normalizeRequiredText(
+    input.questionDraft.standardAnswer ?? null,
+  );
+  const analysis = normalizeRequiredText(input.questionDraft.analysis ?? null);
+
+  if (stem === null || standardAnswer === null || analysis === null) {
+    return null;
+  }
+
+  const questionType = resolveOrganizationTrainingQuestionType(
+    input.questionDraft.questionType ?? input.generationParameters.questionType,
+  );
+  const publicId = `${input.taskPublicId}_question_${input.questionDraft.draftNumber}`;
+
+  return {
+    publicId,
+    sequenceNumber: input.questionDraft.draftNumber,
+    questionType,
+    materialTitle: null,
+    materialContent: null,
+    stem,
+    options:
+      questionType === "short_answer"
+        ? []
+        : createOrganizationTrainingQuestionOptions({
+            publicId,
+            questionDraft: input.questionDraft,
+          }),
+    score: 1,
+    evidenceSummary: {
+      evidenceStatus: input.evidenceStatus,
+      citationCount: input.citationCount,
+    },
+    answerAndAnalysis: {
+      visibility: "collapsed_by_default",
+      standardAnswer,
+      analysis,
+    },
+  };
+}
+
+function resolveOrganizationTrainingQuestionType(
+  value: string | null | undefined,
+): OrganizationTrainingAdminQuestionDetailDto["questionType"] {
+  return (
+    organizationTrainingQuestionTypeByAiType[
+      value as keyof typeof organizationTrainingQuestionTypeByAiType
+    ] ?? "short_answer"
+  );
+}
+
+function createOrganizationTrainingQuestionOptions(input: {
+  publicId: string;
+  questionDraft: AiGenerationRouteIntegratedQuestionDraftSummary;
+}): OrganizationTrainingAdminQuestionDetailDto["options"] {
+  return (input.questionDraft.questionOptions ?? [])
+    .map((option, index) => {
+      const label =
+        normalizeRequiredText(option.optionLabel ?? null) ??
+        String.fromCharCode(65 + index);
+      const content = normalizeRequiredText(option.optionText);
+
+      if (content === null) {
+        return null;
+      }
+
+      return {
+        publicId: `${input.publicId}_option_${label.toLowerCase()}`,
+        label,
+        content,
+      };
+    })
+    .filter(
+      (
+        option,
+      ): option is OrganizationTrainingAdminQuestionDetailDto["options"][number] =>
+        option !== null,
+    );
+}
+
+function normalizeRequiredText(
+  value: string | null | undefined,
+): string | null {
+  const normalizedValue = value?.trim() ?? "";
+
+  return normalizedValue.length > 0 ? normalizedValue : null;
 }
 
 function createAdminAiGenerationPaperAssemblyRedactedSnapshot(
