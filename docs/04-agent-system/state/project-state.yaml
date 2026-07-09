@@ -5,7 +5,7 @@ currentPhase: content-ai-0704-account-fixture-readiness-2026-07-09
 updatedAt: "2026-07-09T06:45:00-07:00"
 latestContentAi0704AccountFixtureReadiness:
   id: content-ai-0704-account-fixture-readiness-2026-07-09
-  status: blocked
+  status: closed
   result: blocked_safe_no_fixture_mutation_incomplete_exact_role_credentials_target_write_precondition_not_met
   branch: codex/content-ai-0704-account-fixture-readiness
   planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-account-fixture-readiness.md
@@ -2240,7 +2240,7 @@ currentTask:
   id: content-ai-0704-account-fixture-readiness-2026-07-09
   title: Content AI 0704 account fixture readiness
   phase: content-ai-0704-account-fixture-readiness-2026-07-09
-  status: blocked
+  status: closed
   result: blocked_safe_no_fixture_mutation_incomplete_exact_role_credentials_target_write_precondition_not_met
   priority: p1
   taskKind: local_acceptance_fixture

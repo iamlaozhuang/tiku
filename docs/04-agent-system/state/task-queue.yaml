@@ -99,7 +99,7 @@ activeTasks:
   - id: content-ai-0704-account-fixture-readiness-2026-07-09
     title: Content AI 0704 account fixture readiness
     phase: content-ai-0704-account-fixture-readiness-2026-07-09
-    status: blocked
+    status: closed
     priority: p1
     taskKind: local_acceptance_fixture
     executionProfile: local_0704_account_fixture_readiness_no_provider
