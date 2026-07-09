@@ -100,7 +100,7 @@ activeTasks:
     title: Content AI question formal publish loop
     phase: content-ai-question-formal-publish-loop-2026-07-09
     status: ready_for_closeout
-    result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_ready_for_commit_merge_push_cleanup
+    result: pass_tdd_targeted_tests_role_boundary_typecheck_lint_diff_precommit_prepush_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_no_provider_no_db
@@ -184,6 +184,11 @@ activeTasks:
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass_after_requirement_mapping_result_anchor
       moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+      masterPostMergeTargetedTests: pass_3_files_46_tests
+      masterPostMergeAdjacentRoleBoundaryTests: pass_6_files_160_tests
+      masterPostMergeTypecheck: pass
+      masterPostMergeLint: pass
+      masterPostMergeDiffCheck: pass
       browserRuntime: not_executed_not_required_for_source_task_no_screenshot_approval
       dbAccessOrMutation: not_executed
       providerExecution: not_executed

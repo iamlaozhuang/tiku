@@ -39,6 +39,12 @@
 - Module Run v2 pre-push readiness:
   - Initial run: failed only because the accepted ancestor repository checkpoint was stale.
   - After aligning `lastKnownMasterSha` and `lastKnownOriginMasterSha` to the confirmed local `master` / `origin/master`: pass.
+- Master post-merge gates:
+  - Targeted question formal publish loop tests: pass, 3 files / 46 tests.
+  - Adjacent role-boundary regression: pass, 6 files / 160 tests.
+  - `corepack pnpm@10.26.1 run typecheck`: pass.
+  - `corepack pnpm@10.26.1 run lint`: pass.
+  - `git diff --check`: pass.
 
 ## Redaction Boundary
 
