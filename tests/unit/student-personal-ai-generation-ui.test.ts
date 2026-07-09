@@ -1443,6 +1443,148 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
   });
 
+  it("renders learner AI paper assembly summaries from result history and detail without selected refs", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const paperAssemblyContainer = createLearnerAiPaperAssemblyContainer({
+      selectedQuestionCount: 2,
+      sourceKind: "enterprise_training_snapshot",
+      enterpriseTrainingSnapshotCount: 2,
+    });
+    const paperAssembly = {
+      status: "assembled" as const,
+      sourceDiagnostics: {
+        role: "org_advanced_employee" as const,
+        platformQuestionCount: 0,
+        enterpriseQuestionCount: 2,
+        enterpriseSourceStatus: "resolved" as const,
+      },
+      container: paperAssemblyContainer,
+      insufficiency: null,
+      redactionStatus: "redacted" as const,
+    };
+    const result = {
+      resultPublicId: "ai-result-public-paper-history-001",
+      taskPublicId: "ai-task-public-paper-history-001",
+      requestPublicId: "ai-request-public-paper-history-001",
+      taskType: "ai_paper_generation" as const,
+      status: "succeeded" as const,
+      persistedAt: "2026-07-09T09:00:00.000Z",
+      contentReference: {
+        contentDigest: "sha256:redacted-paper-history",
+        contentPreviewMasked: "AI组卷摘要已脱敏",
+        contentVisibility: "redacted_snapshot" as const,
+        redactionStatus: "redacted" as const,
+      },
+      evidenceReference: {
+        evidenceStatus: "sufficient" as const,
+        citationCount: 2,
+        aiCallLogPublicId: null,
+        redactionStatus: "redacted" as const,
+      },
+      formalAdoption: {
+        isBlocked: true as const,
+        status: "blocked" as const,
+      },
+      paperAssembly,
+    };
+    const resultHistoryResponse = {
+      ...emptyResultHistoryResponse,
+      data: {
+        ...emptyResultHistoryResponse.data,
+        results: [result],
+      },
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 1,
+        sortBy: "persistedAt",
+        sortOrder: "desc",
+      },
+    };
+    const resultDetailResponse = {
+      code: 0,
+      message: "ok",
+      data: {
+        ...emptyResultHistoryResponse.data,
+        result,
+      },
+    };
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => localSessionResponse,
+        };
+      }
+
+      if (path === "/api/v1/authorizations") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => createAdvancedAuthorizationListResponse(),
+        };
+      }
+
+      if (path.startsWith("/api/v1/personal-ai-generation-requests")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => emptyServerHistoryResponse,
+        };
+      }
+
+      if (
+        path ===
+        "/api/v1/personal-ai-generation-results/ai-result-public-paper-history-001"
+      ) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => resultDetailResponse,
+        };
+      }
+
+      if (path.startsWith("/api/v1/personal-ai-generation-results")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => resultHistoryResponse,
+        };
+      }
+
+      throw new Error(`Unexpected fetch path: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(resultHistoryTitle)).toBeInTheDocument();
+    const historyPaperSummary = screen.getByTestId(
+      "student-ai-paper-assembly-summary",
+    );
+    expect(historyPaperSummary).toHaveTextContent("企业自测试卷预览");
+    expect(historyPaperSummary).toHaveTextContent("2/2 题");
+    expect(historyPaperSummary).toHaveTextContent("企业训练题 2 题");
+    expect(historyPaperSummary).toHaveTextContent("完全匹配");
+
+    fireEvent.click(screen.getByRole("button", { name: "查看结果详情" }));
+
+    expect(await screen.findByText("结果详情")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getAllByTestId("student-ai-paper-assembly-summary"),
+      ).toHaveLength(2),
+    );
+    expect(document.body.textContent).not.toContain("formal-question-public-1");
+    expect(document.body.textContent).not.toContain("standardAnswer");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
   it("shows and submits the learner AI出题 default quantity as 3", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const submittedBodies: Record<string, unknown>[] = [];
@@ -2053,7 +2195,9 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "查看解析" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeEnabled();
-    expect(screen.getByText("依据不足时请重试生成")).toBeInTheDocument();
+    expect(
+      screen.getByText("依据或正式题源不足时请调整参数后重试生成"),
+    ).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/authorizations");
@@ -3568,6 +3712,22 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).toHaveTextContent("结构化预览");
     expect(visibleGeneratedContent).toHaveTextContent("大题模块 2");
     expect(visibleGeneratedContent).toHaveTextContent("题量 50");
+    const paperAssemblySummary = screen.getByTestId(
+      "student-ai-paper-assembly-summary",
+    );
+    expect(paperAssemblySummary).toHaveTextContent("自测试卷预览");
+    expect(paperAssemblySummary).toHaveTextContent(
+      "synthetic assembled learner paper",
+    );
+    expect(paperAssemblySummary).toHaveTextContent("可开始作答");
+    expect(paperAssemblySummary).toHaveTextContent("2/2 题");
+    expect(paperAssemblySummary).toHaveTextContent("平台正式题 2 题");
+    expect(paperAssemblySummary).toHaveTextContent("完全匹配");
+    expect(paperAssemblySummary).toHaveTextContent("单选题");
+    expect(paperAssemblySummary).not.toHaveTextContent(
+      "synthetic visible learner paper stem",
+    );
+    expect(paperAssemblySummary).not.toHaveTextContent("标准答案");
     expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     const learningSession = await screen.findByTestId(
@@ -3707,7 +3867,18 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     fireEvent.click(screen.getByRole("button", { name: paperButtonLabel }));
 
-    expect(await screen.findByText("自测试卷预览")).toBeInTheDocument();
+    expect((await screen.findAllByText("自测试卷预览")).length).toBeGreaterThan(
+      0,
+    );
+    expect(
+      screen.getByTestId("student-ai-paper-assembly-summary"),
+    ).toHaveTextContent("暂不能作答");
+    expect(
+      screen.getByTestId("student-ai-paper-assembly-blocked-reason"),
+    ).toHaveTextContent("正式题源不足");
+    expect(
+      screen.getByTestId("student-ai-paper-assembly-blocked-reason"),
+    ).toHaveTextContent("缺少 1 题");
     expect(screen.getByRole("button", { name: "开始作答" })).toBeDisabled();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("raw prompt");
@@ -3921,6 +4092,17 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(visibleGeneratedContent).not.toHaveTextContent(
       "synthetic visible employee paper analysis",
     );
+    const paperAssemblySummary = screen.getByTestId(
+      "student-ai-paper-assembly-summary",
+    );
+    expect(paperAssemblySummary).toHaveTextContent("企业自测试卷预览");
+    expect(paperAssemblySummary).toHaveTextContent("企业训练题 1 题");
+    expect(paperAssemblySummary).toHaveTextContent("企业题源");
+    expect(paperAssemblySummary).toHaveTextContent("已纳入");
+    expect(paperAssemblySummary).not.toHaveTextContent(
+      "synthetic visible employee paper stem",
+    );
+    expect(paperAssemblySummary).not.toHaveTextContent("标准答案");
     fireEvent.click(screen.getByRole("button", { name: "开始作答" }));
     const learningSession = await screen.findByTestId(
       "student-ai-learning-session",

@@ -177,6 +177,9 @@ type StudentAiPaperStructure = NonNullable<
 type StudentAiPaperAssemblyContainer = NonNullable<
   PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["paperAssembly"]
 >["container"];
+type StudentAiPaperAssembly = NonNullable<
+  PersonalAiGenerationLocalBrowserExperienceDto["runtimeBridge"]["paperAssembly"]
+>;
 
 const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const PERSONAL_AI_GENERATION_HISTORY_PAGE = 1;
@@ -304,12 +307,37 @@ const contractValueLabelMap: Record<string, string> = {
   weak: "依据较少",
 };
 
+const aiPaperQuestionTypeLabelMap: Record<string, string> = {
+  single_choice: "单选题",
+  multi_choice: "多选题",
+  true_false: "判断题",
+  short_answer: "主观题",
+};
+
+const aiPaperMatchQualityLabelMap: Record<string, string> = {
+  fully_matched: "完全匹配",
+  supplemented_from_nearby_knowledge: "相近知识点补足",
+  supplemented_from_same_scope: "同范围补足",
+  insufficient: "题源不足",
+};
+
+const aiPaperSourceKindLabelMap: Record<string, string> = {
+  platform_formal_question: "平台正式题",
+  enterprise_training_snapshot: "企业训练题",
+};
+
+const aiPaperEnterpriseSourceStatusLabelMap: Record<string, string> = {
+  not_applicable: "不适用",
+  resolved: "已纳入",
+  not_resolved: "未纳入",
+};
+
 const practiceFeedbackStatusLabelMap: Record<
   StudentPersonalAiGenerationPracticeFeedbackState,
   string
 > = {
   waiting: "生成后可进入作答、提交答案并查看解析",
-  insufficient: "依据不足时请重试生成",
+  insufficient: "依据或正式题源不足时请调整参数后重试生成",
   practice_ready: "练习内容已就绪",
   answer_submitted: "作答已提交",
   feedback_ready: "解析可查看",
@@ -1984,6 +2012,221 @@ function StudentPaperDraftList({
   );
 }
 
+function StudentAiPaperAssemblySummary({
+  compact = false,
+  paperAssembly,
+}: {
+  compact?: boolean;
+  paperAssembly?: StudentAiPaperAssembly | null;
+}) {
+  if (paperAssembly == null) {
+    return (
+      <section
+        className="border-border bg-background mb-3 rounded-lg border p-3"
+        data-testid="student-ai-paper-assembly-summary"
+      >
+        <div className="flex items-start gap-3">
+          <div className="bg-muted text-text-secondary flex size-8 shrink-0 items-center justify-center rounded-lg">
+            <ClipboardList className="size-4" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-text-primary text-sm font-semibold">
+              正式题源组卷摘要
+            </h3>
+            <p className="text-warning mt-2 text-sm leading-6">
+              暂未生成可作答试卷容器，不能开始作答。
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const container = paperAssembly.container;
+  const selectedQuestionCount = container.selectedQuestionCount;
+  const requestedQuestionCount = container.requestedQuestionCount;
+  const isPracticeReady =
+    paperAssembly.status === "assembled" && selectedQuestionCount > 0;
+  const heading =
+    paperAssembly.sourceDiagnostics.role === "org_advanced_employee"
+      ? "企业自测试卷预览"
+      : "自测试卷预览";
+  const sourceCompositionLabel = [
+    `平台正式题 ${container.sourceComposition.platformFormalQuestionCount} 题`,
+    `企业训练题 ${container.sourceComposition.enterpriseTrainingSnapshotCount} 题`,
+  ].join(" · ");
+  const enterpriseSourceLabel =
+    aiPaperEnterpriseSourceStatusLabelMap[
+      paperAssembly.sourceDiagnostics.enterpriseSourceStatus
+    ] ?? paperAssembly.sourceDiagnostics.enterpriseSourceStatus;
+  const blockReason = getStudentAiPaperAssemblyBlockedReason(paperAssembly);
+
+  return (
+    <section
+      className="border-border bg-background mb-3 rounded-lg border p-3"
+      data-testid="student-ai-paper-assembly-summary"
+    >
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg">
+          <ClipboardList className="size-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-text-primary text-sm font-semibold">
+                {heading}
+              </h3>
+              <p className="text-text-secondary mt-1 text-sm leading-6">
+                {container.title || "AI 自测试卷"}
+              </p>
+            </div>
+            <span
+              className={`rounded-md px-2 py-1 text-xs font-medium ${
+                isPracticeReady
+                  ? "bg-success/10 text-success"
+                  : "bg-warning/10 text-warning"
+              }`}
+            >
+              {isPracticeReady ? "可开始作答" : "暂不能作答"}
+            </span>
+          </div>
+
+          <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <StudentAiPaperAssemblyMetric
+              label="题量"
+              value={`${selectedQuestionCount}/${requestedQuestionCount} 题`}
+            />
+            <StudentAiPaperAssemblyMetric
+              label="大题结构"
+              value={`${container.sections.length} 个大题`}
+            />
+            <StudentAiPaperAssemblyMetric
+              label="题源构成"
+              value={sourceCompositionLabel}
+            />
+            <StudentAiPaperAssemblyMetric
+              label="匹配质量"
+              value={
+                aiPaperMatchQualityLabelMap[container.matchQuality] ??
+                container.matchQuality
+              }
+            />
+            {paperAssembly.sourceDiagnostics.role ===
+            "org_advanced_employee" ? (
+              <StudentAiPaperAssemblyMetric
+                label="企业题源"
+                value={`${enterpriseSourceLabel} · 可见企业题 ${paperAssembly.sourceDiagnostics.enterpriseQuestionCount} 题`}
+              />
+            ) : null}
+          </dl>
+
+          {blockReason !== null ? (
+            <p
+              className="text-warning bg-warning/10 mt-3 rounded-md px-3 py-2 text-sm leading-6"
+              data-testid="student-ai-paper-assembly-blocked-reason"
+            >
+              {blockReason}
+            </p>
+          ) : null}
+
+          {!compact && container.sections.length > 0 ? (
+            <div
+              className="mt-3 space-y-2"
+              data-testid="student-ai-paper-assembly-sections"
+            >
+              {container.sections.map((paperSection) => (
+                <section
+                  className="border-border bg-muted/40 rounded-md border px-3 py-2"
+                  key={paperSection.sectionKey}
+                >
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <h4 className="text-text-primary text-sm font-medium">
+                      {paperSection.title}
+                    </h4>
+                    <span className="text-text-secondary text-xs">
+                      {aiPaperQuestionTypeLabelMap[paperSection.questionType] ??
+                        paperSection.questionType}
+                    </span>
+                  </div>
+                  <p className="text-text-secondary mt-2 text-sm leading-6">
+                    已选 {paperSection.selectedQuestionCount}/
+                    {paperSection.targetQuestionCount} 题 · 精确{" "}
+                    {paperSection.degradationSummary.exactCount} · 相近{" "}
+                    {paperSection.degradationSummary.nearbyKnowledgeCount} ·
+                    同范围 {paperSection.degradationSummary.sameScopeCount}
+                  </p>
+                  <p className="text-text-secondary mt-1 text-xs leading-5">
+                    题源：
+                    {formatStudentAiPaperSectionSourceCounts(
+                      paperSection.selectedQuestions,
+                    )}
+                  </p>
+                </section>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StudentAiPaperAssemblyMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="bg-muted rounded-md px-3 py-2">
+      <dt className="text-text-secondary text-xs font-medium">{label}</dt>
+      <dd className="text-text-primary mt-1 text-sm font-semibold">{value}</dd>
+    </div>
+  );
+}
+
+function getStudentAiPaperAssemblyBlockedReason(
+  paperAssembly: StudentAiPaperAssembly,
+): string | null {
+  if (
+    paperAssembly.status === "assembled" &&
+    paperAssembly.container.selectedQuestionCount > 0
+  ) {
+    return null;
+  }
+
+  if (paperAssembly.insufficiency !== null) {
+    return `正式题源不足：目标 ${paperAssembly.insufficiency.requestedQuestionCount} 题，已匹配 ${paperAssembly.insufficiency.selectedQuestionCount} 题，缺少 ${paperAssembly.insufficiency.missingQuestionCount} 题。`;
+  }
+
+  return "正式题源不足：当前没有可作答题目，请调整知识点、题量或题源后重试生成。";
+}
+
+function formatStudentAiPaperSectionSourceCounts(
+  selectedQuestions: StudentAiPaperAssemblyContainer["sections"][number]["selectedQuestions"],
+): string {
+  if (selectedQuestions.length === 0) {
+    return "暂无可用题源";
+  }
+
+  const countsBySourceKind = selectedQuestions.reduce<Record<string, number>>(
+    (currentCounts, selectedQuestion) => ({
+      ...currentCounts,
+      [selectedQuestion.sourceKind]:
+        (currentCounts[selectedQuestion.sourceKind] ?? 0) + 1,
+    }),
+    {},
+  );
+
+  return Object.entries(countsBySourceKind)
+    .map(
+      ([sourceKind, count]) =>
+        `${aiPaperSourceKindLabelMap[sourceKind] ?? sourceKind} ${count} 题`,
+    )
+    .join(" · ");
+}
+
 function StudentQuestionDraftField({
   label,
   value,
@@ -2812,6 +3055,12 @@ function StudentPersonalAiGenerationResultHistorySummary({
                 value={resultRow.formalAdoption.status}
               />
             </dl>
+            {resultRow.paperAssembly != null ? (
+              <StudentAiPaperAssemblySummary
+                compact
+                paperAssembly={resultRow.paperAssembly}
+              />
+            ) : null}
             <div className="border-border flex justify-end border-t py-3">
               <button
                 type="button"
@@ -2944,34 +3193,44 @@ function StudentPersonalAiGenerationResultDetailSummary({
     }
 
     return (
-      <dl className="border-border rounded-lg border px-3">
-        <ContractField label="任务类型" value={resultDetail.result.taskType} />
-        <ContractField label="状态" value={resultDetail.result.status} />
-        <ContractField
-          label="生成时间"
-          value={resultDetail.result.persistedAt}
-        />
-        <ContractField
-          label="生成内容摘要"
-          value={resultDetail.result.contentReference.contentPreviewMasked}
-        />
-        <ContractField
-          label="依据资料状态"
-          value={resultDetail.result.evidenceReference.evidenceStatus}
-        />
-        <ContractField
-          label="依据数量"
-          value={String(resultDetail.result.evidenceReference.citationCount)}
-        />
-        <ContractField
-          label="学习内容边界"
-          value={resultDetail.result.formalAdoption.status}
-        />
-        <ContractField
-          label="学习闭环限制"
-          value={String(resultDetail.result.formalAdoption.isBlocked)}
-        />
-      </dl>
+      <div className="space-y-3">
+        <dl className="border-border rounded-lg border px-3">
+          <ContractField
+            label="任务类型"
+            value={resultDetail.result.taskType}
+          />
+          <ContractField label="状态" value={resultDetail.result.status} />
+          <ContractField
+            label="生成时间"
+            value={resultDetail.result.persistedAt}
+          />
+          <ContractField
+            label="生成内容摘要"
+            value={resultDetail.result.contentReference.contentPreviewMasked}
+          />
+          <ContractField
+            label="依据资料状态"
+            value={resultDetail.result.evidenceReference.evidenceStatus}
+          />
+          <ContractField
+            label="依据数量"
+            value={String(resultDetail.result.evidenceReference.citationCount)}
+          />
+          <ContractField
+            label="学习内容边界"
+            value={resultDetail.result.formalAdoption.status}
+          />
+          <ContractField
+            label="学习闭环限制"
+            value={String(resultDetail.result.formalAdoption.isBlocked)}
+          />
+        </dl>
+        {resultDetail.result.paperAssembly != null ? (
+          <StudentAiPaperAssemblySummary
+            paperAssembly={resultDetail.result.paperAssembly}
+          />
+        ) : null}
+      </div>
     );
   }
 
@@ -4309,6 +4568,13 @@ export function StudentPersonalAiGenerationPage() {
                 visibleGeneratedContent={
                   experience.runtimeBridge.visibleGeneratedContent
                 }
+              />
+            ) : null}
+            {pageState === "ready" &&
+            experience !== null &&
+            isStudentAiPaperGenerationExperience(experience) ? (
+              <StudentAiPaperAssemblySummary
+                paperAssembly={experience.runtimeBridge.paperAssembly}
               />
             ) : null}
 
