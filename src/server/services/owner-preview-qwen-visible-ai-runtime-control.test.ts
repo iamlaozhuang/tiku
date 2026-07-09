@@ -181,11 +181,11 @@ describe("owner preview Qwen visible AI runtime control", () => {
       expect(retrievalInput.query).not.toContain("3级");
       expect(retrievalInput.query).not.toContain("single_choice");
       expect(retrievalInput.query).not.toContain("medium");
-      expect(retrievalInput.knowledgeNodePublicIds).toEqual(
-        taskType === "ai_question_generation"
-          ? ["knowledge_node_public_runtime_scope"]
-          : undefined,
-      );
+      expect(retrievalInput.subject).toBe("theory");
+      expect(retrievalInput.includeDescendants).toBe(true);
+      expect(retrievalInput.knowledgeNodePublicIds).toEqual([
+        "knowledge_node_public_runtime_scope",
+      ]);
     },
   );
 });

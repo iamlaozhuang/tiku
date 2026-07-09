@@ -28,6 +28,7 @@ import type {
 import type { ResourceStatus, ResourceType } from "../models/ai-rag";
 import { canTransitionResourceStatus } from "../models/ai-rag";
 import type { Profession } from "../models/auth";
+import type { Subject } from "../models/paper";
 import {
   createPostgresAdminFlowRuntimeRepositories,
   type AppendAuditLogInput,
@@ -92,6 +93,7 @@ type LocalResourceCatalogEntry = {
   resourceStatus: ResourceStatus;
   profession: Profession;
   level: number | null;
+  subject: Subject | null;
   originalFileName: string;
   objectKey: string;
   contentType: string;
@@ -109,6 +111,7 @@ type LocalResourceCatalogEntry = {
   textHashes: string[];
   headingPaths: string[][];
   knowledgeNodePublicIds: string[];
+  knowledgeNodeAncestorPublicIds: string[];
   activeMarkdownContentHash: string | null;
   activeChunkSnapshot: LocalResourceVectorChunkSnapshot[];
 };
@@ -153,8 +156,10 @@ export type LocalResourceRagRetrievalInput = {
   query: string;
   profession: Profession;
   level: number | null;
+  subject?: Subject | null;
   authorizedResourcePublicIds?: string[];
   knowledgeNodePublicIds?: string[];
+  includeDescendants?: boolean;
 };
 
 const adminSessionRequiredResponse = createErrorResponse(
@@ -396,7 +401,11 @@ function normalizeLocalResourceCatalogEntry(
 
   return {
     ...entry,
+    subject: isSubject(entry.subject) ? entry.subject : null,
     knowledgeNodePublicIds: normalizeStringArray(entry.knowledgeNodePublicIds),
+    knowledgeNodeAncestorPublicIds: normalizeStringArray(
+      entry.knowledgeNodeAncestorPublicIds,
+    ),
     activeMarkdownContentHash:
       typeof entry.activeMarkdownContentHash === "string"
         ? entry.activeMarkdownContentHash
@@ -432,6 +441,10 @@ function isLocalResourceVectorChunkSnapshot(
 
 function isProfession(value: unknown): value is Profession {
   return value === "monopoly" || value === "marketing" || value === "logistics";
+}
+
+function isSubject(value: unknown): value is Subject {
+  return value === "theory" || value === "skill";
 }
 
 function isResourceType(value: unknown): value is ResourceType {
@@ -788,6 +801,7 @@ async function uploadLocalResource(input: {
     resourceStatus: parsedResource === null ? "conversion_failed" : "draft",
     profession: storedResource.profession,
     level: parseLocalResourceLevel(formData.get("level")),
+    subject: null,
     originalFileName: storedResource.fileName,
     objectKey: storedResource.objectKey,
     contentType: storedResource.contentType,
@@ -806,6 +820,7 @@ async function uploadLocalResource(input: {
     textHashes: [],
     headingPaths: parsedResource?.headingPaths ?? [],
     knowledgeNodePublicIds: parseLocalResourceKnowledgeNodePublicIds(formData),
+    knowledgeNodeAncestorPublicIds: [],
     activeMarkdownContentHash: null,
     activeChunkSnapshot: [],
   };
@@ -1137,10 +1152,12 @@ async function enableLocalResource(input: {
 
 export async function buildLocalResourceRagRetrievalResult({
   authorizedResourcePublicIds,
+  includeDescendants = false,
   knowledgeNodePublicIds,
   level,
   profession,
   query,
+  subject = null,
   storageRoot = defaultLocalUploadStorageRoot,
 }: LocalResourceRagRetrievalInput): Promise<RagRetrievalResultDto> {
   const catalog = await readLocalResourceCatalog(storageRoot);
@@ -1153,9 +1170,11 @@ export async function buildLocalResourceRagRetrievalResult({
           resource.markdownContentHash !== null)) &&
       resource.profession === profession &&
       (level === null || resource.level === null || resource.level === level) &&
+      matchesLocalResourceSubjectScope(resource, subject) &&
       matchesLocalResourceKnowledgeNodeScope(
         resource,
         knowledgeNodePublicIdScope,
+        includeDescendants,
       ),
   );
   const authorizedPublicIds =
@@ -1177,13 +1196,32 @@ export async function buildLocalResourceRagRetrievalResult({
 function matchesLocalResourceKnowledgeNodeScope(
   resource: LocalResourceCatalogEntry,
   knowledgeNodePublicIdScope: ReadonlySet<string>,
+  includeDescendants: boolean,
 ) {
   if (knowledgeNodePublicIdScope.size === 0) {
     return true;
   }
 
-  return resource.knowledgeNodePublicIds.some((knowledgeNodePublicId) =>
+  const resourceKnowledgeNodePublicIds = includeDescendants
+    ? [
+        ...resource.knowledgeNodePublicIds,
+        ...resource.knowledgeNodeAncestorPublicIds,
+      ]
+    : resource.knowledgeNodePublicIds;
+
+  return resourceKnowledgeNodePublicIds.some((knowledgeNodePublicId) =>
     knowledgeNodePublicIdScope.has(knowledgeNodePublicId),
+  );
+}
+
+function matchesLocalResourceSubjectScope(
+  resource: LocalResourceCatalogEntry,
+  subject: Subject | null,
+) {
+  return (
+    subject === null ||
+    resource.subject === null ||
+    resource.subject === subject
   );
 }
 

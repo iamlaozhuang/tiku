@@ -101,10 +101,9 @@ async function resolveOwnerPreviewGroundingContext(input: {
     }),
     profession: generationParameters.profession,
     level: generationParameters.level,
-    knowledgeNodePublicIds:
-      taskType === "ai_question_generation"
-        ? [...generationParameters.knowledgeNodePublicIds]
-        : undefined,
+    subject: generationParameters.subject,
+    knowledgeNodePublicIds: [...generationParameters.knowledgeNodePublicIds],
+    includeDescendants: generationParameters.includeDescendants,
   });
 
   return {

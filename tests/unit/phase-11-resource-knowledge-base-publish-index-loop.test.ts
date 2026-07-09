@@ -793,6 +793,112 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
     });
   });
 
+  it("filters local AI generation RAG scope by subject and selected descendant knowledge node bindings", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-rag-scope-"));
+    const catalogDir = join(storageRoot, "dev", "resource");
+    const catalogPath = join(catalogDir, "catalog.json");
+
+    await mkdir(catalogDir, { recursive: true });
+    await writeFile(
+      catalogPath,
+      JSON.stringify(
+        {
+          resources: [
+            {
+              publicId: "resource-local-theory-child",
+              title: "Theory Child Resource",
+              resourceType: "knowledge_doc",
+              resourceStatus: "rag_ready",
+              profession: "marketing",
+              level: 3,
+              subject: "theory",
+              originalFileName: "theory-child.md",
+              objectKey: "dev/resource/marketing/202605/theory-child.md",
+              contentType: "text/markdown",
+              fileSizeByte: 180,
+              fileHash: "theory-child-file-hash",
+              markdownContent:
+                "marketing scoped descendant theory alpha explanation",
+              markdownContentHash: "theory-child-markdown-hash",
+              indexingErrorMessage: null,
+              isVectorStale: false,
+              publishedAt: "2026-05-25T08:00:00.000Z",
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+              disabledFromStatus: null,
+              chunkCount: 1,
+              textHashes: ["theory-child-text-hash"],
+              headingPaths: [["Theory Child"]],
+              knowledgeNodePublicIds: ["knowledge-node-child"],
+              knowledgeNodeAncestorPublicIds: ["knowledge-node-parent"],
+            },
+            {
+              publicId: "resource-local-skill-child",
+              title: "Skill Child Resource",
+              resourceType: "knowledge_doc",
+              resourceStatus: "rag_ready",
+              profession: "marketing",
+              level: 3,
+              subject: "skill",
+              originalFileName: "skill-child.md",
+              objectKey: "dev/resource/marketing/202605/skill-child.md",
+              contentType: "text/markdown",
+              fileSizeByte: 180,
+              fileHash: "skill-child-file-hash",
+              markdownContent:
+                "marketing scoped descendant skill alpha explanation",
+              markdownContentHash: "skill-child-markdown-hash",
+              indexingErrorMessage: null,
+              isVectorStale: false,
+              publishedAt: "2026-05-25T08:00:00.000Z",
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+              disabledFromStatus: null,
+              chunkCount: 1,
+              textHashes: ["skill-child-text-hash"],
+              headingPaths: [["Skill Child"]],
+              knowledgeNodePublicIds: ["knowledge-node-child"],
+              knowledgeNodeAncestorPublicIds: ["knowledge-node-parent"],
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const descendantScopedResult = await buildLocalResourceRagRetrievalResult({
+      storageRoot,
+      query: "marketing scoped descendant alpha",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
+      knowledgeNodePublicIds: ["knowledge-node-parent"],
+      includeDescendants: true,
+    });
+
+    expect(descendantScopedResult.citations).toEqual([
+      expect.objectContaining({
+        resourcePublicId: "resource-local-theory-child",
+      }),
+    ]);
+
+    await expect(
+      buildLocalResourceRagRetrievalResult({
+        storageRoot,
+        query: "marketing scoped descendant alpha",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        knowledgeNodePublicIds: ["knowledge-node-parent"],
+        includeDescendants: false,
+      }),
+    ).resolves.toMatchObject({
+      evidenceStatus: "none",
+      citations: [],
+    });
+  });
+
   it("marks DOCX PPTX and PDF local resource uploads as conversion failed without converter dependencies", async () => {
     const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-formats-"));
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
