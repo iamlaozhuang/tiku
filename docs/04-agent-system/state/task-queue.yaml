@@ -96,6 +96,133 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: content-ai-0704-account-fixture-readiness-2026-07-09
+    title: Content AI 0704 account fixture readiness
+    phase: content-ai-0704-account-fixture-readiness-2026-07-09
+    status: blocked
+    priority: p1
+    taskKind: local_acceptance_fixture
+    executionProfile: local_0704_account_fixture_readiness_no_provider
+    validationPolicy: redacted_fixture_validation_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/content-ai-0704-account-fixture-readiness
+    humanApprovalBoundary:
+      local0704AccountFixtureCreation: current_user_approved_new_accounts_and_passwords_if_missing_2026_07_09
+      targetConfirmation: required_before_any_write
+      closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+    plannedAt: "2026-07-09T06:45:00-07:00"
+    claimedAt: "2026-07-09T06:45:00-07:00"
+    validatedAt: "2026-07-09T07:00:00-07:00"
+    reviewedAt: "2026-07-09T07:00:00-07:00"
+    result: blocked_safe_no_fixture_mutation_incomplete_exact_role_credentials_target_write_precondition_not_met
+    targetClosureItem: Complete local 0704 exact role account fixture selectors for content AI and advanced-edition localhost acceptance without exposing credentials.
+    behaviorBoundary: local_0704_account_fixture_only_no_source_test_package_lockfile_schema_migration_seed_env_file_change_no_provider_no_screenshot_or_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation
+    evidenceMode: redacted_role_label_route_label_status_category_aggregate_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
+    planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-account-fixture-readiness.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-fixture-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-account-fixture-readiness-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-account-fixture-readiness.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-fixture-readiness.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-account-fixture-readiness-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-fixture-preflight.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-fixture-preflight-audit.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-localhost-write-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-localhost-write-acceptance-audit.md
+      - package.json
+      - src/server/**
+      - src/app/api/v1/**
+      - D:/tiku-local-private/acceptance/**
+      - D:\tiku-local-private\acceptance\**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_unless_source_changes
+      browserRuntime: allowed_localhost_no_screenshot_no_raw_dom_no_storage_capture
+      devServer: use_existing_localhost_or_process_only_0704_override_without_env_file_change
+      privateAccountInMemoryUse: approved_no_output
+      privateExternalAcceptanceMaterialWrite: approved_no_value_output
+      directDatabaseConnection: approved_only_after_0704_target_confirmation_no_raw_rows
+      databaseMutation: approved_local_0704_non_destructive_account_fixture_only_after_target_confirmation
+      providerCall: blocked
+      envSecretAccess: blocked_no_output_no_env_file_change
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec prettier --write --ignore-unknown <scoped-doc-files>
+      - git diff --check
+      - corepack pnpm@10.26.1 lint
+      - corepack pnpm@10.26.1 typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-0704-account-fixture-readiness-2026-07-09
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-0704-account-fixture-readiness-2026-07-09 -SkipRemoteAheadCheck
+    validationSummary:
+      exactStructuredSelectorsReady: 2_of_8
+      missingOrUnusableExactSelectors: 6_of_8
+      localhostStructuredSelectorLogin: pass_2_of_2
+      processOnly0704TargetReconfirmedByCommandLine: not_proven
+      productAdminAccountCreationPath: blocked_no_valid_super_or_ops_selector
+      directDatabaseFixtureWrite: blocked_target_write_precondition_not_met
+      accountFixtureMutationExecuted: false
+      privateCredentialMaterialChanged: false
+      providerCallExecuted: false
+      sourceCodeChanged: false
+      testsChanged: false
+      targetedTest: not_applicable_no_source_or_test_change
+      scopedPrettierWrite: pass
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
   - id: content-ai-0704-fixture-preflight-2026-07-09
     title: Content AI 0704 fixture preflight
     phase: content-ai-0704-fixture-preflight-2026-07-09
