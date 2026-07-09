@@ -255,9 +255,13 @@ function getPageCopy(
       actionLabel: isQuestionGeneration
         ? "生成待审题目草稿"
         : "生成待审试卷草稿",
+      boundaryHeading: "草稿评审",
       boundaryLabel: isQuestionGeneration
         ? "待审题目草稿不直接发布正式题目"
         : "待审试卷草稿不直接发布正式试卷",
+      evidenceHeading: "资料依据",
+      evidenceLabel: "资料依据",
+      evidenceDescription: "生成前需要匹配本地资料；资料不足时不生成草稿。",
     };
   }
 
@@ -267,7 +271,12 @@ function getPageCopy(
     description:
       "为本企业准备训练题目和训练试卷草稿；发布前仍需编辑、预览员工视角并确认范围。",
     actionLabel: isQuestionGeneration ? "生成训练题草稿" : "生成训练试卷草稿",
+    boundaryHeading: "训练发布检查",
     boundaryLabel: "这些内容只进入企业训练草稿，不写入平台正式题库或正式试卷。",
+    evidenceHeading: "依据资料状态",
+    evidenceLabel: "依据资料状态",
+    evidenceDescription:
+      "生成前会匹配本地资料；资料不足时不生成草稿，资料较少时发布前需要确认。",
   };
 }
 
@@ -1361,14 +1370,19 @@ function AdminAiGenerationVisibleGeneratedContent({
     visibleGeneratedContent.structuredPreview,
   );
   const paperAssembly = localContractSummary.paperAssembly ?? null;
+  const workspace = localContractSummary.workspace;
   const visibleGeneratedContentTitle =
     paperAssembly !== null
       ? getAdminPaperAssemblyContainerLabel(localContractSummary.workspace)
       : visibleQuestionDrafts.length > 0
-        ? "生成题目草稿"
+        ? workspace === "organization"
+          ? "企业训练题草稿列表"
+          : "生成题目草稿"
         : visiblePaperSections.length > 0
           ? "生成试卷草稿"
           : "临时展示内容";
+  const visibleGeneratedContentStatusLabel =
+    workspace === "organization" ? "发布前不可见" : "待评审草稿";
 
   return (
     <section
@@ -1383,18 +1397,24 @@ function AdminAiGenerationVisibleGeneratedContent({
           </h3>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-          待评审草稿
+          {visibleGeneratedContentStatusLabel}
         </span>
       </div>
       {visibleQuestionDrafts.length > 0 ? (
-        <AdminQuestionDraftList questionDrafts={visibleQuestionDrafts} />
+        <AdminQuestionDraftList
+          questionDrafts={visibleQuestionDrafts}
+          workspace={workspace}
+        />
       ) : paperAssembly !== null ? (
         <AdminPaperAssemblyContainer
           paperAssembly={paperAssembly}
           workspace={localContractSummary.workspace}
         />
       ) : visiblePaperSections.length > 0 ? (
-        <AdminPaperDraftList paperSections={visiblePaperSections} />
+        <AdminPaperDraftList
+          paperSections={visiblePaperSections}
+          workspace={workspace}
+        />
       ) : (
         <p className="text-text-primary mt-3 text-sm leading-6 whitespace-pre-wrap">
           {visibleGeneratedContentText}
@@ -1403,6 +1423,7 @@ function AdminAiGenerationVisibleGeneratedContent({
       {visibleGeneratedContent.structuredPreview && paperAssembly === null ? (
         <StructuredPreviewSummary
           structuredPreview={visibleGeneratedContent.structuredPreview}
+          workspace={workspace}
         />
       ) : null}
     </section>
@@ -1616,79 +1637,141 @@ function hasVisiblePaperSectionBody(
 function AdminQuestionDraftList({
   questionDrafts,
   testId = "admin-ai-question-drafts",
+  workspace = "content",
 }: {
   questionDrafts: AdminVisibleQuestionDraftSummary[];
   testId?: string;
+  workspace?: AdminAiGenerationWorkspace;
 }) {
+  const isOrganizationDraft = workspace === "organization";
+
   return (
     <div className="mt-3 space-y-3" data-testid={testId}>
-      {questionDrafts.map((questionDraft) => (
-        <section
-          className="border-border bg-muted/40 rounded-md border p-3"
-          data-testid="admin-ai-question-draft-card"
-          key={questionDraft.draftNumber}
-        >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <h4 className="text-text-primary text-sm font-semibold">
-              题目 {questionDraft.draftNumber}
-            </h4>
-            <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
-              {[questionDraft.questionType, questionDraft.difficulty]
-                .filter(Boolean)
-                .join(" / ") || "待评审"}
-            </span>
-          </div>
-          <QuestionDraftField label="题干" value={questionDraft.questionStem} />
-          {questionDraft.questionOptions &&
-          questionDraft.questionOptions.length > 0 ? (
-            <div className="mt-3">
-              <p className="text-text-secondary text-xs font-medium">选项</p>
-              <ol className="mt-2 space-y-2">
-                {questionDraft.questionOptions.map((option, index) => (
-                  <li
-                    className="text-text-primary bg-background rounded-md px-2 py-2 text-sm leading-6"
-                    key={`${option.optionLabel ?? index}-${option.optionText}`}
-                  >
-                    <span className="text-brand-primary mr-2 font-medium">
-                      {option.optionLabel ?? String.fromCharCode(65 + index)}
-                    </span>
-                    {option.optionText}
-                  </li>
-                ))}
-              </ol>
+      {questionDrafts.map((questionDraft) => {
+        const questionTypeLabel = resolveAdminQuestionDraftQuestionTypeLabel(
+          questionDraft.questionType,
+        );
+        const difficultyLabel = resolveAdminQuestionDraftDifficultyLabel(
+          questionDraft.difficulty,
+        );
+        const knowledgeNodeCount = questionDraft.knowledgeNodeCount ?? 0;
+        const metaLabels = isOrganizationDraft
+          ? [
+              questionTypeLabel,
+              difficultyLabel,
+              knowledgeNodeCount > 0 ? `知识点 ${knowledgeNodeCount}` : null,
+            ].filter((metaLabel) => metaLabel !== null)
+          : [questionDraft.questionType, questionDraft.difficulty].filter(
+              Boolean,
+            );
+
+        return (
+          <section
+            className="border-border bg-muted/40 rounded-md border p-3"
+            data-testid="admin-ai-question-draft-card"
+            key={questionDraft.draftNumber}
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              {isOrganizationDraft ? (
+                <div>
+                  <p className="text-brand-primary text-xs font-medium">
+                    企业训练题草稿
+                  </p>
+                  <h4 className="text-text-primary mt-1 text-sm font-semibold">
+                    第 {questionDraft.draftNumber} 题
+                  </h4>
+                </div>
+              ) : (
+                <h4 className="text-text-primary text-sm font-semibold">
+                  题目 {questionDraft.draftNumber}
+                </h4>
+              )}
+              <span className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs">
+                {metaLabels.join(" / ") ||
+                  (isOrganizationDraft ? "待检查" : "待评审")}
+              </span>
             </div>
-          ) : null}
-          <QuestionDraftField
-            label="标准答案"
-            value={questionDraft.standardAnswer}
-          />
-          <QuestionDraftField label="解析" value={questionDraft.analysis} />
-          {questionDraft.knowledgeNodeLabels &&
-          questionDraft.knowledgeNodeLabels.length > 0 ? (
-            <div className="mt-3">
-              <p className="text-text-secondary text-xs font-medium">知识点</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {questionDraft.knowledgeNodeLabels.map((knowledgeNodeLabel) => (
-                  <span
-                    className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
-                    key={knowledgeNodeLabel}
-                  >
-                    {knowledgeNodeLabel}
-                  </span>
-                ))}
+            <QuestionDraftField
+              label="题干"
+              value={questionDraft.questionStem}
+            />
+            {questionDraft.questionOptions &&
+            questionDraft.questionOptions.length > 0 ? (
+              <div className="mt-3">
+                <p className="text-text-secondary text-xs font-medium">选项</p>
+                <ol className="mt-2 space-y-2">
+                  {questionDraft.questionOptions.map((option, index) => (
+                    <li
+                      className="text-text-primary bg-background rounded-md px-2 py-2 text-sm leading-6"
+                      key={`${option.optionLabel ?? index}-${option.optionText}`}
+                    >
+                      <span className="text-brand-primary mr-2 font-medium">
+                        {option.optionLabel ?? String.fromCharCode(65 + index)}
+                      </span>
+                      {option.optionText}
+                    </li>
+                  ))}
+                </ol>
               </div>
-            </div>
-          ) : null}
-        </section>
-      ))}
+            ) : null}
+            {isOrganizationDraft ? (
+              <>
+                <QuestionDraftDisclosureField
+                  label="标准答案"
+                  summaryLabel="查看标准答案"
+                  value={questionDraft.standardAnswer}
+                />
+                <QuestionDraftDisclosureField
+                  label="解析"
+                  summaryLabel="查看解析"
+                  value={questionDraft.analysis}
+                />
+              </>
+            ) : (
+              <>
+                <QuestionDraftField
+                  label="标准答案"
+                  value={questionDraft.standardAnswer}
+                />
+                <QuestionDraftField
+                  label="解析"
+                  value={questionDraft.analysis}
+                />
+              </>
+            )}
+            {questionDraft.knowledgeNodeLabels &&
+            questionDraft.knowledgeNodeLabels.length > 0 ? (
+              <div className="mt-3">
+                <p className="text-text-secondary text-xs font-medium">
+                  知识点
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {questionDraft.knowledgeNodeLabels.map(
+                    (knowledgeNodeLabel) => (
+                      <span
+                        className="bg-background text-text-secondary rounded-md px-2 py-1 text-xs"
+                        key={knowledgeNodeLabel}
+                      >
+                        {knowledgeNodeLabel}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </section>
+        );
+      })}
     </div>
   );
 }
 
 function AdminPaperDraftList({
   paperSections,
+  workspace = "content",
 }: {
   paperSections: AdminPaperSectionDraftSummary[];
+  workspace?: AdminAiGenerationWorkspace;
 }) {
   return (
     <div className="mt-3 space-y-4" data-testid="admin-ai-paper-drafts">
@@ -1718,6 +1801,7 @@ function AdminPaperDraftList({
             <AdminQuestionDraftList
               questionDrafts={paperSection.questionDrafts}
               testId="admin-ai-paper-question-drafts"
+              workspace={workspace}
             />
           ) : null}
         </section>
@@ -1747,14 +1831,72 @@ function QuestionDraftField({
   );
 }
 
+function QuestionDraftDisclosureField({
+  label,
+  summaryLabel,
+  value,
+}: {
+  label: string;
+  summaryLabel: string;
+  value?: string;
+}) {
+  if (!value) {
+    return null;
+  }
+
+  return (
+    <details className="border-border bg-background mt-3 rounded-md border px-2 py-2">
+      <summary className="text-text-primary cursor-pointer text-sm font-medium">
+        {summaryLabel}
+      </summary>
+      <div className="mt-2">
+        <p className="text-text-secondary text-xs font-medium">{label}</p>
+        <p className="text-text-primary mt-2 text-sm leading-6 whitespace-pre-wrap">
+          {value}
+        </p>
+      </div>
+    </details>
+  );
+}
+
+function resolveAdminQuestionDraftQuestionTypeLabel(
+  questionType?: string | null,
+): string | null {
+  if (!questionType) {
+    return null;
+  }
+
+  return (
+    adminQuestionTypeLabelByValue[
+      questionType as keyof typeof adminQuestionTypeLabelByValue
+    ] ?? questionType
+  );
+}
+
+function resolveAdminQuestionDraftDifficultyLabel(
+  difficulty?: string | null,
+): string | null {
+  if (!difficulty) {
+    return null;
+  }
+
+  return (
+    adminDifficultyLabelByValue[
+      difficulty as keyof typeof adminDifficultyLabelByValue
+    ] ?? difficulty
+  );
+}
+
 function StructuredPreviewSummary({
   structuredPreview,
+  workspace = "content",
 }: {
   structuredPreview: NonNullable<
     NonNullable<
       AdminAiGenerationLocalContractDto["runtimeBridge"]["visibleGeneratedContent"]
     >["structuredPreview"]
   >;
+  workspace?: AdminAiGenerationWorkspace;
 }) {
   const displayItems =
     structuredPreview.kind === "question_set"
@@ -1776,7 +1918,9 @@ function StructuredPreviewSummary({
 
   return (
     <div className="border-border bg-muted mt-3 rounded-md border p-2">
-      <p className="text-text-primary text-xs font-medium">结构化预览</p>
+      <p className="text-text-primary text-xs font-medium">
+        {workspace === "organization" ? "草稿概览" : "结构化预览"}
+      </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {displayItems.map((displayItem) => (
           <span
@@ -2036,7 +2180,9 @@ function AdminAiGenerationTaskHistoryPanel({
                 {taskItem.generatedResult !== null ? (
                   <div className="border-border bg-muted/40 mt-3 rounded-md border p-3">
                     <p className="text-brand-primary text-xs font-medium">
-                      历史草稿摘要
+                      {workspace === "organization"
+                        ? "训练草稿摘要"
+                        : "历史草稿摘要"}
                     </p>
                     <p className="text-text-primary mt-2 text-sm leading-6">
                       {resolveAdminAiGenerationBusinessPreview(
@@ -2053,13 +2199,21 @@ function AdminAiGenerationTaskHistoryPanel({
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-text-secondary">资料依据</dt>
+                        <dt className="text-text-secondary">
+                          {workspace === "organization"
+                            ? "依据资料状态"
+                            : "资料依据"}
+                        </dt>
                         <dd className="text-text-primary mt-1">
                           {getEvidenceStatusLabel(taskItem.generatedResult)}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-text-secondary">依据数量</dt>
+                        <dt className="text-text-secondary">
+                          {workspace === "organization"
+                            ? "依据条数"
+                            : "依据数量"}
+                        </dt>
                         <dd className="text-text-primary mt-1">
                           {taskItem.generatedResult.citationCount}
                         </dd>
@@ -2203,15 +2357,34 @@ function OrganizationAiGenerationDraftNextStepPanel({
               : "企业训练题草稿"}
           </p>
           <h4 className="text-text-primary mt-1 text-sm font-semibold">
-            下一步处理
+            创建企业训练草稿
           </h4>
         </div>
-        <a
-          className="border-border text-text-secondary hover:bg-muted inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98]"
-          href="/organization/organization-training"
-        >
-          进入企业训练配置
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            data-testid="organization-ai-training-copy-action"
+            disabled={isCopyActionDisabled}
+            type="button"
+            onClick={() =>
+              onCopyToTrainingDraft({
+                taskItem,
+                confirmation:
+                  copyReadiness === "weak_confirmation_required"
+                    ? "weak_confirmed"
+                    : "not_required",
+              })
+            }
+          >
+            {actionState === "copying" ? "创建中" : actionLabel}
+          </button>
+          <a
+            className="border-border text-text-secondary hover:bg-muted inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98]"
+            href="/organization/organization-training"
+          >
+            进入企业训练配置
+          </a>
+        </div>
       </div>
 
       <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
@@ -2238,31 +2411,17 @@ function OrganizationAiGenerationDraftNextStepPanel({
       </dl>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {draftActionLabels.map((actionLabel) => (
+        <span className="text-text-secondary w-full text-xs">
+          进入企业训练草稿后可继续：
+        </span>
+        {draftActionLabels.map((draftActionLabel) => (
           <span
             className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium"
-            key={actionLabel}
+            key={draftActionLabel}
           >
-            {actionLabel}
+            {draftActionLabel}
           </span>
         ))}
-        <button
-          className="border-border text-text-secondary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          data-testid="organization-ai-training-copy-action"
-          disabled={isCopyActionDisabled}
-          type="button"
-          onClick={() =>
-            onCopyToTrainingDraft({
-              taskItem,
-              confirmation:
-                copyReadiness === "weak_confirmation_required"
-                  ? "weak_confirmed"
-                  : "not_required",
-            })
-          }
-        >
-          {actionState === "copying" ? "创建中" : actionLabel}
-        </button>
       </div>
       {actionMessage === null ? null : (
         <p
@@ -3449,7 +3608,7 @@ export function AdminAiGenerationEntryPage({
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
           <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <FileText aria-hidden="true" className="size-4" />
-            <h2>草稿评审</h2>
+            <h2>{pageCopy.boundaryHeading}</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
             {pageCopy.boundaryLabel}
@@ -3459,10 +3618,10 @@ export function AdminAiGenerationEntryPage({
         <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
           <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <ShieldCheck aria-hidden="true" className="size-4" />
-            <h2>资料依据</h2>
+            <h2>{pageCopy.evidenceHeading}</h2>
           </div>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            生成前需要匹配本地资料；资料不足时不生成草稿。
+            {pageCopy.evidenceDescription}
           </p>
         </section>
       </section>
@@ -3518,7 +3677,9 @@ export function AdminAiGenerationEntryPage({
                 </dd>
               </div>
               <div>
-                <dt className="text-text-secondary">资料依据</dt>
+                <dt className="text-text-secondary">
+                  {pageCopy.evidenceLabel}
+                </dt>
                 <dd className="text-text-primary mt-1">
                   {localContractSummary.resultState.evidenceStatus ===
                   "sufficient"

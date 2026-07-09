@@ -7,6 +7,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -865,6 +866,15 @@ describe("admin AI generation entry surfaces", () => {
       screen.getByTestId("admin-ai-generation-zone-boundary"),
     ).toHaveTextContent("只进入企业训练草稿");
     expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).toHaveTextContent("训练发布检查");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).toHaveTextContent("依据资料状态");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).not.toHaveTextContent("草稿评审");
+    expect(
       await screen.findByTestId("admin-ai-generation-zone-result-history"),
     ).toHaveTextContent("组织草稿池暂无任务记录");
     expect(screen.getByLabelText("出题数量")).toHaveDisplayValue("3");
@@ -956,11 +966,21 @@ describe("admin AI generation entry surfaces", () => {
     expect(
       screen.getByTestId("admin-ai-generation-zone-boundary"),
     ).toHaveTextContent("只进入企业训练草稿");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).toHaveTextContent("训练发布检查");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).toHaveTextContent("依据资料状态");
+    expect(
+      screen.getByTestId("admin-ai-generation-zone-boundary"),
+    ).not.toHaveTextContent("草稿评审");
 
     const nextStep = await screen.findByTestId(
       "organization-ai-generation-draft-next-step",
     );
     expect(nextStep).toHaveTextContent("企业训练试卷草稿");
+    expect(nextStep).toHaveTextContent("创建企业训练草稿");
     expect(nextStep).toHaveTextContent("编辑试卷");
     expect(nextStep).toHaveTextContent("调整题目");
     expect(nextStep).toHaveTextContent("预览员工视角");
@@ -1960,7 +1980,7 @@ describe("admin AI generation entry surfaces", () => {
     const visibleGeneratedContent = await screen.findByTestId(
       "admin-visible-generated-content",
     );
-    expect(visibleGeneratedContent).toHaveTextContent("生成题目草稿");
+    expect(visibleGeneratedContent).toHaveTextContent("企业训练题草稿列表");
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible organization question stem",
     );
@@ -1973,6 +1993,23 @@ describe("admin AI generation entry surfaces", () => {
     expect(visibleGeneratedContent).toHaveTextContent(
       "synthetic visible organization analysis",
     );
+    const draftCard = within(visibleGeneratedContent).getByTestId(
+      "admin-ai-question-draft-card",
+    );
+    expect(draftCard).toHaveTextContent("企业训练题草稿");
+    expect(draftCard).toHaveTextContent("第 1 题");
+    expect(draftCard).toHaveTextContent("单选题");
+    expect(draftCard).toHaveTextContent("中等");
+    expect(draftCard).toHaveTextContent("查看标准答案");
+    expect(draftCard).toHaveTextContent("查看解析");
+    expect(draftCard).not.toHaveTextContent("single_choice");
+    expect(draftCard).not.toHaveTextContent("medium");
+    expect(
+      within(draftCard).getByText("查看标准答案").closest("details"),
+    ).not.toHaveAttribute("open");
+    expect(
+      within(draftCard).getByText("查看解析").closest("details"),
+    ).not.toHaveAttribute("open");
     expect(document.body.textContent).not.toContain("rawPrompt");
     expect(document.body.textContent).not.toContain("providerPayload");
   });
@@ -3261,10 +3298,13 @@ describe("admin AI generation entry surfaces", () => {
     ).toHaveTextContent("组织草稿池");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("草稿快照");
+    ).toHaveTextContent("训练草稿摘要");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("企业训练试卷草稿");
+    expect(
+      screen.getByTestId("admin-ai-generation-task-history"),
+    ).toHaveTextContent("依据资料状态");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("可作为组织训练素材");

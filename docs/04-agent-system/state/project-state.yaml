@@ -1,8 +1,35 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: organization-training-admin-detail-ui-2026-07-08
-updatedAt: "2026-07-08T16:42:49-07:00"
+currentPhase: org-admin-ai-generation-result-ux-2026-07-08
+updatedAt: "2026-07-08T17:48:00-07:00"
+latestOrgAdminAiGenerationResultUx:
+  id: org-admin-ai-generation-result-ux-2026-07-08
+  status: ready_for_closeout
+  result: pass_source_test_browser_precommit_ready_for_commit_merge_push_cleanup
+  branch: codex/org-admin-ai-generation-result-ux
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-org-admin-ai-generation-result-ux.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-admin-ai-generation-result-ux-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-admin-ai-generation-result-ux-audit.md
+  approvalBoundary: current_user_approved_three_stage_ai_generation_result_ux_goal_2026_07_08
+  boundary:
+    scope: organization_admin_ai_generation_result_ui_and_unit_test_only
+    dbMutationExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    formalContentWriteExecuted: false
+  validationSummary:
+    tddRed: pass_expected_org_training_wording_and_draft_hierarchy_failure
+    targetedAdminAiGenerationUiUnit: pass_1_file_39_tests
+    lint: pass
+    typecheck: pass
+    prettierCheck: pass_scoped
+    diffCheck: pass
+    localhostBrowser: pass_org_question_and_paper_training_wording_no_console_errors
+    moduleRunV2PreCommitHardening: pass
+    sourceCodeChanged: true
+    testsChanged: true
 latestOrganizationTrainingAdminDetailUi:
   id: organization-training-admin-detail-ui-2026-07-08
   status: ready_for_closeout
@@ -1437,40 +1464,34 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: organization-training-admin-detail-ui-2026-07-08
-  title: Organization training admin detail UI
-  phase: organization-training-admin-detail-ui-2026-07-08
+  id: org-admin-ai-generation-result-ux-2026-07-08
+  title: Organization admin AI generation result UX
+  phase: org-admin-ai-generation-result-ux-2026-07-08
   status: ready_for_closeout
-  result: pass_master_gates_ready_for_push_cleanup
+  result: pass_source_test_browser_precommit_ready_for_commit_merge_push_cleanup
   priority: p1
   taskKind: implementation
-  branch: codex/org-training-admin-detail-ui
-  humanApprovalBoundary: current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
-  plannedAt: "2026-07-08T16:22:00-07:00"
-  claimedAt: "2026-07-08T16:22:00-07:00"
-  completedAt: "2026-07-08T16:35:33-07:00"
-  targetClosureItem: Organization advanced admins can click published training view to see real safe question or paper detail while draft continue actions open configuration semantics.
-  behaviorBoundary: local_organization_training_admin_detail_ui_only_no_api_dto_service_repository_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write
+  branch: codex/org-admin-ai-generation-result-ux
+  humanApprovalBoundary: current_user_approved_three_stage_ai_generation_result_ux_goal_2026_07_08
+  plannedAt: "2026-07-08T17:05:00-07:00"
+  claimedAt: "2026-07-08T17:05:00-07:00"
+  completedAt: "2026-07-08T17:48:00-07:00"
+  targetClosureItem: Organization advanced admin AI question and AI paper result surfaces use enterprise-training wording, compact draft hierarchy, and clear copy-to-training-draft next action without touching contracts or Provider paths.
+  behaviorBoundary: local_organization_admin_ai_generation_result_ui_and_unit_test_only_no_api_dto_service_repository_db_schema_migration_seed_fixture_no_provider_no_dependency_no_package_lockfile_no_formal_content_write
   evidenceMode: redacted_code_symbol_test_status_browser_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content_no_screenshots_in_repo
-  planPath: docs/05-execution-logs/task-plans/2026-07-08-organization-training-admin-detail-ui.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-08-organization-training-admin-detail-ui-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-organization-training-admin-detail-ui-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-org-admin-ai-generation-result-ux.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-admin-ai-generation-result-ux-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-admin-ai-generation-result-ux-audit.md
   validationSummary:
-    status: pass_master_gates_ready_for_push_cleanup
-    tddRed: pass_expected_missing_detail_ui_states_failure
-    targetedOrganizationTrainingUiUnit: pass_1_file_15_tests
+    status: pass_source_test_browser_precommit_ready_for_commit_merge_push_cleanup
+    tddRed: pass_expected_org_training_wording_and_draft_hierarchy_failure
+    targetedAdminAiGenerationUiUnit: pass_1_file_39_tests
     lint: pass
     typecheck: pass
     prettierCheck: pass_scoped
     diffCheck: pass
-    localhostBrowser: pass_view_detail_disclosure_continue_config_no_console_errors
+    localhostBrowser: pass_org_question_and_paper_training_wording_no_console_errors
     moduleRunV2PreCommitHardening: pass
-    masterPostMergeTargetedTests: pass_1_file_15_tests
-    masterPostMergeLint: pass
-    masterPostMergeTypecheck: pass
-    masterPostMergePrettierCheck: pass_scoped
-    masterPostMergeDiffCheck: pass
-    repositoryCheckpointAlignedForPrePush: pass_using_accepted_ancestor_checkpoint
     sourceCodeChanged: true
     testsChanged: true
     packageLockfileChanged: false
@@ -1482,7 +1503,7 @@ currentTask:
     costCalibrationExecutedOrClaimed: false
     releaseFinalProductionClaimed: false
     productionUsabilityClaimed: false
-    mergePushApproval: granted_current_user_approved_serial_org_training_admin_detail_read_model_and_ui_merge_push_cleanup_2026_07_08
+    mergePushApproval: granted_current_user_approved_three_stage_ai_generation_result_ux_goal_2026_07_08
 previousCurrentTaskBeforeOrganizationTrainingCreateSourceUx20260708:
   id: organization-training-list-management-2026-07-08
   title: Organization training list management UX
