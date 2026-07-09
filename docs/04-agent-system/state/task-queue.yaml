@@ -96,6 +96,157 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: content-ai-0704-localhost-write-acceptance-2026-07-09
+    title: Content AI 0704 localhost write acceptance
+    phase: content-ai-0704-localhost-write-acceptance-2026-07-09
+    status: ready_for_closeout
+    priority: p1
+    taskKind: local_acceptance_regression
+    executionProfile: local_source_and_localhost_acceptance_0704_db_process_override_no_provider
+    validationPolicy: targeted_role_boundary_tests_typecheck_lint_diff_precommit_prepush_redacted_localhost_write_acceptance
+    moduleRunVersion: 2
+    branch: codex/content-ai-0704-localhost-write-acceptance
+    humanApprovalBoundary:
+      runtimeDbAndLogin: current_user_approved_process_only_0704_db_override_private_account_in_memory_login_2026_07_09
+      closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+    plannedAt: "2026-07-09T04:30:00-07:00"
+    claimedAt: "2026-07-09T04:30:00-07:00"
+    validatedAt: "2026-07-09T04:55:00-07:00"
+    targetClosureItem: Run localhost mutating acceptance against the explicit 20260704 local DB target for content-admin AI出题/AI组卷 closed-loop surfaces and adjacent role boundaries.
+    behaviorBoundary: localhost_acceptance_regression_only_no_source_repair_unless_separate_branch_process_only_0704_db_override_no_env_file_mutation_private_account_values_in_memory_only_no_provider_execution_no_schema_migration_seed_fixture_no_dependency_no_package_lockfile_no_screenshot_or_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation
+    evidenceMode: redacted_role_label_route_label_visible_state_label_command_status_aggregate_count_and_safe_failure_category_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
+    planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-localhost-write-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-localhost-write-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-localhost-write-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-localhost-write-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-localhost-write-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-localhost-write-acceptance-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-07-0704-db-local-manual-role-acceptance-prep.md
+      - docs/05-execution-logs/evidence/2026-07-07-0704-db-local-fixture-supplement.md
+      - docs/05-execution-logs/evidence/2026-07-07-full-db-backed-local-runtime-replay.md
+      - docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-parameter-contract.md
+      - docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-rag-scope.md
+      - docs/05-execution-logs/evidence/2026-07-08-org-ai-question-to-training-draft.md
+      - docs/05-execution-logs/evidence/2026-07-08-org-ai-paper-to-training-draft.md
+      - docs/05-execution-logs/evidence/2026-07-08-org-ai-training-loop-regression.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-*.md
+      - docs/05-execution-logs/evidence/2026-07-09-org-ai-paper-section-contract-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-training-loop-regression-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-*.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-org-ai-paper-section-contract-validation-audit.md
+      - package.json
+      - src/app/**
+      - src/features/**
+      - src/server/**
+      - tests/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked_unless_separate_short_branch_after_root_cause
+      focusedUnitTest: approved
+      browserRuntime: approved_localhost_127_loopback_no_screenshot_no_raw_dom_no_storage_capture
+      devServer: approved_process_only_0704_db_override_no_env_file_mutation
+      privateAccountInMemoryUse: approved_no_value_output_no_evidence_recording
+      directDatabaseConnection: approved_redacted_target_label_check_only_no_url_no_raw_rows
+      databaseMutation: approved_localhost_write_path_acceptance_non_destructive_only
+      providerCall: blocked
+      envSecretAccess: approved_process_memory_only_no_value_output_no_env_file_mutation
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceSummary:
+      status: partial_bounded_localhost_acceptance_blocked_by_0704_fixture_history_gaps
+      localhostLoginReachable: pass
+      processOnly0704DbTargetMatched: pass
+      directLoginMatchedRoles:
+        - content_admin
+        - personal_standard_student
+        - org_advanced_employee
+      directLoginFixtureGaps:
+        - personal_advanced_student
+        - org_standard_employee
+        - org_standard_admin
+        - org_advanced_admin
+      contentAiQuestionLoop: blocked_no_existing_adoptable_result_without_provider
+      contentAiPaperLoop: blocked_existing_formal_draft_publish_validation_total_score_gap
+      organizationTrainingEmployeeVisibleList: pass_nonzero
+      organizationTrainingEmployeeSubmit: blocked_conflict_or_already_processed
+      sourceCodeChanged: false
+      providerCallExecuted: false
+      screenshotsOrRawDomCaptured: false
+      sensitiveValuesRecorded: false
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/lib/admin-ai-generation-formal-draft-payload.test.ts src/server/services/paper-draft-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/organization-training-route.test.ts src/server/services/organization-training-service.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run lint
+      - git diff --check
+      - corepack pnpm@10.26.1 exec prettier --write --ignore-unknown <scoped-doc-files>
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-0704-localhost-write-acceptance-2026-07-09
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-0704-localhost-write-acceptance-2026-07-09 -SkipRemoteAheadCheck
+    validationSummary:
+      contentAiUiAndFormalContentRegression: pass_3_files_80_tests
+      contentAiFormalDraftAndPaperServiceRegression: pass_4_files_67_tests
+      personalLearnerAiRegression: pass_4_files_96_tests
+      organizationTrainingAndRoleNavigationRegression: pass_6_files_119_tests
+      typecheck: pass
+      lint: pass
+      diffCheck: pass
+      scopedPrettierWrite: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
   - id: content-ai-local-e2e-regression-2026-07-09
     title: Content AI local e2e regression
     phase: content-ai-local-e2e-regression-2026-07-09
