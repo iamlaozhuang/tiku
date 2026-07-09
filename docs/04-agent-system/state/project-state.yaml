@@ -1,8 +1,56 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-ai-0704-account-fixture-readiness-2026-07-09
-updatedAt: "2026-07-09T06:45:00-07:00"
+currentPhase: content-ai-0704-account-matrix-recovery-2026-07-09
+updatedAt: "2026-07-09T07:35:00-07:00"
+latestContentAi0704AccountMatrixRecovery:
+  id: content-ai-0704-account-matrix-recovery-2026-07-09
+  status: ready_for_closeout
+  result: pass_redacted_account_matrix_recovered_no_fixture_mutation_no_source_change
+  branch: codex/content-ai-0704-account-matrix-recovery
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-account-matrix-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-matrix-recovery.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-account-matrix-recovery-audit.md
+  supersedes:
+    - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-fixture-readiness.md
+  boundary:
+    scope: local_0704_account_matrix_recovery_for_content_ai_acceptance
+    sourceCodeChanged: false
+    testsChanged: false
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    productLoginSessionOnly: true
+    privateAccountValueOutputAllowed: false
+    evidenceRedactionRequired: true
+    screenshotsOrRawDomCaptured: false
+  recoveredRoleMatrix:
+    super_admin: login_pass
+    ops_admin: login_pass
+    content_admin: login_pass
+    org_standard_admin: login_pass
+    org_advanced_admin: login_pass
+    personal_standard_student: standard_personal_context_login_pass
+    personal_advanced_student: advanced_effective_personal_context_login_pass
+    org_standard_employee: standard_org_context_login_pass
+    org_advanced_employee: advanced_org_context_login_pass
+  plannedValidation:
+    targetedTest: not_applicable_no_source_or_test_change
+    diffCheck: required
+    lint: required
+    typecheck: required
+    moduleRunV2PreCommitHardening: required
+    moduleRunV2PrePushReadiness: required
+  validationSummary:
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    targetedTest: not_applicable_no_source_or_test_change
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 latestContentAi0704AccountFixtureReadiness:
   id: content-ai-0704-account-fixture-readiness-2026-07-09
   status: closed
@@ -2237,47 +2285,45 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-ai-0704-account-fixture-readiness-2026-07-09
-  title: Content AI 0704 account fixture readiness
-  phase: content-ai-0704-account-fixture-readiness-2026-07-09
-  status: closed
-  result: blocked_safe_no_fixture_mutation_incomplete_exact_role_credentials_target_write_precondition_not_met
+  id: content-ai-0704-account-matrix-recovery-2026-07-09
+  title: Content AI 0704 account matrix recovery
+  phase: content-ai-0704-account-matrix-recovery-2026-07-09
+  status: ready_for_closeout
+  result: pass_redacted_account_matrix_recovered_no_fixture_mutation_no_source_change
   priority: p1
-  taskKind: local_acceptance_fixture
-  branch: codex/content-ai-0704-account-fixture-readiness
+  taskKind: local_acceptance_fixture_recovery
+  branch: codex/content-ai-0704-account-matrix-recovery
   humanApprovalBoundary:
-    local0704AccountFixtureCreation: current_user_approved_new_accounts_and_passwords_if_missing_2026_07_09
-    targetConfirmation: required_before_any_write
+    privateAccountInMemoryLogin: current_user_approved_process_only_0704_db_override_private_account_in_memory_login_2026_07_09
     closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
-  plannedAt: "2026-07-09T06:45:00-07:00"
-  claimedAt: "2026-07-09T06:45:00-07:00"
-  validatedAt: "2026-07-09T07:00:00-07:00"
-  reviewedAt: "2026-07-09T07:00:00-07:00"
-  targetClosureItem: Complete local 0704 exact role account fixture selectors for content AI and advanced-edition localhost acceptance without exposing credentials.
-  behaviorBoundary: local_0704_account_fixture_only_no_source_test_package_lockfile_schema_migration_seed_env_file_change_no_provider_no_screenshot_or_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation
+    fixtureMutation: not_required_account_matrix_recovered_without_new_account_creation
+  plannedAt: "2026-07-09T07:35:00-07:00"
+  claimedAt: "2026-07-09T07:35:00-07:00"
+  validatedAt: "2026-07-09T07:45:00-07:00"
+  reviewedAt: "2026-07-09T07:45:00-07:00"
+  targetClosureItem: Supersede conservative 0704 credential gap record with corrected redacted account matrix readiness evidence.
+  behaviorBoundary: docs_state_evidence_only_no_source_test_package_lockfile_schema_migration_seed_env_file_change_no_provider_no_screenshot_or_raw_dom_no_staging_prod_deploy_no_cost_calibration_no_destructive_db_operation_no_direct_db_operation
   evidenceMode: redacted_role_label_route_label_status_category_aggregate_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-account-fixture-readiness.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-fixture-readiness.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-account-fixture-readiness-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-account-matrix-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-matrix-recovery.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-account-matrix-recovery-audit.md
   validationSummary:
-    exactStructuredSelectorsReady: 2_of_8
-    missingOrUnusableExactSelectors: 6_of_8
-    localhostStructuredSelectorLogin: pass_2_of_2
-    processOnly0704TargetReconfirmedByCommandLine: not_proven
-    productAdminAccountCreationPath: blocked_no_valid_super_or_ops_selector
-    directDatabaseFixtureWrite: blocked_target_write_precondition_not_met
-    accountFixtureMutationExecuted: false
-    privateCredentialMaterialChanged: false
-    providerCallExecuted: false
+    recoveredRoleMatrix: pass
     sourceCodeChanged: false
     testsChanged: false
+    privateCredentialValuesOutput: false
+    sessionCookieTokenOutput: false
+    providerCallExecuted: false
+    directDatabaseConnectionOrMutationExecuted: false
+    productLoginSessionProbe: pass_localhost_only
     targetedTest: not_applicable_no_source_or_test_change
     scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
     diffCheck: pass
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
