@@ -2672,11 +2672,152 @@ describe("admin AI generation entry surfaces", () => {
     expect(historyPanel).toHaveTextContent("已创建待审草稿");
     expect(adoptAction).toBeDisabled();
     expect(adoptAction).toHaveTextContent("已创建待审题目草稿");
+    expect(
+      screen.getByRole("link", { name: "查看待审题目草稿" }),
+    ).toHaveAttribute(
+      "href",
+      "/content/questions?questionPublicId=formal_question_public_reviewed",
+    );
     expect(rejectAction).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalledWith(
       adoptionUrl,
       expect.objectContaining({ method: "POST" }),
     );
+  });
+
+  it("renders persisted content admin paper adoption detail entry with public id link", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const resultPublicId =
+      "admin_ai_generation_result_content_paper_reviewed_history";
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "paper",
+            generatedResult: {
+              resultPublicId,
+              contentPreviewMasked:
+                "redacted generated paper result summary for adopted history",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              formalAdoptionStatus: "draft_created",
+              formalTargetWriteStatus: "draft_created",
+              formalPaperPublicId: "formal_paper_public_reviewed",
+              formalAdoptionReviewedAt: "2026-06-26T21:18:00.000Z",
+              reviewedDraft: {
+                kind: "paper",
+                paper: {
+                  name: "redacted paper draft",
+                  profession: "marketing",
+                  level: 3,
+                  subject: "theory",
+                  paperType: "mock_paper",
+                  year: 2026,
+                  durationMinute: 90,
+                  source: "redacted source summary",
+                },
+                paperSections: [],
+              },
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "paper",
+      }),
+    );
+
+    const historyPanel = await screen.findByTestId(
+      "admin-ai-generation-task-history",
+    );
+
+    expect(historyPanel).toHaveTextContent("已创建待审草稿");
+    expect(
+      screen.getByRole("link", { name: "查看待审试卷草稿" }),
+    ).toHaveAttribute(
+      "href",
+      "/content/papers?paperPublicId=formal_paper_public_reviewed",
+    );
+  });
+
+  it("keeps content admin adoption detail entry disabled until the formal draft target exists", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Response.json(
+          createSessionResponse({ adminRoles: ["content_admin"] }),
+        );
+      }
+
+      if (
+        isAdminAiGenerationHistoryRequest(
+          url,
+          "/api/v1/content-ai-generation-requests",
+          init,
+        )
+      ) {
+        return Response.json(
+          createTaskHistoryResponse({
+            workspace: "content",
+            generationKind: "question",
+            generatedResult: {
+              resultPublicId:
+                "admin_ai_generation_result_content_question_approved_waiting",
+              contentPreviewMasked:
+                "redacted generated result summary for approved history",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              formalAdoptionStatus: "approved_for_formal_adoption",
+              formalTargetWriteStatus: null,
+              formalQuestionPublicId: null,
+              formalAdoptionReviewedAt: "2026-06-26T21:20:00.000Z",
+            },
+          }),
+        );
+      }
+
+      throw new Error(`Unexpected fetch: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(AdminAiGenerationEntryPage, {
+        workspace: "content",
+        generationKind: "question",
+      }),
+    );
+
+    const traceabilityPanel = await screen.findByTestId(
+      "content-admin-review-traceability",
+    );
+
+    expect(traceabilityPanel).toHaveTextContent("已审核待创建草稿");
+    expect(traceabilityPanel).toHaveTextContent("草稿创建后显示详情入口");
+    expect(screen.queryByRole("link", { name: "查看待审题目草稿" })).toBeNull();
   });
 
   it("submits content admin current paper review adoption with selected platform formal questions", async () => {

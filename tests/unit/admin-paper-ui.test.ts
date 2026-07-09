@@ -467,6 +467,26 @@ describe("AdminPaperManagement", () => {
     );
   });
 
+  it("opens a paper draft management entry from a public id query target", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockPaperFetch();
+
+    render(
+      createElement(AdminPaperManagement, {
+        initialPaperPublicId: "paper-logistics-2026-practice",
+      }),
+    );
+
+    expect(
+      await screen.findByText(
+        "已定位待审试卷草稿 paper-logistics-2026-practice",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("paper-row-paper-logistics-2026-practice"),
+    ).toHaveAttribute("data-selected", "true");
+  });
+
   it("filters papers by keyword, status, level, year, subject, and type", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockPaperFetch();

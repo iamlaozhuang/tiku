@@ -93,6 +93,7 @@ type ContentLoadState =
 export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
   initialKnowledgeNodeFilter?: string;
+  initialQuestionPublicId?: string;
 };
 
 type QuestionFormValues = {
@@ -656,8 +657,11 @@ function upsertByPublicId<TItem extends { publicId: string }>(
 export function AdminQuestionMaterialManagement({
   defaultView = "questions",
   initialKnowledgeNodeFilter = "",
+  initialQuestionPublicId = "",
 }: AdminQuestionMaterialManagementProps) {
-  const [activeView, setActiveView] = useState<ViewMode>(defaultView);
+  const [activeView, setActiveView] = useState<ViewMode>(
+    initialQuestionPublicId.length > 0 ? "questions" : defaultView,
+  );
   const [keyword, setKeyword] = useState("");
   const [knowledgeNodeFilter, setKnowledgeNodeFilter] = useState(
     initialKnowledgeNodeFilter,
@@ -677,11 +681,61 @@ export function AdminQuestionMaterialManagement({
     useState<PendingContentAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [
+    isInitialQuestionTargetDismissed,
+    setIsInitialQuestionTargetDismissed,
+  ] = useState(false);
+  const [
     recommendationsByQuestionPublicId,
     setRecommendationsByQuestionPublicId,
   ] = useState<Record<string, KnowledgeRecommendationReviewState>>({});
   const { loadState, materials, questions, setMaterials, setQuestions } =
     useQuestionMaterialData(activeView);
+
+  const initialQuestionTarget = useMemo(() => {
+    if (
+      activeView !== "questions" ||
+      initialQuestionPublicId.length === 0 ||
+      loadState !== "ready"
+    ) {
+      return null;
+    }
+
+    return (
+      questions.find(
+        (question) => question.publicId === initialQuestionPublicId,
+      ) ?? null
+    );
+  }, [activeView, initialQuestionPublicId, loadState, questions]);
+  const initialQuestionTargetForm = useMemo<ActiveContentForm | null>(() => {
+    if (
+      initialQuestionTarget === null ||
+      isInitialQuestionTargetDismissed ||
+      activeForm !== null
+    ) {
+      return null;
+    }
+
+    return {
+      kind: "question",
+      mode: "edit",
+      publicId: initialQuestionTarget.publicId,
+      values: createQuestionFormValuesFromQuestion(initialQuestionTarget),
+    };
+  }, [activeForm, initialQuestionTarget, isInitialQuestionTargetDismissed]);
+  const displayedActiveForm = activeForm ?? initialQuestionTargetForm;
+  const initialQuestionTargetMessage =
+    initialQuestionTarget === null || isInitialQuestionTargetDismissed
+      ? null
+      : `已定位待审题目草稿 ${initialQuestionTarget.publicId}`;
+  const initialQuestionTargetError =
+    activeView === "questions" &&
+    initialQuestionPublicId.length > 0 &&
+    loadState === "ready" &&
+    initialQuestionTarget === null
+      ? `未找到待审题目草稿 ${initialQuestionPublicId}`
+      : null;
+  const displayedActionMessage = actionMessage ?? initialQuestionTargetMessage;
+  const displayedActionError = actionError ?? initialQuestionTargetError;
 
   const filteredQuestions = useMemo(
     () =>
@@ -748,9 +802,13 @@ export function AdminQuestionMaterialManagement({
     [keyword, levelFilter, materials, profession, status, subject],
   );
   const selectedQuestionPublicId =
-    activeForm?.kind === "question" ? activeForm.publicId : null;
+    displayedActiveForm?.kind === "question"
+      ? displayedActiveForm.publicId
+      : null;
   const selectedMaterialPublicId =
-    activeForm?.kind === "material" ? activeForm.publicId : null;
+    displayedActiveForm?.kind === "material"
+      ? displayedActiveForm.publicId
+      : null;
   const displayedQuestions = useMemo(
     () =>
       sortItemsByUpdatedAt(filteredQuestions, sortOrder).slice(
@@ -794,7 +852,7 @@ export function AdminQuestionMaterialManagement({
   async function handleSaveQuestion(values: QuestionFormValues) {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null || activeForm?.kind !== "question") {
+    if (sessionToken === null || displayedActiveForm?.kind !== "question") {
       setActionError("管理员会话已失效，请重新登录后再操作。");
       return;
     }
@@ -804,19 +862,19 @@ export function AdminQuestionMaterialManagement({
 
     try {
       const response = await mutateAdminApi<{ question: QuestionDto }>(
-        activeForm.mode === "create"
+        displayedActiveForm.mode === "create"
           ? "/api/v1/questions"
-          : `/api/v1/questions/${activeForm.publicId}`,
+          : `/api/v1/questions/${displayedActiveForm.publicId}`,
         sessionToken,
-        activeForm.mode === "create" ? "POST" : "PATCH",
+        displayedActiveForm.mode === "create" ? "POST" : "PATCH",
         (() => {
-          if (activeForm.mode === "create") {
+          if (displayedActiveForm.mode === "create") {
             return createQuestionInput(values);
           }
 
           const currentQuestion =
             questions.find(
-              (question) => question.publicId === activeForm.publicId,
+              (question) => question.publicId === displayedActiveForm.publicId,
             ) ?? null;
 
           return {
@@ -843,6 +901,7 @@ export function AdminQuestionMaterialManagement({
       );
       setActionMessage(`题目 ${savedQuestion.publicId} 已保存`);
       setActiveForm(null);
+      setIsInitialQuestionTargetDismissed(true);
     } catch {
       setActionError("题目保存失败，请刷新后重试。");
     } finally {
@@ -853,7 +912,7 @@ export function AdminQuestionMaterialManagement({
   async function handleSaveMaterial(values: MaterialFormValues) {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null || activeForm?.kind !== "material") {
+    if (sessionToken === null || displayedActiveForm?.kind !== "material") {
       setActionError("管理员会话已失效，请重新登录后再操作。");
       return;
     }
@@ -863,12 +922,12 @@ export function AdminQuestionMaterialManagement({
 
     try {
       const response = await mutateAdminApi<{ material: MaterialDto }>(
-        activeForm.mode === "create"
+        displayedActiveForm.mode === "create"
           ? "/api/v1/materials"
-          : `/api/v1/materials/${activeForm.publicId}`,
+          : `/api/v1/materials/${displayedActiveForm.publicId}`,
         sessionToken,
-        activeForm.mode === "create" ? "POST" : "PATCH",
-        activeForm.mode === "create"
+        displayedActiveForm.mode === "create" ? "POST" : "PATCH",
+        displayedActiveForm.mode === "create"
           ? createMaterialInput(values)
           : {
               ...createMaterialInput(values),
@@ -1162,14 +1221,14 @@ export function AdminQuestionMaterialManagement({
         }
       />
 
-      {actionMessage === null ? null : (
+      {displayedActionMessage === null ? null : (
         <p className="text-brand-primary text-sm" role="status">
-          {actionMessage}
+          {displayedActionMessage}
         </p>
       )}
-      {actionError === null ? null : (
+      {displayedActionError === null ? null : (
         <p className="text-destructive text-sm" role="alert">
-          {actionError}
+          {displayedActionError}
         </p>
       )}
 
@@ -1193,7 +1252,10 @@ export function AdminQuestionMaterialManagement({
           className={tabClassName(activeView === "materials")}
           role="tab"
           type="button"
-          onClick={() => setActiveView("materials")}
+          onClick={() => {
+            setIsInitialQuestionTargetDismissed(true);
+            setActiveView("materials");
+          }}
         >
           <FileText aria-hidden="true" className="size-4" />
           材料
@@ -1202,7 +1264,7 @@ export function AdminQuestionMaterialManagement({
 
       <div
         className={
-          activeForm === null
+          displayedActiveForm === null
             ? "grid gap-4"
             : "grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)]"
         }
@@ -1222,6 +1284,7 @@ export function AdminQuestionMaterialManagement({
               onEdit={(question) => {
                 setActionError(null);
                 setActionMessage(null);
+                setIsInitialQuestionTargetDismissed(true);
                 setActiveForm({
                   kind: "question",
                   mode: "edit",
@@ -1245,6 +1308,7 @@ export function AdminQuestionMaterialManagement({
               onEdit={(material) => {
                 setActionError(null);
                 setActionMessage(null);
+                setIsInitialQuestionTargetDismissed(true);
                 setActiveForm({
                   kind: "material",
                   mode: "edit",
@@ -1255,7 +1319,7 @@ export function AdminQuestionMaterialManagement({
             />
           )}
         </div>
-        {activeForm === null ? null : (
+        {displayedActiveForm === null ? null : (
           <aside
             className="min-w-0 xl:sticky xl:top-4 xl:self-start"
             data-testid="content-edit-context-panel"
@@ -1265,29 +1329,39 @@ export function AdminQuestionMaterialManagement({
                 className="text-text-primary text-sm font-semibold"
                 data-testid="content-edit-context-label"
               >
-                {activeForm.mode === "create" ? "新建" : "编辑"}
-                {activeForm.kind === "question" ? "题目" : "材料"}
+                {displayedActiveForm.mode === "create" ? "新建" : "编辑"}
+                {displayedActiveForm.kind === "question" ? "题目" : "材料"}
               </p>
               <p className="text-text-muted text-xs">
-                {activeForm.publicId ?? "新建本地草稿"}
+                {displayedActiveForm.publicId ?? "新建本地草稿"}
               </p>
             </div>
-            {activeForm.kind === "question" ? (
+            {displayedActiveForm.kind === "question" ? (
               <QuestionWriteForm
                 isSubmitting={isSubmitting}
-                key={`${activeForm.mode}-${activeForm.publicId ?? "new"}`}
-                mode={activeForm.mode}
-                values={activeForm.values}
-                onCancel={() => setActiveForm(null)}
+                key={`${displayedActiveForm.mode}-${
+                  displayedActiveForm.publicId ?? "new"
+                }`}
+                mode={displayedActiveForm.mode}
+                values={displayedActiveForm.values}
+                onCancel={() => {
+                  setActiveForm(null);
+                  setIsInitialQuestionTargetDismissed(true);
+                }}
                 onSubmit={handleSaveQuestion}
               />
             ) : (
               <MaterialWriteForm
                 isSubmitting={isSubmitting}
-                key={`${activeForm.mode}-${activeForm.publicId ?? "new"}`}
-                mode={activeForm.mode}
-                values={activeForm.values}
-                onCancel={() => setActiveForm(null)}
+                key={`${displayedActiveForm.mode}-${
+                  displayedActiveForm.publicId ?? "new"
+                }`}
+                mode={displayedActiveForm.mode}
+                values={displayedActiveForm.values}
+                onCancel={() => {
+                  setActiveForm(null);
+                  setIsInitialQuestionTargetDismissed(true);
+                }}
                 onSubmit={handleSaveMaterial}
               />
             )}

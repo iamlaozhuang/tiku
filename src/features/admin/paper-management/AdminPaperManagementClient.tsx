@@ -114,7 +114,9 @@ type PaperListDto = {
   papers: AdminPaperOpsSummaryDto[];
 };
 
-export type AdminPaperManagementProps = Record<string, never>;
+export type AdminPaperManagementProps = {
+  initialPaperPublicId?: string;
+};
 
 const paperStatusLabels: Record<PaperStatus, string> = {
   archived: "已下架",
@@ -487,8 +489,10 @@ function createPaperAssetFormData(values: PaperAssetFormValues) {
   return formData;
 }
 
-export function AdminPaperManagement() {
-  const [keyword, setKeyword] = useState("");
+export function AdminPaperManagement({
+  initialPaperPublicId = "",
+}: AdminPaperManagementProps) {
+  const [keyword, setKeyword] = useState(initialPaperPublicId);
   const [levelFilter, setLevelFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
@@ -504,6 +508,29 @@ export function AdminPaperManagement() {
     useState<PendingPaperAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { loadState, papers, setPapers } = usePaperData();
+
+  const initialPaperTarget = useMemo(() => {
+    if (initialPaperPublicId.length === 0 || loadState !== "ready") {
+      return null;
+    }
+
+    return (
+      papers.find((paper) => paper.publicId === initialPaperPublicId) ?? null
+    );
+  }, [initialPaperPublicId, loadState, papers]);
+  const initialPaperTargetMessage =
+    initialPaperTarget === null
+      ? null
+      : `已定位待审试卷草稿 ${initialPaperTarget.publicId}`;
+  const initialPaperTargetError =
+    initialPaperPublicId.length > 0 &&
+    loadState === "ready" &&
+    initialPaperTarget === null
+      ? `未找到待审试卷草稿 ${initialPaperPublicId}`
+      : null;
+  const displayedActionMessage = actionMessage ?? initialPaperTargetMessage;
+  const displayedActionError = actionError ?? initialPaperTargetError;
+  const selectedPaperPublicId = initialPaperTarget?.publicId ?? null;
 
   const filteredPapers = useMemo(
     () =>
@@ -877,14 +904,14 @@ export function AdminPaperManagement() {
 
       <SummaryRail rows={displayedPapers} />
 
-      {actionMessage === null ? null : (
+      {displayedActionMessage === null ? null : (
         <p className="text-brand-primary text-sm" role="status">
-          {actionMessage}
+          {displayedActionMessage}
         </p>
       )}
-      {actionError === null ? null : (
+      {displayedActionError === null ? null : (
         <p className="text-destructive text-sm" role="alert">
-          {actionError}
+          {displayedActionError}
         </p>
       )}
 
@@ -919,6 +946,7 @@ export function AdminPaperManagement() {
       {filteredPapers.length > 0 ? (
         <PaperList
           rows={displayedPapers}
+          selectedPublicId={selectedPaperPublicId}
           onArchive={(publicId) =>
             setPendingPaperAction({ kind: "archive", publicId })
           }
@@ -1665,6 +1693,7 @@ function LifecycleMetric({ label, value }: { label: string; value: number }) {
 
 function PaperList({
   rows,
+  selectedPublicId,
   onArchive,
   onBindAsset,
   onCompose,
@@ -1672,6 +1701,7 @@ function PaperList({
   onPublish,
 }: {
   rows: AdminPaperOpsSummaryDto[];
+  selectedPublicId: string | null;
   onArchive: (publicId: string) => void;
   onBindAsset: (publicId: string) => void;
   onCompose: (publicId: string) => void;
@@ -1684,14 +1714,20 @@ function PaperList({
         const isDraft = paper.paperStatus === "draft";
         const isPublished = paper.paperStatus === "published";
         const canCopy = paper.paperStatus !== "draft";
+        const isSelected = paper.publicId === selectedPublicId;
         const questionCountFeedback = createPaperQuestionCountFeedback(paper);
         const questionTypeDistributionFeedback =
           createPaperQuestionTypeDistributionFeedback(paper);
 
         return (
           <article
-            className="bg-surface border-border rounded-md border p-4 shadow-sm"
+            className={
+              isSelected
+                ? "bg-surface border-brand-primary rounded-md border p-4 shadow-sm"
+                : "bg-surface border-border rounded-md border p-4 shadow-sm"
+            }
             data-public-id={paper.publicId}
+            data-selected={isSelected ? "true" : undefined}
             data-testid={`paper-row-${paper.publicId}`}
             key={paper.publicId}
           >

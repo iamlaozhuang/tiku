@@ -352,6 +352,69 @@ function getFormalAdoptionStatusLabel(
   return labels[status];
 }
 
+function getContentFormalDraftDetailEntry({
+  generationKind,
+  generatedResult,
+}: {
+  generationKind: AdminAiGenerationKind;
+  generatedResult: AdminAiGenerationTaskHistoryGeneratedResultDto;
+}): {
+  href: string | null;
+  label: string;
+  note: string;
+} {
+  const draftTargetLabel =
+    generationKind === "paper" ? "待审试卷草稿" : "待审题目草稿";
+
+  if (generatedResult.formalAdoptionStatus === "draft_created") {
+    const targetPublicId =
+      generationKind === "paper"
+        ? generatedResult.formalPaperPublicId
+        : generatedResult.formalQuestionPublicId;
+
+    if (targetPublicId !== null) {
+      const queryKey =
+        generationKind === "paper" ? "paperPublicId" : "questionPublicId";
+      const routePath =
+        generationKind === "paper" ? "/content/papers" : "/content/questions";
+
+      return {
+        href: `${routePath}?${queryKey}=${encodeURIComponent(targetPublicId)}`,
+        label: `查看${draftTargetLabel}`,
+        note: "已创建，可进入正式内容草稿详情",
+      };
+    }
+
+    return {
+      href: null,
+      label: `查看${draftTargetLabel}`,
+      note: "草稿记录暂未返回，请刷新正式内容列表",
+    };
+  }
+
+  if (generatedResult.formalAdoptionStatus === "approved_for_formal_adoption") {
+    return {
+      href: null,
+      label: `查看${draftTargetLabel}`,
+      note: "草稿创建后显示详情入口",
+    };
+  }
+
+  if (generatedResult.formalAdoptionStatus === "rejected") {
+    return {
+      href: null,
+      label: `查看${draftTargetLabel}`,
+      note: "已驳回，未创建待审草稿",
+    };
+  }
+
+  return {
+    href: null,
+    label: `查看${draftTargetLabel}`,
+    note: "通过评审并创建草稿后显示详情入口",
+  };
+}
+
 function getOrganizationDraftUsageStatusLabel(
   status: AdminAiGenerationTaskHistoryGeneratedResultDto["formalAdoptionStatus"],
 ): string {
@@ -2665,6 +2728,10 @@ function ContentAdminReviewTraceabilityPanel({
     generationKind === "paper"
       ? ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"]
       : ["编辑草稿", "驳回草稿", "采用到内容草稿", "进入发布校验"];
+  const formalDraftDetailEntry = getContentFormalDraftDetailEntry({
+    generationKind,
+    generatedResult,
+  });
 
   return (
     <section
@@ -2765,6 +2832,32 @@ function ContentAdminReviewTraceabilityPanel({
             {actionLabel}
           </span>
         ))}
+      </div>
+
+      <div
+        className="border-border bg-muted/40 mt-3 rounded-md border p-3"
+        data-testid="content-admin-formal-draft-detail-entry"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-brand-primary text-xs font-medium">草稿详情</p>
+            <p className="text-text-secondary mt-1 text-xs">
+              {formalDraftDetailEntry.note}
+            </p>
+          </div>
+          {formalDraftDetailEntry.href === null ? (
+            <span className="bg-muted text-text-secondary inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium">
+              {formalDraftDetailEntry.label}
+            </span>
+          ) : (
+            <a
+              className="border-border text-text-primary inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition-transform active:scale-[0.98]"
+              href={formalDraftDetailEntry.href}
+            >
+              {formalDraftDetailEntry.label}
+            </a>
+          )}
+        </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">

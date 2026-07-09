@@ -617,6 +617,27 @@ describe("AdminQuestionMaterialManagement", () => {
     );
   });
 
+  it("opens a question draft edit entry from a public id query target", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        initialQuestionPublicId: "question-marketing-001",
+      }),
+    );
+
+    expect(
+      await screen.findByText("已定位待审题目草稿 question-marketing-001"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("content-edit-context-label")).toHaveTextContent(
+      "编辑题目",
+    );
+    expect(screen.getByTestId("content-edit-context-panel")).toHaveTextContent(
+      "question-marketing-001",
+    );
+  });
+
   it("keeps baseline question and material tabs on the approved active press feedback", () => {
     render(createElement(AdminQuestionMaterialManagementBaseline));
 
