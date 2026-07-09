@@ -328,6 +328,20 @@ function createPaperPlanProviderContent(questionCount: number) {
   });
 }
 
+function createQuestionSetProviderContent(questionCount: number) {
+  return JSON.stringify({
+    questions: Array.from({ length: questionCount }, (_, index) => ({
+      questionType: "single_choice",
+      difficulty: "medium",
+      knowledgeNodeLabels: ["redacted knowledge node"],
+      stem: `redacted stem ${index + 1}`,
+      options: ["A", "B", "C", "D"],
+      answer: "A",
+      analysis: "redacted analysis",
+    })),
+  });
+}
+
 function createAssembledPaperRouteResult(
   input: {
     role: "personal_advanced_student" | "org_advanced_employee";
@@ -1550,13 +1564,7 @@ describe("personal AI generation request route handlers", () => {
               },
               providerErrorSummary: null,
               visibleGeneratedContent: {
-                content: JSON.stringify({
-                  questions: Array.from({ length: 10 }, (_, index) => ({
-                    stem: `redacted stem ${index + 1}`,
-                    options: ["A", "B", "C", "D"],
-                    answer: "A",
-                  })),
-                }),
+                content: createQuestionSetProviderContent(10),
                 contentVisibility: "transient_response_only",
                 persistenceStatus: "not_persisted",
                 safetyStatus: "checked",
@@ -2179,13 +2187,7 @@ describe("personal AI generation request route handlers", () => {
               usageSummary: null,
               providerErrorSummary: null,
               visibleGeneratedContent: {
-                content: JSON.stringify({
-                  questions: Array.from({ length: 10 }, (_, index) => ({
-                    stem: `redacted stem ${index + 1}`,
-                    options: ["A", "B", "C", "D"],
-                    answer: "A",
-                  })),
-                }),
+                content: createQuestionSetProviderContent(10),
                 contentVisibility: "transient_response_only",
                 persistenceStatus: "not_persisted",
                 safetyStatus: "checked",

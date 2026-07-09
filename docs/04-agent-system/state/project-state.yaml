@@ -1,8 +1,40 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: org-ai-paper-to-training-draft-2026-07-08
-updatedAt: "2026-07-08T21:05:00-07:00"
+currentPhase: personal-ai-question-result-fixture-contract-2026-07-08
+updatedAt: "2026-07-08T21:35:00-07:00"
+latestPersonalAiQuestionResultFixtureContract:
+  id: personal-ai-question-result-fixture-contract-2026-07-08
+  status: ready_for_closeout
+  result: pass_source_test_precommit_prepush_ready_for_commit_merge_push_cleanup
+  branch: codex/personal-ai-question-result-fixture-contract
+  planPath: docs/05-execution-logs/task-plans/2026-07-08-personal-ai-question-result-fixture-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-08-personal-ai-question-result-fixture-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-personal-ai-question-result-fixture-contract-audit.md
+  approvalBoundary: current_user_approved_five_stage_org_ai_training_loop_contract_to_regression_2026_07_08
+  boundary:
+    scope: personal_ai_question_route_unit_fixture_contract_alignment_only
+    dbMutationExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    dependencyPackageLockfileChanged: false
+    schemaMigrationSeedExecuted: false
+    productionCodeChanged: false
+  validationSummary:
+    status: pass_source_test_precommit_prepush_ready_for_commit_merge_push_cleanup
+    discoveredDuring: org_ai_training_loop_regression_stage5
+    rootCause: stale_unit_fixture_missing_current_question_set_contract_fields
+    targetedPersonalAiRequestRouteUnit: pass_1_file_36_tests
+    targetedLearnerRoleRegressionUnit: pass_5_files_77_tests
+    lint: pass
+    typecheck: pass
+    prettierWrite: pass_scoped_unchanged
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    sourceCodeChanged: false
+    testsChanged: true
+    productionCodeChanged: false
 latestOrgAiPaperToTrainingDraft:
   id: org-ai-paper-to-training-draft-2026-07-08
   status: ready_for_closeout
@@ -1648,9 +1680,9 @@ latestPostRecontractAcceptanceConsolidation:
     masterPostMergeTypecheck: pass
     masterPostMergeFullUnit: pass_342_files_1722_tests
 currentTask:
-  id: org-ai-paper-to-training-draft-2026-07-08
-  title: Organization AI paper result to training paper draft
-  phase: org-ai-paper-to-training-draft-2026-07-08
+  id: personal-ai-question-result-fixture-contract-2026-07-08
+  title: Personal AI question route test fixture contract alignment
+  phase: personal-ai-question-result-fixture-contract-2026-07-08
   status: ready_for_closeout
   result: pass_source_test_precommit_ready_for_commit_merge_push_cleanup
   priority: p1
@@ -32377,8 +32409,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a9cf6b02c45cf63ee68a01f0b6c6e8aac55203da
-  lastKnownOriginMasterSha: ae38ed77a8a5b0219645ae9caec5d1d789775143
+  lastKnownMasterSha: decedb02a75779d6db6202dfe1da9f2d3e424be6
+  lastKnownOriginMasterSha: decedb02a75779d6db6202dfe1da9f2d3e424be6
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
