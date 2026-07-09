@@ -103,6 +103,10 @@ export type ContentMutationContext = {
   actorPublicId: string;
 };
 
+export type QuestionCreateOptions = {
+  initialStatus?: QuestionStatus;
+};
+
 export type QuestionRepository = {
   listQuestions(
     query: NormalizedQuestionListInput,
@@ -110,6 +114,7 @@ export type QuestionRepository = {
   createQuestion(
     input: NormalizedCreateQuestionInput,
     context?: ContentMutationContext,
+    options?: QuestionCreateOptions,
   ): Promise<QuestionAccessRow>;
   findQuestionByPublicId(publicId: string): Promise<QuestionAccessRow | null>;
   updateQuestion(
@@ -177,7 +182,7 @@ export function createPostgresQuestionRepository(
       };
     },
 
-    async createQuestion(input, context) {
+    async createQuestion(input, context, options) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
       const materialId = await resolveMaterialId(
@@ -199,6 +204,7 @@ export function createPostgresQuestionRepository(
             question_type: input.questionType,
             scoring_method: input.scoringMethod,
             fill_blank_answers: input.fillBlankAnswers,
+            status: options?.initialStatus ?? "available",
             standard_answer_rich_text: input.standardAnswerRichText,
             stem_rich_text: input.stemRichText,
             subject: input.subject,

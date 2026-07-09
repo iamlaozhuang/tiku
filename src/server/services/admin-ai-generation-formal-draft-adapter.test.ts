@@ -262,6 +262,9 @@ describe("admin AI generation formal draft adapter service", () => {
       {
         actorPublicId: "admin_content_public_377",
       },
+      {
+        initialStatus: "disabled",
+      },
     );
     expect(paperWriter.createPaper).not.toHaveBeenCalled();
     expect(response).toEqual({
@@ -560,6 +563,9 @@ describe("admin AI generation formal draft adapter service", () => {
       }),
       {
         actorPublicId: "admin_content_public_current_route_377",
+      },
+      {
+        initialStatus: "disabled",
       },
     );
     expect(paperWriter.createPaper).not.toHaveBeenCalled();

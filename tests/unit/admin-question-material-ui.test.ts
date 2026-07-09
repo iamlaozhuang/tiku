@@ -638,6 +638,46 @@ describe("AdminQuestionMaterialManagement", () => {
     );
   });
 
+  it("publishes a disabled AI question draft opened from a public id query target", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch([
+      {
+        ...questionPayload.data[0],
+        status: "disabled",
+      },
+    ]);
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        initialQuestionPublicId: "question-marketing-001",
+      }),
+    );
+
+    expect(
+      await screen.findByText("已定位待审题目草稿 question-marketing-001"),
+    ).toBeInTheDocument();
+    const questionForm = within(
+      screen.getByTestId("content-edit-context-panel"),
+    );
+
+    fireEvent.click(
+      questionForm.getByRole("button", { name: "发布为正式题目" }),
+    );
+
+    expect(
+      await screen.findByText("题目 question-marketing-001 已发布为正式题目"),
+    ).toBeInTheDocument();
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/questions/question-marketing-001",
+        "PATCH",
+      ),
+    ).toMatchObject({
+      status: "available",
+    });
+  });
+
   it("keeps baseline question and material tabs on the approved active press feedback", () => {
     render(createElement(AdminQuestionMaterialManagementBaseline));
 

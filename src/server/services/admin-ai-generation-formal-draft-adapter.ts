@@ -520,6 +520,7 @@ export function createAdminAiGenerationFormalDraftAdapterService(
         const writerResponse = await writers.questionWriter.createQuestion(
           sanitizeQuestionDraftPayload(input.reviewedDraft),
           resolveWriterContext(input),
+          { initialStatus: "disabled" },
         );
         const questionPublicId = writerResponse.data?.question.publicId ?? null;
 

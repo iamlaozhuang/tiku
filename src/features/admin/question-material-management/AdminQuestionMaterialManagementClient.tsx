@@ -723,6 +723,13 @@ export function AdminQuestionMaterialManagement({
     };
   }, [activeForm, initialQuestionTarget, isInitialQuestionTargetDismissed]);
   const displayedActiveForm = activeForm ?? initialQuestionTargetForm;
+  const isInitialQuestionTargetPublish =
+    initialQuestionTarget !== null &&
+    displayedActiveForm?.kind === "question" &&
+    displayedActiveForm.mode === "edit" &&
+    displayedActiveForm.publicId === initialQuestionTarget.publicId &&
+    initialQuestionTarget.status === "disabled" &&
+    !isInitialQuestionTargetDismissed;
   const initialQuestionTargetMessage =
     initialQuestionTarget === null || isInitialQuestionTargetDismissed
       ? null
@@ -851,6 +858,7 @@ export function AdminQuestionMaterialManagement({
 
   async function handleSaveQuestion(values: QuestionFormValues) {
     const sessionToken = getStoredSessionToken();
+    const shouldPublishInitialQuestionTarget = isInitialQuestionTargetPublish;
 
     if (sessionToken === null || displayedActiveForm?.kind !== "question") {
       setActionError("管理员会话已失效，请重新登录后再操作。");
@@ -899,7 +907,11 @@ export function AdminQuestionMaterialManagement({
       setQuestions((currentQuestions) =>
         upsertByPublicId(currentQuestions, savedQuestion),
       );
-      setActionMessage(`题目 ${savedQuestion.publicId} 已保存`);
+      setActionMessage(
+        shouldPublishInitialQuestionTarget
+          ? `题目 ${savedQuestion.publicId} 已发布为正式题目`
+          : `题目 ${savedQuestion.publicId} 已保存`,
+      );
       setActiveForm(null);
       setIsInitialQuestionTargetDismissed(true);
     } catch {
@@ -1343,6 +1355,9 @@ export function AdminQuestionMaterialManagement({
                   displayedActiveForm.publicId ?? "new"
                 }`}
                 mode={displayedActiveForm.mode}
+                submitLabel={
+                  isInitialQuestionTargetPublish ? "发布为正式题目" : "保存题目"
+                }
                 values={displayedActiveForm.values}
                 onCancel={() => {
                   setActiveForm(null);
@@ -1551,12 +1566,14 @@ function ActionBar({
 function QuestionWriteForm({
   isSubmitting,
   mode,
+  submitLabel = "保存题目",
   values,
   onCancel,
   onSubmit,
 }: {
   isSubmitting: boolean;
   mode: QuestionFormMode;
+  submitLabel?: string;
   values: QuestionFormValues;
   onCancel: () => void;
   onSubmit: (values: QuestionFormValues) => void;
@@ -1943,7 +1960,7 @@ function QuestionWriteForm({
       )}
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting || isFormInvalid} type="submit">
-          保存题目
+          {submitLabel}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           取消

@@ -16,6 +16,7 @@ import type {
   ContentMutationContext,
   QuestionRepository,
 } from "../repositories/question-repository";
+import type { QuestionStatus } from "../models/paper";
 import {
   normalizeCreateQuestionInput,
   normalizeQuestionListInput,
@@ -28,6 +29,7 @@ export type QuestionService = {
   ): Promise<ApiResponse<QuestionDto[] | null>>;
   createQuestion(
     input: unknown,
+    options?: QuestionCreationOptions,
   ): Promise<ApiResponse<QuestionResultDto | null>>;
   getQuestion(publicId: string): Promise<ApiResponse<QuestionResultDto | null>>;
   updateQuestion(
@@ -40,6 +42,10 @@ export type QuestionService = {
   copyQuestion(
     publicId: string,
   ): Promise<ApiResponse<QuestionResultDto | null>>;
+};
+
+export type QuestionCreationOptions = {
+  initialStatus?: QuestionStatus;
 };
 
 export type QuestionServiceOptions = {
@@ -87,7 +93,7 @@ export function createQuestionService(
       );
     },
 
-    async createQuestion(input) {
+    async createQuestion(input, createOptions) {
       const questionInput = normalizeCreateQuestionInput(input);
 
       if (!questionInput.success) {
@@ -97,6 +103,7 @@ export function createQuestionService(
       const question = await questionRepository.createQuestion(
         questionInput.value,
         options.mutationContext,
+        createOptions,
       );
 
       return createSuccessResponse(mapQuestionResultToApi(question));

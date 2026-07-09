@@ -9,6 +9,7 @@ import type {
   MultiChoiceRule,
   PaperType,
   Profession,
+  QuestionStatus,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -106,10 +107,15 @@ export type AdminAiGenerationFormalDraftWriterContext = {
   actorPublicId: string;
 };
 
+export type AdminAiGenerationFormalDraftQuestionCreationOptions = {
+  initialStatus?: QuestionStatus;
+};
+
 export type AdminAiGenerationFormalDraftQuestionWriter = {
   createQuestion(
     input: AdminAiGenerationFormalQuestionDraftPayload,
     context: AdminAiGenerationFormalDraftWriterContext,
+    options?: AdminAiGenerationFormalDraftQuestionCreationOptions,
   ): Promise<ApiResponse<QuestionResultDto | null>>;
 };
 

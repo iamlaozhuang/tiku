@@ -380,6 +380,81 @@ describe("question service", () => {
     });
   });
 
+  it("passes an explicit initial status for internal draft creation while normal creation defaults to available", async () => {
+    const createdCalls: Array<{ options: unknown }> = [];
+    const service = createQuestionService(
+      createRepository({
+        async createQuestion(input, _context, options) {
+          createdCalls.push({ options });
+
+          return createQuestion({
+            question_type: input.questionType,
+            profession: input.profession,
+            level: input.level,
+            subject: input.subject,
+            stem_rich_text: input.stemRichText,
+            analysis_rich_text: input.analysisRichText,
+            standard_answer_rich_text: input.standardAnswerRichText,
+            multi_choice_rule: input.multiChoiceRule,
+            scoring_method: input.scoringMethod,
+            fill_blank_answers: input.fillBlankAnswers,
+            material_public_id: input.materialPublicId,
+            knowledge_node_public_ids: input.knowledgeNodePublicIds,
+            tag_public_ids: input.tagPublicIds,
+            status: options?.initialStatus ?? "available",
+          });
+        },
+      }),
+    );
+    const input = {
+      questionType: "single_choice",
+      profession: "logistics",
+      level: 4,
+      subject: "theory",
+      stemRichText: "<p>Synthetic stem.</p>",
+      analysisRichText: "<p>Synthetic analysis.</p>",
+      standardAnswerRichText: "<p>A</p>",
+      multiChoiceRule: "all_correct_only",
+      scoringMethod: "auto_match",
+      materialPublicId: null,
+      questionOptions: [
+        {
+          label: "A",
+          contentRichText: "<p>Synthetic option.</p>",
+          isCorrect: true,
+          sortOrder: 1,
+        },
+      ],
+      scoringPoints: [],
+      knowledgeNodePublicIds: [],
+      tagPublicIds: [],
+    };
+
+    await expect(service.createQuestion(input)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        question: {
+          status: "available",
+        },
+      },
+    });
+    await expect(
+      service.createQuestion(input, { initialStatus: "disabled" }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        question: {
+          status: "disabled",
+        },
+      },
+    });
+
+    expect(createdCalls).toEqual([
+      { options: undefined },
+      { options: { initialStatus: "disabled" } },
+    ]);
+  });
+
   it.each(["case_analysis", "calculation"] as const)(
     "creates %s as a subjective question without options",
     async (questionType) => {

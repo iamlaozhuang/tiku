@@ -101,10 +101,10 @@ function createDefaultFormalDraftAdapter(): AdminAiGenerationFormalDraftAdapterS
         ),
     },
     questionWriter: {
-      createQuestion: (input, context) =>
+      createQuestion: (input, context, options) =>
         createQuestionService(questionRepository, {
           mutationContext: context,
-        }).createQuestion(input),
+        }).createQuestion(input, options),
     },
   });
 }
