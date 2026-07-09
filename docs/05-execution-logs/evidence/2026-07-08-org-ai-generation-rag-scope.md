@@ -129,6 +129,14 @@ git diff --check
 
 Status: pass on `master` after fast-forward merge.
 
+Command:
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId org-ai-generation-rag-scope-2026-07-08 -SkipRemoteAheadCheck
+```
+
+Status: pass.
+
 ## Boundary Evidence
 
 - Provider call executed: no.

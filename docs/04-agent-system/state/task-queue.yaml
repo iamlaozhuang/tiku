@@ -100,7 +100,7 @@ activeTasks:
     title: Organization admin AI generation RAG scope resolution
     phase: org-ai-generation-rag-scope-2026-07-08
     status: ready_for_closeout
-    result: pass_master_gates_ready_for_push_cleanup
+    result: pass_master_gates_prepush_ready_for_push_cleanup
     priority: p1
     taskKind: implementation
     executionProfile: local_source_targeted_unit_no_provider_no_db
@@ -118,7 +118,7 @@ activeTasks:
     evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-rag-scope.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-generation-rag-scope-audit.md
     validationSummary:
-      status: pass_master_gates_ready_for_push_cleanup
+      status: pass_master_gates_prepush_ready_for_push_cleanup
       redTargetedRagScopeTests: pass_expected_scope_failures_before_implementation
       targetedOwnerPreviewAndRagResourceUnit: pass_2_files_13_tests
       targetedAdjacentAiGenerationUnit: pass_4_files_77_tests
@@ -131,7 +131,7 @@ activeTasks:
       masterPostMergeLint: pass
       masterPostMergeTypecheck: pass
       masterPostMergeDiffCheck: pass
-      prePushReadiness: pending_after_master_post_merge_gate
+      prePushReadiness: pass_skip_remote_ahead_check
       sourceCodeChanged: true
       testsChanged: true
     allowedFiles:
