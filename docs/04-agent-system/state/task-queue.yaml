@@ -99,8 +99,8 @@ activeTasks:
   - id: content-ai-local-e2e-regression-2026-07-09
     title: Content AI local e2e regression
     phase: content-ai-local-e2e-regression-2026-07-09
-    status: ready_for_closeout
-    result: pass_bounded_source_regression_readonly_localhost_role_boundary_ready_for_commit_merge_push_cleanup
+    status: closed
+    result: pass_bounded_source_regression_readonly_localhost_role_boundary_master_gates_ready_for_push_cleanup
     priority: p1
     taskKind: local_acceptance_regression
     executionProfile: local_source_and_localhost_acceptance_no_provider_no_db
@@ -219,8 +219,21 @@ activeTasks:
       browserWriteActions: not_executed_db_target_not_confirmed
       dbAccessOrMutation: not_executed
       providerExecution: not_executed
+      masterPostMergeContentAiUiAndFormalContentRegression: pass_3_files_80_tests
+      masterPostMergeContentAiFormalDraftAndPaperServiceRegression: pass_4_files_67_tests
+      masterPostMergePersonalLearnerAiRegression: pass_4_files_96_tests
+      masterPostMergeOrganizationTrainingAndRoleNavigationRegression: pass_6_files_119_tests
+      masterPostMergeTypecheck: pass
+      masterPostMergeLint: pass
+      masterPostMergeDiffCheck: pass
       dependencyOrLockfileChange: false
       schemaMigrationSeedChanged: false
+    closeout:
+      mergedToMaster: true
+      pushedToOriginMaster: pending_local_closeout_push
+      shortBranchDeleted: pending_local_closeout_cleanup
+      codeCommitSha: 75b44b720
+      approvalBoundary: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
     closeoutPolicy:
       localCommit:
         approved: true

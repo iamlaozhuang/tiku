@@ -32,6 +32,13 @@
 - Lint: pass.
 - Diff check: pass.
 - Localhost read-only visible-state acceptance: pass within current content-admin session boundary.
+- Master post-merge content AI UI and formal content UI regression: pass, 3 files, 80 tests.
+- Master post-merge content AI formal draft and paper service regression: pass, 4 files, 67 tests.
+- Master post-merge personal learner AI regression: pass, 4 files, 96 tests.
+- Master post-merge organization training and role navigation regression: pass, 6 files, 119 tests.
+- Master post-merge typecheck: pass.
+- Master post-merge lint: pass.
+- Master post-merge diff check: pass.
 
 ## Verdict
 

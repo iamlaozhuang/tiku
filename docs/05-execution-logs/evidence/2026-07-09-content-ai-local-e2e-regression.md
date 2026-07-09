@@ -49,6 +49,25 @@
 - `/ai-generation`, `/organization-training`
   - Result: pass for current session boundary. Current browser session redirected to login for learner routes; no credentials were entered.
 
+## Master Post-Merge Validation
+
+- Fast-forward merge target: `master`.
+- Branch commit: `75b44b720`.
+- `corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts --reporter=dot`
+  - Result: pass, 3 files, 80 tests.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/lib/admin-ai-generation-formal-draft-payload.test.ts src/server/services/paper-draft-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts --reporter=dot`
+  - Result: pass, 4 files, 67 tests.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts --reporter=dot`
+  - Result: pass, 4 files, 96 tests.
+- `corepack pnpm@10.26.1 exec vitest run src/server/services/organization-training-route.test.ts src/server/services/organization-training-service.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts --reporter=dot`
+  - Result: pass, 6 files, 119 tests.
+- `corepack pnpm@10.26.1 run typecheck`
+  - Result: pass.
+- `corepack pnpm@10.26.1 run lint`
+  - Result: pass.
+- `git diff --check`
+  - Result: pass.
+
 ## Not Executed
 
 - Browser submit/adopt/publish/takedown actions were not executed.
