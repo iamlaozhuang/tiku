@@ -96,6 +96,136 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: content-ai-0704-final-localhost-acceptance-2026-07-09
+    title: Content AI 0704 final localhost acceptance
+    phase: content-ai-0704-final-localhost-acceptance-2026-07-09
+    status: ready_for_closeout
+    priority: p1
+    taskKind: local_acceptance
+    executionProfile: local_0704_content_ai_final_acceptance_no_provider
+    validationPolicy: redacted_runtime_probe_targeted_tests_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/content-ai-0704-final-localhost-acceptance
+    humanApprovalBoundary:
+      privateAccountInMemoryLogin: current_user_approved_process_only_0704_db_override_private_account_in_memory_login_2026_07_09
+      closeout: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      providerExecution: blocked
+      directDbAccess: blocked
+    plannedAt: "2026-07-09T08:05:00-07:00"
+    claimedAt: "2026-07-09T08:05:00-07:00"
+    validatedAt: "2026-07-09T08:25:00-07:00"
+    reviewedAt: "2026-07-09T08:25:00-07:00"
+    result: partial_bounded_localhost_acceptance_account_matrix_ready_current_fixture_history_not_full_publish_replay
+    targetClosureItem: Verify localhost 0704 content AI closed-loop acceptance after account matrix recovery without Provider or sensitive evidence.
+    behaviorBoundary: local_0704_localhost_acceptance_no_provider_no_direct_db_no_secret_output_no_screenshot_raw_dom_no_source_change_unless_fresh_defect_branch
+    evidenceMode: redacted_role_label_route_label_status_category_aggregate_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
+    planPath: docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-final-localhost-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-final-localhost-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-final-localhost-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-09-content-ai-0704-final-localhost-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-final-localhost-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-09-content-ai-0704-final-localhost-acceptance-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/03-standards/ui-code.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-localhost-write-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-local-e2e-regression.md
+      - docs/05-execution-logs/evidence/2026-07-09-content-ai-0704-account-matrix-recovery.md
+      - src/app/api/v1/**
+      - src/server/**
+      - src/features/**
+      - tests/**
+      - D:/tiku-local-private/acceptance/**
+      - D:/tiku-local-private/owner-facing-fixtures/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    capabilities:
+      localSourceChange: blocked_unless_fresh_current_code_defect_branch
+      focusedUnitTest: approved_existing_tests_only
+      browserRuntime: blocked_no_screenshot_no_raw_dom
+      devServer: use_existing_localhost_only
+      privateAccountInMemoryUse: approved_no_output
+      productLoginSessionProbe: approved_localhost_only_no_session_output
+      directDatabaseConnection: blocked
+      databaseMutation: blocked_except_normal_product_route_session_or_non_provider_acceptance_action
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/admin-ai-generation-formal-draft-adapter.test.ts src/lib/admin-ai-generation-formal-draft-payload.test.ts src/server/services/paper-draft-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/organization-training-route.test.ts src/server/services/organization-training-service.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts --reporter=dot
+      - corepack pnpm@10.26.1 lint
+      - corepack pnpm@10.26.1 typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-ai-0704-final-localhost-acceptance-2026-07-09
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-ai-0704-final-localhost-acceptance-2026-07-09 -SkipRemoteAheadCheck
+    validationSummary:
+      runtimeProbe: pass_bounded_current_fixture_history
+      accountMatrix: pass
+      contentAiQuestionLoop: blocked_current_fixture_no_formal_question_target
+      contentAiPaperLoop: blocked_current_fixture_target_paper_draft_missing_total_score
+      roleBoundary: pass
+      organizationTrainingBoundary: pass_empty_or_safe_unavailable_current_fixture
+      targetedContentAiUiAndFormalContentRegression: pass_3_files_80_tests
+      targetedContentAiFormalDraftAndPaperRegression: pass_4_files_67_tests
+      targetedPersonalLearnerAiRegression: pass_4_files_96_tests
+      targetedOrganizationTrainingAndRoleRegression: pass_6_files_119_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      scopedPrettierCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
   - id: content-ai-0704-account-matrix-recovery-2026-07-09
     title: Content AI 0704 account matrix recovery
     phase: content-ai-0704-account-matrix-recovery-2026-07-09
