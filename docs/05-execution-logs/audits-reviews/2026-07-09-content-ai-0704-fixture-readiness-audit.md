@@ -32,4 +32,5 @@
 - Source/test/package/schema/env/private files: not changed.
 - Sensitive data redaction: no private value, raw DB row, internal id, session, cookie, token, prompt, raw AI output, or full content recorded.
 - Role/data/edition boundaries: explicitly preserved.
+- Current goal status: not complete; next work remains fixture/readiness plus runtime closed-loop replay before final completion.
 - Provider/staging/prod/Cost Calibration: not executed.

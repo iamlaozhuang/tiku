@@ -99,7 +99,7 @@ activeTasks:
   - id: content-ai-0704-fixture-readiness-2026-07-09
     title: Content AI 0704 fixture readiness
     phase: content-ai-0704-fixture-readiness-2026-07-09
-    status: ready_for_closeout
+    status: closed
     priority: p1
     taskKind: readiness_planning
     executionProfile: docs_readiness_only_no_db_mutation_no_provider
@@ -175,7 +175,7 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     readinessSummary:
-      status: readiness_defined_fixture_history_gap_next_approval_required_no_source_change
+      status: readiness_defined_fixture_history_gap_next_approval_required_no_source_change_master_gates_ready_for_push_cleanup
       roleMatrix: needs_exact_runtime_sessions_for_unconfirmed_standard_and_advanced_roles
       contentAiQuestionLoop: needs_adoptable_reviewed_question_result_or_approved_local_fixture_history_refresh
       contentAiPaperLoop: needs_current_code_publishable_plan_select_paper_draft_or_approved_local_fixture_history_refresh
@@ -194,8 +194,19 @@ activeTasks:
     validationSummary:
       scopedPrettierWrite: pass
       diffCheck: pass
+      lint: pass
+      typecheck: pass
+      targetedTest: not_applicable_docs_readiness_only_no_source_or_test_change
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      masterDiffCheck: pass
+      masterPrePushReadiness: pass_skip_remote_ahead_check
+    closeout:
+      mergedToMaster: true
+      pushApproved: true
+      cleanupApproved: true
+      readinessCommitSha: 7a098f626
+      closeoutBranch: codex/content-ai-0704-fixture-readiness-closeout
     closeoutPolicy:
       localCommit:
         approved: true
