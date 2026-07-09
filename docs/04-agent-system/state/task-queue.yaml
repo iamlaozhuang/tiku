@@ -116,6 +116,7 @@ activeTasks:
     evidenceMode: redacted_code_symbol_test_status_only_no_secret_material_no_env_values_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_original_ai_payloads_no_full_question_paper_material_or_resource_content_no_screenshots_in_repo
     planPath: docs/05-execution-logs/task-plans/2026-07-08-org-ai-generation-parameter-contract.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-parameter-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-generation-parameter-contract-audit.md
     validationSummary:
       status: pass_source_test_ready_for_precommit
       targetedAdminAiGenerationUiUnit: pass_1_file_39_tests
@@ -126,8 +127,13 @@ activeTasks:
       combinedTargetedTests: pass_5_files_120_tests
       lint: pass
       typecheck: pass
+      masterPostMergeTargetedTests: pass_5_files_120_tests
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
       diffCheck: pass
       sensitiveDiffScan: pass
+      masterPostMergeDiffCheck: pass
+      prePushReadiness: pending_after_audit_and_checkpoint_update
       sourceCodeChanged: true
       testsChanged: true
     allowedFiles:
@@ -135,6 +141,7 @@ activeTasks:
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/2026-07-08-org-ai-generation-parameter-contract.md
       - docs/05-execution-logs/evidence/2026-07-08-org-ai-generation-parameter-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-07-08-org-ai-generation-parameter-contract-audit.md
       - src/features/admin/ai-generation/AdminAiGenerationEntryPage.tsx
       - src/server/contracts/ai-generation-task-spec-contract.ts
       - src/server/contracts/route-integrated-provider-execution-contract.ts
