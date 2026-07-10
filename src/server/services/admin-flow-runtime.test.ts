@@ -10,7 +10,9 @@ import { createAdminFlowRuntimeRouteHandlers } from "./admin-flow-runtime";
 const testSessionCredential = "admin_flow_test_session";
 const expectedAuthorization = `Bearer ${testSessionCredential}`;
 
-function createTestAdminContext(): AuthContextDto {
+function createTestAdminContext(
+  adminRoles: AuthContextDto["user"]["adminRoles"] = ["content_admin"],
+): AuthContextDto {
   return {
     user: {
       publicId: "test_user_public_id",
@@ -22,7 +24,7 @@ function createTestAdminContext(): AuthContextDto {
       employeePublicId: null,
       organizationPublicId: null,
       adminPublicId: "test_admin_public_id",
-      adminRoles: ["content_admin"],
+      adminRoles,
     },
     session: {
       expiresAt: "2026-07-04T21:00:00.000Z",
@@ -167,6 +169,39 @@ describe("createAdminFlowRuntimeRouteHandlers", () => {
       data: null,
     });
     expect(observedAuthorization).toBeNull();
+    expect(paperListCallCount).toBe(0);
+  });
+
+  it("denies paper collection reads for operations admins", async () => {
+    let paperListCallCount = 0;
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories: createTestRepositories(() => {
+        paperListCallCount += 1;
+      }),
+      sessionService: {
+        async getCurrentSession(): Promise<ApiResponse<AuthContextDto | null>> {
+          return {
+            code: 0,
+            message: "ok",
+            data: createTestAdminContext(["ops_admin"]),
+          };
+        },
+      },
+    });
+
+    const response = await handlers.papers.collection.GET(
+      new Request("http://localhost/api/v1/papers", {
+        headers: {
+          cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
+        },
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403641,
+      message: "Admin permission denied.",
+      data: null,
+    });
     expect(paperListCallCount).toBe(0);
   });
 });

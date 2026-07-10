@@ -666,6 +666,129 @@ activeTasks:
       typecheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_state_sha_ancestor
+  - id: 0704-paper-list-content-guard-repair-2026-07-10
+    title: 0704 paper list content guard repair
+    phase: 0704-paper-list-content-guard-repair-2026-07-10
+    status: ready_for_closeout
+    result: pass_paper_list_content_role_guard_repair
+    priority: p1
+    taskKind: source_repair
+    executionProfile: tdd_source_test_docs_state_evidence_repair_only
+    validationPolicy: tdd_targeted_vitest_prettier_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
+    dependsOn:
+      - 0704-non-ai-learning-smoke-2026-07-10
+    triggerTask: 0704-content-non-ai-publish-smoke-2026-07-10
+    branch: codex/0704-paper-list-content-guard
+    humanApprovalBoundary:
+      implementationAndCloseout: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      providerExecution: blocked
+      destructiveDbOperation: blocked
+      credentialMaterialOutput: blocked
+      screenshotRawDom: blocked
+      directDatabaseConnection: blocked
+    plannedAt: "2026-07-10T00:00:00-07:00"
+    claimedAt: "2026-07-10T00:00:00-07:00"
+    targetClosureItem: Restore content role guard for formal paper list reads discovered by Stage 4 validation.
+    behaviorBoundary: source_test_docs_state_evidence_repair_only_no_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_screenshot_no_raw_dom_no_db_connection_no_db_mutation_no_staging_prod_deploy_no_cost_calibration
+    evidenceMode: redacted_role_label_route_label_status_category_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-paper-list-content-guard-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-paper-list-content-guard-repair-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-paper-list-content-guard-repair-audit.md
+    allowedFiles:
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/services/admin-flow-runtime.test.ts
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-paper-list-content-guard-repair.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-paper-list-content-guard-repair-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-paper-list-content-guard-repair-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - src/app/api/v1/papers/route.ts
+      - src/server/services/paper-composition-lifecycle-runtime.ts
+      - tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: approved_minimal_role_guard_repair
+      testSourceChange: approved_targeted_regression_test
+      focusedUnitTest: approved_targeted_contract_smoke_only
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: blocked_not_needed_for_source_repair
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/admin-flow-runtime.test.ts
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/admin-flow-runtime.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts tests/unit/phase-9-content-question-material-runtime.test.ts tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts tests/unit/paper-draft-repository-composition-guard.test.ts tests/unit/paper-draft-repository-archive-termination.test.ts src/server/services/question-service.test.ts src/server/services/question-route.test.ts src/server/services/material-service.test.ts src/server/services/material-route.test.ts src/server/services/paper-draft-service.test.ts src/server/services/paper-draft-route.test.ts src/server/services/paper-asset-service.test.ts src/server/services/paper-asset-route.test.ts src/server/validators/question.test.ts src/server/validators/paper-draft.test.ts src/server/mappers/paper-mapper.test.ts src/server/repositories/question-repository.test.ts tests/unit/question-paper/question-paper-rest-layering.test.ts
+      - corepack pnpm@10.26.1 exec prettier --check --ignore-unknown src/server/services/admin-flow-runtime.ts src/server/services/admin-flow-runtime.test.ts docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/project-state.yaml docs/05-execution-logs/task-plans/2026-07-10-0704-paper-list-content-guard-repair.md docs/05-execution-logs/evidence/2026-07-10-0704-paper-list-content-guard-repair-evidence.md docs/05-execution-logs/audits-reviews/2026-07-10-0704-paper-list-content-guard-repair-audit.md
+      - git diff --check
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-paper-list-content-guard-repair-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-paper-list-content-guard-repair-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+    validationSummary:
+      status: passed
+      tddRed: pass_failed_expected_old_code_allowed_ops_admin_paper_list
+      focusedAdminFlowRuntime: pass_1_file_3_tests
+      targetedContentSmokeAfterRepair: pass_20_files_110_tests
+      scopedPrettierCheck: pass
+      diffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-content-non-ai-publish-smoke-2026-07-10
     title: 0704 content non-AI publish smoke
     phase: 0704-content-non-ai-publish-smoke-2026-07-10
@@ -674,6 +797,7 @@ activeTasks:
     taskKind: validation_only_localhost_acceptance
     dependsOn:
       - 0704-non-ai-learning-smoke-2026-07-10
+      - 0704-paper-list-content-guard-repair-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md
     sequenceOrder: 4
     branch: codex/0704-content-non-ai-publish-smoke

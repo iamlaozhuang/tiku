@@ -174,6 +174,12 @@ function canReadUserManagement(actor: AdminFlowActor): boolean {
   );
 }
 
+function canReadContentKnowledge(actor: AdminFlowActor): boolean {
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("content_admin")
+  );
+}
+
 function isOrganizationAdminAccountCreationRole(
   role: AdminAccountCreationRole,
 ): role is OrganizationAdminAccountCreationRole {
@@ -759,7 +765,9 @@ export function createAdminFlowRuntimeRouteHandlers(
             return createJsonResponse(adminSessionRequiredResponse);
           }
 
-          void actor;
+          if (!canReadContentKnowledge(actor)) {
+            return createJsonResponse(adminPermissionDeniedResponse);
+          }
 
           const result =
             await repositories.contentKnowledgeRepository.listQuestions(
@@ -784,7 +792,9 @@ export function createAdminFlowRuntimeRouteHandlers(
             return createJsonResponse(adminSessionRequiredResponse);
           }
 
-          void actor;
+          if (!canReadContentKnowledge(actor)) {
+            return createJsonResponse(adminPermissionDeniedResponse);
+          }
 
           const result =
             await repositories.contentKnowledgeRepository.listPapers(
