@@ -1373,15 +1373,21 @@ activeTasks:
   - id: 0704-org-training-edge-acceptance-2026-07-10
     title: 0704 organization training edge acceptance
     phase: 0704-org-training-edge-acceptance-2026-07-10
-    status: pending
+    status: closed
+    result: blocked_requires_answer_deadline_answerability_repair
     priority: p1
     sequenceOrder: 9
     taskKind: validation_only_localhost_acceptance
     executionProfile: targeted_readiness_and_localhost_validation_only
     moduleRunVersion: 2
     branch: codex/0704-org-training-edge-acceptance
+    claimedAt: "2026-07-10T10:53:30-07:00"
+    plannedAt: "2026-07-10T10:53:30-07:00"
+    readinessPreflight: pass_private_index_metadata_core_roles_9
     dependsOn:
       - 0704-audit-privacy-governance-acceptance-2026-07-10
+    nextRequiredTaskId: 0704-org-training-deadline-answerability-fix-2026-07-10
+    blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true
@@ -1396,7 +1402,191 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+    completedAt: "2026-07-10T10:59:10-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: blocked_missing_answer_deadline_persistence_and_answerability_enforcement
+      targetedTests: pass_10_files_163_tests
+      scopedPrettierWrite: pass_unchanged_except_ledger_format
+      sensitiveEvidence: pass_redacted
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  - id: 0704-org-training-deadline-answerability-fix-2026-07-10
+    title: 0704 organization training answer deadline answerability fix
+    phase: 0704-org-training-deadline-answerability-fix-2026-07-10
+    status: pending
+    priority: p0
+    sequenceOrder: 9.1
+    taskKind: implementation_repair
+    executionProfile: targeted_source_repair_with_redacted_local_validation
+    moduleRunVersion: 2
+    branch: codex/0704-org-training-deadline-answerability-fix
+    dependsOn:
+      - 0704-org-training-edge-acceptance-2026-07-10
+    nextRequiredTaskId: 0704-org-training-edge-acceptance-rerun-2026-07-10
+    blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-deadline-answerability-fix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-deadline-answerability-fix-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-deadline-answerability-fix-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-deadline-answerability-fix.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-training-deadline-answerability-fix-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-deadline-answerability-fix-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+      - src/db/schema/organization-training.ts
+      - src/db/schema/organization-training.test.ts
+      - drizzle/20260710110500_add_organization_training_answer_deadline.sql
+      - drizzle/meta/_journal.json
+      - drizzle/meta/20260710110500_snapshot.json
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/organization-training-employee-entry-surface.test.ts
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_targeted_allowed_files_only
+      testSourceChange: approved_targeted_allowed_files_only
+      focusedUnitTest: approved_targeted_contract_smoke_only
+      schemaMigration: approved_code_migration_file_only_no_db_execution
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: approved_redacted_catalog_preflight_only
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 vitest run src/db/schema/organization-training.test.ts src/server/validators/organization-training.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts src/server/mappers/organization-training-mapper.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts
+      - corepack pnpm@10.26.1 prettier --write --ignore-unknown CHANGED_FILES
+      - git diff --check
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-training-deadline-answerability-fix-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-training-deadline-answerability-fix-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-org-training-edge-acceptance-rerun-2026-07-10
+    title: 0704 organization training edge acceptance rerun
+    phase: 0704-org-training-edge-acceptance-rerun-2026-07-10
+    status: pending
+    priority: p0
+    sequenceOrder: 9.2
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-training-edge-acceptance-rerun
+    dependsOn:
+      - 0704-org-training-deadline-answerability-fix-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    rerunAfterRepairTaskId: 0704-org-training-deadline-answerability-fix-2026-07-10
+    blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-rerun-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-rerun-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-rerun-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-rerun-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
@@ -1417,7 +1607,7 @@ activeTasks:
     moduleRunVersion: 2
     branch: codex/0704-org-analytics-acceptance
     dependsOn:
-      - 0704-org-training-edge-acceptance-2026-07-10
+      - 0704-org-training-edge-acceptance-rerun-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true

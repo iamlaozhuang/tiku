@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-audit-privacy-governance-acceptance-2026-07-10
-updatedAt: "2026-07-10T10:46:20-07:00"
+currentPhase: 0704-org-training-edge-acceptance-2026-07-10
+updatedAt: "2026-07-10T10:59:10-07:00"
 latest0704OrgTreeEmployeeTransferFix:
   id: 0704-org-tree-employee-transfer-fix-2026-07-10
   status: closed
@@ -154,6 +154,39 @@ latest0704AuditPrivacyGovernanceAcceptance:
     directDatabaseConnectionExecuted: false
     providerCallExecuted: false
     stagingProdDeployExecuted: false
+latest0704OrgTrainingEdgeAcceptance:
+  id: 0704-org-training-edge-acceptance-2026-07-10
+  status: closed
+  result: blocked_requires_answer_deadline_answerability_repair
+  branch: codex/0704-org-training-edge-acceptance
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-audit.md
+  dependsOn: 0704-audit-privacy-governance-acceptance-2026-07-10
+  nextRequiredTaskId: 0704-org-training-deadline-answerability-fix-2026-07-10
+  blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    sourceInspection: blocked_missing_answer_deadline_persistence_and_answerability_enforcement
+    targetedTests: pass_10_files_163_tests
+    scopedPrettierWrite: pass_unchanged_except_ledger_format
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sensitiveEvidence: pass_redacted
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    stagingProdDeployExecuted: false
+latest0704OrgTrainingDeadlineAnswerabilityFix:
+  id: 0704-org-training-deadline-answerability-fix-2026-07-10
+  status: pending
+  branch: codex/0704-org-training-deadline-answerability-fix
+  dependsOn: 0704-org-training-edge-acceptance-2026-07-10
+  nextRequiredTaskId: 0704-org-training-edge-acceptance-rerun-2026-07-10
+  blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
 latest0704OrgTreeAuthInheritanceAcceptance:
   id: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
   status: closed
@@ -3812,14 +3845,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-audit-privacy-governance-acceptance-2026-07-10
-  title: 0704 audit privacy governance acceptance
-  phase: 0704-audit-privacy-governance-acceptance-2026-07-10
-  status: ready_for_closeout
-  result: pass_audit_privacy_governance_event_categories_role_scope_redaction
+  id: 0704-org-training-edge-acceptance-2026-07-10
+  title: 0704 organization training edge acceptance
+  phase: 0704-org-training-edge-acceptance-2026-07-10
+  status: closed
+  result: blocked_requires_answer_deadline_answerability_repair
   priority: p1
   taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-audit-privacy-governance-acceptance
+  branch: codex/0704-org-training-edge-acceptance
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3830,27 +3863,28 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T10:37:40-07:00"
-  claimedAt: "2026-07-10T10:37:40-07:00"
-  targetClosureItem: Prove audit_log coverage categories, role-scoped log visibility, employee/learner privacy boundaries, and sensitive-value redaction.
+  plannedAt: "2026-07-10T10:53:30-07:00"
+  claimedAt: "2026-07-10T10:53:30-07:00"
+  targetClosureItem: Prove enterprise training source, publish, version, takedown, answer, duplicate-submit, resume, and formal-domain separation edge behavior.
   behaviorBoundary: validation_only_docs_state_evidence_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-audit-privacy-governance-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-audit-privacy-governance-acceptance-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-audit-privacy-governance-acceptance-audit.md
-  dependsOn: 0704-model-prompt-log-governance-acceptance-2026-07-10
-  nextRequiredTaskId: 0704-org-training-edge-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-audit.md
+  dependsOn: 0704-audit-privacy-governance-acceptance-2026-07-10
+  nextRequiredTaskId: 0704-org-training-deadline-answerability-fix-2026-07-10
+  blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
   validationSummary:
-    status: ready_for_closeout
+    status: closed_blocked_repair_required
     readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: pass_14_audit_privacy_governance_markers
-    targetedTests: pass_17_files_97_tests
-    scopedPrettierWrite: pass_unchanged
+    sourceInspection: blocked_missing_answer_deadline_persistence_and_answerability_enforcement
+    targetedTests: pass_10_files_163_tests
+    scopedPrettierWrite: pass_unchanged_except_ledger_format
     diffCheck: pass
     lint: pass
     typecheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
+    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sensitiveEvidence: pass_redacted
     browserRuntimeExecuted: false
     directDatabaseConnectionExecuted: false
@@ -34546,8 +34580,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 70746536188a4c4e48079a4f5fb36c381494c2f0
-  lastKnownOriginMasterSha: 70746536188a4c4e48079a4f5fb36c381494c2f0
+  lastKnownMasterSha: f1fdfab443b56c03ba63753622aea2a15be81340
+  lastKnownOriginMasterSha: f1fdfab443b56c03ba63753622aea2a15be81340
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
