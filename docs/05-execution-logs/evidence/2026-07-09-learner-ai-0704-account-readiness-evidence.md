@@ -36,13 +36,18 @@
 
 ## Credential-Backed Matrix Rerun
 
-| Role                        | Login | Authorization / boundary result                                             | AI submit    |
-| --------------------------- | ----- | --------------------------------------------------------------------------- | ------------ |
-| `personal_standard_student` | PASS  | 1 context, 0 advanced AI-capable contexts                                   | not executed |
-| `personal_advanced_student` | PASS  | 1 context, 1 personal advanced AI-capable context                           | not executed |
-| `org_advanced_employee`     | PASS  | 5 organization advanced AI-capable contexts                                 | not executed |
-| `org_standard_employee`     | PASS  | 3 organization standard contexts, 0 advanced AI-capable contexts            | not executed |
-| `org_advanced_admin`        | PASS  | learner authorization API non-success; learner raw API boundary non-success | not executed |
+| Role                            | Login | Authorization / boundary result                                             | AI submit    |
+| ------------------------------- | ----- | --------------------------------------------------------------------------- | ------------ |
+| `personal_standard_student`     | PASS  | 1 context, 0 advanced AI-capable contexts                                   | not executed |
+| `personal_advanced_student`     | PASS  | 1 context, 1 personal advanced AI-capable context                           | not executed |
+| `org_advanced_employee`         | PASS  | 5 organization advanced AI-capable contexts                                 | not executed |
+| `org_standard_employee`         | PASS  | 3 organization standard contexts, 0 advanced AI-capable contexts            | not executed |
+| `super_admin` bootstrap account | PASS  | learner authorization API non-success; learner raw API boundary non-success | not executed |
+
+Additional admin fixture readiness check: the role-separated `org_advanced_admin`, `org_standard_admin`, `ops_admin`, and
+`content_admin` private fixtures did not produce usable sessions in the current local 0704 app database. They were not
+part of this task's approved account-readiness correction scope, which was limited to `personal_advanced_student` and
+`org_standard_employee`.
 
 ## Validation Commands
 

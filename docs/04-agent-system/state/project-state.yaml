@@ -41,7 +41,8 @@ latestLearnerAi0704AccountReadiness:
     personalAdvancedBoundary: pass_personal_advanced_ai_context
     orgStandardEmployeeBoundary: pass_org_standard_contexts_no_advanced_ai
     orgAdvancedEmployeeBoundary: pass_org_advanced_ai_contexts
-    orgAdvancedAdminLearnerRawBoundary: pass_no_successful_learner_access
+    bootstrapSuperAdminLearnerRawBoundary: pass_no_successful_learner_access
+    roleSeparatedAdminFixtureReadiness: gap_not_in_target_correction_scope
     targetedRegression: pass_7_files_116_tests
     typecheck: pass
     lint: pass
@@ -2971,7 +2972,8 @@ currentTask:
     personalAdvancedBoundary: pass_personal_advanced_ai_context
     orgStandardEmployeeBoundary: pass_org_standard_contexts_no_advanced_ai
     orgAdvancedEmployeeBoundary: pass_org_advanced_ai_contexts
-    orgAdvancedAdminLearnerRawBoundary: pass_no_successful_learner_access
+    bootstrapSuperAdminLearnerRawBoundary: pass_no_successful_learner_access
+    roleSeparatedAdminFixtureReadiness: gap_not_in_target_correction_scope
     targetedRegression: pass_7_files_116_tests
     typecheck: pass
     lint: pass
