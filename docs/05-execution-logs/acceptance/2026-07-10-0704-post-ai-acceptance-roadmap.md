@@ -135,6 +135,14 @@ Exception and degradation smoke passes only if:
   outside approved flows;
 - admin-side summaries remain redacted.
 
+Stage result:
+
+- `0704-exception-degradation-smoke`: closed by
+  `docs/05-execution-logs/evidence/2026-07-10-0704-exception-degradation-smoke-evidence.md`.
+- Result category: `pass_targeted_exception_degradation_contract_smoke`.
+- Rerun rule: no fresh Provider, browser, DB, or write-heavy localhost rerun; use this targeted contract smoke unless a
+  later task records fresh contrary failure evidence.
+
 ## Stage 6 Acceptance Standard
 
 Release-candidate local gates pass only if:
