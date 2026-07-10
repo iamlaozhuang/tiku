@@ -24,6 +24,7 @@ import type {
   EmployeeImportResultDto,
   EmployeeImportRowInputDto,
   EmployeeImportRejectedRowDto,
+  EmployeeTransferResultDto,
   EmployeeMutationResultDto,
   EmployeeUnbindResultDto,
   EmployeeListDto,
@@ -101,6 +102,9 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     input: EmployeeImportInput,
   ): Promise<EmployeeImportResultDto | null>;
   disableEmployee?(publicId: string): Promise<boolean>;
+  transferEmployee?(
+    input: EmployeeTransferInput,
+  ): Promise<EmployeeTransferRepositoryResult | null>;
   unbindEmployee?(
     input: EmployeeUnbindInput,
   ): Promise<EmployeeUnbindResultDto | null>;
@@ -124,6 +128,24 @@ export type EmployeeUnbindInput =
       employeePublicId: string;
       organizationPublicId?: string | null;
     };
+
+export type EmployeeTransferInput = {
+  employeePublicId: string;
+  targetOrganizationPublicId: string;
+};
+
+export type EmployeeTransferBlockedResult = {
+  employeePublicId: string;
+  targetOrganizationPublicId: string;
+  status:
+    | "quota_insufficient"
+    | "same_organization"
+    | "target_organization_not_found";
+};
+
+export type EmployeeTransferRepositoryResult =
+  | EmployeeTransferBlockedResult
+  | EmployeeTransferResultDto;
 
 export type AppendEmployeeAuditLogInput = {
   actorPublicId: string;
@@ -151,6 +173,7 @@ const {
   mockExam,
   orgAuth,
   orgAuthOrganization,
+  organizationTrainingAnswer,
   organization,
   practice,
   user,
@@ -1011,6 +1034,194 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
       }
 
       return true;
+    },
+    async transferEmployee(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const [employeeRow] = await transaction
+          .select({
+            employee_id: employee.id,
+            employee_public_id: employee.public_id,
+            organization_id: employee.organization_id,
+            organization_public_id: organization.public_id,
+            user_id: user.id,
+            user_public_id: user.public_id,
+            auth_user_id: user.auth_user_id,
+          })
+          .from(employee)
+          .innerJoin(user, eq(user.id, employee.user_id))
+          .innerJoin(
+            organization,
+            eq(organization.id, employee.organization_id),
+          )
+          .where(eq(employee.public_id, input.employeePublicId))
+          .limit(1);
+
+        if (employeeRow === undefined) {
+          return null;
+        }
+
+        const [targetOrganizationRow] = await transaction
+          .select({
+            id: organization.id,
+            public_id: organization.public_id,
+            status: organization.status,
+          })
+          .from(organization)
+          .where(eq(organization.public_id, input.targetOrganizationPublicId))
+          .limit(1);
+
+        if (
+          targetOrganizationRow === undefined ||
+          targetOrganizationRow.status !== "active"
+        ) {
+          return {
+            employeePublicId: input.employeePublicId,
+            targetOrganizationPublicId: input.targetOrganizationPublicId,
+            status: "target_organization_not_found",
+          };
+        }
+
+        if (targetOrganizationRow.id === employeeRow.organization_id) {
+          return {
+            employeePublicId: input.employeePublicId,
+            targetOrganizationPublicId: input.targetOrganizationPublicId,
+            status: "same_organization",
+          };
+        }
+
+        const now = new Date();
+        const targetOrgAuthRows = await transaction
+          .select({
+            id: orgAuth.id,
+            profession: orgAuth.profession,
+            level: orgAuth.level,
+            account_quota: orgAuth.account_quota,
+          })
+          .from(orgAuth)
+          .innerJoin(
+            orgAuthOrganization,
+            eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+          )
+          .where(
+            and(
+              eq(orgAuthOrganization.organization_id, targetOrganizationRow.id),
+              eq(orgAuth.status, "active"),
+              lt(orgAuth.starts_at, now),
+              gt(orgAuth.expires_at, now),
+            ),
+          );
+
+        if (targetOrgAuthRows.length === 0) {
+          return {
+            employeePublicId: input.employeePublicId,
+            targetOrganizationPublicId: input.targetOrganizationPublicId,
+            status: "quota_insufficient",
+          };
+        }
+
+        let hasTargetQuota = false;
+
+        for (const targetOrgAuthRow of targetOrgAuthRows) {
+          const scopeRows = await transaction
+            .select({ organization_id: orgAuthOrganization.organization_id })
+            .from(orgAuthOrganization)
+            .where(eq(orgAuthOrganization.org_auth_id, targetOrgAuthRow.id));
+          const organizationIds = scopeRows.map((scopeRow) => {
+            return scopeRow.organization_id;
+          });
+
+          await lockOrgAuthQuotaScope(transaction, {
+            level: targetOrgAuthRow.level,
+            organizationIds,
+            profession: targetOrgAuthRow.profession,
+          });
+
+          const usedQuota = await countActiveEmployeesByOrganizationIds(
+            transaction,
+            organizationIds,
+          );
+          const transferAddsQuota = organizationIds.includes(
+            employeeRow.organization_id,
+          )
+            ? 0
+            : 1;
+
+          if (usedQuota + transferAddsQuota <= targetOrgAuthRow.account_quota) {
+            hasTargetQuota = true;
+          }
+        }
+
+        if (!hasTargetQuota) {
+          return {
+            employeePublicId: input.employeePublicId,
+            targetOrganizationPublicId: input.targetOrganizationPublicId,
+            status: "quota_insufficient",
+          };
+        }
+
+        await transaction
+          .update(employee)
+          .set({
+            organization_id: targetOrganizationRow.id,
+            updated_at: now,
+          })
+          .where(eq(employee.id, employeeRow.employee_id));
+        await transaction
+          .update(user)
+          .set({
+            user_type: "employee",
+            updated_at: now,
+          })
+          .where(eq(user.id, employeeRow.user_id));
+        await transaction
+          .update(organizationTrainingAnswer)
+          .set({
+            organization_training_answer_status: "read_only",
+            updated_at: now,
+          })
+          .where(
+            and(
+              eq(
+                organizationTrainingAnswer.employee_id,
+                employeeRow.employee_id,
+              ),
+              eq(
+                organizationTrainingAnswer.organization_id,
+                employeeRow.organization_id,
+              ),
+              eq(
+                organizationTrainingAnswer.organization_training_answer_status,
+                "in_progress",
+              ),
+            ),
+          );
+
+        if (employeeRow.auth_user_id !== null) {
+          await transaction
+            .delete(authSession)
+            .where(eq(authSession.user_id, employeeRow.auth_user_id));
+        }
+
+        await refreshOrgAuthUsedQuotaByOrganizationIds(transaction, [
+          employeeRow.organization_id,
+          targetOrganizationRow.id,
+        ]);
+
+        return {
+          employeePublicId: employeeRow.employee_public_id,
+          userPublicId: employeeRow.user_public_id,
+          previousOrganizationPublicId: employeeRow.organization_public_id,
+          targetOrganizationPublicId: targetOrganizationRow.public_id,
+          quotaRefreshStatus: "refreshed",
+          sessionRevocationStatus:
+            employeeRow.auth_user_id === null ? "not_needed" : "revoked",
+          historicalSnapshotStatus: "preserved",
+          oldOrganizationInProgressTrainingStatus: "blocked",
+          status: "transferred",
+        };
+      });
     },
     async unbindEmployee(input) {
       const database = getDatabase();

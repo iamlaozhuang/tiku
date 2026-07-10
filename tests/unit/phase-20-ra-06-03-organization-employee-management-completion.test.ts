@@ -17,6 +17,7 @@ import {
 import type {
   EmployeeListDto,
   EmployeeImportResultDto,
+  EmployeeTransferResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
@@ -42,6 +43,10 @@ type ExtendedEnterpriseRepositories =
     importEmployees?(
       input: EmployeeImportInput,
     ): Promise<EmployeeImportResultDto | null>;
+    transferEmployee?(input: {
+      employeePublicId: string;
+      targetOrganizationPublicId: string;
+    }): Promise<EmployeeTransferResultDto | null>;
     unbindEmployee?(publicId: string): Promise<EmployeeUnbindResultDto | null>;
   };
 
@@ -60,6 +65,9 @@ type ExtendedEnterpriseHandlers = ReturnType<
   >["employees"] & {
     importBatch: {
       POST(request: Request): Promise<Response>;
+    };
+    transfer: {
+      POST(request: Request, context: RouteContext): Promise<Response>;
     };
     unbind: {
       POST(request: Request, context: RouteContext): Promise<Response>;
@@ -93,6 +101,15 @@ const organizationListPayload: {
         employeeCount: 1,
         authSummary: "monopoly / level 3",
       },
+      {
+        publicId: "org-target-001",
+        name: "Target Test Tobacco",
+        orgTier: "district",
+        parentOrganizationPublicId: "org-city-001",
+        status: "active",
+        employeeCount: 0,
+        authSummary: "monopoly / level 3",
+      },
     ],
   },
 };
@@ -120,6 +137,23 @@ const orgAuthListPayload: {
         status: "active",
         cancelledAt: null,
         organizationPublicIds: ["org-city-001"],
+        createdAt: "2026-05-31T00:00:00.000Z",
+        updatedAt: "2026-05-31T00:00:00.000Z",
+      },
+      {
+        publicId: "org-auth-target-001",
+        name: "Target Enterprise Auth",
+        purchaserOrganizationPublicId: "org-target-001",
+        authScopeType: "current_and_descendants",
+        profession: "monopoly",
+        level: 3,
+        accountQuota: 10,
+        usedQuota: 0,
+        startsAt: "2026-06-01T00:00:00.000Z",
+        expiresAt: "2027-06-01T00:00:00.000Z",
+        status: "active",
+        cancelledAt: null,
+        organizationPublicIds: ["org-target-001"],
         createdAt: "2026-05-31T00:00:00.000Z",
         updatedAt: "2026-05-31T00:00:00.000Z",
       },
@@ -291,7 +325,7 @@ function createEnterpriseRepositories(input: {
           pageSize: query.pageSize,
           sortBy: query.sortBy,
           sortOrder: query.sortOrder,
-          total: 1,
+          total: 2,
         },
       };
     },
@@ -303,7 +337,7 @@ function createEnterpriseRepositories(input: {
           pageSize: query.pageSize,
           sortBy: query.sortBy,
           sortOrder: query.sortOrder,
-          total: 1,
+          total: 2,
         },
       };
     },
@@ -354,6 +388,24 @@ function createEnterpriseRepositories(input: {
         userPublicId: "user-public-001",
         previousOrganizationPublicId: "org-city-001",
         status: "unbound",
+      };
+    },
+    async transferEmployee(transferInput) {
+      input.mutationInputs.push({
+        action: "transferEmployee",
+        transferInput,
+      });
+
+      return {
+        employeePublicId: transferInput.employeePublicId,
+        userPublicId: "user-public-001",
+        previousOrganizationPublicId: "org-city-001",
+        targetOrganizationPublicId: transferInput.targetOrganizationPublicId,
+        quotaRefreshStatus: "refreshed",
+        sessionRevocationStatus: "revoked",
+        historicalSnapshotStatus: "preserved",
+        oldOrganizationInProgressTrainingStatus: "blocked",
+        status: "transferred",
       };
     },
     auditLogRepository: {
@@ -474,6 +526,26 @@ function mockOrganizationPageFetch() {
         });
       }
 
+      if (path === "/api/v1/employees/employee-public-001/transfer") {
+        const body = JSON.parse(String(init?.body));
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            employeePublicId: "employee-public-001",
+            userPublicId: "user-public-001",
+            previousOrganizationPublicId: "org-city-001",
+            targetOrganizationPublicId: body.targetOrganizationPublicId,
+            quotaRefreshStatus: "refreshed",
+            sessionRevocationStatus: "revoked",
+            historicalSnapshotStatus: "preserved",
+            oldOrganizationInProgressTrainingStatus: "blocked",
+            status: "transferred",
+          },
+        });
+      }
+
       return createJsonResponse({
         code: 404001,
         message: "missing",
@@ -567,7 +639,7 @@ function mockEmptyOrganizationPageFetch() {
 }
 
 describe("phase 20 RA-06-03 organization employee management completion", () => {
-  it("adds organization enable, employee batch import, and employee unbind runtime routes with redacted audits", async () => {
+  it("adds organization enable, employee batch import, employee transfer, and employee unbind runtime routes with redacted audits", async () => {
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
@@ -613,6 +685,19 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       ),
       { params: Promise.resolve({ publicId: "employee-public-001" }) },
     );
+    const transferResponse = await handlers.employees.transfer.POST(
+      new Request(
+        "http://localhost/api/v1/employees/employee-public-001/transfer",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            targetOrganizationPublicId: "org-target-001",
+          }),
+        },
+      ),
+      { params: Promise.resolve({ publicId: "employee-public-001" }) },
+    );
 
     await expect(enableResponse.json()).resolves.toMatchObject({
       code: 0,
@@ -646,6 +731,21 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         status: "unbound",
       },
     });
+    await expect(transferResponse.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        employeePublicId: "employee-public-001",
+        userPublicId: "user-public-001",
+        previousOrganizationPublicId: "org-city-001",
+        targetOrganizationPublicId: "org-target-001",
+        quotaRefreshStatus: "refreshed",
+        sessionRevocationStatus: "revoked",
+        historicalSnapshotStatus: "preserved",
+        oldOrganizationInProgressTrainingStatus: "blocked",
+        status: "transferred",
+      },
+    });
     expect(mutationInputs).toEqual([
       { action: "enableOrganization", publicId: "org-city-001" },
       {
@@ -660,6 +760,13 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         },
       },
       { action: "unbindEmployee", publicId: "employee-public-001" },
+      {
+        action: "transferEmployee",
+        transferInput: {
+          employeePublicId: "employee-public-001",
+          targetOrganizationPublicId: "org-target-001",
+        },
+      },
     ]);
     expect(auditInputs).toEqual([
       expect.objectContaining({
@@ -688,6 +795,14 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         resultStatus: "success",
         metadataSummary: "redacted employee unbind metadata",
       }),
+      expect.objectContaining({
+        actionType: "employee.transfer",
+        actorRole: "ops_admin",
+        targetResourceType: "employee",
+        targetPublicId: "employee-public-001",
+        resultStatus: "success",
+        metadataSummary: "redacted employee transfer metadata",
+      }),
     ]);
     expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
       sessionToken,
@@ -697,7 +812,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     );
   });
 
-  it("denies content admins for employee import and unbind without touching employee records", async () => {
+  it("denies content admins for employee import, transfer and unbind without touching employee records", async () => {
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
@@ -733,6 +848,19 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       ),
       { params: Promise.resolve({ publicId: "employee-public-001" }) },
     );
+    const transferResponse = await handlers.employees.transfer.POST(
+      new Request(
+        "http://localhost/api/v1/employees/employee-public-001/transfer",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            targetOrganizationPublicId: "org-target-001",
+          }),
+        },
+      ),
+      { params: Promise.resolve({ publicId: "employee-public-001" }) },
+    );
 
     await expect(importResponse.json()).resolves.toEqual({
       code: 403601,
@@ -740,6 +868,11 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       data: null,
     });
     await expect(unbindResponse.json()).resolves.toEqual({
+      code: 403601,
+      message: "Admin permission denied.",
+      data: null,
+    });
+    await expect(transferResponse.json()).resolves.toEqual({
       code: 403601,
       message: "Admin permission denied.",
       data: null,
@@ -756,10 +889,15 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         resultStatus: "failed",
         metadataSummary: "redacted employee permission denial metadata",
       }),
+      expect.objectContaining({
+        actionType: "employee.transfer",
+        resultStatus: "failed",
+        metadataSummary: "redacted employee permission denial metadata",
+      }),
     ]);
   });
 
-  it("closes local UI controls for organization enable, employee import and unbind, and auth detail evidence", async () => {
+  it("closes local UI controls for organization enable, employee import, transfer and unbind, and auth detail evidence", async () => {
     localStorage.setItem("tiku.localSessionToken", sessionToken);
     const fetchMock = mockOrganizationPageFetch();
 
@@ -810,6 +948,25 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
                 organizationPublicId: "org-city-001",
               },
             ],
+          }),
+          method: "POST",
+        }),
+      ),
+    );
+
+    fireEvent.click(
+      screen.getByTestId(
+        "employee-transfer-employee-public-001-org-target-001",
+      ),
+    );
+    fireEvent.click(screen.getByTestId("employee-confirm-action"));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/employees/employee-public-001/transfer",
+        expect.objectContaining({
+          body: JSON.stringify({
+            targetOrganizationPublicId: "org-target-001",
           }),
           method: "POST",
         }),

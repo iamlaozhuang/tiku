@@ -22,6 +22,35 @@ function extractBetween(
 }
 
 describe("phase 20 RA-01-12 employee transfer unbind", () => {
+  it("exposes the employee transfer route with public ids", () => {
+    const routePath = "src/app/api/v1/employees/[publicId]/transfer/route.ts";
+
+    expect(existsSync(resolve(process.cwd(), routePath))).toBe(true);
+
+    const routeSource = readSource(routePath);
+
+    expect(routeSource).toMatch(/employees\s*\.\s*transfer\s*\.\s*POST/u);
+    expect(routeSource).not.toContain("id]");
+  });
+
+  it("passes transfer target organization public id into employee repository logic", () => {
+    const serviceSource = readSource(
+      "src/server/services/admin-organization-org-auth-runtime.ts",
+    );
+    const transferSource = extractBetween(
+      serviceSource,
+      "transfer:",
+      "unbind:",
+    );
+
+    expect(transferSource).toContain("targetOrganizationPublicId");
+    expect(transferSource).toContain("repositories.transferEmployee({");
+    expect(transferSource).toContain(
+      'metadataSummary: "redacted employee transfer metadata"',
+    );
+    expect(transferSource).toContain("EmployeeTransferResultDto");
+  });
+
   it("exposes the organization-scoped employee unbind route with public ids", () => {
     const routePath =
       "src/app/api/v1/organizations/[publicId]/employees/[employeePublicId]/unbind/route.ts";
@@ -69,6 +98,30 @@ describe("phase 20 RA-01-12 employee transfer unbind", () => {
     expect(unbindSource).toContain(
       "eq(organization.public_id, organizationPublicId)",
     );
+  });
+
+  it("transfers employees transactionally with quota refresh, session revocation, and old training blocking", () => {
+    const repositorySource = readSource(
+      "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
+    );
+    const transferSource = extractBetween(
+      repositorySource,
+      "async transferEmployee(input)",
+      "async unbindEmployee(input)",
+    );
+
+    expect(repositorySource).toContain("export type EmployeeTransferInput");
+    expect(transferSource).toContain("targetOrganizationPublicId");
+    expect(transferSource).toContain("lockOrgAuthQuotaScope");
+    expect(transferSource).toContain("countActiveEmployeesByOrganizationIds");
+    expect(transferSource).toContain("employee.organization_id");
+    expect(transferSource).toContain("authSession");
+    expect(transferSource).toContain("organizationTrainingAnswer");
+    expect(transferSource).toContain(
+      "refreshOrgAuthUsedQuotaByOrganizationIds(transaction, [",
+    );
+    expect(transferSource).toContain("employeeRow.organization_id");
+    expect(transferSource).toContain("targetOrganizationRow.id");
   });
 
   it("releases org_auth quota and organization employee counts after unbind", () => {

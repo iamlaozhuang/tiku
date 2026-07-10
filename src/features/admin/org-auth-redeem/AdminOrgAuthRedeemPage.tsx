@@ -12,6 +12,7 @@ import {
   Eye,
   KeyRound,
   LoaderCircle,
+  MoveRight,
   Pencil,
   PlusCircle,
   ShieldCheck,
@@ -26,6 +27,7 @@ import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
   EmployeeListDto,
   EmployeeImportResultDto,
+  EmployeeTransferResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
   RedeemCodeDetailDto,
@@ -199,6 +201,11 @@ type EmployeeConfirmationState =
   | {
       kind: "unbindEmployee";
       publicId: string;
+    }
+  | {
+      employeePublicId: string;
+      kind: "transferEmployee";
+      targetOrganizationPublicId: string;
     }
   | null;
 
@@ -2461,10 +2468,15 @@ const employeeTransferReviewReasonLabels: Record<
 
 function EmployeeTransferSessionReviewPanel({
   employees,
+  onTransferEmployee,
   organizations,
   orgAuths,
 }: {
   employees: AdminOrgAuthData["employees"];
+  onTransferEmployee: (input: {
+    employeePublicId: string;
+    targetOrganizationPublicId: string;
+  }) => void;
   organizations: AdminOrgAuthData["organizations"];
   orgAuths: AdminOrgAuthData["orgAuths"];
 }) {
@@ -2536,9 +2548,28 @@ function EmployeeTransferSessionReviewPanel({
                   提交前需再次复核授权范围、训练快照、会话撤销和未提交训练阻断。
                 </p>
               </div>
-              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-                {employeeTransferReviewReasonLabels[reviewRow.reason]}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+                  {employeeTransferReviewReasonLabels[reviewRow.reason]}
+                </span>
+                {reviewRow.reason === "quota_available" ? (
+                  <button
+                    type="button"
+                    className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                    data-testid={`employee-transfer-${reviewRow.employeePublicId}-${reviewRow.targetOrganizationPublicId}`}
+                    onClick={() =>
+                      onTransferEmployee({
+                        employeePublicId: reviewRow.employeePublicId,
+                        targetOrganizationPublicId:
+                          reviewRow.targetOrganizationPublicId,
+                      })
+                    }
+                  >
+                    <MoveRight className="size-3.5" aria-hidden="true" />
+                    转移
+                  </button>
+                ) : null}
+              </div>
             </AdminDataRow>
           ))}
         </div>
@@ -2655,6 +2686,73 @@ function EmployeeUnbindResultPanel({
             <p className="text-text-primary mt-1 text-sm font-medium break-all">
               {previousOrganization?.name ??
                 result.previousOrganizationPublicId}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EmployeeTransferResultPanel({
+  organizations,
+  result,
+}: {
+  organizations: AdminOrgAuthData["organizations"];
+  result: EmployeeTransferResultDto;
+}) {
+  const previousOrganization = organizations.find(
+    (organization) =>
+      organization.publicId === result.previousOrganizationPublicId,
+  );
+  const targetOrganization = organizations.find(
+    (organization) =>
+      organization.publicId === result.targetOrganizationPublicId,
+  );
+
+  return (
+    <section
+      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+      data-public-id={result.employeePublicId}
+      data-testid="employee-transfer-result"
+    >
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">转移结果</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            员工已转移
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            员工已从
+            {previousOrganization?.name ?? result.previousOrganizationPublicId}
+            转移到
+            {targetOrganization?.name ?? result.targetOrganizationPublicId}
+            ；历史作答归属快照保留，原组织未提交企业训练已阻断。
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">状态</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              {result.status}
+            </p>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">额度</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              {result.quotaRefreshStatus}
+            </p>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">会话</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              {result.sessionRevocationStatus}
+            </p>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <p className="text-text-muted text-xs">训练</p>
+            <p className="text-text-primary mt-1 text-sm font-medium">
+              {result.oldOrganizationInProgressTrainingStatus}
             </p>
           </div>
         </div>
@@ -2918,6 +3016,7 @@ function EmployeeConfirmationDialog({
   onConfirm: () => void;
 }) {
   const isImport = confirmationState.kind === "importEmployees";
+  const isTransfer = confirmationState.kind === "transferEmployee";
 
   return (
     <div
@@ -2932,7 +3031,11 @@ function EmployeeConfirmationDialog({
             aria-hidden="true"
           />
           <h2 className="text-text-primary text-base font-semibold">
-            {isImport ? "确认导入员工？" : "确认解绑员工？"}
+            {isImport
+              ? "确认导入员工？"
+              : isTransfer
+                ? "确认转移员工？"
+                : "确认解绑员工？"}
           </h2>
         </div>
         <p className="text-text-muted text-sm leading-6">
@@ -2942,7 +3045,7 @@ function EmployeeConfirmationDialog({
           <button
             type="button"
             className={
-              isImport
+              isImport || isTransfer
                 ? "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
                 : "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
             }
@@ -4460,6 +4563,8 @@ export function AdminOrgAuthPage() {
   ] = useState("");
   const [lastEmployeeImportResult, setLastEmployeeImportResult] =
     useState<EmployeeImportResultDto | null>(null);
+  const [lastEmployeeTransferResult, setLastEmployeeTransferResult] =
+    useState<EmployeeTransferResultDto | null>(null);
   const [lastEmployeeUnbindResult, setLastEmployeeUnbindResult] =
     useState<EmployeeUnbindResultDto | null>(null);
   const [selectedOrganizationPublicId, setSelectedOrganizationPublicId] =
@@ -4855,11 +4960,94 @@ export function AdminOrgAuthPage() {
         })),
       }));
       setLastEmployeeImportResult(importResponse.data);
+      setLastEmployeeTransferResult(null);
       setEmployeeImportText("");
       setToastMessage({
         message: `员工导入完成：成功 ${importedEmployees.length}，拒绝 ${rejectedRows.length}。`,
         tone: rejectedRows.length === 0 ? "success" : "error",
       });
+      return;
+    }
+
+    if (employeeConfirmationState.kind === "transferEmployee") {
+      const transferResponse = await postAdminApi<EmployeeTransferResultDto>(
+        `/api/v1/employees/${employeeConfirmationState.employeePublicId}/transfer`,
+        sessionToken,
+        {
+          targetOrganizationPublicId:
+            employeeConfirmationState.targetOrganizationPublicId,
+        },
+      );
+
+      setEmployeeConfirmationState(null);
+
+      if (transferResponse.code !== 0 || transferResponse.data === null) {
+        setLastEmployeeTransferResult(null);
+        setToastMessage({ message: transferResponse.message, tone: "error" });
+        return;
+      }
+
+      const transferredEmployee = transferResponse.data;
+
+      setData((currentData) => ({
+        ...currentData,
+        employees: currentData.employees.map((employee) =>
+          employee.publicId === transferredEmployee.employeePublicId
+            ? {
+                ...employee,
+                organizationPublicId:
+                  transferredEmployee.targetOrganizationPublicId,
+              }
+            : employee,
+        ),
+        orgAuths: currentData.orgAuths.map((orgAuth) => {
+          const coversPrevious = orgAuth.organizationPublicIds.includes(
+            transferredEmployee.previousOrganizationPublicId,
+          );
+          const coversTarget = orgAuth.organizationPublicIds.includes(
+            transferredEmployee.targetOrganizationPublicId,
+          );
+          const nextUsedQuota =
+            orgAuth.usedQuota +
+            (coversTarget ? 1 : 0) -
+            (coversPrevious ? 1 : 0);
+
+          return {
+            ...orgAuth,
+            usedQuota: Math.max(
+              0,
+              Math.min(orgAuth.accountQuota, nextUsedQuota),
+            ),
+          };
+        }),
+        organizations: currentData.organizations.map((organization) => {
+          if (
+            organization.publicId ===
+            transferredEmployee.previousOrganizationPublicId
+          ) {
+            return {
+              ...organization,
+              employeeCount: Math.max(organization.employeeCount - 1, 0),
+            };
+          }
+
+          if (
+            organization.publicId ===
+            transferredEmployee.targetOrganizationPublicId
+          ) {
+            return {
+              ...organization,
+              employeeCount: organization.employeeCount + 1,
+            };
+          }
+
+          return organization;
+        }),
+      }));
+      setLastEmployeeImportResult(null);
+      setLastEmployeeTransferResult(transferredEmployee);
+      setLastEmployeeUnbindResult(null);
+      setToastMessage({ message: "员工已转移。", tone: "success" });
       return;
     }
 
@@ -4893,6 +5081,7 @@ export function AdminOrgAuthPage() {
       ),
     }));
     setLastEmployeeUnbindResult(unboundEmployee);
+    setLastEmployeeTransferResult(null);
     setToastMessage({ message: "员工已解绑。", tone: "success" });
   }
 
@@ -4906,6 +5095,7 @@ export function AdminOrgAuthPage() {
 
       setEmployeeImportText(fileContent);
       setLastEmployeeImportResult(null);
+      setLastEmployeeTransferResult(null);
       setToastMessage({ message: "员工名录文件已读取。", tone: "success" });
     } catch {
       setToastMessage({
@@ -5017,12 +5207,14 @@ export function AdminOrgAuthPage() {
         onImportTextChange={(nextImportText) => {
           setEmployeeImportText(nextImportText);
           setLastEmployeeImportResult(null);
+          setLastEmployeeTransferResult(null);
         }}
         onSubmit={handleSubmitEmployeeImport}
         onTemplateDownload={downloadEmployeeImportTemplate}
         onTargetOrganizationChange={(nextOrganizationPublicId) => {
           setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
           setLastEmployeeImportResult(null);
+          setLastEmployeeTransferResult(null);
         }}
       />
 
@@ -5032,6 +5224,15 @@ export function AdminOrgAuthPage() {
 
       <EmployeeTransferSessionReviewPanel
         employees={data.employees}
+        onTransferEmployee={(input) => {
+          setLastEmployeeTransferResult(null);
+          setLastEmployeeUnbindResult(null);
+          setEmployeeConfirmationState({
+            employeePublicId: input.employeePublicId,
+            kind: "transferEmployee",
+            targetOrganizationPublicId: input.targetOrganizationPublicId,
+          });
+        }}
         organizations={data.organizations}
         orgAuths={data.orgAuths}
       />
@@ -5067,6 +5268,7 @@ export function AdminOrgAuthPage() {
           employees={data.employees}
           organizations={data.organizations}
           onUnbindEmployee={(publicId) => {
+            setLastEmployeeTransferResult(null);
             setLastEmployeeUnbindResult(null);
             setEmployeeConfirmationState({
               kind: "unbindEmployee",
@@ -5080,6 +5282,13 @@ export function AdminOrgAuthPage() {
         <EmployeeUnbindResultPanel
           organizations={data.organizations}
           result={lastEmployeeUnbindResult}
+        />
+      )}
+
+      {lastEmployeeTransferResult === null ? null : (
+        <EmployeeTransferResultPanel
+          organizations={data.organizations}
+          result={lastEmployeeTransferResult}
         />
       )}
 

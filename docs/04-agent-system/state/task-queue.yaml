@@ -933,7 +933,7 @@ activeTasks:
   - id: 0704-org-tree-employee-transfer-fix-2026-07-10
     title: 0704 organization tree employee transfer mutation fix
     phase: 0704-org-tree-employee-transfer-fix-2026-07-10
-    status: pending
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 4.1
     taskKind: implementation_repair
@@ -957,7 +957,7 @@ activeTasks:
       - src/server/contracts/admin-user-org-auth-ops-contract.ts
       - src/server/services/admin-organization-org-auth-runtime.ts
       - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
-      - src/app/api/v1/employees/[publicId]/transfer/route.ts
+      - src/app/api/v1/employees/`[publicId`]/transfer/route.ts
       - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
       - tests/unit/admin-user-org-auth-ops-baseline.test.ts
       - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
@@ -988,6 +988,22 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T09:12:38-07:00"
+    plannedAt: "2026-07-10T09:12:38-07:00"
+    completedAt: "2026-07-10T09:28:00-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      tddRed: pass_expected_2_files_6_failed_before_implementation
+      sourceChange: pass_employee_transfer_public_route_service_repository_ui
+      targetedTests: pass_5_files_46_tests
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      sensitiveEvidence: pass_redacted
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass_after_allowed_path_escape
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_update
   - id: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
     title: 0704 organization tree auth inheritance acceptance rerun
     phase: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10

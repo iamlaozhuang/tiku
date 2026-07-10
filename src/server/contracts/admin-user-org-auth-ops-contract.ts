@@ -201,6 +201,18 @@ export type EmployeeUnbindResultDto = {
   status: "unbound";
 };
 
+export type EmployeeTransferResultDto = {
+  employeePublicId: string;
+  userPublicId: string;
+  previousOrganizationPublicId: string;
+  targetOrganizationPublicId: string;
+  quotaRefreshStatus: "refreshed";
+  sessionRevocationStatus: "not_needed" | "revoked";
+  historicalSnapshotStatus: "preserved";
+  oldOrganizationInProgressTrainingStatus: "blocked";
+  status: "transferred";
+};
+
 export type AuthorizationSummaryDto = {
   publicId: string;
   purchaserName: string;

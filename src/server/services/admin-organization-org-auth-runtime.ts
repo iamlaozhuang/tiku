@@ -15,6 +15,7 @@ import {
   type AdminAuthOperationSortField,
   type EmployeeSummaryDto,
   type EmployeeImportResultDto,
+  type EmployeeTransferResultDto,
   type EmployeeMutationResultDto,
   type EmployeeUnbindResultDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
@@ -287,6 +288,25 @@ function normalizeEmployeeCreateInput(
     ? {
         userPublicId: value.userPublicId.trim(),
         organizationPublicId: value.organizationPublicId.trim(),
+      }
+    : null;
+}
+
+function normalizeEmployeeTransferInput(
+  input: unknown,
+): { targetOrganizationPublicId: string } | null {
+  if (typeof input !== "object" || input === null) {
+    return null;
+  }
+
+  const value = input as {
+    targetOrganizationPublicId?: unknown;
+  };
+
+  return typeof value.targetOrganizationPublicId === "string" &&
+    value.targetOrganizationPublicId.trim().length > 0
+    ? {
+        targetOrganizationPublicId: value.targetOrganizationPublicId.trim(),
       }
     : null;
 }
@@ -768,6 +788,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
       | "employee.create"
       | "employee.disable"
       | "employee.import"
+      | "employee.transfer"
       | "employee.unbind";
     targetPublicId: string | null;
     resultStatus: "success" | "failed";
@@ -893,6 +914,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
       | "employee.create"
       | "employee.disable"
       | "employee.import"
+      | "employee.transfer"
       | "employee.unbind",
     targetPublicId: string | null,
   ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
@@ -1687,6 +1709,94 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           return createJsonResponse(
             didDisable ? createSuccessResponse(null) : employeeNotFoundResponse,
           );
+        },
+      },
+      transfer: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireEmployeeManager(
+            request,
+            "employee.transfer",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.transferEmployee === undefined) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.transfer",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted employee transfer unavailable metadata",
+            });
+
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeEmployeeTransferInput(
+            await readRequestJson(request),
+          );
+
+          if (normalizedInput === null) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.transfer",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted employee transfer invalid input metadata",
+            });
+
+            return createJsonResponse(employeeInputInvalidResponse);
+          }
+
+          const result = await repositories.transferEmployee({
+            employeePublicId: publicId,
+            targetOrganizationPublicId:
+              normalizedInput.targetOrganizationPublicId,
+          });
+
+          await appendEmployeeAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "employee.transfer",
+            targetPublicId: publicId,
+            resultStatus:
+              result !== null && result.status === "transferred"
+                ? "success"
+                : "failed",
+            metadataSummary: "redacted employee transfer metadata",
+          });
+
+          if (result === null) {
+            return createJsonResponse(employeeNotFoundResponse);
+          }
+
+          if (result.status === "transferred") {
+            return createJsonResponse(
+              createSuccessResponse<EmployeeTransferResultDto>(result),
+            );
+          }
+
+          if (result.status === "target_organization_not_found") {
+            return createJsonResponse(organizationNotFoundResponse);
+          }
+
+          if (result.status === "same_organization") {
+            return createJsonResponse(employeeInputInvalidResponse);
+          }
+
+          if (result.status === "quota_insufficient") {
+            return createJsonResponse(orgAuthQuotaExceededResponse);
+          }
+
+          return createJsonResponse(employeeInputInvalidResponse);
         },
       },
       unbind: {
