@@ -112,6 +112,16 @@ Content non-AI publish smoke passes only if:
 - takedown blocks new learner starts while preserving historical status categories;
 - AI generation formal adoption is not rerun unless a later explicit task asks for it.
 
+Stage 4 result:
+
+- `0704-content-non-ai-publish-smoke`: closed by
+  `docs/05-execution-logs/evidence/2026-07-10-0704-content-non-ai-publish-smoke-evidence.md`.
+- Result category: `pass_targeted_content_non_ai_publish_contract_runtime_ui_and_localhost_api_smoke`.
+- Repair dependency: `0704-paper-list-content-guard-repair-2026-07-10` closed the `ops_admin` `papers_list` content
+  role guard finding before final Stage 4 rerun.
+- Rerun rule: do not rerun content AI formal adoption or write-heavy localhost content lifecycle unless later fresh
+  evidence requires it; Stage 4 localhost smoke remains read-only.
+
 ## Stage 5 Acceptance Standard
 
 Exception and degradation smoke passes only if:
