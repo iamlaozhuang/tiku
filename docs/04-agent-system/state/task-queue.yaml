@@ -1636,13 +1636,17 @@ activeTasks:
   - id: 0704-org-analytics-acceptance-2026-07-10
     title: 0704 organization analytics acceptance
     phase: 0704-org-analytics-acceptance-2026-07-10
-    status: pending
+    status: ready_for_closeout
+    result: pass_organization_scope_training_formal_separation_small_sample_privacy_no_quota_export_boundary
     priority: p1
     sequenceOrder: 10
     taskKind: validation_only_localhost_acceptance
     executionProfile: targeted_readiness_and_localhost_validation_only
     moduleRunVersion: 2
     branch: codex/0704-org-analytics-acceptance
+    claimedAt: "2026-07-10T11:52:40-07:00"
+    plannedAt: "2026-07-10T11:52:40-07:00"
+    readinessPreflight: pass_private_index_metadata_core_roles_9
     dependsOn:
       - 0704-org-training-edge-acceptance-rerun-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
@@ -1659,16 +1663,49 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-analytics-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
+      - corepack pnpm@10.26.1 vitest run tests/unit/organization-analytics-admin-entry-surface.test.ts src/server/contracts/organization-analytics-contract.test.ts src/server/models/organization-analytics.test.ts src/server/repositories/organization-analytics-repository.test.ts src/server/services/organization-analytics-service.test.ts src/server/validators/organization-analytics.test.ts src/server/services/organization-analytics-route.test.ts src/server/mappers/organization-analytics-mapper.test.ts
       - corepack pnpm@10.26.1 run lint
       - corepack pnpm@10.26.1 run typecheck
       - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-analytics-acceptance-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-analytics-acceptance-2026-07-10 -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    completedAt: "2026-07-10T11:56:44-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_organization_scope_training_formal_separation_small_sample_privacy_no_quota_export_markers
+      targetedTests: pass_8_files_72_tests
+      sensitiveEvidence: pass_redacted
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-content-non-ai-publish-acceptance-2026-07-10
     title: 0704 content non-AI publish acceptance
     phase: 0704-content-non-ai-publish-acceptance-2026-07-10

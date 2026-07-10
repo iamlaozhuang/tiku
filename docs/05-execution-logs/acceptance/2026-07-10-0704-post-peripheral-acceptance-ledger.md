@@ -48,7 +48,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     9 | `0704-org-training-edge-acceptance`            | closed  | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
 |    9R | `0704-org-training-deadline-answerability-fix` | closed  | `codex/0704-org-training-deadline-answerability-fix`    | Repair answer-deadline publish, persistence, visibility, draft, and submit closure.  |
 |   9.2 | `0704-org-training-edge-acceptance-rerun`      | closed  | `codex/0704-org-training-edge-acceptance-rerun`         | Rerun enterprise training edge validation after deadline repair.                     |
-|    10 | `0704-org-analytics-acceptance`                | pending | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
+|    10 | `0704-org-analytics-acceptance`                | closed  | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
 |    11 | `0704-content-non-ai-publish-acceptance`       | pending | `codex/0704-content-non-ai-publish-acceptance`          | Formal content non-AI publish/takedown/edit-copy/reference boundaries.               |
 |    12 | `0704-learner-non-ai-study-acceptance`         | pending | `codex/0704-learner-non-ai-study-acceptance`            | Ordinary learner practice, `mock_exam`, reports, mistake-book, and resume details.   |
 |    13 | `0704-role-routing-auth-context-acceptance`    | pending | `codex/0704-role-routing-auth-context-acceptance`       | Login routing, personal/org context choice, quota owner, and direct-route denial.    |
@@ -215,6 +215,8 @@ Additional validation-discovered repair gate:
 - Enterprise training metrics stay separate from formal learning aggregate signals.
 - Organization admins see summaries/status only, not employee raw answers or raw AI content.
 - Enterprise AI quota consumption summary remains hidden from organization admins in first release.
+
+Result 2026-07-10: closed by validation-only source/test acceptance. Evidence confirms scoped organization analytics, separated enterprise-training/formal-learning aggregates, redacted summary-only DTO boundaries, first-release export block, no production quota summary exposure, and 8 focused test files / 72 tests passing.
 
 ### 11. `0704-content-non-ai-publish-acceptance`
 

@@ -1,8 +1,32 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-org-training-edge-acceptance-rerun-2026-07-10
-updatedAt: "2026-07-10T11:42:30-07:00"
+currentPhase: 0704-org-analytics-acceptance-2026-07-10
+updatedAt: "2026-07-10T11:56:44-07:00"
+latest0704OrgAnalyticsAcceptance:
+  id: 0704-org-analytics-acceptance-2026-07-10
+  status: ready_for_closeout
+  result: pass_organization_scope_training_formal_separation_small_sample_privacy_no_quota_export_boundary
+  branch: codex/0704-org-analytics-acceptance
+  dependsOn: 0704-org-training-edge-acceptance-rerun-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-analytics-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-analytics-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-analytics-acceptance-audit.md
+  nextRequiredTaskId: 0704-content-non-ai-publish-acceptance-2026-07-10
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    sourceInspection: pass_organization_scope_training_formal_separation_small_sample_privacy_no_quota_export_markers
+    targetedTests: pass_8_files_72_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    stagingProdDeployExecuted: false
+    dependencyPackageLockfileChanged: false
 latest0704OrgTreeEmployeeTransferFix:
   id: 0704-org-tree-employee-transfer-fix-2026-07-10
   status: closed
@@ -3886,13 +3910,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-org-training-edge-acceptance-rerun-2026-07-10
-  title: 0704 organization training edge acceptance rerun
-  phase: 0704-org-training-edge-acceptance-rerun-2026-07-10
-  status: closed
-  priority: p0
+  id: 0704-org-analytics-acceptance-2026-07-10
+  title: 0704 organization analytics acceptance
+  phase: 0704-org-analytics-acceptance-2026-07-10
+  status: ready_for_closeout
+  result: pass_organization_scope_training_formal_separation_small_sample_privacy_no_quota_export_boundary
+  priority: p1
   taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-org-training-edge-acceptance-rerun
+  branch: codex/0704-org-analytics-acceptance
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3903,29 +3928,26 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T11:42:30-07:00"
-  claimedAt: "2026-07-10T11:42:30-07:00"
-  completedAt: "2026-07-10T11:47:00-07:00"
-  targetClosureItem: Rerun enterprise training edge acceptance after answer-deadline repair.
+  plannedAt: "2026-07-10T11:52:40-07:00"
+  claimedAt: "2026-07-10T11:52:40-07:00"
+  completedAt: "2026-07-10T11:56:44-07:00"
+  targetClosureItem: Validate organization analytics scope, aggregation, filters, summary-only privacy, no-quota exposure, and first-release export block.
   behaviorBoundary: validation_only_docs_state_evidence_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-rerun-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-rerun-audit.md
-  dependsOn: 0704-org-training-deadline-answerability-fix-2026-07-10
-  rerunAfterRepairTaskId: 0704-org-training-deadline-answerability-fix-2026-07-10
-  nextRequiredTaskId: 0704-org-analytics-acceptance-2026-07-10
-  blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-analytics-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-analytics-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-analytics-acceptance-audit.md
+  dependsOn: 0704-org-training-edge-acceptance-rerun-2026-07-10
+  nextRequiredTaskId: 0704-content-non-ai-publish-acceptance-2026-07-10
   validationSummary:
-    status: closed
     readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: pass_training_source_deadline_takedown_duplicate_formal_privacy_markers
-    targetedTests: pass_13_files_251_tests
+    sourceInspection: pass_organization_scope_training_formal_separation_small_sample_privacy_no_quota_export_markers
+    targetedTests: pass_8_files_72_tests
     scopedPrettierWrite: pass
     diffCheck: pass
     lint: pass
     typecheck: pass
-    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sensitiveEvidence: pass_redacted
     browserRuntimeExecuted: false
