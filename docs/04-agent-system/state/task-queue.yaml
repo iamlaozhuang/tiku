@@ -933,7 +933,7 @@ activeTasks:
   - id: 0704-org-tree-employee-transfer-fix-2026-07-10
     title: 0704 organization tree employee transfer mutation fix
     phase: 0704-org-tree-employee-transfer-fix-2026-07-10
-    status: ready_for_closeout
+    status: closed
     priority: p0
     sequenceOrder: 4.1
     taskKind: implementation_repair
@@ -1007,7 +1007,7 @@ activeTasks:
   - id: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
     title: 0704 organization tree auth inheritance acceptance rerun
     phase: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
-    status: pending
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 4.2
     taskKind: validation_only_localhost_acceptance
@@ -1066,6 +1066,20 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T09:36:41-07:00"
+    plannedAt: "2026-07-10T09:36:41-07:00"
+    completedAt: "2026-07-10T09:40:08-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_9_repaired_transfer_tree_auth_markers
+      targetedTests: pass_12_files_61_tests
+      scopedPrettierWrite: pass_unchanged
+      sensitiveEvidence: pass_redacted
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
   - id: 0704-org-admin-surface-acceptance-2026-07-10
     title: 0704 organization admin surface acceptance
     phase: 0704-org-admin-surface-acceptance-2026-07-10
