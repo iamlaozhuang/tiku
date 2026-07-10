@@ -1083,7 +1083,7 @@ activeTasks:
   - id: 0704-org-admin-surface-acceptance-2026-07-10
     title: 0704 organization admin surface acceptance
     phase: 0704-org-admin-surface-acceptance-2026-07-10
-    status: pending
+    status: ready_for_closeout
     priority: p1
     sequenceOrder: 5
     taskKind: validation_only_localhost_acceptance
@@ -1106,7 +1106,28 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-admin-surface-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
@@ -1116,6 +1137,20 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T09:52:09-07:00"
+    plannedAt: "2026-07-10T09:52:09-07:00"
+    completedAt: "2026-07-10T10:01:15-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_9_org_admin_surface_boundary_markers
+      targetedTests: pass_14_files_226_tests
+      scopedPrettierWrite: pass_unchanged
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sensitiveEvidence: pass_redacted
   - id: 0704-resource-rag-management-acceptance-2026-07-10
     title: 0704 resource RAG management acceptance
     phase: 0704-resource-rag-management-acceptance-2026-07-10

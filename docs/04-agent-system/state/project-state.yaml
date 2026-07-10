@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
-updatedAt: "2026-07-10T09:40:08-07:00"
+currentPhase: 0704-org-admin-surface-acceptance-2026-07-10
+updatedAt: "2026-07-10T10:01:15-07:00"
 latest0704OrgTreeEmployeeTransferFix:
   id: 0704-org-tree-employee-transfer-fix-2026-07-10
   status: closed
@@ -51,6 +51,30 @@ latest0704OrgTreeAuthInheritanceAcceptanceRerun:
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    stagingProdDeployExecuted: false
+latest0704OrgAdminSurfaceAcceptance:
+  id: 0704-org-admin-surface-acceptance-2026-07-10
+  status: ready_for_closeout
+  result: pass_org_admin_surface_separation_role_boundary_privacy_redaction
+  branch: codex/0704-org-admin-surface-acceptance
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-admin-surface-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-admin-surface-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-admin-surface-acceptance-audit.md
+  nextRequiredTaskId: 0704-resource-rag-management-acceptance-2026-07-10
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    sourceInspection: pass_9_org_admin_surface_boundary_markers
+    targetedTests: pass_14_files_226_tests
+    scopedPrettierWrite: pass_unchanged
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sensitiveEvidence: pass_redacted
     browserRuntimeExecuted: false
     directDatabaseConnectionExecuted: false
     providerCallExecuted: false
@@ -3713,13 +3737,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
-  title: 0704 organization tree auth inheritance acceptance rerun
-  phase: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
+  id: 0704-org-admin-surface-acceptance-2026-07-10
+  title: 0704 organization admin surface acceptance
+  phase: 0704-org-admin-surface-acceptance-2026-07-10
   status: ready_for_closeout
-  priority: p0
+  priority: p1
   taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-org-tree-auth-inheritance-acceptance-rerun
+  branch: codex/0704-org-admin-surface-acceptance
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3730,30 +3754,28 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T09:36:41-07:00"
-  claimedAt: "2026-07-10T09:36:41-07:00"
-  completedAt: "2026-07-10T09:40:08-07:00"
-  targetClosureItem: Rerun organization tree auth inheritance acceptance after employee transfer repair and prove affected transfer, quota, session, history, unbind, and scoped admin boundaries pass.
+  plannedAt: "2026-07-10T09:52:09-07:00"
+  claimedAt: "2026-07-10T09:52:09-07:00"
+  completedAt: "2026-07-10T10:01:15-07:00"
+  targetClosureItem: Prove organization admin surface separation, scoped read-only/status boundaries, advanced-only organization surfaces, and raw employee/AI/privacy exclusions.
   behaviorBoundary: validation_only_docs_state_evidence_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun-audit.md
-  rerunAfterRepairTaskId: 0704-org-tree-employee-transfer-fix-2026-07-10
-  nextRequiredTaskId: 0704-org-admin-surface-acceptance-2026-07-10
-  blockedContinueTaskId: 0704-org-admin-surface-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-admin-surface-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-admin-surface-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-admin-surface-acceptance-audit.md
+  nextRequiredTaskId: 0704-resource-rag-management-acceptance-2026-07-10
   validationSummary:
-    status: pass_after_employee_transfer_repair
+    status: pass_org_admin_surface_separation_role_boundary_privacy_redaction
     readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: pass_9_repaired_transfer_tree_auth_markers
-    targetedTests: pass_12_files_61_tests
+    sourceInspection: pass_9_org_admin_surface_boundary_markers
+    targetedTests: pass_14_files_226_tests
     scopedPrettierWrite: pass_unchanged
-    sensitiveEvidence: pass_redacted
     diffCheck: pass
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    sensitiveEvidence: pass_redacted
     browserRuntimeExecuted: false
     directDatabaseConnectionExecuted: false
     providerCallExecuted: false

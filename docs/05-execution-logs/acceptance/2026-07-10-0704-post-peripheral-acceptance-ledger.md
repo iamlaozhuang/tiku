@@ -41,7 +41,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     4 | `0704-org-tree-auth-inheritance-acceptance`   | closed  | `codex/0704-org-tree-auth-inheritance-acceptance`       | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
 |    4R | `0704-org-tree-employee-transfer-fix`         | closed  | `codex/0704-org-tree-employee-transfer-fix`             | Repair employee transfer mutation, quota/session/history convergence, and rerun.     |
 |   4.2 | `0704-org-tree-auth-inheritance-rerun`        | closed  | `codex/0704-org-tree-auth-inheritance-acceptance-rerun` | Rerun affected organization tree/auth inheritance validation after repair.           |
-|     5 | `0704-org-admin-surface-acceptance`           | pending | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
+|     5 | `0704-org-admin-surface-acceptance`           | closed  | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
 |     6 | `0704-resource-rag-management-acceptance`     | pending | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
 |     7 | `0704-model-prompt-log-governance-acceptance` | pending | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
 |     8 | `0704-audit-privacy-governance-acceptance`    | pending | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
@@ -145,6 +145,9 @@ Additional validation-discovered repair gate:
   global `redeem_code`, or global `org_auth`.
 - Organization admins cannot view employee learner AI raw results, raw answers, raw generated content, Provider payloads,
   raw Prompt text, or global AI task payloads.
+- 2026-07-10 result: closed. Source markers and focused tests validated standard/read-only organization admin surfaces,
+  advanced-only organization training/analytics/AI surfaces, direct-route denied/unavailable states, global
+  operations/content/model/Prompt/log exclusion, and raw employee/AI privacy redaction boundaries.
 
 ### 6. `0704-resource-rag-management-acceptance`
 
