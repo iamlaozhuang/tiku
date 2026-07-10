@@ -61,14 +61,16 @@ Source: `docs/05-execution-logs/evidence/2026-07-10-0704-role-credential-catalog
 
 Source: `docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md`.
 
-The next approved validation sequence is:
+Current sequence status:
 
-1. `0704-authorization-lifecycle-acceptance`
-2. `0704-org-multitenancy-boundary-acceptance`
-3. `0704-non-ai-learning-smoke`
-4. `0704-content-non-ai-publish-smoke`
-5. `0704-exception-degradation-smoke`
-6. `0704-release-candidate-local-gates`
+| Order | Task id                                     | Status | Evidence                                                         |
+| ----: | ------------------------------------------- | ------ | ---------------------------------------------------------------- |
+|     1 | `0704-authorization-lifecycle-acceptance`   | closed | `2026-07-10-0704-authorization-lifecycle-acceptance-evidence.md` |
+|     2 | `0704-org-multitenancy-boundary-acceptance` | next   | pending                                                          |
+|     3 | `0704-non-ai-learning-smoke`                | queued | pending                                                          |
+|     4 | `0704-content-non-ai-publish-smoke`         | queued | pending                                                          |
+|     5 | `0704-exception-degradation-smoke`          | queued | pending                                                          |
+|     6 | `0704-release-candidate-local-gates`        | queued | pending                                                          |
 
 ## Operating Rule
 
@@ -84,5 +86,6 @@ Before any later 0704 business validation:
 ## Result
 
 Current recommendation: do not repeat the closed no-rerun chains. The planned incremental AI smoke backlog is closed.
-Continue with the post-AI acceptance roadmap stages above. `0704-enterprise-training-smoke` remains optional only if a
-later fresh integration risk appears or the user explicitly requests it.
+Continue with `0704-org-multitenancy-boundary-acceptance` as the next post-AI roadmap stage.
+`0704-enterprise-training-smoke` remains optional only if a later fresh integration risk appears or the user explicitly
+requests it.

@@ -54,6 +54,14 @@ Stop conditions:
   approved;
 - observed behavior contradicts ADR-007 or edition-aware authorization requirements.
 
+Stage result:
+
+- `0704-authorization-lifecycle-acceptance`: closed by
+  `docs/05-execution-logs/evidence/2026-07-10-0704-authorization-lifecycle-acceptance-evidence.md`.
+- Result category: `pass_targeted_authorization_lifecycle_contract_smoke`.
+- Rerun rule: no full 0704 AI or enterprise-training chain rerun; use this stage as the current authorization lifecycle
+  gate unless a later task records fresh contrary evidence.
+
 ## Stage 2 Acceptance Standard
 
 Organization and multitenancy boundary validation passes only if:
