@@ -47,7 +47,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     8 | `0704-audit-privacy-governance-acceptance`     | closed  | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
 |     9 | `0704-org-training-edge-acceptance`            | closed  | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
 |    9R | `0704-org-training-deadline-answerability-fix` | closed  | `codex/0704-org-training-deadline-answerability-fix`    | Repair answer-deadline publish, persistence, visibility, draft, and submit closure.  |
-|   9.2 | `0704-org-training-edge-acceptance-rerun`      | pending | `codex/0704-org-training-edge-acceptance-rerun`         | Rerun enterprise training edge validation after deadline repair.                     |
+|   9.2 | `0704-org-training-edge-acceptance-rerun`      | closed  | `codex/0704-org-training-edge-acceptance-rerun`         | Rerun enterprise training edge validation after deadline repair.                     |
 |    10 | `0704-org-analytics-acceptance`                | pending | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
 |    11 | `0704-content-non-ai-publish-acceptance`       | pending | `codex/0704-content-non-ai-publish-acceptance`          | Formal content non-AI publish/takedown/edit-copy/reference boundaries.               |
 |    12 | `0704-learner-non-ai-study-acceptance`         | pending | `codex/0704-learner-non-ai-study-acceptance`            | Ordinary learner practice, `mock_exam`, reports, mistake-book, and resume details.   |
@@ -203,6 +203,9 @@ Additional validation-discovered repair gate:
   from admin publish input through service normalization, published-version persistence, repository mapping, DTO output,
   employee visible-list filtering, and employee draft/submit answerability. Rerun task 9.2 remains required before
   continuing to organization analytics.
+- 2026-07-10 rerun result: closed after repair. Source markers and focused tests validated training source categories,
+  first-release `mock_exam` source denial, evidence gating, publish/version/takedown lifecycle, deadline answerability,
+  duplicate-submit blocking, formal-domain separation, and admin/employee privacy boundaries.
 
 ### 10. `0704-org-analytics-acceptance`
 

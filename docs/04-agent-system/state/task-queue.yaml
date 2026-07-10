@@ -1561,13 +1561,17 @@ activeTasks:
   - id: 0704-org-training-edge-acceptance-rerun-2026-07-10
     title: 0704 organization training edge acceptance rerun
     phase: 0704-org-training-edge-acceptance-rerun-2026-07-10
-    status: pending
+    status: closed
     priority: p0
     sequenceOrder: 9.2
     taskKind: validation_only_localhost_acceptance
     executionProfile: targeted_readiness_and_localhost_validation_only
     moduleRunVersion: 2
     branch: codex/0704-org-training-edge-acceptance-rerun
+    claimedAt: "2026-07-10T11:42:30-07:00"
+    plannedAt: "2026-07-10T11:42:30-07:00"
+    completedAt: "2026-07-10T11:47:00-07:00"
+    readinessPreflight: pass_private_index_metadata_core_roles_9
     dependsOn:
       - 0704-org-training-deadline-answerability-fix-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
@@ -1609,11 +1613,25 @@ activeTasks:
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
+      - corepack pnpm@10.26.1 vitest run src/db/schema/organization-training.test.ts src/server/validators/organization-training.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts src/server/mappers/organization-training-mapper.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/services/ai-paper-source-adapter-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-plan-select-wiring-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts
       - corepack pnpm@10.26.1 run lint
       - corepack pnpm@10.26.1 run typecheck
       - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-training-edge-acceptance-rerun-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-training-edge-acceptance-rerun-2026-07-10 -SkipRemoteAheadCheck
+    validationResults:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_training_source_deadline_takedown_duplicate_formal_privacy_markers
+      targetedTests: pass_13_files_251_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sensitiveEvidence: pass_redacted
+      directDatabaseConnection: not_executed
+      providerCall: not_executed
+      browserRuntime: not_executed
     closeoutPolicy: *post_peripheral_closeout_policy
   - id: 0704-org-analytics-acceptance-2026-07-10
     title: 0704 organization analytics acceptance
