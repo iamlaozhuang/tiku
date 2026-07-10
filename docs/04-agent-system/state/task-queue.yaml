@@ -363,7 +363,7 @@ activeTasks:
   - id: 0704-org-multitenancy-boundary-acceptance-2026-07-10
     title: 0704 organization multitenancy boundary acceptance
     phase: 0704-org-multitenancy-boundary-acceptance-2026-07-10
-    status: ready_for_closeout
+    status: closed
     result: pass_targeted_org_multitenancy_boundary_contract_and_localhost_api_smoke
     priority: p1
     taskKind: validation_only_localhost_acceptance
@@ -514,9 +514,13 @@ activeTasks:
   - id: 0704-non-ai-learning-smoke-2026-07-10
     title: 0704 non-AI learning smoke
     phase: 0704-non-ai-learning-smoke-2026-07-10
-    status: pending
+    status: ready_for_closeout
+    result: pass_targeted_non_ai_learning_contract_runtime_ui_and_localhost_api_smoke
     priority: p1
     taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_unit_contract_runtime_ui_smoke_redacted_readiness_and_localhost_api_status_only
+    validationPolicy: redacted_readiness_targeted_vitest_prettier_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
     dependsOn:
       - 0704-org-multitenancy-boundary-acceptance-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md
@@ -524,6 +528,144 @@ activeTasks:
     branch: codex/0704-non-ai-learning-smoke
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true
+    humanApprovalBoundary:
+      implementationAndCloseout: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      providerExecution: blocked
+      destructiveDbOperation: blocked
+      credentialMaterialOutput: blocked
+      screenshotRawDom: blocked
+      directDatabaseConnection: blocked
+    plannedAt: "2026-07-10T00:00:00-07:00"
+    claimedAt: "2026-07-10T00:00:00-07:00"
+    targetClosureItem: Validate 0704 ordinary learning coverage after AI closure for personal and employee learners without AI rerun or sensitive learning-content evidence.
+    behaviorBoundary: docs_state_evidence_plus_targeted_unit_contract_runtime_ui_smoke_and_redacted_localhost_api_smoke_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_screenshot_no_raw_dom_no_db_connection_no_db_mutation_no_staging_prod_deploy_no_cost_calibration
+    evidenceMode: redacted_role_label_route_label_status_category_authorization_context_category_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_analysis_standard_answer_report_snapshot_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-non-ai-learning-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-non-ai-learning-smoke-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-non-ai-learning-smoke-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-non-ai-learning-smoke.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-non-ai-learning-smoke-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-non-ai-learning-smoke-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-acceptance-coverage-ledger.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - src/server/models/student-experience.test.ts
+      - src/server/services/student-paper-service.test.ts
+      - src/server/services/student-paper-route.test.ts
+      - src/server/mappers/student-paper-mapper.test.ts
+      - src/server/validators/student-paper.test.ts
+      - src/server/services/practice-service.test.ts
+      - src/server/services/practice-route.test.ts
+      - src/server/mappers/practice-mapper.test.ts
+      - src/server/validators/practice.test.ts
+      - src/server/services/mock-exam-service.test.ts
+      - src/server/services/mock-exam-route.test.ts
+      - src/server/mappers/mock-exam-mapper.test.ts
+      - src/server/validators/mock-exam.test.ts
+      - src/server/services/exam-report-service.test.ts
+      - src/server/services/exam-report-route.test.ts
+      - src/server/mappers/exam-report-mapper.test.ts
+      - src/server/validators/exam-report.test.ts
+      - src/server/services/mistake-book-service.test.ts
+      - src/server/services/mistake-book-route.test.ts
+      - src/server/repositories/mistake-book-repository.test.ts
+      - src/server/mappers/mistake-book-mapper.test.ts
+      - src/server/validators/mistake-book.test.ts
+      - src/server/services/authorization-paper-mock-exam-access-context-service.test.ts
+      - src/server/services/paper-mock-exam-scope-service.test.ts
+      - src/server/validators/paper-mock-exam-scope.test.ts
+      - tests/unit/phase-8-student-mistake-book-runtime.test.ts
+      - tests/unit/student-practice-ui.test.ts
+      - tests/unit/student-mock-exam-report-ui.test.ts
+      - tests/unit/student-mistake-book-ui.test.ts
+      - tests/unit/local-business-flow-mock-exam-isolation.test.ts
+      - D:/tiku-local-private/acceptance/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: approved_targeted_contract_runtime_ui_smoke_only
+      browserRuntime: blocked
+      devServer: approved_existing_localhost_readiness_and_api_status_only
+      privateAccountInMemoryUse: approved_redacted_catalog_preflight_only
+      productLoginSessionProbe: approved_redacted_readiness_only
+      productRouteRead: approved_status_categories_only
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/server/models/student-experience.test.ts src/server/services/student-paper-service.test.ts src/server/services/student-paper-route.test.ts src/server/mappers/student-paper-mapper.test.ts src/server/validators/student-paper.test.ts src/server/services/practice-service.test.ts src/server/services/practice-route.test.ts src/server/mappers/practice-mapper.test.ts src/server/validators/practice.test.ts src/server/services/mock-exam-service.test.ts src/server/services/mock-exam-route.test.ts src/server/mappers/mock-exam-mapper.test.ts src/server/validators/mock-exam.test.ts src/server/services/exam-report-service.test.ts src/server/services/exam-report-route.test.ts src/server/mappers/exam-report-mapper.test.ts src/server/validators/exam-report.test.ts src/server/services/mistake-book-service.test.ts src/server/services/mistake-book-route.test.ts src/server/repositories/mistake-book-repository.test.ts src/server/mappers/mistake-book-mapper.test.ts src/server/validators/mistake-book.test.ts src/server/services/authorization-paper-mock-exam-access-context-service.test.ts src/server/services/paper-mock-exam-scope-service.test.ts src/server/validators/paper-mock-exam-scope.test.ts tests/unit/phase-8-student-mistake-book-runtime.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts tests/unit/local-business-flow-mock-exam-isolation.test.ts
+      - corepack pnpm@10.26.1 exec prettier --check --ignore-unknown docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/project-state.yaml docs/05-execution-logs/task-plans/2026-07-10-0704-non-ai-learning-smoke.md docs/05-execution-logs/evidence/2026-07-10-0704-non-ai-learning-smoke-evidence.md docs/05-execution-logs/audits-reviews/2026-07-10-0704-non-ai-learning-smoke-audit.md docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md docs/05-execution-logs/acceptance/2026-07-10-0704-acceptance-coverage-ledger.md
+      - git diff --check
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-non-ai-learning-smoke-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-non-ai-learning-smoke-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+    validationSummary:
+      status: passed
+      redactedReadinessPreflight: pass_all_9_core_roles_ready_0704_verified
+      targetedNonAiLearningSmoke: pass_30_files_204_tests
+      localhostApiSmoke: pass_16_route_checks
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      diffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_state_sha_ancestor
   - id: 0704-content-non-ai-publish-smoke-2026-07-10
     title: 0704 content non-AI publish smoke
     phase: 0704-content-non-ai-publish-smoke-2026-07-10

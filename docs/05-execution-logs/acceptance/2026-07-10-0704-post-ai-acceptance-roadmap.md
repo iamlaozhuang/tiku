@@ -93,6 +93,14 @@ Non-AI learning smoke passes only if:
 - authorization loss, paper takedown, or account/organization disable terminates in-progress work by status category;
 - evidence records no full stem, answer, analysis, report snapshot, or raw answer content.
 
+Stage result:
+
+- `0704-non-ai-learning-smoke`: closed by
+  `docs/05-execution-logs/evidence/2026-07-10-0704-non-ai-learning-smoke-evidence.md`.
+- Result category: `pass_targeted_non_ai_learning_contract_runtime_ui_and_localhost_api_smoke`.
+- Rerun rule: no AI generation, full browser E2E, or write-heavy learning chain rerun; use this stage as the current
+  ordinary learning gate unless a later task records fresh contrary evidence.
+
 ## Stage 4 Acceptance Standard
 
 Content non-AI publish smoke passes only if:

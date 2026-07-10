@@ -43,6 +43,7 @@ Source: `docs/05-execution-logs/evidence/2026-07-10-0704-role-credential-catalog
 | Standard personal and standard employee AI denial          | closed | no full rerun  | `2026-07-09-learner-ai-0704-account-readiness-evidence.md`, `2026-07-09-content-ai-0704-final-localhost-acceptance.md`, `2026-07-04-full-chain-scenario-8-standard-personal-learning.md`, `2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md` |
 | Standard personal ordinary learning                        | closed | no full rerun  | `2026-07-04-full-chain-scenario-8-standard-personal-learning.md`, `2026-05-23-phase-9-student-practice-runtime-completion.md`, `2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md`, `2026-05-22-phase-8-student-mistake-book-runtime.md`                                                             |
 | Standard employee ordinary learning                        | closed | no full rerun  | `2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md`                                                                                                                                                                                           |
+| Non-AI learning post-AI smoke                              | closed | no full rerun  | `2026-07-10-0704-non-ai-learning-smoke-evidence.md`, `2026-07-04-full-chain-scenario-8-standard-personal-learning.md`, `2026-07-04-full-chain-scenario-10-standard-employee-learning-rerun-after-duplicate-active-practice-state-provisioning.md`                                                                    |
 | Organization AI to enterprise training draft               | closed | smoke only     | `2026-07-06-organization-ai-training-closed-loop.md`, `2026-07-08-org-ai-question-to-training-draft.md`, `2026-07-08-org-ai-paper-to-training-draft.md`, `2026-07-08-org-ai-training-loop-regression.md`                                                                                                             |
 | Enterprise training employee answer and analytics          | closed | smoke only     | `2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md`, `2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md`                                                                                    |
 | Backend role/workspace isolation                           | closed | no full rerun  | `2026-07-05-admin-permission-session-contract-cleanup.md`, `2026-07-07-organization-admin-training-ai-cleanup-evidence.md`, `2026-07-09-content-ai-local-e2e-regression.md`                                                                                                                                          |
@@ -68,8 +69,8 @@ Current sequence status:
 | ----: | ------------------------------------------- | ------ | ------------------------------------------------------------------ |
 |     1 | `0704-authorization-lifecycle-acceptance`   | closed | `2026-07-10-0704-authorization-lifecycle-acceptance-evidence.md`   |
 |     2 | `0704-org-multitenancy-boundary-acceptance` | closed | `2026-07-10-0704-org-multitenancy-boundary-acceptance-evidence.md` |
-|     3 | `0704-non-ai-learning-smoke`                | next   | pending                                                            |
-|     4 | `0704-content-non-ai-publish-smoke`         | queued | pending                                                            |
+|     3 | `0704-non-ai-learning-smoke`                | closed | `2026-07-10-0704-non-ai-learning-smoke-evidence.md`                |
+|     4 | `0704-content-non-ai-publish-smoke`         | next   | pending                                                            |
 |     5 | `0704-exception-degradation-smoke`          | queued | pending                                                            |
 |     6 | `0704-release-candidate-local-gates`        | queued | pending                                                            |
 
@@ -87,6 +88,6 @@ Before any later 0704 business validation:
 ## Result
 
 Current recommendation: do not repeat the closed no-rerun chains. The planned incremental AI smoke backlog is closed.
-Continue with `0704-non-ai-learning-smoke` as the next post-AI roadmap stage after stage 2 closeout.
+Continue with `0704-content-non-ai-publish-smoke` as the next post-AI roadmap stage after stage 3 closeout.
 `0704-enterprise-training-smoke` remains optional only if a later fresh integration risk appears or the user explicitly
 requests it.
