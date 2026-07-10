@@ -57,6 +57,19 @@ Source: `docs/05-execution-logs/evidence/2026-07-10-0704-role-credential-catalog
 | 3        | `0704-rag-citation-smoke`        | closed        | `knowledge_node`, resource, citation, and `evidence_status` propagation in AI/RAG surfaces.                                                   | Closed by targeted contract smoke; Provider-enabled execution remains blocked.                    |
 | 4        | `0704-enterprise-training-smoke` | optional      | Minimal current-catalog role smoke for enterprise training visibility, standard denial, answerability, and aggregate-only admin visibility.   | Run only if the previous three tasks reveal a fresh integration risk or user explicitly requests. |
 
+## Post-AI Acceptance Roadmap
+
+Source: `docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md`.
+
+The next approved validation sequence is:
+
+1. `0704-authorization-lifecycle-acceptance`
+2. `0704-org-multitenancy-boundary-acceptance`
+3. `0704-non-ai-learning-smoke`
+4. `0704-content-non-ai-publish-smoke`
+5. `0704-exception-degradation-smoke`
+6. `0704-release-candidate-local-gates`
+
 ## Operating Rule
 
 Before any later 0704 business validation:
@@ -70,6 +83,6 @@ Before any later 0704 business validation:
 
 ## Result
 
-Current recommendation: do not repeat the closed no-rerun chains. The planned incremental smoke backlog is closed.
-`0704-enterprise-training-smoke` remains optional only if a later fresh integration risk appears or the user explicitly
-requests it.
+Current recommendation: do not repeat the closed no-rerun chains. The planned incremental AI smoke backlog is closed.
+Continue with the post-AI acceptance roadmap stages above. `0704-enterprise-training-smoke` remains optional only if a
+later fresh integration risk appears or the user explicitly requests it.
