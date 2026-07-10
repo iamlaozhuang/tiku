@@ -53,7 +53,7 @@ Source: `docs/05-execution-logs/evidence/2026-07-10-0704-role-credential-catalog
 | Priority | Task id                          | Status target | Scope                                                                                                                                         | Rerun rule                                                                                        |
 | -------- | -------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | 1        | `0704-log-privacy-smoke`         | closed        | Admin-visible log/privacy surfaces: redacted references, summaries, employee learner AI raw boundary, no raw answer or raw generated content. | Closed by targeted log/privacy contract smoke; no full training or learner AI generation rerun.   |
-| 2        | `0704-history-recovery-smoke`    | pending       | AI出题/AI组卷 history recovery, refresh/re-login/resume categories for advanced learner and employee contexts.                                | Only recover existing records; do not create fresh Provider output or formal practice records.    |
+| 2        | `0704-history-recovery-smoke`    | closed        | AI出题/AI组卷 history recovery, refresh/re-login/resume categories for advanced learner and employee contexts.                                | Closed by targeted history recovery contract smoke; no fresh Provider output or formal practice.  |
 | 3        | `0704-rag-citation-smoke`        | closed        | `knowledge_node`, resource, citation, and `evidence_status` propagation in AI/RAG surfaces.                                                   | Closed by targeted contract smoke; Provider-enabled execution remains blocked.                    |
 | 4        | `0704-enterprise-training-smoke` | optional      | Minimal current-catalog role smoke for enterprise training visibility, standard denial, answerability, and aggregate-only admin visibility.   | Run only if the previous three tasks reveal a fresh integration risk or user explicitly requests. |
 
@@ -70,5 +70,6 @@ Before any later 0704 business validation:
 
 ## Result
 
-Current recommendation: do not repeat the closed no-rerun chains. Continue with the remaining incremental smoke backlog:
-history recovery.
+Current recommendation: do not repeat the closed no-rerun chains. The planned incremental smoke backlog is closed.
+`0704-enterprise-training-smoke` remains optional only if a later fresh integration risk appears or the user explicitly
+requests it.
