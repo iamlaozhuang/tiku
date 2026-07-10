@@ -2151,7 +2151,7 @@ activeTasks:
   - id: 0704-summary-archive-decision-framework-2026-07-10
     title: 0704 summary archive decision framework
     phase: 0704-summary-archive-decision-framework-2026-07-10
-    status: ready_for_closeout
+    status: closed
     result: pass_0704_localhost_summary_archive_and_preview_decision_framework
     priority: p1
     sequenceOrder: 17
@@ -2243,6 +2243,114 @@ activeTasks:
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_state_sha_ancestor
+  - id: 0704-project-reality-preview-readiness-assessment-2026-07-10
+    title: 0704 project reality preview readiness assessment
+    phase: 0704-project-reality-preview-readiness-assessment-2026-07-10
+    status: ready_for_closeout
+    result: defer_preview_execution_go_to_preview_preparation_gates_only
+    priority: p1
+    sequenceOrder: 18
+    taskKind: docs_readonly_preview_readiness_assessment
+    executionProfile: docs_state_acceptance_assessment_only
+    moduleRunVersion: 2
+    branch: codex/0704-project-reality-preview-readiness-assessment
+    dependsOn:
+      - 0704-summary-archive-decision-framework-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-project-reality-preview-readiness-assessment.md
+    assessmentPath: docs/05-execution-logs/acceptance/2026-07-10-0704-project-reality-preview-readiness-assessment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-project-reality-preview-readiness-assessment-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-project-reality-preview-readiness-assessment-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-project-reality-preview-readiness-assessment.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-project-reality-preview-readiness-assessment.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-project-reality-preview-readiness-assessment-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-project-reality-preview-readiness-assessment-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_only
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: blocked_not_needed_for_assessment
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_file_path_task_id_status_category_decision_category_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_project_reality_preview_readiness_assessment_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_project_reality_preview_readiness_assessment_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_project_reality_preview_readiness_assessment_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_project_reality_preview_readiness_assessment_commit_merge_push_cleanup_2026_07_10
+    plannedAt: "2026-07-10T14:55:00-07:00"
+    claimedAt: "2026-07-10T14:55:00-07:00"
+    validationSummary:
+      readinessPreflight: not_needed_docs_readonly_assessment
+      assessmentReview: pass_defer_preview_execution_go_to_preparation_gates_only
+      sensitiveEvidence: pass_redacted
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_sha_checkpoint_alignment
   - id: 0704-post-ai-acceptance-roadmap-2026-07-10
     title: 0704 post-AI acceptance roadmap
     phase: 0704-post-ai-acceptance-roadmap-2026-07-10
