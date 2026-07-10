@@ -118,6 +118,7 @@ function createDraftStore() {
         totalScore: versionWrite.totalScore,
         status: versionWrite.status,
         publishedAt: versionWrite.publishedAt,
+        answerDeadlineAt: versionWrite.answerDeadlineAt,
         takenDownAt: versionWrite.takenDownAt,
         takedownReason: versionWrite.takedownReason,
       };
@@ -143,6 +144,7 @@ function createDraftStore() {
         totalScore: 5,
         status: takedownWrite.status,
         publishedAt: "2026-06-15T19:20:13.000Z",
+        answerDeadlineAt: null,
         takenDownAt: takedownWrite.takenDownAt,
         takedownReason: takedownWrite.takedownReason,
       };
@@ -374,6 +376,7 @@ function createPublishedVersion(
     totalScore: 5,
     status: "published",
     publishedAt: fixedNow.toISOString(),
+    answerDeadlineAt: null,
     takenDownAt: null,
     takedownReason: null,
     ...overrides,
@@ -1499,6 +1502,7 @@ describe("organization training service", () => {
       totalScore: 5,
       status: "published",
       publishedAt: fixedNow.toISOString(),
+      answerDeadlineAt: null,
       takenDownAt: null,
       takedownReason: null,
     };
@@ -1544,6 +1548,7 @@ describe("organization training service", () => {
         },
         status: "published",
         publishedAt: fixedNow.toISOString(),
+        answerDeadlineAt: null,
         takenDownAt: null,
         takedownReason: null,
         questionSnapshot: publishInput.questions,
@@ -1556,6 +1561,31 @@ describe("organization training service", () => {
     ).not.toContain("organization_other_public_999");
     expect("authorizationSource" in result.version).toBe(false);
     expect("authorizationPublicId" in result.version).toBe(false);
+  });
+
+  it("carries optional answer deadline through publish version writes and DTOs", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+    const answerDeadlineAt = "2026-06-20T12:00:00.000Z";
+
+    const result = await service.publishVersion({
+      publishInput: createPublishInput({
+        answerDeadlineAt,
+      } as Partial<OrganizationTrainingPublishInput>),
+      persistenceLineage: createPersistenceLineage(),
+    });
+
+    expect(result).toEqual({
+      success: true,
+      version: expect.objectContaining({
+        publicId: "training_version_public_123",
+        answerDeadlineAt,
+      }),
+    });
+    expect(getPublishedVersions()).toEqual([
+      expect.objectContaining({
+        answerDeadlineAt,
+      }),
+    ]);
   });
 
   it("passes internal organization and org_auth lineage to the publish store without exposing it in the DTO", async () => {
@@ -2081,6 +2111,7 @@ describe("organization training service", () => {
         totalScore: 5,
         status: "taken_down",
         publishedAt: fixedNow.toISOString(),
+        answerDeadlineAt: null,
         takenDownAt: fixedNow.toISOString(),
         takedownReason: "outdated training",
       },
@@ -2308,6 +2339,50 @@ describe("organization training service", () => {
     expect(result).toEqual({
       success: true,
       versions: [createPublishedVersion()],
+    });
+  });
+
+  it("excludes expired answer-deadline training from employee visible versions while keeping no-deadline training answerable", async () => {
+    const { service } = createServiceFixture();
+
+    const result = await service.listEmployeeVisibleVersions({
+      employeeContext: {
+        employeePublicId: "employee_public_123",
+        currentOrganizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      sourceVersions: [
+        createPublishedVersion({
+          publicId: "training_version_future_deadline_public_123",
+          answerDeadlineAt: "2026-06-16T00:00:00.000Z",
+        }),
+        createPublishedVersion({
+          publicId: "training_version_expired_deadline_public_456",
+          answerDeadlineAt: "2026-06-15T00:00:00.000Z",
+        }),
+        createPublishedVersion({
+          publicId: "training_version_no_deadline_public_789",
+          answerDeadlineAt: null,
+        }),
+      ],
+    });
+
+    expect(result).toEqual({
+      success: true,
+      versions: [
+        createPublishedVersion({
+          publicId: "training_version_future_deadline_public_123",
+          answerDeadlineAt: "2026-06-16T00:00:00.000Z",
+        }),
+        createPublishedVersion({
+          publicId: "training_version_no_deadline_public_789",
+          answerDeadlineAt: null,
+        }),
+      ],
     });
   });
 
@@ -2548,6 +2623,59 @@ describe("organization training service", () => {
         },
       },
     ]);
+  });
+
+  it("blocks employee draft save and submit after the answer deadline expires", async () => {
+    const { service, getSavedAnswerDrafts, getSubmittedAnswers } =
+      createServiceFixture();
+    const expiredVersion = createPublishedVersion({
+      answerDeadlineAt: "2026-06-15T00:00:00.000Z",
+    });
+    const employeeContext = {
+      employeePublicId: "employee_public_123",
+      currentOrganizationPublicId: "organization_branch_public_456",
+      visibleOrganizationPublicIds: [
+        "organization_branch_public_456",
+        "organization_public_123",
+      ],
+      authorizationContext: createAdvancedOrgAuthContext(),
+    };
+
+    const draftResult = await service.saveEmployeeAnswerDraft({
+      employeeContext,
+      version: expiredVersion,
+      answerInput: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 1,
+      },
+      existingAnswer: null,
+    });
+    const submitResult = await service.submitEmployeeAnswer({
+      employeeContext,
+      version: expiredVersion,
+      answerInput: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      },
+      existingAnswer: null,
+    });
+
+    expect(draftResult).toEqual({
+      success: false,
+      reason: "answer_deadline_expired",
+      message: "Organization training employee answer is blocked.",
+    });
+    expect(submitResult).toEqual({
+      success: false,
+      reason: "answer_deadline_expired",
+      message: "Organization training employee answer is blocked.",
+    });
+    expect(getSavedAnswerDrafts()).toEqual([]);
+    expect(getSubmittedAnswers()).toEqual([]);
   });
 
   it("submits an employee answer once and blocks duplicate official submission", async () => {

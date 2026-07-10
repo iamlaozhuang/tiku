@@ -46,7 +46,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     7 | `0704-model-prompt-log-governance-acceptance`  | closed  | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
 |     8 | `0704-audit-privacy-governance-acceptance`     | closed  | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
 |     9 | `0704-org-training-edge-acceptance`            | closed  | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
-|    9R | `0704-org-training-deadline-answerability-fix` | pending | `codex/0704-org-training-deadline-answerability-fix`    | Repair answer-deadline publish, persistence, visibility, draft, and submit closure.  |
+|    9R | `0704-org-training-deadline-answerability-fix` | closed  | `codex/0704-org-training-deadline-answerability-fix`    | Repair answer-deadline publish, persistence, visibility, draft, and submit closure.  |
 |   9.2 | `0704-org-training-edge-acceptance-rerun`      | pending | `codex/0704-org-training-edge-acceptance-rerun`         | Rerun enterprise training edge validation after deadline repair.                     |
 |    10 | `0704-org-analytics-acceptance`                | pending | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
 |    11 | `0704-content-non-ai-publish-acceptance`       | pending | `codex/0704-content-non-ai-publish-acceptance`          | Formal content non-AI publish/takedown/edit-copy/reference boundaries.               |
@@ -199,6 +199,10 @@ Additional validation-discovered repair gate:
 - 2026-07-10 initial validation result: blocked. Source inspection found `answerDeadlineAt` visible in DTO/UI status
   categories but not carried through publish input, persistence, repository selection, or service answerability. Existing
   focused tests passed, but deadline acceptance cannot close until repair and rerun.
+- 2026-07-10 repair result: `0704-org-training-deadline-answerability-fix` closed locally. `answerDeadlineAt` now flows
+  from admin publish input through service normalization, published-version persistence, repository mapping, DTO output,
+  employee visible-list filtering, and employee draft/submit answerability. Rerun task 9.2 remains required before
+  continuing to organization analytics.
 
 ### 10. `0704-org-analytics-acceptance`
 

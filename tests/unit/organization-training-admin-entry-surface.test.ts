@@ -1861,6 +1861,9 @@ describe("AdminOrganizationTrainingPage", () => {
     fireEvent.change(publishForm.getByLabelText("第 1 题解析"), {
       target: { value: "synthetic reviewed analysis" },
     });
+    fireEvent.change(publishForm.getByLabelText("作答截止时间"), {
+      target: { value: "2026-07-08T12:00:00.000Z" },
+    });
 
     fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -1924,6 +1927,7 @@ describe("AdminOrganizationTrainingPage", () => {
       title: "AI 生成训练草稿",
       questionCount: 1,
       totalScore: 5,
+      answerDeadlineAt: "2026-07-08T12:00:00.000Z",
       questionTypeSummary: {
         singleChoice: 1,
         multiChoice: 0,

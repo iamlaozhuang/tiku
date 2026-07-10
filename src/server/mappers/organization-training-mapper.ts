@@ -52,6 +52,7 @@ export type OrganizationTrainingVersionRow = {
   question_snapshot: OrganizationTrainingQuestionSnapshotValue[];
   version_status: OrganizationTrainingVersionStatus;
   published_at: Date;
+  answer_deadline_at: Date | null;
   taken_down_at: Date | null;
   takedown_reason: string | null;
   created_at: Date;
@@ -202,6 +203,7 @@ export function mapOrganizationTrainingVersionRowToDto(
     totalScore: normalizeTotalScore(row.total_score),
     status: row.version_status,
     publishedAt: row.published_at.toISOString(),
+    answerDeadlineAt: row.answer_deadline_at?.toISOString() ?? null,
     takenDownAt: row.taken_down_at?.toISOString() ?? null,
     takedownReason: row.takedown_reason,
     ...(questions.length > 0 ? { questions } : {}),

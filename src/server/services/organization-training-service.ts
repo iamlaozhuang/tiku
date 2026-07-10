@@ -167,6 +167,7 @@ export type OrganizationTrainingEmployeeAnswerBlockedReason =
   | "organization_training_answer_capability_required"
   | "version_not_visible"
   | "version_not_answerable"
+  | "answer_deadline_expired"
   | "invalid_answer_input"
   | "already_submitted"
   | "history_not_visible";
@@ -1316,8 +1317,41 @@ function isVersionVisibleToEmployee(
   );
 }
 
-function isVersionAnswerable(version: OrganizationTrainingPublishedVersionDto) {
-  return version.status === "published";
+function isAnswerDeadlineExpired(
+  version: OrganizationTrainingPublishedVersionDto,
+  now: Date,
+): boolean {
+  if (version.answerDeadlineAt == null) {
+    return false;
+  }
+
+  const answerDeadlineTime = new Date(version.answerDeadlineAt).getTime();
+
+  return (
+    Number.isNaN(answerDeadlineTime) || answerDeadlineTime <= now.getTime()
+  );
+}
+
+function getVersionNotAnswerableReason(
+  version: OrganizationTrainingPublishedVersionDto,
+  now: Date,
+): OrganizationTrainingEmployeeAnswerBlockedReason | null {
+  if (version.status !== "published") {
+    return "version_not_answerable";
+  }
+
+  if (isAnswerDeadlineExpired(version, now)) {
+    return "answer_deadline_expired";
+  }
+
+  return null;
+}
+
+function isVersionAnswerable(
+  version: OrganizationTrainingPublishedVersionDto,
+  now: Date,
+) {
+  return getVersionNotAnswerableReason(version, now) === null;
 }
 
 function createAnswerOrganizationSnapshot(
@@ -1496,7 +1530,7 @@ function buildEmployeeAnswerLifecycleItem(
   answer: EmployeeOrganizationTrainingAnswerDto | null,
 ): OrganizationTrainingEmployeeAnswerLifecycleItemDto | null {
   if (answer === null) {
-    if (!isVersionAnswerable(version)) {
+    if (!isVersionAnswerable(version, new Date())) {
       return null;
     }
 
@@ -1512,7 +1546,7 @@ function buildEmployeeAnswerLifecycleItem(
   }
 
   if (answer.answerStatus === "in_progress") {
-    if (!isVersionAnswerable(version)) {
+    if (!isVersionAnswerable(version, new Date())) {
       return null;
     }
 
@@ -1527,7 +1561,10 @@ function buildEmployeeAnswerLifecycleItem(
     };
   }
 
-  if (answer.answerStatus === "submitted" && isVersionAnswerable(version)) {
+  if (
+    answer.answerStatus === "submitted" &&
+    isVersionAnswerable(version, new Date())
+  ) {
     return {
       trainingVersionPublicId: version.publicId,
       organizationPublicId: version.organizationPublicId,
@@ -1712,8 +1749,27 @@ type NormalizedPublishMetadata = {
   subject: Subject;
   title: string;
   description: string | null;
+  answerDeadlineAt: string | null;
   publishScopeOrganizationPublicIds: string[];
 };
+
+function normalizeOptionalIsoTimestamp(value: string | null): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  const trimmedValue = normalizeRequiredText(value);
+
+  if (trimmedValue === null) {
+    return null;
+  }
+
+  const timestampValue = new Date(trimmedValue);
+
+  return Number.isNaN(timestampValue.getTime())
+    ? null
+    : timestampValue.toISOString();
+}
 
 function normalizePublishMetadata(
   publishInput: OrganizationTrainingPublishInput,
@@ -1756,6 +1812,9 @@ function normalizePublishMetadata(
     subject: publishInput.subject,
     title,
     description: normalizeOptionalText(publishInput.description),
+    answerDeadlineAt: normalizeOptionalIsoTimestamp(
+      publishInput.answerDeadlineAt,
+    ),
     publishScopeOrganizationPublicIds,
   };
 }
@@ -1765,6 +1824,7 @@ function copyPublishedVersion(
 ): OrganizationTrainingPublishedVersionDto {
   return {
     ...sourceVersion,
+    answerDeadlineAt: sourceVersion.answerDeadlineAt ?? null,
     publishScopeSnapshot: {
       organizationPublicIds: [
         ...sourceVersion.publishScopeSnapshot.organizationPublicIds,
@@ -2160,6 +2220,7 @@ export function createOrganizationTrainingService(
           subject: normalizedMetadata.subject,
           title: normalizedMetadata.title,
           description: normalizedMetadata.description,
+          answerDeadlineAt: normalizedMetadata.answerDeadlineAt,
           questionCount: publishInput.questionCount,
           totalScore: publishInput.totalScore,
           questionTypeSummary: copyQuestionTypeSummary(
@@ -2346,7 +2407,7 @@ export function createOrganizationTrainingService(
         versions: command.sourceVersions
           .filter(
             (version) =>
-              isVersionAnswerable(version) &&
+              isVersionAnswerable(version, clock.now()) &&
               isVersionVisibleToEmployee(version, normalizedEmployeeContext),
           )
           .map(copyPublishedVersion),
@@ -2374,8 +2435,13 @@ export function createOrganizationTrainingService(
         return createEmployeeAnswerBlockedResult("version_not_visible");
       }
 
-      if (!isVersionAnswerable(command.version)) {
-        return createEmployeeAnswerBlockedResult("version_not_answerable");
+      const notAnswerableReason = getVersionNotAnswerableReason(
+        command.version,
+        clock.now(),
+      );
+
+      if (notAnswerableReason !== null) {
+        return createEmployeeAnswerBlockedResult(notAnswerableReason);
       }
 
       if (isSubmittedAnswer(command.existingAnswer)) {
@@ -2449,8 +2515,13 @@ export function createOrganizationTrainingService(
         return createEmployeeAnswerBlockedResult("version_not_visible");
       }
 
-      if (!isVersionAnswerable(command.version)) {
-        return createEmployeeAnswerBlockedResult("version_not_answerable");
+      const notAnswerableReason = getVersionNotAnswerableReason(
+        command.version,
+        clock.now(),
+      );
+
+      if (notAnswerableReason !== null) {
+        return createEmployeeAnswerBlockedResult(notAnswerableReason);
       }
 
       if (isSubmittedAnswer(command.existingAnswer)) {

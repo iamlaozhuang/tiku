@@ -315,6 +315,7 @@ function createVersionWrite(
     ],
     status: "published",
     publishedAt: "2026-06-15T19:20:13.000Z",
+    answerDeadlineAt: null,
     takenDownAt: null,
     takedownReason: null,
     ...overrides,
@@ -381,6 +382,7 @@ function createCopyVersionToNewDraftWrite(
       totalScore: 5,
       status: "published",
       publishedAt: "2026-06-15T19:20:13.000Z",
+      answerDeadlineAt: null,
       takenDownAt: null,
       takedownReason: null,
     },
@@ -677,6 +679,10 @@ function createGateway(
         question_snapshot: input.questionSnapshot,
         version_status: input.status,
         published_at: new Date(input.publishedAt),
+        answer_deadline_at:
+          input.answerDeadlineAt == null
+            ? null
+            : new Date(input.answerDeadlineAt),
         taken_down_at:
           input.takenDownAt === null ? null : new Date(input.takenDownAt),
         takedown_reason: input.takedownReason,
@@ -766,6 +772,7 @@ function createGateway(
         question_snapshot: [],
         version_status: input.status,
         published_at: new Date("2026-06-15T19:20:13.000Z"),
+        answer_deadline_at: null,
         taken_down_at: new Date(input.takenDownAt),
         takedown_reason: input.takedownReason,
         created_at: new Date("2026-06-15T19:20:13.000Z"),
@@ -954,6 +961,7 @@ function createVersionRow(
     question_snapshot: [],
     version_status: "published",
     published_at: new Date("2026-06-15T19:20:13.000Z"),
+    answer_deadline_at: null,
     taken_down_at: null,
     takedown_reason: null,
     created_at: new Date("2026-06-15T19:20:13.000Z"),
@@ -1348,6 +1356,32 @@ describe("organization training repository", () => {
     expect("authorizationPublicId" in result).toBe(false);
     expect("organizationId" in result).toBe(false);
     expect("orgAuthId" in result).toBe(false);
+  });
+
+  it("persists and maps nullable answer deadline for published versions", async () => {
+    const { gateway, insertPublishedVersion } = createGateway();
+    const repository = createOrganizationTrainingRepository(gateway, {
+      createVersionPublicId: () => "training_version_public_deadline",
+    });
+    const answerDeadlineAt = "2026-06-20T12:00:00.000Z";
+
+    const result = await repository.publishVersion({
+      ...createVersionWrite({
+        answerDeadlineAt,
+      } as Partial<OrganizationTrainingPublishedVersionWrite>),
+      organizationId: 501,
+      orgAuthId: 601,
+    });
+
+    expect(insertPublishedVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        answerDeadlineAt,
+      }),
+    );
+    expect(result).toMatchObject({
+      publicId: "training_version_public_deadline",
+      answerDeadlineAt,
+    });
   });
 
   it("assigns version number one when the draft has no previous published version", async () => {

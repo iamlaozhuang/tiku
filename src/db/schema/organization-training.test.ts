@@ -91,6 +91,7 @@ describe("organization training publish-version persistence schema", () => {
         "question_type_summary",
         "version_status",
         "published_at",
+        "answer_deadline_at",
         "taken_down_at",
         "takedown_reason",
         "created_at",
@@ -144,6 +145,7 @@ describe("organization training publish-version persistence schema", () => {
         "idx_organization_training_version_org_published_at",
         "idx_organization_training_version_version_status",
         "idx_organization_training_version_profession_level_subject",
+        "idx_organization_training_version_answer_deadline",
       ]),
     );
     expect(getForeignKeyNames(organizationTrainingVersion)).toEqual(

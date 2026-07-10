@@ -144,6 +144,7 @@ export type OrganizationTrainingPublishInput = {
   subject: Subject;
   title: string;
   description: string | null;
+  answerDeadlineAt: string | null;
   questions: OrganizationTrainingPublishQuestionInput[];
   publishScopeOrganizationPublicIds: string[];
   capabilityContext: OrganizationTrainingCapabilityContext;

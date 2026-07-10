@@ -148,6 +148,13 @@
       "when": 1783315200000,
       "tag": "20260706052000_add_organization_ai_training_closed_loop",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1783706700000,
+      "tag": "20260710110500_add_organization_training_answer_deadline",
+      "breakpoints": true
     }
   ]
 }

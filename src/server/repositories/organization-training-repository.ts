@@ -442,6 +442,7 @@ const organizationTrainingVersionSelection = {
   question_snapshot: organizationTrainingVersion.question_snapshot,
   version_status: organizationTrainingVersion.version_status,
   published_at: organizationTrainingVersion.published_at,
+  answer_deadline_at: organizationTrainingVersion.answer_deadline_at,
   taken_down_at: organizationTrainingVersion.taken_down_at,
   takedown_reason: organizationTrainingVersion.takedown_reason,
   created_at: organizationTrainingVersion.created_at,
@@ -1087,6 +1088,10 @@ export function createPostgresOrganizationTrainingRepository(
           question_snapshot: input.questionSnapshot,
           version_status: input.status,
           published_at: new Date(input.publishedAt),
+          answer_deadline_at:
+            input.answerDeadlineAt == null
+              ? null
+              : new Date(input.answerDeadlineAt),
           taken_down_at:
             input.takenDownAt === null ? null : new Date(input.takenDownAt),
           takedown_reason: input.takedownReason,

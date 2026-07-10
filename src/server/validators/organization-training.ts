@@ -260,6 +260,30 @@ function normalizeNonNegativeInteger(value: unknown): number | null {
     : null;
 }
 
+function normalizeOptionalIsoTimestamp(
+  value: unknown,
+): string | null | undefined {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.length === 0) {
+    return null;
+  }
+
+  const timestampValue = new Date(trimmedValue);
+
+  return Number.isNaN(timestampValue.getTime())
+    ? undefined
+    : timestampValue.toISOString();
+}
+
 function hasForbiddenEmployeeAnswerPayload(value: JsonRecord): boolean {
   return forbiddenEmployeeAnswerPayloadKeys.some((payloadKey) =>
     Object.hasOwn(value, payloadKey),
@@ -612,6 +636,9 @@ export function normalizeOrganizationTrainingPublishInput(
   const level = normalizePositiveInteger(input.level);
   const title = normalizeRequiredText(input.title);
   const description = normalizeOptionalText(input.description);
+  const answerDeadlineAt = normalizeOptionalIsoTimestamp(
+    input.answerDeadlineAt,
+  );
   const questions = normalizePublishQuestions(input.questions);
   const publishScopeOrganizationPublicIds = normalizePublicIdList(
     input.publishScopeOrganizationPublicIds,
@@ -627,6 +654,7 @@ export function normalizeOrganizationTrainingPublishInput(
     level === null ||
     !isSubject(input.subject) ||
     title === null ||
+    answerDeadlineAt === undefined ||
     questions === null ||
     publishScopeOrganizationPublicIds === null ||
     capabilityContext === null
@@ -653,6 +681,7 @@ export function normalizeOrganizationTrainingPublishInput(
       subject: input.subject,
       title,
       description,
+      answerDeadlineAt,
       questions,
       publishScopeOrganizationPublicIds,
       capabilityContext,

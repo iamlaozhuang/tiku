@@ -1448,13 +1448,17 @@ activeTasks:
   - id: 0704-org-training-deadline-answerability-fix-2026-07-10
     title: 0704 organization training answer deadline answerability fix
     phase: 0704-org-training-deadline-answerability-fix-2026-07-10
-    status: pending
+    status: closed
     priority: p0
     sequenceOrder: 9.1
     taskKind: implementation_repair
     executionProfile: targeted_source_repair_with_redacted_local_validation
     moduleRunVersion: 2
     branch: codex/0704-org-training-deadline-answerability-fix
+    claimedAt: "2026-07-10T11:13:30-07:00"
+    plannedAt: "2026-07-10T11:13:30-07:00"
+    completedAt: "2026-07-10T11:31:00-07:00"
+    readinessPreflight: pass_private_index_metadata_core_roles_9
     dependsOn:
       - 0704-org-training-edge-acceptance-2026-07-10
     nextRequiredTaskId: 0704-org-training-edge-acceptance-rerun-2026-07-10
@@ -1538,6 +1542,21 @@ activeTasks:
       - corepack pnpm@10.26.1 run typecheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-training-deadline-answerability-fix-2026-07-10
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-training-deadline-answerability-fix-2026-07-10 -SkipRemoteAheadCheck
+    validationResults:
+      tddRed: pass_expected_4_files_7_failed_74_passed
+      sourceChange: pass_answer_deadline_publish_persistence_mapping_visibility_draft_submit
+      targetedTests: pass_13_files_251_tests
+      scopedPrettierWrite: pass
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      sensitiveEvidence: pass_redacted
+      directDatabaseConnection: not_executed
+      migrationExecution: not_executed
+      providerCall: not_executed
+      browserRuntime: not_executed
     closeoutPolicy: *post_peripheral_closeout_policy
   - id: 0704-org-training-edge-acceptance-rerun-2026-07-10
     title: 0704 organization training edge acceptance rerun

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-org-training-edge-acceptance-2026-07-10
-updatedAt: "2026-07-10T10:59:10-07:00"
+currentPhase: 0704-org-training-deadline-answerability-fix-2026-07-10
+updatedAt: "2026-07-10T11:13:30-07:00"
 latest0704OrgTreeEmployeeTransferFix:
   id: 0704-org-tree-employee-transfer-fix-2026-07-10
   status: closed
@@ -182,11 +182,29 @@ latest0704OrgTrainingEdgeAcceptance:
     stagingProdDeployExecuted: false
 latest0704OrgTrainingDeadlineAnswerabilityFix:
   id: 0704-org-training-deadline-answerability-fix-2026-07-10
-  status: pending
+  status: closed
+  result: pass_answer_deadline_publish_persistence_visibility_draft_submit_repair
   branch: codex/0704-org-training-deadline-answerability-fix
   dependsOn: 0704-org-training-edge-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-deadline-answerability-fix.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-deadline-answerability-fix-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-deadline-answerability-fix-audit.md
   nextRequiredTaskId: 0704-org-training-edge-acceptance-rerun-2026-07-10
   blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    tddRed: pass_expected_4_files_7_failed_74_passed
+    targetedTests: pass_13_files_251_tests
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    migrationExecutionExecuted: false
+    providerCallExecuted: false
+    stagingProdDeployExecuted: false
 latest0704OrgTreeAuthInheritanceAcceptance:
   id: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
   status: closed
@@ -3845,14 +3863,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-org-training-edge-acceptance-2026-07-10
-  title: 0704 organization training edge acceptance
-  phase: 0704-org-training-edge-acceptance-2026-07-10
+  id: 0704-org-training-deadline-answerability-fix-2026-07-10
+  title: 0704 organization training answer deadline answerability fix
+  phase: 0704-org-training-deadline-answerability-fix-2026-07-10
   status: closed
-  result: blocked_requires_answer_deadline_answerability_repair
-  priority: p1
-  taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-org-training-edge-acceptance
+  priority: p0
+  taskKind: implementation_repair
+  branch: codex/0704-org-training-deadline-answerability-fix
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3863,31 +3880,34 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T10:53:30-07:00"
-  claimedAt: "2026-07-10T10:53:30-07:00"
-  targetClosureItem: Prove enterprise training source, publish, version, takedown, answer, duplicate-submit, resume, and formal-domain separation edge behavior.
-  behaviorBoundary: validation_only_docs_state_evidence_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
+  plannedAt: "2026-07-10T11:13:30-07:00"
+  claimedAt: "2026-07-10T11:13:30-07:00"
+  completedAt: "2026-07-10T11:31:00-07:00"
+  targetClosureItem: Repair organization training optional answer deadline publish, persistence, DTO mapping, employee visibility, draft save, and submit answerability closure.
+  behaviorBoundary: targeted_source_repair_docs_state_evidence_no_package_lockfile_seed_provider_db_execution_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-audit.md
-  dependsOn: 0704-audit-privacy-governance-acceptance-2026-07-10
-  nextRequiredTaskId: 0704-org-training-deadline-answerability-fix-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-deadline-answerability-fix.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-deadline-answerability-fix-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-deadline-answerability-fix-audit.md
+  dependsOn: 0704-org-training-edge-acceptance-2026-07-10
+  nextRequiredTaskId: 0704-org-training-edge-acceptance-rerun-2026-07-10
   blockedContinueTaskId: 0704-org-analytics-acceptance-2026-07-10
-  validationSummary:
-    status: closed_blocked_repair_required
+  implementationSummary:
+    status: closed
     readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: blocked_missing_answer_deadline_persistence_and_answerability_enforcement
-    targetedTests: pass_10_files_163_tests
-    scopedPrettierWrite: pass_unchanged_except_ledger_format
+    tddRed: pass_expected_4_files_7_failed_74_passed
+    sourceChange: pass_answer_deadline_publish_persistence_mapping_visibility_draft_submit
+    targetedTests: pass_13_files_251_tests
+    scopedPrettierWrite: pass
     diffCheck: pass
     lint: pass
     typecheck: pass
-    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+    moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sensitiveEvidence: pass_redacted
     browserRuntimeExecuted: false
     directDatabaseConnectionExecuted: false
+    migrationExecutionExecuted: false
     providerCallExecuted: false
     stagingProdDeployExecuted: false
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
@@ -34580,8 +34600,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f1fdfab443b56c03ba63753622aea2a15be81340
-  lastKnownOriginMasterSha: f1fdfab443b56c03ba63753622aea2a15be81340
+  lastKnownMasterSha: 224fc9045a6aeda4a129af1887edd9d8ff4b0a5e
+  lastKnownOriginMasterSha: 224fc9045a6aeda4a129af1887edd9d8ff4b0a5e
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

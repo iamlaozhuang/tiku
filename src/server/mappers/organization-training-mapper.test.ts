@@ -49,6 +49,7 @@ function createVersionRow(
     question_snapshot: [],
     version_status: "published",
     published_at: new Date("2026-06-15T19:20:13.000Z"),
+    answer_deadline_at: null,
     taken_down_at: null,
     takedown_reason: null,
     created_at: new Date("2026-06-15T19:20:13.000Z"),
@@ -223,8 +224,21 @@ describe("organization training mapper", () => {
       totalScore: 5,
       status: "published",
       publishedAt: "2026-06-15T19:20:13.000Z",
+      answerDeadlineAt: null,
       takenDownAt: null,
       takedownReason: null,
+    });
+  });
+
+  it("maps a publish-version row answer deadline to the public DTO", () => {
+    const dto = mapOrganizationTrainingVersionRowToDto(
+      createVersionRow({
+        answer_deadline_at: new Date("2026-06-20T12:00:00.000Z"),
+      } as Partial<OrganizationTrainingVersionRow>),
+    );
+
+    expect(dto).toMatchObject({
+      answerDeadlineAt: "2026-06-20T12:00:00.000Z",
     });
   });
 

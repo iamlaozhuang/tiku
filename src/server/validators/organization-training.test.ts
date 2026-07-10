@@ -50,6 +50,7 @@ describe("organization training contract and validator scaffold", () => {
         subject: "theory",
         title: " Safety training ",
         description: "",
+        answerDeadlineAt: " 2026-06-20T12:00:00.000Z ",
         questions: [
           {
             publicId: " question_one_public_123 ",
@@ -164,6 +165,7 @@ describe("organization training contract and validator scaffold", () => {
         subject: "theory",
         title: "Safety training",
         description: null,
+        answerDeadlineAt: "2026-06-20T12:00:00.000Z",
         questions: [
           {
             publicId: "question_one_public_123",
@@ -819,6 +821,7 @@ describe("organization training contract and validator scaffold", () => {
       totalScore: 10,
       status: "published",
       publishedAt: "2026-06-15T18:12:40.000Z",
+      answerDeadlineAt: null,
       takenDownAt: null,
       takedownReason: null,
     };

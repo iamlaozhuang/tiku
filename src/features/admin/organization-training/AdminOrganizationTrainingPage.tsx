@@ -109,6 +109,7 @@ type PublishQuestionFormValue = {
 
 type PublishFormValues = {
   publishScopeOrganizationPublicIds: string;
+  answerDeadlineAt: string;
   questions: PublishQuestionFormValue[];
   weakEvidenceConfirmed: boolean;
 };
@@ -130,6 +131,7 @@ const defaultCopyFormValues: CopyFormValues = {
 
 const defaultPublishFormValues: PublishFormValues = {
   publishScopeOrganizationPublicIds: "",
+  answerDeadlineAt: "",
   questions: [],
   weakEvidenceConfirmed: false,
 };
@@ -534,6 +536,7 @@ function createPublishFormValuesForDraft(
 
   return {
     publishScopeOrganizationPublicIds: draft.organizationPublicId,
+    answerDeadlineAt: "",
     questions: Array.from({ length: questionCount }, (_, index) =>
       createDefaultPublishQuestionFormValue(index + 1, averageScore),
     ),
@@ -574,6 +577,7 @@ function createPublishFormValuesFromAdminDetail(
 
   return {
     publishScopeOrganizationPublicIds: detail.organizationPublicId,
+    answerDeadlineAt: "",
     questions: detail.questions.map(createPublishQuestionFormValueFromDetail),
     weakEvidenceConfirmed: false,
   };
@@ -808,6 +812,7 @@ function createPublishTrainingInput({
     subject: draft.subject,
     title: draft.title,
     description: draft.description ?? null,
+    answerDeadlineAt: values.answerDeadlineAt.trim() || null,
     questions,
     publishScopeOrganizationPublicIds: normalizePublishScope(
       values.publishScopeOrganizationPublicIds,
@@ -2466,6 +2471,11 @@ function PublishTrainingForm({
         onChange={(value) =>
           onChange({ ...values, publishScopeOrganizationPublicIds: value })
         }
+      />
+      <TextField
+        label="作答截止时间"
+        value={values.answerDeadlineAt}
+        onChange={(value) => onChange({ ...values, answerDeadlineAt: value })}
       />
       <section className="grid gap-3" aria-label="发布前题目预览">
         <div className="space-y-1">

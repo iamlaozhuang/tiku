@@ -370,6 +370,7 @@ export const organizationTrainingVersion = pgTable(
       .default("published")
       .notNull(),
     published_at: timestampColumn("published_at"),
+    answer_deadline_at: nullableTimestampColumn("answer_deadline_at"),
     taken_down_at: nullableTimestampColumn("taken_down_at"),
     takedown_reason: text("takedown_reason"),
     created_at: createdAtColumn(),
@@ -405,6 +406,9 @@ export const organizationTrainingVersion = pgTable(
     ),
     index("idx_organization_training_version_version_status").on(
       table.version_status,
+    ),
+    index("idx_organization_training_version_answer_deadline").on(
+      table.answer_deadline_at,
     ),
     index("idx_organization_training_version_profession_level_subject").on(
       table.profession,

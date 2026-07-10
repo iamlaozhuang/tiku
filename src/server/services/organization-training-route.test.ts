@@ -128,6 +128,7 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
       totalScore: 5,
       status: "published",
       publishedAt: "2026-06-15T10:00:00.000Z",
+      answerDeadlineAt: null,
       takenDownAt: null,
       takedownReason: null,
     }),
@@ -151,6 +152,7 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
       totalScore: 5,
       status: "taken_down",
       publishedAt: "2026-06-15T10:00:00.000Z",
+      answerDeadlineAt: null,
       takenDownAt: "2026-06-15T11:00:00.000Z",
       takedownReason: "outdated training",
     }),
@@ -249,6 +251,7 @@ function createPublishInput(
     subject: "theory",
     title: "Route publish training",
     description: "Route publish description",
+    answerDeadlineAt: null,
     questions: [
       {
         publicId: "training_question_route_public_401",
@@ -316,6 +319,7 @@ function createPublishedVersion(
     totalScore: 5,
     status: "published",
     publishedAt: "2026-06-15T10:00:00.000Z",
+    answerDeadlineAt: null,
     takenDownAt: null,
     takedownReason: null,
     ...overrides,
