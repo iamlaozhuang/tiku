@@ -96,6 +96,820 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: 0704-post-peripheral-acceptance-ledger-2026-07-10
+    title: 0704 post-peripheral acceptance ledger
+    phase: 0704-post-peripheral-acceptance-ledger-2026-07-10
+    status: ready_for_closeout
+    result: pass_17_task_post_peripheral_acceptance_ledger_seeded
+    priority: p1
+    taskKind: docs_acceptance_roadmap
+    executionProfile: docs_state_acceptance_roadmap_only
+    validationPolicy: scoped_prettier_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/0704-post-peripheral-acceptance-ledger
+    dependsOn:
+      - 0704-release-candidate-local-gates-2026-07-10
+    humanApprovalBoundary:
+      implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      providerExecution: blocked
+      destructiveDbOperation: blocked
+      credentialMaterialOutput: blocked
+      screenshotRawDom: blocked
+      directDatabaseConnection: blocked
+      stagingProdDeploy: blocked
+      costCalibrationGate: blocked
+    plannedAt: "2026-07-10T00:00:00-07:00"
+    claimedAt: "2026-07-10T00:00:00-07:00"
+    targetClosureItem: Materialize the owner-approved 17-task 0704 post-peripheral acceptance ledger, task sequence, acceptance standards, and priority repair stop rules.
+    behaviorBoundary: docs_state_acceptance_roadmap_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_db_no_staging_prod_deploy_no_cost_calibration
+    evidenceMode: redacted_role_label_route_label_status_category_file_path_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-post-peripheral-acceptance-ledger-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-post-peripheral-acceptance-ledger-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-post-peripheral-acceptance-ledger-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-post-peripheral-acceptance-ledger-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_only
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: blocked_not_needed_for_roadmap
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec prettier --check --ignore-unknown docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/project-state.yaml docs/05-execution-logs/task-plans/2026-07-10-0704-post-peripheral-acceptance-ledger.md docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md docs/05-execution-logs/evidence/2026-07-10-0704-post-peripheral-acceptance-ledger-evidence.md docs/05-execution-logs/audits-reviews/2026-07-10-0704-post-peripheral-acceptance-ledger-audit.md
+      - git diff --check
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-post-peripheral-acceptance-ledger-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-post-peripheral-acceptance-ledger-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+    validationSummary:
+      status: passed
+      ledgerCreated: pass_17_tasks
+      queueSeeded: pass_17_serial_tasks
+      priorityRepairGates: pass_two_gates_recorded
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  - id: 0704-org-auth-multiscope-acceptance-2026-07-10
+    title: 0704 organization authorization multiscope acceptance
+    phase: 0704-org-auth-multiscope-acceptance-2026-07-10
+    status: pending
+    priority: p0
+    sequenceOrder: 1
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-auth-multiscope-acceptance
+    dependsOn:
+      - 0704-post-peripheral-acceptance-ledger-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    priorityRepairTaskIdCandidate: 0704-org-auth-multiscope-ui-fix-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: &post_peripheral_readonly_files
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - src/**
+      - tests/**
+      - D:/tiku-local-private/acceptance/**
+      - D:\tiku-local-private\acceptance\**
+    blockedFiles: &post_peripheral_validation_blocked_files
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities: &post_peripheral_validation_capabilities
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: approved_targeted_contract_smoke_only
+      browserRuntime: approved_localhost_status_only_no_screenshot_no_raw_dom
+      devServer: approved_localhost_only_if_needed
+      privateAccountInMemoryUse: approved_redacted_catalog_preflight_only
+      productLoginSessionProbe: approved_redacted_readiness_only
+      productRouteRead: approved_status_categories_only
+      productRouteWrite: blocked_unless_task_plan_explicitly_limits_non_destructive_localhost_validation
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: &post_peripheral_evidence_mode redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    validationCommands: &post_peripheral_validation_commands
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: &post_peripheral_closeout_policy
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+  - id: 0704-org-employee-import-acceptance-2026-07-10
+    title: 0704 organization employee import acceptance
+    phase: 0704-org-employee-import-acceptance-2026-07-10
+    status: pending
+    priority: p0
+    sequenceOrder: 2
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-employee-import-acceptance
+    dependsOn:
+      - 0704-org-auth-multiscope-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    priorityRepairTaskIdCandidate: 0704-org-employee-import-template-fix-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-employee-import-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-employee-import-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-employee-import-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-employee-import-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-employee-import-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-employee-import-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-personal-redeem-code-acceptance-2026-07-10
+    title: 0704 personal redeem code acceptance
+    phase: 0704-personal-redeem-code-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 3
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-personal-redeem-code-acceptance
+    dependsOn:
+      - 0704-org-employee-import-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-personal-redeem-code-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-personal-redeem-code-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-personal-redeem-code-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-personal-redeem-code-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-personal-redeem-code-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-personal-redeem-code-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+    title: 0704 organization tree auth inheritance acceptance
+    phase: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 4
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-tree-auth-inheritance-acceptance
+    dependsOn:
+      - 0704-personal-redeem-code-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-org-admin-surface-acceptance-2026-07-10
+    title: 0704 organization admin surface acceptance
+    phase: 0704-org-admin-surface-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 5
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-admin-surface-acceptance
+    dependsOn:
+      - 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-admin-surface-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-admin-surface-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-admin-surface-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-admin-surface-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-admin-surface-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-admin-surface-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-resource-rag-management-acceptance-2026-07-10
+    title: 0704 resource RAG management acceptance
+    phase: 0704-resource-rag-management-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 6
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-resource-rag-management-acceptance
+    dependsOn:
+      - 0704-org-admin-surface-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-resource-rag-management-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-resource-rag-management-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-resource-rag-management-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-resource-rag-management-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-resource-rag-management-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-resource-rag-management-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-model-prompt-log-governance-acceptance-2026-07-10
+    title: 0704 model prompt log governance acceptance
+    phase: 0704-model-prompt-log-governance-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 7
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-model-prompt-log-governance-acceptance
+    dependsOn:
+      - 0704-resource-rag-management-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-model-prompt-log-governance-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-model-prompt-log-governance-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-model-prompt-log-governance-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-model-prompt-log-governance-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-model-prompt-log-governance-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-model-prompt-log-governance-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-audit-privacy-governance-acceptance-2026-07-10
+    title: 0704 audit privacy governance acceptance
+    phase: 0704-audit-privacy-governance-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 8
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-audit-privacy-governance-acceptance
+    dependsOn:
+      - 0704-model-prompt-log-governance-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-audit-privacy-governance-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-audit-privacy-governance-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-audit-privacy-governance-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-audit-privacy-governance-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-audit-privacy-governance-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-audit-privacy-governance-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-org-training-edge-acceptance-2026-07-10
+    title: 0704 organization training edge acceptance
+    phase: 0704-org-training-edge-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 9
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-training-edge-acceptance
+    dependsOn:
+      - 0704-audit-privacy-governance-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-training-edge-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-training-edge-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-training-edge-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-org-analytics-acceptance-2026-07-10
+    title: 0704 organization analytics acceptance
+    phase: 0704-org-analytics-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 10
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-analytics-acceptance
+    dependsOn:
+      - 0704-org-training-edge-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-analytics-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-analytics-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-analytics-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-analytics-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-analytics-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-analytics-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-content-non-ai-publish-acceptance-2026-07-10
+    title: 0704 content non-AI publish acceptance
+    phase: 0704-content-non-ai-publish-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 11
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-content-non-ai-publish-acceptance
+    dependsOn:
+      - 0704-org-analytics-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-content-non-ai-publish-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-content-non-ai-publish-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-content-non-ai-publish-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-content-non-ai-publish-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-content-non-ai-publish-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-content-non-ai-publish-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-learner-non-ai-study-acceptance-2026-07-10
+    title: 0704 learner non-AI study acceptance
+    phase: 0704-learner-non-ai-study-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 12
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-learner-non-ai-study-acceptance
+    dependsOn:
+      - 0704-content-non-ai-publish-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-learner-non-ai-study-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-learner-non-ai-study-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-learner-non-ai-study-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-learner-non-ai-study-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-learner-non-ai-study-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-learner-non-ai-study-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-role-routing-auth-context-acceptance-2026-07-10
+    title: 0704 role routing auth context acceptance
+    phase: 0704-role-routing-auth-context-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 13
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-role-routing-auth-context-acceptance
+    dependsOn:
+      - 0704-learner-non-ai-study-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-role-routing-auth-context-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-role-routing-auth-context-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-role-routing-auth-context-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-role-routing-auth-context-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-role-routing-auth-context-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-role-routing-auth-context-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-api-route-boundary-acceptance-2026-07-10
+    title: 0704 API route boundary acceptance
+    phase: 0704-api-route-boundary-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 14
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-api-route-boundary-acceptance
+    dependsOn:
+      - 0704-role-routing-auth-context-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-api-route-boundary-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-api-route-boundary-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-api-route-boundary-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-api-route-boundary-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-api-route-boundary-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-api-route-boundary-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-failure-degradation-acceptance-2026-07-10
+    title: 0704 failure degradation acceptance
+    phase: 0704-failure-degradation-acceptance-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 15
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-failure-degradation-acceptance
+    dependsOn:
+      - 0704-api-route-boundary-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    repairBranchRequiredForDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-failure-degradation-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-failure-degradation-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-failure-degradation-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-failure-degradation-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-failure-degradation-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-failure-degradation-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles: *post_peripheral_validation_blocked_files
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-staging-readiness-design-2026-07-10
+    title: 0704 staging readiness design
+    phase: 0704-staging-readiness-design-2026-07-10
+    status: pending
+    priority: p1
+    sequenceOrder: 16
+    taskKind: docs_acceptance_readiness_design
+    executionProfile: docs_state_acceptance_design_only
+    moduleRunVersion: 2
+    branch: codex/0704-staging-readiness-design
+    dependsOn:
+      - 0704-failure-degradation-acceptance-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    stopOnRealDefect: true
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-staging-readiness-design.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-staging-readiness-design-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-staging-readiness-design-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-staging-readiness-design.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-staging-readiness-design-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-staging-readiness-design-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: blocked_not_needed_docs_only
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: blocked_not_needed_for_design
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_design_boundary_file_path_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
   - id: 0704-post-ai-acceptance-roadmap-2026-07-10
     title: 0704 post-AI acceptance roadmap
     phase: 0704-post-ai-acceptance-roadmap-2026-07-10
