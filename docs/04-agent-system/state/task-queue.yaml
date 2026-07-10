@@ -1848,7 +1848,8 @@ activeTasks:
   - id: 0704-role-routing-auth-context-acceptance-2026-07-10
     title: 0704 role routing auth context acceptance
     phase: 0704-role-routing-auth-context-acceptance-2026-07-10
-    status: pending
+    status: ready_for_closeout
+    result: pass_role_workspace_auth_context_quota_owner_no_auth_and_advanced_denial_boundary
     priority: p1
     sequenceOrder: 13
     taskKind: validation_only_localhost_acceptance
@@ -1871,7 +1872,28 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-role-routing-auth-context-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
@@ -1881,6 +1903,17 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    plannedAt: "2026-07-10T12:36:00-07:00"
+    claimedAt: "2026-07-10T12:36:00-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_role_workspace_auth_context_quota_no_auth_denial_learner_ai_result_markers
+      targetedTests: pass_21_files_261_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-api-route-boundary-acceptance-2026-07-10
     title: 0704 API route boundary acceptance
     phase: 0704-api-route-boundary-acceptance-2026-07-10
