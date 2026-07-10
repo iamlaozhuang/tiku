@@ -1,8 +1,27 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-content-non-ai-publish-acceptance-2026-07-10
-updatedAt: "2026-07-10T12:14:45-07:00"
+currentPhase: 0704-learner-non-ai-study-acceptance-2026-07-10
+updatedAt: "2026-07-10T12:26:00-07:00"
+latest0704LearnerNonAiStudyAcceptance:
+  id: 0704-learner-non-ai-study-acceptance-2026-07-10
+  status: ready_for_closeout
+  result: pass_ordinary_practice_mock_report_mistake_book_resume_invalidation_baseline_access_boundary
+  branch: codex/0704-learner-non-ai-study-acceptance
+  dependsOn: 0704-content-non-ai-publish-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-learner-non-ai-study-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-learner-non-ai-study-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-learner-non-ai-study-acceptance-audit.md
+  nextRequiredTaskId: 0704-role-routing-auth-context-acceptance-2026-07-10
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    sourceInspection: pass_ordinary_learning_resume_structure_answer_safety_invalidation_auth_markers
+    targetedTests: pass_32_files_221_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 latest0704ContentNonAiPublishAcceptance:
   id: 0704-content-non-ai-publish-acceptance-2026-07-10
   status: ready_for_closeout
@@ -3929,14 +3948,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-content-non-ai-publish-acceptance-2026-07-10
-  title: 0704 content non-AI publish acceptance
-  phase: 0704-content-non-ai-publish-acceptance-2026-07-10
+  id: 0704-learner-non-ai-study-acceptance-2026-07-10
+  title: 0704 learner non-AI study acceptance
+  phase: 0704-learner-non-ai-study-acceptance-2026-07-10
   status: ready_for_closeout
-  result: pass_formal_content_publish_takedown_copy_snapshot_downstream_ai_adoption_boundary
+  result: pass_ordinary_practice_mock_report_mistake_book_resume_invalidation_baseline_access_boundary
   priority: p1
   taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-content-non-ai-publish-acceptance
+  branch: codex/0704-learner-non-ai-study-acceptance
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3947,25 +3966,24 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T12:09:10-07:00"
-  claimedAt: "2026-07-10T12:09:10-07:00"
-  completedAt: "2026-07-10T12:14:45-07:00"
-  targetClosureItem: Validate formal content non-AI publish, takedown, edit-copy, reference immutability, downstream consumption, and governed AI draft adoption boundaries.
+  plannedAt: "2026-07-10T12:26:00-07:00"
+  claimedAt: "2026-07-10T12:26:00-07:00"
+  targetClosureItem: Validate ordinary learner practice, mock_exam, exam_report, objective mistake_book, resume/continue, takedown, organization disable, authorization-loss, and baseline standard/advanced access boundaries.
   behaviorBoundary: validation_only_docs_state_evidence_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-content-non-ai-publish-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-content-non-ai-publish-acceptance-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-content-non-ai-publish-acceptance-audit.md
-  dependsOn: 0704-org-analytics-acceptance-2026-07-10
-  nextRequiredTaskId: 0704-learner-non-ai-study-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-learner-non-ai-study-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-learner-non-ai-study-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-learner-non-ai-study-acceptance-audit.md
+  dependsOn: 0704-content-non-ai-publish-acceptance-2026-07-10
+  nextRequiredTaskId: 0704-role-routing-auth-context-acceptance-2026-07-10
   validationSummary:
     readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: pass_formal_relationship_publish_immutability_downstream_ai_adoption_markers
-    targetedTests: pass_33_files_290_tests
+    sourceInspection: pass_ordinary_learning_resume_structure_answer_safety_invalidation_auth_markers
+    targetedTests: pass_32_files_221_tests
     diffCheck: pass
     lint: pass
     typecheck: pass
-    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+    moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sensitiveEvidence: pass_redacted
     browserRuntimeExecuted: false
