@@ -71,7 +71,7 @@ type AdminOrganizationOrgAuthActor = {
   roles: [AdminOrganizationOrgAuthRole, ...AdminOrganizationOrgAuthRole[]];
 };
 
-const EMPLOYEE_IMPORT_ROW_LIMIT = 100;
+const EMPLOYEE_IMPORT_ROW_LIMIT = 500;
 
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
@@ -571,6 +571,38 @@ function mapEmployeeAccountResultToEmployeeSummary(
   };
 }
 
+function mapEmployeeAccountImportFailureReason(
+  result: ApiResponse<EmployeeAccountResultDto | null>,
+): EmployeeImportResultDto["rejectedRows"][number]["reason"] {
+  const normalizedMessage = result.message.toLowerCase();
+
+  if (result.code === 400006) {
+    return "invalid_row";
+  }
+
+  if (result.code === 404004) {
+    return "organization_not_found";
+  }
+
+  if (normalizedMessage.includes("quota")) {
+    return "quota_insufficient";
+  }
+
+  if (normalizedMessage.includes("disabled")) {
+    return "disabled_account";
+  }
+
+  if (normalizedMessage.includes("account domain")) {
+    return "cross_domain_conflict";
+  }
+
+  if (normalizedMessage.includes("bound to another organization")) {
+    return "cross_organization_conflict";
+  }
+
+  return "employee_create_failed";
+}
+
 async function importEmployeeAccounts(input: {
   employeeAccountService: EmployeeAccountService;
   normalizedInput: Extract<
@@ -619,7 +651,7 @@ async function importEmployeeAccounts(input: {
       rowNumber,
       userPublicId: null,
       organizationPublicId: employeeAccountInput.organizationPublicId,
-      reason: "employee_create_failed",
+      reason: mapEmployeeAccountImportFailureReason(result),
     });
   }
 

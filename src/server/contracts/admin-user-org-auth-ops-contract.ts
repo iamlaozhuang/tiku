@@ -168,11 +168,15 @@ export type EmployeeImportRejectedRowDto = {
   userPublicId: string | null;
   organizationPublicId: string | null;
   reason:
+    | "cross_domain_conflict"
+    | "cross_organization_conflict"
+    | "disabled_account"
     | "duplicate_phone"
     | "duplicate_user"
     | "employee_create_failed"
     | "invalid_row"
     | "organization_not_found"
+    | "quota_insufficient"
     | "user_not_found";
 };
 

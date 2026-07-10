@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -383,7 +384,30 @@ function mockSystemOpsFetchWithOrganizationTree() {
         return createJsonResponse({
           code: 0,
           message: "ok",
-          data: { orgAuths: [] },
+          data: {
+            orgAuths: [
+              {
+                publicId: "org-auth-import-public-001",
+                name: "西湖区员工导入授权",
+                purchaserOrganizationPublicId: "org-city-001",
+                authScopeType: "current_and_descendants",
+                profession: "monopoly",
+                level: 3,
+                edition: "advanced",
+                effectiveEdition: "advanced",
+                upgradeStatus: "none",
+                accountQuota: 10,
+                usedQuota: 3,
+                startsAt: "2026-05-22T00:00:00.000Z",
+                expiresAt: "2026-08-22T00:00:00.000Z",
+                status: "active",
+                cancelledAt: null,
+                organizationPublicIds: ["org-district-001"],
+                createdAt: "2026-05-22T00:00:00.000Z",
+                updatedAt: "2026-05-22T00:00:00.000Z",
+              },
+            ],
+          },
         });
       }
 
@@ -1467,6 +1491,12 @@ describe("admin user organization authorization ops baseline", () => {
     expect(importPreview).toHaveTextContent("员工账号 CSV");
     expect(importPreview).toHaveTextContent("2 行");
     expect(importPreview).toHaveTextContent("2 行未提供 initialPassword");
+    expect(
+      screen.getByTestId("employee-import-inherited-auth-category"),
+    ).toHaveTextContent("已发现目标组织有效企业授权");
+    expect(
+      screen.getByTestId("employee-import-quota-impact-category"),
+    ).toHaveTextContent("授权额度足够");
 
     fireEvent.click(screen.getByTestId("employee-import-submit"));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认导入员工？");
@@ -1489,6 +1519,86 @@ describe("admin user organization authorization ops baseline", () => {
       content: expectedSubmittedContent,
       sourceFormat: "csv",
     });
+  });
+
+  it("downloads an employee import template and loads roster file content", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+    const createObjectUrlMock = vi.fn(() => "blob:employee-import-template");
+    const revokeObjectUrlMock = vi.fn();
+    const anchorClickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+
+    vi.stubGlobal("URL", {
+      createObjectURL: createObjectUrlMock,
+      revokeObjectURL: revokeObjectUrlMock,
+    });
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("employee-import-textarea");
+
+    fireEvent.click(screen.getByTestId("employee-import-template-download"));
+
+    expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
+    expect(anchorClickSpy).toHaveBeenCalled();
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith(
+      "blob:employee-import-template",
+    );
+
+    const employeeImportContent = [
+      "phone,name,initialPassword",
+      "13900003333,Import File,abc12345",
+    ].join("\n");
+    const file = new File([employeeImportContent], "employee-import.csv", {
+      type: "text/csv",
+    });
+
+    fireEvent.change(screen.getByTestId("employee-import-file-input"), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("employee-import-textarea")).toHaveValue(
+        employeeImportContent,
+      );
+    });
+  });
+
+  it("blocks employee import preview when selected organization quota is insufficient", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+    const employeeImportContent = [
+      "phone,name",
+      "13900010001,Import One",
+      "13900010002,Import Two",
+      "13900010003,Import Three",
+      "13900010004,Import Four",
+      "13900010005,Import Five",
+      "13900010006,Import Six",
+      "13900010007,Import Seven",
+      "13900010008,Import Eight",
+    ].join("\n");
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("employee-import-textarea");
+
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: { value: employeeImportContent },
+    });
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      {
+        target: { value: "org-district-001" },
+      },
+    );
+
+    expect(
+      screen.getByTestId("employee-import-quota-impact-category"),
+    ).toHaveTextContent("授权额度不足");
+    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
   });
 
   it("blocks employee import templates that contain authorization scope fields", async () => {

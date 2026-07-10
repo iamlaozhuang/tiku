@@ -301,6 +301,111 @@ describe("phase 20 RA-01-04 employee import", () => {
     expect(JSON.stringify(auditInputs)).not.toContain("abc12345");
   });
 
+  it("maps employee account import service failures to safe rejection categories", async () => {
+    const auditInputs: unknown[] = [];
+    const failureByPhone = new Map([
+      [
+        "13900001001",
+        { code: 404004, message: "Organization does not exist." },
+      ],
+      [
+        "13900001002",
+        {
+          code: 409006,
+          message: "Phone already bound to another organization.",
+        },
+      ],
+      ["13900001003", { code: 409100, message: "Org auth quota is exceeded." }],
+      ["13900001004", { code: 403100, message: "Account disabled." }],
+      ["13900001005", { code: 409100, message: "Account domain conflict." }],
+    ]);
+    const employeeAccountService: EmployeeAccountService = {
+      async createEmployeeAccount(employeeAccountInput) {
+        const phone = (employeeAccountInput as { phone: string }).phone;
+        const failure = failureByPhone.get(phone);
+
+        return {
+          code: failure?.code ?? 503007,
+          message: failure?.message ?? "Employee account runtime failed.",
+          data: null,
+        };
+      },
+    };
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      employeeAccountService,
+      repositories: createRepositories({ auditInputs }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+
+    const response = await handlers.employees.importBatch.POST(
+      new Request("http://localhost/api/v1/employees/import", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          sourceFormat: "csv",
+          content: [
+            "phone,name,initialPassword,organizationPublicId",
+            "13900001001,Employee One,abc12345,organization-public-001",
+            "13900001002,Employee Two,abc12345,organization-public-001",
+            "13900001003,Employee Three,abc12345,organization-public-001",
+            "13900001004,Employee Four,abc12345,organization-public-001",
+            "13900001005,Employee Five,abc12345,organization-public-001",
+          ].join("\n"),
+        }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        generatedInitialPasswords: [],
+        importedEmployees: [],
+        rejectedRows: [
+          {
+            rowNumber: 2,
+            userPublicId: null,
+            organizationPublicId: "organization-public-001",
+            reason: "organization_not_found",
+          },
+          {
+            rowNumber: 3,
+            userPublicId: null,
+            organizationPublicId: "organization-public-001",
+            reason: "cross_organization_conflict",
+          },
+          {
+            rowNumber: 4,
+            userPublicId: null,
+            organizationPublicId: "organization-public-001",
+            reason: "quota_insufficient",
+          },
+          {
+            rowNumber: 5,
+            userPublicId: null,
+            organizationPublicId: "organization-public-001",
+            reason: "disabled_account",
+          },
+          {
+            rowNumber: 6,
+            userPublicId: null,
+            organizationPublicId: "organization-public-001",
+            reason: "cross_domain_conflict",
+          },
+        ],
+      },
+    });
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "employee.import",
+        resultStatus: "failed",
+        metadataSummary:
+          "redacted employee import metadata; imported=0 rejected=5",
+      }),
+    ]);
+    expect(JSON.stringify(auditInputs)).not.toContain("abc12345");
+  });
+
   it("rejects employee import CSV headers that include authorization scope fields", async () => {
     const auditInputs: unknown[] = [];
     const serviceInputs: unknown[] = [];
@@ -363,7 +468,7 @@ describe("phase 20 RA-01-04 employee import", () => {
       repositories: createRepositories({ auditInputs, importInputs }),
       sessionService: createAdminSessionService("ops_admin"),
     });
-    const employees = Array.from({ length: 101 }, (_, index) => ({
+    const employees = Array.from({ length: 501 }, (_, index) => ({
       userPublicId: `user-public-${String(index + 1).padStart(3, "0")}`,
       organizationPublicId: "organization-public-001",
     }));
@@ -401,7 +506,7 @@ describe("phase 20 RA-01-04 employee import", () => {
     });
     const content = [
       "phone,name,initialPassword,organizationPublicId",
-      ...Array.from({ length: 101 }, (_, index) => {
+      ...Array.from({ length: 501 }, (_, index) => {
         const suffix = String(index + 1).padStart(4, "0");
 
         return `1390000${suffix},Employee ${suffix},abc12345,organization-public-001`;
