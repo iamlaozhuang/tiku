@@ -72,7 +72,7 @@ Current sequence status:
 |     3 | `0704-non-ai-learning-smoke`                | closed | `2026-07-10-0704-non-ai-learning-smoke-evidence.md`                |
 |     4 | `0704-content-non-ai-publish-smoke`         | closed | `2026-07-10-0704-content-non-ai-publish-smoke-evidence.md`         |
 |     5 | `0704-exception-degradation-smoke`          | closed | `2026-07-10-0704-exception-degradation-smoke-evidence.md`          |
-|     6 | `0704-release-candidate-local-gates`        | next   | pending                                                            |
+|     6 | `0704-release-candidate-local-gates`        | closed | `2026-07-10-0704-release-candidate-local-gates-evidence.md`        |
 
 ## Operating Rule
 
@@ -87,7 +87,6 @@ Before any later 0704 business validation:
 
 ## Result
 
-Current recommendation: do not repeat the closed no-rerun chains. The planned incremental AI smoke backlog is closed.
-Continue with `0704-release-candidate-local-gates` as the next post-AI roadmap stage after stage 5 closeout.
-`0704-enterprise-training-smoke` remains optional only if a later fresh integration risk appears or the user explicitly
-requests it.
+Current recommendation: do not repeat the closed no-rerun chains. The planned incremental AI smoke backlog and all six
+post-AI roadmap stages are closed. `0704-enterprise-training-smoke` remains optional only if a later fresh integration
+risk appears or the user explicitly requests it.

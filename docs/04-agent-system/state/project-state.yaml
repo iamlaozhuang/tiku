@@ -1,8 +1,43 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-exception-degradation-smoke-2026-07-10
+currentPhase: 0704-release-candidate-local-gates-2026-07-10
 updatedAt: "2026-07-10T00:00:00-07:00"
+latest0704ReleaseCandidateLocalGates:
+  id: 0704-release-candidate-local-gates-2026-07-10
+  status: ready_for_closeout
+  result: pass_release_candidate_local_gates
+  branch: codex/0704-release-candidate-local-gates
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-release-candidate-local-gates.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-release-candidate-local-gates-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-release-candidate-local-gates-audit.md
+  boundary:
+    sourceCodeChangePlanned: false
+    testsChangePlanned: false
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallAllowed: false
+    browserRuntimeAllowed: false
+    directDatabaseConnectionAllowed: false
+    directDatabaseMutationAllowed: false
+    destructiveDatabaseOperationAllowed: false
+    privateCredentialValuesOutputAllowed: false
+    evidenceRedactionRequired: true
+  validationSummary:
+    status: passed
+    redactedReadinessPreflight: pass_all_9_core_roles_ready_0704_verified
+    priorStageEvidenceAuditInventory: pass_10_files
+    coverageLedgerMandatoryPendingCheck: pass_no_mandatory_pending_before_stage6_closeout
+    sensitiveEvidenceScan: pass_no_raw_value_markers
+    targetedRcConfidencePacket: pass_101_files_774_tests
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    diffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 latest0704ExceptionDegradationSmoke:
   id: 0704-exception-degradation-smoke-2026-07-10
   status: ready_for_closeout
@@ -3376,14 +3411,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-exception-degradation-smoke-2026-07-10
-  title: 0704 exception degradation smoke
-  phase: 0704-exception-degradation-smoke-2026-07-10
+  id: 0704-release-candidate-local-gates-2026-07-10
+  title: 0704 release candidate local gates
+  phase: 0704-release-candidate-local-gates-2026-07-10
   status: ready_for_closeout
-  result: pass_targeted_exception_degradation_contract_smoke
+  result: pass_release_candidate_local_gates
   priority: p1
-  taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-exception-degradation-smoke
+  taskKind: validation_only_release_candidate_local_gates
+  branch: codex/0704-release-candidate-local-gates
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_post_ai_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3396,17 +3431,20 @@ currentTask:
     screenshotRawDom: blocked
   plannedAt: "2026-07-10T00:00:00-07:00"
   claimedAt: "2026-07-10T00:00:00-07:00"
-  targetClosureItem: Validate exception and degradation paths after AI closure without executing Provider, browser, DB, or formal product writes.
-  behaviorBoundary: docs_state_evidence_plus_targeted_unit_contract_smoke_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_screenshot_no_raw_dom_no_db_connection_no_db_mutation_no_staging_prod_deploy_no_cost_calibration
+  targetClosureItem: Produce the final local release-candidate confidence packet for the owner-approved 0704 post-AI acceptance sequence.
+  behaviorBoundary: docs_state_acceptance_evidence_audit_plus_targeted_unit_contract_smoke_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_screenshot_no_raw_dom_no_db_connection_no_db_mutation_no_staging_prod_deploy_no_cost_calibration
   evidenceMode: redacted_role_label_status_category_route_label_file_label_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code_no_stack_trace
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-exception-degradation-smoke.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-release-candidate-local-gates.md
   roadmapPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-roadmap.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-exception-degradation-smoke-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-exception-degradation-smoke-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-release-candidate-local-gates-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-release-candidate-local-gates-audit.md
   validationSummary:
     status: passed
     redactedReadinessPreflight: pass_all_9_core_roles_ready_0704_verified
-    targetedExceptionDegradationSmoke: pass_16_files_206_tests
+    priorStageEvidenceAuditInventory: pass_10_files
+    coverageLedgerMandatoryPendingCheck: pass_no_mandatory_pending_before_stage6_closeout
+    sensitiveEvidenceScan: pass_no_raw_value_markers
+    targetedRcConfidencePacket: pass_101_files_774_tests
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     diffCheck: pass
@@ -3414,7 +3452,7 @@ currentTask:
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
@@ -34105,8 +34143,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e631e6680d35acb0420d9e73fb124dc194d3f500
-  lastKnownOriginMasterSha: e631e6680d35acb0420d9e73fb124dc194d3f500
+  lastKnownMasterSha: eaf1cdca2e36cc0c6fe2600f646c6b25c0f93475
+  lastKnownOriginMasterSha: eaf1cdca2e36cc0c6fe2600f646c6b25c0f93475
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed
