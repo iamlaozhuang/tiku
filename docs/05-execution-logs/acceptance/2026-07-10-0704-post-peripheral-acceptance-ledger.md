@@ -37,7 +37,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     0 | `0704-post-peripheral-acceptance-ledger`      | closed  | `codex/0704-post-peripheral-acceptance-ledger`      | Freeze this 17-task queue, acceptance standards, stop rules, and redaction boundary. |
 |     1 | `0704-org-auth-multiscope-acceptance`         | closed  | `codex/0704-org-auth-multiscope-acceptance`         | Enterprise multi-scope `org_auth` UI and atomic authorization closure.               |
 |     2 | `0704-org-employee-import-acceptance`         | closed  | `codex/0704-org-employee-import-acceptance`         | Employee roster import entry, downloadable template, preview, and inherited auth.    |
-|     3 | `0704-personal-redeem-code-acceptance`        | pending | `codex/0704-personal-redeem-code-acceptance`        | Personal `redeem_code` activation, upgrade, rejection, and redaction boundaries.     |
+|     3 | `0704-personal-redeem-code-acceptance`        | closed  | `codex/0704-personal-redeem-code-acceptance`        | Personal `redeem_code` activation, upgrade, rejection, and redaction boundaries.     |
 |     4 | `0704-org-tree-auth-inheritance-acceptance`   | pending | `codex/0704-org-tree-auth-inheritance-acceptance`   | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
 |     5 | `0704-org-admin-surface-acceptance`           | pending | `codex/0704-org-admin-surface-acceptance`           | Organization admin surface separation and role boundary details.                     |
 |     6 | `0704-resource-rag-management-acceptance`     | pending | `codex/0704-resource-rag-management-acceptance`     | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
