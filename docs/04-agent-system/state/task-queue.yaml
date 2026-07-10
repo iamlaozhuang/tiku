@@ -95,11 +95,33 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
   cleanup:
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
+postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
+  - AGENTS.md
+  - .env*
+  - package.json
+  - package-lock.yaml
+  - package-lock.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - src/**
+  - tests/**
+  - src/db/schema/**
+  - drizzle/**
+  - migrations/**
+  - seed/**
+  - e2e/**
+  - compose.yaml
+  - playwright-report/**
+  - test-results/**
+  - .next/**
+  - .runtime/**
+  - D:/tiku-local-private/**
+  - D:\tiku-local-private\**
 activeTasks:
   - id: 0704-post-peripheral-acceptance-ledger-2026-07-10
     title: 0704 post-peripheral acceptance ledger
     phase: 0704-post-peripheral-acceptance-ledger-2026-07-10
-    status: ready_for_closeout
+    status: closed
     result: pass_17_task_post_peripheral_acceptance_ledger_seeded
     priority: p1
     taskKind: docs_acceptance_roadmap
@@ -222,7 +244,8 @@ activeTasks:
   - id: 0704-org-auth-multiscope-acceptance-2026-07-10
     title: 0704 organization authorization multiscope acceptance
     phase: 0704-org-auth-multiscope-acceptance-2026-07-10
-    status: pending
+    status: ready_for_closeout
+    result: blocked_requires_priority_repair_org_auth_multiscope_ui_and_atomic_contract
     priority: p0
     sequenceOrder: 1
     taskKind: validation_only_localhost_acceptance
@@ -235,6 +258,8 @@ activeTasks:
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true
     priorityRepairTaskIdCandidate: 0704-org-auth-multiscope-ui-fix-2026-07-10
+    nextRequiredTaskId: 0704-org-auth-multiscope-ui-fix-2026-07-10
+    blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
     planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-audit.md
@@ -257,7 +282,7 @@ activeTasks:
       - tests/**
       - D:/tiku-local-private/acceptance/**
       - D:\tiku-local-private\acceptance\**
-    blockedFiles: &post_peripheral_validation_blocked_files
+    blockedFiles:
       - AGENTS.md
       - .env*
       - package.json
@@ -322,6 +347,21 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+    claimedAt: "2026-07-10T07:14:18-07:00"
+    plannedAt: "2026-07-10T07:14:18-07:00"
+    completedAt: "2026-07-10T07:14:18-07:00"
+    validationSummary:
+      readinessPreflight: pass_core_roles_9
+      sourceInspection: confirms_missing_multiscope_ui_preview_and_atomic_create_contract
+      targetedTests: pass_6_files_22_tests
+      sensitiveEvidence: pass_redacted
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-org-employee-import-acceptance-2026-07-10
     title: 0704 organization employee import acceptance
     phase: 0704-org-employee-import-acceptance-2026-07-10

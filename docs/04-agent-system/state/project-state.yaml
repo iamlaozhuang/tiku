@@ -1,11 +1,11 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-post-peripheral-acceptance-ledger-2026-07-10
+currentPhase: 0704-org-auth-multiscope-acceptance-2026-07-10
 updatedAt: "2026-07-10T00:00:00-07:00"
 latest0704PostPeripheralAcceptanceLedger:
   id: 0704-post-peripheral-acceptance-ledger-2026-07-10
-  status: ready_for_closeout
+  status: closed
   result: pass_17_task_post_peripheral_acceptance_ledger_seeded
   branch: codex/0704-post-peripheral-acceptance-ledger
   planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-post-peripheral-acceptance-ledger.md
@@ -27,8 +27,8 @@ latest0704PostPeripheralAcceptanceLedger:
     evidenceRedactionRequired: true
   sequence:
     totalTasks: 17
-    currentOrder: 0
-    nextTaskId: 0704-org-auth-multiscope-acceptance-2026-07-10
+    currentOrder: 1
+    nextTaskId: 0704-org-auth-multiscope-ui-fix-2026-07-10
     stopOnCapabilityGap: true
     priorityRepairGates:
       - validationTaskId: 0704-org-auth-multiscope-acceptance-2026-07-10
@@ -40,6 +40,40 @@ latest0704PostPeripheralAcceptanceLedger:
     ledgerCreated: pass_17_tasks
     queueSeeded: pass_17_serial_tasks
     priorityRepairGates: pass_two_gates_recorded
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+latest0704OrgAuthMultiscopeAcceptance:
+  id: 0704-org-auth-multiscope-acceptance-2026-07-10
+  status: ready_for_closeout
+  result: blocked_requires_priority_repair_org_auth_multiscope_ui_and_atomic_contract
+  branch: codex/0704-org-auth-multiscope-acceptance
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-audit.md
+  nextRequiredTaskId: 0704-org-auth-multiscope-ui-fix-2026-07-10
+  blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
+  boundary:
+    sourceCodeChangePlanned: false
+    testsChangePlanned: false
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallAllowed: false
+    browserRuntimeExecuted: false
+    directDatabaseConnectionAllowed: false
+    directDatabaseMutationAllowed: false
+    destructiveDatabaseOperationAllowed: false
+    stagingProdDeployAllowed: false
+    privateCredentialValuesOutputAllowed: false
+    evidenceRedactionRequired: true
+  validationSummary:
+    readinessPreflight: pass_core_roles_9
+    productCapabilityGap: confirmed_missing_multiscope_ui_preview_and_atomic_create_contract
+    targetedTests: pass_6_files_22_tests
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     diffCheck: pass
@@ -3455,38 +3489,42 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-post-peripheral-acceptance-ledger-2026-07-10
-  title: 0704 post-peripheral acceptance ledger
-  phase: 0704-post-peripheral-acceptance-ledger-2026-07-10
+  id: 0704-org-auth-multiscope-acceptance-2026-07-10
+  title: 0704 organization authorization multiscope acceptance
+  phase: 0704-org-auth-multiscope-acceptance-2026-07-10
   status: ready_for_closeout
-  result: pass_17_task_post_peripheral_acceptance_ledger_seeded
-  priority: p1
-  taskKind: docs_acceptance_roadmap
-  branch: codex/0704-post-peripheral-acceptance-ledger
+  result: blocked_requires_priority_repair_org_auth_multiscope_ui_and_atomic_contract
+  priority: p0
+  taskKind: validation_only_localhost_acceptance
+  branch: codex/0704-org-auth-multiscope-acceptance
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
-    productLoginSessionProbe: blocked_not_needed_docs_only
-    productRouteRead: blocked_not_needed_docs_only
+    productLoginSessionProbe: approved_redacted_readiness_only
+    productRouteRead: approved_status_categories_only
     productRouteWrite: blocked
     directDatabaseConnection: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T00:00:00-07:00"
-  claimedAt: "2026-07-10T00:00:00-07:00"
-  targetClosureItem: Materialize the owner-approved 17-task 0704 post-peripheral acceptance ledger, task sequence, acceptance standards, and priority repair stop rules.
-  behaviorBoundary: docs_state_acceptance_roadmap_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_db_no_staging_prod_deploy_no_cost_calibration
-  evidenceMode: redacted_role_label_route_label_status_category_file_path_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-post-peripheral-acceptance-ledger.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-post-peripheral-acceptance-ledger-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-post-peripheral-acceptance-ledger-audit.md
+  plannedAt: "2026-07-10T07:14:18-07:00"
+  claimedAt: "2026-07-10T07:14:18-07:00"
+  completedAt: "2026-07-10T07:14:18-07:00"
+  targetClosureItem: Validate whether enterprise org_auth supports operations multi-select package creation, expanded atomic scope preview, and downstream atomic capability consumption.
+  behaviorBoundary: validation_only_source_and_targeted_tests_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_db_no_staging_prod_deploy_no_cost_calibration
+  evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance.md
+  acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-audit.md
+  nextRequiredTaskId: 0704-org-auth-multiscope-ui-fix-2026-07-10
+  blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
   validationSummary:
-    status: passed
-    ledgerCreated: pass_17_tasks
-    queueSeeded: pass_17_serial_tasks
-    priorityRepairGates: pass_two_gates_recorded
+    status: blocked_requires_priority_repair
+    readinessPreflight: pass_core_roles_9
+    sourceInspection: confirms_missing_multiscope_ui_preview_and_atomic_create_contract
+    targetedTests: pass_6_files_22_tests
+    sensitiveEvidence: pass_redacted
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     diffCheck: pass
