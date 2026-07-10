@@ -38,7 +38,8 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     1 | `0704-org-auth-multiscope-acceptance`         | closed  | `codex/0704-org-auth-multiscope-acceptance`         | Enterprise multi-scope `org_auth` UI and atomic authorization closure.               |
 |     2 | `0704-org-employee-import-acceptance`         | closed  | `codex/0704-org-employee-import-acceptance`         | Employee roster import entry, downloadable template, preview, and inherited auth.    |
 |     3 | `0704-personal-redeem-code-acceptance`        | closed  | `codex/0704-personal-redeem-code-acceptance`        | Personal `redeem_code` activation, upgrade, rejection, and redaction boundaries.     |
-|     4 | `0704-org-tree-auth-inheritance-acceptance`   | pending | `codex/0704-org-tree-auth-inheritance-acceptance`   | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
+|     4 | `0704-org-tree-auth-inheritance-acceptance`   | blocked | `codex/0704-org-tree-auth-inheritance-acceptance`   | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
+|    4R | `0704-org-tree-employee-transfer-fix`         | pending | `codex/0704-org-tree-employee-transfer-fix`         | Repair employee transfer mutation, quota/session/history convergence, and rerun.     |
 |     5 | `0704-org-admin-surface-acceptance`           | pending | `codex/0704-org-admin-surface-acceptance`           | Organization admin surface separation and role boundary details.                     |
 |     6 | `0704-resource-rag-management-acceptance`     | pending | `codex/0704-resource-rag-management-acceptance`     | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
 |     7 | `0704-model-prompt-log-governance-acceptance` | pending | `codex/0704-model-prompt-log-governance-acceptance` | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
@@ -68,6 +69,12 @@ If either task confirms a real product capability gap, the next serial item must
 | ------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------- |
 | `0704-org-auth-multiscope-acceptance` | `0704-org-auth-multiscope-ui-fix`       | Closed: repair merged, pushed, cleaned, and affected validation rerun passed. |
 | `0704-org-employee-import-acceptance` | `0704-org-employee-import-template-fix` | Closed: repair merged, pushed, cleaned, and affected validation rerun passed. |
+
+Additional validation-discovered repair gate:
+
+| Trigger validation task                     | Repair task id candidate              | Continue condition                                                            |
+| ------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------- |
+| `0704-org-tree-auth-inheritance-acceptance` | `0704-org-tree-employee-transfer-fix` | Closed: repair merged, pushed, cleaned, and affected validation rerun passed. |
 
 ## Task Acceptance Standards
 
@@ -122,6 +129,8 @@ If either task confirms a real product capability gap, the next serial item must
 - Employee transfer removes old-organization training, analytics, and AI access.
 - Historical submitted summaries remain read-only and scoped.
 - Sibling, parent, and unrelated organization access is denied.
+- 2026-07-10 validation result: blocked because employee transfer execution has only review UI and lacks a mutation route,
+  service action, and repository transaction. Queue continuation requires `0704-org-tree-employee-transfer-fix` plus rerun.
 
 ### 5. `0704-org-admin-surface-acceptance`
 

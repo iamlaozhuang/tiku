@@ -1,8 +1,31 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-personal-redeem-code-acceptance-2026-07-10
-updatedAt: "2026-07-10T00:00:00-07:00"
+currentPhase: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+updatedAt: "2026-07-10T09:01:50-07:00"
+latest0704OrgTreeAuthInheritanceAcceptance:
+  id: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+  status: closed
+  result: blocked_requires_employee_transfer_mutation_repair
+  branch: codex/0704-org-tree-auth-inheritance-acceptance
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-audit.md
+  nextRequiredTaskId: 0704-org-tree-employee-transfer-fix-2026-07-10
+  blockedContinueTaskId: 0704-org-admin-surface-acceptance-2026-07-10
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    sourceInspection: blocked_missing_employee_transfer_mutation_route_service_repository
+    targetedTests: pass_12_files_58_tests
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    providerCallExecuted: false
+    stagingProdDeployExecuted: false
 latest0704PersonalRedeemCodeAcceptance:
   id: 0704-personal-redeem-code-acceptance-2026-07-10
   status: ready_for_closeout
@@ -3638,13 +3661,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-personal-redeem-code-acceptance-2026-07-10
-  title: 0704 personal redeem code acceptance
-  phase: 0704-personal-redeem-code-acceptance-2026-07-10
-  status: ready_for_closeout
+  id: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+  title: 0704 organization tree auth inheritance acceptance
+  phase: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+  status: closed
   priority: p1
   taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-personal-redeem-code-acceptance
+  branch: codex/0704-org-tree-auth-inheritance-acceptance
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3655,25 +3678,26 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T08:51:00-07:00"
-  claimedAt: "2026-07-10T08:51:00-07:00"
-  completedAt: "2026-07-10T08:54:00-07:00"
-  targetClosureItem: Validate personal redeem_code standard activation, advanced activation, upgrade, safe rejection, and plaintext redaction boundaries after employee import acceptance rerun closeout.
+  plannedAt: "2026-07-10T09:01:50-07:00"
+  claimedAt: "2026-07-10T09:01:50-07:00"
+  completedAt: "2026-07-10T09:08:00-07:00"
+  targetClosureItem: Validate organization tree node lifecycle, org_auth inheritance coverage, employee transfer/unbind convergence, and org admin cross-organization scoping.
   behaviorBoundary: validation_only_docs_state_evidence_audit_no_source_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-personal-redeem-code-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-personal-redeem-code-acceptance-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-personal-redeem-code-acceptance-audit.md
-  blockedContinueTaskId: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-audit.md
+  nextRequiredTaskId: 0704-org-tree-employee-transfer-fix-2026-07-10
+  blockedContinueTaskId: 0704-org-admin-surface-acceptance-2026-07-10
   validationSummary:
-    status: passed
+    status: blocked_requires_repair
     readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: pass_redeem_code_type_generation_redemption_upgrade_plaintext_boundary_markers
-    targetedTests: pass_8_files_60_tests
+    sourceInspection: blocked_missing_employee_transfer_mutation_route_service_repository
+    targetedTests: pass_12_files_58_tests
     diffCheck: pass
     lint: pass
     typecheck: pass
-    moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files_expansion
+    moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     browserRuntimeExecuted: false
     directDatabaseConnectionExecuted: false

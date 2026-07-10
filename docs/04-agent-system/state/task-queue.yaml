@@ -855,7 +855,8 @@ activeTasks:
   - id: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
     title: 0704 organization tree auth inheritance acceptance
     phase: 0704-org-tree-auth-inheritance-acceptance-2026-07-10
-    status: pending
+    status: closed
+    result: blocked_requires_employee_transfer_mutation_repair
     priority: p1
     sequenceOrder: 4
     taskKind: validation_only_localhost_acceptance
@@ -867,6 +868,8 @@ activeTasks:
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true
+    nextRequiredTaskId: 0704-org-tree-employee-transfer-fix-2026-07-10
+    blockedContinueTaskId: 0704-org-admin-surface-acceptance-2026-07-10
     planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance.md
     evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-audit.md
@@ -878,7 +881,166 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - prisma/**
+      - supabase/**
+      - migrations/**
+      - drizzle/**
+      - db/**
+      - sql/**
+      - public/**
+      - app/**
+      - pages/**
+      - components/**
+      - lib/**
+      - server/**
+      - client/**
+      - docs/01-requirements/**
+      - docs/02-architecture/**
+      - docs/03-standards/**
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T09:01:50-07:00"
+    plannedAt: "2026-07-10T09:01:50-07:00"
+    completedAt: "2026-07-10T09:08:00-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: blocked_missing_employee_transfer_mutation_route_service_repository
+      targetedTests: pass_12_files_58_tests
+      sensitiveEvidence: pass_redacted
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  - id: 0704-org-tree-employee-transfer-fix-2026-07-10
+    title: 0704 organization tree employee transfer mutation fix
+    phase: 0704-org-tree-employee-transfer-fix-2026-07-10
+    status: pending
+    priority: p0
+    sequenceOrder: 4.1
+    taskKind: implementation_repair
+    executionProfile: targeted_source_repair_with_redacted_local_validation
+    moduleRunVersion: 2
+    branch: codex/0704-org-tree-employee-transfer-fix
+    dependsOn:
+      - 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+    nextRequiredTaskId: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
+    blockedContinueTaskId: 0704-org-admin-surface-acceptance-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-employee-transfer-fix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-employee-transfer-fix-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-employee-transfer-fix-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-employee-transfer-fix.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-employee-transfer-fix-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-employee-transfer-fix-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/app/api/v1/employees/[publicId]/transfer/route.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - src/server/services/effective-authorization-service.test.ts
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - prisma/**
+      - supabase/**
+      - migrations/**
+      - drizzle/**
+      - db/**
+      - sql/**
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+  - id: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
+    title: 0704 organization tree auth inheritance acceptance rerun
+    phase: 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
+    status: pending
+    priority: p0
+    sequenceOrder: 4.2
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-tree-auth-inheritance-acceptance-rerun
+    dependsOn:
+      - 0704-org-tree-employee-transfer-fix-2026-07-10
+    acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    rerunAfterRepairTaskId: 0704-org-tree-employee-transfer-fix-2026-07-10
+    blockedContinueTaskId: 0704-org-admin-surface-acceptance-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-tree-auth-inheritance-acceptance-rerun-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - scripts/**
+      - prisma/**
+      - supabase/**
+      - migrations/**
+      - drizzle/**
+      - db/**
+      - sql/**
+      - public/**
+      - app/**
+      - pages/**
+      - components/**
+      - lib/**
+      - server/**
+      - client/**
+      - docs/01-requirements/**
+      - docs/02-architecture/**
+      - docs/03-standards/**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
@@ -899,7 +1061,7 @@ activeTasks:
     moduleRunVersion: 2
     branch: codex/0704-org-admin-surface-acceptance
     dependsOn:
-      - 0704-org-tree-auth-inheritance-acceptance-2026-07-10
+      - 0704-org-tree-auth-inheritance-acceptance-rerun-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true
