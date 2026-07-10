@@ -43,7 +43,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |   4.2 | `0704-org-tree-auth-inheritance-rerun`        | closed  | `codex/0704-org-tree-auth-inheritance-acceptance-rerun` | Rerun affected organization tree/auth inheritance validation after repair.           |
 |     5 | `0704-org-admin-surface-acceptance`           | closed  | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
 |     6 | `0704-resource-rag-management-acceptance`     | closed  | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
-|     7 | `0704-model-prompt-log-governance-acceptance` | pending | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
+|     7 | `0704-model-prompt-log-governance-acceptance` | closed  | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
 |     8 | `0704-audit-privacy-governance-acceptance`    | pending | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
 |     9 | `0704-org-training-edge-acceptance`           | pending | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
 |    10 | `0704-org-analytics-acceptance`               | pending | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
@@ -169,6 +169,9 @@ Additional validation-discovered repair gate:
   categories only.
 - Provider-disabled, timeout, quota, empty result, and unavailable states degrade safely without leaking raw Provider,
   prompt, output, or stack content.
+- 2026-07-10 result: closed. Source markers and focused tests validated super-admin-owned model configuration,
+  operations summary-only visibility, first-release Prompt registry rules, redacted `ai_call_log`/`audit_log`
+  behavior, blocked export/delete/archive controls, and Provider-disabled/failure category degradation.
 
 ### 8. `0704-audit-privacy-governance-acceptance`
 
