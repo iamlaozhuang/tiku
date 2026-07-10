@@ -1,8 +1,40 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-acceptance-coverage-ledger-2026-07-10
+currentPhase: 0704-rag-citation-smoke-2026-07-10
 updatedAt: "2026-07-10T00:00:00-07:00"
+latest0704RagCitationSmoke:
+  id: 0704-rag-citation-smoke-2026-07-10
+  status: ready_for_closeout
+  result: pass_targeted_rag_citation_contract_smoke
+  branch: codex/0704-rag-citation-smoke
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-rag-citation-smoke.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-rag-citation-smoke-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-rag-citation-smoke-audit.md
+  boundary:
+    sourceCodeChangePlanned: false
+    testsChangePlanned: false
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallAllowed: false
+    browserRuntimeAllowed: false
+    directDatabaseConnectionAllowed: false
+    directDatabaseMutationAllowed: false
+    destructiveDatabaseOperationAllowed: false
+    privateCredentialValuesOutputAllowed: false
+    evidenceRedactionRequired: true
+  validationSummary:
+    status: passed
+    redactedReadinessPreflight: pass_all_9_core_roles_ready_0704_verified
+    targetedRagCitationSmoke: pass_11_files_153_tests
+    scopedPrettierWrite: pass
+    scopedPrettierCheck: pass
+    diffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 latest0704AcceptanceCoverageLedger:
   id: 0704-acceptance-coverage-ledger-2026-07-10
   status: ready_for_closeout
@@ -3047,14 +3079,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-acceptance-coverage-ledger-2026-07-10
-  title: 0704 acceptance coverage ledger
-  phase: 0704-acceptance-coverage-ledger-2026-07-10
+  id: 0704-rag-citation-smoke-2026-07-10
+  title: 0704 RAG citation smoke
+  phase: 0704-rag-citation-smoke-2026-07-10
   status: ready_for_closeout
-  result: pass_redacted_coverage_ledger_created
+  result: pass_targeted_rag_citation_contract_smoke
   priority: p1
-  taskKind: docs_acceptance_coverage_ledger
-  branch: codex/0704-acceptance-coverage-ledger
+  taskKind: docs_acceptance_targeted_contract_smoke
+  branch: codex/0704-rag-citation-smoke
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -3067,16 +3099,16 @@ currentTask:
     screenshotRawDom: blocked
   plannedAt: "2026-07-10T00:00:00-07:00"
   claimedAt: "2026-07-10T00:00:00-07:00"
-  targetClosureItem: Create a redacted 0704 acceptance coverage ledger that freezes already verified chains and identifies only incremental smoke gaps.
-  behaviorBoundary: docs_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_screenshot_no_raw_dom_no_db_connection_no_db_mutation_no_staging_prod_deploy_no_cost_calibration
+  targetClosureItem: Validate current RAG/knowledge_node citation and evidence_status propagation with targeted local contract smoke only.
+  behaviorBoundary: docs_state_evidence_plus_targeted_unit_contract_smoke_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_screenshot_no_raw_dom_no_db_connection_no_db_mutation_no_staging_prod_deploy_no_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_authorization_context_category_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-acceptance-coverage-ledger.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-acceptance-coverage-ledger-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-acceptance-coverage-ledger-audit.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-rag-citation-smoke.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-rag-citation-smoke-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-rag-citation-smoke-audit.md
   validationSummary:
     status: passed
     redactedReadinessPreflight: pass_all_9_core_roles_ready_0704_verified
-    ledgerCreated: pass
+    targetedRagCitationSmoke: pass_11_files_153_tests
     scopedPrettierWrite: pass
     scopedPrettierCheck: pass
     diffCheck: pass
@@ -3084,7 +3116,7 @@ currentTask:
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_sha_checkpoint_repair
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
@@ -33775,8 +33807,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 58f01cadc2db3136735e63d87f8d7a16a3143264
-  lastKnownOriginMasterSha: 58f01cadc2db3136735e63d87f8d7a16a3143264
+  lastKnownMasterSha: 8852f7de57d95517f3713508e13ef45742cac32b
+  lastKnownOriginMasterSha: 8852f7de57d95517f3713508e13ef45742cac32b
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

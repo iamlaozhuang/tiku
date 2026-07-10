@@ -96,6 +96,134 @@ docsOnlyUiuxCloseoutPolicy: &docs_only_uiux_closeout_policy
     deleteShortBranch: true
     approvalSource: current_user_approved_serial_uiux_docs_batches_materialize_batch0_then_batches_0_to_5_merge_push_cleanup_2026_07_07
 activeTasks:
+  - id: 0704-rag-citation-smoke-2026-07-10
+    title: 0704 RAG citation smoke
+    phase: 0704-rag-citation-smoke-2026-07-10
+    status: ready_for_closeout
+    priority: p1
+    taskKind: docs_acceptance_targeted_contract_smoke
+    executionProfile: targeted_unit_contract_smoke_redacted_evidence_only
+    validationPolicy: targeted_vitest_prettier_lint_typecheck_diff_precommit_prepush
+    moduleRunVersion: 2
+    branch: codex/0704-rag-citation-smoke
+    dependsOn:
+      - 0704-acceptance-coverage-ledger-2026-07-10
+      - 0704-role-credential-catalog-consolidation-2026-07-10
+    humanApprovalBoundary:
+      implementationAndCloseout: current_user_approved_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      providerExecution: blocked
+      destructiveDbOperation: blocked
+      credentialMaterialOutput: blocked
+      screenshotRawDom: blocked
+      directDatabaseConnection: blocked
+    plannedAt: "2026-07-10T00:00:00-07:00"
+    claimedAt: "2026-07-10T00:00:00-07:00"
+    targetClosureItem: Validate the current RAG/knowledge_node citation and evidence_status propagation with targeted local contract tests, without rerunning closed full AI generation chains.
+    behaviorBoundary: docs_state_evidence_plus_targeted_unit_contract_smoke_only_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_browser_no_db_no_staging_prod_deploy_no_cost_calibration
+    evidenceMode: redacted_role_label_route_label_status_category_test_count_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_or_chunk_content_no_session_cookie_token_localStorage_auth_header
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-rag-citation-smoke.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-rag-citation-smoke-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-rag-citation-smoke-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-rag-citation-smoke.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-rag-citation-smoke-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-rag-citation-smoke-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-10-0704-acceptance-coverage-ledger.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - src/server/services/route-integrated-provider-instruction-service.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/server/services/rag-knowledge/route-handlers.ts
+      - tests/unit/knowledge-node-ai-cross-role-regression.test.ts
+      - tests/unit/knowledge-node-ai-final-regression.test.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - D:/tiku-local-private/acceptance/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: approved_targeted_contract_smoke_only
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: approved_redacted_catalog_preflight_only
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/knowledge-node-ai-cross-role-regression.test.ts tests/unit/knowledge-node-ai-final-regression.test.ts src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts src/server/services/route-integrated-provider-instruction-service.test.ts src/server/services/route-integrated-provider-execution-service.test.ts src/server/services/admin-ai-generation-local-contract-route.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts tests/unit/ai-generation-knowledge-node-options-route.test.ts src/server/services/personal-ai-generation-request-route.test.ts src/server/services/personal-ai-generation-route-integrated-provider-execution-service.test.ts
+      - corepack pnpm@10.26.1 exec prettier --check --ignore-unknown docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/project-state.yaml docs/05-execution-logs/task-plans/2026-07-10-0704-rag-citation-smoke.md docs/05-execution-logs/evidence/2026-07-10-0704-rag-citation-smoke-evidence.md docs/05-execution-logs/audits-reviews/2026-07-10-0704-rag-citation-smoke-audit.md docs/05-execution-logs/acceptance/2026-07-10-0704-acceptance-coverage-ledger.md
+      - git diff --check
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-rag-citation-smoke-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-rag-citation-smoke-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_serial_short_branches_commit_merge_push_cleanup_2026_07_10
+    validationSummary:
+      status: passed
+      redactedReadinessPreflight: pass_all_9_core_roles_ready_0704_verified
+      targetedRagCitationSmoke: pass_11_files_153_tests
+      scopedPrettierWrite: pass
+      scopedPrettierCheck: pass
+      diffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-acceptance-coverage-ledger-2026-07-10
     title: 0704 acceptance coverage ledger
     phase: 0704-acceptance-coverage-ledger-2026-07-10
