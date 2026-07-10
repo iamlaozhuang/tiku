@@ -1709,7 +1709,8 @@ activeTasks:
   - id: 0704-content-non-ai-publish-acceptance-2026-07-10
     title: 0704 content non-AI publish acceptance
     phase: 0704-content-non-ai-publish-acceptance-2026-07-10
-    status: pending
+    status: ready_for_closeout
+    result: pass_formal_content_publish_takedown_copy_snapshot_downstream_ai_adoption_boundary
     priority: p1
     sequenceOrder: 11
     taskKind: validation_only_localhost_acceptance
@@ -1732,16 +1733,49 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-content-non-ai-publish-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
     validationCommands:
+      - corepack pnpm@10.26.1 vitest run src/server/services/admin-flow-runtime.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts tests/unit/phase-9-content-question-material-runtime.test.ts tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts tests/unit/paper-draft-repository-composition-guard.test.ts tests/unit/paper-draft-repository-archive-termination.test.ts src/server/services/question-service.test.ts src/server/services/question-route.test.ts src/server/services/material-service.test.ts src/server/services/material-route.test.ts src/server/services/paper-draft-service.test.ts src/server/services/paper-draft-route.test.ts src/server/services/paper-asset-service.test.ts src/server/services/paper-asset-route.test.ts src/server/validators/question.test.ts src/server/validators/paper-draft.test.ts src/server/mappers/paper-mapper.test.ts src/server/repositories/question-repository.test.ts tests/unit/question-paper/question-paper-rest-layering.test.ts src/server/services/student-paper-service.test.ts src/server/services/student-paper-route.test.ts src/server/services/practice-service.test.ts src/server/services/mock-exam-service.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/services/ai-paper-source-adapter-service.test.ts src/server/services/ai-paper-route-source-resolution-service.test.ts src/server/services/ai-paper-route-assembly-service.test.ts src/server/services/ai-paper-plan-and-select-service.test.ts src/server/services/admin-ai-generation-formal-adoption-runtime.test.ts src/server/repositories/admin-ai-generation-formal-adoption-repository.test.ts src/lib/admin-ai-generation-formal-draft-payload.test.ts
       - corepack pnpm@10.26.1 run lint
       - corepack pnpm@10.26.1 run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId TASK_ID
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId TASK_ID -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    plannedAt: "2026-07-10T12:09:10-07:00"
+    claimedAt: "2026-07-10T12:09:10-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_formal_relationship_publish_immutability_downstream_ai_adoption_markers
+      targetedTests: pass_33_files_290_tests
+      lint: pass
+      typecheck: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_after_explicit_blocked_files
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-learner-non-ai-study-acceptance-2026-07-10
     title: 0704 learner non-AI study acceptance
     phase: 0704-learner-non-ai-study-acceptance-2026-07-10
