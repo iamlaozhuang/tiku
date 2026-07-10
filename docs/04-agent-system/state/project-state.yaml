@@ -1,8 +1,27 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-failure-degradation-acceptance-2026-07-10
-updatedAt: "2026-07-10T13:12:00-07:00"
+currentPhase: 0704-staging-readiness-design-2026-07-10
+updatedAt: "2026-07-10T13:25:00-07:00"
+latest0704StagingReadinessDesign:
+  id: 0704-staging-readiness-design-2026-07-10
+  status: ready_for_closeout
+  result: pass_staging_readiness_design_only_boundaries_approval_gates_template_stop_conditions_no_execution
+  branch: codex/0704-staging-readiness-design
+  dependsOn: 0704-failure-degradation-acceptance-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-staging-readiness-design.md
+  designPath: docs/05-execution-logs/acceptance/2026-07-10-0704-staging-readiness-design.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-staging-readiness-design-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-staging-readiness-design-audit.md
+  nextRequiredTaskId: null
+  validationSummary:
+    readinessPreflight: not_needed_private_account_blocked_for_design_only
+    designReview: pass_data_account_credential_resource_migration_redaction_monitoring_template_stop_conditions_non_claims
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_state_sha_ancestor
 latest0704FailureDegradationAcceptance:
   id: 0704-failure-degradation-acceptance-2026-07-10
   status: ready_for_closeout
@@ -4005,14 +4024,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-failure-degradation-acceptance-2026-07-10
-  title: 0704 failure degradation acceptance
-  phase: 0704-failure-degradation-acceptance-2026-07-10
+  id: 0704-staging-readiness-design-2026-07-10
+  title: 0704 staging readiness design
+  phase: 0704-staging-readiness-design-2026-07-10
   status: ready_for_closeout
-  result: pass_failure_degradation_safe_status_no_formal_record_pollution_redacted_admin_visibility
+  result: pass_staging_readiness_design_only_boundaries_approval_gates_template_stop_conditions_no_execution
   priority: p1
-  taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-failure-degradation-acceptance
+  taskKind: docs_acceptance_readiness_design
+  branch: codex/0704-staging-readiness-design
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
@@ -4023,26 +4042,26 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T13:02:00-07:00"
-  claimedAt: "2026-07-10T13:02:00-07:00"
-  targetClosureItem: Validate failure and degradation status categories, no formal record pollution, and redacted admin-side failure visibility for AI, RAG, training, learner, and route failure paths.
-  behaviorBoundary: validation_only_docs_state_evidence_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
-  evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-failure-degradation-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-failure-degradation-acceptance-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-failure-degradation-acceptance-audit.md
-  dependsOn: 0704-api-route-boundary-acceptance-2026-07-10
-  nextRequiredTaskId: 0704-staging-readiness-design-2026-07-10
+  plannedAt: "2026-07-10T13:25:00-07:00"
+  claimedAt: "2026-07-10T13:25:00-07:00"
+  targetClosureItem: Create staging readiness design covering data isolation, account matrix, credential governance, resource boundaries, approval gates, evidence template, and stop conditions without executing staging/prod/cloud/env/secret/Provider/deploy/Cost Calibration actions.
+  behaviorBoundary: docs_state_acceptance_design_only_no_source_test_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_env_secret_cost_calibration
+  evidenceMode: redacted_design_boundary_file_path_command_result_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-staging-readiness-design.md
+  designPath: docs/05-execution-logs/acceptance/2026-07-10-0704-staging-readiness-design.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-staging-readiness-design-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-staging-readiness-design-audit.md
+  dependsOn: 0704-failure-degradation-acceptance-2026-07-10
+  nextRequiredTaskId: null
   validationSummary:
-    readinessPreflight: pass_private_index_metadata_core_roles_9
-    sourceInspection: pass_failure_degradation_evidence_resource_duplicate_formal_record_redaction_status_markers
-    targetedTests: pass_25_files_318_tests
+    readinessPreflight: not_needed_private_account_blocked_for_design_only
+    designReview: pass_data_account_credential_resource_migration_redaction_monitoring_template_stop_conditions_non_claims
     diffCheck: pass
     lint: pass
     typecheck: pass
     moduleRunV2PreCommitHardening: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check_state_sha_ancestor
-    sensitiveEvidence: pass_redacted_evidence_only
+    sensitiveEvidence: pass_redacted_design_only
     browserRuntimeExecuted: false
     directDatabaseConnectionExecuted: false
     providerCallExecuted: false

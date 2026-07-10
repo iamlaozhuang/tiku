@@ -32,29 +32,29 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 
 ## Serial Task Matrix
 
-| Order | Task id                                        | Status  | Branch                                                  | Primary proof target                                                                 |
-| ----: | ---------------------------------------------- | ------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-|     0 | `0704-post-peripheral-acceptance-ledger`       | closed  | `codex/0704-post-peripheral-acceptance-ledger`          | Freeze this 17-task queue, acceptance standards, stop rules, and redaction boundary. |
-|     1 | `0704-org-auth-multiscope-acceptance`          | closed  | `codex/0704-org-auth-multiscope-acceptance`             | Enterprise multi-scope `org_auth` UI and atomic authorization closure.               |
-|     2 | `0704-org-employee-import-acceptance`          | closed  | `codex/0704-org-employee-import-acceptance`             | Employee roster import entry, downloadable template, preview, and inherited auth.    |
-|     3 | `0704-personal-redeem-code-acceptance`         | closed  | `codex/0704-personal-redeem-code-acceptance`            | Personal `redeem_code` activation, upgrade, rejection, and redaction boundaries.     |
-|     4 | `0704-org-tree-auth-inheritance-acceptance`    | closed  | `codex/0704-org-tree-auth-inheritance-acceptance`       | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
-|    4R | `0704-org-tree-employee-transfer-fix`          | closed  | `codex/0704-org-tree-employee-transfer-fix`             | Repair employee transfer mutation, quota/session/history convergence, and rerun.     |
-|   4.2 | `0704-org-tree-auth-inheritance-rerun`         | closed  | `codex/0704-org-tree-auth-inheritance-acceptance-rerun` | Rerun affected organization tree/auth inheritance validation after repair.           |
-|     5 | `0704-org-admin-surface-acceptance`            | closed  | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
-|     6 | `0704-resource-rag-management-acceptance`      | closed  | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
-|     7 | `0704-model-prompt-log-governance-acceptance`  | closed  | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
-|     8 | `0704-audit-privacy-governance-acceptance`     | closed  | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
-|     9 | `0704-org-training-edge-acceptance`            | closed  | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
-|    9R | `0704-org-training-deadline-answerability-fix` | closed  | `codex/0704-org-training-deadline-answerability-fix`    | Repair answer-deadline publish, persistence, visibility, draft, and submit closure.  |
-|   9.2 | `0704-org-training-edge-acceptance-rerun`      | closed  | `codex/0704-org-training-edge-acceptance-rerun`         | Rerun enterprise training edge validation after deadline repair.                     |
-|    10 | `0704-org-analytics-acceptance`                | closed  | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
-|    11 | `0704-content-non-ai-publish-acceptance`       | closed  | `codex/0704-content-non-ai-publish-acceptance`          | Formal content non-AI publish/takedown/edit-copy/reference boundaries.               |
-|    12 | `0704-learner-non-ai-study-acceptance`         | closed  | `codex/0704-learner-non-ai-study-acceptance`            | Ordinary learner practice, `mock_exam`, reports, mistake-book, and resume details.   |
-|    13 | `0704-role-routing-auth-context-acceptance`    | closed  | `codex/0704-role-routing-auth-context-acceptance`       | Login routing, personal/org context choice, quota owner, and direct-route denial.    |
-|    14 | `0704-api-route-boundary-acceptance`           | closed  | `codex/0704-api-route-boundary-acceptance`              | Direct URL/API adversarial authorization and cross-tenant denial.                    |
-|    15 | `0704-failure-degradation-acceptance`          | closed  | `codex/0704-failure-degradation-acceptance`             | Missing source, weak/none evidence, quota, Provider-disabled, duplicate failure.     |
-|    16 | `0704-staging-readiness-design`                | pending | `codex/0704-staging-readiness-design`                   | Staging readiness design, approval boundaries, data isolation, and stop conditions.  |
+| Order | Task id                                        | Status | Branch                                                  | Primary proof target                                                                 |
+| ----: | ---------------------------------------------- | ------ | ------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+|     0 | `0704-post-peripheral-acceptance-ledger`       | closed | `codex/0704-post-peripheral-acceptance-ledger`          | Freeze this 17-task queue, acceptance standards, stop rules, and redaction boundary. |
+|     1 | `0704-org-auth-multiscope-acceptance`          | closed | `codex/0704-org-auth-multiscope-acceptance`             | Enterprise multi-scope `org_auth` UI and atomic authorization closure.               |
+|     2 | `0704-org-employee-import-acceptance`          | closed | `codex/0704-org-employee-import-acceptance`             | Employee roster import entry, downloadable template, preview, and inherited auth.    |
+|     3 | `0704-personal-redeem-code-acceptance`         | closed | `codex/0704-personal-redeem-code-acceptance`            | Personal `redeem_code` activation, upgrade, rejection, and redaction boundaries.     |
+|     4 | `0704-org-tree-auth-inheritance-acceptance`    | closed | `codex/0704-org-tree-auth-inheritance-acceptance`       | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
+|    4R | `0704-org-tree-employee-transfer-fix`          | closed | `codex/0704-org-tree-employee-transfer-fix`             | Repair employee transfer mutation, quota/session/history convergence, and rerun.     |
+|   4.2 | `0704-org-tree-auth-inheritance-rerun`         | closed | `codex/0704-org-tree-auth-inheritance-acceptance-rerun` | Rerun affected organization tree/auth inheritance validation after repair.           |
+|     5 | `0704-org-admin-surface-acceptance`            | closed | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
+|     6 | `0704-resource-rag-management-acceptance`      | closed | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
+|     7 | `0704-model-prompt-log-governance-acceptance`  | closed | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
+|     8 | `0704-audit-privacy-governance-acceptance`     | closed | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
+|     9 | `0704-org-training-edge-acceptance`            | closed | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
+|    9R | `0704-org-training-deadline-answerability-fix` | closed | `codex/0704-org-training-deadline-answerability-fix`    | Repair answer-deadline publish, persistence, visibility, draft, and submit closure.  |
+|   9.2 | `0704-org-training-edge-acceptance-rerun`      | closed | `codex/0704-org-training-edge-acceptance-rerun`         | Rerun enterprise training edge validation after deadline repair.                     |
+|    10 | `0704-org-analytics-acceptance`                | closed | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
+|    11 | `0704-content-non-ai-publish-acceptance`       | closed | `codex/0704-content-non-ai-publish-acceptance`          | Formal content non-AI publish/takedown/edit-copy/reference boundaries.               |
+|    12 | `0704-learner-non-ai-study-acceptance`         | closed | `codex/0704-learner-non-ai-study-acceptance`            | Ordinary learner practice, `mock_exam`, reports, mistake-book, and resume details.   |
+|    13 | `0704-role-routing-auth-context-acceptance`    | closed | `codex/0704-role-routing-auth-context-acceptance`       | Login routing, personal/org context choice, quota owner, and direct-route denial.    |
+|    14 | `0704-api-route-boundary-acceptance`           | closed | `codex/0704-api-route-boundary-acceptance`              | Direct URL/API adversarial authorization and cross-tenant denial.                    |
+|    15 | `0704-failure-degradation-acceptance`          | closed | `codex/0704-failure-degradation-acceptance`             | Missing source, weak/none evidence, quota, Provider-disabled, duplicate failure.     |
+|    16 | `0704-staging-readiness-design`                | closed | `codex/0704-staging-readiness-design`                   | Staging readiness design, approval boundaries, data isolation, and stop conditions.  |
 
 ## Priority Repair Gate
 
