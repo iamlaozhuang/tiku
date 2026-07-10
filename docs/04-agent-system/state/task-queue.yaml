@@ -1297,13 +1297,17 @@ activeTasks:
   - id: 0704-audit-privacy-governance-acceptance-2026-07-10
     title: 0704 audit privacy governance acceptance
     phase: 0704-audit-privacy-governance-acceptance-2026-07-10
-    status: pending
+    status: ready_for_closeout
+    result: pass_audit_privacy_governance_event_categories_role_scope_redaction
     priority: p1
     sequenceOrder: 8
     taskKind: validation_only_localhost_acceptance
     executionProfile: targeted_readiness_and_localhost_validation_only
     moduleRunVersion: 2
     branch: codex/0704-audit-privacy-governance-acceptance
+    claimedAt: "2026-07-10T10:37:40-07:00"
+    plannedAt: "2026-07-10T10:37:40-07:00"
+    readinessPreflight: pass_private_index_metadata_core_roles_9
     dependsOn:
       - 0704-model-prompt-log-governance-acceptance-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
@@ -1320,9 +1324,45 @@ activeTasks:
       - docs/05-execution-logs/audits-reviews/2026-07-10-0704-audit-privacy-governance-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     readOnlyAllowedFiles: *post_peripheral_readonly_files
-    blockedFiles: *post_peripheral_validation_blocked_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
     capabilities: *post_peripheral_validation_capabilities
     evidenceMode: *post_peripheral_evidence_mode
+    validationResult:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_14_audit_privacy_governance_markers
+      targetedTests: pass_17_files_97_tests
+      scopedPrettierWrite: pass_unchanged
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass
+      sensitiveEvidence: pass_redacted
+      browserRuntimeExecuted: false
+      directDatabaseConnectionExecuted: false
+      providerCallExecuted: false
+      stagingProdDeployExecuted: false
     validationCommands:
       - corepack pnpm@10.26.1 run lint
       - corepack pnpm@10.26.1 run typecheck

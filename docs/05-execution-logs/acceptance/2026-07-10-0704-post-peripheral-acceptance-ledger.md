@@ -44,7 +44,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |     5 | `0704-org-admin-surface-acceptance`           | closed  | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
 |     6 | `0704-resource-rag-management-acceptance`     | closed  | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
 |     7 | `0704-model-prompt-log-governance-acceptance` | closed  | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
-|     8 | `0704-audit-privacy-governance-acceptance`    | pending | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
+|     8 | `0704-audit-privacy-governance-acceptance`    | closed  | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
 |     9 | `0704-org-training-edge-acceptance`           | pending | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
 |    10 | `0704-org-analytics-acceptance`               | pending | `codex/0704-org-analytics-acceptance`                   | Organization analytics scope, aggregation, filters, and raw-answer exclusion.        |
 |    11 | `0704-content-non-ai-publish-acceptance`      | pending | `codex/0704-content-non-ai-publish-acceptance`          | Formal content non-AI publish/takedown/edit-copy/reference boundaries.               |
@@ -180,6 +180,9 @@ Additional validation-discovered repair gate:
 - Audit/log views are scoped to the viewer role.
 - Employee raw answers and learner AI raw results are not exposed through organization admin or operations logs.
 - Sensitive values never appear in evidence or committed logs.
+- 2026-07-10 result: closed. Source markers and focused tests validated redacted `audit_log`/`ai_call_log` contracts,
+  global admin role scoping, authorization/card/employee/resource/model/training audit categories, organization-admin
+  summary-only privacy boundaries, blocked raw viewer/export/delete controls, and sensitive evidence redaction.
 
 ### 9. `0704-org-training-edge-acceptance`
 
