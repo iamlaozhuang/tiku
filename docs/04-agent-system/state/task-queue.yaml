@@ -715,7 +715,7 @@ activeTasks:
   - id: 0704-org-employee-import-acceptance-rerun-2026-07-10
     title: 0704 organization employee import acceptance rerun
     phase: 0704-org-employee-import-acceptance-rerun-2026-07-10
-    status: pending
+    status: ready_for_closeout
     priority: p0
     taskKind: validation_only_localhost_acceptance
     executionProfile: targeted_readiness_and_localhost_validation_only
@@ -768,6 +768,20 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-employee-import-acceptance-rerun-2026-07-10
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-employee-import-acceptance-rerun-2026-07-10 -SkipRemoteAheadCheck
     closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T08:40:00-07:00"
+    plannedAt: "2026-07-10T08:40:00-07:00"
+    completedAt: "2026-07-10T08:44:00-07:00"
+    validationSummary:
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      sourceInspection: pass_upload_template_inherited_auth_quota_safe_failure_markers
+      targetedTests: pass_6_files_37_tests
+      scopedPrettierCheck: pass
+      sensitiveEvidence: pass_redacted
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-personal-redeem-code-acceptance-2026-07-10
     title: 0704 personal redeem code acceptance
     phase: 0704-personal-redeem-code-acceptance-2026-07-10

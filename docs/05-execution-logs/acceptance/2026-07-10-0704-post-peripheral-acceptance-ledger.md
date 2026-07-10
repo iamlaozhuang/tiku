@@ -34,9 +34,9 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 
 | Order | Task id                                       | Status  | Branch                                              | Primary proof target                                                                 |
 | ----: | --------------------------------------------- | ------- | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
-|     0 | `0704-post-peripheral-acceptance-ledger`      | current | `codex/0704-post-peripheral-acceptance-ledger`      | Freeze this 17-task queue, acceptance standards, stop rules, and redaction boundary. |
-|     1 | `0704-org-auth-multiscope-acceptance`         | pending | `codex/0704-org-auth-multiscope-acceptance`         | Enterprise multi-scope `org_auth` UI and atomic authorization closure.               |
-|     2 | `0704-org-employee-import-acceptance`         | pending | `codex/0704-org-employee-import-acceptance`         | Employee roster import entry, downloadable template, preview, and inherited auth.    |
+|     0 | `0704-post-peripheral-acceptance-ledger`      | closed  | `codex/0704-post-peripheral-acceptance-ledger`      | Freeze this 17-task queue, acceptance standards, stop rules, and redaction boundary. |
+|     1 | `0704-org-auth-multiscope-acceptance`         | closed  | `codex/0704-org-auth-multiscope-acceptance`         | Enterprise multi-scope `org_auth` UI and atomic authorization closure.               |
+|     2 | `0704-org-employee-import-acceptance`         | closed  | `codex/0704-org-employee-import-acceptance`         | Employee roster import entry, downloadable template, preview, and inherited auth.    |
 |     3 | `0704-personal-redeem-code-acceptance`        | pending | `codex/0704-personal-redeem-code-acceptance`        | Personal `redeem_code` activation, upgrade, rejection, and redaction boundaries.     |
 |     4 | `0704-org-tree-auth-inheritance-acceptance`   | pending | `codex/0704-org-tree-auth-inheritance-acceptance`   | Organization tree, auth inheritance, employee transfer, and tenant isolation.        |
 |     5 | `0704-org-admin-surface-acceptance`           | pending | `codex/0704-org-admin-surface-acceptance`           | Organization admin surface separation and role boundary details.                     |
@@ -64,10 +64,10 @@ Two validation tasks have explicit priority defect handling because the owner id
 
 If either task confirms a real product capability gap, the next serial item must be a separate repair task:
 
-| Trigger validation task               | Repair task id candidate                | Continue condition                                                     |
-| ------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------- |
-| `0704-org-auth-multiscope-acceptance` | `0704-org-auth-multiscope-ui-fix`       | Repair merged, pushed, cleaned, then affected validation rerun passes. |
-| `0704-org-employee-import-acceptance` | `0704-org-employee-import-template-fix` | Repair merged, pushed, cleaned, then affected validation rerun passes. |
+| Trigger validation task               | Repair task id candidate                | Continue condition                                                            |
+| ------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------- |
+| `0704-org-auth-multiscope-acceptance` | `0704-org-auth-multiscope-ui-fix`       | Closed: repair merged, pushed, cleaned, and affected validation rerun passed. |
+| `0704-org-employee-import-acceptance` | `0704-org-employee-import-template-fix` | Closed: repair merged, pushed, cleaned, and affected validation rerun passed. |
 
 ## Task Acceptance Standards
 
