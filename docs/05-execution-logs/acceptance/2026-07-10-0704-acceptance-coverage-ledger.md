@@ -47,6 +47,7 @@ Source: `docs/05-execution-logs/evidence/2026-07-10-0704-role-credential-catalog
 | Enterprise training employee answer and analytics          | closed | smoke only     | `2026-07-05-full-chain-scenario-11-advanced-employee-affected-node-rerun-after-question-count-boundary-repair.md`, `2026-07-05-full-chain-scenario-12-advanced-org-admin-analytics-training-rerun-after-activity-provisioning.md`                                                                                    |
 | Backend role/workspace isolation                           | closed | no full rerun  | `2026-07-05-admin-permission-session-contract-cleanup.md`, `2026-07-07-organization-admin-training-ai-cleanup-evidence.md`, `2026-07-09-content-ai-local-e2e-regression.md`                                                                                                                                          |
 | Learner AI employee privacy boundary                       | closed | no full rerun  | `2026-07-09-learner-ai-employee-privacy-boundary-evidence.md`, `2026-07-09-learner-ai-credential-localhost-acceptance-evidence.md`, `2026-07-09-learner-ai-0704-account-readiness-evidence.md`                                                                                                                       |
+| Organization and multitenancy boundary                     | closed | no full rerun  | `2026-07-10-0704-org-multitenancy-boundary-acceptance-evidence.md`, `2026-07-10-0704-log-privacy-smoke-evidence.md`                                                                                                                                                                                                  |
 
 ## Incremental Validation Backlog
 
@@ -63,14 +64,14 @@ Source: `docs/05-execution-logs/acceptance/2026-07-10-0704-post-ai-acceptance-ro
 
 Current sequence status:
 
-| Order | Task id                                     | Status | Evidence                                                         |
-| ----: | ------------------------------------------- | ------ | ---------------------------------------------------------------- |
-|     1 | `0704-authorization-lifecycle-acceptance`   | closed | `2026-07-10-0704-authorization-lifecycle-acceptance-evidence.md` |
-|     2 | `0704-org-multitenancy-boundary-acceptance` | next   | pending                                                          |
-|     3 | `0704-non-ai-learning-smoke`                | queued | pending                                                          |
-|     4 | `0704-content-non-ai-publish-smoke`         | queued | pending                                                          |
-|     5 | `0704-exception-degradation-smoke`          | queued | pending                                                          |
-|     6 | `0704-release-candidate-local-gates`        | queued | pending                                                          |
+| Order | Task id                                     | Status | Evidence                                                           |
+| ----: | ------------------------------------------- | ------ | ------------------------------------------------------------------ |
+|     1 | `0704-authorization-lifecycle-acceptance`   | closed | `2026-07-10-0704-authorization-lifecycle-acceptance-evidence.md`   |
+|     2 | `0704-org-multitenancy-boundary-acceptance` | closed | `2026-07-10-0704-org-multitenancy-boundary-acceptance-evidence.md` |
+|     3 | `0704-non-ai-learning-smoke`                | next   | pending                                                            |
+|     4 | `0704-content-non-ai-publish-smoke`         | queued | pending                                                            |
+|     5 | `0704-exception-degradation-smoke`          | queued | pending                                                            |
+|     6 | `0704-release-candidate-local-gates`        | queued | pending                                                            |
 
 ## Operating Rule
 
@@ -86,6 +87,6 @@ Before any later 0704 business validation:
 ## Result
 
 Current recommendation: do not repeat the closed no-rerun chains. The planned incremental AI smoke backlog is closed.
-Continue with `0704-org-multitenancy-boundary-acceptance` as the next post-AI roadmap stage.
+Continue with `0704-non-ai-learning-smoke` as the next post-AI roadmap stage after stage 2 closeout.
 `0704-enterprise-training-smoke` remains optional only if a later fresh integration risk appears or the user explicitly
 requests it.
