@@ -244,7 +244,7 @@ activeTasks:
   - id: 0704-org-auth-multiscope-acceptance-2026-07-10
     title: 0704 organization authorization multiscope acceptance
     phase: 0704-org-auth-multiscope-acceptance-2026-07-10
-    status: ready_for_closeout
+    status: closed
     result: blocked_requires_priority_repair_org_auth_multiscope_ui_and_atomic_contract
     priority: p0
     sequenceOrder: 1
@@ -365,7 +365,7 @@ activeTasks:
   - id: 0704-org-auth-multiscope-ui-fix-2026-07-10
     title: 0704 organization authorization multiscope UI and atomic contract fix
     phase: 0704-org-auth-multiscope-ui-fix-2026-07-10
-    status: ready_for_closeout
+    status: closed
     result: pass_multiscope_ui_api_atomic_contract_repair
     priority: p0
     taskKind: implementation_repair
@@ -467,6 +467,78 @@ activeTasks:
       firstModuleRunV2PrePushReadiness: blocked_missing_evidence_audit_and_repository_checkpoint_before_docs_update
       finalModuleRunV2PrePushReadiness: pass_skip_remote_ahead_check
       repositoryCheckpointAligned: true
+  - id: 0704-org-auth-multiscope-acceptance-rerun-2026-07-10
+    title: 0704 organization authorization multiscope acceptance rerun
+    phase: 0704-org-auth-multiscope-acceptance-rerun-2026-07-10
+    status: ready_for_closeout
+    result: pass_after_priority_repair_multiscope_ui_api_atomic_contract
+    priority: p0
+    sequenceOrder: 1
+    taskKind: validation_only_localhost_acceptance
+    executionProfile: targeted_readiness_and_localhost_validation_only
+    moduleRunVersion: 2
+    branch: codex/0704-org-auth-multiscope-acceptance-rerun
+    dependsOn:
+      - 0704-org-auth-multiscope-ui-fix-2026-07-10
+    blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance-rerun.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-rerun-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-rerun-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance-rerun.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-rerun-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-rerun-audit.md
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities: *post_peripheral_validation_capabilities
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 vitest run src/server/validators/org-auth.test.ts src/server/services/organization-auth-service.test.ts src/server/services/organization-auth-route.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-auth-multiscope-acceptance-rerun-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-auth-multiscope-acceptance-rerun-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T07:53:00-07:00"
+    plannedAt: "2026-07-10T07:53:00-07:00"
+    completedAt: "2026-07-10T07:55:00-07:00"
+    validationSummary:
+      status: passed
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      targetedTests: pass_5_files_36_tests
+      staticContractMarkers: pass_scopeSelections_ui_controls_validator_runtime_response
+      browserRuntimeExecuted: false
+      directDatabaseConnectionExecuted: false
+      providerCallExecuted: false
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass_after_blocked_files_anchor_expansion
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: 0704-org-employee-import-acceptance-2026-07-10
     title: 0704 organization employee import acceptance
     phase: 0704-org-employee-import-acceptance-2026-07-10
@@ -478,7 +550,7 @@ activeTasks:
     moduleRunVersion: 2
     branch: codex/0704-org-employee-import-acceptance
     dependsOn:
-      - 0704-org-auth-multiscope-acceptance-2026-07-10
+      - 0704-org-auth-multiscope-acceptance-rerun-2026-07-10
     acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
     stopOnRealDefect: true
     repairBranchRequiredForDefect: true
