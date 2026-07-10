@@ -67,11 +67,13 @@ type CreateOrgAuthInput = {
   authScopeType: AuthScopeType;
   edition: AuthorizationEdition;
   expiresAt: string;
-  level: number;
   name: string;
   organizationPublicIds: string[];
-  profession: Profession;
   purchaserOrganizationPublicId: string;
+  scopeSelections: {
+    level: number;
+    profession: Profession;
+  }[];
   startsAt: string;
 };
 
@@ -80,10 +82,10 @@ type OrgAuthFormState = {
   authScopeType: AuthScopeType;
   edition: AuthorizationEdition | "";
   expiresAt: string;
-  level: string;
+  levels: string[];
   name: string;
   organizationPublicIds: string[];
-  profession: Profession;
+  professions: Profession[];
   purchaserOrganizationPublicId: string;
   startsAt: string;
 };
@@ -220,6 +222,14 @@ const professionLabels = {
   monopoly: "专卖",
 } satisfies Record<Profession, string>;
 
+const orgAuthProfessionOptions: Profession[] = [
+  "monopoly",
+  "marketing",
+  "logistics",
+];
+
+const orgAuthLevelOptions = ["1", "2", "3", "4", "5"] as const;
+
 const orgTierLabels = {
   city: "市级",
   district: "区县级",
@@ -307,10 +317,10 @@ const defaultOrgAuthFormState: OrgAuthFormState = {
   authScopeType: "current_and_descendants",
   edition: "",
   expiresAt: "2027-05-25",
-  level: "3",
+  levels: ["3"],
   name: "本地验证企业授权",
   organizationPublicIds: [],
-  profession: "monopoly",
+  professions: ["monopoly"],
   purchaserOrganizationPublicId: "",
   startsAt: "2026-05-25",
 };
@@ -651,7 +661,9 @@ function buildOrgAuthInput(
   const name = formState.name.trim();
   const accountQuota = Number(formState.accountQuota);
   const edition = formState.edition;
-  const level = Number(formState.level);
+  const levels = formState.levels
+    .map((level) => Number(level))
+    .filter((level) => Number.isInteger(level) && level > 0);
   const organizationPublicIds =
     formState.authScopeType === "specified_nodes"
       ? formState.organizationPublicIds
@@ -675,8 +687,12 @@ function buildOrgAuthInput(
     return { input: null, message: "请选择授权版本。" };
   }
 
-  if (!Number.isInteger(level) || level <= 0) {
-    return { input: null, message: "等级必须为正整数。" };
+  if (formState.professions.length === 0) {
+    return { input: null, message: "请选择至少一个专业。" };
+  }
+
+  if (levels.length === 0) {
+    return { input: null, message: "请选择至少一个等级。" };
   }
 
   if (
@@ -700,11 +716,15 @@ function buildOrgAuthInput(
       authScopeType: formState.authScopeType,
       edition,
       expiresAt: toStartOfDayIso(formState.expiresAt),
-      level,
       name,
       organizationPublicIds,
-      profession: formState.profession,
       purchaserOrganizationPublicId,
+      scopeSelections: formState.professions.flatMap((profession) =>
+        levels.map((level) => ({
+          level,
+          profession,
+        })),
+      ),
       startsAt: toStartOfDayIso(formState.startsAt),
     },
     message: null,
@@ -1709,10 +1729,12 @@ function OrgAuthAtomicScopePreview({
     formState.edition === ""
       ? "请选择授权版本"
       : editionLabels[formState.edition];
-  const levelLabel =
-    formState.level.trim().length === 0
-      ? "请选择等级"
-      : `${formState.level.trim()}级`;
+  const atomicScopeRows = formState.professions.flatMap((profession) =>
+    formState.levels.map((level) => ({
+      level,
+      profession,
+    })),
+  );
   const quotaLabel =
     formState.accountQuota.trim().length === 0
       ? "待填写额度"
@@ -1736,13 +1758,14 @@ function OrgAuthAtomicScopePreview({
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-          {coverageRows.length} 个企业节点
+          {coverageRows.length} 个企业节点 / {atomicScopeRows.length}{" "}
+          个原子专业等级
         </span>
       </div>
 
-      {coverageRows.length === 0 ? (
+      {coverageRows.length === 0 || atomicScopeRows.length === 0 ? (
         <p className="text-text-muted mt-3 text-sm">
-          请选择购买主体或指定企业节点后查看原子范围。
+          请选择购买主体、覆盖企业、专业和等级后查看原子范围。
         </p>
       ) : (
         <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -1754,11 +1777,19 @@ function OrgAuthAtomicScopePreview({
               <p className="text-text-primary text-sm font-medium">
                 {organization.name}
               </p>
-              <p className="text-text-secondary mt-1 text-xs">
-                {professionLabels[formState.profession]} {levelLabel} /{" "}
-                {editionLabel}
-              </p>
+              <div className="text-text-secondary mt-2 flex flex-wrap gap-1 text-xs">
+                {atomicScopeRows.map((atomicScopeRow) => (
+                  <span
+                    key={`${atomicScopeRow.profession}-${atomicScopeRow.level}`}
+                    className="border-border bg-background rounded-md border px-2 py-1"
+                  >
+                    {professionLabels[atomicScopeRow.profession]}{" "}
+                    {atomicScopeRow.level}级
+                  </span>
+                ))}
+              </div>
               <p className="text-text-muted mt-1 text-xs">
+                {editionLabel} /{" "}
                 {formatDate(toStartOfDayIso(formState.startsAt))} 至{" "}
                 {formatDate(toStartOfDayIso(formState.expiresAt))} / 额度{" "}
                 {quotaLabel}
@@ -3485,6 +3516,24 @@ function OrgAuthActionPanel({
     });
   }
 
+  function toggleProfession(profession: Profession) {
+    updateFormState({
+      professions: formState.professions.includes(profession)
+        ? formState.professions.filter(
+            (selectedProfession) => selectedProfession !== profession,
+          )
+        : [...formState.professions, profession],
+    });
+  }
+
+  function toggleLevel(level: string) {
+    updateFormState({
+      levels: formState.levels.includes(level)
+        ? formState.levels.filter((selectedLevel) => selectedLevel !== level)
+        : [...formState.levels, level],
+    });
+  }
+
   return (
     <section
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
@@ -3575,22 +3624,25 @@ function OrgAuthActionPanel({
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">专业</span>
-            <select
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              value={formState.profession}
-              onChange={(event) =>
-                updateFormState({
-                  profession: event.target.value as Profession,
-                })
-              }
-            >
-              <option value="monopoly">专卖</option>
-              <option value="marketing">营销</option>
-              <option value="logistics">物流</option>
-            </select>
-          </label>
+          <fieldset className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+            <legend className="text-text-secondary">专业</legend>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {orgAuthProfessionOptions.map((profession) => (
+                <label
+                  key={profession}
+                  className="border-border bg-background flex h-9 items-center gap-2 rounded-md border px-3 text-sm"
+                >
+                  <input
+                    checked={formState.professions.includes(profession)}
+                    data-testid={`org-auth-profession-${profession}`}
+                    type="checkbox"
+                    onChange={() => toggleProfession(profession)}
+                  />
+                  <span>{professionLabels[profession]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
             <span className="text-text-secondary">授权版本</span>
@@ -3610,18 +3662,25 @@ function OrgAuthActionPanel({
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">等级</span>
-            <input
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              min="1"
-              type="number"
-              value={formState.level}
-              onChange={(event) =>
-                updateFormState({ level: event.target.value })
-              }
-            />
-          </label>
+          <fieldset className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+            <legend className="text-text-secondary">等级</legend>
+            <div className="grid grid-cols-5 gap-2">
+              {orgAuthLevelOptions.map((level) => (
+                <label
+                  key={level}
+                  className="border-border bg-background flex h-9 items-center justify-center gap-2 rounded-md border px-2 text-sm"
+                >
+                  <input
+                    checked={formState.levels.includes(level)}
+                    data-testid={`org-auth-level-${level}`}
+                    type="checkbox"
+                    onChange={() => toggleLevel(level)}
+                  />
+                  <span>{level}级</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <label className="flex flex-col gap-2 text-sm font-medium">
             <span className="text-text-secondary">账号额度</span>
@@ -4278,14 +4337,21 @@ export function AdminOrgAuthPage() {
         return;
       }
 
-      const createdOrgAuth = createResponse.data.orgAuth;
+      const createdOrgAuths =
+        createResponse.data.orgAuths.length > 0
+          ? createResponse.data.orgAuths
+          : [createResponse.data.orgAuth];
 
       setData((currentData) => ({
         ...currentData,
         orgAuths: [
-          createdOrgAuth,
+          ...createdOrgAuths,
           ...currentData.orgAuths.filter(
-            (orgAuth) => orgAuth.publicId !== createdOrgAuth.publicId,
+            (orgAuth) =>
+              !createdOrgAuths.some(
+                (createdOrgAuth) =>
+                  createdOrgAuth.publicId === orgAuth.publicId,
+              ),
           ),
         ],
       }));

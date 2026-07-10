@@ -20,6 +20,15 @@ export type NormalizedCreateOrgAuthInput = {
   organizationPublicIds: string[];
 };
 
+export type OrgAuthScopeSelectionInput = Pick<
+  NormalizedCreateOrgAuthInput,
+  "profession" | "level"
+>;
+
+export type NormalizedCreateOrgAuthPackageInput = {
+  orgAuthInputs: NormalizedCreateOrgAuthInput[];
+};
+
 type ValidationResult<TValue> =
   | {
       success: true;
@@ -95,9 +104,55 @@ function normalizeOrganizationPublicIds(value: unknown): string[] {
     .filter((item) => item.length > 0);
 }
 
-export function normalizeCreateOrgAuthInput(
+function normalizeScopeSelections(
+  input: Record<string, unknown>,
+): OrgAuthScopeSelectionInput[] | null {
+  if (Array.isArray(input.scopeSelections)) {
+    const selections: OrgAuthScopeSelectionInput[] = [];
+    const selectionKeys = new Set<string>();
+
+    for (const item of input.scopeSelections) {
+      if (!isRecord(item) || !isProfession(item.profession)) {
+        return null;
+      }
+
+      const level = normalizePositiveInteger(item.level);
+
+      if (level === null) {
+        return null;
+      }
+
+      const selectionKey = `${item.profession}:${level}`;
+
+      if (selectionKeys.has(selectionKey)) {
+        continue;
+      }
+
+      selectionKeys.add(selectionKey);
+      selections.push({
+        profession: item.profession,
+        level,
+      });
+    }
+
+    return selections.length === 0 ? null : selections;
+  }
+
+  const level = normalizePositiveInteger(input.level);
+
+  return !isProfession(input.profession) || level === null
+    ? null
+    : [
+        {
+          profession: input.profession,
+          level,
+        },
+      ];
+}
+
+export function normalizeCreateOrgAuthPackageInput(
   input: unknown,
-): ValidationResult<NormalizedCreateOrgAuthInput> {
+): ValidationResult<NormalizedCreateOrgAuthPackageInput> {
   if (!isRecord(input)) {
     return {
       success: false,
@@ -109,7 +164,6 @@ export function normalizeCreateOrgAuthInput(
   const purchaserOrganizationPublicId = normalizeRequiredText(
     input.purchaserOrganizationPublicId,
   );
-  const level = normalizePositiveInteger(input.level);
   const edition = normalizeAuthorizationEdition(input.edition);
   const accountQuota = normalizePositiveInteger(input.accountQuota);
   const startsAt = normalizeDate(input.startsAt);
@@ -117,20 +171,22 @@ export function normalizeCreateOrgAuthInput(
   const organizationPublicIds = normalizeOrganizationPublicIds(
     input.organizationPublicIds,
   );
+  const scopeSelections = normalizeScopeSelections(input);
+  const authScopeType = isAuthScopeType(input.authScopeType)
+    ? input.authScopeType
+    : null;
 
   if (
     name === null ||
     purchaserOrganizationPublicId === null ||
-    !isAuthScopeType(input.authScopeType) ||
-    !isProfession(input.profession) ||
-    level === null ||
+    authScopeType === null ||
+    scopeSelections === null ||
     edition === null ||
     accountQuota === null ||
     startsAt === null ||
     expiresAt === null ||
     expiresAt <= startsAt ||
-    (input.authScopeType === "specified_nodes" &&
-      organizationPublicIds.length === 0)
+    (authScopeType === "specified_nodes" && organizationPublicIds.length === 0)
   ) {
     return {
       success: false,
@@ -138,20 +194,37 @@ export function normalizeCreateOrgAuthInput(
     };
   }
 
+  const scopedOrganizationPublicIds =
+    authScopeType === "specified_nodes" ? organizationPublicIds : [];
+
   return {
     success: true,
     value: {
-      name,
-      purchaserOrganizationPublicId,
-      authScopeType: input.authScopeType,
-      profession: input.profession,
-      level,
-      edition,
-      accountQuota,
-      startsAt,
-      expiresAt,
-      organizationPublicIds:
-        input.authScopeType === "specified_nodes" ? organizationPublicIds : [],
+      orgAuthInputs: scopeSelections.map((scopeSelection) => ({
+        name,
+        purchaserOrganizationPublicId,
+        authScopeType,
+        profession: scopeSelection.profession,
+        level: scopeSelection.level,
+        edition,
+        accountQuota,
+        startsAt,
+        expiresAt,
+        organizationPublicIds: scopedOrganizationPublicIds,
+      })),
     },
   };
+}
+
+export function normalizeCreateOrgAuthInput(
+  input: unknown,
+): ValidationResult<NormalizedCreateOrgAuthInput> {
+  const packageInput = normalizeCreateOrgAuthPackageInput(input);
+
+  return packageInput.success
+    ? {
+        success: true,
+        value: packageInput.value.orgAuthInputs[0],
+      }
+    : packageInput;
 }

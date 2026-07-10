@@ -315,30 +315,36 @@ function mockSystemOpsFetch() {
       }
 
       if (path === "/api/v1/org-auths") {
+        const createdOrgAuth = {
+          ...orgAuthPayload.data.orgAuths[0],
+          publicId: "org-auth-public-created-001",
+          name: "本地验证企业授权",
+          usedQuota: 0,
+        };
+
         return createJsonResponse({
           code: 0,
           message: "ok",
           data: {
-            orgAuth: {
-              ...orgAuthPayload.data.orgAuths[0],
-              publicId: "org-auth-public-created-001",
-              name: "本地验证企业授权",
-              usedQuota: 0,
-            },
+            orgAuth: createdOrgAuth,
+            orgAuths: [createdOrgAuth],
           },
         });
       }
 
       if (path === "/api/v1/org-auths/org-auth-public-001/cancel") {
+        const cancelledOrgAuth = {
+          ...orgAuthPayload.data.orgAuths[0],
+          status: "cancelled",
+          cancelledAt: "2026-05-25T00:00:00.000Z",
+        };
+
         return createJsonResponse({
           code: 0,
           message: "ok",
           data: {
-            orgAuth: {
-              ...orgAuthPayload.data.orgAuths[0],
-              status: "cancelled",
-              cancelledAt: "2026-05-25T00:00:00.000Z",
-            },
+            orgAuth: cancelledOrgAuth,
+            orgAuths: [cancelledOrgAuth],
           },
         });
       }
@@ -437,27 +443,39 @@ function mockSystemOpsFetchWithOrganizationTree() {
           });
         }
 
+        const scopeSelections =
+          Array.isArray(body.scopeSelections) && body.scopeSelections.length > 0
+            ? body.scopeSelections
+            : [{ level: body.level, profession: body.profession }];
+        const createdOrgAuths = scopeSelections.map(
+          (
+            scopeSelection: { level: number; profession: string },
+            index: number,
+          ) => ({
+            publicId: `org-auth-public-created-tree-${index + 1}`,
+            name: body.name,
+            purchaserOrganizationPublicId: body.purchaserOrganizationPublicId,
+            authScopeType: body.authScopeType,
+            profession: scopeSelection.profession,
+            level: scopeSelection.level,
+            accountQuota: body.accountQuota,
+            usedQuota: 0,
+            startsAt: body.startsAt,
+            expiresAt: body.expiresAt,
+            status: "active",
+            cancelledAt: null,
+            organizationPublicIds: body.organizationPublicIds,
+            createdAt: "2026-05-26T00:00:00.000Z",
+            updatedAt: "2026-05-26T00:00:00.000Z",
+          }),
+        );
+
         return createJsonResponse({
           code: 0,
           message: "ok",
           data: {
-            orgAuth: {
-              publicId: "org-auth-public-created-tree",
-              name: body.name,
-              purchaserOrganizationPublicId: body.purchaserOrganizationPublicId,
-              authScopeType: body.authScopeType,
-              profession: body.profession,
-              level: body.level,
-              accountQuota: body.accountQuota,
-              usedQuota: 0,
-              startsAt: body.startsAt,
-              expiresAt: body.expiresAt,
-              status: "active",
-              cancelledAt: null,
-              organizationPublicIds: body.organizationPublicIds,
-              createdAt: "2026-05-26T00:00:00.000Z",
-              updatedAt: "2026-05-26T00:00:00.000Z",
-            },
+            orgAuth: createdOrgAuths[0],
+            orgAuths: createdOrgAuths,
           },
         });
       }
@@ -1002,8 +1020,7 @@ describe("admin user organization authorization ops baseline", () => {
     expect(JSON.parse(String(createCall?.[1]?.body))).toMatchObject({
       purchaserOrganizationPublicId: "organization-public-001",
       authScopeType: "current_and_descendants",
-      profession: "monopoly",
-      level: 3,
+      scopeSelections: [{ profession: "monopoly", level: 3 }],
       edition: "standard",
       accountQuota: 100,
       organizationPublicIds: ["organization-public-001"],
@@ -1098,15 +1115,13 @@ describe("admin user organization authorization ops baseline", () => {
       target: { value: "specified_nodes" },
     });
     fireEvent.click(screen.getByLabelText("西湖区烟草公司"));
-    fireEvent.change(screen.getByLabelText("专业"), {
-      target: { value: "logistics" },
-    });
+    fireEvent.click(screen.getByTestId("org-auth-profession-monopoly"));
+    fireEvent.click(screen.getByTestId("org-auth-profession-logistics"));
     fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
       target: { value: "advanced" },
     });
-    fireEvent.change(screen.getByLabelText("等级"), {
-      target: { value: "5" },
-    });
+    fireEvent.click(screen.getByTestId("org-auth-level-3"));
+    fireEvent.click(screen.getByTestId("org-auth-level-5"));
     fireEvent.change(screen.getByLabelText("账号额度"), {
       target: { value: "30" },
     });
@@ -1142,12 +1157,11 @@ describe("admin user organization authorization ops baseline", () => {
       accountQuota: 30,
       authScopeType: "specified_nodes",
       expiresAt: "2027-06-01T00:00:00.000Z",
-      level: 5,
       name: "杭州市县区联合授权",
       organizationPublicIds: ["org-district-001"],
       edition: "advanced",
-      profession: "logistics",
       purchaserOrganizationPublicId: "org-city-001",
+      scopeSelections: [{ profession: "logistics", level: 5 }],
       startsAt: "2026-06-01T00:00:00.000Z",
     });
   });
@@ -1177,6 +1191,77 @@ describe("admin user organization authorization ops baseline", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/org-auths",
       expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("submits one organization auth package with multiple profession and level atoms", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业授权运营" });
+
+    fireEvent.change(screen.getByLabelText("授权名称"), {
+      target: { value: "多专业等级联合授权" },
+    });
+    fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
+      target: { value: "advanced" },
+    });
+    fireEvent.change(screen.getByLabelText("购买主体"), {
+      target: { value: "org-city-001" },
+    });
+    fireEvent.change(screen.getByLabelText("授权范围类型"), {
+      target: { value: "specified_nodes" },
+    });
+    fireEvent.click(screen.getByLabelText("西湖区烟草公司"));
+    fireEvent.change(screen.getByLabelText("账号额度"), {
+      target: { value: "50" },
+    });
+    fireEvent.change(screen.getByLabelText("开始日期"), {
+      target: { value: "2026-06-01" },
+    });
+    fireEvent.change(screen.getByLabelText("到期日期"), {
+      target: { value: "2027-06-01" },
+    });
+
+    fireEvent.click(screen.getByTestId("org-auth-profession-marketing"));
+    fireEvent.click(screen.getByTestId("org-auth-level-4"));
+
+    const preview = screen.getByTestId("org-auth-atomic-scope-preview");
+    expect(preview).toHaveTextContent("4 个原子专业等级");
+    expect(preview).toHaveTextContent("专卖 3级");
+    expect(preview).toHaveTextContent("专卖 4级");
+    expect(preview).toHaveTextContent("营销 3级");
+    expect(preview).toHaveTextContent("营销 4级");
+
+    fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认创建" }));
+
+    await screen.findByRole("status");
+
+    const createCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/org-auths",
+    );
+
+    expect(JSON.parse(String(createCall?.[1]?.body))).toMatchObject({
+      accountQuota: 50,
+      authScopeType: "specified_nodes",
+      edition: "advanced",
+      expiresAt: "2027-06-01T00:00:00.000Z",
+      name: "多专业等级联合授权",
+      organizationPublicIds: ["org-district-001"],
+      purchaserOrganizationPublicId: "org-city-001",
+      scopeSelections: [
+        { profession: "monopoly", level: 3 },
+        { profession: "monopoly", level: 4 },
+        { profession: "marketing", level: 3 },
+        { profession: "marketing", level: 4 },
+      ],
+      startsAt: "2026-06-01T00:00:00.000Z",
+    });
+    expect(JSON.stringify(createCall?.[1]?.body)).not.toContain(
+      "orgAuthScopePublicId",
     );
   });
 

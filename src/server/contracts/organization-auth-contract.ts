@@ -91,6 +91,7 @@ export type OrgAuthDetailDto = OrgAuthDto & {
 
 export type OrgAuthResultDto = {
   orgAuth: OrgAuthDto;
+  orgAuths: OrgAuthDto[];
 };
 
 export type OrgAuthDetailResultDto = {

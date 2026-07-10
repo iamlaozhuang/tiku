@@ -279,4 +279,120 @@ describe("organization auth service", () => {
       },
     });
   });
+
+  it("creates a multi-scope org auth package only after every atom passes overlap checks", async () => {
+    const overlapChecks: { profession: string; level: number }[] = [];
+    const createInputs: { profession: string; level: number }[] = [];
+    const service = createOrganizationAuthService(
+      createRepository({
+        async hasOverlappingOrgAuth(input) {
+          overlapChecks.push({
+            profession: input.profession,
+            level: input.level,
+          });
+
+          return false;
+        },
+        async createOrgAuth(input) {
+          createInputs.push({
+            profession: input.profession,
+            level: input.level,
+          });
+
+          return createOrgAuth({
+            public_id: `org_auth_${input.profession}_${input.level}`,
+            name: input.name,
+            purchaser_organization_public_id:
+              input.purchaserOrganizationPublicId,
+            auth_scope_type: input.authScopeType,
+            profession: input.profession,
+            level: input.level,
+            account_quota: input.accountQuota,
+            starts_at: input.startsAt,
+            expires_at: input.expiresAt,
+            organization_public_ids: input.organizationPublicIds,
+          });
+        },
+      }),
+    );
+
+    await expect(
+      service.createOrgAuth({
+        name: "2026 多专业等级授权包",
+        purchaserOrganizationPublicId: "org_purchaser_123",
+        authScopeType: "specified_nodes",
+        edition: "advanced",
+        accountQuota: 100,
+        startsAt: "2026-05-18T04:00:00.000Z",
+        expiresAt: "2027-05-18T04:00:00.000Z",
+        organizationPublicIds: ["org_city_123"],
+        scopeSelections: [
+          { profession: "monopoly", level: 3 },
+          { profession: "marketing", level: 4 },
+        ],
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        orgAuth: {
+          publicId: "org_auth_monopoly_3",
+        },
+        orgAuths: [
+          { publicId: "org_auth_monopoly_3", profession: "monopoly", level: 3 },
+          {
+            publicId: "org_auth_marketing_4",
+            profession: "marketing",
+            level: 4,
+          },
+        ],
+      },
+    });
+    expect(overlapChecks).toEqual([
+      { profession: "monopoly", level: 3 },
+      { profession: "marketing", level: 4 },
+    ]);
+    expect(createInputs).toEqual([
+      { profession: "monopoly", level: 3 },
+      { profession: "marketing", level: 4 },
+    ]);
+
+    const blockedCreates: { profession: string; level: number }[] = [];
+    const overlapService = createOrganizationAuthService(
+      createRepository({
+        async hasOverlappingOrgAuth(input) {
+          return input.profession === "marketing" && input.level === 4;
+        },
+        async createOrgAuth(input) {
+          blockedCreates.push({
+            profession: input.profession,
+            level: input.level,
+          });
+
+          return createOrgAuth();
+        },
+      }),
+    );
+
+    await expect(
+      overlapService.createOrgAuth({
+        name: "2026 重叠授权包",
+        purchaserOrganizationPublicId: "org_purchaser_123",
+        authScopeType: "specified_nodes",
+        edition: "advanced",
+        accountQuota: 100,
+        startsAt: "2026-05-18T04:00:00.000Z",
+        expiresAt: "2027-05-18T04:00:00.000Z",
+        organizationPublicIds: ["org_city_123"],
+        scopeSelections: [
+          { profession: "monopoly", level: 3 },
+          { profession: "marketing", level: 4 },
+        ],
+      }),
+    ).resolves.toEqual({
+      code: 409005,
+      message: "Org auth scope overlaps an existing active authorization.",
+      data: null,
+    });
+    expect(blockedCreates).toEqual([]);
+  });
 });

@@ -41,7 +41,7 @@ import {
   normalizeCreateEmployeeAccountInput,
   type NormalizedCreateEmployeeAccountInput,
 } from "../validators/employee-account";
-import { normalizeCreateOrgAuthInput } from "../validators/org-auth";
+import { normalizeCreateOrgAuthPackageInput } from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
   normalizeDisableOrganizationInput,
@@ -1213,11 +1213,11 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(orgAuthMutationUnavailableResponse);
           }
 
-          const orgAuthInput = normalizeCreateOrgAuthInput(
+          const orgAuthPackageInput = normalizeCreateOrgAuthPackageInput(
             await readRequestJson(request),
           );
 
-          if (!orgAuthInput.success) {
+          if (!orgAuthPackageInput.success) {
             await appendOrgAuthAuditLog({
               request,
               actor: actorOrError,
@@ -1230,53 +1230,70 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(orgAuthInputInvalidResponse);
           }
 
-          if (await repositories.hasOverlappingOrgAuth(orgAuthInput.value)) {
-            await appendOrgAuthAuditLog({
-              request,
-              actor: actorOrError,
-              actionType: "org_auth.create",
-              targetPublicId: null,
-              resultStatus: "failed",
-              metadataSummary: "redacted org_auth overlap metadata",
-            });
+          for (const orgAuthInput of orgAuthPackageInput.value.orgAuthInputs) {
+            if (await repositories.hasOverlappingOrgAuth(orgAuthInput)) {
+              await appendOrgAuthAuditLog({
+                request,
+                actor: actorOrError,
+                actionType: "org_auth.create",
+                targetPublicId: null,
+                resultStatus: "failed",
+                metadataSummary: "redacted org_auth overlap metadata",
+              });
 
-            return createJsonResponse(orgAuthScopeOverlapResponse);
+              return createJsonResponse(orgAuthScopeOverlapResponse);
+            }
           }
 
-          const orgAuth = await repositories.createOrgAuth(orgAuthInput.value);
+          const orgAuths = [];
 
-          if (
-            orgAuth === null &&
-            (await repositories.hasOverlappingOrgAuth(orgAuthInput.value))
-          ) {
-            await appendOrgAuthAuditLog({
-              request,
-              actor: actorOrError,
-              actionType: "org_auth.create",
-              targetPublicId: null,
-              resultStatus: "failed",
-              metadataSummary: "redacted org_auth overlap metadata",
-            });
+          for (const orgAuthInput of orgAuthPackageInput.value.orgAuthInputs) {
+            const orgAuth = await repositories.createOrgAuth(orgAuthInput);
 
-            return createJsonResponse(orgAuthScopeOverlapResponse);
+            if (orgAuth === null) {
+              if (await repositories.hasOverlappingOrgAuth(orgAuthInput)) {
+                await appendOrgAuthAuditLog({
+                  request,
+                  actor: actorOrError,
+                  actionType: "org_auth.create",
+                  targetPublicId: null,
+                  resultStatus: "failed",
+                  metadataSummary: "redacted org_auth overlap metadata",
+                });
+
+                return createJsonResponse(orgAuthScopeOverlapResponse);
+              }
+
+              await appendOrgAuthAuditLog({
+                request,
+                actor: actorOrError,
+                actionType: "org_auth.create",
+                targetPublicId: null,
+                resultStatus: "failed",
+                metadataSummary:
+                  "redacted org_auth quota or organization metadata",
+              });
+
+              return createJsonResponse(orgAuthQuotaExceededResponse);
+            }
+
+            orgAuths.push(orgAuth);
           }
 
           await appendOrgAuthAuditLog({
             request,
             actor: actorOrError,
             actionType: "org_auth.create",
-            targetPublicId: orgAuth?.publicId ?? null,
-            resultStatus: orgAuth === null ? "failed" : "success",
-            metadataSummary:
-              orgAuth === null
-                ? "redacted org_auth quota or organization metadata"
-                : "redacted org_auth create metadata",
+            targetPublicId: orgAuths[0]?.publicId ?? null,
+            resultStatus: "success",
+            metadataSummary: "redacted org_auth create metadata",
           });
 
           return createJsonResponse(
-            orgAuth === null
-              ? orgAuthQuotaExceededResponse
-              : createSuccessResponse<OrgAuthResultDto>({ orgAuth }),
+            createSuccessResponse<OrgAuthResultDto>({
+              orgAuth: orgAuths[0],
+              orgAuths,
+            }),
           );
         },
       },
@@ -1358,7 +1375,10 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           });
 
           return createJsonResponse(
-            createSuccessResponse<OrgAuthResultDto>({ orgAuth }),
+            createSuccessResponse<OrgAuthResultDto>({
+              orgAuth,
+              orgAuths: [orgAuth],
+            }),
           );
         },
       },

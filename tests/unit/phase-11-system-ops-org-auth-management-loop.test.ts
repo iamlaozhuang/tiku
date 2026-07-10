@@ -211,6 +211,96 @@ describe("phase 11 system ops org auth management loop", () => {
     );
   });
 
+  it("creates a multi-scope org_auth package after checking every atomic scope", async () => {
+    const auditInputs: unknown[] = [];
+    const mutationInputs: unknown[] = [];
+    const createdAtoms: OrgAuthDto[] = [
+      createOrgAuth({
+        publicId: "org-auth-public-monopoly-3",
+        profession: "monopoly",
+        level: 3,
+      }),
+      createOrgAuth({
+        publicId: "org-auth-public-marketing-4",
+        profession: "marketing",
+        level: 4,
+      }),
+    ];
+    let createIndex = 0;
+    const packageRepositories = createRepositories({
+      auditInputs,
+      mutationInputs,
+    });
+
+    packageRepositories.createOrgAuth = async (orgAuthInput) => {
+      mutationInputs.push({ action: "createOrgAuth", orgAuthInput });
+
+      return createdAtoms[createIndex++] ?? null;
+    };
+
+    const response = await createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories: packageRepositories,
+      sessionService: createAdminSessionService("ops_admin"),
+    }).orgAuths.collection.POST(
+      new Request("http://localhost/api/v1/org-auths", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+        body: JSON.stringify({
+          name: "2026 多专业等级授权包",
+          purchaserOrganizationPublicId: "organization-public-001",
+          authScopeType: "specified_nodes",
+          edition: "advanced",
+          accountQuota: 100,
+          startsAt: "2026-05-24T00:00:00.000Z",
+          expiresAt: "2027-05-24T00:00:00.000Z",
+          organizationPublicIds: ["organization-public-001"],
+          scopeSelections: [
+            { profession: "monopoly", level: 3 },
+            { profession: "marketing", level: 4 },
+          ],
+        }),
+      }),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        orgAuth: {
+          publicId: "org-auth-public-monopoly-3",
+        },
+        orgAuths: [
+          { publicId: "org-auth-public-monopoly-3" },
+          { publicId: "org-auth-public-marketing-4" },
+        ],
+      },
+    });
+    expect(
+      mutationInputs.filter(
+        (entry) =>
+          typeof entry === "object" &&
+          entry !== null &&
+          "action" in entry &&
+          entry.action === "hasOverlappingOrgAuth",
+      ),
+    ).toHaveLength(2);
+    expect(
+      mutationInputs.filter(
+        (entry) =>
+          typeof entry === "object" &&
+          entry !== null &&
+          "action" in entry &&
+          entry.action === "createOrgAuth",
+      ),
+    ).toHaveLength(2);
+    expect(auditInputs).toContainEqual(
+      expect.objectContaining({
+        actionType: "org_auth.create",
+        resultStatus: "success",
+        metadataSummary: "redacted org_auth create metadata",
+      }),
+    );
+  });
+
   it("rejects overlapping org_auth scopes before creating records", async () => {
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];

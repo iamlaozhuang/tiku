@@ -1,8 +1,44 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-org-auth-multiscope-acceptance-2026-07-10
+currentPhase: 0704-org-auth-multiscope-ui-fix-2026-07-10
 updatedAt: "2026-07-10T00:00:00-07:00"
+latest0704OrgAuthMultiscopeUiFix:
+  id: 0704-org-auth-multiscope-ui-fix-2026-07-10
+  status: ready_for_closeout
+  result: pass_multiscope_ui_api_atomic_contract_repair
+  branch: codex/0704-org-auth-multiscope-ui-fix
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-ui-fix.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-ui-fix-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-ui-fix-audit.md
+  nextRequiredTaskId: 0704-org-auth-multiscope-acceptance-rerun-2026-07-10
+  blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
+  boundary:
+    sourceCodeChanged: true
+    testsChanged: true
+    packageLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerCallExecuted: false
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    directDatabaseMutationExecuted: false
+    destructiveDatabaseOperationExecuted: false
+    stagingProdDeployExecuted: false
+    privateCredentialValuesOutput: false
+    evidenceRedactionRequired: true
+  validationSummary:
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    tddRed: pass_expected_missing_scopeSelections_contract_and_ui_controls
+    targetedTests: pass_5_files_36_tests
+    scopedPrettierWrite: pass
+    diffCheck: pass
+    lint: pass
+    typecheck: pass
+    moduleRunV2PreCommitHardening: pass
+    firstModuleRunV2PrePushReadiness: blocked_missing_evidence_audit_and_repository_checkpoint_before_docs_update
+    finalModuleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    repositoryCheckpointAligned: true
+    subjectScopedPersistence: deferred_requires_future_reviewed_org_auth_scope_schema_task
 latest0704PostPeripheralAcceptanceLedger:
   id: 0704-post-peripheral-acceptance-ledger-2026-07-10
   status: closed
@@ -3489,49 +3525,40 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-org-auth-multiscope-acceptance-2026-07-10
-  title: 0704 organization authorization multiscope acceptance
-  phase: 0704-org-auth-multiscope-acceptance-2026-07-10
-  status: ready_for_closeout
-  result: blocked_requires_priority_repair_org_auth_multiscope_ui_and_atomic_contract
+  id: 0704-org-auth-multiscope-ui-fix-2026-07-10
+  title: 0704 organization authorization multiscope UI and atomic contract fix
+  phase: 0704-org-auth-multiscope-ui-fix-2026-07-10
+  status: in_progress
+  result: in_progress
   priority: p0
-  taskKind: validation_only_localhost_acceptance
-  branch: codex/0704-org-auth-multiscope-acceptance
+  taskKind: implementation_repair
+  branch: codex/0704-org-auth-multiscope-ui-fix
   humanApprovalBoundary:
     implementationAndCloseout: current_user_approved_17_post_peripheral_acceptance_goal_serial_short_branches_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
-    productLoginSessionProbe: approved_redacted_readiness_only
-    productRouteRead: approved_status_categories_only
+    productLoginSessionProbe: blocked
+    productRouteRead: blocked
     productRouteWrite: blocked
     directDatabaseConnection: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: blocked
-  plannedAt: "2026-07-10T07:14:18-07:00"
-  claimedAt: "2026-07-10T07:14:18-07:00"
-  completedAt: "2026-07-10T07:14:18-07:00"
-  targetClosureItem: Validate whether enterprise org_auth supports operations multi-select package creation, expanded atomic scope preview, and downstream atomic capability consumption.
-  behaviorBoundary: validation_only_source_and_targeted_tests_no_source_test_package_lockfile_schema_migration_seed_change_no_provider_no_db_no_staging_prod_deploy_no_cost_calibration
+  plannedAt: "2026-07-10T07:42:00-07:00"
+  claimedAt: "2026-07-10T07:42:00-07:00"
+  targetClosureItem: Repair enterprise org_auth package creation so operations can select multiple profession and level atoms, preview expansion, and submit one package that creates existing atomic org_auth rows.
+  behaviorBoundary: targeted_source_repair_allowed_files_only_no_package_lockfile_schema_migration_seed_provider_db_staging_prod_deploy_cost_calibration
   evidenceMode: redacted_role_label_route_label_status_category_auth_context_category_command_result_test_count_only_no_credentials_no_env_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-acceptance.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-ui-fix.md
   acceptanceStandardPath: docs/05-execution-logs/acceptance/2026-07-10-0704-post-peripheral-acceptance-ledger.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-acceptance-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-acceptance-audit.md
-  nextRequiredTaskId: 0704-org-auth-multiscope-ui-fix-2026-07-10
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-ui-fix-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-ui-fix-audit.md
+  repairForTaskId: 0704-org-auth-multiscope-acceptance-2026-07-10
   blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
   validationSummary:
-    status: blocked_requires_priority_repair
-    readinessPreflight: pass_core_roles_9
-    sourceInspection: confirms_missing_multiscope_ui_preview_and_atomic_create_contract
-    targetedTests: pass_6_files_22_tests
-    sensitiveEvidence: pass_redacted
-    scopedPrettierWrite: pass
-    scopedPrettierCheck: pass
-    diffCheck: pass
-    lint: pass
-    typecheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    status: in_progress
+    readinessPreflight: pass_private_index_metadata_core_roles_9
+    schemaMigration: not_allowed_current_task
+    subjectScopedPersistence: deferred_requires_future_reviewed_org_auth_scope_schema_task
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
@@ -34222,8 +34249,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8bdeb80dade760870819be0dc9d050b068c94fc6
-  lastKnownOriginMasterSha: 8bdeb80dade760870819be0dc9d050b068c94fc6
+  lastKnownMasterSha: bf24e1c13d08274f8bc7317a2fa577ed2301e6a6
+  lastKnownOriginMasterSha: bf24e1c13d08274f8bc7317a2fa577ed2301e6a6
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

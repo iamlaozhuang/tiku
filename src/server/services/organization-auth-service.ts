@@ -10,11 +10,12 @@ import type {
 } from "../contracts/organization-auth-contract";
 import {
   mapDisableOrganizationResultToApi,
+  mapOrgAuthPackageResultToApi,
   mapOrgAuthResultToApi,
   mapOrganizationResultToApi,
 } from "../mappers/organization-auth-mapper";
 import type { OrganizationAuthRepository } from "../repositories/organization-auth-repository";
-import { normalizeCreateOrgAuthInput } from "../validators/org-auth";
+import { normalizeCreateOrgAuthPackageInput } from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
   normalizeDisableOrganizationInput,
@@ -166,31 +167,35 @@ export function createOrganizationAuthService(
     },
 
     async createOrgAuth(input) {
-      const orgAuthInput = normalizeCreateOrgAuthInput(input);
+      const orgAuthPackageInput = normalizeCreateOrgAuthPackageInput(input);
 
-      if (!orgAuthInput.success) {
+      if (!orgAuthPackageInput.success) {
         return createErrorResponse(
           INVALID_ORG_AUTH_INPUT_CODE,
-          orgAuthInput.message,
+          orgAuthPackageInput.message,
         );
       }
 
-      if (
-        await organizationAuthRepository.hasOverlappingOrgAuth(
-          orgAuthInput.value,
-        )
-      ) {
-        return createErrorResponse(
-          ORG_AUTH_SCOPE_OVERLAP_CODE,
-          "Org auth scope overlaps an existing active authorization.",
+      for (const orgAuthInput of orgAuthPackageInput.value.orgAuthInputs) {
+        if (
+          await organizationAuthRepository.hasOverlappingOrgAuth(orgAuthInput)
+        ) {
+          return createErrorResponse(
+            ORG_AUTH_SCOPE_OVERLAP_CODE,
+            "Org auth scope overlaps an existing active authorization.",
+          );
+        }
+      }
+
+      const orgAuths = [];
+
+      for (const orgAuthInput of orgAuthPackageInput.value.orgAuthInputs) {
+        orgAuths.push(
+          await organizationAuthRepository.createOrgAuth(orgAuthInput),
         );
       }
 
-      const orgAuth = await organizationAuthRepository.createOrgAuth(
-        orgAuthInput.value,
-      );
-
-      return createSuccessResponse(mapOrgAuthResultToApi(orgAuth));
+      return createSuccessResponse(mapOrgAuthPackageResultToApi(orgAuths));
     },
 
     async cancelOrgAuth(publicId) {

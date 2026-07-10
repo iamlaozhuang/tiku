@@ -72,7 +72,21 @@ export function mapOrgAuthToApi(orgAuth: OrgAuthAccessRow): OrgAuthDto {
 export function mapOrgAuthResultToApi(
   orgAuth: OrgAuthAccessRow,
 ): OrgAuthResultDto {
+  const orgAuthDto = mapOrgAuthToApi(orgAuth);
+
   return {
-    orgAuth: mapOrgAuthToApi(orgAuth),
+    orgAuth: orgAuthDto,
+    orgAuths: [orgAuthDto],
+  };
+}
+
+export function mapOrgAuthPackageResultToApi(
+  orgAuths: OrgAuthAccessRow[],
+): OrgAuthResultDto {
+  const orgAuthDtos = orgAuths.map(mapOrgAuthToApi);
+
+  return {
+    orgAuth: orgAuthDtos[0],
+    orgAuths: orgAuthDtos,
   };
 }

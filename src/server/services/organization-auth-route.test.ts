@@ -70,52 +70,58 @@ function createService(): OrganizationAuthService {
       };
     },
     async createOrgAuth() {
+      const orgAuth = {
+        publicId: "org_auth_public_123",
+        name: "2026 杭州授权",
+        purchaserOrganizationPublicId: "org_purchaser_123",
+        authScopeType: "specified_nodes" as const,
+        profession: "monopoly" as const,
+        level: 3,
+        accountQuota: 100,
+        usedQuota: 0,
+        startsAt: "2026-05-18T04:00:00.000Z",
+        expiresAt: "2027-05-18T04:00:00.000Z",
+        status: "active" as const,
+        cancelledAt: null,
+        organizationPublicIds: ["org_city_123"],
+        createdAt: "2026-05-18T04:00:00.000Z",
+        updatedAt: "2026-05-18T04:00:00.000Z",
+      };
+
       return {
         code: 0,
         message: "ok",
         data: {
-          orgAuth: {
-            publicId: "org_auth_public_123",
-            name: "2026 杭州授权",
-            purchaserOrganizationPublicId: "org_purchaser_123",
-            authScopeType: "specified_nodes",
-            profession: "monopoly",
-            level: 3,
-            accountQuota: 100,
-            usedQuota: 0,
-            startsAt: "2026-05-18T04:00:00.000Z",
-            expiresAt: "2027-05-18T04:00:00.000Z",
-            status: "active",
-            cancelledAt: null,
-            organizationPublicIds: ["org_city_123"],
-            createdAt: "2026-05-18T04:00:00.000Z",
-            updatedAt: "2026-05-18T04:00:00.000Z",
-          },
+          orgAuth,
+          orgAuths: [orgAuth],
         },
       };
     },
     async cancelOrgAuth(publicId) {
+      const orgAuth = {
+        publicId,
+        name: "2026 杭州授权",
+        purchaserOrganizationPublicId: "org_purchaser_123",
+        authScopeType: "specified_nodes" as const,
+        profession: "monopoly" as const,
+        level: 3,
+        accountQuota: 100,
+        usedQuota: 0,
+        startsAt: "2026-05-18T04:00:00.000Z",
+        expiresAt: "2027-05-18T04:00:00.000Z",
+        status: "cancelled" as const,
+        cancelledAt: "2026-05-18T04:00:00.000Z",
+        organizationPublicIds: ["org_city_123"],
+        createdAt: "2026-05-18T04:00:00.000Z",
+        updatedAt: "2026-05-18T04:00:00.000Z",
+      };
+
       return {
         code: 0,
         message: "ok",
         data: {
-          orgAuth: {
-            publicId,
-            name: "2026 杭州授权",
-            purchaserOrganizationPublicId: "org_purchaser_123",
-            authScopeType: "specified_nodes",
-            profession: "monopoly",
-            level: 3,
-            accountQuota: 100,
-            usedQuota: 0,
-            startsAt: "2026-05-18T04:00:00.000Z",
-            expiresAt: "2027-05-18T04:00:00.000Z",
-            status: "cancelled",
-            cancelledAt: "2026-05-18T04:00:00.000Z",
-            organizationPublicIds: ["org_city_123"],
-            createdAt: "2026-05-18T04:00:00.000Z",
-            updatedAt: "2026-05-18T04:00:00.000Z",
-          },
+          orgAuth,
+          orgAuths: [orgAuth],
         },
       };
     },

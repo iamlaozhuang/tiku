@@ -362,6 +362,111 @@ activeTasks:
       typecheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  - id: 0704-org-auth-multiscope-ui-fix-2026-07-10
+    title: 0704 organization authorization multiscope UI and atomic contract fix
+    phase: 0704-org-auth-multiscope-ui-fix-2026-07-10
+    status: ready_for_closeout
+    result: pass_multiscope_ui_api_atomic_contract_repair
+    priority: p0
+    taskKind: implementation_repair
+    executionProfile: targeted_source_repair_with_redacted_local_validation
+    moduleRunVersion: 2
+    branch: codex/0704-org-auth-multiscope-ui-fix
+    dependsOn:
+      - 0704-org-auth-multiscope-acceptance-2026-07-10
+    blockedContinueTaskId: 0704-org-employee-import-acceptance-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-ui-fix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-ui-fix-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-ui-fix-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-org-auth-multiscope-ui-fix.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-org-auth-multiscope-ui-fix-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-org-auth-multiscope-ui-fix-audit.md
+      - src/server/validators/org-auth.ts
+      - src/server/contracts/organization-auth-contract.ts
+      - src/server/mappers/organization-auth-mapper.ts
+      - src/server/repositories/organization-auth-repository.ts
+      - src/server/services/organization-auth-service.ts
+      - src/server/services/organization-auth-route.test.ts
+      - src/server/services/organization-auth-service.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+    readOnlyAllowedFiles: *post_peripheral_readonly_files
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_targeted_allowed_files_only
+      testSourceChange: approved_targeted_allowed_files_only
+      focusedUnitTest: approved_targeted_contract_smoke_only
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: approved_redacted_catalog_preflight_only
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: *post_peripheral_evidence_mode
+    validationCommands:
+      - corepack pnpm@10.26.1 vitest run src/server/validators/org-auth.test.ts src/server/services/organization-auth-service.test.ts src/server/services/organization-auth-route.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - corepack pnpm@10.26.1 exec prettier --write CHANGED_FILES
+      - corepack pnpm@10.26.1 exec prettier --check CHANGED_FILES
+      - git diff --check
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-org-auth-multiscope-ui-fix-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-org-auth-multiscope-ui-fix-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy: *post_peripheral_closeout_policy
+    claimedAt: "2026-07-10T07:42:00-07:00"
+    plannedAt: "2026-07-10T07:42:00-07:00"
+    completedAt: "2026-07-10T07:45:00-07:00"
+    validationSummary:
+      status: passed
+      readinessPreflight: pass_private_index_metadata_core_roles_9
+      schemaMigration: not_allowed_current_task
+      subjectScopedPersistence: deferred_requires_future_reviewed_org_auth_scope_schema_task
+      tddRed: pass_expected_missing_scopeSelections_contract_and_ui_controls
+      targetedTests: pass_5_files_36_tests
+      scopedPrettierWrite: pass
+      diffCheck: pass
+      lint: pass
+      typecheck: pass
+      moduleRunV2PreCommitHardening: pass
+      firstModuleRunV2PrePushReadiness: blocked_missing_evidence_audit_and_repository_checkpoint_before_docs_update
+      finalModuleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      repositoryCheckpointAligned: true
   - id: 0704-org-employee-import-acceptance-2026-07-10
     title: 0704 organization employee import acceptance
     phase: 0704-org-employee-import-acceptance-2026-07-10
