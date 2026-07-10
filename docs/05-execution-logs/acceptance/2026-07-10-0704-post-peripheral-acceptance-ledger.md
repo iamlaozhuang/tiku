@@ -53,7 +53,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |    12 | `0704-learner-non-ai-study-acceptance`         | closed  | `codex/0704-learner-non-ai-study-acceptance`            | Ordinary learner practice, `mock_exam`, reports, mistake-book, and resume details.   |
 |    13 | `0704-role-routing-auth-context-acceptance`    | closed  | `codex/0704-role-routing-auth-context-acceptance`       | Login routing, personal/org context choice, quota owner, and direct-route denial.    |
 |    14 | `0704-api-route-boundary-acceptance`           | closed  | `codex/0704-api-route-boundary-acceptance`              | Direct URL/API adversarial authorization and cross-tenant denial.                    |
-|    15 | `0704-failure-degradation-acceptance`          | pending | `codex/0704-failure-degradation-acceptance`             | Missing source, weak/none evidence, quota, Provider-disabled, duplicate failure.     |
+|    15 | `0704-failure-degradation-acceptance`          | closed  | `codex/0704-failure-degradation-acceptance`             | Missing source, weak/none evidence, quota, Provider-disabled, duplicate failure.     |
 |    16 | `0704-staging-readiness-design`                | pending | `codex/0704-staging-readiness-design`                   | Staging readiness design, approval boundaries, data isolation, and stop conditions.  |
 
 ## Priority Repair Gate
