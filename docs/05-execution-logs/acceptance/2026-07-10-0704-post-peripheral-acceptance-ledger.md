@@ -42,7 +42,7 @@ content lifecycle, learner routing, failure degradation, and staging-readiness d
 |    4R | `0704-org-tree-employee-transfer-fix`         | closed  | `codex/0704-org-tree-employee-transfer-fix`             | Repair employee transfer mutation, quota/session/history convergence, and rerun.     |
 |   4.2 | `0704-org-tree-auth-inheritance-rerun`        | closed  | `codex/0704-org-tree-auth-inheritance-acceptance-rerun` | Rerun affected organization tree/auth inheritance validation after repair.           |
 |     5 | `0704-org-admin-surface-acceptance`           | closed  | `codex/0704-org-admin-surface-acceptance`               | Organization admin surface separation and role boundary details.                     |
-|     6 | `0704-resource-rag-management-acceptance`     | pending | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
+|     6 | `0704-resource-rag-management-acceptance`     | closed  | `codex/0704-resource-rag-management-acceptance`         | Resource lifecycle, `knowledge_node`, citation, and `evidence_status` binding.       |
 |     7 | `0704-model-prompt-log-governance-acceptance` | pending | `codex/0704-model-prompt-log-governance-acceptance`     | Model config, Prompt governance, and redacted `ai_call_log` behavior.                |
 |     8 | `0704-audit-privacy-governance-acceptance`    | pending | `codex/0704-audit-privacy-governance-acceptance`        | `audit_log` coverage and admin/employee privacy boundaries.                          |
 |     9 | `0704-org-training-edge-acceptance`           | pending | `codex/0704-org-training-edge-acceptance`               | Enterprise training source, publish, version, takedown, answer, and result edges.    |
@@ -156,6 +156,9 @@ Additional validation-discovered repair gate:
 - Published resources can be consumed by RAG-capable features through citation and `evidence_status` categories.
 - Takedown prevents future use while preserving historical redacted reference categories.
 - `evidence_status = none` never fabricates citations; `weak` requires explicit degradation or confirmation behavior.
+- 2026-07-10 result: closed. Source markers and focused tests validated content-owned resource workspace, legacy operations
+  redirect, service-level write boundary, resource lifecycle states, `knowledge_node` scope filtering, RAG-ready
+  eligibility filtering, citation metadata, and `evidence_status` redaction/degradation behavior.
 
 ### 7. `0704-model-prompt-log-governance-acceptance`
 
