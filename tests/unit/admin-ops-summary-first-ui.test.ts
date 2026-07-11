@@ -674,10 +674,9 @@ describe("admin ops summary-first UI", () => {
   it("renders separated audit and AI call log pages without model management mixing", () => {
     render(createElement(AdminAuditLogOpsPage, { currentRole: "ops_admin" }));
 
-    const auditSummaryBand = screen.getByTestId("ops-audit-log-summary-band");
-    expect(auditSummaryBand).toHaveTextContent("运营管理员");
-    expect(auditSummaryBand).toHaveTextContent("审计日志只读");
-    expect(auditSummaryBand).toHaveTextContent("原始请求体");
+    const auditToolbar = screen.getByRole("region", { name: "审计日志筛选" });
+    expect(auditToolbar).toHaveTextContent("共 2 条审计日志");
+    expect(screen.queryByTestId("ops-audit-log-summary-band")).toBeNull();
     expect(
       screen.getByRole("heading", { name: "审计日志" }),
     ).toBeInTheDocument();

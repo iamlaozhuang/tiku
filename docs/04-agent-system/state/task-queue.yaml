@@ -118,6 +118,104 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-ops-audit-log-list-standardization-2026-07-11
+    title: 0704 operations audit log list standardization
+    phase: 0704-ops-audit-log-list-standardization-2026-07-11
+    status: ready_for_closeout
+    result: pass_localhost_ui_audit_log_list_standardization
+    priority: p1
+    sequenceOrder: 28.0
+    taskKind: implementation_feature
+    executionProfile: audit_log_shared_filters_table_pagination_readable_values_and_redacted_detail_drawer_no_contract_or_permission_change
+    moduleRunVersion: 2
+    branch: codex/0704-ops-audit-log-list-standardization
+    dependsOn:
+      - 0704-ops-redeem-code-flow-separation-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-audit-log-list-standardization.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-audit-log-list-standardization-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-audit-log-list-standardization-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-ops-audit-log-list-standardization.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-ops-audit-log-list-standardization-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-audit-log-list-standardization-audit.md
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - tests/unit/admin-ops-summary-first-ui.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/server/**
+      - src/app/api/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_audit_log_ui_only
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/admin-ops-summary-first-ui.test.ts tests/unit/phase-7-audit-log-runtime-baseline.test.ts tests/unit/phase-11-audit-log-coverage-hardening.test.ts tests/unit/phase-9-multi-client-rest-contract-verification.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-ops-audit-log-list-standardization-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-ops-audit-log-list-standardization-2026-07-11 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ready_for_merge_push_cleanup
+      redTargetedTests: pass_expected_3_failed_21_passed
+      greenTargetedTests: pass_5_files_34_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      formatting: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_8_files_scanned
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      cleanup:
+        approved: true
   - id: 0704-ops-redeem-code-flow-separation-2026-07-11
     title: 0704 operations redeem code flow separation
     phase: 0704-ops-redeem-code-flow-separation-2026-07-11

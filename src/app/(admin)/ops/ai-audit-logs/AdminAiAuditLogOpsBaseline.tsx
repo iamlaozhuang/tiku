@@ -1,8 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AlertCircle, CheckCircle2, Eye, LoaderCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  LoaderCircle,
+  RotateCcw,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   AdminModelConfigManagement,
@@ -16,6 +23,14 @@ import {
   adminListStatePanelClassName,
   adminListToolbarClassName,
 } from "@/components/admin/admin-layout-primitives";
+import {
+  AdminListToolbar,
+  AdminPagination,
+  AdminTableFrame,
+  adminListControlClassName,
+  adminListFilterLabelClassName,
+} from "@/components/admin/AdminList";
+import { Button } from "@/components/ui/button";
 import type {
   ApiPagination,
   ApiResponse,
@@ -44,10 +59,14 @@ type AdminAiAuditLogOpsQueryState = {
   pageSize: 20 | 50 | 100;
 };
 type AdminAuditLogQueryState = {
+  actionType: string;
+  fromDate: string;
   keyword: string;
   page: number;
   pageSize: AdminAiAuditLogPageSize;
   resultStatus: "all" | "success" | "failed";
+  targetResourceType: string;
+  toDate: string;
 };
 type AdminAiCallLogQueryState = {
   callStatus: "all" | "success" | "failed";
@@ -86,16 +105,83 @@ const adminOpsDisplayValueMap: Record<string, string> = {
   metadata_only: "仅元数据",
   "metadata-only": "仅元数据",
   model_config: "模型配置",
+  model_provider: "模型供应商",
   "model_config.enable": "启用模型配置",
+  "model_config.disable": "停用模型配置",
+  "model_config.create": "创建模型配置",
+  "model_config.update": "更新模型配置",
+  "model_provider.create": "创建模型供应商",
+  "model_provider.update": "更新模型供应商",
+  "model_provider.enable": "启用模型供应商",
+  "model_provider.disable": "停用模型供应商",
+  organization: "企业组织",
+  org_auth: "企业授权",
+  "org_auth.create": "创建企业授权",
+  "org_auth.cancel": "取消企业授权",
+  employee: "员工账号",
+  "employee.import": "导入员工账号",
+  "employee.transfer": "转移员工账号",
+  "employee.unbind": "解绑员工账号",
   personal_ai_generation_result: "个人 AI 训练结果",
   "personal_ai_generation_result.formal_adoption_review.ready":
     "正式入库复核就绪",
   redacted: "已脱敏",
+  redeem_code: "卡密",
+  "redeem_code.batch_create": "批量生成卡密",
+  "redeem_code.create": "生成卡密",
   success: "成功",
+  super_admin: "超级管理员",
+  ops_admin: "运营管理员",
+  content_admin: "内容管理员",
+  org_standard_admin: "标准版组织管理员",
+  org_advanced_admin: "高级版组织管理员",
   summary_only: "仅摘要",
   user: "用户",
+  "user.disable": "停用用户",
+  "user.enable": "启用用户",
   "user.reset_password": "重置密码",
+  prompt_template: "Prompt 模板",
 };
+
+const defaultAdminAuditLogQuery: AdminAuditLogQueryState = {
+  actionType: "all",
+  fromDate: "",
+  keyword: "",
+  page: 1,
+  pageSize: 20,
+  resultStatus: "all",
+  targetResourceType: "all",
+  toDate: "",
+};
+
+const auditActionFilterOptions = [
+  ["all", "全部动作"],
+  ["user.reset_password", "重置密码"],
+  ["user.enable", "启用用户"],
+  ["user.disable", "停用用户"],
+  ["employee.import", "导入员工账号"],
+  ["employee.transfer", "转移员工账号"],
+  ["employee.unbind", "解绑员工账号"],
+  ["org_auth.create", "创建企业授权"],
+  ["org_auth.cancel", "取消企业授权"],
+  ["redeem_code.create", "生成卡密"],
+  ["redeem_code.batch_create", "批量生成卡密"],
+  ["model_config.enable", "启用模型配置"],
+  ["model_config.disable", "停用模型配置"],
+] as const;
+
+const auditTargetFilterOptions = [
+  ["all", "全部目标"],
+  ["user", "用户"],
+  ["employee", "员工账号"],
+  ["organization", "企业组织"],
+  ["org_auth", "企业授权"],
+  ["redeem_code", "卡密"],
+  ["model_provider", "模型供应商"],
+  ["model_config", "模型配置"],
+  ["prompt_template", "Prompt 模板"],
+  ["personal_ai_generation_result", "个人 AI 训练结果"],
+] as const;
 
 function formatAdminOpsDisplayValue(value: string) {
   return adminOpsDisplayValueMap[value] ?? value;
@@ -252,15 +338,13 @@ export function AdminAuditLogOpsPage({
   const [runtimeState, setRuntimeState] =
     useState<AdminAiAuditLogOpsState>(state);
   const [runtimeData, setRuntimeData] = useState(staticAuditLogRuntimeData);
-  const [query, setQuery] = useState<AdminAuditLogQueryState>({
-    keyword: "",
-    page: 1,
-    pageSize: 20,
-    resultStatus: "all",
-  });
+  const [query, setQuery] = useState<AdminAuditLogQueryState>(
+    defaultAdminAuditLogQuery,
+  );
   const [selectedAuditLogPublicId, setSelectedAuditLogPublicId] = useState<
     string | null
   >(null);
+  const detailTriggerRef = useRef<HTMLButtonElement | null>(null);
   const shouldLoadRuntimeData = runtimeEnabled && state === "ready";
   const effectiveRuntimeState = shouldLoadRuntimeData ? runtimeState : state;
   const runtimeQuery = useMemo(
@@ -280,9 +364,6 @@ export function AdminAuditLogOpsPage({
   const totalCount =
     runtimeData.pagination?.total ??
     filterAuditLogsForSplitPage(runtimeData.auditLogs, query).length;
-  const failedAuditCount = runtimeData.auditLogs.filter(
-    (auditLog) => auditLog.resultStatus === "failed",
-  ).length;
 
   useEffect(() => {
     if (!shouldLoadRuntimeData) {
@@ -314,7 +395,7 @@ export function AdminAuditLogOpsPage({
         }
 
         setRuntimeData(loadedData);
-        setRuntimeState(loadedData.auditLogs.length > 0 ? "ready" : "empty");
+        setRuntimeState("ready");
       })
       .catch(() => {
         if (isCurrentLoad) {
@@ -364,20 +445,10 @@ export function AdminAuditLogOpsPage({
         description="查看系统操作审计记录；页面只呈现脱敏摘要，不展示原始请求体、密钥、会话、卡密明文或内部标识。"
       />
 
-      <AdminSplitLogSummaryBand
-        description="审计日志只读；原始请求体、凭证、卡密、会话和内部自增 ID 不展示。"
-        metricItems={[
-          { label: "审计日志", value: runtimeData.auditLogs.length },
-          { label: "失败操作", value: failedAuditCount },
-          { label: "当前结果", value: totalCount },
-        ]}
-        roleLabel={formatOpsLogRoleLabel(currentRole)}
-        testId="ops-audit-log-summary-band"
-        title="审计日志只读"
-      />
-
       <AdminAuditLogToolbar
+        currentRole={currentRole}
         query={query}
+        total={totalCount}
         onChange={(nextQuery) => {
           setSelectedAuditLogPublicId(null);
           setQuery(nextQuery);
@@ -386,10 +457,15 @@ export function AdminAuditLogOpsPage({
 
       <AdminAuditLogTable
         auditLogs={displayedAuditLogs}
-        onSelectAuditLog={setSelectedAuditLogPublicId}
+        hasActiveFilters={hasActiveAuditLogFilters(query)}
+        onSelectAuditLog={(publicId, trigger) => {
+          detailTriggerRef.current = trigger;
+          setSelectedAuditLogPublicId(publicId);
+        }}
       />
 
-      <AdminSplitLogPagination
+      <AdminPagination
+        itemLabel="条审计日志"
         page={query.page}
         pageSize={query.pageSize}
         total={totalCount}
@@ -398,7 +474,15 @@ export function AdminAuditLogOpsPage({
         }
       />
 
-      <AdminAuditLogDetailPanel auditLog={selectedAuditLog} />
+      {selectedAuditLog === null ? null : (
+        <AdminAuditLogDetailDrawer
+          auditLog={selectedAuditLog}
+          onClose={() => {
+            setSelectedAuditLogPublicId(null);
+            queueMicrotask(() => detailTriggerRef.current?.focus());
+          }}
+        />
+      )}
     </main>
   );
 }
@@ -1327,6 +1411,22 @@ function createAuditLogRuntimeQuery(query: AdminAuditLogQueryState): string {
     searchParams.set("resultStatus", query.resultStatus);
   }
 
+  if (query.actionType !== "all") {
+    searchParams.set("actionType", query.actionType);
+  }
+
+  if (query.targetResourceType !== "all") {
+    searchParams.set("targetResourceType", query.targetResourceType);
+  }
+
+  if (query.fromDate.length > 0) {
+    searchParams.set("fromCreatedAt", `${query.fromDate}T00:00:00.000Z`);
+  }
+
+  if (query.toDate.length > 0) {
+    searchParams.set("toCreatedAt", `${query.toDate}T23:59:59.999Z`);
+  }
+
   return searchParams.toString();
 }
 
@@ -1360,6 +1460,23 @@ function filterAuditLogsForSplitPage(
     const matchesStatus =
       query.resultStatus === "all" ||
       auditLog.resultStatus === query.resultStatus;
+    const matchesAction =
+      query.actionType === "all" || auditLog.actionType === query.actionType;
+    const matchesTarget =
+      query.targetResourceType === "all" ||
+      auditLog.targetResourceType === query.targetResourceType;
+    const createdTimestamp = Date.parse(auditLog.createdAt);
+    const fromTimestamp =
+      query.fromDate.length === 0
+        ? null
+        : Date.parse(`${query.fromDate}T00:00:00.000Z`);
+    const toTimestamp =
+      query.toDate.length === 0
+        ? null
+        : Date.parse(`${query.toDate}T23:59:59.999Z`);
+    const matchesDateRange =
+      (fromTimestamp === null || createdTimestamp >= fromTimestamp) &&
+      (toTimestamp === null || createdTimestamp <= toTimestamp);
     const matchesKeyword =
       keyword.length === 0 ||
       [
@@ -1373,8 +1490,25 @@ function filterAuditLogsForSplitPage(
         .toLowerCase()
         .includes(keyword);
 
-    return matchesStatus && matchesKeyword;
+    return (
+      matchesStatus &&
+      matchesAction &&
+      matchesTarget &&
+      matchesDateRange &&
+      matchesKeyword
+    );
   });
+}
+
+function hasActiveAuditLogFilters(query: AdminAuditLogQueryState): boolean {
+  return (
+    query.keyword.trim().length > 0 ||
+    query.actionType !== "all" ||
+    query.targetResourceType !== "all" ||
+    query.resultStatus !== "all" ||
+    query.fromDate.length > 0 ||
+    query.toDate.length > 0
+  );
 }
 
 function filterAiCallLogsForSplitPage(
@@ -1526,55 +1660,151 @@ function AdminSplitLogSummaryBand({
 }
 
 function AdminAuditLogToolbar({
+  currentRole,
   onChange,
   query,
+  total,
 }: {
+  currentRole: AdminAiAuditLogOpsRoleMode;
   onChange: (query: AdminAuditLogQueryState) => void;
   query: AdminAuditLogQueryState;
+  total: number;
 }) {
   return (
-    <section className={adminListToolbarClassName}>
-      <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,1fr)_12rem_10rem]">
-        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
-          <span>审计日志关键词</span>
-          <input
-            aria-label="审计日志关键词"
-            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
-            value={query.keyword}
-            onChange={(event) =>
-              onChange({ ...query, keyword: event.target.value, page: 1 })
-            }
-          />
-        </label>
-        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
-          <span>结果状态</span>
-          <select
-            aria-label="审计结果状态"
-            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
-            value={query.resultStatus}
-            onChange={(event) =>
-              onChange({
-                ...query,
-                page: 1,
-                resultStatus: event.target
-                  .value as AdminAuditLogQueryState["resultStatus"],
-              })
-            }
-          >
-            <option value="all">全部结果</option>
-            <option value="success">成功</option>
-            <option value="failed">失败</option>
-          </select>
-        </label>
-        <AdminSplitLogPageSizeSelect
-          pageSize={query.pageSize}
-          onChange={(pageSize) => onChange({ ...query, page: 1, pageSize })}
+    <AdminListToolbar
+      description={`当前为${formatOpsLogRoleLabel(currentRole)}只读视角；筛选变化自动回到第一页，详情仅展示脱敏元数据。`}
+      primaryAction={
+        <Button
+          disabled={!hasActiveAuditLogFilters(query) && query.pageSize === 20}
+          size="lg"
+          variant="outline"
+          onClick={() => onChange(defaultAdminAuditLogQuery)}
+        >
+          <RotateCcw aria-hidden="true" />
+          重置筛选
+        </Button>
+      }
+      resultLabel={`共 ${total} 条审计日志`}
+      title="审计日志筛选"
+    >
+      <label className={`${adminListFilterLabelClassName} min-w-56 flex-1`}>
+        <span>关键词</span>
+        <input
+          aria-label="审计日志关键词"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          placeholder="搜索动作、角色、目标或摘要"
+          value={query.keyword}
+          onChange={(event) =>
+            onChange({ ...query, keyword: event.target.value, page: 1 })
+          }
         />
-      </div>
-      <p className="text-text-muted text-xs leading-5">
-        筛选变化自动回到第一页；详情仅展示脱敏元数据。
-      </p>
-    </section>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-44`}>
+        <span>动作类型</span>
+        <select
+          aria-label="审计动作类型"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.actionType}
+          onChange={(event) =>
+            onChange({ ...query, actionType: event.target.value, page: 1 })
+          }
+        >
+          {auditActionFilterOptions.map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-40`}>
+        <span>目标类别</span>
+        <select
+          aria-label="审计目标类别"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.targetResourceType}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              page: 1,
+              targetResourceType: event.target.value,
+            })
+          }
+        >
+          {auditTargetFilterOptions.map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-32`}>
+        <span>结果状态</span>
+        <select
+          aria-label="审计结果状态"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.resultStatus}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              page: 1,
+              resultStatus: event.target
+                .value as AdminAuditLogQueryState["resultStatus"],
+            })
+          }
+        >
+          <option value="all">全部结果</option>
+          <option value="success">成功</option>
+          <option value="failed">失败</option>
+        </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-40`}>
+        <span>开始日期</span>
+        <input
+          aria-label="开始日期"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          max={query.toDate || undefined}
+          type="date"
+          value={query.fromDate}
+          onChange={(event) =>
+            onChange({ ...query, fromDate: event.target.value, page: 1 })
+          }
+        />
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-40`}>
+        <span>结束日期</span>
+        <input
+          aria-label="结束日期"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          min={query.fromDate || undefined}
+          type="date"
+          value={query.toDate}
+          onChange={(event) =>
+            onChange({ ...query, page: 1, toDate: event.target.value })
+          }
+        />
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-28`}>
+        <span>每页条数</span>
+        <select
+          aria-label="审计日志每页条数"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.pageSize}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              page: 1,
+              pageSize: Number(event.target.value) as AdminAiAuditLogPageSize,
+            })
+          }
+        >
+          {ADMIN_AI_AUDIT_LOG_PAGE_SIZE_OPTIONS.map((pageSizeOption) => (
+            <option key={pageSizeOption} value={pageSizeOption}>
+              {pageSizeOption}
+            </option>
+          ))}
+        </select>
+      </label>
+    </AdminListToolbar>
   );
 }
 
@@ -1659,76 +1889,136 @@ function AdminSplitLogPageSizeSelect({
   );
 }
 
+const auditLogDateTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
+  day: "2-digit",
+  hour: "2-digit",
+  hour12: false,
+  minute: "2-digit",
+  month: "2-digit",
+  timeZone: "Asia/Shanghai",
+  year: "numeric",
+});
+
+function formatAuditLogTimestamp(value: string): string {
+  const timestamp = Date.parse(value);
+
+  return Number.isNaN(timestamp)
+    ? "时间不可用"
+    : auditLogDateTimeFormatter.format(timestamp);
+}
+
+function formatAuditMetadataSummary(value: string | null): string {
+  return value ?? "已记录脱敏元数据";
+}
+
+function AdminAuditResultStatus({
+  status,
+}: {
+  status: AuditLogSummaryDto["resultStatus"];
+}) {
+  const isSuccess = status === "success";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 text-sm font-medium ${isSuccess ? "text-success" : "text-destructive"}`}
+    >
+      {isSuccess ? (
+        <CheckCircle2 aria-hidden="true" className="size-4" />
+      ) : (
+        <AlertCircle aria-hidden="true" className="size-4" />
+      )}
+      {formatAdminOpsDisplayValue(status)}
+    </span>
+  );
+}
+
 function AdminAuditLogTable({
   auditLogs,
+  hasActiveFilters,
   onSelectAuditLog,
 }: {
   auditLogs: AuditLogListDto["auditLogs"];
-  onSelectAuditLog: (publicId: string) => void;
+  hasActiveFilters: boolean;
+  onSelectAuditLog: (publicId: string, trigger: HTMLButtonElement) => void;
 }) {
-  if (auditLogs.length === 0) {
-    return (
-      <div className={adminListStatePanelClassName}>
-        <p className="text-text-primary text-sm font-medium">暂无审计日志</p>
-        <p className="text-text-muted mt-2 text-xs">
-          当前筛选条件下没有可展示的脱敏审计摘要。
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className={adminDataTableContainerClassName}>
+    <AdminTableFrame ariaLabel="审计日志列表" minWidthClassName="min-w-[72rem]">
       <table aria-label="审计日志列表" className={adminDataTableClassName}>
         <thead className="bg-muted/60 text-text-muted">
           <tr>
-            <th className="px-4 py-3 font-medium">时间</th>
-            <th className="px-4 py-3 font-medium">操作者角色</th>
-            <th className="px-4 py-3 font-medium">动作</th>
-            <th className="px-4 py-3 font-medium">目标类别</th>
-            <th className="px-4 py-3 font-medium">结果</th>
+            <th className="w-40 px-4 py-3 font-medium whitespace-nowrap">
+              时间
+            </th>
+            <th className="w-36 px-4 py-3 font-medium whitespace-nowrap">
+              操作者角色
+            </th>
+            <th className="w-52 px-4 py-3 font-medium">动作</th>
+            <th className="w-44 px-4 py-3 font-medium">目标类别</th>
+            <th className="w-28 px-4 py-3 font-medium whitespace-nowrap">
+              结果
+            </th>
             <th className="px-4 py-3 font-medium">摘要</th>
-            <th className="px-4 py-3 text-right font-medium">操作</th>
+            <th className="w-28 px-4 py-3 text-right font-medium">操作</th>
           </tr>
         </thead>
         <tbody className="divide-border divide-y">
+          {auditLogs.length === 0 ? (
+            <tr>
+              <td className="px-4 py-10 text-center" colSpan={7}>
+                <p className="text-text-primary text-sm font-medium">
+                  {hasActiveFilters ? "没有符合条件的审计日志" : "暂无审计日志"}
+                </p>
+                <p className="text-text-muted mt-2 text-xs">
+                  {hasActiveFilters
+                    ? "调整或重置筛选条件后重试。"
+                    : "当前没有可展示的脱敏审计摘要。"}
+                </p>
+              </td>
+            </tr>
+          ) : null}
           {auditLogs.map((auditLog) => (
             <tr
               key={auditLog.publicId}
               data-public-id={auditLog.publicId}
               data-testid={`admin-audit-log-${auditLog.publicId}`}
             >
-              <td className="text-text-secondary px-4 py-3">
-                {auditLog.createdAt}
+              <td className="text-text-secondary px-4 py-3 whitespace-nowrap">
+                {formatAuditLogTimestamp(auditLog.createdAt)}
               </td>
-              <td className="text-text-primary px-4 py-3">
+              <td className="text-text-primary px-4 py-3 whitespace-nowrap">
                 {formatAdminOpsDisplayValue(auditLog.actorRole)}
               </td>
-              <td className="text-text-primary px-4 py-3">
+              <td className="text-text-primary px-4 py-3 leading-5">
                 {formatAdminOpsDisplayValue(auditLog.actionType)}
               </td>
-              <td className="text-text-secondary px-4 py-3">
+              <td className="text-text-secondary px-4 py-3 leading-5">
                 {formatAdminOpsDisplayValue(auditLog.targetResourceType)}
               </td>
-              <td className="text-text-secondary px-4 py-3">
-                {formatAdminOpsDisplayValue(auditLog.resultStatus)}
+              <td className="px-4 py-3 whitespace-nowrap">
+                <AdminAuditResultStatus status={auditLog.resultStatus} />
               </td>
-              <td className="text-text-muted px-4 py-3">
-                {auditLog.metadataSummary ?? "已脱敏元数据"}
+              <td className="text-text-muted px-4 py-3 leading-5">
+                {formatAuditMetadataSummary(auditLog.metadataSummary)}
               </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end">
-                  <AdminOpsDetailButton
-                    label="查看脱敏详情"
-                    onClick={() => onSelectAuditLog(auditLog.publicId)}
-                  />
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={(event) =>
+                      onSelectAuditLog(auditLog.publicId, event.currentTarget)
+                    }
+                  >
+                    <Eye aria-hidden="true" />
+                    查看详情
+                  </Button>
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </AdminTableFrame>
   );
 }
 
@@ -2083,6 +2373,108 @@ function AdminOpsDetailButton({
       <Eye aria-hidden="true" className="mr-2 size-4" />
       {label}
     </button>
+  );
+}
+
+function AdminAuditLogDetailDrawer({
+  auditLog,
+  onClose,
+}: {
+  auditLog: AuditLogSummaryDto;
+  onClose: () => void;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+    closeButtonRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="bg-foreground/30 fixed inset-0 z-50 flex justify-end"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <aside
+        aria-label="审计日志详情"
+        aria-modal="true"
+        className="bg-surface border-border flex h-full w-full max-w-lg flex-col border-l shadow-xl"
+        role="dialog"
+      >
+        <header className="border-border flex items-start justify-between gap-4 border-b p-5">
+          <div className="space-y-1">
+            <h2 className="text-text-primary text-lg font-semibold">
+              审计日志详情
+            </h2>
+            <p className="text-text-muted text-sm">仅展示脱敏元数据</p>
+          </div>
+          <Button
+            ref={closeButtonRef}
+            aria-label="关闭审计日志详情"
+            size="icon-lg"
+            variant="ghost"
+            onClick={onClose}
+          >
+            <X aria-hidden="true" />
+          </Button>
+        </header>
+        <div className="flex-1 space-y-5 overflow-y-auto p-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <AdminOpsReadonlyDetail
+              label="发生时间"
+              value={formatAuditLogTimestamp(auditLog.createdAt)}
+            />
+            <AdminOpsReadonlyDetail
+              label="操作者角色"
+              value={formatAdminOpsDisplayValue(auditLog.actorRole)}
+            />
+            <AdminOpsReadonlyDetail
+              label="动作"
+              value={formatAdminOpsDisplayValue(auditLog.actionType)}
+            />
+            <AdminOpsReadonlyDetail
+              label="目标类别"
+              value={formatAdminOpsDisplayValue(auditLog.targetResourceType)}
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-text-muted text-xs">执行结果</p>
+            <AdminAuditResultStatus status={auditLog.resultStatus} />
+          </div>
+          <AdminOpsReadonlyDetail
+            label="脱敏摘要"
+            value={formatAuditMetadataSummary(auditLog.metadataSummary)}
+          />
+          <div className="border-border bg-muted/40 rounded-md border p-4">
+            <div className="flex flex-wrap gap-2">
+              <AdminOpsStatusBadge label="redacted" />
+              <AdminOpsStatusBadge label="summary_only" />
+            </div>
+            <p className="text-text-muted mt-3 text-xs leading-5">
+              原始请求体、凭证、会话、卡密明文、内部标识和完整业务内容不在此处展示。
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 }
 

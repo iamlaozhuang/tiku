@@ -674,8 +674,9 @@ describe("admin ai and audit log ops baseline", () => {
       screen.getByTestId("admin-audit-log-runtime-audit-log-split-001"),
     ).toHaveTextContent("redacted audit metadata");
     expect(screen.queryByText("AI 调用日志")).toBeNull();
-    expect(screen.queryByText("模型配置")).toBeNull();
-    expect(screen.queryByText("Prompt 模板")).toBeNull();
+    expect(screen.queryByRole("tab", { name: "模型配置" })).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Prompt 模板" })).toBeNull();
+    expect(screen.queryByText("保存配置")).toBeNull();
     expect(document.body).not.toHaveTextContent("RAW_PROMPT");
     expect(document.body).not.toHaveTextContent("RAW_PROVIDER_PAYLOAD");
     expect(document.body).not.toHaveTextContent("split-audit-session");
@@ -692,6 +693,153 @@ describe("admin ai and audit log ops baseline", () => {
     expect(fetchedPaths).not.toContainEqual(
       expect.stringMatching(/^\/api\/v1\/prompt-templates\b/u),
     );
+  });
+
+  it("uses the shared list pattern with readable audit values and a redacted detail drawer", () => {
+    render(createElement(AdminAuditLogOpsPage, { currentRole: "ops_admin" }));
+
+    const toolbar = screen.getByRole("region", { name: "审计日志筛选" });
+    expect(toolbar).toHaveTextContent("共 2 条审计日志");
+    expect(
+      screen.getByRole("table", { name: "审计日志列表" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
+      "显示 1-2 / 共 2 条审计日志",
+    );
+    expect(screen.queryByTestId("ops-audit-log-summary-band")).toBeNull();
+    expect(document.body).not.toHaveTextContent("summary-first");
+    expect(document.body).not.toHaveTextContent("Admin Ops");
+
+    expect(screen.getByLabelText("审计日志关键词")).toBeInTheDocument();
+    expect(screen.getByLabelText("审计动作类型")).toBeInTheDocument();
+    expect(screen.getByLabelText("审计目标类别")).toBeInTheDocument();
+    expect(screen.getByLabelText("审计结果状态")).toBeInTheDocument();
+    expect(screen.getByLabelText("开始日期")).toBeInTheDocument();
+    expect(screen.getByLabelText("结束日期")).toBeInTheDocument();
+    expect(screen.getByLabelText("审计日志每页条数")).toHaveValue("20");
+    expect(
+      screen.getByRole("button", { name: "重置筛选" }),
+    ).toBeInTheDocument();
+
+    const auditTable = screen.getByRole("table", { name: "审计日志列表" });
+    expect(auditTable).toHaveTextContent("超级管理员");
+    expect(auditTable).toHaveTextContent("启用模型配置");
+    expect(auditTable).toHaveTextContent("模型配置");
+    expect(auditTable).toHaveTextContent("成功");
+    expect(auditTable).not.toHaveTextContent("super_admin");
+    expect(auditTable).not.toHaveTextContent("model_config.enable");
+    expect(auditTable).not.toHaveTextContent("2026-05-21T08:00:00.000Z");
+
+    expect(screen.queryByRole("dialog", { name: "审计日志详情" })).toBeNull();
+    fireEvent.click(screen.getAllByRole("button", { name: "查看详情" })[0]);
+
+    const detailDrawer = screen.getByRole("dialog", { name: "审计日志详情" });
+    expect(detailDrawer).toHaveTextContent("仅展示脱敏元数据");
+    expect(detailDrawer).toHaveTextContent("已脱敏");
+    expect(detailDrawer).not.toHaveTextContent(
+      "audit-log-formal-review-candidate-public-001",
+    );
+    expect(detailDrawer).not.toHaveTextContent("admin-content-public-001");
+    expect(detailDrawer).not.toHaveTextContent(
+      "personal_ai_result_public_admin_901",
+    );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "审计日志详情" })).toBeNull();
+  });
+
+  it("sends complete audit filters through the existing contract and resets them", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "split-audit-filter-session",
+    );
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      void input;
+
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: {
+          auditLogs: [],
+          governance: {
+            auditLogRetentionDay: 1095,
+            blockedCapabilities: [],
+            exportStatus: "blocked",
+            hardDeleteStatus: "blocked",
+            rawViewerStatus: "blocked",
+            readOnly: true,
+            status: "blocked",
+          },
+        },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          sortBy: "createdAt",
+          sortOrder: "desc",
+          total: 0,
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminAuditLogOpsPage, { runtimeEnabled: true }));
+    await screen.findByRole("heading", { level: 1, name: "审计日志" });
+
+    fireEvent.change(screen.getByLabelText("审计日志关键词"), {
+      target: { value: "异常操作" },
+    });
+    fireEvent.change(screen.getByLabelText("审计动作类型"), {
+      target: { value: "user.reset_password" },
+    });
+    fireEvent.change(screen.getByLabelText("审计目标类别"), {
+      target: { value: "user" },
+    });
+    fireEvent.change(screen.getByLabelText("审计结果状态"), {
+      target: { value: "failed" },
+    });
+    fireEvent.change(screen.getByLabelText("开始日期"), {
+      target: { value: "2026-07-01" },
+    });
+    fireEvent.change(screen.getByLabelText("结束日期"), {
+      target: { value: "2026-07-11" },
+    });
+    fireEvent.change(screen.getByLabelText("审计日志每页条数"), {
+      target: { value: "50" },
+    });
+
+    await waitFor(() => {
+      const lastRequestUrl = String(fetchMock.mock.calls.at(-1)?.[0]);
+      expect(lastRequestUrl).toContain("page=1&pageSize=50");
+      expect(lastRequestUrl).toContain(
+        "keyword=%E5%BC%82%E5%B8%B8%E6%93%8D%E4%BD%9C",
+      );
+      expect(lastRequestUrl).toContain("actionType=user.reset_password");
+      expect(lastRequestUrl).toContain("targetResourceType=user");
+      expect(lastRequestUrl).toContain("resultStatus=failed");
+      expect(lastRequestUrl).toContain(
+        "fromCreatedAt=2026-07-01T00%3A00%3A00.000Z",
+      );
+      expect(lastRequestUrl).toContain(
+        "toCreatedAt=2026-07-11T23%3A59%3A59.999Z",
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "重置筛选" }));
+
+    await waitFor(() => {
+      expect(String(fetchMock.mock.calls.at(-1)?.[0])).toBe(
+        "/api/v1/audit-logs?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc",
+      );
+    });
+    expect(screen.getByLabelText("审计日志关键词")).toHaveValue("");
+    expect(screen.getByLabelText("审计动作类型")).toHaveValue("all");
+    expect(screen.getByLabelText("审计目标类别")).toHaveValue("all");
+    expect(screen.getByLabelText("审计结果状态")).toHaveValue("all");
+    expect(screen.getByLabelText("开始日期")).toHaveValue("");
+    expect(screen.getByLabelText("结束日期")).toHaveValue("");
+    expect(screen.getByLabelText("审计日志每页条数")).toHaveValue("20");
+    expect(document.body).not.toHaveTextContent("split-audit-filter-session");
   });
 
   it("loads the split AI call log page without audit, model, or prompt endpoints", async () => {
