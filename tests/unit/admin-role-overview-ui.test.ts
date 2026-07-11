@@ -111,9 +111,11 @@ describe("admin role overview UI", () => {
       "href",
       "/ops/organizations",
     );
-    expect(
-      screen.getByRole("link", { name: "卡密与企业授权" }),
-    ).toHaveAttribute("href", "/ops/redeem-codes");
+    expect(screen.getByRole("link", { name: "卡密管理" })).toHaveAttribute(
+      "href",
+      "/ops/redeem-codes",
+    );
+    expect(screen.queryByRole("link", { name: "卡密与企业授权" })).toBeNull();
     expect(screen.getByRole("link", { name: "审计日志" })).toHaveAttribute(
       "href",
       "/ops/audit-logs",

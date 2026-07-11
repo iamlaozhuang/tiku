@@ -86,7 +86,7 @@ const OPS_MENU: MenuItem[] = [
   { href: "/ops/contact-config", label: "购买联系方式", Icon: UserRoundCog },
   { href: "/ops/users", label: "用户管理", Icon: UserRoundCog },
   { href: "/ops/organizations", label: "企业管理", Icon: Building2 },
-  { href: "/ops/redeem-codes", label: "卡密与企业授权", Icon: KeyRound },
+  { href: "/ops/redeem-codes", label: "卡密管理", Icon: KeyRound },
   { href: "/ops/audit-logs", label: "审计日志", Icon: ScrollText },
   { href: "/ops/ai-call-logs", label: "AI 调用日志", Icon: WandSparkles },
 ];

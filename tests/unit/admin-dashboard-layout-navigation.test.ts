@@ -193,9 +193,11 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/ops/overview",
     );
-    expect(
-      screen.getByRole("link", { name: /卡密与企业授权/u }),
-    ).toHaveAttribute("href", "/ops/redeem-codes");
+    expect(screen.getByRole("link", { name: /卡密管理/u })).toHaveAttribute(
+      "href",
+      "/ops/redeem-codes",
+    );
+    expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
     expect(screen.getByRole("link", { name: "审计日志" })).toHaveAttribute(
       "href",
       "/ops/audit-logs",
@@ -251,7 +253,7 @@ describe("AdminDashboardLayout navigation", () => {
       "href",
       "/content/resources",
     );
-    expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /卡密管理/u })).toBeNull();
     expect(screen.queryByRole("link", { name: "审计日志" })).toBeNull();
     expect(screen.queryByRole("link", { name: "AI 调用日志" })).toBeNull();
   });
@@ -481,7 +483,7 @@ describe("AdminDashboardLayout navigation", () => {
     expect(screen.queryByRole("link", { name: /AI组卷/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /试卷管理/u })).toBeNull();
-    expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
+    expect(screen.queryByRole("link", { name: /卡密管理/u })).toBeNull();
     expect(screen.queryByRole("link", { name: "审计日志" })).toBeNull();
     expect(screen.queryByRole("link", { name: "AI 调用日志" })).toBeNull();
   });

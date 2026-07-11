@@ -138,6 +138,7 @@ const redeemCodePayload = {
         level: 3,
         status: "unused",
         redeemedUserPublicId: null,
+        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
         createdAt: "2026-05-22T00:00:00.000Z",
         id: 401,
         code_hash: "do-not-render",
@@ -181,7 +182,7 @@ function mockAdminFetch() {
       return createJsonResponse(employeePayload);
     }
 
-    if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
+    if (path.startsWith("/api/v1/redeem-codes?")) {
       return createJsonResponse(redeemCodePayload);
     }
 
@@ -412,7 +413,7 @@ describe("AdminRedeemCodePage", () => {
     expect(document.body.textContent).not.toContain("do-not-render");
     expect(document.body.textContent).not.toContain("RC-2026-0001-PLAIN");
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/v1/redeem-codes?page=1&pageSize=20",
+      "/api/v1/redeem-codes?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc",
       expect.objectContaining({
         headers: { authorization: "Bearer unit-test-admin-token" },
       }),
@@ -440,8 +441,8 @@ describe("AdminRedeemCodePage", () => {
 
     expect(await screen.findByText("暂无卡密数据")).toBeInTheDocument();
     expect(
-      screen.getByTestId("system-ops-redeem-code-generate-entry"),
-    ).toBeInTheDocument();
+      screen.queryByTestId("system-ops-redeem-code-generate-entry"),
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("redeem-code-generate-button")).toBeDisabled();
 
     cleanup();

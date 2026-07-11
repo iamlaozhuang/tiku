@@ -1,8 +1,45 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-ops-organization-management-split-2026-07-11
+currentPhase: 0704-ops-redeem-code-management-polish-2026-07-11
 updatedAt: "2026-07-11T00:00:00-07:00"
+latest0704OpsRedeemCodeManagementPolish:
+  id: 0704-ops-redeem-code-management-polish-2026-07-11
+  status: ready_for_closeout
+  result: pass_localhost_ui_redeem_code_management_polish
+  branch: codex/0704-ops-redeem-code-management-polish
+  dependsOn: 0704-ops-organization-management-split-2026-07-11
+  startSha: 850ce4119a3763e70b8cba130d73767b52b93632
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-redeem-code-management-polish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-redeem-code-management-polish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-redeem-code-management-polish-audit.md
+  executionBoundary:
+    previewPreparation: paused
+    runtime: localhost_ui_source_test_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    screenshotRawDomTrace: private_screenshot_reviewed_not_copied
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    status: pass_ready_for_closeout
+    redTargetedTests: pass_expected_6_files_58_tests_9_failures_before_implementation
+    greenTargetedTests: pass_6_files_58_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_14_files_scanned
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    providerExecution: blocked_not_executed
+    envSecretAccess: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    screenshotRawDomTrace: private_screenshot_reviewed_not_copied
+    privateValueOutput: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    releaseReadinessClaimed: false
 latest0704OpsOrganizationManagementSplit:
   id: 0704-ops-organization-management-split-2026-07-11
   status: ready_for_closeout
@@ -4300,14 +4337,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-ops-organization-management-split-2026-07-11
-  title: 0704 operations organization management split
-  phase: 0704-ops-organization-management-split-2026-07-11
+  id: 0704-ops-redeem-code-management-polish-2026-07-11
+  title: 0704 operations redeem code management polish
+  phase: 0704-ops-redeem-code-management-polish-2026-07-11
   status: ready_for_closeout
-  result: pass_localhost_ui_organization_management_split
+  result: pass_localhost_ui_redeem_code_management_polish
   priority: p1
   taskKind: implementation_polish
-  branch: codex/0704-ops-organization-management-split
+  branch: codex/0704-ops-redeem-code-management-polish
   humanApprovalBoundary:
     implementation: current_user_approved_ops_admin_ui_serial_execution_commit_merge_push_cleanup_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -4320,39 +4357,37 @@ currentTask:
     directDatabaseConnection: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshotRawDom: not_executed
+    screenshotRawDom: private_screenshot_reviewed_not_copied
   plannedAt: "2026-07-11T00:00:00-07:00"
   claimedAt: "2026-07-11T00:00:00-07:00"
   completedAt: "2026-07-11T00:00:00-07:00"
-  targetClosureItem: Split the operations enterprise management page into organization structure, enterprise authorization, and employee operations task views while preserving business behavior.
-  behaviorBoundary: localhost_ui_source_test_only_organization_management_view_split_no_business_logic_change_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
+  targetClosureItem: Rename and polish the operations redeem code management page while preserving generation, plaintext, detail, and audit behavior.
+  behaviorBoundary: localhost_ui_source_test_only_redeem_code_management_ui_polish_no_business_logic_change_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom_repo_artifacts
   evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-organization-management-split.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-organization-management-split-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-organization-management-split-audit.md
-  dependsOn: 0704-ops-log-duty-split-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-redeem-code-management-polish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-redeem-code-management-polish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-redeem-code-management-polish-audit.md
+  dependsOn: 0704-ops-organization-management-split-2026-07-11
   nextRequiredTaskId: null
   validationSummary:
-    status: pass_ready_for_local_commit
-    redTargetedTests: pass_expected_4_failed_before_implementation
-    greenTargetedTests: pass_4_files_43_tests
-    sourceChange: split_ops_organizations_into_three_task_views
+    status: pass_ready_for_closeout
+    redTargetedTests: pass_expected_6_files_58_tests_9_failures_before_implementation
+    greenTargetedTests: pass_6_files_58_tests
+    sourceChange: redeem_code_menu_renamed_and_page_table_pagination_polished
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_10_files_scanned
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_update
+    moduleRunV2PreCommitHardening: pass_14_files_scanned
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
-    screenshotRawDomTrace: not_executed
+    screenshotRawDomTrace: private_screenshot_reviewed_not_copied
     privateValueOutput: false
     dependencyOrLockfileChanged: false
     schemaMigrationSeedChanged: false
-    repositoryCheckpointAligned: true
     releaseReadinessClaimed: false
-    currentTaskPointerAlignedForCommitHook: true
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract

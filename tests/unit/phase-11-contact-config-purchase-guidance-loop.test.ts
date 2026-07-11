@@ -63,6 +63,7 @@ const redeemCodePayload = {
         level: 3,
         status: "unused",
         redeemedUserPublicId: null,
+        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
         createdAt: "2026-05-22T00:00:00.000Z",
       },
     ],
@@ -156,7 +157,7 @@ describe("phase 11 contact_config purchase guidance loop", () => {
     expect(document.body.textContent).not.toContain("unit-test-student-token");
   });
 
-  it("shows system ops the same purchase guidance on the redeem code management surface", async () => {
+  it("keeps purchase guidance out of the redeem code management surface", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     vi.stubGlobal(
       "fetch",
@@ -167,7 +168,7 @@ describe("phase 11 contact_config purchase guidance loop", () => {
           return createJsonResponse(adminSessionPayload);
         }
 
-        if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
+        if (path.startsWith("/api/v1/redeem-codes?")) {
           return createJsonResponse(redeemCodePayload);
         }
 
@@ -181,13 +182,11 @@ describe("phase 11 contact_config purchase guidance loop", () => {
 
     render(createElement(AdminRedeemCodePage));
 
-    const guidance = await screen.findByTestId(
-      "system-ops-purchase-guidance-contact-config",
-    );
-
-    expect(guidance).toHaveTextContent("购买支持");
-    expect(guidance).toHaveTextContent("Tiku 运营支持");
-    expect(guidance).toHaveTextContent("400-000-2026");
+    await screen.findByRole("heading", { name: "卡密管理" });
+    expect(
+      screen.queryByTestId("system-ops-purchase-guidance-contact-config"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("购买支持")).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 });

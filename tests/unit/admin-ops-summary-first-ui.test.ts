@@ -420,10 +420,8 @@ describe("admin ops summary-first UI", () => {
     expect(summaryBand).toHaveTextContent("证据");
     expect(summaryBand).toHaveTextContent("禁用态");
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByTestId("system-ops-redeem-code-generate-entry"),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+      screen.queryByTestId("system-ops-redeem-code-generate-entry"),
+    ).not.toBeInTheDocument();
     expect(
       summaryBand.compareDocumentPosition(
         screen.getByTestId("redeem-code-generate-button"),

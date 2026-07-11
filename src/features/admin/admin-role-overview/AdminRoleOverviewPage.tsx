@@ -111,8 +111,8 @@ const operationsEntries: OverviewEntry[] = [
     Icon: Building2,
   },
   {
-    label: "卡密与企业授权",
-    description: "生成和核对卡密状态，处理授权运营。",
+    label: "卡密管理",
+    description: "生成、分发和核对卡密状态。",
     href: "/ops/redeem-codes",
     Icon: KeyRound,
   },

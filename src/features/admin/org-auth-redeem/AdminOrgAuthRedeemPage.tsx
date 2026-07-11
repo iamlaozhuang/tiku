@@ -23,7 +23,10 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import type { ApiResponse } from "@/server/contracts/api-response";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import type {
   EmployeeListDto,
   EmployeeImportResultDto,
@@ -36,7 +39,16 @@ import type {
   RedeemCodeListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/lib/local-purchase-guidance-contact-config";
+import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import {
+  adminDataTableClassName,
+  adminDataTableContainerClassName,
+  adminListPaginationClassName,
+} from "@/components/admin/admin-layout-primitives";
+import {
+  ADMIN_PAGE_SIZE_OPTIONS,
+  type AdminListQuery,
+} from "@/server/contracts/admin-interaction-contract";
 import type {
   OrgAuthDetailDto,
   DisableOrganizationResultDto,
@@ -117,7 +129,9 @@ type OrganizationFormState = {
   status: "active" | "disabled";
 };
 
-type AdminRedeemCodeData = RedeemCodeListDto;
+type AdminRedeemCodeData = RedeemCodeListDto & {
+  pagination: ApiPagination | null;
+};
 
 type CreateRedeemCodeInput = {
   count: number;
@@ -540,10 +554,16 @@ function getOrgAuthUpgradeStatusLabel(
 
 function createRedeemCodeListQuery(input: {
   keyword: string;
+  query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">;
   status: RedeemCodeStatus | "all";
 }): string {
-  const searchParams = new URLSearchParams(DEFAULT_LIST_QUERY);
+  const searchParams = new URLSearchParams();
   const keyword = input.keyword.trim();
+
+  searchParams.set("page", String(input.query.page));
+  searchParams.set("pageSize", String(input.query.pageSize));
+  searchParams.set("sortBy", input.query.sortBy);
+  searchParams.set("sortOrder", input.query.sortOrder);
 
   if (input.status !== "all") {
     searchParams.set("status", input.status);
@@ -554,6 +574,19 @@ function createRedeemCodeListQuery(input: {
   }
 
   return searchParams.toString();
+}
+
+function createFallbackRedeemCodePagination(
+  query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">,
+  total: number,
+): ApiPagination {
+  return {
+    page: query.page,
+    pageSize: query.pageSize,
+    sortBy: query.sortBy,
+    sortOrder: query.sortOrder,
+    total,
+  };
 }
 
 function toStartOfDayIso(dateValue: string): string {
@@ -1606,9 +1639,7 @@ function OperationsRedeemCodeSummaryFirstBand({
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">
-            卡密 summary-first
-          </p>
+          <p className="text-brand-primary text-xs font-medium">卡密管理总览</p>
           <h2 className="text-text-primary text-base font-semibold">
             卡密分发总览
           </h2>
@@ -3212,71 +3243,170 @@ function EmployeeConfirmationDialog({
 
 function RedeemCodeList({
   onCopyPlainText,
+  onPageChange,
   onViewDetail,
+  pageCount,
+  pagination,
   redeemCodes,
+  visibleEnd,
+  visibleStart,
 }: {
   onCopyPlainText: (value: string) => void;
+  onPageChange: (page: number) => void;
   onViewDetail: (publicId: string) => void;
+  pageCount: number;
+  pagination: ApiPagination;
   redeemCodes: AdminRedeemCodeData["redeemCodes"];
+  visibleEnd: number;
+  visibleStart: number;
 }) {
   return (
-    <AdminPanel title="卡密列表">
-      {redeemCodes.map((redeemCode) => {
-        const visiblePlainText =
-          redeemCode.canViewPlainText && redeemCode.codePlainText !== null
-            ? redeemCode.codePlainText
-            : null;
-
-        return (
-          <AdminDataRow
-            key={redeemCode.publicId}
-            publicId={redeemCode.publicId}
-            testId={`admin-redeem-code-${redeemCode.publicId}`}
+    <section aria-label="卡密列表区域" className="space-y-3">
+      <div
+        className={adminDataTableContainerClassName}
+        data-testid="admin-redeem-code-table-container"
+      >
+        <div className="overflow-x-auto">
+          <table
+            aria-label="卡密列表"
+            className={`${adminDataTableClassName} min-w-[56rem]`}
           >
-            <div className="min-w-0 space-y-1">
-              <p className="text-text-primary font-mono text-sm font-semibold">
-                {visiblePlainText ?? redeemCode.codeDisplay}
-              </p>
-              <p className="text-text-secondary text-xs">
-                {redeemCodeTypeLabels[redeemCode.redeemCodeType]} /{" "}
-                {formatProfessionLevel(redeemCode)} / 创建于{" "}
-                {formatDate(redeemCode.createdAt)}
-              </p>
-              <p className="text-text-muted flex flex-wrap gap-1 text-xs">
-                <span>兑换用户 {redeemCode.redeemedUserPublicId ?? "无"}</span>
-                <span>/</span>
-                <span>
-                  {visiblePlainText === null ? "明文不可用" : "明文可复制"}
-                </span>
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-                {redeemCodeStatusLabels[redeemCode.status]}
-              </span>
-              {visiblePlainText === null ? null : (
-                <button
-                  type="button"
-                  className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-                  onClick={() => onCopyPlainText(visiblePlainText)}
-                >
-                  <Copy className="size-3.5" aria-hidden="true" />
-                  复制
-                </button>
+            <thead className="bg-muted text-text-secondary">
+              <tr>
+                <th className="px-4 py-3 font-medium" scope="col">
+                  卡密
+                </th>
+                <th className="px-4 py-3 font-medium" scope="col">
+                  类型与状态
+                </th>
+                <th className="px-4 py-3 font-medium" scope="col">
+                  授权范围
+                </th>
+                <th className="px-4 py-3 font-medium" scope="col">
+                  兑换与明文
+                </th>
+                <th className="px-4 py-3 text-right font-medium" scope="col">
+                  操作
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {redeemCodes.length === 0 ? (
+                <tr>
+                  <td
+                    className="text-text-muted px-4 py-8 text-center text-sm"
+                    colSpan={5}
+                  >
+                    当前筛选条件下没有卡密记录。
+                  </td>
+                </tr>
+              ) : (
+                redeemCodes.map((redeemCode) => {
+                  const visiblePlainText =
+                    redeemCode.canViewPlainText &&
+                    redeemCode.codePlainText !== null
+                      ? redeemCode.codePlainText
+                      : null;
+
+                  return (
+                    <tr
+                      className="border-border border-t text-sm"
+                      data-public-id={redeemCode.publicId}
+                      data-testid={`admin-redeem-code-${redeemCode.publicId}`}
+                      key={redeemCode.publicId}
+                    >
+                      <td className="px-4 py-3 align-middle">
+                        <p className="text-text-primary font-mono font-semibold">
+                          {visiblePlainText ?? redeemCode.codeDisplay}
+                        </p>
+                        <p className="text-text-muted mt-1 text-xs">
+                          创建于 {formatDate(redeemCode.createdAt)}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex flex-wrap gap-2">
+                          <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+                            {redeemCodeTypeLabels[redeemCode.redeemCodeType]}
+                          </span>
+                          <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+                            {redeemCodeStatusLabels[redeemCode.status]}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="text-text-primary px-4 py-3 align-middle">
+                        {formatProfessionLevel(redeemCode)}
+                      </td>
+                      <td className="px-4 py-3 align-middle">
+                        <p className="text-text-primary">
+                          {redeemCode.redeemedUserPublicId === null
+                            ? "未兑换"
+                            : "已兑换"}
+                        </p>
+                        <p className="text-text-muted mt-1 text-xs">
+                          兑换截止 {formatDate(redeemCode.redeemDeadlineAt)}
+                        </p>
+                        <p className="text-text-muted mt-1 text-xs">
+                          {visiblePlainText === null
+                            ? "明文不可用"
+                            : "明文可复制"}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex justify-end gap-2">
+                          {visiblePlainText === null ? null : (
+                            <button
+                              type="button"
+                              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                              onClick={() => onCopyPlainText(visiblePlainText)}
+                            >
+                              <Copy className="size-3.5" aria-hidden="true" />
+                              复制
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                            onClick={() => onViewDetail(redeemCode.publicId)}
+                          >
+                            <Eye className="size-3.5" aria-hidden="true" />
+                            详情
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
-              <button
-                type="button"
-                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-                onClick={() => onViewDetail(redeemCode.publicId)}
-              >
-                <Eye className="size-3.5" aria-hidden="true" />
-                详情
-              </button>
-            </div>
-          </AdminDataRow>
-        );
-      })}
-    </AdminPanel>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className={adminListPaginationClassName}>
+        <p className="text-text-muted">
+          显示 {visibleStart}-{visibleEnd} / 共 {pagination.total} 个卡密
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page <= 1}
+            onClick={() => onPageChange(pagination.page - 1)}
+          >
+            上一页
+          </button>
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page >= pageCount}
+            onClick={() =>
+              onPageChange(Math.min(pageCount, pagination.page + 1))
+            }
+          >
+            下一页
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -4252,7 +4382,11 @@ function RedeemCodeActionPanel({
   onGenerateRedeemCode,
   onFormChange,
   onKeywordChange,
+  onPageSizeChange,
+  onSortChange,
   onStatusChange,
+  pageSize,
+  sortOrder,
   status,
 }: {
   disabled: boolean;
@@ -4262,7 +4396,11 @@ function RedeemCodeActionPanel({
   onFormChange: (formState: RedeemCodeGenerationFormState) => void;
   onGenerateRedeemCode: (input: CreateRedeemCodeInput) => void;
   onKeywordChange: (value: string) => void;
+  onPageSizeChange: (value: string) => void;
+  onSortChange: (sortBy: string) => void;
   onStatusChange: (value: RedeemCodeStatus | "all") => void;
+  pageSize: number;
+  sortOrder: "asc" | "desc";
   status: RedeemCodeStatus | "all";
 }) {
   const formValidation = buildRedeemCodeGenerationInput(formState);
@@ -4288,7 +4426,20 @@ function RedeemCodeActionPanel({
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
       id={id}
     >
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-text-primary text-base font-semibold">
+            卡密筛选与生成
+          </h2>
+          <p className="text-text-muted text-sm">
+            先筛选和核对历史卡密，再执行生成；生成前仍需要二次确认。
+          </p>
+        </div>
+        <p className="text-text-muted text-sm">
+          创建时间 {sortOrder === "desc" ? "倒序" : "正序"}
+        </p>
+      </div>
+      <div className="mt-4 flex flex-wrap items-end gap-3">
         <label className="flex min-w-44 flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">卡密状态</span>
           <select
@@ -4313,6 +4464,28 @@ function RedeemCodeActionPanel({
             onChange={(event) => onKeywordChange(event.target.value)}
           />
         </label>
+        <label className="flex min-w-36 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">每页条数</span>
+          <select
+            aria-label="卡密每页条数"
+            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+            value={`${pageSize}`}
+            onChange={(event) => onPageSizeChange(event.target.value)}
+          >
+            {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
+              <option key={optionPageSize} value={optionPageSize}>
+                {optionPageSize}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-9 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+          onClick={() => onSortChange("createdAt")}
+        >
+          创建时间排序
+        </button>
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-12">
@@ -4468,56 +4641,6 @@ function RedeemCodeActionPanel({
   );
 }
 
-function SystemOpsPurchaseGuidanceContactConfig() {
-  const contactConfig = LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG;
-
-  return (
-    <section
-      className="border-border bg-surface rounded-md border p-4 shadow-sm"
-      data-testid="system-ops-purchase-guidance-contact-config"
-    >
-      <div className="flex items-start gap-3">
-        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
-          <Ticket className="size-4" aria-hidden="true" />
-        </div>
-        <div className="min-w-0 space-y-3">
-          <div className="space-y-1">
-            <p className="text-brand-primary text-xs font-medium">
-              购买联系配置
-            </p>
-            <h2 className="text-text-primary text-base font-semibold">
-              {contactConfig.title}
-            </h2>
-            <p className="text-text-secondary text-sm leading-6">
-              {contactConfig.summary}
-            </p>
-          </div>
-          <div className="grid gap-2 md:grid-cols-2">
-            {contactConfig.channels.map((channel) => (
-              <div
-                key={`${channel.channelType}-${channel.value}`}
-                className="bg-background ring-border rounded-md p-3 text-sm ring-1"
-              >
-                <p className="text-text-primary font-medium">{channel.label}</p>
-                <p className="text-brand-primary font-medium">
-                  {channel.value}
-                </p>
-                <p className="text-text-secondary mt-1">
-                  {channel.serviceHours}
-                </p>
-                <p className="text-text-muted mt-1">{channel.usage}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-text-muted text-xs leading-5">
-            {contactConfig.safetyNotice}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function useAdminOrgAuthData() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminOrgAuthData>({
@@ -4617,6 +4740,7 @@ function useAdminOrgAuthData() {
 function useAdminRedeemCodeData(listQuery: string) {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminRedeemCodeData>({
+    pagination: null,
     redeemCodes: [],
   });
 
@@ -4665,7 +4789,10 @@ function useAdminRedeemCodeData(listQuery: string) {
           return;
         }
 
-        setData(redeemCodeResponse.data);
+        setData({
+          pagination: redeemCodeResponse.pagination ?? null,
+          redeemCodes: redeemCodeResponse.data.redeemCodes,
+        });
         setLoadState(
           redeemCodeResponse.data.redeemCodes.length === 0 ? "empty" : "ready",
         );
@@ -5561,13 +5688,26 @@ export function AdminRedeemCodePage() {
     RedeemCodeStatus | "all"
   >("all");
   const [redeemCodeKeyword, setRedeemCodeKeyword] = useState("");
+  const {
+    handleFilterChange,
+    handlePageChange,
+    handlePageSizeChange,
+    handleSortChange,
+    query,
+  } = useAdminListInteraction({
+    initialQuery: {
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    },
+  });
   const redeemCodeListQuery = useMemo(
     () =>
       createRedeemCodeListQuery({
         keyword: redeemCodeKeyword,
+        query,
         status: redeemCodeStatus,
       }),
-    [redeemCodeKeyword, redeemCodeStatus],
+    [query, redeemCodeKeyword, redeemCodeStatus],
   );
   const { data, loadState, setData, setLoadState } =
     useAdminRedeemCodeData(redeemCodeListQuery);
@@ -5593,6 +5733,31 @@ export function AdminRedeemCodePage() {
       (!redeemCode.canViewPlainText || redeemCode.codePlainText === null),
   );
   const isRedeemCodeListEmpty = loadState === "empty";
+  const redeemCodePagination =
+    data.pagination ??
+    createFallbackRedeemCodePagination(query, data.redeemCodes.length);
+  const redeemCodePageCount = Math.max(
+    1,
+    Math.ceil(redeemCodePagination.total / redeemCodePagination.pageSize),
+  );
+  const visibleRedeemCodeStart =
+    redeemCodePagination.total === 0
+      ? 0
+      : (redeemCodePagination.page - 1) * redeemCodePagination.pageSize + 1;
+  const visibleRedeemCodeEnd =
+    redeemCodePagination.total === 0
+      ? 0
+      : visibleRedeemCodeStart + data.redeemCodes.length - 1;
+
+  function handleRedeemCodeStatusChange(value: RedeemCodeStatus | "all") {
+    setRedeemCodeStatus(value);
+    handleFilterChange("redeemCodeStatus");
+  }
+
+  function handleRedeemCodeKeywordChange(value: string) {
+    setRedeemCodeKeyword(value);
+    handleFilterChange("redeemCodeKeyword");
+  }
 
   function handleCopyRedeemCodePlainText(value: string) {
     copyTextToClipboard(value);
@@ -5670,6 +5835,13 @@ export function AdminRedeemCodePage() {
     setGeneratedRedeemCodeSummary(createResponse.data.generation);
     setGeneratedRedeemCodes(generatedRedeemCodes);
     setData((currentData) => ({
+      pagination:
+        currentData.pagination === null
+          ? null
+          : {
+              ...currentData.pagination,
+              total: currentData.pagination.total + generatedRedeemCodes.length,
+            },
       redeemCodes: [
         ...generatedRedeemCodes.map((redeemCode) => ({
           canViewPlainText: true,
@@ -5723,29 +5895,23 @@ export function AdminRedeemCodePage() {
         redeemCodes={data.redeemCodes}
       />
 
-      <SystemOpsRequiredRoleEntry
-        actionHref="#redeem-code-generate-panel"
-        actionLabel="生成卡密"
-        description="卡密生成入口在本页筛选区旁，点击后定位到内联操作；生成前必须显式选择类型并经过二次确认。"
-        testId="system-ops-redeem-code-generate-entry"
-        title="生成卡密入口"
-      />
-
       <RedeemCodeActionPanel
         disabled={false}
         formState={redeemCodeGenerationFormState}
         id="redeem-code-generate-panel"
         keyword={redeemCodeKeyword}
+        pageSize={query.pageSize}
+        sortOrder={query.sortOrder}
         status={redeemCodeStatus}
         onFormChange={setRedeemCodeGenerationFormState}
         onGenerateRedeemCode={(input) =>
           setConfirmationState({ kind: "generateRedeemCode", input })
         }
-        onKeywordChange={setRedeemCodeKeyword}
-        onStatusChange={setRedeemCodeStatus}
+        onKeywordChange={handleRedeemCodeKeywordChange}
+        onPageSizeChange={handlePageSizeChange}
+        onSortChange={handleSortChange}
+        onStatusChange={handleRedeemCodeStatusChange}
       />
-
-      <SystemOpsPurchaseGuidanceContactConfig />
 
       {generatedRedeemCodeSummary === null ? null : (
         <RedeemCodeDistributionWindow
@@ -5791,8 +5957,13 @@ export function AdminRedeemCodePage() {
         />
       ) : (
         <RedeemCodeList
+          pageCount={redeemCodePageCount}
+          pagination={redeemCodePagination}
           redeemCodes={data.redeemCodes}
+          visibleEnd={visibleRedeemCodeEnd}
+          visibleStart={visibleRedeemCodeStart}
           onCopyPlainText={handleCopyRedeemCodePlainText}
+          onPageChange={handlePageChange}
           onViewDetail={(publicId) => {
             void handleViewRedeemCodeDetail(publicId);
           }}

@@ -206,6 +206,24 @@ const redeemCodePayload = {
   },
 };
 
+function createRedeemCodeListPayload(path: string) {
+  const searchParams = new URLSearchParams(path.split("?")[1] ?? "");
+  const page = Number(searchParams.get("page"));
+  const pageSize = Number(searchParams.get("pageSize"));
+  const sortOrder = searchParams.get("sortOrder");
+
+  return {
+    ...redeemCodePayload,
+    pagination: {
+      page: Number.isInteger(page) && page > 0 ? page : 1,
+      pageSize: Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 20,
+      sortBy: searchParams.get("sortBy") ?? "createdAt",
+      sortOrder: sortOrder === "asc" ? "asc" : "desc",
+      total: 4,
+    },
+  };
+}
+
 const redeemCodeDetailPayload = {
   code: 0,
   message: "ok",
@@ -306,19 +324,12 @@ function mockSystemOpsFetch() {
         });
       }
 
-      if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
-        return createJsonResponse(redeemCodePayload);
+      if (path.startsWith("/api/v1/redeem-codes?")) {
+        return createJsonResponse(createRedeemCodeListPayload(path));
       }
 
       if (path === "/api/v1/redeem-codes/redeem-code-public-001") {
         return createJsonResponse(redeemCodeDetailPayload);
-      }
-
-      if (
-        path ===
-        "/api/v1/redeem-codes?page=1&pageSize=20&status=unused&keyword=RC-2026"
-      ) {
-        return createJsonResponse(redeemCodePayload);
       }
 
       if (path === "/api/v1/org-auths") {
@@ -962,20 +973,19 @@ describe("admin user organization authorization ops baseline", () => {
     );
   });
 
-  it("makes required system ops staging entries discoverable from org_auth and redeem_code pages", async () => {
+  it("keeps org_auth staging entry discoverable while focusing redeem code generation inline", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockSystemOpsFetch();
 
     render(createElement(AdminRedeemCodePage));
 
-    const redeemCodeEntry = await screen.findByTestId(
-      "system-ops-redeem-code-generate-entry",
-    );
     expect(
-      within(redeemCodeEntry).getByRole("link", { name: "生成卡密" }),
-    ).toHaveAttribute("href", "#redeem-code-generate-panel");
-    expect(redeemCodeEntry).toHaveTextContent("系统运营本地验收");
-    expect(redeemCodeEntry).not.toHaveTextContent("staging 必验");
+      await screen.findByRole("heading", { name: "卡密管理" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("system-ops-redeem-code-generate-entry"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("redeem-code-generate-button")).toBeVisible();
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -1012,7 +1022,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminRedeemCodePage));
 
-    await screen.findByTestId("system-ops-redeem-code-generate-entry");
+    await screen.findByRole("table", { name: "卡密列表" });
     expect(document.body).not.toHaveTextContent(
       /publicId|org_auth|runtime API|contact_config/,
     );
@@ -1741,9 +1751,30 @@ describe("admin user organization authorization ops baseline", () => {
     });
 
     expect(await screen.findByText("RC-2026-LIST-PLAIN")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/v1/redeem-codes?page=1&pageSize=20&status=unused&keyword=RC-2026",
-      expect.anything(),
+    expect(screen.getByRole("table", { name: "卡密列表" })).toBeInTheDocument();
+    expect(screen.getByText("显示 1-1 / 共 4 个卡密")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/redeem-codes?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc&status=unused&keyword=RC-2026",
+        expect.anything(),
+      ),
+    );
+
+    fireEvent.change(screen.getByLabelText("卡密每页条数"), {
+      target: { value: "50" },
+    });
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/redeem-codes?page=1&pageSize=50&sortBy=createdAt&sortOrder=desc&status=unused&keyword=RC-2026",
+        expect.anything(),
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "创建时间排序" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/redeem-codes?page=1&pageSize=50&sortBy=createdAt&sortOrder=asc&status=unused&keyword=RC-2026",
+        expect.anything(),
+      ),
     );
 
     fireEvent.click(screen.getByTestId("redeem-code-generation-mode-batch"));
