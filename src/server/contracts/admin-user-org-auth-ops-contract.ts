@@ -176,6 +176,31 @@ export type OrganizationTreeNodeDto = {
   authSummary: string | null;
 };
 
+export type OrganizationTreeQuery = {
+  page: number;
+  pageSize: AdminAuthOperationPageSize;
+  parentOrganizationPublicId: string | null;
+  keyword: string | null;
+  status: UserStatus | "all";
+  orgTier: OrgTier | "all";
+  sortOrder: AdminAuthOperationSortOrder;
+};
+
+export type OrganizationTreePathItemDto = {
+  publicId: string;
+  name: string;
+  orgTier: OrgTier;
+};
+
+export type OrganizationTreeQueryNodeDto = OrganizationTreeNodeDto & {
+  childCount: number;
+  ancestorPath: OrganizationTreePathItemDto[];
+};
+
+export type OrganizationTreeNodeListDto = {
+  nodes: OrganizationTreeQueryNodeDto[];
+};
+
 export type OrganizationListDto = {
   organizations: OrganizationTreeNodeDto[];
 };

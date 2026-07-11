@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createAdminOrganizationOrgAuthRuntimeRouteHandlers,
@@ -51,6 +51,46 @@ function createSessionService(role: "super_admin" | "content_admin") {
 
 function createRepositories(): AdminOrganizationOrgAuthRuntimeRepositories {
   return {
+    async listOrganizationTreeNodes(query) {
+      return {
+        nodes: [
+          {
+            publicId: "organization-public-station",
+            name: "测试站点",
+            orgTier: "station",
+            parentOrganizationPublicId: "organization-public-district",
+            status: "active",
+            employeeCount: 2,
+            childCount: 0,
+            authSummary: "monopoly / level 3",
+            ancestorPath: [
+              {
+                publicId: "organization-public-province",
+                name: "测试省",
+                orgTier: "province",
+              },
+              {
+                publicId: "organization-public-city",
+                name: "测试地市",
+                orgTier: "city",
+              },
+              {
+                publicId: "organization-public-district",
+                name: "测试县区",
+                orgTier: "district",
+              },
+            ],
+          },
+        ],
+        pagination: {
+          page: query.page,
+          pageSize: query.pageSize,
+          sortBy: "name",
+          sortOrder: query.sortOrder,
+          total: 1,
+        },
+      };
+    },
     async listOrganizations(query) {
       return {
         organizations: [
@@ -254,6 +294,56 @@ describe("phase 8 admin organization org auth runtime", () => {
     expect(combinedPayload).not.toContain("authUserId");
     expect(combinedPayload).not.toContain("password");
     expect(combinedPayload).not.toContain("admin-session-token");
+  });
+
+  it("returns a server-scoped tree query with branch and ancestor-path filters", async () => {
+    const repositories = createRepositories();
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService("super_admin"),
+    });
+    const listOrganizationTreeNodes = vi.spyOn(
+      repositories,
+      "listOrganizationTreeNodes",
+    );
+
+    const response = await handlers.organizationTreeNodes.collection.GET(
+      new Request(
+        "http://localhost/api/v1/organization-tree-nodes?page=2&pageSize=50&parentOrganizationPublicId=organization-public-district&keyword=%E7%AB%99%E7%82%B9&status=active&orgTier=station&sortOrder=asc",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(listOrganizationTreeNodes).toHaveBeenCalledWith({
+      page: 2,
+      pageSize: 50,
+      parentOrganizationPublicId: "organization-public-district",
+      keyword: "站点",
+      status: "active",
+      orgTier: "station",
+      sortOrder: "asc",
+    });
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        nodes: [
+          {
+            name: "测试站点",
+            orgTier: "station",
+            childCount: 0,
+            ancestorPath: [
+              { name: "测试省", orgTier: "province" },
+              { name: "测试地市", orgTier: "city" },
+              { name: "测试县区", orgTier: "district" },
+            ],
+          },
+        ],
+      },
+      pagination: { page: 2, pageSize: 50, total: 1 },
+    });
+    expect(JSON.stringify(payload)).not.toContain('"id"');
   });
 
   it("resolves organization, org_auth, and employee lists from cookie-backed admin sessions", async () => {

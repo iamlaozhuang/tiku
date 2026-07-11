@@ -170,6 +170,113 @@ function mockAdminFetch() {
       return createJsonResponse(adminSessionPayload);
     }
 
+    if (path.startsWith("/api/v1/organization-tree-nodes?")) {
+      const requestUrl = new URL(path, "http://localhost");
+      const parentOrganizationPublicId = requestUrl.searchParams.get(
+        "parentOrganizationPublicId",
+      );
+      const keyword = requestUrl.searchParams.get("keyword");
+      const treeNodes = [
+        {
+          publicId: "organization-public-province",
+          name: "测试省",
+          orgTier: "province",
+          parentOrganizationPublicId: null,
+          status: "active",
+          employeeCount: 8,
+          childCount: 1,
+          authSummary: null,
+          ancestorPath: [],
+        },
+        {
+          publicId: "organization-public-city",
+          name: "测试地市",
+          orgTier: "city",
+          parentOrganizationPublicId: "organization-public-province",
+          status: "active",
+          employeeCount: 6,
+          childCount: 1,
+          authSummary: null,
+          ancestorPath: [
+            {
+              publicId: "organization-public-province",
+              name: "测试省",
+              orgTier: "province",
+            },
+          ],
+        },
+        {
+          publicId: "organization-public-district",
+          name: "测试县区",
+          orgTier: "district",
+          parentOrganizationPublicId: "organization-public-city",
+          status: "active",
+          employeeCount: 4,
+          childCount: 1,
+          authSummary: "专卖 3级",
+          ancestorPath: [
+            {
+              publicId: "organization-public-province",
+              name: "测试省",
+              orgTier: "province",
+            },
+            {
+              publicId: "organization-public-city",
+              name: "测试地市",
+              orgTier: "city",
+            },
+          ],
+        },
+        {
+          publicId: "organization-public-station",
+          name: "测试站点",
+          orgTier: "station",
+          parentOrganizationPublicId: "organization-public-district",
+          status: "active",
+          employeeCount: 2,
+          childCount: 0,
+          authSummary: "专卖 3级",
+          ancestorPath: [
+            {
+              publicId: "organization-public-province",
+              name: "测试省",
+              orgTier: "province",
+            },
+            {
+              publicId: "organization-public-city",
+              name: "测试地市",
+              orgTier: "city",
+            },
+            {
+              publicId: "organization-public-district",
+              name: "测试县区",
+              orgTier: "district",
+            },
+          ],
+        },
+      ];
+      const nodes =
+        keyword === "测试站点"
+          ? [treeNodes[3]]
+          : treeNodes.filter(
+              (node) =>
+                node.parentOrganizationPublicId === parentOrganizationPublicId,
+            );
+
+      return createJsonResponse({
+        code: 0,
+        message: "ok",
+        data: { nodes },
+        pagination: {
+          page: 1,
+          pageSize: 50,
+          total: nodes.length,
+          sortBy: "name",
+          sortOrder: "asc",
+        },
+      });
+    }
+
     if (path === "/api/v1/organizations?page=1&pageSize=20") {
       return createJsonResponse(organizationPayload);
     }
@@ -242,18 +349,18 @@ describe("AdminOrgAuthPage", () => {
       await screen.findByRole("heading", { name: "企业管理" }),
     ).toBeInTheDocument();
 
-    const organization = screen.getByTestId(
-      "admin-organization-organization-public-001",
+    const organization = await screen.findByTestId(
+      "admin-organization-organization-public-province",
     );
     const orgAuth = screen.getByTestId("admin-org-auth-org-auth-public-001");
     const employee = screen.getByTestId("admin-employee-employee-public-001");
 
     expect(organization).toHaveAttribute(
       "data-public-id",
-      "organization-public-001",
+      "organization-public-province",
     );
     expect(organization).not.toHaveAttribute("data-id");
-    expect(within(organization).getByText("杭州烟草")).toBeInTheDocument();
+    expect(within(organization).getByText("测试省")).toBeInTheDocument();
     expect(within(orgAuth).getByText("专卖 3级")).toBeInTheDocument();
     expect(within(orgAuth).getByText("42 / 100")).toBeInTheDocument();
     expect(within(orgAuth).getByText("高级版")).toBeInTheDocument();
@@ -290,6 +397,10 @@ describe("AdminOrgAuthPage", () => {
     expect(viewTabs).toHaveTextContent("企业授权");
     expect(viewTabs).toHaveTextContent("员工运营");
     expect(
+      screen.queryByTestId("organization-tree-management-form"),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
+    expect(
       screen.getByTestId("organization-tree-management-form"),
     ).toBeVisible();
     expect(screen.getByTestId("org-auth-create-form")).not.toBeVisible();
@@ -308,28 +419,74 @@ describe("AdminOrgAuthPage", () => {
     expect(window.location.search).toContain("view=employees");
   });
 
-  it("shows organization detail management from the existing organization data", async () => {
+  it("shows organization node detail from the branch-loaded tree", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockAdminFetch();
 
     render(createElement(AdminOrgAuthPage));
 
     const organization = await screen.findByTestId(
-      "admin-organization-organization-public-001",
+      "admin-organization-organization-public-province",
     );
     fireEvent.click(within(organization).getByRole("button", { name: "详情" }));
 
     const organizationDetail = screen.getByTestId(
-      "admin-organization-detail-organization-public-001",
+      "admin-organization-detail-organization-public-province",
     );
 
-    expect(organizationDetail).toHaveTextContent("组织详情");
-    expect(organizationDetail).toHaveTextContent("员工 42");
-    expect(organizationDetail).toHaveTextContent("关联授权 1");
-    expect(organizationDetail).toHaveTextContent("杭州烟草企业授权");
+    expect(organizationDetail).toHaveTextContent("当前组织");
+    expect(organizationDetail).toHaveTextContent("测试省");
+    expect(organizationDetail).toHaveTextContent("直属员工");
+    expect(organizationDetail).toHaveTextContent("直属下级");
+    expect(organizationDetail).toHaveTextContent("授权摘要");
     expect(organizationDetail).not.toHaveTextContent("101");
     expect(organizationDetail).not.toHaveTextContent("201");
     expect(organizationDetail).not.toHaveTextContent("301");
+  });
+
+  it("loads the four-level organization tree by branch and shows full search ancestry", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    const tree = await screen.findByRole("tree", { name: "企业组织树" });
+    const provinceNode = within(tree).getByRole("treeitem", {
+      name: /测试省/u,
+    });
+    expect(provinceNode).toHaveClass("text-left");
+
+    fireEvent.click(within(provinceNode).getByRole("button", { name: "展开" }));
+    const cityNode = await within(tree).findByRole("treeitem", {
+      name: /测试地市/u,
+    });
+    fireEvent.click(within(cityNode).getByRole("button", { name: "展开" }));
+    const districtNode = await within(tree).findByRole("treeitem", {
+      name: /测试县区/u,
+    });
+    fireEvent.click(within(districtNode).getByRole("button", { name: "展开" }));
+    expect(
+      await within(tree).findByRole("treeitem", { name: /测试站点/u }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("搜索企业组织"), {
+      target: { value: "测试站点" },
+    });
+    expect(
+      await screen.findAllByText("测试省 / 测试地市 / 测试县区 / 测试站点"),
+    ).toHaveLength(2);
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes(
+          "parentOrganizationPublicId=organization-public-district",
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes("keyword=%E6%B5%8B%E8%AF%95%E7%AB%99%E7%82%B9"),
+      ),
+    ).toBe(true);
   });
 
   it("renders first-create empty data and error states from standard response envelopes", async () => {
@@ -361,6 +518,10 @@ describe("AdminOrgAuthPage", () => {
       await screen.findByRole("heading", { name: "企业管理" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("暂无企业管理数据")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("organization-tree-management-form"),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
     expect(
       screen.getByTestId("organization-tree-management-form"),
     ).toBeVisible();

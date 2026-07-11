@@ -10,6 +10,7 @@ import {
   gt,
   ilike,
   inArray,
+  isNull,
   lt,
   or,
   sql,
@@ -29,6 +30,9 @@ import type {
   EmployeeUnbindResultDto,
   EmployeeListDto,
   OrganizationListDto,
+  OrganizationTreeNodeListDto,
+  OrganizationTreePathItemDto,
+  OrganizationTreeQuery,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
 import type {
@@ -65,6 +69,9 @@ export type AdminOrganizationOrgAuthPage<TData> = TData & {
 };
 
 export type AdminOrganizationOrgAuthRuntimeRepositories = {
+  listOrganizationTreeNodes?(
+    query: OrganizationTreeQuery,
+  ): Promise<AdminOrganizationOrgAuthPage<OrganizationTreeNodeListDto>>;
   listOrganizations(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<OrganizationListDto>>;
@@ -195,6 +202,25 @@ type OrganizationMutationRow = {
   updated_at: Date;
 };
 
+type OrganizationTreeRow = {
+  id: number;
+  public_id: string;
+  name: string;
+  org_tier: OrganizationDto["orgTier"];
+  parent_organization_id: number | null;
+  status: OrganizationDto["status"];
+};
+
+const childOrganizationTierByParentTier = {
+  city: "district",
+  district: "station",
+  province: "city",
+  station: null,
+} satisfies Record<
+  OrganizationDto["orgTier"],
+  OrganizationDto["orgTier"] | null
+>;
+
 type OrgAuthEditionEvaluation = {
   edition: AuthorizationEdition;
   effectiveEdition: AuthorizationEdition;
@@ -238,6 +264,19 @@ function createPagination(
   };
 }
 
+function createOrganizationTreePagination(
+  query: OrganizationTreeQuery,
+  total: number,
+): ApiPagination {
+  return {
+    page: query.page,
+    pageSize: query.pageSize,
+    sortBy: "name",
+    sortOrder: query.sortOrder,
+    total,
+  };
+}
+
 function selectOrganizationMutationColumns() {
   return {
     id: organization.id,
@@ -262,6 +301,114 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
   );
 
   return {
+    async listOrganizationTreeNodes(query) {
+      const database = getDatabase();
+      const parentOrganization =
+        query.parentOrganizationPublicId === null
+          ? null
+          : await findOrganizationIdentityByPublicId(
+              database,
+              query.parentOrganizationPublicId,
+            );
+
+      if (parentOrganization === undefined) {
+        return {
+          nodes: [],
+          pagination: createOrganizationTreePagination(query, 0),
+        };
+      }
+
+      const conditions: SQL[] = [];
+
+      const isFilteredSearch =
+        query.keyword !== null ||
+        query.status !== "all" ||
+        query.orgTier !== "all";
+
+      if (!isFilteredSearch) {
+        if (parentOrganization === null) {
+          conditions.push(
+            isNull(organization.parent_organization_id),
+            eq(organization.org_tier, "province"),
+          );
+        } else {
+          const childOrgTier =
+            childOrganizationTierByParentTier[parentOrganization.orgTier];
+
+          if (childOrgTier === null) {
+            return {
+              nodes: [],
+              pagination: createOrganizationTreePagination(query, 0),
+            };
+          }
+
+          conditions.push(
+            eq(organization.parent_organization_id, parentOrganization.id),
+            eq(organization.org_tier, childOrgTier),
+          );
+        }
+      } else if (query.keyword !== null) {
+        conditions.push(ilike(organization.name, `%${query.keyword}%`));
+      }
+
+      if (query.status !== "all") {
+        conditions.push(eq(organization.status, query.status));
+      }
+
+      if (query.orgTier !== "all") {
+        conditions.push(eq(organization.org_tier, query.orgTier));
+      }
+
+      const sortDirection = query.sortOrder === "asc" ? asc : desc;
+      const rows = await database
+        .select({
+          id: organization.id,
+          public_id: organization.public_id,
+          name: organization.name,
+          org_tier: organization.org_tier,
+          parent_organization_id: organization.parent_organization_id,
+          status: organization.status,
+        })
+        .from(organization)
+        .where(and(...conditions))
+        .orderBy(
+          sortDirection(organization.name),
+          sortDirection(organization.id),
+        )
+        .limit(query.pageSize)
+        .offset((query.page - 1) * query.pageSize);
+      const [totalRow] = await database
+        .select({ value: count() })
+        .from(organization)
+        .where(and(...conditions));
+      const organizationIds = rows.map((row) => row.id);
+      const [employeeCounts, authSummaries, childCounts, ancestorPaths] =
+        await Promise.all([
+          listEmployeeCounts(database, organizationIds),
+          listOrganizationAuthSummaries(database, organizationIds),
+          listChildOrganizationCounts(database, organizationIds),
+          listOrganizationAncestorPaths(database, rows),
+        ]);
+
+      return {
+        nodes: rows.map((row) => ({
+          publicId: row.public_id,
+          name: row.name,
+          orgTier: row.org_tier,
+          parentOrganizationPublicId:
+            ancestorPaths.get(row.id)?.at(-1)?.publicId ?? null,
+          status: row.status,
+          employeeCount: employeeCounts.get(row.id) ?? 0,
+          childCount: childCounts.get(row.id) ?? 0,
+          authSummary: authSummaries.get(row.id) ?? null,
+          ancestorPath: ancestorPaths.get(row.id) ?? [],
+        })),
+        pagination: createOrganizationTreePagination(
+          query,
+          totalRow?.value ?? 0,
+        ),
+      };
+    },
     async listOrganizations(query) {
       const database = getDatabase();
       const conditions = createOrganizationConditions(query);
@@ -1725,6 +1872,130 @@ function createEmployeeOrderBy(query: AdminAuthOperationListQuery): SQL {
   return query.sortOrder === "asc"
     ? asc(user.updated_at)
     : desc(user.updated_at);
+}
+
+async function findOrganizationIdentityByPublicId(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  publicId: string,
+): Promise<{ id: number; orgTier: OrganizationDto["orgTier"] } | undefined> {
+  const [row] = await database
+    .select({ id: organization.id, orgTier: organization.org_tier })
+    .from(organization)
+    .where(eq(organization.public_id, publicId))
+    .limit(1);
+
+  return row;
+}
+
+async function listChildOrganizationCounts(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<Map<number, number>> {
+  if (organizationIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await database
+    .select({
+      parent_organization_id: organization.parent_organization_id,
+      value: count(),
+    })
+    .from(organization)
+    .where(inArray(organization.parent_organization_id, organizationIds))
+    .groupBy(organization.parent_organization_id);
+
+  return new Map(
+    rows.flatMap((row) =>
+      row.parent_organization_id === null
+        ? []
+        : [[row.parent_organization_id, row.value] as const],
+    ),
+  );
+}
+
+async function listOrganizationAncestorPaths(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  rows: OrganizationTreeRow[],
+): Promise<Map<number, OrganizationTreePathItemDto[]>> {
+  const ancestorRowsById = new Map<number, OrganizationTreeRow>();
+  let pendingAncestorIds = [
+    ...new Set(
+      rows.flatMap((row) =>
+        row.parent_organization_id === null ? [] : [row.parent_organization_id],
+      ),
+    ),
+  ];
+
+  for (let depth = 0; depth < 3 && pendingAncestorIds.length > 0; depth += 1) {
+    const ancestorRows = await database
+      .select({
+        id: organization.id,
+        public_id: organization.public_id,
+        name: organization.name,
+        org_tier: organization.org_tier,
+        parent_organization_id: organization.parent_organization_id,
+        status: organization.status,
+      })
+      .from(organization)
+      .where(inArray(organization.id, pendingAncestorIds));
+
+    for (const ancestorRow of ancestorRows) {
+      ancestorRowsById.set(ancestorRow.id, ancestorRow);
+    }
+
+    pendingAncestorIds = [
+      ...new Set(
+        ancestorRows.flatMap((ancestorRow) => {
+          const parentId = ancestorRow.parent_organization_id;
+
+          return parentId === null || ancestorRowsById.has(parentId)
+            ? []
+            : [parentId];
+        }),
+      ),
+    ];
+  }
+
+  return buildOrganizationAncestorPaths(rows, [...ancestorRowsById.values()]);
+}
+
+export function buildOrganizationAncestorPaths(
+  rows: OrganizationTreeRow[],
+  ancestorRows: OrganizationTreeRow[],
+): Map<number, OrganizationTreePathItemDto[]> {
+  const ancestorRowsById = new Map(
+    ancestorRows.map((ancestorRow) => [ancestorRow.id, ancestorRow]),
+  );
+
+  return new Map(
+    rows.map((row) => {
+      const reversePath: OrganizationTreePathItemDto[] = [];
+      const visitedIds = new Set<number>();
+      let parentId = row.parent_organization_id;
+
+      while (
+        parentId !== null &&
+        reversePath.length < 3 &&
+        !visitedIds.has(parentId)
+      ) {
+        visitedIds.add(parentId);
+        const ancestorRow = ancestorRowsById.get(parentId);
+
+        if (ancestorRow === undefined) {
+          break;
+        }
+
+        reversePath.push({
+          publicId: ancestorRow.public_id,
+          name: ancestorRow.name,
+          orgTier: ancestorRow.org_tier,
+        });
+        parentId = ancestorRow.parent_organization_id;
+      }
+
+      return [row.id, reversePath.reverse()];
+    }),
+  );
 }
 
 async function listParentOrganizationPublicIds(

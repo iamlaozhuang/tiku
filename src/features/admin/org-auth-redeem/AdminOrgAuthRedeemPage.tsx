@@ -6,6 +6,8 @@ import {
   Ban,
   Building2,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Clock3,
   Copy,
   Download,
@@ -15,13 +17,15 @@ import {
   MoveRight,
   Pencil,
   PlusCircle,
+  Search,
   ShieldCheck,
   Ticket,
   Upload,
   UserMinus,
   UsersRound,
+  X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
   ApiPagination,
@@ -33,6 +37,8 @@ import type {
   EmployeeTransferResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
+  OrganizationTreeNodeListDto,
+  OrganizationTreeQueryNodeDto,
   RedeemCodeDetailDto,
   RedeemCodeDetailResultDto,
   RedeemCodeGenerationDto,
@@ -75,6 +81,20 @@ type AdminOrgAuthData = {
   organizations: OrganizationListDto["organizations"];
   orgAuths: OrgAuthListDto["orgAuths"];
   employees: EmployeeListDto["employees"];
+};
+
+type OrganizationTreeLoadState = "loading" | "ready" | "error";
+
+type OrganizationTreeBranch = {
+  page: number;
+  pageSize: number;
+  publicIds: string[];
+  total: number;
+};
+
+type OrganizationTreeData = {
+  branches: Record<string, OrganizationTreeBranch>;
+  nodesByPublicId: Record<string, OrganizationTreeQueryNodeDto>;
 };
 
 const opsOrganizationManagementViewIds = [
@@ -261,6 +281,8 @@ type GeneratedRedeemCodeDistribution = RedeemCodeGenerationDto["redeemCodes"];
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const COOKIE_BACKED_SESSION_TOKEN = "__cookie_backed_session__";
 const DEFAULT_LIST_QUERY = "page=1&pageSize=20";
+const ORGANIZATION_TREE_ROOT_KEY = "__root__";
+const ORGANIZATION_TREE_PAGE_SIZE = 50;
 
 const professionLabels = {
   logistics: "物流",
@@ -282,6 +304,13 @@ const orgTierLabels = {
   province: "省",
   station: "站点",
 } satisfies Record<OrgTier, string>;
+
+const childOrgTierByParentTier = {
+  city: "district",
+  district: "station",
+  province: "city",
+  station: null,
+} satisfies Record<OrgTier, OrgTier | null>;
 
 const authScopeTypeLabels = {
   current_and_descendants: "本级及下级",
@@ -634,29 +663,6 @@ function createOrganizationDepthMap(
       readOrganizationDepth(organization.publicId, new Set()),
     ]),
   );
-}
-
-function findOrganizationDisplayName(
-  organizations: AdminOrgAuthData["organizations"],
-  publicId: string | null,
-): string {
-  if (publicId === null) {
-    return "无";
-  }
-
-  return (
-    organizations.find((organization) => organization.publicId === publicId)
-      ?.name ?? "父级未同步"
-  );
-}
-
-function countChildOrganizations(
-  organizations: AdminOrgAuthData["organizations"],
-  publicId: string,
-): number {
-  return organizations.filter(
-    (organization) => organization.parentOrganizationPublicId === publicId,
-  ).length;
 }
 
 function countExpiringOrgAuths(orgAuths: AdminOrgAuthData["orgAuths"]): number {
@@ -2134,321 +2140,455 @@ function OrgAuthAtomicScopePreview({
   );
 }
 
-function OrganizationList({
-  onDisableOrganization,
-  onEditOrganization,
-  onEnableOrganization,
-  onViewOrganizationDetail,
-  organizations,
+function OrganizationTreeBranch({
+  data,
+  depth,
+  expandedPublicIds,
+  parentPublicId,
+  selectedPublicId,
+  onLoadMore,
+  onSelect,
+  onToggleNode,
 }: {
-  onDisableOrganization: (publicId: string) => void;
-  onEditOrganization: (
-    organization: AdminOrgAuthData["organizations"][number],
-  ) => void;
-  onEnableOrganization: (publicId: string) => void;
-  onViewOrganizationDetail: (publicId: string) => void;
-  organizations: AdminOrgAuthData["organizations"];
+  data: OrganizationTreeData;
+  depth: number;
+  expandedPublicIds: Set<string>;
+  parentPublicId: string | null;
+  selectedPublicId: string | null;
+  onLoadMore: (publicId: string | null) => void;
+  onSelect: (publicId: string) => void;
+  onToggleNode: (publicId: string) => void;
 }) {
-  const organizationDepthByPublicId = createOrganizationDepthMap(organizations);
+  const branchKey = parentPublicId ?? ORGANIZATION_TREE_ROOT_KEY;
+  const branch = data.branches[branchKey];
+  const nodes = (branch?.publicIds ?? []).flatMap((publicId) => {
+    const node = data.nodesByPublicId[publicId];
+
+    return node === undefined ? [] : [node];
+  });
 
   return (
-    <AdminPanel title="企业组织">
-      {organizations.map((organization) => {
-        const organizationDepth =
-          organizationDepthByPublicId.get(organization.publicId) ?? 0;
-        const childOrganizationCount = countChildOrganizations(
-          organizations,
-          organization.publicId,
-        );
-        const parentOrganizationName = findOrganizationDisplayName(
-          organizations,
-          organization.parentOrganizationPublicId,
-        );
+    <div role={depth === 0 ? undefined : "group"}>
+      {nodes.map((node) => {
+        const isExpanded = expandedPublicIds.has(node.publicId);
+        const isSelected = selectedPublicId === node.publicId;
 
         return (
-          <AdminDataRow
-            key={organization.publicId}
-            publicId={organization.publicId}
-            testId={`admin-organization-${organization.publicId}`}
-          >
+          <div key={node.publicId}>
             <div
-              className={`min-w-0 space-y-1 ${getOrganizationDepthPaddingClassName(organizationDepth)}`}
+              aria-expanded={node.childCount > 0 ? isExpanded : undefined}
+              aria-selected={isSelected}
+              className={`text-left ${getOrganizationDepthPaddingClassName(depth)}`}
+              data-public-id={node.publicId}
+              data-testid={`admin-organization-${node.publicId}`}
+              role="treeitem"
             >
-              <p className="text-text-primary text-sm font-medium">
-                {organization.name}
-              </p>
-              <p className="text-text-secondary text-xs">
-                {orgTierLabels[organization.orgTier]} /{" "}
-                {organization.employeeCount} 名员工 / 下级{" "}
-                {childOrganizationCount}
-              </p>
-              <p className="text-text-muted text-xs">
-                父级 {parentOrganizationName} /{" "}
-                {organization.authSummary ??
-                  "暂无直接授权摘要，需核对上级或指定范围继承"}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-                {organization.status === "active" ? "启用" : "停用"}
-              </span>
-              <button
-                type="button"
-                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                data-testid={`organization-detail-${organization.publicId}`}
-                onClick={() => onViewOrganizationDetail(organization.publicId)}
+              <div
+                className={`border-border flex min-h-12 items-center gap-2 border-b px-2 py-2 ${
+                  isSelected ? "bg-secondary" : "hover:bg-muted/60"
+                }`}
               >
-                <Eye className="size-3.5" aria-hidden="true" />
-                详情
-              </button>
-              <button
-                type="button"
-                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                data-testid={`organization-edit-${organization.publicId}`}
-                onClick={() => onEditOrganization(organization)}
-              >
-                <Pencil className="size-3.5" aria-hidden="true" />
-                编辑
-              </button>
-              {organization.status === "active" ? (
+                {node.childCount > 0 ? (
+                  <button
+                    aria-label={isExpanded ? "收起" : "展开"}
+                    className="text-text-secondary hover:text-text-primary inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-transform active:scale-[0.98]"
+                    type="button"
+                    onClick={() => onToggleNode(node.publicId)}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="size-4" aria-hidden="true" />
+                    ) : (
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    )}
+                  </button>
+                ) : (
+                  <span className="size-7 shrink-0" aria-hidden="true" />
+                )}
                 <button
+                  aria-label={`选择 ${node.name}`}
+                  className="min-w-0 flex-1 text-left transition-transform active:scale-[0.99]"
                   type="button"
-                  className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                  data-testid={`organization-disable-${organization.publicId}`}
-                  onClick={() => onDisableOrganization(organization.publicId)}
+                  onClick={() => onSelect(node.publicId)}
                 >
-                  <Ban className="size-3.5" aria-hidden="true" />
-                  停用
+                  <span className="text-text-primary block truncate text-sm font-medium">
+                    {node.name}
+                  </span>
+                  <span className="text-text-muted mt-0.5 block text-xs">
+                    {orgTierLabels[node.orgTier]} /{" "}
+                    {node.status === "active" ? "启用" : "停用"} / 直属员工{" "}
+                    {node.employeeCount}
+                  </span>
                 </button>
-              ) : (
                 <button
+                  aria-label="详情"
+                  className="border-border bg-background hover:bg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md border transition-transform active:scale-[0.98]"
                   type="button"
-                  className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                  data-testid={`organization-enable-${organization.publicId}`}
-                  onClick={() => onEnableOrganization(organization.publicId)}
+                  onClick={() => onSelect(node.publicId)}
                 >
-                  <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                  启用
+                  <Eye className="size-4" aria-hidden="true" />
                 </button>
-              )}
+              </div>
             </div>
-          </AdminDataRow>
+            {isExpanded ? (
+              <OrganizationTreeBranch
+                data={data}
+                depth={depth + 1}
+                expandedPublicIds={expandedPublicIds}
+                parentPublicId={node.publicId}
+                selectedPublicId={selectedPublicId}
+                onLoadMore={onLoadMore}
+                onSelect={onSelect}
+                onToggleNode={onToggleNode}
+              />
+            ) : null}
+          </div>
         );
       })}
-    </AdminPanel>
+      {branch !== undefined && branch.publicIds.length < branch.total ? (
+        <button
+          className="text-brand-primary hover:text-brand-primary/80 mt-2 ml-9 text-sm font-medium transition-transform active:scale-[0.98]"
+          type="button"
+          onClick={() => onLoadMore(parentPublicId)}
+        >
+          加载更多下级组织
+        </button>
+      ) : null}
+    </div>
   );
 }
 
-function OrganizationDetailPanel({
-  employees,
-  onClose,
-  onDisableOrganization,
-  onEditOrganization,
-  onEnableOrganization,
-  organization,
-  organizations,
-  orgAuths,
+function OrganizationTreeWorkspace({
+  data,
+  expandedPublicIds,
+  isFilteredSearch,
+  keyword,
+  loadState,
+  orgTier,
+  selectedPublicId,
+  status,
+  onCreateChild,
+  onCreateRoot,
+  onDisable,
+  onEdit,
+  onEnable,
+  onKeywordChange,
+  onLoadMore,
+  onOrgTierChange,
+  onResetFilters,
+  onSelect,
+  onStatusChange,
+  onToggleNode,
 }: {
-  employees: AdminOrgAuthData["employees"];
-  onClose: () => void;
-  onDisableOrganization: (publicId: string) => void;
-  onEditOrganization: (
-    organization: AdminOrgAuthData["organizations"][number],
-  ) => void;
-  onEnableOrganization: (publicId: string) => void;
-  organization: AdminOrgAuthData["organizations"][number];
-  organizations: AdminOrgAuthData["organizations"];
-  orgAuths: AdminOrgAuthData["orgAuths"];
+  data: OrganizationTreeData;
+  expandedPublicIds: Set<string>;
+  isFilteredSearch: boolean;
+  keyword: string;
+  loadState: OrganizationTreeLoadState;
+  orgTier: OrgTier | "all";
+  selectedPublicId: string | null;
+  status: UserStatus | "all";
+  onCreateChild: (node: OrganizationTreeQueryNodeDto) => void;
+  onCreateRoot: () => void;
+  onDisable: (publicId: string) => void;
+  onEdit: (node: OrganizationTreeQueryNodeDto) => void;
+  onEnable: (publicId: string) => void;
+  onKeywordChange: (value: string) => void;
+  onLoadMore: (publicId: string | null) => void;
+  onOrgTierChange: (value: OrgTier | "all") => void;
+  onResetFilters: () => void;
+  onSelect: (publicId: string) => void;
+  onStatusChange: (value: UserStatus | "all") => void;
+  onToggleNode: (publicId: string) => void;
 }) {
-  const parentOrganization = organizations.find(
-    (candidateOrganization) =>
-      candidateOrganization.publicId ===
-      organization.parentOrganizationPublicId,
-  );
-  const childOrganizations = organizations.filter(
-    (candidateOrganization) =>
-      candidateOrganization.parentOrganizationPublicId ===
-      organization.publicId,
-  );
-  const relatedOrgAuths = orgAuths.filter(
-    (orgAuth) =>
-      orgAuth.purchaserOrganizationPublicId === organization.publicId ||
-      orgAuth.organizationPublicIds.includes(organization.publicId),
-  );
-  const relatedEmployees = employees.filter(
-    (employee) => employee.organizationPublicId === organization.publicId,
-  );
-  const inheritedAccessSummary =
-    relatedOrgAuths.length === 0
-      ? "暂无直接或指定覆盖授权；员工仅在上级范围覆盖时继承企业授权。"
-      : `关联 ${relatedOrgAuths.length} 条授权；员工可见专业、等级和版本由这些有效企业授权计算。`;
+  const rootBranch = data.branches[ORGANIZATION_TREE_ROOT_KEY];
+  const rootNodes = (rootBranch?.publicIds ?? []).flatMap((publicId) => {
+    const node = data.nodesByPublicId[publicId];
+
+    return node === undefined ? [] : [node];
+  });
+  const selectedNode =
+    selectedPublicId === null
+      ? null
+      : (data.nodesByPublicId[selectedPublicId] ?? null);
 
   return (
-    <section
-      aria-label="组织详情"
-      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
-      data-public-id={organization.publicId}
-      data-testid={`admin-organization-detail-${organization.publicId}`}
-    >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">组织详情</p>
-          <h2 className="text-text-primary text-base font-semibold">
-            {organization.name}
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            基于当前后台列表数据聚合组织、授权和员工摘要；组织树写操作继续由平台运营处理，组织管理员只读查看范围内结构和授权影响。
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-            onClick={() => onEditOrganization(organization)}
-          >
-            <Pencil className="size-3.5" aria-hidden="true" />
-            编辑组织
-          </button>
-          {organization.status === "active" ? (
-            <button
-              type="button"
-              className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-              onClick={() => onDisableOrganization(organization.publicId)}
-            >
-              <Ban className="size-3.5" aria-hidden="true" />
-              停用组织
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-              onClick={() => onEnableOrganization(organization.publicId)}
-            >
-              <CheckCircle2 className="size-3.5" aria-hidden="true" />
-              启用组织
-            </button>
-          )}
-          <button
-            type="button"
-            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-            onClick={onClose}
-          >
-            关闭
-          </button>
-        </div>
-      </div>
-
-      <div className="border-border bg-background mt-4 grid gap-3 rounded-md border p-3 md:grid-cols-3">
-        <div>
-          <p className="text-brand-primary text-xs font-medium">继承授权</p>
-          <p className="text-text-secondary mt-1 text-sm leading-6">
-            {inheritedAccessSummary}
-          </p>
-        </div>
-        <div>
-          <p className="text-brand-primary text-xs font-medium">停用影响</p>
-          <p className="text-text-secondary mt-1 text-sm leading-6">
-            停用企业节点不删除企业、员工或学习记录；重新启用后，如授权仍有效，可恢复企业授权内容使用。
-          </p>
-        </div>
-        <div>
-          <p className="text-brand-primary text-xs font-medium">移动限制</p>
-          <p className="text-text-secondary mt-1 text-sm leading-6">
-            节点移动仅超级管理员通过受控流程处理，当前页面不提供移动企业组织动作。
-          </p>
-        </div>
-      </div>
-
-      <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">企业层级</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {orgTierLabels[organization.orgTier]}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">组织状态</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {organization.status === "active" ? "启用" : "停用"}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">组织员工</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            员工 {organization.employeeCount}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">关联授权</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            关联授权 {relatedOrgAuths.length}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">父级组织</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
-            {parentOrganization?.name ??
-              findOrganizationDisplayName(
-                organizations,
-                organization.parentOrganizationPublicId,
-              )}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">下级组织</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {childOrganizations.length === 0
-              ? "无下级组织"
-              : childOrganizations.map((child) => child.name).join("、")}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">授权摘要</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {organization.authSummary ?? "暂无授权摘要"}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">员工记录</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {relatedEmployees.length === 0
-              ? "暂无员工记录"
-              : relatedEmployees.map((employee) => employee.name).join("、")}
-          </dd>
-        </div>
-      </dl>
-
-      <div className="mt-4 space-y-2">
-        <h3 className="text-text-primary text-sm font-semibold">
-          关联企业授权
-        </h3>
-        {relatedOrgAuths.length === 0 ? (
-          <p className="text-text-muted text-sm">暂无关联企业授权。</p>
-        ) : (
-          <div className="space-y-2">
-            {relatedOrgAuths.map((orgAuth) => (
-              <div
-                key={orgAuth.publicId}
-                className="border-border flex flex-col gap-1 rounded-md border p-3"
-              >
-                <p className="text-text-primary text-sm font-medium">
-                  {orgAuth.name}
-                </p>
-                <p className="text-text-secondary flex flex-wrap gap-1 text-xs">
-                  <span>{formatProfessionLevel(orgAuth)}</span>
-                  <span>/</span>
-                  <span>{getOrgAuthEditionLabel(orgAuth)}</span>
-                  <span>/</span>
-                  <span>{authStatusLabels[orgAuth.status]}</span>
-                  <span>/</span>
-                  <span>
-                    {orgAuth.usedQuota} / {orgAuth.accountQuota}
-                  </span>
-                </p>
+    <section className="space-y-4" aria-label="组织架构工作区">
+      <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+          <div className="grid flex-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_10rem_auto]">
+            <label className="text-text-secondary flex flex-col gap-1.5 text-sm font-medium">
+              <span>搜索企业组织</span>
+              <div className="relative">
+                <Search
+                  className="text-text-muted pointer-events-none absolute top-2.5 left-3 size-4"
+                  aria-hidden="true"
+                />
+                <input
+                  aria-label="搜索企业组织"
+                  className="border-border bg-background h-9 w-full rounded-md border pr-3 pl-9 text-sm"
+                  placeholder="输入企业组织名称"
+                  value={keyword}
+                  onChange={(event) => onKeywordChange(event.target.value)}
+                />
               </div>
-            ))}
+            </label>
+            <label className="text-text-secondary flex flex-col gap-1.5 text-sm font-medium">
+              <span>组织层级</span>
+              <select
+                aria-label="组织层级"
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                value={orgTier}
+                onChange={(event) =>
+                  onOrgTierChange(event.target.value as OrgTier | "all")
+                }
+              >
+                <option value="all">全部层级</option>
+                <option value="province">省</option>
+                <option value="city">地市</option>
+                <option value="district">县区</option>
+                <option value="station">站点</option>
+              </select>
+            </label>
+            <label className="text-text-secondary flex flex-col gap-1.5 text-sm font-medium">
+              <span>组织状态</span>
+              <select
+                aria-label="组织状态"
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                value={status}
+                onChange={(event) =>
+                  onStatusChange(event.target.value as UserStatus | "all")
+                }
+              >
+                <option value="all">全部状态</option>
+                <option value="active">启用</option>
+                <option value="disabled">停用</option>
+              </select>
+            </label>
+            <button
+              className="border-border bg-background hover:bg-muted h-9 rounded-md border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+              type="button"
+              onClick={onResetFilters}
+            >
+              重置筛选
+            </button>
           </div>
-        )}
+          <button
+            className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            type="button"
+            onClick={onCreateRoot}
+          >
+            <PlusCircle className="size-4" aria-hidden="true" />
+            新增省级组织
+          </button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(22rem,0.9fr)_minmax(28rem,1.1fr)]">
+        <section
+          className="bg-surface border-border min-h-[24rem] rounded-md border shadow-sm"
+          aria-label="企业组织树"
+        >
+          <header className="border-border border-b p-4">
+            <h2 className="text-text-primary text-base font-semibold">
+              {isFilteredSearch ? "筛选结果" : "企业组织树"}
+            </h2>
+            <p className="text-text-muted mt-1 text-sm">
+              {isFilteredSearch
+                ? `共 ${rootBranch?.total ?? 0} 个匹配组织，路径用于确认所属层级。`
+                : "按省、地市、县区、站点逐级展开；不支持拖拽移动。"}
+            </p>
+          </header>
+          {loadState === "loading" ? (
+            <p
+              className="text-text-muted p-6 text-center text-sm"
+              role="status"
+            >
+              正在加载企业组织树
+            </p>
+          ) : null}
+          {loadState === "error" ? (
+            <p
+              className="text-destructive p-6 text-center text-sm"
+              role="alert"
+            >
+              企业组织树加载失败，请稍后重试。
+            </p>
+          ) : null}
+          {loadState === "ready" && rootNodes.length === 0 ? (
+            <p className="text-text-muted p-6 text-center text-sm">
+              {isFilteredSearch
+                ? "没有符合筛选条件的企业组织。"
+                : "暂无企业组织，可先新增省级组织。"}
+            </p>
+          ) : null}
+          {loadState === "ready" && rootNodes.length > 0 ? (
+            <div aria-label="企业组织树" className="pb-3" role="tree">
+              {isFilteredSearch ? (
+                <div>
+                  {rootNodes.map((node) => (
+                    <button
+                      aria-selected={selectedPublicId === node.publicId}
+                      key={node.publicId}
+                      className={`border-border hover:bg-muted block w-full border-b px-4 py-3 text-left transition-transform active:scale-[0.99] ${
+                        selectedPublicId === node.publicId ? "bg-secondary" : ""
+                      }`}
+                      role="treeitem"
+                      type="button"
+                      onClick={() => onSelect(node.publicId)}
+                    >
+                      <span className="text-text-primary block text-sm font-medium">
+                        {[
+                          ...node.ancestorPath.map((item) => item.name),
+                          node.name,
+                        ].join(" / ")}
+                      </span>
+                      <span className="text-text-muted mt-1 block text-xs">
+                        {orgTierLabels[node.orgTier]} /{" "}
+                        {node.status === "active" ? "启用" : "停用"} / 直属员工{" "}
+                        {node.employeeCount}
+                      </span>
+                    </button>
+                  ))}
+                  {rootBranch !== undefined &&
+                  rootBranch.publicIds.length < rootBranch.total ? (
+                    <button
+                      className="text-brand-primary m-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                      type="button"
+                      onClick={() => onLoadMore(null)}
+                    >
+                      加载更多筛选结果
+                    </button>
+                  ) : null}
+                </div>
+              ) : (
+                <OrganizationTreeBranch
+                  data={data}
+                  depth={0}
+                  expandedPublicIds={expandedPublicIds}
+                  parentPublicId={null}
+                  selectedPublicId={selectedPublicId}
+                  onLoadMore={onLoadMore}
+                  onSelect={onSelect}
+                  onToggleNode={onToggleNode}
+                />
+              )}
+            </div>
+          ) : null}
+        </section>
+
+        <section
+          aria-label="组织节点详情"
+          className="bg-surface border-border min-h-[24rem] rounded-md border p-4 shadow-sm"
+          data-public-id={selectedNode?.publicId}
+          data-testid={
+            selectedNode === null
+              ? undefined
+              : `admin-organization-detail-${selectedNode.publicId}`
+          }
+        >
+          {selectedNode === null ? (
+            <div className="flex min-h-[20rem] flex-col items-center justify-center text-center">
+              <Building2
+                className="text-text-muted size-8"
+                aria-hidden="true"
+              />
+              <h2 className="text-text-primary mt-3 text-base font-semibold">
+                选择一个企业组织
+              </h2>
+              <p className="text-text-muted mt-1 max-w-md text-sm">
+                选择左侧节点后查看完整路径、直属规模、授权摘要和可执行操作。
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <p className="text-brand-primary text-xs font-medium">
+                    当前组织
+                  </p>
+                  <h2 className="text-text-primary mt-1 text-lg font-semibold">
+                    {selectedNode.name}
+                  </h2>
+                  <p className="text-text-muted mt-1 text-sm">
+                    {[
+                      ...selectedNode.ancestorPath.map((item) => item.name),
+                      selectedNode.name,
+                    ].join(" / ")}
+                  </p>
+                </div>
+                <span className="bg-secondary text-secondary-foreground w-fit rounded-md px-2 py-1 text-xs font-medium">
+                  {orgTierLabels[selectedNode.orgTier]} /{" "}
+                  {selectedNode.status === "active" ? "启用" : "停用"}
+                </span>
+              </div>
+              <dl className="grid gap-3 sm:grid-cols-2">
+                <div className="border-border rounded-md border p-3">
+                  <dt className="text-text-muted text-xs">直属员工</dt>
+                  <dd className="text-text-primary mt-1 text-base font-semibold">
+                    {selectedNode.employeeCount}
+                  </dd>
+                </div>
+                <div className="border-border rounded-md border p-3">
+                  <dt className="text-text-muted text-xs">直属下级</dt>
+                  <dd className="text-text-primary mt-1 text-base font-semibold">
+                    {selectedNode.childCount}
+                  </dd>
+                </div>
+                <div className="border-border rounded-md border p-3 sm:col-span-2">
+                  <dt className="text-text-muted text-xs">授权摘要</dt>
+                  <dd className="text-text-primary mt-1 text-sm">
+                    {selectedNode.authSummary ??
+                      "暂无直接授权摘要，请核对上级或指定范围继承。"}
+                  </dd>
+                </div>
+              </dl>
+              <div className="border-border flex flex-wrap gap-2 border-t pt-4">
+                {childOrgTierByParentTier[selectedNode.orgTier] ===
+                null ? null : (
+                  <button
+                    className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                    data-testid={`organization-create-child-${selectedNode.publicId}`}
+                    type="button"
+                    onClick={() => onCreateChild(selectedNode)}
+                  >
+                    <PlusCircle className="size-4" aria-hidden="true" />
+                    新增下级组织
+                  </button>
+                )}
+                <button
+                  className="border-border bg-background hover:bg-muted inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                  data-testid={`organization-edit-${selectedNode.publicId}`}
+                  type="button"
+                  onClick={() => onEdit(selectedNode)}
+                >
+                  <Pencil className="size-4" aria-hidden="true" />
+                  编辑组织
+                </button>
+                {selectedNode.status === "active" ? (
+                  <button
+                    className="bg-destructive text-destructive-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                    data-testid={`organization-disable-${selectedNode.publicId}`}
+                    type="button"
+                    onClick={() => onDisable(selectedNode.publicId)}
+                  >
+                    <Ban className="size-4" aria-hidden="true" />
+                    停用组织
+                  </button>
+                ) : (
+                  <button
+                    className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                    data-testid={`organization-enable-${selectedNode.publicId}`}
+                    type="button"
+                    onClick={() => onEnable(selectedNode.publicId)}
+                  >
+                    <CheckCircle2 className="size-4" aria-hidden="true" />
+                    启用组织
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </section>
   );
@@ -3848,10 +3988,11 @@ function OrganizationTreeActionPanel({
           <button
             type="button"
             className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+            title="关闭组织维护表单"
             onClick={onReset}
           >
-            <PlusCircle className="size-3.5" aria-hidden="true" />
-            新增模式
+            <X className="size-3.5" aria-hidden="true" />
+            关闭
           </button>
         </div>
 
@@ -4641,6 +4782,210 @@ function RedeemCodeActionPanel({
   );
 }
 
+function createOrganizationTreeSearchParams(input: {
+  keyword: string;
+  orgTier: OrgTier | "all";
+  page: number;
+  parentOrganizationPublicId: string | null;
+  status: UserStatus | "all";
+}) {
+  const searchParams = new URLSearchParams({
+    page: String(input.page),
+    pageSize: String(ORGANIZATION_TREE_PAGE_SIZE),
+    sortOrder: "asc",
+  });
+  const keyword = input.keyword.trim();
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  if (input.orgTier !== "all") {
+    searchParams.set("orgTier", input.orgTier);
+  }
+
+  if (input.status !== "all") {
+    searchParams.set("status", input.status);
+  }
+
+  if (input.parentOrganizationPublicId !== null) {
+    searchParams.set(
+      "parentOrganizationPublicId",
+      input.parentOrganizationPublicId,
+    );
+  }
+
+  return searchParams.toString();
+}
+
+function useOrganizationTreeData(input: {
+  keyword: string;
+  orgTier: OrgTier | "all";
+  refreshVersion: number;
+  status: UserStatus | "all";
+}) {
+  const [data, setData] = useState<OrganizationTreeData>({
+    branches: {},
+    nodesByPublicId: {},
+  });
+  const [loadState, setLoadState] =
+    useState<OrganizationTreeLoadState>("loading");
+  const [expandedPublicIds, setExpandedPublicIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const requestGenerationRef = useRef(0);
+  const isFilteredSearch =
+    input.keyword.trim().length > 0 ||
+    input.orgTier !== "all" ||
+    input.status !== "all";
+
+  const loadBranch = useCallback(
+    async (parentOrganizationPublicId: string | null, page = 1) => {
+      const requestGeneration = requestGenerationRef.current;
+      const sessionToken = getStoredSessionToken();
+
+      if (sessionToken === null) {
+        setLoadState("error");
+        return;
+      }
+
+      const branchKey =
+        parentOrganizationPublicId ?? ORGANIZATION_TREE_ROOT_KEY;
+
+      try {
+        const response = await fetchAdminApi<OrganizationTreeNodeListDto>(
+          `/api/v1/organization-tree-nodes?${createOrganizationTreeSearchParams(
+            {
+              keyword: input.keyword,
+              orgTier: input.orgTier,
+              page,
+              parentOrganizationPublicId,
+              status: input.status,
+            },
+          )}`,
+          sessionToken,
+        );
+
+        if (requestGeneration !== requestGenerationRef.current) {
+          return;
+        }
+
+        if (response.code !== 0 || response.data === null) {
+          setLoadState("error");
+          return;
+        }
+
+        const responseData = response.data;
+
+        const pagination = response.pagination ?? {
+          page,
+          pageSize: ORGANIZATION_TREE_PAGE_SIZE,
+          sortBy: "name",
+          sortOrder: "asc",
+          total: responseData.nodes.length,
+        };
+
+        setData((currentData) => {
+          const previousPublicIds =
+            page === 1
+              ? []
+              : (currentData.branches[branchKey]?.publicIds ?? []);
+          const nextPublicIds = [
+            ...new Set([
+              ...previousPublicIds,
+              ...responseData.nodes.map((node) => node.publicId),
+            ]),
+          ];
+
+          return {
+            branches: {
+              ...currentData.branches,
+              [branchKey]: {
+                page: pagination.page,
+                pageSize: pagination.pageSize,
+                publicIds: nextPublicIds,
+                total: pagination.total,
+              },
+            },
+            nodesByPublicId: {
+              ...currentData.nodesByPublicId,
+              ...Object.fromEntries(
+                responseData.nodes.map((node) => [node.publicId, node]),
+              ),
+            },
+          };
+        });
+        setLoadState("ready");
+      } catch {
+        if (requestGeneration !== requestGenerationRef.current) {
+          return;
+        }
+
+        setLoadState("error");
+      }
+    },
+    [input.keyword, input.orgTier, input.status],
+  );
+
+  useEffect(() => {
+    let isActive = true;
+    requestGenerationRef.current += 1;
+    const loadTimer = window.setTimeout(() => {
+      if (!isActive) {
+        return;
+      }
+
+      setData({ branches: {}, nodesByPublicId: {} });
+      setExpandedPublicIds(new Set());
+      setLoadState("loading");
+      void loadBranch(null);
+    }, 80);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(loadTimer);
+    };
+  }, [input.refreshVersion, loadBranch]);
+
+  async function handleToggleNode(publicId: string) {
+    if (expandedPublicIds.has(publicId)) {
+      setExpandedPublicIds((currentIds) => {
+        const nextIds = new Set(currentIds);
+
+        nextIds.delete(publicId);
+        return nextIds;
+      });
+      return;
+    }
+
+    if (data.branches[publicId] === undefined) {
+      await loadBranch(publicId);
+    }
+
+    setExpandedPublicIds((currentIds) => new Set([...currentIds, publicId]));
+  }
+
+  async function handleLoadMore(publicId: string | null) {
+    const branchKey = publicId ?? ORGANIZATION_TREE_ROOT_KEY;
+    const branch = data.branches[branchKey];
+
+    if (branch === undefined || branch.publicIds.length >= branch.total) {
+      return;
+    }
+
+    await loadBranch(publicId, branch.page + 1);
+  }
+
+  return {
+    data,
+    expandedPublicIds,
+    isFilteredSearch,
+    loadState,
+    onLoadMore: handleLoadMore,
+    onToggleNode: handleToggleNode,
+  };
+}
+
 function useAdminOrgAuthData() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminOrgAuthData>({
@@ -4818,6 +5163,22 @@ export function AdminOrgAuthPage() {
   const [activeView, setActiveView] = useState<OpsOrganizationManagementView>(
     readOpsOrganizationManagementViewFromLocation,
   );
+  const [organizationTreeKeyword, setOrganizationTreeKeyword] = useState("");
+  const [organizationTreeStatus, setOrganizationTreeStatus] = useState<
+    UserStatus | "all"
+  >("all");
+  const [organizationTreeTier, setOrganizationTreeTier] = useState<
+    OrgTier | "all"
+  >("all");
+  const [organizationTreeRefreshVersion, setOrganizationTreeRefreshVersion] =
+    useState(0);
+  const [isOrganizationFormOpen, setIsOrganizationFormOpen] = useState(false);
+  const organizationTree = useOrganizationTreeData({
+    keyword: organizationTreeKeyword,
+    orgTier: organizationTreeTier,
+    refreshVersion: organizationTreeRefreshVersion,
+    status: organizationTreeStatus,
+  });
   const [confirmationState, setConfirmationState] =
     useState<OrgAuthConfirmationState>(null);
   const [organizationConfirmationState, setOrganizationConfirmationState] =
@@ -4859,16 +5220,29 @@ export function AdminOrgAuthPage() {
   );
   const selectedEmployeeImportOrganizationPublicId =
     employeeImportOrganizationPublicId;
-  const selectedOrganizationDetail = useMemo(
-    () =>
-      selectedOrganizationPublicId === null
-        ? null
-        : (data.organizations.find(
-            (organization) =>
-              organization.publicId === selectedOrganizationPublicId,
-          ) ?? null),
-    [data.organizations, selectedOrganizationPublicId],
-  );
+  const organizationFormOptions = useMemo(() => {
+    const organizationsByPublicId = new Map(
+      data.organizations.map((organization) => [
+        organization.publicId,
+        organization,
+      ]),
+    );
+
+    for (const organization of Object.values(
+      organizationTree.data.nodesByPublicId,
+    )) {
+      organizationsByPublicId.set(organization.publicId, organization);
+    }
+
+    return [...organizationsByPublicId.values()];
+  }, [data.organizations, organizationTree.data.nodesByPublicId]);
+  const effectiveSelectedOrganizationPublicId =
+    selectedOrganizationPublicId !== null &&
+    organizationTree.data.nodesByPublicId[selectedOrganizationPublicId] !==
+      undefined
+      ? selectedOrganizationPublicId
+      : (organizationTree.data.branches[ORGANIZATION_TREE_ROOT_KEY]
+          ?.publicIds[0] ?? null);
 
   useEffect(() => {
     function handlePopState() {
@@ -5004,12 +5378,35 @@ export function AdminOrgAuthPage() {
       remark: "",
       status: organization.status,
     });
+    setIsOrganizationFormOpen(true);
+  }
+
+  function handleCreateRootOrganization() {
+    setOrganizationFormState(defaultOrganizationFormState);
+    setIsOrganizationFormOpen(true);
+  }
+
+  function handleCreateChildOrganization(
+    organization: OrganizationTreeQueryNodeDto,
+  ) {
+    const childOrgTier = childOrgTierByParentTier[organization.orgTier];
+
+    if (childOrgTier === null) {
+      return;
+    }
+
+    setOrganizationFormState({
+      ...defaultOrganizationFormState,
+      orgTier: childOrgTier,
+      parentOrganizationPublicId: organization.publicId,
+    });
+    setIsOrganizationFormOpen(true);
   }
 
   function handleSubmitOrganization() {
     const organizationDraft = buildOrganizationInput(
       organizationFormState,
-      data.organizations,
+      organizationFormOptions,
     );
 
     if (organizationDraft.input === null) {
@@ -5069,6 +5466,7 @@ export function AdminOrgAuthPage() {
             : organization,
         ),
       }));
+      setOrganizationTreeRefreshVersion((version) => version + 1);
       setToastMessage({ message: "企业组织已停用。", tone: "success" });
       return;
     }
@@ -5099,6 +5497,7 @@ export function AdminOrgAuthPage() {
             : organization,
         ),
       }));
+      setOrganizationTreeRefreshVersion((version) => version + 1);
       setToastMessage({ message: "企业组织已启用。", tone: "success" });
       return;
     }
@@ -5165,6 +5564,9 @@ export function AdminOrgAuthPage() {
       };
     });
     setOrganizationFormState(defaultOrganizationFormState);
+    setIsOrganizationFormOpen(false);
+    setSelectedOrganizationPublicId(updatedOrganization.publicId);
+    setOrganizationTreeRefreshVersion((version) => version + 1);
     setToastMessage({
       message:
         organizationConfirmationState.kind === "createOrganization"
@@ -5452,31 +5854,59 @@ export function AdminOrgAuthPage() {
         hidden={activeView !== "organization-tree"}
       >
         <OrganizationTreeGuidancePanel />
-        <OrganizationTreeActionPanel
-          disabled={false}
-          formState={organizationFormState}
-          organizations={data.organizations}
-          onFormChange={setOrganizationFormState}
-          onReset={() => setOrganizationFormState(defaultOrganizationFormState)}
-          onSubmit={handleSubmitOrganization}
-        />
-        <OrganizationList
-          organizations={data.organizations}
-          onDisableOrganization={(publicId) =>
+        <OrganizationTreeWorkspace
+          data={organizationTree.data}
+          expandedPublicIds={organizationTree.expandedPublicIds}
+          isFilteredSearch={organizationTree.isFilteredSearch}
+          keyword={organizationTreeKeyword}
+          loadState={organizationTree.loadState}
+          orgTier={organizationTreeTier}
+          selectedPublicId={effectiveSelectedOrganizationPublicId}
+          status={organizationTreeStatus}
+          onCreateChild={handleCreateChildOrganization}
+          onCreateRoot={handleCreateRootOrganization}
+          onDisable={(publicId) =>
             setOrganizationConfirmationState({
               kind: "disableOrganization",
               publicId,
             })
           }
-          onEditOrganization={handleEditOrganization}
-          onEnableOrganization={(publicId) =>
+          onEdit={handleEditOrganization}
+          onEnable={(publicId) =>
             setOrganizationConfirmationState({
               kind: "enableOrganization",
               publicId,
             })
           }
-          onViewOrganizationDetail={setSelectedOrganizationPublicId}
+          onKeywordChange={setOrganizationTreeKeyword}
+          onLoadMore={(publicId) => {
+            void organizationTree.onLoadMore(publicId);
+          }}
+          onOrgTierChange={setOrganizationTreeTier}
+          onResetFilters={() => {
+            setOrganizationTreeKeyword("");
+            setOrganizationTreeStatus("all");
+            setOrganizationTreeTier("all");
+          }}
+          onSelect={setSelectedOrganizationPublicId}
+          onStatusChange={setOrganizationTreeStatus}
+          onToggleNode={(publicId) => {
+            void organizationTree.onToggleNode(publicId);
+          }}
         />
+        {isOrganizationFormOpen ? (
+          <OrganizationTreeActionPanel
+            disabled={false}
+            formState={organizationFormState}
+            organizations={organizationFormOptions}
+            onFormChange={setOrganizationFormState}
+            onReset={() => {
+              setOrganizationFormState(defaultOrganizationFormState);
+              setIsOrganizationFormOpen(false);
+            }}
+            onSubmit={handleSubmitOrganization}
+          />
+        ) : null}
       </section>
 
       <section
@@ -5604,29 +6034,6 @@ export function AdminOrgAuthPage() {
         <EmployeeTransferResultPanel
           organizations={data.organizations}
           result={lastEmployeeTransferResult}
-        />
-      )}
-
-      {selectedOrganizationDetail === null ? null : (
-        <OrganizationDetailPanel
-          employees={data.employees}
-          organization={selectedOrganizationDetail}
-          organizations={data.organizations}
-          orgAuths={data.orgAuths}
-          onClose={() => setSelectedOrganizationPublicId(null)}
-          onDisableOrganization={(publicId) =>
-            setOrganizationConfirmationState({
-              kind: "disableOrganization",
-              publicId,
-            })
-          }
-          onEditOrganization={handleEditOrganization}
-          onEnableOrganization={(publicId) =>
-            setOrganizationConfirmationState({
-              kind: "enableOrganization",
-              publicId,
-            })
-          }
         />
       )}
 

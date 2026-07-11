@@ -18,6 +18,7 @@ import {
   type EmployeeTransferResultDto,
   type EmployeeMutationResultDto,
   type EmployeeUnbindResultDto,
+  type OrganizationTreeQuery,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
   OrgAuthDetailResultDto,
@@ -51,6 +52,7 @@ import {
   type NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
 import type { SessionService } from "./session-service";
+import { orgTierValues } from "../models/auth";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminOrganizationOrgAuthRuntimeRepositories };
@@ -85,6 +87,10 @@ const adminPermissionDeniedResponse = createErrorResponse(
 const organizationMutationUnavailableResponse = createErrorResponse(
   503005,
   "Organization mutation runtime is not configured.",
+);
+const organizationTreeUnavailableResponse = createErrorResponse(
+  503009,
+  "Organization tree runtime is not configured.",
 );
 const organizationInputInvalidResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
@@ -692,7 +698,7 @@ function readAdminAuthOperationListQuery(
   const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
 
   return createAdminAuthOperationListQuery({
-    page: Number.isFinite(page) && page > 0 ? page : 1,
+    page: Number.isInteger(page) && page > 0 ? page : 1,
     pageSize: pageSize as AdminAuthOperationPageSize,
     sortBy,
     sortOrder,
@@ -700,6 +706,32 @@ function readAdminAuthOperationListQuery(
     status: readStatus(searchParams),
     userType: readUserType(searchParams),
   });
+}
+
+function readOrganizationTreeQuery(request: Request): OrganizationTreeQuery {
+  const searchParams = new URL(request.url).searchParams;
+  const page = Number(searchParams.get("page"));
+  const pageSize = readPageSize(searchParams, [20, 50, 100], 50);
+  const keyword = searchParams.get("keyword")?.trim() ?? "";
+  const parentOrganizationPublicId =
+    searchParams.get("parentOrganizationPublicId")?.trim() ?? "";
+  const status = searchParams.get("status");
+  const orgTier = searchParams.get("orgTier");
+
+  return {
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: pageSize as AdminAuthOperationPageSize,
+    parentOrganizationPublicId:
+      parentOrganizationPublicId.length === 0
+        ? null
+        : parentOrganizationPublicId,
+    keyword: keyword.length === 0 ? null : keyword,
+    status: status === "active" || status === "disabled" ? status : "all",
+    orgTier: orgTierValues.includes(orgTier as (typeof orgTierValues)[number])
+      ? (orgTier as (typeof orgTierValues)[number])
+      : "all",
+    sortOrder: searchParams.get("sortOrder") === "desc" ? "desc" : "asc",
+  };
 }
 
 function readPageSize(
@@ -941,6 +973,29 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   }
 
   return createRouteHandlersWithErrorEnvelope({
+    organizationTreeNodes: {
+      collection: {
+        async GET(request: Request): Promise<Response> {
+          const authError = await requireReadableAdminActor(request);
+
+          if (authError !== null) {
+            return createJsonResponse(authError);
+          }
+
+          if (repositories.listOrganizationTreeNodes === undefined) {
+            return createJsonResponse(organizationTreeUnavailableResponse);
+          }
+
+          const result = await repositories.listOrganizationTreeNodes(
+            readOrganizationTreeQuery(request),
+          );
+
+          return createJsonResponse(
+            createPaginatedResponse({ nodes: result.nodes }, result.pagination),
+          );
+        },
+      },
+    },
     organizations: {
       collection: {
         async GET(request: Request): Promise<Response> {

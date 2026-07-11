@@ -289,6 +289,106 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
+type OrganizationTreeFixture = {
+  authSummary: string | null;
+  employeeCount: number;
+  name: string;
+  orgTier: string;
+  parentOrganizationPublicId: string | null;
+  publicId: string;
+  status: string;
+};
+
+function createOrganizationTreeNodesPayload(
+  path: string,
+  organizations: OrganizationTreeFixture[],
+) {
+  const requestUrl = new URL(path, "http://localhost");
+  const parentOrganizationPublicId = requestUrl.searchParams.get(
+    "parentOrganizationPublicId",
+  );
+  const keyword = requestUrl.searchParams.get("keyword")?.toLowerCase() ?? "";
+  const orgTier = requestUrl.searchParams.get("orgTier");
+  const status = requestUrl.searchParams.get("status");
+  const page = Number(requestUrl.searchParams.get("page") ?? "1");
+  const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "50");
+  const organizationByPublicId = new Map(
+    organizations.map((organization) => [organization.publicId, organization]),
+  );
+  const hasFilters = keyword.length > 0 || orgTier !== null || status !== null;
+  const candidates = organizations.filter((organization) => {
+    if (hasFilters) {
+      return (
+        (keyword.length === 0 ||
+          organization.name.toLowerCase().includes(keyword)) &&
+        (orgTier === null || organization.orgTier === orgTier) &&
+        (status === null || organization.status === status)
+      );
+    }
+
+    if (parentOrganizationPublicId !== null) {
+      return (
+        organization.parentOrganizationPublicId === parentOrganizationPublicId
+      );
+    }
+
+    return (
+      organization.parentOrganizationPublicId === null ||
+      !organizationByPublicId.has(organization.parentOrganizationPublicId)
+    );
+  });
+  const start = (page - 1) * pageSize;
+  const nodes = candidates
+    .slice(start, start + pageSize)
+    .map((organization) => {
+      const ancestorPath: Array<{
+        name: string;
+        orgTier: OrganizationTreeFixture["orgTier"];
+        publicId: string;
+      }> = [];
+      const visitedPublicIds = new Set<string>();
+      let parentPublicId = organization.parentOrganizationPublicId;
+
+      while (parentPublicId !== null && !visitedPublicIds.has(parentPublicId)) {
+        visitedPublicIds.add(parentPublicId);
+        const parent = organizationByPublicId.get(parentPublicId);
+
+        if (parent === undefined) {
+          break;
+        }
+
+        ancestorPath.unshift({
+          name: parent.name,
+          orgTier: parent.orgTier,
+          publicId: parent.publicId,
+        });
+        parentPublicId = parent.parentOrganizationPublicId;
+      }
+
+      return {
+        ...organization,
+        ancestorPath,
+        childCount: organizations.filter(
+          (candidate) =>
+            candidate.parentOrganizationPublicId === organization.publicId,
+        ).length,
+      };
+    });
+
+  return {
+    code: 0,
+    message: "ok",
+    data: { nodes },
+    pagination: {
+      page,
+      pageSize,
+      sortBy: "name",
+      sortOrder: "asc",
+      total: candidates.length,
+    },
+  };
+}
+
 function mockSystemOpsFetch() {
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -297,6 +397,15 @@ function mockSystemOpsFetch() {
 
       if (path === "/api/v1/sessions") {
         return createJsonResponse(adminSessionPayload);
+      }
+
+      if (path.startsWith("/api/v1/organization-tree-nodes?")) {
+        return createJsonResponse(
+          createOrganizationTreeNodesPayload(
+            path,
+            organizationPayload.data.organizations,
+          ),
+        );
       }
 
       if (path === "/api/v1/organizations?page=1&pageSize=20") {
@@ -391,6 +500,15 @@ function mockSystemOpsFetchWithOrganizationTree() {
 
       if (path === "/api/v1/sessions") {
         return createJsonResponse(adminSessionPayload);
+      }
+
+      if (path.startsWith("/api/v1/organization-tree-nodes?")) {
+        return createJsonResponse(
+          createOrganizationTreeNodesPayload(
+            path,
+            organizationTreePayload.data.organizations,
+          ),
+        );
       }
 
       if (path === "/api/v1/organizations?page=1&pageSize=20") {
@@ -1315,6 +1433,8 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await screen.findByTestId("admin-organization-org-province-001");
+    fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
     await screen.findByTestId("organization-tree-management-form");
 
     const pendingWorkbench = screen.getByTestId("operations-pending-workbench");
@@ -1358,6 +1478,15 @@ describe("admin user organization authorization ops baseline", () => {
       parentOrganizationPublicId: null,
     });
 
+    await screen.findByRole("status");
+    const provinceNode = await screen.findByTestId(
+      "admin-organization-org-province-001",
+    );
+    fireEvent.click(within(provinceNode).getByRole("button", { name: "展开" }));
+    const cityNode = await screen.findByTestId(
+      "admin-organization-org-city-001",
+    );
+    fireEvent.click(within(cityNode).getByRole("button", { name: "详情" }));
     fireEvent.click(screen.getByTestId("organization-edit-org-city-001"));
     fireEvent.change(screen.getByTestId("organization-name-input"), {
       target: { value: "Quanzhou Test Tobacco" },
@@ -1378,6 +1507,19 @@ describe("admin user organization authorization ops baseline", () => {
       status: "active",
     });
 
+    await screen.findByRole("status");
+    const refreshedProvinceNode = await screen.findByTestId(
+      "admin-organization-org-province-001",
+    );
+    fireEvent.click(
+      within(refreshedProvinceNode).getByRole("button", { name: "展开" }),
+    );
+    const refreshedCityNode = await screen.findByTestId(
+      "admin-organization-org-city-001",
+    );
+    fireEvent.click(
+      within(refreshedCityNode).getByRole("button", { name: "详情" }),
+    );
     fireEvent.click(screen.getByTestId("organization-disable-org-city-001"));
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
 
@@ -1409,21 +1551,13 @@ describe("admin user organization authorization ops baseline", () => {
       "organization-public-001",
     );
     expect(organizationDetail).not.toHaveAttribute("data-id");
-    expect(organizationDetail).toHaveTextContent("组织详情");
+    expect(organizationDetail).toHaveTextContent("当前组织");
     expect(organizationDetail).toHaveTextContent("杭州烟草");
     expect(organizationDetail).toHaveTextContent("地市");
-    expect(organizationDetail).toHaveTextContent("员工 42");
-    expect(organizationDetail).toHaveTextContent("关联授权 1");
-    expect(organizationDetail).toHaveTextContent(
-      "组织管理员只读查看范围内结构和授权影响",
-    );
-    expect(organizationDetail).toHaveTextContent(
-      "员工可见专业、等级和版本由这些有效企业授权计算",
-    );
-    expect(organizationDetail).toHaveTextContent(
-      "节点移动仅超级管理员通过受控流程处理",
-    );
-    expect(organizationDetail).toHaveTextContent("杭州烟草企业授权");
+    expect(organizationDetail).toHaveTextContent("直属员工");
+    expect(organizationDetail).toHaveTextContent("42");
+    expect(organizationDetail).toHaveTextContent("授权摘要");
+    expect(organizationDetail).toHaveTextContent("专卖 3级 / 42 / 100");
     expect(organizationDetail).not.toHaveTextContent("organization-public-000");
     expect(organizationDetail).not.toHaveTextContent("101");
     expect(organizationDetail).not.toHaveTextContent("201");
@@ -1435,13 +1569,6 @@ describe("admin user organization authorization ops baseline", () => {
     expect(screen.getByTestId("organization-name-input")).toHaveValue(
       "杭州烟草",
     );
-
-    fireEvent.click(
-      within(organizationDetail).getByRole("button", { name: "关闭" }),
-    );
-    expect(
-      screen.queryByTestId("admin-organization-detail-organization-public-001"),
-    ).not.toBeInTheDocument();
   });
 
   it("renders the organization tree as four user-facing levels", async () => {
@@ -1450,6 +1577,8 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await screen.findByTestId("admin-organization-org-province-001");
+    fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
     await screen.findByTestId("organization-tree-management-form");
 
     const tierSelect = screen.getByTestId("organization-tier-select");
@@ -1477,6 +1606,8 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await screen.findByTestId("admin-organization-org-province-001");
+    fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
     await screen.findByTestId("organization-tree-management-form");
 
     fireEvent.change(screen.getByTestId("organization-name-input"), {
@@ -1724,9 +1855,6 @@ describe("admin user organization authorization ops baseline", () => {
     expect(
       screen.queryByTestId("admin-employee-employee-public-001"),
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId("admin-organization-organization-public-001"),
-    ).toHaveTextContent("41 名员工");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/employees/employee-public-001/unbind",
       expect.objectContaining({

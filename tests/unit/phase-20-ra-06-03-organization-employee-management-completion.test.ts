@@ -430,6 +430,57 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
+function createOrganizationTreeNodesPayload(
+  path: string,
+  organizations: OrganizationListDto["organizations"],
+) {
+  const requestUrl = new URL(path, "http://localhost");
+  const parentOrganizationPublicId = requestUrl.searchParams.get(
+    "parentOrganizationPublicId",
+  );
+  const page = Number(requestUrl.searchParams.get("page") ?? "1");
+  const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "50");
+  const organizationByPublicId = new Map(
+    organizations.map((organization) => [organization.publicId, organization]),
+  );
+  const candidates = organizations.filter((organization) => {
+    if (parentOrganizationPublicId !== null) {
+      return (
+        organization.parentOrganizationPublicId === parentOrganizationPublicId
+      );
+    }
+
+    return (
+      organization.parentOrganizationPublicId === null ||
+      !organizationByPublicId.has(organization.parentOrganizationPublicId)
+    );
+  });
+  const start = (page - 1) * pageSize;
+  const nodes = candidates
+    .slice(start, start + pageSize)
+    .map((organization) => ({
+      ...organization,
+      ancestorPath: [],
+      childCount: organizations.filter(
+        (candidate) =>
+          candidate.parentOrganizationPublicId === organization.publicId,
+      ).length,
+    }));
+
+  return {
+    code: 0,
+    message: "ok",
+    data: { nodes },
+    pagination: {
+      page,
+      pageSize,
+      sortBy: "name",
+      sortOrder: "asc",
+      total: candidates.length,
+    },
+  };
+}
+
 function mockOrganizationPageFetch() {
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -455,6 +506,15 @@ function mockOrganizationPageFetch() {
             },
           },
         });
+      }
+
+      if (path.startsWith("/api/v1/organization-tree-nodes?")) {
+        return createJsonResponse(
+          createOrganizationTreeNodesPayload(
+            path,
+            organizationListPayload.data.organizations,
+          ),
+        );
       }
 
       if (path === "/api/v1/organizations?page=1&pageSize=20") {
@@ -590,6 +650,15 @@ function mockEmptyOrganizationPageFetch() {
             },
           },
         });
+      }
+
+      if (path.startsWith("/api/v1/organization-tree-nodes?")) {
+        return createJsonResponse(
+          createOrganizationTreeNodesPayload(
+            path,
+            emptyOrganizationListPayload.data.organizations,
+          ),
+        );
       }
 
       if (path === "/api/v1/organizations?page=1&pageSize=20") {
@@ -925,6 +994,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     fireEvent.click(
       screen.getByTestId("ops-organization-view-organization-tree"),
     );
+    await screen.findByTestId("admin-organization-org-city-001");
     fireEvent.click(screen.getByTestId("organization-enable-org-city-001"));
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
     await waitFor(() =>
@@ -1003,6 +1073,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     await screen.findByRole("heading", { name: "企业管理" });
 
     expect(screen.queryByText("暂无企业管理数据")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
     expect(
       screen.getByTestId("organization-tree-management-form"),
     ).toBeVisible();
