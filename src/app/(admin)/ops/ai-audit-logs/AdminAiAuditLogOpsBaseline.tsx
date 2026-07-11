@@ -9,12 +9,23 @@ import {
   type ModelConfigFormInput,
   type ModelProviderFormInput,
 } from "@/features/admin/model-config-management/AdminModelConfigManagement";
-import type { ApiResponse } from "@/server/contracts/api-response";
+import {
+  adminDataTableClassName,
+  adminDataTableContainerClassName,
+  adminListPaginationClassName,
+  adminListStatePanelClassName,
+  adminListToolbarClassName,
+} from "@/components/admin/admin-layout-primitives";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import type {
   AiCallLogCostSummaryDto,
   AiCallLogListDto,
   AuditLogSummaryDto,
   AuditLogListDto,
+  AdminAiAuditLogPageSize,
   ModelConfigConnectionTestResultDto,
   ModelConfigListDto,
   ModelConfigSummaryDto,
@@ -22,6 +33,7 @@ import type {
   ModelProviderSummaryDto,
   PromptTemplateListDto,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
+import { ADMIN_AI_AUDIT_LOG_PAGE_SIZE_OPTIONS } from "@/server/contracts/admin-ai-audit-log-ops-contract";
 import type { PersonalAiGenerationFormalAdoptionReviewDto } from "@/server/contracts/personal-ai-generation-formal-adoption-contract";
 
 type AdminAiAuditLogOpsState = "ready" | "loading" | "empty" | "error";
@@ -30,6 +42,18 @@ type AdminAiAuditLogOpsRoleMode = "super_admin" | "ops_admin";
 type AdminAiAuditLogOpsQueryState = {
   keyword: string;
   pageSize: 20 | 50 | 100;
+};
+type AdminAuditLogQueryState = {
+  keyword: string;
+  page: number;
+  pageSize: AdminAiAuditLogPageSize;
+  resultStatus: "all" | "success" | "failed";
+};
+type AdminAiCallLogQueryState = {
+  callStatus: "all" | "success" | "failed";
+  keyword: string;
+  page: number;
+  pageSize: AdminAiAuditLogPageSize;
 };
 
 type AdminAiAuditRuntimeData = {
@@ -58,6 +82,7 @@ const adminOpsDisplayValueMap: Record<string, string> = {
   approved_for_manual_adoption: "已通过人工入库复核",
   awaiting_metadata_review: "等待元数据复核",
   blocked_without_follow_up_task: "待后续任务审批",
+  failed: "失败",
   metadata_only: "仅元数据",
   "metadata-only": "仅元数据",
   model_config: "模型配置",
@@ -68,6 +93,8 @@ const adminOpsDisplayValueMap: Record<string, string> = {
   redacted: "已脱敏",
   success: "成功",
   summary_only: "仅摘要",
+  user: "用户",
+  "user.reset_password": "重置密码",
 };
 
 function formatAdminOpsDisplayValue(value: string) {
@@ -201,6 +228,353 @@ const staticRuntimeData: AdminAiAuditRuntimeData = {
     },
   ],
 };
+
+const staticAuditLogRuntimeData = {
+  auditLogs: staticRuntimeData.auditLogs,
+  pagination: null as ApiPagination | null,
+};
+
+const staticAiCallLogRuntimeData = {
+  aiCallLogs: staticRuntimeData.aiCallLogs,
+  costSummaries: staticRuntimeData.costSummaries,
+  pagination: null as ApiPagination | null,
+};
+
+export function AdminAuditLogOpsPage({
+  currentRole = "ops_admin",
+  runtimeEnabled = false,
+  state = "ready",
+}: {
+  currentRole?: AdminAiAuditLogOpsRoleMode;
+  runtimeEnabled?: boolean;
+  state?: AdminAiAuditLogOpsState;
+}) {
+  const [runtimeState, setRuntimeState] =
+    useState<AdminAiAuditLogOpsState>(state);
+  const [runtimeData, setRuntimeData] = useState(staticAuditLogRuntimeData);
+  const [query, setQuery] = useState<AdminAuditLogQueryState>({
+    keyword: "",
+    page: 1,
+    pageSize: 20,
+    resultStatus: "all",
+  });
+  const [selectedAuditLogPublicId, setSelectedAuditLogPublicId] = useState<
+    string | null
+  >(null);
+  const shouldLoadRuntimeData = runtimeEnabled && state === "ready";
+  const effectiveRuntimeState = shouldLoadRuntimeData ? runtimeState : state;
+  const runtimeQuery = useMemo(
+    () => createAuditLogRuntimeQuery(query),
+    [query],
+  );
+  const displayedAuditLogs = shouldLoadRuntimeData
+    ? runtimeData.auditLogs
+    : paginateAuditLogs(
+        filterAuditLogsForSplitPage(runtimeData.auditLogs, query),
+        query,
+      );
+  const selectedAuditLog =
+    runtimeData.auditLogs.find(
+      (auditLog) => auditLog.publicId === selectedAuditLogPublicId,
+    ) ?? null;
+  const totalCount =
+    runtimeData.pagination?.total ??
+    filterAuditLogsForSplitPage(runtimeData.auditLogs, query).length;
+  const failedAuditCount = runtimeData.auditLogs.filter(
+    (auditLog) => auditLog.resultStatus === "failed",
+  ).length;
+
+  useEffect(() => {
+    if (!shouldLoadRuntimeData) {
+      return;
+    }
+
+    let isCurrentLoad = true;
+    const storedSessionToken = readStoredSessionToken();
+
+    if (storedSessionToken === null) {
+      queueMicrotask(() => {
+        if (isCurrentLoad) {
+          setRuntimeState("error");
+        }
+      });
+      return;
+    }
+
+    queueMicrotask(() => {
+      if (isCurrentLoad) {
+        setRuntimeState("loading");
+      }
+    });
+
+    loadAuditLogRuntimeData(storedSessionToken, runtimeQuery)
+      .then((loadedData) => {
+        if (!isCurrentLoad) {
+          return;
+        }
+
+        setRuntimeData(loadedData);
+        setRuntimeState(loadedData.auditLogs.length > 0 ? "ready" : "empty");
+      })
+      .catch(() => {
+        if (isCurrentLoad) {
+          setRuntimeState("error");
+        }
+      });
+
+    return () => {
+      isCurrentLoad = false;
+    };
+  }, [runtimeQuery, shouldLoadRuntimeData]);
+
+  if (effectiveRuntimeState === "loading") {
+    return (
+      <AdminOpsStatePanel
+        icon={
+          <LoaderCircle aria-hidden="true" className="size-8 animate-spin" />
+        }
+        title="正在加载审计日志"
+      />
+    );
+  }
+
+  if (effectiveRuntimeState === "empty") {
+    return (
+      <AdminOpsStatePanel
+        icon={<CheckCircle2 aria-hidden="true" className="size-8" />}
+        title="暂无审计日志"
+      />
+    );
+  }
+
+  if (effectiveRuntimeState === "error") {
+    return (
+      <AdminOpsStatePanel
+        icon={<AlertCircle aria-hidden="true" className="size-8" />}
+        title="审计日志加载失败"
+      />
+    );
+  }
+
+  return (
+    <main className="space-y-6" data-testid="ops-audit-log-runtime-ready">
+      <AdminSplitLogHeader
+        eyebrow="运营后台"
+        title="审计日志"
+        description="查看系统操作审计记录；页面只呈现脱敏摘要，不展示原始请求体、密钥、会话、卡密明文或内部标识。"
+      />
+
+      <AdminSplitLogSummaryBand
+        description="审计日志只读；原始请求体、凭证、卡密、会话和内部自增 ID 不展示。"
+        metricItems={[
+          { label: "审计日志", value: runtimeData.auditLogs.length },
+          { label: "失败操作", value: failedAuditCount },
+          { label: "当前结果", value: totalCount },
+        ]}
+        roleLabel={formatOpsLogRoleLabel(currentRole)}
+        testId="ops-audit-log-summary-band"
+        title="审计日志只读"
+      />
+
+      <AdminAuditLogToolbar
+        query={query}
+        onChange={(nextQuery) => {
+          setSelectedAuditLogPublicId(null);
+          setQuery(nextQuery);
+        }}
+      />
+
+      <AdminAuditLogTable
+        auditLogs={displayedAuditLogs}
+        onSelectAuditLog={setSelectedAuditLogPublicId}
+      />
+
+      <AdminSplitLogPagination
+        page={query.page}
+        pageSize={query.pageSize}
+        total={totalCount}
+        onPageChange={(page) =>
+          setQuery((currentQuery) => ({ ...currentQuery, page }))
+        }
+      />
+
+      <AdminAuditLogDetailPanel auditLog={selectedAuditLog} />
+    </main>
+  );
+}
+
+export function AdminAiCallLogOpsPage({
+  currentRole = "ops_admin",
+  runtimeEnabled = false,
+  state = "ready",
+}: {
+  currentRole?: AdminAiAuditLogOpsRoleMode;
+  runtimeEnabled?: boolean;
+  state?: AdminAiAuditLogOpsState;
+}) {
+  const [runtimeState, setRuntimeState] =
+    useState<AdminAiAuditLogOpsState>(state);
+  const [runtimeData, setRuntimeData] = useState(staticAiCallLogRuntimeData);
+  const [query, setQuery] = useState<AdminAiCallLogQueryState>({
+    callStatus: "all",
+    keyword: "",
+    page: 1,
+    pageSize: 20,
+  });
+  const [selectedAiCallLogPublicId, setSelectedAiCallLogPublicId] = useState<
+    string | null
+  >(null);
+  const shouldLoadRuntimeData = runtimeEnabled && state === "ready";
+  const effectiveRuntimeState = shouldLoadRuntimeData ? runtimeState : state;
+  const runtimeQuery = useMemo(
+    () => createAiCallLogRuntimeQuery(query),
+    [query],
+  );
+  const displayedAiCallLogs = shouldLoadRuntimeData
+    ? runtimeData.aiCallLogs
+    : paginateAiCallLogs(
+        filterAiCallLogsForSplitPage(runtimeData.aiCallLogs, query),
+        query,
+      );
+  const selectedAiCallLog =
+    runtimeData.aiCallLogs.find(
+      (aiCallLog) => aiCallLog.publicId === selectedAiCallLogPublicId,
+    ) ?? null;
+  const totalCount =
+    runtimeData.pagination?.total ??
+    filterAiCallLogsForSplitPage(runtimeData.aiCallLogs, query).length;
+  const failedAiCallCount = runtimeData.aiCallLogs.filter(
+    (aiCallLog) => aiCallLog.callStatus === "failed",
+  ).length;
+
+  useEffect(() => {
+    if (!shouldLoadRuntimeData) {
+      return;
+    }
+
+    let isCurrentLoad = true;
+    const storedSessionToken = readStoredSessionToken();
+
+    if (storedSessionToken === null) {
+      queueMicrotask(() => {
+        if (isCurrentLoad) {
+          setRuntimeState("error");
+        }
+      });
+      return;
+    }
+
+    queueMicrotask(() => {
+      if (isCurrentLoad) {
+        setRuntimeState("loading");
+      }
+    });
+
+    loadAiCallLogRuntimeData(storedSessionToken, runtimeQuery)
+      .then((loadedData) => {
+        if (!isCurrentLoad) {
+          return;
+        }
+
+        setRuntimeData(loadedData);
+        setRuntimeState(
+          loadedData.aiCallLogs.length > 0 ||
+            loadedData.costSummaries.length > 0
+            ? "ready"
+            : "empty",
+        );
+      })
+      .catch(() => {
+        if (isCurrentLoad) {
+          setRuntimeState("error");
+        }
+      });
+
+    return () => {
+      isCurrentLoad = false;
+    };
+  }, [runtimeQuery, shouldLoadRuntimeData]);
+
+  if (effectiveRuntimeState === "loading") {
+    return (
+      <AdminOpsStatePanel
+        icon={
+          <LoaderCircle aria-hidden="true" className="size-8 animate-spin" />
+        }
+        title="正在加载 AI 调用日志"
+      />
+    );
+  }
+
+  if (effectiveRuntimeState === "empty") {
+    return (
+      <AdminOpsStatePanel
+        icon={<CheckCircle2 aria-hidden="true" className="size-8" />}
+        title="暂无 AI 调用日志"
+      />
+    );
+  }
+
+  if (effectiveRuntimeState === "error") {
+    return (
+      <AdminOpsStatePanel
+        icon={<AlertCircle aria-hidden="true" className="size-8" />}
+        title="AI 调用日志加载失败"
+      />
+    );
+  }
+
+  return (
+    <main className="space-y-6" data-testid="ops-ai-call-log-runtime-ready">
+      <AdminSplitLogHeader
+        eyebrow="运营后台"
+        title="AI 调用日志"
+        description="查看 AI 能力调用状态、失败和用量摘要；Provider 不在页面执行，详情只展示脱敏输入输出摘要。"
+      />
+
+      <AdminSplitLogSummaryBand
+        description="AI 调用日志只读；Provider 不在页面执行，原始 Prompt、Provider 请求/响应、原始 AI 输出和完整内容不展示。"
+        metricItems={[
+          { label: "AI 调用", value: runtimeData.aiCallLogs.length },
+          { label: "失败调用", value: failedAiCallCount },
+          { label: "用量摘要", value: runtimeData.costSummaries.length },
+        ]}
+        roleLabel={formatOpsLogRoleLabel(currentRole)}
+        testId="ops-ai-call-log-summary-band"
+        title="AI 调用日志只读"
+      />
+
+      <AdminAiCallLogToolbar
+        query={query}
+        onChange={(nextQuery) => {
+          setSelectedAiCallLogPublicId(null);
+          setQuery(nextQuery);
+        }}
+      />
+
+      <AdminAiCallLogTable
+        aiCallLogs={displayedAiCallLogs}
+        onSelectAiCallLog={setSelectedAiCallLogPublicId}
+      />
+
+      <AdminSplitLogPagination
+        page={query.page}
+        pageSize={query.pageSize}
+        total={totalCount}
+        onPageChange={(page) =>
+          setQuery((currentQuery) => ({ ...currentQuery, page }))
+        }
+      />
+
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.7fr)]">
+        <AdminAiCallLogDetailPanel aiCallLog={selectedAiCallLog} />
+        <AdminAiCallCostSummaryPanel
+          costSummaries={runtimeData.costSummaries}
+        />
+      </section>
+    </main>
+  );
+}
 
 export function AdminAiAuditLogOpsBaseline({
   currentRole = "super_admin",
@@ -929,6 +1303,593 @@ function hasAnyRuntimeData(data: AdminAiAuditRuntimeData): boolean {
     data.auditLogs.length > 0 ||
     data.aiCallLogs.length > 0 ||
     data.costSummaries.length > 0
+  );
+}
+
+function formatOpsLogRoleLabel(role: AdminAiAuditLogOpsRoleMode): string {
+  return role === "super_admin" ? "超级管理员" : "运营管理员";
+}
+
+function createAuditLogRuntimeQuery(query: AdminAuditLogQueryState): string {
+  const searchParams = new URLSearchParams({
+    page: String(query.page),
+    pageSize: String(query.pageSize),
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+  const keyword = query.keyword.trim();
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  if (query.resultStatus !== "all") {
+    searchParams.set("resultStatus", query.resultStatus);
+  }
+
+  return searchParams.toString();
+}
+
+function createAiCallLogRuntimeQuery(query: AdminAiCallLogQueryState): string {
+  const searchParams = new URLSearchParams({
+    page: String(query.page),
+    pageSize: String(query.pageSize),
+    sortBy: "startedAt",
+    sortOrder: "desc",
+  });
+  const keyword = query.keyword.trim();
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  if (query.callStatus !== "all") {
+    searchParams.set("callStatus", query.callStatus);
+  }
+
+  return searchParams.toString();
+}
+
+function filterAuditLogsForSplitPage(
+  auditLogs: AuditLogListDto["auditLogs"],
+  query: AdminAuditLogQueryState,
+): AuditLogListDto["auditLogs"] {
+  const keyword = query.keyword.trim().toLowerCase();
+
+  return auditLogs.filter((auditLog) => {
+    const matchesStatus =
+      query.resultStatus === "all" ||
+      auditLog.resultStatus === query.resultStatus;
+    const matchesKeyword =
+      keyword.length === 0 ||
+      [
+        auditLog.actionType,
+        auditLog.actorRole,
+        auditLog.targetResourceType,
+        auditLog.resultStatus,
+        auditLog.metadataSummary ?? "",
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword);
+
+    return matchesStatus && matchesKeyword;
+  });
+}
+
+function filterAiCallLogsForSplitPage(
+  aiCallLogs: AiCallLogListDto["aiCallLogs"],
+  query: AdminAiCallLogQueryState,
+): AiCallLogListDto["aiCallLogs"] {
+  const keyword = query.keyword.trim().toLowerCase();
+
+  return aiCallLogs.filter((aiCallLog) => {
+    const matchesStatus =
+      query.callStatus === "all" || aiCallLog.callStatus === query.callStatus;
+    const matchesKeyword =
+      keyword.length === 0 ||
+      [
+        aiCallLog.aiFuncType,
+        aiCallLog.callStatus,
+        aiCallLog.providerDisplayName,
+        aiCallLog.modelAlias,
+        aiCallLog.promptSummary ?? "",
+        aiCallLog.outputSummary ?? "",
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword);
+
+    return matchesStatus && matchesKeyword;
+  });
+}
+
+function paginateAuditLogs(
+  auditLogs: AuditLogListDto["auditLogs"],
+  query: AdminAuditLogQueryState,
+): AuditLogListDto["auditLogs"] {
+  const start = (query.page - 1) * query.pageSize;
+
+  return auditLogs.slice(start, start + query.pageSize);
+}
+
+function paginateAiCallLogs(
+  aiCallLogs: AiCallLogListDto["aiCallLogs"],
+  query: AdminAiCallLogQueryState,
+): AiCallLogListDto["aiCallLogs"] {
+  const start = (query.page - 1) * query.pageSize;
+
+  return aiCallLogs.slice(start, start + query.pageSize);
+}
+
+async function loadAuditLogRuntimeData(
+  sessionToken: string,
+  runtimeQuery: string,
+): Promise<typeof staticAuditLogRuntimeData> {
+  const response = await fetchAdminApi<AuditLogListDto>(
+    `/api/v1/audit-logs?${runtimeQuery}`,
+    sessionToken,
+  );
+
+  return {
+    auditLogs: readApiData(response).auditLogs,
+    pagination: response.pagination ?? null,
+  };
+}
+
+async function loadAiCallLogRuntimeData(
+  sessionToken: string,
+  runtimeQuery: string,
+): Promise<typeof staticAiCallLogRuntimeData> {
+  const [aiCallLogsResponse, summaryResponse] = await Promise.all([
+    fetchAdminApi<AiCallLogListDto>(
+      `/api/v1/ai-call-logs?${runtimeQuery}`,
+      sessionToken,
+    ),
+    fetchAdminApi<{ dailySummaries: AiCallLogCostSummaryDto[] }>(
+      `/api/v1/ai-call-logs/summary?${runtimeQuery}`,
+      sessionToken,
+    ),
+  ]);
+
+  return {
+    aiCallLogs: readApiData(aiCallLogsResponse).aiCallLogs,
+    costSummaries: readApiData(summaryResponse).dailySummaries,
+    pagination: aiCallLogsResponse.pagination ?? null,
+  };
+}
+
+function AdminSplitLogHeader({
+  description,
+  eyebrow,
+  title,
+}: {
+  description: string;
+  eyebrow: string;
+  title: string;
+}) {
+  return (
+    <header className="flex flex-col gap-2">
+      <p className="text-brand-primary text-sm font-medium">{eyebrow}</p>
+      <h1 className="font-heading text-text-primary text-2xl font-semibold">
+        {title}
+      </h1>
+      <p className="text-text-secondary max-w-3xl text-sm leading-6">
+        {description}
+      </p>
+    </header>
+  );
+}
+
+function AdminSplitLogSummaryBand({
+  description,
+  metricItems,
+  roleLabel,
+  testId,
+  title,
+}: {
+  description: string;
+  metricItems: Array<{ label: string; value: number }>;
+  roleLabel: string;
+  testId: string;
+  title: string;
+}) {
+  return (
+    <section
+      aria-label={title}
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid={testId}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            运营日志 summary-first
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">{title}</h2>
+          <p className="text-text-secondary text-sm leading-6">{description}</p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+          {roleLabel}
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        {metricItems.map((metricItem) => (
+          <AdminAiAuditSummaryTile
+            key={metricItem.label}
+            label={metricItem.label}
+            value={String(metricItem.value)}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AdminAuditLogToolbar({
+  onChange,
+  query,
+}: {
+  onChange: (query: AdminAuditLogQueryState) => void;
+  query: AdminAuditLogQueryState;
+}) {
+  return (
+    <section className={adminListToolbarClassName}>
+      <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,1fr)_12rem_10rem]">
+        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+          <span>审计日志关键词</span>
+          <input
+            aria-label="审计日志关键词"
+            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+            value={query.keyword}
+            onChange={(event) =>
+              onChange({ ...query, keyword: event.target.value, page: 1 })
+            }
+          />
+        </label>
+        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+          <span>结果状态</span>
+          <select
+            aria-label="审计结果状态"
+            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+            value={query.resultStatus}
+            onChange={(event) =>
+              onChange({
+                ...query,
+                page: 1,
+                resultStatus: event.target
+                  .value as AdminAuditLogQueryState["resultStatus"],
+              })
+            }
+          >
+            <option value="all">全部结果</option>
+            <option value="success">成功</option>
+            <option value="failed">失败</option>
+          </select>
+        </label>
+        <AdminSplitLogPageSizeSelect
+          pageSize={query.pageSize}
+          onChange={(pageSize) => onChange({ ...query, page: 1, pageSize })}
+        />
+      </div>
+      <p className="text-text-muted text-xs leading-5">
+        筛选变化自动回到第一页；详情仅展示脱敏元数据。
+      </p>
+    </section>
+  );
+}
+
+function AdminAiCallLogToolbar({
+  onChange,
+  query,
+}: {
+  onChange: (query: AdminAiCallLogQueryState) => void;
+  query: AdminAiCallLogQueryState;
+}) {
+  return (
+    <section className={adminListToolbarClassName}>
+      <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,1fr)_12rem_10rem]">
+        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+          <span>AI 调用关键词</span>
+          <input
+            aria-label="AI 调用关键词"
+            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+            value={query.keyword}
+            onChange={(event) =>
+              onChange({ ...query, keyword: event.target.value, page: 1 })
+            }
+          />
+        </label>
+        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+          <span>调用状态</span>
+          <select
+            aria-label="AI 调用状态"
+            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+            value={query.callStatus}
+            onChange={(event) =>
+              onChange({
+                ...query,
+                callStatus: event.target
+                  .value as AdminAiCallLogQueryState["callStatus"],
+                page: 1,
+              })
+            }
+          >
+            <option value="all">全部状态</option>
+            <option value="success">成功</option>
+            <option value="failed">失败</option>
+          </select>
+        </label>
+        <AdminSplitLogPageSizeSelect
+          pageSize={query.pageSize}
+          onChange={(pageSize) => onChange({ ...query, page: 1, pageSize })}
+        />
+      </div>
+      <p className="text-text-muted text-xs leading-5">
+        成本仅作本地运营摘要，不声明 Cost Calibration。
+      </p>
+    </section>
+  );
+}
+
+function AdminSplitLogPageSizeSelect({
+  onChange,
+  pageSize,
+}: {
+  onChange: (pageSize: AdminAiAuditLogPageSize) => void;
+  pageSize: AdminAiAuditLogPageSize;
+}) {
+  return (
+    <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+      <span>每页条数</span>
+      <select
+        aria-label="每页条数"
+        className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
+        value={pageSize}
+        onChange={(event) =>
+          onChange(Number(event.target.value) as AdminAiAuditLogPageSize)
+        }
+      >
+        {ADMIN_AI_AUDIT_LOG_PAGE_SIZE_OPTIONS.map((pageSizeOption) => (
+          <option key={pageSizeOption} value={pageSizeOption}>
+            {pageSizeOption}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function AdminAuditLogTable({
+  auditLogs,
+  onSelectAuditLog,
+}: {
+  auditLogs: AuditLogListDto["auditLogs"];
+  onSelectAuditLog: (publicId: string) => void;
+}) {
+  if (auditLogs.length === 0) {
+    return (
+      <div className={adminListStatePanelClassName}>
+        <p className="text-text-primary text-sm font-medium">暂无审计日志</p>
+        <p className="text-text-muted mt-2 text-xs">
+          当前筛选条件下没有可展示的脱敏审计摘要。
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={adminDataTableContainerClassName}>
+      <table aria-label="审计日志列表" className={adminDataTableClassName}>
+        <thead className="bg-muted/60 text-text-muted">
+          <tr>
+            <th className="px-4 py-3 font-medium">时间</th>
+            <th className="px-4 py-3 font-medium">操作者角色</th>
+            <th className="px-4 py-3 font-medium">动作</th>
+            <th className="px-4 py-3 font-medium">目标类别</th>
+            <th className="px-4 py-3 font-medium">结果</th>
+            <th className="px-4 py-3 font-medium">摘要</th>
+            <th className="px-4 py-3 text-right font-medium">操作</th>
+          </tr>
+        </thead>
+        <tbody className="divide-border divide-y">
+          {auditLogs.map((auditLog) => (
+            <tr
+              key={auditLog.publicId}
+              data-public-id={auditLog.publicId}
+              data-testid={`admin-audit-log-${auditLog.publicId}`}
+            >
+              <td className="text-text-secondary px-4 py-3">
+                {auditLog.createdAt}
+              </td>
+              <td className="text-text-primary px-4 py-3">
+                {formatAdminOpsDisplayValue(auditLog.actorRole)}
+              </td>
+              <td className="text-text-primary px-4 py-3">
+                {formatAdminOpsDisplayValue(auditLog.actionType)}
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {formatAdminOpsDisplayValue(auditLog.targetResourceType)}
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {formatAdminOpsDisplayValue(auditLog.resultStatus)}
+              </td>
+              <td className="text-text-muted px-4 py-3">
+                {auditLog.metadataSummary ?? "已脱敏元数据"}
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex justify-end">
+                  <AdminOpsDetailButton
+                    label="查看脱敏详情"
+                    onClick={() => onSelectAuditLog(auditLog.publicId)}
+                  />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function AdminAiCallLogTable({
+  aiCallLogs,
+  onSelectAiCallLog,
+}: {
+  aiCallLogs: AiCallLogListDto["aiCallLogs"];
+  onSelectAiCallLog: (publicId: string) => void;
+}) {
+  if (aiCallLogs.length === 0) {
+    return (
+      <div className={adminListStatePanelClassName}>
+        <p className="text-text-primary text-sm font-medium">
+          暂无 AI 调用日志
+        </p>
+        <p className="text-text-muted mt-2 text-xs">
+          当前筛选条件下没有可展示的脱敏 AI 调用摘要。
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={adminDataTableContainerClassName}>
+      <table aria-label="AI 调用日志列表" className={adminDataTableClassName}>
+        <thead className="bg-muted/60 text-text-muted">
+          <tr>
+            <th className="px-4 py-3 font-medium">时间</th>
+            <th className="px-4 py-3 font-medium">能力</th>
+            <th className="px-4 py-3 font-medium">模型</th>
+            <th className="px-4 py-3 font-medium">状态</th>
+            <th className="px-4 py-3 font-medium">摘要</th>
+            <th className="px-4 py-3 font-medium">Token</th>
+            <th className="px-4 py-3 text-right font-medium">操作</th>
+          </tr>
+        </thead>
+        <tbody className="divide-border divide-y">
+          {aiCallLogs.map((aiCallLog) => (
+            <tr
+              key={aiCallLog.publicId}
+              data-public-id={aiCallLog.publicId}
+              data-testid={`admin-ai-call-log-${aiCallLog.publicId}`}
+            >
+              <td className="text-text-secondary px-4 py-3">
+                {aiCallLog.startedAt}
+              </td>
+              <td className="text-text-primary px-4 py-3">
+                {formatAdminOpsDisplayValue(aiCallLog.aiFuncType)}
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {aiCallLog.providerDisplayName} / {aiCallLog.modelAlias}
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {formatAdminOpsDisplayValue(aiCallLog.callStatus)}
+              </td>
+              <td className="text-text-muted px-4 py-3">
+                {aiCallLog.promptSummary ?? "Prompt 摘要已脱敏"}
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {aiCallLog.totalTokenCount ?? 0}
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex justify-end">
+                  <AdminOpsDetailButton
+                    label="查看脱敏详情"
+                    onClick={() => onSelectAiCallLog(aiCallLog.publicId)}
+                  />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function AdminSplitLogPagination({
+  onPageChange,
+  page,
+  pageSize,
+  total,
+}: {
+  onPageChange: (page: number) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+}) {
+  const totalPage = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPage);
+  const start = total === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const end = Math.min(total, safePage * pageSize);
+
+  return (
+    <section className={adminListPaginationClassName}>
+      <p className="text-text-secondary">
+        显示 {start}-{end} / 共 {total} 条记录
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          className="border-border text-text-secondary hover:bg-muted rounded-md border px-3 py-2 transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={safePage <= 1}
+          type="button"
+          onClick={() => onPageChange(safePage - 1)}
+        >
+          上一页
+        </button>
+        <span className="text-text-muted text-xs">
+          第 {safePage} / {totalPage} 页
+        </span>
+        <button
+          className="border-border text-text-secondary hover:bg-muted rounded-md border px-3 py-2 transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={safePage >= totalPage}
+          type="button"
+          onClick={() => onPageChange(safePage + 1)}
+        >
+          下一页
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function AdminAiCallCostSummaryPanel({
+  costSummaries,
+}: {
+  costSummaries: AiCallLogCostSummaryDto[];
+}) {
+  return (
+    <AdminOpsPanel title="用量摘要">
+      {costSummaries.length === 0 ? (
+        <p className="text-text-muted text-sm">当前没有可展示的用量摘要。</p>
+      ) : (
+        <div>
+          {costSummaries.map((costSummary) => (
+            <AdminOpsSummaryRow
+              key={[
+                costSummary.bucket,
+                costSummary.aiFuncType,
+                costSummary.modelAlias,
+              ].join("-")}
+              label={`${costSummary.bucket} / ${formatAdminOpsDisplayValue(
+                costSummary.aiFuncType,
+              )}`}
+              meta={[
+                costSummary.providerDisplayName,
+                costSummary.modelAlias,
+                `调用次数：${costSummary.callCount}`,
+                `失败：${costSummary.failedCount}`,
+                `预估成本：${costSummary.estimatedCostCny} 元`,
+              ].join(" / ")}
+              publicId={`${costSummary.bucket}-${costSummary.aiFuncType}`}
+            />
+          ))}
+        </div>
+      )}
+      <p className="text-text-muted mt-3 text-xs">
+        用量摘要不展示 Provider payload，也不构成 Cost Calibration 结论。
+      </p>
+    </AdminOpsPanel>
   );
 }
 

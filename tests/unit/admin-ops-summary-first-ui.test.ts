@@ -8,7 +8,10 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AdminAiAuditLogOpsBaseline } from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
+import {
+  AdminAiCallLogOpsPage,
+  AdminAuditLogOpsPage,
+} from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
 import { AdminOpsManagement } from "@/features/admin/admin-ops-management/AdminOpsManagement";
 import { AdminContactConfigPage } from "@/features/admin/contact-config/AdminContactConfigPage";
 import {
@@ -449,37 +452,63 @@ describe("admin ops summary-first UI", () => {
     expectCookieBackedFetch(redeemCodeFetchMock, "/api/v1/redeem-codes");
   });
 
-  it("renders AI audit summary before model management and keeps ops read-only boundary visible", () => {
-    render(
-      createElement(AdminAiAuditLogOpsBaseline, { currentRole: "ops_admin" }),
-    );
+  it("renders separated audit and AI call log pages without model management mixing", () => {
+    render(createElement(AdminAuditLogOpsPage, { currentRole: "ops_admin" }));
 
-    const summaryBand = screen.getByTestId("ops-ai-audit-summary-first-band");
-    expect(summaryBand).toHaveTextContent("运营管理员");
-    expect(summaryBand).toHaveTextContent("只读日志");
-    expect(summaryBand).toHaveTextContent("Provider 不在页面执行");
-    expect(summaryBand).toHaveTextContent("原始 Prompt");
+    const auditSummaryBand = screen.getByTestId("ops-audit-log-summary-band");
+    expect(auditSummaryBand).toHaveTextContent("运营管理员");
+    expect(auditSummaryBand).toHaveTextContent("审计日志只读");
+    expect(auditSummaryBand).toHaveTextContent("原始请求体");
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByRole("tab", { name: "模型配置" }),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+      screen.getByRole("heading", { name: "审计日志" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "模型配置" })).toBeNull();
     expect(screen.queryByText("保存配置")).not.toBeInTheDocument();
+    expect(screen.queryByText("正式入库复核")).not.toBeInTheDocument();
+
+    cleanup();
+
+    render(createElement(AdminAiCallLogOpsPage, { currentRole: "ops_admin" }));
+
+    const aiCallSummaryBand = screen.getByTestId(
+      "ops-ai-call-log-summary-band",
+    );
+    expect(aiCallSummaryBand).toHaveTextContent("运营管理员");
+    expect(aiCallSummaryBand).toHaveTextContent("AI 调用日志只读");
+    expect(aiCallSummaryBand).toHaveTextContent("Provider 不在页面执行");
+    expect(
+      screen.getByRole("heading", { name: "AI 调用日志" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "模型配置" })).toBeNull();
+    expect(screen.queryByText("保存配置")).not.toBeInTheDocument();
+    expect(screen.queryByText("正式入库复核")).not.toBeInTheDocument();
   });
 
-  it("keeps AI audit logs usable with cookie-backed admin sessions", async () => {
+  it("keeps split audit and AI call logs usable with cookie-backed admin sessions", async () => {
     const fetchMock = stubFetchForSummaryFirstPages();
 
-    render(
-      createElement(AdminAiAuditLogOpsBaseline, {
-        currentRole: "ops_admin",
-        runtimeEnabled: true,
-      }),
+    render(createElement(AdminAuditLogOpsPage, { runtimeEnabled: true }));
+
+    await screen.findByRole("heading", { name: "审计日志" });
+    expectCookieBackedFetch(fetchMock, "/api/v1/audit-logs");
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/ai-call-logs\b/u),
     );
 
-    await screen.findByRole("heading", { name: "AI 配置与日志运营" });
-    expectCookieBackedFetch(fetchMock, "/api/v1/model-providers");
-    expectCookieBackedFetch(fetchMock, "/api/v1/audit-logs");
+    cleanup();
+    localStorage.clear();
+    vi.unstubAllGlobals();
+
+    const aiCallFetchMock = stubFetchForSummaryFirstPages();
+
+    render(createElement(AdminAiCallLogOpsPage, { runtimeEnabled: true }));
+
+    await screen.findByRole("heading", { name: "AI 调用日志" });
+    expectCookieBackedFetch(aiCallFetchMock, "/api/v1/ai-call-logs");
+    expectCookieBackedFetch(aiCallFetchMock, "/api/v1/ai-call-logs/summary");
+    expect(
+      aiCallFetchMock.mock.calls.map(([url]) => String(url)),
+    ).not.toContainEqual(expect.stringMatching(/^\/api\/v1\/audit-logs\b/u));
   });
 
   it("renders contact config summary before the form and keeps standard and advanced purchase guidance clear", async () => {

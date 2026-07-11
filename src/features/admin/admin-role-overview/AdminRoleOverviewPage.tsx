@@ -117,10 +117,16 @@ const operationsEntries: OverviewEntry[] = [
     Icon: KeyRound,
   },
   {
-    label: "审计与AI调用日志",
-    description: "查看脱敏日志摘要和失败状态。",
-    href: "/ops/ai-audit-logs",
+    label: "审计日志",
+    description: "查看系统操作审计摘要和失败状态。",
+    href: "/ops/audit-logs",
     Icon: ScrollText,
+  },
+  {
+    label: "AI 调用日志",
+    description: "查看 AI 调用状态、失败和用量摘要。",
+    href: "/ops/ai-call-logs",
+    Icon: WandSparkles,
   },
   {
     label: "购买联系方式",

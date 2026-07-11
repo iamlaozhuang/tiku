@@ -114,9 +114,15 @@ describe("admin role overview UI", () => {
     expect(
       screen.getByRole("link", { name: "卡密与企业授权" }),
     ).toHaveAttribute("href", "/ops/redeem-codes");
-    expect(
-      screen.getByRole("link", { name: "审计与AI调用日志" }),
-    ).toHaveAttribute("href", "/ops/ai-audit-logs");
+    expect(screen.getByRole("link", { name: "审计日志" })).toHaveAttribute(
+      "href",
+      "/ops/audit-logs",
+    );
+    expect(screen.getByRole("link", { name: "AI 调用日志" })).toHaveAttribute(
+      "href",
+      "/ops/ai-call-logs",
+    );
+    expect(screen.queryByRole("link", { name: "审计与AI调用日志" })).toBeNull();
     expect(screen.queryByRole("link", { name: "试卷与发布" })).toBeNull();
   });
 

@@ -196,9 +196,17 @@ describe("AdminDashboardLayout navigation", () => {
     expect(
       screen.getByRole("link", { name: /卡密与企业授权/u }),
     ).toHaveAttribute("href", "/ops/redeem-codes");
+    expect(screen.getByRole("link", { name: "审计日志" })).toHaveAttribute(
+      "href",
+      "/ops/audit-logs",
+    );
+    expect(screen.getByRole("link", { name: "AI 调用日志" })).toHaveAttribute(
+      "href",
+      "/ops/ai-call-logs",
+    );
     expect(
-      screen.getByRole("link", { name: /审计与AI调用日志/u }),
-    ).toHaveAttribute("href", "/ops/ai-audit-logs");
+      screen.queryByRole("link", { name: /审计与AI调用日志/u }),
+    ).toBeNull();
     expect(screen.queryByRole("link", { name: /资源管理/u })).toBeNull();
   });
 
@@ -244,9 +252,8 @@ describe("AdminDashboardLayout navigation", () => {
       "/content/resources",
     );
     expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
-    expect(
-      screen.queryByRole("link", { name: /审计与AI调用日志/u }),
-    ).toBeNull();
+    expect(screen.queryByRole("link", { name: "审计日志" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "AI 调用日志" })).toBeNull();
   });
 
   it("shows explicit workspace switcher destinations for multi-role backend admins", async () => {
@@ -475,9 +482,8 @@ describe("AdminDashboardLayout navigation", () => {
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /试卷管理/u })).toBeNull();
     expect(screen.queryByRole("link", { name: /卡密与企业授权/u })).toBeNull();
-    expect(
-      screen.queryByRole("link", { name: /审计与AI调用日志/u }),
-    ).toBeNull();
+    expect(screen.queryByRole("link", { name: "审计日志" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "AI 调用日志" })).toBeNull();
   });
 
   it("denies content admins from the operations workspace", async () => {

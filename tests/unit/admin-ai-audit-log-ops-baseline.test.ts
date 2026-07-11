@@ -8,7 +8,11 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AdminAiAuditLogOpsBaseline } from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
+import {
+  AdminAiAuditLogOpsBaseline,
+  AdminAiCallLogOpsPage,
+  AdminAuditLogOpsPage,
+} from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
 import {
   ADMIN_AI_AUDIT_LOG_ERROR_CODES,
   ADMIN_AI_AUDIT_LOG_PAGE_SIZE_OPTIONS,
@@ -608,6 +612,205 @@ describe("admin ai and audit log ops baseline", () => {
     expect(document.body).not.toHaveTextContent("RAW_PROMPT");
     expect(document.body).not.toHaveTextContent("RAW_PROVIDER_PAYLOAD");
     expect(document.body).not.toHaveTextContent("synthetic-local-session");
+  });
+
+  it("loads the split audit log page without AI call, cost, model, or prompt endpoints", async () => {
+    localStorage.setItem("tiku.localSessionToken", "split-audit-session");
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const requestPath = String(input);
+
+      if (!requestPath.startsWith("/api/v1/audit-logs")) {
+        return {
+          json: async () => ({
+            code: 500641,
+            message: "unexpected endpoint",
+            data: null,
+          }),
+        } as Response;
+      }
+
+      return {
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: {
+            auditLogs: [
+              {
+                publicId: "runtime-audit-log-split-001",
+                actorPublicId: "admin-runtime-001",
+                actorRole: "ops_admin",
+                actionType: "user.reset_password",
+                targetResourceType: "user",
+                targetPublicId: null,
+                resultStatus: "success",
+                metadataSummary: "redacted audit metadata",
+                requestIp: null,
+                createdAt: "2026-05-26T00:00:00.000Z",
+              },
+            ],
+          },
+          pagination: {
+            page: 1,
+            pageSize: 20,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+            total: 1,
+          },
+        }),
+      } as Response;
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminAuditLogOpsPage, { runtimeEnabled: true }));
+
+    await screen.findByRole("heading", { level: 1, name: "审计日志" });
+
+    expect(
+      screen.getByRole("table", { name: "审计日志列表" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-audit-log-runtime-audit-log-split-001"),
+    ).toHaveTextContent("redacted audit metadata");
+    expect(screen.queryByText("AI 调用日志")).toBeNull();
+    expect(screen.queryByText("模型配置")).toBeNull();
+    expect(screen.queryByText("Prompt 模板")).toBeNull();
+    expect(document.body).not.toHaveTextContent("RAW_PROMPT");
+    expect(document.body).not.toHaveTextContent("RAW_PROVIDER_PAYLOAD");
+    expect(document.body).not.toHaveTextContent("split-audit-session");
+
+    const fetchedPaths = fetchMock.mock.calls.map(([input]) => String(input));
+    expect(fetchedPaths).toHaveLength(1);
+    expect(fetchedPaths[0]).toMatch(/^\/api\/v1\/audit-logs\b/u);
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/ai-call-logs\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/model-/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/prompt-templates\b/u),
+    );
+  });
+
+  it("loads the split AI call log page without audit, model, or prompt endpoints", async () => {
+    localStorage.setItem("tiku.localSessionToken", "split-ai-call-session");
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const requestPath = String(input);
+
+      if (requestPath.startsWith("/api/v1/ai-call-logs/summary")) {
+        return {
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              dailySummaries: [
+                {
+                  bucket: "2026-05-26",
+                  bucketType: "day",
+                  aiFuncType: "ai_scoring",
+                  providerDisplayName: "Local Mock",
+                  modelAlias: "local-runtime-model",
+                  callCount: 1,
+                  successCount: 0,
+                  failedCount: 1,
+                  totalTokenCount: 42,
+                  estimatedCostCny: "0.01",
+                },
+              ],
+            },
+          }),
+        } as Response;
+      }
+
+      if (requestPath.startsWith("/api/v1/ai-call-logs")) {
+        return {
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              aiCallLogs: [
+                {
+                  publicId: "runtime-ai-call-log-split-001",
+                  userPublicId: null,
+                  organizationPublicId: null,
+                  profession: "monopoly",
+                  level: 3,
+                  aiFuncType: "ai_scoring",
+                  callStatus: "failed",
+                  providerDisplayName: "Local Mock",
+                  modelAlias: "local-runtime-model",
+                  promptSummary: "redacted prompt summary",
+                  outputSummary: "redacted output summary",
+                  promptTokenCount: 20,
+                  completionTokenCount: 22,
+                  totalTokenCount: 42,
+                  estimatedCostCny: "0.01",
+                  latencyMs: 100,
+                  startedAt: "2026-05-26T00:00:00.000Z",
+                  completedAt: "2026-05-26T00:00:00.100Z",
+                },
+              ],
+            },
+            pagination: {
+              page: 1,
+              pageSize: 20,
+              sortBy: "startedAt",
+              sortOrder: "desc",
+              total: 1,
+            },
+          }),
+        } as Response;
+      }
+
+      return {
+        json: async () => ({
+          code: 500641,
+          message: "unexpected endpoint",
+          data: null,
+        }),
+      } as Response;
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminAiCallLogOpsPage, { runtimeEnabled: true }));
+
+    await screen.findByRole("heading", { level: 1, name: "AI 调用日志" });
+
+    expect(
+      screen.getByRole("table", { name: "AI 调用日志列表" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-ai-call-log-runtime-ai-call-log-split-001"),
+    ).toHaveTextContent("redacted prompt summary");
+    expect(screen.getByText("失败调用")).toBeInTheDocument();
+    expect(screen.queryByText("审计日志只读")).toBeNull();
+    expect(screen.queryByText("模型配置")).toBeNull();
+    expect(screen.queryByText("Prompt 模板")).toBeNull();
+    expect(document.body).not.toHaveTextContent("RAW_PROMPT");
+    expect(document.body).not.toHaveTextContent("RAW_PROVIDER_PAYLOAD");
+    expect(document.body).not.toHaveTextContent("split-ai-call-session");
+
+    const fetchedPaths = fetchMock.mock.calls.map(([input]) => String(input));
+    expect(fetchedPaths).toHaveLength(2);
+    expect(fetchedPaths).toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/ai-call-logs\b/u),
+    );
+    expect(fetchedPaths).toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/ai-call-logs\/summary\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/audit-logs\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/model-/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/prompt-templates\b/u),
+    );
   });
 
   it("renders ai and audit operation states with redacted runtime metadata", () => {

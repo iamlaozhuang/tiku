@@ -1,5 +1,5 @@
-import { AdminAiAuditLogOpsBaseline } from "./AdminAiAuditLogOpsBaseline";
+import { redirect } from "next/navigation";
 
 export default function AiAuditLogsPage() {
-  return <AdminAiAuditLogOpsBaseline runtimeEnabled />;
+  redirect("/ops/audit-logs");
 }
