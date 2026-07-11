@@ -70,6 +70,18 @@ export function updateAdminPageSize(
   };
 }
 
+export function updateAdminPage(
+  query: AdminListQuery,
+  page: number,
+): AdminListQuery {
+  const nextPage = Number.isFinite(page) ? Math.trunc(page) : 1;
+
+  return {
+    ...query,
+    page: Math.max(1, nextPage),
+  };
+}
+
 export function isAdminPageSize(value: number): value is AdminPageSize {
   return ADMIN_PAGE_SIZE_OPTIONS.includes(value as AdminPageSize);
 }

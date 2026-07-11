@@ -26,7 +26,16 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "@/features/admin/content-admin-runtime";
-import type { ApiResponse } from "@/server/contracts/api-response";
+import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import {
+  ADMIN_DEFAULT_PAGE_SIZE,
+  ADMIN_PAGE_SIZE_OPTIONS,
+  type AdminListQuery,
+} from "@/server/contracts/admin-interaction-contract";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import type {
   AdminAccountCreationRole,
   AdminAccountCreationResultDto,
@@ -53,6 +62,7 @@ type AdminOpsLoadState =
 type AdminOpsData = {
   currentAdminRoles: AdminRole[];
   users: AdminUserListDto["users"];
+  usersPagination: ApiPagination | null;
   organizations: OrganizationListDto["organizations"];
 };
 
@@ -90,7 +100,6 @@ type AdminOpsLoadResult =
       loadState: "unauthorized" | "error";
     };
 
-const DEFAULT_PAGE_SIZE = "20";
 const DEFAULT_SORT_ORDER = "desc";
 
 const userStatusOptions = [
@@ -171,37 +180,45 @@ const emptyAdminOpsData: AdminOpsData = {
   currentAdminRoles: [],
   organizations: [],
   users: [],
+  usersPagination: null,
 };
 
 const adminOpsLoadCache = new Map<string, Promise<AdminOpsLoadResult>>();
 const adminAccountPasswordRequestField = "pass" + "word";
 
-function createListSearchParams(input: {
-  sortBy: string;
-  sortOrder: string;
+function createListSearchParams({
+  query,
+  userStatus,
+  userType,
+}: {
+  query: AdminListQuery;
   userStatus: string;
   userType: string;
 }) {
   const searchParams = new URLSearchParams({
-    page: "1",
-    pageSize: DEFAULT_PAGE_SIZE,
-    sortBy: input.sortBy,
-    sortOrder: input.sortOrder,
+    page: `${query.page}`,
+    pageSize: `${query.pageSize}`,
+    sortBy: query.sortBy,
+    sortOrder: query.sortOrder,
   });
 
-  if (input.userStatus !== "all") {
-    searchParams.set("status", input.userStatus);
+  if (userStatus !== "all") {
+    searchParams.set("status", userStatus);
   }
 
-  if (input.userType !== "all") {
-    searchParams.set("userType", input.userType);
+  if (userType !== "all") {
+    searchParams.set("userType", userType);
   }
 
   return searchParams.toString();
 }
 
 function hasAdminOpsData(data: AdminOpsData): boolean {
-  return data.users.length > 0 || data.organizations.length > 0;
+  return (
+    data.users.length > 0 ||
+    (data.usersPagination?.total ?? 0) > 0 ||
+    data.organizations.length > 0
+  );
 }
 
 function hasAdminOpsWorkspaceContext(data: AdminOpsData): boolean {
@@ -257,6 +274,27 @@ function formatMappedLabel(
   fallback: string,
 ): string {
   return labels[value] ?? fallback;
+}
+
+function createFallbackUserPagination(
+  listQuery: string,
+  total: number,
+): ApiPagination {
+  const searchParams = new URLSearchParams(listQuery);
+  const page = Number(searchParams.get("page"));
+  const pageSize = Number(searchParams.get("pageSize"));
+  const sortOrder = searchParams.get("sortOrder");
+
+  return {
+    page: Number.isInteger(page) && page > 0 ? page : 1,
+    pageSize:
+      Number.isInteger(pageSize) && pageSize > 0
+        ? pageSize
+        : ADMIN_DEFAULT_PAGE_SIZE,
+    sortBy: searchParams.get("sortBy") ?? "updatedAt",
+    sortOrder: sortOrder === "asc" ? "asc" : "desc",
+    total,
+  };
 }
 
 async function postAdminApi<TData>(
@@ -348,6 +386,9 @@ async function loadAdminOpsData(
       currentAdminRoles: sessionResponse.data.user.adminRoles ?? [],
       organizations: organizationResponse.data.organizations,
       users: userResponse.data.users,
+      usersPagination:
+        userResponse.pagination ??
+        createFallbackUserPagination(listQuery, userResponse.data.users.length),
     };
 
     return {
@@ -367,8 +408,18 @@ export function AdminOpsManagement() {
   const [data, setData] = useState<AdminOpsData>(emptyAdminOpsData);
   const [userStatus, setUserStatus] = useState<UserStatus | "all">("all");
   const [userType, setUserType] = useState<UserType | "all">("all");
-  const [sortBy, setSortBy] = useState("updatedAt");
-  const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
+  const {
+    handleFilterChange,
+    handlePageChange,
+    handlePageSizeChange,
+    handleSortChange,
+    query,
+  } = useAdminListInteraction({
+    initialQuery: {
+      sortBy: "updatedAt",
+      sortOrder: DEFAULT_SORT_ORDER,
+    },
+  });
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState>(null);
   const [resetPasswordInput, setResetPasswordInput] = useState("");
@@ -391,12 +442,11 @@ export function AdminOpsManagement() {
   const listQuery = useMemo(
     () =>
       createListSearchParams({
-        sortBy,
-        sortOrder,
+        query,
         userStatus,
         userType,
       }),
-    [sortBy, sortOrder, userStatus, userType],
+    [query, userStatus, userType],
   );
   const allowedAdminAccountCreationRoles = useMemo(
     () => getAllowedAdminAccountCreationRoles(data.currentAdminRoles),
@@ -411,6 +461,34 @@ export function AdminOpsManagement() {
       ),
     [adminAccountForm, allowedAdminAccountCreationRoles, data.organizations],
   );
+  const usersPagination =
+    data.usersPagination ??
+    createFallbackUserPagination(listQuery, data.users.length);
+  const userPageCount = Math.max(
+    1,
+    Math.ceil(usersPagination.total / usersPagination.pageSize),
+  );
+  const visibleUserStart =
+    usersPagination.total === 0
+      ? 0
+      : (usersPagination.page - 1) * usersPagination.pageSize + 1;
+  const visibleUserEnd =
+    usersPagination.total === 0
+      ? 0
+      : Math.min(
+          usersPagination.page * usersPagination.pageSize,
+          usersPagination.total,
+        );
+
+  function handleUserStatusChange(value: UserStatus | "all") {
+    setUserStatus(value);
+    handleFilterChange("userStatus");
+  }
+
+  function handleUserTypeChange(value: UserType | "all") {
+    setUserType(value);
+    handleFilterChange("userType");
+  }
 
   useEffect(() => {
     let isActive = true;
@@ -649,41 +727,11 @@ export function AdminOpsManagement() {
 
       <OperationsSummaryFirstBand data={data} />
 
-      <section
-        aria-label="运营筛选"
-        className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
-      >
-        <FilterSelect
-          label="用户状态"
-          options={userStatusOptions}
-          value={userStatus}
-          onChange={(value) => setUserStatus(value as UserStatus | "all")}
-        />
-        <FilterSelect
-          label="用户类型"
-          options={userTypeOptions}
-          value={userType}
-          onChange={(value) => setUserType(value as UserType | "all")}
-        />
-        <Button
-          variant="outline"
-          onClick={() => {
-            setSortBy("registeredAt");
-            setSortOrder(sortOrder === "desc" ? "asc" : "desc");
-          }}
-        >
-          注册时间排序
-        </Button>
-        <p className="text-text-muted text-sm">
-          筛选变化自动刷新；关键写操作使用二次确认。
-        </p>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-4" aria-label="运营摘要">
+      <section className="grid gap-4 xl:grid-cols-4" aria-label="用户摘要">
         <SummaryTile
           icon={<ShieldCheck aria-hidden="true" className="size-4" />}
           label="用户"
-          value={`${data.users.length}`}
+          value={`${usersPagination.total}`}
         />
         <SummaryTile
           icon={<UserPlus aria-hidden="true" className="size-4" />}
@@ -697,25 +745,73 @@ export function AdminOpsManagement() {
         />
         <SummaryTile
           icon={<UserX aria-hidden="true" className="size-4" />}
-          label="停用用户"
+          label="本页停用"
           value={`${
             data.users.filter((user) => user.status === "disabled").length
           }`}
         />
       </section>
 
-      <AdminAccountSecurityPolicyPanel />
-
-      {allowedAdminAccountCreationRoles.length > 0 ? (
-        <AdminAccountCreationPanel
-          allowedRoles={allowedAdminAccountCreationRoles}
-          formState={normalizedAdminAccountForm}
-          isSubmitting={isCreatingAdminAccount}
-          organizations={data.organizations}
-          onChange={setAdminAccountForm}
-          onSubmit={() => void handleCreateAdminAccount()}
-        />
-      ) : null}
+      <section
+        aria-label="用户筛选"
+        className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      >
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-text-primary text-base font-semibold">
+              用户筛选
+            </h2>
+            <p className="text-text-muted text-sm">
+              按账号状态、用户类型和注册时间缩小用户列表；筛选后自动回到第一页。
+            </p>
+          </div>
+          <p className="text-text-muted text-sm">
+            共 {usersPagination.total} 个用户
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,12rem)_minmax(0,12rem)_minmax(0,10rem)_auto_1fr] xl:items-end">
+          <FilterSelect
+            label="用户状态"
+            options={userStatusOptions}
+            value={userStatus}
+            onChange={(value) =>
+              handleUserStatusChange(value as UserStatus | "all")
+            }
+          />
+          <FilterSelect
+            label="用户类型"
+            options={userTypeOptions}
+            value={userType}
+            onChange={(value) =>
+              handleUserTypeChange(value as UserType | "all")
+            }
+          />
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">每页条数</span>
+            <select
+              aria-label="每页条数"
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+              value={`${query.pageSize}`}
+              onChange={(event) => handlePageSizeChange(event.target.value)}
+            >
+              {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
+                <option key={optionPageSize} value={optionPageSize}>
+                  {optionPageSize}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button
+            variant="outline"
+            onClick={() => handleSortChange("registeredAt")}
+          >
+            注册时间排序
+          </Button>
+          <p className="text-text-muted text-sm">
+            查看详情和重置密码仍需要二次确认。
+          </p>
+        </div>
+      </section>
 
       <section>
         <AdminPanel title="用户管理">
@@ -768,7 +864,48 @@ export function AdminOpsManagement() {
               </AdminRow>
             ))
           )}
+          <div className="border-border flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-text-muted text-sm">
+              显示 {visibleUserStart}-{visibleUserEnd} / 共{" "}
+              {usersPagination.total} 个用户
+            </p>
+            <div className="flex gap-2">
+              <Button
+                disabled={usersPagination.page <= 1}
+                variant="outline"
+                onClick={() => handlePageChange(usersPagination.page - 1)}
+              >
+                上一页
+              </Button>
+              <Button
+                disabled={usersPagination.page >= userPageCount}
+                variant="outline"
+                onClick={() =>
+                  handlePageChange(
+                    Math.min(userPageCount, usersPagination.page + 1),
+                  )
+                }
+              >
+                下一页
+              </Button>
+            </div>
+          </div>
         </AdminPanel>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1.1fr]">
+        <AdminAccountSecurityPolicyPanel />
+
+        {allowedAdminAccountCreationRoles.length > 0 ? (
+          <AdminAccountCreationPanel
+            allowedRoles={allowedAdminAccountCreationRoles}
+            formState={normalizedAdminAccountForm}
+            isSubmitting={isCreatingAdminAccount}
+            organizations={data.organizations}
+            onChange={setAdminAccountForm}
+            onSubmit={() => void handleCreateAdminAccount()}
+          />
+        ) : null}
       </section>
 
       <AdminUserDetailPanel
@@ -928,7 +1065,15 @@ function AdminAccountCreationPanel({
       aria-label="后台账号创建"
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
     >
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+      <div className="mb-4 space-y-1">
+        <h2 className="text-text-primary text-base font-semibold">
+          创建后台账号
+        </h2>
+        <p className="text-text-muted text-sm">
+          后台账号与学员账号域分离；组织管理员必须先绑定组织上下文。
+        </p>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">角色</span>
           <select

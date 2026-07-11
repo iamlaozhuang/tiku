@@ -1,8 +1,34 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-ops-users-information-architecture-repair-2026-07-11
+currentPhase: 0704-ops-users-layout-pagination-polish-2026-07-11
 updatedAt: "2026-07-11T00:00:00-07:00"
+latest0704OpsUsersLayoutPaginationPolish:
+  id: 0704-ops-users-layout-pagination-polish-2026-07-11
+  status: ready_for_closeout
+  result: pass_localhost_ui_layout_pagination_polish_local_commit_ready
+  branch: codex/0704-ops-users-layout-pagination-polish
+  dependsOn: 0704-ops-users-information-architecture-repair-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-users-layout-pagination-polish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-users-layout-pagination-polish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-users-layout-pagination-polish-audit.md
+  executionBoundary:
+    previewPreparation: paused
+    runtime: localhost_ui_source_test_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    screenshotRawDomTrace: not_executed
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    targetedTests: pass_5_files_22_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_10_files_scanned
+    moduleRunV2PrePushReadiness: pass_after_repository_sha_checkpoint_alignment
+    providerExecution: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
 latest0704OpsUsersInformationArchitectureRepair:
   id: 0704-ops-users-information-architecture-repair-2026-07-11
   status: ready_for_closeout
@@ -4164,16 +4190,19 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-ops-users-information-architecture-repair-2026-07-11
-  title: 0704 ops users information architecture repair
-  phase: 0704-ops-users-information-architecture-repair-2026-07-11
+  id: 0704-ops-users-layout-pagination-polish-2026-07-11
+  title: 0704 ops users layout pagination polish
+  phase: 0704-ops-users-layout-pagination-polish-2026-07-11
   status: ready_for_closeout
-  result: pass_localhost_ui_information_architecture_repair_only
+  result: pass_localhost_ui_layout_pagination_polish_local_commit_ready
   priority: p1
-  taskKind: implementation_repair
-  branch: codex/0704-ops-users-information-architecture-repair
+  taskKind: implementation_polish
+  branch: codex/0704-ops-users-layout-pagination-polish
   humanApprovalBoundary:
-    implementationAndCloseout: current_user_approved_0704_ops_users_information_architecture_repair_commit_merge_push_cleanup_2026_07_11
+    implementation: current_user_requested_ops_users_visual_layout_pagination_polish_2026_07_11
+    localCommit: allowed_after_full_local_gate
+    fastForwardMerge: requires_fresh_approval
+    push: requires_fresh_approval
     providerExecution: blocked
     envSecretAccess: blocked
     stagingProdDeploy: blocked
@@ -4185,23 +4214,23 @@ currentTask:
   plannedAt: "2026-07-11T00:00:00-07:00"
   claimedAt: "2026-07-11T00:00:00-07:00"
   completedAt: "2026-07-11T00:00:00-07:00"
-  targetClosureItem: Repair operations user-management information architecture and remove redundant redeem-code page header links.
+  targetClosureItem: Polish operations user-management visual hierarchy, clarify filter/account creation surfaces, and add reusable pagination.
   behaviorBoundary: targeted_ui_source_test_docs_fix_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
   evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-users-information-architecture-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-users-information-architecture-repair-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-users-information-architecture-repair-audit.md
-  dependsOn: 0704-localhost-ui-polish-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-users-layout-pagination-polish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-users-layout-pagination-polish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-users-layout-pagination-polish-audit.md
+  dependsOn: 0704-ops-users-information-architecture-repair-2026-07-11
   nextRequiredTaskId: null
   validationSummary:
-    status: pass_ready_for_closeout
+    status: pass_ready_for_local_commit
     redTargetedTests: pass_expected_2_failed_before_implementation
-    greenTargetedTests: pass_4_files_18_tests_fresh_after_import_cleanup
-    sourceChange: ops_users_user_account_only_redeem_header_links_removed
+    greenTargetedTests: pass_5_files_22_tests
+    sourceChange: ops_users_layout_filter_account_creation_pagination_shared_admin_list_contract
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_11_files_scanned
+    moduleRunV2PreCommitHardening: pass_10_files_scanned
     moduleRunV2PrePushReadiness: pass_after_repository_sha_checkpoint_alignment
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
@@ -4211,6 +4240,7 @@ currentTask:
     privateValueOutput: false
     dependencyOrLockfileChanged: false
     schemaMigrationSeedChanged: false
+    repositoryCheckpointAligned: true
     releaseReadinessClaimed: false
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
@@ -34902,8 +34932,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2a04856b487483067f2e25ad8f3e39cbbc036b8d
-  lastKnownOriginMasterSha: 2a04856b487483067f2e25ad8f3e39cbbc036b8d
+  lastKnownMasterSha: 030764bbbdea870f33a2b58973265d16f2565cf3
+  lastKnownOriginMasterSha: 030764bbbdea870f33a2b58973265d16f2565cf3
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

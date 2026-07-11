@@ -1,5 +1,11 @@
 import { createElement } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminAiAuditLogOpsBaseline } from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
@@ -9,6 +15,7 @@ import {
   AdminOrgAuthPage,
   AdminRedeemCodePage,
 } from "@/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage";
+import type { AdminUserListDto } from "@/server/contracts/admin-user-org-auth-ops-contract";
 
 afterEach(() => {
   cleanup();
@@ -50,6 +57,22 @@ const emptyOpsCollections = {
 };
 const cookieBackedSessionToken = "__cookie_backed_session__";
 
+function createAdminUser(index: number) {
+  const publicId = `user-admin-ui-${String(index).padStart(2, "0")}`;
+
+  return {
+    publicId,
+    phone: `1390000${String(index).padStart(4, "0")}`,
+    name: `分页用户 ${index}`,
+    registeredAt: "2026-05-20T08:00:00.000Z",
+    status: "active",
+    userType: index % 2 === 0 ? "employee" : "personal",
+    organizationPublicId: index % 2 === 0 ? "organization-public-001" : null,
+    organizationName: index % 2 === 0 ? "Ops Smoke Org" : null,
+    authStatus: index % 3 === 0 ? "active" : null,
+  } satisfies AdminUserListDto["users"][number];
+}
+
 function jsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -58,7 +81,11 @@ function jsonResponse(payload: unknown) {
   } as Response;
 }
 
-function stubFetchForSummaryFirstPages() {
+function stubFetchForSummaryFirstPages({
+  users = emptyOpsCollections.users,
+}: {
+  users?: AdminUserListDto["users"];
+} = {}) {
   const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
     const path = String(url);
 
@@ -67,10 +94,22 @@ function stubFetchForSummaryFirstPages() {
     }
 
     if (path.startsWith("/api/v1/users")) {
+      const url = new URL(path, "http://localhost");
+      const page = Number(url.searchParams.get("page") ?? "1");
+      const pageSize = Number(url.searchParams.get("pageSize") ?? "20");
+      const start = (page - 1) * pageSize;
+
       return jsonResponse({
         code: 0,
         message: "ok",
-        data: { users: emptyOpsCollections.users },
+        data: { users: users.slice(start, start + pageSize) },
+        pagination: {
+          page,
+          pageSize,
+          sortBy: url.searchParams.get("sortBy") ?? "updatedAt",
+          sortOrder: url.searchParams.get("sortOrder") ?? "desc",
+          total: users.length,
+        },
       });
     }
 
@@ -212,7 +251,7 @@ describe("admin ops summary-first UI", () => {
 
     expect(
       summaryBand.compareDocumentPosition(
-        screen.getByRole("region", { name: "运营筛选" }),
+        screen.getByRole("region", { name: "用户筛选" }),
       ) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
@@ -241,6 +280,12 @@ describe("admin ops summary-first UI", () => {
     expect(
       screen.queryByRole("link", { name: "打开卡密生成" }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "运营筛选" })).toBeNull();
+    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+    expect(
+      screen.getByRole("heading", { name: "创建后台账号" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/后台账号与学员账号域分离/u)).toBeInTheDocument();
 
     const fetchedPaths = fetchMock.mock.calls.map(([url]) => String(url));
     expect(fetchedPaths).not.toContainEqual(
@@ -258,6 +303,50 @@ describe("admin ops summary-first UI", () => {
     expect(fetchedPaths).not.toContainEqual(
       expect.stringMatching(/^\/api\/v1\/ai-call-logs\b/u),
     );
+  });
+
+  it("paginates the user list with the shared admin page-size options", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token-pagination",
+    );
+    stubFetchForSummaryFirstPages({
+      users: Array.from({ length: 25 }, (_, index) =>
+        createAdminUser(index + 1),
+      ),
+    });
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+
+    expect(screen.getByText("显示 1-20 / 共 25 个用户")).toBeInTheDocument();
+    expect(screen.getByText("分页用户 1 / 13900000001")).toBeInTheDocument();
+    expect(
+      screen.queryByText("分页用户 21 / 13900000021"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+
+    expect(
+      await screen.findByText("显示 21-25 / 共 25 个用户"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("分页用户 21 / 13900000021")).toBeInTheDocument();
+    expect(
+      screen.queryByText("分页用户 1 / 13900000001"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "下一页" })).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "50" },
+    });
+
+    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(
+      await screen.findByText("显示 1-25 / 共 25 个用户"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("分页用户 1 / 13900000001")).toBeInTheDocument();
+    expect(screen.getByText("分页用户 21 / 13900000021")).toBeInTheDocument();
   });
 
   it("renders organization auth summary before operations actions and preserves edition boundary copy", async () => {

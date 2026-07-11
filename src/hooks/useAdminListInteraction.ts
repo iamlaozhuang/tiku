@@ -7,6 +7,7 @@ import {
   createAdminListQuery,
   isAdminPageSize,
   toggleAdminListSort,
+  updateAdminPage,
   updateAdminPageSize,
   type AdminListQuery,
 } from "@/server/contracts/admin-interaction-contract";
@@ -42,8 +43,13 @@ export function useAdminListInteraction({
     setQuery((currentQuery) => applyAdminListFilter(currentQuery, filterName));
   }
 
+  function handlePageChange(page: number) {
+    setQuery((currentQuery) => updateAdminPage(currentQuery, page));
+  }
+
   return {
     handleFilterChange,
+    handlePageChange,
     handlePageSizeChange,
     handleSortChange,
     query,

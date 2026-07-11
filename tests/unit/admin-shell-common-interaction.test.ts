@@ -10,6 +10,7 @@ import {
   applyAdminListFilter,
   createAdminListQuery,
   toggleAdminListSort,
+  updateAdminPage,
 } from "@/server/contracts/admin-interaction-contract";
 
 afterEach(() => {
@@ -28,6 +29,9 @@ describe("admin shell common interaction baseline", () => {
     });
     const ascendingQuery = toggleAdminListSort(initialQuery, "updatedAt");
     const filteredQuery = applyAdminListFilter(ascendingQuery, "status");
+    const pagedQuery = updateAdminPage(filteredQuery, 3);
+    const clampedQuery = updateAdminPage(pagedQuery, 0);
+    const invalidQuery = updateAdminPage(pagedQuery, Number.NaN);
 
     expect(initialQuery).toMatchObject({
       page: 1,
@@ -44,6 +48,15 @@ describe("admin shell common interaction baseline", () => {
       page: 1,
       lastChangedFilter: "status",
       filterRevision: 1,
+    });
+    expect(pagedQuery).toMatchObject({
+      page: 3,
+    });
+    expect(clampedQuery).toMatchObject({
+      page: 1,
+    });
+    expect(invalidQuery).toMatchObject({
+      page: 1,
     });
   });
 
