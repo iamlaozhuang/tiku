@@ -604,16 +604,17 @@ describe("admin ops summary-first UI", () => {
     expect(summaryBand).toHaveTextContent("高级版");
     expect(summaryBand).toHaveTextContent("不会自动升级");
     expect(summaryBand).toHaveTextContent("禁用态");
+    fireEvent.click(screen.getByTestId("ops-organization-view-org-auth"));
+    const createButton = screen.getByRole("button", { name: "新增企业授权" });
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByTestId("system-ops-org-auth-create-entry"),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      summaryBand.compareDocumentPosition(createButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByTestId("org-auth-create-form"),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+      screen.queryByTestId("org-auth-create-form"),
+    ).not.toBeInTheDocument();
+    fireEvent.click(createButton);
+    expect(screen.getByTestId("org-auth-create-form")).toBeInTheDocument();
   });
 
   it("renders redeem code summary before generation and keeps plaintext exception explicit", async () => {

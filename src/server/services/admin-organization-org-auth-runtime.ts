@@ -19,6 +19,7 @@ import {
   type EmployeeMutationResultDto,
   type EmployeeUnbindResultDto,
   type OrganizationTreeQuery,
+  type OrgAuthListQuery,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
   OrgAuthDetailResultDto,
@@ -52,7 +53,11 @@ import {
   type NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
 import type { SessionService } from "./session-service";
-import { orgTierValues } from "../models/auth";
+import {
+  authorizationEditionValues,
+  orgTierValues,
+  professionValues,
+} from "../models/auth";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminOrganizationOrgAuthRuntimeRepositories };
@@ -734,6 +739,45 @@ function readOrganizationTreeQuery(request: Request): OrganizationTreeQuery {
   };
 }
 
+function readOrgAuthListQuery(request: Request): OrgAuthListQuery {
+  const searchParams = new URL(request.url).searchParams;
+  const page = Number(searchParams.get("page"));
+  const pageSize = readPageSize(searchParams, [20, 50, 100], 20);
+  const keyword = searchParams.get("keyword")?.trim() ?? "";
+  const status = searchParams.get("status");
+  const edition = searchParams.get("edition");
+  const profession = searchParams.get("profession");
+  const level = Number(searchParams.get("level"));
+  const expiryStatus = searchParams.get("expiryStatus");
+
+  return {
+    page: Number.isInteger(page) && page > 0 ? page : 1,
+    pageSize: pageSize as AdminAuthOperationPageSize,
+    sortBy: readSortBy(searchParams),
+    sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+    keyword: keyword.length === 0 ? null : keyword,
+    status:
+      status === "active" || status === "expired" || status === "cancelled"
+        ? status
+        : "all",
+    edition: authorizationEditionValues.includes(
+      edition as (typeof authorizationEditionValues)[number],
+    )
+      ? (edition as (typeof authorizationEditionValues)[number])
+      : "all",
+    profession: professionValues.includes(
+      profession as (typeof professionValues)[number],
+    )
+      ? (profession as (typeof professionValues)[number])
+      : "all",
+    level: Number.isInteger(level) && level >= 1 && level <= 5 ? level : null,
+    expiryStatus:
+      expiryStatus === "expiring_soon" || expiryStatus === "not_expiring_soon"
+        ? expiryStatus
+        : "all",
+  };
+}
+
 function readPageSize(
   searchParams: URLSearchParams,
   options: readonly number[],
@@ -1285,7 +1329,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           }
 
           const result = await repositories.listOrgAuths(
-            readAdminAuthOperationListQuery(request),
+            readOrgAuthListQuery(request),
           );
 
           return createJsonResponse(

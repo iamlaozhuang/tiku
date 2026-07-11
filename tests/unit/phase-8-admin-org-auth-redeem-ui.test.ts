@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -70,6 +71,7 @@ const orgAuthPayload = {
         publicId: "org-auth-public-001",
         name: "杭州烟草企业授权",
         purchaserOrganizationPublicId: "organization-public-001",
+        purchaserOrganizationName: "杭州烟草",
         authScopeType: "current_and_descendants",
         profession: "monopoly",
         level: 3,
@@ -83,6 +85,8 @@ const orgAuthPayload = {
         status: "active",
         cancelledAt: null,
         organizationPublicIds: ["organization-public-001"],
+        coveredOrganizationCount: 1,
+        coveredOrganizationNames: ["杭州烟草"],
         createdAt: "2026-05-22T00:00:00.000Z",
         updatedAt: "2026-05-22T00:00:00.000Z",
         id: 201,
@@ -281,8 +285,21 @@ function mockAdminFetch() {
       return createJsonResponse(organizationPayload);
     }
 
-    if (path === "/api/v1/org-auths?page=1&pageSize=20") {
-      return createJsonResponse(orgAuthPayload);
+    if (path.startsWith("/api/v1/org-auths?")) {
+      const requestUrl = new URL(path, "http://localhost");
+      const page = Number(requestUrl.searchParams.get("page") ?? "1");
+      const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "20");
+
+      return createJsonResponse({
+        ...orgAuthPayload,
+        pagination: {
+          page,
+          pageSize,
+          total: 75,
+          sortBy: requestUrl.searchParams.get("sortBy") ?? "updatedAt",
+          sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
+        },
+      });
     }
 
     if (path === "/api/v1/employees?page=1&pageSize=20") {
@@ -310,6 +327,91 @@ afterEach(() => {
 });
 
 describe("AdminOrgAuthPage", () => {
+  it("uses a list-first enterprise authorization workflow with reusable filters and pagination", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业管理" });
+    fireEvent.click(screen.getByTestId("ops-organization-view-org-auth"));
+
+    const toolbar = await screen.findByRole("region", {
+      name: "企业授权筛选",
+    });
+    expect(
+      screen.queryByTestId("org-auth-create-form"),
+    ).not.toBeInTheDocument();
+    const orgAuthTable = screen.getByRole("table", {
+      name: "企业授权列表",
+    });
+    expect(orgAuthTable).toBeInTheDocument();
+    expect(within(toolbar).getByText("共 75 条企业授权")).toBeInTheDocument();
+    expect(screen.getAllByText("杭州烟草").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("覆盖 1 家企业")).toBeInTheDocument();
+    expect(orgAuthTable).not.toHaveTextContent("organization-public-001");
+
+    fireEvent.change(within(toolbar).getByLabelText("授权关键词"), {
+      target: { value: "杭州" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("授权状态"), {
+      target: { value: "active" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("授权版本"), {
+      target: { value: "advanced" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("授权专业"), {
+      target: { value: "logistics" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("授权等级"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("到期状态"), {
+      target: { value: "expiring_soon" },
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/org-auths?page=1&pageSize=20&sortBy=expiresAt&sortOrder=asc&keyword=%E6%9D%AD%E5%B7%9E&status=active&edition=advanced&profession=logistics&level=4&expiryStatus=expiring_soon",
+        expect.anything(),
+      ),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/org-auths?page=2&pageSize=20"),
+        expect.anything(),
+      ),
+    );
+
+    fireEvent.click(within(toolbar).getByRole("button", { name: "重置筛选" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/org-auths?page=1&pageSize=20&sortBy=expiresAt&sortOrder=asc",
+        expect.anything(),
+      ),
+    );
+
+    const createOrgAuthButton = within(toolbar).getByRole("button", {
+      name: "新增企业授权",
+    });
+    createOrgAuthButton.focus();
+    fireEvent.click(createOrgAuthButton);
+    expect(
+      screen.getByRole("dialog", { name: "新增企业授权" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("org-auth-create-form")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "关闭新增企业授权" }),
+    ).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(
+      screen.queryByRole("dialog", { name: "新增企业授权" }),
+    ).not.toBeInTheDocument();
+    expect(createOrgAuthButton).toHaveFocus();
+  });
+
   it("renders unauthorized state without calling protected admin APIs when the local session token is missing", async () => {
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       void url;
@@ -403,10 +505,16 @@ describe("AdminOrgAuthPage", () => {
     expect(
       screen.getByTestId("organization-tree-management-form"),
     ).toBeVisible();
-    expect(screen.getByTestId("org-auth-create-form")).not.toBeVisible();
+    expect(
+      screen.queryByTestId("org-auth-create-form"),
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("employee-import-textarea")).not.toBeVisible();
 
     fireEvent.click(screen.getByTestId("ops-organization-view-org-auth"));
+    expect(
+      screen.queryByTestId("org-auth-create-form"),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
     expect(screen.getByTestId("org-auth-create-form")).toBeVisible();
     expect(
       screen.getByTestId("organization-tree-management-form"),
@@ -415,7 +523,9 @@ describe("AdminOrgAuthPage", () => {
 
     fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
     expect(screen.getByTestId("employee-import-textarea")).toBeVisible();
-    expect(screen.getByTestId("org-auth-create-form")).not.toBeVisible();
+    expect(
+      screen.queryByTestId("org-auth-create-form"),
+    ).not.toBeInTheDocument();
     expect(window.location.search).toContain("view=employees");
   });
 

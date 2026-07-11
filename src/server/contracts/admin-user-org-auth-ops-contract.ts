@@ -2,6 +2,8 @@ import type {
   AdminRole,
   AuthScopeType,
   AuthStatus,
+  AuthUpgradeStatus,
+  AuthorizationEdition,
   OrgTier,
   Profession,
   RedeemCodeStatus,
@@ -105,6 +107,49 @@ export type AdminAuthOperationListQuery = {
   userType: UserType | "all";
   userCategory?: AdminUserCategory | "all";
   authFilter?: AdminUserAuthFilter;
+};
+
+export type OrgAuthExpiryStatus = "all" | "expiring_soon" | "not_expiring_soon";
+
+export type OrgAuthListQuery = {
+  page: number;
+  pageSize: AdminAuthOperationPageSize;
+  sortBy: AdminAuthOperationSortField;
+  sortOrder: AdminAuthOperationSortOrder;
+  keyword: string | null;
+  status: AuthStatus | "all";
+  edition: AuthorizationEdition | "all";
+  profession: Profession | "all";
+  level: number | null;
+  expiryStatus: OrgAuthExpiryStatus;
+};
+
+export type AdminOrgAuthListItemDto = {
+  publicId: string;
+  name: string;
+  purchaserOrganizationPublicId: string;
+  purchaserOrganizationName: string;
+  authScopeType: AuthScopeType;
+  profession: Profession;
+  level: number;
+  edition: AuthorizationEdition;
+  effectiveEdition: AuthorizationEdition;
+  upgradeStatus: AuthUpgradeStatus | "none";
+  accountQuota: number;
+  usedQuota: number;
+  startsAt: string;
+  expiresAt: string;
+  status: AuthStatus;
+  cancelledAt: string | null;
+  organizationPublicIds: string[];
+  coveredOrganizationCount: number;
+  coveredOrganizationNames: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminOrgAuthListDto = {
+  orgAuths: AdminOrgAuthListItemDto[];
 };
 
 export type AdminUserSummaryDto = {

@@ -25,13 +25,21 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import type {
   ApiPagination,
   ApiResponse,
 } from "@/server/contracts/api-response";
 import type {
+  AdminOrgAuthListDto,
   EmployeeListDto,
   EmployeeImportResultDto,
   EmployeeTransferResultDto,
@@ -39,6 +47,7 @@ import type {
   OrganizationListDto,
   OrganizationTreeNodeListDto,
   OrganizationTreeQueryNodeDto,
+  OrgAuthExpiryStatus,
   RedeemCodeDetailDto,
   RedeemCodeDetailResultDto,
   RedeemCodeGenerationDto,
@@ -46,6 +55,13 @@ import type {
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import {
+  adminListControlClassName,
+  adminListFilterLabelClassName,
+  AdminListToolbar,
+  AdminPagination,
+  AdminTableFrame,
+} from "@/components/admin/AdminList";
 import {
   adminDataTableClassName,
   adminDataTableContainerClassName,
@@ -81,6 +97,11 @@ type AdminOrgAuthData = {
   organizations: OrganizationListDto["organizations"];
   orgAuths: OrgAuthListDto["orgAuths"];
   employees: EmployeeListDto["employees"];
+};
+
+type AdminOrgAuthListData = {
+  orgAuths: AdminOrgAuthListDto["orgAuths"];
+  pagination: ApiPagination | null;
 };
 
 type OrganizationTreeLoadState = "loading" | "ready" | "error";
@@ -605,6 +626,63 @@ function createRedeemCodeListQuery(input: {
   return searchParams.toString();
 }
 
+function createOrgAuthListQuery(input: {
+  edition: AuthorizationEdition | "all";
+  expiryStatus: OrgAuthExpiryStatus;
+  keyword: string;
+  level: number | "all";
+  profession: Profession | "all";
+  query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">;
+  status: AuthStatus | "all";
+}): string {
+  const searchParams = new URLSearchParams();
+  const keyword = input.keyword.trim();
+
+  searchParams.set("page", `${input.query.page}`);
+  searchParams.set("pageSize", `${input.query.pageSize}`);
+  searchParams.set("sortBy", input.query.sortBy);
+  searchParams.set("sortOrder", input.query.sortOrder);
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  if (input.status !== "all") {
+    searchParams.set("status", input.status);
+  }
+
+  if (input.edition !== "all") {
+    searchParams.set("edition", input.edition);
+  }
+
+  if (input.profession !== "all") {
+    searchParams.set("profession", input.profession);
+  }
+
+  if (input.level !== "all") {
+    searchParams.set("level", `${input.level}`);
+  }
+
+  if (input.expiryStatus !== "all") {
+    searchParams.set("expiryStatus", input.expiryStatus);
+  }
+
+  return searchParams.toString();
+}
+
+function createFallbackOrgAuthPagination(
+  query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">,
+  total: number,
+): ApiPagination {
+  return {
+    page: query.page,
+    pageSize: query.pageSize,
+    sortBy: query.sortBy,
+    sortOrder: query.sortOrder,
+    total,
+  };
+}
+
 function createFallbackRedeemCodePagination(
   query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">,
   total: number,
@@ -663,35 +741,6 @@ function createOrganizationDepthMap(
       readOrganizationDepth(organization.publicId, new Set()),
     ]),
   );
-}
-
-function countExpiringOrgAuths(orgAuths: AdminOrgAuthData["orgAuths"]): number {
-  const now = Date.now();
-  const fortyFiveDaysInMilliseconds = 45 * 24 * 60 * 60 * 1000;
-
-  return orgAuths.filter((orgAuth) => {
-    if (orgAuth.status !== "active") {
-      return false;
-    }
-
-    const millisecondsUntilExpiry = new Date(orgAuth.expiresAt).getTime() - now;
-
-    return (
-      millisecondsUntilExpiry >= 0 &&
-      millisecondsUntilExpiry <= fortyFiveDaysInMilliseconds
-    );
-  }).length;
-}
-
-function countQuotaRiskOrgAuths(
-  orgAuths: AdminOrgAuthData["orgAuths"],
-): number {
-  return orgAuths.filter(
-    (orgAuth) =>
-      orgAuth.status === "active" &&
-      orgAuth.accountQuota > 0 &&
-      orgAuth.usedQuota / orgAuth.accountQuota >= 0.8,
-  ).length;
 }
 
 function isOrganizationInCoverage(
@@ -1489,43 +1538,6 @@ function AdminPageHeader({
   );
 }
 
-function SystemOpsRequiredRoleEntry({
-  actionHref,
-  actionLabel,
-  description,
-  testId,
-  title,
-}: {
-  actionHref: string;
-  actionLabel: string;
-  description: string;
-  testId: string;
-  title: string;
-}) {
-  return (
-    <section
-      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
-      data-testid={testId}
-    >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">
-            系统运营本地验收
-          </p>
-          <h2 className="text-text-primary text-base font-semibold">{title}</h2>
-          <p className="text-text-secondary text-sm leading-6">{description}</p>
-        </div>
-        <Link
-          className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-          href={actionHref}
-        >
-          {actionLabel}
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 function SummaryTile({
   icon,
   label,
@@ -1769,93 +1781,6 @@ function OrganizationTreeGuidancePanel() {
               {item.description}
             </p>
           </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function OperationsPendingWorkbench({
-  organizations,
-  orgAuths,
-}: {
-  organizations: AdminOrgAuthData["organizations"];
-  orgAuths: AdminOrgAuthData["orgAuths"];
-}) {
-  const expiringOrgAuthCount = countExpiringOrgAuths(orgAuths);
-  const quotaRiskOrgAuthCount = countQuotaRiskOrgAuths(orgAuths);
-  const disabledOrganizationCount = organizations.filter(
-    (organization) => organization.status === "disabled",
-  ).length;
-  const noDirectAuthSummaryCount = organizations.filter(
-    (organization) => organization.authSummary === null,
-  ).length;
-  const pendingItems = [
-    {
-      count: expiringOrgAuthCount,
-      description:
-        "到期授权需要进入授权详情或创建向导处理续费接续，不自动续费。",
-      href: "#org-auth-create-panel",
-      title: "授权到期复核",
-    },
-    {
-      count: quotaRiskOrgAuthCount,
-      description: "额度接近用尽时由运营选择增量扩容或替换授权，不自动扩容。",
-      href: "#org-auth-create-panel",
-      title: "额度风险复核",
-    },
-    {
-      count: 0,
-      description:
-        "同一原子范围重叠默认阻断；只能通过续费、手动升级、替换或增量扩容显式闭环。",
-      href: "#org-auth-create-panel",
-      title: "重叠阻断处理",
-    },
-    {
-      count: disabledOrganizationCount + noDirectAuthSummaryCount,
-      description: "停用节点和暂无直接授权摘要的节点需要运营核对继承授权影响。",
-      href: "#organization-tree-management-panel",
-      title: "组织树待确认",
-    },
-  ];
-
-  return (
-    <section
-      className="bg-surface border-border rounded-md border p-4 shadow-sm"
-      data-testid="operations-pending-workbench"
-    >
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">运营待办</p>
-          <h2 className="text-text-primary text-base font-semibold">
-            运营待办工作台
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            待办只帮助定位需要人工处理的授权、额度、重叠和组织树事项；系统不会自动续费、自动升级、自动合并或自动解决冲突。
-          </p>
-        </div>
-        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-          人工闭环
-        </span>
-      </div>
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {pendingItems.map((item) => (
-          <a
-            key={item.title}
-            className="border-border bg-background hover:bg-muted block rounded-md border p-3 transition-transform active:scale-[0.98]"
-            href={item.href}
-          >
-            <p className="text-text-muted text-xs">待办数量</p>
-            <p className="text-text-primary mt-1 text-2xl font-semibold">
-              {item.count}
-            </p>
-            <h3 className="text-text-primary mt-2 text-sm font-semibold">
-              {item.title}
-            </h3>
-            <p className="text-text-secondary mt-2 text-xs leading-5">
-              {item.description}
-            </p>
-          </a>
         ))}
       </div>
     </section>
@@ -2595,71 +2520,149 @@ function OrganizationTreeWorkspace({
 }
 
 function OrgAuthList({
+  loadState,
   onCancelOrgAuth,
   onViewOrgAuthDetail,
   orgAuths,
 }: {
+  loadState: LoadState;
   onCancelOrgAuth: (publicId: string) => void;
   onViewOrgAuthDetail: (publicId: string) => void;
-  orgAuths: AdminOrgAuthData["orgAuths"];
+  orgAuths: AdminOrgAuthListData["orgAuths"];
 }) {
   return (
-    <AdminPanel title="企业授权">
-      {orgAuths.map((orgAuth) => (
-        <AdminDataRow
-          key={orgAuth.publicId}
-          publicId={orgAuth.publicId}
-          testId={`admin-org-auth-${orgAuth.publicId}`}
-        >
-          <div className="min-w-0 space-y-1">
-            <p className="text-text-primary text-sm font-medium">
-              {orgAuth.name}
-            </p>
-            <p className="text-text-secondary flex flex-wrap gap-1 text-xs">
-              <span>{formatProfessionLevel(orgAuth)}</span>
-              <span>/</span>
-              <span>{getOrgAuthEditionLabel(orgAuth)}</span>
-              <span>/</span>
-              <span>
-                {orgAuth.usedQuota} / {orgAuth.accountQuota}
-              </span>
-            </p>
-            <p className="text-text-muted text-xs">
-              {getOrgAuthUpgradeStatusLabel(orgAuth)}
-            </p>
-            <p className="text-text-muted text-xs">
-              {authScopeTypeLabels[orgAuth.authScopeType]} /{" "}
-              {formatDate(orgAuth.startsAt)} 至 {formatDate(orgAuth.expiresAt)}
-            </p>
-            <p className="text-text-muted text-xs">
-              覆盖企业 {orgAuth.organizationPublicIds.join("、") || "无"}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-success/10 text-success w-fit rounded-lg px-2 py-1 text-xs font-medium">
-              {authStatusLabels[orgAuth.status]}
-            </span>
-            <button
-              type="button"
-              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-              onClick={() => onViewOrgAuthDetail(orgAuth.publicId)}
-            >
-              <Eye className="size-3.5" aria-hidden="true" />
-              查看详情
-            </button>
-            {orgAuth.status === "active" ? (
-              <button
-                type="button"
-                className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-                onClick={() => onCancelOrgAuth(orgAuth.publicId)}
-              >
-                取消授权
-              </button>
-            ) : null}
-          </div>
-        </AdminDataRow>
-      ))}
-    </AdminPanel>
+    <AdminTableFrame ariaLabel="企业授权列表" minWidthClassName="min-w-[74rem]">
+      <table aria-label="企业授权列表" className={adminDataTableClassName}>
+        <thead>
+          <tr>
+            <th scope="col">企业授权</th>
+            <th scope="col">购买主体</th>
+            <th scope="col">覆盖企业</th>
+            <th scope="col">版本与范围</th>
+            <th scope="col">额度</th>
+            <th scope="col">有效期</th>
+            <th scope="col">状态</th>
+            <th scope="col">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loadState === "loading" ? (
+            <tr>
+              <td className="text-text-muted py-8 text-center" colSpan={8}>
+                正在加载企业授权列表
+              </td>
+            </tr>
+          ) : null}
+          {loadState === "error" ? (
+            <tr>
+              <td className="text-destructive py-8 text-center" colSpan={8}>
+                企业授权列表加载失败，请稍后重试。
+              </td>
+            </tr>
+          ) : null}
+          {loadState === "empty" ||
+          (loadState === "ready" && orgAuths.length === 0) ? (
+            <tr>
+              <td className="text-text-muted py-8 text-center" colSpan={8}>
+                暂无符合条件的企业授权。
+              </td>
+            </tr>
+          ) : null}
+          {loadState === "ready"
+            ? orgAuths.map((orgAuth) => (
+                <tr
+                  key={orgAuth.publicId}
+                  data-public-id={orgAuth.publicId}
+                  data-testid={`admin-org-auth-${orgAuth.publicId}`}
+                >
+                  <td>
+                    <p className="text-text-primary font-medium">
+                      {orgAuth.name}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {authScopeTypeLabels[orgAuth.authScopeType]}
+                    </p>
+                  </td>
+                  <td>
+                    <p className="text-text-primary font-medium">
+                      {orgAuth.purchaserOrganizationName}
+                    </p>
+                  </td>
+                  <td className="text-left">
+                    <p className="text-text-primary font-medium">
+                      覆盖 {orgAuth.coveredOrganizationCount} 家企业
+                    </p>
+                    <p className="text-text-muted mt-1 max-w-64 text-xs">
+                      {orgAuth.coveredOrganizationNames.join("、") ||
+                        "暂无覆盖企业名称"}
+                    </p>
+                  </td>
+                  <td>
+                    <p className="text-text-primary">
+                      {formatProfessionLevel(orgAuth)}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {getOrgAuthEditionLabel(orgAuth)}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {getOrgAuthUpgradeStatusLabel(orgAuth)}
+                    </p>
+                  </td>
+                  <td>
+                    <p className="text-text-primary">
+                      {orgAuth.usedQuota} / {orgAuth.accountQuota}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      可用{" "}
+                      {Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0)}
+                    </p>
+                  </td>
+                  <td>
+                    <p className="text-text-primary">
+                      {formatDate(orgAuth.startsAt)}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      至 {formatDate(orgAuth.expiresAt)}
+                    </p>
+                  </td>
+                  <td>
+                    <span
+                      className={
+                        orgAuth.status === "active"
+                          ? "bg-success/10 text-success inline-flex rounded-md px-2 py-1 text-xs font-medium"
+                          : "bg-muted text-text-secondary inline-flex rounded-md px-2 py-1 text-xs font-medium"
+                      }
+                    >
+                      {authStatusLabels[orgAuth.status]}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="border-border bg-background hover:bg-muted inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-sm font-medium"
+                        onClick={() => onViewOrgAuthDetail(orgAuth.publicId)}
+                      >
+                        <Eye className="size-3.5" aria-hidden="true" />
+                        查看详情
+                      </button>
+                      {orgAuth.status === "active" ? (
+                        <button
+                          type="button"
+                          className="border-destructive text-destructive bg-background inline-flex h-8 items-center rounded-md border px-2.5 text-sm font-medium"
+                          onClick={() => onCancelOrgAuth(orgAuth.publicId)}
+                        >
+                          取消授权
+                        </button>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            : null}
+        </tbody>
+      </table>
+    </AdminTableFrame>
   );
 }
 
@@ -2683,7 +2686,7 @@ function OrgAuthDetailPanel({
             {orgAuth.name}
           </h2>
           <div className="text-text-secondary grid gap-1 text-sm md:grid-cols-2">
-            <p>购买主体 {orgAuth.purchaserOrganizationPublicId}</p>
+            <p>购买主体 {orgAuth.purchaserOrganization.name}</p>
             <p>授权范围 {authScopeTypeLabels[orgAuth.authScopeType]}</p>
             <p>{formatProfessionLevel(orgAuth)}</p>
             <p>
@@ -2695,11 +2698,8 @@ function OrgAuthDetailPanel({
               {formatDate(orgAuth.expiresAt)}
             </p>
             <p>状态 {authStatusLabels[orgAuth.status]}</p>
-            <p>购买主体名称 {orgAuth.purchaserOrganization.name}</p>
+            <p>覆盖企业 {orgAuth.coveredOrganizations.length} 家</p>
           </div>
-          <p className="text-text-muted text-xs">
-            覆盖企业 {orgAuth.organizationPublicIds.join("、") || "无"}
-          </p>
           <div className="text-text-muted space-y-1 text-xs">
             {orgAuth.coveredOrganizations.map((organization) => (
               <p key={organization.publicId}>
@@ -2717,6 +2717,75 @@ function OrgAuthDetailPanel({
         </button>
       </div>
     </section>
+  );
+}
+
+function OrgAuthCreateDrawer({
+  children,
+  onClose,
+}: {
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    closeButtonRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus();
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <button
+        aria-label="点击遮罩关闭新增企业授权"
+        className="bg-foreground/20 absolute inset-0 cursor-default"
+        type="button"
+        onClick={onClose}
+      />
+      <aside
+        aria-label="新增企业授权"
+        aria-modal="true"
+        className="bg-background border-border absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l shadow-lg"
+        role="dialog"
+      >
+        <header className="bg-background border-border sticky top-0 z-10 flex items-center justify-between border-b px-5 py-4">
+          <div>
+            <p className="text-brand-primary text-xs font-medium">企业授权</p>
+            <h2 className="text-text-primary mt-1 text-base font-semibold">
+              新增企业授权
+            </h2>
+          </div>
+          <button
+            aria-label="关闭新增企业授权"
+            className="border-border bg-background hover:bg-muted inline-flex size-9 items-center justify-center rounded-md border"
+            ref={closeButtonRef}
+            title="关闭"
+            type="button"
+            onClick={onClose}
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        </header>
+        <div className="flex-1 overflow-y-auto p-5">{children}</div>
+      </aside>
+    </div>
   );
 }
 
@@ -5082,6 +5151,73 @@ function useAdminOrgAuthData() {
   return { data, loadState, setData, setLoadState };
 }
 
+function useAdminOrgAuthListData(
+  enabled: boolean,
+  listQuery: string,
+  refreshVersion: number,
+) {
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [data, setData] = useState<AdminOrgAuthListData>({
+    orgAuths: [],
+    pagination: null,
+  });
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (!enabled) {
+      return () => {
+        isActive = false;
+      };
+    }
+
+    async function loadOrgAuthList() {
+      const sessionToken = getStoredSessionToken();
+
+      if (sessionToken === null) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      setLoadState("loading");
+
+      try {
+        const response = await fetchAdminApi<AdminOrgAuthListDto>(
+          `/api/v1/org-auths?${listQuery}`,
+          sessionToken,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (response.code !== 0 || response.data === null) {
+          setLoadState("error");
+          return;
+        }
+
+        setData({
+          orgAuths: response.data.orgAuths,
+          pagination: response.pagination ?? null,
+        });
+        setLoadState(response.data.orgAuths.length === 0 ? "empty" : "ready");
+      } catch {
+        if (isActive) {
+          setLoadState("error");
+        }
+      }
+    }
+
+    void loadOrgAuthList();
+
+    return () => {
+      isActive = false;
+    };
+  }, [enabled, listQuery, refreshVersion]);
+
+  return { data, loadState };
+}
+
 function useAdminRedeemCodeData(listQuery: string) {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminRedeemCodeData>({
@@ -5160,6 +5296,66 @@ function useAdminRedeemCodeData(listQuery: string) {
 
 export function AdminOrgAuthPage() {
   const { data, loadState, setData, setLoadState } = useAdminOrgAuthData();
+  const [orgAuthKeyword, setOrgAuthKeyword] = useState("");
+  const [orgAuthStatus, setOrgAuthStatus] = useState<AuthStatus | "all">("all");
+  const [orgAuthEdition, setOrgAuthEdition] = useState<
+    AuthorizationEdition | "all"
+  >("all");
+  const [orgAuthProfession, setOrgAuthProfession] = useState<
+    Profession | "all"
+  >("all");
+  const [orgAuthLevel, setOrgAuthLevel] = useState<number | "all">("all");
+  const [orgAuthExpiryStatus, setOrgAuthExpiryStatus] =
+    useState<OrgAuthExpiryStatus>("all");
+  const [orgAuthListRefreshVersion, setOrgAuthListRefreshVersion] = useState(0);
+  const [isOrgAuthCreateDrawerOpen, setIsOrgAuthCreateDrawerOpen] =
+    useState(false);
+  const {
+    handleFilterChange: handleOrgAuthFilterChange,
+    handlePageChange: handleOrgAuthPageChange,
+    handlePageSizeChange: handleOrgAuthPageSizeChange,
+    handleReset: handleOrgAuthListReset,
+    handleSortChange: handleOrgAuthSortChange,
+    query: orgAuthListInteractionQuery,
+  } = useAdminListInteraction({
+    initialQuery: {
+      sortBy: "expiresAt",
+      sortOrder: "asc",
+    },
+  });
+  const orgAuthListQuery = useMemo(
+    () =>
+      createOrgAuthListQuery({
+        edition: orgAuthEdition,
+        expiryStatus: orgAuthExpiryStatus,
+        keyword: orgAuthKeyword,
+        level: orgAuthLevel,
+        profession: orgAuthProfession,
+        query: orgAuthListInteractionQuery,
+        status: orgAuthStatus,
+      }),
+    [
+      orgAuthEdition,
+      orgAuthExpiryStatus,
+      orgAuthKeyword,
+      orgAuthLevel,
+      orgAuthListInteractionQuery,
+      orgAuthProfession,
+      orgAuthStatus,
+    ],
+  );
+  const { data: orgAuthListData, loadState: orgAuthListLoadState } =
+    useAdminOrgAuthListData(
+      loadState === "ready" || loadState === "empty",
+      orgAuthListQuery,
+      orgAuthListRefreshVersion,
+    );
+  const orgAuthListPagination =
+    orgAuthListData.pagination ??
+    createFallbackOrgAuthPagination(
+      orgAuthListInteractionQuery,
+      orgAuthListData.orgAuths.length,
+    );
   const [activeView, setActiveView] = useState<OpsOrganizationManagementView>(
     readOpsOrganizationManagementViewFromLocation,
   );
@@ -5260,7 +5456,20 @@ export function AdminOrgAuthPage() {
     nextView: OpsOrganizationManagementView,
   ) {
     setActiveView(nextView);
+    if (nextView !== "org-auth") {
+      setIsOrgAuthCreateDrawerOpen(false);
+    }
     writeOpsOrganizationManagementViewToLocation(nextView);
+  }
+
+  function handleResetOrgAuthFilters() {
+    setOrgAuthKeyword("");
+    setOrgAuthStatus("all");
+    setOrgAuthEdition("all");
+    setOrgAuthProfession("all");
+    setOrgAuthLevel("all");
+    setOrgAuthExpiryStatus("all");
+    handleOrgAuthListReset();
   }
 
   async function handleViewOrgAuthDetail(publicId: string) {
@@ -5332,6 +5541,8 @@ export function AdminOrgAuthPage() {
           ),
         ],
       }));
+      setIsOrgAuthCreateDrawerOpen(false);
+      setOrgAuthListRefreshVersion((version) => version + 1);
       setToastMessage({ message: "企业授权已创建", tone: "success" });
       return;
     }
@@ -5361,6 +5572,7 @@ export function AdminOrgAuthPage() {
           : orgAuth,
       ),
     }));
+    setOrgAuthListRefreshVersion((version) => version + 1);
     setToastMessage({ message: "企业授权已取消", tone: "success" });
   }
 
@@ -5910,49 +6122,169 @@ export function AdminOrgAuthPage() {
       </section>
 
       <section
-        className={activeView === "org-auth" ? "space-y-6" : "hidden"}
+        className={activeView === "org-auth" ? "space-y-4" : "hidden"}
         data-testid="ops-org-auth-view"
         hidden={activeView !== "org-auth"}
       >
-        <SystemOpsRequiredRoleEntry
-          actionHref="#org-auth-create-panel"
-          actionLabel="新增企业授权"
-          description="企业授权入口位于本任务视图内；提交前仍由二次确认保护写操作，并继续只提交公开编号和既有授权字段。"
-          testId="system-ops-org-auth-create-entry"
-          title="新增企业授权入口"
-        />
-        <OperationsPendingWorkbench
-          organizations={data.organizations}
-          orgAuths={data.orgAuths}
-        />
-        <OrgAuthActionPanel
-          disabled={data.organizations.length === 0}
-          formState={orgAuthFormState}
-          id="org-auth-create-panel"
-          organizations={data.organizations}
-          onCreateOrgAuth={() => {
-            const orgAuthDraft = buildOrgAuthInput(
-              orgAuthFormState,
-              data.organizations,
-            );
+        <AdminListToolbar
+          description="按购买主体、授权范围和到期风险缩小结果；筛选变化自动回到第一页。"
+          primaryAction={
+            <button
+              className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium"
+              type="button"
+              onClick={() => setIsOrgAuthCreateDrawerOpen(true)}
+            >
+              <PlusCircle className="size-4" aria-hidden="true" />
+              新增企业授权
+            </button>
+          }
+          resultLabel={`共 ${orgAuthListPagination.total} 条企业授权`}
+          title="企业授权筛选"
+        >
+          <label className={adminListFilterLabelClassName}>
+            <span>关键词</span>
+            <input
+              aria-label="授权关键词"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              placeholder="授权名称或购买主体"
+              value={orgAuthKeyword}
+              onChange={(event) => {
+                setOrgAuthKeyword(event.target.value);
+                handleOrgAuthFilterChange("keyword");
+              }}
+            />
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>状态</span>
+            <select
+              aria-label="授权状态"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={orgAuthStatus}
+              onChange={(event) => {
+                setOrgAuthStatus(event.target.value as AuthStatus | "all");
+                handleOrgAuthFilterChange("status");
+              }}
+            >
+              <option value="all">全部状态</option>
+              <option value="active">生效中</option>
+              <option value="expired">已过期</option>
+              <option value="cancelled">已取消</option>
+            </select>
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>版本</span>
+            <select
+              aria-label="授权版本"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={orgAuthEdition}
+              onChange={(event) => {
+                setOrgAuthEdition(
+                  event.target.value as AuthorizationEdition | "all",
+                );
+                handleOrgAuthFilterChange("edition");
+              }}
+            >
+              <option value="all">全部版本</option>
+              <option value="standard">标准版</option>
+              <option value="advanced">高级版</option>
+            </select>
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>专业</span>
+            <select
+              aria-label="授权专业"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={orgAuthProfession}
+              onChange={(event) => {
+                setOrgAuthProfession(event.target.value as Profession | "all");
+                handleOrgAuthFilterChange("profession");
+              }}
+            >
+              <option value="all">全部专业</option>
+              {orgAuthProfessionOptions.map((profession) => (
+                <option key={profession} value={profession}>
+                  {professionLabels[profession]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>等级</span>
+            <select
+              aria-label="授权等级"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={orgAuthLevel}
+              onChange={(event) => {
+                setOrgAuthLevel(
+                  event.target.value === "all"
+                    ? "all"
+                    : Number(event.target.value),
+                );
+                handleOrgAuthFilterChange("level");
+              }}
+            >
+              <option value="all">全部等级</option>
+              {orgAuthLevelOptions.map((level) => (
+                <option key={level} value={level}>
+                  {level}级
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>到期状态</span>
+            <select
+              aria-label="到期状态"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={orgAuthExpiryStatus}
+              onChange={(event) => {
+                setOrgAuthExpiryStatus(
+                  event.target.value as OrgAuthExpiryStatus,
+                );
+                handleOrgAuthFilterChange("expiryStatus");
+              }}
+            >
+              <option value="all">全部到期状态</option>
+              <option value="expiring_soon">45 天内到期</option>
+              <option value="not_expiring_soon">45 天后到期</option>
+            </select>
+          </label>
+          <button
+            className={`border-border bg-background hover:bg-muted rounded-md border px-3 text-sm font-medium ${adminListControlClassName}`}
+            type="button"
+            onClick={() => handleOrgAuthSortChange("expiresAt")}
+          >
+            到期时间排序
+          </button>
+          <label className={adminListFilterLabelClassName}>
+            <span>每页条数</span>
+            <select
+              aria-label="授权每页条数"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={orgAuthListInteractionQuery.pageSize}
+              onChange={(event) =>
+                handleOrgAuthPageSizeChange(event.target.value)
+              }
+            >
+              {ADMIN_PAGE_SIZE_OPTIONS.map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className={`border-border bg-background hover:bg-muted rounded-md border px-3 text-sm font-medium ${adminListControlClassName}`}
+            type="button"
+            onClick={handleResetOrgAuthFilters}
+          >
+            重置筛选
+          </button>
+        </AdminListToolbar>
 
-            if (orgAuthDraft.input === null) {
-              setToastMessage({
-                message: orgAuthDraft.message ?? "企业授权输入无效。",
-                tone: "error",
-              });
-              return;
-            }
-
-            setConfirmationState({
-              kind: "createOrgAuth",
-              input: orgAuthDraft.input,
-            });
-          }}
-          onFormChange={setOrgAuthFormState}
-        />
         <OrgAuthList
-          orgAuths={data.orgAuths}
+          loadState={orgAuthListLoadState}
+          orgAuths={orgAuthListData.orgAuths}
           onCancelOrgAuth={(publicId) =>
             setConfirmationState({ kind: "cancelOrgAuth", publicId })
           }
@@ -5960,6 +6292,46 @@ export function AdminOrgAuthPage() {
             void handleViewOrgAuthDetail(publicId);
           }}
         />
+        <AdminPagination
+          itemLabel="条企业授权"
+          page={orgAuthListPagination.page}
+          pageSize={orgAuthListPagination.pageSize}
+          total={orgAuthListPagination.total}
+          onPageChange={handleOrgAuthPageChange}
+        />
+
+        {isOrgAuthCreateDrawerOpen ? (
+          <OrgAuthCreateDrawer
+            onClose={() => setIsOrgAuthCreateDrawerOpen(false)}
+          >
+            <OrgAuthActionPanel
+              disabled={data.organizations.length === 0}
+              formState={orgAuthFormState}
+              id="org-auth-create-panel"
+              organizations={data.organizations}
+              onCreateOrgAuth={() => {
+                const orgAuthDraft = buildOrgAuthInput(
+                  orgAuthFormState,
+                  data.organizations,
+                );
+
+                if (orgAuthDraft.input === null) {
+                  setToastMessage({
+                    message: orgAuthDraft.message ?? "企业授权输入无效。",
+                    tone: "error",
+                  });
+                  return;
+                }
+
+                setConfirmationState({
+                  kind: "createOrgAuth",
+                  input: orgAuthDraft.input,
+                });
+              }}
+              onFormChange={setOrgAuthFormState}
+            />
+          </OrgAuthCreateDrawer>
+        ) : null}
       </section>
 
       <section

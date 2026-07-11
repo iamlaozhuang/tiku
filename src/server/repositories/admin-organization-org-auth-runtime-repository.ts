@@ -11,6 +11,7 @@ import {
   ilike,
   inArray,
   isNull,
+  lte,
   lt,
   or,
   sql,
@@ -33,6 +34,7 @@ import type {
   OrganizationTreeNodeListDto,
   OrganizationTreePathItemDto,
   OrganizationTreeQuery,
+  OrgAuthListQuery,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
 import type {
@@ -76,7 +78,7 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<OrganizationListDto>>;
   listOrgAuths(
-    query: AdminAuthOperationListQuery,
+    query: OrgAuthListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<OrgAuthListDto>>;
   getOrgAuthDetail?(publicId: string): Promise<OrgAuthDetailDto | null>;
   listEmployees(
@@ -473,6 +475,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           public_id: orgAuth.public_id,
           name: orgAuth.name,
           purchaser_organization_public_id: organization.public_id,
+          purchaser_organization_name: organization.name,
           auth_scope_type: orgAuth.auth_scope_type,
           profession: orgAuth.profession,
           level: orgAuth.level,
@@ -503,8 +506,8 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           eq(organization.id, orgAuth.purchaser_organization_id),
         )
         .where(and(...conditions));
-      const organizationPublicIdsByOrgAuthId =
-        await listOrgAuthOrganizationPublicIds(
+      const organizationSummariesByOrgAuthId =
+        await listOrgAuthOrganizationSummaries(
           database,
           rows.map((row) => row.id),
         );
@@ -518,6 +521,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           publicId: row.public_id,
           name: row.name,
           purchaserOrganizationPublicId: row.purchaser_organization_public_id,
+          purchaserOrganizationName: row.purchaser_organization_name,
           authScopeType: row.auth_scope_type,
           profession: row.profession,
           level: row.level,
@@ -530,7 +534,11 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           cancelledAt:
             row.cancelled_at === null ? null : row.cancelled_at.toISOString(),
           organizationPublicIds:
-            organizationPublicIdsByOrgAuthId.get(row.id) ?? [],
+            organizationSummariesByOrgAuthId.get(row.id)?.publicIds ?? [],
+          coveredOrganizationCount:
+            organizationSummariesByOrgAuthId.get(row.id)?.names.length ?? 0,
+          coveredOrganizationNames:
+            organizationSummariesByOrgAuthId.get(row.id)?.names ?? [],
           createdAt: row.created_at.toISOString(),
           updatedAt: row.updated_at.toISOString(),
         })),
@@ -1785,7 +1793,7 @@ function createOrganizationConditions(
   return conditions;
 }
 
-function createOrgAuthConditions(query: AdminAuthOperationListQuery): SQL[] {
+function createOrgAuthConditions(query: OrgAuthListQuery): SQL[] {
   const conditions: SQL[] = [];
 
   if (query.keyword !== null) {
@@ -1803,6 +1811,32 @@ function createOrgAuthConditions(query: AdminAuthOperationListQuery): SQL[] {
     query.status === "cancelled"
   ) {
     conditions.push(eq(orgAuth.status, query.status));
+  }
+
+  if (query.edition !== "all") {
+    conditions.push(eq(orgAuth.edition, query.edition));
+  }
+
+  if (query.profession !== "all") {
+    conditions.push(eq(orgAuth.profession, query.profession));
+  }
+
+  if (query.level !== null) {
+    conditions.push(eq(orgAuth.level, query.level));
+  }
+
+  if (query.expiryStatus !== "all") {
+    const now = new Date();
+    const expiryThreshold = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
+
+    conditions.push(eq(orgAuth.status, "active"));
+    conditions.push(gt(orgAuth.expires_at, now));
+
+    if (query.expiryStatus === "expiring_soon") {
+      conditions.push(lte(orgAuth.expires_at, expiryThreshold));
+    } else {
+      conditions.push(gt(orgAuth.expires_at, expiryThreshold));
+    }
   }
 
   return conditions;
@@ -1844,7 +1878,7 @@ function createOrganizationOrderBy(query: AdminAuthOperationListQuery): SQL {
     : desc(organization.updated_at);
 }
 
-function createOrgAuthOrderBy(query: AdminAuthOperationListQuery): SQL {
+function createOrgAuthOrderBy(query: OrgAuthListQuery): SQL {
   if (query.sortBy === "createdAt") {
     return query.sortOrder === "asc"
       ? asc(orgAuth.created_at)
@@ -2153,6 +2187,43 @@ async function listOrgAuthOrganizationPublicIds(
   }
 
   return publicIds;
+}
+
+async function listOrgAuthOrganizationSummaries(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  orgAuthIds: number[],
+): Promise<Map<number, { names: string[]; publicIds: string[] }>> {
+  if (orgAuthIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await database
+    .select({
+      org_auth_id: orgAuthOrganization.org_auth_id,
+      organization_name: organization.name,
+      organization_public_id: organization.public_id,
+    })
+    .from(orgAuthOrganization)
+    .innerJoin(
+      organization,
+      eq(organization.id, orgAuthOrganization.organization_id),
+    )
+    .where(inArray(orgAuthOrganization.org_auth_id, orgAuthIds))
+    .orderBy(asc(organization.name), asc(organization.public_id));
+  const summaries = new Map<number, { names: string[]; publicIds: string[] }>();
+
+  for (const row of rows) {
+    const currentSummary = summaries.get(row.org_auth_id) ?? {
+      names: [],
+      publicIds: [],
+    };
+
+    currentSummary.names.push(row.organization_name);
+    currentSummary.publicIds.push(row.organization_public_id);
+    summaries.set(row.org_auth_id, currentSummary);
+  }
+
+  return summaries;
 }
 
 async function listOrgAuthUpgradeRows(

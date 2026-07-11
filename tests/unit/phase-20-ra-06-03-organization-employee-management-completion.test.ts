@@ -15,6 +15,7 @@ import {
   type AdminOrganizationOrgAuthRuntimeRepositories,
 } from "@/server/services/admin-organization-org-auth-runtime";
 import type {
+  AdminOrgAuthListDto,
   EmployeeListDto,
   EmployeeImportResultDto,
   EmployeeTransferResultDto,
@@ -23,7 +24,6 @@ import type {
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type {
   OrgAuthDetailResultDto,
-  OrgAuthListDto,
   OrganizationDto,
 } from "@/server/contracts/organization-auth-contract";
 import type { SessionService } from "@/server/services/session-service";
@@ -117,7 +117,7 @@ const organizationListPayload: {
 const orgAuthListPayload: {
   code: number;
   message: string;
-  data: OrgAuthListDto;
+  data: AdminOrgAuthListDto;
 } = {
   code: 0,
   message: "ok",
@@ -127,9 +127,15 @@ const orgAuthListPayload: {
         publicId: "org-auth-public-001",
         name: "Hangzhou Enterprise Auth",
         purchaserOrganizationPublicId: "org-city-001",
+        purchaserOrganizationName: "Hangzhou Test Tobacco",
+        coveredOrganizationCount: 1,
+        coveredOrganizationNames: ["Hangzhou Test Tobacco"],
         authScopeType: "current_and_descendants",
         profession: "monopoly",
         level: 3,
+        edition: "advanced",
+        effectiveEdition: "advanced",
+        upgradeStatus: "none",
         accountQuota: 100,
         usedQuota: 1,
         startsAt: "2026-06-01T00:00:00.000Z",
@@ -144,9 +150,15 @@ const orgAuthListPayload: {
         publicId: "org-auth-target-001",
         name: "Target Enterprise Auth",
         purchaserOrganizationPublicId: "org-target-001",
+        purchaserOrganizationName: "Target Organization",
+        coveredOrganizationCount: 1,
+        coveredOrganizationNames: ["Target Organization"],
         authScopeType: "current_and_descendants",
         profession: "monopoly",
         level: 3,
+        edition: "standard",
+        effectiveEdition: "standard",
+        upgradeStatus: "none",
         accountQuota: 10,
         usedQuota: 0,
         startsAt: "2026-06-01T00:00:00.000Z",
@@ -231,7 +243,7 @@ const emptyOrganizationListPayload: {
 const emptyOrgAuthListPayload: {
   code: number;
   message: string;
-  data: OrgAuthListDto;
+  data: AdminOrgAuthListDto;
 } = {
   code: 0,
   message: "ok",
@@ -521,7 +533,7 @@ function mockOrganizationPageFetch() {
         return createJsonResponse(organizationListPayload);
       }
 
-      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/org-auths?")) {
         return createJsonResponse(orgAuthListPayload);
       }
 
@@ -665,7 +677,7 @@ function mockEmptyOrganizationPageFetch() {
         return createJsonResponse(emptyOrganizationListPayload);
       }
 
-      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/org-auths?")) {
         return createJsonResponse(emptyOrgAuthListPayload);
       }
 
@@ -989,7 +1001,10 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     ).toHaveTextContent("100");
     expect(
       screen.getByTestId("admin-org-auth-detail-org-auth-public-001"),
-    ).toHaveTextContent("org-city-001");
+    ).toHaveTextContent("Hangzhou Test Tobacco");
+    expect(
+      screen.getByTestId("admin-org-auth-detail-org-auth-public-001"),
+    ).not.toHaveTextContent("org-city-001");
 
     fireEvent.click(
       screen.getByTestId("ops-organization-view-organization-tree"),

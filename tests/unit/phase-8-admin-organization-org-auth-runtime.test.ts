@@ -346,6 +346,36 @@ describe("phase 8 admin organization org auth runtime", () => {
     expect(JSON.stringify(payload)).not.toContain('"id"');
   });
 
+  it("parses dedicated enterprise authorization list filters without changing write contracts", async () => {
+    const repositories = createRepositories();
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService("super_admin"),
+    });
+    const listOrgAuths = vi.spyOn(repositories, "listOrgAuths");
+
+    const response = await handlers.orgAuths.collection.GET(
+      new Request(
+        "http://localhost/api/v1/org-auths?page=3&pageSize=50&sortBy=expiresAt&sortOrder=asc&keyword=%E6%9D%AD%E5%B7%9E&status=active&edition=advanced&profession=logistics&level=4&expiryStatus=expiring_soon",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listOrgAuths).toHaveBeenCalledWith({
+      page: 3,
+      pageSize: 50,
+      sortBy: "expiresAt",
+      sortOrder: "asc",
+      keyword: "杭州",
+      status: "active",
+      edition: "advanced",
+      profession: "logistics",
+      level: 4,
+      expiryStatus: "expiring_soon",
+    });
+  });
+
   it("resolves organization, org_auth, and employee lists from cookie-backed admin sessions", async () => {
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
       repositories: createRepositories(),

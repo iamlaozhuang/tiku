@@ -133,6 +133,9 @@ const orgAuthPayload = {
         publicId: "org-auth-public-001",
         name: "杭州烟草企业授权",
         purchaserOrganizationPublicId: "organization-public-001",
+        purchaserOrganizationName: "杭州烟草",
+        coveredOrganizationCount: 1,
+        coveredOrganizationNames: ["杭州烟草"],
         authScopeType: "current_and_descendants",
         profession: "monopoly",
         level: 3,
@@ -150,6 +153,9 @@ const orgAuthPayload = {
         publicId: "org-auth-public-002",
         name: "宁波烟草企业授权",
         purchaserOrganizationPublicId: "organization-public-002",
+        purchaserOrganizationName: "宁波烟草",
+        coveredOrganizationCount: 1,
+        coveredOrganizationNames: ["宁波烟草"],
         authScopeType: "current_and_descendants",
         profession: "monopoly",
         level: 3,
@@ -412,7 +418,7 @@ function mockSystemOpsFetch() {
         return createJsonResponse(organizationPayload);
       }
 
-      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/org-auths?")) {
         return createJsonResponse(orgAuthPayload);
       }
 
@@ -515,7 +521,7 @@ function mockSystemOpsFetchWithOrganizationTree() {
         return createJsonResponse(organizationTreePayload);
       }
 
-      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/org-auths?")) {
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -525,6 +531,9 @@ function mockSystemOpsFetchWithOrganizationTree() {
                 publicId: "org-auth-import-public-001",
                 name: "西湖区员工导入授权",
                 purchaserOrganizationPublicId: "org-city-001",
+                purchaserOrganizationName: "杭州市烟草公司",
+                coveredOrganizationCount: 1,
+                coveredOrganizationNames: ["西湖区烟草公司"],
                 authScopeType: "current_and_descendants",
                 profession: "monopoly",
                 level: 3,
@@ -1091,7 +1100,7 @@ describe("admin user organization authorization ops baseline", () => {
     );
   });
 
-  it("keeps org_auth staging entry discoverable while focusing redeem code generation inline", async () => {
+  it("keeps organization authorization creation discoverable as the page primary action", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockSystemOpsFetch();
 
@@ -1112,14 +1121,11 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
-    const orgAuthEntry = await screen.findByTestId(
-      "system-ops-org-auth-create-entry",
-    );
+    await screen.findByRole("table", { name: "企业授权列表" });
+    expect(screen.getByRole("button", { name: "新增企业授权" })).toBeVisible();
     expect(
-      within(orgAuthEntry).getByRole("link", { name: "新增企业授权" }),
-    ).toHaveAttribute("href", "#org-auth-create-panel");
-    expect(orgAuthEntry).toHaveTextContent("系统运营本地验收");
-    expect(orgAuthEntry).not.toHaveTextContent("staging 必验");
+      screen.queryByTestId("org-auth-create-form"),
+    ).not.toBeInTheDocument();
   });
 
   it("does not expose sampled visible technical labels on ops org auth and redeem code pages", async () => {
@@ -1129,7 +1135,7 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
-    await screen.findByTestId("system-ops-org-auth-create-entry");
+    await screen.findByRole("table", { name: "企业授权列表" });
     expect(document.body).not.toHaveTextContent(
       /publicId|org_auth|runtime API|contact_config/,
     );
@@ -1153,6 +1159,7 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
     await screen.findByTestId("org-auth-create-form");
     fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
       target: { value: "standard" },
@@ -1216,6 +1223,7 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
     await screen.findByTestId("org-auth-create-form");
 
     const atomicScopePreview = screen.getByTestId(
@@ -1266,6 +1274,7 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
 
     fireEvent.change(screen.getByLabelText("授权名称"), {
       target: { value: "杭州市县区联合授权" },
@@ -1335,6 +1344,7 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
 
     fireEvent.change(screen.getByLabelText("授权名称"), {
       target: { value: "Overlap Test" },
@@ -1363,6 +1373,7 @@ describe("admin user organization authorization ops baseline", () => {
     render(createElement(AdminOrgAuthPage));
 
     await openOpsOrganizationManagementView("ops-organization-view-org-auth");
+    fireEvent.click(screen.getByRole("button", { name: "新增企业授权" }));
 
     fireEvent.change(screen.getByLabelText("授权名称"), {
       target: { value: "多专业等级联合授权" },
@@ -1436,14 +1447,6 @@ describe("admin user organization authorization ops baseline", () => {
     await screen.findByTestId("admin-organization-org-province-001");
     fireEvent.click(screen.getByRole("button", { name: "新增省级组织" }));
     await screen.findByTestId("organization-tree-management-form");
-
-    const pendingWorkbench = screen.getByTestId("operations-pending-workbench");
-    expect(pendingWorkbench).toHaveTextContent("运营待办工作台");
-    expect(pendingWorkbench).toHaveTextContent("系统不会自动续费");
-    expect(pendingWorkbench).toHaveTextContent("组织树待确认");
-    expect(pendingWorkbench).toHaveTextContent(
-      "停用节点和暂无直接授权摘要的节点需要运营核对继承授权影响",
-    );
 
     const organizationTreeGuidance = screen.getByTestId(
       "organization-tree-guidance",

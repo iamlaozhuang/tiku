@@ -256,7 +256,7 @@ describe("phase 20 RA-06-04 org_auth detail route alignment", () => {
         });
       }
 
-      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/org-auths?")) {
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -266,9 +266,15 @@ describe("phase 20 RA-06-04 org_auth detail route alignment", () => {
                 publicId: "org-auth-public-001",
                 name: "杭州烟草企业授权",
                 purchaserOrganizationPublicId: "organization-public-001",
+                purchaserOrganizationName: "杭州烟草",
+                coveredOrganizationCount: 1,
+                coveredOrganizationNames: ["杭州烟草"],
                 authScopeType: "specified_nodes",
                 profession: "monopoly",
                 level: 3,
+                edition: "advanced",
+                effectiveEdition: "advanced",
+                upgradeStatus: "none",
                 accountQuota: 100,
                 usedQuota: 42,
                 startsAt: "2026-05-22T00:00:00.000Z",
@@ -313,6 +319,9 @@ describe("phase 20 RA-06-04 org_auth detail route alignment", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    fireEvent.click(
+      await screen.findByTestId("ops-organization-view-org-auth"),
+    );
     const orgAuthRow = await screen.findByTestId(
       "admin-org-auth-org-auth-public-001",
     );
