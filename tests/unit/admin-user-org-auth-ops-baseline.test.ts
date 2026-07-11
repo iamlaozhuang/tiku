@@ -1391,7 +1391,7 @@ describe("admin user organization authorization ops baseline", () => {
     expect(organizationDetail).not.toHaveAttribute("data-id");
     expect(organizationDetail).toHaveTextContent("组织详情");
     expect(organizationDetail).toHaveTextContent("杭州烟草");
-    expect(organizationDetail).toHaveTextContent("市级");
+    expect(organizationDetail).toHaveTextContent("地市");
     expect(organizationDetail).toHaveTextContent("员工 42");
     expect(organizationDetail).toHaveTextContent("关联授权 1");
     expect(organizationDetail).toHaveTextContent(
@@ -1422,6 +1422,33 @@ describe("admin user organization authorization ops baseline", () => {
     expect(
       screen.queryByTestId("admin-organization-detail-organization-public-001"),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders the organization tree as four user-facing levels", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("organization-tree-management-form");
+
+    const tierSelect = screen.getByTestId("organization-tier-select");
+    expect(within(tierSelect).getByRole("option", { name: "省" })).toHaveValue(
+      "province",
+    );
+    expect(
+      within(tierSelect).getByRole("option", { name: "地市" }),
+    ).toHaveValue("city");
+    expect(
+      within(tierSelect).getByRole("option", { name: "县区" }),
+    ).toHaveValue("district");
+    expect(
+      within(tierSelect).getByRole("option", { name: "站点" }),
+    ).toHaveValue("station");
+
+    expect(
+      screen.getByTestId("organization-tree-management-form"),
+    ).toHaveTextContent("维护省、地市、县区及站点层级");
   });
 
   it("blocks organization tree mutations with invalid tier parent selection", async () => {

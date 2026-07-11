@@ -251,9 +251,9 @@ const orgAuthProfessionOptions: Profession[] = [
 const orgAuthLevelOptions = ["1", "2", "3", "4", "5"] as const;
 
 const orgTierLabels = {
-  city: "市级",
-  district: "区县级",
-  province: "省级",
+  city: "地市",
+  district: "县区",
+  province: "省",
   station: "站点",
 } satisfies Record<OrgTier, string>;
 
@@ -1056,7 +1056,7 @@ function buildOrganizationInput(
   }
 
   if (expectedParentTier === null && parentOrganizationPublicId !== null) {
-    return { input: null, message: "省公司不能设置父级组织。" };
+    return { input: null, message: "省不能设置父级组织。" };
   }
 
   if (
@@ -3560,7 +3560,7 @@ function OrganizationTreeActionPanel({
               企业组织树维护
             </h2>
             <p className="text-text-secondary text-sm leading-6">
-              维护省公司、地市公司、县区公司及站点层级；层级和父级关系会在提交前校验。节点移动首期仅超级管理员
+              维护省、地市、县区及站点层级；层级和父级关系会在提交前校验。节点移动首期仅超级管理员
               通过受控流程处理。
             </p>
           </div>
@@ -3603,9 +3603,9 @@ function OrganizationTreeActionPanel({
                 })
               }
             >
-              <option value="province">省公司</option>
-              <option value="city">地市公司</option>
-              <option value="district">县区公司</option>
+              <option value="province">省</option>
+              <option value="city">地市</option>
+              <option value="district">县区</option>
               <option value="station">站点</option>
             </select>
           </label>

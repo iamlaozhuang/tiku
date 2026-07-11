@@ -9,7 +9,12 @@ import {
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { adminFilterGridPanelClassName } from "@/components/admin/admin-layout-primitives";
+import {
+  adminDataTableClassName,
+  adminDataTableContainerClassName,
+  adminFilterGridPanelClassName,
+  adminListStatePanelClassName,
+} from "@/components/admin/admin-layout-primitives";
 import {
   ADMIN_CONFLICT_MESSAGE,
   ADMIN_DEFAULT_PAGE_SIZE,
@@ -179,8 +184,11 @@ export function AdminCommonInteractionBaseline({
         </div>
       </div>
 
-      <div className="border-border bg-surface overflow-hidden rounded-md border shadow-sm">
-        <table className="w-full text-left text-sm">
+      <div
+        className={adminDataTableContainerClassName}
+        data-testid="admin-list-table-container"
+      >
+        <table className={adminDataTableClassName}>
           <thead className="bg-muted text-text-secondary">
             <tr>
               <th className="px-4 py-3 font-medium" scope="col">
@@ -292,7 +300,10 @@ function AdminStatePanel({
   title: string;
 }) {
   return (
-    <div className="bg-surface border-border rounded-md border p-8 text-center shadow-sm">
+    <div
+      className={adminListStatePanelClassName}
+      data-testid="admin-list-state-panel"
+    >
       <div className="text-brand-primary mx-auto flex justify-center">
         {icon}
       </div>
