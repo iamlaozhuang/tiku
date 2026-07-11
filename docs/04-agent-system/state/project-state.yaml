@@ -1,11 +1,46 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-admin-list-pattern-v2-2026-07-11
+currentPhase: 0704-ops-backend-account-list-2026-07-11
 updatedAt: "2026-07-11T00:00:00-07:00"
+latest0704OpsBackendAccountList:
+  id: 0704-ops-backend-account-list-2026-07-11
+  status: closed
+  result: pass_localhost_ui_backend_account_list
+  branch: codex/0704-ops-backend-account-list
+  dependsOn: 0704-admin-list-pattern-v2-2026-07-11
+  startSha: c177e4f9f884e9c87baf6273c988f01ca41faf77
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-backend-account-list.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-backend-account-list-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-backend-account-list-audit.md
+  executionBoundary:
+    previewPreparation: paused
+    runtime: localhost_ui_source_test_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    screenshotRawDomTrace: existing_user_supplied_screenshot_reviewed_not_copied
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    status: pass_ready_for_commit_merge_push_cleanup
+    redTargetedTests: pass_expected_missing_contract_ui_and_failure_isolation_failures
+    greenTargetedTests: pass_7_files_33_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_16_files_scanned
+    moduleRunV2PrePushReadiness: pass
+    providerExecution: blocked_not_executed
+    envSecretAccess: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    releaseReadinessClaimed: false
 latest0704AdminListPatternV2:
   id: 0704-admin-list-pattern-v2-2026-07-11
-  status: ready_for_closeout
+  status: closed
   result: pass_localhost_ui_admin_list_pattern_v2
   branch: codex/0704-admin-list-pattern-v2
   dependsOn: 0704-ops-user-filter-contract-repair-2026-07-11
@@ -4445,13 +4480,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-admin-list-pattern-v2-2026-07-11
-  title: 0704 admin list pattern v2
-  phase: 0704-admin-list-pattern-v2-2026-07-11
-  status: ready_for_closeout
+  id: 0704-ops-backend-account-list-2026-07-11
+  title: 0704 operations backend account list
+  phase: 0704-ops-backend-account-list-2026-07-11
+  status: in_progress
   priority: p0
-  taskKind: implementation_foundation
-  branch: codex/0704-admin-list-pattern-v2
+  taskKind: implementation_feature
+  branch: codex/0704-ops-backend-account-list
   humanApprovalBoundary:
     implementation: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -4467,23 +4502,16 @@ currentTask:
     screenshotRawDom: existing_user_supplied_screenshot_reviewed_not_copied
   plannedAt: "2026-07-11T00:00:00-07:00"
   claimedAt: "2026-07-11T00:00:00-07:00"
-  targetClosureItem: Establish business-agnostic admin list toolbar, table frame, pagination, and reset behavior.
-  behaviorBoundary: localhost_ui_source_test_only_shared_admin_list_foundation_no_page_migration_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
+  targetClosureItem: Add a server-scoped backend-account read list and separate backend accounts from learner and employee accounts in user management.
+  behaviorBoundary: localhost_ui_source_test_only_backend_account_read_contract_and_tabs_no_new_account_writes_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
   evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-admin-list-pattern-v2.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-admin-list-pattern-v2-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-admin-list-pattern-v2-audit.md
-  dependsOn: 0704-ops-user-filter-contract-repair-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-backend-account-list.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-backend-account-list-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-backend-account-list-audit.md
+  dependsOn: 0704-admin-list-pattern-v2-2026-07-11
   nextRequiredTaskId: null
   validationSummary:
-    status: pass_ready_for_commit_merge_push_cleanup
-    redTargetedTests: pass_expected_missing_component_overflow_and_non_finite_boundary_failures
-    greenTargetedTests: pass_7_files_62_tests
-    lint: pass_0_errors_0_warnings
-    typecheck: pass_tsc_no_emit
-    diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_10_files_scanned
-    moduleRunV2PrePushReadiness: pass
+    status: pending_tdd_and_local_gates
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
@@ -35183,8 +35211,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 887042f783b1305db004f6566a4c9d411b4953fb
-  lastKnownOriginMasterSha: 887042f783b1305db004f6566a4c9d411b4953fb
+  lastKnownMasterSha: c177e4f9f884e9c87baf6273c988f01ca41faf77
+  lastKnownOriginMasterSha: c177e4f9f884e9c87baf6273c988f01ca41faf77
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

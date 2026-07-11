@@ -251,6 +251,21 @@ function mockAdminOpsFetch() {
       );
     }
 
+    if (url.startsWith("/api/v1/admin-accounts")) {
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: { adminAccounts: [] },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          sortBy: "registeredAt",
+          sortOrder: "desc",
+          total: 0,
+        },
+      });
+    }
+
     if (url.startsWith("/api/v1/organizations")) {
       return Response.json(
         createOkPayload({
@@ -485,9 +500,8 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "后台账号安全策略" }),
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));
+    fireEvent.click(screen.getByText("后台账号安全策略"));
     expect(screen.getByText("5 次 / 15 分钟")).toBeInTheDocument();
     expect(screen.getByText("8 小时")).toBeInTheDocument();
     expect(screen.getByText("后台账号独立")).toBeInTheDocument();
@@ -496,6 +510,7 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("super_admin")).toBeNull();
 
+    fireEvent.click(screen.getByRole("tab", { name: "学员与员工账号" }));
     fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
 
     const detailPanel = await screen.findByTestId(

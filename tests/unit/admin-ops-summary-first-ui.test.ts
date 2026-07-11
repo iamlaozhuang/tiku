@@ -78,6 +78,27 @@ function createAdminUser(index: number) {
   } satisfies AdminUserListDto["users"][number];
 }
 
+function createBackendAdminAccount(index: number) {
+  return {
+    publicId: `admin-public-ui-${String(index).padStart(2, "0")}`,
+    phone: `admin-account-${String(index).padStart(2, "0")}`,
+    name: `后台账号 ${index}`,
+    adminRole: index % 2 === 0 ? "org_standard_admin" : "content_admin",
+    status: "active",
+    registeredAt: "2026-05-20T08:00:00.000Z",
+    accountDomain: "admin",
+    organizations:
+      index % 2 === 0
+        ? [
+            {
+              publicId: "organization-public-001",
+              name: "Ops Smoke Org",
+            },
+          ]
+        : [],
+  } as const;
+}
+
 function jsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -87,8 +108,12 @@ function jsonResponse(payload: unknown) {
 }
 
 function stubFetchForSummaryFirstPages({
+  adminAccountFailure = false,
+  adminAccounts = [],
   users = emptyOpsCollections.users,
 }: {
+  adminAccountFailure?: boolean;
+  adminAccounts?: ReturnType<typeof createBackendAdminAccount>[];
   users?: AdminUserListDto["users"];
 } = {}) {
   const fetchMock = vi.fn(
@@ -97,6 +122,36 @@ function stubFetchForSummaryFirstPages({
 
       if (path === "/api/v1/sessions") {
         return jsonResponse(adminSessionPayload);
+      }
+
+      if (path.startsWith("/api/v1/admin-accounts")) {
+        if (adminAccountFailure) {
+          return jsonResponse({
+            code: 503605,
+            message: "Admin account list unavailable.",
+            data: null,
+          });
+        }
+
+        const url = new URL(path, "http://localhost");
+        const page = Number(url.searchParams.get("page") ?? "1");
+        const pageSize = Number(url.searchParams.get("pageSize") ?? "20");
+        const start = (page - 1) * pageSize;
+
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            adminAccounts: adminAccounts.slice(start, start + pageSize),
+          },
+          pagination: {
+            page,
+            pageSize,
+            sortBy: url.searchParams.get("sortBy") ?? "registeredAt",
+            sortOrder: url.searchParams.get("sortOrder") ?? "desc",
+            total: adminAccounts.length,
+          },
+        });
       }
 
       if (path.startsWith("/api/v1/users")) {
@@ -286,13 +341,11 @@ describe("admin ops summary-first UI", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText(visibleUser.publicId)).toBeNull();
 
-    const backendAccountSection = screen.getByRole("region", {
+    const accountTabs = screen.getByRole("tablist", { name: "账号类型" });
+    fireEvent.click(within(accountTabs).getByRole("tab", { name: "后台账号" }));
+    const backendAccountSection = screen.getByRole("tabpanel", {
       name: "后台账号",
     });
-    expect(
-      userWorkArea.compareDocumentPosition(backendAccountSection) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
     expect(screen.queryByRole("region", { name: "后台账号创建" })).toBeNull();
     fireEvent.click(
       within(backendAccountSection).getByRole("button", {
@@ -325,7 +378,7 @@ describe("admin ops summary-first UI", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "用户筛选" })).toBeNull();
     expect(screen.queryByRole("region", { name: "运营筛选" })).toBeNull();
-    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+    expect(screen.getByLabelText("后台账号每页条数")).toHaveValue("20");
     expect(screen.getByText(/后台账号与学员账号域分离/u)).toBeInTheDocument();
 
     const fetchedPaths = fetchMock.mock.calls.map(([url]) => String(url));
@@ -425,6 +478,117 @@ describe("admin ops summary-first UI", () => {
       ).toBe(true);
     });
     expect(screen.getByText("显示 1-20 / 共 25 个用户")).toBeInTheDocument();
+  });
+
+  it("separates backend accounts into a filtered and paginated tab", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token-backend-list",
+    );
+    const backendAccounts = Array.from({ length: 25 }, (_, index) =>
+      createBackendAdminAccount(index + 1),
+    );
+    const fetchMock = stubFetchForSummaryFirstPages({
+      adminAccounts: backendAccounts,
+      users: [createAdminUser(1)],
+    });
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+    const accountTabs = screen.getByRole("tablist", { name: "账号类型" });
+    expect(
+      within(accountTabs).getByRole("tab", { name: "学员与员工账号" }),
+    ).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(within(accountTabs).getByRole("tab", { name: "后台账号" }));
+
+    const backendAccountRegion = screen.getByRole("tabpanel", {
+      name: "后台账号",
+    });
+    expect(
+      within(backendAccountRegion).getByLabelText("搜索后台账号"),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByLabelText("后台角色"),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByLabelText("后台账号状态"),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByLabelText("绑定组织"),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByLabelText("后台账号每页条数"),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByRole("columnheader", { name: "账号" }),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByRole("columnheader", { name: "角色" }),
+    ).toBeInTheDocument();
+    expect(
+      within(backendAccountRegion).getByRole("columnheader", {
+        name: "组织范围",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("后台账号 1 / admin-account-01"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(backendAccounts[0]?.publicId ?? "missing"),
+    ).toBeNull();
+    expect(
+      screen.getByText("显示 1-20 / 共 25 个后台账号"),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("搜索后台账号"), {
+      target: { value: "目标管理员" },
+    });
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([url]) => {
+          const requestUrl = new URL(String(url), "http://localhost");
+
+          return (
+            requestUrl.pathname === "/api/v1/admin-accounts" &&
+            requestUrl.searchParams.get("keyword") === "目标管理员" &&
+            requestUrl.searchParams.get("page") === "1"
+          );
+        }),
+      ).toBe(true);
+    });
+    expect(
+      within(backendAccountRegion).getByRole("button", {
+        name: "创建后台账号",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText("初始密码")).toBeNull();
+  });
+
+  it("isolates a backend account list failure from learner and employee accounts", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token-admin-list-failure",
+    );
+    stubFetchForSummaryFirstPages({
+      adminAccountFailure: true,
+      users: [createAdminUser(1)],
+    });
+
+    render(createElement(AdminOpsManagement));
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "学员与员工账号",
+      }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));
+    expect(
+      await screen.findByRole("alert", {
+        name: "后台账号列表加载失败",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("renders organization auth summary before operations actions and preserves edition boundary copy", async () => {

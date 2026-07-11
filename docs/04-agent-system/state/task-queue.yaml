@@ -118,10 +118,123 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-ops-backend-account-list-2026-07-11
+    title: 0704 operations backend account list
+    phase: 0704-ops-backend-account-list-2026-07-11
+    status: closed
+    result: pass_localhost_ui_backend_account_list
+    priority: p0
+    sequenceOrder: 23.0
+    taskKind: implementation_feature
+    executionProfile: backend_account_read_list_server_scope_ui_tabs_no_new_writes
+    moduleRunVersion: 2
+    branch: codex/0704-ops-backend-account-list
+    dependsOn:
+      - 0704-admin-list-pattern-v2-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-backend-account-list.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-backend-account-list-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-backend-account-list-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-ops-backend-account-list.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-ops-backend-account-list-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-backend-account-list-audit.md
+      - src/app/api/v1/admin-accounts/route.ts
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
+      - src/server/repositories/admin-flow-runtime-repository.test.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/services/admin-flow-runtime.test.ts
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - tests/unit/admin-ops-summary-first-ui.test.ts
+      - tests/unit/phase-11-audit-log-coverage-hardening.test.ts
+      - tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts
+      - tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - tests/unit/phase-7-admin-flow-runtime-smoke.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_read_contract_repository_route_and_ui
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/admin-flow-runtime.test.ts src/server/repositories/admin-flow-runtime-repository.test.ts tests/unit/admin-ops-summary-first-ui.test.ts tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts tests/unit/phase-7-admin-flow-runtime-smoke.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-ops-backend-account-list-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-ops-backend-account-list-2026-07-11 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ready_for_commit_merge_push_cleanup
+      redTargetedTests: pass_expected_missing_contract_ui_and_failure_isolation_failures
+      greenTargetedTests: pass_7_files_33_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_16_files_scanned
+      moduleRunV2PrePushReadiness: pass
+      providerExecution: blocked_not_executed
+      envSecretAccess: blocked_not_executed
+      stagingProdDeploy: blocked_not_executed
+      directDatabaseConnectionExecuted: false
+      dependencyOrLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      releaseReadinessClaimed: false
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
   - id: 0704-admin-list-pattern-v2-2026-07-11
     title: 0704 admin list pattern v2
     phase: 0704-admin-list-pattern-v2-2026-07-11
-    status: ready_for_closeout
+    status: closed
     result: pass_localhost_ui_admin_list_pattern_v2
     priority: p0
     sequenceOrder: 22.0

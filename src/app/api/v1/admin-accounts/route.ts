@@ -3,3 +3,4 @@ import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flo
 const adminFlowRuntimeRouteHandlers = createAdminFlowRuntimeRouteHandlers();
 
 export const POST = adminFlowRuntimeRouteHandlers.adminAccounts.collection.POST;
+export const GET = adminFlowRuntimeRouteHandlers.adminAccounts.collection.GET;

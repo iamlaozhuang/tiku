@@ -33,10 +33,13 @@ import type {
   AdminAccountCreationInputDto,
   AdminAccountCreationNotFoundReason,
   AdminAccountCreationResultDto,
+  AdminAccountListDto,
+  AdminAccountListQuery,
   AdminAuthOperationListQuery,
   AdminUserDetailDto,
   AdminUserListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import type { AdminRole } from "../models/auth";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
@@ -53,6 +56,10 @@ export type AdminFlowPage<TData> = TData & {
 };
 
 export type AdminUserOrgAuthRuntimeRepository = {
+  listAdminAccounts?(
+    query: AdminAccountListQuery,
+    visibleAdminRoles: readonly AdminRole[],
+  ): Promise<AdminFlowPage<AdminAccountListDto>>;
   listUsers(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
@@ -155,6 +162,7 @@ function createLazyDatabaseGetter(
 function createPagination(
   query: Pick<
     | AdminAuthOperationListQuery
+    | AdminAccountListQuery
     | AdminContentKnowledgeListQuery
     | AdminAiAuditLogListQuery,
     "page" | "pageSize" | "sortBy" | "sortOrder"
@@ -255,6 +263,95 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
   getDatabase: () => AdminFlowRuntimeDatabase,
 ): AdminUserOrgAuthRuntimeRepository {
   return {
+    async listAdminAccounts(query, visibleAdminRoles) {
+      const database = getDatabase();
+      const conditions: SQL[] = [
+        inArray(admin.admin_role, [...visibleAdminRoles]),
+      ];
+
+      if (query.keyword !== null) {
+        conditions.push(
+          or(
+            ilike(admin.name, `%${query.keyword}%`),
+            ilike(admin.phone, `%${query.keyword}%`),
+          )!,
+        );
+      }
+
+      if (query.adminRole !== "all") {
+        conditions.push(eq(admin.admin_role, query.adminRole));
+      }
+
+      if (query.status !== "all") {
+        conditions.push(eq(admin.status, query.status));
+      }
+
+      if (query.organizationPublicId !== null) {
+        const organizationAdminIds = database
+          .select({ admin_id: adminOrganization.admin_id })
+          .from(adminOrganization)
+          .innerJoin(
+            organization,
+            eq(organization.id, adminOrganization.organization_id),
+          )
+          .where(eq(organization.public_id, query.organizationPublicId));
+
+        conditions.push(inArray(admin.id, organizationAdminIds));
+      }
+
+      const sortColumn =
+        query.sortBy === "registeredAt" ? admin.created_at : admin.updated_at;
+      const sortDirection = query.sortOrder === "asc" ? asc : desc;
+      const adminAccounts = await database.query.admin.findMany({
+        columns: {
+          admin_role: true,
+          created_at: true,
+          name: true,
+          phone: true,
+          public_id: true,
+          status: true,
+        },
+        limit: query.pageSize,
+        offset: (query.page - 1) * query.pageSize,
+        orderBy: [sortDirection(sortColumn), sortDirection(admin.id)],
+        where: and(...conditions),
+        with: {
+          adminOrganizations: {
+            with: {
+              organization: {
+                columns: {
+                  name: true,
+                  public_id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      const [totalRow] = await database
+        .select({ value: count() })
+        .from(admin)
+        .where(and(...conditions));
+
+      return {
+        adminAccounts: adminAccounts.map((adminAccount) => ({
+          accountDomain: "admin",
+          adminRole: adminAccount.admin_role,
+          name: adminAccount.name,
+          organizations: adminAccount.adminOrganizations.map(
+            ({ organization: linkedOrganization }) => ({
+              name: linkedOrganization.name,
+              publicId: linkedOrganization.public_id,
+            }),
+          ),
+          phone: adminAccount.phone,
+          publicId: adminAccount.public_id,
+          registeredAt: adminAccount.created_at.toISOString(),
+          status: adminAccount.status,
+        })),
+        pagination: createPagination(query, totalRow?.value ?? 0),
+      };
+    },
     async listUsers(query) {
       const database = getDatabase();
       const conditions = createUserConditions(query);

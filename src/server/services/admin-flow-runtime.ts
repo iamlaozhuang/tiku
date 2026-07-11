@@ -18,18 +18,22 @@ import {
   type AdminContentKnowledgePageSize,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import {
+  ADMIN_ACCOUNT_LIST_SORT_FIELDS,
   ADMIN_AUTH_OPERATION_SORT_FIELDS,
   type AdminAccountCreationRole,
   type AdminAccountCreationConflictDto,
   type AdminAccountCreationResultDto,
+  type AdminAccountListQuery,
+  type AdminAccountListSortField,
   type OrganizationAdminAccountCreationRole,
   ADMIN_AUTH_OPERATION_ERROR_CODES,
+  createAdminAccountListQuery,
   createAdminAuthOperationListQuery,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { AdminRole } from "../models/auth";
+import { adminRoleValues, type AdminRole } from "../models/auth";
 import {
   createPostgresAdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositories,
@@ -89,6 +93,10 @@ const userDetailUnavailableResponse = createErrorResponse(
 const adminAccountCreationUnavailableResponse = createErrorResponse(
   503604,
   "Admin account creation runtime is not configured.",
+);
+const adminAccountListUnavailableResponse = createErrorResponse(
+  503605,
+  "Admin account list runtime is not configured.",
 );
 const adminAccountCreationValidationFailedResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
@@ -202,6 +210,19 @@ function canCreateAdminAccount(
   );
 }
 
+const operationsVisibleAdminRoles = [
+  "org_standard_admin",
+  "org_advanced_admin",
+] as const satisfies readonly AdminRole[];
+
+function getVisibleAdminAccountRoles(
+  actor: AdminFlowActor,
+): readonly AdminRole[] {
+  return actor.roles.includes("super_admin")
+    ? adminRoleValues
+    : operationsVisibleAdminRoles;
+}
+
 function readRequestIp(request: Request): string | null {
   const forwardedFor = request.headers.get("x-forwarded-for");
 
@@ -228,6 +249,32 @@ function readAdminAuthOperationListQuery(
     keyword: searchParams.get("keyword"),
     status: readAdminAuthOperationStatus(searchParams),
     userType: readAdminAuthOperationUserType(searchParams),
+  });
+}
+
+function readAdminAccountListQuery(request: Request): AdminAccountListQuery {
+  const searchParams = new URL(request.url).searchParams;
+  const pageSize = readPageSize(searchParams, [20, 50, 100], 20);
+  const page = Number(searchParams.get("page"));
+  const sortBy = searchParams.get("sortBy");
+  const adminRole = searchParams.get("adminRole");
+  const status = searchParams.get("status");
+
+  return createAdminAccountListQuery({
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: pageSize as AdminAuthOperationPageSize,
+    sortBy: ADMIN_ACCOUNT_LIST_SORT_FIELDS.includes(
+      sortBy as AdminAccountListSortField,
+    )
+      ? (sortBy as AdminAccountListSortField)
+      : "registeredAt",
+    sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+    keyword: searchParams.get("keyword"),
+    adminRole: adminRoleValues.includes(adminRole as AdminRole)
+      ? (adminRole as AdminRole)
+      : "all",
+    status: status === "active" || status === "disabled" ? status : "all",
+    organizationPublicId: searchParams.get("organizationPublicId"),
   });
 }
 
@@ -545,6 +592,34 @@ export function createAdminFlowRuntimeRouteHandlers(
     );
   }
 
+  async function listAdminAccounts(request: Request): Promise<Response> {
+    const actor = await requireAdminActor(request);
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse);
+    }
+
+    if (!canReadUserManagement(actor)) {
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    if (repositories.userOrgAuthRepository.listAdminAccounts === undefined) {
+      return createJsonResponse(adminAccountListUnavailableResponse);
+    }
+
+    const result = await repositories.userOrgAuthRepository.listAdminAccounts(
+      readAdminAccountListQuery(request),
+      getVisibleAdminAccountRoles(actor),
+    );
+
+    return createJsonResponse(
+      createPaginatedResponse(
+        { adminAccounts: result.adminAccounts },
+        result.pagination,
+      ),
+    );
+  }
+
   async function updateUserLifecycle(input: {
     request: Request;
     context: { params: Promise<{ publicId: string }> };
@@ -627,6 +702,7 @@ export function createAdminFlowRuntimeRouteHandlers(
   return createRouteHandlersWithErrorEnvelope({
     adminAccounts: {
       collection: {
+        GET: listAdminAccounts,
         POST: createAdminAccount,
       },
     },

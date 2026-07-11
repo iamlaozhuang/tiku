@@ -242,6 +242,21 @@ function mockAdminOpsFetch() {
       );
     }
 
+    if (url.startsWith("/api/v1/admin-accounts")) {
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: { adminAccounts: [] },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          sortBy: "registeredAt",
+          sortOrder: "desc",
+          total: 0,
+        },
+      });
+    }
+
     if (url.startsWith("/api/v1/organizations")) {
       return Response.json(
         createOkPayload({
@@ -459,6 +474,21 @@ function mockBootstrapOnlyAdminOpsFetch() {
       return Response.json(createOkPayload({ users: [] }));
     }
 
+    if (url.startsWith("/api/v1/admin-accounts")) {
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: { adminAccounts: [] },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          sortBy: "registeredAt",
+          sortOrder: "desc",
+          total: 0,
+        },
+      });
+    }
+
     if (url.startsWith("/api/v1/organizations")) {
       return Response.json(createOkPayload({ organizations: [] }));
     }
@@ -499,6 +529,22 @@ function mockOpsAdminOrganizationAdminCreationFetch() {
   localStorage.setItem("tiku.localSessionToken", "ops-admin-session-token");
 
   const capturedAdminAccountBodies: unknown[] = [];
+  const backendAdminAccounts: Array<Record<string, unknown>> = [];
+  const createdBackendAdminAccount = {
+    publicId: "admin-public-created-org-standard",
+    phone: "13900009010",
+    name: "组织管理员",
+    adminRole: "org_standard_admin",
+    status: "active",
+    registeredAt: now,
+    accountDomain: "admin",
+    organizations: [
+      {
+        publicId: "organization-public-001",
+        name: "杭州烟草",
+      },
+    ],
+  };
   const fetchMock = vi.spyOn(globalThis, "fetch");
 
   fetchMock.mockImplementation(async (input, init) => {
@@ -530,6 +576,28 @@ function mockOpsAdminOrganizationAdminCreationFetch() {
       );
     }
 
+    if (url.startsWith("/api/v1/admin-accounts") && method !== "POST") {
+      const requestUrl = new URL(url, "http://localhost");
+      const page = Number(requestUrl.searchParams.get("page") ?? "1");
+      const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "20");
+      const start = (page - 1) * pageSize;
+
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: {
+          adminAccounts: backendAdminAccounts.slice(start, start + pageSize),
+        },
+        pagination: {
+          page,
+          pageSize,
+          sortBy: requestUrl.searchParams.get("sortBy") ?? "registeredAt",
+          sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
+          total: backendAdminAccounts.length,
+        },
+      });
+    }
+
     if (url.startsWith("/api/v1/admin-accounts") && method === "POST") {
       const body =
         input instanceof Request
@@ -537,6 +605,7 @@ function mockOpsAdminOrganizationAdminCreationFetch() {
           : JSON.parse(String(init?.body ?? "{}"));
 
       capturedAdminAccountBodies.push(body);
+      backendAdminAccounts.push(createdBackendAdminAccount);
 
       return Response.json(
         createOkPayload({
@@ -825,6 +894,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
       await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("暂无用户管理数据")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));
     fireEvent.click(screen.getByRole("button", { name: "创建后台账号" }));
     expect(
       screen.getByRole("region", { name: "后台账号创建" }),
@@ -842,6 +912,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
       await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));
     fireEvent.click(screen.getByRole("button", { name: "创建后台账号" }));
 
     const roleSelect = screen.getByLabelText("角色") as HTMLSelectElement;
@@ -853,9 +924,12 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(
       screen.queryByRole("option", { name: "内容管理员" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByLabelText("绑定组织")).toHaveValue(
-      "organization-public-001",
-    );
+    const accountCreationRegion = screen.getByRole("region", {
+      name: "后台账号创建",
+    });
+    expect(
+      within(accountCreationRegion).getByLabelText("绑定组织"),
+    ).toHaveValue("organization-public-001");
 
     fireEvent.change(screen.getByLabelText("手机号"), {
       target: { value: "13900009010" },
@@ -876,6 +950,9 @@ describe("phase 9 admin ops runtime ui completion", () => {
         }),
       ]);
     });
+    expect(
+      await screen.findByText("组织管理员 / 13900009010"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("OrgAdmin2026")).not.toBeInTheDocument();
   });
 });

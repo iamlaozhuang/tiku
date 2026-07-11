@@ -189,6 +189,21 @@ function mockAdminOpsFetch() {
       return Response.json(createOkPayload({ aiCallLogs: [] }));
     }
 
+    if (url.startsWith("/api/v1/admin-accounts")) {
+      return Response.json({
+        code: 0,
+        message: "ok",
+        data: { adminAccounts: [] },
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          sortBy: "registeredAt",
+          sortOrder: "desc",
+          total: 0,
+        },
+      });
+    }
+
     const listKeyByPath: [string, string][] = [
       ["/api/v1/users", "users"],
       ["/api/v1/organizations", "organizations"],

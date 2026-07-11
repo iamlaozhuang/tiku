@@ -12,6 +12,11 @@ import type {
 
 export const ADMIN_AUTH_OPERATION_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 
+export const ADMIN_ACCOUNT_LIST_SORT_FIELDS = [
+  "registeredAt",
+  "updatedAt",
+] as const;
+
 export const ADMIN_AUTH_OPERATION_SORT_FIELDS = [
   "registeredAt",
   "updatedAt",
@@ -33,6 +38,40 @@ export type AdminAuthOperationSortField =
   (typeof ADMIN_AUTH_OPERATION_SORT_FIELDS)[number];
 
 export type AdminAuthOperationSortOrder = "asc" | "desc";
+
+export type AdminAccountListSortField =
+  (typeof ADMIN_ACCOUNT_LIST_SORT_FIELDS)[number];
+
+export type AdminAccountListQuery = {
+  page: number;
+  pageSize: AdminAuthOperationPageSize;
+  sortBy: AdminAccountListSortField;
+  sortOrder: AdminAuthOperationSortOrder;
+  keyword: string | null;
+  adminRole: AdminRole | "all";
+  status: UserStatus | "all";
+  organizationPublicId: string | null;
+};
+
+export type AdminAccountOrganizationSummaryDto = {
+  publicId: string;
+  name: string;
+};
+
+export type AdminAccountListItemDto = {
+  publicId: string;
+  phone: string;
+  name: string;
+  adminRole: AdminRole;
+  status: UserStatus;
+  registeredAt: string;
+  accountDomain: "admin";
+  organizations: AdminAccountOrganizationSummaryDto[];
+};
+
+export type AdminAccountListDto = {
+  adminAccounts: AdminAccountListItemDto[];
+};
 
 export type AdminUserCategory =
   | "no_auth_personal"
@@ -379,6 +418,27 @@ export function createAdminAuthOperationListQuery(
     authFilter: "all",
     ...queryOverrides,
     keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,
+  };
+}
+
+export function createAdminAccountListQuery(
+  overrides: Partial<AdminAccountListQuery> = {},
+): AdminAccountListQuery {
+  const { keyword, organizationPublicId, ...queryOverrides } = overrides;
+
+  return {
+    page: 1,
+    pageSize: 20,
+    sortBy: "registeredAt",
+    sortOrder: "desc",
+    adminRole: "all",
+    status: "all",
+    ...queryOverrides,
+    keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,
+    organizationPublicId:
+      typeof organizationPublicId === "string"
+        ? normalizeKeyword(organizationPublicId)
+        : null,
   };
 }
 

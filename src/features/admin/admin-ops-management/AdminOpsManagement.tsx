@@ -13,6 +13,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  adminListControlClassName,
+  adminListFilterLabelClassName,
+  AdminListToolbar,
+  AdminPagination,
+  AdminTableFrame,
+} from "@/components/admin/AdminList";
+import {
   AdminEmptyState,
   AdminErrorState,
   AdminLoadingState,
@@ -38,6 +45,7 @@ import type {
 import type {
   AdminAccountCreationRole,
   AdminAccountCreationResultDto,
+  AdminAccountListDto,
   OrganizationAdminAccountCreationRole,
   OrganizationListDto,
   AdminUserDetailDto,
@@ -58,12 +66,18 @@ type AdminOpsLoadState =
   | "unauthorized"
   | "error";
 
+type AdminAccountLoadState = "loading" | "ready" | "error";
+
 type AdminOpsData = {
+  adminAccounts: AdminAccountListDto["adminAccounts"];
+  adminAccountsPagination: ApiPagination | null;
   currentAdminRoles: AdminRole[];
   users: AdminUserListDto["users"];
   usersPagination: ApiPagination | null;
   organizations: OrganizationListDto["organizations"];
 };
+
+type AccountTab = "learner_employee" | "backend_admin";
 
 type ConfirmationState =
   | {
@@ -100,6 +114,8 @@ type AdminOpsLoadResult =
     };
 
 const DEFAULT_SORT_ORDER = "desc";
+const ADMIN_ACCOUNT_ORGANIZATION_OPTIONS_QUERY =
+  "page=1&pageSize=100&sortBy=updatedAt&sortOrder=desc";
 
 const userStatusOptions = [
   ["all", "全部状态"],
@@ -168,6 +184,8 @@ const opsAdminAccountCreationRoles = [
 ] as const satisfies readonly OrganizationAdminAccountCreationRole[];
 
 const emptyAdminOpsData: AdminOpsData = {
+  adminAccounts: [],
+  adminAccountsPagination: null,
   currentAdminRoles: [],
   organizations: [],
   users: [],
@@ -212,9 +230,51 @@ function createListSearchParams({
   return searchParams.toString();
 }
 
+function createAdminAccountListSearchParams({
+  adminRole,
+  keyword,
+  organizationPublicId,
+  query,
+  status,
+}: {
+  adminRole: AdminRole | "all";
+  keyword: string;
+  organizationPublicId: string;
+  query: AdminListQuery;
+  status: UserStatus | "all";
+}) {
+  const searchParams = new URLSearchParams({
+    page: `${query.page}`,
+    pageSize: `${query.pageSize}`,
+    sortBy: query.sortBy,
+    sortOrder: query.sortOrder,
+  });
+  const normalizedKeyword = keyword.trim();
+
+  if (normalizedKeyword.length > 0) {
+    searchParams.set("keyword", normalizedKeyword);
+  }
+
+  if (adminRole !== "all") {
+    searchParams.set("adminRole", adminRole);
+  }
+
+  if (status !== "all") {
+    searchParams.set("status", status);
+  }
+
+  if (organizationPublicId.length > 0) {
+    searchParams.set("organizationPublicId", organizationPublicId);
+  }
+
+  return searchParams.toString();
+}
+
 function hasAdminOpsData(data: AdminOpsData): boolean {
   return (
     data.users.length > 0 ||
+    data.adminAccounts.length > 0 ||
+    (data.adminAccountsPagination?.total ?? 0) > 0 ||
     (data.usersPagination?.total ?? 0) > 0 ||
     data.organizations.length > 0
   );
@@ -242,6 +302,22 @@ function getAllowedAdminAccountCreationRoles(
   }
 
   return [];
+}
+
+function getVisibleAdminAccountRoles(
+  currentAdminRoles: AdminRole[],
+): AdminRole[] {
+  if (currentAdminRoles.includes("super_admin")) {
+    return [
+      "super_admin",
+      "ops_admin",
+      "content_admin",
+      "org_standard_admin",
+      "org_advanced_admin",
+    ];
+  }
+
+  return ["org_standard_admin", "org_advanced_admin"];
 }
 
 function normalizeAdminAccountCreationForm(
@@ -296,6 +372,18 @@ function createFallbackUserPagination(
   };
 }
 
+function createFallbackAdminAccountPagination(
+  listQuery: string,
+  total: number,
+): ApiPagination {
+  const pagination = createFallbackUserPagination(listQuery, total);
+
+  return {
+    ...pagination,
+    sortBy: new URLSearchParams(listQuery).get("sortBy") ?? "registeredAt",
+  };
+}
+
 async function postAdminApi<TData>(
   path: string,
   sessionToken: string,
@@ -313,16 +401,16 @@ async function postAdminApi<TData>(
   return (await response.json()) as ApiResponse<TData | null>;
 }
 
-function getCachedAdminOpsLoadResult(listQuery: string) {
+function getCachedAdminOpsLoadResult(userListQuery: string) {
   const sessionToken = getStoredSessionToken();
-  const cacheKey = `${sessionToken ?? "anonymous"}:${listQuery}`;
+  const cacheKey = `${sessionToken ?? "anonymous"}:${userListQuery}`;
   const cachedResult = adminOpsLoadCache.get(cacheKey);
 
   if (cachedResult !== undefined) {
     return cachedResult;
   }
 
-  const loadResult = loadAdminOpsData(listQuery, sessionToken);
+  const loadResult = loadAdminOpsData(userListQuery, sessionToken);
 
   adminOpsLoadCache.set(cacheKey, loadResult);
 
@@ -330,7 +418,7 @@ function getCachedAdminOpsLoadResult(listQuery: string) {
 }
 
 async function loadAdminOpsData(
-  listQuery: string,
+  userListQuery: string,
   sessionToken: string | null,
 ): Promise<AdminOpsLoadResult> {
   if (sessionToken === null) {
@@ -360,11 +448,11 @@ async function loadAdminOpsData(
 
     const [userResponse, organizationResponse] = await Promise.all([
       fetchAdminApi<AdminUserListDto>(
-        `/api/v1/users?${listQuery}`,
+        `/api/v1/users?${userListQuery}`,
         sessionToken,
       ),
       fetchAdminApi<OrganizationListDto>(
-        `/api/v1/organizations?${listQuery}`,
+        `/api/v1/organizations?${ADMIN_ACCOUNT_ORGANIZATION_OPTIONS_QUERY}`,
         sessionToken,
       ),
     ]);
@@ -382,12 +470,17 @@ async function loadAdminOpsData(
     }
 
     const data = {
+      adminAccounts: [],
+      adminAccountsPagination: null,
       currentAdminRoles: sessionResponse.data.user.adminRoles ?? [],
       organizations: organizationResponse.data.organizations,
       users: userResponse.data.users,
       usersPagination:
         userResponse.pagination ??
-        createFallbackUserPagination(listQuery, userResponse.data.users.length),
+        createFallbackUserPagination(
+          userListQuery,
+          userResponse.data.users.length,
+        ),
     };
 
     return {
@@ -404,7 +497,10 @@ async function loadAdminOpsData(
 
 export function AdminOpsManagement() {
   const [loadState, setLoadState] = useState<AdminOpsLoadState>("loading");
+  const [adminAccountLoadState, setAdminAccountLoadState] =
+    useState<AdminAccountLoadState>("loading");
   const [data, setData] = useState<AdminOpsData>(emptyAdminOpsData);
+  const [accountTab, setAccountTab] = useState<AccountTab>("learner_employee");
   const [userKeyword, setUserKeyword] = useState("");
   const [userStatus, setUserStatus] = useState<UserStatus | "all">("all");
   const [userType, setUserType] = useState<UserType | "all">("all");
@@ -417,6 +513,30 @@ export function AdminOpsManagement() {
   } = useAdminListInteraction({
     initialQuery: {
       sortBy: "updatedAt",
+      sortOrder: DEFAULT_SORT_ORDER,
+    },
+  });
+  const [adminAccountKeyword, setAdminAccountKeyword] = useState("");
+  const [adminAccountRole, setAdminAccountRole] = useState<AdminRole | "all">(
+    "all",
+  );
+  const [adminAccountStatus, setAdminAccountStatus] = useState<
+    UserStatus | "all"
+  >("all");
+  const [
+    adminAccountOrganizationPublicId,
+    setAdminAccountOrganizationPublicId,
+  ] = useState("");
+  const {
+    handleFilterChange: handleAdminAccountFilterChange,
+    handlePageChange: handleAdminAccountPageChange,
+    handlePageSizeChange: handleAdminAccountPageSizeChange,
+    handleReset: resetAdminAccountListQuery,
+    handleSortChange: handleAdminAccountSortChange,
+    query: adminAccountQuery,
+  } = useAdminListInteraction({
+    initialQuery: {
+      sortBy: "registeredAt",
       sortOrder: DEFAULT_SORT_ORDER,
     },
   });
@@ -451,8 +571,29 @@ export function AdminOpsManagement() {
       }),
     [query, userKeyword, userStatus, userType],
   );
+  const adminAccountListQuery = useMemo(
+    () =>
+      createAdminAccountListSearchParams({
+        adminRole: adminAccountRole,
+        keyword: adminAccountKeyword,
+        organizationPublicId: adminAccountOrganizationPublicId,
+        query: adminAccountQuery,
+        status: adminAccountStatus,
+      }),
+    [
+      adminAccountKeyword,
+      adminAccountOrganizationPublicId,
+      adminAccountQuery,
+      adminAccountRole,
+      adminAccountStatus,
+    ],
+  );
   const allowedAdminAccountCreationRoles = useMemo(
     () => getAllowedAdminAccountCreationRoles(data.currentAdminRoles),
+    [data.currentAdminRoles],
+  );
+  const visibleAdminAccountRoles = useMemo(
+    () => getVisibleAdminAccountRoles(data.currentAdminRoles),
     [data.currentAdminRoles],
   );
   const normalizedAdminAccountForm = useMemo(
@@ -467,6 +608,12 @@ export function AdminOpsManagement() {
   const usersPagination =
     data.usersPagination ??
     createFallbackUserPagination(listQuery, data.users.length);
+  const adminAccountsPagination =
+    data.adminAccountsPagination ??
+    createFallbackAdminAccountPagination(
+      adminAccountListQuery,
+      data.adminAccounts.length,
+    );
   const userPageCount = Math.max(
     1,
     Math.ceil(usersPagination.total / usersPagination.pageSize),
@@ -498,6 +645,34 @@ export function AdminOpsManagement() {
     handleFilterChange("userType");
   }
 
+  function handleAdminAccountKeywordChange(value: string) {
+    setAdminAccountKeyword(value);
+    handleAdminAccountFilterChange("adminAccountKeyword");
+  }
+
+  function handleAdminAccountRoleChange(value: AdminRole | "all") {
+    setAdminAccountRole(value);
+    handleAdminAccountFilterChange("adminAccountRole");
+  }
+
+  function handleAdminAccountStatusChange(value: UserStatus | "all") {
+    setAdminAccountStatus(value);
+    handleAdminAccountFilterChange("adminAccountStatus");
+  }
+
+  function handleAdminAccountOrganizationChange(value: string) {
+    setAdminAccountOrganizationPublicId(value);
+    handleAdminAccountFilterChange("adminAccountOrganization");
+  }
+
+  function handleAdminAccountReset() {
+    setAdminAccountKeyword("");
+    setAdminAccountRole("all");
+    setAdminAccountStatus("all");
+    setAdminAccountOrganizationPublicId("");
+    resetAdminAccountListQuery();
+  }
+
   useEffect(() => {
     let isActive = true;
 
@@ -507,7 +682,11 @@ export function AdminOpsManagement() {
           return;
         }
 
-        setData(result.data);
+        setData((currentData) => ({
+          ...result.data,
+          adminAccounts: currentData.adminAccounts,
+          adminAccountsPagination: currentData.adminAccountsPagination,
+        }));
         setLoadState(result.loadState);
       });
     }, 50);
@@ -517,6 +696,54 @@ export function AdminOpsManagement() {
       window.clearTimeout(loadTimer);
     };
   }, [listQuery]);
+
+  useEffect(() => {
+    let isActive = true;
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      return;
+    }
+
+    const loadTimer = window.setTimeout(() => {
+      void fetchAdminApi<AdminAccountListDto>(
+        `/api/v1/admin-accounts?${adminAccountListQuery}`,
+        sessionToken,
+      )
+        .then((response) => {
+          if (!isActive) {
+            return;
+          }
+
+          if (response.code !== 0 || response.data === null) {
+            setAdminAccountLoadState("error");
+            return;
+          }
+
+          setData((currentData) => ({
+            ...currentData,
+            adminAccounts: response.data?.adminAccounts ?? [],
+            adminAccountsPagination:
+              response.pagination ??
+              createFallbackAdminAccountPagination(
+                adminAccountListQuery,
+                response.data?.adminAccounts.length ?? 0,
+              ),
+          }));
+          setAdminAccountLoadState("ready");
+        })
+        .catch(() => {
+          if (isActive) {
+            setAdminAccountLoadState("error");
+          }
+        });
+    }, 50);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(loadTimer);
+    };
+  }, [adminAccountListQuery]);
 
   async function handleViewUserDetail(publicId: string) {
     const sessionToken = getStoredSessionToken();
@@ -634,12 +861,28 @@ export function AdminOpsManagement() {
     setConfirmationState(null);
   }
 
-  async function refreshAdminOpsData(sessionToken: string) {
-    adminOpsLoadCache.clear();
-    const result = await loadAdminOpsData(listQuery, sessionToken);
+  async function refreshAdminAccountList(sessionToken: string) {
+    const response = await fetchAdminApi<AdminAccountListDto>(
+      `/api/v1/admin-accounts?${adminAccountListQuery}`,
+      sessionToken,
+    );
 
-    setData(result.data);
-    setLoadState(result.loadState);
+    if (response.code !== 0 || response.data === null) {
+      setAdminAccountLoadState("error");
+      return;
+    }
+
+    setData((currentData) => ({
+      ...currentData,
+      adminAccounts: response.data?.adminAccounts ?? [],
+      adminAccountsPagination:
+        response.pagination ??
+        createFallbackAdminAccountPagination(
+          adminAccountListQuery,
+          response.data?.adminAccounts.length ?? 0,
+        ),
+    }));
+    setAdminAccountLoadState("ready");
   }
 
   async function handleCreateAdminAccount() {
@@ -686,7 +929,7 @@ export function AdminOpsManagement() {
       organizationPublicId: data.organizations[0]?.publicId ?? "",
       phone: "",
     });
-    await refreshAdminOpsData(sessionToken);
+    await refreshAdminAccountList(sessionToken);
     setToastMessage({
       message: "后台账号已创建",
       tone: "success",
@@ -734,128 +977,294 @@ export function AdminOpsManagement() {
         </div>
       </header>
 
-      <section
-        aria-label="学员与员工账号"
-        className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      <div
+        aria-label="账号类型"
+        className="bg-muted inline-flex w-fit rounded-md p-1"
+        role="tablist"
       >
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-1">
-            <h2 className="text-text-primary text-base font-semibold">
-              学员与员工账号
-            </h2>
-            <p className="text-text-muted text-sm">
-              按账号状态、用户类型和注册时间筛选；查看详情后再执行重置或启停操作。
-            </p>
-          </div>
-          <p className="text-text-muted text-sm">
-            筛选结果 {usersPagination.total} 个
-          </p>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(14rem,1.5fr)_minmax(0,10rem)_minmax(0,10rem)_minmax(0,8rem)_auto] xl:items-end">
-          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">搜索用户</span>
-            <Input
-              aria-label="搜索用户"
-              placeholder="姓名或手机号"
-              value={userKeyword}
-              onChange={(event) => handleUserKeywordChange(event.target.value)}
-            />
-          </label>
-          <FilterSelect
-            label="用户状态"
-            options={userStatusOptions}
-            value={userStatus}
-            onChange={(value) =>
-              handleUserStatusChange(value as UserStatus | "all")
-            }
-          />
-          <FilterSelect
-            label="用户类型"
-            options={userTypeOptions}
-            value={userType}
-            onChange={(value) =>
-              handleUserTypeChange(value as UserType | "all")
-            }
-          />
-          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">每页条数</span>
-            <select
-              aria-label="每页条数"
-              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-              value={`${query.pageSize}`}
-              onChange={(event) => handlePageSizeChange(event.target.value)}
-            >
-              {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
-                <option key={optionPageSize} value={optionPageSize}>
-                  {optionPageSize}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button
-            variant="outline"
-            onClick={() => handleSortChange("registeredAt")}
-          >
-            注册时间排序
-          </Button>
-          <p className="text-text-muted text-sm md:col-span-2 xl:col-span-5">
-            查看详情和重置密码仍需要二次确认。
-          </p>
-        </div>
-        <AdminUserListTable
-          pageCount={userPageCount}
-          pagination={usersPagination}
-          users={data.users}
-          visibleEnd={visibleUserEnd}
-          visibleStart={visibleUserStart}
-          onPageChange={handlePageChange}
-          onResetPassword={(publicId) =>
-            setConfirmationState({ kind: "resetPassword", publicId })
-          }
-          onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
-        />
-      </section>
+        <Button
+          aria-controls="learner-employee-account-panel"
+          aria-selected={accountTab === "learner_employee"}
+          role="tab"
+          variant={accountTab === "learner_employee" ? "secondary" : "ghost"}
+          onClick={() => setAccountTab("learner_employee")}
+        >
+          学员与员工账号
+        </Button>
+        <Button
+          aria-controls="backend-admin-account-panel"
+          aria-selected={accountTab === "backend_admin"}
+          role="tab"
+          variant={accountTab === "backend_admin" ? "secondary" : "ghost"}
+          onClick={() => setAccountTab("backend_admin")}
+        >
+          后台账号
+        </Button>
+      </div>
 
-      <section
-        aria-label="后台账号"
-        className="border-border space-y-4 border-t pt-6"
-      >
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-1">
-            <h2 className="text-text-primary text-base font-semibold">
-              后台账号
-            </h2>
-            <p className="text-text-muted text-sm">
-              后台账号与学员、员工账号域分离；创建和角色分配属于独立安全操作。
-            </p>
-          </div>
-          {allowedAdminAccountCreationRoles.length > 0 ? (
+      {accountTab === "learner_employee" ? (
+        <div
+          aria-label="学员与员工账号"
+          id="learner-employee-account-panel"
+          role="tabpanel"
+        >
+          <section
+            aria-label="学员与员工账号"
+            className="bg-surface border-border rounded-md border p-4 shadow-sm"
+          >
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-1">
+                <h2 className="text-text-primary text-base font-semibold">
+                  学员与员工账号
+                </h2>
+                <p className="text-text-muted text-sm">
+                  按账号状态、用户类型和注册时间筛选；查看详情后再执行重置或启停操作。
+                </p>
+              </div>
+              <p className="text-text-muted text-sm">
+                筛选结果 {usersPagination.total} 个
+              </p>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(14rem,1.5fr)_minmax(0,10rem)_minmax(0,10rem)_minmax(0,8rem)_auto] xl:items-end">
+              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+                <span className="text-text-secondary">搜索用户</span>
+                <Input
+                  aria-label="搜索用户"
+                  placeholder="姓名或手机号"
+                  value={userKeyword}
+                  onChange={(event) =>
+                    handleUserKeywordChange(event.target.value)
+                  }
+                />
+              </label>
+              <FilterSelect
+                label="用户状态"
+                options={userStatusOptions}
+                value={userStatus}
+                onChange={(value) =>
+                  handleUserStatusChange(value as UserStatus | "all")
+                }
+              />
+              <FilterSelect
+                label="用户类型"
+                options={userTypeOptions}
+                value={userType}
+                onChange={(value) =>
+                  handleUserTypeChange(value as UserType | "all")
+                }
+              />
+              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+                <span className="text-text-secondary">每页条数</span>
+                <select
+                  aria-label="每页条数"
+                  className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+                  value={`${query.pageSize}`}
+                  onChange={(event) => handlePageSizeChange(event.target.value)}
+                >
+                  {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
+                    <option key={optionPageSize} value={optionPageSize}>
+                      {optionPageSize}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <Button
+                variant="outline"
+                onClick={() => handleSortChange("registeredAt")}
+              >
+                注册时间排序
+              </Button>
+              <p className="text-text-muted text-sm md:col-span-2 xl:col-span-5">
+                查看详情和重置密码仍需要二次确认。
+              </p>
+            </div>
+            <AdminUserListTable
+              pageCount={userPageCount}
+              pagination={usersPagination}
+              users={data.users}
+              visibleEnd={visibleUserEnd}
+              visibleStart={visibleUserStart}
+              onPageChange={handlePageChange}
+              onResetPassword={(publicId) =>
+                setConfirmationState({ kind: "resetPassword", publicId })
+              }
+              onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
+            />
+          </section>
+        </div>
+      ) : null}
+
+      {accountTab === "backend_admin" ? (
+        <div
+          aria-label="后台账号"
+          className="space-y-4"
+          id="backend-admin-account-panel"
+          role="tabpanel"
+        >
+          <AdminListToolbar
+            description="后台账号与学员、员工账号域分离；筛选和创建均受当前角色范围约束。"
+            primaryAction={
+              allowedAdminAccountCreationRoles.length > 0 ? (
+                <Button
+                  aria-controls="admin-account-creation-panel"
+                  aria-expanded={isAdminAccountCreationOpen}
+                  size="lg"
+                  variant={isAdminAccountCreationOpen ? "secondary" : "default"}
+                  onClick={() =>
+                    setIsAdminAccountCreationOpen((isOpen) => !isOpen)
+                  }
+                >
+                  <UserPlus aria-hidden="true" />
+                  {isAdminAccountCreationOpen ? "收起创建表单" : "创建后台账号"}
+                </Button>
+              ) : undefined
+            }
+            resultLabel={`共 ${adminAccountsPagination.total} 个后台账号`}
+            title="后台账号"
+          >
+            <label className={adminListFilterLabelClassName}>
+              <span>搜索后台账号</span>
+              <Input
+                aria-label="搜索后台账号"
+                className={adminListControlClassName}
+                placeholder="姓名或手机号"
+                value={adminAccountKeyword}
+                onChange={(event) =>
+                  handleAdminAccountKeywordChange(event.target.value)
+                }
+              />
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>后台角色</span>
+              <select
+                aria-label="后台角色"
+                className="border-input bg-background text-text-primary h-9 min-w-40 rounded-md border px-3 text-sm"
+                value={adminAccountRole}
+                onChange={(event) =>
+                  handleAdminAccountRoleChange(
+                    event.target.value as AdminRole | "all",
+                  )
+                }
+              >
+                <option value="all">全部角色</option>
+                {visibleAdminAccountRoles.map((adminRole) => (
+                  <option key={adminRole} value={adminRole}>
+                    {adminRoleLabels[adminRole]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>后台账号状态</span>
+              <select
+                aria-label="后台账号状态"
+                className="border-input bg-background text-text-primary h-9 min-w-32 rounded-md border px-3 text-sm"
+                value={adminAccountStatus}
+                onChange={(event) =>
+                  handleAdminAccountStatusChange(
+                    event.target.value as UserStatus | "all",
+                  )
+                }
+              >
+                <option value="all">全部状态</option>
+                <option value="active">正常</option>
+                <option value="disabled">已停用</option>
+              </select>
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>绑定组织</span>
+              <select
+                aria-label="绑定组织"
+                className="border-input bg-background text-text-primary h-9 min-w-44 rounded-md border px-3 text-sm"
+                value={adminAccountOrganizationPublicId}
+                onChange={(event) =>
+                  handleAdminAccountOrganizationChange(event.target.value)
+                }
+              >
+                <option value="">全部组织</option>
+                {data.organizations.map((organization) => (
+                  <option
+                    key={organization.publicId}
+                    value={organization.publicId}
+                  >
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            </label>
             <Button
-              aria-controls="admin-account-creation-panel"
-              aria-expanded={isAdminAccountCreationOpen}
-              variant={isAdminAccountCreationOpen ? "secondary" : "default"}
-              onClick={() => setIsAdminAccountCreationOpen((isOpen) => !isOpen)}
+              size="lg"
+              variant="outline"
+              onClick={() => handleAdminAccountSortChange("registeredAt")}
             >
-              <UserPlus aria-hidden="true" />
-              {isAdminAccountCreationOpen ? "收起创建表单" : "创建后台账号"}
+              注册时间排序
             </Button>
+            <label className={adminListFilterLabelClassName}>
+              <span>每页条数</span>
+              <select
+                aria-label="后台账号每页条数"
+                className="border-input bg-background text-text-primary h-9 min-w-28 rounded-md border px-3 text-sm"
+                value={`${adminAccountQuery.pageSize}`}
+                onChange={(event) =>
+                  handleAdminAccountPageSizeChange(event.target.value)
+                }
+              >
+                {ADMIN_PAGE_SIZE_OPTIONS.map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    {pageSize}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button size="lg" variant="ghost" onClick={handleAdminAccountReset}>
+              重置筛选
+            </Button>
+          </AdminListToolbar>
+
+          {adminAccountLoadState === "loading" ? (
+            <p
+              className="text-text-muted py-6 text-center text-sm"
+              role="status"
+            >
+              正在加载后台账号列表
+            </p>
+          ) : null}
+          {adminAccountLoadState === "error" ? (
+            <div
+              aria-label="后台账号列表加载失败"
+              className="border-destructive/30 bg-destructive/5 text-text-secondary rounded-md border p-4 text-sm"
+              role="alert"
+            >
+              后台账号列表暂时不可用；学员与员工账号不受影响，请稍后重试。
+            </div>
+          ) : null}
+          {adminAccountLoadState === "ready" ? (
+            <>
+              <AdminBackendAccountTable adminAccounts={data.adminAccounts} />
+              <AdminPagination
+                itemLabel="个后台账号"
+                page={adminAccountsPagination.page}
+                pageSize={adminAccountsPagination.pageSize}
+                total={adminAccountsPagination.total}
+                onPageChange={handleAdminAccountPageChange}
+              />
+            </>
+          ) : null}
+          <AdminAccountSecurityPolicyPanel />
+
+          {allowedAdminAccountCreationRoles.length > 0 &&
+          isAdminAccountCreationOpen ? (
+            <AdminAccountCreationPanel
+              allowedRoles={allowedAdminAccountCreationRoles}
+              formState={normalizedAdminAccountForm}
+              isSubmitting={isCreatingAdminAccount}
+              organizations={data.organizations}
+              onChange={setAdminAccountForm}
+              onSubmit={() => void handleCreateAdminAccount()}
+            />
           ) : null}
         </div>
-
-        <AdminAccountSecurityPolicyPanel />
-
-        {allowedAdminAccountCreationRoles.length > 0 &&
-        isAdminAccountCreationOpen ? (
-          <AdminAccountCreationPanel
-            allowedRoles={allowedAdminAccountCreationRoles}
-            formState={normalizedAdminAccountForm}
-            isSubmitting={isCreatingAdminAccount}
-            organizations={data.organizations}
-            onChange={setAdminAccountForm}
-            onSubmit={() => void handleCreateAdminAccount()}
-          />
-        ) : null}
-      </section>
+      ) : null}
 
       <AdminUserDetailPanel
         detail={selectedUserDetail}
@@ -1028,17 +1437,110 @@ function AdminUserListTable({
   );
 }
 
+function formatAdminAccountRegisteredAt(registeredAt: string): string {
+  const date = new Date(registeredAt);
+
+  if (Number.isNaN(date.getTime())) {
+    return "时间暂不可用";
+  }
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    hour12: false,
+  }).format(date);
+}
+
+function AdminBackendAccountTable({
+  adminAccounts,
+}: {
+  adminAccounts: AdminAccountListDto["adminAccounts"];
+}) {
+  return (
+    <AdminTableFrame ariaLabel="后台账号列表" minWidthClassName="min-w-[64rem]">
+      <table className="w-full border-separate border-spacing-0 text-left text-sm">
+        <thead className="bg-muted/60 text-text-muted text-xs">
+          <tr>
+            <th className="border-border border-b px-4 py-3 font-medium">
+              账号
+            </th>
+            <th className="border-border border-b px-4 py-3 font-medium">
+              角色
+            </th>
+            <th className="border-border border-b px-4 py-3 font-medium">
+              组织范围
+            </th>
+            <th className="border-border border-b px-4 py-3 font-medium">
+              状态
+            </th>
+            <th className="border-border border-b px-4 py-3 font-medium">
+              注册时间
+            </th>
+            <th className="border-border border-b px-4 py-3 text-right font-medium">
+              操作
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {adminAccounts.length === 0 ? (
+            <tr>
+              <td
+                className="text-text-muted px-4 py-10 text-center"
+                colSpan={6}
+              >
+                当前筛选条件下没有后台账号。
+              </td>
+            </tr>
+          ) : (
+            adminAccounts.map((adminAccount) => (
+              <tr key={adminAccount.publicId}>
+                <td className="border-border border-b px-4 py-3">
+                  <p className="text-text-primary font-medium">
+                    {adminAccount.name} / {adminAccount.phone}
+                  </p>
+                </td>
+                <td className="border-border border-b px-4 py-3">
+                  <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
+                    {adminRoleLabels[adminAccount.adminRole]}
+                  </span>
+                </td>
+                <td className="border-border text-text-secondary border-b px-4 py-3">
+                  {adminAccount.organizations.length === 0
+                    ? "平台范围"
+                    : adminAccount.organizations
+                        .map((organization) => organization.name)
+                        .join("、")}
+                </td>
+                <td className="border-border border-b px-4 py-3">
+                  <span className="text-text-secondary">
+                    {userStatusLabels[adminAccount.status]}
+                  </span>
+                </td>
+                <td className="border-border text-text-secondary border-b px-4 py-3 whitespace-nowrap">
+                  {formatAdminAccountRegisteredAt(adminAccount.registeredAt)}
+                </td>
+                <td className="border-border border-b px-4 py-3 text-right">
+                  <Button disabled size="sm" variant="ghost">
+                    暂无操作
+                  </Button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </AdminTableFrame>
+  );
+}
+
 function AdminAccountSecurityPolicyPanel() {
   return (
-    <section
-      aria-label="后台账号安全策略"
-      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
-    >
+    <details className="bg-surface border-border rounded-md border p-4 shadow-sm">
+      <summary className="text-text-primary cursor-pointer text-sm font-semibold transition-transform active:scale-[0.98]">
+        后台账号安全策略
+      </summary>
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="space-y-2">
-          <h3 className="text-text-primary text-sm font-semibold">
-            后台账号安全策略
-          </h3>
           <p className="text-text-muted max-w-2xl text-sm leading-6">
             后台用户使用独立账号体系，角色授权与学员账号分离；锁定只阻止新登录，不影响已有活跃后台会话。
           </p>
@@ -1057,7 +1559,7 @@ function AdminAccountSecurityPolicyPanel() {
           ))}
         </div>
       </div>
-    </section>
+    </details>
   );
 }
 
