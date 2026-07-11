@@ -196,23 +196,38 @@ function mockAdminFetch() {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
 
 describe("AdminOrgAuthPage", () => {
-  it("renders unauthorized state without calling protected admin APIs when the local session token is missing", () => {
-    const fetchMock = vi.fn();
+  it("renders unauthorized state without calling protected admin APIs when the local session token is missing", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      void url;
+
+      return createJsonResponse({
+        code: 401001,
+        message: "unauthorized",
+        data: null,
+      });
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(AdminOrgAuthPage));
 
-    expect(screen.getByText("请先登录后台")).toBeInTheDocument();
+    expect(await screen.findByText("请先登录后台")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
       "href",
       "/login",
     );
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/sessions",
+      expect.anything(),
+    );
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).includes("org-auths")),
+    ).toBe(false);
   });
 
   it("loads organization, org_auth, and employee data through the admin session runtime without leaking internals", async () => {
@@ -221,9 +236,9 @@ describe("AdminOrgAuthPage", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    expect(screen.getByText("正在加载企业授权运营数据")).toBeInTheDocument();
+    expect(screen.getByText("正在加载企业管理数据")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "企业授权运营" }),
+      await screen.findByRole("heading", { name: "企业管理" }),
     ).toBeInTheDocument();
 
     const organization = screen.getByTestId(
@@ -257,6 +272,39 @@ describe("AdminOrgAuthPage", () => {
         headers: { authorization: "Bearer unit-test-admin-token" },
       }),
     );
+  });
+
+  it("splits enterprise management into organization, authorization, and employee task views", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockAdminFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业管理" });
+
+    const viewTabs = screen.getByTestId(
+      "ops-organization-management-view-tabs",
+    );
+    expect(viewTabs).toHaveTextContent("组织架构");
+    expect(viewTabs).toHaveTextContent("企业授权");
+    expect(viewTabs).toHaveTextContent("员工运营");
+    expect(
+      screen.getByTestId("organization-tree-management-form"),
+    ).toBeVisible();
+    expect(screen.getByTestId("org-auth-create-form")).not.toBeVisible();
+    expect(screen.getByTestId("employee-import-textarea")).not.toBeVisible();
+
+    fireEvent.click(screen.getByTestId("ops-organization-view-org-auth"));
+    expect(screen.getByTestId("org-auth-create-form")).toBeVisible();
+    expect(
+      screen.getByTestId("organization-tree-management-form"),
+    ).not.toBeVisible();
+    expect(window.location.search).toContain("view=org-auth");
+
+    fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
+    expect(screen.getByTestId("employee-import-textarea")).toBeVisible();
+    expect(screen.getByTestId("org-auth-create-form")).not.toBeVisible();
+    expect(window.location.search).toContain("view=employees");
   });
 
   it("shows organization detail management from the existing organization data", async () => {
@@ -309,9 +357,9 @@ describe("AdminOrgAuthPage", () => {
     render(createElement(AdminOrgAuthPage));
 
     expect(
-      await screen.findByRole("heading", { name: "企业授权运营" }),
+      await screen.findByRole("heading", { name: "企业管理" }),
     ).toBeInTheDocument();
-    expect(screen.queryByText("暂无企业授权运营数据")).not.toBeInTheDocument();
+    expect(screen.queryByText("暂无企业管理数据")).not.toBeInTheDocument();
     expect(
       screen.getByTestId("organization-tree-management-form"),
     ).toBeVisible();
@@ -335,9 +383,7 @@ describe("AdminOrgAuthPage", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    expect(
-      await screen.findByText("企业授权运营数据加载失败"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("企业管理数据加载失败")).toBeInTheDocument();
   });
 });
 

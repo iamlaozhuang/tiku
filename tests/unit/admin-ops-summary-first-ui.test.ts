@@ -23,6 +23,7 @@ import type { AdminUserListDto } from "@/server/contracts/admin-user-org-auth-op
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -379,7 +380,7 @@ describe("admin ops summary-first UI", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await screen.findByRole("heading", { name: "企业管理" });
 
     const summaryBand = screen.getByTestId("ops-org-auth-summary-first-band");
     expect(summaryBand).toHaveTextContent("标准版");
@@ -435,7 +436,7 @@ describe("admin ops summary-first UI", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await screen.findByRole("heading", { name: "企业管理" });
     expectCookieBackedFetch(orgAuthFetchMock, "/api/v1/sessions");
     expectCookieBackedFetch(orgAuthFetchMock, "/api/v1/organizations");
 

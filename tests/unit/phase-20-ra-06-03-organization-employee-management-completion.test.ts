@@ -255,8 +255,14 @@ const emptyEmployeeListPayload: {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
 });
+
+async function openOpsOrganizationManagementView(testId: string) {
+  await screen.findByRole("heading", { name: "企业管理" });
+  fireEvent.click(screen.getByTestId(testId));
+}
 
 function createAdminSessionService(
   role: AdminRole,
@@ -903,7 +909,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
 
     const orgAuthRow = screen.getByTestId("admin-org-auth-org-auth-public-001");
     fireEvent.click(
@@ -916,6 +922,9 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       screen.getByTestId("admin-org-auth-detail-org-auth-public-001"),
     ).toHaveTextContent("org-city-001");
 
+    fireEvent.click(
+      screen.getByTestId("ops-organization-view-organization-tree"),
+    );
     fireEvent.click(screen.getByTestId("organization-enable-org-city-001"));
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
     await waitFor(() =>
@@ -925,6 +934,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       ),
     );
 
+    fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: "user-public-002,org-city-001" },
     });
@@ -990,9 +1000,9 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await screen.findByRole("heading", { name: "企业管理" });
 
-    expect(screen.queryByText("暂无企业授权运营数据")).not.toBeInTheDocument();
+    expect(screen.queryByText("暂无企业管理数据")).not.toBeInTheDocument();
     expect(
       screen.getByTestId("organization-tree-management-form"),
     ).toBeVisible();

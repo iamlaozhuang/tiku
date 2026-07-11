@@ -29,9 +29,15 @@ import { createAdminUserOrgAuthOpsRouteHandlers } from "@/server/services/admin-
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
+
+async function openOpsOrganizationManagementView(testId: string) {
+  await screen.findByRole("heading", { name: "企业管理" });
+  fireEvent.click(screen.getByTestId(testId));
+}
 
 const adminSessionPayload = {
   code: 0,
@@ -977,6 +983,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
     const orgAuthEntry = await screen.findByTestId(
       "system-ops-org-auth-create-entry",
     );
@@ -993,6 +1000,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
     await screen.findByTestId("system-ops-org-auth-create-entry");
     expect(document.body).not.toHaveTextContent(
       /publicId|org_auth|runtime API|contact_config/,
@@ -1016,12 +1024,13 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
     await screen.findByTestId("org-auth-create-form");
     fireEvent.change(screen.getByTestId("org-auth-edition-select"), {
       target: { value: "standard" },
     });
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await screen.findByRole("heading", { name: "企业管理" });
 
     fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
@@ -1078,6 +1087,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
     await screen.findByTestId("org-auth-create-form");
 
     const atomicScopePreview = screen.getByTestId(
@@ -1127,7 +1137,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
 
     fireEvent.change(screen.getByLabelText("授权名称"), {
       target: { value: "杭州市县区联合授权" },
@@ -1196,7 +1206,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
 
     fireEvent.change(screen.getByLabelText("授权名称"), {
       target: { value: "Overlap Test" },
@@ -1224,7 +1234,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await screen.findByRole("heading", { name: "企业授权运营" });
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
 
     fireEvent.change(screen.getByLabelText("授权名称"), {
       target: { value: "多专业等级联合授权" },
@@ -1496,6 +1506,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-employees");
     await screen.findByTestId("employee-import-textarea");
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
@@ -1564,6 +1575,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-employees");
     await screen.findByTestId("employee-import-textarea");
 
     fireEvent.click(screen.getByTestId("employee-import-template-download"));
@@ -1610,6 +1622,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-employees");
     await screen.findByTestId("employee-import-textarea");
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
@@ -1638,6 +1651,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-employees");
     await screen.findByTestId("employee-import-textarea");
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
@@ -1667,6 +1681,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
+    await openOpsOrganizationManagementView("ops-organization-view-employees");
     const employee = await screen.findByTestId(
       "admin-employee-employee-public-001",
     );

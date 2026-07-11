@@ -65,6 +65,18 @@ type AdminOrgAuthData = {
   employees: EmployeeListDto["employees"];
 };
 
+const opsOrganizationManagementViewIds = [
+  "organization-tree",
+  "org-auth",
+  "employees",
+] as const;
+
+type OpsOrganizationManagementView =
+  (typeof opsOrganizationManagementViewIds)[number];
+
+const defaultOpsOrganizationManagementView: OpsOrganizationManagementView =
+  "organization-tree";
+
 type CreateOrgAuthInput = {
   accountQuota: number;
   authScopeType: AuthScopeType;
@@ -1531,20 +1543,18 @@ function OperationsOrgAuthSummaryFirstBand({
 
   return (
     <section
-      aria-label="企业授权摘要优先"
+      aria-label="企业管理摘要"
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
       data-testid="ops-org-auth-summary-first-band"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">
-            企业授权 summary-first
-          </p>
+          <p className="text-brand-primary text-xs font-medium">企业管理概览</p>
           <h2 className="text-text-primary text-base font-semibold">
-            企业授权总览
+            组织、授权与员工总览
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            先查看组织、授权、员工和标准版/高级版分布，再进入新增、导入、解绑或停用操作；系统不会自动升级、续费、扩容或合并重叠授权。
+            先确认组织层级、授权版本、额度和员工规模，再进入对应任务视图；系统不会自动升级、续费、扩容或合并重叠授权。
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
@@ -1810,6 +1820,147 @@ function OperationsPendingWorkbench({
             </p>
           </a>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function isOpsOrganizationManagementView(
+  view: string | null,
+): view is OpsOrganizationManagementView {
+  return opsOrganizationManagementViewIds.includes(
+    view as OpsOrganizationManagementView,
+  );
+}
+
+function readOpsOrganizationManagementViewFromLocation(): OpsOrganizationManagementView {
+  if (typeof window === "undefined") {
+    return defaultOpsOrganizationManagementView;
+  }
+
+  const view = new URLSearchParams(window.location.search).get("view");
+
+  return isOpsOrganizationManagementView(view)
+    ? view
+    : defaultOpsOrganizationManagementView;
+}
+
+function writeOpsOrganizationManagementViewToLocation(
+  view: OpsOrganizationManagementView,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const searchParams = new URLSearchParams(window.location.search);
+
+  if (view === defaultOpsOrganizationManagementView) {
+    searchParams.delete("view");
+  } else {
+    searchParams.set("view", view);
+  }
+
+  const nextSearch = searchParams.toString();
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${nextSearch.length === 0 ? "" : `?${nextSearch}`}${window.location.hash}`,
+  );
+}
+
+function OpsOrganizationManagementViewTabs({
+  activeView,
+  employees,
+  onViewChange,
+  organizations,
+  orgAuths,
+}: {
+  activeView: OpsOrganizationManagementView;
+  employees: AdminOrgAuthData["employees"];
+  onViewChange: (view: OpsOrganizationManagementView) => void;
+  organizations: AdminOrgAuthData["organizations"];
+  orgAuths: AdminOrgAuthData["orgAuths"];
+}) {
+  const viewItems = [
+    {
+      description: "维护省、地市、县区、站点四级结构",
+      icon: <Building2 className="size-4" aria-hidden="true" />,
+      id: "organization-tree",
+      metric: `${organizations.length} 个组织`,
+      testId: "ops-organization-view-organization-tree",
+      title: "组织架构",
+    },
+    {
+      description: "新增、复核、取消企业授权",
+      icon: <ShieldCheck className="size-4" aria-hidden="true" />,
+      id: "org-auth",
+      metric: `${orgAuths.length} 条授权`,
+      testId: "ops-organization-view-org-auth",
+      title: "企业授权",
+    },
+    {
+      description: "员工导入、转移、解绑影响复核",
+      icon: <UsersRound className="size-4" aria-hidden="true" />,
+      id: "employees",
+      metric: `${employees.length} 名员工`,
+      testId: "ops-organization-view-employees",
+      title: "员工运营",
+    },
+  ] satisfies {
+    description: string;
+    icon: React.ReactNode;
+    id: OpsOrganizationManagementView;
+    metric: string;
+    testId: string;
+    title: string;
+  }[];
+
+  return (
+    <section
+      aria-label="企业管理任务视图"
+      className="bg-surface border-border rounded-md border p-3 shadow-sm"
+      data-testid="ops-organization-management-view-tabs"
+    >
+      <div className="grid gap-2 lg:grid-cols-3">
+        {viewItems.map((item) => {
+          const isActive = item.id === activeView;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={isActive}
+              className={
+                isActive
+                  ? "border-brand-primary bg-secondary text-text-primary flex min-h-24 items-start gap-3 rounded-md border p-3 text-left shadow-sm"
+                  : "border-border bg-background text-text-secondary hover:bg-muted flex min-h-24 items-start gap-3 rounded-md border p-3 text-left transition-transform active:scale-[0.99]"
+              }
+              data-testid={item.testId}
+              onClick={() => onViewChange(item.id)}
+            >
+              <span
+                className={
+                  isActive
+                    ? "bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
+                    : "bg-muted text-text-secondary flex size-8 shrink-0 items-center justify-center rounded-md"
+                }
+              >
+                {item.icon}
+              </span>
+              <span className="min-w-0 space-y-1">
+                <span className="block text-sm font-semibold">
+                  {item.title}
+                </span>
+                <span className="text-text-muted block text-xs">
+                  {item.metric}
+                </span>
+                <span className="block text-xs leading-5">
+                  {item.description}
+                </span>
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -4537,6 +4688,9 @@ function useAdminRedeemCodeData(listQuery: string) {
 
 export function AdminOrgAuthPage() {
   const { data, loadState, setData, setLoadState } = useAdminOrgAuthData();
+  const [activeView, setActiveView] = useState<OpsOrganizationManagementView>(
+    readOpsOrganizationManagementViewFromLocation,
+  );
   const [confirmationState, setConfirmationState] =
     useState<OrgAuthConfirmationState>(null);
   const [organizationConfirmationState, setOrganizationConfirmationState] =
@@ -4588,6 +4742,26 @@ export function AdminOrgAuthPage() {
           ) ?? null),
     [data.organizations, selectedOrganizationPublicId],
   );
+
+  useEffect(() => {
+    function handlePopState() {
+      setActiveView(readOpsOrganizationManagementViewFromLocation());
+    }
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  function handleOrgManagementViewChange(
+    nextView: OpsOrganizationManagementView,
+  ) {
+    setActiveView(nextView);
+    writeOpsOrganizationManagementViewToLocation(nextView);
+  }
+
   async function handleViewOrgAuthDetail(publicId: string) {
     const sessionToken = getStoredSessionToken();
 
@@ -5098,7 +5272,7 @@ export function AdminOrgAuthPage() {
   }
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="正在加载企业授权运营数据" />;
+    return <AdminLoadingState label="正在加载企业管理数据" />;
   }
 
   if (loadState === "unauthorized") {
@@ -5108,8 +5282,8 @@ export function AdminOrgAuthPage() {
   if (loadState === "error") {
     return (
       <AdminErrorState
-        title="企业授权运营数据加载失败"
-        description="请稍后刷新页面，或重新登录后再查看企业授权运营数据。"
+        title="企业管理数据加载失败"
+        description="请稍后刷新页面，或重新登录后再查看企业组织、企业授权和员工运营数据。"
       />
     );
   }
@@ -5117,7 +5291,7 @@ export function AdminOrgAuthPage() {
   if (loadState === "empty") {
     return (
       <AdminEmptyState
-        title="暂无企业授权运营数据"
+        title="暂无企业管理数据"
         description="当前没有可展示的企业、企业授权或员工账号记录。"
       />
     );
@@ -5126,8 +5300,8 @@ export function AdminOrgAuthPage() {
   return (
     <main className="space-y-6">
       <AdminPageHeader
-        title="企业授权运营"
-        description="查看企业组织、企业授权与员工账号的最小运营切片，所有数据均来自受保护的本地运行接口。"
+        title="企业管理"
+        description="按组织架构、企业授权和员工运营三个任务域维护企业相关数据；现有授权、导入和组织写入规则保持不变。"
         icon={<Building2 className="size-5" aria-hidden="true" />}
       />
 
@@ -5137,99 +5311,28 @@ export function AdminOrgAuthPage() {
         orgAuths={data.orgAuths}
       />
 
-      <SystemOpsRequiredRoleEntry
-        actionHref="#org-auth-create-panel"
-        actionLabel="新增企业授权"
-        description="企业授权新增入口在本页下方，点击后定位到内联表单；提交前仍由二次确认保护写操作，并继续只提交公开编号。"
-        testId="system-ops-org-auth-create-entry"
-        title="新增企业授权入口"
-      />
-
-      <OperationsPendingWorkbench
-        organizations={data.organizations}
-        orgAuths={data.orgAuths}
-      />
-
-      <OrganizationTreeGuidancePanel />
-
-      <OrgAuthActionPanel
-        disabled={data.organizations.length === 0}
-        formState={orgAuthFormState}
-        id="org-auth-create-panel"
-        organizations={data.organizations}
-        onCreateOrgAuth={() => {
-          const orgAuthDraft = buildOrgAuthInput(
-            orgAuthFormState,
-            data.organizations,
-          );
-
-          if (orgAuthDraft.input === null) {
-            setToastMessage({
-              message: orgAuthDraft.message ?? "企业授权输入无效。",
-              tone: "error",
-            });
-            return;
-          }
-
-          setConfirmationState({
-            kind: "createOrgAuth",
-            input: orgAuthDraft.input,
-          });
-        }}
-        onFormChange={setOrgAuthFormState}
-      />
-
-      <OrganizationTreeActionPanel
-        disabled={false}
-        formState={organizationFormState}
-        organizations={data.organizations}
-        onFormChange={setOrganizationFormState}
-        onReset={() => setOrganizationFormState(defaultOrganizationFormState)}
-        onSubmit={handleSubmitOrganization}
-      />
-
-      <EmployeeImportActionPanel
-        importText={employeeImportText}
-        importPreview={employeeImportPreview}
-        organizations={data.organizations}
-        targetOrganizationPublicId={selectedEmployeeImportOrganizationPublicId}
-        onImportFileChange={(file) => {
-          void handleEmployeeImportFileChange(file);
-        }}
-        onImportTextChange={(nextImportText) => {
-          setEmployeeImportText(nextImportText);
-          setLastEmployeeImportResult(null);
-          setLastEmployeeTransferResult(null);
-        }}
-        onSubmit={handleSubmitEmployeeImport}
-        onTemplateDownload={downloadEmployeeImportTemplate}
-        onTargetOrganizationChange={(nextOrganizationPublicId) => {
-          setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
-          setLastEmployeeImportResult(null);
-          setLastEmployeeTransferResult(null);
-        }}
-      />
-
-      {lastEmployeeImportResult === null ? null : (
-        <EmployeeImportResultPanel result={lastEmployeeImportResult} />
-      )}
-
-      <EmployeeTransferSessionReviewPanel
+      <OpsOrganizationManagementViewTabs
+        activeView={activeView}
         employees={data.employees}
-        onTransferEmployee={(input) => {
-          setLastEmployeeTransferResult(null);
-          setLastEmployeeUnbindResult(null);
-          setEmployeeConfirmationState({
-            employeePublicId: input.employeePublicId,
-            kind: "transferEmployee",
-            targetOrganizationPublicId: input.targetOrganizationPublicId,
-          });
-        }}
         organizations={data.organizations}
         orgAuths={data.orgAuths}
+        onViewChange={handleOrgManagementViewChange}
       />
 
-      <section className="grid gap-4 xl:grid-cols-3">
+      <section
+        className={activeView === "organization-tree" ? "space-y-6" : "hidden"}
+        data-testid="ops-organization-tree-view"
+        hidden={activeView !== "organization-tree"}
+      >
+        <OrganizationTreeGuidancePanel />
+        <OrganizationTreeActionPanel
+          disabled={false}
+          formState={organizationFormState}
+          organizations={data.organizations}
+          onFormChange={setOrganizationFormState}
+          onReset={() => setOrganizationFormState(defaultOrganizationFormState)}
+          onSubmit={handleSubmitOrganization}
+        />
         <OrganizationList
           organizations={data.organizations}
           onDisableOrganization={(publicId) =>
@@ -5247,6 +5350,50 @@ export function AdminOrgAuthPage() {
           }
           onViewOrganizationDetail={setSelectedOrganizationPublicId}
         />
+      </section>
+
+      <section
+        className={activeView === "org-auth" ? "space-y-6" : "hidden"}
+        data-testid="ops-org-auth-view"
+        hidden={activeView !== "org-auth"}
+      >
+        <SystemOpsRequiredRoleEntry
+          actionHref="#org-auth-create-panel"
+          actionLabel="新增企业授权"
+          description="企业授权入口位于本任务视图内；提交前仍由二次确认保护写操作，并继续只提交公开编号和既有授权字段。"
+          testId="system-ops-org-auth-create-entry"
+          title="新增企业授权入口"
+        />
+        <OperationsPendingWorkbench
+          organizations={data.organizations}
+          orgAuths={data.orgAuths}
+        />
+        <OrgAuthActionPanel
+          disabled={data.organizations.length === 0}
+          formState={orgAuthFormState}
+          id="org-auth-create-panel"
+          organizations={data.organizations}
+          onCreateOrgAuth={() => {
+            const orgAuthDraft = buildOrgAuthInput(
+              orgAuthFormState,
+              data.organizations,
+            );
+
+            if (orgAuthDraft.input === null) {
+              setToastMessage({
+                message: orgAuthDraft.message ?? "企业授权输入无效。",
+                tone: "error",
+              });
+              return;
+            }
+
+            setConfirmationState({
+              kind: "createOrgAuth",
+              input: orgAuthDraft.input,
+            });
+          }}
+          onFormChange={setOrgAuthFormState}
+        />
         <OrgAuthList
           orgAuths={data.orgAuths}
           onCancelOrgAuth={(publicId) =>
@@ -5255,6 +5402,55 @@ export function AdminOrgAuthPage() {
           onViewOrgAuthDetail={(publicId) => {
             void handleViewOrgAuthDetail(publicId);
           }}
+        />
+      </section>
+
+      <section
+        className={activeView === "employees" ? "space-y-6" : "hidden"}
+        data-testid="ops-employees-view"
+        hidden={activeView !== "employees"}
+      >
+        <EmployeeImportActionPanel
+          importText={employeeImportText}
+          importPreview={employeeImportPreview}
+          organizations={data.organizations}
+          targetOrganizationPublicId={
+            selectedEmployeeImportOrganizationPublicId
+          }
+          onImportFileChange={(file) => {
+            void handleEmployeeImportFileChange(file);
+          }}
+          onImportTextChange={(nextImportText) => {
+            setEmployeeImportText(nextImportText);
+            setLastEmployeeImportResult(null);
+            setLastEmployeeTransferResult(null);
+          }}
+          onSubmit={handleSubmitEmployeeImport}
+          onTemplateDownload={downloadEmployeeImportTemplate}
+          onTargetOrganizationChange={(nextOrganizationPublicId) => {
+            setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
+            setLastEmployeeImportResult(null);
+            setLastEmployeeTransferResult(null);
+          }}
+        />
+
+        {lastEmployeeImportResult === null ? null : (
+          <EmployeeImportResultPanel result={lastEmployeeImportResult} />
+        )}
+
+        <EmployeeTransferSessionReviewPanel
+          employees={data.employees}
+          onTransferEmployee={(input) => {
+            setLastEmployeeTransferResult(null);
+            setLastEmployeeUnbindResult(null);
+            setEmployeeConfirmationState({
+              employeePublicId: input.employeePublicId,
+              kind: "transferEmployee",
+              targetOrganizationPublicId: input.targetOrganizationPublicId,
+            });
+          }}
+          organizations={data.organizations}
+          orgAuths={data.orgAuths}
         />
         <EmployeeList
           employees={data.employees}
