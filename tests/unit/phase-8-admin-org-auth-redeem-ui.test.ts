@@ -113,6 +113,9 @@ const employeePayload = {
         phone: "13800000000",
         name: "张三",
         organizationPublicId: "organization-public-001",
+        organizationName: "杭州烟草",
+        activeOrgAuthCount: 2,
+        registeredAt: "2026-05-20T00:00:00.000Z",
         status: "active",
         id: 301,
       },
@@ -302,8 +305,21 @@ function mockAdminFetch() {
       });
     }
 
-    if (path === "/api/v1/employees?page=1&pageSize=20") {
-      return createJsonResponse(employeePayload);
+    if (path.startsWith("/api/v1/employees?")) {
+      const requestUrl = new URL(path, "http://localhost");
+      const page = Number(requestUrl.searchParams.get("page") ?? "1");
+      const pageSize = Number(requestUrl.searchParams.get("pageSize") ?? "20");
+
+      return createJsonResponse({
+        ...employeePayload,
+        pagination: {
+          page,
+          pageSize,
+          total: 65,
+          sortBy: requestUrl.searchParams.get("sortBy") ?? "registeredAt",
+          sortOrder: requestUrl.searchParams.get("sortOrder") ?? "desc",
+        },
+      });
     }
 
     if (path.startsWith("/api/v1/redeem-codes?")) {
@@ -327,6 +343,79 @@ afterEach(() => {
 });
 
 describe("AdminOrgAuthPage", () => {
+  it("uses a list-first employee workflow with reusable filters, pagination, and on-demand actions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业管理" });
+    fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
+
+    const toolbar = await screen.findByRole("region", { name: "员工筛选" });
+    const table = screen.getByRole("table", { name: "员工账号列表" });
+    expect(toolbar).toHaveTextContent("共 65 名员工");
+    expect(table).toHaveTextContent("杭州烟草");
+    expect(table).toHaveTextContent("有效企业授权 2 项");
+    expect(table).toHaveTextContent("2026-05-20");
+    expect(
+      within(table).queryByText("employee-public-001"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("employee-import-textarea"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.change(within(toolbar).getByLabelText("员工关键词"), {
+      target: { value: "员工" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("所属企业名称"), {
+      target: { value: "杭州" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("员工状态"), {
+      target: { value: "disabled" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("员工每页条数"), {
+      target: { value: "50" },
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/employees?page=1&pageSize=50&sortBy=registeredAt&sortOrder=desc&keyword=%E5%91%98%E5%B7%A5&organizationKeyword=%E6%9D%AD%E5%B7%9E&status=disabled",
+        expect.anything(),
+      ),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/employees?page=2&pageSize=50"),
+        expect.anything(),
+      ),
+    );
+
+    fireEvent.click(within(toolbar).getByRole("button", { name: "重置筛选" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/employees?page=1&pageSize=20&sortBy=registeredAt&sortOrder=desc",
+        expect.anything(),
+      ),
+    );
+
+    fireEvent.click(
+      within(toolbar).getByRole("button", { name: "批量导入员工" }),
+    );
+    expect(
+      screen.getByRole("dialog", { name: "批量导入员工" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("employee-import-textarea")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    fireEvent.click(within(table).getByRole("button", { name: "转移员工" }));
+    expect(
+      screen.getByRole("dialog", { name: "转移员工" }),
+    ).toBeInTheDocument();
+  });
+
   it("uses a list-first enterprise authorization workflow with reusable filters and pagination", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockAdminFetch();
@@ -508,7 +597,9 @@ describe("AdminOrgAuthPage", () => {
     expect(
       screen.queryByTestId("org-auth-create-form"),
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("employee-import-textarea")).not.toBeVisible();
+    expect(
+      screen.queryByTestId("employee-import-textarea"),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("ops-organization-view-org-auth"));
     expect(
@@ -522,6 +613,10 @@ describe("AdminOrgAuthPage", () => {
     expect(window.location.search).toContain("view=org-auth");
 
     fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
+    expect(
+      screen.queryByTestId("employee-import-textarea"),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "批量导入员工" }));
     expect(screen.getByTestId("employee-import-textarea")).toBeVisible();
     expect(
       screen.queryByTestId("org-auth-create-form"),

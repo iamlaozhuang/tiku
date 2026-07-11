@@ -15,6 +15,7 @@ import {
   type AdminOrganizationOrgAuthRuntimeRepositories,
 } from "@/server/services/admin-organization-org-auth-runtime";
 import type {
+  AdminEmployeeListDto,
   AdminOrgAuthListDto,
   EmployeeListDto,
   EmployeeImportResultDto,
@@ -210,7 +211,7 @@ const orgAuthDetailPayload: {
 const employeeListPayload: {
   code: number;
   message: string;
-  data: EmployeeListDto;
+  data: AdminEmployeeListDto;
 } = {
   code: 0,
   message: "ok",
@@ -222,6 +223,9 @@ const employeeListPayload: {
         phone: "13900000001",
         name: "Employee One",
         organizationPublicId: "org-city-001",
+        organizationName: "Hangzhou Test Tobacco",
+        activeOrgAuthCount: 1,
+        registeredAt: "2026-05-31T00:00:00.000Z",
         status: "active",
       },
     ],
@@ -541,7 +545,7 @@ function mockOrganizationPageFetch() {
         return createJsonResponse(orgAuthDetailPayload);
       }
 
-      if (path === "/api/v1/employees?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/employees?")) {
         return createJsonResponse(employeeListPayload);
       }
 
@@ -681,7 +685,7 @@ function mockEmptyOrganizationPageFetch() {
         return createJsonResponse(emptyOrgAuthListPayload);
       }
 
-      if (path === "/api/v1/employees?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/employees?")) {
         return createJsonResponse(emptyEmployeeListPayload);
       }
 
@@ -1020,6 +1024,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     );
 
     fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
+    fireEvent.click(screen.getByRole("button", { name: "批量导入员工" }));
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: "user-public-002,org-city-001" },
     });
@@ -1048,6 +1053,17 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         }),
       ),
     );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    const employeeRow = await screen.findByTestId(
+      "admin-employee-employee-public-001",
+    );
+    fireEvent.click(
+      within(employeeRow).getByRole("button", { name: "转移员工" }),
+    );
+    fireEvent.change(screen.getByLabelText("目标企业"), {
+      target: { value: "org-target-001" },
+    });
 
     fireEvent.click(
       screen.getByTestId(

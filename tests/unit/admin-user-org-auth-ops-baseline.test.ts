@@ -39,6 +39,12 @@ async function openOpsOrganizationManagementView(testId: string) {
   fireEvent.click(screen.getByTestId(testId));
 }
 
+async function openEmployeeImportDrawer() {
+  await openOpsOrganizationManagementView("ops-organization-view-employees");
+  fireEvent.click(screen.getByRole("button", { name: "批量导入员工" }));
+  await screen.findByTestId("employee-import-textarea");
+}
+
 const adminSessionPayload = {
   code: 0,
   message: "ok",
@@ -184,6 +190,9 @@ const employeePayload = {
         phone: "13800000000",
         name: "张三",
         organizationPublicId: "organization-public-001",
+        organizationName: "杭州烟草",
+        activeOrgAuthCount: 1,
+        registeredAt: "2026-05-22T00:00:00.000Z",
         status: "active",
       },
     ],
@@ -422,7 +431,7 @@ function mockSystemOpsFetch() {
         return createJsonResponse(orgAuthPayload);
       }
 
-      if (path === "/api/v1/employees?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/employees?")) {
         return createJsonResponse(employeePayload);
       }
 
@@ -555,7 +564,7 @@ function mockSystemOpsFetchWithOrganizationTree() {
         });
       }
 
-      if (path === "/api/v1/employees?page=1&pageSize=20") {
+      if (path.startsWith("/api/v1/employees?")) {
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -1650,8 +1659,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await openOpsOrganizationManagementView("ops-organization-view-employees");
-    await screen.findByTestId("employee-import-textarea");
+    await openEmployeeImportDrawer();
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: employeeImportContent },
@@ -1672,7 +1680,7 @@ describe("admin user organization authorization ops baseline", () => {
     const importPreview = screen.getByTestId("employee-import-preview");
     expect(importPreview).toHaveTextContent("员工账号 CSV");
     expect(importPreview).toHaveTextContent("2 行");
-    expect(importPreview).toHaveTextContent("2 行未提供 initialPassword");
+    expect(importPreview).toHaveTextContent("2 行未填写初始密码");
     expect(
       screen.getByTestId("employee-import-inherited-auth-category"),
     ).toHaveTextContent("已发现目标组织有效企业授权");
@@ -1719,8 +1727,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await openOpsOrganizationManagementView("ops-organization-view-employees");
-    await screen.findByTestId("employee-import-textarea");
+    await openEmployeeImportDrawer();
 
     fireEvent.click(screen.getByTestId("employee-import-template-download"));
 
@@ -1766,8 +1773,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await openOpsOrganizationManagementView("ops-organization-view-employees");
-    await screen.findByTestId("employee-import-textarea");
+    await openEmployeeImportDrawer();
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: employeeImportContent },
@@ -1795,8 +1801,7 @@ describe("admin user organization authorization ops baseline", () => {
 
     render(createElement(AdminOrgAuthPage));
 
-    await openOpsOrganizationManagementView("ops-organization-view-employees");
-    await screen.findByTestId("employee-import-textarea");
+    await openEmployeeImportDrawer();
 
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
       target: { value: employeeImportContent },
@@ -1829,23 +1834,25 @@ describe("admin user organization authorization ops baseline", () => {
     const employee = await screen.findByTestId(
       "admin-employee-employee-public-001",
     );
+    fireEvent.click(within(employee).getByRole("button", { name: "转移员工" }));
     const transferBoundary = screen.getByTestId(
       "employee-transfer-session-review",
     );
+    fireEvent.change(within(transferBoundary).getByLabelText("目标企业"), {
+      target: { value: "organization-public-002" },
+    });
 
     expect(transferBoundary).toHaveTextContent("员工调动影响复核");
     expect(transferBoundary).toHaveTextContent("目标授权额度不足时阻断");
     expect(transferBoundary).toHaveTextContent("撤销员工已有活跃会话");
     expect(transferBoundary).toHaveTextContent("作答时企业归属快照");
-    expect(transferBoundary).toHaveTextContent("尚未提交的原组织企业训练");
+    expect(transferBoundary).toHaveTextContent("原组织未提交企业训练");
     expect(transferBoundary).toHaveTextContent("宁波烟草");
     expect(transferBoundary).toHaveTextContent("目标授权额度不足");
     expect(transferBoundary).not.toHaveTextContent("approval_required");
-    expect(within(employee).getByText(/解绑影响/)).toHaveTextContent(
-      "原组织员工数 -1",
-    );
+    fireEvent.keyDown(document, { key: "Escape" });
 
-    fireEvent.click(within(employee).getByRole("button", { name: "解绑" }));
+    fireEvent.click(screen.getByTestId("employee-unbind-employee-public-001"));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认解绑员工？");
     fireEvent.click(screen.getByTestId("employee-confirm-action"));
 
@@ -1855,9 +1862,13 @@ describe("admin user organization authorization ops baseline", () => {
     expect(unbindResult).toHaveTextContent("解绑成功");
     expect(unbindResult).toHaveTextContent("杭州烟草");
     expect(unbindResult).not.toHaveAttribute("data-id");
-    expect(
-      screen.queryByTestId("admin-employee-employee-public-001"),
-    ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.filter(([url]) =>
+          String(url).startsWith("/api/v1/employees?"),
+        ).length,
+      ).toBeGreaterThanOrEqual(2);
+    });
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/employees/employee-public-001/unbind",
       expect.objectContaining({

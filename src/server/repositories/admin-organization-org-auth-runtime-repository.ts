@@ -24,6 +24,7 @@ import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
   EmployeeImportResultDto,
+  EmployeeListQuery,
   EmployeeImportRowInputDto,
   EmployeeImportRejectedRowDto,
   EmployeeTransferResultDto,
@@ -82,7 +83,7 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   ): Promise<AdminOrganizationOrgAuthPage<OrgAuthListDto>>;
   getOrgAuthDetail?(publicId: string): Promise<OrgAuthDetailDto | null>;
   listEmployees(
-    query: AdminAuthOperationListQuery,
+    query: EmployeeListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<EmployeeListDto>>;
   createOrganization?(
     input: NormalizedCreateOrganizationInput,
@@ -658,8 +659,11 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           user_public_id: user.public_id,
           phone: user.phone,
           name: user.name,
+          organization_id: organization.id,
           organization_public_id: organization.public_id,
+          organization_name: organization.name,
           status: user.status,
+          registered_at: user.created_at,
         })
         .from(employee)
         .innerJoin(user, eq(user.id, employee.user_id))
@@ -674,6 +678,10 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         .innerJoin(user, eq(user.id, employee.user_id))
         .innerJoin(organization, eq(organization.id, employee.organization_id))
         .where(and(...conditions));
+      const activeOrgAuthCounts = await listActiveOrgAuthCountsByOrganization(
+        database,
+        rows.map((row) => row.organization_id),
+      );
 
       return {
         employees: rows.map((row) => ({
@@ -682,6 +690,9 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           phone: row.phone,
           name: row.name,
           organizationPublicId: row.organization_public_id,
+          organizationName: row.organization_name,
+          activeOrgAuthCount: activeOrgAuthCounts.get(row.organization_id) ?? 0,
+          registeredAt: row.registered_at.toISOString(),
           status: row.status,
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
@@ -1842,12 +1853,8 @@ function createOrgAuthConditions(query: OrgAuthListQuery): SQL[] {
   return conditions;
 }
 
-function createEmployeeConditions(query: AdminAuthOperationListQuery): SQL[] {
+function createEmployeeConditions(query: EmployeeListQuery): SQL[] {
   const conditions: SQL[] = [eq(user.user_type, "employee")];
-
-  if (query.userType === "personal") {
-    conditions.push(sql`false`);
-  }
 
   if (query.keyword !== null) {
     conditions.push(
@@ -1861,6 +1868,10 @@ function createEmployeeConditions(query: AdminAuthOperationListQuery): SQL[] {
 
   if (query.status === "active" || query.status === "disabled") {
     conditions.push(eq(user.status, query.status));
+  }
+
+  if (query.organizationKeyword !== null) {
+    conditions.push(ilike(organization.name, `%${query.organizationKeyword}%`));
   }
 
   return conditions;
@@ -1896,8 +1907,8 @@ function createOrgAuthOrderBy(query: OrgAuthListQuery): SQL {
     : desc(orgAuth.updated_at);
 }
 
-function createEmployeeOrderBy(query: AdminAuthOperationListQuery): SQL {
-  if (query.sortBy === "createdAt" || query.sortBy === "registeredAt") {
+function createEmployeeOrderBy(query: EmployeeListQuery): SQL {
+  if (query.sortBy === "registeredAt") {
     return query.sortOrder === "asc"
       ? asc(user.created_at)
       : desc(user.created_at);
@@ -1906,6 +1917,35 @@ function createEmployeeOrderBy(query: AdminAuthOperationListQuery): SQL {
   return query.sortOrder === "asc"
     ? asc(user.updated_at)
     : desc(user.updated_at);
+}
+
+async function listActiveOrgAuthCountsByOrganization(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<Map<number, number>> {
+  if (organizationIds.length === 0) {
+    return new Map();
+  }
+
+  const now = new Date();
+  const rows = await database
+    .select({
+      organization_id: orgAuthOrganization.organization_id,
+      value: count(),
+    })
+    .from(orgAuthOrganization)
+    .innerJoin(orgAuth, eq(orgAuth.id, orgAuthOrganization.org_auth_id))
+    .where(
+      and(
+        inArray(orgAuthOrganization.organization_id, organizationIds),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, now),
+        gt(orgAuth.expires_at, now),
+      ),
+    )
+    .groupBy(orgAuthOrganization.organization_id);
+
+  return new Map(rows.map((row) => [row.organization_id, row.value]));
 }
 
 async function findOrganizationIdentityByPublicId(

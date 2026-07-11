@@ -263,6 +263,26 @@ export type EmployeeListDto = {
   employees: EmployeeSummaryDto[];
 };
 
+export type EmployeeListQuery = {
+  page: number;
+  pageSize: AdminAuthOperationPageSize;
+  sortBy: "registeredAt" | "updatedAt";
+  sortOrder: AdminAuthOperationSortOrder;
+  keyword: string | null;
+  organizationKeyword: string | null;
+  status: UserStatus | "all";
+};
+
+export type AdminEmployeeListItemDto = EmployeeSummaryDto & {
+  organizationName: string;
+  activeOrgAuthCount: number;
+  registeredAt: string;
+};
+
+export type AdminEmployeeListDto = {
+  employees: AdminEmployeeListItemDto[];
+};
+
 export type EmployeeMutationResultDto = {
   employee: EmployeeSummaryDto;
 };

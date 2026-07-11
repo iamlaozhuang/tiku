@@ -13,6 +13,7 @@ import {
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
+  type EmployeeListQuery,
   type EmployeeSummaryDto,
   type EmployeeImportResultDto,
   type EmployeeTransferResultDto,
@@ -775,6 +776,28 @@ function readOrgAuthListQuery(request: Request): OrgAuthListQuery {
       expiryStatus === "expiring_soon" || expiryStatus === "not_expiring_soon"
         ? expiryStatus
         : "all",
+  };
+}
+
+function readEmployeeListQuery(request: Request): EmployeeListQuery {
+  const searchParams = new URL(request.url).searchParams;
+  const page = Number(searchParams.get("page"));
+  const pageSize = readPageSize(searchParams, [20, 50, 100], 20);
+  const keyword = searchParams.get("keyword")?.trim() ?? "";
+  const organizationKeyword =
+    searchParams.get("organizationKeyword")?.trim() ?? "";
+  const status = searchParams.get("status");
+
+  return {
+    page: Number.isInteger(page) && page > 0 ? page : 1,
+    pageSize: pageSize as AdminAuthOperationPageSize,
+    sortBy:
+      searchParams.get("sortBy") === "updatedAt" ? "updatedAt" : "registeredAt",
+    sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+    keyword: keyword.length === 0 ? null : keyword,
+    organizationKeyword:
+      organizationKeyword.length === 0 ? null : organizationKeyword,
+    status: status === "active" || status === "disabled" ? status : "all",
   };
 }
 
@@ -1546,7 +1569,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           }
 
           const result = await repositories.listEmployees(
-            readAdminAuthOperationListQuery(request),
+            readEmployeeListQuery(request),
           );
 
           return createJsonResponse(

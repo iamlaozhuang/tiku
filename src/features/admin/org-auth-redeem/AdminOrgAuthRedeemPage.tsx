@@ -39,6 +39,7 @@ import type {
   ApiResponse,
 } from "@/server/contracts/api-response";
 import type {
+  AdminEmployeeListDto,
   AdminOrgAuthListDto,
   EmployeeListDto,
   EmployeeImportResultDto,
@@ -101,6 +102,11 @@ type AdminOrgAuthData = {
 
 type AdminOrgAuthListData = {
   orgAuths: AdminOrgAuthListDto["orgAuths"];
+  pagination: ApiPagination | null;
+};
+
+type AdminEmployeeListData = {
+  employees: AdminEmployeeListDto["employees"];
   pagination: ApiPagination | null;
 };
 
@@ -670,7 +676,50 @@ function createOrgAuthListQuery(input: {
   return searchParams.toString();
 }
 
+function createEmployeeListQuery(input: {
+  keyword: string;
+  organizationKeyword: string;
+  query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">;
+  status: UserStatus | "all";
+}): string {
+  const searchParams = new URLSearchParams();
+  const keyword = input.keyword.trim();
+  const organizationKeyword = input.organizationKeyword.trim();
+
+  searchParams.set("page", `${input.query.page}`);
+  searchParams.set("pageSize", `${input.query.pageSize}`);
+  searchParams.set("sortBy", input.query.sortBy);
+  searchParams.set("sortOrder", input.query.sortOrder);
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  if (organizationKeyword.length > 0) {
+    searchParams.set("organizationKeyword", organizationKeyword);
+  }
+
+  if (input.status !== "all") {
+    searchParams.set("status", input.status);
+  }
+
+  return searchParams.toString();
+}
+
 function createFallbackOrgAuthPagination(
+  query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">,
+  total: number,
+): ApiPagination {
+  return {
+    page: query.page,
+    pageSize: query.pageSize,
+    sortBy: query.sortBy,
+    sortOrder: query.sortOrder,
+    total,
+  };
+}
+
+function createFallbackEmployeePagination(
   query: Pick<AdminListQuery, "page" | "pageSize" | "sortBy" | "sortOrder">,
   total: number,
 ): ApiPagination {
@@ -1694,41 +1743,6 @@ function OperationsRedeemCodeSummaryFirstBand({
   );
 }
 
-function AdminPanel({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <section className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1">
-      <h2 className="text-text-primary text-base font-semibold">{title}</h2>
-      <div className="mt-3 space-y-3">{children}</div>
-    </section>
-  );
-}
-
-function AdminDataRow({
-  children,
-  publicId,
-  testId,
-}: {
-  children: React.ReactNode;
-  publicId: string;
-  testId: string;
-}) {
-  return (
-    <article
-      className="border-border flex flex-col gap-3 border-t pt-3 first:border-t-0 first:pt-0 lg:flex-row lg:items-center lg:justify-between"
-      data-public-id={publicId}
-      data-testid={testId}
-    >
-      {children}
-    </article>
-  );
-}
-
 function OrganizationTreeGuidancePanel() {
   const guidanceItems = [
     {
@@ -2720,12 +2734,18 @@ function OrgAuthDetailPanel({
   );
 }
 
-function OrgAuthCreateDrawer({
+function AdminTaskDrawer({
+  ariaLabel,
   children,
+  eyebrow,
   onClose,
+  title,
 }: {
+  ariaLabel: string;
   children: ReactNode;
+  eyebrow: string;
   onClose: () => void;
+  title: string;
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -2754,26 +2774,26 @@ function OrgAuthCreateDrawer({
   return (
     <div className="fixed inset-0 z-50">
       <button
-        aria-label="点击遮罩关闭新增企业授权"
+        aria-label={`点击遮罩关闭${ariaLabel}`}
         className="bg-foreground/20 absolute inset-0 cursor-default"
         type="button"
         onClick={onClose}
       />
       <aside
-        aria-label="新增企业授权"
+        aria-label={ariaLabel}
         aria-modal="true"
         className="bg-background border-border absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l shadow-lg"
         role="dialog"
       >
         <header className="bg-background border-border sticky top-0 z-10 flex items-center justify-between border-b px-5 py-4">
           <div>
-            <p className="text-brand-primary text-xs font-medium">企业授权</p>
+            <p className="text-brand-primary text-xs font-medium">{eyebrow}</p>
             <h2 className="text-text-primary mt-1 text-base font-semibold">
-              新增企业授权
+              {title}
             </h2>
           </div>
           <button
-            aria-label="关闭新增企业授权"
+            aria-label={`关闭${ariaLabel}`}
             className="border-border bg-background hover:bg-muted inline-flex size-9 items-center justify-center rounded-md border"
             ref={closeButtonRef}
             title="关闭"
@@ -2849,13 +2869,13 @@ const employeeTransferReviewReasonLabels: Record<
   target_no_active_auth: "目标组织暂无有效授权",
 };
 
-function EmployeeTransferSessionReviewPanel({
-  employees,
+function EmployeeTransferActionPanel({
+  employee,
   onTransferEmployee,
   organizations,
   orgAuths,
 }: {
-  employees: AdminOrgAuthData["employees"];
+  employee: AdminEmployeeListData["employees"][number];
   onTransferEmployee: (input: {
     employeePublicId: string;
     targetOrganizationPublicId: string;
@@ -2863,167 +2883,208 @@ function EmployeeTransferSessionReviewPanel({
   organizations: AdminOrgAuthData["organizations"];
   orgAuths: AdminOrgAuthData["orgAuths"];
 }) {
-  const transferReviewRows = buildEmployeeTransferReviewRows({
-    employees,
+  const [targetOrganizationPublicId, setTargetOrganizationPublicId] =
+    useState("");
+  const reviewRows = buildEmployeeTransferReviewRows({
+    employees: [employee],
     organizations,
     orgAuths,
   });
-  const blockedReviewCount = transferReviewRows.filter(
-    (reviewRow) => reviewRow.reason !== "quota_available",
-  ).length;
-  const visibleReviewRows = transferReviewRows.slice(0, 4);
+  const selectedReview = reviewRows.find(
+    (reviewRow) =>
+      reviewRow.targetOrganizationPublicId === targetOrganizationPublicId,
+  );
 
   return (
     <section
-      className="bg-surface border-border rounded-md border border-dashed p-4 shadow-sm"
+      className="space-y-4"
       data-testid="employee-transfer-session-review"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
-            <AlertCircle className="size-4" aria-hidden="true" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-brand-primary text-xs font-medium">
-              员工调动影响复核
-            </p>
-            <h2 className="text-text-primary text-base font-semibold">
-              转移前先复核额度、会话和历史归属
-            </h2>
-            <p className="text-text-secondary text-sm leading-6">
-              员工转移必须先确认目标组织有可用企业授权额度；额度不足时阻断，不形成已调入但无清晰授权的状态。
-            </p>
-            <p className="text-text-muted text-xs">
-              调动成功后撤销员工已有活跃会话并要求重新登录；已提交企业训练保留作答时企业归属快照，尚未提交的原组织企业训练不得继续作答。
-            </p>
-          </div>
-        </div>
-        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-          阻断 {blockedReviewCount}
-        </span>
+      <div className="space-y-1">
+        <p className="text-brand-primary text-xs font-medium">
+          员工调动影响复核
+        </p>
+        <h2 className="text-text-primary text-base font-semibold">
+          {employee.name}
+        </h2>
+        <p className="text-text-secondary text-sm leading-6">
+          目标授权额度不足时阻断；成功后撤销员工已有活跃会话，保留已提交作答时企业归属快照，并阻断原组织未提交企业训练。
+        </p>
       </div>
-
-      {visibleReviewRows.length === 0 ? (
-        <div className="border-border bg-background mt-4 rounded-md border p-3">
+      <label className="flex flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">目标企业</span>
+        <select
+          aria-label="目标企业"
+          className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+          value={targetOrganizationPublicId}
+          onChange={(event) =>
+            setTargetOrganizationPublicId(event.target.value)
+          }
+        >
+          <option value="">请选择目标企业</option>
+          {reviewRows.map((reviewRow) => (
+            <option
+              key={reviewRow.targetOrganizationPublicId}
+              value={reviewRow.targetOrganizationPublicId}
+            >
+              {reviewRow.targetOrganizationName}
+            </option>
+          ))}
+        </select>
+      </label>
+      {selectedReview === undefined ? (
+        <p className="text-text-muted text-sm">选择目标企业后查看影响。</p>
+      ) : (
+        <div className="border-border bg-background space-y-2 rounded-md border p-3">
+          <p className="text-text-primary text-sm font-medium">
+            {selectedReview.currentOrganizationName} 到{" "}
+            {selectedReview.targetOrganizationName}
+          </p>
           <p className="text-text-secondary text-sm">
-            暂无可选目标组织。后续执行转移时仍必须在事务中释放原组织额度、占用目标组织额度并撤销员工会话。
+            目标有效授权范围 {selectedReview.activeScopeCount}；可用额度{" "}
+            {selectedReview.availableQuota}
+          </p>
+          <p className="text-text-muted text-xs">
+            {employeeTransferReviewReasonLabels[selectedReview.reason]}
           </p>
         </div>
-      ) : (
-        <div className="mt-4 space-y-3">
-          {visibleReviewRows.map((reviewRow) => (
-            <AdminDataRow
-              key={`${reviewRow.employeePublicId}-${reviewRow.targetOrganizationPublicId}`}
-              publicId={reviewRow.employeePublicId}
-              testId={`employee-transfer-review-${reviewRow.employeePublicId}-${reviewRow.targetOrganizationPublicId}`}
-            >
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {reviewRow.employeeName}：{reviewRow.currentOrganizationName}
-                  {" -> "}
-                  {reviewRow.targetOrganizationName}
-                </p>
-                <p className="text-text-secondary text-xs">
-                  目标有效授权范围 {reviewRow.activeScopeCount}；可用额度{" "}
-                  {reviewRow.availableQuota}
-                </p>
-                <p className="text-text-muted text-xs">
-                  提交前需再次复核授权范围、训练快照、会话撤销和未提交训练阻断。
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-                  {employeeTransferReviewReasonLabels[reviewRow.reason]}
-                </span>
-                {reviewRow.reason === "quota_available" ? (
-                  <button
-                    type="button"
-                    className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                    data-testid={`employee-transfer-${reviewRow.employeePublicId}-${reviewRow.targetOrganizationPublicId}`}
-                    onClick={() =>
-                      onTransferEmployee({
-                        employeePublicId: reviewRow.employeePublicId,
-                        targetOrganizationPublicId:
-                          reviewRow.targetOrganizationPublicId,
-                      })
-                    }
-                  >
-                    <MoveRight className="size-3.5" aria-hidden="true" />
-                    转移
-                  </button>
-                ) : null}
-              </div>
-            </AdminDataRow>
-          ))}
-        </div>
       )}
-
-      <div className="text-text-muted mt-4 grid gap-2 text-xs md:grid-cols-4">
-        <p>可管理员工 {employees.length}</p>
-        <p>可选企业组织 {organizations.length}</p>
-        <p>目标授权额度不足时阻断</p>
-        <p>不提供员工级授权白名单</p>
-      </div>
+      <button
+        className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+        data-testid={
+          selectedReview === undefined
+            ? "employee-transfer-submit"
+            : `employee-transfer-${selectedReview.employeePublicId}-${selectedReview.targetOrganizationPublicId}`
+        }
+        disabled={selectedReview?.reason !== "quota_available"}
+        type="button"
+        onClick={() => {
+          if (selectedReview !== undefined) {
+            onTransferEmployee({
+              employeePublicId: selectedReview.employeePublicId,
+              targetOrganizationPublicId:
+                selectedReview.targetOrganizationPublicId,
+            });
+          }
+        }}
+      >
+        <MoveRight className="size-4" aria-hidden="true" />
+        继续转移
+      </button>
     </section>
   );
 }
 
 function EmployeeList({
   employees,
+  loadState,
+  onTransferEmployee,
   onUnbindEmployee,
-  organizations,
 }: {
-  employees: AdminOrgAuthData["employees"];
+  employees: AdminEmployeeListData["employees"];
+  loadState: LoadState;
+  onTransferEmployee: (
+    employee: AdminEmployeeListData["employees"][number],
+  ) => void;
   onUnbindEmployee: (publicId: string) => void;
-  organizations: AdminOrgAuthData["organizations"];
 }) {
   return (
-    <AdminPanel title="员工账号">
-      {employees.map((employee) => {
-        const employeeOrganization = organizations.find(
-          (organization) =>
-            organization.publicId === employee.organizationPublicId,
-        );
-
-        return (
-          <AdminDataRow
-            key={employee.publicId}
-            publicId={employee.publicId}
-            testId={`admin-employee-${employee.publicId}`}
-          >
-            <div className="min-w-0 space-y-1">
-              <p className="text-text-primary text-sm font-medium">
-                {employee.name}
-              </p>
-              <p className="text-text-secondary text-xs">{employee.phone}</p>
-              <p className="text-text-muted text-xs">
-                用户 {employee.userPublicId} / 企业{" "}
-                {employee.organizationPublicId}
-              </p>
-              <p className="text-text-muted text-xs">
-                解绑影响：从{" "}
-                {employeeOrganization?.name ?? employee.organizationPublicId}
-                移除，原组织员工数 -1。
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-                {userStatusLabels[employee.status]}
-              </span>
-              <button
-                type="button"
-                className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-                data-testid={`employee-unbind-${employee.publicId}`}
-                onClick={() => onUnbindEmployee(employee.publicId)}
-              >
-                <UserMinus className="size-3.5" aria-hidden="true" />
-                解绑
-              </button>
-            </div>
-          </AdminDataRow>
-        );
-      })}
-    </AdminPanel>
+    <AdminTableFrame ariaLabel="员工账号列表" minWidthClassName="min-w-[62rem]">
+      <table aria-label="员工账号列表" className={adminDataTableClassName}>
+        <thead>
+          <tr>
+            <th scope="col">员工</th>
+            <th scope="col">所属企业</th>
+            <th scope="col">状态</th>
+            <th scope="col">授权继承</th>
+            <th scope="col">注册时间</th>
+            <th scope="col">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loadState === "loading" ? (
+            <tr>
+              <td className="text-text-muted py-8 text-center" colSpan={6}>
+                正在加载员工账号列表
+              </td>
+            </tr>
+          ) : null}
+          {loadState === "error" ? (
+            <tr>
+              <td className="text-destructive py-8 text-center" colSpan={6}>
+                员工账号列表加载失败，请稍后重试。
+              </td>
+            </tr>
+          ) : null}
+          {loadState === "empty" ||
+          (loadState === "ready" && employees.length === 0) ? (
+            <tr>
+              <td className="text-text-muted py-8 text-center" colSpan={6}>
+                暂无符合条件的员工账号。
+              </td>
+            </tr>
+          ) : null}
+          {loadState === "ready"
+            ? employees.map((employee) => (
+                <tr
+                  key={employee.publicId}
+                  data-public-id={employee.publicId}
+                  data-testid={`admin-employee-${employee.publicId}`}
+                >
+                  <td>
+                    <p className="text-text-primary font-medium">
+                      {employee.name}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {employee.phone}
+                    </p>
+                  </td>
+                  <td className="text-left">{employee.organizationName}</td>
+                  <td>
+                    <span className="bg-secondary text-secondary-foreground inline-flex rounded-md px-2 py-1 text-xs font-medium">
+                      {userStatusLabels[employee.status]}
+                    </span>
+                  </td>
+                  <td>
+                    <p className="text-text-primary">
+                      {employee.activeOrgAuthCount > 0
+                        ? `有效企业授权 ${employee.activeOrgAuthCount} 项`
+                        : "暂无有效企业授权"}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      权限由所属企业授权继承
+                    </p>
+                  </td>
+                  <td>{formatDate(employee.registeredAt)}</td>
+                  <td>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        aria-label="转移员工"
+                        className="border-border bg-background hover:bg-muted inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-sm font-medium"
+                        type="button"
+                        onClick={() => onTransferEmployee(employee)}
+                      >
+                        <MoveRight className="size-3.5" aria-hidden="true" />
+                        转移
+                      </button>
+                      <button
+                        aria-label="解绑员工"
+                        className="border-destructive text-destructive bg-background inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-sm font-medium"
+                        data-testid={`employee-unbind-${employee.publicId}`}
+                        type="button"
+                        onClick={() => onUnbindEmployee(employee.publicId)}
+                      >
+                        <UserMinus className="size-3.5" aria-hidden="true" />
+                        解绑
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            : null}
+        </tbody>
+      </table>
+    </AdminTableFrame>
   );
 }
 
@@ -3169,18 +3230,29 @@ function EmployeeImportActionPanel({
     <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">employee</p>
+          <p className="text-brand-primary text-xs font-medium">员工导入</p>
           <h2 className="text-text-primary text-base font-semibold">
             员工批量导入
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            先选择目标组织，再上传或粘贴 phone,name CSV/TSV；initialPassword
-            可选，留空时系统生成初始密码并仅在本次结果窗口展示。模板只绑定
-            organization 员工身份，不得包含
-            profession,level,edition,orgAuthScopePublicId。历史
-            userPublicId,organizationPublicId 绑定格式仍可受控导入。
+            先选择员工所属企业，再上传或粘贴员工名录。初始密码可不填写，系统生成后仅在本次导入结果中展示。
           </p>
         </div>
+        <ol
+          className="border-border grid gap-2 border-y py-3 text-xs sm:grid-cols-2"
+          aria-label="员工导入步骤"
+        >
+          {[
+            "1. 选择企业",
+            "2. 上传或粘贴名录",
+            "3. 核对解析预览",
+            "4. 确认导入",
+          ].map((step) => (
+            <li key={step} className="text-text-secondary">
+              {step}
+            </li>
+          ))}
+        </ol>
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
@@ -3207,14 +3279,14 @@ function EmployeeImportActionPanel({
           </label>
         </div>
         <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">目标组织</span>
+          <span className="text-text-secondary">目标企业</span>
           <select
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
             data-testid="employee-import-organization-select"
             value={targetOrganizationPublicId}
             onChange={(event) => onTargetOrganizationChange(event.target.value)}
           >
-            <option value="">请选择目标组织</option>
+            <option value="">请选择目标企业</option>
             {organizations.map((organization) => (
               <option key={organization.publicId} value={organization.publicId}>
                 {organization.name}
@@ -3223,6 +3295,7 @@ function EmployeeImportActionPanel({
           </select>
         </label>
         <textarea
+          aria-label="员工名录"
           className="border-border bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm"
           data-testid="employee-import-textarea"
           value={importText}
@@ -3265,8 +3338,8 @@ function EmployeeImportActionPanel({
           </p>
           {importPreview.generatedPasswordRowCount > 0 ? (
             <p className="text-warning mt-2 text-xs leading-5">
-              {importPreview.generatedPasswordRowCount} 行未提供
-              initialPassword；成功新建账号时将在一次性分发窗口展示系统生成密码。
+              {importPreview.generatedPasswordRowCount}{" "}
+              行未填写初始密码；成功新建账号时将在一次性分发窗口展示系统生成密码。
             </p>
           ) : null}
         </div>
@@ -5218,6 +5291,73 @@ function useAdminOrgAuthListData(
   return { data, loadState };
 }
 
+function useAdminEmployeeListData(
+  enabled: boolean,
+  listQuery: string,
+  refreshVersion: number,
+) {
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [data, setData] = useState<AdminEmployeeListData>({
+    employees: [],
+    pagination: null,
+  });
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (!enabled) {
+      return () => {
+        isActive = false;
+      };
+    }
+
+    async function loadEmployeeList() {
+      const sessionToken = getStoredSessionToken();
+
+      if (sessionToken === null) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      setLoadState("loading");
+
+      try {
+        const response = await fetchAdminApi<AdminEmployeeListDto>(
+          `/api/v1/employees?${listQuery}`,
+          sessionToken,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (response.code !== 0 || response.data === null) {
+          setLoadState("error");
+          return;
+        }
+
+        setData({
+          employees: response.data.employees,
+          pagination: response.pagination ?? null,
+        });
+        setLoadState(response.data.employees.length === 0 ? "empty" : "ready");
+      } catch {
+        if (isActive) {
+          setLoadState("error");
+        }
+      }
+    }
+
+    void loadEmployeeList();
+
+    return () => {
+      isActive = false;
+    };
+  }, [enabled, listQuery, refreshVersion]);
+
+  return { data, loadState };
+}
+
 function useAdminRedeemCodeData(listQuery: string) {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminRedeemCodeData>({
@@ -5356,6 +5496,59 @@ export function AdminOrgAuthPage() {
       orgAuthListInteractionQuery,
       orgAuthListData.orgAuths.length,
     );
+  const [employeeKeyword, setEmployeeKeyword] = useState("");
+  const [employeeOrganizationKeyword, setEmployeeOrganizationKeyword] =
+    useState("");
+  const [employeeStatus, setEmployeeStatus] = useState<UserStatus | "all">(
+    "all",
+  );
+  const [employeeListRefreshVersion, setEmployeeListRefreshVersion] =
+    useState(0);
+  const [isEmployeeImportDrawerOpen, setIsEmployeeImportDrawerOpen] =
+    useState(false);
+  const [selectedTransferEmployee, setSelectedTransferEmployee] = useState<
+    AdminEmployeeListDto["employees"][number] | null
+  >(null);
+  const {
+    handleFilterChange: handleEmployeeFilterChange,
+    handlePageChange: handleEmployeePageChange,
+    handlePageSizeChange: handleEmployeePageSizeChange,
+    handleReset: handleEmployeeListReset,
+    handleSortChange: handleEmployeeSortChange,
+    query: employeeListInteractionQuery,
+  } = useAdminListInteraction({
+    initialQuery: {
+      sortBy: "registeredAt",
+      sortOrder: "desc",
+    },
+  });
+  const employeeListQuery = useMemo(
+    () =>
+      createEmployeeListQuery({
+        keyword: employeeKeyword,
+        organizationKeyword: employeeOrganizationKeyword,
+        query: employeeListInteractionQuery,
+        status: employeeStatus,
+      }),
+    [
+      employeeKeyword,
+      employeeListInteractionQuery,
+      employeeOrganizationKeyword,
+      employeeStatus,
+    ],
+  );
+  const { data: employeeListData, loadState: employeeListLoadState } =
+    useAdminEmployeeListData(
+      loadState === "ready" || loadState === "empty",
+      employeeListQuery,
+      employeeListRefreshVersion,
+    );
+  const employeeListPagination =
+    employeeListData.pagination ??
+    createFallbackEmployeePagination(
+      employeeListInteractionQuery,
+      employeeListData.employees.length,
+    );
   const [activeView, setActiveView] = useState<OpsOrganizationManagementView>(
     readOpsOrganizationManagementViewFromLocation,
   );
@@ -5459,6 +5652,10 @@ export function AdminOrgAuthPage() {
     if (nextView !== "org-auth") {
       setIsOrgAuthCreateDrawerOpen(false);
     }
+    if (nextView !== "employees") {
+      setIsEmployeeImportDrawerOpen(false);
+      setSelectedTransferEmployee(null);
+    }
     writeOpsOrganizationManagementViewToLocation(nextView);
   }
 
@@ -5470,6 +5667,13 @@ export function AdminOrgAuthPage() {
     setOrgAuthLevel("all");
     setOrgAuthExpiryStatus("all");
     handleOrgAuthListReset();
+  }
+
+  function handleResetEmployeeFilters() {
+    setEmployeeKeyword("");
+    setEmployeeOrganizationKeyword("");
+    setEmployeeStatus("all");
+    handleEmployeeListReset();
   }
 
   async function handleViewOrgAuthDetail(publicId: string) {
@@ -5869,6 +6073,7 @@ export function AdminOrgAuthPage() {
       setLastEmployeeImportResult(importResponse.data);
       setLastEmployeeTransferResult(null);
       setEmployeeImportText("");
+      setEmployeeListRefreshVersion((version) => version + 1);
       setToastMessage({
         message: `员工导入完成：成功 ${importedEmployees.length}，拒绝 ${rejectedRows.length}。`,
         tone: rejectedRows.length === 0 ? "success" : "error",
@@ -5954,6 +6159,8 @@ export function AdminOrgAuthPage() {
       setLastEmployeeImportResult(null);
       setLastEmployeeTransferResult(transferredEmployee);
       setLastEmployeeUnbindResult(null);
+      setSelectedTransferEmployee(null);
+      setEmployeeListRefreshVersion((version) => version + 1);
       setToastMessage({ message: "员工已转移。", tone: "success" });
       return;
     }
@@ -5989,6 +6196,7 @@ export function AdminOrgAuthPage() {
     }));
     setLastEmployeeUnbindResult(unboundEmployee);
     setLastEmployeeTransferResult(null);
+    setEmployeeListRefreshVersion((version) => version + 1);
     setToastMessage({ message: "员工已解绑。", tone: "success" });
   }
 
@@ -6301,8 +6509,11 @@ export function AdminOrgAuthPage() {
         />
 
         {isOrgAuthCreateDrawerOpen ? (
-          <OrgAuthCreateDrawer
+          <AdminTaskDrawer
+            ariaLabel="新增企业授权"
+            eyebrow="企业授权"
             onClose={() => setIsOrgAuthCreateDrawerOpen(false)}
+            title="新增企业授权"
           >
             <OrgAuthActionPanel
               disabled={data.organizations.length === 0}
@@ -6330,60 +6541,109 @@ export function AdminOrgAuthPage() {
               }}
               onFormChange={setOrgAuthFormState}
             />
-          </OrgAuthCreateDrawer>
+          </AdminTaskDrawer>
         ) : null}
       </section>
 
       <section
-        className={activeView === "employees" ? "space-y-6" : "hidden"}
+        className={activeView === "employees" ? "space-y-4" : "hidden"}
         data-testid="ops-employees-view"
         hidden={activeView !== "employees"}
       >
-        <EmployeeImportActionPanel
-          importText={employeeImportText}
-          importPreview={employeeImportPreview}
-          organizations={data.organizations}
-          targetOrganizationPublicId={
-            selectedEmployeeImportOrganizationPublicId
+        <AdminListToolbar
+          description="按员工姓名、手机号、所属企业和账号状态缩小结果；筛选变化自动回到第一页。"
+          primaryAction={
+            <button
+              className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium"
+              type="button"
+              onClick={() => setIsEmployeeImportDrawerOpen(true)}
+            >
+              <Upload className="size-4" aria-hidden="true" />
+              批量导入员工
+            </button>
           }
-          onImportFileChange={(file) => {
-            void handleEmployeeImportFileChange(file);
-          }}
-          onImportTextChange={(nextImportText) => {
-            setEmployeeImportText(nextImportText);
-            setLastEmployeeImportResult(null);
-            setLastEmployeeTransferResult(null);
-          }}
-          onSubmit={handleSubmitEmployeeImport}
-          onTemplateDownload={downloadEmployeeImportTemplate}
-          onTargetOrganizationChange={(nextOrganizationPublicId) => {
-            setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
-            setLastEmployeeImportResult(null);
-            setLastEmployeeTransferResult(null);
-          }}
-        />
+          resultLabel={`共 ${employeeListPagination.total} 名员工`}
+          title="员工筛选"
+        >
+          <label className={adminListFilterLabelClassName}>
+            <span>关键词</span>
+            <input
+              aria-label="员工关键词"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              placeholder="姓名或手机号"
+              value={employeeKeyword}
+              onChange={(event) => {
+                setEmployeeKeyword(event.target.value);
+                handleEmployeeFilterChange("keyword");
+              }}
+            />
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>所属企业</span>
+            <input
+              aria-label="所属企业名称"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              placeholder="企业名称"
+              value={employeeOrganizationKeyword}
+              onChange={(event) => {
+                setEmployeeOrganizationKeyword(event.target.value);
+                handleEmployeeFilterChange("organizationKeyword");
+              }}
+            />
+          </label>
+          <label className={adminListFilterLabelClassName}>
+            <span>状态</span>
+            <select
+              aria-label="员工状态"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={employeeStatus}
+              onChange={(event) => {
+                setEmployeeStatus(event.target.value as UserStatus | "all");
+                handleEmployeeFilterChange("status");
+              }}
+            >
+              <option value="all">全部状态</option>
+              <option value="active">正常</option>
+              <option value="disabled">已停用</option>
+            </select>
+          </label>
+          <button
+            className={`border-border bg-background hover:bg-muted rounded-md border px-3 text-sm font-medium ${adminListControlClassName}`}
+            type="button"
+            onClick={() => handleEmployeeSortChange("registeredAt")}
+          >
+            注册时间排序
+          </button>
+          <label className={adminListFilterLabelClassName}>
+            <span>每页条数</span>
+            <select
+              aria-label="员工每页条数"
+              className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+              value={employeeListInteractionQuery.pageSize}
+              onChange={(event) =>
+                handleEmployeePageSizeChange(event.target.value)
+              }
+            >
+              {ADMIN_PAGE_SIZE_OPTIONS.map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className={`border-border bg-background hover:bg-muted rounded-md border px-3 text-sm font-medium ${adminListControlClassName}`}
+            type="button"
+            onClick={handleResetEmployeeFilters}
+          >
+            重置筛选
+          </button>
+        </AdminListToolbar>
 
-        {lastEmployeeImportResult === null ? null : (
-          <EmployeeImportResultPanel result={lastEmployeeImportResult} />
-        )}
-
-        <EmployeeTransferSessionReviewPanel
-          employees={data.employees}
-          onTransferEmployee={(input) => {
-            setLastEmployeeTransferResult(null);
-            setLastEmployeeUnbindResult(null);
-            setEmployeeConfirmationState({
-              employeePublicId: input.employeePublicId,
-              kind: "transferEmployee",
-              targetOrganizationPublicId: input.targetOrganizationPublicId,
-            });
-          }}
-          organizations={data.organizations}
-          orgAuths={data.orgAuths}
-        />
         <EmployeeList
-          employees={data.employees}
-          organizations={data.organizations}
+          employees={employeeListData.employees}
+          loadState={employeeListLoadState}
+          onTransferEmployee={setSelectedTransferEmployee}
           onUnbindEmployee={(publicId) => {
             setLastEmployeeTransferResult(null);
             setLastEmployeeUnbindResult(null);
@@ -6393,6 +6653,75 @@ export function AdminOrgAuthPage() {
             });
           }}
         />
+        <AdminPagination
+          itemLabel="名员工"
+          page={employeeListPagination.page}
+          pageSize={employeeListPagination.pageSize}
+          total={employeeListPagination.total}
+          onPageChange={handleEmployeePageChange}
+        />
+
+        {isEmployeeImportDrawerOpen ? (
+          <AdminTaskDrawer
+            ariaLabel="批量导入员工"
+            eyebrow="员工运营"
+            title="批量导入员工"
+            onClose={() => setIsEmployeeImportDrawerOpen(false)}
+          >
+            <EmployeeImportActionPanel
+              importText={employeeImportText}
+              importPreview={employeeImportPreview}
+              organizations={data.organizations}
+              targetOrganizationPublicId={
+                selectedEmployeeImportOrganizationPublicId
+              }
+              onImportFileChange={(file) => {
+                void handleEmployeeImportFileChange(file);
+              }}
+              onImportTextChange={(nextImportText) => {
+                setEmployeeImportText(nextImportText);
+                setLastEmployeeImportResult(null);
+                setLastEmployeeTransferResult(null);
+              }}
+              onSubmit={handleSubmitEmployeeImport}
+              onTemplateDownload={downloadEmployeeImportTemplate}
+              onTargetOrganizationChange={(nextOrganizationPublicId) => {
+                setEmployeeImportOrganizationPublicId(nextOrganizationPublicId);
+                setLastEmployeeImportResult(null);
+                setLastEmployeeTransferResult(null);
+              }}
+            />
+            {lastEmployeeImportResult === null ? null : (
+              <div className="mt-4">
+                <EmployeeImportResultPanel result={lastEmployeeImportResult} />
+              </div>
+            )}
+          </AdminTaskDrawer>
+        ) : null}
+
+        {selectedTransferEmployee === null ? null : (
+          <AdminTaskDrawer
+            ariaLabel="转移员工"
+            eyebrow="员工运营"
+            title="转移员工"
+            onClose={() => setSelectedTransferEmployee(null)}
+          >
+            <EmployeeTransferActionPanel
+              employee={selectedTransferEmployee}
+              organizations={data.organizations}
+              orgAuths={data.orgAuths}
+              onTransferEmployee={(input) => {
+                setLastEmployeeTransferResult(null);
+                setLastEmployeeUnbindResult(null);
+                setEmployeeConfirmationState({
+                  employeePublicId: input.employeePublicId,
+                  kind: "transferEmployee",
+                  targetOrganizationPublicId: input.targetOrganizationPublicId,
+                });
+              }}
+            />
+          </AdminTaskDrawer>
+        )}
       </section>
 
       {lastEmployeeUnbindResult === null ? null : (

@@ -376,6 +376,33 @@ describe("phase 8 admin organization org auth runtime", () => {
     });
   });
 
+  it("parses dedicated employee list filters without changing mutation contracts", async () => {
+    const repositories = createRepositories();
+    const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService("super_admin"),
+    });
+    const listEmployees = vi.spyOn(repositories, "listEmployees");
+
+    const response = await handlers.employees.collection.GET(
+      new Request(
+        "http://localhost/api/v1/employees?page=4&pageSize=50&sortBy=registeredAt&sortOrder=asc&keyword=%E5%91%98%E5%B7%A5&organizationKeyword=%E6%9D%AD%E5%B7%9E&status=disabled",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listEmployees).toHaveBeenCalledWith({
+      page: 4,
+      pageSize: 50,
+      sortBy: "registeredAt",
+      sortOrder: "asc",
+      keyword: "员工",
+      organizationKeyword: "杭州",
+      status: "disabled",
+    });
+  });
+
   it("resolves organization, org_auth, and employee lists from cookie-backed admin sessions", async () => {
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
       repositories: createRepositories(),
