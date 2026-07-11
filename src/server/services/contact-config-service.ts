@@ -3,8 +3,10 @@ import {
   createErrorResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import { randomUUID } from "crypto";
 import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "../../lib/local-purchase-guidance-contact-config";
 import {
+  type ContactConfigQrImageUploadResultDto,
   type ContactConfigChannelDto,
   type PurchaseGuidanceContactConfigDto,
   type PurchaseGuidanceContactConfigResultDto,
@@ -31,7 +33,7 @@ export type ContactConfigAuditLogRepository = {
   appendAuditLog(input: {
     actorPublicId: string;
     actorRole: ContactConfigAdminRole;
-    actionType: "contact_config.update";
+    actionType: "contact_config.update" | "contact_config.qr_image_upload";
     targetResourceType: "contact_config";
     targetPublicId: string;
     resultStatus: "success";
@@ -68,6 +70,19 @@ type NormalizedContactConfigInputResult =
       response: ApiResponse<null>;
     };
 
+type NormalizedQrImageUploadResult =
+  | {
+      success: true;
+      value: {
+        bytes: Uint8Array;
+        contentType: "image/jpeg" | "image/png" | "image/webp";
+      };
+    }
+  | {
+      success: false;
+      response: ApiResponse<null>;
+    };
+
 const contactConfigSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
@@ -80,6 +95,23 @@ const contactConfigInputInvalidResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
   "Contact config input is invalid.",
 );
+const contactConfigQrImageInvalidResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Contact QR image input is invalid.",
+);
+
+const allowedQrImageContentTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+const maxQrImageByteSize = 2 * 1024 * 1024;
+
+type LocalQrImageRecord = {
+  bytes: Uint8Array;
+  contentType: "image/jpeg" | "image/png" | "image/webp";
+  publicId: string;
+};
 
 let localContactConfigStore: PurchaseGuidanceContactConfigDto = {
   ...LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG,
@@ -87,6 +119,7 @@ let localContactConfigStore: PurchaseGuidanceContactConfigDto = {
     ...channel,
   })),
 };
+const localQrImageStore = new Map<string, LocalQrImageRecord>();
 
 export function createContactConfigService(): ContactConfigService {
   return {
@@ -183,6 +216,30 @@ function normalizeHref(value: unknown): string | null {
   return normalizedValue.length === 0 ? null : normalizedValue;
 }
 
+function normalizeOptionalBoolean(value: unknown, fallback: boolean): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function normalizeQrImageUrl(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+
+  if (normalizedValue.length === 0) {
+    return null;
+  }
+
+  return normalizedValue.startsWith("/api/v1/contact-configs/qr-images/")
+    ? normalizedValue
+    : null;
+}
+
 function normalizeChannel(value: unknown): ContactConfigChannelDto | null {
   if (!isRecord(value)) {
     return null;
@@ -199,19 +256,26 @@ function normalizeChannel(value: unknown): ContactConfigChannelDto | null {
   const serviceHours = normalizeText(value.serviceHours, 80);
   const usage = normalizeText(value.usage, 120);
   const href = normalizeHref(value.href);
+  const isEnabled = normalizeOptionalBoolean(value.isEnabled, true);
+  const qrImageUrl = normalizeQrImageUrl(value.qrImageUrl);
 
   if (
     label === null ||
     channelValue === null ||
     serviceHours === null ||
-    usage === null
+    usage === null ||
+    (value.qrImageUrl !== null &&
+      value.qrImageUrl !== undefined &&
+      qrImageUrl === null)
   ) {
     return null;
   }
 
   return {
     channelType,
+    isEnabled,
     label,
+    qrImageUrl,
     value: channelValue,
     serviceHours,
     usage,
@@ -260,6 +324,57 @@ function normalizeContactConfigInput(
       title,
     },
   };
+}
+
+async function normalizeQrImageUpload(
+  request: Request,
+): Promise<NormalizedQrImageUploadResult> {
+  let formData: FormData;
+
+  try {
+    formData = await request.formData();
+  } catch {
+    return {
+      success: false,
+      response: contactConfigQrImageInvalidResponse,
+    };
+  }
+
+  const file = formData.get("file");
+
+  if (file === null || typeof file === "string") {
+    return {
+      success: false,
+      response: contactConfigQrImageInvalidResponse,
+    };
+  }
+
+  if (
+    !allowedQrImageContentTypes.has(file.type) ||
+    file.size <= 0 ||
+    file.size > maxQrImageByteSize
+  ) {
+    return {
+      success: false,
+      response: contactConfigQrImageInvalidResponse,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      bytes: new Uint8Array(await file.arrayBuffer()),
+      contentType: file.type as "image/jpeg" | "image/png" | "image/webp",
+    },
+  };
+}
+
+function createQrImagePublicId(): string {
+  return `contact-config-qr-${randomUUID()}`;
+}
+
+function createQrImageUrl(publicId: string): string {
+  return `/api/v1/contact-configs/qr-images/${encodeURIComponent(publicId)}`;
 }
 
 export function createLocalContactConfigRepository(
@@ -358,6 +473,76 @@ export function createContactConfigRuntimeRouteHandlers(
             contactConfig,
           }),
         );
+      },
+    },
+    contactConfigQrImages: {
+      async POST(request: Request): Promise<Response> {
+        const actorOrError = await requireManager(request);
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const normalizedUpload = await normalizeQrImageUpload(request);
+
+        if (!normalizedUpload.success) {
+          return createJsonResponse(normalizedUpload.response);
+        }
+
+        const publicId = createQrImagePublicId();
+        const qrImageRecord: LocalQrImageRecord = {
+          publicId,
+          ...normalizedUpload.value,
+        };
+
+        localQrImageStore.set(publicId, qrImageRecord);
+
+        await repositories.auditLogRepository?.appendAuditLog({
+          actorPublicId: actorOrError.publicId,
+          actorRole: actorOrError.roles[0],
+          actionType: "contact_config.qr_image_upload",
+          targetResourceType: "contact_config",
+          targetPublicId: publicId,
+          resultStatus: "success",
+          metadataSummary: `redacted contact_config qr image upload metadata; contentType=${qrImageRecord.contentType}; byteSize=${qrImageRecord.bytes.byteLength}`,
+          requestIp: null,
+        });
+
+        return createJsonResponse(
+          createSuccessResponse<ContactConfigQrImageUploadResultDto>({
+            qrImage: {
+              byteSize: qrImageRecord.bytes.byteLength,
+              contentType: qrImageRecord.contentType,
+              publicId,
+              qrImageUrl: createQrImageUrl(publicId),
+            },
+          }),
+        );
+      },
+      async GET(
+        _request: Request,
+        context: { params: Promise<{ publicId: string }> },
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+        const qrImageRecord = localQrImageStore.get(publicId);
+
+        if (qrImageRecord === undefined) {
+          return createJsonResponse(
+            createErrorResponse(404001, "Contact QR image not found."),
+          );
+        }
+
+        const responseBody = qrImageRecord.bytes.buffer.slice(
+          qrImageRecord.bytes.byteOffset,
+          qrImageRecord.bytes.byteOffset + qrImageRecord.bytes.byteLength,
+        ) as ArrayBuffer;
+
+        return new Response(responseBody, {
+          headers: {
+            "cache-control": "no-store",
+            "content-type": qrImageRecord.contentType,
+          },
+        });
       },
     },
   });

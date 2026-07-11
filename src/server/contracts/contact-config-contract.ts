@@ -2,7 +2,9 @@ export type ContactConfigChannelType = "phone" | "wechat_work";
 
 export type ContactConfigChannelDto = {
   channelType: ContactConfigChannelType;
+  isEnabled: boolean;
   label: string;
+  qrImageUrl: string | null;
   value: string;
   serviceHours: string;
   usage: string;
@@ -27,4 +29,13 @@ export type UpdateContactConfigInputDto = {
   summary: string;
   channels: ContactConfigChannelDto[];
   safetyNotice: string;
+};
+
+export type ContactConfigQrImageUploadResultDto = {
+  qrImage: {
+    publicId: string;
+    qrImageUrl: string;
+    contentType: "image/jpeg" | "image/png" | "image/webp";
+    byteSize: number;
+  };
 };

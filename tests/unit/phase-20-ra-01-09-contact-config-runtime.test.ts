@@ -16,7 +16,9 @@ const baseContactConfig = {
   channels: [
     {
       channelType: "phone" as const,
+      isEnabled: true,
       label: "Tiku Ops",
+      qrImageUrl: null,
       value: "400-000-2026",
       serviceHours: "Workdays 09:00-18:00",
       usage: "Purchase and authorization support",
@@ -34,7 +36,9 @@ const updatedContactConfig = {
   channels: [
     {
       channelType: "wechat_work" as const,
+      isEnabled: true,
       label: "Ops WeCom",
+      qrImageUrl: "/api/v1/contact-configs/qr-images/contact-config-qr-001",
       value: "tiku-ops",
       serviceHours: "Workdays 10:00-18:00",
       usage: "Purchase handoff",
@@ -102,6 +106,24 @@ function createRequest(method: "GET" | "PUT", body?: unknown) {
   });
 }
 
+function createQrUploadRequest(fileType = "image/png") {
+  const formData = new FormData();
+
+  formData.append(
+    "file",
+    new Blob(["local qr placeholder"], { type: fileType }),
+    "contact-qr.png",
+  );
+
+  return new Request("http://localhost/api/v1/contact-configs/qr-images", {
+    body: formData,
+    headers: {
+      authorization: "Bearer admin-session-marker",
+    },
+    method: "POST",
+  });
+}
+
 function createCookieBackedRequest(method: "GET" | "PUT", body?: unknown) {
   return new Request("http://localhost/api/v1/contact-configs", {
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -165,7 +187,13 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
     expect(
       repositories.contactConfigRepository.updateContactConfig,
     ).toHaveBeenCalledWith({
-      channels: updatedContactConfig.channels,
+      channels: [
+        expect.objectContaining({
+          channelType: "wechat_work",
+          isEnabled: true,
+          qrImageUrl: "/api/v1/contact-configs/qr-images/contact-config-qr-001",
+        }),
+      ],
       safetyNotice: updatedContactConfig.safetyNotice,
       summary: "Use the verified operations channel for local purchases.",
       title: "Updated purchase support",
@@ -219,6 +247,59 @@ describe("phase 20 RA-01-09 contact_config runtime", () => {
     expect(
       repositories.auditLogRepository?.appendAuditLog,
     ).not.toHaveBeenCalled();
+  });
+
+  it("allows ops_admin QR image upload and denies content_admin before storing", async () => {
+    const repositories = createRepositories();
+    const handlers = createContactConfigRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService(["ops_admin"]),
+    });
+
+    const uploadResponse = await handlers.contactConfigQrImages.POST(
+      createQrUploadRequest(),
+    );
+    const uploadPayload = await uploadResponse.json();
+
+    expect(uploadPayload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        qrImage: {
+          contentType: "image/png",
+          qrImageUrl: expect.stringMatching(
+            /^\/api\/v1\/contact-configs\/qr-images\/contact-config-qr-/u,
+          ),
+        },
+      },
+    });
+    expect(JSON.stringify(uploadPayload)).not.toContain("admin-session-marker");
+
+    const qrImagePublicId = String(uploadPayload.data.qrImage.publicId);
+    const qrImageResponse = await handlers.contactConfigQrImages.GET(
+      new Request(
+        `http://localhost/api/v1/contact-configs/qr-images/${qrImagePublicId}`,
+      ),
+      { params: Promise.resolve({ publicId: qrImagePublicId }) },
+    );
+
+    expect(qrImageResponse.headers.get("content-type")).toBe("image/png");
+    expect(qrImageResponse.headers.get("cache-control")).toBe("no-store");
+    expect((await qrImageResponse.arrayBuffer()).byteLength).toBeGreaterThan(0);
+
+    const deniedHandlers = createContactConfigRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService(["content_admin"]),
+    });
+    const deniedResponse = await deniedHandlers.contactConfigQrImages.POST(
+      createQrUploadRequest(),
+    );
+
+    expect(await deniedResponse.json()).toEqual({
+      code: 403601,
+      message: "Admin permission denied.",
+      data: null,
+    });
   });
 
   it("accepts cookie-backed admin marker for browser runtime reads and updates", async () => {

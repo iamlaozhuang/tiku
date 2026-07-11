@@ -721,6 +721,9 @@ function ProfileAuthorizationDetails({
 
 function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
   const contactConfig = LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG;
+  const enabledChannels = contactConfig.channels.filter(
+    (channel) => channel.isEnabled,
+  );
 
   return (
     <section
@@ -741,26 +744,42 @@ function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
             </p>
           </div>
           <div className="space-y-2">
-            {contactConfig.channels.map((channel) => (
-              <div
-                key={`${channel.channelType}-${channel.value}`}
-                className="text-text-secondary text-sm leading-6"
-              >
-                <p className="text-text-primary font-medium">{channel.label}</p>
-                {channel.href === null ? (
-                  <p>{channel.value}</p>
-                ) : (
-                  <a
-                    className="text-brand-primary font-medium transition-transform active:scale-[0.98]"
-                    href={channel.href}
-                  >
-                    {channel.value}
-                  </a>
-                )}
-                <p>{channel.serviceHours}</p>
-                <p>{channel.usage}</p>
-              </div>
-            ))}
+            {enabledChannels.length === 0 ? (
+              <p className="text-text-muted text-sm leading-6">
+                购买联系方式暂未启用，请稍后再试。
+              </p>
+            ) : (
+              enabledChannels.map((channel) => (
+                <div
+                  key={`${channel.channelType}-${channel.value}`}
+                  className="text-text-secondary text-sm leading-6"
+                >
+                  <p className="text-text-primary font-medium">
+                    {channel.label}
+                  </p>
+                  {channel.href === null ? (
+                    <p>{channel.value}</p>
+                  ) : (
+                    <a
+                      className="text-brand-primary font-medium transition-transform active:scale-[0.98]"
+                      href={channel.href}
+                    >
+                      {channel.value}
+                    </a>
+                  )}
+                  <p>{channel.serviceHours}</p>
+                  <p>{channel.usage}</p>
+                  {channel.qrImageUrl === null ? null : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      alt={`${channel.label}二维码`}
+                      className="border-border mt-2 size-28 rounded-lg border object-cover"
+                      src={channel.qrImageUrl}
+                    />
+                  )}
+                </div>
+              ))
+            )}
           </div>
           <p className="text-text-muted text-xs leading-5">
             {contactConfig.safetyNotice}

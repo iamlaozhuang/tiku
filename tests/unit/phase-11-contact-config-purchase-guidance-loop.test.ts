@@ -106,7 +106,9 @@ describe("phase 11 contact_config purchase guidance loop", () => {
           channels: [
             expect.objectContaining({
               channelType: "phone",
+              isEnabled: true,
               label: "Tiku 运营支持",
+              qrImageUrl: null,
               value: "400-000-2026",
             }),
           ],

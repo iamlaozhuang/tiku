@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -90,129 +91,144 @@ function stubFetchForSummaryFirstPages({
 }: {
   users?: AdminUserListDto["users"];
 } = {}) {
-  const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-    const path = String(url);
+  const fetchMock = vi.fn(
+    async (...[url]: [RequestInfo | URL, RequestInit?]) => {
+      const path = String(url);
 
-    if (path === "/api/v1/sessions") {
-      return jsonResponse(adminSessionPayload);
-    }
+      if (path === "/api/v1/sessions") {
+        return jsonResponse(adminSessionPayload);
+      }
 
-    if (path.startsWith("/api/v1/users")) {
-      const url = new URL(path, "http://localhost");
-      const page = Number(url.searchParams.get("page") ?? "1");
-      const pageSize = Number(url.searchParams.get("pageSize") ?? "20");
-      const start = (page - 1) * pageSize;
+      if (path.startsWith("/api/v1/users")) {
+        const url = new URL(path, "http://localhost");
+        const page = Number(url.searchParams.get("page") ?? "1");
+        const pageSize = Number(url.searchParams.get("pageSize") ?? "20");
+        const start = (page - 1) * pageSize;
 
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { users: users.slice(start, start + pageSize) },
-        pagination: {
-          page,
-          pageSize,
-          sortBy: url.searchParams.get("sortBy") ?? "updatedAt",
-          sortOrder: url.searchParams.get("sortOrder") ?? "desc",
-          total: users.length,
-        },
-      });
-    }
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { users: users.slice(start, start + pageSize) },
+          pagination: {
+            page,
+            pageSize,
+            sortBy: url.searchParams.get("sortBy") ?? "updatedAt",
+            sortOrder: url.searchParams.get("sortOrder") ?? "desc",
+            total: users.length,
+          },
+        });
+      }
 
-    if (path.startsWith("/api/v1/organizations")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: {
-          organizations: [
-            {
-              publicId: "organization-public-001",
-              name: "Ops Smoke Org",
-              orgTier: "city",
-              parentOrganizationPublicId: null,
-              status: "active",
-              employeeCount: 0,
-              authSummary: null,
-            },
-          ],
-        },
-      });
-    }
-
-    if (path.startsWith("/api/v1/employees")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { employees: emptyOpsCollections.employees },
-      });
-    }
-
-    if (path.startsWith("/api/v1/org-auths")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { orgAuths: emptyOpsCollections.orgAuths },
-      });
-    }
-
-    if (path.startsWith("/api/v1/redeem-codes")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { redeemCodes: emptyOpsCollections.redeemCodes },
-      });
-    }
-
-    if (path.startsWith("/api/v1/audit-logs")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { auditLogs: emptyOpsCollections.auditLogs },
-      });
-    }
-
-    if (path.startsWith("/api/v1/ai-call-logs/summary")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { dailySummaries: emptyOpsCollections.dailySummaries },
-      });
-    }
-
-    if (path.startsWith("/api/v1/ai-call-logs")) {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: { aiCallLogs: emptyOpsCollections.aiCallLogs },
-      });
-    }
-
-    if (path === "/api/v1/contact-configs") {
-      return jsonResponse({
-        code: 0,
-        message: "ok",
-        data: {
-          contactConfig: {
-            publicId: "contact-config-local-purchase-guidance",
-            title: "本地购买咨询",
-            summary: "购买标准版或高级版前先联系运营确认。",
-            safetyNotice: "不要在公开渠道发送凭证。",
-            channels: [
+      if (path.startsWith("/api/v1/organizations")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            organizations: [
               {
-                channelType: "phone",
-                label: "运营电话",
-                value: "400-000-0000",
-                serviceHours: "工作日",
-                usage: "购买咨询",
-                href: null,
+                publicId: "organization-public-001",
+                name: "Ops Smoke Org",
+                orgTier: "city",
+                parentOrganizationPublicId: null,
+                status: "active",
+                employeeCount: 0,
+                authSummary: null,
               },
             ],
-            updatedAt: "2026-05-26T00:00:00.000Z",
           },
-        },
-      });
-    }
+        });
+      }
 
-    return jsonResponse({ code: 404001, message: "missing", data: null });
-  });
+      if (path.startsWith("/api/v1/employees")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { employees: emptyOpsCollections.employees },
+        });
+      }
+
+      if (path.startsWith("/api/v1/org-auths")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { orgAuths: emptyOpsCollections.orgAuths },
+        });
+      }
+
+      if (path.startsWith("/api/v1/redeem-codes")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { redeemCodes: emptyOpsCollections.redeemCodes },
+        });
+      }
+
+      if (path.startsWith("/api/v1/audit-logs")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { auditLogs: emptyOpsCollections.auditLogs },
+        });
+      }
+
+      if (path.startsWith("/api/v1/ai-call-logs/summary")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { dailySummaries: emptyOpsCollections.dailySummaries },
+        });
+      }
+
+      if (path.startsWith("/api/v1/ai-call-logs")) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { aiCallLogs: emptyOpsCollections.aiCallLogs },
+        });
+      }
+
+      if (path === "/api/v1/contact-configs") {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            contactConfig: {
+              publicId: "contact-config-local-purchase-guidance",
+              title: "本地购买咨询",
+              summary: "购买标准版或高级版前先联系运营确认。",
+              safetyNotice: "不要在公开渠道发送凭证。",
+              channels: [
+                {
+                  channelType: "phone",
+                  isEnabled: true,
+                  label: "运营电话",
+                  qrImageUrl: null,
+                  value: "400-000-0000",
+                  serviceHours: "工作日",
+                  usage: "购买咨询",
+                  href: null,
+                },
+                {
+                  channelType: "wechat_work",
+                  isEnabled: true,
+                  label: "企业微信",
+                  qrImageUrl:
+                    "/api/v1/contact-configs/qr-images/contact-config-qr-local-ui",
+                  value: "tiku-ops",
+                  serviceHours: "工作日 09:00-18:00",
+                  usage: "企业微信购买咨询",
+                  href: null,
+                },
+              ],
+              updatedAt: "2026-05-26T00:00:00.000Z",
+            },
+          },
+        });
+      }
+
+      return jsonResponse({ code: 404001, message: "missing", data: null });
+    },
+  );
 
   vi.stubGlobal("fetch", fetchMock);
 
@@ -512,7 +528,7 @@ describe("admin ops summary-first UI", () => {
 
   it("renders contact config summary before the form and keeps standard and advanced purchase guidance clear", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    stubFetchForSummaryFirstPages();
+    const fetchMock = stubFetchForSummaryFirstPages();
 
     render(createElement(AdminContactConfigPage));
 
@@ -525,11 +541,52 @@ describe("admin ops summary-first UI", () => {
     expect(summaryBand).toHaveTextContent("高级版");
     expect(summaryBand).toHaveTextContent("错误态");
     expect(summaryBand).toHaveTextContent("禁用态");
+    expect(summaryBand).not.toHaveTextContent("summary-first");
     expect(
       summaryBand.compareDocumentPosition(
         screen.getByLabelText("购买联系方式标题"),
       ) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(within(summaryBand).queryByText("400-000-0000")).toBeNull();
+    expect(screen.getByLabelText("渠道 1 类型")).toHaveValue("phone");
+    expect(screen.getByLabelText("渠道 2 类型")).toHaveValue("wechat_work");
+    expect(screen.getByLabelText("渠道 2 二维码图片地址")).toHaveValue(
+      "/api/v1/contact-configs/qr-images/contact-config-qr-local-ui",
+    );
+    expect(screen.getByRole("img", { name: "企业微信二维码" })).toHaveAttribute(
+      "src",
+      "/api/v1/contact-configs/qr-images/contact-config-qr-local-ui",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "保存购买联系方式" }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/contact-configs",
+        expect.objectContaining({
+          method: "PUT",
+        }),
+      ),
+    );
+    const saveCall = fetchMock.mock.calls.find(
+      ([url, init]) =>
+        String(url) === "/api/v1/contact-configs" &&
+        (init as RequestInit | undefined)?.method === "PUT",
+    );
+    expect(JSON.parse(String(saveCall?.[1]?.body))).toMatchObject({
+      channels: [
+        expect.objectContaining({
+          channelType: "phone",
+          isEnabled: true,
+          qrImageUrl: null,
+        }),
+        expect.objectContaining({
+          channelType: "wechat_work",
+          isEnabled: true,
+          qrImageUrl:
+            "/api/v1/contact-configs/qr-images/contact-config-qr-local-ui",
+        }),
+      ],
+    });
   });
 });

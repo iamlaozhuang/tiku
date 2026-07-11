@@ -9,7 +9,9 @@ export const LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG: PurchaseGuidanceContactConf
     channels: [
       {
         channelType: "phone",
+        isEnabled: true,
         label: "Tiku 运营支持",
+        qrImageUrl: null,
         value: "400-000-2026",
         serviceHours: "工作日 09:00-18:00",
         usage: "购买咨询、卡密开通、授权范围确认",
