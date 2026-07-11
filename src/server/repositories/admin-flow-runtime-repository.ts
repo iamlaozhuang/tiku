@@ -258,6 +258,10 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     async listUsers(query) {
       const database = getDatabase();
       const conditions = createUserConditions(query);
+      const sortColumn =
+        query.sortBy === "registeredAt" || query.sortBy === "createdAt"
+          ? user.created_at
+          : user.updated_at;
       const personalAuthStatusByUser = database
         .select({
           auth_status: sql<AdminUserAuthStatus>`case
@@ -292,9 +296,8 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         )
         .where(and(...conditions))
         .orderBy(
-          query.sortOrder === "asc"
-            ? asc(user.updated_at)
-            : desc(user.updated_at),
+          query.sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn),
+          query.sortOrder === "asc" ? asc(user.id) : desc(user.id),
         )
         .limit(query.pageSize)
         .offset((query.page - 1) * query.pageSize);

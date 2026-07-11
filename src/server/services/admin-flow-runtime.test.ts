@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SESSION_COOKIE_NAME } from "../auth/session-cookie";
 import type { ApiResponse } from "../contracts/api-response";
 import type { AuthContextDto } from "../contracts/auth-contract";
+import type { AdminAuthOperationListQuery } from "../contracts/admin-user-org-auth-ops-contract";
 import type { AdminFlowRuntimeRepositories } from "../repositories/admin-flow-runtime-repository";
 import type { AuthRequestInput } from "./auth-service";
 import { createAdminFlowRuntimeRouteHandlers } from "./admin-flow-runtime";
@@ -34,6 +35,7 @@ function createTestAdminContext(
 
 function createTestRepositories(
   onListPapers: () => void = () => undefined,
+  onListUsers: (query: AdminAuthOperationListQuery) => void = () => undefined,
 ): AdminFlowRuntimeRepositories {
   const pagination = {
     page: 1,
@@ -45,7 +47,9 @@ function createTestRepositories(
 
   return {
     userOrgAuthRepository: {
-      async listUsers() {
+      async listUsers(query) {
+        onListUsers(query);
+
         return {
           users: [],
           pagination,
@@ -83,6 +87,51 @@ function createTestRepositories(
 }
 
 describe("createAdminFlowRuntimeRouteHandlers", () => {
+  it("forwards user filters, normalized keyword, and registration ordering", async () => {
+    let observedQuery: AdminAuthOperationListQuery | null = null;
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories: createTestRepositories(
+        () => undefined,
+        (query) => {
+          observedQuery = query;
+        },
+      ),
+      sessionService: {
+        async getCurrentSession(): Promise<ApiResponse<AuthContextDto | null>> {
+          return {
+            code: 0,
+            message: "ok",
+            data: createTestAdminContext(["ops_admin"]),
+          };
+        },
+      },
+    });
+
+    const response = await handlers.users.collection.GET(
+      new Request(
+        "http://localhost/api/v1/users?page=3&pageSize=50&sortBy=registeredAt&sortOrder=asc&status=disabled&userType=employee&keyword=%20target%20",
+        {
+          headers: {
+            cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
+          },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(observedQuery).toEqual({
+      page: 3,
+      pageSize: 50,
+      sortBy: "registeredAt",
+      sortOrder: "asc",
+      keyword: "target",
+      status: "disabled",
+      userType: "employee",
+      userCategory: "all",
+      authFilter: "all",
+    });
+  });
+
   it("uses the cookie-backed admin session for paper collection reads", async () => {
     let observedAuthorization: string | null | undefined;
     let paperListCallCount = 0;

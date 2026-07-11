@@ -18,6 +18,7 @@ import {
   type AdminContentKnowledgePageSize,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import {
+  ADMIN_AUTH_OPERATION_SORT_FIELDS,
   type AdminAccountCreationRole,
   type AdminAccountCreationConflictDto,
   type AdminAccountCreationResultDto,
@@ -26,6 +27,7 @@ import {
   createAdminAuthOperationListQuery,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
+  type AdminAuthOperationSortField,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { AdminRole } from "../models/auth";
 import {
@@ -216,12 +218,56 @@ function readAdminAuthOperationListQuery(
   const searchParams = new URL(request.url).searchParams;
   const pageSize = readPageSize(searchParams, [20, 50, 100], 20);
   const page = Number(searchParams.get("page"));
+  const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
 
   return createAdminAuthOperationListQuery({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: pageSize as AdminAuthOperationPageSize,
+    sortBy: readAdminAuthOperationSortBy(searchParams),
+    sortOrder,
     keyword: searchParams.get("keyword"),
+    status: readAdminAuthOperationStatus(searchParams),
+    userType: readAdminAuthOperationUserType(searchParams),
   });
+}
+
+function readAdminAuthOperationSortBy(
+  searchParams: URLSearchParams,
+): AdminAuthOperationSortField {
+  const sortBy = searchParams.get("sortBy");
+
+  return ADMIN_AUTH_OPERATION_SORT_FIELDS.includes(
+    sortBy as AdminAuthOperationSortField,
+  )
+    ? (sortBy as AdminAuthOperationSortField)
+    : "updatedAt";
+}
+
+function readAdminAuthOperationStatus(
+  searchParams: URLSearchParams,
+): AdminAuthOperationListQuery["status"] {
+  const status = searchParams.get("status");
+
+  if (
+    status === "active" ||
+    status === "disabled" ||
+    status === "expired" ||
+    status === "cancelled" ||
+    status === "unused" ||
+    status === "used"
+  ) {
+    return status;
+  }
+
+  return "all";
+}
+
+function readAdminAuthOperationUserType(
+  searchParams: URLSearchParams,
+): AdminAuthOperationListQuery["userType"] {
+  const userType = searchParams.get("userType");
+
+  return userType === "personal" || userType === "employee" ? userType : "all";
 }
 
 function readAdminContentKnowledgeListQuery(

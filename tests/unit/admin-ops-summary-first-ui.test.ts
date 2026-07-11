@@ -390,6 +390,43 @@ describe("admin ops summary-first UI", () => {
     expect(screen.getByText("分页用户 21 / 13900000021")).toBeInTheDocument();
   });
 
+  it("searches users by keyword and returns pagination to the first page", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token-keyword",
+    );
+    const fetchMock = stubFetchForSummaryFirstPages({
+      users: Array.from({ length: 25 }, (_, index) =>
+        createAdminUser(index + 1),
+      ),
+    });
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    await screen.findByText("显示 21-25 / 共 25 个用户");
+
+    fireEvent.change(screen.getByLabelText("搜索用户"), {
+      target: { value: "目标用户" },
+    });
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([url]) => {
+          const requestUrl = new URL(String(url), "http://localhost");
+
+          return (
+            requestUrl.pathname === "/api/v1/users" &&
+            requestUrl.searchParams.get("keyword") === "目标用户" &&
+            requestUrl.searchParams.get("page") === "1"
+          );
+        }),
+      ).toBe(true);
+    });
+    expect(screen.getByText("显示 1-20 / 共 25 个用户")).toBeInTheDocument();
+  });
+
   it("renders organization auth summary before operations actions and preserves edition boundary copy", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     stubFetchForSummaryFirstPages();

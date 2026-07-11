@@ -178,10 +178,12 @@ const adminOpsLoadCache = new Map<string, Promise<AdminOpsLoadResult>>();
 const adminAccountPasswordRequestField = "pass" + "word";
 
 function createListSearchParams({
+  keyword,
   query,
   userStatus,
   userType,
 }: {
+  keyword: string;
   query: AdminListQuery;
   userStatus: string;
   userType: string;
@@ -199,6 +201,12 @@ function createListSearchParams({
 
   if (userType !== "all") {
     searchParams.set("userType", userType);
+  }
+
+  const normalizedKeyword = keyword.trim();
+
+  if (normalizedKeyword.length > 0) {
+    searchParams.set("keyword", normalizedKeyword);
   }
 
   return searchParams.toString();
@@ -397,6 +405,7 @@ async function loadAdminOpsData(
 export function AdminOpsManagement() {
   const [loadState, setLoadState] = useState<AdminOpsLoadState>("loading");
   const [data, setData] = useState<AdminOpsData>(emptyAdminOpsData);
+  const [userKeyword, setUserKeyword] = useState("");
   const [userStatus, setUserStatus] = useState<UserStatus | "all">("all");
   const [userType, setUserType] = useState<UserType | "all">("all");
   const {
@@ -435,11 +444,12 @@ export function AdminOpsManagement() {
   const listQuery = useMemo(
     () =>
       createListSearchParams({
+        keyword: userKeyword,
         query,
         userStatus,
         userType,
       }),
-    [query, userStatus, userType],
+    [query, userKeyword, userStatus, userType],
   );
   const allowedAdminAccountCreationRoles = useMemo(
     () => getAllowedAdminAccountCreationRoles(data.currentAdminRoles),
@@ -476,6 +486,11 @@ export function AdminOpsManagement() {
   function handleUserStatusChange(value: UserStatus | "all") {
     setUserStatus(value);
     handleFilterChange("userStatus");
+  }
+
+  function handleUserKeywordChange(value: string) {
+    setUserKeyword(value);
+    handleFilterChange("userKeyword");
   }
 
   function handleUserTypeChange(value: UserType | "all") {
@@ -736,7 +751,16 @@ export function AdminOpsManagement() {
             筛选结果 {usersPagination.total} 个
           </p>
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,12rem)_minmax(0,12rem)_minmax(0,10rem)_auto_1fr] xl:items-end">
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(14rem,1.5fr)_minmax(0,10rem)_minmax(0,10rem)_minmax(0,8rem)_auto] xl:items-end">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">搜索用户</span>
+            <Input
+              aria-label="搜索用户"
+              placeholder="姓名或手机号"
+              value={userKeyword}
+              onChange={(event) => handleUserKeywordChange(event.target.value)}
+            />
+          </label>
           <FilterSelect
             label="用户状态"
             options={userStatusOptions}
@@ -774,7 +798,7 @@ export function AdminOpsManagement() {
           >
             注册时间排序
           </Button>
-          <p className="text-text-muted text-sm">
+          <p className="text-text-muted text-sm md:col-span-2 xl:col-span-5">
             查看详情和重置密码仍需要二次确认。
           </p>
         </div>
