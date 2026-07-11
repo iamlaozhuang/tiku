@@ -5,7 +5,7 @@ export const adminListToolbarClassName =
   "bg-surface border-border flex flex-col gap-3 rounded-md border p-4 shadow-sm lg:flex-row lg:items-end lg:justify-between";
 
 export const adminDataTableContainerClassName =
-  "border-border bg-surface overflow-hidden rounded-md border shadow-sm";
+  "border-border bg-surface overflow-x-auto rounded-md border shadow-sm";
 
 export const adminDataTableClassName = "w-full text-left text-sm";
 

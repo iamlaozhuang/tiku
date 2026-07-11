@@ -1,11 +1,46 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-ops-user-filter-contract-repair-2026-07-11
+currentPhase: 0704-admin-list-pattern-v2-2026-07-11
 updatedAt: "2026-07-11T00:00:00-07:00"
+latest0704AdminListPatternV2:
+  id: 0704-admin-list-pattern-v2-2026-07-11
+  status: ready_for_closeout
+  result: pass_localhost_ui_admin_list_pattern_v2
+  branch: codex/0704-admin-list-pattern-v2
+  dependsOn: 0704-ops-user-filter-contract-repair-2026-07-11
+  startSha: 887042f783b1305db004f6566a4c9d411b4953fb
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-admin-list-pattern-v2.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-admin-list-pattern-v2-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-admin-list-pattern-v2-audit.md
+  executionBoundary:
+    previewPreparation: paused
+    runtime: localhost_ui_source_test_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    screenshotRawDomTrace: existing_user_supplied_screenshot_reviewed_not_copied
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    status: pass_ready_for_commit_merge_push_cleanup
+    redTargetedTests: pass_expected_missing_component_overflow_and_non_finite_boundary_failures
+    greenTargetedTests: pass_7_files_62_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_10_files_scanned
+    moduleRunV2PrePushReadiness: pass
+    providerExecution: blocked_not_executed
+    envSecretAccess: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    releaseReadinessClaimed: false
 latest0704OpsUserFilterContractRepair:
   id: 0704-ops-user-filter-contract-repair-2026-07-11
-  status: ready_for_closeout
+  status: closed
   result: pass_localhost_ui_user_filter_contract_repair
   branch: codex/0704-ops-user-filter-contract-repair
   dependsOn: 0704-ops-contact-config-polish-2026-07-11
@@ -4410,13 +4445,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-ops-user-filter-contract-repair-2026-07-11
-  title: 0704 operations user filter contract repair
-  phase: 0704-ops-user-filter-contract-repair-2026-07-11
+  id: 0704-admin-list-pattern-v2-2026-07-11
+  title: 0704 admin list pattern v2
+  phase: 0704-admin-list-pattern-v2-2026-07-11
   status: ready_for_closeout
   priority: p0
-  taskKind: implementation_repair
-  branch: codex/0704-ops-user-filter-contract-repair
+  taskKind: implementation_foundation
+  branch: codex/0704-admin-list-pattern-v2
   humanApprovalBoundary:
     implementation: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -4432,23 +4467,23 @@ currentTask:
     screenshotRawDom: existing_user_supplied_screenshot_reviewed_not_copied
   plannedAt: "2026-07-11T00:00:00-07:00"
   claimedAt: "2026-07-11T00:00:00-07:00"
-  targetClosureItem: Repair the user-management status, user-type, keyword, and registration-order query contract.
-  behaviorBoundary: localhost_ui_source_test_only_user_filter_contract_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
+  targetClosureItem: Establish business-agnostic admin list toolbar, table frame, pagination, and reset behavior.
+  behaviorBoundary: localhost_ui_source_test_only_shared_admin_list_foundation_no_page_migration_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
   evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-user-filter-contract-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-user-filter-contract-repair-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-user-filter-contract-repair-audit.md
-  dependsOn: 0704-ops-contact-config-polish-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-admin-list-pattern-v2.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-admin-list-pattern-v2-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-admin-list-pattern-v2-audit.md
+  dependsOn: 0704-ops-user-filter-contract-repair-2026-07-11
   nextRequiredTaskId: null
   validationSummary:
     status: pass_ready_for_commit_merge_push_cleanup
-    redTargetedTests: pass_expected_2_failures_before_implementation
-    greenTargetedTests: pass_7_files_51_tests
+    redTargetedTests: pass_expected_missing_component_overflow_and_non_finite_boundary_failures
+    greenTargetedTests: pass_7_files_62_tests
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass_10_files_scanned
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    moduleRunV2PrePushReadiness: pass
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
@@ -35148,8 +35183,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f131814e223368b770be9c665e2fdf18b4227671
-  lastKnownOriginMasterSha: f131814e223368b770be9c665e2fdf18b4227671
+  lastKnownMasterSha: 887042f783b1305db004f6566a4c9d411b4953fb
+  lastKnownOriginMasterSha: 887042f783b1305db004f6566a4c9d411b4953fb
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

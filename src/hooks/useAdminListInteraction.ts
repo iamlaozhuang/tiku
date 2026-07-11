@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
 
 import {
   applyAdminListFilter,
@@ -20,8 +20,14 @@ export function useAdminListInteraction({
   initialQuery,
 }: AdminListInteractionOptions = {}) {
   const [query, setQuery] = useState(() => createAdminListQuery(initialQuery));
+  const resetQueryRef = useRef(
+    createAdminListQuery({
+      sortBy: initialQuery?.sortBy ?? "updatedAt",
+      sortOrder: initialQuery?.sortOrder ?? "desc",
+    }),
+  );
 
-  const refreshCount = useMemo(() => query.filterRevision, [query]);
+  const refreshCount = query.filterRevision;
 
   function handlePageSizeChange(value: string) {
     const parsedPageSize = Number(value);
@@ -47,10 +53,15 @@ export function useAdminListInteraction({
     setQuery((currentQuery) => updateAdminPage(currentQuery, page));
   }
 
+  function handleReset() {
+    setQuery({ ...resetQueryRef.current });
+  }
+
   return {
     handleFilterChange,
     handlePageChange,
     handlePageSizeChange,
+    handleReset,
     handleSortChange,
     query,
     refreshCount,
