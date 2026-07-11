@@ -755,6 +755,71 @@ describe("AdminOrgAuthPage", () => {
 });
 
 describe("AdminRedeemCodePage", () => {
+  it("separates the shared redeem code list workflow from on-demand generation", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockAdminFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    await screen.findByRole("heading", { name: "卡密管理" });
+    const toolbar = screen.getByRole("region", { name: "卡密筛选" });
+    const table = screen.getByRole("table", { name: "卡密列表" });
+    const generateButton = within(toolbar).getByRole("button", {
+      name: "生成卡密",
+    });
+
+    expect(table).toBeInTheDocument();
+    expect(toolbar).toHaveTextContent("共 1 个卡密");
+    expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("redeem-code-generation-type-select"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.change(within(toolbar).getByLabelText("卡密状态"), {
+      target: { value: "unused" },
+    });
+    fireEvent.change(within(toolbar).getByLabelText("卡密搜索"), {
+      target: { value: "批次" },
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/redeem-codes?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc&status=unused&keyword=%E6%89%B9%E6%AC%A1",
+        expect.anything(),
+      ),
+    );
+
+    generateButton.focus();
+    fireEvent.click(generateButton);
+    const drawer = screen.getByRole("dialog", { name: "生成卡密" });
+
+    expect(screen.getByRole("button", { name: "关闭生成卡密" })).toHaveFocus();
+    expect(
+      within(drawer).queryByTestId("redeem-code-generation-count-input"),
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      within(drawer).getByTestId("redeem-code-generation-mode-batch"),
+    );
+    expect(
+      within(drawer).getByTestId("redeem-code-generation-count-input"),
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(
+      screen.queryByRole("dialog", { name: "生成卡密" }),
+    ).not.toBeInTheDocument();
+    expect(generateButton).toHaveFocus();
+    expect(within(toolbar).getByLabelText("卡密状态")).toHaveValue("unused");
+
+    fireEvent.click(within(toolbar).getByRole("button", { name: "重置筛选" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/redeem-codes?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc",
+        expect.anything(),
+      ),
+    );
+  });
+
   it("loads masked redeem_code data through the admin session runtime without rendering plaintext or hashes", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockAdminFetch();
@@ -805,11 +870,19 @@ describe("AdminRedeemCodePage", () => {
 
     render(createElement(AdminRedeemCodePage));
 
-    expect(await screen.findByText("暂无卡密数据")).toBeInTheDocument();
+    expect(
+      await screen.findByText("当前筛选条件下没有卡密记录。"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "卡密筛选" })).toHaveTextContent(
+      "共 0 个卡密",
+    );
+    expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
+      "显示 0-0 / 共 0 个卡密",
+    );
     expect(
       screen.queryByTestId("system-ops-redeem-code-generate-entry"),
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("redeem-code-generate-button")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "生成卡密" })).toBeEnabled();
 
     cleanup();
     vi.stubGlobal(

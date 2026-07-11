@@ -1121,7 +1121,10 @@ describe("admin user organization authorization ops baseline", () => {
     expect(
       screen.queryByTestId("system-ops-redeem-code-generate-entry"),
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("redeem-code-generate-button")).toBeVisible();
+    expect(screen.getByRole("button", { name: "生成卡密" })).toBeVisible();
+    expect(
+      screen.queryByTestId("redeem-code-generation-type-select"),
+    ).not.toBeInTheDocument();
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -1894,7 +1897,9 @@ describe("admin user organization authorization ops baseline", () => {
 
     expect(await screen.findByText("RC-2026-LIST-PLAIN")).toBeInTheDocument();
     expect(screen.getByRole("table", { name: "卡密列表" })).toBeInTheDocument();
-    expect(screen.getByText("显示 1-1 / 共 4 个卡密")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
+      "显示 1-4 / 共 4 个卡密",
+    );
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/v1/redeem-codes?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc&status=unused&keyword=RC-2026",
@@ -1911,7 +1916,7 @@ describe("admin user organization authorization ops baseline", () => {
         expect.anything(),
       ),
     );
-    fireEvent.click(screen.getByRole("button", { name: "创建时间排序" }));
+    fireEvent.click(screen.getByRole("button", { name: /创建时间/ }));
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/v1/redeem-codes?page=1&pageSize=50&sortBy=createdAt&sortOrder=asc&status=unused&keyword=RC-2026",
@@ -1919,7 +1924,11 @@ describe("admin user organization authorization ops baseline", () => {
       ),
     );
 
-    fireEvent.click(screen.getByTestId("redeem-code-generation-mode-batch"));
+    fireEvent.click(screen.getByRole("button", { name: "生成卡密" }));
+    const generationDrawer = screen.getByRole("dialog", { name: "生成卡密" });
+    fireEvent.click(
+      within(generationDrawer).getByTestId("redeem-code-generation-mode-batch"),
+    );
     fireEvent.change(screen.getByTestId("redeem-code-generation-type-select"), {
       target: { value: "edition_upgrade" },
     });
@@ -1957,7 +1966,7 @@ describe("admin user organization authorization ops baseline", () => {
     );
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "卡密已生成，请仅在本地验证时复制给学员",
+      "卡密已生成，请在受控分发窗口核对并复制",
     );
     const generationSummary = await screen.findByTestId(
       "redeem-code-generation-redacted-summary",

@@ -118,6 +118,110 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-ops-redeem-code-flow-separation-2026-07-11
+    title: 0704 operations redeem code flow separation
+    phase: 0704-ops-redeem-code-flow-separation-2026-07-11
+    status: closed
+    result: pass_localhost_ui_redeem_code_flow_separation
+    priority: p1
+    sequenceOrder: 27.0
+    taskKind: implementation_feature
+    executionProfile: redeem_code_list_first_shared_filters_pagination_and_on_demand_generation_drawer_no_business_contract_change
+    moduleRunVersion: 2
+    branch: codex/0704-ops-redeem-code-flow-separation
+    dependsOn:
+      - 0704-ops-employee-list-completion-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-redeem-code-flow-separation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-redeem-code-flow-separation-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-redeem-code-flow-separation-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-ops-redeem-code-flow-separation.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-ops-redeem-code-flow-separation-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-redeem-code-flow-separation-audit.md
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/admin-ops-summary-first-ui.test.ts
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
+      - tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/server/**
+      - src/app/api/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_redeem_code_ui_only
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/admin-ops-summary-first-ui.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-ops-redeem-code-flow-separation-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-ops-redeem-code-flow-separation-2026-07-11 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ready_for_commit_merge_push_cleanup
+      redTargetedTests: pass_expected_missing_list_first_and_generation_drawer_failure
+      greenTargetedTests: pass_6_files_61_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      formatting: pass
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_9_files_scanned
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
   - id: 0704-ops-employee-list-completion-2026-07-11
     title: 0704 operations employee account list completion
     phase: 0704-ops-employee-list-completion-2026-07-11

@@ -8,11 +8,9 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Clock3,
   Copy,
   Download,
   Eye,
-  KeyRound,
   LoaderCircle,
   MoveRight,
   Pencil,
@@ -63,11 +61,7 @@ import {
   AdminPagination,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
-import {
-  adminDataTableClassName,
-  adminDataTableContainerClassName,
-  adminListPaginationClassName,
-} from "@/components/admin/admin-layout-primitives";
+import { adminDataTableClassName } from "@/components/admin/admin-layout-primitives";
 import {
   ADMIN_PAGE_SIZE_OPTIONS,
   type AdminListQuery,
@@ -1681,63 +1675,6 @@ function OperationsOrgAuthSummaryFirstBand({
       <p className="text-text-muted mt-3 text-xs leading-5">
         空态、错误态和禁用态保持可见；当前禁用态组织 {disabledOrganizationCount}{" "}
         个，新增授权按钮只提交公开编号和版本字段。
-      </p>
-    </section>
-  );
-}
-
-function OperationsRedeemCodeSummaryFirstBand({
-  hasUnavailablePlainTextCode,
-  redeemCodes,
-}: {
-  hasUnavailablePlainTextCode: boolean;
-  redeemCodes: AdminRedeemCodeData["redeemCodes"];
-}) {
-  const unusedCount = redeemCodes.filter(
-    (redeemCode) => redeemCode.status === "unused",
-  ).length;
-  const consumedOrExpiredCount = redeemCodes.length - unusedCount;
-
-  return (
-    <section
-      aria-label="卡密摘要优先"
-      className="bg-surface border-border rounded-md border p-4 shadow-sm"
-      data-testid="ops-redeem-code-summary-first-band"
-    >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">卡密管理总览</p>
-          <h2 className="text-text-primary text-base font-semibold">
-            卡密分发总览
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            明文仅限有权运营界面复制；证据和审计只记录脱敏命令状态、数量和路径，不记录卡密明文、哈希或内部标识。
-          </p>
-        </div>
-        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-          二次确认
-        </span>
-      </div>
-      <div className="mt-4 grid gap-4 xl:grid-cols-3" aria-label="卡密摘要">
-        <SummaryTile
-          icon={<KeyRound className="size-4" aria-hidden="true" />}
-          label="卡密总数"
-          value={`${redeemCodes.length}`}
-        />
-        <SummaryTile
-          icon={<CheckCircle2 className="size-4" aria-hidden="true" />}
-          label="未使用"
-          value={`${unusedCount}`}
-        />
-        <SummaryTile
-          icon={<Clock3 className="size-4" aria-hidden="true" />}
-          label="已使用或过期"
-          value={`${consumedOrExpiredCount}`}
-        />
-      </div>
-      <p className="text-text-muted mt-3 text-xs leading-5">
-        空态、错误态和禁用态保持可见；明文不可见记录{" "}
-        {hasUnavailablePlainTextCode ? "需要提示" : "当前无"}。
       </p>
     </section>
   );
@@ -3525,170 +3462,122 @@ function EmployeeConfirmationDialog({
 
 function RedeemCodeList({
   onCopyPlainText,
-  onPageChange,
   onViewDetail,
-  pageCount,
-  pagination,
   redeemCodes,
-  visibleEnd,
-  visibleStart,
 }: {
   onCopyPlainText: (value: string) => void;
-  onPageChange: (page: number) => void;
   onViewDetail: (publicId: string) => void;
-  pageCount: number;
-  pagination: ApiPagination;
   redeemCodes: AdminRedeemCodeData["redeemCodes"];
-  visibleEnd: number;
-  visibleStart: number;
 }) {
   return (
-    <section aria-label="卡密列表区域" className="space-y-3">
-      <div
-        className={adminDataTableContainerClassName}
-        data-testid="admin-redeem-code-table-container"
-      >
-        <div className="overflow-x-auto">
-          <table
-            aria-label="卡密列表"
-            className={`${adminDataTableClassName} min-w-[56rem]`}
-          >
-            <thead className="bg-muted text-text-secondary">
-              <tr>
-                <th className="px-4 py-3 font-medium" scope="col">
-                  卡密
-                </th>
-                <th className="px-4 py-3 font-medium" scope="col">
-                  类型与状态
-                </th>
-                <th className="px-4 py-3 font-medium" scope="col">
-                  授权范围
-                </th>
-                <th className="px-4 py-3 font-medium" scope="col">
-                  兑换与明文
-                </th>
-                <th className="px-4 py-3 text-right font-medium" scope="col">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {redeemCodes.length === 0 ? (
-                <tr>
-                  <td
-                    className="text-text-muted px-4 py-8 text-center text-sm"
-                    colSpan={5}
-                  >
-                    当前筛选条件下没有卡密记录。
+    <AdminTableFrame ariaLabel="卡密列表区域" minWidthClassName="min-w-[56rem]">
+      <table aria-label="卡密列表" className={adminDataTableClassName}>
+        <thead className="bg-muted text-text-secondary">
+          <tr>
+            <th className="px-4 py-3 font-medium" scope="col">
+              卡密
+            </th>
+            <th className="px-4 py-3 font-medium" scope="col">
+              类型与状态
+            </th>
+            <th className="px-4 py-3 font-medium" scope="col">
+              授权范围
+            </th>
+            <th className="px-4 py-3 font-medium" scope="col">
+              兑换与明文
+            </th>
+            <th className="px-4 py-3 text-right font-medium" scope="col">
+              操作
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {redeemCodes.length === 0 ? (
+            <tr>
+              <td
+                className="text-text-muted px-4 py-8 text-center text-sm"
+                colSpan={5}
+              >
+                当前筛选条件下没有卡密记录。
+              </td>
+            </tr>
+          ) : (
+            redeemCodes.map((redeemCode) => {
+              const visiblePlainText =
+                redeemCode.canViewPlainText && redeemCode.codePlainText !== null
+                  ? redeemCode.codePlainText
+                  : null;
+
+              return (
+                <tr
+                  className="border-border border-t text-sm"
+                  data-public-id={redeemCode.publicId}
+                  data-testid={`admin-redeem-code-${redeemCode.publicId}`}
+                  key={redeemCode.publicId}
+                >
+                  <td className="px-4 py-3 align-middle">
+                    <p className="text-text-primary font-mono font-semibold">
+                      {visiblePlainText ?? redeemCode.codeDisplay}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      创建于 {formatDate(redeemCode.createdAt)}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
+                        {redeemCodeTypeLabels[redeemCode.redeemCodeType]}
+                      </span>
+                      <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+                        {redeemCodeStatusLabels[redeemCode.status]}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="text-text-primary px-4 py-3 align-middle">
+                    {formatProfessionLevel(redeemCode)}
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <p className="text-text-primary">
+                      {redeemCode.redeemedUserPublicId === null
+                        ? "未兑换"
+                        : "已兑换"}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      兑换截止 {formatDate(redeemCode.redeemDeadlineAt)}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {visiblePlainText === null ? "明文不可用" : "明文可复制"}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex justify-end gap-2">
+                      {visiblePlainText === null ? null : (
+                        <button
+                          type="button"
+                          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                          onClick={() => onCopyPlainText(visiblePlainText)}
+                        >
+                          <Copy className="size-3.5" aria-hidden="true" />
+                          复制
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+                        onClick={() => onViewDetail(redeemCode.publicId)}
+                      >
+                        <Eye className="size-3.5" aria-hidden="true" />
+                        详情
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ) : (
-                redeemCodes.map((redeemCode) => {
-                  const visiblePlainText =
-                    redeemCode.canViewPlainText &&
-                    redeemCode.codePlainText !== null
-                      ? redeemCode.codePlainText
-                      : null;
-
-                  return (
-                    <tr
-                      className="border-border border-t text-sm"
-                      data-public-id={redeemCode.publicId}
-                      data-testid={`admin-redeem-code-${redeemCode.publicId}`}
-                      key={redeemCode.publicId}
-                    >
-                      <td className="px-4 py-3 align-middle">
-                        <p className="text-text-primary font-mono font-semibold">
-                          {visiblePlainText ?? redeemCode.codeDisplay}
-                        </p>
-                        <p className="text-text-muted mt-1 text-xs">
-                          创建于 {formatDate(redeemCode.createdAt)}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3 align-middle">
-                        <div className="flex flex-wrap gap-2">
-                          <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
-                            {redeemCodeTypeLabels[redeemCode.redeemCodeType]}
-                          </span>
-                          <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
-                            {redeemCodeStatusLabels[redeemCode.status]}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="text-text-primary px-4 py-3 align-middle">
-                        {formatProfessionLevel(redeemCode)}
-                      </td>
-                      <td className="px-4 py-3 align-middle">
-                        <p className="text-text-primary">
-                          {redeemCode.redeemedUserPublicId === null
-                            ? "未兑换"
-                            : "已兑换"}
-                        </p>
-                        <p className="text-text-muted mt-1 text-xs">
-                          兑换截止 {formatDate(redeemCode.redeemDeadlineAt)}
-                        </p>
-                        <p className="text-text-muted mt-1 text-xs">
-                          {visiblePlainText === null
-                            ? "明文不可用"
-                            : "明文可复制"}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3 align-middle">
-                        <div className="flex justify-end gap-2">
-                          {visiblePlainText === null ? null : (
-                            <button
-                              type="button"
-                              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-                              onClick={() => onCopyPlainText(visiblePlainText)}
-                            >
-                              <Copy className="size-3.5" aria-hidden="true" />
-                              复制
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
-                            onClick={() => onViewDetail(redeemCode.publicId)}
-                          >
-                            <Eye className="size-3.5" aria-hidden="true" />
-                            详情
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className={adminListPaginationClassName}>
-        <p className="text-text-muted">
-          显示 {visibleStart}-{visibleEnd} / 共 {pagination.total} 个卡密
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={pagination.page <= 1}
-            onClick={() => onPageChange(pagination.page - 1)}
-          >
-            上一页
-          </button>
-          <button
-            type="button"
-            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={pagination.page >= pageCount}
-            onClick={() =>
-              onPageChange(Math.min(pageCount, pagination.page + 1))
-            }
-          >
-            下一页
-          </button>
-        </div>
-      </div>
-    </section>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </AdminTableFrame>
   );
 }
 
@@ -4305,15 +4194,16 @@ function RedeemCodeConfirmationDialog({
           </h2>
         </div>
         <p className="text-text-muted text-sm">
-          将生成 {input.count} 个 {input.profession} {input.level} 级卡密，
-          类型为 {redeemCodeTypeLabels[input.redeemCodeType]}， 有效期{" "}
-          {input.durationDay} 天，兑换截止日期 {input.redeemDeadlineDate}
-          。审计日志和 evidence 只记录脱敏摘要。
+          将生成 {input.count} 个{redeemCodeTypeLabels[input.redeemCodeType]}
+          ，授权范围为 {professionLabels[input.profession]} {input.level}{" "}
+          级，有效期 {input.durationDay} 天，兑换截止日期{" "}
+          {input.redeemDeadlineDate}
+          。审计日志只记录操作摘要，不记录卡密明文。
         </p>
         <div className="flex gap-2">
           <button
             type="button"
-            className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
             data-testid="redeem-code-generation-confirm-action"
             onClick={onConfirm}
           >
@@ -4657,34 +4547,118 @@ function OrgAuthActionPanel({
   );
 }
 
-function RedeemCodeActionPanel({
-  disabled,
-  formState,
-  id,
+function RedeemCodeFilterToolbar({
   keyword,
-  onGenerateRedeemCode,
-  onFormChange,
+  onGenerate,
   onKeywordChange,
   onPageSizeChange,
+  onReset,
   onSortChange,
   onStatusChange,
   pageSize,
+  resultLabel,
   sortOrder,
   status,
+}: {
+  keyword: string;
+  onGenerate: () => void;
+  onKeywordChange: (value: string) => void;
+  onPageSizeChange: (value: string) => void;
+  onReset: () => void;
+  onSortChange: (sortBy: string) => void;
+  onStatusChange: (value: RedeemCodeStatus | "all") => void;
+  pageSize: number;
+  resultLabel: string;
+  sortOrder: "asc" | "desc";
+  status: RedeemCodeStatus | "all";
+}) {
+  return (
+    <AdminListToolbar
+      description="按卡密状态或关键词缩小分发记录；筛选变化自动回到第一页。"
+      primaryAction={
+        <button
+          type="button"
+          className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+          onClick={onGenerate}
+        >
+          <PlusCircle className="size-4" aria-hidden="true" />
+          生成卡密
+        </button>
+      }
+      resultLabel={resultLabel}
+      title="卡密筛选"
+    >
+      <label className={adminListFilterLabelClassName}>
+        <span>关键词</span>
+        <input
+          aria-label="卡密搜索"
+          className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+          placeholder="卡密号或批次关键词"
+          value={keyword}
+          onChange={(event) => onKeywordChange(event.target.value)}
+        />
+      </label>
+      <label className={adminListFilterLabelClassName}>
+        <span>卡密状态</span>
+        <select
+          aria-label="卡密状态"
+          className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+          value={status}
+          onChange={(event) =>
+            onStatusChange(event.target.value as RedeemCodeStatus | "all")
+          }
+        >
+          <option value="all">全部状态</option>
+          <option value="unused">未使用</option>
+          <option value="used">已使用</option>
+          <option value="expired">已过期</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        className={`border-border bg-background hover:bg-muted rounded-md border px-3 text-sm font-medium ${adminListControlClassName}`}
+        onClick={() => onSortChange("createdAt")}
+      >
+        创建时间{sortOrder === "desc" ? "倒序" : "正序"}
+      </button>
+      <label className={adminListFilterLabelClassName}>
+        <span>每页条数</span>
+        <select
+          aria-label="卡密每页条数"
+          className={`border-border bg-background rounded-md border px-3 text-sm ${adminListControlClassName}`}
+          value={`${pageSize}`}
+          onChange={(event) => onPageSizeChange(event.target.value)}
+        >
+          {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
+            <option key={optionPageSize} value={optionPageSize}>
+              {optionPageSize}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        type="button"
+        className={`border-border bg-background hover:bg-muted rounded-md border px-3 text-sm font-medium ${adminListControlClassName}`}
+        onClick={onReset}
+      >
+        重置筛选
+      </button>
+    </AdminListToolbar>
+  );
+}
+
+function RedeemCodeGenerationPanel({
+  disabled,
+  formState,
+  id,
+  onGenerateRedeemCode,
+  onFormChange,
 }: {
   disabled: boolean;
   formState: RedeemCodeGenerationFormState;
   id?: string;
-  keyword: string;
   onFormChange: (formState: RedeemCodeGenerationFormState) => void;
   onGenerateRedeemCode: (input: CreateRedeemCodeInput) => void;
-  onKeywordChange: (value: string) => void;
-  onPageSizeChange: (value: string) => void;
-  onSortChange: (sortBy: string) => void;
-  onStatusChange: (value: RedeemCodeStatus | "all") => void;
-  pageSize: number;
-  sortOrder: "asc" | "desc";
-  status: RedeemCodeStatus | "all";
 }) {
   const formValidation = buildRedeemCodeGenerationInput(formState);
   const isGenerateDisabled = disabled || formValidation.input === null;
@@ -4705,77 +4679,19 @@ function RedeemCodeActionPanel({
   }
 
   return (
-    <section
-      className="bg-surface border-border rounded-md border p-4 shadow-sm"
-      id={id}
-    >
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <h2 className="text-text-primary text-base font-semibold">
-            卡密筛选与生成
-          </h2>
-          <p className="text-text-muted text-sm">
-            先筛选和核对历史卡密，再执行生成；生成前仍需要二次确认。
-          </p>
-        </div>
-        <p className="text-text-muted text-sm">
-          创建时间 {sortOrder === "desc" ? "倒序" : "正序"}
+    <section className="space-y-5" id={id}>
+      <div className="space-y-1">
+        <h2 className="text-text-primary text-base font-semibold">生成参数</h2>
+        <p className="text-text-muted text-sm leading-5">
+          明确选择卡密类型和授权范围，核对数量与有效期后再提交二次确认。
         </p>
       </div>
-      <div className="mt-4 flex flex-wrap items-end gap-3">
-        <label className="flex min-w-44 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">卡密状态</span>
-          <select
-            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-            value={status}
-            onChange={(event) =>
-              onStatusChange(event.target.value as RedeemCodeStatus | "all")
-            }
-          >
-            <option value="all">全部状态</option>
-            <option value="unused">未使用</option>
-            <option value="used">已使用</option>
-            <option value="expired">已过期</option>
-          </select>
-        </label>
-        <label className="flex min-w-56 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">卡密搜索</span>
-          <input
-            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-            placeholder="卡密号或批次关键词"
-            value={keyword}
-            onChange={(event) => onKeywordChange(event.target.value)}
-          />
-        </label>
-        <label className="flex min-w-36 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">每页条数</span>
-          <select
-            aria-label="卡密每页条数"
-            className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-            value={`${pageSize}`}
-            onChange={(event) => onPageSizeChange(event.target.value)}
-          >
-            {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
-              <option key={optionPageSize} value={optionPageSize}>
-                {optionPageSize}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="button"
-          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-9 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-          onClick={() => onSortChange("createdAt")}
-        >
-          创建时间排序
-        </button>
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-12">
-        <div className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="flex flex-col gap-2 text-sm font-medium md:col-span-2">
           <span className="text-text-secondary">生成模式</span>
           <div className="flex gap-2">
             <button
+              aria-pressed={formState.generationMode === "single"}
               type="button"
               className={`inline-flex h-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] ${
                 formState.generationMode === "single"
@@ -4793,6 +4709,7 @@ function RedeemCodeActionPanel({
               单个
             </button>
             <button
+              aria-pressed={formState.generationMode === "batch"}
               type="button"
               className={`inline-flex h-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] ${
                 formState.generationMode === "batch"
@@ -4811,7 +4728,7 @@ function RedeemCodeActionPanel({
           </div>
         </div>
 
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
+        <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">卡密类型</span>
           <select
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -4830,21 +4747,31 @@ function RedeemCodeActionPanel({
           </select>
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
-          <span className="text-text-secondary">数量</span>
-          <input
-            className="border-border bg-background h-9 rounded-md border px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-            data-testid="redeem-code-generation-count-input"
-            disabled={formState.generationMode === "single"}
-            max={100}
-            min={1}
-            type="number"
-            value={formState.count}
-            onChange={(event) => updateFormState({ count: event.target.value })}
-          />
-        </label>
+        {formState.generationMode === "batch" ? (
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">生成数量</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              data-testid="redeem-code-generation-count-input"
+              max={100}
+              min={1}
+              type="number"
+              value={formState.count}
+              onChange={(event) =>
+                updateFormState({ count: event.target.value })
+              }
+            />
+          </label>
+        ) : null}
 
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+        <div className="border-border border-t pt-4 md:col-span-2">
+          <h3 className="text-text-primary text-sm font-semibold">授权范围</h3>
+          <p className="text-text-muted mt-1 text-xs">
+            卡密只作用于明确选择的专业和等级。
+          </p>
+        </div>
+
+        <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">专业</span>
           <select
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -4863,7 +4790,7 @@ function RedeemCodeActionPanel({
           </select>
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-1">
+        <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">等级</span>
           <input
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -4876,7 +4803,14 @@ function RedeemCodeActionPanel({
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+        <div className="border-border border-t pt-4 md:col-span-2">
+          <h3 className="text-text-primary text-sm font-semibold">有效期</h3>
+          <p className="text-text-muted mt-1 text-xs">
+            授权时长和最晚兑换日期均沿用现有校验规则。
+          </p>
+        </div>
+
+        <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">授权天数</span>
           <input
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -4891,7 +4825,7 @@ function RedeemCodeActionPanel({
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+        <label className="flex flex-col gap-2 text-sm font-medium">
           <span className="text-text-secondary">兑换截止</span>
           <input
             className="border-border bg-background h-9 rounded-md border px-3 text-sm"
@@ -4908,7 +4842,7 @@ function RedeemCodeActionPanel({
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-text-muted text-sm">
           {formValidation.message ??
-            "筛选变化自动刷新；生成操作需要二次确认，类型、专业、等级必须显式选择。"}
+            "参数完整。提交后还需核对最终数量、类型、授权范围和有效期。"}
         </p>
         <button
           type="button"
@@ -6800,6 +6734,7 @@ export function AdminRedeemCodePage() {
     handleFilterChange,
     handlePageChange,
     handlePageSizeChange,
+    handleReset,
     handleSortChange,
     query,
   } = useAdminListInteraction({
@@ -6821,6 +6756,10 @@ export function AdminRedeemCodePage() {
     useAdminRedeemCodeData(redeemCodeListQuery);
   const [confirmationState, setConfirmationState] =
     useState<RedeemCodeConfirmationState>(null);
+  const [
+    isRedeemCodeGenerationDrawerOpen,
+    setIsRedeemCodeGenerationDrawerOpen,
+  ] = useState(false);
   const [redeemCodeGenerationFormState, setRedeemCodeGenerationFormState] =
     useState<RedeemCodeGenerationFormState>(
       defaultRedeemCodeGenerationFormState,
@@ -6840,22 +6779,9 @@ export function AdminRedeemCodePage() {
       redeemCode.status === "unused" &&
       (!redeemCode.canViewPlainText || redeemCode.codePlainText === null),
   );
-  const isRedeemCodeListEmpty = loadState === "empty";
   const redeemCodePagination =
     data.pagination ??
     createFallbackRedeemCodePagination(query, data.redeemCodes.length);
-  const redeemCodePageCount = Math.max(
-    1,
-    Math.ceil(redeemCodePagination.total / redeemCodePagination.pageSize),
-  );
-  const visibleRedeemCodeStart =
-    redeemCodePagination.total === 0
-      ? 0
-      : (redeemCodePagination.page - 1) * redeemCodePagination.pageSize + 1;
-  const visibleRedeemCodeEnd =
-    redeemCodePagination.total === 0
-      ? 0
-      : visibleRedeemCodeStart + data.redeemCodes.length - 1;
 
   function handleRedeemCodeStatusChange(value: RedeemCodeStatus | "all") {
     setRedeemCodeStatus(value);
@@ -6865,6 +6791,12 @@ export function AdminRedeemCodePage() {
   function handleRedeemCodeKeywordChange(value: string) {
     setRedeemCodeKeyword(value);
     handleFilterChange("redeemCodeKeyword");
+  }
+
+  function handleResetRedeemCodeFilters() {
+    setRedeemCodeKeyword("");
+    setRedeemCodeStatus("all");
+    handleReset();
   }
 
   function handleCopyRedeemCodePlainText(value: string) {
@@ -6968,7 +6900,7 @@ export function AdminRedeemCodePage() {
       ],
     }));
     setToastMessage({
-      message: "卡密已生成，请仅在本地验证时复制给学员",
+      message: "卡密已生成，请在受控分发窗口核对并复制",
       tone: "success",
     });
   }
@@ -6994,45 +6926,42 @@ export function AdminRedeemCodePage() {
     <main className="space-y-6">
       <AdminPageHeader
         title="卡密管理"
-        description="查看卡密使用状态、类型和授权范围；符合权限的运营人员可复制明文，页面不展示哈希或内部标识。"
+        description="查看卡密使用状态、类型和授权范围；有权限的运营人员可按分发需要复制明文。"
         icon={<Ticket className="size-5" aria-hidden="true" />}
       />
 
-      <OperationsRedeemCodeSummaryFirstBand
-        hasUnavailablePlainTextCode={hasUnavailablePlainTextCode}
-        redeemCodes={data.redeemCodes}
-      />
-
-      <RedeemCodeActionPanel
-        disabled={false}
-        formState={redeemCodeGenerationFormState}
-        id="redeem-code-generate-panel"
+      <RedeemCodeFilterToolbar
         keyword={redeemCodeKeyword}
+        resultLabel={`共 ${redeemCodePagination.total} 个卡密`}
         pageSize={query.pageSize}
         sortOrder={query.sortOrder}
         status={redeemCodeStatus}
-        onFormChange={setRedeemCodeGenerationFormState}
-        onGenerateRedeemCode={(input) =>
-          setConfirmationState({ kind: "generateRedeemCode", input })
-        }
+        onGenerate={() => setIsRedeemCodeGenerationDrawerOpen(true)}
         onKeywordChange={handleRedeemCodeKeywordChange}
         onPageSizeChange={handlePageSizeChange}
+        onReset={handleResetRedeemCodeFilters}
         onSortChange={handleSortChange}
         onStatusChange={handleRedeemCodeStatusChange}
       />
 
-      {generatedRedeemCodeSummary === null ? null : (
-        <RedeemCodeDistributionWindow
-          generation={generatedRedeemCodeSummary}
-          redeemCodes={generatedRedeemCodes}
-          onCopyAll={handleCopyGeneratedRedeemCodes}
-          onCopyOne={handleCopyRedeemCodePlainText}
-        />
-      )}
-
       {hasUnavailablePlainTextCode ? (
         <RedeemCodePlainTextUnavailableNotice />
       ) : null}
+
+      <RedeemCodeList
+        redeemCodes={data.redeemCodes}
+        onCopyPlainText={handleCopyRedeemCodePlainText}
+        onViewDetail={(publicId) => {
+          void handleViewRedeemCodeDetail(publicId);
+        }}
+      />
+      <AdminPagination
+        itemLabel="个卡密"
+        page={redeemCodePagination.page}
+        pageSize={redeemCodePagination.pageSize}
+        total={redeemCodePagination.total}
+        onPageChange={handlePageChange}
+      />
 
       {selectedRedeemCodePublicId !== null &&
       selectedRedeemCodeDetail === null ? (
@@ -7058,25 +6987,34 @@ export function AdminRedeemCodePage() {
         />
       )}
 
-      {isRedeemCodeListEmpty ? (
-        <AdminEmptyState
-          title="暂无卡密数据"
-          description="当前没有可展示的卡密记录。"
-        />
-      ) : (
-        <RedeemCodeList
-          pageCount={redeemCodePageCount}
-          pagination={redeemCodePagination}
-          redeemCodes={data.redeemCodes}
-          visibleEnd={visibleRedeemCodeEnd}
-          visibleStart={visibleRedeemCodeStart}
-          onCopyPlainText={handleCopyRedeemCodePlainText}
-          onPageChange={handlePageChange}
-          onViewDetail={(publicId) => {
-            void handleViewRedeemCodeDetail(publicId);
-          }}
-        />
-      )}
+      {isRedeemCodeGenerationDrawerOpen ? (
+        <AdminTaskDrawer
+          ariaLabel="生成卡密"
+          eyebrow="卡密管理"
+          title="生成卡密"
+          onClose={() => setIsRedeemCodeGenerationDrawerOpen(false)}
+        >
+          <RedeemCodeGenerationPanel
+            disabled={false}
+            formState={redeemCodeGenerationFormState}
+            id="redeem-code-generate-panel"
+            onFormChange={setRedeemCodeGenerationFormState}
+            onGenerateRedeemCode={(input) =>
+              setConfirmationState({ kind: "generateRedeemCode", input })
+            }
+          />
+          {generatedRedeemCodeSummary === null ? null : (
+            <div className="mt-5">
+              <RedeemCodeDistributionWindow
+                generation={generatedRedeemCodeSummary}
+                redeemCodes={generatedRedeemCodes}
+                onCopyAll={handleCopyGeneratedRedeemCodes}
+                onCopyOne={handleCopyRedeemCodePlainText}
+              />
+            </div>
+          )}
+        </AdminTaskDrawer>
+      ) : null}
 
       {confirmationState === null ? null : (
         <RedeemCodeConfirmationDialog

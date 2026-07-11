@@ -617,7 +617,7 @@ describe("admin ops summary-first UI", () => {
     expect(screen.getByTestId("org-auth-create-form")).toBeInTheDocument();
   });
 
-  it("renders redeem code summary before generation and keeps plaintext exception explicit", async () => {
+  it("renders the redeem code list workflow before on-demand generation and keeps plaintext exception explicit", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     stubFetchForSummaryFirstPages();
 
@@ -631,20 +631,22 @@ describe("admin ops summary-first UI", () => {
       screen.queryByRole("link", { name: "卡密管理" }),
     ).not.toBeInTheDocument();
 
-    const summaryBand = screen.getByTestId(
-      "ops-redeem-code-summary-first-band",
+    const filterToolbar = screen.getByRole("region", { name: "卡密筛选" });
+    const redeemCodeTable = screen.getByRole("table", { name: "卡密列表" });
+    expect(filterToolbar).toHaveTextContent("筛选变化自动回到第一页");
+    expect(document.body).toHaveTextContent(
+      "有权限的运营人员可按分发需要复制明文",
     );
-    expect(summaryBand).toHaveTextContent("明文仅限有权运营界面复制");
-    expect(summaryBand).toHaveTextContent("证据");
-    expect(summaryBand).toHaveTextContent("禁用态");
     expect(
       screen.queryByTestId("system-ops-redeem-code-generate-entry"),
     ).not.toBeInTheDocument();
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByTestId("redeem-code-generate-button"),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      filterToolbar.compareDocumentPosition(redeemCodeTable) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(
+      screen.queryByTestId("redeem-code-generation-type-select"),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps operations org auth pages usable with cookie-backed admin sessions", async () => {
