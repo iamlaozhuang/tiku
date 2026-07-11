@@ -2490,6 +2490,142 @@ activeTasks:
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+  - id: 0704-owner-preview-provider-gate-hardening-2026-07-10
+    title: 0704 owner preview provider gate hardening
+    phase: 0704-owner-preview-provider-gate-hardening-2026-07-10
+    status: ready_for_closeout
+    result: pass_owner_preview_provider_gate_hardened
+    priority: p1
+    sequenceOrder: 19.1
+    taskKind: provider_gate_hardening
+    executionProfile: source_test_docs_provider_disabled_gate_hardening_no_provider_execution
+    moduleRunVersion: 2
+    branch: codex/0704-owner-preview-provider-gate-hardening
+    dependsOn:
+      - 0704-code-readonly-preview-risk-assessment-2026-07-10
+    planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-owner-preview-provider-gate-hardening.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-owner-preview-provider-gate-hardening-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-owner-preview-provider-gate-hardening-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-10-0704-owner-preview-provider-gate-hardening.md
+      - docs/05-execution-logs/evidence/2026-07-10-0704-owner-preview-provider-gate-hardening-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-10-0704-owner-preview-provider-gate-hardening-audit.md
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/**
+      - package.json
+      - tsconfig.json
+      - next.config.*
+      - vitest.config.*
+      - eslint.config.*
+      - scripts/**
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/app/api/v1/content-ai-generation-requests/route.ts
+      - src/app/api/v1/organization-ai-generation-requests/route.ts
+      - src/server/services/**
+      - src/server/contracts/**
+      - tests/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_scoped_owner_preview_gate_only
+      testSourceChange: approved_scoped_owner_preview_gate_only
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      devServer: blocked
+      privateAccountInMemoryUse: blocked_not_needed_for_code_gate
+      productLoginSessionProbe: blocked
+      productRouteRead: blocked
+      productRouteWrite: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    humanApprovalBoundary:
+      implementationAndCloseout: current_user_approved_owner_preview_provider_gate_hardening_commit_merge_push_cleanup_2026_07_10
+      providerExecution: blocked
+      envSecretAccess: blocked
+      productLoginSessionProbe: blocked
+      directDatabaseConnection: blocked
+      destructiveDbOperation: blocked
+      credentialMaterialOutput: blocked
+      screenshotRawDom: blocked
+    plannedAt: "2026-07-10T16:05:00-07:00"
+    claimedAt: "2026-07-10T16:05:00-07:00"
+    targetClosureItem: Harden owner-preview Provider route controls so runtime credentials alone cannot enable Provider-capable AI generation in any environment.
+    behaviorBoundary: source_test_docs_gate_hardening_no_provider_execution_no_env_secret_read_no_browser_no_db_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration
+    evidenceMode: redacted_file_path_code_symbol_status_category_decision_category_command_result_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+      - corepack pnpm@10.26.1 exec vitest run TARGETED_ADJACENT_AI_RUNTIME_BRIDGE_TEST_FILES
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-owner-preview-provider-gate-hardening-2026-07-10
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-owner-preview-provider-gate-hardening-2026-07-10 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_owner_preview_provider_gate_hardening_commit_merge_push_cleanup_2026_07_10
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_owner_preview_provider_gate_hardening_commit_merge_push_cleanup_2026_07_10
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_owner_preview_provider_gate_hardening_commit_merge_push_cleanup_2026_07_10
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_owner_preview_provider_gate_hardening_commit_merge_push_cleanup_2026_07_10
+    validationSummary:
+      readinessPreflight: not_needed_code_gate_no_private_account
+      providerExecution: blocked_not_executed
+      envSecretAccess: blocked_not_executed
+      browserRuntime: blocked_not_executed
+      directDatabaseConnection: blocked_not_executed
+      targetedTests: pass_9_files_146_tests
+      lint: pass
+      typecheck: pass
+      scopedPrettier: pass
+      diffCheck: pass
+      blockedPathDiffCheck: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
   - id: 0704-post-ai-acceptance-roadmap-2026-07-10
     title: 0704 post-AI acceptance roadmap
     phase: 0704-post-ai-acceptance-roadmap-2026-07-10

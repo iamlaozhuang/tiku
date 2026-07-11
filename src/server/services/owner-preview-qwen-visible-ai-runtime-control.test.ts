@@ -16,26 +16,68 @@ beforeEach(() => {
   localResourceRetrievalMock.mockReset();
 });
 
+const explicitLocalOwnerPreviewProviderGate = {
+  NODE_ENV: "development",
+  TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+  TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
+} as const;
+
 describe("owner preview Qwen visible AI runtime control", () => {
   it("does not enable route-integrated provider execution in production", () => {
     expect(
       createOwnerPreviewQwenPersonalRuntimeBridgeControl({
         ALIBABA_API_KEY: "synthetic-runtime-key",
         NODE_ENV: "production",
+        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
       }),
     ).toBeUndefined();
     expect(
       createOwnerPreviewQwenAdminRuntimeBridgeControl({
         ALIBABA_API_KEY: "synthetic-runtime-key",
         NODE_ENV: "production",
+        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("keeps owner-preview provider disabled by default even when a runtime key exists", () => {
+    expect(
+      createOwnerPreviewQwenPersonalRuntimeBridgeControl({
+        ALIBABA_API_KEY: "synthetic-runtime-key",
+        NODE_ENV: "development",
+      }),
+    ).toBeUndefined();
+    expect(
+      createOwnerPreviewQwenAdminRuntimeBridgeControl({
+        ALIBABA_API_KEY: "synthetic-runtime-key",
+        NODE_ENV: "test",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("requires an explicit local owner-preview provider gate", () => {
+    expect(
+      createOwnerPreviewQwenAdminRuntimeBridgeControl({
+        NODE_ENV: "development",
+        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "disabled",
+        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
+      }),
+    ).toBeUndefined();
+    expect(
+      createOwnerPreviewQwenPersonalRuntimeBridgeControl({
+        NODE_ENV: "development",
+        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "preview",
       }),
     ).toBeUndefined();
   });
 
   it("reads only the runtime Alibaba key through the injected credential reader", async () => {
     const control = createOwnerPreviewQwenAdminRuntimeBridgeControl({
+      ...explicitLocalOwnerPreviewProviderGate,
       ALIBABA_API_KEY: " synthetic-runtime-key ",
-      NODE_ENV: "development",
     });
 
     expect(control).toMatchObject({
@@ -58,7 +100,7 @@ describe("owner preview Qwen visible AI runtime control", () => {
 
   it("returns null credentials when the runtime key is absent", async () => {
     const control = createOwnerPreviewQwenPersonalRuntimeBridgeControl({
-      NODE_ENV: "development",
+      ...explicitLocalOwnerPreviewProviderGate,
     });
 
     expect(control).not.toBeUndefined();
@@ -119,8 +161,8 @@ describe("owner preview Qwen visible AI runtime control", () => {
         }),
       );
       const control = createOwnerPreviewQwenAdminRuntimeBridgeControl({
+        ...explicitLocalOwnerPreviewProviderGate,
         ALIBABA_API_KEY: "synthetic-runtime-key",
-        NODE_ENV: "development",
       });
       const resolveGroundingContext =
         control?.providerExecution?.resolveGroundingContext;

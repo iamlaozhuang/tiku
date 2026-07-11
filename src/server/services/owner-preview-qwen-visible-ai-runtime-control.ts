@@ -10,8 +10,19 @@ import type {
 import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "../contracts/route-integrated-provider-execution-contract";
 
 type RuntimeEnv = Partial<
-  Pick<NodeJS.ProcessEnv, "ALIBABA_API_KEY" | "NODE_ENV">
+  Pick<
+    NodeJS.ProcessEnv,
+    | "ALIBABA_API_KEY"
+    | "NODE_ENV"
+    | "TIKU_OWNER_PREVIEW_PROVIDER_GATE"
+    | "TIKU_OWNER_PREVIEW_PROVIDER_TARGET"
+  >
 >;
+
+const ownerPreviewProviderGate = {
+  enabled: "enabled",
+  target: "local",
+} as const;
 
 type GroundableRouteIntegratedRequestContext = {
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
@@ -20,7 +31,11 @@ type GroundableRouteIntegratedRequestContext = {
 };
 
 function isOwnerPreviewQwenRuntimeEnabled(env: RuntimeEnv): boolean {
-  return env.NODE_ENV !== "production";
+  return (
+    env.NODE_ENV !== "production" &&
+    env.TIKU_OWNER_PREVIEW_PROVIDER_GATE === ownerPreviewProviderGate.enabled &&
+    env.TIKU_OWNER_PREVIEW_PROVIDER_TARGET === ownerPreviewProviderGate.target
+  );
 }
 
 function readAlibabaApiKeyFromRuntimeEnv(env: RuntimeEnv): string | null {
