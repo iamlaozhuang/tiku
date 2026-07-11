@@ -4,7 +4,6 @@ import {
   AlertCircle,
   Eye,
   RotateCcwKey,
-  ShieldCheck,
   UserCheck,
   UserPlus,
   UserX,
@@ -154,14 +153,6 @@ const adminSecurityPolicies = [
   ["多设备登录", "允许"],
   ["登录失败锁定", "5 次 / 15 分钟"],
   ["账号边界", "后台账号独立"],
-] as const;
-
-const adminRolePolicies = [
-  ["super_admin", "超级管理员", "后台账号与角色管理"],
-  ["ops_admin", "运营管理员", "用户、企业、授权、卡密运营"],
-  ["content_admin", "内容管理员", "题库、试卷、知识点内容维护"],
-  ["org_standard_admin", "标准版组织管理员", "组织员工与授权状态查看"],
-  ["org_advanced_admin", "高级版组织管理员", "企业训练、统计与组织 AI"],
 ] as const;
 
 const superAdminAccountCreationRoles = [
@@ -432,6 +423,8 @@ export function AdminOpsManagement() {
       phone: "",
     });
   const [isCreatingAdminAccount, setIsCreatingAdminAccount] = useState(false);
+  const [isAdminAccountCreationOpen, setIsAdminAccountCreationOpen] =
+    useState(false);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [selectedUserDetail, setSelectedUserDetail] =
     useState<AdminUserDetailDto | null>(null);
@@ -683,6 +676,7 @@ export function AdminOpsManagement() {
       message: "后台账号已创建",
       tone: "success",
     });
+    setIsAdminAccountCreationOpen(false);
   }
 
   if (loadState === "loading") {
@@ -725,48 +719,21 @@ export function AdminOpsManagement() {
         </div>
       </header>
 
-      <OperationsSummaryFirstBand data={data} />
-
-      <section className="grid gap-4 xl:grid-cols-4" aria-label="用户摘要">
-        <SummaryTile
-          icon={<ShieldCheck aria-hidden="true" className="size-4" />}
-          label="用户"
-          value={`${usersPagination.total}`}
-        />
-        <SummaryTile
-          icon={<UserPlus aria-hidden="true" className="size-4" />}
-          label="后台角色"
-          value={`${allowedAdminAccountCreationRoles.length}`}
-        />
-        <SummaryTile
-          icon={<UserCheck aria-hidden="true" className="size-4" />}
-          label="可绑定组织"
-          value={`${data.organizations.length}`}
-        />
-        <SummaryTile
-          icon={<UserX aria-hidden="true" className="size-4" />}
-          label="本页停用"
-          value={`${
-            data.users.filter((user) => user.status === "disabled").length
-          }`}
-        />
-      </section>
-
       <section
-        aria-label="用户筛选"
+        aria-label="学员与员工账号"
         className="bg-surface border-border rounded-md border p-4 shadow-sm"
       >
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-1">
             <h2 className="text-text-primary text-base font-semibold">
-              用户筛选
+              学员与员工账号
             </h2>
             <p className="text-text-muted text-sm">
-              按账号状态、用户类型和注册时间缩小用户列表；筛选后自动回到第一页。
+              按账号状态、用户类型和注册时间筛选；查看详情后再执行重置或启停操作。
             </p>
           </div>
           <p className="text-text-muted text-sm">
-            共 {usersPagination.total} 个用户
+            筛选结果 {usersPagination.total} 个
           </p>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,12rem)_minmax(0,12rem)_minmax(0,10rem)_auto_1fr] xl:items-end">
@@ -811,92 +778,50 @@ export function AdminOpsManagement() {
             查看详情和重置密码仍需要二次确认。
           </p>
         </div>
+        <AdminUserListTable
+          pageCount={userPageCount}
+          pagination={usersPagination}
+          users={data.users}
+          visibleEnd={visibleUserEnd}
+          visibleStart={visibleUserStart}
+          onPageChange={handlePageChange}
+          onResetPassword={(publicId) =>
+            setConfirmationState({ kind: "resetPassword", publicId })
+          }
+          onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
+        />
       </section>
 
-      <section>
-        <AdminPanel title="用户管理">
-          {data.users.length === 0 ? (
+      <section
+        aria-label="后台账号"
+        className="border-border space-y-4 border-t pt-6"
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-text-primary text-base font-semibold">
+              后台账号
+            </h2>
             <p className="text-text-muted text-sm">
-              暂无用户记录，可先创建后台账号或调整筛选条件。
+              后台账号与学员、员工账号域分离；创建和角色分配属于独立安全操作。
             </p>
-          ) : (
-            data.users.map((user) => (
-              <AdminRow
-                key={user.publicId}
-                publicId={user.publicId}
-                testId={`admin-user-row-${user.publicId}`}
-              >
-                <div className="min-w-0 space-y-1">
-                  <p className="text-text-primary text-sm font-medium">
-                    {user.name} / {user.phone}
-                  </p>
-                  <p className="text-text-muted text-xs">
-                    {userTypeLabels[user.userType]} /{" "}
-                    {userStatusLabels[user.status]} /{" "}
-                    {user.organizationName ?? "未绑定企业"} /{" "}
-                    {user.authStatus === null
-                      ? "无授权"
-                      : authStatusLabels[user.authStatus]}
-                  </p>
-                  <PublicId value={user.publicId} />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => void handleViewUserDetail(user.publicId)}
-                  >
-                    <Eye aria-hidden="true" />
-                    查看详情
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      setConfirmationState({
-                        kind: "resetPassword",
-                        publicId: user.publicId,
-                      })
-                    }
-                  >
-                    <RotateCcwKey aria-hidden="true" />
-                    重置密码
-                  </Button>
-                </div>
-              </AdminRow>
-            ))
-          )}
-          <div className="border-border flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-text-muted text-sm">
-              显示 {visibleUserStart}-{visibleUserEnd} / 共{" "}
-              {usersPagination.total} 个用户
-            </p>
-            <div className="flex gap-2">
-              <Button
-                disabled={usersPagination.page <= 1}
-                variant="outline"
-                onClick={() => handlePageChange(usersPagination.page - 1)}
-              >
-                上一页
-              </Button>
-              <Button
-                disabled={usersPagination.page >= userPageCount}
-                variant="outline"
-                onClick={() =>
-                  handlePageChange(
-                    Math.min(userPageCount, usersPagination.page + 1),
-                  )
-                }
-              >
-                下一页
-              </Button>
-            </div>
           </div>
-        </AdminPanel>
-      </section>
+          {allowedAdminAccountCreationRoles.length > 0 ? (
+            <Button
+              aria-controls="admin-account-creation-panel"
+              aria-expanded={isAdminAccountCreationOpen}
+              variant={isAdminAccountCreationOpen ? "secondary" : "default"}
+              onClick={() => setIsAdminAccountCreationOpen((isOpen) => !isOpen)}
+            >
+              <UserPlus aria-hidden="true" />
+              {isAdminAccountCreationOpen ? "收起创建表单" : "创建后台账号"}
+            </Button>
+          ) : null}
+        </div>
 
-      <section className="grid gap-4 xl:grid-cols-[1fr_1.1fr]">
         <AdminAccountSecurityPolicyPanel />
 
-        {allowedAdminAccountCreationRoles.length > 0 ? (
+        {allowedAdminAccountCreationRoles.length > 0 &&
+        isAdminAccountCreationOpen ? (
           <AdminAccountCreationPanel
             allowedRoles={allowedAdminAccountCreationRoles}
             formState={normalizedAdminAccountForm}
@@ -938,57 +863,144 @@ export function AdminOpsManagement() {
   );
 }
 
-function OperationsSummaryFirstBand({ data }: { data: AdminOpsData }) {
-  const visibleRoleLabels = data.currentAdminRoles
-    .map((role) => adminRoleLabels[role] ?? role)
-    .join("、");
-  const disabledUserCount = data.users.filter(
-    (user) => user.status === "disabled",
-  ).length;
-  const summaryItems = [
-    ["角色边界", visibleRoleLabels || "后台角色未同步"],
-    [
-      "summary-first",
-      `用户 ${data.users.length} / 后台可建角色 ${getAllowedAdminAccountCreationRoles(data.currentAdminRoles).length}`,
-    ],
-    ["权限与版本", "用户与后台账号在本页维护；授权版本不在此页重新判定。"],
-    ["状态核对", `空态、错误态、禁用态均保留；停用用户 ${disabledUserCount}。`],
-  ] as const;
-
+function AdminUserListTable({
+  pageCount,
+  pagination,
+  users,
+  visibleEnd,
+  visibleStart,
+  onPageChange,
+  onResetPassword,
+  onViewDetail,
+}: {
+  pageCount: number;
+  pagination: ApiPagination;
+  users: AdminUserListDto["users"];
+  visibleEnd: number;
+  visibleStart: number;
+  onPageChange: (page: number) => void;
+  onResetPassword: (publicId: string) => void;
+  onViewDetail: (publicId: string) => void;
+}) {
   return (
-    <section
-      aria-label="运营摘要优先"
-      className="bg-surface border-border rounded-md border p-4 shadow-sm"
-      data-testid="ops-summary-first-band"
-    >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">
-            用户管理 summary-first
-          </p>
-          <h2 className="text-text-primary text-base font-semibold">
-            用户与后台账号总览
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            先核对账号家族、后台角色和停用风险，再进入筛选、账号创建和用户详情。
-          </p>
-        </div>
-        <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-          运营管理员
-        </span>
+    <>
+      <div className="border-border mt-4 overflow-x-auto border-t pt-2">
+        <table className="w-full min-w-[48rem] border-separate border-spacing-0 text-left">
+          <caption className="sr-only">学员与员工账号列表</caption>
+          <thead>
+            <tr className="text-text-muted text-xs">
+              <th
+                className="border-border border-b px-3 py-3 font-medium"
+                scope="col"
+              >
+                用户
+              </th>
+              <th
+                className="border-border border-b px-3 py-3 font-medium"
+                scope="col"
+              >
+                类型与状态
+              </th>
+              <th
+                className="border-border border-b px-3 py-3 font-medium"
+                scope="col"
+              >
+                企业与授权
+              </th>
+              <th
+                className="border-border border-b px-3 py-3 text-right font-medium"
+                scope="col"
+              >
+                操作
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td
+                  className="text-text-muted px-3 py-8 text-center text-sm"
+                  colSpan={4}
+                >
+                  当前筛选条件下没有用户记录。
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr className="text-sm" key={user.publicId}>
+                  <td className="border-border border-b px-3 py-3 align-middle">
+                    <p className="text-text-primary font-medium">
+                      {user.name} / {user.phone}
+                    </p>
+                  </td>
+                  <td className="border-border border-b px-3 py-3 align-middle">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs">
+                        {userTypeLabels[user.userType]}
+                      </span>
+                      <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
+                        {userStatusLabels[user.status]}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="border-border border-b px-3 py-3 align-middle">
+                    <p className="text-text-primary">
+                      {user.organizationName ?? "未绑定企业"}
+                    </p>
+                    <p className="text-text-muted mt-1 text-xs">
+                      {user.authStatus === null
+                        ? "无授权"
+                        : authStatusLabels[user.authStatus]}
+                    </p>
+                  </td>
+                  <td className="border-border border-b px-3 py-3 align-middle">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => onViewDetail(user.publicId)}
+                      >
+                        <Eye aria-hidden="true" />
+                        查看详情
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => onResetPassword(user.publicId)}
+                      >
+                        <RotateCcwKey aria-hidden="true" />
+                        重置密码
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {summaryItems.map(([label, value]) => (
-          <div
-            key={label}
-            className="border-border bg-background rounded-md border p-3"
+      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-text-muted text-sm">
+          显示 {visibleStart}-{visibleEnd} / 共 {pagination.total} 个用户
+        </p>
+        <div className="flex gap-2">
+          <Button
+            disabled={pagination.page <= 1}
+            variant="outline"
+            onClick={() => onPageChange(pagination.page - 1)}
           >
-            <p className="text-text-muted text-xs">{label}</p>
-            <p className="text-text-primary mt-2 text-sm leading-6">{value}</p>
-          </div>
-        ))}
+            上一页
+          </Button>
+          <Button
+            disabled={pagination.page >= pageCount}
+            variant="outline"
+            onClick={() =>
+              onPageChange(Math.min(pageCount, pagination.page + 1))
+            }
+          >
+            下一页
+          </Button>
+        </div>
       </div>
-    </section>
+    </>
   );
 }
 
@@ -1000,9 +1012,9 @@ function AdminAccountSecurityPolicyPanel() {
     >
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="space-y-2">
-          <h2 className="text-text-primary text-base font-semibold">
+          <h3 className="text-text-primary text-sm font-semibold">
             后台账号安全策略
-          </h2>
+          </h3>
           <p className="text-text-muted max-w-2xl text-sm leading-6">
             后台用户使用独立账号体系，角色授权与学员账号分离；锁定只阻止新登录，不影响已有活跃后台会话。
           </p>
@@ -1020,16 +1032,6 @@ function AdminAccountSecurityPolicyPanel() {
             </div>
           ))}
         </div>
-      </div>
-      <div className="border-border mt-4 grid gap-3 border-t pt-4 xl:grid-cols-3">
-        {adminRolePolicies.map(([role, roleLabel, scope]) => (
-          <article key={role} className="min-w-0">
-            <p className="text-text-primary text-sm font-semibold">
-              {roleLabel}
-            </p>
-            <p className="text-text-muted mt-1 text-xs">{scope}</p>
-          </article>
-        ))}
       </div>
     </section>
   );
@@ -1063,12 +1065,13 @@ function AdminAccountCreationPanel({
   return (
     <section
       aria-label="后台账号创建"
+      id="admin-account-creation-panel"
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
     >
       <div className="mb-4 space-y-1">
-        <h2 className="text-text-primary text-base font-semibold">
+        <h3 className="text-text-primary text-base font-semibold">
           创建后台账号
-        </h2>
+        </h3>
         <p className="text-text-muted text-sm">
           后台账号与学员账号域分离；组织管理员必须先绑定组织上下文。
         </p>
@@ -1320,63 +1323,6 @@ function AdminUserDetailPanel({
         </section>
       </div>
     </section>
-  );
-}
-
-function SummaryTile({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1">
-      <div className="text-text-secondary flex items-center gap-2 text-sm">
-        {icon}
-        {label}
-      </div>
-      <p className="font-heading text-text-primary mt-3 text-2xl font-semibold">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function AdminPanel({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <section className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1">
-      <h2 className="text-text-primary text-base font-semibold">{title}</h2>
-      <div className="mt-3 space-y-3">{children}</div>
-    </section>
-  );
-}
-
-function AdminRow({
-  children,
-  publicId,
-  testId,
-}: {
-  children: React.ReactNode;
-  publicId: string;
-  testId?: string;
-}) {
-  return (
-    <article
-      className="border-border flex flex-col gap-3 border-t pt-3 first:border-t-0 first:pt-0 lg:flex-row lg:items-center lg:justify-between"
-      data-public-id={publicId}
-      data-testid={testId}
-    >
-      {children}
-    </article>
   );
 }
 

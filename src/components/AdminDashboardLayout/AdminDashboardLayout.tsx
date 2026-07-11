@@ -13,6 +13,7 @@ import {
   FileText,
   FolderOpen,
   KeyRound,
+  LayoutDashboard,
   LogOut,
   Network,
   ScrollText,
@@ -31,13 +32,16 @@ import {
   AdminStateTemplate,
   AdminWorkspaceContextBand,
 } from "@/components/admin/AdminStateTemplate";
-import type { AdminWorkspaceRouteAccessDecision } from "@/server/contracts/admin-workspace-role-guard-contract";
+import type {
+  AdminWorkspace,
+  AdminWorkspaceRouteAccessDecision,
+} from "@/server/contracts/admin-workspace-role-guard-contract";
 import { resolveAdminWorkspaceRouteAccess } from "@/server/services/admin-workspace-role-guard-service";
 
 /**
  * 后台管理端布局
  * Desktop-first: 左侧 Sidebar + 顶部 TopBar
- * content/ 和 ops/ 共用此组件，通过 pathname 自动适配菜单
+ * 平台、内容、运营和组织工作区共用此组件，通过 pathname 自动适配菜单
  * 组件结构遵循 ui-code.md §3.1
  */
 
@@ -58,7 +62,12 @@ interface WorkspaceSwitchItem {
   requiresOrganizationContext?: boolean;
 }
 
+const PLATFORM_MENU: MenuItem[] = [
+  { href: "/admin/overview", label: "总览", Icon: LayoutDashboard },
+];
+
 const CONTENT_MENU: MenuItem[] = [
+  { href: "/content/overview", label: "总览", Icon: LayoutDashboard },
   { href: "/content/papers", label: "试卷管理", Icon: FileText },
   { href: "/content/questions", label: "题库管理", Icon: BookOpenText },
   { href: "/content/materials", label: "材料管理", Icon: Boxes },
@@ -73,6 +82,7 @@ const CONTENT_MENU: MenuItem[] = [
 ];
 
 const OPS_MENU: MenuItem[] = [
+  { href: "/ops/overview", label: "总览", Icon: LayoutDashboard },
   { href: "/ops/contact-config", label: "购买联系方式", Icon: UserRoundCog },
   { href: "/ops/users", label: "用户管理", Icon: UserRoundCog },
   { href: "/ops/organizations", label: "企业管理", Icon: Building2 },
@@ -115,7 +125,6 @@ type AdminDashboardLayoutStatus =
   | "forbidden"
   | "missing-organization-context"
   | "standard-unavailable";
-type AdminWorkspace = "ops" | "content" | "organization";
 type AdminDashboardAuthState = {
   status: AdminDashboardLayoutStatus;
   workspace: AdminWorkspace | null;
@@ -140,6 +149,10 @@ const ADMIN_ROLE_LABELS: Record<string, string> = {
 };
 
 function getWorkspaceFromPath(pathname: string): AdminWorkspace {
+  if (pathname.startsWith("/admin")) {
+    return "platform";
+  }
+
   if (pathname.startsWith("/content")) {
     return "content";
   }
@@ -163,6 +176,13 @@ function getWorkspacePresentation(
   adminRoles: readonly string[],
   canUseOrganizationAdvancedWorkspace: boolean,
 ) {
+  if (workspace === "platform") {
+    return {
+      menuItems: PLATFORM_MENU,
+      portalName: "平台总览",
+    };
+  }
+
   if (workspace === "content") {
     return {
       menuItems: CONTENT_MENU,
@@ -188,6 +208,10 @@ function getWorkspacePresentation(
 }
 
 function getWorkspaceScopeLabel(workspace: AdminWorkspace): string {
+  if (workspace === "platform") {
+    return "平台总览只汇总跨工作区风险与入口，不承接业务明细操作。";
+  }
+
   if (workspace === "content") {
     return "题库、材料、试卷、资源与内容 AI 草稿归属于内容后台。";
   }
@@ -216,6 +240,10 @@ function getWorkspaceCapabilityLabel(
   adminRoles: readonly string[],
   canUseOrganizationAdvancedWorkspace: boolean,
 ): string {
+  if (workspace === "platform") {
+    return "超级管理员监督视角不绕过运营、内容、组织上下文和脱敏边界。";
+  }
+
   if (workspace === "content") {
     return adminRoles.includes("super_admin")
       ? "当前为超级管理员监督视角，内容草稿、待审、发布闭环仍按内容后台规则执行。"
@@ -240,13 +268,19 @@ function getWorkspaceSwitchItems(
   if (adminRoles.includes("super_admin")) {
     return [
       {
-        href: "/ops/users",
+        href: "/admin/overview",
+        label: "平台总览",
+        workspace: "platform",
+        Icon: LayoutDashboard,
+      },
+      {
+        href: "/ops/overview",
         label: "运营后台",
         workspace: "ops",
         Icon: UserRoundCog,
       },
       {
-        href: "/content/papers",
+        href: "/content/overview",
         label: "内容后台",
         workspace: "content",
         Icon: BookOpenText,
@@ -280,7 +314,7 @@ function getWorkspaceSwitchItems(
 
   if (adminRoles.includes("ops_admin")) {
     workspaceItems.push({
-      href: "/ops/users",
+      href: "/ops/overview",
       label: "运营后台",
       workspace: "ops",
       Icon: UserRoundCog,
@@ -289,7 +323,7 @@ function getWorkspaceSwitchItems(
 
   if (adminRoles.includes("content_admin")) {
     workspaceItems.push({
-      href: "/content/papers",
+      href: "/content/overview",
       label: "内容后台",
       workspace: "content",
       Icon: BookOpenText,
@@ -302,6 +336,13 @@ function getWorkspaceSwitchItems(
 function getForbiddenWorkspaceReturnAction(
   adminRoles: readonly string[],
 ): WorkspaceReturnAction | null {
+  if (adminRoles.includes("super_admin")) {
+    return {
+      href: "/admin/overview",
+      label: "返回平台总览",
+    };
+  }
+
   if (hasOrganizationAdminRole(adminRoles)) {
     return {
       href: "/organization/portal",
@@ -311,14 +352,14 @@ function getForbiddenWorkspaceReturnAction(
 
   if (adminRoles.includes("content_admin")) {
     return {
-      href: "/content/papers",
+      href: "/content/overview",
       label: "返回内容后台",
     };
   }
 
   if (adminRoles.includes("ops_admin")) {
     return {
-      href: "/ops/users",
+      href: "/ops/overview",
       label: "返回运营后台",
     };
   }
@@ -327,6 +368,10 @@ function getForbiddenWorkspaceReturnAction(
 }
 
 function getReturnActionLabel(href: string): string {
+  if (href.startsWith("/admin")) {
+    return "返回平台总览";
+  }
+
   if (href.startsWith("/organization")) {
     return "返回组织概览";
   }

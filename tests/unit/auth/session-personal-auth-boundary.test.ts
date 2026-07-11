@@ -27,21 +27,21 @@ describe("unified repair auth session personal auth boundary", () => {
         adminPublicId: "admin-ops-public-001",
         adminRoles: ["ops_admin"],
       }).redirectPath,
-    ).toBe("/ops/users");
+    ).toBe("/ops/overview");
     expect(
       createPostLoginSessionBoundary({
         userType: null,
         adminPublicId: "admin-content-public-001",
         adminRoles: ["content_admin"],
       }).redirectPath,
-    ).toBe("/content/papers");
+    ).toBe("/content/overview");
     expect(
       createPostLoginSessionBoundary({
         userType: null,
         adminPublicId: "admin-super-public-001",
         adminRoles: ["super_admin"],
       }).redirectPath,
-    ).toBe("/ops/users");
+    ).toBe("/admin/overview");
     expect(
       createPostLoginSessionBoundary({
         userType: null,

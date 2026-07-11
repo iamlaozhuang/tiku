@@ -15,8 +15,9 @@ export type PostLoginSessionBoundary = {
   exposeBearerTokenToClient: false;
   redirectPath:
     | "/home"
-    | "/ops/users"
-    | "/content/papers"
+    | "/admin/overview"
+    | "/ops/overview"
+    | "/content/overview"
     | "/organization/portal";
   sessionPersistenceMode: "server_session";
 };
@@ -52,11 +53,15 @@ function hasOrganizationAdminRole(adminRoles: readonly PostLoginAdminRole[]) {
 
 export function resolveAdminWorkspaceLandingPath(
   loginUser: PostLoginSessionUser,
-): "/ops/users" | "/content/papers" | "/organization/portal" {
+):
+  | "/admin/overview"
+  | "/ops/overview"
+  | "/content/overview"
+  | "/organization/portal" {
   const adminRoles = loginUser.adminRoles ?? [];
 
   if (adminRoles.includes("super_admin")) {
-    return "/ops/users";
+    return "/admin/overview";
   }
 
   if (hasOrganizationAdminRole(adminRoles)) {
@@ -67,10 +72,10 @@ export function resolveAdminWorkspaceLandingPath(
     adminRoles.includes("content_admin") &&
     !adminRoles.includes("ops_admin")
   ) {
-    return "/content/papers";
+    return "/content/overview";
   }
 
-  return "/ops/users";
+  return "/ops/overview";
 }
 
 export function createPostLoginSessionBoundary(

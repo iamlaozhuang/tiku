@@ -1,6 +1,6 @@
 import type { AdminRole, AuthorizationEdition } from "../models/auth";
 
-export type AdminWorkspace = "ops" | "content" | "organization";
+export type AdminWorkspace = "platform" | "ops" | "content" | "organization";
 
 export type AdminWorkspaceCapabilitySource =
   | "service_computed"

@@ -31,10 +31,13 @@ function normalizePathname(pathname: string): string {
       : pathWithLeadingSlash;
 
   if (normalizedPath === "/admin") {
-    return "/ops";
+    return "/admin/overview";
   }
 
-  if (normalizedPath.startsWith("/admin/")) {
+  if (
+    normalizedPath.startsWith("/admin/") &&
+    normalizedPath !== "/admin/overview"
+  ) {
     return normalizedPath.slice("/admin".length);
   }
 
@@ -45,6 +48,10 @@ export function resolveAdminWorkspaceFromPath(
   pathname: string,
 ): AdminWorkspace | null {
   const normalizedPath = normalizePathname(pathname);
+
+  if (normalizedPath === "/admin/overview") {
+    return "platform";
+  }
 
   if (normalizedPath === "/ops" || normalizedPath.startsWith("/ops/")) {
     return "ops";
@@ -121,19 +128,20 @@ function resolveOrganizationAuthorizationSource(
 function resolveReturnPath(
   capabilitySummary: AdminWorkspaceCapabilitySummary,
 ): string {
+  if (hasRole(capabilitySummary, "super_admin")) {
+    return "/admin/overview";
+  }
+
   if (hasOrganizationAdminRole(capabilitySummary)) {
     return "/organization/portal";
   }
 
   if (hasRole(capabilitySummary, "content_admin")) {
-    return "/content/papers";
+    return "/content/overview";
   }
 
-  if (
-    hasRole(capabilitySummary, "ops_admin") ||
-    hasRole(capabilitySummary, "super_admin")
-  ) {
-    return "/ops/users";
+  if (hasRole(capabilitySummary, "ops_admin")) {
+    return "/ops/overview";
   }
 
   return "/login";
@@ -304,6 +312,15 @@ export function resolveAdminWorkspaceRouteAccess({
       pathname,
       capabilitySummary,
       workspace,
+      returnPath,
+    });
+  }
+
+  if (workspace === "platform" && !hasRole(capabilitySummary, "super_admin")) {
+    return createDecision({
+      status: "denied",
+      workspace,
+      reason: "workspace_role_mismatch",
       returnPath,
     });
   }

@@ -491,7 +491,9 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(screen.getByText("5 次 / 15 分钟")).toBeInTheDocument();
     expect(screen.getByText("8 小时")).toBeInTheDocument();
     expect(screen.getByText("后台账号独立")).toBeInTheDocument();
-    expect(screen.getByText("超级管理员")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "创建后台账号" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("super_admin")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "查看详情" }));

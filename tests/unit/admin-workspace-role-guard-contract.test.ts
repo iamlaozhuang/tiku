@@ -21,6 +21,46 @@ function capabilitySummary(
 }
 
 describe("backend workspace role guard contract", () => {
+  it("allows only super admins into the platform overview workspace", () => {
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/admin/overview",
+        capabilitySummary: capabilitySummary({ adminRoles: ["super_admin"] }),
+      }),
+    ).toMatchObject({
+      status: "allowed",
+      workspace: "platform",
+      reason: null,
+      returnPath: "/admin/overview",
+    });
+
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/admin/overview",
+        capabilitySummary: capabilitySummary({ adminRoles: ["ops_admin"] }),
+      }),
+    ).toMatchObject({
+      status: "denied",
+      workspace: "platform",
+      reason: "workspace_role_mismatch",
+      returnPath: "/ops/overview",
+    });
+
+    expect(
+      resolveAdminWorkspaceRouteAccess({
+        pathname: "/admin/overview",
+        capabilitySummary: capabilitySummary({
+          adminRoles: ["content_admin"],
+        }),
+      }),
+    ).toMatchObject({
+      status: "denied",
+      workspace: "platform",
+      reason: "workspace_role_mismatch",
+      returnPath: "/content/overview",
+    });
+  });
+
   it("denies unrelated backend workspace direct routes before menu visibility can matter", () => {
     expect(
       resolveAdminWorkspaceRouteAccess({
@@ -31,7 +71,7 @@ describe("backend workspace role guard contract", () => {
       status: "denied",
       workspace: "content",
       reason: "workspace_role_mismatch",
-      returnPath: "/ops/users",
+      returnPath: "/ops/overview",
     });
 
     expect(
@@ -45,7 +85,7 @@ describe("backend workspace role guard contract", () => {
       status: "denied",
       workspace: "ops",
       reason: "workspace_role_mismatch",
-      returnPath: "/content/papers",
+      returnPath: "/content/overview",
     });
 
     expect(

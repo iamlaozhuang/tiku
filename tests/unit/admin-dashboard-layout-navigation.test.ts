@@ -189,6 +189,10 @@ describe("AdminDashboardLayout navigation", () => {
     );
 
     expect(await screen.findByText("admin page")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "总览" })).toHaveAttribute(
+      "href",
+      "/ops/overview",
+    );
     expect(
       screen.getByRole("link", { name: /卡密与企业授权/u }),
     ).toHaveAttribute("href", "/ops/redeem-codes");
@@ -223,6 +227,10 @@ describe("AdminDashboardLayout navigation", () => {
       screen.getByRole("button", { name: "退出登录" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("内容后台").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "总览" })).toHaveAttribute(
+      "href",
+      "/content/overview",
+    );
     expect(screen.getByRole("link", { name: /AI出题/u })).toHaveAttribute(
       "href",
       "/content/ai-question-generation",
@@ -276,8 +284,39 @@ describe("AdminDashboardLayout navigation", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "切换到内容后台" }),
-    ).toHaveAttribute("href", "/content/papers");
+    ).toHaveAttribute("href", "/content/overview");
     expect(screen.queryByRole("link", { name: "切换到组织后台" })).toBeNull();
+  });
+
+  it("shows a dedicated platform overview workspace for super admins", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => adminSessionPayload,
+      })),
+    );
+    pathnameMock = "/admin/overview";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "platform page"),
+      ),
+    );
+
+    expect(await screen.findByText("platform page")).toBeInTheDocument();
+    expect(screen.getAllByText("平台总览").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "切换到运营后台" }),
+    ).toHaveAttribute("href", "/ops/overview");
+    expect(
+      screen.getByRole("link", { name: "切换到内容后台" }),
+    ).toHaveAttribute("href", "/content/overview");
+    expect(screen.queryByRole("link", { name: "用户管理" })).toBeNull();
   });
 
   it("clears the server-backed session when the backend logout control is clicked", async () => {
@@ -465,7 +504,7 @@ describe("AdminDashboardLayout navigation", () => {
     expect(denialAlert).toHaveTextContent("无权访问此后台工作区");
     expect(screen.getByRole("link", { name: "返回内容后台" })).toHaveAttribute(
       "href",
-      "/content/papers",
+      "/content/overview",
     );
     expect(screen.queryByText("ops page")).toBeNull();
     expect(screen.queryByRole("link", { name: /用户管理/u })).toBeNull();

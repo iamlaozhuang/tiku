@@ -391,7 +391,9 @@ describe("LoginPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
-    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
+    await waitFor(() =>
+      expect(replaceMock).toHaveBeenCalledWith("/admin/overview"),
+    );
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
 
     cleanup();
@@ -474,7 +476,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
     await waitFor(() =>
-      expect(replaceMock).toHaveBeenCalledWith("/content/papers"),
+      expect(replaceMock).toHaveBeenCalledWith("/content/overview"),
     );
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
 
@@ -493,7 +495,9 @@ describe("LoginPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
-    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
+    await waitFor(() =>
+      expect(replaceMock).toHaveBeenCalledWith("/ops/overview"),
+    );
     expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
   });
 
@@ -514,7 +518,9 @@ describe("LoginPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
-    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
+    await waitFor(() =>
+      expect(replaceMock).toHaveBeenCalledWith("/admin/overview"),
+    );
     expect(localStorage.getItem(STUDENT_SESSION_TOKEN_STORAGE_KEY)).toBe(
       COOKIE_BACKED_SESSION_MARKER,
     );

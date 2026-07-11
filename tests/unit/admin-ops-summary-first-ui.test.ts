@@ -235,30 +235,53 @@ function expectCookieBackedFetch(
 }
 
 describe("admin ops summary-first UI", () => {
-  it("renders operations workspace summary and boundaries before filters and write actions", async () => {
+  it("renders a list-first learner and employee account work area before backend account tools", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    const fetchMock = stubFetchForSummaryFirstPages();
+    const visibleUser = createAdminUser(1);
+    const fetchMock = stubFetchForSummaryFirstPages({ users: [visibleUser] });
 
     render(createElement(AdminOpsManagement));
 
     await screen.findByRole("heading", { level: 1, name: "用户管理" });
 
-    const summaryBand = screen.getByTestId("ops-summary-first-band");
-    expect(summaryBand).toHaveTextContent("summary-first");
-    expect(summaryBand).toHaveTextContent("运营管理员");
-    expect(summaryBand).toHaveTextContent("用户与后台账号");
-    expect(summaryBand).toHaveTextContent("空态");
+    expect(screen.queryByTestId("ops-summary-first-band")).toBeNull();
+    expect(screen.queryByRole("region", { name: "用户摘要" })).toBeNull();
 
+    const userWorkArea = screen.getByRole("region", {
+      name: "学员与员工账号",
+    });
+    expect(within(userWorkArea).getByLabelText("用户状态")).toBeInTheDocument();
+    expect(within(userWorkArea).getByLabelText("用户类型")).toBeInTheDocument();
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByRole("region", { name: "用户筛选" }),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+      within(userWorkArea).getByRole("columnheader", { name: "用户" }),
+    ).toBeInTheDocument();
     expect(
-      summaryBand.compareDocumentPosition(
-        screen.getByRole("region", { name: "后台账号创建" }),
-      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      within(userWorkArea).getByRole("columnheader", { name: "类型与状态" }),
+    ).toBeInTheDocument();
+    expect(
+      within(userWorkArea).getByRole("columnheader", { name: "企业与授权" }),
+    ).toBeInTheDocument();
+    expect(
+      within(userWorkArea).getByRole("columnheader", { name: "操作" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(visibleUser.publicId)).toBeNull();
+
+    const backendAccountSection = screen.getByRole("region", {
+      name: "后台账号",
+    });
+    expect(
+      userWorkArea.compareDocumentPosition(backendAccountSection) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "后台账号创建" })).toBeNull();
+    fireEvent.click(
+      within(backendAccountSection).getByRole("button", {
+        name: "创建后台账号",
+      }),
+    );
+    expect(
+      screen.getByRole("region", { name: "后台账号创建" }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "企业组织与员工" }),
     ).not.toBeInTheDocument();
@@ -280,11 +303,9 @@ describe("admin ops summary-first UI", () => {
     expect(
       screen.queryByRole("link", { name: "打开卡密生成" }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "用户筛选" })).toBeNull();
     expect(screen.queryByRole("region", { name: "运营筛选" })).toBeNull();
     expect(screen.getByLabelText("每页条数")).toHaveValue("20");
-    expect(
-      screen.getByRole("heading", { name: "创建后台账号" }),
-    ).toBeInTheDocument();
     expect(screen.getByText(/后台账号与学员账号域分离/u)).toBeInTheDocument();
 
     const fetchedPaths = fetchMock.mock.calls.map(([url]) => String(url));

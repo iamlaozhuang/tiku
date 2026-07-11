@@ -19,13 +19,13 @@ export default function RootPage() {
           进入学员端
         </Link>
         <Link
-          href="/content/papers"
+          href="/content/overview"
           className="rounded-radius-md border-border bg-surface text-text-primary hover:bg-muted border px-6 py-3 text-center text-sm font-medium shadow-sm transition-transform active:scale-[0.98]"
         >
           内容后台
         </Link>
         <Link
-          href="/ops/users"
+          href="/ops/overview"
           className="rounded-radius-md border-border bg-surface text-text-primary hover:bg-muted border px-6 py-3 text-center text-sm font-medium shadow-sm transition-transform active:scale-[0.98]"
         >
           运营后台

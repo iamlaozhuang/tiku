@@ -91,9 +91,9 @@ describe("AdminDashboardLayout shared admin state templates", () => {
     );
 
     expect(await screen.findByText("需要选择组织上下文")).toBeInTheDocument();
-    expect(screen.getByText("返回运营后台")).toHaveAttribute(
+    expect(screen.getByText("返回平台总览")).toHaveAttribute(
       "href",
-      "/ops/users",
+      "/admin/overview",
     );
     expect(
       screen.queryByText("organization page body"),

@@ -711,7 +711,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
     ]);
   });
 
-  it("renders protected admin ops data, read-only logs, publicId rows, redaction, confirmations, and filter refresh", async () => {
+  it("renders protected admin ops data, semantic rows, redaction, confirmations, and filter refresh", async () => {
     const fetchMock = mockAdminOpsFetch();
 
     render(createElement(AdminOpsManagement));
@@ -721,12 +721,11 @@ describe("phase 9 admin ops runtime ui completion", () => {
       await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByTestId("admin-user-row-user-public-001"),
-    ).toHaveAttribute("data-public-id", "user-public-001");
-    expect(
-      screen.getByTestId("admin-user-row-user-public-001"),
-    ).not.toHaveAttribute("data-id");
+    const userRow = screen.getByRole("row", {
+      name: /学员甲 \/ 13900000002/,
+    });
+    expect(userRow).not.toHaveAttribute("data-public-id");
+    expect(userRow).not.toHaveAttribute("data-id");
     expect(screen.queryByText("审计日志只读")).not.toBeInTheDocument();
     expect(screen.queryByText("AI 调用日志只读")).not.toBeInTheDocument();
     expect(screen.queryByText("RC-2026-****")).not.toBeInTheDocument();
@@ -772,12 +771,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
       ).toBe(true);
     });
 
-    fireEvent.click(
-      within(screen.getByTestId("admin-user-row-user-public-001")).getByRole(
-        "button",
-        { name: "重置密码" },
-      ),
-    );
+    fireEvent.click(within(userRow).getByRole("button", { name: "重置密码" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认重置用户密码？",
     );
@@ -831,6 +825,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
       await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("暂无用户管理数据")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "创建后台账号" }));
     expect(
       screen.getByRole("region", { name: "后台账号创建" }),
     ).toBeInTheDocument();
@@ -846,6 +841,8 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "创建后台账号" }));
 
     const roleSelect = screen.getByLabelText("角色") as HTMLSelectElement;
 

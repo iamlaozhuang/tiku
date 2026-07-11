@@ -118,11 +118,150 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-admin-role-overviews-users-ia-polish-2026-07-11
+    title: 0704 admin role overviews and users information architecture polish
+    phase: 0704-admin-role-overviews-users-ia-polish-2026-07-11
+    status: ready_for_closeout
+    result: pass_localhost_ui_role_workbenches_users_ia_polish
+    priority: p1
+    sequenceOrder: 19.5
+    taskKind: implementation_polish
+    executionProfile: admin_role_overviews_redacted_summary_contract_and_ops_users_ui_no_provider
+    moduleRunVersion: 2
+    branch: codex/0704-admin-role-overviews-users-ia-polish
+    dependsOn:
+      - 0704-ops-users-layout-pagination-polish-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-admin-role-overviews-users-ia-polish.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-admin-role-overviews-users-ia-polish-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-admin-role-overviews-users-ia-polish-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-admin-role-overviews-users-ia-polish.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-admin-role-overviews-users-ia-polish-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-admin-role-overviews-users-ia-polish-audit.md
+      - src/app/page.tsx
+      - src/app/(admin)/admin/overview/page.tsx
+      - src/app/(admin)/ops/overview/page.tsx
+      - src/app/(admin)/content/overview/page.tsx
+      - src/app/api/v1/admin-overviews/route.ts
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx
+      - src/features/admin/admin-role-overview/AdminRoleOverviewPage.tsx
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - src/server/contracts/admin-role-overview-contract.ts
+      - src/server/contracts/admin-workspace-role-guard-contract.ts
+      - src/server/contracts/user-auth/session-boundary.ts
+      - src/server/repositories/admin-role-overview-repository.ts
+      - src/server/services/admin-role-overview-route.ts
+      - src/server/services/admin-role-overview-route.test.ts
+      - src/server/services/admin-role-overview-service.ts
+      - src/server/services/admin-workspace-role-guard-service.ts
+      - tests/unit/admin-role-overview-ui.test.ts
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - tests/unit/admin-workspace-role-guard-contract.test.ts
+      - tests/unit/admin-ops-summary-first-ui.test.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts
+      - tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - tests/unit/student-login-ui.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/**
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/**
+      - docs/04-agent-system/**
+      - docs/05-execution-logs/**
+      - package.json
+      - tsconfig.json
+      - next.config.*
+      - vitest.config.*
+      - eslint.config.*
+      - scripts/**
+      - src/**
+      - tests/**
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_role_overviews_readonly_contract_and_ops_users_ui
+      testSourceChange: approved_targeted_contract_route_ui_guard
+      focusedUnitTest: approved
+      browserRuntime: blocked_not_approved_this_turn
+      devServer: blocked_not_needed
+      privateAccountInMemoryUse: blocked_not_needed
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    humanApprovalBoundary:
+      implementation: current_user_approved_role_workbench_minimal_readonly_summary_contract_2026_07_11
+      localCommit: approved_after_full_local_gate
+      fastForwardMerge: approved
+      push: approved_origin_master
+      cleanup: approved_delete_short_branch_after_merge
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+      credentialMaterialOutput: blocked
+      screenshotRawDom: not_approved_this_turn
+    plannedAt: "2026-07-11T00:00:00-07:00"
+    claimedAt: "2026-07-11T00:00:00-07:00"
+    targetClosureItem: Add three role-specific admin overview workbenches with a minimal redacted summary contract and finish operations user-management information hierarchy.
+    behaviorBoundary: localhost_ui_source_test_docs_only_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
+    evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_auth_header_plaintext_redeem_code
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/server/services/admin-role-overview-route.test.ts tests/unit/admin-role-overview-ui.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts tests/unit/admin-ops-summary-first-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-login-ui.test.ts src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx tests/unit/admin-shell-common-interaction.test.ts tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts tests/unit/phase-11-audit-log-coverage-hardening.test.ts tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-admin-role-overviews-users-ia-polish-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-admin-role-overviews-users-ia-polish-2026-07-11 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_role_workbench_minimal_readonly_summary_contract_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_merge_push_cleanup_2026_07_11
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_merge_push_cleanup_2026_07_11
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_merge_push_cleanup_2026_07_11
   - id: 0704-ops-users-layout-pagination-polish-2026-07-11
     title: 0704 ops users layout pagination polish
     phase: 0704-ops-users-layout-pagination-polish-2026-07-11
-    status: ready_for_closeout
-    result: pass_localhost_ui_layout_pagination_polish_local_commit_ready
+    status: closed
+    result: pass_localhost_ui_layout_pagination_polish_merged_pushed_cleaned
     priority: p1
     sequenceOrder: 19.4
     taskKind: implementation_polish
