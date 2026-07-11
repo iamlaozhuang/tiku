@@ -966,7 +966,7 @@ export function StudentHomePage({
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20 lg:max-w-5xl">
       <div className="flex flex-col gap-3">
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">继续学习</p>

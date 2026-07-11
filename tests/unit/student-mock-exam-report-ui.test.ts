@@ -25,6 +25,24 @@ afterEach(() => {
 });
 
 describe("StudentMockExamPage", () => {
+  it("shows an actionable empty state when the runtime route has no selected paper or mock exam", () => {
+    const fetchMock = vi.fn();
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentMockExamPage));
+
+    expect(screen.getByText("请选择模拟考试入口")).toBeInTheDocument();
+    expect(
+      screen.getByText("请先从学员首页选择试卷后再进入模拟考试。"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "返回学员首页" })).toHaveAttribute(
+      "href",
+      "/home",
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("renders the selected mock exam with public identifiers, remaining time, and progress", () => {
     render(
       createElement(StudentMockExamPage, {
@@ -835,9 +853,10 @@ describe("StudentExamReportPage", () => {
     expect(screen.getByText("正确率 67%")).toBeInTheDocument();
     expect(screen.getByText("得分 86.0 / 100")).toBeInTheDocument();
     expect(screen.getByText("客户需求分析")).toBeInTheDocument();
-    expect(
-      screen.getByText("已加入错题本：mistake-book-marketing-101"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("已加入错题本")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(
+      "mistake-book-marketing-101",
+    );
     expect(screen.getByText("学习建议：生成中")).toBeInTheDocument();
 
     const reportSurface = screen.getByTestId(
@@ -1014,18 +1033,22 @@ describe("StudentExamReportPage", () => {
     );
 
     expect(screen.getByText("知识点薄弱项")).toBeInTheDocument();
-    expect(screen.getByText("knowledge_node_public_weak")).toBeInTheDocument();
+    expect(screen.getByText("薄弱项 1")).toBeInTheDocument();
     expect(screen.getByText("得分率 0%")).toBeInTheDocument();
     expect(screen.getByText("正确率 0%")).toBeInTheDocument();
     expect(screen.getByText("0.0 / 2.0")).toBeInTheDocument();
     expect(
       screen.getByText("覆盖 1 题，已答 0 题，正确 0 题"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("knowledge_node_public_shared"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("薄弱项 2")).toBeInTheDocument();
     expect(screen.getByText("得分率 25%")).toBeInTheDocument();
     expect(screen.getByText("正确率 50%")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(
+      "knowledge_node_public_weak",
+    );
+    expect(document.body.textContent).not.toContain(
+      "knowledge_node_public_shared",
+    );
   });
 
   it("renders fill_blank scoring method and per-blank report details", () => {

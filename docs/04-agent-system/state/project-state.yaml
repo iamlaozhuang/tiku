@@ -1,8 +1,34 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-owner-preview-provider-gate-hardening-2026-07-10
-updatedAt: "2026-07-10T16:05:00-07:00"
+currentPhase: 0704-localhost-ui-polish-2026-07-10
+updatedAt: "2026-07-10T22:15:00-07:00"
+latest0704LocalhostUiPolish:
+  id: 0704-localhost-ui-polish-2026-07-10
+  status: ready_for_closeout
+  result: pass_localhost_ui_polish_only_no_preview_readiness_claim
+  branch: codex/0704-localhost-ui-polish
+  dependsOn: 0704-owner-preview-provider-gate-hardening-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-localhost-ui-polish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-localhost-ui-polish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-localhost-ui-polish-audit.md
+  executionBoundary:
+    previewPreparation: paused
+    runtime: localhost_0704db_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    screenshotRawDomTrace: blocked_without_same_turn_user_approval
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    targetedTests: pass_7_files_95_tests
+    lint: pass
+    typecheck: pass
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    providerExecution: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
 latest0704OwnerPreviewProviderGateHardening:
   id: 0704-owner-preview-provider-gate-hardening-2026-07-10
   status: ready_for_closeout
@@ -4111,51 +4137,52 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-owner-preview-provider-gate-hardening-2026-07-10
-  title: 0704 owner preview provider gate hardening
-  phase: 0704-owner-preview-provider-gate-hardening-2026-07-10
+  id: 0704-localhost-ui-polish-2026-07-10
+  title: 0704 localhost UI polish
+  phase: 0704-localhost-ui-polish-2026-07-10
   status: ready_for_closeout
-  result: pass_owner_preview_provider_gate_hardened
+  result: pass_localhost_ui_polish_only_no_preview_readiness_claim
   priority: p1
-  taskKind: provider_gate_hardening
-  branch: codex/0704-owner-preview-provider-gate-hardening
+  taskKind: implementation
+  branch: codex/0704-localhost-ui-polish
   humanApprovalBoundary:
-    implementationAndCloseout: current_user_approved_owner_preview_provider_gate_hardening_commit_merge_push_cleanup_2026_07_10
+    implementationAndCloseout: current_user_requested_0704_localhost_ui_polish_commit_merge_push_cleanup_2026_07_10
     providerExecution: blocked
-    productLoginSessionProbe: blocked
-    productRouteRead: blocked
-    productRouteWrite: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    productLoginSessionProbe: approved_localhost_test_owned_only_if_needed
     directDatabaseConnection: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshotRawDom: blocked
-  plannedAt: "2026-07-10T16:05:00-07:00"
-  claimedAt: "2026-07-10T16:05:00-07:00"
-  targetClosureItem: Harden owner-preview Provider route controls so runtime credentials alone cannot enable Provider-capable AI generation in any environment.
-  behaviorBoundary: source_test_docs_gate_hardening_no_provider_execution_no_env_secret_read_no_browser_no_db_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration
-  evidenceMode: redacted_file_path_code_symbol_status_category_decision_category_command_result_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-owner-preview-provider-gate-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-owner-preview-provider-gate-hardening-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-owner-preview-provider-gate-hardening-audit.md
-  dependsOn: 0704-code-readonly-preview-risk-assessment-2026-07-10
+    screenshotRawDom: blocked_without_same_turn_user_approval
+  plannedAt: "2026-07-10T21:40:00-07:00"
+  claimedAt: "2026-07-10T21:40:00-07:00"
+  completedAt: "2026-07-10T22:15:00-07:00"
+  targetClosureItem: Assess localhost UI using the 0704DB-backed local app, apply focused UI fixes, and close out locally without preview readiness claims.
+  behaviorBoundary: localhost_0704db_ui_assessment_and_focused_source_test_docs_fix_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom_without_same_turn_approval
+  evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
+  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-localhost-ui-polish.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-localhost-ui-polish-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-localhost-ui-polish-audit.md
+  dependsOn: 0704-owner-preview-provider-gate-hardening-2026-07-10
   nextRequiredTaskId: null
   validationSummary:
-    readinessPreflight: not_needed_code_gate_no_private_account
+    localService: pass_reused_localhost_0704db_no_env_output
+    readOnlyUiAssessment: pass_redacted_route_status_categories_only
+    focusedUiFixes: pass_learner_entry_layout_wording_ops_cookie_session
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
-    browserRuntime: blocked_not_executed
-    directDatabaseConnection: blocked_not_executed
-    targetedTests: pass_9_files_146_tests
+    stagingProdDeploy: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    screenshotRawDomTrace: blocked_not_executed
+    targetedTests: pass_7_files_95_tests
     lint: pass
     typecheck: pass
-    scopedPrettier: pass
     diffCheck: pass
-    blockedPathDiffCheck: pass
     moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_after_repository_checkpoint_alignment
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     sensitiveEvidence: pass_redacted_no_secret_material
     browserRuntimeExecuted: false
-    directDatabaseConnectionExecuted: false
     providerCallExecuted: false
     stagingProdDeployExecuted: false
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:

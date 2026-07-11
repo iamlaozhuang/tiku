@@ -42,6 +42,7 @@ type AdminAiAuditRuntimeData = {
 };
 
 const sessionTokenStorageKey = "tiku.localSessionToken";
+const cookieBackedSessionToken = "__cookie_backed_session__";
 const formalAdoptionTargetResourceType = "personal_ai_generation_result";
 const formalAdoptionReviewTargetType = "question";
 const formalAdoptionReviewReasonCategory = "content_quality_passed";
@@ -848,7 +849,11 @@ function createRuntimeCallbacks() {
 }
 
 function readStoredSessionToken(): string | null {
-  return localStorage.getItem(sessionTokenStorageKey)?.trim() || null;
+  const sessionToken = localStorage.getItem(sessionTokenStorageKey)?.trim();
+
+  return sessionToken === "" || sessionToken === undefined
+    ? cookieBackedSessionToken
+    : sessionToken;
 }
 
 function readRequiredSessionToken(): string {
@@ -866,6 +871,7 @@ async function fetchAdminApi<TData>(
   sessionToken: string,
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
+    credentials: "same-origin",
     headers: {
       authorization: `Bearer ${sessionToken}`,
     },
@@ -881,6 +887,7 @@ async function postAdminApi<TData>(
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
     body: JSON.stringify(body),
+    credentials: "same-origin",
     headers: {
       authorization: `Bearer ${sessionToken}`,
       "content-type": "application/json",

@@ -587,6 +587,24 @@ function getFillBlankReportAnswers(value: unknown): FillBlankReportAnswer[] {
     .sort((left, right) => left.sortOrder - right.sortOrder);
 }
 
+function formatKnowledgeNodeWeaknessLabel(
+  analysisItem: KnowledgeNodeAnalysisResult,
+): string {
+  return `薄弱项 ${analysisItem.weaknessRank}`;
+}
+
+function formatKnowledgeNodeWeaknessSummaryText(
+  summaryText: string | null,
+): string | null {
+  if (summaryText === null) {
+    return null;
+  }
+
+  return /knowledge[_-]?node|public[_-]?/iu.test(summaryText)
+    ? "按得分率和正确率排序展示薄弱知识点。"
+    : summaryText;
+}
+
 function getStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -1221,10 +1239,13 @@ function StudentScoringProgressPanel({
 export function StudentMockExamPage({
   state = "ready",
   paperPublicId,
-  mockExamPublicId = "mock-exam-marketing-theory-001",
+  mockExamPublicId,
   mockExams,
 }: StudentMockExamPageProps) {
   const isRuntimeMode = mockExams === undefined;
+  const selectedRouteMockExamPublicId =
+    mockExamPublicId ??
+    (isRuntimeMode ? null : "mock-exam-marketing-theory-001");
   const [runtimeState, setRuntimeState] = useState<StudentPageState>("loading");
   const [runtimeMockExams, setRuntimeMockExams] = useState<
     StudentMockExamFixture[]
@@ -1235,12 +1256,14 @@ export function StudentMockExamPage({
   const selectedMockExamPublicId =
     isRuntimeMode && runtimeMockExams.length > 0
       ? runtimeMockExams[0].mockExam.publicId
-      : mockExamPublicId;
+      : selectedRouteMockExamPublicId;
   const selectedMockExamFixture =
-    displayMockExams.find(
-      (mockExamFixture) =>
-        mockExamFixture.mockExam.publicId === selectedMockExamPublicId,
-    ) ?? null;
+    selectedMockExamPublicId === null
+      ? null
+      : (displayMockExams.find(
+          (mockExamFixture) =>
+            mockExamFixture.mockExam.publicId === selectedMockExamPublicId,
+        ) ?? null);
   const mockExam = selectedMockExamFixture?.mockExam ?? null;
   const questions = useMemo(
     () =>
@@ -1279,7 +1302,11 @@ export function StudentMockExamPage({
   const pendingAnswerCount = Object.keys(pendingAnswerByQuestion).length;
 
   useEffect(() => {
-    if (!isRuntimeMode || state !== "ready") {
+    if (
+      !isRuntimeMode ||
+      state !== "ready" ||
+      (paperPublicId === undefined && selectedRouteMockExamPublicId === null)
+    ) {
       return;
     }
 
@@ -1289,14 +1316,14 @@ export function StudentMockExamPage({
       const storedSessionValue = getStoredStudentSessionToken();
       const cacheStorageKey = createMockExamCacheStorageKey({
         paperPublicId,
-        mockExamPublicId,
+        mockExamPublicId: selectedRouteMockExamPublicId ?? "",
       });
 
       try {
         const mockExamPayload =
           paperPublicId === undefined
             ? await fetchStudentApi<MockExamResultDto>(
-                `/api/v1/mock-exams/${mockExamPublicId}`,
+                `/api/v1/mock-exams/${selectedRouteMockExamPublicId}`,
                 storedSessionValue,
               )
             : await fetchStudentApi<MockExamResultDto>(
@@ -1368,7 +1395,30 @@ export function StudentMockExamPage({
     return () => {
       isActive = false;
     };
-  }, [isRuntimeMode, mockExamPublicId, paperPublicId, state]);
+  }, [isRuntimeMode, paperPublicId, selectedRouteMockExamPublicId, state]);
+
+  if (
+    isRuntimeMode &&
+    state === "ready" &&
+    paperPublicId === undefined &&
+    selectedRouteMockExamPublicId === null
+  ) {
+    return (
+      <StudentStatusMessage
+        title="请选择模拟考试入口"
+        description="请先从学员首页选择试卷后再进入模拟考试。"
+        testId="mock-exam-empty-state"
+        action={
+          <Link
+            href="/home"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回学员首页
+          </Link>
+        }
+      />
+    );
+  }
 
   if (displayState === "loading") {
     return <StudentMockExamLoading />;
@@ -2369,10 +2419,13 @@ export function StudentExamReportPage({
               知识点薄弱项
             </h2>
           </div>
-          {parsedReportSnapshot.knowledgeNodeWeaknessSummaryText ===
-          null ? null : (
+          {formatKnowledgeNodeWeaknessSummaryText(
+            parsedReportSnapshot.knowledgeNodeWeaknessSummaryText,
+          ) === null ? null : (
             <p className="text-text-muted text-xs">
-              {parsedReportSnapshot.knowledgeNodeWeaknessSummaryText}
+              {formatKnowledgeNodeWeaknessSummaryText(
+                parsedReportSnapshot.knowledgeNodeWeaknessSummaryText,
+              )}
             </p>
           )}
           <div className="space-y-2">
@@ -2383,8 +2436,8 @@ export function StudentExamReportPage({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-text-primary text-sm font-semibold break-all">
-                      {analysisItem.knowledgeNodePublicId}
+                    <p className="text-text-primary text-sm font-semibold">
+                      {formatKnowledgeNodeWeaknessLabel(analysisItem)}
                     </p>
                     <p className="text-text-secondary mt-1 text-xs">
                       覆盖 {analysisItem.questionCount} 题，已答{" "}
@@ -2468,7 +2521,7 @@ export function StudentExamReportPage({
                 )}
                 {questionResult.mistakeBookPublicId === null ? null : (
                   <p className="text-warning text-sm font-medium">
-                    已加入错题本：{questionResult.mistakeBookPublicId}
+                    已加入错题本
                   </p>
                 )}
               </article>

@@ -48,6 +48,7 @@ const emptyOpsCollections = {
   redeemCodes: [],
   users: [],
 };
+const cookieBackedSessionToken = "__cookie_backed_session__";
 
 function jsonResponse(payload: unknown) {
   return {
@@ -175,6 +176,25 @@ function stubFetchForSummaryFirstPages() {
   return fetchMock;
 }
 
+function expectCookieBackedFetch(
+  fetchMock: ReturnType<typeof vi.fn>,
+  pathPrefix: string,
+) {
+  const matchedCall = fetchMock.mock.calls.find(([url]) =>
+    String(url).startsWith(pathPrefix),
+  );
+
+  expect(matchedCall).toBeDefined();
+  expect(matchedCall?.[1]).toEqual(
+    expect.objectContaining({
+      credentials: "same-origin",
+    }),
+  );
+  expect(new Headers(matchedCall?.[1]?.headers).get("authorization")).toBe(
+    `Bearer ${cookieBackedSessionToken}`,
+  );
+}
+
 describe("admin ops summary-first UI", () => {
   it("renders operations workspace summary and boundaries before filters and write actions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -253,6 +273,28 @@ describe("admin ops summary-first UI", () => {
     ).toBeTruthy();
   });
 
+  it("keeps operations org auth pages usable with cookie-backed admin sessions", async () => {
+    const orgAuthFetchMock = stubFetchForSummaryFirstPages();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业授权运营" });
+    expectCookieBackedFetch(orgAuthFetchMock, "/api/v1/sessions");
+    expectCookieBackedFetch(orgAuthFetchMock, "/api/v1/organizations");
+
+    cleanup();
+    localStorage.clear();
+    vi.unstubAllGlobals();
+
+    const redeemCodeFetchMock = stubFetchForSummaryFirstPages();
+
+    render(createElement(AdminRedeemCodePage));
+
+    await screen.findByRole("heading", { name: "卡密管理" });
+    expectCookieBackedFetch(redeemCodeFetchMock, "/api/v1/sessions");
+    expectCookieBackedFetch(redeemCodeFetchMock, "/api/v1/redeem-codes");
+  });
+
   it("renders AI audit summary before model management and keeps ops read-only boundary visible", () => {
     render(
       createElement(AdminAiAuditLogOpsBaseline, { currentRole: "ops_admin" }),
@@ -269,6 +311,21 @@ describe("admin ops summary-first UI", () => {
       ) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(screen.queryByText("保存配置")).not.toBeInTheDocument();
+  });
+
+  it("keeps AI audit logs usable with cookie-backed admin sessions", async () => {
+    const fetchMock = stubFetchForSummaryFirstPages();
+
+    render(
+      createElement(AdminAiAuditLogOpsBaseline, {
+        currentRole: "ops_admin",
+        runtimeEnabled: true,
+      }),
+    );
+
+    await screen.findByRole("heading", { name: "AI 配置与日志运营" });
+    expectCookieBackedFetch(fetchMock, "/api/v1/model-providers");
+    expectCookieBackedFetch(fetchMock, "/api/v1/audit-logs");
   });
 
   it("renders contact config summary before the form and keeps standard and advanced purchase guidance clear", async () => {

@@ -4459,7 +4459,7 @@ export function StudentPersonalAiGenerationPage() {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20 lg:max-w-5xl">
       <section data-testid="student-ai-zone-context" className="space-y-5">
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">个人 AI 训练</p>

@@ -538,7 +538,7 @@ function PracticeResumeChoicePanel({
     <section
       data-testid="practice-resume-choice"
       data-public-id={practice.publicId}
-      className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20 lg:max-w-5xl"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-2">
@@ -1064,10 +1064,12 @@ function SubjectiveQuestionPanel({
 
 export function StudentPracticePage({
   state = "ready",
-  paperPublicId = "paper-marketing-theory-002",
+  paperPublicId,
   practices,
 }: StudentPracticePageProps) {
   const isRuntimeMode = practices === undefined;
+  const selectedPaperPublicId =
+    paperPublicId ?? (isRuntimeMode ? null : "paper-marketing-theory-002");
   const [runtimeState, setRuntimeState] =
     useState<StudentPracticePageState>("loading");
   const [runtimePractices, setRuntimePractices] = useState<
@@ -1077,10 +1079,12 @@ export function StudentPracticePage({
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayPractices = practices ?? runtimePractices;
   const selectedPracticeFixture =
-    displayPractices.find(
-      (practiceFixture) =>
-        practiceFixture.practice.paperPublicId === paperPublicId,
-    ) ?? null;
+    selectedPaperPublicId === null
+      ? null
+      : (displayPractices.find(
+          (practiceFixture) =>
+            practiceFixture.practice.paperPublicId === selectedPaperPublicId,
+        ) ?? null);
   const practice = selectedPracticeFixture?.practice ?? null;
   const questions = useMemo(
     () =>
@@ -1113,7 +1117,7 @@ export function StudentPracticePage({
   const [isResumeChoiceVisible, setIsResumeChoiceVisible] = useState(false);
 
   useEffect(() => {
-    if (!isRuntimeMode || state !== "ready") {
+    if (!isRuntimeMode || state !== "ready" || selectedPaperPublicId === null) {
       return;
     }
 
@@ -1128,7 +1132,7 @@ export function StudentPracticePage({
           storedSessionValue,
           {
             method: "POST",
-            body: JSON.stringify({ paperPublicId }),
+            body: JSON.stringify({ paperPublicId: selectedPaperPublicId }),
           },
         );
 
@@ -1187,7 +1191,25 @@ export function StudentPracticePage({
     return () => {
       isActive = false;
     };
-  }, [isRuntimeMode, paperPublicId, state]);
+  }, [isRuntimeMode, selectedPaperPublicId, state]);
+
+  if (isRuntimeMode && state === "ready" && selectedPaperPublicId === null) {
+    return (
+      <StudentPracticeStatusMessage
+        title="请选择练习入口"
+        description="请先从学员首页选择试卷后再进入普通练习。"
+        testId="practice-empty-state"
+        action={
+          <Link
+            href="/home"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回学员首页
+          </Link>
+        }
+      />
+    );
+  }
 
   if (displayState === "loading") {
     return <StudentPracticeLoading />;
@@ -1619,7 +1641,7 @@ export function StudentPracticePage({
     <section
       data-testid={`practice-surface-${practice.publicId}`}
       data-public-id={practice.publicId}
-      className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20 lg:max-w-5xl"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-2">

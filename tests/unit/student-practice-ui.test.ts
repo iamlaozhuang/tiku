@@ -22,6 +22,24 @@ afterEach(() => {
 });
 
 describe("StudentPracticePage", () => {
+  it("shows an actionable empty state when the runtime route has no selected paper", () => {
+    const fetchMock = vi.fn();
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPracticePage));
+
+    expect(screen.getByText("请选择练习入口")).toBeInTheDocument();
+    expect(
+      screen.getByText("请先从学员首页选择试卷后再进入普通练习。"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "返回学员首页" })).toHaveAttribute(
+      "href",
+      "/home",
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("renders the selected practice with public identifiers and progress", () => {
     render(
       createElement(StudentPracticePage, {

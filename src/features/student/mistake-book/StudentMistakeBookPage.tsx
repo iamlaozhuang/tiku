@@ -238,7 +238,7 @@ function StudentMistakeBookLoading() {
   return (
     <main
       aria-busy="true"
-      className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-5"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-5 lg:max-w-5xl"
     >
       <p className="text-text-secondary text-sm">正在加载错题本</p>
       {[0, 1, 2].map((itemIndex) => (
@@ -802,7 +802,7 @@ export function StudentMistakeBookPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20 lg:max-w-5xl">
       <section className="space-y-4">
         <Link
           href="/home"

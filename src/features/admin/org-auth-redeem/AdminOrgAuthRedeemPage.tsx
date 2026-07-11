@@ -233,6 +233,7 @@ type GeneratedRedeemCodeSummary = RedeemCodeGenerationDto["generation"];
 type GeneratedRedeemCodeDistribution = RedeemCodeGenerationDto["redeemCodes"];
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
+const COOKIE_BACKED_SESSION_TOKEN = "__cookie_backed_session__";
 const DEFAULT_LIST_QUERY = "page=1&pageSize=20";
 
 const professionLabels = {
@@ -411,7 +412,9 @@ const organizationDepthPaddingClassNames = [
 function getStoredSessionToken(): string | null {
   const sessionToken = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY)?.trim();
 
-  return sessionToken === "" ? null : (sessionToken ?? null);
+  return sessionToken === "" || sessionToken === undefined
+    ? COOKIE_BACKED_SESSION_TOKEN
+    : sessionToken;
 }
 
 function createAdminAuthHeaders(sessionToken: string) {
@@ -425,6 +428,7 @@ async function fetchAdminApi<TData>(
   sessionToken: string,
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
+    credentials: "same-origin",
     headers: createAdminAuthHeaders(sessionToken),
   });
 
@@ -438,6 +442,7 @@ async function postAdminApi<TData>(
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
     body: body === undefined ? undefined : JSON.stringify(body),
+    credentials: "same-origin",
     headers: {
       ...createAdminAuthHeaders(sessionToken),
       "content-type": "application/json",
@@ -455,6 +460,7 @@ async function patchAdminApi<TData>(
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
     body: JSON.stringify(body),
+    credentials: "same-origin",
     headers: {
       ...createAdminAuthHeaders(sessionToken),
       "content-type": "application/json",
