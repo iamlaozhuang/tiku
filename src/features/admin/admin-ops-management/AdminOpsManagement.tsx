@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   Eye,
+  RotateCcw,
   RotateCcwKey,
   UserCheck,
   UserPlus,
@@ -24,7 +25,6 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
-  FilterSelect,
   PublicId,
   fetchAdminApi,
   formatProfessionLevel,
@@ -508,6 +508,7 @@ export function AdminOpsManagement() {
     handleFilterChange,
     handlePageChange,
     handlePageSizeChange,
+    handleReset: resetUserListQuery,
     handleSortChange,
     query,
   } = useAdminListInteraction({
@@ -614,22 +615,6 @@ export function AdminOpsManagement() {
       adminAccountListQuery,
       data.adminAccounts.length,
     );
-  const userPageCount = Math.max(
-    1,
-    Math.ceil(usersPagination.total / usersPagination.pageSize),
-  );
-  const visibleUserStart =
-    usersPagination.total === 0
-      ? 0
-      : (usersPagination.page - 1) * usersPagination.pageSize + 1;
-  const visibleUserEnd =
-    usersPagination.total === 0
-      ? 0
-      : Math.min(
-          usersPagination.page * usersPagination.pageSize,
-          usersPagination.total,
-        );
-
   function handleUserStatusChange(value: UserStatus | "all") {
     setUserStatus(value);
     handleFilterChange("userStatus");
@@ -643,6 +628,13 @@ export function AdminOpsManagement() {
   function handleUserTypeChange(value: UserType | "all") {
     setUserType(value);
     handleFilterChange("userType");
+  }
+
+  function handleResetUserFilters() {
+    setUserKeyword("");
+    setUserStatus("all");
+    setUserType("all");
+    resetUserListQuery();
   }
 
   function handleAdminAccountKeywordChange(value: string) {
@@ -1005,92 +997,105 @@ export function AdminOpsManagement() {
       {accountTab === "learner_employee" ? (
         <div
           aria-label="学员与员工账号"
+          className="space-y-4"
           id="learner-employee-account-panel"
           role="tabpanel"
         >
-          <section
-            aria-label="学员与员工账号"
-            className="bg-surface border-border rounded-md border p-4 shadow-sm"
+          <AdminListToolbar
+            description="按姓名或手机号、账号状态和用户类型筛选；查看详情后再执行重置或启停操作。"
+            resultLabel={`共 ${usersPagination.total} 个用户`}
+            title="学员与员工账号筛选"
           >
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-1">
-                <h2 className="text-text-primary text-base font-semibold">
-                  学员与员工账号
-                </h2>
-                <p className="text-text-muted text-sm">
-                  按账号状态、用户类型和注册时间筛选；查看详情后再执行重置或启停操作。
-                </p>
-              </div>
-              <p className="text-text-muted text-sm">
-                筛选结果 {usersPagination.total} 个
-              </p>
-            </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(14rem,1.5fr)_minmax(0,10rem)_minmax(0,10rem)_minmax(0,8rem)_auto] xl:items-end">
-              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-                <span className="text-text-secondary">搜索用户</span>
-                <Input
-                  aria-label="搜索用户"
-                  placeholder="姓名或手机号"
-                  value={userKeyword}
-                  onChange={(event) =>
-                    handleUserKeywordChange(event.target.value)
-                  }
-                />
-              </label>
-              <FilterSelect
-                label="用户状态"
-                options={userStatusOptions}
+            <label
+              className={`${adminListFilterLabelClassName} min-w-56 flex-1`}
+            >
+              <span>搜索用户</span>
+              <Input
+                aria-label="搜索用户"
+                className={adminListControlClassName}
+                placeholder="姓名或手机号"
+                value={userKeyword}
+                onChange={(event) =>
+                  handleUserKeywordChange(event.target.value)
+                }
+              />
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>用户状态</span>
+              <select
+                aria-label="用户状态"
+                className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
                 value={userStatus}
-                onChange={(value) =>
-                  handleUserStatusChange(value as UserStatus | "all")
+                onChange={(event) =>
+                  handleUserStatusChange(
+                    event.target.value as UserStatus | "all",
+                  )
                 }
-              />
-              <FilterSelect
-                label="用户类型"
-                options={userTypeOptions}
-                value={userType}
-                onChange={(value) =>
-                  handleUserTypeChange(value as UserType | "all")
-                }
-              />
-              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-                <span className="text-text-secondary">每页条数</span>
-                <select
-                  aria-label="每页条数"
-                  className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-                  value={`${query.pageSize}`}
-                  onChange={(event) => handlePageSizeChange(event.target.value)}
-                >
-                  {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
-                    <option key={optionPageSize} value={optionPageSize}>
-                      {optionPageSize}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <Button
-                variant="outline"
-                onClick={() => handleSortChange("registeredAt")}
               >
-                注册时间排序
-              </Button>
-              <p className="text-text-muted text-sm md:col-span-2 xl:col-span-5">
-                查看详情和重置密码仍需要二次确认。
-              </p>
-            </div>
-            <AdminUserListTable
-              pageCount={userPageCount}
-              pagination={usersPagination}
-              users={data.users}
-              visibleEnd={visibleUserEnd}
-              visibleStart={visibleUserStart}
-              onPageChange={handlePageChange}
-              onResetPassword={(publicId) =>
-                setConfirmationState({ kind: "resetPassword", publicId })
-              }
-              onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
-            />
-          </section>
+                {userStatusOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={adminListFilterLabelClassName}>
+              <span>用户类型</span>
+              <select
+                aria-label="用户类型"
+                className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+                value={userType}
+                onChange={(event) =>
+                  handleUserTypeChange(event.target.value as UserType | "all")
+                }
+              >
+                {userTypeOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => handleSortChange("registeredAt")}
+            >
+              注册时间排序
+            </Button>
+            <label className={adminListFilterLabelClassName}>
+              <span>每页条数</span>
+              <select
+                aria-label="用户每页条数"
+                className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+                value={`${query.pageSize}`}
+                onChange={(event) => handlePageSizeChange(event.target.value)}
+              >
+                {ADMIN_PAGE_SIZE_OPTIONS.map((optionPageSize) => (
+                  <option key={optionPageSize} value={optionPageSize}>
+                    {optionPageSize}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleResetUserFilters}
+            >
+              <RotateCcw aria-hidden="true" />
+              重置筛选
+            </Button>
+          </AdminListToolbar>
+          <AdminUserListTable
+            pagination={usersPagination}
+            users={data.users}
+            onPageChange={handlePageChange}
+            onResetPassword={(publicId) =>
+              setConfirmationState({ kind: "resetPassword", publicId })
+            }
+            onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
+          />
         </div>
       ) : null}
 
@@ -1297,29 +1302,28 @@ export function AdminOpsManagement() {
 }
 
 function AdminUserListTable({
-  pageCount,
   pagination,
   users,
-  visibleEnd,
-  visibleStart,
   onPageChange,
   onResetPassword,
   onViewDetail,
 }: {
-  pageCount: number;
   pagination: ApiPagination;
   users: AdminUserListDto["users"];
-  visibleEnd: number;
-  visibleStart: number;
   onPageChange: (page: number) => void;
   onResetPassword: (publicId: string) => void;
   onViewDetail: (publicId: string) => void;
 }) {
   return (
     <>
-      <div className="border-border mt-4 overflow-x-auto border-t pt-2">
-        <table className="w-full min-w-[48rem] border-separate border-spacing-0 text-left">
-          <caption className="sr-only">学员与员工账号列表</caption>
+      <AdminTableFrame
+        ariaLabel="学员与员工账号列表"
+        minWidthClassName="min-w-[48rem]"
+      >
+        <table
+          aria-label="学员与员工账号列表"
+          className="w-full border-separate border-spacing-0 text-left"
+        >
           <thead>
             <tr className="text-text-muted text-xs">
               <th
@@ -1409,30 +1413,14 @@ function AdminUserListTable({
             )}
           </tbody>
         </table>
-      </div>
-      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-text-muted text-sm">
-          显示 {visibleStart}-{visibleEnd} / 共 {pagination.total} 个用户
-        </p>
-        <div className="flex gap-2">
-          <Button
-            disabled={pagination.page <= 1}
-            variant="outline"
-            onClick={() => onPageChange(pagination.page - 1)}
-          >
-            上一页
-          </Button>
-          <Button
-            disabled={pagination.page >= pageCount}
-            variant="outline"
-            onClick={() =>
-              onPageChange(Math.min(pageCount, pagination.page + 1))
-            }
-          >
-            下一页
-          </Button>
-        </div>
-      </div>
+      </AdminTableFrame>
+      <AdminPagination
+        itemLabel="个用户"
+        page={pagination.page}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        onPageChange={onPageChange}
+      />
     </>
   );
 }

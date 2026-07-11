@@ -350,6 +350,7 @@ describe("AdminOrgAuthPage", () => {
     render(createElement(AdminOrgAuthPage));
 
     await screen.findByRole("heading", { name: "企业管理" });
+    expect(document.body).not.toHaveTextContent("Admin Ops");
     fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
 
     const toolbar = await screen.findByRole("region", { name: "员工筛选" });
@@ -762,6 +763,7 @@ describe("AdminRedeemCodePage", () => {
     render(createElement(AdminRedeemCodePage));
 
     await screen.findByRole("heading", { name: "卡密管理" });
+    expect(document.body).not.toHaveTextContent("Admin Ops");
     const toolbar = screen.getByRole("region", { name: "卡密筛选" });
     const table = screen.getByRole("table", { name: "卡密列表" });
     const generateButton = within(toolbar).getByRole("button", {

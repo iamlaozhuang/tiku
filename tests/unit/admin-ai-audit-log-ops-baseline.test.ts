@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -927,10 +928,32 @@ describe("admin ai and audit log ops baseline", () => {
     render(createElement(AdminAiCallLogOpsPage, { runtimeEnabled: true }));
 
     await screen.findByRole("heading", { level: 1, name: "AI 调用日志" });
+    expect(document.body).not.toHaveTextContent("summary-first");
+    expect(document.body).not.toHaveTextContent("Admin Ops");
+
+    const aiCallToolbar = screen.getByRole("region", {
+      name: "AI 调用日志筛选",
+    });
+    expect(aiCallToolbar).toHaveTextContent("共 1 条 AI 调用日志");
+    expect(
+      within(aiCallToolbar).getByRole("button", { name: "重置筛选" }),
+    ).toBeInTheDocument();
+    expect(
+      within(aiCallToolbar).getByLabelText("AI 调用关键词"),
+    ).toBeInTheDocument();
+    expect(
+      within(aiCallToolbar).getByLabelText("AI 调用状态"),
+    ).toBeInTheDocument();
+    expect(
+      within(aiCallToolbar).getByLabelText("AI 调用日志每页条数"),
+    ).toHaveValue("20");
 
     expect(
       screen.getByRole("table", { name: "AI 调用日志列表" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
+      "显示 1-1 / 共 1 条 AI 调用日志",
+    );
     expect(
       screen.getByTestId("admin-ai-call-log-runtime-ai-call-log-split-001"),
     ).toHaveTextContent("redacted prompt summary");

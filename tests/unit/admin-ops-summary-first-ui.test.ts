@@ -322,9 +322,24 @@ describe("admin ops summary-first UI", () => {
     expect(screen.queryByTestId("ops-summary-first-band")).toBeNull();
     expect(screen.queryByRole("region", { name: "用户摘要" })).toBeNull();
 
-    const userWorkArea = screen.getByRole("region", {
+    const userWorkArea = screen.getByRole("tabpanel", {
       name: "学员与员工账号",
     });
+    const userToolbar = within(userWorkArea).getByRole("region", {
+      name: "学员与员工账号筛选",
+    });
+    expect(userToolbar).toHaveTextContent("共 1 个用户");
+    expect(
+      within(userToolbar).getByRole("button", { name: "重置筛选" }),
+    ).toBeInTheDocument();
+    expect(
+      within(userWorkArea).getByRole("table", {
+        name: "学员与员工账号列表",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(userWorkArea).getByRole("region", { name: "列表分页" }),
+    ).toHaveTextContent("显示 1-1 / 共 1 个用户");
     expect(within(userWorkArea).getByLabelText("用户状态")).toBeInTheDocument();
     expect(within(userWorkArea).getByLabelText("用户类型")).toBeInTheDocument();
     expect(
@@ -431,11 +446,11 @@ describe("admin ops summary-first UI", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "下一页" })).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText("每页条数"), {
+    fireEvent.change(screen.getByLabelText("用户每页条数"), {
       target: { value: "50" },
     });
 
-    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(screen.getByLabelText("用户每页条数")).toHaveValue("50");
     expect(
       await screen.findByText("显示 1-25 / 共 25 个用户"),
     ).toBeInTheDocument();
@@ -476,6 +491,32 @@ describe("admin ops summary-first UI", () => {
           );
         }),
       ).toBe(true);
+    });
+    expect(screen.getByText("显示 1-20 / 共 25 个用户")).toBeInTheDocument();
+
+    const userToolbar = screen.getByRole("region", {
+      name: "学员与员工账号筛选",
+    });
+    fireEvent.change(within(userToolbar).getByLabelText("用户状态"), {
+      target: { value: "disabled" },
+    });
+    fireEvent.change(within(userToolbar).getByLabelText("用户类型"), {
+      target: { value: "employee" },
+    });
+    fireEvent.change(within(userToolbar).getByLabelText("用户每页条数"), {
+      target: { value: "50" },
+    });
+    fireEvent.click(
+      within(userToolbar).getByRole("button", { name: "重置筛选" }),
+    );
+
+    await waitFor(() => {
+      expect(within(userToolbar).getByLabelText("搜索用户")).toHaveValue("");
+      expect(within(userToolbar).getByLabelText("用户状态")).toHaveValue("all");
+      expect(within(userToolbar).getByLabelText("用户类型")).toHaveValue("all");
+      expect(within(userToolbar).getByLabelText("用户每页条数")).toHaveValue(
+        "20",
+      );
     });
     expect(screen.getByText("显示 1-20 / 共 25 个用户")).toBeInTheDocument();
   });
@@ -580,7 +621,7 @@ describe("admin ops summary-first UI", () => {
     expect(
       await screen.findByRole("heading", {
         level: 2,
-        name: "学员与员工账号",
+        name: "学员与员工账号筛选",
       }),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));

@@ -1568,7 +1568,7 @@ function AdminPageHeader({
           {icon}
         </div>
         <div className="space-y-1">
-          <p className="text-brand-primary text-sm font-medium">Admin Ops</p>
+          <p className="text-brand-primary text-sm font-medium">运营后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             {title}
           </h1>

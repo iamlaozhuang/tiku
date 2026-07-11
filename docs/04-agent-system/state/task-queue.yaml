@@ -118,6 +118,114 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-ops-list-consistency-acceptance-2026-07-11
+    title: 0704 operations list consistency acceptance
+    phase: 0704-ops-list-consistency-acceptance-2026-07-11
+    status: ready_for_closeout
+    result: pass_localhost_ui_ops_list_consistency_acceptance
+    priority: p0
+    sequenceOrder: 29.0
+    taskKind: implementation_feature
+    executionProfile: cross_page_list_consistency_adversarial_acceptance_with_test_proven_user_list_shared_chrome_and_internal_wording_cleanup_only
+    moduleRunVersion: 2
+    branch: codex/0704-ops-list-consistency-acceptance
+    dependsOn:
+      - 0704-ops-audit-log-list-standardization-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-list-consistency-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-list-consistency-acceptance-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-list-consistency-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-ops-list-consistency-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-ops-list-consistency-acceptance-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-list-consistency-acceptance-audit.md
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - tests/unit/admin-ops-summary-first-ui.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - src/components/admin/AdminList/AdminList.test.tsx
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+      - tests/unit/admin-workspace-role-guard-service.test.ts
+      - tests/unit/phase-7-audit-log-runtime-baseline.test.ts
+      - tests/unit/phase-9-multi-client-rest-contract-verification.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/server/**
+      - src/app/api/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_test_proven_list_consistency_ui_only
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-ops-summary-first-ui.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts src/components/admin/AdminList/AdminList.test.tsx tests/unit/admin-dashboard-layout-navigation.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts tests/unit/phase-7-audit-log-runtime-baseline.test.ts tests/unit/phase-9-multi-client-rest-contract-verification.test.ts tests/unit/phase-7-admin-flow-runtime-smoke.test.ts tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts src/server/services/effective-authorization-service.test.ts src/server/services/effective-authorization-route.test.ts src/server/services/edition-aware-authorization-service.test.ts src/server/services/edition-aware-authorization-route.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-ops-list-consistency-acceptance-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-ops-list-consistency-acceptance-2026-07-11 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pass_ready_for_merge_push_cleanup
+      redTargetedTests: pass_expected_first_5_failed_second_1_failed
+      greenTargetedTests: pass_19_files_135_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      formatting: pass_full_repository
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_11_files_scanned
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_tasks_1_to_9_serial_commit_merge_push_cleanup_2026_07_11
+      cleanup:
+        approved: true
   - id: 0704-ops-audit-log-list-standardization-2026-07-11
     title: 0704 operations audit log list standardization
     phase: 0704-ops-audit-log-list-standardization-2026-07-11

@@ -16,13 +16,7 @@ import {
   type ModelConfigFormInput,
   type ModelProviderFormInput,
 } from "@/features/admin/model-config-management/AdminModelConfigManagement";
-import {
-  adminDataTableClassName,
-  adminDataTableContainerClassName,
-  adminListPaginationClassName,
-  adminListStatePanelClassName,
-  adminListToolbarClassName,
-} from "@/components/admin/admin-layout-primitives";
+import { adminDataTableClassName } from "@/components/admin/admin-layout-primitives";
 import {
   AdminListToolbar,
   AdminPagination,
@@ -152,6 +146,13 @@ const defaultAdminAuditLogQuery: AdminAuditLogQueryState = {
   resultStatus: "all",
   targetResourceType: "all",
   toDate: "",
+};
+
+const defaultAdminAiCallLogQuery: AdminAiCallLogQueryState = {
+  callStatus: "all",
+  keyword: "",
+  page: 1,
+  pageSize: 20,
 };
 
 const auditActionFilterOptions = [
@@ -499,12 +500,9 @@ export function AdminAiCallLogOpsPage({
   const [runtimeState, setRuntimeState] =
     useState<AdminAiAuditLogOpsState>(state);
   const [runtimeData, setRuntimeData] = useState(staticAiCallLogRuntimeData);
-  const [query, setQuery] = useState<AdminAiCallLogQueryState>({
-    callStatus: "all",
-    keyword: "",
-    page: 1,
-    pageSize: 20,
-  });
+  const [query, setQuery] = useState<AdminAiCallLogQueryState>(
+    defaultAdminAiCallLogQuery,
+  );
   const [selectedAiCallLogPublicId, setSelectedAiCallLogPublicId] = useState<
     string | null
   >(null);
@@ -561,12 +559,7 @@ export function AdminAiCallLogOpsPage({
         }
 
         setRuntimeData(loadedData);
-        setRuntimeState(
-          loadedData.aiCallLogs.length > 0 ||
-            loadedData.costSummaries.length > 0
-            ? "ready"
-            : "empty",
-        );
+        setRuntimeState("ready");
       })
       .catch(() => {
         if (isCurrentLoad) {
@@ -629,7 +622,9 @@ export function AdminAiCallLogOpsPage({
       />
 
       <AdminAiCallLogToolbar
+        currentRole={currentRole}
         query={query}
+        total={totalCount}
         onChange={(nextQuery) => {
           setSelectedAiCallLogPublicId(null);
           setQuery(nextQuery);
@@ -641,7 +636,8 @@ export function AdminAiCallLogOpsPage({
         onSelectAiCallLog={setSelectedAiCallLogPublicId}
       />
 
-      <AdminSplitLogPagination
+      <AdminPagination
+        itemLabel="条 AI 调用日志"
         page={query.page}
         pageSize={query.pageSize}
         total={totalCount}
@@ -991,7 +987,7 @@ function AdminAiAuditSummaryFirstBand({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
           <p className="text-brand-primary text-xs font-medium">
-            AI 日志 summary-first
+            AI 与日志概览
           </p>
           <h2 className="text-text-primary text-base font-semibold">
             AI 与日志总览
@@ -1636,9 +1632,7 @@ function AdminSplitLogSummaryBand({
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">
-            运营日志 summary-first
-          </p>
+          <p className="text-brand-primary text-xs font-medium">运营日志概览</p>
           <h2 className="text-text-primary text-base font-semibold">{title}</h2>
           <p className="text-text-secondary text-sm leading-6">{description}</p>
         </div>
@@ -1809,83 +1803,91 @@ function AdminAuditLogToolbar({
 }
 
 function AdminAiCallLogToolbar({
+  currentRole,
   onChange,
   query,
+  total,
 }: {
+  currentRole: AdminAiAuditLogOpsRoleMode;
   onChange: (query: AdminAiCallLogQueryState) => void;
   query: AdminAiCallLogQueryState;
+  total: number;
 }) {
   return (
-    <section className={adminListToolbarClassName}>
-      <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,1fr)_12rem_10rem]">
-        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
-          <span>AI 调用关键词</span>
-          <input
-            aria-label="AI 调用关键词"
-            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
-            value={query.keyword}
-            onChange={(event) =>
-              onChange({ ...query, keyword: event.target.value, page: 1 })
-            }
-          />
-        </label>
-        <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
-          <span>调用状态</span>
-          <select
-            aria-label="AI 调用状态"
-            className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
-            value={query.callStatus}
-            onChange={(event) =>
-              onChange({
-                ...query,
-                callStatus: event.target
-                  .value as AdminAiCallLogQueryState["callStatus"],
-                page: 1,
-              })
-            }
-          >
-            <option value="all">全部状态</option>
-            <option value="success">成功</option>
-            <option value="failed">失败</option>
-          </select>
-        </label>
-        <AdminSplitLogPageSizeSelect
-          pageSize={query.pageSize}
-          onChange={(pageSize) => onChange({ ...query, page: 1, pageSize })}
+    <AdminListToolbar
+      description={`当前为${formatOpsLogRoleLabel(currentRole)}只读视角；成本仅作本地运营摘要，不构成 Cost Calibration 结论。`}
+      primaryAction={
+        <Button
+          disabled={
+            query.keyword.trim().length === 0 &&
+            query.callStatus === "all" &&
+            query.pageSize === 20
+          }
+          size="lg"
+          variant="outline"
+          onClick={() => onChange(defaultAdminAiCallLogQuery)}
+        >
+          <RotateCcw aria-hidden="true" />
+          重置筛选
+        </Button>
+      }
+      resultLabel={`共 ${total} 条 AI 调用日志`}
+      title="AI 调用日志筛选"
+    >
+      <label className={`${adminListFilterLabelClassName} min-w-56 flex-1`}>
+        <span>关键词</span>
+        <input
+          aria-label="AI 调用关键词"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          placeholder="搜索能力、模型或脱敏摘要"
+          value={query.keyword}
+          onChange={(event) =>
+            onChange({ ...query, keyword: event.target.value, page: 1 })
+          }
         />
-      </div>
-      <p className="text-text-muted text-xs leading-5">
-        成本仅作本地运营摘要，不声明 Cost Calibration。
-      </p>
-    </section>
-  );
-}
-
-function AdminSplitLogPageSizeSelect({
-  onChange,
-  pageSize,
-}: {
-  onChange: (pageSize: AdminAiAuditLogPageSize) => void;
-  pageSize: AdminAiAuditLogPageSize;
-}) {
-  return (
-    <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
-      <span>每页条数</span>
-      <select
-        aria-label="每页条数"
-        className="border-input bg-background text-text-primary h-9 rounded-md border px-3 text-sm"
-        value={pageSize}
-        onChange={(event) =>
-          onChange(Number(event.target.value) as AdminAiAuditLogPageSize)
-        }
-      >
-        {ADMIN_AI_AUDIT_LOG_PAGE_SIZE_OPTIONS.map((pageSizeOption) => (
-          <option key={pageSizeOption} value={pageSizeOption}>
-            {pageSizeOption}
-          </option>
-        ))}
-      </select>
-    </label>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-36`}>
+        <span>调用状态</span>
+        <select
+          aria-label="AI 调用状态"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.callStatus}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              callStatus: event.target
+                .value as AdminAiCallLogQueryState["callStatus"],
+              page: 1,
+            })
+          }
+        >
+          <option value="all">全部状态</option>
+          <option value="success">成功</option>
+          <option value="failed">失败</option>
+        </select>
+      </label>
+      <label className={`${adminListFilterLabelClassName} min-w-28`}>
+        <span>每页条数</span>
+        <select
+          aria-label="AI 调用日志每页条数"
+          className={`${adminListControlClassName} border-input bg-background text-text-primary rounded-md border px-3 text-sm`}
+          value={query.pageSize}
+          onChange={(event) =>
+            onChange({
+              ...query,
+              page: 1,
+              pageSize: Number(event.target.value) as AdminAiAuditLogPageSize,
+            })
+          }
+        >
+          {ADMIN_AI_AUDIT_LOG_PAGE_SIZE_OPTIONS.map((pageSizeOption) => (
+            <option key={pageSizeOption} value={pageSizeOption}>
+              {pageSizeOption}
+            </option>
+          ))}
+        </select>
+      </label>
+    </AdminListToolbar>
   );
 }
 
@@ -2029,42 +2031,50 @@ function AdminAiCallLogTable({
   aiCallLogs: AiCallLogListDto["aiCallLogs"];
   onSelectAiCallLog: (publicId: string) => void;
 }) {
-  if (aiCallLogs.length === 0) {
-    return (
-      <div className={adminListStatePanelClassName}>
-        <p className="text-text-primary text-sm font-medium">
-          暂无 AI 调用日志
-        </p>
-        <p className="text-text-muted mt-2 text-xs">
-          当前筛选条件下没有可展示的脱敏 AI 调用摘要。
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className={adminDataTableContainerClassName}>
+    <AdminTableFrame
+      ariaLabel="AI 调用日志列表"
+      minWidthClassName="min-w-[68rem]"
+    >
       <table aria-label="AI 调用日志列表" className={adminDataTableClassName}>
         <thead className="bg-muted/60 text-text-muted">
           <tr>
-            <th className="px-4 py-3 font-medium">时间</th>
-            <th className="px-4 py-3 font-medium">能力</th>
-            <th className="px-4 py-3 font-medium">模型</th>
-            <th className="px-4 py-3 font-medium">状态</th>
+            <th className="w-40 px-4 py-3 font-medium whitespace-nowrap">
+              时间
+            </th>
+            <th className="w-36 px-4 py-3 font-medium">能力</th>
+            <th className="w-52 px-4 py-3 font-medium">模型</th>
+            <th className="w-24 px-4 py-3 font-medium whitespace-nowrap">
+              状态
+            </th>
             <th className="px-4 py-3 font-medium">摘要</th>
-            <th className="px-4 py-3 font-medium">Token</th>
-            <th className="px-4 py-3 text-right font-medium">操作</th>
+            <th className="w-24 px-4 py-3 font-medium whitespace-nowrap">
+              Token
+            </th>
+            <th className="w-32 px-4 py-3 text-right font-medium">操作</th>
           </tr>
         </thead>
         <tbody className="divide-border divide-y">
+          {aiCallLogs.length === 0 ? (
+            <tr>
+              <td className="px-4 py-10 text-center" colSpan={7}>
+                <p className="text-text-primary text-sm font-medium">
+                  暂无 AI 调用日志
+                </p>
+                <p className="text-text-muted mt-2 text-xs">
+                  当前筛选条件下没有可展示的脱敏 AI 调用摘要。
+                </p>
+              </td>
+            </tr>
+          ) : null}
           {aiCallLogs.map((aiCallLog) => (
             <tr
               key={aiCallLog.publicId}
               data-public-id={aiCallLog.publicId}
               data-testid={`admin-ai-call-log-${aiCallLog.publicId}`}
             >
-              <td className="text-text-secondary px-4 py-3">
-                {aiCallLog.startedAt}
+              <td className="text-text-secondary px-4 py-3 whitespace-nowrap">
+                {formatAuditLogTimestamp(aiCallLog.startedAt)}
               </td>
               <td className="text-text-primary px-4 py-3">
                 {formatAdminOpsDisplayValue(aiCallLog.aiFuncType)}
@@ -2072,8 +2082,8 @@ function AdminAiCallLogTable({
               <td className="text-text-secondary px-4 py-3">
                 {aiCallLog.providerDisplayName} / {aiCallLog.modelAlias}
               </td>
-              <td className="text-text-secondary px-4 py-3">
-                {formatAdminOpsDisplayValue(aiCallLog.callStatus)}
+              <td className="px-4 py-3 whitespace-nowrap">
+                <AdminAuditResultStatus status={aiCallLog.callStatus} />
               </td>
               <td className="text-text-muted px-4 py-3">
                 {aiCallLog.promptSummary ?? "Prompt 摘要已脱敏"}
@@ -2093,53 +2103,7 @@ function AdminAiCallLogTable({
           ))}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-function AdminSplitLogPagination({
-  onPageChange,
-  page,
-  pageSize,
-  total,
-}: {
-  onPageChange: (page: number) => void;
-  page: number;
-  pageSize: number;
-  total: number;
-}) {
-  const totalPage = Math.max(1, Math.ceil(total / pageSize));
-  const safePage = Math.min(page, totalPage);
-  const start = total === 0 ? 0 : (safePage - 1) * pageSize + 1;
-  const end = Math.min(total, safePage * pageSize);
-
-  return (
-    <section className={adminListPaginationClassName}>
-      <p className="text-text-secondary">
-        显示 {start}-{end} / 共 {total} 条记录
-      </p>
-      <div className="flex items-center gap-2">
-        <button
-          className="border-border text-text-secondary hover:bg-muted rounded-md border px-3 py-2 transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={safePage <= 1}
-          type="button"
-          onClick={() => onPageChange(safePage - 1)}
-        >
-          上一页
-        </button>
-        <span className="text-text-muted text-xs">
-          第 {safePage} / {totalPage} 页
-        </span>
-        <button
-          className="border-border text-text-secondary hover:bg-muted rounded-md border px-3 py-2 transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={safePage >= totalPage}
-          type="button"
-          onClick={() => onPageChange(safePage + 1)}
-        >
-          下一页
-        </button>
-      </div>
-    </section>
+    </AdminTableFrame>
   );
 }
 
