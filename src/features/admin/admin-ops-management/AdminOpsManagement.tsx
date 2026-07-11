@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import {
   AlertCircle,
   Eye,
-  KeyRound,
   RotateCcwKey,
   ShieldCheck,
   UserCheck,
@@ -30,27 +28,17 @@ import {
 } from "@/features/admin/content-admin-runtime";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
-  AiCallLogListDto,
-  AiCallLogSummaryListDto,
-  AuditLogListDto,
-} from "@/server/contracts/admin-ai-audit-log-ops-contract";
-import type {
   AdminAccountCreationRole,
   AdminAccountCreationResultDto,
-  EmployeeListDto,
   OrganizationAdminAccountCreationRole,
   OrganizationListDto,
-  RedeemCodeGenerationDto,
-  RedeemCodeListDto,
   AdminUserDetailDto,
   AdminUserListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import type { OrgAuthListDto } from "@/server/contracts/organization-auth-contract";
 import type {
   AdminRole,
   AuthStatus,
-  RedeemCodeStatus,
   UserStatus,
   UserType,
 } from "@/server/models/auth";
@@ -66,12 +54,6 @@ type AdminOpsData = {
   currentAdminRoles: AdminRole[];
   users: AdminUserListDto["users"];
   organizations: OrganizationListDto["organizations"];
-  employees: EmployeeListDto["employees"];
-  orgAuths: OrgAuthListDto["orgAuths"];
-  redeemCodes: RedeemCodeListDto["redeemCodes"];
-  auditLogs: AuditLogListDto["auditLogs"];
-  aiCallLogs: AiCallLogListDto["aiCallLogs"];
-  dailySummaries: AiCallLogSummaryListDto["dailySummaries"];
 };
 
 type ConfirmationState =
@@ -82,9 +64,6 @@ type ConfirmationState =
   | {
       kind: "disableUser" | "enableUser";
       publicId: string;
-    }
-  | {
-      kind: "generateRedeemCode";
     }
   | null;
 
@@ -99,12 +78,6 @@ type AdminAccountCreationFormState = {
   name: string;
   organizationPublicId: string;
   phone: string;
-};
-
-type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCodes"][number];
-
-type LegacyRedeemCodeGenerationDto = RedeemCodeGenerationDto & {
-  redeemCode?: GeneratedRedeemCode;
 };
 
 type AdminOpsLoadResult =
@@ -148,12 +121,6 @@ const authStatusLabels = {
   expired: "已过期",
 } satisfies Record<AuthStatus, string>;
 
-const redeemCodeStatusLabels = {
-  expired: "已过期",
-  unused: "未使用",
-  used: "已使用",
-} satisfies Record<RedeemCodeStatus, string>;
-
 const adminRoleLabels = {
   content_admin: "内容管理员",
   ops_admin: "运营管理员",
@@ -171,41 +138,6 @@ const orgTierLabels = {
 const authorizationTypeLabels = {
   org_auth: "组织授权",
   personal_auth: "个人授权",
-} satisfies Record<string, string>;
-
-const auditActionTypeLabels = {
-  "user.disable": "停用用户",
-  "user.enable": "启用用户",
-  "user.reset_password": "重置用户密码",
-} satisfies Record<string, string>;
-
-const auditTargetResourceTypeLabels = {
-  ai_call_log: "AI 调用日志",
-  audit_log: "审计日志",
-  org_auth: "组织授权",
-  organization: "组织",
-  redeem_code: "卡密",
-  user: "用户",
-} satisfies Record<string, string>;
-
-const auditResultStatusLabels = {
-  failed: "操作失败",
-  success: "操作成功",
-} satisfies Record<string, string>;
-
-const aiFuncTypeLabels = {
-  ai_explanation: "AI 讲解",
-  ai_hint: "AI 提示",
-  ai_paper_generation: "AI 组卷",
-  ai_question_generation: "AI 出题",
-  ai_scoring: "AI 评分",
-  kn_recommendation: "知识点推荐",
-} satisfies Record<string, string>;
-
-const aiCallStatusLabels = {
-  failed: "调用失败",
-  pending: "等待处理",
-  success: "调用成功",
 } satisfies Record<string, string>;
 
 const adminSecurityPolicies = [
@@ -236,14 +168,8 @@ const opsAdminAccountCreationRoles = [
 ] as const satisfies readonly OrganizationAdminAccountCreationRole[];
 
 const emptyAdminOpsData: AdminOpsData = {
-  aiCallLogs: [],
-  auditLogs: [],
   currentAdminRoles: [],
-  dailySummaries: [],
-  employees: [],
-  orgAuths: [],
   organizations: [],
-  redeemCodes: [],
   users: [],
 };
 
@@ -251,7 +177,6 @@ const adminOpsLoadCache = new Map<string, Promise<AdminOpsLoadResult>>();
 const adminAccountPasswordRequestField = "pass" + "word";
 
 function createListSearchParams(input: {
-  auditKeyword: string;
   sortBy: string;
   sortOrder: string;
   userStatus: string;
@@ -272,26 +197,11 @@ function createListSearchParams(input: {
     searchParams.set("userType", input.userType);
   }
 
-  const auditKeyword = input.auditKeyword.trim();
-
-  if (auditKeyword.length > 0) {
-    searchParams.set("keyword", auditKeyword);
-  }
-
   return searchParams.toString();
 }
 
 function hasAdminOpsData(data: AdminOpsData): boolean {
-  return (
-    data.users.length > 0 ||
-    data.organizations.length > 0 ||
-    data.employees.length > 0 ||
-    data.orgAuths.length > 0 ||
-    data.redeemCodes.length > 0 ||
-    data.auditLogs.length > 0 ||
-    data.aiCallLogs.length > 0 ||
-    data.dailySummaries.length > 0
-  );
+  return data.users.length > 0 || data.organizations.length > 0;
 }
 
 function hasAdminOpsWorkspaceContext(data: AdminOpsData): boolean {
@@ -347,18 +257,6 @@ function formatMappedLabel(
   fallback: string,
 ): string {
   return labels[value] ?? fallback;
-}
-
-function formatRedactedSummary(value: string | null | undefined): string {
-  if (value === null || value === undefined || value.trim().length === 0) {
-    return "暂无摘要";
-  }
-
-  if (/credential|metadata|prompt|redacted|snapshot/i.test(value)) {
-    return "已脱敏摘要";
-  }
-
-  return value;
 }
 
 async function postAdminApi<TData>(
@@ -423,16 +321,7 @@ async function loadAdminOpsData(
       };
     }
 
-    const [
-      userResponse,
-      organizationResponse,
-      employeeResponse,
-      orgAuthResponse,
-      redeemCodeResponse,
-      auditLogResponse,
-      aiCallLogResponse,
-      aiCallLogSummaryResponse,
-    ] = await Promise.all([
+    const [userResponse, organizationResponse] = await Promise.all([
       fetchAdminApi<AdminUserListDto>(
         `/api/v1/users?${listQuery}`,
         sessionToken,
@@ -441,49 +330,13 @@ async function loadAdminOpsData(
         `/api/v1/organizations?${listQuery}`,
         sessionToken,
       ),
-      fetchAdminApi<EmployeeListDto>(
-        `/api/v1/employees?${listQuery}`,
-        sessionToken,
-      ),
-      fetchAdminApi<OrgAuthListDto>(
-        `/api/v1/org-auths?${listQuery}`,
-        sessionToken,
-      ),
-      fetchAdminApi<RedeemCodeListDto>(
-        `/api/v1/redeem-codes?${listQuery}`,
-        sessionToken,
-      ),
-      fetchAdminApi<AuditLogListDto>(
-        `/api/v1/audit-logs?${listQuery}`,
-        sessionToken,
-      ),
-      fetchAdminApi<AiCallLogListDto>(
-        `/api/v1/ai-call-logs?${listQuery}`,
-        sessionToken,
-      ),
-      fetchAdminApi<AiCallLogSummaryListDto>(
-        `/api/v1/ai-call-logs/summary?${listQuery}`,
-        sessionToken,
-      ),
     ]);
 
     if (
       userResponse.code !== 0 ||
       userResponse.data === null ||
       organizationResponse.code !== 0 ||
-      organizationResponse.data === null ||
-      employeeResponse.code !== 0 ||
-      employeeResponse.data === null ||
-      orgAuthResponse.code !== 0 ||
-      orgAuthResponse.data === null ||
-      redeemCodeResponse.code !== 0 ||
-      redeemCodeResponse.data === null ||
-      auditLogResponse.code !== 0 ||
-      auditLogResponse.data === null ||
-      aiCallLogResponse.code !== 0 ||
-      aiCallLogResponse.data === null ||
-      aiCallLogSummaryResponse.code !== 0 ||
-      aiCallLogSummaryResponse.data === null
+      organizationResponse.data === null
     ) {
       return {
         data: emptyAdminOpsData,
@@ -492,14 +345,8 @@ async function loadAdminOpsData(
     }
 
     const data = {
-      aiCallLogs: aiCallLogResponse.data.aiCallLogs,
-      auditLogs: auditLogResponse.data.auditLogs,
       currentAdminRoles: sessionResponse.data.user.adminRoles ?? [],
-      dailySummaries: aiCallLogSummaryResponse.data.dailySummaries,
-      employees: employeeResponse.data.employees,
-      orgAuths: orgAuthResponse.data.orgAuths,
       organizations: organizationResponse.data.organizations,
-      redeemCodes: redeemCodeResponse.data.redeemCodes,
       users: userResponse.data.users,
     };
 
@@ -520,7 +367,6 @@ export function AdminOpsManagement() {
   const [data, setData] = useState<AdminOpsData>(emptyAdminOpsData);
   const [userStatus, setUserStatus] = useState<UserStatus | "all">("all");
   const [userType, setUserType] = useState<UserType | "all">("all");
-  const [auditKeyword, setAuditKeyword] = useState("");
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
   const [confirmationState, setConfirmationState] =
@@ -536,8 +382,6 @@ export function AdminOpsManagement() {
     });
   const [isCreatingAdminAccount, setIsCreatingAdminAccount] = useState(false);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
-  const [generatedRedeemCode, setGeneratedRedeemCode] =
-    useState<GeneratedRedeemCode | null>(null);
   const [selectedUserDetail, setSelectedUserDetail] =
     useState<AdminUserDetailDto | null>(null);
   const [userDetailState, setUserDetailState] = useState<
@@ -547,13 +391,12 @@ export function AdminOpsManagement() {
   const listQuery = useMemo(
     () =>
       createListSearchParams({
-        auditKeyword,
         sortBy,
         sortOrder,
         userStatus,
         userType,
       }),
-    [auditKeyword, sortBy, sortOrder, userStatus, userType],
+    [sortBy, sortOrder, userStatus, userType],
   );
   const allowedAdminAccountCreationRoles = useMemo(
     () => getAllowedAdminAccountCreationRoles(data.currentAdminRoles),
@@ -650,36 +493,6 @@ export function AdminOpsManagement() {
     if (sessionToken === null || confirmationState === null) {
       setConfirmationState(null);
       setLoadState("unauthorized");
-      return;
-    }
-
-    if (confirmationState.kind === "generateRedeemCode") {
-      const createRedeemCodeResponse =
-        await postAdminApi<RedeemCodeGenerationDto>(
-          "/api/v1/redeem-codes",
-          sessionToken,
-        );
-
-      setConfirmationState(null);
-
-      if (
-        createRedeemCodeResponse.code !== 0 ||
-        createRedeemCodeResponse.data === null
-      ) {
-        setToastMessage({
-          message: createRedeemCodeResponse.message,
-          tone: "error",
-        });
-        return;
-      }
-
-      setGeneratedRedeemCode(
-        getFirstGeneratedRedeemCode(createRedeemCodeResponse.data),
-      );
-      setToastMessage({
-        message: "卡密已生成，请仅在本地验证时复制给学员",
-        tone: "success",
-      });
       return;
     }
 
@@ -795,7 +608,7 @@ export function AdminOpsManagement() {
   }
 
   if (loadState === "loading") {
-    return <AdminLoadingState label="正在加载运营后台数据" />;
+    return <AdminLoadingState label="正在加载用户管理数据" />;
   }
 
   if (loadState === "unauthorized") {
@@ -805,8 +618,8 @@ export function AdminOpsManagement() {
   if (loadState === "error") {
     return (
       <AdminErrorState
-        description="请稍后刷新页面，或重新登录后再查看运营后台数据。"
-        title="运营后台数据加载失败"
+        description="请稍后刷新页面，或重新登录后再查看用户和后台账号数据。"
+        title="用户管理数据加载失败"
       />
     );
   }
@@ -814,8 +627,8 @@ export function AdminOpsManagement() {
   if (loadState === "empty") {
     return (
       <AdminEmptyState
-        description="当前没有可展示的用户、企业、卡密、审计日志或 AI 调用日志。"
-        title="暂无运营后台数据"
+        description="当前没有可展示的用户记录或后台账号创建上下文。"
+        title="暂无用户管理数据"
       />
     );
   }
@@ -826,26 +639,11 @@ export function AdminOpsManagement() {
         <div className="space-y-2">
           <p className="text-brand-primary text-sm font-medium">运营后台</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            运营后台闭环
+            用户管理
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm leading-6">
-            用户、企业、员工、企业授权、卡密、审计日志和 AI
-            调用日志均通过受保护接口加载，页面只使用业务标识。
+            维护用户账号、后台角色、密码重置与启停状态；企业授权、卡密和日志治理在各自专属页面处理。
           </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-            href="/ops/organizations"
-          >
-            企业授权页
-          </Link>
-          <Link
-            className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-            href="/ops/redeem-codes"
-          >
-            打开卡密生成
-          </Link>
         </div>
       </header>
 
@@ -876,15 +674,6 @@ export function AdminOpsManagement() {
         >
           注册时间排序
         </Button>
-        <label className="flex min-w-64 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">审计关键词</span>
-          <Input
-            aria-label="审计日志关键词"
-            placeholder="操作类型 / 业务标识 / 元数据摘要"
-            value={auditKeyword}
-            onChange={(event) => setAuditKeyword(event.target.value)}
-          />
-        </label>
         <p className="text-text-muted text-sm">
           筛选变化自动刷新；关键写操作使用二次确认。
         </p>
@@ -897,19 +686,21 @@ export function AdminOpsManagement() {
           value={`${data.users.length}`}
         />
         <SummaryTile
-          icon={<ShieldCheck aria-hidden="true" className="size-4" />}
-          label="企业授权"
-          value={`${data.orgAuths.length}`}
+          icon={<UserPlus aria-hidden="true" className="size-4" />}
+          label="后台角色"
+          value={`${allowedAdminAccountCreationRoles.length}`}
         />
         <SummaryTile
-          icon={<KeyRound aria-hidden="true" className="size-4" />}
-          label="卡密"
-          value={`${data.redeemCodes.length}`}
+          icon={<UserCheck aria-hidden="true" className="size-4" />}
+          label="可绑定组织"
+          value={`${data.organizations.length}`}
         />
         <SummaryTile
-          icon={<RotateCcwKey aria-hidden="true" className="size-4" />}
-          label="AI 调用"
-          value={`${data.aiCallLogs.length}`}
+          icon={<UserX aria-hidden="true" className="size-4" />}
+          label="停用用户"
+          value={`${
+            data.users.filter((user) => user.status === "disabled").length
+          }`}
         />
       </section>
 
@@ -926,227 +717,57 @@ export function AdminOpsManagement() {
         />
       ) : null}
 
-      {generatedRedeemCode === null ? null : (
-        <section
-          aria-label="本地卡密生成结果"
-          className="bg-surface border-success/40 rounded-md border p-4 shadow-sm"
-          role="status"
-        >
-          <div className="space-y-2">
-            <p className="text-text-primary text-sm font-semibold">
-              卡密已生成，请仅在本地验证时复制给学员
-            </p>
-            <p className="text-text-secondary text-xs">
-              该明文仅在本次创建响应中展示；卡密列表仍保持掩码展示。
-            </p>
-            <p className="text-text-primary font-mono text-base font-semibold tracking-normal">
-              {generatedRedeemCode.codePlainText}
-            </p>
-          </div>
-        </section>
-      )}
-
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section>
         <AdminPanel title="用户管理">
-          {data.users.map((user) => (
-            <AdminRow
-              key={user.publicId}
-              publicId={user.publicId}
-              testId={`admin-user-row-${user.publicId}`}
-            >
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {user.name} / {user.phone}
-                </p>
-                <p className="text-text-muted text-xs">
-                  {userTypeLabels[user.userType]} /{" "}
-                  {userStatusLabels[user.status]} /{" "}
-                  {user.organizationName ?? "未绑定企业"} /{" "}
-                  {user.authStatus === null
-                    ? "无授权"
-                    : authStatusLabels[user.authStatus]}
-                </p>
-                <PublicId value={user.publicId} />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => void handleViewUserDetail(user.publicId)}
-                >
-                  <Eye aria-hidden="true" />
-                  查看详情
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setConfirmationState({
-                      kind: "resetPassword",
-                      publicId: user.publicId,
-                    })
-                  }
-                >
-                  <RotateCcwKey aria-hidden="true" />
-                  重置密码
-                </Button>
-              </div>
-            </AdminRow>
-          ))}
-        </AdminPanel>
-
-        <AdminPanel title="企业组织与员工">
-          {data.organizations.map((organization) => (
-            <AdminRow
-              key={organization.publicId}
-              publicId={organization.publicId}
-            >
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {organization.name}
-                </p>
-                <p className="text-text-muted text-xs">
-                  {formatMappedLabel(
-                    orgTierLabels,
-                    organization.orgTier,
-                    "其他组织层级",
-                  )}{" "}
-                  / {organization.employeeCount} 名员工 /{" "}
-                  {formatRedactedSummary(organization.authSummary)}
-                </p>
-              </div>
-            </AdminRow>
-          ))}
-          {data.employees.map((employee) => (
-            <AdminRow key={employee.publicId} publicId={employee.publicId}>
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {employee.name} / {employee.phone}
-                </p>
-                <p className="text-text-muted text-xs">
-                  用户业务标识 {employee.userPublicId} / 企业业务标识{" "}
-                  {employee.organizationPublicId}
-                </p>
-              </div>
-            </AdminRow>
-          ))}
-        </AdminPanel>
-
-        <AdminPanel title="企业授权">
-          {data.orgAuths.map((orgAuth) => (
-            <AdminRow key={orgAuth.publicId} publicId={orgAuth.publicId}>
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {orgAuth.name}
-                </p>
-                <p className="text-text-muted text-xs">
-                  {formatProfessionLevel(orgAuth)} / {orgAuth.usedQuota} /{" "}
-                  {orgAuth.accountQuota} / {authStatusLabels[orgAuth.status]}
-                </p>
-              </div>
-            </AdminRow>
-          ))}
-        </AdminPanel>
-
-        <AdminPanel title="卡密管理">
-          {data.redeemCodes.map((redeemCode) => (
-            <AdminRow key={redeemCode.publicId} publicId={redeemCode.publicId}>
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary font-mono text-sm font-semibold">
-                  {redeemCode.codeDisplay}
-                </p>
-                <p className="text-text-muted text-xs">
-                  {formatProfessionLevel(redeemCode)} /{" "}
-                  {redeemCodeStatusLabels[redeemCode.status]} / 兑换用户{" "}
-                  {redeemCode.redeemedUserPublicId ?? "无"}
-                </p>
-              </div>
-            </AdminRow>
-          ))}
-        </AdminPanel>
-
-        <AdminPanel title="审计日志">
-          <p className="text-text-muted mb-2 text-xs">审计日志只读</p>
-          {data.auditLogs.map((auditLog) => (
-            <AdminRow key={auditLog.publicId} publicId={auditLog.publicId}>
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {formatMappedLabel(
-                    auditActionTypeLabels,
-                    auditLog.actionType,
-                    "其他审计操作",
-                  )}
-                </p>
-                <p className="text-text-muted text-xs">
-                  {formatMappedLabel(
-                    adminRoleLabels,
-                    auditLog.actorRole,
-                    "其他管理员",
-                  )}{" "}
-                  /{" "}
-                  {formatMappedLabel(
-                    auditTargetResourceTypeLabels,
-                    auditLog.targetResourceType,
-                    "其他资源",
-                  )}{" "}
-                  /{" "}
-                  {formatMappedLabel(
-                    auditResultStatusLabels,
-                    auditLog.resultStatus,
-                    "其他结果",
-                  )}{" "}
-                  / {formatRedactedSummary(auditLog.metadataSummary)}
-                </p>
-              </div>
-            </AdminRow>
-          ))}
-        </AdminPanel>
-
-        <AdminPanel title="AI 调用日志">
-          <p className="text-text-muted mb-2 text-xs">AI 调用日志只读</p>
-          {data.aiCallLogs.map((aiCallLog) => (
-            <AdminRow key={aiCallLog.publicId} publicId={aiCallLog.publicId}>
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {formatMappedLabel(
-                    aiFuncTypeLabels,
-                    aiCallLog.aiFuncType,
-                    "其他 AI 功能",
-                  )}{" "}
-                  /{" "}
-                  {formatMappedLabel(
-                    aiCallStatusLabels,
-                    aiCallLog.callStatus,
-                    "其他调用状态",
-                  )}
-                </p>
-                <p className="text-text-muted text-xs">
-                  {aiCallLog.providerDisplayName} / {aiCallLog.modelAlias} /{" "}
-                  Token 数 {aiCallLog.totalTokenCount ?? 0} /{" "}
-                  {formatRedactedSummary(aiCallLog.promptSummary)}
-                </p>
-              </div>
-            </AdminRow>
-          ))}
-          {data.dailySummaries.map((summary) => (
-            <AdminRow
-              key={`${summary.bucket}-${summary.aiFuncType}-${summary.modelAlias}`}
-              publicId={`${summary.bucket}-${summary.aiFuncType}-${summary.modelAlias}`}
-            >
-              <div className="min-w-0 space-y-1">
-                <p className="text-text-primary text-sm font-medium">
-                  {summary.bucket} /{" "}
-                  {formatMappedLabel(
-                    aiFuncTypeLabels,
-                    summary.aiFuncType,
-                    "其他 AI 功能",
-                  )}
-                </p>
-                <p className="text-text-muted text-xs">
-                  调用次数 {summary.callCount} 次 / 预估成本{" "}
-                  {summary.estimatedCostCny} 元
-                </p>
-              </div>
-            </AdminRow>
-          ))}
+          {data.users.length === 0 ? (
+            <p className="text-text-muted text-sm">
+              暂无用户记录，可先创建后台账号或调整筛选条件。
+            </p>
+          ) : (
+            data.users.map((user) => (
+              <AdminRow
+                key={user.publicId}
+                publicId={user.publicId}
+                testId={`admin-user-row-${user.publicId}`}
+              >
+                <div className="min-w-0 space-y-1">
+                  <p className="text-text-primary text-sm font-medium">
+                    {user.name} / {user.phone}
+                  </p>
+                  <p className="text-text-muted text-xs">
+                    {userTypeLabels[user.userType]} /{" "}
+                    {userStatusLabels[user.status]} /{" "}
+                    {user.organizationName ?? "未绑定企业"} /{" "}
+                    {user.authStatus === null
+                      ? "无授权"
+                      : authStatusLabels[user.authStatus]}
+                  </p>
+                  <PublicId value={user.publicId} />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => void handleViewUserDetail(user.publicId)}
+                  >
+                    <Eye aria-hidden="true" />
+                    查看详情
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setConfirmationState({
+                        kind: "resetPassword",
+                        publicId: user.publicId,
+                      })
+                    }
+                  >
+                    <RotateCcwKey aria-hidden="true" />
+                    重置密码
+                  </Button>
+                </div>
+              </AdminRow>
+            ))
+          )}
         </AdminPanel>
       </section>
 
@@ -1187,23 +808,14 @@ function OperationsSummaryFirstBand({ data }: { data: AdminOpsData }) {
   const disabledUserCount = data.users.filter(
     (user) => user.status === "disabled",
   ).length;
-  const unusedRedeemCodeCount = data.redeemCodes.filter(
-    (redeemCode) => redeemCode.status === "unused",
-  ).length;
-  const failedAiCallCount = data.aiCallLogs.filter(
-    (aiCallLog) => aiCallLog.callStatus === "failed",
-  ).length;
   const summaryItems = [
     ["角色边界", visibleRoleLabels || "后台角色未同步"],
     [
       "summary-first",
-      `用户 ${data.users.length} / 企业 ${data.organizations.length} / 卡密 ${data.redeemCodes.length}`,
+      `用户 ${data.users.length} / 后台可建角色 ${getAllowedAdminAccountCreationRoles(data.currentAdminRoles).length}`,
     ],
-    ["权限与版本", "运营管理员管理运营闭环；授权版本不在此页重新判定。"],
-    [
-      "状态核对",
-      `空态、错误态、禁用态均保留；停用用户 ${disabledUserCount}，未用卡密 ${unusedRedeemCodeCount}，失败 AI 调用 ${failedAiCallCount}。`,
-    ],
+    ["权限与版本", "用户与后台账号在本页维护；授权版本不在此页重新判定。"],
+    ["状态核对", `空态、错误态、禁用态均保留；停用用户 ${disabledUserCount}。`],
   ] as const;
 
   return (
@@ -1215,13 +827,13 @@ function OperationsSummaryFirstBand({ data }: { data: AdminOpsData }) {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
           <p className="text-brand-primary text-xs font-medium">
-            运营 summary-first
+            用户管理 summary-first
           </p>
           <h2 className="text-text-primary text-base font-semibold">
-            运营后台总览
+            用户与后台账号总览
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            先核对账号家族、授权版本边界和红线状态，再进入筛选、账号创建、卡密或日志明细。
+            先核对账号家族、后台角色和停用风险，再进入筛选、账号创建和用户详情。
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
@@ -1412,12 +1024,6 @@ function AdminAccountCreationPanel({
       </div>
     </section>
   );
-}
-
-function getFirstGeneratedRedeemCode(
-  data: LegacyRedeemCodeGenerationDto,
-): GeneratedRedeemCode | null {
-  return data.redeemCodes?.[0] ?? data.redeemCode ?? null;
 }
 
 function AdminUserDetailPanel({
@@ -1644,7 +1250,6 @@ function AdminOpsConfirmationDialog({
 }) {
   const isResetPassword = confirmationState.kind === "resetPassword";
   const isDisableUser = confirmationState.kind === "disableUser";
-  const isEnableUser = confirmationState.kind === "enableUser";
   const canConfirm =
     !isResetPassword ||
     /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(resetPasswordInput.trim());
@@ -1652,16 +1257,12 @@ function AdminOpsConfirmationDialog({
     ? "确认重置用户密码？"
     : isDisableUser
       ? "确认停用用户？"
-      : isEnableUser
-        ? "确认启用用户？"
-        : "卡密生成需要二次确认";
+      : "确认启用用户？";
   const confirmLabel = isResetPassword
     ? "确认重置"
     : isDisableUser
       ? "确认停用"
-      : isEnableUser
-        ? "确认启用"
-        : "确认生成";
+      : "确认启用";
 
   return (
     <div
@@ -1682,9 +1283,7 @@ function AdminOpsConfirmationDialog({
             ? "重置只提交用户业务标识，响应不会返回明文密码。"
             : isDisableUser
               ? "停用用户会提交业务标识，并撤销该用户现有会话。"
-              : isEnableUser
-                ? "启用用户只恢复账号状态，不创建新授权。"
-                : "批量生成卡密必须由后端原子操作保护；当前提示并发冲突以防止重复生成。"}
+              : "启用用户只恢复账号状态，不创建新授权。"}
         </p>
         {isResetPassword ? (
           <Input
@@ -1700,7 +1299,7 @@ function AdminOpsConfirmationDialog({
         <div className="flex gap-2">
           <Button
             disabled={!canConfirm}
-            variant={isResetPassword ? "default" : "destructive"}
+            variant={isDisableUser ? "destructive" : "default"}
             onClick={onConfirm}
           >
             {confirmLabel}

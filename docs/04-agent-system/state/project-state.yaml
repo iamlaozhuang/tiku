@@ -1,8 +1,35 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-localhost-ui-polish-2026-07-10
-updatedAt: "2026-07-10T22:15:00-07:00"
+currentPhase: 0704-ops-users-information-architecture-repair-2026-07-11
+updatedAt: "2026-07-11T00:00:00-07:00"
+latest0704OpsUsersInformationArchitectureRepair:
+  id: 0704-ops-users-information-architecture-repair-2026-07-11
+  status: ready_for_closeout
+  result: pass_localhost_ui_information_architecture_repair_only
+  branch: codex/0704-ops-users-information-architecture-repair
+  dependsOn: 0704-localhost-ui-polish-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-users-information-architecture-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-users-information-architecture-repair-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-users-information-architecture-repair-audit.md
+  executionBoundary:
+    previewPreparation: paused
+    runtime: localhost_ui_source_test_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    screenshotRawDomTrace: not_executed
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    redTargetedTests: pass_expected_2_failed_before_implementation
+    greenTargetedTests: pass_4_files_18_tests_fresh_after_import_cleanup
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_11_files_scanned
+    moduleRunV2PrePushReadiness: pass_after_repository_sha_checkpoint_alignment
+    providerExecution: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
 latest0704LocalhostUiPolish:
   id: 0704-localhost-ui-polish-2026-07-10
   status: ready_for_closeout
@@ -4137,54 +4164,54 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-localhost-ui-polish-2026-07-10
-  title: 0704 localhost UI polish
-  phase: 0704-localhost-ui-polish-2026-07-10
+  id: 0704-ops-users-information-architecture-repair-2026-07-11
+  title: 0704 ops users information architecture repair
+  phase: 0704-ops-users-information-architecture-repair-2026-07-11
   status: ready_for_closeout
-  result: pass_localhost_ui_polish_only_no_preview_readiness_claim
+  result: pass_localhost_ui_information_architecture_repair_only
   priority: p1
-  taskKind: implementation
-  branch: codex/0704-localhost-ui-polish
+  taskKind: implementation_repair
+  branch: codex/0704-ops-users-information-architecture-repair
   humanApprovalBoundary:
-    implementationAndCloseout: current_user_requested_0704_localhost_ui_polish_commit_merge_push_cleanup_2026_07_10
+    implementationAndCloseout: current_user_approved_0704_ops_users_information_architecture_repair_commit_merge_push_cleanup_2026_07_11
     providerExecution: blocked
     envSecretAccess: blocked
     stagingProdDeploy: blocked
-    productLoginSessionProbe: approved_localhost_test_owned_only_if_needed
+    productLoginSessionProbe: not_needed
     directDatabaseConnection: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshotRawDom: blocked_without_same_turn_user_approval
-  plannedAt: "2026-07-10T21:40:00-07:00"
-  claimedAt: "2026-07-10T21:40:00-07:00"
-  completedAt: "2026-07-10T22:15:00-07:00"
-  targetClosureItem: Assess localhost UI using the 0704DB-backed local app, apply focused UI fixes, and close out locally without preview readiness claims.
-  behaviorBoundary: localhost_0704db_ui_assessment_and_focused_source_test_docs_fix_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom_without_same_turn_approval
+    screenshotRawDom: not_executed
+  plannedAt: "2026-07-11T00:00:00-07:00"
+  claimedAt: "2026-07-11T00:00:00-07:00"
+  completedAt: "2026-07-11T00:00:00-07:00"
+  targetClosureItem: Repair operations user-management information architecture and remove redundant redeem-code page header links.
+  behaviorBoundary: targeted_ui_source_test_docs_fix_no_provider_no_env_secret_no_staging_prod_deploy_no_package_lockfile_schema_migration_seed_cost_calibration_no_screenshot_raw_dom
   evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_chunk_no_employee_raw_answer_no_session_cookie_token_localStorage_auth_header_plaintext_redeem_code
-  planPath: docs/05-execution-logs/task-plans/2026-07-10-0704-localhost-ui-polish.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-10-0704-localhost-ui-polish-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-10-0704-localhost-ui-polish-audit.md
-  dependsOn: 0704-owner-preview-provider-gate-hardening-2026-07-10
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-ops-users-information-architecture-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-ops-users-information-architecture-repair-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-ops-users-information-architecture-repair-audit.md
+  dependsOn: 0704-localhost-ui-polish-2026-07-10
   nextRequiredTaskId: null
   validationSummary:
-    localService: pass_reused_localhost_0704db_no_env_output
-    readOnlyUiAssessment: pass_redacted_route_status_categories_only
-    focusedUiFixes: pass_learner_entry_layout_wording_ops_cookie_session
+    status: pass_ready_for_closeout
+    redTargetedTests: pass_expected_2_failed_before_implementation
+    greenTargetedTests: pass_4_files_18_tests_fresh_after_import_cleanup
+    sourceChange: ops_users_user_account_only_redeem_header_links_removed
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_11_files_scanned
+    moduleRunV2PrePushReadiness: pass_after_repository_sha_checkpoint_alignment
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
-    screenshotRawDomTrace: blocked_not_executed
-    targetedTests: pass_7_files_95_tests
-    lint: pass
-    typecheck: pass
-    diffCheck: pass
-    moduleRunV2PreCommitHardening: pass
-    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    sensitiveEvidence: pass_redacted_no_secret_material
-    browserRuntimeExecuted: false
-    providerCallExecuted: false
-    stagingProdDeployExecuted: false
+    screenshotRawDomTrace: not_executed
+    privateValueOutput: false
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    releaseReadinessClaimed: false
 previousCurrentTaskBeforeOrgAiGenerationRagScope20260708:
   id: org-ai-generation-parameter-contract-2026-07-08
   title: Organization admin AI generation parameter contract
@@ -34875,8 +34902,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 30dd9f46ccabfcc6b0b639ee009ddce28a6a861f
-  lastKnownOriginMasterSha: 30dd9f46ccabfcc6b0b639ee009ddce28a6a861f
+  lastKnownMasterSha: 2a04856b487483067f2e25ad8f3e39cbbc036b8d
+  lastKnownOriginMasterSha: 2a04856b487483067f2e25ad8f3e39cbbc036b8d
 previousCurrentTaskBeforeRequirementsCodeImplementationAlignmentAudit20260702:
   id: requirements-ssot-cross-doc-alignment-audit-2026-07-02
   status: closed

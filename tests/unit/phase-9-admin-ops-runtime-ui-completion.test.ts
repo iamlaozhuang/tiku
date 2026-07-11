@@ -716,9 +716,9 @@ describe("phase 9 admin ops runtime ui completion", () => {
 
     render(createElement(AdminOpsManagement));
 
-    expect(screen.getByText("正在加载运营后台数据")).toBeInTheDocument();
+    expect(screen.getByText("正在加载用户管理数据")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "运营后台闭环" }),
+      await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
 
     expect(
@@ -727,15 +727,15 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(
       screen.getByTestId("admin-user-row-user-public-001"),
     ).not.toHaveAttribute("data-id");
-    expect(screen.getByText("审计日志只读")).toBeInTheDocument();
-    expect(screen.getByText("AI 调用日志只读")).toBeInTheDocument();
-    expect(screen.getByText("RC-2026-****")).toBeInTheDocument();
+    expect(screen.queryByText("审计日志只读")).not.toBeInTheDocument();
+    expect(screen.queryByText("AI 调用日志只读")).not.toBeInTheDocument();
+    expect(screen.queryByText("RC-2026-****")).not.toBeInTheDocument();
     expect(screen.queryByText("RC-2026-0001-PLAIN")).toBeNull();
     expect(screen.queryByText("code_hash")).toBeNull();
     expect(screen.queryByText("raw prompt")).toBeNull();
     expect(screen.queryByText("sk-real-secret")).toBeNull();
     expect(screen.queryByText("admin-session-token")).toBeNull();
-    expect(screen.getByText("AI 评分 / 调用成功")).toBeInTheDocument();
+    expect(screen.queryByText("AI 评分 / 调用成功")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
     expect(await screen.findByText("组织授权")).toBeInTheDocument();
@@ -789,15 +789,29 @@ describe("phase 9 admin ops runtime ui completion", () => {
       "密码已重置，未返回明文密码",
     );
 
-    expect(screen.getByRole("link", { name: "打开卡密生成" })).toHaveAttribute(
-      "href",
-      "/ops/redeem-codes",
-    );
+    expect(
+      screen.queryByRole("link", { name: "打开卡密生成" }),
+    ).not.toBeInTheDocument();
     expect(
       fetchMock.mock.calls.some(
         ([input, init]) =>
           String(input).startsWith("/api/v1/redeem-codes") &&
           init?.method === "POST",
+      ),
+    ).toBe(false);
+    expect(
+      fetchMock.mock.calls.some(([input]) =>
+        String(input).startsWith("/api/v1/redeem-codes"),
+      ),
+    ).toBe(false);
+    expect(
+      fetchMock.mock.calls.some(([input]) =>
+        String(input).startsWith("/api/v1/audit-logs"),
+      ),
+    ).toBe(false);
+    expect(
+      fetchMock.mock.calls.some(([input]) =>
+        String(input).startsWith("/api/v1/ai-call-logs"),
       ),
     ).toBe(false);
     expect(screen.queryByText("卡密生成需要二次确认")).not.toBeInTheDocument();
@@ -814,9 +828,9 @@ describe("phase 9 admin ops runtime ui completion", () => {
     render(createElement(AdminOpsManagement));
 
     expect(
-      await screen.findByRole("heading", { name: "运营后台闭环" }),
+      await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
-    expect(screen.queryByText("暂无运营后台数据")).not.toBeInTheDocument();
+    expect(screen.queryByText("暂无用户管理数据")).not.toBeInTheDocument();
     expect(
       screen.getByRole("region", { name: "后台账号创建" }),
     ).toBeInTheDocument();
@@ -830,7 +844,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
     render(createElement(AdminOpsManagement));
 
     expect(
-      await screen.findByRole("heading", { name: "运营后台闭环" }),
+      await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
 
     const roleSelect = screen.getByLabelText("角色") as HTMLSelectElement;

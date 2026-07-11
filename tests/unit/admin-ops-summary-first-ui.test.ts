@@ -198,16 +198,16 @@ function expectCookieBackedFetch(
 describe("admin ops summary-first UI", () => {
   it("renders operations workspace summary and boundaries before filters and write actions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    stubFetchForSummaryFirstPages();
+    const fetchMock = stubFetchForSummaryFirstPages();
 
     render(createElement(AdminOpsManagement));
 
-    await screen.findByRole("heading", { name: "运营后台闭环" });
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
 
     const summaryBand = screen.getByTestId("ops-summary-first-band");
     expect(summaryBand).toHaveTextContent("summary-first");
     expect(summaryBand).toHaveTextContent("运营管理员");
-    expect(summaryBand).toHaveTextContent("授权版本不在此页重新判定");
+    expect(summaryBand).toHaveTextContent("用户与后台账号");
     expect(summaryBand).toHaveTextContent("空态");
 
     expect(
@@ -220,6 +220,44 @@ describe("admin ops summary-first UI", () => {
         screen.getByRole("region", { name: "后台账号创建" }),
       ) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(
+      screen.queryByRole("heading", { name: "企业组织与员工" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "企业授权" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "卡密管理" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "审计日志" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "AI 调用日志" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "企业授权页" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "打开卡密生成" }),
+    ).not.toBeInTheDocument();
+
+    const fetchedPaths = fetchMock.mock.calls.map(([url]) => String(url));
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/employees\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/org-auths\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/redeem-codes\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/audit-logs\b/u),
+    );
+    expect(fetchedPaths).not.toContainEqual(
+      expect.stringMatching(/^\/api\/v1\/ai-call-logs\b/u),
+    );
   });
 
   it("renders organization auth summary before operations actions and preserves edition boundary copy", async () => {
@@ -254,6 +292,12 @@ describe("admin ops summary-first UI", () => {
     render(createElement(AdminRedeemCodePage));
 
     await screen.findByRole("heading", { name: "卡密管理" });
+    expect(
+      screen.queryByRole("link", { name: "企业授权" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "卡密管理" }),
+    ).not.toBeInTheDocument();
 
     const summaryBand = screen.getByTestId(
       "ops-redeem-code-summary-first-band",

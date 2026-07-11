@@ -483,7 +483,7 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     render(createElement(AdminOpsManagement));
 
     expect(
-      await screen.findByRole("heading", { name: "运营后台闭环" }),
+      await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "后台账号安全策略" }),

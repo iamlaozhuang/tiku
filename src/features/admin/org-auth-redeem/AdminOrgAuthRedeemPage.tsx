@@ -1419,7 +1419,7 @@ function AdminPageHeader({
   title: string;
 }) {
   return (
-    <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <header className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
           {icon}
@@ -1433,20 +1433,6 @@ function AdminPageHeader({
             {description}
           </p>
         </div>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Link
-          href="/ops/organizations"
-          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-        >
-          企业授权
-        </Link>
-        <Link
-          href="/ops/redeem-codes"
-          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
-        >
-          卡密管理
-        </Link>
       </div>
     </header>
   );

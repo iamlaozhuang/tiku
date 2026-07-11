@@ -1,11 +1,5 @@
 import { createElement } from "react";
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminOpsManagement } from "@/features/admin/admin-ops-management/AdminOpsManagement";
@@ -278,27 +272,22 @@ describe("phase 11 audit_log coverage hardening", () => {
     expect(JSON.stringify(payload)).not.toContain("requestBody");
   });
 
-  it("lets admins search audit coverage from the ops page without exposing tokens", async () => {
+  it("keeps audit coverage out of the users page without exposing tokens", async () => {
     const fetchMock = mockAdminOpsFetch();
 
     render(createElement(AdminOpsManagement));
 
     expect(
-      await screen.findByRole("heading", { name: "运营后台闭环" }),
+      await screen.findByRole("heading", { level: 1, name: "用户管理" }),
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("审计日志关键词"), {
-      target: { value: "user.reset_password" },
-    });
-
-    await waitFor(() => {
-      expect(
-        fetchMock.mock.calls.some(([input]) =>
-          String(input).includes("keyword=user.reset_password"),
-        ),
-      ).toBe(true);
-    });
-    expect(screen.getByText("审计日志只读")).toBeInTheDocument();
+    expect(screen.queryByLabelText("审计日志关键词")).toBeNull();
+    expect(screen.queryByText("审计日志只读")).not.toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(([input]) =>
+        String(input).startsWith("/api/v1/audit-logs"),
+      ),
+    ).toBe(false);
     expect(document.body.textContent).not.toContain("admin-session-token");
     expect(document.body.textContent).not.toContain("requestBody");
   });
