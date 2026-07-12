@@ -655,6 +655,11 @@ function PaperComposerConfirmationDialog({
   }[action.kind];
 
   useEffect(() => {
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
     cancelButtonRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -680,7 +685,10 @@ function PaperComposerConfirmationDialog({
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus();
+    };
   }, [onCancel]);
 
   return (

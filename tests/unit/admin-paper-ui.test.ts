@@ -89,6 +89,16 @@ const paperPayload = {
   },
 };
 
+function createPaginatedPaperRows(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    ...paperPayload.data.papers[0],
+    publicId: `paper-pagination-${String(index + 1).padStart(2, "0")}`,
+    name: `分页试卷 ${String(index + 1).padStart(2, "0")}`,
+    updatedAt: new Date(Date.UTC(2026, 4, 19, 8, index)).toISOString(),
+    id: 1_000 + index,
+  }));
+}
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -108,7 +118,7 @@ function mockPaperFetch(payload: unknown = paperPayload) {
     if (path.startsWith("/api/v1/papers?")) {
       const payloadRecord = payload as typeof paperPayload;
       const searchParams = new URL(path, "http://localhost").searchParams;
-      const rows = Array.isArray(payloadRecord.data?.papers)
+      const filteredRows = Array.isArray(payloadRecord.data?.papers)
         ? payloadRecord.data.papers.filter((paper) => {
             const keyword = searchParams.get("keyword")?.toLowerCase();
 
@@ -134,6 +144,12 @@ function mockPaperFetch(payload: unknown = paperPayload) {
             );
           })
         : null;
+      const page = Number(searchParams.get("page") ?? "1");
+      const pageSize = Number(searchParams.get("pageSize") ?? "20");
+      const rows =
+        filteredRows === null
+          ? null
+          : filteredRows.slice((page - 1) * pageSize, page * pageSize);
 
       return createJsonResponse(
         rows === null
@@ -143,10 +159,9 @@ function mockPaperFetch(payload: unknown = paperPayload) {
               data: { papers: rows },
               pagination: {
                 ...payloadRecord.pagination,
-                total:
-                  searchParams.size > 4
-                    ? rows.length
-                    : payloadRecord.pagination.total,
+                page,
+                pageSize,
+                total: filteredRows?.length ?? 0,
               },
             },
       );
@@ -588,16 +603,18 @@ describe("AdminPaperManagement", () => {
     expect(window.location.search).toContain("subject=skill");
   });
 
-  it("uses the shared ledger toolbar and requests the next server page", async () => {
+  it("returns distinct server rows across real pages and keeps list controls consistent", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const paginationRows = createPaginatedPaperRows(45);
     const fetchMock = mockPaperFetch({
       ...paperPayload,
+      data: { papers: paginationRows },
       pagination: { ...paperPayload.pagination, total: 45 },
     });
 
     render(createElement(AdminPaperManagement));
 
-    await screen.findByText("2026 春季营销理论模拟卷");
+    await screen.findByText("分页试卷 01");
 
     expect(
       screen.getByRole("region", { name: "试卷筛选" }),
@@ -609,15 +626,8 @@ describe("AdminPaperManagement", () => {
     );
     expect(screen.getByRole("table", { name: "试卷列表" })).toBeInTheDocument();
     expect(screen.getByLabelText("每页条数")).toHaveValue("20");
-    fireEvent.change(screen.getByLabelText("每页条数"), {
-      target: { value: "100" },
-    });
-    await waitFor(() =>
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining("pageSize=100"),
-        expect.anything(),
-      ),
-    );
+    expect(screen.getByText("分页试卷 20")).toBeInTheDocument();
+    expect(screen.queryByText("分页试卷 21")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "更新时间排序" }));
     await waitFor(() =>
@@ -631,12 +641,48 @@ describe("AdminPaperManagement", () => {
       target: { value: "20" },
     });
     fireEvent.click(await screen.findByRole("button", { name: "下一页" }));
+    expect(await screen.findByText("分页试卷 21")).toBeInTheDocument();
+    expect(screen.queryByText("分页试卷 01")).toBeNull();
+    expect(screen.getByText("第 2 / 3 页")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "50" },
+    });
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("page=1&pageSize=50"),
+        expect.anything(),
+      );
+      expect(screen.getByText("分页试卷 01")).toBeInTheDocument();
+      expect(screen.getByText("分页试卷 45")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "100" },
+    });
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining("page=2"),
+        expect.stringContaining("page=1&pageSize=100"),
         expect.anything(),
       ),
     );
+
+    fireEvent.change(screen.getByLabelText("关键词"), {
+      target: { value: "分页试卷 45" },
+    });
+    await waitFor(() => {
+      expect(screen.getByText("共 1 套试卷")).toBeInTheDocument();
+      expect(screen.getByText("分页试卷 45")).toBeInTheDocument();
+      expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "重置筛选" }));
+    await waitFor(() => {
+      expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+      expect(screen.getByLabelText("关键词")).toHaveValue("");
+      expect(screen.getByText("第 1 / 3 页")).toBeInTheDocument();
+      expect(screen.getByText("分页试卷 01")).toBeInTheDocument();
+    });
   });
 
   it("restores paper list query state from the URL", async () => {

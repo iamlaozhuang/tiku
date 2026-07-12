@@ -402,6 +402,36 @@ describe("AdminPaperComposerPage", () => {
     expect(screen.queryByRole("button", { name: "编辑题目设置" })).toBeNull();
   });
 
+  it("restores the confirmation trigger after Escape closes the dialog", async () => {
+    localStorage.setItem("tiku.localSessionToken", "test-session");
+    installComposerFetch({
+      ...paper,
+      paperStatus: "published",
+      publishedAt: "2026-07-11T01:00:00.000Z",
+    });
+
+    render(<AdminPaperComposerPage paperPublicId={paper.publicId} />);
+
+    const trigger = await screen.findByRole("button", {
+      name: "复制为新草稿",
+    });
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "取消" })).toHaveFocus();
+
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(screen.getByRole("button", { name: "确认复制" })).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(screen.getByRole("button", { name: "取消" })).toHaveFocus();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect(trigger).toHaveFocus();
+  });
+
   it("adds a selected question without asking for a public identifier", async () => {
     localStorage.setItem("tiku.localSessionToken", "test-session");
     const fetchMock = installComposerFetch(paper, [availableQuestion]);
