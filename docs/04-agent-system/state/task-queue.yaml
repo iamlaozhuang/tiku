@@ -185,7 +185,7 @@ activeTasks:
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
     finalCommit: 8b1b8f567fe436d795dd6463227f48716eb91490
-    closeoutStatus: local_committed_ready_for_merge
+    closeoutStatus: remote_synced_origin_master_72c432995
   - id: user-led-b3-ai-task-lifecycle-2026-07-12
     title: User-led B3 AI task lifecycle consistency repair
     phase: user-led-b3-ai-task-lifecycle-2026-07-12

@@ -1,11 +1,11 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-b4-ai-training-information-architecture-commit-closeout-2026-07-12
-updatedAt: "2026-07-12T13:39:00-07:00"
+currentPhase: user-led-b4-ai-training-information-architecture-remote-sync-2026-07-12
+updatedAt: "2026-07-12T13:42:00-07:00"
 latestUserLedB4AiTrainingInformationArchitecture:
   id: user-led-b4-ai-training-information-architecture-2026-07-12
-  status: closed_local_committed_ready_for_merge
+  status: closed_remote_synced
   result: pass_ai_training_context_localization_and_provider_closed_browsing
   priority: p1
   branch: codex/user-led-b4-ai-training-ux
@@ -28,6 +28,14 @@ latestUserLedB4AiTrainingInformationArchitecture:
     moduleRunV2PreCommitHardening: pass_real_hook
     moduleRunV2ModuleCloseoutReadiness: pass
     localCommit: pass_8b1b8f567
+    localMasterMerge: pass_ff_only_72c432995
+    masterFocusedTests: pass_2_files_54_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
+    moduleRunV2PrePushReadiness: pass_real_push_hook
+    remotePush: pass_origin_master_72c432995
+    localRemoteComparison: pass_0_behind_0_ahead
   nextRequiredTaskId: user-led-b5-ai-paper-source-strategy-2026-07-12
 latestUserLedB3AiTaskLifecycle:
   id: user-led-b3-ai-task-lifecycle-2026-07-12
@@ -5510,7 +5518,7 @@ currentTask:
   id: user-led-b4-ai-training-information-architecture-2026-07-12
   title: User-led B4 AI training information architecture and Provider-closed experience repair
   phase: user-led-b4-ai-training-information-architecture-2026-07-12
-  status: closed_local_committed_ready_for_merge
+  status: closed_remote_synced
   priority: p1
   taskKind: targeted_student_ai_training_ux_repair
   branch: codex/user-led-b4-ai-training-ux

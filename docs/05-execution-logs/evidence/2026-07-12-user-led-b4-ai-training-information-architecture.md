@@ -39,6 +39,10 @@
 - `corepack pnpm@10.26.1 run format:check`：首次发现任务方案格式问题，格式化后 pass。
 - `corepack pnpm@10.26.1 exec next build --webpack`：pass，90/90 静态页面生成。
 - `git diff --check`：pass。
+- ff-only 合入本地 `master` 后复验：focused 2 文件 / 54 用例、lint、typecheck 与 `git diff --check` 通过。
+- Test-ModuleRunV2PrePushReadiness：pass；真实 push hook 再次通过，远端无领先、本地仅包含本批 2 个提交。
+- 普通推送 `origin/master`：pass，产品与治理提交同步至 `72c432995bc0d94e2408e9ac9ad5020cb737b8fd`。
+- 推送后比较：`origin/master...master` 为 0 behind / 0 ahead，工作区 clean。
 
 ## 两轮对抗式复核
 
@@ -52,6 +56,10 @@
 - localFullLoopGate: pass
 - Test-ModuleRunV2PreCommitHardening: pass；真实 commit hook 的 scope、敏感信息、术语、lint-staged、lint、typecheck 与 post-commit advisory 均通过。
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass；严格 RED/GREEN、commit、localFullLoopGate、blocked remainder、thread rollover 和 next module run 锚点均通过。
+- masterPostMergeVerification: pass_2_files_54_tests_lint_typecheck_diff_check。
+- Test-ModuleRunV2PrePushReadiness: pass_real_push_hook。
+- remotePush: pass_origin_master_72c432995。
+- localRemoteComparison: pass_0_behind_0_ahead。
 - Provider execution: blocked_not_executed
 - database mutation: blocked_not_executed
 - Cost Calibration Gate remains blocked
@@ -61,4 +69,4 @@
 
 ## 结论
 
-B4 产品实现、真实提交与本地质量门禁通过，等待 ff-only 合入、主分支复验和远端同步。结论仅覆盖 localhost 代码，不代表 staging、production 或 release readiness。
+B4 产品实现、真实提交、ff-only 合入、主分支复验和远端同步均通过。结论仅覆盖 localhost 代码，不代表 staging、production 或 release readiness。

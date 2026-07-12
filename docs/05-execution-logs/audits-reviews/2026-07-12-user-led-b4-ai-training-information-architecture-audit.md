@@ -19,6 +19,8 @@
 | 敏感信息          | pass；无凭证、token、session、DB URL、Provider payload 或内部 publicId 新增展示。  |
 | 范围控制          | pass；仅修改 allowedFiles，未触碰 server、schema、migration、fixture、env 或依赖。 |
 | 回归门禁          | pass；360 文件、1972 用例、lint、typecheck、format 和 webpack build 通过。         |
+| 主分支复验        | pass；ff-only 合入后 focused 54 用例、lint、typecheck 和 diff check 通过。         |
+| 远端门禁          | pass；pre-push 通过，普通推送后 master/origin/master 比较为 0/0。                  |
 
 ## 反证与残余风险
 
