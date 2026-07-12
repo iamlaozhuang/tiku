@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -99,7 +100,50 @@ function mockPaperFetch(payload: unknown = paperPayload) {
     }
 
     if (path.startsWith("/api/v1/papers?")) {
-      return createJsonResponse(payload);
+      const payloadRecord = payload as typeof paperPayload;
+      const searchParams = new URL(path, "http://localhost").searchParams;
+      const rows = Array.isArray(payloadRecord.data?.papers)
+        ? payloadRecord.data.papers.filter((paper) => {
+            const keyword = searchParams.get("keyword")?.toLowerCase();
+
+            return (
+              (keyword === undefined ||
+                [paper.name, paper.publicId, paper.sourceFileName]
+                  .filter(Boolean)
+                  .join(" ")
+                  .toLowerCase()
+                  .includes(keyword)) &&
+              (searchParams.get("profession") === null ||
+                paper.profession === searchParams.get("profession")) &&
+              (searchParams.get("subject") === null ||
+                paper.subject === searchParams.get("subject")) &&
+              (searchParams.get("level") === null ||
+                String(paper.level) === searchParams.get("level")) &&
+              (searchParams.get("year") === null ||
+                String(paper.year) === searchParams.get("year")) &&
+              (searchParams.get("status") === null ||
+                paper.paperStatus === searchParams.get("status")) &&
+              (searchParams.get("paperType") === null ||
+                paper.paperType === searchParams.get("paperType"))
+            );
+          })
+        : null;
+
+      return createJsonResponse(
+        rows === null
+          ? payload
+          : {
+              ...payloadRecord,
+              data: { papers: rows },
+              pagination: {
+                ...payloadRecord.pagination,
+                total:
+                  searchParams.size > 4
+                    ? rows.length
+                    : payloadRecord.pagination.total,
+              },
+            },
+      );
     }
 
     return createJsonResponse({ code: 404001, message: "missing", data: null });
@@ -326,6 +370,7 @@ function expectAdminFetchAuthorization(
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -487,9 +532,9 @@ describe("AdminPaperManagement", () => {
     ).toHaveAttribute("data-selected", "true");
   });
 
-  it("filters papers by keyword, status, level, year, subject, and type", async () => {
+  it("forwards paper filters to the server and persists them in the URL", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    mockPaperFetch();
+    const fetchMock = mockPaperFetch();
 
     render(createElement(AdminPaperManagement));
 
@@ -513,35 +558,93 @@ describe("AdminPaperManagement", () => {
       target: { value: "mock_paper" },
     });
 
-    expect(screen.getByText("物流技能练习卷")).toBeInTheDocument();
-    expect(screen.queryByText("2026 春季营销理论模拟卷")).toBeNull();
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("keyword=%E7%89%A9%E6%B5%81%E6%8A%80%E8%83%BD"),
+        expect.anything(),
+      ),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("status=draft"),
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("paperType=mock_paper"),
+      expect.anything(),
+    );
+    expect(window.location.search).toContain("year=2026");
+    expect(window.location.search).toContain("subject=skill");
   });
 
-  it("renders common pagination and updated-at sorting controls for paper lists", async () => {
+  it("uses the shared ledger toolbar and requests the next server page", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    mockPaperFetch();
+    const fetchMock = mockPaperFetch({
+      ...paperPayload,
+      pagination: { ...paperPayload.pagination, total: 45 },
+    });
 
     render(createElement(AdminPaperManagement));
 
     await screen.findByText("2026 春季营销理论模拟卷");
 
+    expect(
+      screen.getByRole("region", { name: "试卷筛选" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("共 45 套试卷")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "试卷列表" })).toHaveAttribute(
+      "data-slot",
+      "admin-table-frame",
+    );
+    expect(screen.getByRole("table", { name: "试卷列表" })).toBeInTheDocument();
     expect(screen.getByLabelText("每页条数")).toHaveValue("20");
     fireEvent.change(screen.getByLabelText("每页条数"), {
       target: { value: "100" },
     });
-    expect(screen.getByLabelText("每页条数")).toHaveValue("100");
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("pageSize=100"),
+        expect.anything(),
+      ),
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "更新时间排序" }));
-    const rows = screen.getAllByTestId(/paper-row-/);
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("sortOrder=asc"),
+        expect.anything(),
+      ),
+    );
 
-    expect(rows[0]).toHaveAttribute(
-      "data-public-id",
-      "paper-logistics-2026-practice",
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "20" },
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "下一页" }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("page=2"),
+        expect.anything(),
+      ),
     );
-    expect(rows[1]).toHaveAttribute(
-      "data-public-id",
-      "paper-marketing-2026-spring",
+  });
+
+  it("restores paper list query state from the URL", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/content/papers?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&status=draft",
     );
+    const fetchMock = mockPaperFetch();
+
+    render(createElement(AdminPaperManagement));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("page=2&pageSize=50"),
+        expect.anything(),
+      ),
+    );
+    expect(screen.getByLabelText("状态")).toHaveValue("draft");
   });
 
   it("shows source file summaries, validation issues, empty, loading, and error states", async () => {
@@ -607,7 +710,7 @@ describe("AdminPaperManagement", () => {
       },
     });
     render(createElement(AdminPaperManagement));
-    expect(await screen.findByText("没有匹配的试卷")).toBeInTheDocument();
+    expect(await screen.findByText("暂无试卷")).toBeInTheDocument();
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -619,7 +722,7 @@ describe("AdminPaperManagement", () => {
     fireEvent.change(screen.getByLabelText("关键词"), {
       target: { value: "不存在的试卷" },
     });
-    expect(screen.getByText("没有匹配的试卷")).toBeInTheDocument();
+    expect(await screen.findByText("没有匹配的试卷")).toBeInTheDocument();
   });
 
   it("creates, composes, publishes, archives, copies, and binds paper assets through the protected runtime", async () => {

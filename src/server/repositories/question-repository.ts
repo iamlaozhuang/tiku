@@ -8,6 +8,7 @@ import {
   eq,
   ilike,
   inArray,
+  or,
   sql,
   type SQL,
 } from "drizzle-orm";
@@ -423,7 +424,12 @@ function createQuestionConditions(
   }
 
   if (queryInput.keyword !== null) {
-    conditions.push(ilike(question.stem_rich_text, `%${queryInput.keyword}%`));
+    conditions.push(
+      or(
+        ilike(question.public_id, `%${queryInput.keyword}%`),
+        ilike(question.stem_rich_text, `%${queryInput.keyword}%`),
+      )!,
+    );
   }
 
   const knowledgeNodePublicIdCondition =

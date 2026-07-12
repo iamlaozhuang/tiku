@@ -34,6 +34,14 @@ import {
   type AdminAuthOperationSortField,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import { adminRoleValues, type AdminRole } from "../models/auth";
+import { knStatusValues, resourceStatusValues } from "../models/ai-rag";
+import {
+  paperStatusValues,
+  paperTypeValues,
+  professionValues,
+  questionStatusValues,
+  subjectValues,
+} from "../models/paper";
 import {
   createPostgresAdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositories,
@@ -324,12 +332,48 @@ function readAdminContentKnowledgeListQuery(
   const pageSize = readPageSize(searchParams, [20, 50, 100], 20);
   const page = Number(searchParams.get("page"));
   const level = Number(searchParams.get("level"));
+  const year = Number(searchParams.get("year"));
+  const sortBy = searchParams.get("sortBy");
+  const status = searchParams.get("status");
+  const profession = searchParams.get("profession");
+  const subject = searchParams.get("subject");
+  const paperType = searchParams.get("paperType");
+  const contentStatuses = [
+    ...questionStatusValues,
+    ...paperStatusValues,
+    ...resourceStatusValues,
+    ...knStatusValues,
+  ] as const;
 
   return createAdminContentKnowledgeListQuery({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: pageSize as AdminContentKnowledgePageSize,
     keyword: searchParams.get("keyword"),
     level: Number.isFinite(level) && level > 0 ? level : null,
+    sortBy:
+      sortBy === "createdAt" ||
+      sortBy === "publishedAt" ||
+      sortBy === "sortOrder"
+        ? sortBy
+        : "updatedAt",
+    sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+    status: contentStatuses.includes(status as (typeof contentStatuses)[number])
+      ? (status as (typeof contentStatuses)[number])
+      : "all",
+    profession: professionValues.includes(
+      profession as (typeof professionValues)[number],
+    )
+      ? (profession as (typeof professionValues)[number])
+      : "all",
+    subject: subjectValues.includes(subject as (typeof subjectValues)[number])
+      ? (subject as (typeof subjectValues)[number])
+      : "all",
+    paperType: paperTypeValues.includes(
+      paperType as (typeof paperTypeValues)[number],
+    )
+      ? (paperType as (typeof paperTypeValues)[number])
+      : "all",
+    year: Number.isFinite(year) && year > 0 ? year : null,
   });
 }
 

@@ -58,6 +58,27 @@ function AdminListInteractionHarness() {
   );
 }
 
+function AdminListDefaultResetHarness() {
+  const { handleReset, query } = useAdminListInteraction({
+    initialQuery: {
+      page: 3,
+      pageSize: 50,
+      sortBy: "updatedAt",
+      sortOrder: "asc",
+    },
+    resetQuery: {},
+  });
+
+  return (
+    <div>
+      <output aria-label="默认重置状态">{JSON.stringify(query)}</output>
+      <button type="button" onClick={handleReset}>
+        恢复列表默认值
+      </button>
+    </div>
+  );
+}
+
 describe("admin list pattern v2", () => {
   it("renders a labelled toolbar while preserving caller-owned filter order", () => {
     render(
@@ -206,6 +227,23 @@ describe("admin list pattern v2", () => {
         pageSize: 20,
         sortBy: "registeredAt",
         sortOrder: "asc",
+        filterRevision: 0,
+        lastChangedFilter: null,
+      }),
+    );
+  });
+
+  it("can reset URL-restored state to the list defaults", () => {
+    render(<AdminListDefaultResetHarness />);
+
+    fireEvent.click(screen.getByRole("button", { name: "恢复列表默认值" }));
+
+    expect(screen.getByLabelText("默认重置状态")).toHaveTextContent(
+      JSON.stringify({
+        page: 1,
+        pageSize: 20,
+        sortBy: "updatedAt",
+        sortOrder: "desc",
         filterRevision: 0,
         lastChangedFilter: null,
       }),

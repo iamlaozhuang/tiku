@@ -185,6 +185,7 @@ function readMaterialQuery(request: Request): Record<string, unknown> {
     level: searchParams.get("level") ?? undefined,
     subject: searchParams.get("subject") ?? undefined,
     status: searchParams.get("status") ?? undefined,
+    keyword: searchParams.get("keyword") ?? undefined,
   };
 }
 

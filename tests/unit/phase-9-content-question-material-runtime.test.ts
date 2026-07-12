@@ -278,6 +278,45 @@ const questionInput = {
 };
 
 describe("phase 9 content question material runtime", () => {
+  it("forwards material keyword and pagination filters to the repository", async () => {
+    const repositories = createRepositories();
+    let capturedQuery:
+      | Parameters<typeof repositories.materialRepository.listMaterials>[0]
+      | null = null;
+    const originalListMaterials = repositories.materialRepository.listMaterials;
+
+    repositories.materialRepository.listMaterials = async (query) => {
+      capturedQuery = query;
+      return originalListMaterials(query);
+    };
+
+    const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
+      repositories,
+      sessionService: createSessionService("content_admin"),
+    });
+    const response = await handlers.materials.collection.GET(
+      new Request(
+        "http://localhost/api/v1/materials?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&keyword=case&profession=marketing&level=3&subject=theory&status=available",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(capturedQuery).toEqual(
+      expect.objectContaining({
+        page: 2,
+        pageSize: 50,
+        sortBy: "updatedAt",
+        sortOrder: "asc",
+        keyword: "case",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        status: "available",
+      }),
+    );
+  });
+
   it("requires an authenticated admin session before returning content data", async () => {
     const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
       repositories: createRepositories(),

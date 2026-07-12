@@ -15,6 +15,13 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AdminListToolbar,
+  AdminPagination,
+  AdminTableFrame,
+} from "@/components/admin/AdminList";
+import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import type { ApiPagination } from "@/server/contracts/api-response";
 import type {
   AdminPaperOpsSummaryDto,
   AdminPaperQuestionTypeDistributionDto,
@@ -38,18 +45,12 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
-  ContentOpsStagingRoleArrangement,
-  DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
-  PublicId,
   fetchAdminApi,
   formatScope,
   getStoredSessionToken,
-  includesKeyword,
   isAdminContext,
   isUnauthorizedResponse,
-  matchesFilter,
-  matchesNullableFilter,
 } from "../content-admin-runtime";
 
 type PaperStatusFilter = "all" | PaperStatus;
@@ -57,7 +58,7 @@ type PaperTypeFilter = "all" | PaperType;
 type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
 type AdminCommonSortOrder = "asc" | "desc";
-type PaperLoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
+type PaperLoadState = "loading" | "ready" | "unauthorized" | "error";
 type PaperFormValues = {
   durationMinute: string;
   level: string;
@@ -145,9 +146,74 @@ const questionTypeLabels: Record<
 const PUBLISHED_PAPER_MIN_QUESTION_COUNT = 1;
 const PAPER_QUESTION_COUNT_LIMIT = 100;
 
-function usePaperData() {
+function readPaperListUrlQuery(): {
+  keyword: string;
+  level: string;
+  year: string;
+  profession: ProfessionFilter;
+  subject: SubjectFilter;
+  status: PaperStatusFilter;
+  paperType: PaperTypeFilter;
+  list: {
+    page: number;
+    pageSize: 20 | 50 | 100;
+    sortBy: "updatedAt";
+    sortOrder: AdminCommonSortOrder;
+  };
+} {
+  const searchParams = new URLSearchParams(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
+  const page = Number(searchParams.get("page"));
+  const pageSize = Number(searchParams.get("pageSize"));
+  const profession = searchParams.get("profession");
+  const subject = searchParams.get("subject");
+  const status = searchParams.get("status");
+  const paperType = searchParams.get("paperType");
+
+  return {
+    keyword: searchParams.get("keyword") ?? "",
+    level: searchParams.get("level") ?? "",
+    year: searchParams.get("year") ?? "",
+    profession: (["marketing", "logistics", "monopoly"] as const).includes(
+      profession as Profession,
+    )
+      ? (profession as Profession)
+      : "all",
+    subject: (["theory", "skill"] as const).includes(subject as Subject)
+      ? (subject as Subject)
+      : "all",
+    status: (["draft", "published", "archived"] as const).includes(
+      status as PaperStatus,
+    )
+      ? (status as PaperStatus)
+      : "all",
+    paperType: (["mock_paper", "past_paper"] as const).includes(
+      paperType as PaperType,
+    )
+      ? (paperType as PaperType)
+      : "all",
+    list: {
+      page: Number.isInteger(page) && page > 0 ? page : 1,
+      pageSize: pageSize === 50 || pageSize === 100 ? pageSize : 20,
+      sortBy: "updatedAt",
+      sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+    } as const,
+  };
+}
+
+const defaultPaperPagination: ApiPagination = {
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  sortBy: "updatedAt",
+  sortOrder: "desc",
+};
+
+function usePaperData(queryString: string) {
   const [loadState, setLoadState] = useState<PaperLoadState>("loading");
   const [papers, setPapers] = useState<AdminPaperOpsSummaryDto[]>([]);
+  const [pagination, setPagination] = useState(defaultPaperPagination);
 
   useEffect(() => {
     let isActive = true;
@@ -181,7 +247,7 @@ function usePaperData() {
         }
 
         const paperResponse = await fetchAdminApi<PaperListDto>(
-          `/api/v1/papers?${DEFAULT_CONTENT_LIST_QUERY}`,
+          `/api/v1/papers?${queryString}`,
           sessionToken,
         );
 
@@ -195,9 +261,8 @@ function usePaperData() {
         }
 
         setPapers(paperResponse.data.papers);
-        setLoadState(
-          paperResponse.data.papers.length === 0 ? "empty" : "ready",
-        );
+        setPagination(paperResponse.pagination ?? defaultPaperPagination);
+        setLoadState("ready");
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -210,9 +275,9 @@ function usePaperData() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [queryString]);
 
-  return { loadState, papers, setPapers };
+  return { loadState, pagination, papers, setPapers };
 }
 
 async function mutateAdminApi<TData>(
@@ -492,22 +557,82 @@ function createPaperAssetFormData(values: PaperAssetFormValues) {
 export function AdminPaperManagement({
   initialPaperPublicId = "",
 }: AdminPaperManagementProps) {
-  const [keyword, setKeyword] = useState(initialPaperPublicId);
-  const [levelFilter, setLevelFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [profession, setProfession] = useState<ProfessionFilter>("all");
-  const [subject, setSubject] = useState<SubjectFilter>("all");
-  const [paperStatus, setPaperStatus] = useState<PaperStatusFilter>("all");
-  const [paperType, setPaperType] = useState<PaperTypeFilter>("all");
+  const [initialUrlQuery] = useState(() => readPaperListUrlQuery());
+  const [keyword, setKeyword] = useState(
+    initialPaperPublicId || initialUrlQuery.keyword,
+  );
+  const [levelFilter, setLevelFilter] = useState(initialUrlQuery.level);
+  const [yearFilter, setYearFilter] = useState(initialUrlQuery.year);
+  const [profession, setProfession] = useState<ProfessionFilter>(
+    initialUrlQuery.profession,
+  );
+  const [subject, setSubject] = useState<SubjectFilter>(
+    initialUrlQuery.subject,
+  );
+  const [paperStatus, setPaperStatus] = useState<PaperStatusFilter>(
+    initialUrlQuery.status,
+  );
+  const [paperType, setPaperType] = useState<PaperTypeFilter>(
+    initialUrlQuery.paperType,
+  );
   const [activeForm, setActiveForm] = useState<ActivePaperForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [pageSize, setPageSize] = useState("20");
-  const [sortOrder, setSortOrder] = useState<AdminCommonSortOrder>("desc");
+  const {
+    handleFilterChange,
+    handlePageChange,
+    handlePageSizeChange,
+    handleReset,
+    handleSortChange,
+    query,
+  } = useAdminListInteraction({
+    initialQuery: initialUrlQuery.list,
+    resetQuery: {},
+  });
   const [pendingPaperAction, setPendingPaperAction] =
     useState<PendingPaperAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { loadState, papers, setPapers } = usePaperData();
+  const paperQueryString = useMemo(() => {
+    const searchParams = new URLSearchParams({
+      page: String(query.page),
+      pageSize: String(query.pageSize),
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    });
+
+    if (keyword.trim() !== "") searchParams.set("keyword", keyword.trim());
+    if (profession !== "all") searchParams.set("profession", profession);
+    if (subject !== "all") searchParams.set("subject", subject);
+    if (levelFilter.trim() !== "")
+      searchParams.set("level", levelFilter.trim());
+    if (yearFilter.trim() !== "") searchParams.set("year", yearFilter.trim());
+    if (paperStatus !== "all") searchParams.set("status", paperStatus);
+    if (paperType !== "all") searchParams.set("paperType", paperType);
+
+    return searchParams.toString();
+  }, [
+    keyword,
+    levelFilter,
+    paperStatus,
+    paperType,
+    profession,
+    query.page,
+    query.pageSize,
+    query.sortBy,
+    query.sortOrder,
+    subject,
+    yearFilter,
+  ]);
+  const { loadState, pagination, papers, setPapers } =
+    usePaperData(paperQueryString);
+
+  useEffect(() => {
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?${paperQueryString}`,
+    );
+  }, [paperQueryString]);
 
   const initialPaperTarget = useMemo(() => {
     if (initialPaperPublicId.length === 0 || loadState !== "ready") {
@@ -531,50 +656,16 @@ export function AdminPaperManagement({
   const displayedActionMessage = actionMessage ?? initialPaperTargetMessage;
   const displayedActionError = actionError ?? initialPaperTargetError;
   const selectedPaperPublicId = initialPaperTarget?.publicId ?? null;
+  const hasActivePaperFilters =
+    keyword.trim() !== "" ||
+    levelFilter.trim() !== "" ||
+    yearFilter.trim() !== "" ||
+    profession !== "all" ||
+    subject !== "all" ||
+    paperStatus !== "all" ||
+    paperType !== "all";
 
-  const filteredPapers = useMemo(
-    () =>
-      papers.filter((paper) => {
-        const searchableText = [
-          paper.publicId,
-          paper.name,
-          paper.sourceFileName,
-          paper.publishValidationSummary,
-          paper.year,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return (
-          includesKeyword(searchableText, keyword) &&
-          includesKeyword(String(paper.level), levelFilter) &&
-          includesKeyword(String(paper.year ?? ""), yearFilter) &&
-          matchesFilter(paper.profession, profession) &&
-          matchesFilter(paper.subject, subject) &&
-          matchesFilter(paper.paperStatus, paperStatus) &&
-          matchesNullableFilter(paper.paperType, paperType)
-        );
-      }),
-    [
-      keyword,
-      levelFilter,
-      paperStatus,
-      paperType,
-      papers,
-      profession,
-      subject,
-      yearFilter,
-    ],
-  );
-  const displayedPapers = useMemo(
-    () =>
-      sortItemsByUpdatedAt(filteredPapers, sortOrder).slice(
-        0,
-        Number(pageSize),
-      ),
-    [filteredPapers, pageSize, sortOrder],
-  );
+  const displayedPapers = papers;
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载试卷" />;
@@ -845,8 +936,7 @@ export function AdminPaperManagement({
             试卷管理
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
-            管理草稿组卷、发布校验、下架复制、原始文件与模拟考试记录概览；页面只展示
-            业务标识与契约字段。
+            按专业、等级和生命周期维护试卷草稿，完成发布校验、下架与复制。
           </p>
         </div>
         <ActionBar
@@ -871,35 +961,59 @@ export function AdminPaperManagement({
         />
       </header>
 
-      <ContentOpsStagingRoleArrangement />
       <PaperLifecycleContextBand papers={papers} />
 
       <FilterPanel
         keyword={keyword}
         levelFilter={levelFilter}
+        pageSize={query.pageSize}
         paperStatus={paperStatus}
         paperType={paperType}
         profession={profession}
+        sortOrder={query.sortOrder}
         subject={subject}
+        total={pagination.total}
         yearFilter={yearFilter}
-        onKeywordChange={setKeyword}
-        onLevelFilterChange={setLevelFilter}
-        onPaperStatusChange={setPaperStatus}
-        onPaperTypeChange={setPaperType}
-        onProfessionChange={setProfession}
-        onSubjectChange={setSubject}
-        onYearFilterChange={setYearFilter}
-      />
-
-      <AdminCommonListControls
-        pageSize={pageSize}
-        sortOrder={sortOrder}
-        onPageSizeChange={setPageSize}
-        onToggleSortOrder={() =>
-          setSortOrder((currentSortOrder) =>
-            currentSortOrder === "desc" ? "asc" : "desc",
-          )
-        }
+        onKeywordChange={(value) => {
+          setKeyword(value);
+          handleFilterChange("keyword");
+        }}
+        onLevelFilterChange={(value) => {
+          setLevelFilter(value);
+          handleFilterChange("level");
+        }}
+        onPageSizeChange={handlePageSizeChange}
+        onPaperStatusChange={(value) => {
+          setPaperStatus(value);
+          handleFilterChange("status");
+        }}
+        onPaperTypeChange={(value) => {
+          setPaperType(value);
+          handleFilterChange("paperType");
+        }}
+        onProfessionChange={(value) => {
+          setProfession(value);
+          handleFilterChange("profession");
+        }}
+        onReset={() => {
+          setKeyword(initialPaperPublicId);
+          setLevelFilter("");
+          setYearFilter("");
+          setProfession("all");
+          setSubject("all");
+          setPaperStatus("all");
+          setPaperType("all");
+          handleReset();
+        }}
+        onSort={() => handleSortChange("updatedAt")}
+        onSubjectChange={(value) => {
+          setSubject(value);
+          handleFilterChange("subject");
+        }}
+        onYearFilterChange={(value) => {
+          setYearFilter(value);
+          handleFilterChange("year");
+        }}
       />
 
       <SummaryRail rows={displayedPapers} />
@@ -943,55 +1057,60 @@ export function AdminPaperManagement({
         />
       ) : null}
 
-      {filteredPapers.length > 0 ? (
-        <PaperList
-          rows={displayedPapers}
-          selectedPublicId={selectedPaperPublicId}
-          onArchive={(publicId) =>
-            setPendingPaperAction({ kind: "archive", publicId })
-          }
-          onBindAsset={(publicId) => {
-            setActionError(null);
-            setActionMessage(null);
-            const selectedPaper = papers.find(
-              (paper) => paper.publicId === publicId,
-            );
-            setActiveForm({
-              kind: "paperAsset",
-              values: {
-                paperPublicId: publicId,
-                profession: selectedPaper?.profession ?? "marketing",
-                file: null,
-              },
-            });
-          }}
-          onCompose={(publicId) => {
-            setActionError(null);
-            setActionMessage(null);
-            setActiveForm({
-              kind: "paperQuestion",
-              values: {
-                materialPublicId: "",
-                paperPublicId: publicId,
-                paperSectionDescription: "",
-                paperSectionSortOrder: "1",
-                paperSectionTitle: "默认大题",
-                questionPublicId: "question-marketing-001",
-                questionGroupSortOrder: "1",
-                questionGroupTitle: "",
-                score: "5.0",
-                sortOrder: "1",
-              },
-            });
-          }}
-          onCopy={(publicId) => void handleCopyPaper(publicId)}
-          onPublish={(publicId) =>
-            setPendingPaperAction({ kind: "publish", publicId })
-          }
-        />
-      ) : (
-        <FilteredEmptyState />
-      )}
+      <PaperList
+        emptyTitle={hasActivePaperFilters ? "没有匹配的试卷" : "暂无试卷"}
+        rows={displayedPapers}
+        selectedPublicId={selectedPaperPublicId}
+        onArchive={(publicId) =>
+          setPendingPaperAction({ kind: "archive", publicId })
+        }
+        onBindAsset={(publicId) => {
+          setActionError(null);
+          setActionMessage(null);
+          const selectedPaper = papers.find(
+            (paper) => paper.publicId === publicId,
+          );
+          setActiveForm({
+            kind: "paperAsset",
+            values: {
+              paperPublicId: publicId,
+              profession: selectedPaper?.profession ?? "marketing",
+              file: null,
+            },
+          });
+        }}
+        onCompose={(publicId) => {
+          setActionError(null);
+          setActionMessage(null);
+          setActiveForm({
+            kind: "paperQuestion",
+            values: {
+              materialPublicId: "",
+              paperPublicId: publicId,
+              paperSectionDescription: "",
+              paperSectionSortOrder: "1",
+              paperSectionTitle: "默认大题",
+              questionPublicId: "question-marketing-001",
+              questionGroupSortOrder: "1",
+              questionGroupTitle: "",
+              score: "5.0",
+              sortOrder: "1",
+            },
+          });
+        }}
+        onCopy={(publicId) => void handleCopyPaper(publicId)}
+        onPublish={(publicId) =>
+          setPendingPaperAction({ kind: "publish", publicId })
+        }
+      />
+
+      <AdminPagination
+        itemLabel="套试卷"
+        page={query.page}
+        pageSize={query.pageSize}
+        total={pagination.total}
+        onPageChange={handlePageChange}
+      />
 
       {pendingPaperAction === null ? null : (
         <PaperConfirmationDialog
@@ -1042,65 +1161,15 @@ function PaperLifecycleContextBand({
           </p>
         </div>
         <dl className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
-          <LifecycleMetric label="草稿" value={draftCount} />
-          <LifecycleMetric label="已发布" value={publishedCount} />
-          <LifecycleMetric label="已下架" value={archivedCount} />
+          <LifecycleMetric label="本页草稿" value={draftCount} />
+          <LifecycleMetric label="本页已发布" value={publishedCount} />
+          <LifecycleMetric label="本页已下架" value={archivedCount} />
           <LifecycleMetric
-            label="发布校验待处理"
+            label="本页发布校验待处理"
             value={publishValidationPendingCount}
           />
         </dl>
       </div>
-    </section>
-  );
-}
-
-function sortItemsByUpdatedAt<TItem extends { updatedAt: string }>(
-  items: TItem[],
-  sortOrder: AdminCommonSortOrder,
-) {
-  return [...items].sort((leftItem, rightItem) => {
-    const leftTime = new Date(leftItem.updatedAt).getTime();
-    const rightTime = new Date(rightItem.updatedAt).getTime();
-
-    return sortOrder === "desc" ? rightTime - leftTime : leftTime - rightTime;
-  });
-}
-
-function AdminCommonListControls({
-  pageSize,
-  sortOrder,
-  onPageSizeChange,
-  onToggleSortOrder,
-}: {
-  pageSize: string;
-  sortOrder: AdminCommonSortOrder;
-  onPageSizeChange: (value: string) => void;
-  onToggleSortOrder: () => void;
-}) {
-  return (
-    <section
-      aria-label="列表通用控制"
-      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
-    >
-      <FilterSelect
-        label="每页条数"
-        options={[
-          ["20", "20"],
-          ["50", "50"],
-          ["100", "100"],
-        ]}
-        value={pageSize}
-        onChange={onPageSizeChange}
-      />
-      <Button type="button" variant="outline" onClick={onToggleSortOrder}>
-        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
-        更新时间排序
-      </Button>
-      <p className="text-text-secondary text-xs">
-        当前{sortOrder === "desc" ? "降序" : "升序"}
-        ，筛选变更会自动刷新当前结果。
-      </p>
     </section>
   );
 }
@@ -1534,115 +1603,156 @@ function PaperAssetWriteForm({
 function FilterPanel({
   keyword,
   levelFilter,
+  pageSize,
   paperStatus,
   paperType,
   profession,
+  sortOrder,
   subject,
+  total,
   yearFilter,
   onKeywordChange,
   onLevelFilterChange,
+  onPageSizeChange,
   onPaperStatusChange,
   onPaperTypeChange,
   onProfessionChange,
+  onReset,
+  onSort,
   onSubjectChange,
   onYearFilterChange,
 }: {
   keyword: string;
   levelFilter: string;
+  pageSize: number;
   paperStatus: PaperStatusFilter;
   paperType: PaperTypeFilter;
   profession: ProfessionFilter;
+  sortOrder: AdminCommonSortOrder;
   subject: SubjectFilter;
+  total: number;
   yearFilter: string;
   onKeywordChange: (value: string) => void;
   onLevelFilterChange: (value: string) => void;
+  onPageSizeChange: (value: string) => void;
   onPaperStatusChange: (value: PaperStatusFilter) => void;
   onPaperTypeChange: (value: PaperTypeFilter) => void;
   onProfessionChange: (value: ProfessionFilter) => void;
+  onReset: () => void;
+  onSort: () => void;
   onSubjectChange: (value: SubjectFilter) => void;
   onYearFilterChange: (value: string) => void;
 }) {
   return (
-    <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
-        <label className="flex flex-1 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">关键词</span>
-          <span className="relative">
-            <Search
-              aria-hidden="true"
-              className="text-text-muted pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
-            />
-            <Input
-              aria-label="关键词"
-              className="pl-8"
-              placeholder="试卷名称、业务标识、校验结果或文件名"
-              value={keyword}
-              onChange={(event) => onKeywordChange(event.target.value)}
-            />
-          </span>
-        </label>
-        <FilterSelect
-          label="专业"
-          options={[
-            ["all", "全部专业"],
-            ["marketing", "营销"],
-            ["logistics", "物流"],
-            ["monopoly", "专卖"],
-          ]}
-          value={profession}
-          onChange={(value) => onProfessionChange(value as ProfessionFilter)}
-        />
-        <FilterSelect
-          label="科目"
-          options={[
-            ["all", "全部科目"],
-            ["theory", "理论"],
-            ["skill", "技能"],
-          ]}
-          value={subject}
-          onChange={(value) => onSubjectChange(value as SubjectFilter)}
-        />
-        <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
-          <span className="text-text-secondary">等级</span>
-          <Input
-            aria-label="等级筛选"
-            placeholder="全部等级"
-            value={levelFilter}
-            onChange={(event) => onLevelFilterChange(event.target.value)}
+    <AdminListToolbar
+      description="按试卷范围和生命周期缩小结果；筛选变化后从第一页重新查询。"
+      resultLabel={`共 ${total} 套试卷`}
+      title="试卷筛选"
+    >
+      <label className="flex flex-1 flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">关键词</span>
+        <span className="relative">
+          <Search
+            aria-hidden="true"
+            className="text-text-muted pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
           />
-        </label>
-        <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
-          <span className="text-text-secondary">年份</span>
           <Input
-            aria-label="年份筛选"
-            placeholder="全部年份"
-            value={yearFilter}
-            onChange={(event) => onYearFilterChange(event.target.value)}
+            aria-label="关键词"
+            className="h-9 pl-8"
+            placeholder="试卷名称、业务标识、校验结果或文件名"
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
           />
-        </label>
-        <FilterSelect
-          label="状态"
-          options={[
-            ["all", "全部状态"],
-            ["draft", "草稿"],
-            ["published", "已发布"],
-            ["archived", "已下架"],
-          ]}
-          value={paperStatus}
-          onChange={(value) => onPaperStatusChange(value as PaperStatusFilter)}
+        </span>
+      </label>
+      <FilterSelect
+        label="专业"
+        options={[
+          ["all", "全部专业"],
+          ["marketing", "营销"],
+          ["logistics", "物流"],
+          ["monopoly", "专卖"],
+        ]}
+        value={profession}
+        onChange={(value) => onProfessionChange(value as ProfessionFilter)}
+      />
+      <FilterSelect
+        label="科目"
+        options={[
+          ["all", "全部科目"],
+          ["theory", "理论"],
+          ["skill", "技能"],
+        ]}
+        value={subject}
+        onChange={(value) => onSubjectChange(value as SubjectFilter)}
+      />
+      <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
+        <span className="text-text-secondary">等级</span>
+        <Input
+          aria-label="等级筛选"
+          className="h-9"
+          placeholder="全部等级"
+          value={levelFilter}
+          onChange={(event) => onLevelFilterChange(event.target.value)}
         />
-        <FilterSelect
-          label="类型"
-          options={[
-            ["all", "全部类型"],
-            ["mock_paper", "模拟卷"],
-            ["past_paper", "历年真题"],
-          ]}
-          value={paperType}
-          onChange={(value) => onPaperTypeChange(value as PaperTypeFilter)}
+      </label>
+      <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
+        <span className="text-text-secondary">年份</span>
+        <Input
+          aria-label="年份筛选"
+          className="h-9"
+          placeholder="全部年份"
+          value={yearFilter}
+          onChange={(event) => onYearFilterChange(event.target.value)}
         />
-      </div>
-    </div>
+      </label>
+      <FilterSelect
+        label="状态"
+        options={[
+          ["all", "全部状态"],
+          ["draft", "草稿"],
+          ["published", "已发布"],
+          ["archived", "已下架"],
+        ]}
+        value={paperStatus}
+        onChange={(value) => onPaperStatusChange(value as PaperStatusFilter)}
+      />
+      <FilterSelect
+        label="类型"
+        options={[
+          ["all", "全部类型"],
+          ["mock_paper", "模拟卷"],
+          ["past_paper", "历年真题"],
+        ]}
+        value={paperType}
+        onChange={(value) => onPaperTypeChange(value as PaperTypeFilter)}
+      />
+      <Button
+        aria-label="更新时间排序"
+        type="button"
+        variant="outline"
+        onClick={onSort}
+      >
+        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
+        更新时间排序
+        <span className="sr-only">
+          当前{sortOrder === "desc" ? "降序" : "升序"}
+        </span>
+      </Button>
+      <FilterSelect
+        label="每页条数"
+        options={[
+          ["20", "20"],
+          ["50", "50"],
+          ["100", "100"],
+        ]}
+        value={String(pageSize)}
+        onChange={onPageSizeChange}
+      />
+      <Button type="button" variant="outline" onClick={onReset}>
+        重置筛选
+      </Button>
+    </AdminListToolbar>
   );
 }
 
@@ -1661,10 +1771,10 @@ function SummaryRail({ rows }: { rows: AdminPaperOpsSummaryDto[] }) {
 
   return (
     <div className="grid gap-3 md:grid-cols-3">
-      <SummaryItem label="当前结果" value={`${rows.length} 套`} />
-      <SummaryItem label="题目总数" value={`${totalQuestionCount} 题`} />
+      <SummaryItem label="本页结果" value={`${rows.length} 套`} />
+      <SummaryItem label="本页题目合计" value={`${totalQuestionCount} 题`} />
       <SummaryItem
-        label="发布 / 模拟记录"
+        label="本页发布 / 模拟记录"
         value={`${publishedCount} 套 / ${totalMockExamRecordCount} 次`}
       />
     </div>
@@ -1692,6 +1802,7 @@ function LifecycleMetric({ label, value }: { label: string; value: number }) {
 }
 
 function PaperList({
+  emptyTitle,
   rows,
   selectedPublicId,
   onArchive,
@@ -1700,6 +1811,7 @@ function PaperList({
   onCopy,
   onPublish,
 }: {
+  emptyTitle: string;
   rows: AdminPaperOpsSummaryDto[];
   selectedPublicId: string | null;
   onArchive: (publicId: string) => void;
@@ -1709,148 +1821,155 @@ function PaperList({
   onPublish: (publicId: string) => void;
 }) {
   return (
-    <div className="grid gap-3">
-      {rows.map((paper) => {
-        const isDraft = paper.paperStatus === "draft";
-        const isPublished = paper.paperStatus === "published";
-        const canCopy = paper.paperStatus !== "draft";
-        const isSelected = paper.publicId === selectedPublicId;
-        const questionCountFeedback = createPaperQuestionCountFeedback(paper);
-        const questionTypeDistributionFeedback =
-          createPaperQuestionTypeDistributionFeedback(paper);
+    <AdminTableFrame ariaLabel="试卷列表" minWidthClassName="min-w-[72rem]">
+      <div
+        aria-label="试卷列表"
+        className="divide-border divide-y"
+        role="table"
+      >
+        {rows.length === 0 ? <FilteredEmptyState title={emptyTitle} /> : null}
+        {rows.map((paper) => {
+          const isDraft = paper.paperStatus === "draft";
+          const isPublished = paper.paperStatus === "published";
+          const canCopy = paper.paperStatus !== "draft";
+          const isSelected = paper.publicId === selectedPublicId;
+          const questionCountFeedback = createPaperQuestionCountFeedback(paper);
+          const questionTypeDistributionFeedback =
+            createPaperQuestionTypeDistributionFeedback(paper);
 
-        return (
-          <article
-            className={
-              isSelected
-                ? "bg-surface border-brand-primary rounded-md border p-4 shadow-sm"
-                : "bg-surface border-border rounded-md border p-4 shadow-sm"
-            }
-            data-public-id={paper.publicId}
-            data-selected={isSelected ? "true" : undefined}
-            data-testid={`paper-row-${paper.publicId}`}
-            key={paper.publicId}
-          >
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={paper.paperStatus} />
-                  <span className="text-text-muted text-xs">
-                    {paperTypeLabels[paper.paperType]}
-                  </span>
-                  <span className="text-text-muted text-xs">
-                    {formatScope(paper)}
-                  </span>
-                  {paper.year === null ? null : (
+          return (
+            <article
+              className={
+                isSelected
+                  ? "bg-surface border-brand-primary rounded-md border p-4 shadow-sm"
+                  : "bg-surface border-border rounded-md border p-4 shadow-sm"
+              }
+              data-public-id={paper.publicId}
+              data-selected={isSelected ? "true" : undefined}
+              data-testid={`paper-row-${paper.publicId}`}
+              key={paper.publicId}
+              role="row"
+            >
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={paper.paperStatus} />
                     <span className="text-text-muted text-xs">
-                      {paper.year}
+                      {paperTypeLabels[paper.paperType]}
                     </span>
-                  )}
-                </div>
-                <h2 className="text-text-primary text-base font-semibold">
-                  {paper.name}
-                </h2>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  <MetricBadge label="总分" value={paper.totalScore} />
-                  <MetricBadge
-                    label="题量"
-                    value={questionCountFeedback.value}
-                  />
-                  <MetricBadge
-                    label="模拟记录"
-                    value={`${paper.mockExamCount}`}
-                  />
+                    <span className="text-text-muted text-xs">
+                      {formatScope(paper)}
+                    </span>
+                    {paper.year === null ? null : (
+                      <span className="text-text-muted text-xs">
+                        {paper.year}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-text-primary text-base font-semibold">
+                    {paper.name}
+                  </h2>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <MetricBadge label="总分" value={paper.totalScore} />
+                    <MetricBadge
+                      label="题量"
+                      value={questionCountFeedback.value}
+                    />
+                    <MetricBadge
+                      label="模拟记录"
+                      value={`${paper.mockExamCount}`}
+                    />
+                  </div>
                 </div>
               </div>
-              <PublicId value={paper.publicId} />
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                aria-label={`组卷 ${paper.publicId}`}
-                disabled={!isDraft}
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={() => onCompose(paper.publicId)}
-              >
-                <Layers3 aria-hidden="true" data-icon="inline-start" />
-                组卷
-              </Button>
-              <Button
-                aria-label={`发布 ${paper.publicId}`}
-                disabled={!isDraft}
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={() => onPublish(paper.publicId)}
-              >
-                <FileCheck aria-hidden="true" data-icon="inline-start" />
-                发布
-              </Button>
-              <Button
-                aria-label={`下架 ${paper.publicId}`}
-                disabled={!isPublished}
-                size="sm"
-                type="button"
-                variant="destructive"
-                onClick={() => onArchive(paper.publicId)}
-              >
-                <Archive aria-hidden="true" data-icon="inline-start" />
-                下架
-              </Button>
-              <Button
-                aria-label={`复制 ${paper.publicId}`}
-                disabled={!canCopy}
-                size="sm"
-                type="button"
-                variant="secondary"
-                onClick={() => onCopy(paper.publicId)}
-              >
-                <Copy aria-hidden="true" data-icon="inline-start" />
-                复制
-              </Button>
-              <Button
-                aria-label={`绑定原始文件 ${paper.publicId}`}
-                size="sm"
-                type="button"
-                variant="secondary"
-                onClick={() => onBindAsset(paper.publicId)}
-              >
-                <Upload aria-hidden="true" data-icon="inline-start" />
-                绑定原始文件
-              </Button>
-            </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  aria-label={`组卷 ${paper.publicId}`}
+                  disabled={!isDraft}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => onCompose(paper.publicId)}
+                >
+                  <Layers3 aria-hidden="true" data-icon="inline-start" />
+                  组卷
+                </Button>
+                <Button
+                  aria-label={`发布 ${paper.publicId}`}
+                  disabled={!isDraft}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => onPublish(paper.publicId)}
+                >
+                  <FileCheck aria-hidden="true" data-icon="inline-start" />
+                  发布
+                </Button>
+                <Button
+                  aria-label={`下架 ${paper.publicId}`}
+                  disabled={!isPublished}
+                  size="sm"
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onArchive(paper.publicId)}
+                >
+                  <Archive aria-hidden="true" data-icon="inline-start" />
+                  下架
+                </Button>
+                <Button
+                  aria-label={`复制 ${paper.publicId}`}
+                  disabled={!canCopy}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onCopy(paper.publicId)}
+                >
+                  <Copy aria-hidden="true" data-icon="inline-start" />
+                  复制
+                </Button>
+                <Button
+                  aria-label={`绑定原始文件 ${paper.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onBindAsset(paper.publicId)}
+                >
+                  <Upload aria-hidden="true" data-icon="inline-start" />
+                  绑定原始文件
+                </Button>
+              </div>
 
-            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
-              <InfoBlock
-                label="原始文件"
-                value={paper.sourceFileName ?? "暂未绑定"}
-              />
-              <InfoBlock
-                label="题量发布风险"
-                value={questionCountFeedback.feedback}
-              />
-              <InfoBlock
-                label="题型分布"
-                value={questionTypeDistributionFeedback}
-              />
-              <InfoBlock
-                label="发布校验"
-                value={paper.publishValidationSummary ?? "暂无校验结果"}
-              />
-              <InfoBlock
-                label="生命周期闭环"
-                value={createPaperLifecycleSummary(paper)}
-              />
-              <InfoBlock
-                label="更新时间"
-                value={formatDateTime(paper.updatedAt)}
-              />
-            </div>
-          </article>
-        );
-      })}
-    </div>
+              <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
+                <InfoBlock
+                  label="原始文件"
+                  value={paper.sourceFileName ?? "暂未绑定"}
+                />
+                <InfoBlock
+                  label="题量发布风险"
+                  value={questionCountFeedback.feedback}
+                />
+                <InfoBlock
+                  label="题型分布"
+                  value={questionTypeDistributionFeedback}
+                />
+                <InfoBlock
+                  label="发布校验"
+                  value={paper.publishValidationSummary ?? "暂无校验结果"}
+                />
+                <InfoBlock
+                  label="生命周期闭环"
+                  value={createPaperLifecycleSummary(paper)}
+                />
+                <InfoBlock
+                  label="更新时间"
+                  value={formatDateTime(paper.updatedAt)}
+                />
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </AdminTableFrame>
   );
 }
 
@@ -1879,14 +1998,14 @@ function InfoBlock({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FilteredEmptyState() {
+function FilteredEmptyState({ title = "没有匹配的试卷" }: { title?: string }) {
   return (
     <div className="bg-surface border-border rounded-md border p-8 text-center shadow-sm">
       <ClipboardList
         aria-hidden="true"
         className="text-text-muted mx-auto size-8"
       />
-      <p className="text-text-primary mt-4 font-medium">没有匹配的试卷</p>
+      <p className="text-text-primary mt-4 font-medium">{title}</p>
       <p className="text-text-secondary mt-2 text-sm">
         调整关键词或筛选条件后再试。
       </p>

@@ -14,16 +14,24 @@ import {
 
 type AdminListInteractionOptions = {
   initialQuery?: Partial<AdminListQuery>;
+  resetQuery?: Partial<AdminListQuery>;
 };
 
 export function useAdminListInteraction({
   initialQuery,
+  resetQuery,
 }: AdminListInteractionOptions = {}) {
   const [query, setQuery] = useState(() => createAdminListQuery(initialQuery));
+  const shouldResetToDefaults = resetQuery !== undefined;
   const resetQueryRef = useRef(
     createAdminListQuery({
-      sortBy: initialQuery?.sortBy ?? "updatedAt",
-      sortOrder: initialQuery?.sortOrder ?? "desc",
+      sortBy:
+        resetQuery?.sortBy ??
+        (shouldResetToDefaults ? "updatedAt" : initialQuery?.sortBy),
+      sortOrder:
+        resetQuery?.sortOrder ??
+        (shouldResetToDefaults ? "desc" : initialQuery?.sortOrder),
+      ...resetQuery,
     }),
   );
 

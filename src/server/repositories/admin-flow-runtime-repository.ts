@@ -1219,6 +1219,10 @@ function createQuestionConditions(
     conditions.push(eq(question.level, queryInput.level));
   }
 
+  if (queryInput.subject !== "all") {
+    conditions.push(eq(question.subject, queryInput.subject));
+  }
+
   return conditions;
 }
 
@@ -1228,7 +1232,12 @@ function createPaperConditions(
   const conditions: SQL[] = [];
 
   if (queryInput.keyword !== null) {
-    conditions.push(ilike(paper.name, `%${queryInput.keyword}%`));
+    conditions.push(
+      or(
+        ilike(paper.public_id, `%${queryInput.keyword}%`),
+        ilike(paper.name, `%${queryInput.keyword}%`),
+      )!,
+    );
   }
 
   if (
@@ -1245,6 +1254,18 @@ function createPaperConditions(
 
   if (queryInput.level !== null) {
     conditions.push(eq(paper.level, queryInput.level));
+  }
+
+  if (queryInput.subject !== "all") {
+    conditions.push(eq(paper.subject, queryInput.subject));
+  }
+
+  if (queryInput.paperType !== "all") {
+    conditions.push(eq(paper.paper_type, queryInput.paperType));
+  }
+
+  if (queryInput.year !== null) {
+    conditions.push(eq(paper.year, queryInput.year));
   }
 
   return conditions;

@@ -163,6 +163,48 @@ function createRepositories(): AdminFlowRuntimeRepositories {
 }
 
 describe("phase 7 admin flow runtime smoke", () => {
+  it("forwards the complete paper ledger query to the repository", async () => {
+    const repositories = createRepositories();
+    let capturedQuery:
+      | Parameters<typeof repositories.contentKnowledgeRepository.listPapers>[0]
+      | null = null;
+    const originalListPapers =
+      repositories.contentKnowledgeRepository.listPapers;
+
+    repositories.contentKnowledgeRepository.listPapers = async (query) => {
+      capturedQuery = query;
+      return originalListPapers(query);
+    };
+
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      sessionService: createSessionService(),
+      repositories,
+    });
+    const response = await handlers.papers.collection.GET(
+      new Request(
+        "http://localhost/api/v1/papers?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&keyword=spring&profession=marketing&level=3&subject=theory&status=published&paperType=mock_paper&year=2026",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(capturedQuery).toEqual(
+      expect.objectContaining({
+        page: 2,
+        pageSize: 50,
+        sortBy: "updatedAt",
+        sortOrder: "asc",
+        keyword: "spring",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        status: "published",
+        paperType: "mock_paper",
+        year: 2026,
+      }),
+    );
+  });
+
   it("keeps the runtime user list unique by publicId when a user has multiple personal_auth rows", async () => {
     const duplicatedUserRows = [
       {

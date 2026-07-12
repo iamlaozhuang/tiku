@@ -242,11 +242,71 @@ function mockContentFetch(
     }
 
     if (path.startsWith("/api/v1/questions?")) {
-      return createJsonResponse(createQuestionListPayload(data));
+      const searchParams = new URL(path, "http://localhost").searchParams;
+      const filteredData = data.filter((question) => {
+        const keyword = searchParams.get("keyword")?.toLowerCase();
+        const knowledgeNodePublicIds =
+          question.knowledgeNodePublicIds as string[];
+        const tagPublicIds = question.tagPublicIds as string[];
+
+        return (
+          (keyword === undefined ||
+            [question.publicId, question.stemRichText]
+              .join(" ")
+              .toLowerCase()
+              .includes(keyword)) &&
+          (searchParams.get("profession") === null ||
+            question.profession === searchParams.get("profession")) &&
+          (searchParams.get("subject") === null ||
+            question.subject === searchParams.get("subject")) &&
+          (searchParams.get("level") === null ||
+            String(question.level) === searchParams.get("level")) &&
+          (searchParams.get("status") === null ||
+            question.status === searchParams.get("status")) &&
+          (searchParams.get("questionType") === null ||
+            question.questionType === searchParams.get("questionType")) &&
+          (searchParams.get("knowledgeNodePublicId") === null ||
+            knowledgeNodePublicIds.includes(
+              searchParams.get("knowledgeNodePublicId")!,
+            )) &&
+          (searchParams.get("tagPublicId") === null ||
+            tagPublicIds.includes(searchParams.get("tagPublicId")!))
+        );
+      });
+
+      return createJsonResponse(createQuestionListPayload(filteredData));
     }
 
     if (path.startsWith("/api/v1/materials?")) {
-      return createJsonResponse(materialPayload);
+      const searchParams = new URL(path, "http://localhost").searchParams;
+      const filteredMaterials = materialPayload.data.filter((material) => {
+        const keyword = searchParams.get("keyword")?.toLowerCase();
+
+        return (
+          (keyword === undefined ||
+            [material.title, material.contentRichText]
+              .join(" ")
+              .toLowerCase()
+              .includes(keyword)) &&
+          (searchParams.get("profession") === null ||
+            material.profession === searchParams.get("profession")) &&
+          (searchParams.get("subject") === null ||
+            material.subject === searchParams.get("subject")) &&
+          (searchParams.get("level") === null ||
+            String(material.level) === searchParams.get("level")) &&
+          (searchParams.get("status") === null ||
+            material.status === searchParams.get("status"))
+        );
+      });
+
+      return createJsonResponse({
+        ...materialPayload,
+        data: filteredMaterials,
+        pagination: {
+          ...materialPayload.pagination,
+          total: filteredMaterials.length,
+        },
+      });
     }
 
     return createJsonResponse({ code: 404001, message: "missing", data: null });
@@ -519,6 +579,7 @@ function expectAdminFetchAuthorization(
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -619,7 +680,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
   it("opens a question draft edit entry from a public id query target", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    mockContentFetch();
+    const fetchMock = mockContentFetch();
 
     render(
       createElement(AdminQuestionMaterialManagement, {
@@ -636,6 +697,11 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.getByTestId("content-edit-context-panel")).toHaveTextContent(
       "question-marketing-001",
     );
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes("keyword=question-marketing-001"),
+      ),
+    ).toBe(true);
   });
 
   it("publishes a disabled AI question draft opened from a public id query target", async () => {
@@ -705,10 +771,14 @@ describe("AdminQuestionMaterialManagement", () => {
       target: { value: "disabled" },
     });
 
-    expect(
-      screen.getByText("物流成本核算适用于哪类场景？"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("市场调研抽样方法的核心目标是什么？")).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.getByText("物流成本核算适用于哪类场景？"),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("市场调研抽样方法的核心目标是什么？"),
+      ).toBeNull();
+    });
 
     const row = screen
       .getByText("物流成本核算适用于哪类场景？")
@@ -718,25 +788,68 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(row).not.toHaveAttribute("data-id");
   });
 
-  it("renders common pagination and updated-at sorting controls for question lists", async () => {
+  it("uses the shared question ledger and requests server pagination", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    mockContentFetch();
+    const fetchMock = mockContentFetch();
 
     render(createElement(AdminQuestionMaterialManagement));
 
     await screen.findByText("市场调研抽样方法的核心目标是什么？");
 
+    expect(
+      screen.getByRole("region", { name: "题目筛选" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("共 2 道题目")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "题目列表" })).toHaveAttribute(
+      "data-slot",
+      "admin-table-frame",
+    );
+    expect(screen.getByRole("table", { name: "题目列表" })).toBeInTheDocument();
     expect(screen.getByLabelText("每页条数")).toHaveValue("20");
     fireEvent.change(screen.getByLabelText("每页条数"), {
       target: { value: "50" },
     });
-    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("pageSize=50"),
+        expect.anything(),
+      ),
+    );
+    expect(screen.getByRole("button", { name: "重置筛选" })).toBeEnabled();
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "更新时间排序" }));
-    const rows = screen.getAllByTestId(/question-row-/);
+  it("forwards material keyword filters and keeps shared pagination visible", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockContentFetch();
 
-    expect(rows[0]).toHaveAttribute("data-public-id", "question-logistics-002");
-    expect(rows[1]).toHaveAttribute("data-public-id", "question-marketing-001");
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    await screen.findByText("营销案例材料 A");
+    expect(
+      screen.getByRole("region", { name: "材料筛选" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("共 2 份材料")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "材料列表" })).toHaveAttribute(
+      "data-slot",
+      "admin-table-frame",
+    );
+    expect(screen.getByRole("table", { name: "材料列表" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("关键词"), {
+      target: { value: "营销案例" },
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("keyword=%E8%90%A5%E9%94%80%E6%A1%88%E4%BE%8B"),
+        expect.anything(),
+      ),
+    );
+    expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
   });
 
   it("filters questions by level, question type, knowledge_node, and tag", async () => {
@@ -757,10 +870,14 @@ describe("AdminQuestionMaterialManagement", () => {
       target: { value: "knowledge-node-costing" },
     });
 
-    expect(
-      screen.getByText("物流成本核算适用于哪类场景？"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("市场调研抽样方法的核心目标是什么？")).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.getByText("物流成本核算适用于哪类场景？"),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("市场调研抽样方法的核心目标是什么？"),
+      ).toBeNull();
+    });
 
     fireEvent.change(screen.getByLabelText("等级筛选"), {
       target: { value: "3" },
@@ -775,10 +892,12 @@ describe("AdminQuestionMaterialManagement", () => {
       target: { value: "tag-research" },
     });
 
-    expect(
-      screen.getByText("市场调研抽样方法的核心目标是什么？"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.getByText("市场调研抽样方法的核心目标是什么？"),
+      ).toBeInTheDocument();
+      expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
+    });
   });
 
   it("renders explicit question binding feedback for material, knowledge_node, and tag", async () => {
@@ -792,16 +911,16 @@ describe("AdminQuestionMaterialManagement", () => {
     const boundQuestion = screen.getByTestId(
       "question-binding-question-marketing-001",
     );
-    expect(boundQuestion).toHaveTextContent("关联材料：material-marketing-001");
-    expect(boundQuestion).toHaveTextContent("知识点：knowledge-node-sampling");
-    expect(boundQuestion).toHaveTextContent("标签：tag-research");
+    expect(boundQuestion).toHaveTextContent("关联材料：1 份");
+    expect(boundQuestion).toHaveTextContent("知识点：1 个");
+    expect(boundQuestion).toHaveTextContent("标签：1 个");
 
     const unboundQuestion = screen.getByTestId(
       "question-binding-question-logistics-002",
     );
     expect(unboundQuestion).toHaveTextContent("关联材料：无");
-    expect(unboundQuestion).toHaveTextContent("知识点：knowledge-node-costing");
-    expect(unboundQuestion).toHaveTextContent("标签：无");
+    expect(unboundQuestion).toHaveTextContent("知识点：1 个");
+    expect(unboundQuestion).toHaveTextContent("标签：0 个");
   });
 
   it("starts question review from a knowledge_node durable binding handoff", async () => {
@@ -834,26 +953,34 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.getByText("Synthetic calculation stem")).toBeInTheDocument();
     expect(screen.getAllByText("案例分析题").length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByText("计算题").length).toBeGreaterThanOrEqual(2);
-    expect(
-      screen.getByText("knowledge-node-case-analysis"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("tag-calculation")).toBeInTheDocument();
+    expect(screen.getAllByText("知识点：1 个").length).toBeGreaterThanOrEqual(
+      2,
+    );
+    expect(screen.getAllByText("标签：1 个").length).toBeGreaterThanOrEqual(2);
+    expect(screen.queryByText("knowledge-node-case-analysis")).toBeNull();
+    expect(screen.queryByText("tag-calculation")).toBeNull();
 
     fireEvent.change(screen.getByLabelText("题型"), {
       target: { value: "case_analysis" },
     });
 
-    expect(
-      screen.getByText("Synthetic case_analysis stem"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("Synthetic calculation stem")).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.getByText("Synthetic case_analysis stem"),
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Synthetic calculation stem")).toBeNull();
+    });
 
     fireEvent.change(screen.getByLabelText("题型"), {
       target: { value: "calculation" },
     });
 
-    expect(screen.getByText("Synthetic calculation stem")).toBeInTheDocument();
-    expect(screen.queryByText("Synthetic case_analysis stem")).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.getByText("Synthetic calculation stem"),
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Synthetic case_analysis stem")).toBeNull();
+    });
   });
 
   it("keeps locked questions copy-only in the content admin list", async () => {
@@ -935,15 +1062,15 @@ describe("AdminQuestionMaterialManagement", () => {
       "data-public-id",
       "material-marketing-001",
     );
-    expect(materialRow).toHaveTextContent("question-marketing-001");
-    expect(materialRow).toHaveTextContent("paper-material-ref-001");
+    expect(materialRow).toHaveTextContent("关联题目 1 道，关联试卷 1 套");
+    expect(materialRow).toHaveTextContent("具体引用关系请在材料详情中查看");
     expect(materialRow).toHaveTextContent("营销 / 3级 / 理论");
 
     fireEvent.change(screen.getByLabelText("关键词"), {
       target: { value: "不存在的材料" },
     });
 
-    expect(screen.getByText("没有匹配的材料")).toBeInTheDocument();
+    expect(await screen.findByText("没有匹配的材料")).toBeInTheDocument();
   });
 
   it("keeps locked materials copy-only and exposes their lock boundary", async () => {
@@ -987,13 +1114,12 @@ describe("AdminQuestionMaterialManagement", () => {
       "material-reference-summary-material-marketing-001",
     );
     expect(materialReferences).toHaveTextContent("题目引用数：1");
-    expect(materialReferences).toHaveTextContent(
-      "question-marketing-001 (单选题, 可用)",
-    );
     expect(materialReferences).toHaveTextContent("试卷引用数：1");
     expect(materialReferences).toHaveTextContent(
-      "paper-material-ref-001 (已发布)",
+      "具体引用关系请在材料详情中查看。",
     );
+    expect(materialReferences).not.toHaveTextContent("question-marketing-001");
+    expect(materialReferences).not.toHaveTextContent("paper-material-ref-001");
 
     const lockedMaterial = screen.getByTestId(
       "material-lock-material-locked-002",
@@ -1487,14 +1613,15 @@ describe("AdminQuestionMaterialManagement", () => {
       "tag-research",
       "tag-compliance",
     ]);
-    await waitFor(() =>
-      expect(
-        screen.getByTestId("question-row-question-marketing-001"),
-      ).toHaveTextContent("knowledge-node-price"),
+    const updatedQuestionRow = screen.getByTestId(
+      "question-row-question-marketing-001",
     );
-    expect(
-      screen.getByTestId("question-row-question-marketing-001"),
-    ).toHaveTextContent("tag-compliance");
+    await waitFor(() =>
+      expect(updatedQuestionRow).toHaveTextContent("知识点：3 个"),
+    );
+    expect(updatedQuestionRow).toHaveTextContent("标签：2 个");
+    expect(updatedQuestionRow).not.toHaveTextContent("knowledge-node-price");
+    expect(updatedQuestionRow).not.toHaveTextContent("tag-compliance");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 

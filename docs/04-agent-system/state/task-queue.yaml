@@ -118,6 +118,124 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-content-list-foundation-2026-07-11
+    title: 0704 content list foundation
+    phase: 0704-content-list-foundation-2026-07-11
+    status: ready_for_closeout
+    result: pass_localhost_ui_content_list_foundation
+    priority: p0
+    sequenceOrder: 30.0
+    taskKind: implementation_feature
+    executionProfile: content_admin_server_paginated_shared_list_foundation_no_write_or_permission_change
+    moduleRunVersion: 2
+    branch: codex/0704-content-list-foundation
+    dependsOn:
+      - 0704-ops-list-consistency-acceptance-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-content-list-foundation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-content-list-foundation-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-content-list-foundation-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-content-list-foundation.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-content-list-foundation-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-content-list-foundation-audit.md
+      - src/components/admin/AdminList/index.tsx
+      - src/components/admin/AdminList/AdminList.test.tsx
+      - src/hooks/useAdminListInteraction.ts
+      - src/features/admin/paper-management/AdminPaperManagementClient.tsx
+      - src/features/admin/paper-management/AdminPaperManagementClient.test.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/features/admin/content-admin-runtime.tsx
+      - src/server/contracts/admin-content-knowledge-ops-contract.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
+      - src/server/services/content-question-material-runtime.ts
+      - src/server/validators/material.ts
+      - src/server/repositories/material-repository.ts
+      - src/server/repositories/question-repository.ts
+      - tests/unit/admin-paper-ui.test.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/phase-7-admin-flow-runtime-smoke.test.ts
+      - tests/unit/phase-9-content-question-material-runtime.test.ts
+      - tests/unit/phase-9-multi-client-rest-contract-verification.test.ts
+      - src/server/validators/question.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\\tiku-local-private\\**
+    capabilities:
+      localSourceChange: approved_content_list_query_and_ui_only
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_five_content_admin_tasks_serial_goal_2026_07_11
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationSummary:
+      status: pass_ready_for_commit_merge_push_cleanup
+      greenTargetedTests: pass_6_files_70_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      formatting: pass_full_repository
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_21_files_scanned
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      dependencyOrLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      providerExecution: blocked_not_executed
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/components/admin/AdminList/AdminList.test.tsx src/features/admin/paper-management/AdminPaperManagementClient.test.tsx tests/unit/admin-paper-ui.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/phase-7-admin-flow-runtime-smoke.test.ts tests/unit/phase-9-content-question-material-runtime.test.ts tests/unit/phase-9-multi-client-rest-contract-verification.test.ts src/server/validators/question.test.ts
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\agent-system\\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-content-list-foundation-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\agent-system\\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-content-list-foundation-2026-07-11 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_five_content_admin_tasks_serial_goal_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_five_content_admin_tasks_serial_goal_2026_07_11
+      cleanup:
+        approved: true
+        deleteShortBranch: true
+        approvalSource: current_user_approved_five_content_admin_tasks_serial_goal_2026_07_11
   - id: 0704-ops-list-consistency-acceptance-2026-07-11
     title: 0704 operations list consistency acceptance
     phase: 0704-ops-list-consistency-acceptance-2026-07-11

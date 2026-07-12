@@ -48,6 +48,9 @@ export type AdminContentKnowledgeListQuery = {
   status: AdminContentKnowledgeStatus;
   profession: Profession | "all";
   level: number | null;
+  subject: Subject | "all";
+  paperType: PaperType | "all";
+  year: number | null;
 };
 
 export type AdminQuestionOpsSummaryDto = {
@@ -148,6 +151,9 @@ export function createAdminContentKnowledgeListQuery(
     status: "all",
     profession: "all",
     level: null,
+    subject: "all",
+    paperType: "all",
+    year: null,
     ...queryOverrides,
     keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,
   };

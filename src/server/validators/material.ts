@@ -23,6 +23,7 @@ export type NormalizedMaterialListInput = NormalizedPagination & {
   level: number | null;
   subject: (typeof subjectValues)[number] | null;
   status: (typeof materialStatusValues)[number] | null;
+  keyword: string | null;
 };
 
 type ValidationResult<TValue> =
@@ -176,6 +177,10 @@ export function normalizeMaterialListInput(
     sortOrder:
       typeof input.sortOrder === "string" ? input.sortOrder : undefined,
   });
+  const keyword =
+    typeof input.keyword === "string" && input.keyword.trim().length > 0
+      ? input.keyword.trim()
+      : null;
 
   return {
     ...pagination,
@@ -183,5 +188,6 @@ export function normalizeMaterialListInput(
     level: normalizeQueryInteger(input.level) ?? null,
     subject: isSubject(input.subject) ? input.subject : null,
     status: isMaterialStatus(input.status) ? input.status : null,
+    keyword,
   };
 }

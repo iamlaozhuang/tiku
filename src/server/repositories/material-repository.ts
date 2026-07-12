@@ -1,6 +1,16 @@
 import { randomUUID } from "node:crypto";
 
-import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  or,
+  type SQL,
+} from "drizzle-orm";
 
 import { admin, material, paper, question, questionGroup } from "@/db/schema";
 import type {
@@ -254,6 +264,15 @@ function createMaterialConditions(
 
   if (queryInput.status !== null) {
     conditions.push(eq(material.status, queryInput.status));
+  }
+
+  if (queryInput.keyword !== null) {
+    conditions.push(
+      or(
+        ilike(material.title, `%${queryInput.keyword}%`),
+        ilike(material.content_rich_text, `%${queryInput.keyword}%`),
+      )!,
+    );
   }
 
   return conditions;

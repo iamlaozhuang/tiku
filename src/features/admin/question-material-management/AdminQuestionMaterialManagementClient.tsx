@@ -17,6 +17,13 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AdminListToolbar,
+  AdminPagination,
+  AdminTableFrame,
+} from "@/components/admin/AdminList";
+import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { MaterialDto } from "@/server/contracts/material-contract";
 import type {
@@ -37,17 +44,12 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
-  ContentOpsStagingRoleArrangement,
-  DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
-  PublicId,
   fetchAdminApi,
   formatScope,
   getStoredSessionToken,
-  includesKeyword,
   isAdminContext,
   isUnauthorizedResponse,
-  matchesFilter,
 } from "../content-admin-runtime";
 
 type ViewMode = "questions" | "materials";
@@ -73,6 +75,62 @@ const managedMediaReferences = {
   },
 } as const;
 
+function readContentListUrlQuery(): {
+  keyword: string;
+  knowledgeNodePublicId: string;
+  level: string;
+  profession: ProfessionFilter;
+  questionType: QuestionTypeFilter;
+  status: StatusFilter;
+  subject: SubjectFilter;
+  tagPublicId: string;
+  list: {
+    page: number;
+    pageSize: 20 | 50 | 100;
+    sortBy: "updatedAt";
+    sortOrder: AdminCommonSortOrder;
+  };
+} {
+  const searchParams = new URLSearchParams(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
+  const page = Number(searchParams.get("page"));
+  const pageSize = Number(searchParams.get("pageSize"));
+  const profession = searchParams.get("profession");
+  const subject = searchParams.get("subject");
+  const status = searchParams.get("status");
+  const questionType = searchParams.get("questionType");
+
+  return {
+    keyword: searchParams.get("keyword") ?? "",
+    knowledgeNodePublicId: searchParams.get("knowledgeNodePublicId") ?? "",
+    level: searchParams.get("level") ?? "",
+    profession: (["marketing", "logistics", "monopoly"] as const).includes(
+      profession as Profession,
+    )
+      ? (profession as Profession)
+      : "all",
+    questionType: Object.hasOwn(questionTypeLabels, questionType ?? "")
+      ? (questionType as QuestionType)
+      : "all",
+    status: (["available", "disabled"] as const).includes(
+      status as QuestionStatus,
+    )
+      ? (status as QuestionStatus)
+      : "all",
+    subject: (["theory", "skill"] as const).includes(subject as Subject)
+      ? (subject as Subject)
+      : "all",
+    tagPublicId: searchParams.get("tagPublicId") ?? "",
+    list: {
+      page: Number.isInteger(page) && page > 0 ? page : 1,
+      pageSize: pageSize === 50 || pageSize === 100 ? pageSize : 20,
+      sortBy: "updatedAt",
+      sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
+    } as const,
+  };
+}
+
 function createManagedPaperAssetImageMarkup({
   altText,
   paperAssetPublicId,
@@ -83,12 +141,7 @@ function createManagedPaperAssetImageMarkup({
   return `<img src="/api/v1/paper-assets/${paperAssetPublicId}" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="${paperAssetPublicId}" alt="${altText}" />`;
 }
 
-type ContentLoadState =
-  | "loading"
-  | "ready"
-  | "empty"
-  | "unauthorized"
-  | "error";
+type ContentLoadState = "loading" | "ready" | "unauthorized" | "error";
 
 export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
@@ -182,12 +235,6 @@ type KnowledgeRecommendationReviewState = {
 const statusLabels: Record<QuestionStatus | MaterialStatus, string> = {
   available: "可用",
   disabled: "已停用",
-};
-
-const paperStatusLabels: Record<string, string> = {
-  archived: "已下架",
-  draft: "草稿",
-  published: "已发布",
 };
 
 const recommendationReviewStatusLabels: Record<
@@ -354,10 +401,19 @@ function createMaterialFormValuesFromMaterial(
   };
 }
 
-function useQuestionMaterialData(activeView: ViewMode) {
+const defaultContentPagination: ApiPagination = {
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  sortBy: "updatedAt",
+  sortOrder: "desc",
+};
+
+function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
   const [loadState, setLoadState] = useState<ContentLoadState>("loading");
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
   const [materials, setMaterials] = useState<MaterialDto[]>([]);
+  const [pagination, setPagination] = useState(defaultContentPagination);
 
   useEffect(() => {
     let isActive = true;
@@ -390,19 +446,13 @@ function useQuestionMaterialData(activeView: ViewMode) {
           return;
         }
 
-        const path =
-          activeView === "questions"
-            ? `/api/v1/questions?${DEFAULT_CONTENT_LIST_QUERY}`
-            : `/api/v1/materials?${DEFAULT_CONTENT_LIST_QUERY}`;
+        const path = `/api/v1/${activeView}?${queryString}`;
 
         if (activeView === "materials") {
-          const [materialResponse, questionResponse] = await Promise.all([
-            fetchAdminApi<MaterialDto[]>(path, sessionToken),
-            fetchAdminApi<QuestionDto[]>(
-              `/api/v1/questions?${DEFAULT_CONTENT_LIST_QUERY}`,
-              sessionToken,
-            ),
-          ]);
+          const materialResponse = await fetchAdminApi<MaterialDto[]>(
+            path,
+            sessionToken,
+          );
 
           if (!isActive) {
             return;
@@ -411,16 +461,15 @@ function useQuestionMaterialData(activeView: ViewMode) {
           if (
             materialResponse.code !== 0 ||
             materialResponse.data === null ||
-            questionResponse.code !== 0 ||
-            questionResponse.data === null
+            materialResponse.pagination === undefined
           ) {
             setLoadState("error");
             return;
           }
 
           setMaterials(materialResponse.data);
-          setQuestions(questionResponse.data);
-          setLoadState(materialResponse.data.length === 0 ? "empty" : "ready");
+          setPagination(materialResponse.pagination);
+          setLoadState("ready");
           return;
         }
 
@@ -439,7 +488,8 @@ function useQuestionMaterialData(activeView: ViewMode) {
         }
 
         setQuestions(contentResponse.data);
-        setLoadState(contentResponse.data.length === 0 ? "empty" : "ready");
+        setPagination(contentResponse.pagination ?? defaultContentPagination);
+        setLoadState("ready");
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -452,9 +502,16 @@ function useQuestionMaterialData(activeView: ViewMode) {
     return () => {
       isActive = false;
     };
-  }, [activeView]);
+  }, [activeView, queryString]);
 
-  return { loadState, materials, questions, setMaterials, setQuestions };
+  return {
+    loadState,
+    materials,
+    pagination,
+    questions,
+    setMaterials,
+    setQuestions,
+  };
 }
 
 async function mutateAdminApi<TData>(
@@ -565,40 +622,6 @@ function formatBindingPublicIdList(publicIds: string[]): string {
   return publicIds.length === 0 ? "无" : publicIds.join(", ");
 }
 
-function formatMaterialQuestionReferences(
-  references: MaterialDto["references"]["questions"],
-): string {
-  if (references.length === 0) {
-    return "无";
-  }
-
-  return references
-    .map(
-      (reference) =>
-        `${reference.questionPublicId} (${
-          questionTypeLabels[reference.questionType] ?? reference.questionType
-        }, ${statusLabels[reference.status] ?? reference.status})`,
-    )
-    .join(", ");
-}
-
-function formatMaterialPaperReferences(
-  references: MaterialDto["references"]["papers"],
-): string {
-  if (references.length === 0) {
-    return "无";
-  }
-
-  return references
-    .map(
-      (reference) =>
-        `${reference.paperPublicId} (${
-          paperStatusLabels[reference.paperStatus] ?? reference.paperStatus
-        })`,
-    )
-    .join(", ");
-}
-
 function parsePublicIdList(value: string): string[] {
   const publicIds = value
     .split(/[\s,，]+/u)
@@ -659,24 +682,42 @@ export function AdminQuestionMaterialManagement({
   initialKnowledgeNodeFilter = "",
   initialQuestionPublicId = "",
 }: AdminQuestionMaterialManagementProps) {
+  const [initialUrlQuery] = useState(() => readContentListUrlQuery());
   const [activeView, setActiveView] = useState<ViewMode>(
     initialQuestionPublicId.length > 0 ? "questions" : defaultView,
   );
-  const [keyword, setKeyword] = useState("");
-  const [knowledgeNodeFilter, setKnowledgeNodeFilter] = useState(
-    initialKnowledgeNodeFilter,
+  const [keyword, setKeyword] = useState(
+    initialQuestionPublicId || initialUrlQuery.keyword,
   );
-  const [levelFilter, setLevelFilter] = useState("");
-  const [profession, setProfession] = useState<ProfessionFilter>("all");
-  const [questionType, setQuestionType] = useState<QuestionTypeFilter>("all");
-  const [subject, setSubject] = useState<SubjectFilter>("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
-  const [tagFilter, setTagFilter] = useState("");
+  const [knowledgeNodeFilter, setKnowledgeNodeFilter] = useState(
+    initialKnowledgeNodeFilter || initialUrlQuery.knowledgeNodePublicId,
+  );
+  const [levelFilter, setLevelFilter] = useState(initialUrlQuery.level);
+  const [profession, setProfession] = useState<ProfessionFilter>(
+    initialUrlQuery.profession,
+  );
+  const [questionType, setQuestionType] = useState<QuestionTypeFilter>(
+    initialUrlQuery.questionType,
+  );
+  const [subject, setSubject] = useState<SubjectFilter>(
+    initialUrlQuery.subject,
+  );
+  const [status, setStatus] = useState<StatusFilter>(initialUrlQuery.status);
+  const [tagFilter, setTagFilter] = useState(initialUrlQuery.tagPublicId);
   const [activeForm, setActiveForm] = useState<ActiveContentForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [pageSize, setPageSize] = useState("20");
-  const [sortOrder, setSortOrder] = useState<AdminCommonSortOrder>("desc");
+  const {
+    handleFilterChange,
+    handlePageChange,
+    handlePageSizeChange,
+    handleReset,
+    handleSortChange,
+    query,
+  } = useAdminListInteraction({
+    initialQuery: initialUrlQuery.list,
+    resetQuery: {},
+  });
   const [pendingContentAction, setPendingContentAction] =
     useState<PendingContentAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -688,8 +729,62 @@ export function AdminQuestionMaterialManagement({
     recommendationsByQuestionPublicId,
     setRecommendationsByQuestionPublicId,
   ] = useState<Record<string, KnowledgeRecommendationReviewState>>({});
-  const { loadState, materials, questions, setMaterials, setQuestions } =
-    useQuestionMaterialData(activeView);
+  const contentQueryString = useMemo(() => {
+    const searchParams = new URLSearchParams({
+      page: String(query.page),
+      pageSize: String(query.pageSize),
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    });
+
+    if (keyword.trim() !== "") searchParams.set("keyword", keyword.trim());
+    if (profession !== "all") searchParams.set("profession", profession);
+    if (subject !== "all") searchParams.set("subject", subject);
+    if (levelFilter.trim() !== "")
+      searchParams.set("level", levelFilter.trim());
+    if (status !== "all") searchParams.set("status", status);
+    if (activeView === "questions" && questionType !== "all") {
+      searchParams.set("questionType", questionType);
+    }
+    if (activeView === "questions" && knowledgeNodeFilter.trim() !== "") {
+      searchParams.set("knowledgeNodePublicId", knowledgeNodeFilter.trim());
+    }
+    if (activeView === "questions" && tagFilter.trim() !== "") {
+      searchParams.set("tagPublicId", tagFilter.trim());
+    }
+
+    return searchParams.toString();
+  }, [
+    activeView,
+    keyword,
+    knowledgeNodeFilter,
+    levelFilter,
+    profession,
+    query.page,
+    query.pageSize,
+    query.sortBy,
+    query.sortOrder,
+    questionType,
+    status,
+    subject,
+    tagFilter,
+  ]);
+  const {
+    loadState,
+    materials,
+    pagination,
+    questions,
+    setMaterials,
+    setQuestions,
+  } = useQuestionMaterialData(activeView, contentQueryString);
+
+  useEffect(() => {
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?${contentQueryString}`,
+    );
+  }, [contentQueryString]);
 
   const initialQuestionTarget = useMemo(() => {
     if (
@@ -744,70 +839,6 @@ export function AdminQuestionMaterialManagement({
   const displayedActionMessage = actionMessage ?? initialQuestionTargetMessage;
   const displayedActionError = actionError ?? initialQuestionTargetError;
 
-  const filteredQuestions = useMemo(
-    () =>
-      questions.filter((question) => {
-        const searchableText = [
-          question.publicId,
-          question.stemRichText,
-          question.analysisRichText,
-          question.standardAnswerRichText,
-          question.knowledgeNodePublicIds.join(" "),
-          question.tagPublicIds.join(" "),
-        ]
-          .join(" ")
-          .toLowerCase();
-
-        return (
-          includesKeyword(searchableText, keyword) &&
-          includesKeyword(String(question.level), levelFilter) &&
-          includesKeyword(
-            question.knowledgeNodePublicIds.join(" ").toLowerCase(),
-            knowledgeNodeFilter,
-          ) &&
-          includesKeyword(
-            question.tagPublicIds.join(" ").toLowerCase(),
-            tagFilter,
-          ) &&
-          matchesFilter(question.profession, profession) &&
-          matchesFilter(question.questionType, questionType) &&
-          matchesFilter(question.subject, subject) &&
-          matchesFilter(question.status, status)
-        );
-      }),
-    [
-      keyword,
-      knowledgeNodeFilter,
-      levelFilter,
-      profession,
-      questionType,
-      questions,
-      status,
-      subject,
-      tagFilter,
-    ],
-  );
-  const filteredMaterials = useMemo(
-    () =>
-      materials.filter((material) => {
-        const searchableText = [
-          material.publicId,
-          material.title,
-          material.contentRichText,
-        ]
-          .join(" ")
-          .toLowerCase();
-
-        return (
-          includesKeyword(searchableText, keyword) &&
-          includesKeyword(String(material.level), levelFilter) &&
-          matchesFilter(material.profession, profession) &&
-          matchesFilter(material.subject, subject) &&
-          matchesFilter(material.status, status)
-        );
-      }),
-    [keyword, levelFilter, materials, profession, status, subject],
-  );
   const selectedQuestionPublicId =
     displayedActiveForm?.kind === "question"
       ? displayedActiveForm.publicId
@@ -816,22 +847,18 @@ export function AdminQuestionMaterialManagement({
     displayedActiveForm?.kind === "material"
       ? displayedActiveForm.publicId
       : null;
-  const displayedQuestions = useMemo(
-    () =>
-      sortItemsByUpdatedAt(filteredQuestions, sortOrder).slice(
-        0,
-        Number(pageSize),
-      ),
-    [filteredQuestions, pageSize, sortOrder],
-  );
-  const displayedMaterials = useMemo(
-    () =>
-      sortItemsByUpdatedAt(filteredMaterials, sortOrder).slice(
-        0,
-        Number(pageSize),
-      ),
-    [filteredMaterials, pageSize, sortOrder],
-  );
+  const hasActiveContentFilters =
+    keyword.trim() !== "" ||
+    levelFilter.trim() !== "" ||
+    profession !== "all" ||
+    subject !== "all" ||
+    status !== "all" ||
+    (activeView === "questions" &&
+      (questionType !== "all" ||
+        knowledgeNodeFilter.trim() !== "" ||
+        tagFilter.trim() !== ""));
+  const displayedQuestions = questions;
+  const displayedMaterials = materials;
 
   if (loadState === "loading") {
     return (
@@ -1167,8 +1194,7 @@ export function AdminQuestionMaterialManagement({
             题库与材料管理
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
-            管理题目、材料、知识点标签与试卷引用关系；页面只展示运行时数据中的业务标识，不暴露内部自增
-            id。
+            按专业、等级和内容状态维护正式题目与材料，查看锁定和引用摘要后再执行写操作。
           </p>
         </div>
         <ActionBar
@@ -1195,7 +1221,6 @@ export function AdminQuestionMaterialManagement({
         />
       </header>
 
-      <ContentOpsStagingRoleArrangement />
       <QuestionMaterialLifecycleContextBand
         activeView={activeView}
         materials={materials}
@@ -1207,30 +1232,59 @@ export function AdminQuestionMaterialManagement({
         keyword={keyword}
         knowledgeNodeFilter={knowledgeNodeFilter}
         levelFilter={levelFilter}
+        pageSize={query.pageSize}
         profession={profession}
         questionType={questionType}
+        sortOrder={query.sortOrder}
         status={status}
         subject={subject}
         tagFilter={tagFilter}
-        onKeywordChange={setKeyword}
-        onKnowledgeNodeFilterChange={setKnowledgeNodeFilter}
-        onLevelFilterChange={setLevelFilter}
-        onProfessionChange={setProfession}
-        onQuestionTypeChange={setQuestionType}
-        onStatusChange={setStatus}
-        onSubjectChange={setSubject}
-        onTagFilterChange={setTagFilter}
-      />
-
-      <AdminCommonListControls
-        pageSize={pageSize}
-        sortOrder={sortOrder}
-        onPageSizeChange={setPageSize}
-        onToggleSortOrder={() =>
-          setSortOrder((currentSortOrder) =>
-            currentSortOrder === "desc" ? "asc" : "desc",
-          )
-        }
+        total={pagination.total}
+        onKeywordChange={(value) => {
+          setKeyword(value);
+          handleFilterChange("keyword");
+        }}
+        onKnowledgeNodeFilterChange={(value) => {
+          setKnowledgeNodeFilter(value);
+          handleFilterChange("knowledgeNodePublicId");
+        }}
+        onLevelFilterChange={(value) => {
+          setLevelFilter(value);
+          handleFilterChange("level");
+        }}
+        onPageSizeChange={handlePageSizeChange}
+        onProfessionChange={(value) => {
+          setProfession(value);
+          handleFilterChange("profession");
+        }}
+        onQuestionTypeChange={(value) => {
+          setQuestionType(value);
+          handleFilterChange("questionType");
+        }}
+        onReset={() => {
+          setKeyword("");
+          setKnowledgeNodeFilter(initialKnowledgeNodeFilter);
+          setLevelFilter("");
+          setProfession("all");
+          setQuestionType("all");
+          setSubject("all");
+          setStatus("all");
+          setTagFilter("");
+          handleReset();
+        }}
+        onSort={() => handleSortChange("updatedAt")}
+        onStatusChange={(value) => {
+          setStatus(value);
+          handleFilterChange("status");
+        }}
+        onSubjectChange={(value) => {
+          setSubject(value);
+          handleFilterChange("subject");
+        }}
+        onTagFilterChange={(value) => {
+          setTagFilter(value);
+          handleFilterChange("tagPublicId");
+        }}
       />
 
       {displayedActionMessage === null ? null : (
@@ -1254,7 +1308,10 @@ export function AdminQuestionMaterialManagement({
           className={tabClassName(activeView === "questions")}
           role="tab"
           type="button"
-          onClick={() => setActiveView("questions")}
+          onClick={() => {
+            setActiveView("questions");
+            handleFilterChange("view");
+          }}
         >
           <FileQuestion aria-hidden="true" className="size-4" />
           题目
@@ -1267,6 +1324,7 @@ export function AdminQuestionMaterialManagement({
           onClick={() => {
             setIsInitialQuestionTargetDismissed(true);
             setActiveView("materials");
+            handleFilterChange("view");
           }}
         >
           <FileText aria-hidden="true" className="size-4" />
@@ -1284,6 +1342,9 @@ export function AdminQuestionMaterialManagement({
         <div className="min-w-0">
           {activeView === "questions" ? (
             <QuestionList
+              emptyTitle={
+                hasActiveContentFilters ? "没有匹配的题目" : "暂无题目"
+              }
               recommendationByQuestionPublicId={
                 recommendationsByQuestionPublicId
               }
@@ -1311,6 +1372,9 @@ export function AdminQuestionMaterialManagement({
             />
           ) : (
             <MaterialList
+              emptyTitle={
+                hasActiveContentFilters ? "没有匹配的材料" : "暂无材料"
+              }
               rows={displayedMaterials}
               selectedPublicId={selectedMaterialPublicId}
               onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
@@ -1384,6 +1448,14 @@ export function AdminQuestionMaterialManagement({
         )}
       </div>
 
+      <AdminPagination
+        itemLabel={activeView === "questions" ? "道题目" : "份材料"}
+        page={query.page}
+        pageSize={query.pageSize}
+        total={pagination.total}
+        onPageChange={handlePageChange}
+      />
+
       {pendingContentAction === null ? null : (
         <ContentDangerConfirmationDialog
           action={pendingContentAction}
@@ -1428,61 +1500,11 @@ function QuestionMaterialLifecycleContextBand({
           <p className="text-text-secondary text-sm leading-6">{description}</p>
         </div>
         <dl className="grid gap-2 text-xs sm:grid-cols-3">
-          <LifecycleMetric label="可编辑" value={editableCount} />
-          <LifecycleMetric label="已停用" value={disabledCount} />
-          <LifecycleMetric label="锁定" value={lockedCount} />
+          <LifecycleMetric label="本页可编辑" value={editableCount} />
+          <LifecycleMetric label="本页已停用" value={disabledCount} />
+          <LifecycleMetric label="本页锁定" value={lockedCount} />
         </dl>
       </div>
-    </section>
-  );
-}
-
-function sortItemsByUpdatedAt<TItem extends { updatedAt: string }>(
-  items: TItem[],
-  sortOrder: AdminCommonSortOrder,
-) {
-  return [...items].sort((leftItem, rightItem) => {
-    const leftTime = new Date(leftItem.updatedAt).getTime();
-    const rightTime = new Date(rightItem.updatedAt).getTime();
-
-    return sortOrder === "desc" ? rightTime - leftTime : leftTime - rightTime;
-  });
-}
-
-function AdminCommonListControls({
-  pageSize,
-  sortOrder,
-  onPageSizeChange,
-  onToggleSortOrder,
-}: {
-  pageSize: string;
-  sortOrder: AdminCommonSortOrder;
-  onPageSizeChange: (value: string) => void;
-  onToggleSortOrder: () => void;
-}) {
-  return (
-    <section
-      aria-label="列表通用控制"
-      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
-    >
-      <FilterSelect
-        label="每页条数"
-        options={[
-          ["20", "20"],
-          ["50", "50"],
-          ["100", "100"],
-        ]}
-        value={pageSize}
-        onChange={onPageSizeChange}
-      />
-      <Button type="button" variant="outline" onClick={onToggleSortOrder}>
-        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
-        更新时间排序
-      </Button>
-      <p className="text-text-secondary text-xs">
-        当前{sortOrder === "desc" ? "降序" : "升序"}
-        ，筛选变更会自动刷新当前结果。
-      </p>
     </section>
   );
 }
@@ -2182,16 +2204,22 @@ function FilterPanel({
   keyword,
   knowledgeNodeFilter,
   levelFilter,
+  pageSize,
   profession,
   questionType,
+  sortOrder,
   status,
   subject,
   tagFilter,
+  total,
   onKeywordChange,
   onKnowledgeNodeFilterChange,
   onLevelFilterChange,
+  onPageSizeChange,
   onProfessionChange,
   onQuestionTypeChange,
+  onReset,
+  onSort,
   onStatusChange,
   onSubjectChange,
   onTagFilterChange,
@@ -2200,99 +2228,108 @@ function FilterPanel({
   keyword: string;
   knowledgeNodeFilter: string;
   levelFilter: string;
+  pageSize: number;
   profession: ProfessionFilter;
   questionType: QuestionTypeFilter;
+  sortOrder: AdminCommonSortOrder;
   status: StatusFilter;
   subject: SubjectFilter;
   tagFilter: string;
+  total: number;
   onKeywordChange: (value: string) => void;
   onKnowledgeNodeFilterChange: (value: string) => void;
   onLevelFilterChange: (value: string) => void;
+  onPageSizeChange: (value: string) => void;
   onProfessionChange: (value: ProfessionFilter) => void;
   onQuestionTypeChange: (value: QuestionTypeFilter) => void;
+  onReset: () => void;
+  onSort: () => void;
   onStatusChange: (value: StatusFilter) => void;
   onSubjectChange: (value: SubjectFilter) => void;
   onTagFilterChange: (value: string) => void;
 }) {
+  const itemLabel = activeView === "questions" ? "道题目" : "份材料";
+
   return (
-    <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
-        <label className="flex flex-1 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">关键词</span>
-          <span className="relative">
-            <Search
-              aria-hidden="true"
-              className="text-text-muted pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
-            />
-            <Input
-              aria-label="关键词"
-              className="pl-8"
-              placeholder="题干、材料、业务标识、知识点或标签"
-              value={keyword}
-              onChange={(event) => onKeywordChange(event.target.value)}
-            />
-          </span>
-        </label>
-        <FilterSelect
-          label="专业"
-          options={[
-            ["all", "全部专业"],
-            ["marketing", "营销"],
-            ["logistics", "物流"],
-            ["monopoly", "专卖"],
-          ]}
-          value={profession}
-          onChange={(value) => onProfessionChange(value as ProfessionFilter)}
-        />
-        <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
-          <span className="text-text-secondary">等级</span>
+    <AdminListToolbar
+      description="按内容范围和状态缩小结果；筛选变化后从第一页重新查询。"
+      resultLabel={`共 ${total} ${itemLabel}`}
+      title={activeView === "questions" ? "题目筛选" : "材料筛选"}
+    >
+      <label className="flex flex-1 flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">关键词</span>
+        <span className="relative">
+          <Search
+            aria-hidden="true"
+            className="text-text-muted pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
+          />
           <Input
-            aria-label="等级筛选"
-            placeholder="全部等级"
-            value={levelFilter}
-            onChange={(event) => onLevelFilterChange(event.target.value)}
+            aria-label="关键词"
+            className="h-9 pl-8"
+            placeholder="题干、材料、业务标识、知识点或标签"
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
           />
-        </label>
-        <FilterSelect
-          label="科目"
-          options={[
-            ["all", "全部科目"],
-            ["theory", "理论"],
-            ["skill", "技能"],
-          ]}
-          value={subject}
-          onChange={(value) => onSubjectChange(value as SubjectFilter)}
+        </span>
+      </label>
+      <FilterSelect
+        label="专业"
+        options={[
+          ["all", "全部专业"],
+          ["marketing", "营销"],
+          ["logistics", "物流"],
+          ["monopoly", "专卖"],
+        ]}
+        value={profession}
+        onChange={(value) => onProfessionChange(value as ProfessionFilter)}
+      />
+      <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
+        <span className="text-text-secondary">等级</span>
+        <Input
+          aria-label="等级筛选"
+          className="h-9"
+          placeholder="全部等级"
+          value={levelFilter}
+          onChange={(event) => onLevelFilterChange(event.target.value)}
         />
-        {activeView === "questions" ? (
-          <FilterSelect
-            label="题型"
-            options={[
-              ["all", "全部题型"],
-              ...Object.entries(questionTypeLabels),
-            ]}
-            value={questionType}
-            onChange={(value) =>
-              onQuestionTypeChange(value as QuestionTypeFilter)
-            }
-          />
-        ) : null}
-        <FilterSelect
-          label="状态"
-          options={[
-            ["all", "全部状态"],
-            ["available", "可用"],
-            ["disabled", "已停用"],
-          ]}
-          value={status}
-          onChange={(value) => onStatusChange(value as StatusFilter)}
-        />
-      </div>
+      </label>
+      <FilterSelect
+        label="科目"
+        options={[
+          ["all", "全部科目"],
+          ["theory", "理论"],
+          ["skill", "技能"],
+        ]}
+        value={subject}
+        onChange={(value) => onSubjectChange(value as SubjectFilter)}
+      />
       {activeView === "questions" ? (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <FilterSelect
+          label="题型"
+          options={[["all", "全部题型"], ...Object.entries(questionTypeLabels)]}
+          value={questionType}
+          onChange={(value) =>
+            onQuestionTypeChange(value as QuestionTypeFilter)
+          }
+        />
+      ) : null}
+      <FilterSelect
+        label="状态"
+        options={[
+          ["all", "全部状态"],
+          ["available", "可用"],
+          ["disabled", "已停用"],
+        ]}
+        value={status}
+        onChange={(value) => onStatusChange(value as StatusFilter)}
+      />
+      {activeView === "questions" ? (
+        <>
           <label className="flex flex-col gap-2 text-sm font-medium">
             <span className="text-text-secondary">知识点筛选</span>
             <Input
               aria-label="知识点筛选"
+              className="h-9"
               placeholder="知识点业务标识"
               value={knowledgeNodeFilter}
               onChange={(event) =>
@@ -2304,18 +2341,45 @@ function FilterPanel({
             <span className="text-text-secondary">标签筛选</span>
             <Input
               aria-label="标签筛选"
+              className="h-9"
               placeholder="标签业务标识"
               value={tagFilter}
               onChange={(event) => onTagFilterChange(event.target.value)}
             />
           </label>
-        </div>
+        </>
       ) : null}
-    </div>
+      <Button
+        aria-label="更新时间排序"
+        type="button"
+        variant="outline"
+        onClick={onSort}
+      >
+        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
+        更新时间排序
+        <span className="sr-only">
+          当前{sortOrder === "desc" ? "降序" : "升序"}
+        </span>
+      </Button>
+      <FilterSelect
+        label="每页条数"
+        options={[
+          ["20", "20"],
+          ["50", "50"],
+          ["100", "100"],
+        ]}
+        value={String(pageSize)}
+        onChange={onPageSizeChange}
+      />
+      <Button type="button" variant="outline" onClick={onReset}>
+        重置筛选
+      </Button>
+    </AdminListToolbar>
   );
 }
 
 function QuestionList({
+  emptyTitle,
   recommendationByQuestionPublicId,
   rows,
   selectedPublicId,
@@ -2325,6 +2389,7 @@ function QuestionList({
   onRecommend,
   onReviewRecommendation,
 }: {
+  emptyTitle: string;
   recommendationByQuestionPublicId: Record<
     string,
     KnowledgeRecommendationReviewState
@@ -2341,125 +2406,112 @@ function QuestionList({
     reviewStatus: RecommendationReviewStatus,
   ) => void;
 }) {
-  if (rows.length === 0) {
-    return <FilteredEmptyState title="没有匹配的题目" />;
-  }
-
   return (
-    <div className="grid gap-3">
-      {rows.map((question) => {
-        const isSelected = question.publicId === selectedPublicId;
+    <AdminTableFrame ariaLabel="题目列表" minWidthClassName="min-w-[72rem]">
+      <div
+        aria-label="题目列表"
+        className="divide-border divide-y"
+        role="table"
+      >
+        {rows.length === 0 ? <FilteredEmptyState title={emptyTitle} /> : null}
+        {rows.map((question) => {
+          const isSelected = question.publicId === selectedPublicId;
 
-        return (
-          <article
-            aria-current={isSelected ? "true" : undefined}
-            className={`bg-surface border-border rounded-md border p-4 shadow-sm ${
-              isSelected ? "ring-primary/60 bg-primary/5 ring-2" : ""
-            }`}
-            data-public-id={question.publicId}
-            data-selected={String(isSelected)}
-            data-testid={`question-row-${question.publicId}`}
-            key={question.publicId}
-          >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={question.status} />
-                  <span className="text-text-muted text-xs">
-                    {questionTypeLabels[question.questionType]}
-                  </span>
-                  <span className="text-text-muted text-xs">
-                    {formatScope(question)}
-                  </span>
-                </div>
-                <h2 className="text-text-primary text-base font-semibold">
-                  {readQuestionSummary(question)}
-                </h2>
-                <QuestionBindingSummary question={question} />
-                <QuestionLockSummary question={question} />
-                <div className="flex flex-wrap gap-2">
-                  {question.knowledgeNodePublicIds.map((publicId) => (
-                    <span
-                      className="bg-muted text-muted-foreground rounded-md px-2 py-1 text-xs"
-                      key={publicId}
-                    >
-                      {publicId}
+          return (
+            <article
+              aria-current={isSelected ? "true" : undefined}
+              className={`bg-surface border-border rounded-md border p-4 shadow-sm ${
+                isSelected ? "ring-primary/60 bg-primary/5 ring-2" : ""
+              }`}
+              data-public-id={question.publicId}
+              data-selected={String(isSelected)}
+              data-testid={`question-row-${question.publicId}`}
+              key={question.publicId}
+              role="row"
+            >
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={question.status} />
+                    <span className="text-text-muted text-xs">
+                      {questionTypeLabels[question.questionType]}
                     </span>
-                  ))}
-                  {question.tagPublicIds.map((publicId) => (
-                    <span
-                      className="border-border text-text-secondary rounded-md border px-2 py-1 text-xs"
-                      key={publicId}
-                    >
-                      {publicId}
+                    <span className="text-text-muted text-xs">
+                      {formatScope(question)}
                     </span>
-                  ))}
+                  </div>
+                  <h2 className="text-text-primary text-base font-semibold">
+                    {readQuestionSummary(question)}
+                  </h2>
+                  <QuestionBindingSummary question={question} />
+                  <QuestionLockSummary question={question} />
                 </div>
               </div>
-              <PublicId value={question.publicId} />
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                aria-label={`编辑题目 ${question.publicId}`}
-                data-testid={`question-edit-${question.publicId}`}
-                disabled={question.isLocked}
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={() => onEdit(question)}
-              >
-                <Pencil aria-hidden="true" data-icon="inline-start" />
-                编辑
-              </Button>
-              {question.isLocked ? (
-                <span className="text-text-muted self-center text-xs">
-                  已锁定题目只能复制新题后编辑
-                </span>
-              ) : null}
-              <Button
-                aria-label={`停用题目 ${question.publicId}`}
-                size="sm"
-                type="button"
-                variant="destructive"
-                onClick={() => onDisable(question.publicId)}
-              >
-                <ShieldOff aria-hidden="true" data-icon="inline-start" />
-                停用
-              </Button>
-              <Button
-                aria-label={`复制题目 ${question.publicId}`}
-                size="sm"
-                type="button"
-                variant="secondary"
-                onClick={() => onCopy(question.publicId)}
-              >
-                <Copy aria-hidden="true" data-icon="inline-start" />
-                复制
-              </Button>
-              <Button
-                aria-label={`为题目 ${question.publicId} 推荐知识点`}
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={() => onRecommend(question)}
-              >
-                <Sparkles aria-hidden="true" data-icon="inline-start" />
-                推荐知识点
-              </Button>
-            </div>
-            <KnowledgeRecommendationReviewPanel
-              question={question}
-              reviewState={recommendationByQuestionPublicId[question.publicId]}
-              onReviewRecommendation={onReviewRecommendation}
-            />
-            <ReferenceBlock
-              label="关联材料"
-              value={question.materialPublicId ?? "未关联材料"}
-            />
-          </article>
-        );
-      })}
-    </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  aria-label={`编辑题目 ${question.publicId}`}
+                  data-testid={`question-edit-${question.publicId}`}
+                  disabled={question.isLocked}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => onEdit(question)}
+                >
+                  <Pencil aria-hidden="true" data-icon="inline-start" />
+                  编辑
+                </Button>
+                {question.isLocked ? (
+                  <span className="text-text-muted self-center text-xs">
+                    已锁定题目只能复制新题后编辑
+                  </span>
+                ) : null}
+                <Button
+                  aria-label={`停用题目 ${question.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onDisable(question.publicId)}
+                >
+                  <ShieldOff aria-hidden="true" data-icon="inline-start" />
+                  停用
+                </Button>
+                <Button
+                  aria-label={`复制题目 ${question.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onCopy(question.publicId)}
+                >
+                  <Copy aria-hidden="true" data-icon="inline-start" />
+                  复制
+                </Button>
+                <Button
+                  aria-label={`为题目 ${question.publicId} 推荐知识点`}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => onRecommend(question)}
+                >
+                  <Sparkles aria-hidden="true" data-icon="inline-start" />
+                  推荐知识点
+                </Button>
+              </div>
+              <KnowledgeRecommendationReviewPanel
+                question={question}
+                reviewState={
+                  recommendationByQuestionPublicId[question.publicId]
+                }
+                onReviewRecommendation={onReviewRecommendation}
+              />
+              <ReferenceBlock
+                label="关联材料"
+                value={question.materialPublicId === null ? "未关联" : "已关联"}
+              />
+            </article>
+          );
+        })}
+      </div>
+    </AdminTableFrame>
   );
 }
 
@@ -2470,14 +2522,13 @@ function QuestionBindingSummary({ question }: { question: QuestionDto }) {
       data-testid={`question-binding-${question.publicId}`}
     >
       <p className="text-text-secondary">
-        关联材料：{formatBindingPublicId(question.materialPublicId)}
+        关联材料：{question.materialPublicId === null ? "无" : "1 份"}
       </p>
       <p className="text-text-secondary">
-        知识点：
-        {formatBindingPublicIdList(question.knowledgeNodePublicIds)}
+        知识点：{question.knowledgeNodePublicIds.length} 个
       </p>
       <p className="text-text-secondary">
-        标签：{formatBindingPublicIdList(question.tagPublicIds)}
+        标签：{question.tagPublicIds.length} 个
       </p>
     </div>
   );
@@ -2674,126 +2725,109 @@ function KnowledgeRecommendationReviewPanel({
 }
 
 function MaterialList({
+  emptyTitle,
   rows,
   selectedPublicId,
   onCopy,
   onDisable,
   onEdit,
 }: {
+  emptyTitle: string;
   rows: MaterialDto[];
   selectedPublicId: string | null;
   onCopy: (publicId: string) => void;
   onDisable: (publicId: string) => void;
   onEdit: (material: MaterialDto) => void;
 }) {
-  if (rows.length === 0) {
-    return <FilteredEmptyState title="没有匹配的材料" />;
-  }
-
   return (
-    <div className="grid gap-3">
-      {rows.map((material) => {
-        const isSelected = material.publicId === selectedPublicId;
-        const referencedQuestionPublicIds = material.references.questions.map(
-          (reference) => reference.questionPublicId,
-        );
-        const referencedPaperPublicIds = material.references.papers.map(
-          (reference) => reference.paperPublicId,
-        );
-
-        return (
-          <article
-            aria-current={isSelected ? "true" : undefined}
-            className={`bg-surface border-border rounded-md border p-4 shadow-sm ${
-              isSelected ? "ring-primary/60 bg-primary/5 ring-2" : ""
-            }`}
-            data-public-id={material.publicId}
-            data-selected={String(isSelected)}
-            data-testid={`material-row-${material.publicId}`}
-            key={material.publicId}
-          >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={material.status} />
-                  <span className="text-text-muted text-xs">
-                    {formatScope(material)}
-                  </span>
+    <AdminTableFrame ariaLabel="材料列表" minWidthClassName="min-w-[72rem]">
+      <div
+        aria-label="材料列表"
+        className="divide-border divide-y"
+        role="table"
+      >
+        {rows.length === 0 ? <FilteredEmptyState title={emptyTitle} /> : null}
+        {rows.map((material) => {
+          const isSelected = material.publicId === selectedPublicId;
+          return (
+            <article
+              aria-current={isSelected ? "true" : undefined}
+              className={`bg-surface border-border rounded-md border p-4 shadow-sm ${
+                isSelected ? "ring-primary/60 bg-primary/5 ring-2" : ""
+              }`}
+              data-public-id={material.publicId}
+              data-selected={String(isSelected)}
+              data-testid={`material-row-${material.publicId}`}
+              key={material.publicId}
+              role="row"
+            >
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={material.status} />
+                    <span className="text-text-muted text-xs">
+                      {formatScope(material)}
+                    </span>
+                  </div>
+                  <h2 className="text-text-primary text-base font-semibold">
+                    {material.title}
+                  </h2>
+                  <p className="text-text-secondary text-sm">
+                    关联题目 {material.references.questions.length} 道，关联试卷{" "}
+                    {material.references.papers.length} 套
+                  </p>
                 </div>
-                <h2 className="text-text-primary text-base font-semibold">
-                  {material.title}
-                </h2>
-                <p className="text-text-secondary line-clamp-2 text-sm">
-                  {stripRichText(material.contentRichText)}
-                </p>
               </div>
-              <PublicId value={material.publicId} />
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                aria-label={`编辑材料 ${material.publicId}`}
-                data-testid={`material-edit-${material.publicId}`}
-                disabled={material.isLocked}
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={() => onEdit(material)}
-              >
-                <Pencil aria-hidden="true" data-icon="inline-start" />
-                编辑
-              </Button>
-              {material.isLocked ? (
-                <span className="text-text-muted self-center text-xs">
-                  已锁定材料只能复制新材料后编辑
-                </span>
-              ) : null}
-              <Button
-                aria-label={`停用材料 ${material.publicId}`}
-                size="sm"
-                type="button"
-                variant="destructive"
-                onClick={() => onDisable(material.publicId)}
-              >
-                <ShieldOff aria-hidden="true" data-icon="inline-start" />
-                停用
-              </Button>
-              <Button
-                aria-label={`复制材料 ${material.publicId}`}
-                size="sm"
-                type="button"
-                variant="secondary"
-                onClick={() => onCopy(material.publicId)}
-              >
-                <Copy aria-hidden="true" data-icon="inline-start" />
-                复制
-              </Button>
-            </div>
-            <MaterialLockSummary material={material} />
-            <MaterialReferenceSummary material={material} />
-            <ReferenceBlock
-              label="材料锁定"
-              value={material.isLocked ? "已被发布试卷锁定" : "未锁定"}
-            />
-            <ReferenceBlock
-              label="关联题目"
-              value={
-                referencedQuestionPublicIds.length === 0
-                  ? "当前没有题目引用"
-                  : referencedQuestionPublicIds.join(", ")
-              }
-            />
-            <ReferenceBlock
-              label="关联试卷"
-              value={
-                referencedPaperPublicIds.length === 0
-                  ? "当前没有试卷引用"
-                  : referencedPaperPublicIds.join(", ")
-              }
-            />
-          </article>
-        );
-      })}
-    </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  aria-label={`编辑材料 ${material.publicId}`}
+                  data-testid={`material-edit-${material.publicId}`}
+                  disabled={material.isLocked}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => onEdit(material)}
+                >
+                  <Pencil aria-hidden="true" data-icon="inline-start" />
+                  编辑
+                </Button>
+                {material.isLocked ? (
+                  <span className="text-text-muted self-center text-xs">
+                    已锁定材料只能复制新材料后编辑
+                  </span>
+                ) : null}
+                <Button
+                  aria-label={`停用材料 ${material.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onDisable(material.publicId)}
+                >
+                  <ShieldOff aria-hidden="true" data-icon="inline-start" />
+                  停用
+                </Button>
+                <Button
+                  aria-label={`复制材料 ${material.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onCopy(material.publicId)}
+                >
+                  <Copy aria-hidden="true" data-icon="inline-start" />
+                  复制
+                </Button>
+              </div>
+              <MaterialLockSummary material={material} />
+              <MaterialReferenceSummary material={material} />
+              <ReferenceBlock
+                label="材料锁定"
+                value={material.isLocked ? "已被发布试卷锁定" : "未锁定"}
+              />
+            </article>
+          );
+        })}
+      </div>
+    </AdminTableFrame>
   );
 }
 
@@ -2823,14 +2857,9 @@ function MaterialReferenceSummary({ material }: { material: MaterialDto }) {
         题目引用数：{material.references.questions.length}
       </p>
       <p className="text-text-secondary">
-        {formatMaterialQuestionReferences(material.references.questions)}
-      </p>
-      <p className="text-text-secondary">
         试卷引用数：{material.references.papers.length}
       </p>
-      <p className="text-text-secondary">
-        {formatMaterialPaperReferences(material.references.papers)}
-      </p>
+      <p className="text-text-secondary">具体引用关系请在材料详情中查看。</p>
     </div>
   );
 }

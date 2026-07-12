@@ -301,7 +301,7 @@ export function FilterSelect({
       <span className="text-text-secondary">{label}</span>
       <select
         aria-label={label}
-        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
