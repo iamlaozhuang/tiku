@@ -339,7 +339,7 @@ describe("shared route-integrated Provider execution primitives", () => {
         JSON.stringify({
           questions: [
             {
-              questionType: "multiple_choice",
+              questionType: "multi_choice",
               difficulty: "medium",
             },
           ],

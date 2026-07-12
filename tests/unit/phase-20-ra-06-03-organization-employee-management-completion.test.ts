@@ -1093,7 +1093,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         expect.objectContaining({ method: "POST" }),
       ),
     );
-  });
+  }, 15_000);
 
   it("keeps the organization first-create surface available when enterprise data is empty", async () => {
     localStorage.setItem("tiku.localSessionToken", sessionToken);

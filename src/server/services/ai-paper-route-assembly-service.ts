@@ -528,12 +528,7 @@ function readSourcePreference(
 }
 
 function normalizeQuestionType(value: string | null): QuestionType | null {
-  const normalizedValue =
-    value === "judge"
-      ? "true_false"
-      : value === "multiple_choice"
-        ? "multi_choice"
-        : value;
+  const normalizedValue = value === "judge" ? "true_false" : value;
 
   return normalizedValue !== null && allowedQuestionTypes.has(normalizedValue)
     ? (normalizedValue as QuestionType)

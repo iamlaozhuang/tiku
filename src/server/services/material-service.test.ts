@@ -179,6 +179,7 @@ describe("material service", () => {
         level: null,
         subject: "skill",
         status: "available",
+        keyword: null,
       },
     ]);
   });

@@ -72,11 +72,11 @@ describe("phase 21 authorization overlap concurrency proof", () => {
     );
     const postSource = extractBetween(
       serviceSource,
-      "const orgAuth = await repositories.createOrgAuth(orgAuthInput.value);",
-      "item: {",
+      "const orgAuth = await repositories.createOrgAuth(orgAuthInput);",
+      "orgAuths.push(orgAuth);",
     );
     const postCreateOverlapIndex = postSource.indexOf(
-      "await repositories.hasOverlappingOrgAuth(orgAuthInput.value)",
+      "await repositories.hasOverlappingOrgAuth(orgAuthInput)",
     );
     const overlapResponseIndex = postSource.indexOf(
       "orgAuthScopeOverlapResponse",

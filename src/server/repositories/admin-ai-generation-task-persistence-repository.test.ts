@@ -23,6 +23,7 @@ import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedGroundingContext,
 } from "../contracts/route-integrated-provider-execution-contract";
+import type { AiPaperAssemblyRole } from "../contracts/ai-paper-plan-and-select-contract";
 import type { AdminRole } from "../models/auth";
 import {
   ADMIN_AI_GENERATION_PERSISTENCE_TASK_TYPES,
@@ -33,6 +34,7 @@ import {
   type AdminAiGenerationRuntimeBridgeControl,
   type AdminAiGenerationWorkspace,
 } from "../services/admin-ai-generation-local-contract-route";
+import type { AiPaperRoutePlanSelectWiringResult } from "../services/ai-paper-route-plan-select-wiring-service";
 import type { SessionService } from "../services/session-service";
 
 const defaultAdminGenerationParameters: AiGenerationRouteIntegratedGenerationParameters =
@@ -141,6 +143,45 @@ function createRepositoryTestProviderRuntimeBridgeControl(): AdminAiGenerationRu
   };
 }
 
+function createRepositoryTestInsufficientPaperAssembly(
+  role: AiPaperAssemblyRole,
+): AiPaperRoutePlanSelectWiringResult {
+  return {
+    status: "insufficient",
+    sourceDiagnostics: {
+      role,
+      platformQuestionCount: 0,
+      enterpriseQuestionCount: 0,
+      enterpriseSourceStatus:
+        role === "content_admin" ? "not_applicable" : "resolved",
+    },
+    assembly: {
+      status: "insufficient",
+      container: {
+        title: "redacted paper container",
+        profession: "marketing",
+        level: 3,
+        subject: "theory",
+        requestedQuestionCount: 50,
+        selectedQuestionCount: 0,
+        sourceComposition: {
+          platformFormalQuestionCount: 0,
+          enterpriseTrainingSnapshotCount: 0,
+        },
+        matchQuality: "insufficient",
+        sections: [],
+      },
+      insufficiency: {
+        requestedQuestionCount: 50,
+        selectedQuestionCount: 0,
+        missingQuestionCount: 50,
+        failureCategory: "insufficient_formal_question_source",
+      },
+    },
+    rejection: null,
+  };
+}
+
 function createDefaultAdminWorkspaceCapability(input: {
   adminRoles: AdminRole[];
   organizationPublicId: string | null;
@@ -245,6 +286,10 @@ async function createAcceptedLocalContract(input: {
         organizationPublicId: input.organizationPublicId,
       }),
       runtimeBridgeControl: createRepositoryTestProviderRuntimeBridgeControl(),
+      paperAssemblyResolver: ({ workspace }) =>
+        createRepositoryTestInsufficientPaperAssembly(
+          workspace === "content" ? "content_admin" : "org_advanced_admin",
+        ),
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository:
         createLocalContractRouteResultPersistenceRepository(),

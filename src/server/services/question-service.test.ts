@@ -228,6 +228,7 @@ describe("question service", () => {
         subject: "theory",
         questionType: "single_choice",
         status: "available",
+        materialPublicId: null,
         knowledgeNodePublicId: "knowledge_node_public_storage",
         tagPublicId: "tag_public_storage",
         keyword: "仓储",

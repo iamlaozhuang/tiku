@@ -1481,8 +1481,19 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("organization-tier-select"), {
       target: { value: "province" },
     });
+    const treeCallsBeforeCreate = fetchMock.mock.calls.filter(([url]) =>
+      String(url).startsWith("/api/v1/organization-tree-nodes?"),
+    ).length;
     fireEvent.click(screen.getByTestId("organization-submit-button"));
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) =>
+          String(url).startsWith("/api/v1/organization-tree-nodes?"),
+        ).length,
+      ).toBeGreaterThan(treeCallsBeforeCreate),
+    );
 
     const createCall = fetchMock.mock.calls.find(
       ([url]) => String(url) === "/api/v1/organizations",
@@ -1502,15 +1513,28 @@ describe("admin user organization authorization ops baseline", () => {
       "admin-organization-org-city-001",
     );
     fireEvent.click(within(cityNode).getByRole("button", { name: "详情" }));
-    fireEvent.click(screen.getByTestId("organization-edit-org-city-001"));
+    fireEvent.click(
+      await screen.findByTestId("organization-edit-org-city-001"),
+    );
     fireEvent.change(screen.getByTestId("organization-name-input"), {
       target: { value: "Quanzhou Test Tobacco" },
     });
     fireEvent.change(screen.getByTestId("organization-parent-select"), {
       target: { value: "org-province-001" },
     });
+    const treeCallsBeforeUpdate = fetchMock.mock.calls.filter(([url]) =>
+      String(url).startsWith("/api/v1/organization-tree-nodes?"),
+    ).length;
     fireEvent.click(screen.getByTestId("organization-submit-button"));
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) =>
+          String(url).startsWith("/api/v1/organization-tree-nodes?"),
+        ).length,
+      ).toBeGreaterThan(treeCallsBeforeUpdate),
+    );
 
     const updateCall = fetchMock.mock.calls.find(
       ([url]) => String(url) === "/api/v1/organizations/org-city-001",
@@ -1535,7 +1559,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.click(
       within(refreshedCityNode).getByRole("button", { name: "详情" }),
     );
-    fireEvent.click(screen.getByTestId("organization-disable-org-city-001"));
+    fireEvent.click(
+      await screen.findByTestId("organization-disable-org-city-001"),
+    );
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
 
     expect(fetchMock).toHaveBeenCalledWith(

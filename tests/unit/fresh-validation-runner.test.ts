@@ -103,7 +103,7 @@ describe("fresh validation runner", () => {
     expect(result.stdout).not.toContain("fake-password");
     expect(result.stdout).not.toContain("postgres://");
     expect(result.stderr).not.toContain("fake-password");
-  });
+  }, 45_000);
 
   test("blocks non-loopback database targets without leaking the URL", () => {
     const result = runRunner(

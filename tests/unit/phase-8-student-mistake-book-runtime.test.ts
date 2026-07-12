@@ -155,6 +155,30 @@ function createHandlers(
 
   return createStudentMistakeBookRuntimeRouteHandlers({
     mistakeBookRepository: options.repository ?? createRepository(),
+    aiCallLogRepository: {
+      async appendAiCallLog(input) {
+        return {
+          publicId: "ai-call-log-public-default",
+          userPublicId: input.userPublicId,
+          organizationPublicId: null,
+          profession: null,
+          level: null,
+          aiFuncType: input.aiFuncType,
+          callStatus: input.callStatus,
+          providerDisplayName: input.modelConfigSnapshot.providerDisplayName,
+          modelAlias: input.modelConfigSnapshot.modelName,
+          promptSummary: "redacted prompt snapshot",
+          outputSummary: "redacted model output snapshot",
+          promptTokenCount: input.promptTokenCount,
+          completionTokenCount: input.completionTokenCount,
+          totalTokenCount: input.totalTokenCount,
+          estimatedCostCny: "0.00",
+          latencyMs: input.latencyMs,
+          startedAt: input.startedAt.toISOString(),
+          completedAt: input.completedAt?.toISOString() ?? null,
+        };
+      },
+    },
     now: () => now,
     sessionService: {
       async getCurrentSession(input) {

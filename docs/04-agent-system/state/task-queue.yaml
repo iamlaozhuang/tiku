@@ -118,6 +118,102 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-acceptance-remediation-ledger-2026-07-11
+    title: 0704 acceptance remediation ledger B0
+    phase: 0704-acceptance-remediation-ledger-2026-07-11
+    status: ready_for_closeout
+    result: pass_b0_ledger_and_unit_baseline_restoration
+    priority: p0
+    sequenceOrder: 35.0
+    taskKind: implementation_feature
+    executionProfile: acceptance_ledger_master_unit_baseline_repair_and_test_stability
+    moduleRunVersion: 2
+    branch: codex/0704-acceptance-remediation-ledger
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-acceptance-remediation-ledger.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-acceptance-remediation-ledger.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-acceptance-remediation-ledger-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-acceptance-remediation-ledger.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-acceptance-remediation-ledger.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-acceptance-remediation-ledger-audit.md
+      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
+      - src/server/services/ai-paper-route-assembly-service.ts
+      - src/server/services/material-service.test.ts
+      - src/server/services/question-service.test.ts
+      - src/server/services/route-integrated-provider-execution-service.test.ts
+      - src/server/services/route-integrated-provider-execution-service.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/fresh-validation-runner.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
+      - tests/unit/phase-21-authorization-overlap-concurrency-proof.test.ts
+      - tests/unit/phase-8-student-mistake-book-runtime.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\\tiku-local-private\\**
+    capabilities:
+      localSourceChange: approved_b0_baseline_repair_only
+      focusedUnitTest: approved
+      fullUnitTest: approved
+      browserRuntime: blocked_not_needed_b0
+      directDatabaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_issue_id_status_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      localCommit: approved_after_full_local_gate
+      fastForwardMerge: approved_master
+      push: blocked_requires_fresh_approval
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationSummary:
+      status: pass_ready_for_commit_and_local_merge
+      redTargetedTests: pass_expected_8_stable_failures_and_3_concurrency_failures
+      greenTargetedTests: pass_focused_and_default_concurrency_full_suite
+      fullUnitTests: pass_357_files_1929_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      formatting: pass_full_repository
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_16_files_scanned
+      dependencyOrLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      providerExecution: blocked_not_executed
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\agent-system\\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-acceptance-remediation-ledger-2026-07-11
   - id: 0704-content-ai-surface-convergence-2026-07-11
     title: 0704 content AI surface convergence
     phase: 0704-content-ai-surface-convergence-2026-07-11
