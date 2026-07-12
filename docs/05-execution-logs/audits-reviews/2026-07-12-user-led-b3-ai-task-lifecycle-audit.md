@@ -18,6 +18,8 @@
 | 正式域红线    | pass；结果保持草稿且禁止正式采用，未写题目或试卷正式域。                       |
 | 数据与配置    | pass；无 schema、migration、fixture、seed、依赖、env 或数据库数据改动。        |
 | 回归门禁      | pass；360 文件、1970 用例、lint、typecheck、format 和 webpack build 通过。     |
+| 主分支复验    | pass；ff-only 合入后 focused 14 用例、lint、typecheck 和 diff check 通过。     |
+| 远端门禁      | pass；pre-push readiness 通过，仅允许普通 push `origin/master`。               |
 
 ## 反证与残余风险
 

@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b3-ai-task-lifecycle-2026-07-12
     title: User-led B3 AI task lifecycle consistency repair
     phase: user-led-b3-ai-task-lifecycle-2026-07-12
-    status: ready_for_closeout
+    status: closed
     result: pass_ai_task_result_atomic_lifecycle_and_history_compatibility
     priority: p1
     sequenceOrder: 48
@@ -181,6 +181,8 @@ activeTasks:
       - corepack pnpm@10.26.1 run format:check
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
+    finalCommit: ba3e3e34c7a67e120ec4085e8767d58c3c4e5245
+    closeoutStatus: local_master_verified_ready_for_origin_master_sync
   - id: 0704-b0-b6-push-closeout-2026-07-12
     title: 0704 B0-B6 push-ready review and origin master synchronization
     phase: 0704-b0-b6-push-closeout-2026-07-12

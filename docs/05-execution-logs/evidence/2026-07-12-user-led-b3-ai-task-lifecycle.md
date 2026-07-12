@@ -43,7 +43,9 @@
 - Test-ModuleRunV2PreCommitHardening：pass。首次执行因任务使用 YAML anchor 继承 blockedFiles，脚本把空数组绑定到必填参数而中止；显式核对 9 个变更文件均在 allowedFiles 后先完成其余硬化检查，再把同一 blockedFiles 列表显式物化到任务，供无参数真实 hook 完整执行范围扫描。
 - 首次真实 `git commit` 被 hook 拒绝：project-state 的深层 `currentTask` 仍指向已关闭的 push-closeout 任务。已将指针切换到 B3，并把旧值保留为 `previousCurrentTaskBeforeUserLedB3AiTaskLifecycle20260712`，随后重新执行无参数真实 hook。
 - Test-ModuleRunV2ModuleCloseoutReadiness：pass；严格 RED/GREEN、commit、localFullLoopGate、blocked remainder、thread rollover 和 next module run 锚点均通过。
-- Test-ModuleRunV2PrePushReadiness：待本地提交和主分支复验后执行。
+- 本地提交：`ba3e3e34c7a67e120ec4085e8767d58c3c4e5245`，真实 hook 的 scope、敏感信息、术语、lint-staged、lint、typecheck 与 post-commit advisory 通过。
+- ff-only 合入本地 `master` 后复验：focused 2 文件 / 14 用例、lint、typecheck、`git diff --check` 通过。
+- Test-ModuleRunV2PrePushReadiness：pass（`-SkipRemoteAheadCheck`）；本地 `master` 为 `ba3e3e34c`，`origin/master` 仍为任务基线，远端普通推送尚未执行。
 
 ## 对抗式边界
 
@@ -58,9 +60,11 @@
 ## Module Run v2 锚点
 
 - result: pass
-- Commit: `f1148823d6f2d59ea3cb40d430ef7cb552c969cb`（任务起始提交；本批次提交在 closeout 后创建）。
+- Commit: `ba3e3e34c7a67e120ec4085e8767d58c3c4e5245`。
 - localFullLoopGate: pass；focused/full unit、lint、typecheck、format、webpack build 与 diff check 已通过。
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass。
+- masterPostMergeVerification: pass_2_files_14_tests_lint_typecheck_diff_check。
+- Test-ModuleRunV2PrePushReadiness: pass_skip_remote_ahead_check。
 - Cost Calibration Gate remains blocked。
 - threadRolloverGate: not_required；当前批次可在本任务内完成提交、快进合入、推送与清理。
 - nextModuleRunCandidate: `user-led-b4-ai-training-information-architecture-2026-07-12`，仅在 B3 完整远端收口后领取。
