@@ -153,6 +153,19 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
+function createCompleteOrganizationTrainingListResponse() {
+  return createJsonResponse({
+    code: 0,
+    message: "ok",
+    data: {
+      items: [],
+      redactionStatus: "metadata_only",
+      integrityStatus: "complete",
+      warningCode: null,
+    },
+  });
+}
+
 function readJsonRequestBody(
   fetchMock: ReturnType<typeof vi.fn>,
   path: string,
@@ -268,6 +281,116 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
       "/api/v1/sessions",
     ]);
+  });
+
+  it("fails closed on a partial lifecycle list and restores creation only after a complete retry", async () => {
+    let listRequestCount = 0;
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (isOrganizationTrainingListGet(url)) {
+        listRequestCount += 1;
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data:
+            listRequestCount === 1
+              ? {
+                  items: [
+                    {
+                      publicId:
+                        "organization-training-version-visible-redacted",
+                      resourceType: "organization_training_version",
+                      organizationPublicId: "organization-admin-scope-redacted",
+                      title: "可用训练",
+                      status: "published",
+                      sourceKind: "platform_paper",
+                      contentKind: "paper_training",
+                      availableActions: ["copy_to_new_draft"],
+                    },
+                  ],
+                  redactionStatus: "metadata_only",
+                  integrityStatus: "partial",
+                  warningCode: "historical_version_unavailable",
+                }
+              : {
+                  items: [],
+                  redactionStatus: "metadata_only",
+                  integrityStatus: "complete",
+                  warningCode: null,
+                },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(await screen.findByText("可用训练")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("部分历史训练暂不可用");
+    expect(screen.getByRole("button", { name: "新建企业训练" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
+    );
+    expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "重试企业训练列表" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "新建企业训练" }),
+      ).toBeEnabled();
+    });
+    expect(listRequestCount).toBe(2);
+  });
+
+  it("keeps creation disabled when the lifecycle list request fails", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (isOrganizationTrainingListGet(url)) {
+        return createJsonResponse({
+          code: 503001,
+          message: "temporarily unavailable",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "企业训练列表加载失败",
+    );
+    expect(screen.getByRole("button", { name: "新建企业训练" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "新建企业训练" }));
+    expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "重试企业训练列表" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "返回组织概览" })).toHaveAttribute(
+      "href",
+      "/organization/portal",
+    );
   });
 
   it("filters organization training lifecycle rows and exposes read-only published actions", async () => {
@@ -398,6 +521,8 @@ describe("AdminOrganizationTrainingPage", () => {
               },
             ],
             redactionStatus: "metadata_only",
+            integrityStatus: "complete",
+            warningCode: null,
           },
         });
       }
@@ -555,6 +680,8 @@ describe("AdminOrganizationTrainingPage", () => {
               },
             ],
             redactionStatus: "metadata_only",
+            integrityStatus: "complete",
+            warningCode: null,
           },
         });
       }
@@ -699,6 +826,8 @@ describe("AdminOrganizationTrainingPage", () => {
           data: {
             items: filteredItems,
             redactionStatus: "metadata_only",
+            integrityStatus: "complete",
+            warningCode: null,
           },
           pagination: {
             page: Number.parseInt(searchParams.get("page") ?? "1", 10),
@@ -837,6 +966,8 @@ describe("AdminOrganizationTrainingPage", () => {
           data: {
             items: lifecycleItems,
             redactionStatus: "metadata_only",
+            integrityStatus: "complete",
+            warningCode: null,
           },
         });
       }
@@ -903,6 +1034,8 @@ describe("AdminOrganizationTrainingPage", () => {
           data: {
             items: [],
             redactionStatus: "metadata_only",
+            integrityStatus: "complete",
+            warningCode: null,
           },
         });
       }
@@ -921,6 +1054,12 @@ describe("AdminOrganizationTrainingPage", () => {
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "新建企业训练" }),
+      ).toBeEnabled();
+    });
 
     openCreateWizard();
 
@@ -1039,6 +1178,8 @@ describe("AdminOrganizationTrainingPage", () => {
                 },
               ],
               redactionStatus: "metadata_only",
+              integrityStatus: "complete",
+              warningCode: null,
             },
           });
         }
@@ -1170,6 +1311,8 @@ describe("AdminOrganizationTrainingPage", () => {
             data: {
               items: [],
               redactionStatus: "metadata_only",
+              integrityStatus: "complete",
+              warningCode: null,
             },
           });
         }
@@ -1254,6 +1397,12 @@ describe("AdminOrganizationTrainingPage", () => {
       screen.getByRole("button", { name: "新建企业训练" }),
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "新建企业训练" }),
+      ).toBeEnabled();
+    });
 
     openCreateWizard();
 
@@ -1372,6 +1521,10 @@ describe("AdminOrganizationTrainingPage", () => {
         return createJsonResponse(adminSessionPayload);
       }
 
+      if (isOrganizationTrainingListGet(url)) {
+        return createCompleteOrganizationTrainingListResponse();
+      }
+
       return createJsonResponse({
         code: 404001,
         message: "missing",
@@ -1385,6 +1538,12 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "新建企业训练" }),
+      ).toBeEnabled();
+    });
 
     openCreateWizard();
     fireEvent.click(screen.getByRole("radio", { name: "新建题目训练" }));
@@ -1444,6 +1603,8 @@ describe("AdminOrganizationTrainingPage", () => {
                 },
               ],
               redactionStatus: "metadata_only",
+              integrityStatus: "complete",
+              warningCode: null,
             },
           });
         }
@@ -1591,6 +1752,8 @@ describe("AdminOrganizationTrainingPage", () => {
                 },
               ],
               redactionStatus: "metadata_only",
+              integrityStatus: "complete",
+              warningCode: null,
             },
           });
         }
@@ -1773,6 +1936,8 @@ describe("AdminOrganizationTrainingPage", () => {
                 },
               ],
               redactionStatus: "metadata_only",
+              integrityStatus: "complete",
+              warningCode: null,
             },
           });
         }
@@ -1979,6 +2144,10 @@ describe("AdminOrganizationTrainingPage", () => {
           return createJsonResponse(adminSessionPayload);
         }
 
+        if (isOrganizationTrainingListGet(url, init)) {
+          return createCompleteOrganizationTrainingListResponse();
+        }
+
         if (path === "/api/v1/organization-trainings" && method === "POST") {
           return createJsonResponse({
             code: 500001,
@@ -2001,6 +2170,12 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "新建企业训练" }),
+      ).toBeEnabled();
+    });
 
     openCreateWizard();
 
@@ -2039,6 +2214,10 @@ describe("AdminOrganizationTrainingPage", () => {
           return createJsonResponse(adminSessionPayload);
         }
 
+        if (isOrganizationTrainingListGet(url, init)) {
+          return createCompleteOrganizationTrainingListResponse();
+        }
+
         if (path === "/api/v1/organization-trainings" && method === "POST") {
           return draftResponsePromise;
         }
@@ -2057,6 +2236,12 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("heading", { name: "企业训练" }),
     ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "新建企业训练" }),
+      ).toBeEnabled();
+    });
 
     openCreateWizard();
 

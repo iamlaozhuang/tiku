@@ -19,10 +19,15 @@ type AdminStateTemplateVariant =
   | "standard-unavailable"
   | "unauthorized";
 
-type AdminStateTemplateAction = {
-  href: string;
-  label: string;
-};
+type AdminStateTemplateAction =
+  | {
+      href: string;
+      label: string;
+    }
+  | {
+      label: string;
+      onClick: () => void;
+    };
 
 const adminStateTemplateIcon = {
   empty: <CheckCircle2 aria-hidden="true" className="size-5" />,
@@ -40,19 +45,26 @@ export function AdminStateTemplate({
   details,
   title,
   variant,
+  withinWorkspace = false,
 }: {
   action?: AdminStateTemplateAction | null;
   description: string;
   details?: readonly string[];
   title: string;
   variant: AdminStateTemplateVariant;
+  withinWorkspace?: boolean;
 }) {
   const isLoading = variant === "loading";
   const isEmpty = variant === "empty";
   const role = isLoading || isEmpty ? "status" : "alert";
+  const Container = withinWorkspace ? "div" : "main";
 
   return (
-    <main className="bg-background flex min-h-screen items-center justify-center px-6">
+    <Container
+      className={`bg-background flex items-center justify-center px-6 ${
+        withinWorkspace ? "min-h-full py-12" : "min-h-screen"
+      }`}
+    >
       <section
         aria-live={role === "status" ? "polite" : "assertive"}
         className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center"
@@ -78,15 +90,25 @@ export function AdminStateTemplate({
           </ul>
         ) : null}
         {action !== null && action !== undefined ? (
-          <Link
-            className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
-            href={action.href}
-          >
-            {action.label}
-          </Link>
+          "href" in action ? (
+            <Link
+              className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+              href={action.href}
+            >
+              {action.label}
+            </Link>
+          ) : (
+            <button
+              className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+              onClick={action.onClick}
+              type="button"
+            >
+              {action.label}
+            </button>
+          )
         ) : null}
       </section>
-    </main>
+    </Container>
   );
 }
 

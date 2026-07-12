@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
 import {
   CheckCircle2,
@@ -20,6 +21,7 @@ import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
   OrganizationTrainingAdminLifecycleContentKind,
+  OrganizationTrainingAdminLifecycleFlowDto,
   OrganizationTrainingAdminLifecycleItemDto,
   OrganizationTrainingAdminLifecycleSourceKind,
   OrganizationTrainingAdminDetailDto,
@@ -55,7 +57,7 @@ type AdminOrganizationTrainingLoadState =
   | "unauthorized"
   | "error";
 
-type OrganizationTrainingListState = "loading" | "ready" | "error";
+type OrganizationTrainingListState = "loading" | "ready" | "partial" | "error";
 
 type OrganizationTrainingDetailState = "idle" | "loading" | "ready" | "error";
 
@@ -848,6 +850,7 @@ export function AdminOrganizationTrainingPage() {
     useState<OrganizationTrainingDraftDto | null>(null);
   const [trainingListState, setTrainingListState] =
     useState<OrganizationTrainingListState>("loading");
+  const [trainingListReloadSerial, setTrainingListReloadSerial] = useState(0);
   const [trainingListMessage, setTrainingListMessage] = useState<string | null>(
     null,
   );
@@ -944,24 +947,23 @@ export function AdminOrganizationTrainingPage() {
       setTrainingListMessage(null);
 
       try {
-        const response = await fetchAdminOrganizationTrainingApi<{
-          items: OrganizationTrainingAdminLifecycleItemDto[];
-          redactionStatus: "metadata_only";
-        }>(
-          createAdminLifecycleListPath({
-            contentKind: selectedLifecycleContentKindFilter,
-            page: selectedLifecyclePage,
-            sourceKind: selectedLifecycleSourceKindFilter,
-            status: selectedLifecycleStatusFilter,
-          }),
-          sessionToken,
-        );
+        const response =
+          await fetchAdminOrganizationTrainingApi<OrganizationTrainingAdminLifecycleFlowDto>(
+            createAdminLifecycleListPath({
+              contentKind: selectedLifecycleContentKindFilter,
+              page: selectedLifecyclePage,
+              sourceKind: selectedLifecycleSourceKindFilter,
+              status: selectedLifecycleStatusFilter,
+            }),
+            sessionToken,
+          );
 
         if (!isActive) {
           return;
         }
 
         if (response.code !== 0 || response.data === null) {
+          setIsCreateWizardOpen(false);
           setTrainingItems([]);
           setTrainingPagination(null);
           setTrainingListMessage(
@@ -971,11 +973,38 @@ export function AdminOrganizationTrainingPage() {
           return;
         }
 
+        const hasValidIntegrityContract =
+          Array.isArray(response.data.items) &&
+          response.data.redactionStatus === "metadata_only" &&
+          ((response.data.integrityStatus === "complete" &&
+            response.data.warningCode === null) ||
+            (response.data.integrityStatus === "partial" &&
+              response.data.warningCode === "historical_version_unavailable"));
+
+        if (!hasValidIntegrityContract) {
+          setIsCreateWizardOpen(false);
+          setTrainingItems([]);
+          setTrainingPagination(null);
+          setTrainingListMessage("企业训练列表完整性状态不可用");
+          setTrainingListState("error");
+          return;
+        }
+
         setTrainingItems(response.data.items);
         setTrainingPagination(response.pagination ?? null);
+        if (response.data.integrityStatus === "partial") {
+          setIsCreateWizardOpen(false);
+          setTrainingListMessage(
+            "部分历史训练暂不可用，已暂停新建以避免遗漏或重复。",
+          );
+          setTrainingListState("partial");
+          return;
+        }
+
         setTrainingListState("ready");
       } catch {
         if (isActive) {
+          setIsCreateWizardOpen(false);
           setTrainingItems([]);
           setTrainingPagination(null);
           setTrainingListMessage("企业训练列表加载失败");
@@ -991,6 +1020,7 @@ export function AdminOrganizationTrainingPage() {
     };
   }, [
     loadState,
+    trainingListReloadSerial,
     selectedLifecycleContentKindFilter,
     selectedLifecyclePage,
     selectedLifecycleSourceKindFilter,
@@ -1047,6 +1077,11 @@ export function AdminOrganizationTrainingPage() {
     setMessage(null);
 
     try {
+      if (trainingListState !== "ready") {
+        setErrorMessage("企业训练列表尚未完整加载，暂不能新建训练");
+        return;
+      }
+
       if (capabilitySummary === null) {
         setErrorMessage("企业训练权限上下文缺失");
         return;
@@ -1334,7 +1369,14 @@ export function AdminOrganizationTrainingPage() {
         selectedStatusFilter={selectedLifecycleStatusFilter}
         isSubmitting={isSubmitting}
         isCreateWizardOpen={isCreateWizardOpen}
-        onCreateTraining={() => setIsCreateWizardOpen(true)}
+        onCreateTraining={() => {
+          if (trainingListState === "ready") {
+            setIsCreateWizardOpen(true);
+          }
+        }}
+        onRetry={() =>
+          setTrainingListReloadSerial((currentSerial) => currentSerial + 1)
+        }
         onSelectContentKindFilter={(filter) => {
           setSelectedLifecycleContentKindFilter(filter);
           setSelectedLifecyclePage(1);
@@ -1434,6 +1476,7 @@ function TrainingListPanel({
   selectedSourceKindFilter,
   selectedStatusFilter,
   onCreateTraining,
+  onRetry,
   onContinueDraft,
   onCopyVersionToDraft,
   onSelectContentKindFilter,
@@ -1455,6 +1498,7 @@ function TrainingListPanel({
   selectedSourceKindFilter: OrganizationTrainingLifecycleSourceKindFilter;
   selectedStatusFilter: OrganizationTrainingLifecycleStatusFilter;
   onCreateTraining: () => void;
+  onRetry: () => void;
   onContinueDraft: (
     draft: OrganizationTrainingAdminLifecycleItemDto,
   ) => Promise<OrganizationTrainingAdminDetailDto | null>;
@@ -1520,6 +1564,7 @@ function TrainingListPanel({
     selectedContentKindFilter !== "all";
   const shouldShowLifecycleControls =
     visibleItems.length > 0 || hasActiveLifecycleFilter;
+  const isCreationAllowed = listState === "ready";
 
   function clearSelectedDetail() {
     detailRequestSerial.current += 1;
@@ -1599,13 +1644,51 @@ function TrainingListPanel({
         </div>
         <Button
           aria-controls="organization-training-create"
+          aria-describedby="organization-training-create-availability"
           aria-expanded={isCreateWizardOpen}
+          disabled={!isCreationAllowed}
           onClick={onCreateTraining}
           type="button"
         >
           新建企业训练
         </Button>
       </div>
+      <p
+        className="text-text-secondary mt-3 text-sm"
+        id="organization-training-create-availability"
+      >
+        {isCreationAllowed
+          ? "列表完整性已确认，可以新建企业训练。"
+          : listState === "loading"
+            ? "列表确认完成后才能新建企业训练。"
+            : "列表未完整恢复，暂不能新建企业训练。"}
+      </p>
+      {listState === "partial" || listState === "error" ? (
+        <div
+          className="border-border bg-muted mt-4 space-y-3 rounded-md border p-3"
+          role="alert"
+        >
+          <p className="text-text-secondary text-sm leading-6">
+            {listMessage ?? "企业训练列表加载失败"}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              aria-label="重试企业训练列表"
+              onClick={onRetry}
+              type="button"
+              variant="outline"
+            >
+              重试
+            </Button>
+            <Link
+              className="border-border bg-surface text-text-primary inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+              href="/organization/portal"
+            >
+              返回组织概览
+            </Link>
+          </div>
+        </div>
+      ) : null}
       {shouldShowLifecycleControls ? (
         <div
           aria-label="企业训练状态筛选"
@@ -1692,7 +1775,7 @@ function TrainingListPanel({
         ) : listState === "error" ? (
           <div className="grid min-h-28 place-items-center px-4 py-6 text-center">
             <p className="text-destructive text-sm">
-              {listMessage ?? "企业训练列表加载失败"}
+              列表暂不可用，请使用上方恢复操作。
             </p>
           </div>
         ) : visibleItems.length === 0 && !hasActiveLifecycleFilter ? (

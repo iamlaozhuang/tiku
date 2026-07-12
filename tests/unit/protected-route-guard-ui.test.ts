@@ -202,8 +202,63 @@ describe("protected route guard UI", () => {
       ),
     );
 
-    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/login"));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "无权访问此后台工作区",
+    );
+    expect(replaceMock).not.toHaveBeenCalled();
     expect(screen.queryByRole("navigation")).toBeNull();
     expect(screen.queryByTestId("admin-child")).toBeNull();
+  });
+
+  it("shows a role-specific forbidden state when an admin opens a student route", async () => {
+    const fetchMock = vi.fn(async () =>
+      createSessionResponse(adminSessionPayload),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(
+        StudentAppLayout,
+        null,
+        createElement("div", { "data-testid": "student-child" }, "student"),
+      ),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "无权访问学员页面",
+    );
+    expect(screen.getByRole("link", { name: "返回运营后台" })).toHaveAttribute(
+      "href",
+      "/ops/overview",
+    );
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole("tablist")).toBeNull();
+    expect(screen.queryByTestId("student-child")).toBeNull();
+  });
+
+  it("shows a recoverable session error without pretending the user is logged out", async () => {
+    const fetchMock = vi.fn(async () =>
+      createSessionResponse({
+        code: 503001,
+        message: "temporarily unavailable",
+        data: null,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(
+        StudentAppLayout,
+        null,
+        createElement("div", { "data-testid": "student-child" }, "student"),
+      ),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "会话状态暂不可用",
+    );
+    expect(screen.getByRole("button", { name: "重试" })).toBeInTheDocument();
+    expect(replaceMock).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("student-child")).toBeNull();
   });
 });

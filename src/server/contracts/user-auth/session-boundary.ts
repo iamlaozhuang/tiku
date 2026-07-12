@@ -1,3 +1,5 @@
+import type { AuthContextDto } from "../auth-contract";
+
 export type PostLoginAdminRole =
   | "super_admin"
   | "ops_admin"
@@ -22,6 +24,23 @@ export type PostLoginSessionBoundary = {
   sessionPersistenceMode: "server_session";
 };
 
+export type SessionRouteRole = "admin" | "student";
+
+export type SessionRouteAccessDecision =
+  | {
+      authContext: AuthContextDto;
+      status: "authorized" | "forbidden";
+    }
+  | {
+      authContext: null;
+      status: "unauthorized" | "error";
+    };
+
+type SessionRouteResponse = {
+  code: number;
+  data: AuthContextDto | null;
+};
+
 const ADMIN_ROLES = [
   "super_admin",
   "ops_admin",
@@ -42,6 +61,44 @@ function isAdminLoginUser(loginUser: PostLoginSessionUser) {
       loginUser.adminPublicId !== undefined) ||
     hasAdminRole(loginUser)
   );
+}
+
+function isAuthorizedForSessionRouteRole(
+  authContext: AuthContextDto,
+  requiredRole: SessionRouteRole,
+): boolean {
+  if (requiredRole === "admin") {
+    return (
+      authContext.user.adminPublicId !== null &&
+      authContext.user.adminPublicId !== undefined &&
+      (authContext.user.adminRoles?.length ?? 0) > 0
+    );
+  }
+
+  return authContext.user.userType !== null;
+}
+
+export function resolveSessionRouteAccess(
+  response: SessionRouteResponse,
+  requiredRole: SessionRouteRole,
+): SessionRouteAccessDecision {
+  if (response.code === 0 && response.data !== null) {
+    return {
+      authContext: response.data,
+      status: isAuthorizedForSessionRouteRole(response.data, requiredRole)
+        ? "authorized"
+        : "forbidden",
+    };
+  }
+
+  if (
+    response.data === null &&
+    (response.code === 0 || response.code === 401001)
+  ) {
+    return { authContext: null, status: "unauthorized" };
+  }
+
+  return { authContext: null, status: "error" };
 }
 
 function hasOrganizationAdminRole(adminRoles: readonly PostLoginAdminRole[]) {

@@ -13,9 +13,7 @@ const navigationMocks = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigationMocks.pathname,
-  useRouter: () => ({
-    replace: navigationMocks.replace,
-  }),
+  useRouter: () => navigationMocks,
 }));
 
 function createGuardTree() {
@@ -35,6 +33,16 @@ describe("phase 11 protected route hydration fix", () => {
   beforeEach(() => {
     localStorage.clear();
     navigationMocks.replace.mockReset();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        json: async () => ({
+          code: 401001,
+          data: null,
+          message: "UNAUTHORIZED",
+        }),
+      }),
+    );
   });
 
   afterEach(() => {

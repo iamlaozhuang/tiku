@@ -37,6 +37,7 @@ import type {
   AdminWorkspaceRouteAccessDecision,
 } from "@/server/contracts/admin-workspace-role-guard-contract";
 import { resolveAdminWorkspaceRouteAccess } from "@/server/services/admin-workspace-role-guard-service";
+import { resolveSessionRouteAccess } from "@/server/contracts/user-auth/session-boundary";
 
 /**
  * 后台管理端布局
@@ -123,6 +124,7 @@ type AdminDashboardLayoutStatus =
   | "checking"
   | "authorized"
   | "unauthorized"
+  | "error"
   | "forbidden"
   | "missing-organization-context"
   | "standard-unavailable";
@@ -406,14 +408,6 @@ function mapAccessDecisionToStatus(
   return "forbidden";
 }
 
-function isAdminContext(authContext: AuthContextDto): boolean {
-  return (
-    authContext.user.adminPublicId !== null &&
-    authContext.user.adminPublicId !== undefined &&
-    (authContext.user.adminRoles?.length ?? 0) > 0
-  );
-}
-
 async function fetchAdminAuthContext(): Promise<
   ApiResponse<AuthContextDto | null>
 > {
@@ -427,13 +421,17 @@ async function fetchAdminAuthContext(): Promise<
 function AdminDashboardStatus({
   accessDecision,
   adminRoles,
+  onRetry,
   returnAction,
   status,
+  withinWorkspace = false,
 }: {
   accessDecision?: AdminWorkspaceRouteAccessDecision | null;
   adminRoles: readonly string[];
+  onRetry: () => void;
   returnAction?: WorkspaceReturnAction | null;
   status: Exclude<AdminDashboardLayoutStatus, "authorized">;
+  withinWorkspace?: boolean;
 }) {
   if (status === "checking") {
     return (
@@ -452,6 +450,17 @@ function AdminDashboardStatus({
         description="当前页面需要有效管理员会话，登录后再进入对应后台。"
         title="请先登录后台"
         variant="unauthorized"
+      />
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <AdminStateTemplate
+        action={{ label: "重试", onClick: onRetry }}
+        description="暂时无法确认管理员会话，请重试。系统不会把运行时错误误报为退出登录。"
+        title="后台会话状态暂不可用"
+        variant="error"
       />
     );
   }
@@ -488,6 +497,7 @@ function AdminDashboardStatus({
         description="当前组织上下文仅具备标准版能力，高级版企业训练、统计摘要和组织 AI 需要由运营管理员维护高级版企业授权。"
         title="标准版暂不可用"
         variant="standard-unavailable"
+        withinWorkspace={withinWorkspace}
       />
     );
   }
@@ -506,6 +516,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const workspace = getWorkspaceFromPath(pathname);
+  const [retrySerial, setRetrySerial] = useState(0);
   const [authState, setAuthState] = useState<AdminDashboardAuthState>({
     status: "checking",
     workspace: null,
@@ -556,13 +567,14 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           return;
         }
 
-        if (
-          sessionResponse.code === 0 &&
-          sessionResponse.data !== null &&
-          isAdminContext(sessionResponse.data)
-        ) {
+        const sessionAccess = resolveSessionRouteAccess(
+          sessionResponse,
+          "admin",
+        );
+
+        if (sessionAccess.status === "authorized") {
           const capabilitySummary = getAdminWorkspaceCapabilitySummary(
-            sessionResponse.data,
+            sessionAccess.authContext,
           );
           const accessDecision = resolveAdminWorkspaceRouteAccess({
             capabilitySummary,
@@ -573,7 +585,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
             status: mapAccessDecisionToStatus(accessDecision),
             workspace,
             pathname,
-            adminRoles: sessionResponse.data.user.adminRoles ?? [],
+            adminRoles: sessionAccess.authContext.user.adminRoles ?? [],
             canUseOrganizationAdvancedWorkspace:
               canUseOrganizationAdvancedWorkspaceCapability(capabilitySummary),
             hasOrganizationWorkspaceContext:
@@ -584,7 +596,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         }
 
         setAuthState({
-          status: "unauthorized",
+          status: sessionAccess.status,
           workspace,
           pathname,
           adminRoles: [],
@@ -592,7 +604,9 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           hasOrganizationWorkspaceContext: false,
           accessDecision: null,
         });
-        router.replace("/login");
+        if (sessionAccess.status === "unauthorized") {
+          router.replace("/login");
+        }
       })
       .catch(() => {
         if (!isCurrentCheck) {
@@ -600,7 +614,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         }
 
         setAuthState({
-          status: "unauthorized",
+          status: "error",
           workspace,
           pathname,
           adminRoles: [],
@@ -608,13 +622,22 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
           hasOrganizationWorkspaceContext: false,
           accessDecision: null,
         });
-        router.replace("/login");
       });
 
     return () => {
       isCurrentCheck = false;
     };
-  }, [pathname, router, workspace]);
+  }, [pathname, retrySerial, router, workspace]);
+
+  function handleRetry() {
+    setAuthState((currentState) => ({
+      ...currentState,
+      status: "checking",
+      pathname,
+      workspace,
+    }));
+    setRetrySerial((currentSerial) => currentSerial + 1);
+  }
 
   async function handleLogoutClick() {
     try {
@@ -637,11 +660,12 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
     }
   }
 
-  if (status !== "authorized") {
+  if (status !== "authorized" && status !== "standard-unavailable") {
     return (
       <AdminDashboardStatus
         accessDecision={accessDecision}
         adminRoles={adminRoles}
+        onRetry={handleRetry}
         returnAction={
           status === "forbidden"
             ? getForbiddenWorkspaceReturnAction(adminRoles)
@@ -832,7 +856,17 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
             scopeLabel={getWorkspaceScopeLabel(workspace)}
             workspaceLabel={portalName}
           />
-          {children}
+          {status === "standard-unavailable" ? (
+            <AdminDashboardStatus
+              accessDecision={accessDecision}
+              adminRoles={adminRoles}
+              onRetry={handleRetry}
+              status="standard-unavailable"
+              withinWorkspace
+            />
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>
