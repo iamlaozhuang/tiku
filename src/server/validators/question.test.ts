@@ -234,4 +234,16 @@ describe("question validator", () => {
       message: "Invalid question input.",
     });
   });
+
+  it("normalizes the optional material filter used by material-first composition", () => {
+    expect(
+      normalizeQuestionListInput({
+        materialPublicId: " material_public_case_1 ",
+      }),
+    ).toMatchObject({ materialPublicId: "material_public_case_1" });
+
+    expect(normalizeQuestionListInput({ materialPublicId: 123 })).toMatchObject(
+      { materialPublicId: null },
+    );
+  });
 });

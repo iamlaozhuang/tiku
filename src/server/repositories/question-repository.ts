@@ -439,6 +439,9 @@ function createQuestionConditions(
   const tagPublicIdCondition = createQuestionTagPublicIdCondition(
     queryInput.tagPublicId,
   );
+  const materialPublicIdCondition = createQuestionMaterialPublicIdCondition(
+    queryInput.materialPublicId,
+  );
 
   if (knowledgeNodePublicIdCondition !== null) {
     conditions.push(knowledgeNodePublicIdCondition);
@@ -448,7 +451,23 @@ function createQuestionConditions(
     conditions.push(tagPublicIdCondition);
   }
 
+  if (materialPublicIdCondition !== null) {
+    conditions.push(materialPublicIdCondition);
+  }
+
   return conditions;
+}
+
+export function createQuestionMaterialPublicIdCondition(
+  publicId: string | null | undefined,
+): SQL | null {
+  return publicId === null || publicId === undefined
+    ? null
+    : sql`${question.material_id} = (
+        select ${material.id}
+        from ${material}
+        where ${material.public_id} = ${publicId}
+      )`;
 }
 
 export function createQuestionKnowledgeNodePublicIdCondition(

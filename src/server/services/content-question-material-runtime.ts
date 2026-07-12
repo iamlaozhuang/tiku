@@ -169,6 +169,7 @@ function readQuestionQuery(request: Request): Record<string, unknown> {
     keyword: searchParams.get("keyword") ?? undefined,
     knowledgeNodePublicId:
       searchParams.get("knowledgeNodePublicId") ?? undefined,
+    materialPublicId: searchParams.get("materialPublicId") ?? undefined,
     tagPublicId: searchParams.get("tagPublicId") ?? undefined,
   };
 }

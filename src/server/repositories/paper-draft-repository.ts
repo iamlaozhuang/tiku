@@ -184,6 +184,41 @@ export type PaperDraftRepository = {
   ): Promise<PaperDraftAccessRow | null>;
 };
 
+export type PaperQuestionSectionMovePlan =
+  | {
+      kind: "paper_question";
+      paperQuestionId: number;
+      sourcePaperSectionId: number;
+      targetPaperSectionId: number;
+    }
+  | {
+      kind: "question_group";
+      questionGroupId: number;
+      sourcePaperSectionId: number;
+      targetPaperSectionId: number;
+    };
+
+export function createPaperQuestionSectionMovePlan(input: {
+  paperQuestionId: number;
+  questionGroupId: number | null;
+  sourcePaperSectionId: number;
+  targetPaperSectionId: number;
+}): PaperQuestionSectionMovePlan {
+  return input.questionGroupId === null
+    ? {
+        kind: "paper_question",
+        paperQuestionId: input.paperQuestionId,
+        sourcePaperSectionId: input.sourcePaperSectionId,
+        targetPaperSectionId: input.targetPaperSectionId,
+      }
+    : {
+        kind: "question_group",
+        questionGroupId: input.questionGroupId,
+        sourcePaperSectionId: input.sourcePaperSectionId,
+        targetPaperSectionId: input.targetPaperSectionId,
+      };
+}
+
 type PaperBaseRow = Omit<
   PaperDraftAccessRow,
   "paper_sections" | "question_groups"
@@ -429,9 +464,47 @@ export function createPostgresPaperDraftRepository(
       }
 
       return database.transaction(async (transaction) => {
+        const targetPaperSectionId =
+          input.paperSection === null
+            ? existingPaperQuestion.paper_section_id
+            : await upsertPaperSection(
+                transaction as RuntimeDatabase,
+                existingPaperQuestion.paper_id,
+                input.paperSection,
+              );
+        const movePlan = createPaperQuestionSectionMovePlan({
+          paperQuestionId: existingPaperQuestion.id,
+          questionGroupId: existingPaperQuestion.question_group_id,
+          sourcePaperSectionId: existingPaperQuestion.paper_section_id,
+          targetPaperSectionId,
+        });
+
+        if (
+          movePlan.kind === "question_group" &&
+          movePlan.sourcePaperSectionId !== movePlan.targetPaperSectionId
+        ) {
+          await transaction
+            .update(questionGroup)
+            .set({
+              paper_section_id: movePlan.targetPaperSectionId,
+              updated_at: new Date(),
+            })
+            .where(eq(questionGroup.id, movePlan.questionGroupId));
+          await transaction
+            .update(paperQuestion)
+            .set({
+              paper_section_id: movePlan.targetPaperSectionId,
+              updated_at: new Date(),
+            })
+            .where(
+              eq(paperQuestion.question_group_id, movePlan.questionGroupId),
+            );
+        }
+
         await transaction
           .update(paperQuestion)
           .set({
+            paper_section_id: targetPaperSectionId,
             score: input.score,
             sort_order: input.sortOrder,
             updated_at: new Date(),
@@ -441,6 +514,12 @@ export function createPostgresPaperDraftRepository(
           transaction as RuntimeDatabase,
           existingPaperQuestion.paper_section_id,
         );
+        if (targetPaperSectionId !== existingPaperQuestion.paper_section_id) {
+          await updatePaperSectionTotalScore(
+            transaction as RuntimeDatabase,
+            targetPaperSectionId,
+          );
+        }
         await transaction
           .delete(paperScoringPoint)
           .where(
@@ -1238,11 +1317,18 @@ async function findPaperQuestionByPaperPublicIds(
   database: RuntimeDatabase,
   paperPublicId: string,
   paperQuestionPublicId: string,
-): Promise<{ id: number; paper_section_id: number } | null> {
+): Promise<{
+  id: number;
+  paper_id: number;
+  paper_section_id: number;
+  question_group_id: number | null;
+} | null> {
   const [row] = await database
     .select({
       id: paperQuestion.id,
+      paper_id: paperQuestion.paper_id,
       paper_section_id: paperQuestion.paper_section_id,
+      question_group_id: paperQuestion.question_group_id,
     })
     .from(paperQuestion)
     .innerJoin(paper, eq(paper.id, paperQuestion.paper_id))

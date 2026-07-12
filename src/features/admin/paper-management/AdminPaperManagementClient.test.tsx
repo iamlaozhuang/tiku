@@ -1,6 +1,12 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const { navigationPush } = vi.hoisted(() => ({ navigationPush: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: navigationPush }),
+}));
+
 import type { AdminPaperOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 
 import { AdminPaperManagement } from "./AdminPaperManagementClient";

@@ -59,6 +59,7 @@ export type NormalizedQuestionListInput = NormalizedPagination & {
   status: (typeof questionStatusValues)[number] | null;
   keyword: string | null;
   knowledgeNodePublicId: string | null;
+  materialPublicId?: string | null;
   tagPublicId: string | null;
 };
 
@@ -516,6 +517,7 @@ export function normalizeQuestionListInput(
     status: isQuestionStatus(input.status) ? input.status : null,
     keyword,
     knowledgeNodePublicId: normalizeQueryPublicId(input.knowledgeNodePublicId),
+    materialPublicId: normalizeQueryPublicId(input.materialPublicId),
     tagPublicId: normalizeQueryPublicId(input.tagPublicId),
   };
 }

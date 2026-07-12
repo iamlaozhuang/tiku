@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createQuestionKnowledgeNodePublicIdCondition,
+  createQuestionMaterialPublicIdCondition,
   createQuestionTagPublicIdCondition,
 } from "./question-repository";
 
@@ -44,8 +45,19 @@ describe("question repository filters", () => {
     expect(containsText(condition, "tag_public_storage")).toBe(true);
   });
 
+  it("builds a database-level material binding condition", () => {
+    const condition = createQuestionMaterialPublicIdCondition(
+      "material_public_case_1",
+    );
+
+    expect(condition).not.toBeNull();
+    expect(containsText(condition, "material")).toBe(true);
+    expect(containsText(condition, "material_public_case_1")).toBe(true);
+  });
+
   it("omits binding conditions when no filter is requested", () => {
     expect(createQuestionKnowledgeNodePublicIdCondition(null)).toBeNull();
+    expect(createQuestionMaterialPublicIdCondition(null)).toBeNull();
     expect(createQuestionTagPublicIdCondition(null)).toBeNull();
   });
 });

@@ -9,6 +9,12 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const { navigationPush } = vi.hoisted(() => ({ navigationPush: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: navigationPush }),
+}));
+
 import { AdminPaperManagement } from "@/features/admin/paper-management/AdminPaperManagement";
 
 const adminSessionPayload = {
@@ -449,10 +455,10 @@ describe("AdminPaperManagement", () => {
       }),
     ).toHaveAttribute("href", "/content/papers/paper-marketing-2026-spring");
     expect(
-      within(firstRow).getByRole("button", {
+      within(firstRow).getByRole("link", {
         name: "组卷 paper-marketing-2026-spring",
       }),
-    ).toBeDisabled();
+    ).toHaveAttribute("aria-disabled", "true");
     expect(
       within(firstRow).getByRole("button", {
         name: "发布 paper-marketing-2026-spring",
@@ -490,10 +496,13 @@ describe("AdminPaperManagement", () => {
       within(draftRow).getByText(/草稿可继续组卷；发布前需处理/),
     ).toBeInTheDocument();
     expect(
-      within(draftRow).getByRole("button", {
+      within(draftRow).getByRole("link", {
         name: "组卷 paper-logistics-2026-practice",
       }),
-    ).toBeEnabled();
+    ).toHaveAttribute(
+      "href",
+      "/content/papers/paper-logistics-2026-practice/compose",
+    );
     expect(
       within(draftRow).getByRole("button", {
         name: "发布 paper-logistics-2026-practice",
@@ -730,7 +739,7 @@ describe("AdminPaperManagement", () => {
     expect(await screen.findByText("没有匹配的试卷")).toBeInTheDocument();
   });
 
-  it("creates, composes, publishes, archives, copies, and binds paper assets through the protected runtime", async () => {
+  it("creates a draft, enters the workbench, and preserves list lifecycle actions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockWritablePaperFetch();
 
@@ -769,8 +778,11 @@ describe("AdminPaperManagement", () => {
     fireEvent.click(paperForm.getByRole("button", { name: "保存草稿" }));
 
     expect(
-      await screen.findByText("试卷 paper-created-001 已保存"),
+      await screen.findByText("草稿已保存，正在进入组卷工作台。"),
     ).toBeInTheDocument();
+    expect(navigationPush).toHaveBeenCalledWith(
+      "/content/papers/paper-created-001/compose",
+    );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/papers",
       expect.objectContaining({ method: "POST" }),
@@ -789,70 +801,15 @@ describe("AdminPaperManagement", () => {
       year: 2025,
     });
 
-    fireEvent.click(
-      screen.getByRole("button", {
+    expect(
+      screen.getByRole("link", {
         name: "组卷 paper-logistics-2026-practice",
       }),
+    ).toHaveAttribute(
+      "href",
+      "/content/papers/paper-logistics-2026-practice/compose",
     );
-    const composeForm = within(screen.getByRole("form", { name: "组卷表单" }));
-    expect(composeForm.queryByText(/publicId/)).toBeNull();
-    fireEvent.change(composeForm.getByLabelText("题目业务标识"), {
-      target: { value: "question-marketing-001" },
-    });
-    fireEvent.change(composeForm.getByLabelText("题目分值"), {
-      target: { value: "4.5" },
-    });
-    fireEvent.change(composeForm.getByLabelText("题目顺序"), {
-      target: { value: "2" },
-    });
-    fireEvent.change(composeForm.getByLabelText("大题名称"), {
-      target: { value: "案例分析" },
-    });
-    fireEvent.change(composeForm.getByLabelText("大题说明"), {
-      target: { value: "技能题" },
-    });
-    fireEvent.change(composeForm.getByLabelText("大题顺序"), {
-      target: { value: "3" },
-    });
-    fireEvent.change(composeForm.getByLabelText("材料业务标识"), {
-      target: { value: "material-marketing-001" },
-    });
-    fireEvent.change(composeForm.getByLabelText("题组名称"), {
-      target: { value: "材料题组" },
-    });
-    fireEvent.change(composeForm.getByLabelText("题组顺序"), {
-      target: { value: "1" },
-    });
-    fireEvent.click(composeForm.getByRole("button", { name: "加入试卷" }));
-
-    expect(
-      await screen.findByText("题目 paper-question-created-001 已加入试卷"),
-    ).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/v1/papers/paper-logistics-2026-practice/questions",
-      expect.objectContaining({ method: "POST" }),
-    );
-    expect(
-      readJsonRequestBody(
-        fetchMock,
-        "/api/v1/papers/paper-logistics-2026-practice/questions",
-        "POST",
-      ),
-    ).toMatchObject({
-      questionPublicId: "question-marketing-001",
-      score: "4.5",
-      sortOrder: 2,
-      paperSection: {
-        title: "案例分析",
-        description: "技能题",
-        sortOrder: 3,
-      },
-      questionGroup: {
-        title: "材料题组",
-        materialPublicId: "material-marketing-001",
-        sortOrder: 1,
-      },
-    });
+    expect(screen.queryByLabelText("题目业务标识")).toBeNull();
 
     fireEvent.click(
       screen.getByRole("button", {

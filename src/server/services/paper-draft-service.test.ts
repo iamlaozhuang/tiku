@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createPaperDraftService } from "./paper-draft-service";
 import type {
@@ -534,7 +534,9 @@ describe("paper draft service", () => {
   });
 
   it("updates and removes paper questions by public identifiers", async () => {
-    const service = createPaperDraftService(createRepository());
+    const repository = createRepository();
+    const updatePaperQuestion = vi.spyOn(repository, "updatePaperQuestion");
+    const service = createPaperDraftService(repository);
 
     await expect(
       service.updatePaperQuestion(
@@ -550,6 +552,11 @@ describe("paper draft service", () => {
               sortOrder: 1,
             },
           ],
+          paperSection: {
+            title: "案例分析",
+            description: null,
+            sortOrder: 2,
+          },
         },
       ),
     ).resolves.toMatchObject({
@@ -562,6 +569,17 @@ describe("paper draft service", () => {
         },
       },
     });
+    expect(updatePaperQuestion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paperPublicId: "paper_public_123",
+        paperQuestionPublicId: "paper_question_public_123",
+        paperSection: {
+          title: "案例分析",
+          description: null,
+          sortOrder: 2,
+        },
+      }),
+    );
 
     await expect(
       service.removePaperQuestion(

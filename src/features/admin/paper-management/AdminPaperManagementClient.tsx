@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
@@ -34,7 +35,6 @@ import type {
   PaperCopyResultDto,
   PaperDraftDto,
   PaperPublishResultDto,
-  PaperQuestionDto,
 } from "@/server/contracts/paper-draft-contract";
 import type {
   PaperStatus,
@@ -72,18 +72,6 @@ type PaperFormValues = {
   totalScore: string;
   year: string;
 };
-type PaperQuestionFormValues = {
-  materialPublicId: string;
-  paperPublicId: string;
-  paperSectionDescription: string;
-  paperSectionSortOrder: string;
-  paperSectionTitle: string;
-  questionPublicId: string;
-  questionGroupSortOrder: string;
-  questionGroupTitle: string;
-  score: string;
-  sortOrder: string;
-};
 type PaperAssetFormValues = {
   paperPublicId: string;
   profession: Profession;
@@ -93,10 +81,6 @@ type ActivePaperForm =
   | {
       kind: "paper";
       values: PaperFormValues;
-    }
-  | {
-      kind: "paperQuestion";
-      values: PaperQuestionFormValues;
     }
   | {
       kind: "paperAsset";
@@ -514,33 +498,6 @@ function createPaperInput(values: PaperFormValues) {
   };
 }
 
-function createPaperQuestionInput(values: PaperQuestionFormValues) {
-  return {
-    questionPublicId: values.questionPublicId,
-    score: values.score,
-    sortOrder: Number(values.sortOrder),
-    paperSection: {
-      title: values.paperSectionTitle,
-      description:
-        values.paperSectionDescription.trim().length === 0
-          ? null
-          : values.paperSectionDescription,
-      sortOrder: Number(values.paperSectionSortOrder),
-    },
-    questionGroup:
-      values.materialPublicId.trim().length === 0
-        ? null
-        : {
-            title:
-              values.questionGroupTitle.trim().length === 0
-                ? values.paperSectionTitle
-                : values.questionGroupTitle,
-            materialPublicId: values.materialPublicId,
-            sortOrder: Number(values.questionGroupSortOrder),
-          },
-  };
-}
-
 function createPaperAssetFormData(values: PaperAssetFormValues) {
   const formData = new FormData();
 
@@ -559,6 +516,7 @@ function createPaperAssetFormData(values: PaperAssetFormValues) {
 export function AdminPaperManagement({
   initialPaperPublicId = "",
 }: AdminPaperManagementProps) {
+  const router = useRouter();
   const [initialUrlQuery] = useState(() => readPaperListUrlQuery());
   const [keyword, setKeyword] = useState(
     initialPaperPublicId || initialUrlQuery.keyword,
@@ -712,54 +670,11 @@ export function AdminPaperManagement({
 
       const savedPaper = mapPaperDraftToSummary(response.data.paper);
       setPapers((currentPapers) => upsertByPublicId(currentPapers, savedPaper));
-      setActionMessage(`试卷 ${savedPaper.publicId} 已保存`);
+      setActionMessage("草稿已保存，正在进入组卷工作台。");
       setActiveForm(null);
+      router.push(`/content/papers/${savedPaper.publicId}/compose`);
     } catch {
       setActionError("试卷保存失败，请刷新后重试。");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function handleAddPaperQuestion(values: PaperQuestionFormValues) {
-    const sessionToken = getStoredSessionToken();
-
-    if (sessionToken === null) {
-      setActionError("管理员会话已失效，请重新登录后再操作。");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setActionError(null);
-
-    try {
-      const response = await mutateAdminApi<{
-        paperQuestion: PaperQuestionDto;
-      }>(
-        `/api/v1/papers/${values.paperPublicId}/questions`,
-        sessionToken,
-        "POST",
-        createPaperQuestionInput(values),
-      );
-
-      if (response.code !== 0 || response.data === null) {
-        setActionError("题目加入试卷失败，请刷新后重试。");
-        return;
-      }
-
-      setPapers((currentPapers) =>
-        currentPapers.map((paper) =>
-          paper.publicId === values.paperPublicId
-            ? { ...paper, questionCount: paper.questionCount + 1 }
-            : paper,
-        ),
-      );
-      setActionMessage(
-        `题目 ${response.data.paperQuestion.publicId} 已加入试卷`,
-      );
-      setActiveForm(null);
-    } catch {
-      setActionError("题目加入试卷失败，请刷新后重试。");
     } finally {
       setIsSubmitting(false);
     }
@@ -1040,15 +955,6 @@ export function AdminPaperManagement({
         />
       ) : null}
 
-      {activeForm?.kind === "paperQuestion" ? (
-        <PaperQuestionWriteForm
-          isSubmitting={isSubmitting}
-          values={activeForm.values}
-          onCancel={() => setActiveForm(null)}
-          onSubmit={handleAddPaperQuestion}
-        />
-      ) : null}
-
       {activeForm?.kind === "paperAsset" ? (
         <PaperAssetWriteForm
           isSubmitting={isSubmitting}
@@ -1078,25 +984,6 @@ export function AdminPaperManagement({
               paperPublicId: publicId,
               profession: selectedPaper?.profession ?? "marketing",
               file: null,
-            },
-          });
-        }}
-        onCompose={(publicId) => {
-          setActionError(null);
-          setActionMessage(null);
-          setActiveForm({
-            kind: "paperQuestion",
-            values: {
-              materialPublicId: "",
-              paperPublicId: publicId,
-              paperSectionDescription: "",
-              paperSectionSortOrder: "1",
-              paperSectionTitle: "默认大题",
-              questionPublicId: "question-marketing-001",
-              questionGroupSortOrder: "1",
-              questionGroupTitle: "",
-              score: "5.0",
-              sortOrder: "1",
             },
           });
         }}
@@ -1233,7 +1120,7 @@ function ActionBar({ onCreate }: { onCreate: () => void }) {
         id="paper-action-unavailable"
         role="status"
       >
-        草稿新建已接入本地运行时；组卷、发布、下架、复制和附件元数据登记请在对应试卷行内操作。
+        保存草稿后会进入组卷工作台；发布、下架、复制和原始文件按试卷状态提供。
       </p>
     </div>
   );
@@ -1381,164 +1268,6 @@ function PaperWriteForm({
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting} type="submit">
           保存草稿
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          取消
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-function PaperQuestionWriteForm({
-  isSubmitting,
-  values,
-  onCancel,
-  onSubmit,
-}: {
-  isSubmitting: boolean;
-  values: PaperQuestionFormValues;
-  onCancel: () => void;
-  onSubmit: (values: PaperQuestionFormValues) => void;
-}) {
-  const [formValues, setFormValues] = useState(values);
-
-  return (
-    <form
-      aria-label="组卷表单"
-      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSubmit(formValues);
-      }}
-    >
-      <h2 className="text-text-primary text-base font-semibold">组卷</h2>
-      <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">题目业务标识</span>
-        <Input
-          aria-label="题目业务标识"
-          value={formValues.questionPublicId}
-          onChange={(event) =>
-            setFormValues({
-              ...formValues,
-              questionPublicId: event.target.value,
-            })
-          }
-        />
-      </label>
-      <div className="grid gap-3 md:grid-cols-3">
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">题目分值</span>
-          <Input
-            aria-label="题目分值"
-            value={formValues.score}
-            onChange={(event) =>
-              setFormValues({ ...formValues, score: event.target.value })
-            }
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">题目顺序</span>
-          <Input
-            aria-label="题目顺序"
-            min={1}
-            type="number"
-            value={formValues.sortOrder}
-            onChange={(event) =>
-              setFormValues({ ...formValues, sortOrder: event.target.value })
-            }
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">大题顺序</span>
-          <Input
-            aria-label="大题顺序"
-            min={1}
-            type="number"
-            value={formValues.paperSectionSortOrder}
-            onChange={(event) =>
-              setFormValues({
-                ...formValues,
-                paperSectionSortOrder: event.target.value,
-              })
-            }
-          />
-        </label>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">大题名称</span>
-          <Input
-            aria-label="大题名称"
-            value={formValues.paperSectionTitle}
-            onChange={(event) =>
-              setFormValues({
-                ...formValues,
-                paperSectionTitle: event.target.value,
-              })
-            }
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">大题说明</span>
-          <Input
-            aria-label="大题说明"
-            value={formValues.paperSectionDescription}
-            onChange={(event) =>
-              setFormValues({
-                ...formValues,
-                paperSectionDescription: event.target.value,
-              })
-            }
-          />
-        </label>
-      </div>
-      <div className="grid gap-3 md:grid-cols-3">
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">材料业务标识</span>
-          <Input
-            aria-label="材料业务标识"
-            value={formValues.materialPublicId}
-            onChange={(event) =>
-              setFormValues({
-                ...formValues,
-                materialPublicId: event.target.value,
-              })
-            }
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">题组名称</span>
-          <Input
-            aria-label="题组名称"
-            value={formValues.questionGroupTitle}
-            onChange={(event) =>
-              setFormValues({
-                ...formValues,
-                questionGroupTitle: event.target.value,
-              })
-            }
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">题组顺序</span>
-          <Input
-            aria-label="题组顺序"
-            min={1}
-            type="number"
-            value={formValues.questionGroupSortOrder}
-            onChange={(event) =>
-              setFormValues({
-                ...formValues,
-                questionGroupSortOrder: event.target.value,
-              })
-            }
-          />
-        </label>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting} type="submit">
-          加入试卷
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
@@ -1809,7 +1538,6 @@ function PaperList({
   selectedPublicId,
   onArchive,
   onBindAsset,
-  onCompose,
   onCopy,
   onPublish,
 }: {
@@ -1818,7 +1546,6 @@ function PaperList({
   selectedPublicId: string | null;
   onArchive: (publicId: string) => void;
   onBindAsset: (publicId: string) => void;
-  onCompose: (publicId: string) => void;
   onCopy: (publicId: string) => void;
   onPublish: (publicId: string) => void;
 }) {
@@ -1893,17 +1620,24 @@ function PaperList({
                   <Eye aria-hidden="true" className="size-3.5" />
                   查看试卷
                 </Link>
-                <Button
+                <Link
                   aria-label={`组卷 ${paper.publicId}`}
-                  disabled={!isDraft}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                  onClick={() => onCompose(paper.publicId)}
+                  aria-disabled={!isDraft}
+                  className={
+                    isDraft
+                      ? "border-border bg-background hover:bg-muted focus-visible:ring-ring/50 inline-flex h-7 items-center gap-1 rounded-md border px-2.5 text-xs font-medium outline-none focus-visible:ring-3"
+                      : "border-border bg-muted text-text-muted pointer-events-none inline-flex h-7 items-center gap-1 rounded-md border px-2.5 text-xs font-medium opacity-50"
+                  }
+                  href={
+                    isDraft
+                      ? `/content/papers/${paper.publicId}/compose`
+                      : `/content/papers/${paper.publicId}`
+                  }
+                  tabIndex={isDraft ? undefined : -1}
                 >
                   <Layers3 aria-hidden="true" data-icon="inline-start" />
                   组卷
-                </Button>
+                </Link>
                 <Button
                   aria-label={`发布 ${paper.publicId}`}
                   disabled={!isDraft}

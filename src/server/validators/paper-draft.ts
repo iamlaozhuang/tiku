@@ -48,6 +48,7 @@ export type NormalizedAddPaperQuestionInput = {
 };
 
 export type NormalizedUpdatePaperQuestionInput = {
+  paperSection: NormalizedPaperSectionInput | null;
   score: string;
   sortOrder: number;
   scoringPoints: NormalizedPaperScoringPointInput[];
@@ -458,8 +459,17 @@ export function normalizeUpdatePaperQuestionInput(
   const score = normalizeScore(input.score);
   const sortOrder = normalizePositiveInteger(input.sortOrder);
   const scoringPoints = normalizeScoringPoints(input.scoringPoints);
+  const paperSection =
+    input.paperSection === undefined
+      ? null
+      : normalizePaperSectionInput(input.paperSection);
 
-  if (score === null || sortOrder === null || scoringPoints === null) {
+  if (
+    score === null ||
+    sortOrder === null ||
+    scoringPoints === null ||
+    (input.paperSection !== undefined && paperSection === null)
+  ) {
     return {
       success: false,
       message: INVALID_PAPER_INPUT_MESSAGE,
@@ -472,6 +482,7 @@ export function normalizeUpdatePaperQuestionInput(
       score,
       sortOrder,
       scoringPoints,
+      paperSection,
     },
   };
 }

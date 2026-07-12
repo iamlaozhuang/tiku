@@ -123,6 +123,7 @@ function createQuestionRepository(): QuestionRepository {
           createQuestionRow({
             profession: query.profession ?? "monopoly",
             level: query.level ?? 3,
+            material_public_id: query.materialPublicId ?? "material-public-001",
             knowledge_node_public_ids:
               query.knowledgeNodePublicId === null
                 ? []
@@ -377,7 +378,7 @@ describe("phase 9 content question material runtime", () => {
 
     const questionsResponse = await handlers.questions.collection.GET(
       new Request(
-        "http://localhost/api/v1/questions?page=2&pageSize=50&knowledgeNodePublicId=knowledge-node-public-001&tagPublicId=tag-public-001",
+        "http://localhost/api/v1/questions?page=2&pageSize=50&knowledgeNodePublicId=knowledge-node-public-001&tagPublicId=tag-public-001&materialPublicId=material-public-filtered",
         {
           headers,
         },
@@ -406,7 +407,7 @@ describe("phase 9 content question material runtime", () => {
       data: [
         {
           publicId: "question-public-001",
-          materialPublicId: "material-public-001",
+          materialPublicId: "material-public-filtered",
           knowledgeNodePublicIds: ["knowledge-node-public-001"],
           tagPublicIds: ["tag-public-001"],
         },
