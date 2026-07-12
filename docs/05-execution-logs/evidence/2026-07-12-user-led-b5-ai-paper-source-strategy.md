@@ -51,8 +51,10 @@
 - localFullLoopGate: pass
 - Test-ModuleRunV2PreCommitHardening: pass；真实 commit hook 的 scope、敏感信息、术语、lint-staged、lint、typecheck 与 post-commit advisory 均通过。
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass；首次因 RED/GREEN 使用全角冒号而缺失机器可解析锚点，修正文档后复跑通过；产品代码未变化。
-- masterPostMergeVerification: pending
-- Test-ModuleRunV2PrePushReadiness: pending
+- masterPostMergeVerification: pass_2_files_16_tests_lint_typecheck_diff_check
+- Test-ModuleRunV2PrePushReadiness: pass_real_push_hook
+- remotePush: pass_origin_master_b173e0cc3
+- localRemoteComparison: pass_0_behind_0_ahead
 - Provider execution: blocked_not_executed
 - database mutation: blocked_not_executed
 - Cost Calibration Gate remains blocked
@@ -62,4 +64,4 @@
 
 ## 结论
 
-B5 本地实现和全量质量门禁通过，等待 Module Run v2 提交、合入、主分支复验和远端同步。结论仅覆盖 localhost 代码，不代表 staging、production 或 release readiness。
+B5 产品实现、真实提交、ff-only 合入、主分支复验和远端同步均通过。结论仅覆盖 localhost 代码，不代表 staging、production 或 release readiness。

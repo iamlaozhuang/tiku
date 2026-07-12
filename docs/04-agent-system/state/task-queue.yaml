@@ -187,7 +187,7 @@ activeTasks:
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
     finalCommit: 0ab2a2b0c
-    closeoutStatus: local_verified_ready_for_merge
+    closeoutStatus: remote_synced_origin_master_b173e0cc3
   - id: user-led-b4-ai-training-information-architecture-2026-07-12
     title: User-led B4 AI training information architecture and Provider-closed experience repair
     phase: user-led-b4-ai-training-information-architecture-2026-07-12
