@@ -1,15 +1,16 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-b4-ai-training-information-architecture-local-closeout-2026-07-12
-updatedAt: "2026-07-12T13:34:00-07:00"
+currentPhase: user-led-b4-ai-training-information-architecture-commit-closeout-2026-07-12
+updatedAt: "2026-07-12T13:39:00-07:00"
 latestUserLedB4AiTrainingInformationArchitecture:
   id: user-led-b4-ai-training-information-architecture-2026-07-12
-  status: closed_local_verified_ready_for_commit
+  status: closed_local_committed_ready_for_merge
   result: pass_ai_training_context_localization_and_provider_closed_browsing
   priority: p1
   branch: codex/user-led-b4-ai-training-ux
   startSha: 86610c400f6db101ffefc08d179c0ad1de5ce641
+  finalCommit: 8b1b8f567fe436d795dd6463227f48716eb91490
   approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
   planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b4-ai-training-information-architecture.md
   evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b4-ai-training-information-architecture.md
@@ -24,6 +25,9 @@ latestUserLedB4AiTrainingInformationArchitecture:
     diffCheck: pass
     providerExecution: blocked_not_executed
     databaseMutation: blocked_not_executed
+    moduleRunV2PreCommitHardening: pass_real_hook
+    moduleRunV2ModuleCloseoutReadiness: pass
+    localCommit: pass_8b1b8f567
   nextRequiredTaskId: user-led-b5-ai-paper-source-strategy-2026-07-12
 latestUserLedB3AiTaskLifecycle:
   id: user-led-b3-ai-task-lifecycle-2026-07-12
@@ -5506,7 +5510,7 @@ currentTask:
   id: user-led-b4-ai-training-information-architecture-2026-07-12
   title: User-led B4 AI training information architecture and Provider-closed experience repair
   phase: user-led-b4-ai-training-information-architecture-2026-07-12
-  status: closed_local_verified_ready_for_commit
+  status: closed_local_committed_ready_for_merge
   priority: p1
   taskKind: targeted_student_ai_training_ux_repair
   branch: codex/user-led-b4-ai-training-ux
@@ -5532,6 +5536,7 @@ currentTask:
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b4-ai-training-information-architecture-audit.md
   nextRequiredTaskId: user-led-b5-ai-paper-source-strategy-2026-07-12
   localFullLoopGate: pass
+  finalCommit: 8b1b8f567fe436d795dd6463227f48716eb91490
 
 previousCurrentTaskBeforeUserLedB4AiTrainingInformationArchitecture20260712:
   id: user-led-b3-ai-task-lifecycle-2026-07-12

@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b4-ai-training-information-architecture-2026-07-12
     title: User-led B4 AI training information architecture and Provider-closed experience repair
     phase: user-led-b4-ai-training-information-architecture-2026-07-12
-    status: closed_local_verified_ready_for_commit
+    status: closed
     result: pass_ai_training_context_localization_and_provider_closed_browsing
     priority: p1
     sequenceOrder: 49
@@ -184,7 +184,8 @@ activeTasks:
       - corepack pnpm@10.26.1 run format:check
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
-    closeoutStatus: local_verified_ready_for_commit
+    finalCommit: 8b1b8f567fe436d795dd6463227f48716eb91490
+    closeoutStatus: local_committed_ready_for_merge
   - id: user-led-b3-ai-task-lifecycle-2026-07-12
     title: User-led B3 AI task lifecycle consistency repair
     phase: user-led-b3-ai-task-lifecycle-2026-07-12

@@ -15,9 +15,9 @@
 
 ## RED / GREEN
 
-- RED：新增企业员工标题、中文专业/日期、关闭状态可切换授权/任务类型、历史先于折叠生成设置的用例；初次运行 4 个预期失败。
-- GREEN：标题按有效企业授权上下文区分；专业与学习者时间显示中文化；浏览导航和生成提交禁用条件拆分；关闭/异常状态历史前置且生成设置默认收起。
-- HARDEN：关闭状态切换企业授权和 AI组卷后，显式断言未发出任何生成 POST。
+- RED: 新增企业员工标题、中文专业/日期、关闭状态可切换授权/任务类型、历史先于折叠生成设置的用例；初次运行 4 个预期失败。
+- GREEN: 标题按有效企业授权上下文区分；专业与学习者时间显示中文化；浏览导航和生成提交禁用条件拆分；关闭/异常状态历史前置且生成设置默认收起。
+- HARDEN: 关闭状态切换企业授权和 AI组卷后，显式断言未发出任何生成 POST。
 
 ## 实现证据
 
@@ -47,14 +47,18 @@
 
 ## Module Run v2 锚点
 
-- result: pending_pre_commit_hardening
-- Commit: pending
+- result: pass
+- Commit: `8b1b8f567fe436d795dd6463227f48716eb91490`
 - localFullLoopGate: pass
+- Test-ModuleRunV2PreCommitHardening: pass；真实 commit hook 的 scope、敏感信息、术语、lint-staged、lint、typecheck 与 post-commit advisory 均通过。
+- Test-ModuleRunV2ModuleCloseoutReadiness: pass；严格 RED/GREEN、commit、localFullLoopGate、blocked remainder、thread rollover 和 next module run 锚点均通过。
 - Provider execution: blocked_not_executed
 - database mutation: blocked_not_executed
-- Cost Calibration Gate: blocked
+- Cost Calibration Gate remains blocked
+- threadRolloverGate: not_required；本批可在当前任务内完成串行 closeout。
 - nextModuleRunCandidate: `user-led-b5-ai-paper-source-strategy-2026-07-12`
+- blocked remainder: B0-B2 数据库迁移执行仍等待额外机制批准；Provider-enabled、staging、production、deploy、PR 与 force push remain blocked。
 
 ## 结论
 
-B4 产品实现与本地质量门禁通过，等待 Module Run v2 提交、合入、主分支复验和远端同步。结论仅覆盖 localhost 代码，不代表 staging、production 或 release readiness。
+B4 产品实现、真实提交与本地质量门禁通过，等待 ff-only 合入、主分支复验和远端同步。结论仅覆盖 localhost 代码，不代表 staging、production 或 release readiness。
