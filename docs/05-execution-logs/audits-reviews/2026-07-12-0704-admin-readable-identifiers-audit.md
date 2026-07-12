@@ -24,6 +24,7 @@
 - 默认 Turbopack build 仅受 worktree 外部 `node_modules` junction 限制，失败发生在源码编译前。
 - 原 0704DB 未挂载，角色浏览器交互不作虚假通过声明。
 - 本地 master 首次默认并发全量 unit 的 2 项超时和 1 项测试竞态已隔离：3 个文件单 worker 47/47，选择器文件连续 3 轮 36/36；修正仅等待异步 ready，不掩盖生产失败。
+- 稳定性补丁合入后，master 单 worker 全量 unit 1963/1963，lint、typecheck、format 和 diff 门禁均通过。
 
 ## 品味合规自检 Checklist
 

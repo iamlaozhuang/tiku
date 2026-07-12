@@ -42,6 +42,7 @@
 - 本地 master 首次默认并发全量 unit 为 1960/1963：2 项既有扫描型用例在全仓并发资源压力下超时，1 项 B4 材料选择用例在异步选项 ready 前操作禁用控件。
 - 将 3 个失败文件以单 worker 隔离复跑，47/47 通过，确认生产合同未失败；随后为两个绑定测试补充异步业务名称选项 ready 条件，不修改生产代码。
 - 题目材料 UI 单文件以单 worker 连续执行 3 次，每次 36/36 通过。
+- 稳定性补丁快进合入本地 master 后，以单 worker 运行全量 unit：359 个文件、1963 项全部通过；master 上 lint、typecheck、全仓 format check 与 `git diff --check` 同步通过。
 
 ## Localhost 边界
 

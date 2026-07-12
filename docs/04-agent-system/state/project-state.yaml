@@ -39,6 +39,11 @@ latest0704AdminReadableIdentifiers:
     postMergeDefaultFullUnit: resource_contention_3_failures_2_timeouts_1_async_selector_race
     postMergeIsolatedFailures: pass_3_files_47_tests_max_workers_1
     selectorStability: pass_1_file_36_tests_three_consecutive_runs
+    masterPostMergeFullUnit: pass_359_files_1963_tests_max_workers_1
+    masterPostMergeLint: pass_0_errors_0_warnings
+    masterPostMergeTypecheck: pass_tsc_no_emit
+    masterPostMergeFormatting: pass_full_repository
+    masterPostMergeDiffCheck: pass
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     directDatabaseConnectionExecuted: false
@@ -5182,6 +5187,11 @@ currentTask:
     postMergeDefaultFullUnit: resource_contention_3_failures_2_timeouts_1_async_selector_race
     postMergeIsolatedFailures: pass_3_files_47_tests_max_workers_1
     selectorStability: pass_1_file_36_tests_three_consecutive_runs
+    masterPostMergeFullUnit: pass_359_files_1963_tests_max_workers_1
+    masterPostMergeLint: pass_0_errors_0_warnings
+    masterPostMergeTypecheck: pass_tsc_no_emit
+    masterPostMergeFormatting: pass_full_repository
+    masterPostMergeDiffCheck: pass
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
