@@ -121,7 +121,8 @@ activeTasks:
   - id: user-led-b8-content-ops-interface-details-2026-07-12
     title: User-led B8 content and operations interface details
     phase: user-led-b8-content-ops-interface-details-2026-07-12
-    status: ready_for_commit
+    status: ready_for_closeout
+    result: pass_content_ops_interface_details
     priority: p1
     sequenceOrder: 53
     taskKind: targeted_content_ops_interface_detail_repair
@@ -187,12 +188,31 @@ activeTasks:
       - Eligible operations plaintext redeem-code capability and redacted audit behavior remain protected.
     validationCommands:
       - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx
-      - corepack pnpm@10.26.1 exec vitest run --maxWorkers=50% --testTimeout=10000
+      - corepack pnpm@10.26.1 exec vitest run --maxWorkers=25% --testTimeout=20000
       - corepack pnpm@10.26.1 run lint
       - corepack pnpm@10.26.1 run typecheck
       - corepack pnpm@10.26.1 run format:check
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
+    validationSummary:
+      status: pass_ready_for_closeout
+      tddRed: pass_4_expected_failures
+      focusedTests: pass_4_files_69_tests
+      fullTests: pass_360_files_1982_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_of_90_static_pages
+      diffCheck: pass
+      blockedPathDiff: pass_no_output
+      providerExecution: blocked_not_executed
+      databaseConnection: blocked_not_executed
+      databaseMutation: blocked_not_executed
+      schemaMigration: blocked_not_created_not_executed
+      moduleRunV2PreCommitHardening: pass_11_files_scanned
+      localCommit: pass_ce5d3047c
+      moduleRunV2ModuleCloseoutReadiness: pass
+    finalCommit: ce5d3047c
   - id: user-led-b7-learner-comprehensive-experience-2026-07-12
     title: User-led B7 learner comprehensive experience
     phase: user-led-b7-learner-comprehensive-experience-2026-07-12
