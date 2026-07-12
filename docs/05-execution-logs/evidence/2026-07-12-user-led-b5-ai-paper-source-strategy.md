@@ -15,8 +15,8 @@
 
 ## RED / GREEN
 
-- RED：新增 4 个大题、两侧同质量且题量充足的 `balanced` 用例；原实现实际选择平台题 4、企业题 0，期望 2/2。
-- GREEN：在每个匹配层级内逐题选择；全卷累计来源数量相等时先取平台题，随后取企业题追平。
+- RED: 新增 4 个大题、两侧同质量且题量充足的 `balanced` 用例；原实现实际选择平台题 4、企业题 0，期望 2/2。
+- GREEN: 在每个匹配层级内逐题选择；全卷累计来源数量相等时先取平台题，随后取企业题追平。
 - HARDEN：覆盖奇数 3 题的 2/1 确定性分配、单侧不足回退、两种优先策略，以及更高匹配质量不为均衡让位。
 
 ## 实现证据
@@ -46,11 +46,11 @@
 
 ## Module Run v2 锚点
 
-- result: local_verified_ready_for_commit
-- Commit: pending
+- result: pass
+- Commit: `0ab2a2b0c`
 - localFullLoopGate: pass
-- Test-ModuleRunV2PreCommitHardening: pass；7 个变更文件的 scope、敏感信息与术语扫描通过。
-- Test-ModuleRunV2ModuleCloseoutReadiness: pending
+- Test-ModuleRunV2PreCommitHardening: pass；真实 commit hook 的 scope、敏感信息、术语、lint-staged、lint、typecheck 与 post-commit advisory 均通过。
+- Test-ModuleRunV2ModuleCloseoutReadiness: pass；首次因 RED/GREEN 使用全角冒号而缺失机器可解析锚点，修正文档后复跑通过；产品代码未变化。
 - masterPostMergeVerification: pending
 - Test-ModuleRunV2PrePushReadiness: pending
 - Provider execution: blocked_not_executed

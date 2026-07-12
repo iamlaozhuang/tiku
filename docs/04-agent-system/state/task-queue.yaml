@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b5-ai-paper-source-strategy-2026-07-12
     title: User-led B5 AI paper source strategy repair
     phase: user-led-b5-ai-paper-source-strategy-2026-07-12
-    status: local_verified_ready_for_commit
+    status: closed
     result: pass_ai_paper_balanced_source_strategy
     priority: p1
     sequenceOrder: 50
@@ -186,6 +186,8 @@ activeTasks:
       - corepack pnpm@10.26.1 run format:check
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
+    finalCommit: 0ab2a2b0c
+    closeoutStatus: local_verified_ready_for_merge
   - id: user-led-b4-ai-training-information-architecture-2026-07-12
     title: User-led B4 AI training information architecture and Provider-closed experience repair
     phase: user-led-b4-ai-training-information-architecture-2026-07-12
