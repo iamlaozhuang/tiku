@@ -264,6 +264,234 @@ describe("AI组卷 plan-and-select 后端合同", () => {
     }
   });
 
+  it("均衡使用在多大题间按全卷累计来源数量确定性平衡", () => {
+    const knowledgeNodePublicIds = ["a", "b", "c", "d"].map(
+      (suffix) => `knowledge_node_public_${suffix}`,
+    );
+    const sections = knowledgeNodePublicIds.map(
+      (knowledgeNodePublicId, index) => ({
+        ...basePlan.sections[0],
+        sectionKey: `single-choice-${index + 1}`,
+        title: `单选题 ${index + 1}`,
+        targetQuestionCount: 1,
+        knowledgeNodePublicIds: [knowledgeNodePublicId],
+        parentKnowledgeNodePublicIds: [
+          `knowledge_node_parent_public_${index + 1}`,
+        ],
+      }),
+    );
+    const createSourceQuestions = (
+      sourceKind: "platform_formal_question" | "enterprise_training_snapshot",
+    ) =>
+      knowledgeNodePublicIds.map((knowledgeNodePublicId, index) =>
+        createQuestion({
+          publicId: `${sourceKind}_${index + 1}`,
+          sourceKind,
+          organizationPublicId:
+            sourceKind === "enterprise_training_snapshot"
+              ? "organization_public_a"
+              : null,
+          status:
+            sourceKind === "enterprise_training_snapshot"
+              ? "published"
+              : "available",
+          knowledgeNodePublicIds: [knowledgeNodePublicId],
+          parentKnowledgeNodePublicIds: [
+            `knowledge_node_parent_public_${index + 1}`,
+          ],
+        }),
+      );
+
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        role: "org_advanced_employee",
+        organizationPublicId: "organization_public_a",
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 4,
+          sourcePreference: "balanced",
+          sections,
+        },
+        platformQuestions: createSourceQuestions("platform_formal_question"),
+        enterpriseQuestions: createSourceQuestions(
+          "enterprise_training_snapshot",
+        ),
+      }),
+    );
+
+    expect(result.status).toBe("assembled");
+    expect(result.container.sourceComposition).toEqual({
+      platformFormalQuestionCount: 2,
+      enterpriseTrainingSnapshotCount: 2,
+    });
+    expect(
+      result.container.sections.map(
+        (section) => section.selectedQuestions[0]?.sourceKind,
+      ),
+    ).toEqual([
+      "platform_formal_question",
+      "enterprise_training_snapshot",
+      "platform_formal_question",
+      "enterprise_training_snapshot",
+    ]);
+  });
+
+  it.each([
+    ["prefer_platform", "platform_formal_question"],
+    ["prefer_enterprise", "enterprise_training_snapshot"],
+  ] as const)("%s 优先取满首选题源", (sourcePreference, expectedSourceKind) => {
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        role: "org_advanced_admin",
+        organizationPublicId: "organization_public_a",
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 2,
+          sourcePreference,
+          sections: [
+            {
+              ...basePlan.sections[0],
+              targetQuestionCount: 2,
+            },
+          ],
+        },
+        platformQuestions: [
+          createQuestion({ publicId: "platform_question_1" }),
+          createQuestion({ publicId: "platform_question_2" }),
+        ],
+        enterpriseQuestions: [
+          createQuestion({
+            publicId: "enterprise_question_1",
+            sourceKind: "enterprise_training_snapshot",
+            organizationPublicId: "organization_public_a",
+            status: "published",
+          }),
+          createQuestion({
+            publicId: "enterprise_question_2",
+            sourceKind: "enterprise_training_snapshot",
+            organizationPublicId: "organization_public_a",
+            status: "published",
+          }),
+        ],
+      }),
+    );
+
+    expect(
+      result.container.sections[0]?.selectedQuestions.map(
+        (question) => question.sourceKind,
+      ),
+    ).toEqual([expectedSourceKind, expectedSourceKind]);
+  });
+
+  it("均衡使用对奇数确定性分配并在单侧不足时由另一侧补足", () => {
+    const plan = {
+      ...basePlan,
+      targetQuestionCount: 3,
+      sourcePreference: "balanced" as const,
+      sections: [
+        {
+          ...basePlan.sections[0],
+          targetQuestionCount: 3,
+        },
+      ],
+    };
+    const platformQuestions = [1, 2, 3].map((index) =>
+      createQuestion({ publicId: `platform_question_${index}` }),
+    );
+    const enterpriseQuestions = [1, 2, 3].map((index) =>
+      createQuestion({
+        publicId: `enterprise_question_${index}`,
+        sourceKind: "enterprise_training_snapshot",
+        organizationPublicId: "organization_public_a",
+        status: "published",
+      }),
+    );
+    const balancedResult = assembleAiPaperFromPlan(
+      createInput({
+        role: "org_advanced_employee",
+        organizationPublicId: "organization_public_a",
+        plan,
+        platformQuestions,
+        enterpriseQuestions,
+      }),
+    );
+    const fallbackResult = assembleAiPaperFromPlan(
+      createInput({
+        role: "org_advanced_employee",
+        organizationPublicId: "organization_public_a",
+        plan,
+        platformQuestions: platformQuestions.slice(0, 1),
+        enterpriseQuestions,
+      }),
+    );
+
+    expect(balancedResult.container.sourceComposition).toEqual({
+      platformFormalQuestionCount: 2,
+      enterpriseTrainingSnapshotCount: 1,
+    });
+    expect(fallbackResult.status).toBe("assembled");
+    expect(fallbackResult.container.sourceComposition).toEqual({
+      platformFormalQuestionCount: 1,
+      enterpriseTrainingSnapshotCount: 2,
+    });
+  });
+
+  it("均衡使用仍先选更高匹配层级的题目", () => {
+    const result = assembleAiPaperFromPlan(
+      createInput({
+        role: "org_advanced_employee",
+        organizationPublicId: "organization_public_a",
+        plan: {
+          ...basePlan,
+          targetQuestionCount: 2,
+          sourcePreference: "balanced",
+          sections: [
+            {
+              ...basePlan.sections[0],
+              sectionKey: "platform-only-exact",
+              targetQuestionCount: 1,
+            },
+            {
+              ...basePlan.sections[0],
+              sectionKey: "quality-before-balance",
+              targetQuestionCount: 1,
+              knowledgeNodePublicIds: ["knowledge_node_public_b"],
+              parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_b"],
+            },
+          ],
+        },
+        platformQuestions: [
+          createQuestion({ publicId: "platform_question_a" }),
+          createQuestion({
+            publicId: "platform_question_b_exact",
+            knowledgeNodePublicIds: ["knowledge_node_public_b"],
+            parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_b"],
+          }),
+        ],
+        enterpriseQuestions: [
+          createQuestion({
+            publicId: "enterprise_question_b_nearby",
+            sourceKind: "enterprise_training_snapshot",
+            organizationPublicId: "organization_public_a",
+            status: "published",
+            difficulty: "hard",
+            knowledgeNodePublicIds: ["knowledge_node_public_other"],
+            parentKnowledgeNodePublicIds: ["knowledge_node_parent_public_b"],
+          }),
+        ],
+      }),
+    );
+
+    expect(result.container.sections[1]?.selectedQuestions).toEqual([
+      {
+        questionPublicId: "platform_question_b_exact",
+        sourceKind: "platform_formal_question",
+        matchTier: "exact",
+        score: 2,
+      },
+    ]);
+  });
+
   it("按 exact -> nearby knowledge -> same scope 降级选题，题源不足时不虚构题目", () => {
     const result = assembleAiPaperFromPlan(
       createInput({

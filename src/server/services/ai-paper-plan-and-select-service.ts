@@ -11,6 +11,7 @@ import {
   type AiPaperPlanAndSelectResult,
   type AiPaperPlanAndSelectSectionDto,
   type AiPaperQuestionSourceKind,
+  type AiPaperSourcePreference,
   type AiPaperSelectableQuestionDto,
   type AiPaperSelectedQuestionDto,
 } from "../contracts/ai-paper-plan-and-select-contract";
@@ -38,6 +39,12 @@ const forbiddenProviderQuestionContentKeys = new Set([
   "scoringPoints",
   "scoring_points",
 ]);
+
+type AiPaperSelectionState = {
+  selectedPublicIds: Set<string>;
+  enterpriseQuestionCount: number;
+  platformQuestionCount: number;
+};
 
 export function validateAiPaperAssemblyPlan(
   input: unknown,
@@ -130,14 +137,19 @@ export function assembleAiPaperFromPlan(
 function assembleSections(
   input: AiPaperPlanAndSelectInput,
 ): AiPaperPlanAndSelectSectionDto[] {
-  const selectedPublicIds = new Set<string>();
+  const selectionState = {
+    selectedPublicIds: new Set<string>(),
+    enterpriseQuestionCount: 0,
+    platformQuestionCount: 0,
+  };
   const candidates = createEligibleCandidates(input);
 
   return input.plan.sections.map((section) => {
     const selectedQuestions = selectQuestionsForSection(
       section,
       candidates,
-      selectedPublicIds,
+      selectionState,
+      input.plan.sourcePreference,
     );
 
     return {
@@ -190,7 +202,8 @@ function createEligibleCandidates(
 function selectQuestionsForSection(
   section: AiPaperAssemblyPlanSectionDto,
   candidates: AiPaperSelectableQuestionDto[],
-  selectedPublicIds: Set<string>,
+  selectionState: AiPaperSelectionState,
+  sourcePreference: AiPaperSourcePreference | null,
 ): AiPaperSelectedQuestionDto[] {
   const selectedQuestions: AiPaperSelectedQuestionDto[] = [];
 
@@ -199,19 +212,25 @@ function selectQuestionsForSection(
     "nearby_knowledge",
     "same_scope",
   ] as const) {
-    for (const candidate of candidates) {
-      if (selectedQuestions.length >= section.targetQuestionCount) {
-        return selectedQuestions;
+    while (selectedQuestions.length < section.targetQuestionCount) {
+      const candidate = selectNextCandidate({
+        candidates,
+        matchTier,
+        section,
+        selectionState,
+        sourcePreference,
+      });
+
+      if (candidate === null) {
+        break;
       }
 
-      if (
-        selectedPublicIds.has(candidate.publicId) ||
-        !matchesSection(candidate, section, matchTier)
-      ) {
-        continue;
+      selectionState.selectedPublicIds.add(candidate.publicId);
+      if (candidate.sourceKind === "enterprise_training_snapshot") {
+        selectionState.enterpriseQuestionCount += 1;
+      } else {
+        selectionState.platformQuestionCount += 1;
       }
-
-      selectedPublicIds.add(candidate.publicId);
       selectedQuestions.push({
         questionPublicId: candidate.publicId,
         sourceKind: candidate.sourceKind as Exclude<
@@ -225,6 +244,62 @@ function selectQuestionsForSection(
   }
 
   return selectedQuestions;
+}
+
+function selectNextCandidate({
+  candidates,
+  matchTier,
+  section,
+  selectionState,
+  sourcePreference,
+}: {
+  candidates: AiPaperSelectableQuestionDto[];
+  matchTier: AiPaperMatchTier;
+  section: AiPaperAssemblyPlanSectionDto;
+  selectionState: AiPaperSelectionState;
+  sourcePreference: AiPaperSourcePreference | null;
+}): AiPaperSelectableQuestionDto | null {
+  const eligibleCandidates = candidates.filter(
+    (candidate) =>
+      !selectionState.selectedPublicIds.has(candidate.publicId) &&
+      matchesSection(candidate, section, matchTier),
+  );
+
+  if (eligibleCandidates.length === 0) {
+    return null;
+  }
+
+  const preferredSourceKind = resolvePreferredSourceKind(
+    sourcePreference,
+    selectionState,
+  );
+
+  return (
+    eligibleCandidates.find(
+      (candidate) => candidate.sourceKind === preferredSourceKind,
+    ) ??
+    eligibleCandidates[0] ??
+    null
+  );
+}
+
+function resolvePreferredSourceKind(
+  sourcePreference: AiPaperSourcePreference | null,
+  selectionState: AiPaperSelectionState,
+): Exclude<AiPaperQuestionSourceKind, "ai_generated_draft"> {
+  if (sourcePreference === "prefer_enterprise") {
+    return "enterprise_training_snapshot";
+  }
+
+  if (
+    sourcePreference === "balanced" &&
+    selectionState.enterpriseQuestionCount <
+      selectionState.platformQuestionCount
+  ) {
+    return "enterprise_training_snapshot";
+  }
+
+  return "platform_formal_question";
 }
 
 function matchesSection(
