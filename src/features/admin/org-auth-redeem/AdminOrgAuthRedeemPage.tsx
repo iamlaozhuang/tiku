@@ -450,6 +450,8 @@ const defaultOrgAuthFormState: OrgAuthFormState = {
   startsAt: "2026-05-25",
 };
 
+const adminOrganizationTableCellClassName = "px-4 py-3";
+
 const defaultRedeemCodeGenerationFormState: RedeemCodeGenerationFormState = {
   count: "1",
   durationDay: "365",
@@ -2487,27 +2489,46 @@ function OrgAuthList({
       <table aria-label="企业授权列表" className={adminDataTableClassName}>
         <thead>
           <tr>
-            <th scope="col">企业授权</th>
-            <th scope="col">购买主体</th>
-            <th scope="col">覆盖企业</th>
-            <th scope="col">版本与范围</th>
-            <th scope="col">额度</th>
-            <th scope="col">有效期</th>
-            <th scope="col">状态</th>
-            <th scope="col">操作</th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              企业授权
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              购买主体
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              覆盖企业
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              版本与范围
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              额度
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              有效期
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              状态
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              操作
+            </th>
           </tr>
         </thead>
         <tbody>
           {loadState === "loading" ? (
             <tr>
-              <td className="text-text-muted py-8 text-center" colSpan={8}>
+              <td className="text-text-muted px-4 py-8 text-center" colSpan={8}>
                 正在加载企业授权列表
               </td>
             </tr>
           ) : null}
           {loadState === "error" ? (
             <tr>
-              <td className="text-destructive py-8 text-center" colSpan={8}>
+              <td
+                className="text-destructive px-4 py-8 text-center"
+                colSpan={8}
+              >
                 企业授权列表加载失败，请稍后重试。
               </td>
             </tr>
@@ -2515,7 +2536,7 @@ function OrgAuthList({
           {loadState === "empty" ||
           (loadState === "ready" && orgAuths.length === 0) ? (
             <tr>
-              <td className="text-text-muted py-8 text-center" colSpan={8}>
+              <td className="text-text-muted px-4 py-8 text-center" colSpan={8}>
                 暂无符合条件的企业授权。
               </td>
             </tr>
@@ -2527,7 +2548,7 @@ function OrgAuthList({
                   data-public-id={orgAuth.publicId}
                   data-testid={`admin-org-auth-${orgAuth.publicId}`}
                 >
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary font-medium">
                       {orgAuth.name}
                     </p>
@@ -2535,12 +2556,14 @@ function OrgAuthList({
                       {authScopeTypeLabels[orgAuth.authScopeType]}
                     </p>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary font-medium">
                       {orgAuth.purchaserOrganizationName}
                     </p>
                   </td>
-                  <td className="text-left">
+                  <td
+                    className={`${adminOrganizationTableCellClassName} text-left`}
+                  >
                     <p className="text-text-primary font-medium">
                       覆盖 {orgAuth.coveredOrganizationCount} 家企业
                     </p>
@@ -2549,7 +2572,7 @@ function OrgAuthList({
                         "暂无覆盖企业名称"}
                     </p>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary">
                       {formatProfessionLevel(orgAuth)}
                     </p>
@@ -2560,7 +2583,7 @@ function OrgAuthList({
                       {getOrgAuthUpgradeStatusLabel(orgAuth)}
                     </p>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary">
                       {orgAuth.usedQuota} / {orgAuth.accountQuota}
                     </p>
@@ -2569,7 +2592,7 @@ function OrgAuthList({
                       {Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0)}
                     </p>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary">
                       {formatDate(orgAuth.startsAt)}
                     </p>
@@ -2577,7 +2600,7 @@ function OrgAuthList({
                       至 {formatDate(orgAuth.expiresAt)}
                     </p>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <span
                       className={
                         orgAuth.status === "active"
@@ -2588,7 +2611,7 @@ function OrgAuthList({
                       {authStatusLabels[orgAuth.status]}
                     </span>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <div className="flex flex-wrap gap-2">
                       <button
                         aria-label={`查看企业授权 ${orgAuth.name}`}
@@ -2933,25 +2956,40 @@ function EmployeeList({
       <table aria-label="员工账号列表" className={adminDataTableClassName}>
         <thead>
           <tr>
-            <th scope="col">员工</th>
-            <th scope="col">所属企业</th>
-            <th scope="col">状态</th>
-            <th scope="col">授权继承</th>
-            <th scope="col">注册时间</th>
-            <th scope="col">操作</th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              员工
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              所属企业
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              状态
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              授权继承
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              注册时间
+            </th>
+            <th className={adminOrganizationTableCellClassName} scope="col">
+              操作
+            </th>
           </tr>
         </thead>
         <tbody>
           {loadState === "loading" ? (
             <tr>
-              <td className="text-text-muted py-8 text-center" colSpan={6}>
+              <td className="text-text-muted px-4 py-8 text-center" colSpan={6}>
                 正在加载员工账号列表
               </td>
             </tr>
           ) : null}
           {loadState === "error" ? (
             <tr>
-              <td className="text-destructive py-8 text-center" colSpan={6}>
+              <td
+                className="text-destructive px-4 py-8 text-center"
+                colSpan={6}
+              >
                 员工账号列表加载失败，请稍后重试。
               </td>
             </tr>
@@ -2959,7 +2997,7 @@ function EmployeeList({
           {loadState === "empty" ||
           (loadState === "ready" && employees.length === 0) ? (
             <tr>
-              <td className="text-text-muted py-8 text-center" colSpan={6}>
+              <td className="text-text-muted px-4 py-8 text-center" colSpan={6}>
                 暂无符合条件的员工账号。
               </td>
             </tr>
@@ -2971,7 +3009,7 @@ function EmployeeList({
                   data-public-id={employee.publicId}
                   data-testid={`admin-employee-${employee.publicId}`}
                 >
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary font-medium">
                       {employee.name}
                     </p>
@@ -2979,13 +3017,17 @@ function EmployeeList({
                       {employee.phone}
                     </p>
                   </td>
-                  <td className="text-left">{employee.organizationName}</td>
-                  <td>
+                  <td
+                    className={`${adminOrganizationTableCellClassName} text-left`}
+                  >
+                    {employee.organizationName}
+                  </td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <span className="bg-secondary text-secondary-foreground inline-flex rounded-md px-2 py-1 text-xs font-medium">
                       {userStatusLabels[employee.status]}
                     </span>
                   </td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <p className="text-text-primary">
                       {employee.activeOrgAuthCount > 0
                         ? `有效企业授权 ${employee.activeOrgAuthCount} 项`
@@ -2995,8 +3037,10 @@ function EmployeeList({
                       权限由所属企业授权继承
                     </p>
                   </td>
-                  <td>{formatDate(employee.registeredAt)}</td>
-                  <td>
+                  <td className={adminOrganizationTableCellClassName}>
+                    {formatDate(employee.registeredAt)}
+                  </td>
+                  <td className={adminOrganizationTableCellClassName}>
                     <div className="flex flex-wrap gap-2">
                       <button
                         aria-label={`转移员工 ${employee.name}`}

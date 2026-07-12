@@ -15,7 +15,6 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
-  ContentOpsStagingRoleArrangement,
   FilterSelect,
   createAdminAuthHeaders,
   fetchAdminApi,
@@ -446,7 +445,6 @@ export function AdminKnowledgeNodeManagement() {
         </div>
       </header>
 
-      <ContentOpsStagingRoleArrangement />
       <KnowledgeNodeLifecycleContextBand knowledgeNodes={knowledgeNodes} />
 
       <div className="bg-surface border-border rounded-md border p-4 shadow-sm">

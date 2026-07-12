@@ -355,6 +355,13 @@ describe("AdminOrgAuthPage", () => {
 
     const toolbar = await screen.findByRole("region", { name: "员工筛选" });
     const table = screen.getByRole("table", { name: "员工账号列表" });
+    const employeeTableCells = [
+      ...within(table).getAllByRole("columnheader"),
+      ...within(table).getAllByRole("cell"),
+    ];
+    for (const tableCell of employeeTableCells) {
+      expect(tableCell).toHaveClass("px-4", "py-3");
+    }
     expect(toolbar).toHaveTextContent("共 65 名员工");
     expect(table).toHaveTextContent("杭州烟草");
     expect(table).toHaveTextContent("有效企业授权 2 项");
@@ -437,6 +444,13 @@ describe("AdminOrgAuthPage", () => {
     const orgAuthTable = screen.getByRole("table", {
       name: "企业授权列表",
     });
+    const orgAuthTableCells = [
+      ...within(orgAuthTable).getAllByRole("columnheader"),
+      ...within(orgAuthTable).getAllByRole("cell"),
+    ];
+    for (const tableCell of orgAuthTableCells) {
+      expect(tableCell).toHaveClass("px-4", "py-3");
+    }
     expect(orgAuthTable).toBeInTheDocument();
     expect(within(toolbar).getByText("共 75 条企业授权")).toBeInTheDocument();
     expect(screen.getAllByText("杭州烟草").length).toBeGreaterThanOrEqual(2);

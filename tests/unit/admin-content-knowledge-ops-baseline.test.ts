@@ -664,20 +664,13 @@ describe("admin content and knowledge ops baseline", () => {
     cleanup();
     render(createElement(AdminContentKnowledgeOpsBaseline));
 
-    const requiredRoleArrangement = screen.getByTestId(
-      "content-ops-staging-required-role-arrangement",
-    );
-    expect(requiredRoleArrangement).toHaveTextContent("内容运营本地验收");
-    expect(requiredRoleArrangement).not.toHaveTextContent("staging 必验");
-    expect(requiredRoleArrangement).toHaveTextContent(
-      "知识点节点新增、编辑、停用",
-    );
-    expect(requiredRoleArrangement).toHaveTextContent(
-      "题目、材料、试卷先验只读筛选",
-    );
-    expect(requiredRoleArrangement).toHaveTextContent(
-      "不可用写操作必须显示原因和下一步",
-    );
+    expect(
+      screen.queryByTestId("content-ops-staging-required-role-arrangement"),
+    ).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("内容运营本地验收");
+    expect(document.body).not.toHaveTextContent("内容运营体验安排");
+    expect(document.body).not.toHaveTextContent("本轮可写闭环");
+    expect(document.body).not.toHaveTextContent("先验只读筛选");
 
     expect(
       screen.getByRole("heading", { name: "内容与知识库运营" }),
@@ -724,6 +717,11 @@ describe("admin content and knowledge ops baseline", () => {
     expect(
       await screen.findByRole("heading", { name: "知识点树维护" }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("content-ops-staging-required-role-arrangement"),
+    ).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("内容运营本地验收");
+    expect(document.body).not.toHaveTextContent("内容运营体验安排");
 
     const firstNode = screen.getByTestId(
       "knowledge-node-row-knowledge-node-public-001",

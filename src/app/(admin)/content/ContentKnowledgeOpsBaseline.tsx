@@ -5,7 +5,6 @@ import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ContentOpsStagingRoleArrangement } from "@/features/admin/content-admin-runtime";
 import {
   ADMIN_CONFLICT_MESSAGE,
   ADMIN_PAGE_SIZE_OPTIONS,
@@ -118,8 +117,6 @@ export function AdminContentKnowledgeOpsBaseline({
           </Button>
         </div>
       </header>
-
-      <ContentOpsStagingRoleArrangement />
 
       <div className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm lg:grid-cols-[12rem_12rem_1fr]">
         <label className="flex flex-col gap-2 text-sm font-medium">
