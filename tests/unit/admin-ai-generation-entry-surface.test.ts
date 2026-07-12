@@ -555,7 +555,8 @@ describe("admin AI generation entry surfaces", () => {
     expect(paperRouteSource).toContain('workspace="content"');
     expect(paperRouteSource).toContain('generationKind="paper"');
     expect(sharedSurfaceSource).toContain("内容 AI 辅助");
-    expect(sharedSurfaceSource).toContain("待审题目和待审试卷");
+    expect(sharedSurfaceSource).toContain("AI出题工作台");
+    expect(sharedSurfaceSource).toContain("AI组卷工作台");
     expect(sharedSurfaceSource).not.toContain("本地 owner preview");
     expect(sharedSurfaceSource).not.toContain("本地生成");
     expect(sharedSurfaceSource).not.toContain("本地预览");
@@ -708,7 +709,7 @@ describe("admin AI generation entry surfaces", () => {
       "不包含",
     );
     expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
-      "生成待审题目草稿",
+      "生成题目草稿",
     );
     fireEvent.change(screen.getByLabelText("专业"), {
       target: { value: "物流管理" },
@@ -818,7 +819,7 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(screen.getByText("内容 AI 辅助")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "待审试卷草稿" }),
+      screen.getByRole("heading", { name: "AI组卷工作台" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("题目数量")).toHaveDisplayValue("30");
     expect(screen.getByLabelText("题目数量")).toHaveAttribute("max", "80");
@@ -836,7 +837,7 @@ describe("admin AI generation entry surfaces", () => {
     expect(detailControls).not.toHaveTextContent("优先使用企业题");
     expect(detailControls).not.toHaveTextContent("优先使用平台题");
     expect(screen.getByTestId("admin-ai-generation-submit")).toHaveTextContent(
-      "生成待审试卷草稿",
+      "生成组卷方案并本地选题",
     );
     expect(document.body).toHaveTextContent(
       "待审试卷草稿仍需编辑、驳回、审核和发布校验",
@@ -1019,21 +1020,21 @@ describe("admin AI generation entry surfaces", () => {
 
   it.each([
     {
-      actionLabel: "生成待审题目草稿",
+      actionLabel: "生成题目草稿",
       adminRoles: ["content_admin"] satisfies AdminRole[],
       generationKind: "question" as const,
       historyPath:
         "/api/v1/content-ai-generation-requests?generationKind=question&page=1&pageSize=10",
-      title: "待审题目草稿",
+      title: "AI出题工作台",
       workspace: "content" as const,
     },
     {
-      actionLabel: "生成待审试卷草稿",
+      actionLabel: "生成组卷方案并本地选题",
       adminRoles: ["content_admin"] satisfies AdminRole[],
       generationKind: "paper" as const,
       historyPath:
         "/api/v1/content-ai-generation-requests?generationKind=paper&page=1&pageSize=10",
-      title: "待审试卷草稿",
+      title: "AI组卷工作台",
       workspace: "content" as const,
     },
     {
@@ -1276,7 +1277,7 @@ describe("admin AI generation entry surfaces", () => {
       }),
     );
 
-    expect(await screen.findByText("最近任务")).toBeInTheDocument();
+    expect(await screen.findByText("最近生成记录")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("知识点覆盖"), {
       target: { value: "指定知识点" },
     });
@@ -1367,7 +1368,7 @@ describe("admin AI generation entry surfaces", () => {
       }),
     );
 
-    expect(await screen.findByText("最近任务")).toBeInTheDocument();
+    expect(await screen.findByText("最近生成记录")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("知识点覆盖"), {
       target: { value: "指定知识点" },
     });
@@ -2205,7 +2206,7 @@ describe("admin AI generation entry surfaces", () => {
 
     expect(
       await screen.findByTestId("admin-ai-generation-task-history"),
-    ).toHaveTextContent("最近任务");
+    ).toHaveTextContent("最近生成记录");
     expect(
       screen.getByTestId("admin-ai-generation-task-history"),
     ).toHaveTextContent("AI组卷");

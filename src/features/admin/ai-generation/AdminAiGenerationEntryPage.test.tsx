@@ -335,6 +335,59 @@ describe("AdminAiGenerationEntryPage", () => {
     });
   });
 
+  it.each([
+    ["question", "AI出题工作台", "生成题目草稿"],
+    ["paper", "AI组卷工作台", "生成组卷方案并本地选题"],
+  ] as const)(
+    "uses the shared content AI workbench structure for %s",
+    async (generationKind, title, actionLabel) => {
+      mockAdminAiGenerationFetch();
+
+      render(
+        <AdminAiGenerationEntryPage
+          generationKind={generationKind}
+          workspace="content"
+        />,
+      );
+
+      expect(
+        await screen.findByRole("heading", { name: title }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("navigation", { name: "工作台视图" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: actionLabel }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "本次结果与评审" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "任务记录" }),
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector('[data-slot="admin-list-pagination"]'),
+      ).toBeInTheDocument();
+      expect(document.body).not.toHaveTextContent("Provider");
+      expect(document.body).not.toHaveTextContent("raw prompt");
+      expect(document.body).not.toHaveTextContent("raw output");
+    },
+  );
+
+  it("states the AI paper plan and formal-source selection boundary", async () => {
+    mockAdminAiGenerationFetch();
+
+    render(
+      <AdminAiGenerationEntryPage generationKind="paper" workspace="content" />,
+    );
+
+    expect(
+      await screen.findByText(
+        "AI 先生成组卷方案，系统再从平台正式题库本地选题；缺口会明确提示，不生成正式题目正文。",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("shows generated draft content with business wording and hides governance implementation terms", async () => {
     mockAdminAiGenerationFetch();
 
@@ -346,7 +399,7 @@ describe("AdminAiGenerationEntryPage", () => {
     );
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "生成待审题目草稿" }),
+      await screen.findByRole("button", { name: "生成题目草稿" }),
     );
 
     await waitFor(() => {
@@ -384,7 +437,7 @@ describe("AdminAiGenerationEntryPage", () => {
     fireEvent.change(await screen.findByLabelText("知识点补充说明"), {
       target: { value: "围绕营销基础与客户沟通" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "生成待审题目草稿" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成题目草稿" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
@@ -460,7 +513,7 @@ describe("AdminAiGenerationEntryPage", () => {
     );
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "生成待审题目草稿" }),
+      await screen.findByRole("button", { name: "生成题目草稿" }),
     );
 
     await waitFor(() => {
@@ -488,7 +541,7 @@ describe("AdminAiGenerationEntryPage", () => {
 
     expect(await screen.findByText("内容 AI 辅助")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "待审试卷草稿" }),
+      screen.getByRole("heading", { name: "AI组卷工作台" }),
     ).toBeInTheDocument();
     expect(screen.getByText("按大题模块组织")).toBeInTheDocument();
     expect(screen.getByText("生成记录")).toBeInTheDocument();
@@ -512,7 +565,7 @@ describe("AdminAiGenerationEntryPage", () => {
     );
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "生成待审题目草稿" }),
+      await screen.findByRole("button", { name: "生成题目草稿" }),
     );
 
     await waitFor(() => {

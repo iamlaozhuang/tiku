@@ -9,6 +9,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 
+import { AdminPagination } from "@/components/admin/AdminList";
 import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
@@ -251,12 +252,13 @@ function getPageCopy(
   if (workspace === "content") {
     return {
       eyebrow: "内容 AI 辅助",
-      title: isQuestionGeneration ? "待审题目草稿" : "待审试卷草稿",
-      description:
-        "待审题目和待审试卷进入内容评审流程；发布前仍需编辑、审核和发布校验。",
+      title: isQuestionGeneration ? "AI出题工作台" : "AI组卷工作台",
+      description: isQuestionGeneration
+        ? "设置生成条件，查看待审题目草稿，并在人工评审后进入正式内容流程。"
+        : "先生成组卷方案，再从平台正式题库本地选题，确认缺口后进入待审试卷流程。",
       actionLabel: isQuestionGeneration
-        ? "生成待审题目草稿"
-        : "生成待审试卷草稿",
+        ? "生成题目草稿"
+        : "生成组卷方案并本地选题",
       boundaryHeading: "草稿评审",
       boundaryLabel: isQuestionGeneration
         ? "待审题目草稿不直接发布正式题目"
@@ -2318,8 +2320,6 @@ function AdminAiGenerationTaskHistoryPanel({
     pagination === null
       ? 1
       : Math.max(1, Math.ceil(pagination.total / pagination.pageSize));
-  const canGoPrevious = pagination !== null && pagination.page > 1;
-  const canGoNext = pagination !== null && pagination.page < totalPages;
   const historyCopy =
     workspace === "organization"
       ? {
@@ -2363,7 +2363,7 @@ function AdminAiGenerationTaskHistoryPanel({
             {historyCopy.eyebrow}
           </p>
           <h2 className="text-text-primary mt-1 text-base font-semibold">
-            最近任务
+            最近生成记录
           </h2>
         </div>
         <span className="bg-muted text-text-secondary rounded-md px-2 py-1 text-xs font-medium">
@@ -2383,35 +2383,6 @@ function AdminAiGenerationTaskHistoryPanel({
           </span>
         ) : null}
       </div>
-      {pagination !== null ? (
-        <nav
-          aria-label="AI生成历史分页"
-          className="mt-3 flex items-center justify-between gap-3"
-        >
-          <p className="text-text-secondary text-sm">
-            第 {pagination.page} / {totalPages} 页
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={state === "loading" || !canGoPrevious}
-              onClick={() => onChangePage(pagination.page - 1)}
-            >
-              上一页
-            </button>
-            <button
-              type="button"
-              className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={state === "loading" || !canGoNext}
-              onClick={() => onChangePage(pagination.page + 1)}
-            >
-              下一页
-            </button>
-          </div>
-        </nav>
-      ) : null}
-
       {state === "loading" ? (
         <div
           className="text-text-secondary mt-4 flex items-center gap-2 text-sm"
@@ -2629,6 +2600,18 @@ function AdminAiGenerationTaskHistoryPanel({
               </article>
             );
           })}
+        </div>
+      ) : null}
+
+      {pagination !== null ? (
+        <div className="mt-4">
+          <AdminPagination
+            itemLabel="条任务"
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            onPageChange={state === "loading" ? () => undefined : onChangePage}
+          />
         </div>
       ) : null}
     </section>
@@ -4001,28 +3984,38 @@ export function AdminAiGenerationEntryPage({
         </div>
       </header>
 
-      <section
-        className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      <nav
+        aria-label="工作台视图"
+        className="border-border flex flex-wrap items-center gap-2 border-b pb-3"
         data-testid="admin-ai-generation-zone-mode"
       >
-        <p className="text-brand-primary text-xs font-medium">当前模式</p>
-        <h2 className="text-text-primary mt-1 text-base font-semibold">
+        <span className="text-text-secondary mr-2 text-sm font-medium">
           {getGenerationKindLabel(generationKind)}
-        </h2>
-        <p className="text-text-secondary mt-2 text-sm leading-6">
-          {workspace === "organization"
-            ? "组织 AI 结果只进入企业训练草稿闭环，发布前仍需编辑、预览和范围确认。"
-            : "内容 AI 结果只进入内容评审闭环，发布前仍需审核和正式发布校验。"}
-        </p>
-      </section>
-
-      {workspace === "content" ? (
-        <ContentAiAdoptionLifecycleBand generationKind={generationKind} />
-      ) : null}
+        </span>
+        <a
+          className="border-border bg-surface text-text-primary hover:bg-muted rounded-md border px-3 py-2 text-sm font-medium"
+          href="#generation-conditions"
+        >
+          生成条件
+        </a>
+        <a
+          className="border-border bg-surface text-text-primary hover:bg-muted rounded-md border px-3 py-2 text-sm font-medium"
+          href="#current-result-review"
+        >
+          本次结果与评审
+        </a>
+        <a
+          className="border-border bg-surface text-text-primary hover:bg-muted rounded-md border px-3 py-2 text-sm font-medium"
+          href="#generation-history"
+        >
+          任务记录
+        </a>
+      </nav>
 
       <section
-        className="grid gap-4 lg:grid-cols-[2fr_1fr]"
+        className="space-y-4"
         data-testid="admin-ai-generation-zone-parameters"
+        id="generation-conditions"
       >
         <AdminAiGenerationDetailControls
           generationParameters={generationParameters}
@@ -4032,17 +4025,21 @@ export function AdminAiGenerationEntryPage({
           onChange={handleGenerationParameterChange}
           workspace={workspace}
         />
-        <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
-          <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
-            <WandSparkles aria-hidden="true" className="size-4" />
-            <h2>{pageCopy.actionLabel}</h2>
+        <section className="bg-surface border-border flex flex-col gap-4 rounded-md border p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
+              <WandSparkles aria-hidden="true" className="size-4" />
+              <h2>开始生成</h2>
+            </div>
+            <p className="text-text-secondary mt-2 max-w-3xl text-sm leading-6">
+              {knowledgeScopeBlockedReason ??
+                (workspace === "content" && generationKind === "paper"
+                  ? "AI 先生成组卷方案，系统再从平台正式题库本地选题；缺口会明确提示，不生成正式题目正文。"
+                  : "生成入口已就绪，资料充足时可生成预览草稿。")}
+            </p>
           </div>
-          <p className="text-text-secondary mt-3 text-sm leading-6">
-            {knowledgeScopeBlockedReason ??
-              "生成入口已就绪，资料充足时可生成预览草稿。"}
-          </p>
           <button
-            className="bg-primary text-primary-foreground mt-4 inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            className="bg-primary text-primary-foreground inline-flex h-9 shrink-0 items-center justify-center rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             data-testid="admin-ai-generation-submit"
             disabled={isSubmitDisabled}
             type="button"
@@ -4053,131 +4050,172 @@ export function AdminAiGenerationEntryPage({
         </section>
       </section>
 
+      {workspace === "content" ? (
+        <ContentAiAdoptionLifecycleBand generationKind={generationKind} />
+      ) : null}
+
       <section
-        className="grid gap-4 lg:grid-cols-2"
+        className="bg-surface border-border rounded-md border p-4 shadow-sm"
         data-testid="admin-ai-generation-zone-boundary"
       >
-        <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+        <div className="grid gap-4 lg:grid-cols-2">
           <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
             <FileText aria-hidden="true" className="size-4" />
             <h2>{pageCopy.boundaryHeading}</h2>
           </div>
-          <p className="text-text-secondary mt-3 text-sm leading-6">
-            {pageCopy.boundaryLabel}
-          </p>
-        </section>
-
-        <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
-          <div className="text-text-primary flex items-center gap-2 text-base font-semibold">
+          <div className="text-text-primary flex items-center gap-2 text-base font-semibold lg:col-start-2">
             <ShieldCheck aria-hidden="true" className="size-4" />
             <h2>{pageCopy.evidenceHeading}</h2>
           </div>
-          <p className="text-text-secondary mt-3 text-sm leading-6">
+          <p className="text-text-secondary text-sm leading-6">
+            {pageCopy.boundaryLabel}
+          </p>
+          <p className="text-text-secondary text-sm leading-6">
             {pageCopy.evidenceDescription}
           </p>
-        </section>
+        </div>
       </section>
 
-      <section
+      <div
         className="space-y-4"
         data-testid="admin-ai-generation-zone-result-history"
       >
-        {requestState === "error" ? (
-          <section
-            className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
-            data-testid="admin-ai-generation-local-contract-error"
-            role="alert"
-          >
-            <h2 className="text-text-primary text-sm font-semibold">
-              生成请求暂不可用
+        <section className="space-y-4" id="current-result-review">
+          <div>
+            <p className="text-brand-primary text-xs font-medium">当前任务</p>
+            <h2 className="text-text-primary mt-1 text-lg font-semibold">
+              本次结果与评审
             </h2>
-            <p className="text-text-secondary mt-2 text-sm leading-6">
-              {requestErrorMessage ?? providerExecutionCopy.error}
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              查看本次生成结果、资料依据和人工评审状态。
             </p>
-          </section>
-        ) : null}
+          </div>
 
-        {localContractSummary !== null ? (
-          <section
-            className="bg-surface border-border rounded-md border p-4 shadow-sm"
-            data-testid="admin-ai-generation-local-contract-summary"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-brand-primary text-xs font-medium">
-                  草稿已提交
-                </p>
-                <h2 className="text-text-primary mt-1 text-base font-semibold">
-                  {getTaskStatusLabel(localContractSummary.resultState.status)}
-                </h2>
+          {requestState === "error" ? (
+            <section
+              className="border-destructive/40 bg-destructive/5 rounded-md border p-4"
+              data-testid="admin-ai-generation-local-contract-error"
+              role="alert"
+            >
+              <h3 className="text-text-primary text-sm font-semibold">
+                生成请求暂不可用
+              </h3>
+              <p className="text-text-secondary mt-2 text-sm leading-6">
+                {requestErrorMessage ?? providerExecutionCopy.error}
+              </p>
+            </section>
+          ) : null}
+
+          {localContractSummary !== null ? (
+            <section
+              className="bg-surface border-border rounded-md border p-4 shadow-sm"
+              data-testid="admin-ai-generation-local-contract-summary"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-brand-primary text-xs font-medium">
+                    草稿已提交
+                  </p>
+                  <h3 className="text-text-primary mt-1 text-base font-semibold">
+                    {getTaskStatusLabel(
+                      localContractSummary.resultState.status,
+                    )}
+                  </h3>
+                </div>
               </div>
+
+              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <dt className="text-text-secondary">任务状态</dt>
+                  <dd className="text-text-primary mt-1">
+                    {getTaskStatusLabel(
+                      localContractSummary.resultState.status,
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">结果内容</dt>
+                  <dd className="text-text-primary mt-1">
+                    {localContractSummary.resultState.resultPublicId === null
+                      ? "暂无生成结果"
+                      : "已产生结果引用"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">
+                    {pageCopy.evidenceLabel}
+                  </dt>
+                  <dd className="text-text-primary mt-1">
+                    {localContractSummary.resultState.evidenceStatus ===
+                    "sufficient"
+                      ? "资料充足"
+                      : "资料不足"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">
+                    {providerExecutionCopy.label}
+                  </dt>
+                  <dd className="text-text-primary mt-1">
+                    {localContractSummary.runtimeBridge.providerCallExecuted
+                      ? "已执行"
+                      : providerExecutionCopy.blocked}
+                  </dd>
+                </div>
+              </dl>
+
+              <AdminAiGenerationVisibleGeneratedContent
+                localContractSummary={localContractSummary}
+              />
+            </section>
+          ) : null}
+
+          {requestState === "idle" && localContractSummary === null ? (
+            <div
+              className="bg-muted text-text-secondary rounded-md p-4 text-sm leading-6"
+              role="status"
+            >
+              尚未开始本次生成。请先确认生成条件，再执行生成。
             </div>
+          ) : null}
+        </section>
 
-            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <dt className="text-text-secondary">任务状态</dt>
-                <dd className="text-text-primary mt-1">
-                  {getTaskStatusLabel(localContractSummary.resultState.status)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-text-secondary">结果内容</dt>
-                <dd className="text-text-primary mt-1">
-                  {localContractSummary.resultState.resultPublicId === null
-                    ? "暂无生成结果"
-                    : "已产生结果引用"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-text-secondary">
-                  {pageCopy.evidenceLabel}
-                </dt>
-                <dd className="text-text-primary mt-1">
-                  {localContractSummary.resultState.evidenceStatus ===
-                  "sufficient"
-                    ? "资料充足"
-                    : "资料不足"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-text-secondary">
-                  {providerExecutionCopy.label}
-                </dt>
-                <dd className="text-text-primary mt-1">
-                  {localContractSummary.runtimeBridge.providerCallExecuted
-                    ? "已执行"
-                    : providerExecutionCopy.blocked}
-                </dd>
-              </div>
-            </dl>
-
-            <AdminAiGenerationVisibleGeneratedContent
-              localContractSummary={localContractSummary}
-            />
-          </section>
-        ) : null}
-
-        <AdminAiGenerationTaskHistoryPanel
-          adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
-          copyActionErrorMessageByResultPublicId={
-            copyActionErrorMessageByResultPublicId
-          }
-          copyActionStateByResultPublicId={copyActionStateByResultPublicId}
-          currentLocalContractSummary={localContractSummary}
-          generationParameters={generationParameters}
-          generationKind={generationKind}
-          onCopyToTrainingDraft={(input) =>
-            void handleCopyOrganizationAiResultToTrainingDraft(input)
-          }
-          onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
-          pagination={taskHistoryPagination}
-          reviewActionStateByResultPublicId={reviewActionStateByResultPublicId}
-          state={historyState}
-          taskHistory={taskHistory}
-          workspace={workspace}
-          onReviewContentDraft={(input) => void handleReviewContentDraft(input)}
-        />
-      </section>
+        <section className="space-y-4" id="generation-history">
+          <div>
+            <p className="text-brand-primary text-xs font-medium">历史记录</p>
+            <h2 className="text-text-primary mt-1 text-lg font-semibold">
+              任务记录
+            </h2>
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              按生成时间查看历史任务、评审结果和后续处理状态。
+            </p>
+          </div>
+          <AdminAiGenerationTaskHistoryPanel
+            adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
+            copyActionErrorMessageByResultPublicId={
+              copyActionErrorMessageByResultPublicId
+            }
+            copyActionStateByResultPublicId={copyActionStateByResultPublicId}
+            currentLocalContractSummary={localContractSummary}
+            generationParameters={generationParameters}
+            generationKind={generationKind}
+            onCopyToTrainingDraft={(input) =>
+              void handleCopyOrganizationAiResultToTrainingDraft(input)
+            }
+            onChangePage={(page) => void handleChangeTaskHistoryPage(page)}
+            pagination={taskHistoryPagination}
+            reviewActionStateByResultPublicId={
+              reviewActionStateByResultPublicId
+            }
+            state={historyState}
+            taskHistory={taskHistory}
+            workspace={workspace}
+            onReviewContentDraft={(input) =>
+              void handleReviewContentDraft(input)
+            }
+          />
+        </section>
+      </div>
     </section>
   );
 }
