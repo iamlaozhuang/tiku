@@ -118,10 +118,129 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-practice-mock-session-acceptance-2026-07-12
+    title: 0704 practice mock exam session and role isolation acceptance A23 B6
+    phase: 0704-practice-mock-session-acceptance-2026-07-12
+    status: ready_for_closeout
+    result: pass_product_api_lifecycle_and_adversarial_role_isolation
+    priority: p1
+    sequenceOrder: 45
+    taskKind: localhost_product_api_acceptance
+    executionProfile: local_0704_practice_mock_report_lifecycle_and_adversarial_isolation
+    moduleRunVersion: 2
+    branch: codex/0704-practice-mock-session-acceptance
+    dependsOn:
+      - 0704-admin-login-regression-diagnosis-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-practice-mock-session-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-practice-mock-session-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-practice-mock-session-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-0704-practice-mock-session-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-12-0704-practice-mock-session-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-0704-practice-mock-session-acceptance-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/01-requirements/**
+      - docs/02-architecture/adr/**
+      - docs/03-standards/**
+      - docs/05-execution-logs/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - D:/tiku-local-private/acceptance/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - D:/tiku-local-private/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localhostServiceHealthRead: approved
+      privateCredentialInMemoryRead: approved_no_value_output
+      productLoginSessionUse: approved_localhost_only_no_session_output
+      practiceMockReportProductApiWrite: approved_local_0704_only
+      browserRuntime: approved_redacted_no_artifacts
+      localSourceChange: blocked_separate_tdd_task_if_defect
+      screenshot: blocked_not_required
+      rawDomTrace: blocked
+      directDatabaseConnection: blocked
+      fixtureSchemaMigrationSeedChange: blocked
+      privateCredentialFileChange: blocked
+      providerCall: blocked
+      envFileChangeOrSecretOutput: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      push:
+        approved: false
+        reason: fresh_remote_approval_required
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+    acceptanceStandards:
+      - Practice, mock exam, answer save, submit, and report generation/read complete only through local 0704 product APIs.
+      - A second learner, an admin role, and an unauthenticated client cannot access or mutate the primary learner lifecycle.
+      - Standard and advanced learners retain only their authorized ordinary learning boundary.
+      - No direct DB, fixture, schema, migration, seed, Provider, env file, sensitive output, staging/prod/deploy, or remote action occurs.
+    validationCommands:
+      - run redacted localhost 0704 product API lifecycle and adversarial role-isolation matrix
+      - run redacted browser acceptance for practice, mock exam, and report states without screenshot or raw DOM artifacts
+      - npm.cmd exec -- prettier --check --ignore-unknown <scoped-doc-files>
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-practice-mock-session-acceptance-2026-07-12
+    validationSummary:
+      status: pass_ready_for_commit_and_local_merge
+      localhostHealth: pass
+      providerAvailability: closed
+      providerRequestDelta: 0
+      learnerRoleLoginMatrix: pass_2_of_2
+      standardOrdinaryLearning: pass
+      advancedOrdinaryLearning: pass
+      practiceLifecycle: pass_start_or_resume_save_reread
+      mockExamLifecycle: pass_save_submit_completed
+      reportLifecycle: pass_generate_detail_list
+      crossLearnerIsolation: pass
+      adminIsolation: pass
+      unauthenticatedIsolation: pass
+      browserPracticeResume: pass
+      browserMockExamAnswerSheet: pass
+      browserReportDetailAndIsolation: pass
+      browserCurrentWindowErrors: 0
+      browserCurrentWindowWarnings: 0
+      screenshotTraceArtifact: none
+      envLocalModified: false
+      providerExecution: blocked_not_executed
+      directDatabaseConnectionExecuted: false
   - id: 0704-admin-login-regression-diagnosis-2026-07-12
     title: 0704 admin login regression diagnosis before B6 closeout
     phase: 0704-admin-login-regression-diagnosis-2026-07-12
-    status: ready_for_closeout
+    status: closed_local_merged
     result: pass_runtime_target_recovered_no_product_or_credential_fix
     priority: p1
     sequenceOrder: 44
