@@ -43,7 +43,7 @@ describe("StudentMockExamPage", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("renders the selected mock exam with public identifiers, remaining time, and progress", () => {
+  it("renders the selected mock exam without visible public identifiers", () => {
     render(
       createElement(StudentMockExamPage, {
         mockExamPublicId: "mock-exam-marketing-theory-001",
@@ -56,9 +56,7 @@ describe("StudentMockExamPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("剩余 75 分钟")).toBeInTheDocument();
     expect(screen.getByText("第 1 / 3 题")).toBeInTheDocument();
-    expect(
-      screen.getByText("mock-exam-marketing-theory-001"),
-    ).toBeInTheDocument();
+    expect(screen.queryByText("mock-exam-marketing-theory-001")).toBeNull();
 
     const mockExamSurface = screen.getByTestId(
       "mock-exam-surface-mock-exam-marketing-theory-001",
@@ -525,7 +523,9 @@ describe("StudentMockExamPage", () => {
 
     expect(
       await screen.findByTestId("mock-exam-offline-recovery"),
-    ).toHaveTextContent("Offline recovery");
+    ).toHaveTextContent(
+      "网络暂不可用，已显示本机保存的考试内容。作答会先保存在本机，联网后请按提示重试保存。",
+    );
     expect(
       screen.getByTestId("mock-exam-surface-mock-exam-marketing-theory-001"),
     ).toBeInTheDocument();
@@ -849,7 +849,9 @@ describe("StudentExamReportPage", () => {
     expect(
       screen.getByRole("heading", { name: "营销理论模考卷 A" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("总分 86.0")).toBeInTheDocument();
+    expect(screen.getByText("86.0")).toBeInTheDocument();
+    expect(screen.getByText("用时")).toBeInTheDocument();
+    expect(screen.getByText("45 分")).toBeInTheDocument();
     expect(screen.getByText("正确率 67%")).toBeInTheDocument();
     expect(screen.getByText("得分 86.0 / 100")).toBeInTheDocument();
     expect(screen.getByText("客户需求分析")).toBeInTheDocument();
@@ -868,6 +870,9 @@ describe("StudentExamReportPage", () => {
       "exam-report-marketing-theory-001",
     );
     expect(reportSurface).not.toHaveAttribute("data-id");
+    expect(reportSurface).not.toHaveTextContent(
+      "exam-report-marketing-theory-001",
+    );
     expect(reportSurface).not.toHaveTextContent("2001");
   });
 
@@ -1186,6 +1191,9 @@ describe("StudentExamReportPage", () => {
       "exam-report-marketing-scoring-001",
     );
     expect(
+      screen.getByTestId("exam-scoring-progress-surface"),
+    ).not.toHaveTextContent("exam-report-marketing-scoring-001");
+    expect(
       screen.getByText("评分可能需要几分钟，请耐心等待或稍后查看"),
     ).toBeInTheDocument();
     expect(
@@ -1240,7 +1248,7 @@ describe("StudentExamReportPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "刷新结果" }));
 
-    expect(await screen.findByText("总分 86.0")).toBeInTheDocument();
+    expect(await screen.findByText("86.0")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
@@ -1325,13 +1333,30 @@ describe("StudentExamReportPage", () => {
     );
 
     expect(screen.getByText("正在加载考试报告")).toBeInTheDocument();
-    expect(await screen.findByText("总分 86.0")).toBeInTheDocument();
+    expect(await screen.findByText("86.0")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("StudentExamReportListPage", () => {
+  it("shows total score and exact elapsed time without rounding away seconds", () => {
+    render(
+      createElement(StudentExamReportListPage, {
+        examReports: [
+          {
+            ...studentExamReportFixture.examReports[0],
+            durationSecond: 3661,
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByText("总分：86.0")).toBeInTheDocument();
+    expect(screen.getByText("用时：1 小时 1 分 1 秒")).toBeInTheDocument();
+    expect(screen.queryByText("用时：61 分钟")).toBeNull();
+  });
+
   it("loads mock exam records through the cookie-backed session when no local token is stored", async () => {
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -1507,7 +1532,7 @@ describe("StudentExamReportListPage", () => {
 
     expect(screen.getByText("营销理论终止记录")).toBeInTheDocument();
     expect(screen.queryByText("营销理论模考卷 A")).toBeNull();
-    expect(screen.getByText("得分：--")).toBeInTheDocument();
+    expect(screen.getByText("总分：--")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 });

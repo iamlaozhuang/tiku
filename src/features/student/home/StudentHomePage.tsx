@@ -10,10 +10,8 @@ import {
   ClipboardList,
   Clock3,
   History,
-  ListChecks,
   PlayCircle,
   Ticket,
-  UserRound,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -588,7 +586,7 @@ function StudentPaperCard({ paper }: { paper: StudentPaperSummaryDto }) {
         </span>
         <span className="bg-background flex items-center gap-1 rounded-lg px-2 py-2">
           <BookOpen className="size-3.5" aria-hidden="true" />
-          {paper.totalScore ?? "总分待定"}
+          {paper.totalScore === null ? "总分待定" : `总分 ${paper.totalScore}`}
         </span>
       </div>
 
@@ -974,27 +972,13 @@ export function StudentHomePage({
             学员首页
           </h1>
           <p className="text-text-secondary text-sm leading-6">
-            选择当前授权范围，按科目进入练习或模拟考试。
+            先选择专业和等级，再选择试卷开始练习或模拟考试。
           </p>
-          <div className="text-text-secondary space-y-1 text-sm leading-6">
-            <p>理论/技能是科目分组，不是两套系统或答题模式。</p>
-            <p>
-              本页最多展示 {studentPaperPageSize}{" "}
-              套试卷；每张卡片内的“题”才是该试卷题量。
-            </p>
-          </div>
         </div>
         <nav
-          className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6"
+          className="grid grid-cols-2 gap-2 lg:grid-cols-4"
           aria-label="学员导航"
         >
-          <Link
-            href="/profile"
-            className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
-          >
-            <UserRound className="size-4" aria-hidden="true" />
-            个人中心
-          </Link>
           <Link
             href="/redeem-code"
             className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
@@ -1020,13 +1004,6 @@ export function StudentHomePage({
               企业训练
             </Link>
           ) : null}
-          <Link
-            href="/mistake-book"
-            className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
-          >
-            <ListChecks className="size-4" aria-hidden="true" />
-            错题本
-          </Link>
           <Link
             href="/exam-report"
             className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"

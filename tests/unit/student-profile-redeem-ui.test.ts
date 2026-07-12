@@ -495,6 +495,50 @@ describe("StudentProfilePage", () => {
 });
 
 describe("StudentRedeemCodePage", () => {
+  it("explains that employee redemption adds personal authorization without changing organization benefits", async () => {
+    const employeeSessionPayload = createSessionPayload({
+      employeePublicId: "employee-public-redeem-ui-001",
+      organizationPublicId: "organization-public-redeem-ui-001",
+      userType: "employee",
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: RequestInfo | URL) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(employeeSessionPayload);
+        }
+
+        if (path === "/api/v1/personal-auths") {
+          return createJsonResponse(personalAuthPayload);
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      }),
+    );
+
+    render(createElement(StudentRedeemCodePage));
+
+    expect(
+      await screen.findByText(
+        "兑换成功后会新增或升级你的个人授权，不会改变企业授权、企业版本或企业额度。",
+      ),
+    ).toBeInTheDocument();
+
+    const redeemForm = screen
+      .getByRole("button", { name: "预览权益" })
+      .closest("form");
+
+    expect(redeemForm).not.toBeNull();
+    expect(redeemForm).toHaveTextContent("不会改变企业授权");
+  });
+
   it("shows empty authorization state and keeps the submit button disabled until the code shape is valid", async () => {
     vi.stubGlobal(
       "fetch",

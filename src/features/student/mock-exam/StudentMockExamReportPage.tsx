@@ -762,6 +762,33 @@ function formatDate(value: string | null): string {
   return value === null ? "未记录" : value.slice(0, 10);
 }
 
+function formatDurationSecond(durationSecond: number): string {
+  const normalizedDurationSecond = Math.max(Math.floor(durationSecond), 0);
+
+  if (normalizedDurationSecond === 0) {
+    return "0 秒";
+  }
+
+  const hour = Math.floor(normalizedDurationSecond / 3600);
+  const minute = Math.floor((normalizedDurationSecond % 3600) / 60);
+  const second = normalizedDurationSecond % 60;
+  const durationParts: string[] = [];
+
+  if (hour > 0) {
+    durationParts.push(`${hour} 小时`);
+  }
+
+  if (minute > 0) {
+    durationParts.push(`${minute} 分`);
+  }
+
+  if (second > 0) {
+    durationParts.push(`${second} 秒`);
+  }
+
+  return durationParts.join(" ");
+}
+
 function includesLabel(selectedLabels: string[], label: string): boolean {
   return selectedLabels.includes(label);
 }
@@ -1166,7 +1193,6 @@ function StudentScoringProgressPanel({
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             {paperName}
           </h1>
-          <p className="text-text-secondary text-sm break-all">{publicId}</p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
           <Clock3 className="size-5" aria-hidden="true" />
@@ -1951,9 +1977,6 @@ export function StudentMockExamPage({
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             {getPaperName(mockExam)}
           </h1>
-          <p className="text-text-secondary text-sm break-all">
-            {mockExam.publicId}
-          </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
           <Clock3 className="size-5" aria-hidden="true" />
@@ -1965,7 +1988,7 @@ export function StudentMockExamPage({
           data-testid="mock-exam-offline-recovery"
           className="border-border bg-background text-text-secondary rounded-lg border px-3 py-2 text-sm leading-6"
         >
-          Offline recovery: showing cached mock exam.
+          网络暂不可用，已显示本机保存的考试内容。作答会先保存在本机，联网后请按提示重试保存。
         </div>
       ) : null}
 
@@ -2350,16 +2373,13 @@ export function StudentExamReportPage({
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             {examReport.paperName}
           </h1>
-          <p className="text-text-secondary text-sm break-all">
-            {examReport.publicId}
-          </p>
         </div>
         <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
           <BarChart3 className="size-5" aria-hidden="true" />
         </div>
       </div>
 
-      <div className="bg-surface ring-border grid grid-cols-1 gap-2 rounded-xl p-3 text-center shadow-sm ring-1 sm:grid-cols-4">
+      <div className="bg-surface ring-border grid grid-cols-2 gap-2 rounded-xl p-3 text-center shadow-sm ring-1 sm:grid-cols-5">
         <div>
           <p className="text-text-secondary text-xs">状态</p>
           <p className="text-text-primary mt-1 text-sm font-semibold">
@@ -2369,7 +2389,13 @@ export function StudentExamReportPage({
         <div>
           <p className="text-text-secondary text-xs">总分</p>
           <p className="text-text-primary mt-1 text-sm font-semibold">
-            {parsedReportSnapshot.totalScoreText}
+            {examReport.totalScore ?? "--"}
+          </p>
+        </div>
+        <div>
+          <p className="text-text-secondary text-xs">用时</p>
+          <p className="text-text-primary mt-1 text-sm font-semibold">
+            {formatDurationSecond(examReport.durationSecond)}
           </p>
         </div>
         <div>
@@ -2795,13 +2821,13 @@ export function StudentExamReportListPage({
               </div>
               <div className="text-text-secondary grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
                 <span className="bg-background rounded-lg px-3 py-2">
-                  得分：{examReport.totalScore ?? "--"}
+                  总分：{examReport.totalScore ?? "--"}
                 </span>
                 <span className="bg-background rounded-lg px-3 py-2">
                   客观题：{examReport.objectiveScore ?? "--"}
                 </span>
                 <span className="bg-background rounded-lg px-3 py-2">
-                  用时：{Math.round(examReport.durationSecond / 60)} 分钟
+                  用时：{formatDurationSecond(examReport.durationSecond)}
                 </span>
               </div>
               {examReport.examStatus === "terminated" ? (

@@ -935,6 +935,7 @@ export function StudentProfilePage() {
 export function StudentRedeemCodePage() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [personalAuths, setPersonalAuths] = useState<PersonalAuthDto[]>([]);
+  const [isEmployee, setIsEmployee] = useState(false);
   const [redeemCode, setRedeemCode] = useState("");
   const [reviewedRedeemCode, setReviewedRedeemCode] = useState<string | null>(
     null,
@@ -985,6 +986,7 @@ export function StudentRedeemCodePage() {
         }
 
         setPersonalAuths(personalAuthResponse.data.personalAuths);
+        setIsEmployee(isEmployeeUser(sessionResponse.data));
         setLoadState("ready");
       } catch {
         if (isActive) {
@@ -1107,6 +1109,11 @@ export function StudentRedeemCodePage() {
         </div>
 
         <form className="flex flex-col gap-3" onSubmit={handleSubmitRedeemCode}>
+          {isEmployee ? (
+            <p className="border-border bg-background text-text-secondary rounded-lg border px-3 py-2 text-sm leading-6">
+              兑换成功后会新增或升级你的个人授权，不会改变企业授权、企业版本或企业额度。
+            </p>
+          ) : null}
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             <span className="text-text-primary">兑换码</span>
             <Input
@@ -1162,8 +1169,6 @@ export function StudentRedeemCodePage() {
         </form>
       </section>
 
-      <AccountSupportNotice />
-
       {personalAuths.length === 0 ? <RedeemCodePreparationNotice /> : null}
 
       <section className="space-y-3">
@@ -1186,6 +1191,8 @@ export function StudentRedeemCodePage() {
         </div>
         <PersonalAuthList personalAuths={personalAuths} />
       </section>
+
+      <AccountSupportNotice />
     </main>
   );
 }

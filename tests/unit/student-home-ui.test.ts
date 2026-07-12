@@ -247,10 +247,16 @@ describe("StudentHomePage", () => {
       "aria-pressed",
       "true",
     );
-    expect(screen.getByRole("link", { name: "错题本" })).toHaveAttribute(
+    expect(screen.queryByRole("link", { name: "个人中心" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "错题本" })).toBeNull();
+    expect(screen.getByRole("link", { name: "考试记录" })).toHaveAttribute(
       "href",
-      "/mistake-book",
+      "/exam-report",
     );
+    expect(
+      screen.getByText("先选择专业和等级，再选择试卷开始练习或模拟考试。"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/不是两套系统|本页最多展示/)).toBeNull();
     expect(screen.getByRole("heading", { name: "理论" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "技能" })).toBeInTheDocument();
 
@@ -260,13 +266,14 @@ describe("StudentHomePage", () => {
     expect(
       within(theoryGroup).getByText("营销理论冲刺卷 B"),
     ).toBeInTheDocument();
+    expect(within(theoryGroup).getAllByText(/总分 100/)).not.toHaveLength(0);
     expect(
       within(theoryGroup).getByText("营销理论冲刺卷 A"),
     ).toBeInTheDocument();
     expect(within(skillGroup).getByText("营销技能案例卷")).toBeInTheDocument();
   });
 
-  it("clarifies subject groups and paper count wording", () => {
+  it("keeps the home guidance concise while preserving subject and paper counts", () => {
     render(
       createElement(StudentHomePage, {
         rememberedScope: {
@@ -279,13 +286,9 @@ describe("StudentHomePage", () => {
     );
 
     expect(
-      screen.getByText("理论/技能是科目分组，不是两套系统或答题模式。"),
+      screen.getByText("先选择专业和等级，再选择试卷开始练习或模拟考试。"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "本页最多展示 20 套试卷；每张卡片内的“题”才是该试卷题量。",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.queryByText(/不是两套系统|本页最多展示/)).toBeNull();
 
     const theoryGroup = screen.getByTestId("subject-group-theory");
     const theoryPaperCard = screen.getByTestId(
