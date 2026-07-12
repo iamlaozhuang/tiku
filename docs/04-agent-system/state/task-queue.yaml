@@ -218,7 +218,7 @@ activeTasks:
       masterTypecheck: pass
       masterDiffCheck: pass
     finalCommit: ce5d3047c
-    closeoutStatus: local_master_216a41bdb_ready_for_push
+    closeoutStatus: remote_synced_origin_master_8f8f6ab3b
   - id: user-led-b7-learner-comprehensive-experience-2026-07-12
     title: User-led B7 learner comprehensive experience
     phase: user-led-b7-learner-comprehensive-experience-2026-07-12

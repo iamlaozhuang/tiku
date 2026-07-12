@@ -63,7 +63,9 @@ result: pass
 | master 定向复验           | `4 files / 69 tests` 通过                  |
 | master lint/typecheck     | 通过                                       |
 | master diff check         | 通过                                       |
-| 推送                      | 待 pre-push closeout                       |
+| Module Run v2 pre-push    | 真实 push hook 通过                        |
+| 推送                      | `origin/master` 到 `8f8f6ab3b`             |
+| 本地/远端比较             | `0 behind / 0 ahead`                       |
 
 ## Module Run v2 锚点
 
@@ -75,6 +77,9 @@ result: pass
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass
 - localMasterMerge: pass_ff_only_216a41bdb
 - masterPostMergeVerification: pass_4_files_69_tests_lint_typecheck_diff_check
+- Test-ModuleRunV2PrePushReadiness: pass_real_push_hook
+- remotePush: pass_origin_master_8f8f6ab3b
+- localRemoteComparison: pass_0_behind_0_ahead
 - threadRolloverGate: not_required；本批可在当前任务内完成串行 closeout。
 - Provider execution: blocked_not_executed
 - database connection: blocked_not_executed
@@ -97,4 +102,4 @@ result: pass
 
 ## 结论
 
-当前结果达到真实提交门禁，不扩展为 staging、production 或 release readiness。
+B8 已完成真实提交、ff-only 合入、master 复验、普通推送和 0/0 远端同步，不扩展为 staging、production 或 release readiness。
