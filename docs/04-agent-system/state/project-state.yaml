@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: 0704-b0-b6-cumulative-closeout-2026-07-12
-updatedAt: "2026-07-12T09:26:00-07:00"
+updatedAt: "2026-07-12T09:35:26-07:00"
 latest0704B0B6CumulativeCloseout:
   id: 0704-b0-b6-cumulative-closeout-2026-07-12
-  status: ready_for_closeout
+  status: closed_local_merged
   result: pass_a01_a30_and_cumulative_regression
   priority: p1
   branch: codex/0704-b0-b6-cumulative-closeout
@@ -37,6 +37,13 @@ latest0704B0B6CumulativeCloseout:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass_5_files_scanned
     moduleRunV2ModuleCloseoutReadiness: pass
+    localCommit: pass_f73b54487
+    localMasterMerge: pass_f73b54487
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeDiffCheck: pass
+    masterPostMergeLocalhostLoginHealth: pass_200
+    unauthenticatedAvailabilityBoundary: pass_business_code_401001
     productSourceOrTestChanged: false
     databaseMutationExecuted: false
     envLocalModified: false
@@ -167,7 +174,7 @@ latest0704KeyboardPaginationAcceptance:
   nextRequiredTaskId: 0704-practice-mock-session-acceptance-2026-07-12
 latest0704MobileSafeAreaOverflow:
   id: 0704-mobile-safe-area-overflow-2026-07-12
-  status: ready_for_closeout
+  status: closed_local_merged
   result: pass_mobile_safe_area_and_table_overflow_containment
   branch: codex/0704-mobile-safe-area-overflow
   startSha: 1784bfc3229c8305595762cc3becd6acf97c3414
@@ -5463,6 +5470,13 @@ currentTask:
     diffCheck: pass
     moduleRunV2PreCommitHardening: pass_5_files_scanned
     moduleRunV2ModuleCloseoutReadiness: pass
+    localCommit: pass_f73b54487
+    localMasterMerge: pass_f73b54487
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeDiffCheck: pass
+    masterPostMergeLocalhostLoginHealth: pass_200
+    unauthenticatedAvailabilityBoundary: pass_business_code_401001
     productSourceOrTestChanged: false
     envLocalModified: false
     providerExecution: blocked_not_executed

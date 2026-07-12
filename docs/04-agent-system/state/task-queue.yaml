@@ -121,7 +121,7 @@ activeTasks:
   - id: 0704-b0-b6-cumulative-closeout-2026-07-12
     title: 0704 B0-B6 cumulative regression and ledger closeout
     phase: 0704-b0-b6-cumulative-closeout-2026-07-12
-    status: ready_for_closeout
+    status: closed_local_merged
     result: pass_a01_a30_and_cumulative_regression
     priority: p1
     sequenceOrder: 46
@@ -232,6 +232,13 @@ activeTasks:
       diffCheck: pass
       moduleRunV2PreCommitHardening: pass_5_files_scanned
       moduleRunV2ModuleCloseoutReadiness: pass
+      localCommit: pass_f73b54487
+      localMasterMerge: pass_f73b54487
+      masterPostMergeLint: pass
+      masterPostMergeTypecheck: pass
+      masterPostMergeDiffCheck: pass
+      masterPostMergeLocalhostLoginHealth: pass_200
+      unauthenticatedAvailabilityBoundary: pass_business_code_401001
       productSourceOrTestChanged: false
       databaseMutationExecuted: false
       envLocalModified: false
