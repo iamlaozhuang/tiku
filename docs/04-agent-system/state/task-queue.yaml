@@ -207,10 +207,13 @@ activeTasks:
       diffCheck: pass
       adversarialReview: pass_2_rounds
       moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
       providerExecution: blocked_not_executed
       databaseConnection: blocked_not_executed
       databaseMutation: blocked_not_executed
       schemaMigration: blocked_not_created_not_executed
+    finalCommit: 96a80cf1b
+    closeoutStatus: ready_for_ff_only_merge_and_remote_sync
   - id: user-led-b5-ai-paper-source-strategy-2026-07-12
     title: User-led B5 AI paper source strategy repair
     phase: user-led-b5-ai-paper-source-strategy-2026-07-12
