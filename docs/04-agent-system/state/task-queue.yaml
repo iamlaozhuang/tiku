@@ -121,7 +121,8 @@ activeTasks:
   - id: user-led-b7-learner-comprehensive-experience-2026-07-12
     title: User-led B7 learner comprehensive experience
     phase: user-led-b7-learner-comprehensive-experience-2026-07-12
-    status: ready_for_commit
+    status: ready_for_closeout
+    result: pass_learner_comprehensive_experience
     priority: p1
     sequenceOrder: 52
     taskKind: targeted_learner_experience_repair
@@ -194,7 +195,7 @@ activeTasks:
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
     validationSummary:
-      status: pass_ready_for_commit
+      status: pass_ready_for_closeout
       tddRed: pass_10_expected_failures_across_3_cycles
       focusedTests: pass_6_files_98_tests
       fullTests: pass_360_files_1982_tests
@@ -209,6 +210,9 @@ activeTasks:
       databaseMutation: blocked_not_executed
       schemaMigration: blocked_not_created_not_executed
       moduleRunV2PreCommitHardening: pass_11_files_scanned
+      localCommit: pass_07bc6109f
+      moduleRunV2ModuleCloseoutReadiness: pass
+    finalCommit: 07bc6109f
   - id: user-led-b6-ai-paper-organization-training-handoff-2026-07-12
     title: User-led B6 AI paper organization training structure handoff
     phase: user-led-b6-ai-paper-organization-training-handoff-2026-07-12

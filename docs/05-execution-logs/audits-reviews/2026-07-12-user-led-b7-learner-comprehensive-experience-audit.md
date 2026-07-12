@@ -4,6 +4,8 @@
 
 两轮对抗式审查均通过，未发现阻断提交的问题。审查只覆盖 B7 学员端 UI 与既有授权边界，不声明浏览器视觉验收、staging、production 或 release readiness。
 
+APPROVE：B7 适合按既定授权执行治理记录提交、ff-only 合入、master 复验、普通 push 与短分支清理。
+
 ## 第一轮：业务与权限对抗
 
 - **标准版直达**：个人标准版和企业标准版员工的 AI/企业训练直接 URL 既有 fail-closed 测试通过；本批未修改授权服务或菜单能力计算。
