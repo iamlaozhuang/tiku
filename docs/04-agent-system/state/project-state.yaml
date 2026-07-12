@@ -2,11 +2,11 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: user-led-b6-ai-paper-organization-training-handoff-2026-07-12
-updatedAt: "2026-07-12T14:56:26-07:00"
+updatedAt: "2026-07-12T15:07:50-07:00"
 latestUserLedB6AiPaperOrganizationTrainingHandoff:
   id: user-led-b6-ai-paper-organization-training-handoff-2026-07-12
-  status: ready_for_closeout
-  result: pass_ai_paper_structure_handoff_pending_git_closeout
+  status: closed_remote_synced
+  result: pass_ai_paper_structure_handoff
   priority: p1
   branch: codex/user-led-b6-ai-paper-training
   startSha: 88b02f7eaff1aaf1a4c1143e0a7295c57a823596
@@ -39,6 +39,14 @@ latestUserLedB6AiPaperOrganizationTrainingHandoff:
     moduleRunV2PreCommitHardening: pass
     localCommit: pass_96a80cf1b
     moduleRunV2ModuleCloseoutReadiness: pass
+    localMasterMerge: pass_ff_only_23e515ad8
+    masterFocusedTests: pass_4_files_99_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
+    moduleRunV2PrePushReadiness: pass_real_push_hook
+    remotePush: pass_origin_master_23e515ad8
+    localRemoteComparison: pass_0_behind_0_ahead
   nextRequiredTaskId: user-led-b7-learner-comprehensive-experience-2026-07-12
 latestUserLedB5AiPaperSourceStrategy:
   id: user-led-b5-ai-paper-source-strategy-2026-07-12
@@ -409,7 +417,7 @@ latest0704RedeemFilteredEmptyState:
   nextRequiredTaskId: 0704-mobile-safe-area-overflow-2026-07-12
 latest0704AcceptanceFixtureReadability:
   id: 0704-acceptance-fixture-readability-2026-07-12
-  status: ready_for_closeout
+  status: closed_remote_synced
   result: pass_readable_bounded_fixture_sources
   branch: codex/0704-acceptance-fixture-readability
   startSha: 71f658fab24cc2c38776c43d9cae187a60890140
@@ -5631,6 +5639,14 @@ currentTask:
     moduleRunV2PreCommitHardening: pass_explicit_task_id
     localCommit: pass_96a80cf1b
     moduleRunV2ModuleCloseoutReadiness: pass
+    localMasterMerge: pass_ff_only_23e515ad8
+    masterFocusedTests: pass_4_files_99_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
+    moduleRunV2PrePushReadiness: pass_real_push_hook
+    remotePush: pass_origin_master_23e515ad8
+    localRemoteComparison: pass_0_behind_0_ahead
 
 previousCurrentTaskBeforeUserLedB6AiPaperOrganizationTrainingHandoff20260712:
   id: user-led-b5-ai-paper-source-strategy-2026-07-12

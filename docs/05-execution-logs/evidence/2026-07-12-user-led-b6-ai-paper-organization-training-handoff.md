@@ -51,12 +51,16 @@
 - localFullLoopGate: pass
 - Test-ModuleRunV2PreCommitHardening: pass_15_files_scope_sensitive_terminology
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass
-- Test-ModuleRunV2PrePushReadiness: pending
+- Test-ModuleRunV2PrePushReadiness: pass_real_push_hook
 - threadRolloverGate: not_required；本批可在当前任务内完成串行 closeout。
 - Provider execution: blocked_not_executed
 - database connection: blocked_not_executed
 - database mutation: blocked_not_executed
 - schema migration: blocked_not_created_not_executed
+- localMasterMerge: pass_ff_only_23e515ad8
+- masterPostMergeVerification: pass_4_files_99_tests_lint_typecheck_diff_check
+- remotePush: pass_origin_master_23e515ad8
+- localRemoteComparison: pass_0_behind_0_ahead
 - Cost Calibration Gate remains blocked
 - nextModuleRunCandidate: `user-led-b7-learner-comprehensive-experience-2026-07-12`
 

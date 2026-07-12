@@ -121,8 +121,8 @@ activeTasks:
   - id: user-led-b6-ai-paper-organization-training-handoff-2026-07-12
     title: User-led B6 AI paper organization training structure handoff
     phase: user-led-b6-ai-paper-organization-training-handoff-2026-07-12
-    status: ready_for_closeout
-    result: pass_ai_paper_structure_handoff_pending_git_closeout
+    status: closed
+    result: pass_ai_paper_structure_handoff
     priority: p1
     sequenceOrder: 51
     taskKind: targeted_ai_paper_training_structure_handoff
@@ -213,7 +213,7 @@ activeTasks:
       databaseMutation: blocked_not_executed
       schemaMigration: blocked_not_created_not_executed
     finalCommit: 96a80cf1b
-    closeoutStatus: ready_for_ff_only_merge_and_remote_sync
+    closeoutStatus: remote_synced_origin_master_23e515ad8
   - id: user-led-b5-ai-paper-source-strategy-2026-07-12
     title: User-led B5 AI paper source strategy repair
     phase: user-led-b5-ai-paper-source-strategy-2026-07-12
