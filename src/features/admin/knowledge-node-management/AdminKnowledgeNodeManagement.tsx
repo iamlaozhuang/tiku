@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowDownUp,
-  GitBranch,
-  Move,
-  Pencil,
-  Plus,
-  Search,
-  ShieldOff,
-} from "lucide-react";
+import { GitBranch, Move, Pencil, Plus, Search, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,9 +16,7 @@ import {
   AdminLoadingState,
   AdminUnauthorizedState,
   ContentOpsStagingRoleArrangement,
-  DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
-  PublicId,
   createAdminAuthHeaders,
   fetchAdminApi,
   getStoredSessionToken,
@@ -45,7 +35,6 @@ type KnowledgeNodeLoadState =
   | "error";
 type KnowledgeNodeStatusFilter = "all" | KnStatus;
 type ProfessionFilter = "all" | Profession;
-type AdminCommonSortOrder = "asc" | "desc";
 
 type KnowledgeNodeListDto = {
   knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
@@ -151,7 +140,7 @@ function useKnowledgeNodeData() {
         }
 
         const knowledgeNodeResponse = await fetchAdminApi<KnowledgeNodeListDto>(
-          `/api/v1/knowledge-nodes?${DEFAULT_CONTENT_LIST_QUERY}`,
+          "/api/v1/knowledge-nodes?page=1&pageSize=100&sortBy=sortOrder&sortOrder=asc",
           sessionToken,
         );
 
@@ -167,12 +156,34 @@ function useKnowledgeNodeData() {
           return;
         }
 
-        setKnowledgeNodes(knowledgeNodeResponse.data.knowledgeNodes);
-        setLoadState(
-          knowledgeNodeResponse.data.knowledgeNodes.length === 0
-            ? "empty"
-            : "ready",
-        );
+        const loadedKnowledgeNodes = [
+          ...knowledgeNodeResponse.data.knowledgeNodes,
+        ];
+        const total =
+          knowledgeNodeResponse.pagination?.total ??
+          loadedKnowledgeNodes.length;
+        let nextPage = 2;
+
+        while (loadedKnowledgeNodes.length < total) {
+          const nextResponse = await fetchAdminApi<KnowledgeNodeListDto>(
+            `/api/v1/knowledge-nodes?page=${nextPage}&pageSize=100&sortBy=sortOrder&sortOrder=asc`,
+            sessionToken,
+          );
+
+          if (
+            nextResponse.code !== 0 ||
+            nextResponse.data === null ||
+            nextResponse.data.knowledgeNodes.length === 0
+          ) {
+            break;
+          }
+
+          loadedKnowledgeNodes.push(...nextResponse.data.knowledgeNodes);
+          nextPage += 1;
+        }
+
+        setKnowledgeNodes(loadedKnowledgeNodes);
+        setLoadState(loadedKnowledgeNodes.length === 0 ? "empty" : "ready");
       } catch {
         if (isActive) {
           setLoadState("error");
@@ -194,8 +205,7 @@ export function AdminKnowledgeNodeManagement() {
   const [keyword, setKeyword] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
   const [status, setStatus] = useState<KnowledgeNodeStatusFilter>("all");
-  const [pageSize, setPageSize] = useState("20");
-  const [sortOrder, setSortOrder] = useState<AdminCommonSortOrder>("desc");
+  const [selectedPublicId, setSelectedPublicId] = useState<string | null>(null);
   const [action, setAction] = useState<KnowledgeNodeAction>({
     status: "idle",
   });
@@ -223,14 +233,13 @@ export function AdminKnowledgeNodeManagement() {
       }),
     [keyword, knowledgeNodes, profession, status],
   );
-  const activeKnowledgeNode = filteredKnowledgeNodes[0] ?? null;
+  const activeKnowledgeNode =
+    filteredKnowledgeNodes.find(
+      (knowledgeNode) => knowledgeNode.publicId === selectedPublicId,
+    ) ?? null;
   const displayedKnowledgeNodes = useMemo(
-    () =>
-      sortKnowledgeNodesByUpdatedAt(filteredKnowledgeNodes, sortOrder).slice(
-        0,
-        Number(pageSize),
-      ),
-    [filteredKnowledgeNodes, pageSize, sortOrder],
+    () => sortKnowledgeNodesByTreeOrder(filteredKnowledgeNodes),
+    [filteredKnowledgeNodes],
   );
   const moveParentCandidate = useMemo(
     () =>
@@ -308,6 +317,7 @@ export function AdminKnowledgeNodeManagement() {
           message: "知识点节点已新增",
           tone: "success",
         });
+        setSelectedPublicId(response.publicId);
         return;
       }
 
@@ -327,6 +337,7 @@ export function AdminKnowledgeNodeManagement() {
               : "知识点节点已停用",
         tone: "success",
       });
+      setSelectedPublicId(response.publicId);
     } catch {
       setToastMessage({
         message: "知识点节点操作失败，请刷新后重试",
@@ -363,8 +374,7 @@ export function AdminKnowledgeNodeManagement() {
             知识点树维护
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
-            按专业维护知识点节点、适用等级、排序、停用状态与绑定题目数量；页面只展示
-            业务标识，不暴露内部自增 id。
+            按专业维护知识点层级、适用等级、显示顺序与使用状态。先在树中选择节点，再进行编辑、移动或停用。
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -382,7 +392,7 @@ export function AdminKnowledgeNodeManagement() {
             新增节点
           </Button>
           <Button
-            disabled={filteredKnowledgeNodes.length === 0}
+            disabled={activeKnowledgeNode === null}
             variant="outline"
             onClick={() => {
               setToastMessage(null);
@@ -420,7 +430,10 @@ export function AdminKnowledgeNodeManagement() {
             移动节点
           </Button>
           <Button
-            disabled={filteredKnowledgeNodes.length === 0}
+            disabled={
+              activeKnowledgeNode === null ||
+              activeKnowledgeNode.knStatus === "disabled"
+            }
             variant="outline"
             onClick={() => {
               setToastMessage(null);
@@ -448,7 +461,7 @@ export function AdminKnowledgeNodeManagement() {
               <Input
                 aria-label="关键词"
                 className="pl-8"
-                placeholder="节点名称、路径或业务标识"
+                placeholder="节点名称或完整路径"
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
               />
@@ -478,45 +491,31 @@ export function AdminKnowledgeNodeManagement() {
         </div>
       </div>
 
-      <section className="grid gap-3 md:grid-cols-3" aria-label="知识点摘要">
-        <SummaryItem
-          label="当前结果"
-          value={`${displayedKnowledgeNodes.length} 个`}
-        />
-        <SummaryItem
-          label="绑定题目"
-          value={`${displayedKnowledgeNodes.reduce(
-            (questionCount, knowledgeNode) =>
-              questionCount + knowledgeNode.questionCount,
-            0,
-          )} 题`}
-        />
-        <SummaryItem
-          label="可推荐"
-          value={`${
-            displayedKnowledgeNodes.filter(
-              (knowledgeNode) => knowledgeNode.isRecommendable,
-            ).length
-          } 个`}
-        />
+      <section
+        className="grid min-h-[520px] gap-4 xl:grid-cols-[minmax(320px,0.85fr)_minmax(0,1.4fr)]"
+        aria-label="知识点树工作区"
+      >
+        <div className="border-border bg-surface rounded-md border p-4 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-text-primary font-semibold">知识点树</h2>
+              <p className="text-text-muted mt-1 text-xs">
+                共 {displayedKnowledgeNodes.length} 个节点
+              </p>
+            </div>
+          </div>
+          {displayedKnowledgeNodes.length > 0 ? (
+            <KnowledgeNodeList
+              rows={displayedKnowledgeNodes}
+              selectedPublicId={selectedPublicId}
+              onSelect={setSelectedPublicId}
+            />
+          ) : (
+            <FilteredEmptyState />
+          )}
+        </div>
+        <KnowledgeNodeDetailPanel knowledgeNode={activeKnowledgeNode} />
       </section>
-
-      <AdminCommonListControls
-        pageSize={pageSize}
-        sortOrder={sortOrder}
-        onPageSizeChange={setPageSize}
-        onToggleSortOrder={() =>
-          setSortOrder((currentSortOrder) =>
-            currentSortOrder === "desc" ? "asc" : "desc",
-          )
-        }
-      />
-
-      {displayedKnowledgeNodes.length > 0 ? (
-        <KnowledgeNodeList rows={displayedKnowledgeNodes} />
-      ) : (
-        <FilteredEmptyState />
-      )}
 
       {action.status === "create" ||
       action.status === "edit" ||
@@ -525,6 +524,7 @@ export function AdminKnowledgeNodeManagement() {
       action.status === "submitting" ? (
         <KnowledgeNodeActionDialog
           action={action}
+          knowledgeNodes={knowledgeNodes}
           onCancel={() => setAction({ status: "idle" })}
           onConfirm={handleConfirmAction}
           onUpdateFormValues={(formValues) => {
@@ -752,64 +752,43 @@ function parseSortOrder(value: string) {
   return Number.isInteger(sortOrder) ? sortOrder : 0;
 }
 
-function sortKnowledgeNodesByUpdatedAt(
+function sortKnowledgeNodesByTreeOrder(
   knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[],
-  sortOrder: AdminCommonSortOrder,
 ) {
   return [...knowledgeNodes].sort((leftNode, rightNode) => {
-    const leftTime = new Date(leftNode.updatedAt).getTime();
-    const rightTime = new Date(rightNode.updatedAt).getTime();
+    const professionOrder = leftNode.profession.localeCompare(
+      rightNode.profession,
+    );
 
-    return sortOrder === "desc" ? rightTime - leftTime : leftTime - rightTime;
+    if (professionOrder !== 0) {
+      return professionOrder;
+    }
+
+    const leftParentPath = leftNode.pathName.split("/").slice(0, -1).join("/");
+    const rightParentPath = rightNode.pathName
+      .split("/")
+      .slice(0, -1)
+      .join("/");
+    const parentOrder = leftParentPath.localeCompare(rightParentPath, "zh-CN");
+
+    if (parentOrder !== 0) {
+      return parentOrder;
+    }
+
+    return leftNode.sortOrder - rightNode.sortOrder;
   });
-}
-
-function AdminCommonListControls({
-  pageSize,
-  sortOrder,
-  onPageSizeChange,
-  onToggleSortOrder,
-}: {
-  pageSize: string;
-  sortOrder: AdminCommonSortOrder;
-  onPageSizeChange: (value: string) => void;
-  onToggleSortOrder: () => void;
-}) {
-  return (
-    <section
-      aria-label="列表通用控制"
-      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
-    >
-      <FilterSelect
-        label="每页条数"
-        options={[
-          ["20", "20"],
-          ["50", "50"],
-          ["100", "100"],
-        ]}
-        value={pageSize}
-        onChange={onPageSizeChange}
-      />
-      <Button type="button" variant="outline" onClick={onToggleSortOrder}>
-        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
-        更新时间排序
-      </Button>
-      <p className="text-text-secondary text-xs">
-        当前{sortOrder === "desc" ? "降序" : "升序"}
-        ，筛选变更会自动刷新当前结果。
-      </p>
-    </section>
-  );
 }
 
 function KnowledgeNodeActionDialog({
   action,
+  knowledgeNodes,
   onCancel,
   onConfirm,
   onUpdateFormValues,
   onUpdateMoveValues,
 }: {
   action: Exclude<KnowledgeNodeAction, { status: "idle" }>;
+  knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
   onCancel: () => void;
   onConfirm: () => void;
   onUpdateFormValues: (formValues: KnowledgeNodeFormValues) => void;
@@ -846,6 +825,16 @@ function KnowledgeNodeActionDialog({
       : action.status === "submitting"
         ? action.values
         : undefined;
+  const parentOptions = knowledgeNodes.filter((knowledgeNode) => {
+    if (action.target === null) {
+      return true;
+    }
+
+    return (
+      knowledgeNode.publicId !== action.target.publicId &&
+      !knowledgeNode.pathName.startsWith(`${action.target.pathName}/`)
+    );
+  });
 
   return (
     <div
@@ -859,14 +848,15 @@ function KnowledgeNodeActionDialog({
         </h2>
         <p className="text-text-secondary text-sm">
           {actionType === "create"
-            ? "按专业、父级、等级和排序创建知识点节点。"
+            ? "按专业、父级、等级和显示顺序创建知识点节点。"
             : actionType === "move"
-              ? "将目标节点移动到指定父级业务标识下，并同步提交排序值。"
-              : "操作仅提交业务标识和允许的结构化字段，不提交内部自增 id。"}
+              ? "选择新的父级知识点并设置同级显示顺序。"
+              : "修改节点名称、适用等级和显示顺序；路径变更仍由服务端校验。"}
         </p>
         {formValues === undefined ? null : (
           <KnowledgeNodeForm
             disabled={isSubmitting}
+            parentOptions={parentOptions}
             values={formValues}
             onChange={onUpdateFormValues}
           />
@@ -874,6 +864,7 @@ function KnowledgeNodeActionDialog({
         {moveValues === undefined ? null : (
           <KnowledgeNodeMoveForm
             disabled={isSubmitting}
+            parentOptions={parentOptions}
             values={moveValues}
             onChange={onUpdateMoveValues}
           />
@@ -898,10 +889,12 @@ function KnowledgeNodeActionDialog({
 function KnowledgeNodeForm({
   disabled,
   onChange,
+  parentOptions,
   values,
 }: {
   disabled: boolean;
   onChange: (values: KnowledgeNodeFormValues) => void;
+  parentOptions: AdminKnowledgeNodeOpsSummaryDto[];
   values: KnowledgeNodeFormValues;
 }) {
   return (
@@ -949,11 +942,11 @@ function KnowledgeNodeForm({
         />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
-        <span className="text-text-secondary">父级业务标识</span>
-        <Input
-          aria-label="父级业务标识"
+        <span className="text-text-secondary">父级知识点</span>
+        <select
+          aria-label="父级知识点"
+          className="border-input bg-background rounded-md border px-3 py-2 text-sm"
           disabled={disabled}
-          placeholder="根节点留空"
           value={values.parentKnowledgeNodePublicId}
           onChange={(event) =>
             onChange({
@@ -961,12 +954,26 @@ function KnowledgeNodeForm({
               parentKnowledgeNodePublicId: event.target.value,
             })
           }
-        />
+        >
+          <option value="">作为专业根节点</option>
+          {parentOptions
+            .filter(
+              (knowledgeNode) => knowledgeNode.profession === values.profession,
+            )
+            .map((knowledgeNode) => (
+              <option
+                key={knowledgeNode.publicId}
+                value={knowledgeNode.publicId}
+              >
+                {knowledgeNode.pathName}
+              </option>
+            ))}
+        </select>
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
-        <span className="text-text-secondary">排序</span>
+        <span className="text-text-secondary">显示顺序</span>
         <Input
-          aria-label="排序"
+          aria-label="显示顺序"
           disabled={disabled}
           inputMode="numeric"
           value={values.sortOrder}
@@ -982,20 +989,22 @@ function KnowledgeNodeForm({
 function KnowledgeNodeMoveForm({
   disabled,
   onChange,
+  parentOptions,
   values,
 }: {
   disabled: boolean;
   onChange: (values: KnowledgeNodeMoveValues) => void;
+  parentOptions: AdminKnowledgeNodeOpsSummaryDto[];
   values: KnowledgeNodeMoveValues;
 }) {
   return (
     <div className="grid gap-3">
       <label className="flex flex-col gap-1 text-sm font-medium">
-        <span className="text-text-secondary">新父级业务标识</span>
-        <Input
-          aria-label="新父级业务标识"
+        <span className="text-text-secondary">新父级知识点</span>
+        <select
+          aria-label="新父级知识点"
+          className="border-input bg-background rounded-md border px-3 py-2 text-sm"
           disabled={disabled}
-          placeholder="移到根节点可留空"
           value={values.parentKnowledgeNodePublicId}
           onChange={(event) =>
             onChange({
@@ -1003,12 +1012,19 @@ function KnowledgeNodeMoveForm({
               parentKnowledgeNodePublicId: event.target.value,
             })
           }
-        />
+        >
+          <option value="">移到专业根层级</option>
+          {parentOptions.map((knowledgeNode) => (
+            <option key={knowledgeNode.publicId} value={knowledgeNode.publicId}>
+              {knowledgeNode.pathName}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
-        <span className="text-text-secondary">新排序</span>
+        <span className="text-text-secondary">显示顺序</span>
         <Input
-          aria-label="新排序"
+          aria-label="显示顺序"
           disabled={disabled}
           inputMode="numeric"
           value={values.sortOrder}
@@ -1036,15 +1052,6 @@ function KnowledgeNodeToast({ message }: { message: ToastMessage }) {
   );
 }
 
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-border bg-surface rounded-md border px-4 py-3 shadow-sm">
-      <p className="text-text-muted text-xs font-medium">{label}</p>
-      <p className="text-text-primary mt-1 text-lg font-semibold">{value}</p>
-    </div>
-  );
-}
-
 function KnowledgeLifecycleMetric({
   label,
   value,
@@ -1063,9 +1070,13 @@ function KnowledgeLifecycleMetric({
 }
 
 function KnowledgeNodeList({
+  onSelect,
   rows,
+  selectedPublicId,
 }: {
+  onSelect: (publicId: string) => void;
   rows: AdminKnowledgeNodeOpsSummaryDto[];
+  selectedPublicId: string | null;
 }) {
   const groupedRows = Object.entries(professionLabels)
     .map(([profession, label]) => ({
@@ -1089,72 +1100,138 @@ function KnowledgeNodeList({
           <h2 className="text-text-primary text-base font-semibold">
             {group.label}知识点树
           </h2>
-          {group.rows.map((knowledgeNode) => (
-            <article
-              aria-selected="false"
-              className="bg-surface border-border rounded-md border p-4 shadow-sm"
-              data-depth={String(getKnowledgeNodeDepth(knowledgeNode))}
-              data-public-id={knowledgeNode.publicId}
-              data-testid={`knowledge-node-row-${knowledgeNode.publicId}`}
-              key={knowledgeNode.publicId}
-              role="treeitem"
-            >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+          <div className="space-y-1">
+            {group.rows.map((knowledgeNode) => {
+              const depth = getKnowledgeNodeDepth(knowledgeNode);
+              const isSelected = knowledgeNode.publicId === selectedPublicId;
+
+              return (
+                <button
+                  aria-selected={isSelected}
+                  className={`border-border hover:bg-muted/40 focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-left focus-visible:ring-2 ${
+                    isSelected
+                      ? "bg-secondary text-secondary-foreground"
+                      : "bg-surface"
+                  } ${depth === 1 ? "ml-0" : depth === 2 ? "ml-4 w-[calc(100%-1rem)]" : "ml-8 w-[calc(100%-2rem)]"}`}
+                  data-depth={String(getKnowledgeNodeDepth(knowledgeNode))}
+                  data-public-id={knowledgeNode.publicId}
+                  data-testid={`knowledge-node-row-${knowledgeNode.publicId}`}
+                  key={knowledgeNode.publicId}
+                  role="treeitem"
+                  type="button"
+                  onClick={() => onSelect(knowledgeNode.publicId)}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <GitBranch
+                        aria-hidden="true"
+                        className="size-4 shrink-0"
+                      />
+                      <span className="truncate font-medium">
+                        {knowledgeNode.name}
+                      </span>
+                    </span>
+                    <span className="text-text-muted shrink-0 text-xs">
                       {knStatusLabels[knowledgeNode.knStatus]}
                     </span>
-                    <span className="text-text-muted text-xs">
-                      {professionLabels[knowledgeNode.profession]}
-                    </span>
-                    <span className="text-text-muted text-xs">
-                      等级 {formatLevelList(knowledgeNode.levelList)}
-                    </span>
                   </div>
-                  <h3 className="text-text-primary flex items-center gap-2 text-base font-semibold">
-                    <GitBranch aria-hidden="true" className="size-4" />
+                  <p className="text-text-muted mt-1 truncate text-xs">
                     {knowledgeNode.pathName}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    <MetricBadge
-                      label="绑定题目"
-                      value={`${knowledgeNode.questionCount}`}
-                    />
-                    <MetricBadge
-                      label="排序"
-                      value={`${knowledgeNode.sortOrder}`}
-                    />
-                    <MetricBadge
-                      label="推荐"
-                      value={
-                        knowledgeNode.isRecommendable ? "可推荐" : "不推荐"
-                      }
-                    />
-                  </div>
-                </div>
-                <PublicId value={knowledgeNode.publicId} />
-              </div>
-              {knowledgeNode.isRecommendable ? (
-                <a
-                  aria-label={`查看 ${knowledgeNode.publicId} 的知识点推荐绑定`}
-                  className="border-border text-text-secondary hover:bg-muted hover:text-foreground mt-4 inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium transition-all active:translate-y-px"
-                  href={createRecommendationBindingReviewHref(
-                    knowledgeNode.publicId,
-                  )}
-                >
-                  <GitBranch aria-hidden="true" className="size-3" />
-                  复核推荐绑定
-                </a>
-              ) : null}
-              <p className="text-text-muted border-border mt-4 border-t pt-4 text-xs">
-                父级 {knowledgeNode.parentKnowledgeNodePublicId ?? "无"} /
-                更新时间 {formatDateTime(knowledgeNode.updatedAt)}
-              </p>
-            </article>
-          ))}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </section>
       ))}
+    </div>
+  );
+}
+
+function KnowledgeNodeDetailPanel({
+  knowledgeNode,
+}: {
+  knowledgeNode: AdminKnowledgeNodeOpsSummaryDto | null;
+}) {
+  if (knowledgeNode === null) {
+    return (
+      <section className="border-border bg-surface flex min-h-72 items-center justify-center rounded-md border p-8 text-center shadow-sm">
+        <div>
+          <h2 className="text-text-primary font-semibold">请选择一个知识点</h2>
+          <p className="text-text-secondary mt-2 text-sm">
+            选择左侧节点后查看完整路径、适用范围和关联摘要。
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-5 shadow-sm"
+      aria-label="知识点详情"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">知识点详情</p>
+          <h2 className="text-text-primary mt-1 text-lg font-semibold">
+            {knowledgeNode.name}
+          </h2>
+        </div>
+        <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+          {knStatusLabels[knowledgeNode.knStatus]}
+        </span>
+      </div>
+
+      <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+        <DetailItem label="完整路径" value={knowledgeNode.pathName} />
+        <DetailItem
+          label="专业"
+          value={professionLabels[knowledgeNode.profession]}
+        />
+        <DetailItem
+          label="适用等级"
+          value={formatLevelList(knowledgeNode.levelList)}
+        />
+        <DetailItem label="显示顺序" value={String(knowledgeNode.sortOrder)} />
+        <DetailItem
+          label="绑定题目"
+          value={`${knowledgeNode.questionCount} 题`}
+        />
+        <DetailItem
+          label="推荐状态"
+          value={
+            knowledgeNode.isRecommendable
+              ? "可用于知识点推荐"
+              : "当前不参与推荐"
+          }
+        />
+        <DetailItem label="关联资源" value="通过资料管理维护知识点绑定" />
+        <DetailItem
+          label="最近更新"
+          value={formatDateTime(knowledgeNode.updatedAt)}
+        />
+      </dl>
+
+      {knowledgeNode.isRecommendable ? (
+        <a
+          aria-label={`查看 ${knowledgeNode.name} 的知识点推荐绑定`}
+          className="border-border text-text-secondary hover:bg-muted hover:text-foreground mt-5 inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium"
+          href={createRecommendationBindingReviewHref(knowledgeNode.publicId)}
+        >
+          <GitBranch aria-hidden="true" className="size-4" />
+          复核推荐绑定
+        </a>
+      ) : null}
+    </section>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border-border rounded-md border p-3">
+      <dt className="text-text-muted text-xs">{label}</dt>
+      <dd className="text-text-primary mt-1 text-sm font-medium">{value}</dd>
     </div>
   );
 }
@@ -1170,14 +1247,6 @@ function createRecommendationBindingReviewHref(knowledgeNodePublicId: string) {
 
 function getKnowledgeNodeDepth(knowledgeNode: AdminKnowledgeNodeOpsSummaryDto) {
   return Math.max(knowledgeNode.pathName.split("/").length - 1, 1);
-}
-
-function MetricBadge({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="border-border text-text-secondary rounded-md border px-2 py-1">
-      {label} {value}
-    </span>
-  );
 }
 
 function FilteredEmptyState() {

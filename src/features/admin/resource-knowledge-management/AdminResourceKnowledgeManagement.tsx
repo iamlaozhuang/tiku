@@ -7,7 +7,9 @@ import {
   ChevronUp,
   CheckCircle2,
   DatabaseZap,
+  Eye,
   FileText,
+  RotateCcw,
   Search,
   Upload,
   XCircle,
@@ -15,8 +17,18 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AdminListToolbar,
+  AdminPagination,
+  AdminTableFrame,
+  adminListControlClassName,
+  adminListFilterLabelClassName,
+} from "@/components/admin/AdminList";
 import type { ResourceVectorRebuildResultDto } from "@/server/contracts/ai-rag-contract";
-import type { ApiResponse } from "@/server/contracts/api-response";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import {
   ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS,
   type AdminResourceOpsSummaryDto,
@@ -34,10 +46,8 @@ import {
   createAdminAuthHeaders,
   fetchAdminApi,
   getStoredSessionToken,
-  includesKeyword,
   isAdminContext,
   isUnauthorizedResponse,
-  matchesFilter,
   professionLabels,
 } from "../content-admin-runtime";
 
@@ -171,9 +181,6 @@ const resourceTypeLabels: Record<ResourceType, string> = {
   other: "其他",
   textbook: "教材",
 };
-
-const RESOURCE_LIST_FETCH_QUERY =
-  "page=1&pageSize=100&sortBy=updatedAt&sortOrder=desc";
 
 const resourceSortFieldLabels: Record<ResourceSortField, string> = {
   publishedAt: "发布时间",
@@ -338,6 +345,33 @@ function writeResourceListQueryState(queryState: ResourceListQueryState) {
   window.history.replaceState(window.history.state, "", nextUrl);
 }
 
+function createResourceListQueryString(queryState: ResourceListQueryState) {
+  const searchParams = new URLSearchParams({
+    page: String(queryState.page),
+    pageSize: String(queryState.pageSize),
+    sortBy: queryState.sortBy,
+    sortOrder: queryState.sortOrder,
+  });
+
+  if (queryState.keyword.trim().length > 0) {
+    searchParams.set("keyword", queryState.keyword.trim());
+  }
+  if (queryState.profession !== "all") {
+    searchParams.set("profession", queryState.profession);
+  }
+  if (queryState.level !== "all") {
+    searchParams.set("level", queryState.level);
+  }
+  if (queryState.status !== "all") {
+    searchParams.set("status", queryState.status);
+  }
+  if (queryState.resourceType !== "all") {
+    searchParams.set("resourceType", queryState.resourceType);
+  }
+
+  return searchParams.toString();
+}
+
 function isSafePublicId(value: string) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 }
@@ -354,18 +388,6 @@ function formatResourceScope(resource: AdminResourceOpsSummaryDto) {
   return `${professionLabels[resource.profession]} ${formatLevel(resource.level)}`;
 }
 
-function matchesLevelFilter(value: number | null, expected: LevelFilter) {
-  if (expected === "all") {
-    return true;
-  }
-
-  if (expected === "general") {
-    return value === null;
-  }
-
-  return value === Number(expected);
-}
-
 function parseKnowledgeNodePublicIdsText(value: string) {
   return Array.from(
     new Set(
@@ -375,29 +397,6 @@ function parseKnowledgeNodePublicIdsText(value: string) {
         .filter((item) => item.length > 0),
     ),
   );
-}
-
-function readResourceDateValue(
-  resource: AdminResourceOpsSummaryDto,
-  sortBy: ResourceSortField,
-) {
-  const value = resource[sortBy];
-
-  return value === null ? 0 : new Date(value).getTime();
-}
-
-function sortResources(
-  resources: AdminResourceOpsSummaryDto[],
-  sortBy: ResourceSortField,
-  sortOrder: ResourceSortOrder,
-) {
-  return [...resources].sort((leftResource, rightResource) => {
-    const leftValue = readResourceDateValue(leftResource, sortBy);
-    const rightValue = readResourceDateValue(rightResource, sortBy);
-    const result = leftValue - rightValue;
-
-    return sortOrder === "asc" ? result : -result;
-  });
 }
 
 function collectMarkdownHeadingReviewItems(
@@ -620,9 +619,17 @@ async function postLocalResourceEnable(
     : null;
 }
 
-function useResourceData() {
+function useResourceData(queryState: ResourceListQueryState) {
   const [loadState, setLoadState] = useState<ResourceLoadState>("loading");
   const [resources, setResources] = useState<AdminResourceOpsSummaryDto[]>([]);
+  const [pagination, setPagination] = useState<ApiPagination>({
+    page: queryState.page,
+    pageSize: queryState.pageSize,
+    sortBy: queryState.sortBy,
+    sortOrder: queryState.sortOrder,
+    total: 0,
+  });
+  const queryString = createResourceListQueryString(queryState);
 
   useEffect(() => {
     let isActive = true;
@@ -656,7 +663,7 @@ function useResourceData() {
         }
 
         const resourceResponse = await fetchAdminApi<ResourceListDto>(
-          `/api/v1/resources?${RESOURCE_LIST_FETCH_QUERY}`,
+          `/api/v1/resources?${queryString}`,
           sessionToken,
         );
 
@@ -670,6 +677,15 @@ function useResourceData() {
         }
 
         setResources(resourceResponse.data.resources);
+        setPagination(
+          resourceResponse.pagination ?? {
+            page: queryState.page,
+            pageSize: queryState.pageSize,
+            sortBy: queryState.sortBy,
+            sortOrder: queryState.sortOrder,
+            total: resourceResponse.data.resources.length,
+          },
+        );
         setLoadState(
           resourceResponse.data.resources.length === 0 ? "empty" : "ready",
         );
@@ -685,9 +701,15 @@ function useResourceData() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [
+    queryState.page,
+    queryState.pageSize,
+    queryState.sortBy,
+    queryState.sortOrder,
+    queryString,
+  ]);
 
-  return { loadState, resources, setResources };
+  return { loadState, pagination, resources, setResources };
 }
 
 export function AdminResourceKnowledgeManagement() {
@@ -737,42 +759,45 @@ export function AdminResourceKnowledgeManagement() {
     title: "资料校对示例",
   });
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
-  const { loadState, resources, setResources } = useResourceData();
-  const filteredResources = useMemo(
-    () =>
-      resources.filter((resource) => {
-        const searchableText = [
-          resource.publicId,
-          resource.title,
-          resource.originalFileName,
-          resource.resourceStatus,
-          resource.resourceType,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return (
-          includesKeyword(searchableText, keyword) &&
-          matchesFilter(resource.profession, profession) &&
-          matchesFilter(resource.resourceStatus, status) &&
-          matchesFilter(resource.resourceType, resourceType) &&
-          matchesLevelFilter(resource.level, level)
-        );
-      }),
-    [keyword, level, profession, resourceType, resources, status],
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [resourceDetail, setResourceDetail] = useState<
+    | { status: "idle" }
+    | { status: "loading"; resource: AdminResourceOpsSummaryDto }
+    | {
+        status: "ready";
+        resource: AdminResourceOpsSummaryDto;
+        markdownContent: string | null;
+      }
+    | { status: "error"; resource: AdminResourceOpsSummaryDto }
+  >({ status: "idle" });
+  const queryState = useMemo<ResourceListQueryState>(
+    () => ({
+      keyword,
+      level,
+      page,
+      pageSize,
+      profession,
+      resourceType,
+      sortBy,
+      sortOrder,
+      status,
+    }),
+    [
+      keyword,
+      level,
+      page,
+      pageSize,
+      profession,
+      resourceType,
+      sortBy,
+      sortOrder,
+      status,
+    ],
   );
-  const sortedResources = useMemo(
-    () => sortResources(filteredResources, sortBy, sortOrder),
-    [filteredResources, sortBy, sortOrder],
-  );
-  const totalPages = Math.max(1, Math.ceil(sortedResources.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const paginatedResources = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-
-    return sortedResources.slice(startIndex, startIndex + pageSize);
-  }, [currentPage, pageSize, sortedResources]);
+  const { loadState, pagination, resources, setResources } =
+    useResourceData(queryState);
+  const currentPage = pagination.page;
+  const totalRows = pagination.total;
 
   useEffect(() => {
     writeResourceListQueryState({
@@ -797,6 +822,34 @@ export function AdminResourceKnowledgeManagement() {
     sortOrder,
     status,
   ]);
+
+  async function handleOpenResourceDetail(
+    resource: AdminResourceOpsSummaryDto,
+  ) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || !isSafePublicId(resource.publicId)) {
+      setResourceDetail({ status: "error", resource });
+      return;
+    }
+
+    setResourceDetail({ status: "loading", resource });
+
+    try {
+      const detail = await getLocalResourceDetail(
+        resource.publicId,
+        sessionToken,
+      );
+
+      setResourceDetail({
+        status: "ready",
+        resource: detail?.resource ?? resource,
+        markdownContent: detail?.markdownContent ?? null,
+      });
+    } catch {
+      setResourceDetail({ status: "error", resource });
+    }
+  }
 
   async function handleConfirmRebuild() {
     if (rebuildState.status !== "confirming") {
@@ -1183,160 +1236,178 @@ export function AdminResourceKnowledgeManagement() {
     );
   }
 
-  if (loadState === "empty") {
-    return (
-      <section className="space-y-6">
-        <ResourcePageHeader />
+  return (
+    <section className="space-y-6">
+      <ResourcePageHeader
+        isUploadOpen={isUploadOpen}
+        onToggleUpload={() => setIsUploadOpen((isOpen) => !isOpen)}
+      />
+
+      {isUploadOpen ? (
         <ResourceUploadPanel
           uploadState={uploadState}
           onChange={setUploadState}
           onSubmit={handleUploadResource}
         />
-        <ResourceStateMachineContextBand resources={resources} />
-        <AdminEmptyState
-          description="当前还没有资料。可先上传 Markdown 或文本文件生成解析草稿。"
-          title="暂无资料与知识库数据"
-        />
-      </section>
-    );
-  }
-
-  return (
-    <section className="space-y-6">
-      <ResourcePageHeader />
-
-      <ResourceUploadPanel
-        uploadState={uploadState}
-        onChange={setUploadState}
-        onSubmit={handleUploadResource}
-      />
+      ) : null}
       <ResourceStateMachineContextBand resources={resources} />
 
-      <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
-          <label className="flex flex-1 flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">关键词</span>
-            <span className="relative">
-              <Search
-                aria-hidden="true"
-                className="text-text-muted pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
-              />
-              <Input
-                aria-label="关键词"
-                className="pl-8"
-                placeholder="资料名称、文件名或资料编号"
-                value={keyword}
-                onChange={(event) => {
-                  setKeyword(event.target.value);
-                  setPage(1);
-                }}
-              />
-            </span>
-          </label>
-          <FilterSelect
-            label="专业"
-            options={[
-              ["all", "全部专业"],
-              ["marketing", "营销"],
-              ["logistics", "物流"],
-              ["monopoly", "专卖"],
-            ]}
-            value={profession}
-            onChange={(value) => {
-              setProfession(value as ProfessionFilter);
-              setPage(1);
-            }}
-          />
-          <FilterSelect
-            label="等级"
-            options={levelFilterOptions}
-            value={level}
-            onChange={(value) => {
-              setLevel(value as LevelFilter);
-              setPage(1);
-            }}
-          />
-          <FilterSelect
-            label="状态"
-            options={[
-              ["all", "全部状态"],
-              ["uploaded", "已上传"],
-              ["draft", "解析草稿待校对"],
-              ["published", "已发布"],
-              ["indexing", "索引重建中"],
-              ["rag_ready", "检索可用"],
-              ["index_failed", "索引重建失败"],
-              ["disabled", "已停用"],
-            ]}
-            value={status}
-            onChange={(value) => {
-              setStatus(value as ResourceStatusFilter);
-              setPage(1);
-            }}
-          />
-          <FilterSelect
-            label="资料类型"
-            options={[
-              ["all", "全部类型"],
-              ["textbook", "教材"],
-              ["courseware", "课件"],
-              ["knowledge_doc", "知识点文档"],
-              ["lecture_note", "讲义"],
-              ["other", "其他"],
-            ]}
-            value={resourceType}
-            onChange={(value) => {
-              setResourceType(value as ResourceTypeFilter);
-              setPage(1);
-            }}
-          />
-        </div>
-        <ResourceListControls
-          currentPage={currentPage}
-          pageSize={pageSize}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          totalPages={totalPages}
-          totalRows={sortedResources.length}
-          onChangePage={setPage}
-          onChangePageSize={(nextPageSize) => {
-            setPageSize(nextPageSize);
-            setPage(1);
-          }}
-          onChangeSortBy={(nextSortBy) => {
-            setSortBy(nextSortBy);
-            setPage(1);
-          }}
-          onToggleSortOrder={() => {
-            setSortOrder((currentSortOrder) =>
-              currentSortOrder === "desc" ? "asc" : "desc",
-            );
+      <AdminListToolbar
+        description="按条件查找资料；筛选、排序和每页条数变化后自动回到第一页。"
+        resultLabel={`共 ${totalRows} 份资料`}
+        title="资料列表"
+      >
+        <label className={`${adminListFilterLabelClassName} min-w-64 flex-1`}>
+          <span className="text-text-secondary">关键词</span>
+          <span className="relative">
+            <Search
+              aria-hidden="true"
+              className="text-text-muted pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2"
+            />
+            <Input
+              aria-label="关键词"
+              className={`${adminListControlClassName} pl-8`}
+              placeholder="资料名称或文件名"
+              value={keyword}
+              onChange={(event) => {
+                setKeyword(event.target.value);
+                setPage(1);
+              }}
+            />
+          </span>
+        </label>
+        <FilterSelect
+          label="专业"
+          options={[
+            ["all", "全部专业"],
+            ["marketing", "营销"],
+            ["logistics", "物流"],
+            ["monopoly", "专卖"],
+          ]}
+          value={profession}
+          onChange={(value) => {
+            setProfession(value as ProfessionFilter);
             setPage(1);
           }}
         />
-      </div>
+        <FilterSelect
+          label="等级"
+          options={levelFilterOptions}
+          value={level}
+          onChange={(value) => {
+            setLevel(value as LevelFilter);
+            setPage(1);
+          }}
+        />
+        <FilterSelect
+          label="状态"
+          options={[
+            ["all", "全部状态"],
+            ["uploaded", "已上传"],
+            ["draft", "解析草稿待校对"],
+            ["published", "已发布"],
+            ["indexing", "索引重建中"],
+            ["rag_ready", "检索可用"],
+            ["index_failed", "索引重建失败"],
+            ["disabled", "已停用"],
+          ]}
+          value={status}
+          onChange={(value) => {
+            setStatus(value as ResourceStatusFilter);
+            setPage(1);
+          }}
+        />
+        <FilterSelect
+          label="资料类型"
+          options={[
+            ["all", "全部类型"],
+            ["textbook", "教材"],
+            ["courseware", "课件"],
+            ["knowledge_doc", "知识点文档"],
+            ["lecture_note", "讲义"],
+            ["other", "其他"],
+          ]}
+          value={resourceType}
+          onChange={(value) => {
+            setResourceType(value as ResourceTypeFilter);
+            setPage(1);
+          }}
+        />
+        <label className={`${adminListFilterLabelClassName} min-w-32`}>
+          <span>排序</span>
+          <select
+            aria-label="排序字段"
+            className={`${adminListControlClassName} border-input bg-surface rounded-lg border px-2.5 text-sm`}
+            value={sortBy}
+            onChange={(event) => {
+              setSortBy(event.target.value as ResourceSortField);
+              setPage(1);
+            }}
+          >
+            {Object.entries(resourceSortFieldLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={`${adminListFilterLabelClassName} min-w-28`}>
+          <span>每页条数</span>
+          <select
+            aria-label="每页条数"
+            className={`${adminListControlClassName} border-input bg-surface rounded-lg border px-2.5 text-sm`}
+            value={String(pageSize)}
+            onChange={(event) => {
+              setPageSize(
+                Number(
+                  event.target.value,
+                ) as ResourceListQueryState["pageSize"],
+              );
+              setPage(1);
+            }}
+          >
+            {ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button
+          aria-label={sortOrder === "desc" ? "切换为升序" : "切换为降序"}
+          variant="outline"
+          onClick={() => {
+            setSortOrder((current) => (current === "desc" ? "asc" : "desc"));
+            setPage(1);
+          }}
+        >
+          {sortOrder === "desc" ? "降序" : "升序"}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setKeyword("");
+            setProfession("all");
+            setLevel("all");
+            setStatus("all");
+            setResourceType("all");
+            setSortBy("updatedAt");
+            setSortOrder("desc");
+            setPageSize(20);
+            setPage(1);
+          }}
+        >
+          <RotateCcw aria-hidden="true" data-icon="inline-start" />
+          重置筛选
+        </Button>
+      </AdminListToolbar>
 
-      <section className="grid gap-3 md:grid-cols-3" aria-label="资料摘要">
-        <SummaryItem label="当前结果" value={`${sortedResources.length} 个`} />
-        <SummaryItem
-          label="检索可用"
-          value={`${
-            sortedResources.filter(
-              (resource) => resource.resourceStatus === "rag_ready",
-            ).length
-          } 个`}
-        />
-        <SummaryItem
-          label="待重建检索索引"
-          value={`${
-            sortedResources.filter((resource) => resource.isVectorStale).length
-          } 个`}
-        />
-      </section>
-
-      {paginatedResources.length > 0 ? (
+      {resources.length > 0 ? (
         <ResourceList
-          rows={paginatedResources}
+          rows={resources}
+          onRequestDetail={(resource) =>
+            void handleOpenResourceDetail(resource)
+          }
           onRequestPublish={(resource) => {
             setToastMessage(null);
             setPublishState({ resource, status: "confirming" });
@@ -1358,9 +1429,36 @@ export function AdminResourceKnowledgeManagement() {
             void handleOpenMarkdownReview(resource);
           }}
         />
-      ) : (
-        <FilteredEmptyState />
-      )}
+      ) : loadState === "empty" ? (
+        <AdminEmptyState
+          description={
+            keyword === "" &&
+            profession === "all" &&
+            level === "all" &&
+            status === "all" &&
+            resourceType === "all"
+              ? "当前还没有资料。可使用页面上方的“上传资料”创建解析草稿。"
+              : "调整关键词或筛选条件后再试。"
+          }
+          title={
+            keyword === "" &&
+            profession === "all" &&
+            level === "all" &&
+            status === "all" &&
+            resourceType === "all"
+              ? "暂无资料与知识库数据"
+              : "没有匹配的资料"
+          }
+        />
+      ) : null}
+
+      <AdminPagination
+        itemLabel="份资料"
+        page={currentPage}
+        pageSize={pageSize}
+        total={totalRows}
+        onPageChange={setPage}
+      />
 
       {rebuildState.status === "confirming" ||
       rebuildState.status === "submitting" ? (
@@ -1420,6 +1518,13 @@ export function AdminResourceKnowledgeManagement() {
         />
       ) : null}
 
+      {resourceDetail.status === "idle" ? null : (
+        <ResourceDetailDialog
+          detail={resourceDetail}
+          onClose={() => setResourceDetail({ status: "idle" })}
+        />
+      )}
+
       {toastMessage === null ? null : (
         <AdminResourceToast message={toastMessage} />
       )}
@@ -1445,12 +1550,14 @@ function ResourceStateMachineContextBand({
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">资源状态机</p>
+          <p className="text-brand-primary text-xs font-medium">
+            当前页资料状态
+          </p>
           <h2 className="text-text-primary text-base font-semibold">
             上传、解析、发布与检索新鲜度
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            内容后台只展示资料生命周期摘要；检索新鲜度用于提示是否需要重建索引，不展示原文片段。
+            当前页仅展示资料生命周期摘要；检索新鲜度用于提示是否需要重建索引，不展示原文片段。
           </p>
         </div>
         <dl className="grid gap-2 text-xs sm:grid-cols-2 xl:grid-cols-6">
@@ -1486,7 +1593,13 @@ function ResourceStateMachineContextBand({
   );
 }
 
-function ResourcePageHeader() {
+function ResourcePageHeader({
+  isUploadOpen,
+  onToggleUpload,
+}: {
+  isUploadOpen: boolean;
+  onToggleUpload: () => void;
+}) {
   return (
     <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="space-y-2">
@@ -1499,6 +1612,10 @@ function ResourcePageHeader() {
           学员端只会看到允许展示的引用标题和章节路径。
         </p>
       </div>
+      <Button onClick={onToggleUpload}>
+        <Upload aria-hidden="true" data-icon="inline-start" />
+        {isUploadOpen ? "收起上传" : "上传资料"}
+      </Button>
     </header>
   );
 }
@@ -1618,106 +1735,6 @@ function ResourceUploadPanel({
   );
 }
 
-function ResourceListControls({
-  currentPage,
-  onChangePage,
-  onChangePageSize,
-  onChangeSortBy,
-  onToggleSortOrder,
-  pageSize,
-  sortBy,
-  sortOrder,
-  totalPages,
-  totalRows,
-}: {
-  currentPage: number;
-  onChangePage: (page: number) => void;
-  onChangePageSize: (pageSize: ResourceListQueryState["pageSize"]) => void;
-  onChangeSortBy: (sortBy: ResourceSortField) => void;
-  onToggleSortOrder: () => void;
-  pageSize: ResourceListQueryState["pageSize"];
-  sortBy: ResourceSortField;
-  sortOrder: ResourceSortOrder;
-  totalPages: number;
-  totalRows: number;
-}) {
-  return (
-    <div className="border-border mt-4 flex flex-col gap-3 border-t pt-4 lg:flex-row lg:items-end lg:justify-between">
-      <div className="flex flex-wrap gap-3">
-        <label className="flex min-w-32 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">每页条数</span>
-          <select
-            aria-label="每页条数"
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-            value={String(pageSize)}
-            onChange={(event) =>
-              onChangePageSize(
-                Number(
-                  event.target.value,
-                ) as ResourceListQueryState["pageSize"],
-              )
-            }
-          >
-            {ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-36 flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">排序字段</span>
-          <select
-            aria-label="排序字段"
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-            value={sortBy}
-            onChange={(event) =>
-              onChangeSortBy(event.target.value as ResourceSortField)
-            }
-          >
-            {Object.entries(resourceSortFieldLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <Button variant="outline" onClick={onToggleSortOrder}>
-          {sortOrder === "desc" ? "降序" : "升序"}
-        </Button>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="text-text-secondary">
-          第 {currentPage} / {totalPages} 页，共 {totalRows} 条
-        </span>
-        <Button
-          disabled={currentPage <= 1}
-          variant="outline"
-          onClick={() => onChangePage(currentPage - 1)}
-        >
-          上一页
-        </Button>
-        <Button
-          disabled={currentPage >= totalPages}
-          variant="outline"
-          onClick={() => onChangePage(currentPage + 1)}
-        >
-          下一页
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-border bg-surface rounded-md border px-4 py-3 shadow-sm">
-      <p className="text-text-muted text-xs font-medium">{label}</p>
-      <p className="text-text-primary mt-1 text-lg font-semibold">{value}</p>
-    </div>
-  );
-}
-
 function ResourceLifecycleMetric({
   label,
   value,
@@ -1736,6 +1753,7 @@ function ResourceLifecycleMetric({
 }
 
 function ResourceList({
+  onRequestDetail,
   onRequestDisable,
   onRequestEnable,
   onRequestMarkdownReview,
@@ -1743,6 +1761,7 @@ function ResourceList({
   onRequestRebuild,
   rows,
 }: {
+  onRequestDetail: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestDisable: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestEnable: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestMarkdownReview: (resource: AdminResourceOpsSummaryDto) => void;
@@ -1751,161 +1770,292 @@ function ResourceList({
   rows: AdminResourceOpsSummaryDto[];
 }) {
   return (
-    <div className="grid gap-3">
-      {rows.map((resource) => (
-        <article
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-public-id={resource.publicId}
-          data-testid={`resource-row-${createTestId(resource.publicId)}`}
-          key={resource.publicId}
-        >
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+    <AdminTableFrame ariaLabel="资料列表" minWidthClassName="min-w-[1120px]">
+      <table className="w-full border-collapse text-left text-sm">
+        <thead className="bg-muted/40 text-text-secondary">
+          <tr>
+            <th className="px-4 py-3 font-medium">资料</th>
+            <th className="px-4 py-3 font-medium">适用范围</th>
+            <th className="px-4 py-3 font-medium">状态</th>
+            <th className="px-4 py-3 font-medium">检索与绑定</th>
+            <th className="px-4 py-3 font-medium">更新时间</th>
+            <th className="px-4 py-3 text-right font-medium">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((resource) => (
+            <tr
+              className="border-border border-t align-top"
+              data-public-id={resource.publicId}
+              data-testid={`resource-row-${createTestId(resource.publicId)}`}
+              key={resource.publicId}
+            >
+              <td className="px-4 py-3">
+                <p className="text-text-primary font-medium">
+                  {resource.title}
+                </p>
+                <p className="text-text-muted mt-1 text-xs">
+                  {resourceTypeLabels[resource.resourceType]} /{" "}
+                  {resource.originalFileName ?? "未记录文件名"}
+                </p>
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {formatResourceScope(resource)}
+              </td>
+              <td className="px-4 py-3">
+                <span className="bg-secondary text-secondary-foreground inline-flex rounded-md px-2 py-1 text-xs font-medium">
                   {resourceStatusLabels[resource.resourceStatus]}
                 </span>
-                <span className="text-text-muted text-xs">
-                  {formatResourceScope(resource)}
-                </span>
-                <span className="text-text-muted text-xs">
-                  {resourceTypeLabels[resource.resourceType]}
-                </span>
-              </div>
-              <h2 className="text-text-primary flex items-center gap-2 text-base font-semibold">
-                <DatabaseZap aria-hidden="true" className="size-4" />
-                {resource.title}
-              </h2>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <MetricBadge
-                  label="解析草稿"
-                  value={
-                    resource.markdownPreviewAvailable ? "可校对" : "未生成"
-                  }
-                />
-                <MetricBadge
-                  label="原始文件"
-                  value={resource.downloadAvailable ? "可申请下载" : "不可下载"}
-                />
-                <MetricBadge
-                  label="检索索引"
-                  value={resource.isVectorStale ? "待重建" : "已同步"}
-                />
-                <MetricBadge
-                  label="知识点绑定"
-                  value={`${resource.knowledgeNodePublicIds.length} 个`}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-3 xl:items-end">
-              <ResourceReference value={resource.publicId} />
-              {resource.resourceStatus === "draft" ||
-              resource.resourceStatus === "rag_ready" ? (
-                <Button
-                  disabled={
-                    !isSafePublicId(resource.publicId) ||
-                    !resource.markdownPreviewAvailable
-                  }
-                  variant="outline"
-                  onClick={() => onRequestPublish(resource)}
-                >
-                  <FileText aria-hidden="true" data-icon="inline-start" />
-                  发布解析草稿
-                </Button>
-              ) : null}
-              <Button
-                disabled={
-                  !isSafePublicId(resource.publicId) ||
-                  !resource.markdownPreviewAvailable
-                }
-                variant="outline"
-                onClick={() => onRequestMarkdownReview(resource)}
-              >
-                <FileText aria-hidden="true" data-icon="inline-start" />
-                校对解析草稿
-              </Button>
-              <Button
-                disabled={!isSafePublicId(resource.publicId)}
-                variant={
-                  resource.resourceStatus === "published" ||
-                  resource.isVectorStale
-                    ? "destructive"
-                    : "outline"
-                }
-                onClick={() => onRequestRebuild(resource)}
-              >
-                {isSafePublicId(resource.publicId) ? (
-                  <>
-                    <DatabaseZap aria-hidden="true" data-icon="inline-start" />
-                    重建检索索引
-                  </>
-                ) : (
-                  <>
-                    <AlertTriangle
-                      aria-hidden="true"
-                      data-icon="inline-start"
-                    />
-                    资料编号异常
-                  </>
-                )}
-              </Button>
-              {resource.resourceStatus === "disabled" ? (
-                <Button
-                  disabled={!isSafePublicId(resource.publicId)}
-                  variant="outline"
-                  onClick={() => onRequestEnable(resource)}
-                >
-                  <CheckCircle2 aria-hidden="true" data-icon="inline-start" />
-                  启用资料
-                </Button>
-              ) : (
-                <Button
-                  disabled={!isSafePublicId(resource.publicId)}
-                  variant="destructive"
-                  onClick={() => onRequestDisable(resource)}
-                >
-                  <XCircle aria-hidden="true" data-icon="inline-start" />
-                  停用资料
-                </Button>
-              )}
-            </div>
-          </div>
-          <p className="text-text-muted border-border mt-4 border-t pt-4 text-xs">
-            文件 {resource.originalFileName ?? "未记录"} / 上传时间{" "}
-            {formatDateTime(resource.uploadedAt)}
-          </p>
-        </article>
-      ))}
+                <p className="text-text-muted mt-2 text-xs">
+                  解析草稿{" "}
+                  {resource.markdownPreviewAvailable ? "可校对" : "未生成"}
+                </p>
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                <p>检索索引 {resource.isVectorStale ? "待重建" : "已同步"}</p>
+                <p className="text-text-muted mt-1 text-xs">
+                  绑定知识点 {resource.knowledgeNodePublicIds.length} 个
+                </p>
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {formatDateTime(resource.updatedAt)}
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button
+                    disabled={!isSafePublicId(resource.publicId)}
+                    variant="outline"
+                    onClick={() => onRequestDetail(resource)}
+                  >
+                    <Eye aria-hidden="true" data-icon="inline-start" />
+                    查看资料
+                  </Button>
+                  <Button
+                    disabled={
+                      !isSafePublicId(resource.publicId) ||
+                      !resource.markdownPreviewAvailable
+                    }
+                    variant="outline"
+                    onClick={() => onRequestMarkdownReview(resource)}
+                  >
+                    <FileText aria-hidden="true" data-icon="inline-start" />
+                    校对内容
+                  </Button>
+                  {resource.resourceStatus === "draft" ||
+                  resource.resourceStatus === "rag_ready" ? (
+                    <Button
+                      disabled={
+                        !isSafePublicId(resource.publicId) ||
+                        !resource.markdownPreviewAvailable
+                      }
+                      variant="outline"
+                      onClick={() => onRequestPublish(resource)}
+                    >
+                      发布资料
+                    </Button>
+                  ) : null}
+                  <Button
+                    disabled={!isSafePublicId(resource.publicId)}
+                    variant={
+                      resource.resourceStatus === "published" ||
+                      resource.isVectorStale
+                        ? "destructive"
+                        : "outline"
+                    }
+                    onClick={() => onRequestRebuild(resource)}
+                  >
+                    {isSafePublicId(resource.publicId) ? (
+                      <>
+                        <DatabaseZap
+                          aria-hidden="true"
+                          data-icon="inline-start"
+                        />
+                        重建检索索引
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle
+                          aria-hidden="true"
+                          data-icon="inline-start"
+                        />
+                        资料编号异常
+                      </>
+                    )}
+                  </Button>
+                  {resource.resourceStatus === "disabled" ? (
+                    <Button
+                      disabled={!isSafePublicId(resource.publicId)}
+                      variant="outline"
+                      onClick={() => onRequestEnable(resource)}
+                    >
+                      <CheckCircle2
+                        aria-hidden="true"
+                        data-icon="inline-start"
+                      />
+                      启用资料
+                    </Button>
+                  ) : (
+                    <Button
+                      disabled={!isSafePublicId(resource.publicId)}
+                      variant="destructive"
+                      onClick={() => onRequestDisable(resource)}
+                    >
+                      <XCircle aria-hidden="true" data-icon="inline-start" />
+                      停用资料
+                    </Button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </AdminTableFrame>
+  );
+}
+
+function ResourceDetailDialog({
+  detail,
+  onClose,
+}: {
+  detail: Exclude<
+    | { status: "idle" }
+    | { status: "loading"; resource: AdminResourceOpsSummaryDto }
+    | {
+        status: "ready";
+        resource: AdminResourceOpsSummaryDto;
+        markdownContent: string | null;
+      }
+    | { status: "error"; resource: AdminResourceOpsSummaryDto },
+    { status: "idle" }
+  >;
+  onClose: () => void;
+}) {
+  const headings =
+    detail.status === "ready" && detail.markdownContent !== null
+      ? collectMarkdownHeadingReviewItems(detail.markdownContent)
+      : [];
+  const preview =
+    detail.status === "ready" && detail.markdownContent !== null
+      ? detail.markdownContent.slice(0, 4000)
+      : null;
+
+  return (
+    <div
+      aria-label="资料详情"
+      aria-modal="true"
+      className="border-border bg-surface fixed top-16 right-4 bottom-4 z-50 w-[min(720px,calc(100vw-2rem))] overflow-y-auto rounded-md border p-5 shadow-lg"
+      role="dialog"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-brand-primary text-xs font-medium">资料详情</p>
+          <h2 className="text-text-primary mt-1 text-lg font-semibold">
+            {detail.resource.title}
+          </h2>
+        </div>
+        <Button aria-label="关闭资料详情" variant="outline" onClick={onClose}>
+          关闭
+        </Button>
+      </div>
+
+      {detail.status === "loading" ? (
+        <p className="text-text-secondary mt-6 text-sm">正在加载资料详情</p>
+      ) : detail.status === "error" ? (
+        <p className="text-destructive mt-6 text-sm">
+          资料详情加载失败，请稍后重试。
+        </p>
+      ) : (
+        <div className="mt-6 space-y-6">
+          <dl className="grid gap-3 sm:grid-cols-2">
+            <DetailMetric
+              label="资料类型"
+              value={resourceTypeLabels[detail.resource.resourceType]}
+            />
+            <DetailMetric
+              label="适用范围"
+              value={formatResourceScope(detail.resource)}
+            />
+            <DetailMetric
+              label="处理进度"
+              value={resourceStatusLabels[detail.resource.resourceStatus]}
+            />
+            <DetailMetric
+              label="检索状态"
+              value={
+                detail.resource.isVectorStale
+                  ? "内容已更新，需重建检索索引"
+                  : "检索内容已同步"
+              }
+            />
+            <DetailMetric
+              label="发布时间"
+              value={
+                detail.resource.publishedAt === null
+                  ? "尚未发布"
+                  : formatDateTime(detail.resource.publishedAt)
+              }
+            />
+            <DetailMetric
+              label="绑定知识点"
+              value={`${detail.resource.knowledgeNodePublicIds.length} 个`}
+            />
+          </dl>
+
+          <section aria-label="章节目录">
+            <h3 className="text-text-primary font-semibold">章节目录</h3>
+            {headings.length === 0 ? (
+              <p className="text-text-muted mt-2 text-sm">
+                当前资料没有可识别的章节标题。
+              </p>
+            ) : (
+              <ol className="text-text-secondary mt-2 space-y-1 text-sm">
+                {headings.map((heading) => (
+                  <li key={`${heading.lineNumber}-${heading.title}`}>
+                    {heading.path.join(" / ")}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
+
+          <section aria-label="内容预览">
+            <h3 className="text-text-primary font-semibold">内容预览</h3>
+            {preview === null ? (
+              <p className="text-text-muted mt-2 text-sm">
+                当前资料暂无可读内容预览。
+              </p>
+            ) : (
+              <pre className="bg-muted/40 text-text-secondary mt-2 max-h-80 overflow-auto rounded-md p-4 text-sm leading-6 whitespace-pre-wrap">
+                {preview}
+              </pre>
+            )}
+          </section>
+
+          <section aria-label="安全时间线">
+            <h3 className="text-text-primary font-semibold">处理时间线</h3>
+            <ul className="text-text-secondary mt-2 space-y-1 text-sm">
+              <li>上传：{formatDateTime(detail.resource.uploadedAt)}</li>
+              <li>最近更新：{formatDateTime(detail.resource.updatedAt)}</li>
+              <li>
+                发布：
+                {detail.resource.publishedAt === null
+                  ? "尚未发布"
+                  : formatDateTime(detail.resource.publishedAt)}
+              </li>
+            </ul>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
 
-function ResourceReference({ value }: { value: string }) {
+function DetailMetric({ label, value }: { label: string; value: string }) {
   return (
-    <span className="text-text-muted inline-flex items-center gap-2 text-xs">
-      <span>资料编号</span>
-      <code className="bg-muted text-text-secondary rounded-md px-2 py-1 font-mono">
-        {value}
-      </code>
-    </span>
-  );
-}
-
-function MetricBadge({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="border-border text-text-secondary rounded-md border px-2 py-1">
-      {label} {value}
-    </span>
-  );
-}
-
-function FilteredEmptyState() {
-  return (
-    <div className="bg-surface border-border rounded-md border p-8 text-center shadow-sm">
-      <p className="text-text-primary font-medium">没有匹配的资料</p>
-      <p className="text-text-secondary mt-2 text-sm">
-        调整关键词或筛选条件后再试。
-      </p>
+    <div className="border-border rounded-md border p-3">
+      <dt className="text-text-muted text-xs">{label}</dt>
+      <dd className="text-text-primary mt-1 text-sm font-medium">{value}</dd>
     </div>
   );
 }

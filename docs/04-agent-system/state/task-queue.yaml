@@ -118,6 +118,101 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-resource-knowledge-workspace-2026-07-11
+    title: 0704 resource and knowledge workspace
+    phase: 0704-resource-knowledge-workspace-2026-07-11
+    status: ready_for_closeout
+    result: pass_localhost_ui_resource_knowledge_workspace
+    priority: p0
+    sequenceOrder: 33.0
+    taskKind: implementation_feature
+    executionProfile: content_admin_resource_lifecycle_and_explicit_knowledge_tree_workspace
+    moduleRunVersion: 2
+    branch: codex/0704-resource-knowledge-workspace
+    dependsOn:
+      - 0704-paper-composer-workbench-2026-07-11
+    planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-resource-knowledge-workspace.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-resource-knowledge-workspace-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-resource-knowledge-workspace-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-11-0704-resource-knowledge-workspace.md
+      - docs/05-execution-logs/evidence/2026-07-11-0704-resource-knowledge-workspace-evidence.md
+      - docs/05-execution-logs/audits-reviews/2026-07-11-0704-resource-knowledge-workspace-audit.md
+      - src/features/admin/resource-knowledge-management/**
+      - src/features/admin/knowledge-node-management/**
+      - src/server/contracts/admin-content-knowledge-ops-contract.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - src/server/repositories/rag-resource-knowledge-runtime-repository.ts
+      - src/app/api/v1/resources/**
+      - src/app/api/v1/knowledge-nodes/**
+      - tests/unit/admin-resource-knowledge-ui-layout.test.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts
+      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\\tiku-local-private\\**
+    capabilities:
+      localSourceChange: approved_resource_knowledge_ui_and_scoped_existing_query_contract_extension
+      focusedUnitTest: approved
+      browserRuntime: blocked
+      directDatabaseConnection: blocked
+      databaseMutation: blocked_runtime_only_repository_unit_mocks_allowed
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+    approval:
+      implementationAndCloseout: current_user_approved_five_content_admin_tasks_serial_goal_2026_07_11
+      providerExecution: blocked
+      envSecretAccess: blocked
+      stagingProdDeploy: blocked
+      directDatabaseConnection: blocked
+    validationSummary:
+      status: pass_ready_for_commit_merge_push_cleanup
+      redTargetedTests: pass_expected_2_initial_failures
+      greenTargetedTests: pass_4_files_32_tests
+      lint: pass_0_errors_0_warnings
+      typecheck: pass_tsc_no_emit
+      formatting: pass_full_repository
+      diffCheck: pass
+      moduleRunV2PreCommitHardening: pass_13_files_scanned
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      dependencyOrLockfileChanged: false
+      schemaMigrationSeedChanged: false
+      providerExecution: blocked_not_executed
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-resource-knowledge-ui-layout.test.ts tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\agent-system\\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-resource-knowledge-workspace-2026-07-11
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\agent-system\\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-resource-knowledge-workspace-2026-07-11 -SkipRemoteAheadCheck
   - id: 0704-paper-composer-workbench-2026-07-11
     title: 0704 paper composer workbench
     phase: 0704-paper-composer-workbench-2026-07-11

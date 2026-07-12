@@ -50,6 +50,8 @@ export type AdminContentKnowledgeListQuery = {
   level: number | null;
   subject: Subject | "all";
   paperType: PaperType | "all";
+  resourceType: ResourceType | "all";
+  resourceLevel: number | "general" | null;
   year: number | null;
 };
 
@@ -153,6 +155,8 @@ export function createAdminContentKnowledgeListQuery(
     level: null,
     subject: "all",
     paperType: "all",
+    resourceType: "all",
+    resourceLevel: null,
     year: null,
     ...queryOverrides,
     keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,

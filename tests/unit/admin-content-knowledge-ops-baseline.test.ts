@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -315,6 +316,23 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
       }
 
       if (path.startsWith("/api/v1/resources?")) {
+        if (
+          path.includes("keyword=%E4%B8%8D%E5%AD%98%E5%9C%A8") &&
+          (payload as { code?: number }).code === 0
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { resources: [] },
+            pagination: {
+              page: 1,
+              pageSize: 20,
+              total: 0,
+              sortBy: "updatedAt",
+              sortOrder: "desc",
+            },
+          });
+        }
         return createJsonResponse(payload);
       }
 
@@ -710,10 +728,12 @@ describe("admin content and knowledge ops baseline", () => {
     expect(marketingTree).toContainElement(firstNode);
     expect(firstNode).not.toHaveAttribute("data-id");
     expect(within(firstNode).getByText("营销/市场调研")).toBeInTheDocument();
-    expect(within(firstNode).getByText("绑定题目 18")).toBeInTheDocument();
+    fireEvent.click(firstNode);
+    const detailPanel = screen.getByRole("region", { name: "知识点详情" });
+    expect(within(detailPanel).getByText("18 题")).toBeInTheDocument();
     expect(
-      within(firstNode).getByRole("link", {
-        name: "查看 knowledge-node-public-001 的知识点推荐绑定",
+      within(detailPanel).getByRole("link", {
+        name: "查看 市场调研 的知识点推荐绑定",
       }),
     ).toHaveAttribute(
       "href",
@@ -723,8 +743,41 @@ describe("admin content and knowledge ops baseline", () => {
     expect(document.body.textContent).not.toContain('"id"');
     expectAdminFetchAuthorization(
       fetchMock,
-      "/api/v1/knowledge-nodes?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+      "/api/v1/knowledge-nodes?page=1&pageSize=100&sortBy=sortOrder&sortOrder=asc",
     );
+  });
+
+  it("requires explicit knowledge node selection and uses readable tree controls", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockKnowledgeNodeFetch();
+
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    const firstNode = await screen.findByTestId(
+      "knowledge-node-row-knowledge-node-public-001",
+    );
+
+    expect(screen.getByRole("button", { name: "编辑节点" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "移动节点" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "停用节点" })).toBeDisabled();
+    expect(screen.getByText("请选择一个知识点")).toBeInTheDocument();
+
+    fireEvent.click(firstNode);
+
+    expect(firstNode).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: "编辑节点" })).toBeEnabled();
+    expect(
+      screen.getByRole("heading", { name: "市场调研" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("完整路径")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "移动节点" }));
+    const moveDialog = screen.getByRole("alertdialog");
+    expect(
+      within(moveDialog).getByLabelText("新父级知识点"),
+    ).toBeInTheDocument();
+    expect(within(moveDialog).getByLabelText("显示顺序")).toBeInTheDocument();
+    expect(within(moveDialog).queryByLabelText("新父级业务标识")).toBeNull();
   });
 
   it("filters knowledge_node rows and renders empty, unauthorized, and error states", async () => {
@@ -792,7 +845,7 @@ describe("admin content and knowledge ops baseline", () => {
     expect(await screen.findByText("知识点树加载失败")).toBeInTheDocument();
   });
 
-  it("renders common pagination and updated-at sorting controls for knowledge_node lists", async () => {
+  it("renders a complete tree without destructive global pagination", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockKnowledgeNodeFetch();
 
@@ -800,13 +853,10 @@ describe("admin content and knowledge ops baseline", () => {
 
     await screen.findByText("营销/市场调研");
 
-    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
-    fireEvent.change(screen.getByLabelText("每页条数"), {
-      target: { value: "50" },
-    });
-    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(screen.queryByLabelText("每页条数")).toBeNull();
+    expect(screen.queryByLabelText("列表分页")).toBeNull();
     expect(
-      screen.getByRole("button", { name: "更新时间排序" }),
+      screen.getByRole("region", { name: "知识点树工作区" }),
     ).toBeInTheDocument();
   });
 
@@ -832,17 +882,17 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.change(createDialog.getByLabelText("适用等级"), {
       target: { value: "2,3" },
     });
-    fireEvent.change(createDialog.getByLabelText("父级业务标识"), {
+    fireEvent.change(createDialog.getByLabelText("父级知识点"), {
       target: { value: "knowledge-node-public-001" },
     });
-    fireEvent.change(createDialog.getByLabelText("排序"), {
+    fireEvent.change(createDialog.getByLabelText("显示顺序"), {
       target: { value: "40" },
     });
     fireEvent.click(screen.getByRole("button", { name: "确认新增" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "知识点节点已新增",
     );
-    expect(screen.getByText("营销/新增知识点")).toBeInTheDocument();
+    expect(screen.getAllByText("营销/新增知识点").length).toBeGreaterThan(0);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/knowledge-nodes",
       expect.objectContaining({
@@ -860,6 +910,9 @@ describe("admin content and knowledge ops baseline", () => {
       }),
     );
 
+    fireEvent.click(
+      screen.getByTestId("knowledge-node-row-knowledge-node-public-001"),
+    );
     fireEvent.click(screen.getByRole("button", { name: "编辑节点" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("编辑知识点节点");
     const editDialog = within(screen.getByRole("alertdialog"));
@@ -870,14 +923,16 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.change(editDialog.getByLabelText("适用等级"), {
       target: { value: "3,4" },
     });
-    fireEvent.change(editDialog.getByLabelText("排序"), {
+    fireEvent.change(editDialog.getByLabelText("显示顺序"), {
       target: { value: "15" },
     });
     fireEvent.click(screen.getByRole("button", { name: "确认更新" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "知识点节点已更新",
     );
-    expect(screen.getByText("营销/市场调研（已更新）")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("营销/市场调研（已更新）").length,
+    ).toBeGreaterThan(0);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/knowledge-nodes/knowledge-node-public-001",
       expect.objectContaining({
@@ -927,13 +982,16 @@ describe("admin content and knowledge ops baseline", () => {
       await screen.findByRole("heading", { name: "知识点树维护" }),
     ).toBeInTheDocument();
 
+    fireEvent.click(
+      screen.getByTestId("knowledge-node-row-knowledge-node-public-001"),
+    );
     fireEvent.click(screen.getByRole("button", { name: "移动节点" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("移动知识点节点");
     const moveDialog = within(screen.getByRole("alertdialog"));
-    fireEvent.change(moveDialog.getByLabelText("新父级业务标识"), {
+    fireEvent.change(moveDialog.getByLabelText("新父级知识点"), {
       target: { value: "knowledge-node-public-002" },
     });
-    fireEvent.change(moveDialog.getByLabelText("新排序"), {
+    fireEvent.change(moveDialog.getByLabelText("显示顺序"), {
       target: { value: "45" },
     });
     fireEvent.click(screen.getByRole("button", { name: "确认移动" }));
@@ -941,7 +999,9 @@ describe("admin content and knowledge ops baseline", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "知识点节点已移动",
     );
-    expect(screen.getByText("物流/成本核算/市场调研")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("物流/成本核算/市场调研").length,
+    ).toBeGreaterThan(0);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/knowledge-nodes/knowledge-node-public-001",
       expect.objectContaining({
@@ -984,7 +1044,9 @@ describe("admin content and knowledge ops baseline", () => {
       within(firstResource).getByText("营销知识库讲义"),
     ).toBeInTheDocument();
     expect(within(firstResource).getByText("营销 3级")).toBeInTheDocument();
-    expect(within(firstResource).getByText("讲义")).toBeInTheDocument();
+    expect(
+      within(firstResource).getByText(/讲义 \/ marketing-guide\.md/),
+    ).toBeInTheDocument();
     expect(
       within(firstResource).getByText("已发布，待重建检索索引"),
     ).toBeInTheDocument();
@@ -998,7 +1060,7 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.change(screen.getByLabelText("每页条数"), {
       target: { value: "50" },
     });
-    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(await screen.findByLabelText("每页条数")).toHaveValue("50");
     expect(window.location.search).toContain("pageSize=50");
     expect(screen.getByLabelText("排序字段")).toHaveValue("updatedAt");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
@@ -1008,8 +1070,13 @@ describe("admin content and knowledge ops baseline", () => {
     expect(document.body.textContent).not.toContain("embedding");
     expect(document.body.textContent).not.toContain("RAW_CHUNK_TEXT");
 
+    const refreshedFirstResource = await screen.findByTestId(
+      "resource-row-resource-public-001",
+    );
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "重建检索索引" }),
+      within(refreshedFirstResource).getByRole("button", {
+        name: "重建检索索引",
+      }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认重建营销知识库讲义的检索索引？",
@@ -1027,6 +1094,62 @@ describe("admin content and knowledge ops baseline", () => {
       }),
     );
     expect(document.body.textContent).not.toContain("hash-one");
+  });
+
+  it("uses server-side resource pagination and separates upload from read-only detail", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockResourceFetch();
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    const firstResource = await screen.findByTestId(
+      "resource-row-resource-public-001",
+    );
+
+    expect(screen.queryByLabelText("资料名称")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "上传资料" }),
+    ).toBeInTheDocument();
+    expect(
+      within(firstResource).getByRole("button", { name: "查看资料" }),
+    ).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes(
+          "/api/v1/resources?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes("pageSize=100"),
+      ),
+    ).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "上传资料" }));
+    expect(screen.getByLabelText("资料名称")).toBeInTheDocument();
+
+    fireEvent.click(
+      within(firstResource).getByRole("button", { name: "查看资料" }),
+    );
+    const detailDialog = await screen.findByRole("dialog", {
+      name: "资料详情",
+    });
+    expect(detailDialog).toHaveTextContent("章节目录");
+    expect(detailDialog).toHaveTextContent("检索状态");
+    expect(detailDialog.textContent).not.toContain("objectStoragePath");
+    expect(detailDialog.textContent).not.toContain("embedding");
+
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "50" },
+    });
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("page=1&pageSize=50"),
+        ),
+      ).toBe(true),
+    );
   });
 
   it("publishes a draft resource through the protected runtime", async () => {
@@ -1053,7 +1176,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "发布解析草稿" }),
+      within(firstResource).getByRole("button", { name: "发布资料" }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认发布营销知识库讲义的解析草稿？",
@@ -1086,9 +1209,10 @@ describe("admin content and knowledge ops baseline", () => {
     expect(
       within(
         await screen.findByTestId("resource-row-resource-public-001"),
-      ).getByText("知识点绑定 2 个"),
+      ).getByText("绑定知识点 2 个"),
     ).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "上传资料" }));
     fireEvent.change(screen.getByLabelText("资料文件"), {
       target: {
         files: [
@@ -1130,7 +1254,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "校对解析草稿" }),
+      within(firstResource).getByRole("button", { name: "校对内容" }),
     );
     expect(await screen.findByRole("dialog")).toHaveTextContent(
       "校对营销知识库讲义的解析草稿",
@@ -1223,7 +1347,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "校对解析草稿" }),
+      within(firstResource).getByRole("button", { name: "校对内容" }),
     );
 
     const reviewDialog = await screen.findByRole("dialog");
@@ -1318,7 +1442,7 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.change(screen.getByLabelText("关键词"), {
       target: { value: "不存在的资料" },
     });
-    expect(screen.getByText("没有匹配的资料")).toBeInTheDocument();
+    expect(await screen.findByText("没有匹配的资料")).toBeInTheDocument();
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");

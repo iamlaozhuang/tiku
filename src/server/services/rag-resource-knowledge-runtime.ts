@@ -251,7 +251,8 @@ function readListQuery(request: Request): AdminContentKnowledgeListQuery {
   const searchParams = new URL(request.url).searchParams;
   const page = Number(searchParams.get("page"));
   const pageSize = Number(searchParams.get("pageSize"));
-  const level = Number(searchParams.get("level"));
+  const levelValue = searchParams.get("level");
+  const level = Number(levelValue);
   const sortBy = searchParams.get("sortBy");
 
   return createAdminContentKnowledgeListQuery({
@@ -262,7 +263,14 @@ function readListQuery(request: Request): AdminContentKnowledgeListQuery {
     keyword: searchParams.get("keyword"),
     status: parseContentKnowledgeStatus(searchParams.get("status")),
     profession: parseProfessionFilter(searchParams.get("profession")),
+    resourceType: parseResourceTypeFilter(searchParams.get("resourceType")),
     level: Number.isFinite(level) && level > 0 ? level : null,
+    resourceLevel:
+      levelValue === "general"
+        ? "general"
+        : Number.isFinite(level) && level > 0
+          ? level
+          : null,
     sortBy: ADMIN_CONTENT_KNOWLEDGE_SORT_FIELDS.includes(
       sortBy as AdminContentKnowledgeSortField,
     )
@@ -270,6 +278,10 @@ function readListQuery(request: Request): AdminContentKnowledgeListQuery {
       : "updatedAt",
     sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
   });
+}
+
+function parseResourceTypeFilter(value: string | null): ResourceType | "all" {
+  return isResourceType(value) ? value : "all";
 }
 
 function parseContentKnowledgeStatus(
@@ -590,7 +602,12 @@ function matchesLocalResourceQuery(
       resourceSummary.resourceStatus === query.status) &&
     (query.profession === "all" ||
       resourceSummary.profession === query.profession) &&
-    (query.level === null || resourceSummary.level === query.level)
+    (query.resourceType === "all" ||
+      resourceSummary.resourceType === query.resourceType) &&
+    (query.resourceLevel === null ||
+      (query.resourceLevel === "general"
+        ? resourceSummary.level === null
+        : resourceSummary.level === query.resourceLevel))
   );
 }
 
@@ -1311,24 +1328,24 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
 
           void actorOrError;
           const listQuery = readListQuery(request);
-          const [result, localCatalog] = await Promise.all([
-            repositories.resourceRepository.listResources(listQuery),
-            readLocalResourceCatalog(localResourceStorageRoot),
-          ]);
+          const localCatalog = await readLocalResourceCatalog(
+            localResourceStorageRoot,
+          );
           const localResources = localCatalog.resources
             .map(mapLocalResourceEntry)
             .filter((resource) =>
               matchesLocalResourceQuery(resource, listQuery),
             );
-          const resources = [...localResources, ...result.resources];
+          const result = await listMergedResourcePage({
+            localResources,
+            query: listQuery,
+            repository: repositories.resourceRepository,
+          });
 
           return createJsonResponse(
             createPaginatedResponse(
-              { resources },
-              {
-                ...result.pagination,
-                total: result.pagination.total + localResources.length,
-              },
+              { resources: result.resources },
+              result.pagination,
             ),
           );
         },
@@ -1714,4 +1731,82 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
       },
     },
   });
+}
+
+async function listMergedResourcePage({
+  localResources,
+  query,
+  repository,
+}: {
+  localResources: AdminResourceOpsSummaryDto[];
+  query: AdminContentKnowledgeListQuery;
+  repository: RagResourceRuntimeRepository;
+}) {
+  if (localResources.length === 0) {
+    return repository.listResources(query);
+  }
+
+  const sortedLocalResources = [...localResources].sort((left, right) => {
+    const leftValue = readResourceSortValue(left, query.sortBy);
+    const rightValue = readResourceSortValue(right, query.sortBy);
+    const comparison = leftValue.localeCompare(rightValue);
+
+    return query.sortOrder === "asc" ? comparison : -comparison;
+  });
+  const pageStart = (query.page - 1) * query.pageSize;
+  const pageEnd = pageStart + query.pageSize;
+  const localPage = sortedLocalResources.slice(pageStart, pageEnd);
+  const databaseStart = Math.max(0, pageStart - sortedLocalResources.length);
+  const neededDatabaseRows = query.pageSize - localPage.length;
+  const databasePage = Math.floor(databaseStart / query.pageSize) + 1;
+  const databaseOffset = databaseStart % query.pageSize;
+  const firstDatabaseResult = await repository.listResources({
+    ...query,
+    page: databasePage,
+  });
+  let databaseRows = firstDatabaseResult.resources.slice(
+    databaseOffset,
+    databaseOffset + neededDatabaseRows,
+  );
+
+  if (
+    databaseRows.length < neededDatabaseRows &&
+    databasePage * query.pageSize < firstDatabaseResult.pagination.total
+  ) {
+    const secondDatabaseResult = await repository.listResources({
+      ...query,
+      page: databasePage + 1,
+    });
+    databaseRows = [
+      ...databaseRows,
+      ...secondDatabaseResult.resources.slice(
+        0,
+        neededDatabaseRows - databaseRows.length,
+      ),
+    ];
+  }
+
+  return {
+    resources: [...localPage, ...databaseRows],
+    pagination: {
+      ...firstDatabaseResult.pagination,
+      page: query.page,
+      total: firstDatabaseResult.pagination.total + sortedLocalResources.length,
+    },
+  };
+}
+
+function readResourceSortValue(
+  resourceSummary: AdminResourceOpsSummaryDto,
+  sortBy: AdminContentKnowledgeSortField,
+) {
+  if (sortBy === "createdAt") {
+    return resourceSummary.uploadedAt;
+  }
+
+  if (sortBy === "publishedAt") {
+    return resourceSummary.publishedAt ?? "";
+  }
+
+  return resourceSummary.updatedAt;
 }

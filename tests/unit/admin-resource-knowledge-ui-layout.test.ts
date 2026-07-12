@@ -44,7 +44,7 @@ describe("admin resource knowledge UI layout", () => {
     expect(resourceSource).toContain(
       'data-testid="resource-state-machine-context-band"',
     );
-    expect(resourceSource).toContain("资源状态机");
+    expect(resourceSource).toContain("当前页资料状态");
     expect(resourceSource).toContain("上传待解析");
     expect(resourceSource).toContain("解析草稿");
     expect(resourceSource).toContain("已发布待索引");

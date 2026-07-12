@@ -8,6 +8,8 @@ import {
   eq,
   ilike,
   inArray,
+  isNull,
+  or,
   type SQL,
 } from "drizzle-orm";
 
@@ -535,7 +537,12 @@ function createResourceConditions(
   const conditions: SQL[] = [];
 
   if (queryInput.keyword !== null) {
-    conditions.push(ilike(resource.title, `%${queryInput.keyword}%`));
+    conditions.push(
+      or(
+        ilike(resource.title, `%${queryInput.keyword}%`),
+        ilike(resource.original_file_name, `%${queryInput.keyword}%`),
+      )!,
+    );
   }
 
   if (isResourceStatus(queryInput.status)) {
@@ -546,8 +553,14 @@ function createResourceConditions(
     conditions.push(eq(resource.profession, queryInput.profession));
   }
 
-  if (queryInput.level !== null) {
-    conditions.push(eq(resource.level, queryInput.level));
+  if (queryInput.resourceType !== "all") {
+    conditions.push(eq(resource.resource_type, queryInput.resourceType));
+  }
+
+  if (queryInput.resourceLevel === "general") {
+    conditions.push(isNull(resource.level));
+  } else if (queryInput.resourceLevel !== null) {
+    conditions.push(eq(resource.level, queryInput.resourceLevel));
   }
 
   return conditions;

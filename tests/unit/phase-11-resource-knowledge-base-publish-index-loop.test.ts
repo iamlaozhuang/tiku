@@ -59,11 +59,13 @@ function createAdminSessionService(): Pick<
 
 function createRepositories(input: {
   auditLogEntries: unknown[];
+  listQueries?: unknown[];
   publishCalls: string[];
 }): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   return {
     resourceRepository: {
       async listResources(query) {
+        input.listQueries?.push(query);
         return {
           resources: [
             {
@@ -197,6 +199,41 @@ function createRepositories(input: {
 }
 
 describe("phase 11 resource knowledge_base publish index loop", () => {
+  it("passes resource type and general-level filters into the paginated repository query", async () => {
+    const listQueries: unknown[] = [];
+    const localResourceStorageRoot = await mkdtemp(
+      join(tmpdir(), "tiku-resource-list-query-"),
+    );
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      localResourceStorageRoot,
+      repositories: createRepositories({
+        auditLogEntries: [],
+        listQueries,
+        publishCalls: [],
+      }),
+      sessionService: createAdminSessionService(),
+    });
+
+    const response = await handlers.resources.collection.GET(
+      new Request(
+        "http://localhost/api/v1/resources?page=2&pageSize=50&resourceType=lecture_note&level=general&sortBy=publishedAt&sortOrder=asc",
+        { headers: { authorization: "Bearer admin-session-token" } },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listQueries).toEqual([
+      expect.objectContaining({
+        page: 2,
+        pageSize: 50,
+        resourceType: "lecture_note",
+        resourceLevel: "general",
+        sortBy: "publishedAt",
+        sortOrder: "asc",
+      }),
+    ]);
+  });
+
   it("publishes a Markdown draft through a publicId route and writes redacted audit evidence", async () => {
     const auditLogEntries: unknown[] = [];
     const publishCalls: string[] = [];
