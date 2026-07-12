@@ -1,11 +1,33 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-b3-ai-task-lifecycle-remote-sync-2026-07-12
-updatedAt: "2026-07-12T13:08:00-07:00"
+currentPhase: user-led-b4-ai-training-information-architecture-local-closeout-2026-07-12
+updatedAt: "2026-07-12T13:34:00-07:00"
+latestUserLedB4AiTrainingInformationArchitecture:
+  id: user-led-b4-ai-training-information-architecture-2026-07-12
+  status: closed_local_verified_ready_for_commit
+  result: pass_ai_training_context_localization_and_provider_closed_browsing
+  priority: p1
+  branch: codex/user-led-b4-ai-training-ux
+  startSha: 86610c400f6db101ffefc08d179c0ad1de5ce641
+  approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b4-ai-training-information-architecture.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b4-ai-training-information-architecture.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b4-ai-training-information-architecture-audit.md
+  verification:
+    focusedTests: pass_2_files_54_tests
+    fullTests: pass_360_files_1972_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    diffCheck: pass
+    providerExecution: blocked_not_executed
+    databaseMutation: blocked_not_executed
+  nextRequiredTaskId: user-led-b5-ai-paper-source-strategy-2026-07-12
 latestUserLedB3AiTaskLifecycle:
   id: user-led-b3-ai-task-lifecycle-2026-07-12
-  status: closed_local_verified_ready_for_push
+  status: closed_remote_synced
   result: pass_ai_task_result_atomic_lifecycle_and_history_compatibility
   priority: p1
   branch: codex/user-led-b3-ai-training
@@ -33,6 +55,8 @@ latestUserLedB3AiTaskLifecycle:
     masterTypecheck: pass
     masterDiffCheck: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    remotePush: pass_origin_master_86610c400
+    localRemoteComparison: pass_0_behind_0_ahead
     databaseMutationExecuted: false
     providerExecution: blocked_not_executed
   nextRequiredTaskId: user-led-b4-ai-training-information-architecture-2026-07-12
@@ -5479,6 +5503,37 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
+  id: user-led-b4-ai-training-information-architecture-2026-07-12
+  title: User-led B4 AI training information architecture and Provider-closed experience repair
+  phase: user-led-b4-ai-training-information-architecture-2026-07-12
+  status: closed_local_verified_ready_for_commit
+  priority: p1
+  taskKind: targeted_student_ai_training_ux_repair
+  branch: codex/user-led-b4-ai-training-ux
+  humanApprovalBoundary:
+    implementation: approved
+    localCommit: approved
+    fastForwardMerge: approved_master_only
+    push: approved_origin_master_only
+    cleanup: approved_after_remote_sync
+    approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+    databaseMigration: blocked
+    providerExecution: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pullRequest: blocked
+  plannedAt: "2026-07-12T13:20:00-07:00"
+  claimedAt: "2026-07-12T13:20:00-07:00"
+  targetClosureItem: Keep AI history and authorization navigation usable while generation is closed, and localize learner-facing context metadata.
+  behaviorBoundary: student_ai_training_page_tests_and_governance_only_no_api_repository_schema_migration_fixture_seed_provider_env_staging_prod_or_deploy
+  evidenceMode: redacted_status_count_command_screenshot_path_and_commit_sha_only_no_credentials_tokens_env_values_database_urls_or_raw_generation_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b4-ai-training-information-architecture.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b4-ai-training-information-architecture.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b4-ai-training-information-architecture-audit.md
+  nextRequiredTaskId: user-led-b5-ai-paper-source-strategy-2026-07-12
+  localFullLoopGate: pass
+
+previousCurrentTaskBeforeUserLedB4AiTrainingInformationArchitecture20260712:
   id: user-led-b3-ai-task-lifecycle-2026-07-12
   title: User-led B3 AI task lifecycle consistency repair
   phase: user-led-b3-ai-task-lifecycle-closeout-2026-07-12

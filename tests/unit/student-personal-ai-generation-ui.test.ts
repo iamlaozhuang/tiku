@@ -1324,9 +1324,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     render(createElement(StudentPersonalAiGenerationPage));
 
-    expect(
-      await screen.findByText("2026-06-12T10:00:00.000Z"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("2026年6月12日 18:00")).toBeInTheDocument();
     expect(screen.getByText("状态")).toBeInTheDocument();
     expect(screen.getByText("已完成")).toBeInTheDocument();
     expect(screen.getByText("请求时间")).toBeInTheDocument();
@@ -2528,9 +2526,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
     expect(screen.getByText("授权上下文")).toBeInTheDocument();
     expect(screen.getByText("额度归属确认")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("个人授权 · 高级版 · monopoly 3级"),
-    ).toBeChecked();
+    expect(screen.getByLabelText("个人授权 · 高级版 · 专卖 3级")).toBeChecked();
     expect(screen.getByText(/当前将使用个人额度/u)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
@@ -2546,7 +2542,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       quotaOwnerPublicId: "employee-session-user-public-123",
     });
 
-    fireEvent.click(screen.getByLabelText("组织授权 · 高级版 · monopoly 3级"));
+    fireEvent.click(screen.getByLabelText("组织授权 · 高级版 · 专卖 3级"));
     expect(screen.getByText(/当前将使用组织额度/u)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: aiPaperTabLabel }));
     fireEvent.change(screen.getByLabelText("题源偏好"), {
@@ -2894,9 +2890,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     expect(await screen.findByText("生成任务已受理")).toBeInTheDocument();
-    expect(
-      await screen.findByText("2026-06-12T12:30:00.000Z"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("2026年6月12日 20:30")).toBeInTheDocument();
     expect(screen.getAllByText("处理中").length).toBeGreaterThan(0);
     expect(screen.getAllByText("依据不足").length).toBeGreaterThan(0);
     expect(screen.getAllByText("0").length).toBeGreaterThan(0);
@@ -4223,9 +4217,7 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(
-      await screen.findByText("2026-06-12T12:45:00.000Z"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("2026年6月12日 20:45")).toBeInTheDocument();
     expect(screen.queryByText("requestPublicId")).not.toBeInTheDocument();
     expect(screen.queryByText("taskPublicId")).not.toBeInTheDocument();
     expect(screen.queryByText("resultPublicId")).not.toBeInTheDocument();

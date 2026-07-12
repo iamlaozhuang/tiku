@@ -621,7 +621,7 @@ function mapStudentAiKnowledgeNodeOption(
   return {
     publicId: knowledgeNode.publicId,
     label: knowledgeNode.pathName,
-    description: `${knowledgeNode.profession} / ${knowledgeNode.levelList.join(", ") || "全等级"}`,
+    description: `${getProfessionLabel(knowledgeNode.profession)} / ${knowledgeNode.levelList.join(", ") || "全等级"}`,
   };
 }
 
@@ -1287,6 +1287,69 @@ function getEditionLabel(
   return edition === "advanced" ? "高级版" : "标准版";
 }
 
+const professionLabelMap: Record<
+  EffectiveAuthorizationContextDto["profession"],
+  string
+> = {
+  logistics: "物流",
+  marketing: "营销",
+  monopoly: "专卖",
+};
+
+function getProfessionLabel(
+  profession: EffectiveAuthorizationContextDto["profession"],
+): string {
+  return professionLabelMap[profession];
+}
+
+function getDatePart(
+  parts: Intl.DateTimeFormatPart[],
+  type: Intl.DateTimeFormatPartTypes,
+): string {
+  return parts.find((part) => part.type === type)?.value ?? "";
+}
+
+function formatLearnerDate(value: string | null | undefined): string {
+  if (value == null) {
+    return "未设置";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "时间暂不可用";
+  }
+
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    day: "numeric",
+    month: "numeric",
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+  }).formatToParts(date);
+
+  return `${getDatePart(parts, "year")}年${getDatePart(parts, "month")}月${getDatePart(parts, "day")}日`;
+}
+
+function formatLearnerDateTime(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "时间暂不可用";
+  }
+
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    day: "numeric",
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    month: "numeric",
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+  }).formatToParts(date);
+
+  return `${getDatePart(parts, "year")}年${getDatePart(parts, "month")}月${getDatePart(parts, "day")}日 ${getDatePart(parts, "hour")}:${getDatePart(parts, "minute")}`;
+}
+
 function getQuotaOwnerLabel(
   quotaOwnerType: EffectiveAuthorizationContextDto["quotaOwnerType"],
 ): string {
@@ -1306,9 +1369,9 @@ function getAuthorizationContextAccessibleLabel(
 ): string {
   return `${getAuthorizationSourceLabel(
     authorizationContext.authorizationSource,
-  )} · ${getEditionLabel(authorizationContext.effectiveEdition)} · ${
-    authorizationContext.profession
-  } ${authorizationContext.level}级`;
+  )} · ${getEditionLabel(authorizationContext.effectiveEdition)} · ${getProfessionLabel(
+    authorizationContext.profession,
+  )} ${authorizationContext.level}级`;
 }
 
 function StudentPersonalAiGenerationAuthorizationContextSelector({
@@ -1390,7 +1453,7 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
                     有效{getEditionLabel(authorizationContext.effectiveEdition)}
                   </span>
                   <span className="bg-muted rounded-md px-2 py-1">
-                    到期 {authorizationContext.expiresAt ?? "未设置"}
+                    到期 {formatLearnerDate(authorizationContext.expiresAt)}
                   </span>
                   <span className="bg-muted rounded-md px-2 py-1">
                     额度{" "}
@@ -1409,7 +1472,8 @@ function StudentPersonalAiGenerationAuthorizationContextSelector({
           <p className="text-text-secondary mt-1 text-sm leading-6">
             当前将使用
             {getQuotaOwnerLabel(selectedAuthorizationContext.quotaOwnerType)}
-            额度，范围为 {selectedAuthorizationContext.profession}{" "}
+            额度，范围为
+            {getProfessionLabel(selectedAuthorizationContext.profession)}{" "}
             {selectedAuthorizationContext.level}级。
           </p>
         </div>
@@ -2897,7 +2961,10 @@ function StudentPersonalAiGenerationHistorySummary({
           >
             <dl>
               <ContractField label="状态" value={historyRow.status} />
-              <ContractField label="请求时间" value={historyRow.requestedAt} />
+              <ContractField
+                label="请求时间"
+                value={formatLearnerDateTime(historyRow.requestedAt)}
+              />
               <ContractField
                 label="依据资料状态"
                 value={historyRow.evidenceStatus}
@@ -3044,7 +3111,10 @@ function StudentPersonalAiGenerationResultHistorySummary({
             <dl>
               <ContractField label="任务类型" value={resultRow.taskType} />
               <ContractField label="状态" value={resultRow.status} />
-              <ContractField label="生成时间" value={resultRow.persistedAt} />
+              <ContractField
+                label="生成时间"
+                value={formatLearnerDateTime(resultRow.persistedAt)}
+              />
               <ContractField
                 label="生成内容摘要"
                 value={resultRow.contentReference.contentPreviewMasked}
@@ -3209,7 +3279,7 @@ function StudentPersonalAiGenerationResultDetailSummary({
           <ContractField label="状态" value={resultDetail.result.status} />
           <ContractField
             label="生成时间"
-            value={resultDetail.result.persistedAt}
+            value={formatLearnerDateTime(resultDetail.result.persistedAt)}
           />
           <ContractField
             label="生成内容摘要"
@@ -4148,6 +4218,11 @@ export function StudentPersonalAiGenerationPage() {
     pageState === "checking" ||
     pageState === "loading" ||
     pageState === "unavailable";
+  const isAiGenerationNavigationDisabled =
+    !hasSessionToken ||
+    pageState === "checking" ||
+    pageState === "loading" ||
+    pageState === "unavailable";
   const shouldShowAiGenerationDetailControls =
     hasSessionToken &&
     pageState !== "checking" &&
@@ -4155,6 +4230,9 @@ export function StudentPersonalAiGenerationPage() {
     pageState !== "unavailable";
   const shouldShowAuthorizationContextSelector =
     shouldShowAiGenerationDetailControls && authorizationContexts.length > 0;
+  const isOrganizationEmployeeAiTraining = authorizationContexts.some(
+    (authorizationContext) => authorizationContext.ownerType === "organization",
+  );
   const hasLocalAiGenerationExperience =
     pageState === "ready" && experience !== null;
   const currentAiLearningSessionPublicId =
@@ -4508,11 +4586,149 @@ export function StudentPersonalAiGenerationPage() {
     }
   }
 
+  const shouldPrioritizeResultHistory =
+    generationAvailabilityState === "closed" ||
+    generationAvailabilityState === "error";
+
+  function renderResultHistoryZone() {
+    return (
+      <section
+        data-testid="student-ai-zone-result-history"
+        className="flex flex-col gap-5"
+      >
+        {pageState === "ready" && experience !== null ? (
+          <StudentPersonalAiGenerationVisibleGeneratedContent
+            visibleGeneratedContent={
+              experience.runtimeBridge.visibleGeneratedContent
+            }
+          />
+        ) : null}
+        {pageState === "ready" &&
+        experience !== null &&
+        isStudentAiPaperGenerationExperience(experience) ? (
+          <StudentAiPaperAssemblySummary
+            paperAssembly={experience.runtimeBridge.paperAssembly}
+          />
+        ) : null}
+
+        <StudentPersonalAiGenerationPracticeFeedbackActions
+          canUseGeneratedPractice={canUseGeneratedPractice}
+          isRetryDisabled={isRetryGenerationDisabled}
+          practiceFeedbackState={practiceFeedbackStateForCurrentResult}
+          onStartPractice={() => void handleStartAiLearningSession()}
+          onSubmitAnswer={() => void handleSubmitAiLearningAnswer()}
+          onViewFeedback={() => void handleViewAiLearningFeedback()}
+          onRetryGeneration={handleRetryPersonalAiGenerationRequest}
+        />
+
+        {isAiLearningSessionStarted &&
+        activeAiLearningSessionQuestions.length > 0 ? (
+          <StudentAiLearningSessionPanel
+            answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
+            onSelectOptionLabel={(question, optionLabel) => {
+              setSelectedAiLearningAnswerLabelsByQuestion(
+                (currentSelectedLabels) => {
+                  const currentQuestionLabels =
+                    currentSelectedLabels[question.sessionQuestionPublicId] ??
+                    [];
+                  const nextQuestionLabels =
+                    question.questionType === "multi_choice"
+                      ? currentQuestionLabels.includes(optionLabel)
+                        ? currentQuestionLabels.filter(
+                            (currentLabel) => currentLabel !== optionLabel,
+                          )
+                        : [...currentQuestionLabels, optionLabel]
+                      : [optionLabel];
+
+                  return {
+                    ...currentSelectedLabels,
+                    [question.sessionQuestionPublicId]: nextQuestionLabels,
+                  };
+                },
+              );
+              setAiLearningAnswerFeedbackByQuestion({});
+            }}
+            questions={activeAiLearningSessionQuestions}
+            selectedOptionLabelsByQuestion={
+              selectedAiLearningAnswerLabelsByQuestion
+            }
+          />
+        ) : null}
+
+        {pageState === "loading" ? (
+          <section
+            className="border-border bg-surface rounded-xl border p-4"
+            aria-busy="true"
+          >
+            <div className="flex items-center gap-3">
+              <Loader2
+                className="text-brand-primary size-5 animate-spin"
+                aria-hidden="true"
+              />
+              <p className="text-text-primary text-sm font-medium">
+                {copy.loadingTitle}
+              </p>
+            </div>
+          </section>
+        ) : null}
+
+        {pageState === "empty" ? (
+          <StudentPersonalAiGenerationStateMessage
+            title={copy.emptyTitle}
+            description={copy.emptyDescription}
+          />
+        ) : null}
+
+        {pageState === "error" ? (
+          <StudentPersonalAiGenerationStateMessage
+            title={copy.errorTitle}
+            description={copy.errorDescription}
+            tone="warning"
+          />
+        ) : null}
+
+        {pageState === "ready" && experience !== null ? (
+          <StudentPersonalAiGenerationContractSummary experience={experience} />
+        ) : null}
+
+        <StudentPersonalAiGenerationHistorySummary
+          historyState={historyState}
+          historyRows={requestHistory}
+          onChangePage={(page) => void handleChangeRequestHistoryPage(page)}
+          pagination={requestHistoryPagination}
+          taskType={historyTaskType}
+        />
+
+        <StudentPersonalAiGenerationResultHistorySummary
+          historyTaskType={historyTaskType}
+          onChangePage={(page) => void handleChangeResultHistoryPage(page)}
+          pagination={resultHistoryPagination}
+          resultHistoryState={resultHistoryState}
+          resultHistory={resultHistory}
+          isResultDetailLoading={resultDetailState === "loading"}
+          onOpenResultDetail={(resultPublicId) =>
+            void handleOpenPersonalAiGenerationResultDetail(resultPublicId)
+          }
+          selectedResultPublicId={selectedResultPublicId}
+        />
+
+        <StudentPersonalAiGenerationResultDetailSummary
+          resultDetailState={resultDetailState}
+          resultDetail={resultDetail}
+        />
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20 lg:max-w-5xl">
       <section data-testid="student-ai-zone-context" className="space-y-5">
         <div className="space-y-2">
-          <p className="text-brand-primary text-sm font-medium">个人 AI 训练</p>
+          <p className="text-brand-primary text-sm font-medium">
+            {isOrganizationEmployeeAiTraining
+              ? "企业员工 AI 训练"
+              : "个人 AI 训练"}
+          </p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
             {copy.title}
           </h1>
@@ -4552,7 +4768,7 @@ export function StudentPersonalAiGenerationPage() {
         {shouldShowAuthorizationContextSelector ? (
           <StudentPersonalAiGenerationAuthorizationContextSelector
             authorizationContexts={authorizationContexts}
-            disabled={isAiGenerationActionDisabled}
+            disabled={isAiGenerationNavigationDisabled}
             onSelectAuthorizationContext={handleSelectAuthorizationContext}
             selectedAuthorizationPublicId={selectedAuthorizationPublicId}
           />
@@ -4564,207 +4780,101 @@ export function StudentPersonalAiGenerationPage() {
           <section data-testid="student-ai-zone-mode">
             <StudentAiTrainingModeTabs
               activeTaskType={activeTaskType}
-              disabled={isAiGenerationActionDisabled}
+              disabled={isAiGenerationNavigationDisabled}
               onSelectTaskType={handleSelectAiTrainingTaskType}
             />
           </section>
 
-          <section
-            data-testid="student-ai-zone-parameters"
-            className="grid grid-cols-1 gap-3"
+          {shouldPrioritizeResultHistory ? renderResultHistoryZone() : null}
+
+          <details
+            className="border-border bg-surface rounded-xl border"
+            data-testid="student-ai-generation-settings"
+            open={generationAvailabilityState === "available"}
           >
-            {activeTaskType === "ai_question_generation" ? (
-              <>
-                <StudentAiKnowledgeScopePanel
-                  disabled={isAiGenerationBaseActionDisabled}
-                  knowledgeNodeLoadState={activeKnowledgeNodeLoadState}
-                  knowledgeNodeOptions={activeKnowledgeNodeOptions}
-                  knowledgeScopeState={aiQuestionKnowledgeScope}
-                  onKnowledgeScopeChange={setAiQuestionKnowledgeScope}
-                  titlePrefix="AI出题"
-                />
-                <StudentPersonalAiGenerationDetailControlGroup
-                  title="AI出题参数"
-                  description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
-                  controls={activeAiQuestionDetailControls}
-                  disabled={isAiGenerationActionDisabled}
-                />
-              </>
-            ) : (
-              <>
-                <StudentAiPaperSourceSummary
-                  authorizationContext={activeAuthorizationContext}
-                  disabled={isAiGenerationBaseActionDisabled}
-                  onSourcePreferenceChange={setAiPaperSourcePreference}
-                  sourcePreference={aiPaperSourcePreference}
-                />
-                <StudentAiKnowledgeScopePanel
-                  disabled={isAiGenerationBaseActionDisabled}
-                  knowledgeNodeLoadState={activeKnowledgeNodeLoadState}
-                  knowledgeNodeOptions={activeKnowledgeNodeOptions}
-                  knowledgeScopeState={aiPaperKnowledgeScope}
-                  onKnowledgeScopeChange={setAiPaperKnowledgeScope}
-                  titlePrefix="AI组卷"
-                />
-                <StudentPersonalAiGenerationDetailControlGroup
-                  title="AI组卷参数"
-                  description="用于个人或企业授权上下文下的自测组卷，从正式题库选题，不写入正式试卷。"
-                  controls={activeAiPaperDetailControls}
-                  disabled={isAiGenerationActionDisabled}
-                />
-              </>
-            )}
-            <button
-              type="button"
-              disabled={isAiGenerationActionDisabled}
-              onClick={() =>
-                void handleSubmitPersonalAiGenerationRequest(activeTaskType)
-              }
-              className="bg-primary text-primary-foreground flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {pageState === "loading" ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              ) : activeTaskType === "ai_question_generation" ? (
-                <Sparkles className="size-4" aria-hidden="true" />
-              ) : (
-                <ClipboardList className="size-4" aria-hidden="true" />
-              )}
-              {activeSubmitButtonLabel}
-            </button>
-          </section>
-
-          <StudentAiGenerationBoundarySummary
-            authorizationContext={activeAuthorizationContext}
-          />
-
-          <section
-            data-testid="student-ai-zone-result-history"
-            className="flex flex-col gap-5"
-          >
-            {pageState === "ready" && experience !== null ? (
-              <StudentPersonalAiGenerationVisibleGeneratedContent
-                visibleGeneratedContent={
-                  experience.runtimeBridge.visibleGeneratedContent
-                }
-              />
-            ) : null}
-            {pageState === "ready" &&
-            experience !== null &&
-            isStudentAiPaperGenerationExperience(experience) ? (
-              <StudentAiPaperAssemblySummary
-                paperAssembly={experience.runtimeBridge.paperAssembly}
-              />
-            ) : null}
-
-            <StudentPersonalAiGenerationPracticeFeedbackActions
-              canUseGeneratedPractice={canUseGeneratedPractice}
-              isRetryDisabled={isRetryGenerationDisabled}
-              practiceFeedbackState={practiceFeedbackStateForCurrentResult}
-              onStartPractice={() => void handleStartAiLearningSession()}
-              onSubmitAnswer={() => void handleSubmitAiLearningAnswer()}
-              onViewFeedback={() => void handleViewAiLearningFeedback()}
-              onRetryGeneration={handleRetryPersonalAiGenerationRequest}
-            />
-
-            {isAiLearningSessionStarted &&
-            activeAiLearningSessionQuestions.length > 0 ? (
-              <StudentAiLearningSessionPanel
-                answerFeedbackByQuestion={aiLearningAnswerFeedbackByQuestion}
-                onSelectOptionLabel={(question, optionLabel) => {
-                  setSelectedAiLearningAnswerLabelsByQuestion(
-                    (currentSelectedLabels) => {
-                      const currentQuestionLabels =
-                        currentSelectedLabels[
-                          question.sessionQuestionPublicId
-                        ] ?? [];
-                      const nextQuestionLabels =
-                        question.questionType === "multi_choice"
-                          ? currentQuestionLabels.includes(optionLabel)
-                            ? currentQuestionLabels.filter(
-                                (currentLabel) => currentLabel !== optionLabel,
-                              )
-                            : [...currentQuestionLabels, optionLabel]
-                          : [optionLabel];
-
-                      return {
-                        ...currentSelectedLabels,
-                        [question.sessionQuestionPublicId]: nextQuestionLabels,
-                      };
-                    },
-                  );
-                  setAiLearningAnswerFeedbackByQuestion({});
-                }}
-                questions={activeAiLearningSessionQuestions}
-                selectedOptionLabelsByQuestion={
-                  selectedAiLearningAnswerLabelsByQuestion
-                }
-              />
-            ) : null}
-
-            {pageState === "loading" ? (
+            <summary className="text-text-primary hover:bg-muted flex cursor-pointer items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-semibold">
+              <span>生成设置</span>
+              <span className="text-text-secondary text-xs font-normal">
+                {generationAvailabilityState === "available"
+                  ? "可调整本次生成条件"
+                  : "当前仅可查看"}
+              </span>
+            </summary>
+            <div className="border-border grid grid-cols-1 gap-3 border-t p-4">
               <section
-                className="border-border bg-surface rounded-xl border p-4"
-                aria-busy="true"
+                data-testid="student-ai-zone-parameters"
+                className="grid grid-cols-1 gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <Loader2
-                    className="text-brand-primary size-5 animate-spin"
-                    aria-hidden="true"
-                  />
-                  <p className="text-text-primary text-sm font-medium">
-                    {copy.loadingTitle}
-                  </p>
-                </div>
+                {activeTaskType === "ai_question_generation" ? (
+                  <>
+                    <StudentAiKnowledgeScopePanel
+                      disabled={isAiGenerationBaseActionDisabled}
+                      knowledgeNodeLoadState={activeKnowledgeNodeLoadState}
+                      knowledgeNodeOptions={activeKnowledgeNodeOptions}
+                      knowledgeScopeState={aiQuestionKnowledgeScope}
+                      onKnowledgeScopeChange={setAiQuestionKnowledgeScope}
+                      titlePrefix="AI出题"
+                    />
+                    <StudentPersonalAiGenerationDetailControlGroup
+                      title="AI出题参数"
+                      description="用于个人或企业授权上下文下的自练出题，不写入正式题目。"
+                      controls={activeAiQuestionDetailControls}
+                      disabled={isAiGenerationActionDisabled}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <StudentAiPaperSourceSummary
+                      authorizationContext={activeAuthorizationContext}
+                      disabled={isAiGenerationBaseActionDisabled}
+                      onSourcePreferenceChange={setAiPaperSourcePreference}
+                      sourcePreference={aiPaperSourcePreference}
+                    />
+                    <StudentAiKnowledgeScopePanel
+                      disabled={isAiGenerationBaseActionDisabled}
+                      knowledgeNodeLoadState={activeKnowledgeNodeLoadState}
+                      knowledgeNodeOptions={activeKnowledgeNodeOptions}
+                      knowledgeScopeState={aiPaperKnowledgeScope}
+                      onKnowledgeScopeChange={setAiPaperKnowledgeScope}
+                      titlePrefix="AI组卷"
+                    />
+                    <StudentPersonalAiGenerationDetailControlGroup
+                      title="AI组卷参数"
+                      description="用于个人或企业授权上下文下的自测组卷，从正式题库选题，不写入正式试卷。"
+                      controls={activeAiPaperDetailControls}
+                      disabled={isAiGenerationActionDisabled}
+                    />
+                  </>
+                )}
+                <button
+                  type="button"
+                  disabled={isAiGenerationActionDisabled}
+                  onClick={() =>
+                    void handleSubmitPersonalAiGenerationRequest(activeTaskType)
+                  }
+                  className="bg-primary text-primary-foreground flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {pageState === "loading" ? (
+                    <Loader2
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : activeTaskType === "ai_question_generation" ? (
+                    <Sparkles className="size-4" aria-hidden="true" />
+                  ) : (
+                    <ClipboardList className="size-4" aria-hidden="true" />
+                  )}
+                  {activeSubmitButtonLabel}
+                </button>
               </section>
-            ) : null}
 
-            {pageState === "empty" ? (
-              <StudentPersonalAiGenerationStateMessage
-                title={copy.emptyTitle}
-                description={copy.emptyDescription}
+              <StudentAiGenerationBoundarySummary
+                authorizationContext={activeAuthorizationContext}
               />
-            ) : null}
+            </div>
+          </details>
 
-            {pageState === "error" ? (
-              <StudentPersonalAiGenerationStateMessage
-                title={copy.errorTitle}
-                description={copy.errorDescription}
-                tone="warning"
-              />
-            ) : null}
-
-            {pageState === "ready" && experience !== null ? (
-              <StudentPersonalAiGenerationContractSummary
-                experience={experience}
-              />
-            ) : null}
-
-            <StudentPersonalAiGenerationHistorySummary
-              historyState={historyState}
-              historyRows={requestHistory}
-              onChangePage={(page) => void handleChangeRequestHistoryPage(page)}
-              pagination={requestHistoryPagination}
-              taskType={historyTaskType}
-            />
-
-            <StudentPersonalAiGenerationResultHistorySummary
-              historyTaskType={historyTaskType}
-              onChangePage={(page) => void handleChangeResultHistoryPage(page)}
-              pagination={resultHistoryPagination}
-              resultHistoryState={resultHistoryState}
-              resultHistory={resultHistory}
-              isResultDetailLoading={resultDetailState === "loading"}
-              onOpenResultDetail={(resultPublicId) =>
-                void handleOpenPersonalAiGenerationResultDetail(resultPublicId)
-              }
-              selectedResultPublicId={selectedResultPublicId}
-            />
-
-            <StudentPersonalAiGenerationResultDetailSummary
-              resultDetailState={resultDetailState}
-              resultDetail={resultDetail}
-            />
-          </section>
+          {!shouldPrioritizeResultHistory ? renderResultHistoryZone() : null}
         </>
       ) : null}
 

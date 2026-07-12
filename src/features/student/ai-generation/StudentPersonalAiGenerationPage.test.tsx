@@ -146,6 +146,26 @@ function createStandardAuthorizationListPayload(): EffectiveAuthorizationListDto
   };
 }
 
+function createPersonalAndOrganizationAuthorizationListPayload(): EffectiveAuthorizationListDto {
+  const personalPayload = createAdvancedAuthorizationListPayload("personal");
+  const organizationPayload =
+    createAdvancedAuthorizationListPayload("organization");
+
+  return {
+    authorizations: [],
+    effectiveAuthorizations: [],
+    authorizationContexts: [
+      ...(personalPayload.authorizationContexts ?? []),
+      ...((organizationPayload.authorizationContexts ?? []).map(
+        (authorizationContext) => ({
+          ...authorizationContext,
+          authorizationPublicId: "organization_authorization_context_ui_502",
+        }),
+      ) ?? []),
+    ],
+  };
+}
+
 function createResultDetailPayload(
   unsafeEchoFields: Record<string, string> = {},
 ) {
@@ -366,6 +386,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       expect(
         await screen.findByText("AI 生成服务当前未开放"),
       ).toBeInTheDocument();
+      fireEvent.click(screen.getByText("生成设置"));
       const submitButton = screen.getByRole("button", {
         name: "生成练习题草稿",
       });
@@ -379,6 +400,91 @@ describe("StudentPersonalAiGenerationPage", () => {
       expect(document.body).not.toHaveTextContent("Provider");
     },
   );
+
+  it("keeps history and authorization navigation usable while generation is closed", async () => {
+    mockAuthorizationAndResultHistoryResponse(
+      {
+        code: 0,
+        message: "ok",
+        data: createResultHistoryPayload(),
+      },
+      {
+        code: 0,
+        message: "ok",
+        data: createRequestHistoryPayload(),
+      },
+      {
+        authorizationPayload:
+          createPersonalAndOrganizationAuthorizationListPayload(),
+        generationAvailability: "closed",
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    expect(
+      await screen.findByText("AI 生成服务当前未开放"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("企业员工 AI 训练")).toBeInTheDocument();
+    expect(screen.queryByText("个人 AI 训练")).not.toBeInTheDocument();
+
+    const organizationContext = screen.getByRole("radio", {
+      name: "组织授权 · 高级版 · 专卖 3级",
+    });
+    expect(organizationContext).not.toBeDisabled();
+    fireEvent.click(organizationContext);
+    expect(organizationContext).toBeChecked();
+
+    const paperTab = screen.getByRole("tab", { name: "AI组卷" });
+    expect(paperTab).not.toBeDisabled();
+    fireEvent.click(paperTab);
+    expect(paperTab).toHaveAttribute("aria-selected", "true");
+
+    const historyZone = screen.getByTestId("student-ai-zone-result-history");
+    const generationSettings = screen.getByTestId(
+      "student-ai-generation-settings",
+    );
+    expect(
+      historyZone.compareDocumentPosition(generationSettings) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(generationSettings).not.toHaveAttribute("open");
+    expect(document.body).not.toHaveTextContent("Provider");
+    expect(
+      studentRuntimeApiMock.fetchStudentApi.mock.calls.some(
+        (requestCall) =>
+          (requestCall[2] as RequestInit | undefined)?.method === "POST",
+      ),
+    ).toBe(false);
+  });
+
+  it("localizes profession and learner-facing dates", async () => {
+    mockAuthorizationAndResultHistoryResponse(
+      {
+        code: 0,
+        message: "ok",
+        data: createResultHistoryPayload(),
+      },
+      {
+        code: 0,
+        message: "ok",
+        data: createRequestHistoryPayload(),
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    expect(
+      await screen.findByRole("radio", {
+        name: "个人授权 · 高级版 · 专卖 3级",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("到期 2027年6月14日")).toBeInTheDocument();
+    expect(screen.getByText("2026年6月14日 17:00")).toBeInTheDocument();
+    expect(screen.getByText("2026年6月14日 18:00")).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("monopoly");
+    expect(document.body).not.toHaveTextContent("2026-06-14T09:00:00.000Z");
+  });
 
   it("fails closed when the learner availability status cannot be loaded", async () => {
     mockAuthorizationAndResultHistoryResponse(
@@ -521,9 +627,7 @@ describe("StudentPersonalAiGenerationPage", () => {
         },
       );
     });
-    expect(
-      await screen.findByText("2026-06-14T09:00:00.000Z"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("2026年6月14日 17:00")).toBeInTheDocument();
     expect(screen.getByText("已完成")).toBeInTheDocument();
     expect(screen.getByText("依据较少")).toBeInTheDocument();
     expect(

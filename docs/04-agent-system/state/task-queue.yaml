@@ -118,6 +118,73 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-b4-ai-training-information-architecture-2026-07-12
+    title: User-led B4 AI training information architecture and Provider-closed experience repair
+    phase: user-led-b4-ai-training-information-architecture-2026-07-12
+    status: closed_local_verified_ready_for_commit
+    result: pass_ai_training_context_localization_and_provider_closed_browsing
+    priority: p1
+    sequenceOrder: 49
+    taskKind: targeted_student_ai_training_ux_repair
+    moduleRunVersion: 2
+    branch: codex/user-led-b4-ai-training-ux
+    dependsOn:
+      - user-led-b3-ai-task-lifecycle-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b4-ai-training-information-architecture.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b4-ai-training-information-architecture.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b4-ai-training-information-architecture-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-user-led-b4-ai-training-information-architecture.md
+      - docs/05-execution-logs/evidence/2026-07-12-user-led-b4-ai-training-information-architecture.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b4-ai-training-information-architecture-audit.md
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/server/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      <<: *low_risk_capabilities
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+    acceptanceStandards:
+      - Enterprise employees see enterprise employee AI training context instead of personal-only wording.
+      - Profession and dates are localized without changing API contracts.
+      - Provider-closed keeps authorization, task-type, and history navigation enabled while generation POST remains blocked.
+      - Provider-closed history is before collapsed generation settings, including narrow viewports.
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/student-personal-ai-generation-ui.test.ts
+      - corepack pnpm@10.26.1 exec vitest run --maxWorkers=50% --testTimeout=10000
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - corepack pnpm@10.26.1 exec next build --webpack
+      - git diff --check
+    closeoutStatus: local_verified_ready_for_commit
   - id: user-led-b3-ai-task-lifecycle-2026-07-12
     title: User-led B3 AI task lifecycle consistency repair
     phase: user-led-b3-ai-task-lifecycle-2026-07-12
@@ -182,7 +249,7 @@ activeTasks:
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
     finalCommit: ba3e3e34c7a67e120ec4085e8767d58c3c4e5245
-    closeoutStatus: local_master_verified_ready_for_origin_master_sync
+    closeoutStatus: remote_synced_origin_master_86610c400
   - id: 0704-b0-b6-push-closeout-2026-07-12
     title: 0704 B0-B6 push-ready review and origin master synchronization
     phase: 0704-b0-b6-push-closeout-2026-07-12
