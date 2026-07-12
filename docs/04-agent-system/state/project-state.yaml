@@ -36,6 +36,9 @@ latest0704AdminReadableIdentifiers:
     localhostHealth: pass_http_200
     localhostRoleAcceptance: deferred_original_0704db_not_mounted
     moduleRunV2PreCommitHardening: pass_34_files_scanned
+    postMergeDefaultFullUnit: resource_contention_3_failures_2_timeouts_1_async_selector_race
+    postMergeIsolatedFailures: pass_3_files_47_tests_max_workers_1
+    selectorStability: pass_1_file_36_tests_three_consecutive_runs
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     directDatabaseConnectionExecuted: false
@@ -5176,6 +5179,9 @@ currentTask:
     localhostHealth: pass_http_200
     localhostRoleAcceptance: deferred_original_0704db_not_mounted
     moduleRunV2PreCommitHardening: pass_34_files_scanned
+    postMergeDefaultFullUnit: resource_contention_3_failures_2_timeouts_1_async_selector_race
+    postMergeIsolatedFailures: pass_3_files_47_tests_max_workers_1
+    selectorStability: pass_1_file_36_tests_three_consecutive_runs
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed

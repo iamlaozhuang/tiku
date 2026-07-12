@@ -1716,6 +1716,8 @@ describe("AdminQuestionMaterialManagement", () => {
       fireEvent.change(questionForm.getByLabelText("评分方式"), {
         target: { value: "ai_scoring" },
       });
+      await questionForm.findByRole("option", { name: "营销案例材料 A" });
+      expect(questionForm.getByLabelText("关联材料")).toBeEnabled();
       fireEvent.change(questionForm.getByLabelText("关联材料"), {
         target: { value: "material-marketing-001" },
       });
@@ -1857,6 +1859,7 @@ describe("AdminQuestionMaterialManagement", () => {
     const questionForm = within(
       screen.getByTestId("content-edit-context-panel"),
     );
+    await questionForm.findByRole("option", { name: "营销案例材料 A" });
     const bindingPreview = screen.getByTestId("question-binding-preview");
 
     expect(bindingPreview).toHaveTextContent("关联材料：营销案例材料 A");

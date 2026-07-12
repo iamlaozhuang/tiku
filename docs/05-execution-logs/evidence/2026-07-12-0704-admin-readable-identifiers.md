@@ -37,6 +37,12 @@
 - Module Run v2 pre-commit hardening：34 个登记文件通过范围、敏感证据与术语扫描；Cost Calibration 保持阻断。
 - localhost：`/login` HTTP 200。
 
+## 合并后稳定性诊断
+
+- 本地 master 首次默认并发全量 unit 为 1960/1963：2 项既有扫描型用例在全仓并发资源压力下超时，1 项 B4 材料选择用例在异步选项 ready 前操作禁用控件。
+- 将 3 个失败文件以单 worker 隔离复跑，47/47 通过，确认生产合同未失败；随后为两个绑定测试补充异步业务名称选项 ready 条件，不修改生产代码。
+- 题目材料 UI 单文件以单 worker 连续执行 3 次，每次 36/36 通过。
+
 ## Localhost 边界
 
 - 当前 localhost 进程未挂载原 0704DB，私有角色目录账号不能用于当前数据集。
