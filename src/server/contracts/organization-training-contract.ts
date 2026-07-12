@@ -101,6 +101,19 @@ export type OrganizationTrainingPublishedVersionDto = {
   questions?: OrganizationTrainingQuestionSnapshotDto[];
 };
 
+export type OrganizationTrainingVersionListIntegrityStatus =
+  | "complete"
+  | "partial";
+
+export type OrganizationTrainingVersionListWarningCode =
+  "historical_version_unavailable";
+
+export type OrganizationTrainingVersionListReadResult = {
+  versions: OrganizationTrainingPublishedVersionDto[];
+  integrityStatus: OrganizationTrainingVersionListIntegrityStatus;
+  warningCode: OrganizationTrainingVersionListWarningCode | null;
+};
+
 export type EmployeeOrganizationTrainingScoreSummaryDto = {
   score: number;
   totalScore: number;
@@ -199,6 +212,8 @@ export type OrganizationTrainingAdminLifecycleItemDto = {
 export type OrganizationTrainingAdminLifecycleFlowDto = {
   items: OrganizationTrainingAdminLifecycleItemDto[];
   redactionStatus: "metadata_only";
+  integrityStatus: OrganizationTrainingVersionListIntegrityStatus;
+  warningCode: OrganizationTrainingVersionListWarningCode | null;
 };
 
 export type OrganizationTrainingAdminQuestionDetailDto = {

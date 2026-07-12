@@ -562,6 +562,7 @@ function createGateway(
     versionOrganizationPublicId?: string | null;
     employeeAnswerPersistenceLineage?: EmployeeAnswerPersistenceLineage | null;
     employeeVisibleVersionRows?: OrganizationTrainingVersionRow[];
+    adminLifecycleVersionRows?: OrganizationTrainingVersionRow[];
     draftPersistenceLineage?: DraftPersistenceLineage | null;
     manualDraftInsertResult?: "row" | "null";
     sourceContextInsertResult?: "rows" | "empty";
@@ -612,6 +613,9 @@ function createGateway(
 
       return options.employeeVisibleVersionRows ?? [createVersionRow()];
     },
+  );
+  const listAdminLifecycleVersions = vi.fn(
+    async () => options.adminLifecycleVersionRows ?? [createVersionRow()],
   );
   const findPublishedVersionByPublicId = vi.fn(
     async (
@@ -875,6 +879,7 @@ function createGateway(
     findEmployeeAnswerPersistenceLineageByPublicIds,
     findDraftPersistenceLineageByPublicIds,
     listPublishedVersionsForEmployeeOrganization,
+    listAdminLifecycleVersions,
     findPublishedVersionByPublicId,
     listPaperQuestionSnapshotsForTrainingDrafts,
     findEmployeeAnswerByVersionPublicId,
@@ -895,6 +900,7 @@ function createGateway(
     findEmployeeAnswerPersistenceLineageByPublicIds,
     findDraftPersistenceLineageByPublicIds,
     listPublishedVersionsForEmployeeOrganization,
+    listAdminLifecycleVersions,
     findPublishedVersionByPublicId,
     listPaperQuestionSnapshotsForTrainingDrafts,
     findEmployeeAnswerByVersionPublicId,
@@ -1904,6 +1910,79 @@ describe("organization training repository", () => {
     });
   });
 
+  it("isolates incomplete historical versions from admin and employee list reads without inferring scope", async () => {
+    const validVersion = createVersionRow({
+      public_id: "training_version_public_valid",
+    });
+    const missingScopeVersion = {
+      ...createVersionRow({
+        public_id: "training_version_public_missing_scope",
+      }),
+      publish_scope_snapshot: null,
+    } as unknown as OrganizationTrainingVersionRow;
+    const missingPublishedAtVersion = {
+      ...createVersionRow({
+        public_id: "training_version_public_missing_published_at",
+      }),
+      published_at: null,
+    } as unknown as OrganizationTrainingVersionRow;
+    const { gateway } = createGateway({
+      adminLifecycleVersionRows: [
+        validVersion,
+        missingScopeVersion,
+        missingPublishedAtVersion,
+      ],
+      employeeVisibleVersionRows: [
+        validVersion,
+        missingScopeVersion,
+        missingPublishedAtVersion,
+      ],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const adminResult = await repository.listAdminLifecycleVersions({
+      visibleOrganizationPublicIds: ["organization_public_123"],
+    });
+    const employeeResult = await repository.listEmployeeVisibleVersions({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+    const adminReadResult = await repository.readAdminLifecycleVersions({
+      visibleOrganizationPublicIds: ["organization_public_123"],
+    });
+    const employeeReadResult = await repository.readEmployeeVisibleVersions({
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_public_123",
+    });
+
+    expect(adminResult).toEqual([
+      expect.objectContaining({ publicId: "training_version_public_valid" }),
+    ]);
+    expect(employeeResult).toEqual([
+      expect.objectContaining({ publicId: "training_version_public_valid" }),
+    ]);
+    expect(adminReadResult).toEqual({
+      versions: [
+        expect.objectContaining({ publicId: "training_version_public_valid" }),
+      ],
+      integrityStatus: "partial",
+      warningCode: "historical_version_unavailable",
+    });
+    expect(employeeReadResult).toEqual({
+      versions: [
+        expect.objectContaining({ publicId: "training_version_public_valid" }),
+      ],
+      integrityStatus: "partial",
+      warningCode: "historical_version_unavailable",
+    });
+    expect(JSON.stringify({ adminResult, employeeResult })).not.toContain(
+      "missing_scope",
+    );
+    expect(JSON.stringify({ adminResult, employeeResult })).not.toContain(
+      "missing_published_at",
+    );
+  });
+
   it("attaches paper-source question snapshots to employee visible versions by draft public id", async () => {
     const {
       gateway,
@@ -2053,6 +2132,18 @@ describe("organization training repository", () => {
           ],
           taken_down_at: new Date("2026-06-16T08:00:00.000Z"),
         }),
+        {
+          ...createVersionRow({
+            public_id: "training_version_incomplete",
+            question_snapshot: [
+              {
+                ...questionSnapshot[0],
+                publicId: "training_question_public_incomplete",
+              },
+            ],
+          }),
+          publish_scope_snapshot: null,
+        } as unknown as OrganizationTrainingVersionRow,
       ],
     });
     const repository = createOrganizationTrainingRepository(gateway);
@@ -2080,6 +2171,41 @@ describe("organization training repository", () => {
     expect(JSON.stringify(snapshots)).toContain("analysisSummary");
     expect(JSON.stringify(snapshots)).not.toContain(
       "training_question_public_taken_down",
+    );
+    expect(JSON.stringify(snapshots)).not.toContain(
+      "training_question_public_incomplete",
+    );
+  });
+
+  it("excludes incomplete admin training versions from AI paper source snapshots", async () => {
+    const questionSnapshot = createVersionWrite().questionSnapshot;
+    const { gateway } = createGateway({
+      adminLifecycleVersionRows: [
+        createVersionRow({ question_snapshot: questionSnapshot }),
+        {
+          ...createVersionRow({
+            public_id: "training_version_admin_incomplete",
+            question_snapshot: [
+              {
+                ...questionSnapshot[0],
+                publicId: "training_question_public_admin_incomplete",
+              },
+            ],
+          }),
+          published_at: null,
+        } as unknown as OrganizationTrainingVersionRow,
+      ],
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const snapshots =
+      await repository.listAdminVisibleQuestionSnapshotsForAiPaperSource({
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      });
+
+    expect(snapshots).toEqual(questionSnapshot);
+    expect(JSON.stringify(snapshots)).not.toContain(
+      "training_question_public_admin_incomplete",
     );
   });
 

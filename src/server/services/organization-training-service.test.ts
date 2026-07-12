@@ -783,6 +783,8 @@ describe("organization training service", () => {
           },
         ],
         redactionStatus: "metadata_only",
+        integrityStatus: "complete",
+        warningCode: null,
       },
       pagination: {
         page: 1,

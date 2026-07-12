@@ -1,8 +1,42 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-paper-picker-response-contract-2026-07-11
-updatedAt: "2026-07-12T00:16:17-07:00"
+currentPhase: 0704-training-lifecycle-read-repair-2026-07-11
+updatedAt: "2026-07-12T00:45:00-07:00"
+latest0704TrainingLifecycleReadRepair:
+  id: 0704-training-lifecycle-read-repair-2026-07-11
+  status: ready_for_closeout
+  result: pass_source_contract_and_regression_with_localhost_deferred
+  branch: codex/0704-training-lifecycle-read-repair
+  startSha: 677c2689d9daa4ff5a748a3b24c4d48285e77e61
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-training-lifecycle-read-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-training-lifecycle-read-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-training-lifecycle-read-repair-audit.md
+  executionBoundary:
+    runtime: local_source_test_only_until_0704db_remounted
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    schemaMigrationSeed: blocked
+    dependencyIntroduction: blocked
+    warningMode: fixed_redacted_integrity_code_only
+  validationSummary:
+    status: pass_ready_for_commit_and_local_merge
+    redTargetedTests: pass_expected_repository_runtime_failure_and_2_route_500_failures
+    greenTargetedTests: pass_4_files_122_tests
+    affectedRegression: pass_7_files_150_tests
+    fullUnitTests: pass_357_files_1935_tests
+    lint: pass_0_errors
+    typecheck: pass_tsc_no_emit
+    webpackCompilation: pass_then_blocked_by_unrelated_a31_route_context_type
+    formatting: pass_full_repository
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_13_files_scanned
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerExecution: blocked_not_executed
+  nextRequiredTaskId: 0704-resource-id-routing-repair-2026-07-11
 latest0704PaperPickerResponseContract:
   id: 0704-paper-picker-response-contract-2026-07-11
   status: ready_for_closeout
@@ -4907,13 +4941,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-paper-picker-response-contract-2026-07-11
-  title: 0704 paper picker response contract B1A
-  phase: 0704-paper-picker-response-contract-2026-07-11
+  id: 0704-training-lifecycle-read-repair-2026-07-11
+  title: 0704 organization training lifecycle read repair B1B
+  phase: 0704-training-lifecycle-read-repair-2026-07-11
   status: ready_for_closeout
-  priority: p0
-  taskKind: implementation_feature
-  branch: codex/0704-paper-picker-response-contract
+  priority: p1
+  taskKind: implementation_bugfix
+  branch: codex/0704-training-lifecycle-read-repair
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -4927,34 +4961,35 @@ currentTask:
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
     screenshotRawDom: approved_redacted_only
-  plannedAt: "2026-07-11T23:56:36-07:00"
-  claimedAt: "2026-07-11T23:56:36-07:00"
-  targetClosureItem: Align paper composer question and material pickers with the real paginated array envelope.
-  behaviorBoundary: local_source_test_and_redacted_localhost_b1a_consumer_contract_only_no_api_service_repository_validator_provider_env_secret_direct_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
+  plannedAt: "2026-07-12T00:45:00-07:00"
+  claimedAt: "2026-07-12T00:45:00-07:00"
+  targetClosureItem: Isolate incomplete organization training version rows from admin and employee lifecycle reads without inferring publish scope.
+  behaviorBoundary: local_source_test_b1b_persistence_read_boundary_only_no_provider_env_secret_direct_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
   evidenceMode: redacted_issue_id_status_fix_summary_command_name_test_count_only_no_secret_env_database_url_rows_internal_numeric_ids_provider_payload_prompt_ai_output_full_content_session_cookie_token_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-paper-picker-response-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-paper-picker-response-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-paper-picker-response-contract-audit.md
-  nextRequiredTaskId: 0704-training-lifecycle-read-repair-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-training-lifecycle-read-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-training-lifecycle-read-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-training-lifecycle-read-repair-audit.md
+  nextRequiredTaskId: 0704-resource-id-routing-repair-2026-07-11
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    redTargetedTests: pass_expected_4_array_contract_failures_and_1_material_page_failure
-    greenTargetedTests: pass_1_file_10_tests
-    affectedRegression: pass_5_files_33_tests
-    fullUnitTests: pass_357_files_1931_tests
-    lint: pass_0_errors_0_warnings
+    redTargetedTests: pass_expected_repository_runtime_failure_and_2_route_500_failures
+    greenTargetedTests: pass_4_files_122_tests
+    affectedRegression: pass_7_files_150_tests
+    fullUnitTests: pass_357_files_1935_tests
+    lint: pass_0_errors
     typecheck: pass_tsc_no_emit
     formatting: pass_full_repository
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_7_files_scanned
+    moduleRunV2PreCommitHardening: pass_13_files_scanned
+    webpackCompilation: pass_then_blocked_by_unrelated_a31_route_context_type
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
-    screenshotRawDomTrace: pending_if_needed_redacted_only
+    screenshotRawDomTrace: deferred_until_0704db_remounted
     privateValueOutput: false
     dependencyOrLockfileChanged: false
-    apiServiceRepositoryValidatorChanged: false
+    apiServiceRepositoryValidatorChanged: true_contract_mapper_repository_service_route_only
     schemaMigrationSeedChanged: false
     releaseReadinessClaimed: false
 

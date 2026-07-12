@@ -966,6 +966,45 @@ describe("organization training draft source-context route handlers", () => {
     });
   });
 
+  it("returns a redacted partial-integrity warning when historical admin versions are isolated", async () => {
+    runtimeRepositoryMock.listAdminLifecycleVersions.mockResolvedValueOnce({
+      versions: [createEmployeeVisibleVersion()],
+      integrityStatus: "partial",
+      warningCode: "historical_version_unavailable",
+    } as never);
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService: createCurrentSessionService({
+        code: 0,
+        message: "ok",
+        data: createAdminAuthContext(),
+      }),
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.manualDraft.GET(
+      new Request("http://localhost/api/v1/organization-trainings"),
+    );
+    const payload = await resolveJsonPayload(response);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        integrityStatus: "partial",
+        warningCode: "historical_version_unavailable",
+        items: [
+          expect.objectContaining({
+            publicId: "organization_training_draft_route_401",
+          }),
+          expect.objectContaining({
+            publicId: "organization_training_version_route_401",
+          }),
+        ],
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain("invalid row");
+    expect(JSON.stringify(payload)).not.toMatch(/"id":/u);
+  });
+
   it("filters and paginates organization training lifecycle read model by source and content kind", async () => {
     runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValue([
       createManualDraftDto({
@@ -2602,6 +2641,8 @@ describe("organization training employee answer route handlers", () => {
       message: "ok",
       data: {
         versions: [createEmployeeVisibleVersion()],
+        integrityStatus: "complete",
+        warningCode: null,
       },
     });
     expect(sessionService.requests).toEqual([
@@ -2616,6 +2657,39 @@ describe("organization training employee answer route handlers", () => {
       organizationPublicId: "organization_route_public_401",
       visibleOrganizationPublicIds: ["organization_route_public_401"],
     });
+  });
+
+  it("returns only valid employee versions with a redacted partial-integrity warning", async () => {
+    runtimeRepositoryMock.listEmployeeVisibleVersions.mockResolvedValueOnce({
+      versions: [createEmployeeVisibleVersion()],
+      integrityStatus: "partial",
+      warningCode: "historical_version_unavailable",
+    } as never);
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService: createCurrentSessionService({
+        code: 0,
+        message: "ok",
+        data: createEmployeeAuthContext(),
+      }),
+      effectiveAuthorizationService: createRouteEffectiveAuthorizationService(),
+    });
+
+    const response = await handlers.employeeVisibleList.GET(
+      createVisibleListRequest(),
+    );
+    const payload = await resolveJsonPayload(response);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        versions: [createEmployeeVisibleVersion()],
+        integrityStatus: "partial",
+        warningCode: "historical_version_unavailable",
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain("invalid row");
+    expect(JSON.stringify(payload)).not.toMatch(/"id":/u);
   });
 
   it("blocks standard organization employees before repository visible-list access", async () => {
@@ -2715,6 +2789,8 @@ describe("organization training employee answer route handlers", () => {
       message: "ok",
       data: {
         versions: [matchingMarketingVersion],
+        integrityStatus: "complete",
+        warningCode: null,
       },
     });
   });

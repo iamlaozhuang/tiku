@@ -29,6 +29,8 @@ import type {
   OrganizationTrainingSourceContextAttachmentDto,
   OrganizationTrainingSourceContextDto,
   OrganizationTrainingSourceContextUsageDto,
+  OrganizationTrainingVersionListIntegrityStatus,
+  OrganizationTrainingVersionListWarningCode,
 } from "../contracts/organization-training-contract";
 import { professionValues, type Profession } from "../models/auth";
 import {
@@ -214,6 +216,8 @@ export type OrganizationTrainingAdminLifecycleFlowReadModelInput = {
   versions: readonly OrganizationTrainingPublishedVersionDto[];
   sourceMetadata?: readonly OrganizationTrainingAdminLifecycleSourceMetadataDto[];
   query?: OrganizationTrainingAdminLifecycleQuery;
+  integrityStatus?: OrganizationTrainingVersionListIntegrityStatus;
+  warningCode?: OrganizationTrainingVersionListWarningCode | null;
 };
 
 export type OrganizationTrainingAdminDetailReadModelInput =
@@ -880,6 +884,8 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
     {
       items: filteredItems.slice(startIndex, startIndex + query.pageSize),
       redactionStatus: "metadata_only",
+      integrityStatus: input.integrityStatus ?? "complete",
+      warningCode: input.warningCode ?? null,
     },
     {
       page: query.page,

@@ -16,6 +16,7 @@ import type {
   OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
+  OrganizationTrainingVersionListReadResult,
 } from "../contracts/organization-training-contract";
 import type { AdminAiGenerationResultPersistenceRepository } from "../contracts/admin-ai-generation-result-persistence-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
@@ -216,7 +217,10 @@ export type OrganizationTrainingAdminLifecycleDraftsReader = (
 
 export type OrganizationTrainingAdminLifecycleVersionsReader = (
   input: OrganizationTrainingAdminLifecycleReaderInput,
-) => Promise<OrganizationTrainingPublishedVersionDto[]>;
+) => Promise<
+  | OrganizationTrainingPublishedVersionDto[]
+  | OrganizationTrainingVersionListReadResult
+>;
 
 export type OrganizationTrainingAdminLifecycleSourceMetadataReader = (
   input: OrganizationTrainingAdminLifecycleSourceMetadataReaderInput,
@@ -233,7 +237,10 @@ export type OrganizationTrainingEmployeeVisibleVersionsReaderInput = {
 
 export type OrganizationTrainingEmployeeVisibleVersionsReader = (
   input: OrganizationTrainingEmployeeVisibleVersionsReaderInput,
-) => Promise<OrganizationTrainingPublishedVersionDto[]>;
+) => Promise<
+  | OrganizationTrainingPublishedVersionDto[]
+  | OrganizationTrainingVersionListReadResult
+>;
 
 export type OrganizationTrainingPublishedVersionResolverInput = {
   request: Request;
@@ -463,6 +470,20 @@ async function defaultResolveOrganizationAdminContext(): Promise<null> {
 
 async function defaultResolveVersionOrganizationPublicId(): Promise<null> {
   return null;
+}
+
+function normalizeVersionListReadResult(
+  value:
+    | OrganizationTrainingPublishedVersionDto[]
+    | OrganizationTrainingVersionListReadResult,
+): OrganizationTrainingVersionListReadResult {
+  return Array.isArray(value)
+    ? {
+        versions: value,
+        integrityStatus: "complete",
+        warningCode: null,
+      }
+    : value;
 }
 
 async function defaultResolveEmployeeContext(): Promise<null> {
@@ -956,15 +977,23 @@ function createRepositoryBackedEmployeeVisibleVersionsReader(
   repository: Pick<
     OrganizationTrainingRepository,
     "listEmployeeVisibleVersions"
-  >,
+  > &
+    Partial<
+      Pick<OrganizationTrainingRepository, "readEmployeeVisibleVersions">
+    >,
 ): OrganizationTrainingEmployeeVisibleVersionsReader {
-  return async ({ employeeContext }) =>
-    repository.listEmployeeVisibleVersions({
+  return async ({ employeeContext }) => {
+    const input = {
       employeePublicId: employeeContext.employeePublicId,
       organizationPublicId: employeeContext.currentOrganizationPublicId,
       visibleOrganizationPublicIds:
         employeeContext.visibleOrganizationPublicIds,
-    });
+    };
+
+    return repository.readEmployeeVisibleVersions === undefined
+      ? repository.listEmployeeVisibleVersions(input)
+      : repository.readEmployeeVisibleVersions(input);
+  };
 }
 
 function createRepositoryBackedAdminLifecycleDraftsReader(
@@ -980,12 +1009,18 @@ function createRepositoryBackedAdminLifecycleVersionsReader(
   repository: Pick<
     OrganizationTrainingRepository,
     "listAdminLifecycleVersions"
-  >,
+  > &
+    Partial<Pick<OrganizationTrainingRepository, "readAdminLifecycleVersions">>,
 ): OrganizationTrainingAdminLifecycleVersionsReader {
-  return async ({ adminContext }) =>
-    repository.listAdminLifecycleVersions({
+  return async ({ adminContext }) => {
+    const input = {
       visibleOrganizationPublicIds: adminContext.visibleOrganizationPublicIds,
-    });
+    };
+
+    return repository.readAdminLifecycleVersions === undefined
+      ? repository.listAdminLifecycleVersions(input)
+      : repository.readAdminLifecycleVersions(input);
+  };
 }
 
 function createRepositoryBackedAdminLifecycleSourceMetadataReader(
@@ -1564,7 +1599,7 @@ export function createOrganizationTrainingRouteHandlers(
         }
 
         const query = normalizeAdminLifecycleQuery(request);
-        const [drafts, versions] = await Promise.all([
+        const [drafts, versionReadValue] = await Promise.all([
           listAdminLifecycleDrafts({
             request,
             adminContext,
@@ -1574,6 +1609,9 @@ export function createOrganizationTrainingRouteHandlers(
             adminContext,
           }),
         ]);
+        const versionReadResult =
+          normalizeVersionListReadResult(versionReadValue);
+        const versions = versionReadResult.versions;
         const draftPublicIds = [
           ...new Set([
             ...drafts.map((draft) => draft.publicId),
@@ -1593,6 +1631,8 @@ export function createOrganizationTrainingRouteHandlers(
             versions,
             sourceMetadata,
             query,
+            integrityStatus: versionReadResult.integrityStatus,
+            warningCode: versionReadResult.warningCode,
           }),
         );
       },
@@ -1679,12 +1719,15 @@ export function createOrganizationTrainingRouteHandlers(
           return createJsonResponse(createEmployeeAnswerBlockedResponse());
         }
 
-        const result = await listEmployeeVisibleVersionsService({
-          employeeContext,
-          sourceVersions: await listEmployeeVisibleVersions({
+        const versionReadResult = normalizeVersionListReadResult(
+          await listEmployeeVisibleVersions({
             request,
             employeeContext,
           }),
+        );
+        const result = await listEmployeeVisibleVersionsService({
+          employeeContext,
+          sourceVersions: versionReadResult.versions,
         });
 
         if (!result.success) {
@@ -1694,6 +1737,8 @@ export function createOrganizationTrainingRouteHandlers(
         return createJsonResponse(
           createSuccessResponse({
             versions: result.versions,
+            integrityStatus: versionReadResult.integrityStatus,
+            warningCode: versionReadResult.warningCode,
           }),
         );
       },

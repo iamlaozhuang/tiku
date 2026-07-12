@@ -15,16 +15,17 @@ import type {
   OrganizationTrainingScopeSnapshotDto,
   OrganizationTrainingSourceContextDto,
 } from "../contracts/organization-training-contract";
-import type { Profession } from "../models/auth";
-import type {
-  OrganizationTrainingAnswerStatus,
-  OrganizationTrainingQuestionTypeSummary,
-  OrganizationTrainingRetentionStatus,
-  OrganizationTrainingSourceContextType,
-  OrganizationTrainingValidationStatus,
-  OrganizationTrainingVersionStatus,
+import { professionValues, type Profession } from "../models/auth";
+import {
+  organizationTrainingVersionStatusValues,
+  type OrganizationTrainingAnswerStatus,
+  type OrganizationTrainingQuestionTypeSummary,
+  type OrganizationTrainingRetentionStatus,
+  type OrganizationTrainingSourceContextType,
+  type OrganizationTrainingValidationStatus,
+  type OrganizationTrainingVersionStatus,
 } from "../models/organization-training";
-import type { Subject } from "../models/paper";
+import { subjectValues, type Subject } from "../models/paper";
 
 export type OrganizationTrainingVersionRow = {
   id?: number;
@@ -210,6 +211,20 @@ export function mapOrganizationTrainingVersionRowToDto(
   };
 }
 
+export function tryMapOrganizationTrainingVersionRowToDto(
+  candidate: unknown,
+): OrganizationTrainingPublishedVersionDto | null {
+  if (!isOrganizationTrainingVersionRow(candidate)) {
+    return null;
+  }
+
+  try {
+    return mapOrganizationTrainingVersionRowToDto(candidate);
+  } catch {
+    return null;
+  }
+}
+
 export function mapOrganizationTrainingAnswerRowToDto(
   row: OrganizationTrainingAnswerRow,
 ): EmployeeOrganizationTrainingAnswerDto {
@@ -328,6 +343,110 @@ function copyScopeSnapshot(
     organizationPublicIds: [...snapshot.organizationPublicIds],
     capturedAt: snapshot.capturedAt,
   };
+}
+
+function isOrganizationTrainingVersionRow(
+  candidate: unknown,
+): candidate is OrganizationTrainingVersionRow {
+  if (!isRecord(candidate)) {
+    return false;
+  }
+
+  const publishScopeSnapshot = candidate.publish_scope_snapshot;
+  const questionTypeSummary = candidate.question_type_summary;
+  const totalScore = Number(candidate.total_score);
+
+  return (
+    isNonEmptyText(candidate.public_id) &&
+    isNonEmptyText(candidate.draft_public_id) &&
+    isPositiveInteger(candidate.version_number) &&
+    isPositiveInteger(candidate.organization_id) &&
+    isNonEmptyText(candidate.organization_public_id) &&
+    isPositiveInteger(candidate.org_auth_id) &&
+    candidate.authorization_source === "org_auth" &&
+    isNonEmptyText(candidate.authorization_public_id) &&
+    candidate.owner_type === "organization" &&
+    candidate.owner_public_id === candidate.organization_public_id &&
+    candidate.quota_owner_type === "organization" &&
+    candidate.quota_owner_public_id === candidate.organization_public_id &&
+    isScopeSnapshot(publishScopeSnapshot) &&
+    professionValues.includes(candidate.profession as Profession) &&
+    isPositiveInteger(candidate.level) &&
+    subjectValues.includes(candidate.subject as Subject) &&
+    isNonEmptyText(candidate.title) &&
+    (candidate.description === null ||
+      typeof candidate.description === "string") &&
+    isNonNegativeInteger(candidate.question_count) &&
+    Number.isFinite(totalScore) &&
+    totalScore >= 0 &&
+    isQuestionTypeSummary(questionTypeSummary) &&
+    Array.isArray(candidate.question_snapshot) &&
+    organizationTrainingVersionStatusValues.includes(
+      candidate.version_status as OrganizationTrainingVersionStatus,
+    ) &&
+    isValidDate(candidate.published_at) &&
+    isNullableValidDate(candidate.answer_deadline_at) &&
+    isNullableValidDate(candidate.taken_down_at) &&
+    (candidate.takedown_reason === null ||
+      typeof candidate.takedown_reason === "string") &&
+    isValidDate(candidate.created_at) &&
+    isValidDate(candidate.updated_at)
+  );
+}
+
+function isScopeSnapshot(
+  candidate: unknown,
+): candidate is OrganizationTrainingScopeSnapshotDto {
+  if (!isRecord(candidate)) {
+    return false;
+  }
+
+  return (
+    Array.isArray(candidate.organizationPublicIds) &&
+    candidate.organizationPublicIds.length > 0 &&
+    candidate.organizationPublicIds.every(isNonEmptyText) &&
+    typeof candidate.capturedAt === "string" &&
+    Number.isFinite(Date.parse(candidate.capturedAt))
+  );
+}
+
+function isQuestionTypeSummary(
+  candidate: unknown,
+): candidate is OrganizationTrainingQuestionTypeSummary {
+  if (!isRecord(candidate)) {
+    return false;
+  }
+
+  return [
+    candidate.singleChoice,
+    candidate.multiChoice,
+    candidate.trueFalse,
+    candidate.shortAnswer,
+  ].every(isNonNegativeInteger);
+}
+
+function isRecord(candidate: unknown): candidate is Record<string, unknown> {
+  return typeof candidate === "object" && candidate !== null;
+}
+
+function isNonEmptyText(candidate: unknown): candidate is string {
+  return typeof candidate === "string" && candidate.trim().length > 0;
+}
+
+function isPositiveInteger(candidate: unknown): candidate is number {
+  return Number.isInteger(candidate) && Number(candidate) > 0;
+}
+
+function isNonNegativeInteger(candidate: unknown): candidate is number {
+  return Number.isInteger(candidate) && Number(candidate) >= 0;
+}
+
+function isValidDate(candidate: unknown): candidate is Date {
+  return candidate instanceof Date && Number.isFinite(candidate.getTime());
+}
+
+function isNullableValidDate(candidate: unknown): candidate is Date | null {
+  return candidate === null || isValidDate(candidate);
 }
 
 function copyQuestionTypeSummary(

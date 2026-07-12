@@ -32,6 +32,7 @@ import type {
   OrganizationTrainingQuestionSnapshotDto,
   OrganizationTrainingScopeSnapshotDto,
   OrganizationTrainingSourceContextAttachmentDto,
+  OrganizationTrainingVersionListReadResult,
 } from "../contracts/organization-training-contract";
 import { organizationTrainingQuestionTypeValues } from "../models/organization-training";
 import type {
@@ -49,6 +50,7 @@ import {
   mapOrganizationTrainingDraftRowToDto,
   mapOrganizationTrainingSourceContextRowToDto,
   mapOrganizationTrainingVersionRowToDto,
+  tryMapOrganizationTrainingVersionRowToDto,
   type OrganizationTrainingAnswerRow,
   type OrganizationTrainingDraftRow,
   type OrganizationTrainingSourceContextRow,
@@ -362,6 +364,9 @@ export type OrganizationTrainingRepository = {
   listEmployeeVisibleVersions(
     input: OrganizationTrainingEmployeeVisibleVersionListInput,
   ): Promise<OrganizationTrainingPublishedVersionDto[]>;
+  readEmployeeVisibleVersions(
+    input: OrganizationTrainingEmployeeVisibleVersionListInput,
+  ): Promise<OrganizationTrainingVersionListReadResult>;
   listEmployeeVisibleQuestionSnapshotsForAiPaperSource(
     input: OrganizationTrainingEmployeeVisibleQuestionSnapshotSourceInput,
   ): Promise<OrganizationTrainingQuestionSnapshotValue[]>;
@@ -383,6 +388,9 @@ export type OrganizationTrainingRepository = {
   listAdminLifecycleVersions(
     input: OrganizationTrainingAdminLifecycleListInput,
   ): Promise<OrganizationTrainingPublishedVersionDto[]>;
+  readAdminLifecycleVersions(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingVersionListReadResult>;
   listAdminLifecycleSourceMetadata(
     input: OrganizationTrainingAdminLifecycleSourceMetadataListInput,
   ): Promise<OrganizationTrainingAdminLifecycleSourceMetadataDto[]>;
@@ -545,6 +553,61 @@ export function createOrganizationTrainingRepository(
   const createAnswerPublicId =
     options.createAnswerPublicId ?? createDefaultAnswerPublicId;
 
+  async function readEmployeeVisibleVersions(
+    input: OrganizationTrainingEmployeeVisibleVersionListInput,
+  ): Promise<OrganizationTrainingVersionListReadResult> {
+    const normalizedInput = normalizeEmployeeVisibleVersionListInput(input);
+
+    if (normalizedInput === null) {
+      return createVersionListReadResult([], false);
+    }
+
+    const rows =
+      await gateway.listPublishedVersionsForEmployeeOrganization(
+        normalizedInput,
+      );
+    const versions = rows
+      .map(tryMapOrganizationTrainingVersionRowToDto)
+      .filter(
+        (version): version is OrganizationTrainingPublishedVersionDto =>
+          version !== null,
+      );
+    const versionsWithQuestions =
+      await attachPaperSourceQuestionSnapshotsToVersions(versions, gateway);
+
+    return createVersionListReadResult(
+      versionsWithQuestions,
+      versions.length !== rows.length,
+    );
+  }
+
+  async function readAdminLifecycleVersions(
+    input: OrganizationTrainingAdminLifecycleListInput,
+  ): Promise<OrganizationTrainingVersionListReadResult> {
+    const normalizedInput = normalizeAdminLifecycleListInput(
+      input.visibleOrganizationPublicIds,
+    );
+
+    if (normalizedInput === null) {
+      return createVersionListReadResult([], false);
+    }
+
+    const rows = await gateway.listAdminLifecycleVersions({
+      visibleOrganizationPublicIds: normalizedInput,
+    });
+    const versions = rows
+      .map(tryMapOrganizationTrainingVersionRowToDto)
+      .filter(
+        (version): version is OrganizationTrainingPublishedVersionDto =>
+          version !== null,
+      );
+
+    return createVersionListReadResult(
+      versions,
+      versions.length !== rows.length,
+    );
+  }
+
   return {
     async lookupVisibleOrganizationScope(input) {
       const adminPublicId = normalizeRequiredText(input.adminPublicId);
@@ -606,20 +669,10 @@ export function createOrganizationTrainingRepository(
     },
 
     async listEmployeeVisibleVersions(input) {
-      const normalizedInput = normalizeEmployeeVisibleVersionListInput(input);
-
-      if (normalizedInput === null) {
-        return [];
-      }
-
-      const rows =
-        await gateway.listPublishedVersionsForEmployeeOrganization(
-          normalizedInput,
-        );
-      const versions = rows.map(mapOrganizationTrainingVersionRowToDto);
-
-      return attachPaperSourceQuestionSnapshotsToVersions(versions, gateway);
+      return (await readEmployeeVisibleVersions(input)).versions;
     },
+
+    readEmployeeVisibleVersions,
 
     async listEmployeeVisibleQuestionSnapshotsForAiPaperSource(input) {
       const normalizedInput = normalizeEmployeeVisibleVersionListInput(input);
@@ -634,6 +687,10 @@ export function createOrganizationTrainingRepository(
         );
 
       return rows.flatMap((row) => {
+        if (tryMapOrganizationTrainingVersionRowToDto(row) === null) {
+          return [];
+        }
+
         if (row.version_status !== "published" || row.taken_down_at !== null) {
           return [];
         }
@@ -658,6 +715,10 @@ export function createOrganizationTrainingRepository(
       });
 
       return rows.flatMap((row) => {
+        if (tryMapOrganizationTrainingVersionRowToDto(row) === null) {
+          return [];
+        }
+
         if (row.version_status !== "published" || row.taken_down_at !== null) {
           return [];
         }
@@ -733,20 +794,10 @@ export function createOrganizationTrainingRepository(
     },
 
     async listAdminLifecycleVersions(input) {
-      const normalizedInput = normalizeAdminLifecycleListInput(
-        input.visibleOrganizationPublicIds,
-      );
-
-      if (normalizedInput === null) {
-        return [];
-      }
-
-      const rows = await gateway.listAdminLifecycleVersions({
-        visibleOrganizationPublicIds: normalizedInput,
-      });
-
-      return rows.map(mapOrganizationTrainingVersionRowToDto);
+      return (await readAdminLifecycleVersions(input)).versions;
     },
+
+    readAdminLifecycleVersions,
 
     async listAdminLifecycleSourceMetadata(input) {
       const normalizedDraftPublicIds = normalizePublicIdList(
@@ -1233,6 +1284,17 @@ function normalizeOptionalText(value: string | null): string | null {
   const trimmedValue = value.trim();
 
   return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function createVersionListReadResult(
+  versions: OrganizationTrainingPublishedVersionDto[],
+  hasIsolatedRows: boolean,
+): OrganizationTrainingVersionListReadResult {
+  return {
+    versions,
+    integrityStatus: hasIsolatedRows ? "partial" : "complete",
+    warningCode: hasIsolatedRows ? "historical_version_unavailable" : null,
+  };
 }
 
 function normalizeTextList(values: readonly string[]): string[] {
