@@ -876,12 +876,12 @@ describe("AdminRedeemCodePage", () => {
 
     render(createElement(AdminRedeemCodePage));
 
+    expect(await screen.findByText("暂无卡密记录。")).toBeInTheDocument();
     expect(
-      await screen.findByText("当前筛选条件下没有卡密记录。"),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "卡密筛选" })).toHaveTextContent(
-      "共 0 个卡密",
-    );
+      screen.queryByText("当前筛选条件下没有卡密记录。"),
+    ).not.toBeInTheDocument();
+    const emptyToolbar = screen.getByRole("region", { name: "卡密筛选" });
+    expect(emptyToolbar).toHaveTextContent("共 0 个卡密");
     expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
       "显示 0-0 / 共 0 个卡密",
     );
@@ -889,6 +889,27 @@ describe("AdminRedeemCodePage", () => {
       screen.queryByTestId("system-ops-redeem-code-generate-entry"),
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "生成卡密" })).toBeEnabled();
+    expect(
+      document.querySelector('[data-slot="admin-table-empty-row"]'),
+    ).toBeInTheDocument();
+
+    fireEvent.change(within(emptyToolbar).getByLabelText("卡密状态"), {
+      target: { value: "unused" },
+    });
+
+    expect(
+      await screen.findByText("当前筛选条件下没有卡密记录。"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("暂无卡密记录。")).not.toBeInTheDocument();
+    expect(within(emptyToolbar).getByLabelText("卡密状态")).toHaveValue(
+      "unused",
+    );
+    expect(
+      within(emptyToolbar).getByRole("button", { name: "重置筛选" }),
+    ).toBeEnabled();
+    expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
+      "显示 0-0 / 共 0 个卡密",
+    );
 
     cleanup();
     vi.stubGlobal(

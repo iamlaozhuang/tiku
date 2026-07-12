@@ -79,6 +79,29 @@ export function AdminTableFrame({
   );
 }
 
+export function AdminTableEmptyRow({
+  colSpan,
+  description,
+  title,
+}: {
+  colSpan: number;
+  description?: string;
+  title: string;
+}) {
+  return (
+    <tr data-slot="admin-table-empty-row">
+      <td className="px-4 py-10 text-center" colSpan={colSpan}>
+        <div className="space-y-1" role="status">
+          <p className="text-text-primary text-sm font-medium">{title}</p>
+          {description === undefined ? null : (
+            <p className="text-text-muted text-xs leading-5">{description}</p>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export function AdminPagination({
   itemLabel,
   onPageChange,

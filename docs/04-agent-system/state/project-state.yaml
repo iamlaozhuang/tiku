@@ -1,8 +1,42 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-acceptance-fixture-readability-2026-07-12
-updatedAt: "2026-07-12T05:38:25-07:00"
+currentPhase: 0704-redeem-filtered-empty-state-2026-07-12
+updatedAt: "2026-07-12T06:03:16-07:00"
+latest0704RedeemFilteredEmptyState:
+  id: 0704-redeem-filtered-empty-state-2026-07-12
+  status: ready_for_closeout
+  result: pass_shared_initial_filtered_error_empty_state
+  branch: codex/0704-redeem-filtered-empty-state
+  startSha: b0b5c4b81fb6395837d0111a1b084858e913625e
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-redeem-filtered-empty-state.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-redeem-filtered-empty-state.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-redeem-filtered-empty-state-audit.md
+  executionBoundary:
+    runtime: local_admin_redeem_list_empty_state_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    schemaMigrationSeed: blocked
+    dependencyIntroduction: blocked
+    redeemPlaintextRoleCapabilityChange: blocked_A15_protected
+  validationSummary:
+    status: pass_ready_for_commit_and_local_merge
+    redFocused: pass_expected_2_of_17_failures
+    greenFocused: pass_2_files_17_tests
+    redeemA15Regression: pass_3_files_22_tests
+    fullUnitTests: pass_360_files_1966_tests_max_workers_1
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    formatting: pass_full_repository
+    diffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass_9_files_scanned
+    providerExecution: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    dependencyOrLockfileChanged: false
+  nextRequiredTaskId: 0704-mobile-safe-area-overflow-2026-07-12
 latest0704AcceptanceFixtureReadability:
   id: 0704-acceptance-fixture-readability-2026-07-12
   status: ready_for_closeout
@@ -5182,14 +5216,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-acceptance-fixture-readability-2026-07-12
-  title: 0704 acceptance fixture readability A24 A25 B5A
-  phase: 0704-acceptance-fixture-readability-2026-07-12
+  id: 0704-redeem-filtered-empty-state-2026-07-12
+  title: 0704 redeem code filtered empty state A27 B5B
+  phase: 0704-redeem-filtered-empty-state-2026-07-12
   status: ready_for_closeout
-  result: pass_readable_bounded_fixture_sources
+  result: pass_shared_initial_filtered_error_empty_state
   priority: p3
-  taskKind: fixture_source_polish
-  branch: codex/0704-acceptance-fixture-readability
+  taskKind: implementation_ui_bugfix
+  branch: codex/0704-redeem-filtered-empty-state
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -5198,48 +5232,38 @@ currentTask:
     providerExecution: blocked
     envSecretAccess: blocked
     stagingProdDeploy: blocked
-    fixtureSourceChange: approved
-    fixtureExecution: blocked
-    browserRuntime: blocked_not_needed
+    browserRuntime: approved_redacted_after_green
     directDatabaseConnection: blocked
-    databaseMutation: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshot: blocked_not_needed
+    screenshot: approved_redacted_page_only
     rawDom: blocked
-  plannedAt: "2026-07-12T05:15:00-07:00"
-  claimedAt: "2026-07-12T05:15:00-07:00"
-  completedAt: "2026-07-12T05:38:25-07:00"
-  targetClosureItem: Make the bounded 0704 organization and material acceptance fixture definitions readable in Chinese without changing production UI logic or mutating the existing localhost database.
-  behaviorBoundary: local_fixture_source_strings_and_unit_contract_only_no_fixture_execution_database_connection_or_write_production_ui_logic_provider_env_secret_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
-  evidenceMode: redacted_fixture_label_category_source_file_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_database_rows_internal_ids_provider_payload_prompt_ai_output_or_full_sensitive_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-acceptance-fixture-readability.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-acceptance-fixture-readability.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-acceptance-fixture-readability-audit.md
-  nextRequiredTaskId: 0704-redeem-filtered-empty-state-2026-07-12
+  plannedAt: "2026-07-12T05:43:19-07:00"
+  claimedAt: "2026-07-12T05:43:19-07:00"
+  completedAt: "2026-07-12T06:03:16-07:00"
+  targetClosureItem: Use the shared admin table empty-state primitive for redeem codes and distinguish initial empty, filtered empty, and error while retaining filters and pagination.
+  behaviorBoundary: local_admin_redeem_list_empty_state_component_and_tests_only_no_redeem_plaintext_role_change_permission_expansion_provider_env_secret_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
+  evidenceMode: redacted_role_label_route_label_state_category_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_redeem_plaintext_database_rows_internal_ids_provider_payload_prompt_ai_output
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-redeem-filtered-empty-state.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-redeem-filtered-empty-state.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-redeem-filtered-empty-state-audit.md
+  nextRequiredTaskId: 0704-mobile-safe-area-overflow-2026-07-12
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    dependencyCliRecovery: pass_no_repository_diff
-    baselineDevSeedUnit: pass_1_file_3_tests_main_and_worktree
-    redFocused: pass_expected_3_of_5_failures
-    greenFocused: pass_2_files_5_tests
-    fullUnitTests: pass_360_files_1965_tests_max_workers_1
+    redFocused: pass_expected_2_of_17_failures
+    greenFocused: pass_2_files_17_tests
+    redeemA15Regression: pass_3_files_22_tests
+    fullUnitTests: pass_360_files_1966_tests_max_workers_1
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
     formatting: pass_full_repository
     diffCheck: pass
     blockedPathDiffCheck: pass_no_output
-    moduleRunV2PreCommitHardening: pass_10_files_scanned
-    hardeningCompatibilityFocused: pass_2_files_5_tests
-    hardeningCompatibilityTypecheck: pass_tsc_no_emit
-    initialSensitiveScan: blocked_4_preexisting_assignment_shapes_then_1_remaining_token_property
-    finalSensitiveScan: pass_zero_findings
+    moduleRunV2PreCommitHardening: pass_9_files_scanned
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
-    databaseMutationExecuted: false
-    fixtureExecution: false
     sensitiveOutput: false
     dependencyOrLockfileChanged: false
     repositorySchemaMigrationSeedChanged: false

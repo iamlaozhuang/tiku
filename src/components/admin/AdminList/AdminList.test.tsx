@@ -12,6 +12,7 @@ import {
   adminListFilterLabelClassName,
   AdminListToolbar,
   AdminPagination,
+  AdminTableEmptyRow,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
 import { Button } from "@/components/ui/button";
@@ -156,6 +157,29 @@ describe("admin list pattern v2", () => {
       within(tableFrame).getByTestId("admin-table-min-width-frame"),
     ).toHaveClass("min-w-[48rem]");
     expect(within(tableFrame).getByRole("table")).toBeInTheDocument();
+  });
+
+  it("renders a shared table empty row with stable status semantics", () => {
+    render(
+      <table>
+        <tbody>
+          <AdminTableEmptyRow
+            colSpan={4}
+            description="调整筛选条件后重试。"
+            title="当前筛选没有结果"
+          />
+        </tbody>
+      </table>,
+    );
+
+    const emptyStatus = screen.getByRole("status");
+    expect(emptyStatus).toHaveTextContent("当前筛选没有结果");
+    expect(emptyStatus).toHaveTextContent("调整筛选条件后重试。");
+    expect(emptyStatus.closest("tr")).toHaveAttribute(
+      "data-slot",
+      "admin-table-empty-row",
+    );
+    expect(emptyStatus.closest("td")).toHaveAttribute("colspan", "4");
   });
 
   it("renders bounded pagination controls and keeps the empty summary visible", () => {

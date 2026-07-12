@@ -59,6 +59,7 @@ import {
   adminListFilterLabelClassName,
   AdminListToolbar,
   AdminPagination,
+  AdminTableEmptyRow,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
 import { adminDataTableClassName } from "@/components/admin/admin-layout-primitives";
@@ -3462,10 +3463,12 @@ function EmployeeConfirmationDialog({
 }
 
 function RedeemCodeList({
+  isFiltered,
   onCopyPlainText,
   onViewDetail,
   redeemCodes,
 }: {
+  isFiltered: boolean;
   onCopyPlainText: (value: string) => void;
   onViewDetail: (publicId: string) => void;
   redeemCodes: AdminRedeemCodeData["redeemCodes"];
@@ -3494,14 +3497,17 @@ function RedeemCodeList({
         </thead>
         <tbody>
           {redeemCodes.length === 0 ? (
-            <tr>
-              <td
-                className="text-text-muted px-4 py-8 text-center text-sm"
-                colSpan={5}
-              >
-                当前筛选条件下没有卡密记录。
-              </td>
-            </tr>
+            <AdminTableEmptyRow
+              colSpan={5}
+              description={
+                isFiltered
+                  ? "可调整筛选条件或重置筛选后重试。"
+                  : "可使用“生成卡密”创建首批卡密。"
+              }
+              title={
+                isFiltered ? "当前筛选条件下没有卡密记录。" : "暂无卡密记录。"
+              }
+            />
           ) : (
             redeemCodes.map((redeemCode) => {
               const visiblePlainText =
@@ -6946,6 +6952,9 @@ export function AdminRedeemCodePage() {
       ) : null}
 
       <RedeemCodeList
+        isFiltered={
+          redeemCodeKeyword.trim().length > 0 || redeemCodeStatus !== "all"
+        }
         redeemCodes={data.redeemCodes}
         onCopyPlainText={handleCopyRedeemCodePlainText}
         onViewDetail={(publicId) => {
