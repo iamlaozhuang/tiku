@@ -444,6 +444,11 @@ describe("AdminPaperManagement", () => {
     );
     expect(firstRow).not.toHaveAttribute("data-id");
     expect(
+      within(firstRow).getByRole("link", {
+        name: "查看试卷 paper-marketing-2026-spring",
+      }),
+    ).toHaveAttribute("href", "/content/papers/paper-marketing-2026-spring");
+    expect(
       within(firstRow).getByRole("button", {
         name: "组卷 paper-marketing-2026-spring",
       }),

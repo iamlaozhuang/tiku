@@ -309,6 +309,22 @@ function mockContentFetch(
       });
     }
 
+    if (path === "/api/v1/questions/question-marketing-001") {
+      return createJsonResponse({
+        code: 0,
+        message: "ok",
+        data: { question: questionPayload.data[0] },
+      });
+    }
+
+    if (path === "/api/v1/materials/material-marketing-001") {
+      return createJsonResponse({
+        code: 0,
+        message: "ok",
+        data: { material: materialPayload.data[0] },
+      });
+    }
+
     return createJsonResponse({ code: 404001, message: "missing", data: null });
   });
 
@@ -666,6 +682,11 @@ describe("AdminQuestionMaterialManagement", () => {
         name: "复制题目 question-marketing-001",
       }),
     ).toBeEnabled();
+    expect(
+      screen.getByRole("button", {
+        name: "查看题目 question-marketing-001",
+      }),
+    ).toBeEnabled();
 
     expect(
       screen.getByTestId("question-row-question-marketing-001"),
@@ -675,6 +696,62 @@ describe("AdminQuestionMaterialManagement", () => {
     expectAdminFetchAuthorization(
       fetchMock,
       "/api/v1/questions?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+    );
+  });
+
+  it("opens and closes a question detail drawer while preserving list query state", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/content/questions?profession=marketing&page=2",
+    );
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "查看题目 question-marketing-001",
+      }),
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "题目详情" }),
+    ).toBeInTheDocument();
+    expect(window.location.search).toContain("profession=marketing");
+    expect(window.location.search).toContain(
+      "questionDetail=question-marketing-001",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭题目详情" }));
+    expect(screen.queryByRole("dialog", { name: "题目详情" })).toBeNull();
+    expect(window.location.search).toContain("profession=marketing");
+    expect(window.location.search).not.toContain("questionDetail");
+  });
+
+  it("restores a material detail drawer from the route query", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/content/materials?materialDetail=material-marketing-001",
+    );
+    mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("dialog", { name: "材料详情" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("营销案例材料 A").length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(window.location.search).toContain(
+      "materialDetail=material-marketing-001",
     );
   });
 

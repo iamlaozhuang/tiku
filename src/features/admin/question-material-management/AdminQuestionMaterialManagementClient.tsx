@@ -6,6 +6,7 @@ import {
   Ban,
   Check,
   Copy,
+  Eye,
   FileQuestion,
   FileText,
   Pencil,
@@ -51,6 +52,10 @@ import {
   isAdminContext,
   isUnauthorizedResponse,
 } from "../content-admin-runtime";
+import {
+  AdminContentDetailDrawer,
+  type AdminContentDetailTarget,
+} from "./AdminContentDetailDrawer";
 
 type ViewMode = "questions" | "materials";
 type StatusFilter = "all" | QuestionStatus | MaterialStatus;
@@ -76,6 +81,7 @@ const managedMediaReferences = {
 } as const;
 
 function readContentListUrlQuery(): {
+  materialDetailPublicId: string;
   keyword: string;
   knowledgeNodePublicId: string;
   level: string;
@@ -84,6 +90,7 @@ function readContentListUrlQuery(): {
   status: StatusFilter;
   subject: SubjectFilter;
   tagPublicId: string;
+  questionDetailPublicId: string;
   list: {
     page: number;
     pageSize: 20 | 50 | 100;
@@ -102,6 +109,7 @@ function readContentListUrlQuery(): {
   const questionType = searchParams.get("questionType");
 
   return {
+    materialDetailPublicId: searchParams.get("materialDetail") ?? "",
     keyword: searchParams.get("keyword") ?? "",
     knowledgeNodePublicId: searchParams.get("knowledgeNodePublicId") ?? "",
     level: searchParams.get("level") ?? "",
@@ -122,6 +130,7 @@ function readContentListUrlQuery(): {
       ? (subject as Subject)
       : "all",
     tagPublicId: searchParams.get("tagPublicId") ?? "",
+    questionDetailPublicId: searchParams.get("questionDetail") ?? "",
     list: {
       page: Number.isInteger(page) && page > 0 ? page : 1,
       pageSize: pageSize === 50 || pageSize === 100 ? pageSize : 20,
@@ -704,6 +713,30 @@ export function AdminQuestionMaterialManagement({
   );
   const [status, setStatus] = useState<StatusFilter>(initialUrlQuery.status);
   const [tagFilter, setTagFilter] = useState(initialUrlQuery.tagPublicId);
+  const [detailTarget, setDetailTarget] =
+    useState<AdminContentDetailTarget | null>(() => {
+      if (
+        defaultView === "questions" &&
+        initialUrlQuery.questionDetailPublicId !== ""
+      ) {
+        return {
+          kind: "question",
+          publicId: initialUrlQuery.questionDetailPublicId,
+        };
+      }
+
+      if (
+        defaultView === "materials" &&
+        initialUrlQuery.materialDetailPublicId !== ""
+      ) {
+        return {
+          kind: "material",
+          publicId: initialUrlQuery.materialDetailPublicId,
+        };
+      }
+
+      return null;
+    });
   const [activeForm, setActiveForm] = useState<ActiveContentForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -779,12 +812,22 @@ export function AdminQuestionMaterialManagement({
   } = useQuestionMaterialData(activeView, contentQueryString);
 
   useEffect(() => {
+    const routeSearchParams = new URLSearchParams(contentQueryString);
+
+    if (detailTarget?.kind === "question") {
+      routeSearchParams.set("questionDetail", detailTarget.publicId);
+    }
+
+    if (detailTarget?.kind === "material") {
+      routeSearchParams.set("materialDetail", detailTarget.publicId);
+    }
+
     window.history.replaceState(
       null,
       "",
-      `${window.location.pathname}?${contentQueryString}`,
+      `${window.location.pathname}?${routeSearchParams.toString()}`,
     );
-  }, [contentQueryString]);
+  }, [contentQueryString, detailTarget]);
 
   const initialQuestionTarget = useMemo(() => {
     if (
@@ -842,11 +885,15 @@ export function AdminQuestionMaterialManagement({
   const selectedQuestionPublicId =
     displayedActiveForm?.kind === "question"
       ? displayedActiveForm.publicId
-      : null;
+      : detailTarget?.kind === "question"
+        ? detailTarget.publicId
+        : null;
   const selectedMaterialPublicId =
     displayedActiveForm?.kind === "material"
       ? displayedActiveForm.publicId
-      : null;
+      : detailTarget?.kind === "material"
+        ? detailTarget.publicId
+        : null;
   const hasActiveContentFilters =
     keyword.trim() !== "" ||
     levelFilter.trim() !== "" ||
@@ -1309,6 +1356,7 @@ export function AdminQuestionMaterialManagement({
           role="tab"
           type="button"
           onClick={() => {
+            setDetailTarget(null);
             setActiveView("questions");
             handleFilterChange("view");
           }}
@@ -1322,6 +1370,7 @@ export function AdminQuestionMaterialManagement({
           role="tab"
           type="button"
           onClick={() => {
+            setDetailTarget(null);
             setIsInitialQuestionTargetDismissed(true);
             setActiveView("materials");
             handleFilterChange("view");
@@ -1365,6 +1414,9 @@ export function AdminQuestionMaterialManagement({
                   values: createQuestionFormValuesFromQuestion(question),
                 });
               }}
+              onView={(publicId) =>
+                setDetailTarget({ kind: "question", publicId })
+              }
               onRecommend={(question) =>
                 void handleRecommendKnowledgeNodes(question)
               }
@@ -1392,6 +1444,9 @@ export function AdminQuestionMaterialManagement({
                   values: createMaterialFormValuesFromMaterial(material),
                 });
               }}
+              onView={(publicId) =>
+                setDetailTarget({ kind: "material", publicId })
+              }
             />
           )}
         </div>
@@ -1455,6 +1510,13 @@ export function AdminQuestionMaterialManagement({
         total={pagination.total}
         onPageChange={handlePageChange}
       />
+
+      {detailTarget === null ? null : (
+        <AdminContentDetailDrawer
+          target={detailTarget}
+          onClose={() => setDetailTarget(null)}
+        />
+      )}
 
       {pendingContentAction === null ? null : (
         <ContentDangerConfirmationDialog
@@ -2388,6 +2450,7 @@ function QuestionList({
   onEdit,
   onRecommend,
   onReviewRecommendation,
+  onView,
 }: {
   emptyTitle: string;
   recommendationByQuestionPublicId: Record<
@@ -2405,6 +2468,7 @@ function QuestionList({
     knowledgeNodePublicId: string,
     reviewStatus: RecommendationReviewStatus,
   ) => void;
+  onView: (publicId: string) => void;
 }) {
   return (
     <AdminTableFrame ariaLabel="题目列表" minWidthClassName="min-w-[72rem]">
@@ -2448,6 +2512,16 @@ function QuestionList({
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  aria-label={`查看题目 ${question.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onView(question.publicId)}
+                >
+                  <Eye aria-hidden="true" data-icon="inline-start" />
+                  查看题目
+                </Button>
                 <Button
                   aria-label={`编辑题目 ${question.publicId}`}
                   data-testid={`question-edit-${question.publicId}`}
@@ -2731,6 +2805,7 @@ function MaterialList({
   onCopy,
   onDisable,
   onEdit,
+  onView,
 }: {
   emptyTitle: string;
   rows: MaterialDto[];
@@ -2738,6 +2813,7 @@ function MaterialList({
   onCopy: (publicId: string) => void;
   onDisable: (publicId: string) => void;
   onEdit: (material: MaterialDto) => void;
+  onView: (publicId: string) => void;
 }) {
   return (
     <AdminTableFrame ariaLabel="材料列表" minWidthClassName="min-w-[72rem]">
@@ -2779,6 +2855,16 @@ function MaterialList({
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  aria-label={`查看材料 ${material.publicId}`}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onView(material.publicId)}
+                >
+                  <Eye aria-hidden="true" data-icon="inline-start" />
+                  查看材料
+                </Button>
                 <Button
                   aria-label={`编辑材料 ${material.publicId}`}
                   data-testid={`material-edit-${material.publicId}`}

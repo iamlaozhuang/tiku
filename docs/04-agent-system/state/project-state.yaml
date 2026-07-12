@@ -1,8 +1,44 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-content-list-foundation-2026-07-11
+currentPhase: 0704-content-detail-entry-2026-07-11
 updatedAt: "2026-07-11T00:00:00-07:00"
+latest0704ContentDetailEntry:
+  id: 0704-content-detail-entry-2026-07-11
+  status: ready_for_closeout
+  result: pass_localhost_ui_content_detail_entry
+  branch: codex/0704-content-detail-entry
+  dependsOn: 0704-content-list-foundation-2026-07-11
+  startSha: 59812c3f18f4fb989ae4bd3b7d250addbc5b5ec0
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-content-detail-entry.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-content-detail-entry-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-content-detail-entry-audit.md
+  executionBoundary:
+    runtime: localhost_ui_source_test_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    screenshotRawDomTrace: existing_private_screenshots_reviewed_not_copied
+    evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
+  validationSummary:
+    status: pass_ready_for_commit_merge_push_cleanup
+    redTargetedTests: pass_expected_missing_entries_components_and_attachment_isolation_failure
+    greenTargetedTests: pass_3_files_51_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    formatting: pass_full_repository
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_14_files_scanned
+    moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+    providerExecution: blocked_not_executed
+    envSecretAccess: blocked_not_executed
+    stagingProdDeploy: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    dependencyOrLockfileChanged: false
+    apiServiceRepositoryValidatorChanged: false
+    schemaMigrationSeedChanged: false
+    releaseReadinessClaimed: false
 latest0704ContentListFoundation:
   id: 0704-content-list-foundation-2026-07-11
   status: ready_for_closeout
@@ -4729,13 +4765,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-content-list-foundation-2026-07-11
-  title: 0704 content list foundation
-  phase: 0704-content-list-foundation-2026-07-11
+  id: 0704-content-detail-entry-2026-07-11
+  title: 0704 content detail entry
+  phase: 0704-content-detail-entry-2026-07-11
   status: ready_for_closeout
   priority: p0
   taskKind: implementation_feature
-  branch: codex/0704-content-list-foundation
+  branch: codex/0704-content-detail-entry
   humanApprovalBoundary:
     implementation: current_user_approved_five_content_admin_tasks_serial_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -4751,23 +4787,23 @@ currentTask:
     screenshotRawDom: existing_private_screenshots_reviewed_not_copied
   plannedAt: "2026-07-11T00:00:00-07:00"
   claimedAt: "2026-07-11T00:00:00-07:00"
-  targetClosureItem: Establish the server-paginated shared content list baseline for papers, questions, and materials without changing content write semantics.
-  behaviorBoundary: localhost_ui_source_test_only_content_list_query_filter_sort_pagination_url_state_and_summary_display_no_write_permission_lifecycle_snapshot_lock_provider_env_secret_database_schema_dependency_staging_prod_deploy_cost_calibration_or_new_screenshot_raw_dom_change
+  targetClosureItem: Add stable read-only paper, question, and material detail entries without changing content write semantics.
+  behaviorBoundary: localhost_ui_source_test_only_content_detail_get_render_url_state_and_accessibility_no_api_contract_service_repository_validator_write_permission_lifecycle_snapshot_lock_provider_env_secret_database_schema_dependency_staging_prod_deploy_cost_calibration_or_new_screenshot_raw_dom_change
   evidenceMode: redacted_role_label_route_label_status_category_problem_category_fix_summary_command_name_test_count_only_no_secret_material_no_env_values_no_database_url_no_database_rows_no_internal_numeric_ids_no_provider_payloads_no_raw_prompt_no_raw_ai_output_no_full_question_paper_material_resource_no_session_cookie_token_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-content-list-foundation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-content-list-foundation-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-content-list-foundation-audit.md
-  dependsOn: 0704-ops-list-consistency-acceptance-2026-07-11
-  nextRequiredTaskId: 0704-content-detail-entry-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-content-detail-entry.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-content-detail-entry-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-content-detail-entry-audit.md
+  dependsOn: 0704-content-list-foundation-2026-07-11
+  nextRequiredTaskId: 0704-paper-composer-workbench-2026-07-11
   validationSummary:
     status: pass_ready_for_commit_merge_push_cleanup
-    redTargetedTests: pass_expected_query_shared_list_reset_and_deep_link_failures
-    greenTargetedTests: pass_6_files_70_tests
+    redTargetedTests: pass_expected_missing_entries_components_and_attachment_isolation_failure
+    greenTargetedTests: pass_3_files_51_tests
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
     formatting: pass_full_repository
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_21_files_scanned
+    moduleRunV2PreCommitHardening: pass_14_files_scanned
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
@@ -4776,6 +4812,7 @@ currentTask:
     screenshotRawDomTrace: existing_private_screenshots_reviewed_not_copied
     privateValueOutput: false
     dependencyOrLockfileChanged: false
+    apiServiceRepositoryValidatorChanged: false
     schemaMigrationSeedChanged: false
     releaseReadinessClaimed: false
 

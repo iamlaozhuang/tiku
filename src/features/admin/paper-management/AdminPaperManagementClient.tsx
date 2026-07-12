@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
   ArrowDownUp,
   ClipboardList,
   Copy,
+  Eye,
   FileCheck,
   FilePlus2,
   Layers3,
@@ -1883,6 +1885,14 @@ function PaperList({
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  aria-label={`查看试卷 ${paper.publicId}`}
+                  className="border-border bg-background hover:bg-muted focus-visible:ring-ring/50 inline-flex h-7 items-center gap-1 rounded-md border px-2.5 text-xs font-medium outline-none focus-visible:ring-3"
+                  href={`/content/papers/${paper.publicId}`}
+                >
+                  <Eye aria-hidden="true" className="size-3.5" />
+                  查看试卷
+                </Link>
                 <Button
                   aria-label={`组卷 ${paper.publicId}`}
                   disabled={!isDraft}
