@@ -1386,7 +1386,191 @@ describe("admin content and knowledge ops baseline", () => {
     );
   });
 
-  it("renders resource empty, unauthorized, error, filtered-empty, and unsafe publicId boundaries", async () => {
+  it("treats a resource publicId as one opaque encoded path segment for every resource action", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const opaqueResourcePublicId = "resource_legacy/segment?mode#view";
+    const encodedResourcePublicId = encodeURIComponent(opaqueResourcePublicId);
+    const resourcePath = `/api/v1/resources/${encodedResourcePublicId}`;
+    const opaqueResource = {
+      ...resourcePayload.data.resources[0],
+      publicId: opaqueResourcePublicId,
+      resourceStatus: "draft" as const,
+      publishedAt: null,
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(adminSessionPayload);
+        }
+        if (path.startsWith("/api/v1/resources?")) {
+          return createJsonResponse({
+            ...resourcePayload,
+            data: { resources: [opaqueResource] },
+            pagination: { ...resourcePayload.pagination, total: 1 },
+          });
+        }
+        if (path === resourcePath && init?.method === "PATCH") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              resource: {
+                ...opaqueResource,
+                isVectorStale: true,
+              },
+            },
+          });
+        }
+        if (path === resourcePath) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              resource: opaqueResource,
+              localOnly: true,
+              markdownContent: "# 第一章\n\n仅用于单元测试",
+            },
+          });
+        }
+        if (path === `${resourcePath}/publish` && init?.method === "POST") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              resource: {
+                ...opaqueResource,
+                resourceStatus: "published",
+                isVectorStale: true,
+                publishedAt: "2026-05-20T14:00:00.000Z",
+              },
+            },
+          });
+        }
+        if (
+          path === `${resourcePath}/rebuild-vector` &&
+          init?.method === "POST"
+        ) {
+          return createJsonResponse({
+            ...resourceVectorRebuildPayload,
+            data: {
+              resourceVector: {
+                ...resourceVectorRebuildPayload.data.resourceVector,
+                resourcePublicId: opaqueResourcePublicId,
+              },
+            },
+          });
+        }
+        if (path === `${resourcePath}/disable` && init?.method === "POST") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              resource: {
+                ...opaqueResource,
+                resourceStatus: "disabled",
+              },
+            },
+          });
+        }
+        if (path === `${resourcePath}/enable` && init?.method === "POST") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              resource: {
+                ...opaqueResource,
+                resourceStatus: "rag_ready",
+                isVectorStale: false,
+              },
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    const resourceRow = await screen.findByTestId(
+      "resource-row-resource-legacy-segment-mode-view",
+    );
+    fireEvent.click(
+      within(resourceRow).getByRole("button", { name: "查看资料" }),
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "资料详情" }),
+    ).toHaveTextContent("营销知识库讲义");
+    fireEvent.click(screen.getByRole("button", { name: "关闭资料详情" }));
+
+    fireEvent.click(
+      within(resourceRow).getByRole("button", { name: "校对内容" }),
+    );
+    expect(await screen.findByLabelText("解析草稿原文")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "解析草稿已保存",
+    );
+
+    fireEvent.click(
+      within(resourceRow).getByRole("button", { name: "发布资料" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "资料已发布，待重建检索索引",
+    );
+
+    fireEvent.click(
+      within(resourceRow).getByRole("button", { name: "重建检索索引" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认重建" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "检索索引重建完成",
+    );
+
+    fireEvent.click(
+      within(resourceRow).getByRole("button", { name: "停用资料" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("资料已停用");
+
+    fireEvent.click(
+      within(resourceRow).getByRole("button", { name: "启用资料" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认启用" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("资料已启用");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      resourcePath,
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+      }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      resourcePath,
+      expect.objectContaining({ method: "PATCH" }),
+    );
+    for (const action of ["publish", "rebuild-vector", "disable", "enable"]) {
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${resourcePath}/${action}`,
+        expect.objectContaining({ method: "POST" }),
+      );
+    }
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).startsWith(`/api/v1/resources/${opaqueResourcePublicId}`),
+      ),
+    ).toBe(false);
+  });
+
+  it("renders resource empty, unauthorized, error, filtered-empty, and empty publicId boundaries", async () => {
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const path = String(url);
 
@@ -1464,7 +1648,7 @@ describe("admin content and knowledge ops baseline", () => {
         resources: [
           {
             ...resourcePayload.data.resources[0],
-            publicId: "resource/public-unsafe",
+            publicId: "",
           },
         ],
       },
@@ -1472,11 +1656,9 @@ describe("admin content and knowledge ops baseline", () => {
     });
     render(createElement(AdminResourceKnowledgeManagement));
 
-    const unsafeRow = await screen.findByTestId(
-      "resource-row-resource-public-unsafe",
-    );
+    const emptyIdRow = await screen.findByTestId("resource-row-");
     expect(
-      within(unsafeRow).getByRole("button", { name: "资料编号异常" }),
+      within(emptyIdRow).getByRole("button", { name: "资料编号异常" }),
     ).toBeDisabled();
   });
 });

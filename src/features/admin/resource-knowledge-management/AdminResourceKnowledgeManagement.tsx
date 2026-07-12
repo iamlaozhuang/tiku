@@ -372,8 +372,17 @@ function createResourceListQueryString(queryState: ResourceListQueryState) {
   return searchParams.toString();
 }
 
-function isSafePublicId(value: string) {
-  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+function hasResourcePublicId(value: string) {
+  return value.length > 0;
+}
+
+function createResourcePath(
+  resourcePublicId: string,
+  action?: "disable" | "enable" | "publish" | "rebuild-vector",
+) {
+  const resourcePath = `/api/v1/resources/${encodeURIComponent(resourcePublicId)}`;
+
+  return action === undefined ? resourcePath : `${resourcePath}/${action}`;
 }
 
 function createTestId(value: string) {
@@ -471,7 +480,7 @@ async function postResourceVectorRebuild(
   sessionToken: string,
 ): Promise<ResourceVectorRebuildResultDto | null> {
   const response = await fetch(
-    `/api/v1/resources/${resourcePublicId}/rebuild-vector`,
+    createResourcePath(resourcePublicId, "rebuild-vector"),
     {
       headers: createAdminAuthHeaders(sessionToken),
       method: "POST",
@@ -492,7 +501,7 @@ async function postResourceMarkdownPublish(
   sessionToken: string,
 ): Promise<AdminResourceOpsSummaryDto | null> {
   const response = await fetch(
-    `/api/v1/resources/${resourcePublicId}/publish`,
+    createResourcePath(resourcePublicId, "publish"),
     {
       headers: createAdminAuthHeaders(sessionToken),
       method: "POST",
@@ -551,7 +560,7 @@ async function getLocalResourceDetail(
   resourcePublicId: string,
   sessionToken: string,
 ): Promise<LocalResourceDetailDto | null> {
-  const response = await fetch(`/api/v1/resources/${resourcePublicId}`, {
+  const response = await fetch(createResourcePath(resourcePublicId), {
     headers: createAdminAuthHeaders(sessionToken),
   });
   const payload =
@@ -565,7 +574,7 @@ async function patchLocalResourceMarkdown(
   markdownContent: string,
   sessionToken: string,
 ): Promise<AdminResourceOpsSummaryDto | null> {
-  const response = await fetch(`/api/v1/resources/${resourcePublicId}`, {
+  const response = await fetch(createResourcePath(resourcePublicId), {
     body: JSON.stringify({ markdownContent }),
     headers: {
       ...createAdminAuthHeaders(sessionToken),
@@ -587,7 +596,7 @@ async function postLocalResourceDisable(
   sessionToken: string,
 ): Promise<AdminResourceOpsSummaryDto | null> {
   const response = await fetch(
-    `/api/v1/resources/${resourcePublicId}/disable`,
+    createResourcePath(resourcePublicId, "disable"),
     {
       headers: createAdminAuthHeaders(sessionToken),
       method: "POST",
@@ -606,7 +615,7 @@ async function postLocalResourceEnable(
   resourcePublicId: string,
   sessionToken: string,
 ): Promise<AdminResourceOpsSummaryDto | null> {
-  const response = await fetch(`/api/v1/resources/${resourcePublicId}/enable`, {
+  const response = await fetch(createResourcePath(resourcePublicId, "enable"), {
     headers: createAdminAuthHeaders(sessionToken),
     method: "POST",
   });
@@ -828,7 +837,7 @@ export function AdminResourceKnowledgeManagement() {
   ) {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null || !isSafePublicId(resource.publicId)) {
+    if (sessionToken === null || !hasResourcePublicId(resource.publicId)) {
       setResourceDetail({ status: "error", resource });
       return;
     }
@@ -860,7 +869,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (
       sessionToken === null ||
-      !isSafePublicId(rebuildState.resource.publicId)
+      !hasResourcePublicId(rebuildState.resource.publicId)
     ) {
       setRebuildState({ status: "idle" });
       setToastMessage({
@@ -909,7 +918,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (
       sessionToken === null ||
-      !isSafePublicId(publishState.resource.publicId)
+      !hasResourcePublicId(publishState.resource.publicId)
     ) {
       setPublishState({ status: "idle" });
       setToastMessage({
@@ -1020,7 +1029,7 @@ export function AdminResourceKnowledgeManagement() {
   ) {
     const sessionToken = getStoredSessionToken();
 
-    if (sessionToken === null || !isSafePublicId(resource.publicId)) {
+    if (sessionToken === null || !hasResourcePublicId(resource.publicId)) {
       setToastMessage({
         message: "资料编号异常，请刷新后重试",
         tone: "error",
@@ -1057,7 +1066,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (
       sessionToken === null ||
-      !isSafePublicId(markdownReviewState.resource.publicId)
+      !hasResourcePublicId(markdownReviewState.resource.publicId)
     ) {
       setMarkdownReviewState({ status: "idle" });
       setToastMessage({
@@ -1116,7 +1125,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (
       sessionToken === null ||
-      !isSafePublicId(disableState.resource.publicId)
+      !hasResourcePublicId(disableState.resource.publicId)
     ) {
       setDisableState({ status: "idle" });
       setToastMessage({
@@ -1172,7 +1181,7 @@ export function AdminResourceKnowledgeManagement() {
 
     if (
       sessionToken === null ||
-      !isSafePublicId(enableState.resource.publicId)
+      !hasResourcePublicId(enableState.resource.publicId)
     ) {
       setEnableState({ status: "idle" });
       setToastMessage({
@@ -1823,7 +1832,7 @@ function ResourceList({
               <td className="px-4 py-3">
                 <div className="flex flex-wrap justify-end gap-2">
                   <Button
-                    disabled={!isSafePublicId(resource.publicId)}
+                    disabled={!hasResourcePublicId(resource.publicId)}
                     variant="outline"
                     onClick={() => onRequestDetail(resource)}
                   >
@@ -1832,7 +1841,7 @@ function ResourceList({
                   </Button>
                   <Button
                     disabled={
-                      !isSafePublicId(resource.publicId) ||
+                      !hasResourcePublicId(resource.publicId) ||
                       !resource.markdownPreviewAvailable
                     }
                     variant="outline"
@@ -1845,7 +1854,7 @@ function ResourceList({
                   resource.resourceStatus === "rag_ready" ? (
                     <Button
                       disabled={
-                        !isSafePublicId(resource.publicId) ||
+                        !hasResourcePublicId(resource.publicId) ||
                         !resource.markdownPreviewAvailable
                       }
                       variant="outline"
@@ -1855,7 +1864,7 @@ function ResourceList({
                     </Button>
                   ) : null}
                   <Button
-                    disabled={!isSafePublicId(resource.publicId)}
+                    disabled={!hasResourcePublicId(resource.publicId)}
                     variant={
                       resource.resourceStatus === "published" ||
                       resource.isVectorStale
@@ -1864,7 +1873,7 @@ function ResourceList({
                     }
                     onClick={() => onRequestRebuild(resource)}
                   >
-                    {isSafePublicId(resource.publicId) ? (
+                    {hasResourcePublicId(resource.publicId) ? (
                       <>
                         <DatabaseZap
                           aria-hidden="true"
@@ -1884,7 +1893,7 @@ function ResourceList({
                   </Button>
                   {resource.resourceStatus === "disabled" ? (
                     <Button
-                      disabled={!isSafePublicId(resource.publicId)}
+                      disabled={!hasResourcePublicId(resource.publicId)}
                       variant="outline"
                       onClick={() => onRequestEnable(resource)}
                     >
@@ -1896,7 +1905,7 @@ function ResourceList({
                     </Button>
                   ) : (
                     <Button
-                      disabled={!isSafePublicId(resource.publicId)}
+                      disabled={!hasResourcePublicId(resource.publicId)}
                       variant="destructive"
                       onClick={() => onRequestDisable(resource)}
                     >
