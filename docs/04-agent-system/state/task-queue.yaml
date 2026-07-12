@@ -118,6 +118,91 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-b0-b6-push-closeout-2026-07-12
+    title: 0704 B0-B6 push-ready review and origin master synchronization
+    phase: 0704-b0-b6-push-closeout-2026-07-12
+    status: ready_for_closeout
+    result: pass_push_ready_review_pending_remote_sync
+    priority: p1
+    sequenceOrder: 47
+    taskKind: remote_push_closeout
+    executionProfile: local_docs_only_remote_push_closeout
+    moduleRunVersion: 2
+    branch: codex/0704-b0-b6-push-closeout
+    dependsOn:
+      - 0704-b0-b6-cumulative-closeout-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-b0-b6-push-closeout.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-b0-b6-push-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-b0-b6-push-closeout-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-0704-b0-b6-push-closeout.md
+      - docs/05-execution-logs/evidence/2026-07-12-0704-b0-b6-push-closeout.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-0704-b0-b6-push-closeout-audit.md
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - D:/tiku-local-private/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      remotePushOriginMaster: approved_fresh_user_approval
+      forcePush: blocked
+      pullRequest: blocked
+      tagRelease: blocked
+      stagingProdDeploy: blocked
+      providerCall: blocked
+      envSecretOutput: blocked
+      databaseMutation: blocked
+      productSourceOrTestChange: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_serial_push_ready_review_and_push_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_serial_push_ready_review_and_push_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_serial_push_ready_review_and_push_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_serial_push_ready_review_and_push_2026_07_12
+    acceptanceStandards:
+      - origin/master remains an ancestor of local master with remote ahead count zero before push.
+      - The 18-commit B0-B6 range contains no forbidden files, high-risk secret patterns, or binary changes.
+      - Only ordinary git push origin master is executed and local/remote SHAs match afterward.
+    validationCommands:
+      - git fetch --prune origin
+      - git diff --check origin/master..master
+      - run redacted forbidden-file secret-pattern and binary-diff scan
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId 0704-b0-b6-push-closeout-2026-07-12
+      - git push origin master
+    validationSummary:
+      status: pass_push_ready_review_pending_pre_push_gate
+      refreshedRemoteAhead: 0
+      localAhead: 18
+      changedFiles: 131
+      forbiddenFiles: 0
+      highRiskSecretPatterns: 0
+      binaryDiffFiles: 0
+      diffCheck: pass
+      remotePush: pending
   - id: 0704-b0-b6-cumulative-closeout-2026-07-12
     title: 0704 B0-B6 cumulative regression and ledger closeout
     phase: 0704-b0-b6-cumulative-closeout-2026-07-12
