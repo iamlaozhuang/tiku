@@ -73,4 +73,18 @@ describe("personal AI generation request mapper", () => {
       redactionStatus: "redacted",
     });
   });
+
+  it("treats historical pending tasks with a persisted result as succeeded", () => {
+    expect(
+      mapPersonalAiGenerationRequestRowToHistoryDto(
+        createPersistenceRow({
+          task_status: "pending",
+          result_public_id: "ai_generation_result_public_historical_201",
+        }),
+      ),
+    ).toMatchObject({
+      status: "succeeded",
+      resultPublicId: "ai_generation_result_public_historical_201",
+    });
+  });
 });

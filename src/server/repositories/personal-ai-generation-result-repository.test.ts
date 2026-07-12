@@ -8,7 +8,9 @@ import {
   createPersonalAiGenerationResultByTaskCondition,
   createPersonalAiGenerationResultHistoryCondition,
   createPersonalAiGenerationResultRepository,
+  persistPersonalAiGenerationDraftResultAndCompleteTask,
 } from "./personal-ai-generation-result-repository";
+import type { RuntimeDatabase } from "./runtime-database";
 
 function containsText(value: unknown, text: string, seen = new Set()): boolean {
   if (typeof value === "string") {
@@ -58,6 +60,44 @@ function createPersistenceRow(
   };
 }
 
+function createAtomicPersistenceInput(
+  row: PersonalAiGenerationResultPersistenceRow,
+) {
+  return {
+    result: {
+      resultPublicId: row.public_id,
+      taskPublicId: row.task_public_id,
+      ownerType: "personal" as const,
+      ownerPublicId: row.owner_public_id,
+      actorPublicId: row.actor_public_id ?? row.owner_public_id,
+      taskType: row.task_type,
+      aiGenerationTaskId: row.ai_generation_task_id,
+      requestPublicId: row.request_public_id,
+      resultStatus: "draft" as const,
+      contentRedactedSnapshot: row.content_redacted_snapshot,
+      contentDigest: row.content_digest,
+      contentPreviewMasked: row.content_preview_masked,
+      citationRedactedSnapshot: row.citation_redacted_snapshot,
+      evidenceStatus: row.evidence_status,
+      citationCount: row.citation_count,
+      aiCallLogPublicId: row.ai_call_log_public_id,
+      isFormalAdoptionBlocked: true as const,
+      createdAt: row.created_at,
+    },
+    task: {
+      ownerType: "personal" as const,
+      ownerPublicId: row.owner_public_id,
+      actorPublicId: row.actor_public_id ?? row.owner_public_id,
+      taskPublicId: row.task_public_id,
+      resultPublicId: row.public_id,
+      taskStatus: "succeeded" as const,
+      evidenceStatus: row.evidence_status,
+      citationCount: row.citation_count,
+      aiCallLogPublicId: row.ai_call_log_public_id,
+    },
+  };
+}
+
 function createGateway(
   options: {
     rows?: PersonalAiGenerationResultPersistenceRow[];
@@ -92,17 +132,15 @@ function createGateway(
     async () => options.existingRow ?? null,
   );
   const findTaskByPublicId = vi.fn(async () => options.taskRow ?? null);
-  const insertDraftResult = vi.fn(
+  const insertDraftResultAndCompleteTask = vi.fn(
     async () => options.insertedRow ?? createPersistenceRow(),
   );
-  const attachResultToTask = vi.fn(async () => undefined);
 
   const gateway: PersonalAiGenerationResultTaskGateway = {
     listResultRows,
     findResultByTaskPublicId,
     findTaskByPublicId,
-    insertDraftResult,
-    attachResultToTask,
+    insertDraftResultAndCompleteTask,
   };
 
   return {
@@ -110,12 +148,78 @@ function createGateway(
     listResultRows,
     findResultByTaskPublicId,
     findTaskByPublicId,
-    insertDraftResult,
-    attachResultToTask,
+    insertDraftResultAndCompleteTask,
   };
 }
 
 describe("personal AI generation result repository", () => {
+  it("persists the draft result and succeeded task state in one database transaction", async () => {
+    const insertedRow = createPersistenceRow();
+    const updateReturning = vi.fn(async () => [
+      { public_id: insertedRow.task_public_id },
+    ]);
+    const updateWhere = vi.fn(() => ({ returning: updateReturning }));
+    const updateSet = vi.fn(() => ({ where: updateWhere }));
+    const insertReturning = vi.fn(async () => [insertedRow]);
+    const insertOnConflict = vi.fn(() => ({ returning: insertReturning }));
+    const insertValues = vi.fn(() => ({
+      onConflictDoNothing: insertOnConflict,
+    }));
+    const transactionDatabase = {
+      insert: vi.fn(() => ({ values: insertValues })),
+      update: vi.fn(() => ({ set: updateSet })),
+    };
+    const transaction = vi.fn(async (callback) =>
+      callback(transactionDatabase),
+    );
+
+    const result = await persistPersonalAiGenerationDraftResultAndCompleteTask(
+      { transaction } as unknown as RuntimeDatabase,
+      createAtomicPersistenceInput(insertedRow),
+    );
+
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(updateSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        task_status: "succeeded",
+        result_public_id: insertedRow.public_id,
+      }),
+    );
+    expect(updateWhere).toHaveBeenCalledTimes(1);
+    expect(updateReturning).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(insertedRow);
+  });
+
+  it("rolls back when the owner-scoped task cannot be completed", async () => {
+    const insertedRow = createPersistenceRow();
+    const transactionDatabase = {
+      insert: vi.fn(() => ({
+        values: vi.fn(() => ({
+          onConflictDoNothing: vi.fn(() => ({
+            returning: vi.fn(async () => [insertedRow]),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn(() => ({
+          where: vi.fn(() => ({ returning: vi.fn(async () => []) })),
+        })),
+      })),
+    };
+    const transaction = vi.fn(async (callback) =>
+      callback(transactionDatabase),
+    );
+
+    await expect(
+      persistPersonalAiGenerationDraftResultAndCompleteTask(
+        { transaction } as unknown as RuntimeDatabase,
+        createAtomicPersistenceInput(insertedRow),
+      ),
+    ).rejects.toThrow(
+      "personal AI generation task completion persistence failed.",
+    );
+  });
+
   it("builds owner-scoped result history conditions", () => {
     const condition = createPersonalAiGenerationResultHistoryCondition({
       ownerPublicId: "student_public_170",
@@ -309,7 +413,7 @@ describe("personal AI generation result repository", () => {
       task_public_id: "ai_generation_task_public_existing",
       owner_public_id: "student_public_173",
     });
-    const { gateway, insertDraftResult } = createGateway({
+    const { gateway, insertDraftResultAndCompleteTask } = createGateway({
       existingRow,
     });
     const repository = createPersonalAiGenerationResultRepository(gateway);
@@ -335,7 +439,7 @@ describe("personal AI generation result repository", () => {
     expect(result.result.resultPublicId).toBe(
       "personal_ai_result_public_existing",
     );
-    expect(insertDraftResult).not.toHaveBeenCalled();
+    expect(insertDraftResultAndCompleteTask).not.toHaveBeenCalled();
   });
 
   it("creates a draft result with server-owned no-adoption metadata", async () => {
@@ -349,20 +453,16 @@ describe("personal AI generation result repository", () => {
       evidence_status: "sufficient",
       citation_count: 2,
     });
-    const {
-      gateway,
-      findTaskByPublicId,
-      insertDraftResult,
-      attachResultToTask,
-    } = createGateway({
-      insertedRow,
-      taskRow: {
-        id: 704,
-        public_id: "ai_generation_task_public_created",
-        request_public_id: "personal_ai_request_public_created",
-        owner_public_id: "student_public_174",
-      },
-    });
+    const { gateway, findTaskByPublicId, insertDraftResultAndCompleteTask } =
+      createGateway({
+        insertedRow,
+        taskRow: {
+          id: 704,
+          public_id: "ai_generation_task_public_created",
+          request_public_id: "personal_ai_request_public_created",
+          owner_public_id: "student_public_174",
+        },
+      });
     const repository = createPersonalAiGenerationResultRepository(gateway);
 
     const result = await repository.createOrReuseDraftResult({
@@ -391,24 +491,27 @@ describe("personal AI generation result repository", () => {
       actorPublicId: "student_public_174",
       taskPublicId: "ai_generation_task_public_created",
     });
-    expect(insertDraftResult).toHaveBeenCalledWith(
+    expect(insertDraftResultAndCompleteTask).toHaveBeenCalledWith(
       expect.objectContaining({
-        aiGenerationTaskId: 704,
-        requestPublicId: "personal_ai_request_public_created",
-        resultStatus: "draft",
-        isFormalAdoptionBlocked: true,
+        result: expect.objectContaining({
+          aiGenerationTaskId: 704,
+          requestPublicId: "personal_ai_request_public_created",
+          resultStatus: "draft",
+          isFormalAdoptionBlocked: true,
+        }),
+        task: {
+          ownerType: "personal",
+          ownerPublicId: "student_public_174",
+          actorPublicId: "student_public_174",
+          taskPublicId: "ai_generation_task_public_created",
+          resultPublicId: "personal_ai_result_public_created",
+          taskStatus: "succeeded",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+          aiCallLogPublicId: null,
+        },
       }),
     );
-    expect(attachResultToTask).toHaveBeenCalledWith({
-      ownerType: "personal",
-      ownerPublicId: "student_public_174",
-      actorPublicId: "student_public_174",
-      taskPublicId: "ai_generation_task_public_created",
-      resultPublicId: "personal_ai_result_public_created",
-      evidenceStatus: "sufficient",
-      citationCount: 2,
-      aiCallLogPublicId: null,
-    });
     expect(result).toMatchObject({
       persistenceStatus: "created",
       result: {

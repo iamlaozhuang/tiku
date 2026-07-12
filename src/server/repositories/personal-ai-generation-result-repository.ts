@@ -56,9 +56,15 @@ export type AttachPersonalAiGenerationResultToTaskInput = {
   actorPublicId?: string;
   taskPublicId: string;
   resultPublicId: string;
+  taskStatus: "succeeded";
   evidenceStatus: EvidenceStatus;
   citationCount: number;
   aiCallLogPublicId: string | null;
+};
+
+export type InsertPersonalAiGenerationDraftResultAndCompleteTaskInput = {
+  result: InsertPersonalAiGenerationDraftResultInput;
+  task: AttachPersonalAiGenerationResultToTaskInput;
 };
 
 export type PersonalAiGenerationResultPersistenceResult =
@@ -105,12 +111,9 @@ export type PersonalAiGenerationResultTaskGateway = {
     actorPublicId?: string;
     taskPublicId: string;
   }): Promise<PersonalAiGenerationResultTaskRow | null>;
-  insertDraftResult(
-    input: InsertPersonalAiGenerationDraftResultInput,
+  insertDraftResultAndCompleteTask(
+    input: InsertPersonalAiGenerationDraftResultAndCompleteTaskInput,
   ): Promise<PersonalAiGenerationResultPersistenceRow | null>;
-  attachResultToTask(
-    input: AttachPersonalAiGenerationResultToTaskInput,
-  ): Promise<void>;
 };
 
 const DEFAULT_RESULT_HISTORY_LIMIT = 20;
@@ -234,9 +237,21 @@ export function createPersonalAiGenerationResultRepository(
         throw new Error("personal AI generation task was not found.");
       }
 
-      const insertedRow = await gateway.insertDraftResult(
-        createServerOwnedDraftResultInput(input, taskRow),
-      );
+      const resultInput = createServerOwnedDraftResultInput(input, taskRow);
+      const insertedRow = await gateway.insertDraftResultAndCompleteTask({
+        result: resultInput,
+        task: {
+          ownerType: input.ownerType,
+          ownerPublicId: input.ownerPublicId,
+          actorPublicId: input.actorPublicId,
+          taskPublicId: input.taskPublicId,
+          resultPublicId: input.resultPublicId,
+          taskStatus: "succeeded",
+          evidenceStatus: input.evidenceStatus,
+          citationCount: input.citationCount,
+          aiCallLogPublicId: input.aiCallLogPublicId,
+        },
+      });
       const resolvedRow =
         insertedRow ??
         (await gateway.findResultByTaskPublicId({
@@ -248,19 +263,6 @@ export function createPersonalAiGenerationResultRepository(
 
       if (resolvedRow === null) {
         throw new Error("personal AI generation result persistence failed.");
-      }
-
-      if (insertedRow !== null) {
-        await gateway.attachResultToTask({
-          ownerType: input.ownerType,
-          ownerPublicId: input.ownerPublicId,
-          actorPublicId: input.actorPublicId,
-          taskPublicId: input.taskPublicId,
-          resultPublicId: input.resultPublicId,
-          evidenceStatus: input.evidenceStatus,
-          citationCount: input.citationCount,
-          aiCallLogPublicId: input.aiCallLogPublicId,
-        });
       }
 
       return {
@@ -357,56 +359,77 @@ export function createPostgresPersonalAiGenerationResultRepository(
 
       return row ?? null;
     },
-    async insertDraftResult(input) {
-      const [row] = await getDatabase()
-        .insert(personalAiGenerationResult)
-        .values({
-          public_id: input.resultPublicId,
-          ai_generation_task_id: input.aiGenerationTaskId,
-          task_public_id: input.taskPublicId,
-          request_public_id: input.requestPublicId,
-          owner_public_id: input.ownerPublicId,
-          task_type: input.taskType,
-          result_status: input.resultStatus,
-          content_redacted_snapshot: input.contentRedactedSnapshot,
-          content_digest: input.contentDigest,
-          content_preview_masked: input.contentPreviewMasked,
-          citation_redacted_snapshot: input.citationRedactedSnapshot,
-          evidence_status: input.evidenceStatus,
-          citation_count: input.citationCount,
-          ai_call_log_public_id: input.aiCallLogPublicId,
-          is_formal_adoption_blocked: input.isFormalAdoptionBlocked,
-          created_at: input.createdAt,
-          updated_at: input.createdAt,
-        })
-        .onConflictDoNothing({
-          target: personalAiGenerationResult.ai_generation_task_id,
-        })
-        .returning(personalAiGenerationResultSelection);
-
-      return (
-        (row as PersonalAiGenerationResultPersistenceRow | undefined) ?? null
+    async insertDraftResultAndCompleteTask(input) {
+      return persistPersonalAiGenerationDraftResultAndCompleteTask(
+        getDatabase(),
+        input,
       );
     },
-    async attachResultToTask(input) {
-      await getDatabase()
-        .update(aiGenerationTask)
-        .set({
-          result_public_id: input.resultPublicId,
-          evidence_status: input.evidenceStatus,
-          citation_count: input.citationCount,
-          ai_call_log_public_id: input.aiCallLogPublicId,
-          updated_at: new Date(),
-        })
-        .where(
-          createPersonalAiGenerationTaskLookupCondition({
-            ownerType: input.ownerType,
-            ownerPublicId: input.ownerPublicId,
-            actorPublicId: input.actorPublicId,
-            taskPublicId: input.taskPublicId,
-          }),
-        );
-    },
+  });
+}
+
+export async function persistPersonalAiGenerationDraftResultAndCompleteTask(
+  database: RuntimeDatabase,
+  input: InsertPersonalAiGenerationDraftResultAndCompleteTaskInput,
+): Promise<PersonalAiGenerationResultPersistenceRow | null> {
+  return database.transaction(async (transaction) => {
+    const [row] = await transaction
+      .insert(personalAiGenerationResult)
+      .values({
+        public_id: input.result.resultPublicId,
+        ai_generation_task_id: input.result.aiGenerationTaskId,
+        task_public_id: input.result.taskPublicId,
+        request_public_id: input.result.requestPublicId,
+        owner_public_id: input.result.ownerPublicId,
+        task_type: input.result.taskType,
+        result_status: input.result.resultStatus,
+        content_redacted_snapshot: input.result.contentRedactedSnapshot,
+        content_digest: input.result.contentDigest,
+        content_preview_masked: input.result.contentPreviewMasked,
+        citation_redacted_snapshot: input.result.citationRedactedSnapshot,
+        evidence_status: input.result.evidenceStatus,
+        citation_count: input.result.citationCount,
+        ai_call_log_public_id: input.result.aiCallLogPublicId,
+        is_formal_adoption_blocked: input.result.isFormalAdoptionBlocked,
+        created_at: input.result.createdAt,
+        updated_at: input.result.createdAt,
+      })
+      .onConflictDoNothing({
+        target: personalAiGenerationResult.ai_generation_task_id,
+      })
+      .returning(personalAiGenerationResultSelection);
+
+    if (row === undefined) {
+      return null;
+    }
+
+    const [updatedTaskRow] = await transaction
+      .update(aiGenerationTask)
+      .set({
+        task_status: input.task.taskStatus,
+        result_public_id: input.task.resultPublicId,
+        evidence_status: input.task.evidenceStatus,
+        citation_count: input.task.citationCount,
+        ai_call_log_public_id: input.task.aiCallLogPublicId,
+        updated_at: input.result.createdAt,
+      })
+      .where(
+        createPersonalAiGenerationTaskLookupCondition({
+          ownerType: input.task.ownerType,
+          ownerPublicId: input.task.ownerPublicId,
+          actorPublicId: input.task.actorPublicId,
+          taskPublicId: input.task.taskPublicId,
+        }),
+      )
+      .returning({ public_id: aiGenerationTask.public_id });
+
+    if (updatedTaskRow === undefined) {
+      throw new Error(
+        "personal AI generation task completion persistence failed.",
+      );
+    }
+
+    return row as PersonalAiGenerationResultPersistenceRow;
   });
 }
 

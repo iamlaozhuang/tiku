@@ -1,8 +1,34 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-b0-b6-push-closeout-2026-07-12
-updatedAt: "2026-07-12T09:51:07-07:00"
+currentPhase: user-led-b3-ai-task-lifecycle-closeout-2026-07-12
+updatedAt: "2026-07-12T13:02:00-07:00"
+latestUserLedB3AiTaskLifecycle:
+  id: user-led-b3-ai-task-lifecycle-2026-07-12
+  status: ready_for_closeout
+  result: pass_ai_task_result_atomic_lifecycle_and_history_compatibility
+  priority: p1
+  branch: codex/user-led-b3-ai-training
+  startSha: f1148823d6f2d59ea3cb40d430ef7cb552c969cb
+  approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b3-ai-task-lifecycle.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b3-ai-task-lifecycle.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b3-ai-task-lifecycle-audit.md
+  validationSummary:
+    status: pass_ready_for_commit
+    focusedUnit: pass_31_tests
+    transactionUnit: pass_13_tests
+    fullUnit: pass_360_files_1970_tests
+    lint: pass
+    typecheck: pass
+    fullFormatCheck: pass
+    webpackBuild: pass_90_static_pages
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_after_materialized_blocked_files_and_real_hook
+    moduleRunV2ModuleCloseoutReadiness: pass
+    databaseMutationExecuted: false
+    providerExecution: blocked_not_executed
+  nextRequiredTaskId: user-led-b4-ai-training-information-architecture-2026-07-12
 latest0704B0B6PushCloseout:
   id: 0704-b0-b6-push-closeout-2026-07-12
   status: closed_remote_synced
@@ -5446,6 +5472,48 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
+  id: user-led-b3-ai-task-lifecycle-2026-07-12
+  title: User-led B3 AI task lifecycle consistency repair
+  phase: user-led-b3-ai-task-lifecycle-closeout-2026-07-12
+  status: ready_for_closeout
+  priority: p1
+  taskKind: targeted_ai_lifecycle_source_repair
+  branch: codex/user-led-b3-ai-training
+  humanApprovalBoundary:
+    implementation: approved
+    localCommit: approved
+    fastForwardMerge: approved_master_only
+    push: approved_origin_master_only
+    cleanup: approved_after_remote_sync
+    approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+    databaseMigration: blocked_pending_journal_safe_baseline_approval
+    providerExecution: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pullRequest: blocked
+  plannedAt: "2026-07-12T09:51:07-07:00"
+  claimedAt: "2026-07-12T09:51:07-07:00"
+  targetClosureItem: Persist AI generation result and succeeded task state atomically while preserving historical pending result compatibility.
+  behaviorBoundary: personal_ai_result_and_task_lifecycle_source_tests_and_governance_only_no_schema_migration_fixture_seed_provider_env_staging_prod_or_deploy
+  evidenceMode: redacted_status_count_command_and_commit_sha_only_no_credentials_tokens_env_values_database_urls_or_raw_generation_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b3-ai-task-lifecycle.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b3-ai-task-lifecycle.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b3-ai-task-lifecycle-audit.md
+  nextRequiredTaskId: user-led-b4-ai-training-information-architecture-2026-07-12
+  validationSummary:
+    status: pass_ready_for_commit
+    focusedUnit: pass_31_tests
+    transactionUnit: pass_13_tests
+    fullUnit: pass_360_files_1970_tests
+    lint: pass
+    typecheck: pass
+    fullFormatCheck: pass
+    webpackBuild: pass_90_static_pages
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_after_materialized_blocked_files_and_real_hook
+    moduleRunV2ModuleCloseoutReadiness: pass
+
+previousCurrentTaskBeforeUserLedB3AiTaskLifecycle20260712:
   id: 0704-b0-b6-push-closeout-2026-07-12
   title: 0704 B0-B6 push-ready review and origin master synchronization
   phase: 0704-b0-b6-push-closeout-2026-07-12

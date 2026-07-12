@@ -23,11 +23,16 @@ export type PersonalAiGenerationRequestPersistenceRow = {
 export function mapPersonalAiGenerationRequestRowToHistoryDto(
   row: PersonalAiGenerationRequestPersistenceRow,
 ): PersonalAiGenerationRequestHistoryItemDto {
+  const effectiveTaskStatus =
+    row.task_status === "pending" && row.result_public_id !== null
+      ? "succeeded"
+      : row.task_status;
+
   return {
     requestPublicId: row.request_public_id,
     taskPublicId: row.public_id,
     taskType: row.task_type,
-    status: row.task_status,
+    status: effectiveTaskStatus,
     requestedAt: row.requested_at.toISOString(),
     resultPublicId: row.result_public_id,
     evidenceStatus: row.evidence_status,
