@@ -1565,6 +1565,35 @@ describe("organization training service", () => {
     expect("authorizationPublicId" in result.version).toBe(false);
   });
 
+  it("copies AI paper section metadata into the immutable question snapshot", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+    const structuredQuestions = createPublishInput().questions.map(
+      (question, index) => ({
+        ...question,
+        paperSectionKey:
+          question.questionType === "short_answer"
+            ? "short_answer"
+            : "single_choice",
+        paperSectionTitle:
+          question.questionType === "short_answer"
+            ? "简答题部分"
+            : "单选题部分",
+        paperSectionSortOrder: index + 1,
+        questionSortOrder: 1,
+      }),
+    );
+
+    const result = await service.publishVersion({
+      publishInput: createPublishInput({ questions: structuredQuestions }),
+      persistenceLineage: createPersistenceLineage(),
+    });
+
+    expect(result.success).toBe(true);
+    expect(getPublishedVersions()[0]?.questionSnapshot).toEqual(
+      structuredQuestions,
+    );
+  });
+
   it("carries optional answer deadline through publish version writes and DTOs", async () => {
     const { service, getPublishedVersions } = createServiceFixture();
     const answerDeadlineAt = "2026-06-20T12:00:00.000Z";

@@ -125,6 +125,10 @@ export type OrganizationTrainingQuestionSnapshotValue = {
     | "multi_choice"
     | "true_false"
     | "short_answer";
+  paperSectionKey?: string;
+  paperSectionTitle?: string;
+  paperSectionSortOrder?: number;
+  questionSortOrder?: number;
   materialTitle: string | null;
   materialContent: string | null;
   stem: string;

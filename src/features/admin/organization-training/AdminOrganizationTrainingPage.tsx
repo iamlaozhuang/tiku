@@ -95,6 +95,10 @@ type CopyFormValues = {
 type PublishQuestionFormValue = {
   sequenceNumber: number;
   questionType: OrganizationTrainingPublishInput["questions"][number]["questionType"];
+  paperSectionKey: string | null;
+  paperSectionTitle: string | null;
+  paperSectionSortOrder: number | null;
+  questionSortOrder: number | null;
   materialTitle: string;
   materialContent: string;
   stem: string;
@@ -512,6 +516,10 @@ function createDefaultPublishQuestionFormValue(
   return {
     sequenceNumber,
     questionType: "single_choice",
+    paperSectionKey: null,
+    paperSectionTitle: null,
+    paperSectionSortOrder: null,
+    questionSortOrder: null,
     materialTitle: "",
     materialContent: "",
     stem: "",
@@ -548,10 +556,21 @@ function createPublishFormValuesForDraft(
 
 function createPublishQuestionFormValueFromDetail(
   question: OrganizationTrainingAdminQuestionDetailDto,
+  paperSectionMetadata: Pick<
+    PublishQuestionFormValue,
+    | "paperSectionKey"
+    | "paperSectionTitle"
+    | "paperSectionSortOrder"
+    | "questionSortOrder"
+  > | null = null,
 ): PublishQuestionFormValue {
   return {
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
+    paperSectionKey: paperSectionMetadata?.paperSectionKey ?? null,
+    paperSectionTitle: paperSectionMetadata?.paperSectionTitle ?? null,
+    paperSectionSortOrder: paperSectionMetadata?.paperSectionSortOrder ?? null,
+    questionSortOrder: paperSectionMetadata?.questionSortOrder ?? null,
     materialTitle: question.materialTitle ?? "",
     materialContent: question.materialContent ?? "",
     stem: question.stem,
@@ -577,10 +596,31 @@ function createPublishFormValuesFromAdminDetail(
     return null;
   }
 
+  const structuredQuestions = detail.paperSections?.flatMap(
+    (paperSection, paperSectionIndex) =>
+      paperSection.questions.map((question, questionIndex) =>
+        createPublishQuestionFormValueFromDetail(question, {
+          paperSectionKey: paperSection.sectionKey,
+          paperSectionTitle: paperSection.title,
+          paperSectionSortOrder: paperSectionIndex + 1,
+          questionSortOrder: questionIndex + 1,
+        }),
+      ),
+  );
+  const questions =
+    structuredQuestions !== undefined && structuredQuestions.length > 0
+      ? structuredQuestions.map((question, index) => ({
+          ...question,
+          sequenceNumber: index + 1,
+        }))
+      : detail.questions.map((question) =>
+          createPublishQuestionFormValueFromDetail(question),
+        );
+
   return {
     publishScopeOrganizationPublicIds: detail.organizationPublicId,
     answerDeadlineAt: "",
-    questions: detail.questions.map(createPublishQuestionFormValueFromDetail),
+    questions,
     weakEvidenceConfirmed: false,
   };
 }
@@ -648,6 +688,17 @@ function normalizePublishQuestionFormValue(
     publicId: createQuestionPublicId(question.sequenceNumber),
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
+    ...(question.paperSectionKey !== null &&
+    question.paperSectionTitle !== null &&
+    question.paperSectionSortOrder !== null &&
+    question.questionSortOrder !== null
+      ? {
+          paperSectionKey: question.paperSectionKey,
+          paperSectionTitle: question.paperSectionTitle,
+          paperSectionSortOrder: question.paperSectionSortOrder,
+          questionSortOrder: question.questionSortOrder,
+        }
+      : {}),
     materialTitle: normalizeOptionalPreviewText(question.materialTitle),
     materialContent: normalizeOptionalPreviewText(question.materialContent),
     stem,

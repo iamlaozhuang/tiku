@@ -558,6 +558,24 @@ function normalizePublishQuestion(
   const standardAnswer = normalizeRequiredText(value.standardAnswer);
   const analysisSummary = normalizeRequiredText(value.analysisSummary);
   const citationCount = normalizeNonNegativeInteger(value.citationCount);
+  const hasPaperSectionMetadata = [
+    "paperSectionKey",
+    "paperSectionTitle",
+    "paperSectionSortOrder",
+    "questionSortOrder",
+  ].some((key) => value[key] !== null && value[key] !== undefined);
+  const paperSectionKey = hasPaperSectionMetadata
+    ? normalizeRequiredText(value.paperSectionKey)
+    : null;
+  const paperSectionTitle = hasPaperSectionMetadata
+    ? normalizeRequiredText(value.paperSectionTitle)
+    : null;
+  const paperSectionSortOrder = hasPaperSectionMetadata
+    ? normalizePositiveInteger(value.paperSectionSortOrder)
+    : null;
+  const questionSortOrder = hasPaperSectionMetadata
+    ? normalizePositiveInteger(value.questionSortOrder)
+    : null;
 
   if (
     publicId === null ||
@@ -569,7 +587,12 @@ function normalizePublishQuestion(
     standardAnswer === null ||
     analysisSummary === null ||
     !isEvidenceStatus(value.evidenceStatus) ||
-    citationCount === null
+    citationCount === null ||
+    (hasPaperSectionMetadata &&
+      (paperSectionKey === null ||
+        paperSectionTitle === null ||
+        paperSectionSortOrder === null ||
+        questionSortOrder === null))
   ) {
     return null;
   }
@@ -586,6 +609,14 @@ function normalizePublishQuestion(
     publicId,
     sequenceNumber,
     questionType: value.questionType,
+    ...(hasPaperSectionMetadata
+      ? {
+          paperSectionKey: paperSectionKey as string,
+          paperSectionTitle: paperSectionTitle as string,
+          paperSectionSortOrder: paperSectionSortOrder as number,
+          questionSortOrder: questionSortOrder as number,
+        }
+      : {}),
     materialTitle,
     materialContent,
     stem,
@@ -613,7 +644,101 @@ function normalizePublishQuestions(
     return null;
   }
 
-  return normalizedQuestions as OrganizationTrainingPublishQuestionInput[];
+  const questions =
+    normalizedQuestions as OrganizationTrainingPublishQuestionInput[];
+  const publicIds = new Set(questions.map((question) => question.publicId));
+  const structuredQuestionCount = questions.filter(
+    (question) => question.paperSectionKey !== undefined,
+  ).length;
+
+  if (publicIds.size !== questions.length) {
+    return null;
+  }
+
+  if (structuredQuestionCount === 0) {
+    return questions;
+  }
+
+  if (structuredQuestionCount !== questions.length) {
+    return null;
+  }
+
+  const sectionByKey = new Map<
+    string,
+    {
+      title: string;
+      questionType: OrganizationTrainingQuestionType;
+      sortOrder: number;
+      questionSortOrders: number[];
+    }
+  >();
+  const sectionKeyBySortOrder = new Map<number, string>();
+
+  for (const question of questions) {
+    const sectionKey = question.paperSectionKey;
+    const sectionTitle = question.paperSectionTitle;
+    const sectionSortOrder = question.paperSectionSortOrder;
+    const questionSortOrder = question.questionSortOrder;
+
+    if (
+      sectionKey === undefined ||
+      sectionTitle === undefined ||
+      sectionSortOrder === undefined ||
+      questionSortOrder === undefined
+    ) {
+      return null;
+    }
+
+    const existingSectionKey = sectionKeyBySortOrder.get(sectionSortOrder);
+
+    if (existingSectionKey !== undefined && existingSectionKey !== sectionKey) {
+      return null;
+    }
+
+    sectionKeyBySortOrder.set(sectionSortOrder, sectionKey);
+    const existingSection = sectionByKey.get(sectionKey);
+
+    if (existingSection === undefined) {
+      sectionByKey.set(sectionKey, {
+        title: sectionTitle,
+        questionType: question.questionType,
+        sortOrder: sectionSortOrder,
+        questionSortOrders: [questionSortOrder],
+      });
+      continue;
+    }
+
+    if (
+      existingSection.title !== sectionTitle ||
+      existingSection.questionType !== question.questionType ||
+      existingSection.sortOrder !== sectionSortOrder
+    ) {
+      return null;
+    }
+
+    existingSection.questionSortOrders.push(questionSortOrder);
+  }
+
+  const sectionSortOrders = [...sectionByKey.values()]
+    .map((section) => section.sortOrder)
+    .sort((left, right) => left - right);
+
+  if (
+    sectionSortOrders.some((sortOrder, index) => sortOrder !== index + 1) ||
+    [...sectionByKey.values()].some((section) => {
+      const questionSortOrders = [...section.questionSortOrders].sort(
+        (left, right) => left - right,
+      );
+
+      return questionSortOrders.some(
+        (sortOrder, index) => sortOrder !== index + 1,
+      );
+    })
+  ) {
+    return null;
+  }
+
+  return questions;
 }
 
 export function normalizeOrganizationTrainingPublishInput(

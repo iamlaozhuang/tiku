@@ -124,6 +124,10 @@ export type OrganizationTrainingPublishQuestionInput = {
   publicId: string;
   sequenceNumber: number;
   questionType: OrganizationTrainingQuestionType;
+  paperSectionKey?: string;
+  paperSectionTitle?: string;
+  paperSectionSortOrder?: number;
+  questionSortOrder?: number;
   materialTitle: string | null;
   materialContent: string | null;
   stem: string;

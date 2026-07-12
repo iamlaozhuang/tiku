@@ -2111,6 +2111,86 @@ describe("organization training repository", () => {
     expect(JSON.stringify(adminDetail)).not.toMatch(/"id":|"orgAuthId":/u);
   });
 
+  it("rebuilds AI paper sections from structured version snapshots while leaving legacy flat snapshots ungrouped", async () => {
+    const structuredQuestionSnapshot =
+      createVersionWrite().questionSnapshot.map((question, index) => ({
+        ...question,
+        paperSectionKey:
+          question.questionType === "short_answer"
+            ? "short_answer"
+            : "single_choice",
+        paperSectionTitle:
+          question.questionType === "short_answer"
+            ? "简答题部分"
+            : "单选题部分",
+        paperSectionSortOrder: index + 1,
+        questionSortOrder: 1,
+      }));
+    const { gateway: structuredGateway } = createGateway({
+      publishedVersionRow: createVersionRow({
+        question_snapshot: structuredQuestionSnapshot,
+      }),
+    });
+    const { gateway: legacyGateway } = createGateway({
+      publishedVersionRow: createVersionRow({
+        question_snapshot: createVersionWrite().questionSnapshot,
+      }),
+    });
+    const { gateway: malformedGateway } = createGateway({
+      publishedVersionRow: createVersionRow({
+        question_snapshot: structuredQuestionSnapshot.map((question, index) =>
+          index === 1
+            ? { ...question, questionSortOrder: undefined }
+            : question,
+        ),
+      }),
+    });
+
+    const structuredDetail = await createOrganizationTrainingRepository(
+      structuredGateway,
+    ).findAdminPublishedVersionDetailByPublicId({
+      trainingVersionPublicId: "training_version_public_123",
+    });
+    const legacyDetail = await createOrganizationTrainingRepository(
+      legacyGateway,
+    ).findAdminPublishedVersionDetailByPublicId({
+      trainingVersionPublicId: "training_version_public_123",
+    });
+    const malformedDetail = await createOrganizationTrainingRepository(
+      malformedGateway,
+    ).findAdminPublishedVersionDetailByPublicId({
+      trainingVersionPublicId: "training_version_public_123",
+    });
+
+    expect(structuredDetail?.paperSections).toEqual([
+      expect.objectContaining({
+        sectionKey: "single_choice",
+        title: "单选题部分",
+        questionType: "single_choice",
+        targetQuestionCount: 1,
+        selectedQuestionCount: 1,
+        totalScore: 2,
+        questions: [
+          expect.objectContaining({ publicId: "training_question_public_123" }),
+        ],
+      }),
+      expect.objectContaining({
+        sectionKey: "short_answer",
+        title: "简答题部分",
+        questionType: "short_answer",
+        targetQuestionCount: 1,
+        selectedQuestionCount: 1,
+        totalScore: 3,
+        questions: [
+          expect.objectContaining({ publicId: "training_question_public_456" }),
+        ],
+      }),
+    ]);
+    expect(legacyDetail?.paperSections).toBeUndefined();
+    expect(malformedDetail?.questions).toHaveLength(2);
+    expect(malformedDetail?.paperSections).toBeUndefined();
+  });
+
   it("lists server-only employee visible question snapshots for AI paper source", async () => {
     const questionSnapshot = createVersionWrite().questionSnapshot;
     const {

@@ -314,6 +314,155 @@ describe("organization training contract and validator scaffold", () => {
     });
   });
 
+  it("preserves complete paper section metadata and rejects structurally inconsistent publish input", () => {
+    const structuredPublishInput = {
+      draftPublicId: " training_draft_public_123 ",
+      organizationPublicId: " organization_public_123 ",
+      authorizationPublicId: " org_auth_public_123 ",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: " Structured safety training ",
+      description: null,
+      answerDeadlineAt: null,
+      questions: [
+        {
+          publicId: " question_one_public_123 ",
+          sequenceNumber: 1,
+          questionType: "single_choice",
+          paperSectionKey: " single_choice ",
+          paperSectionTitle: " 单选题部分 ",
+          paperSectionSortOrder: 1,
+          questionSortOrder: 1,
+          materialTitle: null,
+          materialContent: null,
+          stem: " First question ",
+          options: [
+            {
+              publicId: " question_one_option_a ",
+              label: " A ",
+              content: " First option ",
+            },
+          ],
+          score: 2,
+          standardAnswer: " A ",
+          analysisSummary: " First rationale ",
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
+        {
+          publicId: " question_two_public_123 ",
+          sequenceNumber: 2,
+          questionType: "short_answer",
+          paperSectionKey: " short_answer ",
+          paperSectionTitle: " 简答题部分 ",
+          paperSectionSortOrder: 2,
+          questionSortOrder: 1,
+          materialTitle: null,
+          materialContent: null,
+          stem: " Second question ",
+          options: [],
+          score: 3,
+          standardAnswer: " Expected answer ",
+          analysisSummary: " Second rationale ",
+          evidenceStatus: "sufficient",
+          citationCount: 1,
+        },
+      ],
+      publishScopeOrganizationPublicIds: ["organization_public_123"],
+      capabilityContext: {
+        effectiveEdition: "advanced",
+        authorizationSource: "org_auth",
+        canCreateOrganizationTraining: true,
+      },
+      weakEvidenceConfirmed: false,
+    };
+
+    const normalizedResult = normalizeOrganizationTrainingPublishInput(
+      structuredPublishInput,
+    );
+
+    expect(normalizedResult).toEqual({
+      success: true,
+      value: expect.objectContaining({
+        questions: [
+          expect.objectContaining({
+            publicId: "question_one_public_123",
+            paperSectionKey: "single_choice",
+            paperSectionTitle: "单选题部分",
+            paperSectionSortOrder: 1,
+            questionSortOrder: 1,
+          }),
+          expect.objectContaining({
+            publicId: "question_two_public_123",
+            paperSectionKey: "short_answer",
+            paperSectionTitle: "简答题部分",
+            paperSectionSortOrder: 2,
+            questionSortOrder: 1,
+          }),
+        ],
+      }),
+    });
+
+    expect(
+      normalizeOrganizationTrainingPublishInput({
+        ...structuredPublishInput,
+        questions: structuredPublishInput.questions.map((question, index) =>
+          index === 0 ? { ...question, paperSectionTitle: null } : question,
+        ),
+      }).success,
+    ).toBe(false);
+    expect(
+      normalizeOrganizationTrainingPublishInput({
+        ...structuredPublishInput,
+        questions: [
+          structuredPublishInput.questions[0],
+          {
+            ...structuredPublishInput.questions[0],
+            publicId: "question_two_public_456",
+            sequenceNumber: 2,
+            questionSortOrder: 1,
+          },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(
+      normalizeOrganizationTrainingPublishInput({
+        ...structuredPublishInput,
+        questions: structuredPublishInput.questions.map((question, index) =>
+          index === 1
+            ? {
+                ...question,
+                paperSectionKey: "single_choice",
+                paperSectionSortOrder: 1,
+                questionSortOrder: 2,
+              }
+            : question,
+        ),
+      }).success,
+    ).toBe(false);
+    expect(
+      normalizeOrganizationTrainingPublishInput({
+        ...structuredPublishInput,
+        questions: structuredPublishInput.questions.map((question, index) =>
+          index === 1 ? { ...question, paperSectionSortOrder: 3 } : question,
+        ),
+      }).success,
+    ).toBe(false);
+    expect(
+      normalizeOrganizationTrainingPublishInput({
+        ...structuredPublishInput,
+        questions: [
+          structuredPublishInput.questions[0],
+          {
+            ...structuredPublishInput.questions[1],
+            publicId: structuredPublishInput.questions[0].publicId,
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
   it("rejects deferred question types and incomplete publish confirmation", () => {
     expect(organizationTrainingDeferredQuestionTypeValues).toEqual([
       "fill_blank",

@@ -24,6 +24,7 @@ import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingAdminLifecycleSourceMetadataDto,
+  OrganizationTrainingAdminPaperSectionDetailDto,
   OrganizationTrainingAdminPublishedVersionDetailDto,
   OrganizationTrainingAdminQuestionDetailDto,
   OrganizationTrainingDraftDto,
@@ -1373,11 +1374,17 @@ async function mapOrganizationTrainingVersionRowToAdminDetailDto(
   const persistedQuestions = mapQuestionSnapshotsToAdminDetail(
     Array.isArray(row.question_snapshot) ? row.question_snapshot : [],
   );
+  const persistedPaperSections = mapQuestionSnapshotsToAdminPaperSections(
+    Array.isArray(row.question_snapshot) ? row.question_snapshot : [],
+  );
 
   if (persistedQuestions.length > 0) {
     return {
       ...version,
       questions: persistedQuestions,
+      ...(persistedPaperSections === undefined
+        ? {}
+        : { paperSections: persistedPaperSections }),
     };
   }
 
@@ -1608,6 +1615,12 @@ function getNonNegativeNumber(value: unknown): number {
   return Number.isFinite(numberValue) && numberValue >= 0 ? numberValue : 0;
 }
 
+function getPositiveInteger(value: unknown): number | null {
+  const numberValue = typeof value === "number" ? value : Number(value);
+
+  return Number.isInteger(numberValue) && numberValue > 0 ? numberValue : null;
+}
+
 function getEvidenceStatus(
   value: unknown,
 ): OrganizationTrainingAdminQuestionDetailDto["evidenceSummary"]["evidenceStatus"] {
@@ -1688,6 +1701,128 @@ function mapQuestionSnapshotsToAdminDetail(
       (question): question is OrganizationTrainingAdminQuestionDetailDto =>
         question !== null,
     );
+}
+
+function mapQuestionSnapshotsToAdminPaperSections(
+  snapshots: readonly unknown[],
+): OrganizationTrainingAdminPaperSectionDetailDto[] | undefined {
+  const records = snapshots.map(asRecord);
+  const metadataKeys = [
+    "paperSectionKey",
+    "paperSectionTitle",
+    "paperSectionSortOrder",
+    "questionSortOrder",
+  ] as const;
+  const hasStructuredSnapshot = records.some((record) =>
+    metadataKeys.some(
+      (key) => record[key] !== null && record[key] !== undefined,
+    ),
+  );
+
+  if (!hasStructuredSnapshot) {
+    return undefined;
+  }
+
+  const sectionByKey = new Map<
+    string,
+    {
+      title: string;
+      questionType: OrganizationTrainingAdminQuestionDetailDto["questionType"];
+      sortOrder: number;
+      questions: {
+        sortOrder: number;
+        detail: OrganizationTrainingAdminQuestionDetailDto;
+      }[];
+    }
+  >();
+  const sectionKeyBySortOrder = new Map<number, string>();
+  const questionPublicIds = new Set<string>();
+
+  for (const [index, snapshot] of records.entries()) {
+    const detail = mapQuestionSnapshotRecordToAdminDetail(snapshot, index + 1);
+    const sectionKey = getFirstStringField(snapshot, ["paperSectionKey"]);
+    const sectionTitle = getFirstStringField(snapshot, ["paperSectionTitle"]);
+    const sectionSortOrder = getPositiveInteger(snapshot.paperSectionSortOrder);
+    const questionSortOrder = getPositiveInteger(snapshot.questionSortOrder);
+
+    if (
+      detail === null ||
+      sectionKey === null ||
+      sectionTitle === null ||
+      sectionSortOrder === null ||
+      questionSortOrder === null ||
+      questionPublicIds.has(detail.publicId)
+    ) {
+      return undefined;
+    }
+
+    questionPublicIds.add(detail.publicId);
+    const existingKey = sectionKeyBySortOrder.get(sectionSortOrder);
+
+    if (existingKey !== undefined && existingKey !== sectionKey) {
+      return undefined;
+    }
+
+    sectionKeyBySortOrder.set(sectionSortOrder, sectionKey);
+    const existingSection = sectionByKey.get(sectionKey);
+
+    if (existingSection === undefined) {
+      sectionByKey.set(sectionKey, {
+        title: sectionTitle,
+        questionType: detail.questionType,
+        sortOrder: sectionSortOrder,
+        questions: [{ sortOrder: questionSortOrder, detail }],
+      });
+      continue;
+    }
+
+    if (
+      existingSection.title !== sectionTitle ||
+      existingSection.questionType !== detail.questionType ||
+      existingSection.sortOrder !== sectionSortOrder ||
+      existingSection.questions.some(
+        (question) => question.sortOrder === questionSortOrder,
+      )
+    ) {
+      return undefined;
+    }
+
+    existingSection.questions.push({ sortOrder: questionSortOrder, detail });
+  }
+
+  const sections = [...sectionByKey.entries()].sort(
+    ([, left], [, right]) => left.sortOrder - right.sortOrder,
+  );
+
+  if (
+    sections.some(([, section], index) => section.sortOrder !== index + 1) ||
+    sections.some(([, section]) =>
+      [...section.questions]
+        .sort((left, right) => left.sortOrder - right.sortOrder)
+        .some((question, index) => question.sortOrder !== index + 1),
+    )
+  ) {
+    return undefined;
+  }
+
+  return sections.map(([sectionKey, section]) => {
+    const questions = [...section.questions]
+      .sort((left, right) => left.sortOrder - right.sortOrder)
+      .map((question) => question.detail);
+
+    return {
+      sectionKey,
+      title: section.title,
+      questionType: section.questionType,
+      targetQuestionCount: questions.length,
+      selectedQuestionCount: questions.length,
+      totalScore: questions.reduce(
+        (totalScore, question) => totalScore + question.score,
+        0,
+      ),
+      questions,
+    };
+  });
 }
 
 function normalizeTrustedPersistenceLineageLookupInput(

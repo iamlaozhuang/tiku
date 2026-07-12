@@ -1712,6 +1712,17 @@ function copyPublishQuestionSnapshot(
     publicId: question.publicId,
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
+    ...(question.paperSectionKey !== undefined &&
+    question.paperSectionTitle !== undefined &&
+    question.paperSectionSortOrder !== undefined &&
+    question.questionSortOrder !== undefined
+      ? {
+          paperSectionKey: question.paperSectionKey,
+          paperSectionTitle: question.paperSectionTitle,
+          paperSectionSortOrder: question.paperSectionSortOrder,
+          questionSortOrder: question.questionSortOrder,
+        }
+      : {}),
     materialTitle: normalizeOptionalText(question.materialTitle),
     materialContent: normalizeOptionalText(question.materialContent),
     stem: question.stem,

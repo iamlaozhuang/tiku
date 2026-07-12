@@ -1855,6 +1855,43 @@ describe("AdminOrganizationTrainingPage", () => {
           });
         }
 
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001/publish" &&
+          method === "POST"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              version: {
+                publicId: "organization-training-version-ai-paper-ui-001",
+                draftPublicId: "organization-training-draft-ai-paper-ui-001",
+                versionNumber: 1,
+                organizationPublicId: persistedAiDraft.organizationPublicId,
+                publishScopeSnapshot: {
+                  organizationPublicIds: [
+                    persistedAiDraft.organizationPublicId,
+                  ],
+                  capturedAt: "2026-07-12T21:00:00.000Z",
+                },
+                profession: persistedAiDraft.profession,
+                level: persistedAiDraft.level,
+                subject: persistedAiDraft.subject,
+                title: "AI组卷训练草稿",
+                description: "来自 AI 组卷结果",
+                questionCount: 1,
+                totalScore: 5,
+                status: "published",
+                publishedAt: "2026-07-12T21:00:00.000Z",
+                answerDeadlineAt: null,
+                takenDownAt: null,
+                takedownReason: null,
+              },
+            },
+          });
+        }
+
         return createJsonResponse({
           code: 404001,
           message: "missing",
@@ -1896,6 +1933,26 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(publishForm.getByLabelText("第 1 题解析")).toHaveValue(
       "synthetic AI paper analysis",
     );
+    fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "企业训练已发布",
+    );
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001/publish",
+        "POST",
+      ),
+    ).toMatchObject({
+      questions: [
+        {
+          paperSectionKey: "single_choice",
+          paperSectionTitle: "单选题部分",
+          paperSectionSortOrder: 1,
+          questionSortOrder: 1,
+        },
+      ],
+    });
     expect(JSON.stringify(fetchMock.mock.calls)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput/u,
     );
