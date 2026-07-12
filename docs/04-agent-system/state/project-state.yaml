@@ -1,11 +1,52 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-keyboard-pagination-acceptance-2026-07-12
-updatedAt: "2026-07-12T07:26:09-07:00"
+currentPhase: 0704-admin-login-regression-diagnosis-2026-07-12
+updatedAt: "2026-07-12T07:38:00-07:00"
+latest0704AdminLoginRegressionDiagnosis:
+  id: 0704-admin-login-regression-diagnosis-2026-07-12
+  status: ready_for_closeout
+  result: pass_runtime_target_recovered_no_product_or_credential_fix
+  priority: p1
+  branch: codex/0704-admin-login-regression-diagnosis
+  startSha: 28dc0bcc5ec94021557e4663e70713c5a2e11424
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-admin-login-regression-diagnosis.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-admin-login-regression-diagnosis.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-login-regression-diagnosis-audit.md
+  confirmedConflict:
+    prior0704ContentAdminLogin: pass_2026_07_09
+    current0704ContentAdminLogin: fail_invalid_credential_category
+    preRecoveryMixedRoleMatrix: fail_7_pass_2
+    postRecoveryCoreRoleMatrix: pass_9_of_9
+    classification: localhost_process_targeted_wrong_database
+  executionBoundary:
+    localhostDbTarget: explicit_process_only_0704db_override_required
+    privateCredentialUse: approved_in_memory_no_value_output
+    ordinaryLoginSessionProbe: approved_localhost_only
+    sourceChange: blocked_until_root_cause_and_separate_tdd_task
+    directDatabaseConnection: blocked_requires_fresh_approval
+    databaseMutation: blocked
+    privateCredentialFileChange: blocked
+    providerExecution: blocked
+    envSecretOutput: blocked
+    screenshotRawDomTrace: blocked
+    stagingProdDeploy: blocked
+    dependencySchemaMigrationSeed: blocked
+  validationSummary:
+    canonicalCatalogMatchesArchivedSources: pass_9_of_9_in_memory
+    authenticationSourceDiffFromBaseline: none
+    defaultAnd0704TargetsDistinct: true
+    processOnly0704Restart: pass
+    providerEnabled: false
+    envLocalModified: false
+    localhostHealth: pass
+    coreRoleLoginMatrix: pass_9_of_9
+    productOrCredentialFixRequired: false
+    directDatabaseConnectionExecuted: false
+  nextRequiredTaskId: pending_diagnosis_then_0704_practice_mock_session_acceptance_2026_07_12
 latest0704KeyboardPaginationAcceptance:
   id: 0704-keyboard-pagination-acceptance-2026-07-12
-  status: ready_for_closeout
+  status: closed_local_merged
   result: pass_keyboard_focus_and_deterministic_pagination
   branch: codex/0704-keyboard-pagination-acceptance
   startSha: b22a7745a2bbeda8d5d23e493bc77e021eee2dc2
@@ -41,6 +82,8 @@ latest0704KeyboardPaginationAcceptance:
     providerExecution: blocked_not_executed
     directDatabaseConnectionExecuted: false
     dependencyOrLockfileChanged: false
+    localMasterMerge: pass_28dc0bcc5
+    shortBranchCleanup: pass
   nextRequiredTaskId: 0704-practice-mock-session-acceptance-2026-07-12
 latest0704MobileSafeAreaOverflow:
   id: 0704-mobile-safe-area-overflow-2026-07-12
@@ -5291,58 +5334,58 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-keyboard-pagination-acceptance-2026-07-12
-  title: 0704 keyboard and deterministic pagination acceptance A21 A22 B6
-  phase: 0704-keyboard-pagination-acceptance-2026-07-12
+  id: 0704-admin-login-regression-diagnosis-2026-07-12
+  title: 0704 admin login regression diagnosis before B6 closeout
+  phase: 0704-admin-login-regression-diagnosis-2026-07-12
   status: ready_for_closeout
-  priority: p3
-  taskKind: implementation_accessibility_and_acceptance_coverage
-  branch: codex/0704-keyboard-pagination-acceptance
+  priority: p1
+  taskKind: readonly_authentication_regression_diagnosis
+  branch: codex/0704-admin-login-regression-diagnosis
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
-    localCommit: approved_after_full_local_gate
+    localCommit: approved_after_diagnostic_gate
     fastForwardMerge: approved
     push: blocked_requires_fresh_approval
     providerExecution: blocked
-    envSecretAccess: blocked
+    envSecretOutput: blocked
     stagingProdDeploy: blocked
-    browserRuntime: approved_redacted_localhost_only
-    e2eRuntime: approved_localhost_route_fixture_only
-    directDatabaseConnection: blocked
+    productLoginSessionProbe: approved_redacted_localhost_only
+    directDatabaseConnection: blocked_requires_fresh_approval
     databaseMutation: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshot: approved_redacted_page_only
+    privateCredentialFileChange: blocked
+    screenshot: blocked_not_required
     rawDom: blocked
-  plannedAt: "2026-07-12T06:57:12-07:00"
-  claimedAt: "2026-07-12T06:57:12-07:00"
-  targetClosureItem: Prove drawer and confirmation-dialog keyboard focus behavior, repair confirmation focus restoration, and prove page two returns distinct server rows with more than twenty records.
-  behaviorBoundary: local_keyboard_focus_and_test_fixture_pagination_only_no_role_permission_business_data_provider_env_secret_direct_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
-  evidenceMode: redacted_role_route_state_category_focus_boolean_page_count_and_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_database_rows_internal_ids_provider_payload_prompt_ai_output_full_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-keyboard-pagination-acceptance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-keyboard-pagination-acceptance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-keyboard-pagination-acceptance-audit.md
+  plannedAt: "2026-07-12T07:38:00-07:00"
+  claimedAt: "2026-07-12T07:38:00-07:00"
+  targetClosureItem: Reconcile previously passing 0704 admin credentials with current login failures and restore the intended localhost target without changing credentials, product source, or database state.
+  behaviorBoundary: localhost_0704_runtime_target_diagnosis_and_redacted_role_preflight_only_no_product_source_private_credential_database_provider_env_value_dependency_schema_staging_prod_deploy_or_cost_calibration_change
+  evidenceMode: redacted_role_status_boolean_path_and_commit_only_no_credentials_sessions_cookies_tokens_headers_env_values_database_urls_rows_internal_ids_provider_payload_prompt_ai_output_full_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-admin-login-regression-diagnosis.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-admin-login-regression-diagnosis.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-login-regression-diagnosis-audit.md
   nextRequiredTaskId: 0704-practice-mock-session-acceptance-2026-07-12
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    localhost0704DbService: pass_process_only_override_login_verified
-    contentAdminCredentialRuntime: blocked_catalog_ready_marker_mismatches_current_login
-    manualContentAdminKeyboard: blocked_no_verified_real_account_session
-    redFocused: pass_expected_1_of_19_failure
-    greenFocused: pass_2_files_19_tests
-    playwrightKeyboard: pass_1_test_all_api_routes_intercepted
-    paginationOverTwenty: pass_45_rows_distinct_page_two_20_50_100_filter_reset
-    fullUnitTests: pass_360_files_1967_tests_max_workers_1
-    lint: pass
-    typecheck: pass
-    formatting: pass_full_repository
+    priorPassingMatricesRead: pass_2026_07_09_and_2026_07_10
+    canonicalCatalogMatchesArchivedSources: pass_9_of_9_in_memory
+    authenticationSourceChangedSincePriorPass: false
+    preRecoveryMixedRoleMatrix: fail_7_pass_2
+    rootCause: prior_localhost_process_targeted_wrong_database
+    processOnly0704Restart: pass
+    providerEnabled: false
+    envLocalModified: false
+    coreRoleLoginMatrix: pass_9_of_9
+    productOrCredentialFixRequired: false
+    formatting: pass_scoped
     diffCheck: pass
-    blockedPathDiffCheck: pass_no_output
-    moduleRunV2PreCommitHardening: pass_9_files_scanned
+    moduleRunV2PreCommitHardening: pass_6_files_scanned
     providerExecution: blocked_not_executed
-    envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
+    databaseMutationExecuted: false
+    privateCredentialFileChanged: false
     sensitiveOutput: false
     dependencyOrLockfileChanged: false
     repositorySchemaMigrationSeedChanged: false

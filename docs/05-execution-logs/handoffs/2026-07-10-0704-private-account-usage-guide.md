@@ -14,6 +14,18 @@ Future localhost 0704 role acceptance must not guess which private file contains
 5. Run redacted login and authorization readiness preflight.
 6. If readiness fails, stop the business acceptance and create a separate account-readiness task.
 
+## Process-Only 0704 Startup Gate
+
+- The default localhost database is not the 0704 acceptance target.
+- Read the default connection material and the canonical catalog target label only in process memory. Override the
+  database target for the launched localhost process only; never edit `.env.local`.
+- Force Provider execution off in the launched process.
+- After every restart, a healthy `/login` response and one learner login are insufficient target proof. Run the
+  redacted core-role readiness preflight before business acceptance. If any role fails, stop immediately instead of
+  retrying and risking an account lock.
+- Record only the start-mode Boolean, Provider-disabled Boolean, `.env.local` unchanged Boolean, role labels, and
+  pass/failure categories. Never record connection values or credential material.
+
 ## Private File Meanings
 
 | Private path                                                                    | Meaning                                             | Current use rule                                                             |
@@ -41,6 +53,11 @@ Only these status labels should be used in task plans, evidence, and audits:
 - `unknown_needs_preflight`
 
 Current 2026-07-10 readiness status after canonical-catalog consolidation: all 9 core role labels are `ready_0704_verified` by redacted localhost preflight.
+
+2026-07-12 recovery note: a localhost process that appeared healthy accepted a learner account while rejecting the
+admin account family. Re-launching with the canonical process-only 0704 target restored all 9 core role logins without
+changing credentials, source, or database state. A single successful learner login must therefore never be treated as
+proof that the 0704 target is active.
 
 ## Redacted Preflight Evidence Shape
 

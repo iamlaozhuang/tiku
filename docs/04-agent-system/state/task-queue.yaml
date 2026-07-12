@@ -118,10 +118,119 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-admin-login-regression-diagnosis-2026-07-12
+    title: 0704 admin login regression diagnosis before B6 closeout
+    phase: 0704-admin-login-regression-diagnosis-2026-07-12
+    status: ready_for_closeout
+    result: pass_runtime_target_recovered_no_product_or_credential_fix
+    priority: p1
+    sequenceOrder: 44
+    taskKind: readonly_authentication_regression_diagnosis
+    executionProfile: localhost_0704_redacted_login_matrix_and_source_history_diagnosis
+    moduleRunVersion: 2
+    branch: codex/0704-admin-login-regression-diagnosis
+    dependsOn:
+      - 0704-keyboard-pagination-acceptance-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-admin-login-regression-diagnosis.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-admin-login-regression-diagnosis.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-login-regression-diagnosis-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-0704-admin-login-regression-diagnosis.md
+      - docs/05-execution-logs/evidence/2026-07-12-0704-admin-login-regression-diagnosis.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-login-regression-diagnosis-audit.md
+      - docs/05-execution-logs/handoffs/2026-07-10-0704-private-account-usage-guide.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/01-requirements/**
+      - docs/02-architecture/adr/**
+      - docs/03-standards/**
+      - docs/05-execution-logs/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - D:/tiku-local-private/acceptance/**
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - D:/tiku-local-private/**
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localhostServiceHealthRead: approved
+      privateCredentialInMemoryRead: approved_no_value_output
+      productLoginSessionProbe: approved_localhost_only_no_session_output
+      sourceHistoryRead: approved
+      localSourceChange: blocked_until_root_cause_and_separate_tdd_task
+      browserRuntime: approved_redacted_no_artifacts
+      screenshot: blocked_not_required
+      rawDomTrace: blocked
+      directDatabaseConnection: blocked_requires_fresh_approval
+      databaseMutation: blocked
+      privateCredentialFileChange: blocked
+      providerCall: blocked
+      envSecretOutput: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      push:
+        approved: false
+        reason: fresh_remote_approval_required
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+    acceptanceStandards:
+      - Prior passing and current failing content-admin login evidence are reconciled without guessing.
+      - Current previously verified admin roles have a redacted role-label login matrix.
+      - No source, credential, private file, database, Provider, environment, dependency, schema, deploy, screenshot, trace, raw DOM, or remote mutation occurs.
+      - A source fix is allowed only in a separate TDD task after root cause is proven.
+    validationCommands:
+      - npm.cmd exec -- prettier --check --ignore-unknown <scoped-doc-files>
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-admin-login-regression-diagnosis-2026-07-12
+    validationSummary:
+      status: pass_ready_for_commit_and_local_merge
+      priorPassingMatricesRead: pass_2026_07_09_and_2026_07_10
+      canonicalCatalogMatchesArchivedSources: pass_9_of_9_in_memory
+      authenticationSourceChangedSincePriorPass: false
+      preRecoveryMixedRoleMatrix: fail_7_pass_2
+      processOnly0704Restart: pass
+      providerEnabled: false
+      envLocalModified: false
+      coreRoleLoginMatrix: pass_9_of_9
+      rootCause: prior_localhost_process_targeted_wrong_database
+      productOrCredentialFixRequired: false
+      directDatabaseConnectionExecuted: false
+      databaseMutationExecuted: false
+      privateCredentialFileChanged: false
   - id: 0704-keyboard-pagination-acceptance-2026-07-12
     title: 0704 keyboard and deterministic pagination acceptance A21 A22 B6
     phase: 0704-keyboard-pagination-acceptance-2026-07-12
-    status: ready_for_closeout
+    status: closed_local_merged
     result: pass_keyboard_focus_and_deterministic_pagination
     priority: p3
     sequenceOrder: 43
@@ -219,6 +328,8 @@ activeTasks:
       providerExecution: blocked_not_executed
       directDatabaseConnectionExecuted: false
       dependencyOrLockfileChanged: false
+      localMasterMerge: pass_28dc0bcc5
+      shortBranchCleanup: pass
   - id: 0704-mobile-safe-area-overflow-2026-07-12
     title: 0704 mobile safe area and overflow containment A28 A29 B5C
     phase: 0704-mobile-safe-area-overflow-2026-07-12
