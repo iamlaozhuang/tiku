@@ -1,8 +1,44 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-redeem-filtered-empty-state-2026-07-12
-updatedAt: "2026-07-12T06:03:16-07:00"
+currentPhase: 0704-mobile-safe-area-overflow-2026-07-12
+updatedAt: "2026-07-12T06:41:27-07:00"
+latest0704MobileSafeAreaOverflow:
+  id: 0704-mobile-safe-area-overflow-2026-07-12
+  status: ready_for_closeout
+  result: pass_mobile_safe_area_and_table_overflow_containment
+  branch: codex/0704-mobile-safe-area-overflow
+  startSha: 1784bfc3229c8305595762cc3becd6acf97c3414
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-mobile-safe-area-overflow.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-mobile-safe-area-overflow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-mobile-safe-area-overflow-audit.md
+  executionBoundary:
+    runtime: local_mobile_shell_and_admin_table_containment_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    schemaMigrationSeed: blocked
+    dependencyIntroduction: blocked
+  validationSummary:
+    status: pass_ready_for_commit_and_local_merge
+    browserLoginViewportBaseline: pass_390_by_844_no_horizontal_overflow
+    localhostRoleAcceptance: blocked_original_0704db_not_mounted
+    localhostRuntimeGuardrail: required_explicit_process_only_0704db_override_before_role_acceptance
+    redFocused: pass_expected_2_of_12_failures
+    greenFocused: pass_3_files_12_tests
+    fullUnitTests: pass_360_files_1966_tests_max_workers_1
+    lint: pass
+    typecheck: pass
+    formatting: pass_full_repository
+    webpackBuild: pass_90_routes
+    diffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass_9_files_scanned
+    providerExecution: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    dependencyOrLockfileChanged: false
+  nextRequiredTaskId: 0704-keyboard-pagination-acceptance-2026-07-12
 latest0704RedeemFilteredEmptyState:
   id: 0704-redeem-filtered-empty-state-2026-07-12
   status: ready_for_closeout
@@ -5216,14 +5252,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-redeem-filtered-empty-state-2026-07-12
-  title: 0704 redeem code filtered empty state A27 B5B
-  phase: 0704-redeem-filtered-empty-state-2026-07-12
+  id: 0704-mobile-safe-area-overflow-2026-07-12
+  title: 0704 mobile safe area and overflow containment A28 A29 B5C
+  phase: 0704-mobile-safe-area-overflow-2026-07-12
   status: ready_for_closeout
-  result: pass_shared_initial_filtered_error_empty_state
   priority: p3
-  taskKind: implementation_ui_bugfix
-  branch: codex/0704-redeem-filtered-empty-state
+  taskKind: implementation_responsive_ui_bugfix
+  branch: codex/0704-mobile-safe-area-overflow
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -5238,25 +5273,27 @@ currentTask:
     credentialMaterialOutput: blocked
     screenshot: approved_redacted_page_only
     rawDom: blocked
-  plannedAt: "2026-07-12T05:43:19-07:00"
-  claimedAt: "2026-07-12T05:43:19-07:00"
-  completedAt: "2026-07-12T06:03:16-07:00"
-  targetClosureItem: Use the shared admin table empty-state primitive for redeem codes and distinguish initial empty, filtered empty, and error while retaining filters and pagination.
-  behaviorBoundary: local_admin_redeem_list_empty_state_component_and_tests_only_no_redeem_plaintext_role_change_permission_expansion_provider_env_secret_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
-  evidenceMode: redacted_role_label_route_label_state_category_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_redeem_plaintext_database_rows_internal_ids_provider_payload_prompt_ai_output
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-redeem-filtered-empty-state.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-redeem-filtered-empty-state.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-redeem-filtered-empty-state-audit.md
-  nextRequiredTaskId: 0704-mobile-safe-area-overflow-2026-07-12
+  plannedAt: "2026-07-12T06:15:22-07:00"
+  claimedAt: "2026-07-12T06:15:22-07:00"
+  targetClosureItem: Add mobile safe-area spacing and stable shell containment, and ensure wide admin tables remain contained by AdminTableFrame instead of widening the page.
+  behaviorBoundary: local_student_shell_safe_area_and_shared_admin_table_width_containment_only_no_role_permission_business_flow_provider_env_secret_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
+  evidenceMode: redacted_route_label_viewport_dimensions_overflow_boolean_state_category_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_database_rows_internal_ids_provider_payload_prompt_ai_output_full_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-mobile-safe-area-overflow.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-mobile-safe-area-overflow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-mobile-safe-area-overflow-audit.md
+  nextRequiredTaskId: 0704-keyboard-pagination-acceptance-2026-07-12
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    redFocused: pass_expected_2_of_17_failures
-    greenFocused: pass_2_files_17_tests
-    redeemA15Regression: pass_3_files_22_tests
+    browserLoginViewportBaseline: pass_390_by_844_no_horizontal_overflow
+    localhostRoleAcceptance: blocked_original_0704db_not_mounted
+    localhostRuntimeGuardrail: required_explicit_process_only_0704db_override_before_role_acceptance
+    redFocused: pass_expected_2_of_12_failures
+    greenFocused: pass_3_files_12_tests
     fullUnitTests: pass_360_files_1966_tests_max_workers_1
-    lint: pass_0_errors_0_warnings
-    typecheck: pass_tsc_no_emit
+    lint: pass
+    typecheck: pass
     formatting: pass_full_repository
+    webpackBuild: pass_90_routes
     diffCheck: pass
     blockedPathDiffCheck: pass_no_output
     moduleRunV2PreCommitHardening: pass_9_files_scanned

@@ -29,11 +29,25 @@ describe("StudentAppLayout", () => {
       </StudentAppLayout>,
     );
 
+    expect(screen.getByTestId("student-shell")).toHaveClass(
+      "min-h-dvh",
+      "w-full",
+      "max-w-full",
+      "overflow-x-clip",
+    );
     expect(screen.getByTestId("student-shell-header-inner")).toHaveClass(
       "max-w-5xl",
     );
-    expect(screen.getByTestId("student-shell-main")).toHaveClass("flex-1");
+    expect(screen.getByTestId("student-shell-main")).toHaveClass(
+      "flex-1",
+      "min-w-0",
+      "overflow-x-clip",
+    );
+    expect(screen.getByRole("tablist", { name: "主导航" })).toHaveClass(
+      "pb-[env(safe-area-inset-bottom)]",
+    );
     expect(screen.getByTestId("student-shell-bottom-nav-inner")).toHaveClass(
+      "h-14",
       "max-w-3xl",
     );
     expect(screen.getByText("学员端")).toBeInTheDocument();

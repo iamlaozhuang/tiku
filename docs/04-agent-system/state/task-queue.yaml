@@ -118,6 +118,103 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: 0704-mobile-safe-area-overflow-2026-07-12
+    title: 0704 mobile safe area and overflow containment A28 A29 B5C
+    phase: 0704-mobile-safe-area-overflow-2026-07-12
+    status: ready_for_closeout
+    result: pass_mobile_safe_area_and_table_overflow_containment
+    priority: p3
+    sequenceOrder: 42
+    taskKind: implementation_responsive_ui_bugfix
+    executionProfile: local_student_shell_safe_area_and_admin_table_containment
+    moduleRunVersion: 2
+    branch: codex/0704-mobile-safe-area-overflow
+    dependsOn:
+      - 0704-redeem-filtered-empty-state-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-mobile-safe-area-overflow.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-mobile-safe-area-overflow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-mobile-safe-area-overflow-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-0704-mobile-safe-area-overflow.md
+      - docs/05-execution-logs/evidence/2026-07-12-0704-mobile-safe-area-overflow.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-0704-mobile-safe-area-overflow-audit.md
+      - src/components/StudentAppLayout/StudentAppLayout.tsx
+      - src/components/StudentAppLayout/StudentAppLayout.test.tsx
+      - src/components/admin/admin-layout-primitives.ts
+      - tests/unit/admin-layout-primitives-ui.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/server/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      browserRuntime: approved_redacted
+      screenshot: approved_redacted_page_only
+      rawDom: blocked
+      databaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+      permissionExpansion: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+      push:
+        approved: false
+        reason: fresh_remote_approval_required
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
+    validationCommands:
+      - npm.cmd run test:unit -- src/components/StudentAppLayout/StudentAppLayout.test.tsx src/components/admin/AdminList/AdminList.test.tsx tests/unit/admin-layout-primitives-ui.test.ts --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId 0704-mobile-safe-area-overflow-2026-07-12
+    validationSummary:
+      status: pass_ready_for_commit_and_local_merge
+      browserLoginViewportBaseline: pass_390_by_844_no_horizontal_overflow
+      localhostRoleAcceptance: blocked_original_0704db_not_mounted
+      localhostRuntimeGuardrail: required_explicit_process_only_0704db_override_before_role_acceptance
+      redFocused: pass_expected_2_of_12_failures
+      greenFocused: pass_3_files_12_tests
+      fullUnitTests: pass_360_files_1966_tests_max_workers_1
+      lint: pass
+      typecheck: pass
+      formatting: pass_full_repository
+      webpackBuild: pass_90_routes
+      diffCheck: pass
+      blockedPathDiffCheck: pass_no_output
+      moduleRunV2PreCommitHardening: pass_9_files_scanned
+      providerExecution: blocked_not_executed
+      directDatabaseConnectionExecuted: false
+      dependencyOrLockfileChanged: false
   - id: 0704-redeem-filtered-empty-state-2026-07-12
     title: 0704 redeem code filtered empty state A27 B5B
     phase: 0704-redeem-filtered-empty-state-2026-07-12

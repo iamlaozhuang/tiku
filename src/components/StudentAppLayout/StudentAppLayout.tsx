@@ -23,7 +23,10 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <ProtectedRouteGuard requiredRole="student">
-      <div className="bg-background flex min-h-screen flex-col">
+      <div
+        className="bg-background flex min-h-dvh min-h-screen w-full max-w-full flex-col overflow-x-clip"
+        data-testid="student-shell"
+      >
         {/* Header */}
         <header className="border-border bg-surface sticky top-0 z-30 border-b shadow-sm">
           <div
@@ -42,14 +45,14 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
         {/* Main Content */}
         <main
           data-testid="student-shell-main"
-          className="flex-1 overflow-y-auto"
+          className="min-w-0 flex-1 overflow-x-clip overflow-y-auto"
         >
           {children}
         </main>
 
         {/* Bottom Tab Bar */}
         <nav
-          className="border-border bg-surface sticky bottom-0 z-30 border-t"
+          className="border-border bg-surface sticky bottom-0 z-30 w-full max-w-full border-t pb-[env(safe-area-inset-bottom)]"
           role="tablist"
           aria-label="主导航"
         >

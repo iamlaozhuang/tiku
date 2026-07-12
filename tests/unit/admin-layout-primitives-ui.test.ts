@@ -30,6 +30,9 @@ describe("admin layout primitives", () => {
   it("exposes shared list primitives for toolbar, table, pagination, and state surfaces", () => {
     expect(adminListToolbarClassName).toContain("bg-surface");
     expect(adminListToolbarClassName).toContain("border-border");
+    expect(adminDataTableContainerClassName).toContain("w-full");
+    expect(adminDataTableContainerClassName).toContain("max-w-full");
+    expect(adminDataTableContainerClassName).toContain("min-w-0");
     expect(adminDataTableContainerClassName).toContain("overflow-x-auto");
     expect(adminDataTableClassName).toContain("w-full");
     expect(adminListPaginationClassName).toContain("justify-between");
