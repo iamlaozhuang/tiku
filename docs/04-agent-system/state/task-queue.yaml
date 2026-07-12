@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b8-content-ops-interface-details-2026-07-12
     title: User-led B8 content and operations interface details
     phase: user-led-b8-content-ops-interface-details-2026-07-12
-    status: ready_for_closeout
+    status: closed
     result: pass_content_ops_interface_details
     priority: p1
     sequenceOrder: 53
@@ -195,7 +195,7 @@ activeTasks:
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
     validationSummary:
-      status: pass_ready_for_closeout
+      status: pass_closed_local_merged
       tddRed: pass_4_expected_failures
       focusedTests: pass_4_files_69_tests
       fullTests: pass_360_files_1982_tests
@@ -212,7 +212,13 @@ activeTasks:
       moduleRunV2PreCommitHardening: pass_11_files_scanned
       localCommit: pass_ce5d3047c
       moduleRunV2ModuleCloseoutReadiness: pass
+      localMasterMerge: pass_ff_only_216a41bdb
+      masterFocusedTests: pass_4_files_69_tests
+      masterLint: pass
+      masterTypecheck: pass
+      masterDiffCheck: pass
     finalCommit: ce5d3047c
+    closeoutStatus: local_master_216a41bdb_ready_for_push
   - id: user-led-b7-learner-comprehensive-experience-2026-07-12
     title: User-led B7 learner comprehensive experience
     phase: user-led-b7-learner-comprehensive-experience-2026-07-12
