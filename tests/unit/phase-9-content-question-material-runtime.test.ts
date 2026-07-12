@@ -248,6 +248,18 @@ function createRepositories(
         };
       },
     },
+    tagRepository: {
+      async listTags() {
+        return {
+          tags: [
+            {
+              publicId: "tag-public-001",
+              name: "证件办理",
+            },
+          ],
+        };
+      },
+    },
     auditLogRepository: {
       async appendAuditLog(input) {
         auditLogEntries.push(input);
@@ -333,6 +345,43 @@ describe("phase 9 content question material runtime", () => {
       message: "Admin session is required.",
       data: null,
     });
+  });
+
+  it("returns readable tag options only to authenticated content administrators", async () => {
+    const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("content_admin"),
+    });
+
+    const unauthorizedResponse = await handlers.tags.collection.GET(
+      new Request("http://localhost/api/v1/tags"),
+    );
+    await expect(unauthorizedResponse.json()).resolves.toEqual({
+      code: 401001,
+      message: "Admin session is required.",
+      data: null,
+    });
+
+    const response = await handlers.tags.collection.GET(
+      new Request("http://localhost/api/v1/tags", {
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+    );
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        tags: [
+          {
+            publicId: "tag-public-001",
+            name: "证件办理",
+          },
+        ],
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain('"id"');
   });
 
   it("rejects non-content admin mutations and records a redacted audit failure", async () => {

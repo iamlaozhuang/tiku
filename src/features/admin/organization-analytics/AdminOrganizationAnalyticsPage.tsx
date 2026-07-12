@@ -501,13 +501,14 @@ function DashboardSummaryForm({
             </span>
           </div>
         ) : (
-          <TextField
-            label="组织业务标识"
-            value={values.organizationPublicId}
-            onChange={(value) =>
-              onChange({ ...values, organizationPublicId: value, page: 1 })
-            }
-          />
+          <div
+            className="bg-destructive/10 text-destructive grid gap-2 rounded-md px-3 py-2 text-sm"
+            data-testid="organization-analytics-scope-unavailable"
+            role="status"
+          >
+            <span className="font-medium">统计范围不可用</span>
+            <span className="text-xs">组织范围不可用，请重新登录后重试</span>
+          </div>
         )}
 
         <div className="grid gap-3">
@@ -564,7 +565,11 @@ function DashboardSummaryForm({
         </div>
 
         <div className="flex items-end">
-          <Button className="w-full" disabled={isSubmitting} type="submit">
+          <Button
+            className="w-full"
+            disabled={isSubmitting || !hasScopedOrganization}
+            type="submit"
+          >
             <RefreshCw aria-hidden="true" className="size-4" />
             加载统计
           </Button>
@@ -1163,27 +1168,6 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt>{label}</dt>
       <dd className="text-text-primary text-right font-medium">{value}</dd>
     </div>
-  );
-}
-
-function TextField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-2 text-sm font-medium">
-      <span className="text-text-secondary">{label}</span>
-      <Input
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
   );
 }
 

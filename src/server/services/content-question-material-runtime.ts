@@ -33,6 +33,10 @@ import {
   type QuestionRepository,
 } from "../repositories/question-repository";
 import {
+  createPostgresTagRepository,
+  type TagRepository,
+} from "../repositories/tag-repository";
+import {
   createPostgresAdminFlowRuntimeRepositories,
   type AppendAuditLogInput,
 } from "../repositories/admin-flow-runtime-repository";
@@ -75,6 +79,7 @@ export type ContentQuestionMaterialRuntimeRepositories = {
   questionRepository: QuestionRepository;
   materialRepository: MaterialRepository;
   knowledgeNodeRepository: ContentKnowledgeNodeRuntimeRepository;
+  tagRepository?: TagRepository;
   auditLogRepository: ContentAuditLogRepository;
   aiCallLogRepository?: ContentAiCallLogRepository;
 };
@@ -235,6 +240,7 @@ function createDefaultRepositories(): ContentQuestionMaterialRuntimeRepositories
     materialRepository: createPostgresMaterialRepository(),
     knowledgeNodeRepository:
       createPostgresContentKnowledgeNodeRuntimeRepository(),
+    tagRepository: createPostgresTagRepository(),
     auditLogRepository: adminFlowRepositories.auditLogRepository,
     aiCallLogRepository: adminAiAuditLogRepositories,
   };
@@ -534,6 +540,25 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
   }
 
   return createRouteHandlersWithErrorEnvelope({
+    tags: {
+      collection: {
+        async GET(request: Request): Promise<Response> {
+          const actorOrError = await requireContentAdminActor(request);
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          return createJsonResponse(
+            createSuccessResponse(
+              repositories.tagRepository === undefined
+                ? { tags: [] }
+                : await repositories.tagRepository.listTags(),
+            ),
+          );
+        },
+      },
+    },
     questions: {
       collection: {
         async GET(request: Request): Promise<Response> {

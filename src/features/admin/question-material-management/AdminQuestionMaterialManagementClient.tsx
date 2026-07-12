@@ -25,12 +25,14 @@ import {
 } from "@/components/admin/AdminList";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
 import type { ApiPagination } from "@/server/contracts/api-response";
+import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { MaterialDto } from "@/server/contracts/material-contract";
 import type {
   QuestionDto,
   QuestionKnowledgeRecommendationResultDto,
 } from "@/server/contracts/question-contract";
+import type { TagOptionDto } from "@/server/contracts/tag-contract";
 import type {
   MaterialStatus,
   MultiChoiceRule,
@@ -66,8 +68,18 @@ type QuestionFormMode = "create" | "edit";
 type MaterialFormMode = "create" | "edit";
 type RecommendationReviewStatus = "accepted" | "discarded";
 type AdminCommonSortOrder = "asc" | "desc";
+type BindingOptionsLoadState = "idle" | "loading" | "ready" | "error";
 type QuestionKnowledgeRecommendationDto =
   QuestionKnowledgeRecommendationResultDto["recommendation"];
+
+type QuestionBindingOptions = {
+  knowledgeNodes: Pick<
+    AdminKnowledgeNodeOpsSummaryDto,
+    "name" | "pathName" | "publicId"
+  >[];
+  materials: Pick<MaterialDto, "publicId" | "title">[];
+  tags: TagOptionDto[];
+};
 
 const managedMediaReferences = {
   material: {
@@ -217,10 +229,12 @@ type ActiveContentForm =
 type PendingContentAction =
   | {
       kind: "questionDisable";
+      readableName: string;
       publicId: string;
     }
   | {
       kind: "materialDisable";
+      readableName: string;
       publicId: string;
     };
 
@@ -302,6 +316,18 @@ const MAX_MATERIAL_RICH_TEXT_LENGTH = 30000;
 
 function readQuestionSummary(question: QuestionDto): string {
   return stripRichText(question.stemRichText);
+}
+
+function createQuestionReadableName(question: QuestionDto): string {
+  const summary = readQuestionSummary(question);
+  const boundedSummary =
+    summary.length > 48 ? `${summary.slice(0, 48)}...` : summary;
+
+  return `${questionTypeLabels[question.questionType]} ${boundedSummary}`;
+}
+
+function createMaterialReadableName(material: MaterialDto): string {
+  return `${material.title}（${statusLabels[material.status]}）`;
 }
 
 function stripRichText(value: string): string {
@@ -523,6 +549,89 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
   };
 }
 
+const emptyQuestionBindingOptions: QuestionBindingOptions = {
+  knowledgeNodes: [],
+  materials: [],
+  tags: [],
+};
+
+function useQuestionBindingOptions(enabled: boolean) {
+  const [loadState, setLoadState] = useState<BindingOptionsLoadState>("idle");
+  const [options, setOptions] = useState<QuestionBindingOptions>(
+    emptyQuestionBindingOptions,
+  );
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadBindingOptions() {
+      const sessionToken = getStoredSessionToken();
+
+      if (sessionToken === null) {
+        if (isActive) setLoadState("error");
+        return;
+      }
+
+      setLoadState("loading");
+
+      try {
+        const [materialResponse, knowledgeNodeResponse, tagResponse] =
+          await Promise.all([
+            fetchAdminApi<MaterialDto[]>(
+              "/api/v1/materials?page=1&pageSize=100&sortBy=updatedAt&sortOrder=desc&status=available",
+              sessionToken,
+            ),
+            fetchAdminApi<{
+              knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
+            }>(
+              "/api/v1/knowledge-nodes?page=1&pageSize=100&sortBy=sortOrder&sortOrder=asc&status=active",
+              sessionToken,
+            ),
+            fetchAdminApi<{ tags: TagOptionDto[] }>(
+              "/api/v1/tags",
+              sessionToken,
+            ),
+          ]);
+
+        if (
+          materialResponse.code !== 0 ||
+          materialResponse.data === null ||
+          knowledgeNodeResponse.code !== 0 ||
+          knowledgeNodeResponse.data === null ||
+          tagResponse.code !== 0 ||
+          tagResponse.data === null
+        ) {
+          if (isActive) setLoadState("error");
+          return;
+        }
+
+        if (isActive) {
+          setOptions({
+            knowledgeNodes: knowledgeNodeResponse.data.knowledgeNodes,
+            materials: materialResponse.data,
+            tags: tagResponse.data.tags,
+          });
+          setLoadState("ready");
+        }
+      } catch {
+        if (isActive) setLoadState("error");
+      }
+    }
+
+    void loadBindingOptions();
+
+    return () => {
+      isActive = false;
+    };
+  }, [enabled]);
+
+  return { loadState, options };
+}
+
 async function mutateAdminApi<TData>(
   path: string,
   sessionToken: string,
@@ -621,14 +730,6 @@ function createQuestionInputFromQuestion(
 
 function formatPublicIdList(publicIds: string[]): string {
   return publicIds.join("\n");
-}
-
-function formatBindingPublicId(value: string | null): string {
-  return value === null || value.trim().length === 0 ? "无" : value.trim();
-}
-
-function formatBindingPublicIdList(publicIds: string[]): string {
-  return publicIds.length === 0 ? "无" : publicIds.join(", ");
 }
 
 function parsePublicIdList(value: string): string[] {
@@ -810,6 +911,10 @@ export function AdminQuestionMaterialManagement({
     setMaterials,
     setQuestions,
   } = useQuestionMaterialData(activeView, contentQueryString);
+  const { loadState: bindingOptionsLoadState, options: bindingOptions } =
+    useQuestionBindingOptions(
+      loadState === "ready" && activeView === "questions",
+    );
 
   useEffect(() => {
     const routeSearchParams = new URLSearchParams(contentQueryString);
@@ -871,13 +976,13 @@ export function AdminQuestionMaterialManagement({
   const initialQuestionTargetMessage =
     initialQuestionTarget === null || isInitialQuestionTargetDismissed
       ? null
-      : `已定位待审题目草稿 ${initialQuestionTarget.publicId}`;
+      : `已定位待审题目草稿 ${createQuestionReadableName(initialQuestionTarget)}`;
   const initialQuestionTargetError =
     activeView === "questions" &&
     initialQuestionPublicId.length > 0 &&
     loadState === "ready" &&
     initialQuestionTarget === null
-      ? `未找到待审题目草稿 ${initialQuestionPublicId}`
+      ? "未找到指定的待审题目草稿"
       : null;
   const displayedActionMessage = actionMessage ?? initialQuestionTargetMessage;
   const displayedActionError = actionError ?? initialQuestionTargetError;
@@ -983,8 +1088,8 @@ export function AdminQuestionMaterialManagement({
       );
       setActionMessage(
         shouldPublishInitialQuestionTarget
-          ? `题目 ${savedQuestion.publicId} 已发布为正式题目`
-          : `题目 ${savedQuestion.publicId} 已保存`,
+          ? `题目“${createQuestionReadableName(savedQuestion)}”已发布为正式题目`
+          : `题目“${createQuestionReadableName(savedQuestion)}”已保存`,
       );
       setActiveForm(null);
       setIsInitialQuestionTargetDismissed(true);
@@ -1030,7 +1135,7 @@ export function AdminQuestionMaterialManagement({
       setMaterials((currentMaterials) =>
         upsertByPublicId(currentMaterials, savedMaterial),
       );
-      setActionMessage(`材料 ${savedMaterial.publicId} 已保存`);
+      setActionMessage(`材料“${savedMaterial.title}”已保存`);
       setActiveForm(null);
     } catch {
       setActionError("材料保存失败，请刷新后重试。");
@@ -1040,7 +1145,7 @@ export function AdminQuestionMaterialManagement({
   }
 
   async function handleQuestionAction(
-    publicId: string,
+    question: QuestionDto,
     action: "copy" | "disable",
   ) {
     const sessionToken = getStoredSessionToken();
@@ -1052,7 +1157,7 @@ export function AdminQuestionMaterialManagement({
 
     setActionError(null);
     const response = await mutateAdminApi<{ question: QuestionDto }>(
-      `/api/v1/questions/${publicId}/${action}`,
+      `/api/v1/questions/${question.publicId}/${action}`,
       sessionToken,
       "POST",
     );
@@ -1066,7 +1171,7 @@ export function AdminQuestionMaterialManagement({
     setQuestions((currentQuestions) =>
       upsertByPublicId(currentQuestions, updatedQuestion),
     );
-    setActionMessage(`题目 ${updatedQuestion.publicId} 已更新`);
+    setActionMessage(`题目“${createQuestionReadableName(question)}”已更新`);
   }
 
   async function handleRecommendKnowledgeNodes(question: QuestionDto) {
@@ -1100,7 +1205,9 @@ export function AdminQuestionMaterialManagement({
         reviewStatusByKnowledgeNodePublicId: {},
       },
     }));
-    setActionMessage(`题目 ${question.publicId} 知识点推荐已生成`);
+    setActionMessage(
+      `题目“${createQuestionReadableName(question)}”的知识点推荐已生成`,
+    );
   }
 
   async function handleReviewKnowledgeRecommendation(
@@ -1112,6 +1219,14 @@ export function AdminQuestionMaterialManagement({
     const currentQuestion =
       questions.find((question) => question.publicId === questionPublicId) ??
       null;
+    const recommendationItem =
+      recommendationsByQuestionPublicId[
+        questionPublicId
+      ]?.recommendation.recommendations.find(
+        (recommendation) =>
+          recommendation.knowledgeNodePublicId === knowledgeNodePublicId,
+      ) ?? null;
+    const recommendationName = recommendationItem?.name.trim() || "该知识点";
 
     if (reviewStatus === "accepted") {
       if (sessionToken === null || currentQuestion === null) {
@@ -1181,13 +1296,13 @@ export function AdminQuestionMaterialManagement({
 
     setActionMessage(
       reviewStatus === "accepted"
-        ? `已采纳推荐 ${knowledgeNodePublicId}`
-        : `已丢弃推荐 ${knowledgeNodePublicId}`,
+        ? `已采纳推荐“${recommendationName}”`
+        : `已丢弃推荐“${recommendationName}”`,
     );
   }
 
   async function handleMaterialAction(
-    publicId: string,
+    material: MaterialDto,
     action: "copy" | "disable",
   ) {
     const sessionToken = getStoredSessionToken();
@@ -1199,7 +1314,7 @@ export function AdminQuestionMaterialManagement({
 
     setActionError(null);
     const response = await mutateAdminApi<{ material: MaterialDto }>(
-      `/api/v1/materials/${publicId}/${action}`,
+      `/api/v1/materials/${material.publicId}/${action}`,
       sessionToken,
       "POST",
     );
@@ -1213,7 +1328,7 @@ export function AdminQuestionMaterialManagement({
     setMaterials((currentMaterials) =>
       upsertByPublicId(currentMaterials, updatedMaterial),
     );
-    setActionMessage(`材料 ${updatedMaterial.publicId} 已更新`);
+    setActionMessage(`材料“${material.title}”已更新`);
   }
 
   async function handleConfirmPendingContentAction() {
@@ -1225,11 +1340,21 @@ export function AdminQuestionMaterialManagement({
     setPendingContentAction(null);
 
     if (currentAction.kind === "questionDisable") {
-      await handleQuestionAction(currentAction.publicId, "disable");
+      const question = questions.find(
+        (item) => item.publicId === currentAction.publicId,
+      );
+      if (question !== undefined) {
+        await handleQuestionAction(question, "disable");
+      }
       return;
     }
 
-    await handleMaterialAction(currentAction.publicId, "disable");
+    const material = materials.find(
+      (item) => item.publicId === currentAction.publicId,
+    );
+    if (material !== undefined) {
+      await handleMaterialAction(material, "disable");
+    }
   }
 
   return (
@@ -1276,6 +1401,7 @@ export function AdminQuestionMaterialManagement({
 
       <FilterPanel
         activeView={activeView}
+        bindingOptions={bindingOptions}
         keyword={keyword}
         knowledgeNodeFilter={knowledgeNodeFilter}
         levelFilter={levelFilter}
@@ -1399,9 +1525,13 @@ export function AdminQuestionMaterialManagement({
               }
               rows={displayedQuestions}
               selectedPublicId={selectedQuestionPublicId}
-              onCopy={(publicId) => void handleQuestionAction(publicId, "copy")}
-              onDisable={(publicId) =>
-                setPendingContentAction({ kind: "questionDisable", publicId })
+              onCopy={(question) => void handleQuestionAction(question, "copy")}
+              onDisable={(question) =>
+                setPendingContentAction({
+                  kind: "questionDisable",
+                  readableName: createQuestionReadableName(question),
+                  publicId: question.publicId,
+                })
               }
               onEdit={(question) => {
                 setActionError(null);
@@ -1429,9 +1559,13 @@ export function AdminQuestionMaterialManagement({
               }
               rows={displayedMaterials}
               selectedPublicId={selectedMaterialPublicId}
-              onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
-              onDisable={(publicId) =>
-                setPendingContentAction({ kind: "materialDisable", publicId })
+              onCopy={(material) => void handleMaterialAction(material, "copy")}
+              onDisable={(material) =>
+                setPendingContentAction({
+                  kind: "materialDisable",
+                  readableName: createMaterialReadableName(material),
+                  publicId: material.publicId,
+                })
               }
               onEdit={(material) => {
                 setActionError(null);
@@ -1464,11 +1598,15 @@ export function AdminQuestionMaterialManagement({
                 {displayedActiveForm.kind === "question" ? "题目" : "材料"}
               </p>
               <p className="text-text-muted text-xs">
-                {displayedActiveForm.publicId ?? "新建本地草稿"}
+                {displayedActiveForm.mode === "create"
+                  ? "新建本地草稿"
+                  : "正在编辑所选内容"}
               </p>
             </div>
             {displayedActiveForm.kind === "question" ? (
               <QuestionWriteForm
+                bindingOptions={bindingOptions}
+                bindingOptionsLoadState={bindingOptionsLoadState}
                 isSubmitting={isSubmitting}
                 key={`${displayedActiveForm.mode}-${
                   displayedActiveForm.publicId ?? "new"
@@ -1604,7 +1742,7 @@ function ContentDangerConfirmationDialog({
           确认停用{noun}？
         </h2>
         <p className="text-text-secondary text-sm">
-          将提交 {action.publicId} 的停用操作；操作只使用业务标识。
+          将停用{noun}“{action.readableName}”。
         </p>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="destructive" onClick={onConfirm}>
@@ -1648,6 +1786,8 @@ function ActionBar({
 }
 
 function QuestionWriteForm({
+  bindingOptions,
+  bindingOptionsLoadState,
   isSubmitting,
   mode,
   submitLabel = "保存题目",
@@ -1655,6 +1795,8 @@ function QuestionWriteForm({
   onCancel,
   onSubmit,
 }: {
+  bindingOptions: QuestionBindingOptions;
+  bindingOptionsLoadState: BindingOptionsLoadState;
   isSubmitting: boolean;
   mode: QuestionFormMode;
   submitLabel?: string;
@@ -1771,9 +1913,11 @@ function QuestionWriteForm({
           }
         />
         <label className="grid gap-2 text-sm font-medium">
-          <span className="text-text-secondary">关联材料业务标识</span>
-          <Input
-            aria-label="关联材料业务标识"
+          <span className="text-text-secondary">关联材料</span>
+          <select
+            aria-label="关联材料"
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-3 py-1 text-sm outline-none focus-visible:ring-3"
+            disabled={bindingOptionsLoadState !== "ready"}
             value={formValues.materialPublicId}
             onChange={(event) =>
               setFormValues({
@@ -1781,46 +1925,70 @@ function QuestionWriteForm({
                 materialPublicId: event.target.value,
               })
             }
-          />
+          >
+            <option value="">不关联材料</option>
+            {formValues.materialPublicId !== "" &&
+            !bindingOptions.materials.some(
+              (material) => material.publicId === formValues.materialPublicId,
+            ) ? (
+              <option value={formValues.materialPublicId}>绑定项不可用</option>
+            ) : null}
+            {bindingOptions.materials.map((material) => (
+              <option key={material.publicId} value={material.publicId}>
+                {material.title}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
       <fieldset className="border-border grid gap-3 rounded-md border p-3">
         <legend className="text-text-secondary px-1 text-sm font-medium">
           知识点与标签绑定
         </legend>
+        {bindingOptionsLoadState === "loading" ? (
+          <p className="text-text-secondary text-sm">正在加载绑定选项</p>
+        ) : null}
+        {bindingOptionsLoadState === "error" ? (
+          <p className="text-destructive text-sm" role="alert">
+            绑定选项暂不可用，请刷新后重试。
+          </p>
+        ) : null}
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="grid gap-2 text-sm font-medium">
-            <span className="text-text-secondary">知识点业务标识</span>
-            <textarea
-              aria-label="知识点业务标识"
-              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-16 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
-              placeholder="knowledge-node-public-001"
-              value={formValues.knowledgeNodePublicIdsText}
-              onChange={(event) =>
-                setFormValues({
-                  ...formValues,
-                  knowledgeNodePublicIdsText: event.target.value,
-                })
-              }
-            />
-          </label>
-          <label className="grid gap-2 text-sm font-medium">
-            <span className="text-text-secondary">标签业务标识</span>
-            <textarea
-              aria-label="标签业务标识"
-              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-16 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
-              placeholder="tag-public-001"
-              value={formValues.tagPublicIdsText}
-              onChange={(event) =>
-                setFormValues({
-                  ...formValues,
-                  tagPublicIdsText: event.target.value,
-                })
-              }
-            />
-          </label>
+          <BusinessBindingSelector
+            label="知识点"
+            options={bindingOptions.knowledgeNodes.map((knowledgeNode) => ({
+              label: knowledgeNode.pathName || knowledgeNode.name,
+              publicId: knowledgeNode.publicId,
+            }))}
+            searchLabel="搜索知识点"
+            selectedPublicIds={previewKnowledgeNodePublicIds}
+            onChange={(knowledgeNodePublicIds) =>
+              setFormValues({
+                ...formValues,
+                knowledgeNodePublicIdsText: formatPublicIdList(
+                  knowledgeNodePublicIds,
+                ),
+              })
+            }
+          />
+          <BusinessBindingSelector
+            label="标签"
+            options={bindingOptions.tags.map((tag) => ({
+              label: tag.name,
+              publicId: tag.publicId,
+            }))}
+            searchLabel="搜索标签"
+            selectedPublicIds={previewTagPublicIds}
+            onChange={(tagPublicIds) =>
+              setFormValues({
+                ...formValues,
+                tagPublicIdsText: formatPublicIdList(tagPublicIds),
+              })
+            }
+          />
         </div>
         <QuestionBindingPreview
+          bindingOptions={bindingOptions}
           knowledgeNodePublicIds={previewKnowledgeNodePublicIds}
           materialPublicId={previewMaterialPublicId}
           tagPublicIds={previewTagPublicIds}
@@ -2055,10 +2223,12 @@ function QuestionWriteForm({
 }
 
 function QuestionBindingPreview({
+  bindingOptions,
   knowledgeNodePublicIds,
   materialPublicId,
   tagPublicIds,
 }: {
+  bindingOptions: QuestionBindingOptions;
   knowledgeNodePublicIds: string[];
   materialPublicId: string | null;
   tagPublicIds: string[];
@@ -2069,17 +2239,128 @@ function QuestionBindingPreview({
       data-testid="question-binding-preview"
     >
       <p className="text-text-secondary">
-        关联材料：{formatBindingPublicId(materialPublicId)}
+        关联材料：
+        {materialPublicId === null
+          ? "无"
+          : (bindingOptions.materials.find(
+              (material) => material.publicId === materialPublicId,
+            )?.title ?? "绑定项不可用")}
       </p>
       <p className="text-text-secondary">
         知识点：{knowledgeNodePublicIds.length} 个{" "}
-        {formatBindingPublicIdList(knowledgeNodePublicIds)}
+        {formatBindingOptionNames(
+          knowledgeNodePublicIds,
+          bindingOptions.knowledgeNodes.map((knowledgeNode) => ({
+            label: knowledgeNode.pathName || knowledgeNode.name,
+            publicId: knowledgeNode.publicId,
+          })),
+        )}
       </p>
       <p className="text-text-secondary">
-        标签：{tagPublicIds.length} 个 {formatBindingPublicIdList(tagPublicIds)}
+        标签：{tagPublicIds.length} 个{" "}
+        {formatBindingOptionNames(
+          tagPublicIds,
+          bindingOptions.tags.map((tag) => ({
+            label: tag.name,
+            publicId: tag.publicId,
+          })),
+        )}
       </p>
     </div>
   );
+}
+
+type BusinessBindingOption = {
+  label: string;
+  publicId: string;
+};
+
+function BusinessBindingSelector({
+  label,
+  options,
+  searchLabel,
+  selectedPublicIds,
+  onChange,
+}: {
+  label: string;
+  options: BusinessBindingOption[];
+  searchLabel: string;
+  selectedPublicIds: string[];
+  onChange: (publicIds: string[]) => void;
+}) {
+  const [keyword, setKeyword] = useState("");
+  const normalizedKeyword = keyword.trim().toLocaleLowerCase();
+  const displayedOptions = options.filter((bindingOption) =>
+    bindingOption.label.toLocaleLowerCase().includes(normalizedKeyword),
+  );
+  const unavailableCount = selectedPublicIds.filter(
+    (publicId) =>
+      !options.some((bindingOption) => bindingOption.publicId === publicId),
+  ).length;
+
+  return (
+    <fieldset className="border-border grid gap-2 rounded-md border p-3">
+      <legend className="text-text-secondary px-1 text-sm font-medium">
+        {label}
+      </legend>
+      <Input
+        aria-label={searchLabel}
+        placeholder={`搜索${label}名称`}
+        value={keyword}
+        onChange={(event) => setKeyword(event.target.value)}
+      />
+      {unavailableCount === 0 ? null : (
+        <p className="text-destructive text-xs">
+          {unavailableCount} 个现有绑定项不可用
+        </p>
+      )}
+      <div className="max-h-36 space-y-2 overflow-y-auto">
+        {displayedOptions.length === 0 ? (
+          <p className="text-text-muted text-xs">没有匹配的可用选项</p>
+        ) : (
+          displayedOptions.map((bindingOption) => (
+            <label
+              className="flex items-start gap-2 text-sm"
+              key={bindingOption.publicId}
+            >
+              <input
+                checked={selectedPublicIds.includes(bindingOption.publicId)}
+                className="mt-0.5 size-4"
+                type="checkbox"
+                onChange={(event) =>
+                  onChange(
+                    event.target.checked
+                      ? [...selectedPublicIds, bindingOption.publicId]
+                      : selectedPublicIds.filter(
+                          (publicId) => publicId !== bindingOption.publicId,
+                        ),
+                  )
+                }
+              />
+              <span>{bindingOption.label}</span>
+            </label>
+          ))
+        )}
+      </div>
+    </fieldset>
+  );
+}
+
+function formatBindingOptionNames(
+  publicIds: string[],
+  options: BusinessBindingOption[],
+): string {
+  if (publicIds.length === 0) {
+    return "无";
+  }
+
+  return publicIds
+    .map(
+      (publicId) =>
+        options.find((bindingOption) => bindingOption.publicId === publicId)
+          ?.label ?? "绑定项不可用",
+    )
+    .join("、");
 }
 
 function QuestionFormSelect({
@@ -2263,6 +2544,7 @@ function MaterialWriteForm({
 
 function FilterPanel({
   activeView,
+  bindingOptions,
   keyword,
   knowledgeNodeFilter,
   levelFilter,
@@ -2287,6 +2569,7 @@ function FilterPanel({
   onTagFilterChange,
 }: {
   activeView: ViewMode;
+  bindingOptions: QuestionBindingOptions;
   keyword: string;
   knowledgeNodeFilter: string;
   levelFilter: string;
@@ -2328,7 +2611,7 @@ function FilterPanel({
           <Input
             aria-label="关键词"
             className="h-9 pl-8"
-            placeholder="题干、材料、业务标识、知识点或标签"
+            placeholder="题干、材料、知识点或标签名称"
             value={keyword}
             onChange={(event) => onKeywordChange(event.target.value)}
           />
@@ -2387,28 +2670,48 @@ function FilterPanel({
       />
       {activeView === "questions" ? (
         <>
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">知识点筛选</span>
-            <Input
-              aria-label="知识点筛选"
-              className="h-9"
-              placeholder="知识点业务标识"
-              value={knowledgeNodeFilter}
-              onChange={(event) =>
-                onKnowledgeNodeFilterChange(event.target.value)
-              }
-            />
-          </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">标签筛选</span>
-            <Input
-              aria-label="标签筛选"
-              className="h-9"
-              placeholder="标签业务标识"
-              value={tagFilter}
-              onChange={(event) => onTagFilterChange(event.target.value)}
-            />
-          </label>
+          <FilterSelect
+            label="知识点筛选"
+            options={[
+              ["", "全部知识点"],
+              ...(knowledgeNodeFilter !== "" &&
+              !bindingOptions.knowledgeNodes.some(
+                (knowledgeNode) =>
+                  knowledgeNode.publicId === knowledgeNodeFilter,
+              )
+                ? [
+                    [knowledgeNodeFilter, "指定知识点（名称不可用）"] as [
+                      string,
+                      string,
+                    ],
+                  ]
+                : []),
+              ...bindingOptions.knowledgeNodes.map(
+                (knowledgeNode): [string, string] => [
+                  knowledgeNode.publicId,
+                  knowledgeNode.pathName || knowledgeNode.name,
+                ],
+              ),
+            ]}
+            value={knowledgeNodeFilter}
+            onChange={onKnowledgeNodeFilterChange}
+          />
+          <FilterSelect
+            label="标签筛选"
+            options={[
+              ["", "全部标签"],
+              ...(tagFilter !== "" &&
+              !bindingOptions.tags.some((tag) => tag.publicId === tagFilter)
+                ? [[tagFilter, "指定标签（名称不可用）"] as [string, string]]
+                : []),
+              ...bindingOptions.tags.map((tag): [string, string] => [
+                tag.publicId,
+                tag.name,
+              ]),
+            ]}
+            value={tagFilter}
+            onChange={onTagFilterChange}
+          />
         </>
       ) : null}
       <Button
@@ -2459,8 +2762,8 @@ function QuestionList({
   >;
   rows: QuestionDto[];
   selectedPublicId: string | null;
-  onCopy: (publicId: string) => void;
-  onDisable: (publicId: string) => void;
+  onCopy: (question: QuestionDto) => void;
+  onDisable: (question: QuestionDto) => void;
   onEdit: (question: QuestionDto) => void;
   onRecommend: (question: QuestionDto) => void;
   onReviewRecommendation: (
@@ -2480,6 +2783,7 @@ function QuestionList({
         {rows.length === 0 ? <FilteredEmptyState title={emptyTitle} /> : null}
         {rows.map((question) => {
           const isSelected = question.publicId === selectedPublicId;
+          const readableName = createQuestionReadableName(question);
 
           return (
             <article
@@ -2513,7 +2817,7 @@ function QuestionList({
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
-                  aria-label={`查看题目 ${question.publicId}`}
+                  aria-label={`查看题目 ${readableName}`}
                   size="sm"
                   type="button"
                   variant="secondary"
@@ -2523,7 +2827,7 @@ function QuestionList({
                   查看题目
                 </Button>
                 <Button
-                  aria-label={`编辑题目 ${question.publicId}`}
+                  aria-label={`编辑题目 ${readableName}`}
                   data-testid={`question-edit-${question.publicId}`}
                   disabled={question.isLocked}
                   size="sm"
@@ -2540,27 +2844,27 @@ function QuestionList({
                   </span>
                 ) : null}
                 <Button
-                  aria-label={`停用题目 ${question.publicId}`}
+                  aria-label={`停用题目 ${readableName}`}
                   size="sm"
                   type="button"
                   variant="destructive"
-                  onClick={() => onDisable(question.publicId)}
+                  onClick={() => onDisable(question)}
                 >
                   <ShieldOff aria-hidden="true" data-icon="inline-start" />
                   停用
                 </Button>
                 <Button
-                  aria-label={`复制题目 ${question.publicId}`}
+                  aria-label={`复制题目 ${readableName}`}
                   size="sm"
                   type="button"
                   variant="secondary"
-                  onClick={() => onCopy(question.publicId)}
+                  onClick={() => onCopy(question)}
                 >
                   <Copy aria-hidden="true" data-icon="inline-start" />
                   复制
                 </Button>
                 <Button
-                  aria-label={`为题目 ${question.publicId} 推荐知识点`}
+                  aria-label={`为题目 ${readableName} 推荐知识点`}
                   size="sm"
                   type="button"
                   variant="outline"
@@ -2680,14 +2984,14 @@ function KnowledgeRecommendationReviewPanel({
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
-          {reviewState.recommendation.reviewState.bindingMode}
+          持久化题目绑定
         </span>
       </div>
       <div
         className="text-text-secondary mt-3 grid gap-1 text-xs leading-5"
         data-testid={`knowledge-recommendation-review-summary-${question.publicId}`}
       >
-        <p>目标题目：{question.publicId}</p>
+        <p>目标题目：{createQuestionReadableName(question)}</p>
         <p>
           已采纳：{acceptedCount} | 已丢弃：{discardedCount} | 待确认：{" "}
           {pendingCount}
@@ -2704,13 +3008,26 @@ function KnowledgeRecommendationReviewPanel({
         {reviewActions.length === 0 ? (
           <li>暂无本地审查操作</li>
         ) : (
-          reviewActions.map((reviewAction) => (
-            <li key={reviewAction.knowledgeNodePublicId}>
-              {recommendationReviewStatusLabels[reviewAction.reviewStatus]}{" "}
-              {reviewAction.knowledgeNodePublicId} -&gt;{" "}
-              {reviewAction.auditAction}
-            </li>
-          ))
+          reviewActions.map((reviewAction) => {
+            const reviewedRecommendation =
+              reviewState.recommendation.recommendations.find(
+                (recommendation) =>
+                  recommendation.knowledgeNodePublicId ===
+                  reviewAction.knowledgeNodePublicId,
+              );
+            const reviewedName =
+              reviewedRecommendation?.name.trim() || "不可用推荐项";
+
+            return (
+              <li key={reviewAction.knowledgeNodePublicId}>
+                {recommendationReviewStatusLabels[reviewAction.reviewStatus]}{" "}
+                {reviewedName} ·{" "}
+                {reviewAction.auditAction === "question.update"
+                  ? "已保存题目绑定"
+                  : "仅记录本地审查"}
+              </li>
+            );
+          })
         )}
       </ul>
 
@@ -2725,6 +3042,12 @@ function KnowledgeRecommendationReviewPanel({
               reviewState.reviewStatusByKnowledgeNodePublicId[
                 recommendation.knowledgeNodePublicId
               ] ?? recommendation.confirmationStatus;
+            const isReadableRecommendation =
+              recommendation.name.trim().length > 0 &&
+              recommendation.pathName.trim().length > 0;
+            const recommendationName = isReadableRecommendation
+              ? recommendation.name
+              : "推荐项不可用";
 
             return (
               <article
@@ -2745,10 +3068,12 @@ function KnowledgeRecommendationReviewPanel({
                       </span>
                     </div>
                     <p className="text-text-primary text-sm font-medium">
-                      {recommendation.name}
+                      {recommendationName}
                     </p>
                     <p className="text-text-secondary text-xs leading-5">
-                      {recommendation.pathName}
+                      {isReadableRecommendation
+                        ? recommendation.pathName
+                        : "缺少知识点名称或完整路径，不能审查。"}
                     </p>
                     <p className="text-text-secondary text-xs leading-5">
                       {recommendation.reason}
@@ -2756,7 +3081,8 @@ function KnowledgeRecommendationReviewPanel({
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      aria-label={`采纳推荐 ${recommendation.knowledgeNodePublicId}`}
+                      aria-label={`采纳推荐 ${recommendationName}`}
+                      disabled={!isReadableRecommendation}
                       size="sm"
                       type="button"
                       variant="secondary"
@@ -2772,7 +3098,8 @@ function KnowledgeRecommendationReviewPanel({
                       采纳
                     </Button>
                     <Button
-                      aria-label={`丢弃推荐 ${recommendation.knowledgeNodePublicId}`}
+                      aria-label={`丢弃推荐 ${recommendationName}`}
+                      disabled={!isReadableRecommendation}
                       size="sm"
                       type="button"
                       variant="outline"
@@ -2810,8 +3137,8 @@ function MaterialList({
   emptyTitle: string;
   rows: MaterialDto[];
   selectedPublicId: string | null;
-  onCopy: (publicId: string) => void;
-  onDisable: (publicId: string) => void;
+  onCopy: (material: MaterialDto) => void;
+  onDisable: (material: MaterialDto) => void;
   onEdit: (material: MaterialDto) => void;
   onView: (publicId: string) => void;
 }) {
@@ -2825,6 +3152,7 @@ function MaterialList({
         {rows.length === 0 ? <FilteredEmptyState title={emptyTitle} /> : null}
         {rows.map((material) => {
           const isSelected = material.publicId === selectedPublicId;
+          const readableName = createMaterialReadableName(material);
           return (
             <article
               aria-current={isSelected ? "true" : undefined}
@@ -2856,7 +3184,7 @@ function MaterialList({
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
-                  aria-label={`查看材料 ${material.publicId}`}
+                  aria-label={`查看材料 ${readableName}`}
                   size="sm"
                   type="button"
                   variant="secondary"
@@ -2866,7 +3194,7 @@ function MaterialList({
                   查看材料
                 </Button>
                 <Button
-                  aria-label={`编辑材料 ${material.publicId}`}
+                  aria-label={`编辑材料 ${readableName}`}
                   data-testid={`material-edit-${material.publicId}`}
                   disabled={material.isLocked}
                   size="sm"
@@ -2883,21 +3211,21 @@ function MaterialList({
                   </span>
                 ) : null}
                 <Button
-                  aria-label={`停用材料 ${material.publicId}`}
+                  aria-label={`停用材料 ${readableName}`}
                   size="sm"
                   type="button"
                   variant="destructive"
-                  onClick={() => onDisable(material.publicId)}
+                  onClick={() => onDisable(material)}
                 >
                   <ShieldOff aria-hidden="true" data-icon="inline-start" />
                   停用
                 </Button>
                 <Button
-                  aria-label={`复制材料 ${material.publicId}`}
+                  aria-label={`复制材料 ${readableName}`}
                   size="sm"
                   type="button"
                   variant="secondary"
-                  onClick={() => onCopy(material.publicId)}
+                  onClick={() => onCopy(material)}
                 >
                   <Copy aria-hidden="true" data-icon="inline-start" />
                   复制

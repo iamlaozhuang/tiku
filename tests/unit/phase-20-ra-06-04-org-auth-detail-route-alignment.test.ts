@@ -326,7 +326,9 @@ describe("phase 20 RA-06-04 org_auth detail route alignment", () => {
       "admin-org-auth-org-auth-public-001",
     );
     fireEvent.click(
-      within(orgAuthRow).getByRole("button", { name: "查看详情" }),
+      within(orgAuthRow).getByRole("button", {
+        name: "查看企业授权 杭州烟草企业授权",
+      }),
     );
 
     const detailPanel = await screen.findByTestId(

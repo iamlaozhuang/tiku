@@ -451,32 +451,32 @@ describe("AdminPaperManagement", () => {
     expect(firstRow).not.toHaveAttribute("data-id");
     expect(
       within(firstRow).getByRole("link", {
-        name: "查看试卷 paper-marketing-2026-spring",
+        name: "查看试卷 2026 春季营销理论模拟卷",
       }),
     ).toHaveAttribute("href", "/content/papers/paper-marketing-2026-spring");
     expect(
       within(firstRow).getByRole("link", {
-        name: "组卷 paper-marketing-2026-spring",
+        name: "组卷 2026 春季营销理论模拟卷",
       }),
     ).toHaveAttribute("aria-disabled", "true");
     expect(
       within(firstRow).getByRole("button", {
-        name: "发布 paper-marketing-2026-spring",
+        name: "发布 2026 春季营销理论模拟卷",
       }),
     ).toBeDisabled();
     expect(
       within(firstRow).getByRole("button", {
-        name: "下架 paper-marketing-2026-spring",
+        name: "下架 2026 春季营销理论模拟卷",
       }),
     ).toBeEnabled();
     expect(
       within(firstRow).getByRole("button", {
-        name: "复制 paper-marketing-2026-spring",
+        name: "复制 2026 春季营销理论模拟卷",
       }),
     ).toBeEnabled();
     expect(
       within(firstRow).getByRole("button", {
-        name: "绑定原始文件 paper-marketing-2026-spring",
+        name: "绑定原始文件 2026 春季营销理论模拟卷",
       }),
     ).toBeEnabled();
     expect(
@@ -497,7 +497,7 @@ describe("AdminPaperManagement", () => {
     ).toBeInTheDocument();
     expect(
       within(draftRow).getByRole("link", {
-        name: "组卷 paper-logistics-2026-practice",
+        name: "组卷 物流技能练习卷",
       }),
     ).toHaveAttribute(
       "href",
@@ -505,17 +505,17 @@ describe("AdminPaperManagement", () => {
     );
     expect(
       within(draftRow).getByRole("button", {
-        name: "发布 paper-logistics-2026-practice",
+        name: "发布 物流技能练习卷",
       }),
     ).toBeEnabled();
     expect(
       within(draftRow).getByRole("button", {
-        name: "下架 paper-logistics-2026-practice",
+        name: "下架 物流技能练习卷",
       }),
     ).toBeDisabled();
     expect(
       within(draftRow).getByRole("button", {
-        name: "复制 paper-logistics-2026-practice",
+        name: "复制 物流技能练习卷",
       }),
     ).toBeDisabled();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
@@ -537,9 +537,7 @@ describe("AdminPaperManagement", () => {
     );
 
     expect(
-      await screen.findByText(
-        "已定位待审试卷草稿 paper-logistics-2026-practice",
-      ),
+      await screen.findByText("已定位待审试卷草稿 物流技能练习卷"),
     ).toBeInTheDocument();
     expect(
       screen.getByTestId("paper-row-paper-logistics-2026-practice"),
@@ -803,7 +801,7 @@ describe("AdminPaperManagement", () => {
 
     expect(
       screen.getByRole("link", {
-        name: "组卷 paper-logistics-2026-practice",
+        name: "组卷 物流技能练习卷",
       }),
     ).toHaveAttribute(
       "href",
@@ -813,13 +811,13 @@ describe("AdminPaperManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "发布 paper-logistics-2026-practice",
+        name: "发布 物流技能练习卷",
       }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认发布试卷？");
     fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
     expect(
-      await screen.findByText("试卷 paper-logistics-2026-practice 已发布"),
+      await screen.findByText("试卷“物流技能练习卷”已发布"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/papers/paper-logistics-2026-practice/publish",
@@ -828,14 +826,14 @@ describe("AdminPaperManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "下架 paper-marketing-2026-spring",
+        name: "下架 2026 春季营销理论模拟卷",
       }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认下架试卷？");
     fireEvent.click(screen.getByRole("button", { name: "确认下架" }));
     fireEvent.click(
       screen.getByRole("button", {
-        name: "复制 paper-marketing-2026-spring",
+        name: "复制 2026 春季营销理论模拟卷",
       }),
     );
     expect(fetchMock).toHaveBeenCalledWith(
@@ -850,7 +848,7 @@ describe("AdminPaperManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "绑定原始文件 paper-logistics-2026-practice",
+        name: "绑定原始文件 物流技能练习卷",
       }),
     );
     expect(
@@ -872,7 +870,7 @@ describe("AdminPaperManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存附件" }));
 
     expect(
-      await screen.findByText("附件 paper-asset-created-001 元数据已登记"),
+      await screen.findByText("附件“local-paper-source.pdf”元数据已登记"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/paper-assets",

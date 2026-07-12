@@ -336,6 +336,10 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
         return createJsonResponse(payload);
       }
 
+      if (path.startsWith("/api/v1/knowledge-nodes?")) {
+        return createJsonResponse(knowledgeNodePayload);
+      }
+
       if (path === "/api/v1/resources" && init?.method === "POST") {
         return createJsonResponse({
           code: 0,
@@ -686,6 +690,14 @@ describe("admin content and knowledge ops baseline", () => {
     ).not.toHaveAttribute("data-id");
     expect(screen.getByText("营销知识库讲义")).toBeInTheDocument();
     expect(screen.queryByText("dev/resources/marketing/raw.pdf")).toBeNull();
+    expect(
+      screen.getByRole("button", {
+        name: "查看市场调研抽样方法的核心目标是什么？",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "查看营销知识库讲义" }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "发布资料" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认发布资料？");
@@ -1075,7 +1087,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
     fireEvent.click(
       within(refreshedFirstResource).getByRole("button", {
-        name: "重建检索索引",
+        name: /^重建检索索引 /u,
       }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
@@ -1111,7 +1123,9 @@ describe("admin content and knowledge ops baseline", () => {
       screen.getByRole("button", { name: "上传资料" }),
     ).toBeInTheDocument();
     expect(
-      within(firstResource).getByRole("button", { name: "查看资料" }),
+      within(firstResource).getByRole("button", {
+        name: "查看资料 营销知识库讲义",
+      }),
     ).toBeInTheDocument();
     expect(
       fetchMock.mock.calls.some(([url]) =>
@@ -1130,7 +1144,9 @@ describe("admin content and knowledge ops baseline", () => {
     expect(screen.getByLabelText("资料名称")).toBeInTheDocument();
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "查看资料" }),
+      within(firstResource).getByRole("button", {
+        name: "查看资料 营销知识库讲义",
+      }),
     );
     const detailDialog = await screen.findByRole("dialog", {
       name: "资料详情",
@@ -1176,7 +1192,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "发布资料" }),
+      within(firstResource).getByRole("button", { name: /^发布资料 /u }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认发布营销知识库讲义的解析草稿？",
@@ -1222,11 +1238,21 @@ describe("admin content and knowledge ops baseline", () => {
         ],
       },
     });
-    fireEvent.change(screen.getByLabelText("知识点业务标识"), {
-      target: {
-        value: "knowledge-node-public-001\nknowledge-node-public-002",
-      },
+    fireEvent.change(screen.getByLabelText("搜索知识点"), {
+      target: { value: "营销" },
     });
+    fireEvent.click(
+      await screen.findByRole("checkbox", { name: "营销/市场调研" }),
+    );
+    fireEvent.change(screen.getByLabelText("搜索知识点"), {
+      target: { value: "物流" },
+    });
+    fireEvent.click(
+      await screen.findByRole("checkbox", {
+        name: "物流/成本核算/物流成本",
+      }),
+    );
+    expect(screen.queryByText("知识点业务标识")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "上传资料并生成草稿" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "资料上传完成，已生成解析草稿",
@@ -1254,7 +1280,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "校对内容" }),
+      within(firstResource).getByRole("button", { name: /^校对内容 /u }),
     );
     expect(await screen.findByRole("dialog")).toHaveTextContent(
       "校对营销知识库讲义的解析草稿",
@@ -1275,7 +1301,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "停用资料" }),
+      within(firstResource).getByRole("button", { name: /^停用资料 /u }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认停用营销知识库讲义？",
@@ -1316,7 +1342,7 @@ describe("admin content and knowledge ops baseline", () => {
 
     expect(within(disabledResource).getByText("已停用")).toBeInTheDocument();
     fireEvent.click(
-      within(disabledResource).getByRole("button", { name: "启用资料" }),
+      within(disabledResource).getByRole("button", { name: /^启用资料 /u }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认启用营销知识库讲义？",
@@ -1347,7 +1373,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(firstResource).getByRole("button", { name: "校对内容" }),
+      within(firstResource).getByRole("button", { name: /^校对内容 /u }),
     );
 
     const reviewDialog = await screen.findByRole("dialog");
@@ -1503,7 +1529,7 @@ describe("admin content and knowledge ops baseline", () => {
       "resource-row-resource-legacy-segment-mode-view",
     );
     fireEvent.click(
-      within(resourceRow).getByRole("button", { name: "查看资料" }),
+      within(resourceRow).getByRole("button", { name: /^查看资料 /u }),
     );
     expect(
       await screen.findByRole("dialog", { name: "资料详情" }),
@@ -1511,7 +1537,7 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.click(screen.getByRole("button", { name: "关闭资料详情" }));
 
     fireEvent.click(
-      within(resourceRow).getByRole("button", { name: "校对内容" }),
+      within(resourceRow).getByRole("button", { name: /^校对内容 /u }),
     );
     expect(await screen.findByLabelText("解析草稿原文")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
@@ -1520,7 +1546,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(resourceRow).getByRole("button", { name: "发布资料" }),
+      within(resourceRow).getByRole("button", { name: /^发布资料 /u }),
     );
     fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
@@ -1528,7 +1554,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(resourceRow).getByRole("button", { name: "重建检索索引" }),
+      within(resourceRow).getByRole("button", { name: /^重建检索索引 /u }),
     );
     fireEvent.click(screen.getByRole("button", { name: "确认重建" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
@@ -1536,13 +1562,13 @@ describe("admin content and knowledge ops baseline", () => {
     );
 
     fireEvent.click(
-      within(resourceRow).getByRole("button", { name: "停用资料" }),
+      within(resourceRow).getByRole("button", { name: /^停用资料 /u }),
     );
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
     expect(await screen.findByRole("status")).toHaveTextContent("资料已停用");
 
     fireEvent.click(
-      within(resourceRow).getByRole("button", { name: "启用资料" }),
+      within(resourceRow).getByRole("button", { name: /^启用资料 /u }),
     );
     fireEvent.click(screen.getByRole("button", { name: "确认启用" }));
     expect(await screen.findByRole("status")).toHaveTextContent("资料已启用");
@@ -1658,7 +1684,7 @@ describe("admin content and knowledge ops baseline", () => {
 
     const emptyIdRow = await screen.findByTestId("resource-row-");
     expect(
-      within(emptyIdRow).getByRole("button", { name: "资料编号异常" }),
+      within(emptyIdRow).getByRole("button", { name: /^资料编号异常 /u }),
     ).toBeDisabled();
   });
 });

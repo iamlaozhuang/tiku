@@ -2096,7 +2096,7 @@ function OrganizationTreeBranch({
                   </span>
                 </button>
                 <button
-                  aria-label="详情"
+                  aria-label={`查看${node.name}详情`}
                   className="border-border bg-background hover:bg-muted inline-flex size-8 shrink-0 items-center justify-center rounded-md border transition-transform active:scale-[0.98]"
                   type="button"
                   onClick={() => onSelect(node.publicId)}
@@ -2590,6 +2590,7 @@ function OrgAuthList({
                   <td>
                     <div className="flex flex-wrap gap-2">
                       <button
+                        aria-label={`查看企业授权 ${orgAuth.name}`}
                         type="button"
                         className="border-border bg-background hover:bg-muted inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-sm font-medium"
                         onClick={() => onViewOrgAuthDetail(orgAuth.publicId)}
@@ -2599,6 +2600,7 @@ function OrgAuthList({
                       </button>
                       {orgAuth.status === "active" ? (
                         <button
+                          aria-label={`取消企业授权 ${orgAuth.name}`}
                           type="button"
                           className="border-destructive text-destructive bg-background inline-flex h-8 items-center rounded-md border px-2.5 text-sm font-medium"
                           onClick={() => onCancelOrgAuth(orgAuth.publicId)}
@@ -2996,7 +2998,7 @@ function EmployeeList({
                   <td>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        aria-label="转移员工"
+                        aria-label={`转移员工 ${employee.name}`}
                         className="border-border bg-background hover:bg-muted inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-sm font-medium"
                         type="button"
                         onClick={() => onTransferEmployee(employee)}
@@ -3005,7 +3007,7 @@ function EmployeeList({
                         转移
                       </button>
                       <button
-                        aria-label="解绑员工"
+                        aria-label={`解绑员工 ${employee.name}`}
                         className="border-destructive text-destructive bg-background inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-sm font-medium"
                         data-testid={`employee-unbind-${employee.publicId}`}
                         type="button"
@@ -3051,7 +3053,7 @@ function EmployeeUnbindResultPanel({
           </h2>
           <p className="text-text-secondary text-sm leading-6">
             员工已从
-            {previousOrganization?.name ?? result.previousOrganizationPublicId}
+            {previousOrganization?.name ?? "组织信息不可用"}
             移除，原组织员工数已减少。
           </p>
         </div>
@@ -3065,8 +3067,7 @@ function EmployeeUnbindResultPanel({
           <div className="bg-background rounded-md p-3">
             <p className="text-text-muted text-xs">影响组织</p>
             <p className="text-text-primary mt-1 text-sm font-medium break-all">
-              {previousOrganization?.name ??
-                result.previousOrganizationPublicId}
+              {previousOrganization?.name ?? "组织信息不可用"}
             </p>
           </div>
         </div>
@@ -3105,9 +3106,9 @@ function EmployeeTransferResultPanel({
           </h2>
           <p className="text-text-secondary text-sm leading-6">
             员工已从
-            {previousOrganization?.name ?? result.previousOrganizationPublicId}
+            {previousOrganization?.name ?? "组织信息不可用"}
             转移到
-            {targetOrganization?.name ?? result.targetOrganizationPublicId}
+            {targetOrganization?.name ?? "组织信息不可用"}
             ；历史作答归属快照保留，原组织未提交企业训练已阻断。
           </p>
         </div>
@@ -3432,7 +3433,7 @@ function EmployeeConfirmationDialog({
           </h2>
         </div>
         <p className="text-text-muted text-sm leading-6">
-          员工操作只提交用户和企业公开编号；后端继续执行角色校验和脱敏审计。
+          员工操作按所选员工和目标企业提交；后端继续执行角色校验和脱敏审计。
         </p>
         <div className="flex gap-2">
           <button
@@ -3553,6 +3554,7 @@ function RedeemCodeList({
                     <div className="flex justify-end gap-2">
                       {visiblePlainText === null ? null : (
                         <button
+                          aria-label={`复制卡密 ${redeemCode.codeDisplay}`}
                           type="button"
                           className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
                           onClick={() => onCopyPlainText(visiblePlainText)}
@@ -3562,6 +3564,7 @@ function RedeemCodeList({
                         </button>
                       )}
                       <button
+                        aria-label={`查看卡密 ${redeemCode.codeDisplay} 详情`}
                         type="button"
                         className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
                         onClick={() => onViewDetail(redeemCode.publicId)}
@@ -3615,6 +3618,7 @@ function RedeemCodeDetailPanel({
         <div className="flex flex-wrap gap-2">
           {visiblePlainText === null ? null : (
             <button
+              aria-label={`复制卡密 ${redeemCode.codeDisplay} 明文`}
               type="button"
               className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
               onClick={() => onCopyPlainText(visiblePlainText)}
@@ -3633,12 +3637,6 @@ function RedeemCodeDetailPanel({
         </div>
       </div>
       <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">公开标识</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
-            {redeemCode.publicId}
-          </dd>
-        </div>
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">卡密类型</dt>
           <dd className="text-text-primary mt-1 text-sm font-medium">
@@ -3659,8 +3657,8 @@ function RedeemCodeDetailPanel({
         </div>
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">兑换用户</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
-            {redeemCode.redeemedUserPublicId ?? "未兑换"}
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {redeemCode.redeemedUserPublicId === null ? "未兑换" : "已兑换"}
           </dd>
         </div>
         <div className="bg-background rounded-md p-3">
@@ -3676,9 +3674,9 @@ function RedeemCodeDetailPanel({
           </dd>
         </div>
         <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">生成批次</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
-            {redeemCode.generationGroupId}
+          <dt className="text-text-muted text-xs">生成来源</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            受控批量生成
           </dd>
         </div>
         <div className="bg-background rounded-md p-3">
@@ -3703,9 +3701,7 @@ function RedeemCodeDetailPanel({
         </div>
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">脱敏状态</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {redeemCode.redactionStatus}
-          </dd>
+          <dd className="text-text-primary mt-1 text-sm font-medium">已脱敏</dd>
         </div>
         <div className="bg-background rounded-md p-3">
           <dt className="text-text-muted text-xs">脱敏原因</dt>
@@ -3767,10 +3763,10 @@ function RedeemCodeDistributionWindow({
         >
           <p className="text-text-primary text-sm font-medium">批次摘要</p>
           <p className="text-text-secondary mt-1 text-xs">
-            generationGroupId:{generation.generationGroupId}; count:
-            {generation.count}; type:
-            {generation.redeemCodeType}; profession:{generation.profession};
-            level:{generation.level}; deadline:{generation.redeemDeadlineAt}
+            共 {generation.count} 个 /{" "}
+            {redeemCodeTypeLabels[generation.redeemCodeType]} /{" "}
+            {professionLabels[generation.profession]} {generation.level}级 /
+            兑换截止 {formatDate(generation.redeemDeadlineAt)}
           </p>
         </div>
 
@@ -3790,6 +3786,7 @@ function RedeemCodeDistributionWindow({
                 {formatProfessionLevel(redeemCode)}
               </p>
               <button
+                aria-label={`复制卡密 ${redeemCode.codeDisplay}`}
                 type="button"
                 className="border-border bg-surface hover:bg-muted hover:text-foreground mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
                 onClick={() => onCopyOne(redeemCode.codePlainText)}

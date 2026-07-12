@@ -1,4 +1,10 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { navigationPush } = vi.hoisted(() => ({ navigationPush: vi.fn() }));
@@ -106,6 +112,45 @@ afterEach(() => {
 });
 
 describe("AdminPaperManagement", () => {
+  it("names paper actions with business names and keeps opaque identifiers out of operator copy", async () => {
+    const paper = createPaper({
+      publicId: "paper_internal_marker_001",
+      name: "区域营销能力测评",
+    });
+    mockAdminPaperList([paper]);
+
+    render(<AdminPaperManagement initialPaperPublicId={paper.publicId} />);
+
+    const row = within(
+      await screen.findByTestId(`paper-row-${paper.publicId}`),
+    );
+    expect(
+      row.getByRole("link", { name: "查看试卷 区域营销能力测评" }),
+    ).toBeInTheDocument();
+    expect(
+      row.getByRole("link", { name: "组卷 区域营销能力测评" }),
+    ).toBeInTheDocument();
+    expect(
+      row.getByRole("button", { name: "发布 区域营销能力测评" }),
+    ).toBeInTheDocument();
+    expect(
+      row.getByRole("button", { name: "绑定原始文件 区域营销能力测评" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("已定位待审试卷草稿 区域营销能力测评"),
+    ).toHaveAttribute("role", "status");
+    expect(
+      screen.getByPlaceholderText("试卷名称、校验结果或文件名"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(row.getByRole("button", { name: "发布 区域营销能力测评" }));
+
+    const dialog = screen.getByRole("alertdialog");
+    expect(dialog).toHaveTextContent("将发布试卷“区域营销能力测评”");
+    expect(dialog).not.toHaveTextContent(paper.publicId);
+    expect(document.body).not.toHaveTextContent(paper.publicId);
+  });
+
   it("shows admin question-count capacity and publish-risk feedback", async () => {
     mockAdminPaperList([
       createPaper({
@@ -168,7 +213,7 @@ describe("AdminPaperManagement", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      cappedRow.getByRole("button", { name: "发布 paper-draft-capped" }),
+      cappedRow.getByRole("button", { name: "发布 Capped draft paper" }),
     ).toBeEnabled();
 
     const overLimitRow = within(

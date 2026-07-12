@@ -210,6 +210,52 @@ const materialPayload = {
   },
 };
 
+const knowledgeNodeOptionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    knowledgeNodes: [
+      {
+        publicId: "knowledge-node-sampling",
+        name: "Sampling",
+        pathName: "Marketing / Research / Sampling",
+      },
+      {
+        publicId: "knowledge-node-costing",
+        name: "Costing",
+        pathName: "Logistics / Costing",
+      },
+      {
+        publicId: "knowledge-node-retail",
+        name: "Retail",
+        pathName: "Marketing / Retail",
+      },
+      {
+        publicId: "knowledge-node-price",
+        name: "Pricing",
+        pathName: "Marketing / Pricing",
+      },
+    ],
+  },
+};
+
+const tagOptionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    tags: [
+      { publicId: "tag-research", name: "Research" },
+      { publicId: "tag-compliance", name: "Compliance" },
+    ],
+  },
+};
+
+const marketingQuestionReadableName =
+  "单选题 市场调研抽样方法的核心目标是什么？";
+const logisticsQuestionReadableName = "简答题 物流成本核算适用于哪类场景？";
+const marketingMaterialReadableName = "营销案例材料 A（可用）";
+const lockedMaterialReadableName = "已锁定物流材料 B（可用）";
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -309,6 +355,14 @@ function mockContentFetch(
       });
     }
 
+    if (path.startsWith("/api/v1/knowledge-nodes?")) {
+      return createJsonResponse(knowledgeNodeOptionPayload);
+    }
+
+    if (path === "/api/v1/tags") {
+      return createJsonResponse(tagOptionPayload);
+    }
+
     if (path === "/api/v1/questions/question-marketing-001") {
       return createJsonResponse({
         code: 0,
@@ -351,6 +405,14 @@ function mockWritableContentFetch(
 
       if (path.startsWith("/api/v1/materials?")) {
         return createJsonResponse(materialPayload);
+      }
+
+      if (path.startsWith("/api/v1/knowledge-nodes?")) {
+        return createJsonResponse(knowledgeNodeOptionPayload);
+      }
+
+      if (path === "/api/v1/tags") {
+        return createJsonResponse(tagOptionPayload);
       }
 
       if (path === "/api/v1/questions" && method === "POST") {
@@ -462,6 +524,15 @@ function mockWritableContentFetch(
                   pathName: "Marketing / Research / Segmentation",
                   confidence: "low",
                   reason: "bounded local fallback reason",
+                  source: "ai_recommended",
+                  confirmationStatus: "pending_confirmation",
+                },
+                {
+                  knowledgeNodePublicId: "knowledge-node-unreadable-marker",
+                  name: "",
+                  pathName: "",
+                  confidence: "medium",
+                  reason: "bounded incomplete recommendation fixture",
                   source: "ai_recommended",
                   confirmationStatus: "pending_confirmation",
                 },
@@ -601,6 +672,68 @@ afterEach(() => {
 });
 
 describe("AdminQuestionMaterialManagement", () => {
+  it("uses readable question context and business-name binding selectors", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    const questionName = marketingQuestionReadableName;
+    expect(
+      await screen.findByRole("button", { name: `查看题目 ${questionName}` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: `编辑题目 ${questionName}` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: `复制题目 ${questionName}` }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: `编辑题目 ${questionName}` }),
+    );
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+
+    expect(questionForm.getByLabelText("关联材料")).toHaveValue(
+      "material-marketing-001",
+    );
+    expect(
+      await questionForm.findByRole("checkbox", {
+        name: "Marketing / Research / Sampling",
+      }),
+    ).toBeChecked();
+    expect(
+      await questionForm.findByRole("checkbox", { name: "Research" }),
+    ).toBeChecked();
+    expect(questionForm.getByLabelText("搜索知识点")).toBeInTheDocument();
+    expect(questionForm.getByLabelText("搜索标签")).toBeInTheDocument();
+    expect(questionForm.getByText("营销案例材料 A")).toBeInTheDocument();
+    expect(questionForm.queryByText("knowledge-node-sampling")).toBeNull();
+    expect(questionForm.queryByText("tag-research")).toBeNull();
+  });
+
+  it("uses material titles and statuses to name repeated material actions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    const materialName = marketingMaterialReadableName;
+    expect(
+      await screen.findByRole("button", { name: `查看材料 ${materialName}` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: `编辑材料 ${materialName}` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: `复制材料 ${materialName}` }),
+    ).toBeInTheDocument();
+  });
+
   it("renders unauthorized state without calling protected content APIs when the local session token is missing", async () => {
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const path = String(url);
@@ -669,22 +802,22 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: "编辑题目 question-marketing-001",
+        name: `编辑题目 ${marketingQuestionReadableName}`,
       }),
     ).toBeEnabled();
     expect(
       screen.getByRole("button", {
-        name: "停用题目 question-marketing-001",
+        name: `停用题目 ${marketingQuestionReadableName}`,
       }),
     ).toBeEnabled();
     expect(
       screen.getByRole("button", {
-        name: "复制题目 question-marketing-001",
+        name: `复制题目 ${marketingQuestionReadableName}`,
       }),
     ).toBeEnabled();
     expect(
       screen.getByRole("button", {
-        name: "查看题目 question-marketing-001",
+        name: `查看题目 ${marketingQuestionReadableName}`,
       }),
     ).toBeEnabled();
 
@@ -712,7 +845,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "查看题目 question-marketing-001",
+        name: `查看题目 ${marketingQuestionReadableName}`,
       }),
     );
     expect(
@@ -766,14 +899,19 @@ describe("AdminQuestionMaterialManagement", () => {
     );
 
     expect(
-      await screen.findByText("已定位待审题目草稿 question-marketing-001"),
+      await screen.findByText(
+        `已定位待审题目草稿 ${marketingQuestionReadableName}`,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByTestId("content-edit-context-label")).toHaveTextContent(
       "编辑题目",
     );
     expect(screen.getByTestId("content-edit-context-panel")).toHaveTextContent(
-      "question-marketing-001",
+      "正在编辑所选内容",
     );
+    expect(
+      screen.getByTestId("content-edit-context-panel"),
+    ).not.toHaveTextContent("question-marketing-001");
     expect(
       fetchMock.mock.calls.some(([url]) =>
         String(url).includes("keyword=question-marketing-001"),
@@ -797,7 +935,9 @@ describe("AdminQuestionMaterialManagement", () => {
     );
 
     expect(
-      await screen.findByText("已定位待审题目草稿 question-marketing-001"),
+      await screen.findByText(
+        `已定位待审题目草稿 ${marketingQuestionReadableName}`,
+      ),
     ).toBeInTheDocument();
     const questionForm = within(
       screen.getByTestId("content-edit-context-panel"),
@@ -808,7 +948,7 @@ describe("AdminQuestionMaterialManagement", () => {
     );
 
     expect(
-      await screen.findByText("题目 question-marketing-001 已发布为正式题目"),
+      await screen.findByText("题目“单选题 编辑后的题干”已发布为正式题目"),
     ).toBeInTheDocument();
     expect(
       readJsonRequestBody(
@@ -1013,7 +1153,7 @@ describe("AdminQuestionMaterialManagement", () => {
     await screen.findByText("物流成本核算适用于哪类场景？");
 
     expect(
-      screen.getByDisplayValue("knowledge-node-costing"),
+      await screen.findByDisplayValue("Logistics / Costing"),
     ).toBeInTheDocument();
     expect(screen.queryByText("市场调研抽样方法的核心目标是什么？")).toBeNull();
   });
@@ -1076,7 +1216,7 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: "复制题目 question-logistics-002",
+        name: `复制题目 ${logisticsQuestionReadableName}`,
       }),
     ).toBeEnabled();
   });
@@ -1170,7 +1310,7 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: "复制材料 material-locked-002",
+        name: `复制材料 ${lockedMaterialReadableName}`,
       }),
     ).toBeEnabled();
   });
@@ -1228,7 +1368,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
 
     expect(
-      await screen.findByText("题目 question-created-001 已保存"),
+      await screen.findByText("题目“单选题 新建题目题干”已保存"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/questions",
@@ -1243,7 +1383,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "编辑题目 question-marketing-001",
+        name: `编辑题目 ${marketingQuestionReadableName}`,
       }),
     );
     fireEvent.change(screen.getByLabelText("题干"), {
@@ -1252,7 +1392,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
 
     expect(
-      await screen.findByText("题目 question-marketing-001 已保存"),
+      await screen.findByText("题目“单选题 编辑后的题干”已保存"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/questions/question-marketing-001",
@@ -1261,14 +1401,14 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "停用题目 question-marketing-001",
+        name: "停用题目 单选题 编辑后的题干",
       }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认停用题目？");
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
     fireEvent.click(
       screen.getByRole("button", {
-        name: "复制题目 question-marketing-001",
+        name: "复制题目 单选题 编辑后的题干",
       }),
     );
 
@@ -1304,7 +1444,9 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.change(questionForm.getByLabelText("科目"), {
       target: { value: "skill" },
     });
-    fireEvent.change(questionForm.getByLabelText("关联材料业务标识"), {
+    await questionForm.findByRole("option", { name: "营销案例材料 A" });
+    expect(questionForm.getByLabelText("关联材料")).toBeEnabled();
+    fireEvent.change(questionForm.getByLabelText("关联材料"), {
       target: { value: "material-marketing-001" },
     });
     fireEvent.change(questionForm.getByLabelText("题干"), {
@@ -1330,7 +1472,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
     expect(
-      await screen.findByText("题目 question-created-001 已保存"),
+      await screen.findByText("题目“单选题 新建题目题干”已保存"),
     ).toBeInTheDocument();
 
     const requestBody = readJsonRequestBody(
@@ -1408,7 +1550,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
     expect(
-      await screen.findByText("题目 question-created-001 已保存"),
+      await screen.findByText("题目“单选题 新建题目题干”已保存"),
     ).toBeInTheDocument();
 
     const requestBody = readJsonRequestBody(
@@ -1527,7 +1669,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
     expect(
-      await screen.findByText("题目 question-created-001 已保存"),
+      await screen.findByText("题目“单选题 新建题目题干”已保存"),
     ).toBeInTheDocument();
 
     const requestBody = readJsonRequestBody(
@@ -1574,7 +1716,7 @@ describe("AdminQuestionMaterialManagement", () => {
       fireEvent.change(questionForm.getByLabelText("评分方式"), {
         target: { value: "ai_scoring" },
       });
-      fireEvent.change(questionForm.getByLabelText("关联材料业务标识"), {
+      fireEvent.change(questionForm.getByLabelText("关联材料"), {
         target: { value: "material-marketing-001" },
       });
       fireEvent.change(questionForm.getByLabelText("题干"), {
@@ -1595,7 +1737,7 @@ describe("AdminQuestionMaterialManagement", () => {
       fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
       expect(
-        await screen.findByText("题目 question-created-001 已保存"),
+        await screen.findByText("题目“单选题 新建题目题干”已保存"),
       ).toBeInTheDocument();
 
       const requestBody = readJsonRequestBody(
@@ -1632,7 +1774,8 @@ describe("AdminQuestionMaterialManagement", () => {
 
     const editPanel = screen.getByTestId("content-edit-context-panel");
 
-    expect(editPanel).toHaveTextContent("question-marketing-001");
+    expect(editPanel).toHaveTextContent("正在编辑所选内容");
+    expect(editPanel).not.toHaveTextContent("question-marketing-001");
     expect(
       screen.getByTestId("question-row-question-marketing-001"),
     ).toHaveAttribute("data-selected", "true");
@@ -1653,26 +1796,26 @@ describe("AdminQuestionMaterialManagement", () => {
 
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
 
-    expect(questionForm.getByLabelText("知识点业务标识")).toHaveValue(
-      "knowledge-node-sampling",
-    );
-    expect(questionForm.getByLabelText("标签业务标识")).toHaveValue(
-      "tag-research",
-    );
+    expect(
+      await questionForm.findByRole("checkbox", {
+        name: "Marketing / Research / Sampling",
+      }),
+    ).toBeChecked();
+    expect(
+      await questionForm.findByRole("checkbox", { name: "Research" }),
+    ).toBeChecked();
 
-    fireEvent.change(questionForm.getByLabelText("知识点业务标识"), {
-      target: {
-        value:
-          "knowledge-node-sampling\nknowledge-node-retail, knowledge-node-price",
-      },
-    });
-    fireEvent.change(questionForm.getByLabelText("标签业务标识"), {
-      target: { value: "tag-research tag-compliance" },
-    });
+    fireEvent.click(
+      questionForm.getByRole("checkbox", { name: "Marketing / Retail" }),
+    );
+    fireEvent.click(
+      questionForm.getByRole("checkbox", { name: "Marketing / Pricing" }),
+    );
+    fireEvent.click(questionForm.getByRole("checkbox", { name: "Compliance" }));
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
     expect(
-      await screen.findByText("题目 question-marketing-001 已保存"),
+      await screen.findByText("题目“单选题 编辑后的题干”已保存"),
     ).toBeInTheDocument();
 
     const requestBody = readJsonRequestBody(
@@ -1716,30 +1859,23 @@ describe("AdminQuestionMaterialManagement", () => {
     );
     const bindingPreview = screen.getByTestId("question-binding-preview");
 
+    expect(bindingPreview).toHaveTextContent("关联材料：营销案例材料 A");
     expect(bindingPreview).toHaveTextContent(
-      "关联材料：material-marketing-001",
+      "知识点：1 个 Marketing / Research / Sampling",
     );
-    expect(bindingPreview).toHaveTextContent(
-      "知识点：1 个 knowledge-node-sampling",
-    );
-    expect(bindingPreview).toHaveTextContent("标签：1 个 tag-research");
+    expect(bindingPreview).toHaveTextContent("标签：1 个 Research");
 
-    fireEvent.change(questionForm.getByLabelText("关联材料业务标识"), {
+    fireEvent.change(questionForm.getByLabelText("关联材料"), {
       target: { value: "" },
     });
-    fireEvent.change(questionForm.getByLabelText("知识点业务标识"), {
-      target: {
-        value:
-          "knowledge-node-sampling\nknowledge-node-retail knowledge-node-retail",
-      },
-    });
-    fireEvent.change(questionForm.getByLabelText("标签业务标识"), {
-      target: { value: "" },
-    });
+    fireEvent.click(
+      questionForm.getByRole("checkbox", { name: "Marketing / Retail" }),
+    );
+    fireEvent.click(questionForm.getByRole("checkbox", { name: "Research" }));
 
     expect(bindingPreview).toHaveTextContent("关联材料：无");
     expect(bindingPreview).toHaveTextContent(
-      "知识点：2 个 knowledge-node-sampling, knowledge-node-retail",
+      "知识点：2 个 Marketing / Research / Sampling、Marketing / Retail",
     );
     expect(bindingPreview).toHaveTextContent("标签：0 个 无");
   });
@@ -1753,7 +1889,7 @@ describe("AdminQuestionMaterialManagement", () => {
     await screen.findByTestId("question-row-question-marketing-001");
     fireEvent.click(
       screen.getByRole("button", {
-        name: "为题目 question-marketing-001 推荐知识点",
+        name: `为题目 ${marketingQuestionReadableName} 推荐知识点`,
       }),
     );
 
@@ -1764,10 +1900,12 @@ describe("AdminQuestionMaterialManagement", () => {
     const reviewSummary = screen.getByTestId(
       "knowledge-recommendation-review-summary-question-marketing-001",
     );
-    expect(reviewSummary).toHaveTextContent("目标题目：question-marketing-001");
+    expect(reviewSummary).toHaveTextContent(
+      `目标题目：${marketingQuestionReadableName}`,
+    );
     expect(reviewSummary).toHaveTextContent("已采纳：0");
     expect(reviewSummary).toHaveTextContent("已丢弃：0");
-    expect(reviewSummary).toHaveTextContent("待确认： 2");
+    expect(reviewSummary).toHaveTextContent("待确认： 3");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-row-knowledge-node-sampling-v2",
@@ -1778,6 +1916,21 @@ describe("AdminQuestionMaterialManagement", () => {
         "knowledge-recommendation-row-knowledge-node-segmentation",
       ),
     ).toHaveTextContent("low");
+    const unreadableRecommendation = screen.getByTestId(
+      "knowledge-recommendation-row-knowledge-node-unreadable-marker",
+    );
+    expect(unreadableRecommendation).toHaveTextContent("推荐项不可用");
+    expect(unreadableRecommendation).toHaveTextContent(
+      "缺少知识点名称或完整路径，不能审查。",
+    );
+    expect(
+      within(unreadableRecommendation).getByRole("button", {
+        name: "采纳推荐 推荐项不可用",
+      }),
+    ).toBeDisabled();
+    expect(unreadableRecommendation).not.toHaveTextContent(
+      "knowledge-node-unreadable-marker",
+    );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes",
       expect.objectContaining({ method: "POST" }),
@@ -1785,7 +1938,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "采纳推荐 knowledge-node-sampling-v2",
+        name: "采纳推荐 Sampling v2",
       }),
     );
 
@@ -1801,12 +1954,15 @@ describe("AdminQuestionMaterialManagement", () => {
     await waitFor(() =>
       expect(
         screen.getByTestId("question-row-question-marketing-001"),
-      ).toHaveTextContent("knowledge-node-sampling-v2"),
+      ).toHaveTextContent("Sampling v2"),
     );
+    expect(
+      screen.getByTestId("question-row-question-marketing-001"),
+    ).not.toHaveTextContent("knowledge-node-sampling-v2");
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "丢弃推荐 knowledge-node-segmentation",
+        name: "丢弃推荐 Segmentation",
       }),
     );
     expect(
@@ -1816,23 +1972,21 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toHaveTextContent("已丢弃");
     expect(reviewSummary).toHaveTextContent("已采纳：1");
     expect(reviewSummary).toHaveTextContent("已丢弃：1");
-    expect(reviewSummary).toHaveTextContent("待确认： 0");
+    expect(reviewSummary).toHaveTextContent("待确认： 1");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-review-trace-question-marketing-001",
       ),
-    ).toHaveTextContent("已采纳 knowledge-node-sampling-v2 -> question.update");
+    ).toHaveTextContent("已采纳 Sampling v2 · 已保存题目绑定");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-review-trace-question-marketing-001",
       ),
-    ).toHaveTextContent(
-      "已丢弃 knowledge-node-segmentation -> local_review_only",
-    );
+    ).toHaveTextContent("已丢弃 Segmentation · 仅记录本地审查");
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "编辑题目 question-marketing-001",
+        name: "编辑题目 单选题 编辑后的题干",
       }),
     );
     fireEvent.change(screen.getByLabelText("题干"), {
@@ -1840,7 +1994,7 @@ describe("AdminQuestionMaterialManagement", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
 
-    await screen.findByText("题目 question-marketing-001 已保存");
+    await screen.findByText("题目“单选题 编辑后的题干”已保存");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-panel-question-marketing-001",
@@ -1884,7 +2038,7 @@ describe("AdminQuestionMaterialManagement", () => {
     );
 
     expect(
-      await screen.findByText("材料 material-created-001 已保存"),
+      await screen.findByText("材料“新建案例材料”已保存"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/materials",
@@ -1908,7 +2062,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "编辑材料 material-marketing-001",
+        name: `编辑材料 ${marketingMaterialReadableName}`,
       }),
     );
     const editMaterialForm = within(
@@ -1923,7 +2077,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(editMaterialForm.getByRole("button", { name: "保存材料" }));
 
     expect(
-      await screen.findByText("材料 material-marketing-001 已保存"),
+      await screen.findByText("材料“编辑后的材料”已保存"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/materials/material-marketing-001",
@@ -1944,14 +2098,14 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "停用材料 material-marketing-001",
+        name: "停用材料 编辑后的材料（可用）",
       }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认停用材料？");
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
     fireEvent.click(
       screen.getByRole("button", {
-        name: "复制材料 material-marketing-001",
+        name: "复制材料 编辑后的材料（可用）",
       }),
     );
 

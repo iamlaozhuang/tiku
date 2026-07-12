@@ -411,7 +411,9 @@ describe("AdminOrgAuthPage", () => {
     expect(screen.getByTestId("employee-import-textarea")).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
 
-    fireEvent.click(within(table).getByRole("button", { name: "转移员工" }));
+    fireEvent.click(
+      within(table).getByRole("button", { name: "转移员工 张三" }),
+    );
     expect(
       screen.getByRole("dialog", { name: "转移员工" }),
     ).toBeInTheDocument();
@@ -634,7 +636,9 @@ describe("AdminOrgAuthPage", () => {
     const organization = await screen.findByTestId(
       "admin-organization-organization-public-province",
     );
-    fireEvent.click(within(organization).getByRole("button", { name: "详情" }));
+    fireEvent.click(
+      within(organization).getByRole("button", { name: "查看测试省详情" }),
+    );
 
     const organizationDetail = screen.getByTestId(
       "admin-organization-detail-organization-public-province",

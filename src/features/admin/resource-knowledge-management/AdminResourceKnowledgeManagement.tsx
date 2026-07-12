@@ -31,6 +31,7 @@ import type {
 } from "@/server/contracts/api-response";
 import {
   ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS,
+  type AdminKnowledgeNodeOpsSummaryDto,
   type AdminResourceOpsSummaryDto,
 } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -67,6 +68,8 @@ type ResourceSortOrder = "asc" | "desc";
 type ResourceListDto = {
   resources: AdminResourceOpsSummaryDto[];
 };
+
+type KnowledgeNodeOptionLoadState = "idle" | "loading" | "ready" | "error";
 
 type LocalResourceUploadSummaryDto = {
   parserMode: "local_only";
@@ -721,6 +724,66 @@ function useResourceData(queryState: ResourceListQueryState) {
   return { loadState, pagination, resources, setResources };
 }
 
+function useKnowledgeNodeOptions(enabled: boolean) {
+  const [loadState, setLoadState] =
+    useState<KnowledgeNodeOptionLoadState>("idle");
+  const [knowledgeNodes, setKnowledgeNodes] = useState<
+    AdminKnowledgeNodeOpsSummaryDto[]
+  >([]);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadKnowledgeNodes() {
+      const sessionToken = getStoredSessionToken();
+
+      if (sessionToken === null) {
+        setLoadState("error");
+        return;
+      }
+
+      setLoadState("loading");
+
+      try {
+        const response = await fetchAdminApi<{
+          knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
+        }>(
+          "/api/v1/knowledge-nodes?page=1&pageSize=100&sortBy=sortOrder&sortOrder=asc&status=active",
+          sessionToken,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (response.code !== 0 || response.data === null) {
+          setLoadState("error");
+          return;
+        }
+
+        setKnowledgeNodes(response.data.knowledgeNodes);
+        setLoadState("ready");
+      } catch {
+        if (isActive) {
+          setLoadState("error");
+        }
+      }
+    }
+
+    void loadKnowledgeNodes();
+
+    return () => {
+      isActive = false;
+    };
+  }, [enabled]);
+
+  return { knowledgeNodes, loadState };
+}
+
 export function AdminResourceKnowledgeManagement() {
   const initialQueryState = useMemo(() => readResourceListQueryState(), []);
   const [keyword, setKeyword] = useState(initialQueryState.keyword);
@@ -805,6 +868,7 @@ export function AdminResourceKnowledgeManagement() {
   );
   const { loadState, pagination, resources, setResources } =
     useResourceData(queryState);
+  const knowledgeNodeOptions = useKnowledgeNodeOptions(isUploadOpen);
   const currentPage = pagination.page;
   const totalRows = pagination.total;
 
@@ -1254,6 +1318,8 @@ export function AdminResourceKnowledgeManagement() {
 
       {isUploadOpen ? (
         <ResourceUploadPanel
+          knowledgeNodeOptions={knowledgeNodeOptions.knowledgeNodes}
+          knowledgeNodeOptionsLoadState={knowledgeNodeOptions.loadState}
           uploadState={uploadState}
           onChange={setUploadState}
           onSubmit={handleUploadResource}
@@ -1630,14 +1696,61 @@ function ResourcePageHeader({
 }
 
 function ResourceUploadPanel({
+  knowledgeNodeOptions,
+  knowledgeNodeOptionsLoadState,
   onChange,
   onSubmit,
   uploadState,
 }: {
+  knowledgeNodeOptions: AdminKnowledgeNodeOpsSummaryDto[];
+  knowledgeNodeOptionsLoadState: KnowledgeNodeOptionLoadState;
   onChange: (nextState: UploadState) => void;
   onSubmit: () => void;
   uploadState: UploadState;
 }) {
+  const [knowledgeNodeKeyword, setKnowledgeNodeKeyword] = useState("");
+  const selectedKnowledgeNodePublicIds = useMemo(
+    () =>
+      new Set(
+        parseKnowledgeNodePublicIdsText(uploadState.knowledgeNodePublicIdsText),
+      ),
+    [uploadState.knowledgeNodePublicIdsText],
+  );
+  const filteredKnowledgeNodeOptions = useMemo(() => {
+    const normalizedKeyword = knowledgeNodeKeyword.trim().toLocaleLowerCase();
+
+    if (normalizedKeyword.length === 0) {
+      return knowledgeNodeOptions;
+    }
+
+    return knowledgeNodeOptions.filter((knowledgeNode) =>
+      `${knowledgeNode.name} ${knowledgeNode.pathName}`
+        .toLocaleLowerCase()
+        .includes(normalizedKeyword),
+    );
+  }, [knowledgeNodeKeyword, knowledgeNodeOptions]);
+  const unavailableSelectionCount = [...selectedKnowledgeNodePublicIds].filter(
+    (publicId) =>
+      !knowledgeNodeOptions.some(
+        (knowledgeNode) => knowledgeNode.publicId === publicId,
+      ),
+  ).length;
+
+  function handleKnowledgeNodeToggle(publicId: string, checked: boolean) {
+    const nextSelection = new Set(selectedKnowledgeNodePublicIds);
+
+    if (checked) {
+      nextSelection.add(publicId);
+    } else {
+      nextSelection.delete(publicId);
+    }
+
+    onChange({
+      ...uploadState,
+      knowledgeNodePublicIdsText: [...nextSelection].join("\n"),
+    });
+  }
+
   return (
     <section className="border-border bg-surface rounded-md border p-4 shadow-sm">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px_160px_160px] lg:items-end">
@@ -1695,21 +1808,60 @@ function ResourceUploadPanel({
             onChange({ ...uploadState, resourceType: value as ResourceType })
           }
         />
-        <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
-          <span className="text-text-secondary">知识点业务标识</span>
-          <textarea
-            aria-label="知识点业务标识"
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-2.5 py-2 text-sm outline-none focus-visible:ring-3"
-            placeholder="多个 public id 可用空格、逗号或换行分隔"
-            value={uploadState.knowledgeNodePublicIdsText}
-            onChange={(event) =>
-              onChange({
-                ...uploadState,
-                knowledgeNodePublicIdsText: event.target.value,
-              })
-            }
+        <div className="flex flex-col gap-2 text-sm font-medium lg:col-span-3">
+          <span className="text-text-secondary">关联知识点</span>
+          <Input
+            aria-label="搜索知识点"
+            placeholder="按知识点名称或完整路径搜索"
+            value={knowledgeNodeKeyword}
+            onChange={(event) => setKnowledgeNodeKeyword(event.target.value)}
           />
-        </label>
+          <div className="border-input bg-surface max-h-40 overflow-y-auto rounded-lg border p-2">
+            {knowledgeNodeOptionsLoadState === "loading" ? (
+              <p className="text-text-muted px-1 py-2 font-normal">
+                正在加载知识点
+              </p>
+            ) : knowledgeNodeOptionsLoadState === "error" ? (
+              <p className="text-destructive px-1 py-2 font-normal">
+                知识点选项暂不可用，请刷新后重试。
+              </p>
+            ) : filteredKnowledgeNodeOptions.length === 0 ? (
+              <p className="text-text-muted px-1 py-2 font-normal">
+                没有匹配的知识点
+              </p>
+            ) : (
+              <div className="grid gap-1 md:grid-cols-2">
+                {filteredKnowledgeNodeOptions.map((knowledgeNode) => (
+                  <label
+                    className="hover:bg-muted/50 flex items-start gap-2 rounded-md px-2 py-1.5 font-normal"
+                    key={knowledgeNode.publicId}
+                  >
+                    <input
+                      aria-label={knowledgeNode.pathName}
+                      checked={selectedKnowledgeNodePublicIds.has(
+                        knowledgeNode.publicId,
+                      )}
+                      className="mt-0.5 size-4"
+                      type="checkbox"
+                      onChange={(event) =>
+                        handleKnowledgeNodeToggle(
+                          knowledgeNode.publicId,
+                          event.target.checked,
+                        )
+                      }
+                    />
+                    <span>{knowledgeNode.pathName}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+          {unavailableSelectionCount > 0 ? (
+            <p className="text-warning font-normal">
+              {unavailableSelectionCount} 个现有绑定项不可用
+            </p>
+          ) : null}
+        </div>
         <div className="flex flex-col gap-2">
           <label className="text-text-secondary text-sm font-medium">
             资料文件
@@ -1832,6 +1984,7 @@ function ResourceList({
               <td className="px-4 py-3">
                 <div className="flex flex-wrap justify-end gap-2">
                   <Button
+                    aria-label={`查看资料 ${resource.title}`}
                     disabled={!hasResourcePublicId(resource.publicId)}
                     variant="outline"
                     onClick={() => onRequestDetail(resource)}
@@ -1840,6 +1993,7 @@ function ResourceList({
                     查看资料
                   </Button>
                   <Button
+                    aria-label={`校对内容 ${resource.title}`}
                     disabled={
                       !hasResourcePublicId(resource.publicId) ||
                       !resource.markdownPreviewAvailable
@@ -1853,6 +2007,7 @@ function ResourceList({
                   {resource.resourceStatus === "draft" ||
                   resource.resourceStatus === "rag_ready" ? (
                     <Button
+                      aria-label={`发布资料 ${resource.title}`}
                       disabled={
                         !hasResourcePublicId(resource.publicId) ||
                         !resource.markdownPreviewAvailable
@@ -1864,6 +2019,11 @@ function ResourceList({
                     </Button>
                   ) : null}
                   <Button
+                    aria-label={
+                      hasResourcePublicId(resource.publicId)
+                        ? `重建检索索引 ${resource.title}`
+                        : `资料编号异常 ${resource.title}`
+                    }
                     disabled={!hasResourcePublicId(resource.publicId)}
                     variant={
                       resource.resourceStatus === "published" ||
@@ -1893,6 +2053,7 @@ function ResourceList({
                   </Button>
                   {resource.resourceStatus === "disabled" ? (
                     <Button
+                      aria-label={`启用资料 ${resource.title}`}
                       disabled={!hasResourcePublicId(resource.publicId)}
                       variant="outline"
                       onClick={() => onRequestEnable(resource)}
@@ -1905,6 +2066,7 @@ function ResourceList({
                     </Button>
                   ) : (
                     <Button
+                      aria-label={`停用资料 ${resource.title}`}
                       disabled={!hasResourcePublicId(resource.publicId)}
                       variant="destructive"
                       onClick={() => onRequestDisable(resource)}

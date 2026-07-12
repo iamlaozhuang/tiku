@@ -586,7 +586,7 @@ function KnowledgeNodeLifecycleContextBand({
             路径、推荐绑定与检索新鲜度
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            路径变更需复核题目绑定和推荐绑定；检索新鲜度由资料状态页承接，本页只展示业务标识。
+            路径变更需复核题目绑定和推荐绑定；检索新鲜度由资料状态页承接，本页按知识点名称和完整路径展示。
           </p>
         </div>
         <dl className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">

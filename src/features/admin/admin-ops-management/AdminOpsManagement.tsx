@@ -25,7 +25,6 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
-  PublicId,
   fetchAdminApi,
   formatProfessionLevel,
   getStoredSessionToken,
@@ -83,10 +82,12 @@ type ConfirmationState =
   | {
       kind: "resetPassword";
       publicId: string;
+      userName: string;
     }
   | {
       kind: "disableUser" | "enableUser";
       publicId: string;
+      userName: string;
     }
   | null;
 
@@ -1091,8 +1092,12 @@ export function AdminOpsManagement() {
             pagination={usersPagination}
             users={data.users}
             onPageChange={handlePageChange}
-            onResetPassword={(publicId) =>
-              setConfirmationState({ kind: "resetPassword", publicId })
+            onResetPassword={(publicId, userName) =>
+              setConfirmationState({
+                kind: "resetPassword",
+                publicId,
+                userName,
+              })
             }
             onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
           />
@@ -1274,15 +1279,19 @@ export function AdminOpsManagement() {
       <AdminUserDetailPanel
         detail={selectedUserDetail}
         state={userDetailState}
-        onDisableUser={(publicId) =>
-          setConfirmationState({ kind: "disableUser", publicId })
+        onDisableUser={(publicId, userName) =>
+          setConfirmationState({ kind: "disableUser", publicId, userName })
         }
-        onEnableUser={(publicId) =>
-          setConfirmationState({ kind: "enableUser", publicId })
+        onEnableUser={(publicId, userName) =>
+          setConfirmationState({ kind: "enableUser", publicId, userName })
         }
-        onResetPassword={(publicId) => {
+        onResetPassword={(publicId, userName) => {
           setResetPasswordInput("");
-          setConfirmationState({ kind: "resetPassword", publicId });
+          setConfirmationState({
+            kind: "resetPassword",
+            publicId,
+            userName,
+          });
         }}
       />
 
@@ -1311,7 +1320,7 @@ function AdminUserListTable({
   pagination: ApiPagination;
   users: AdminUserListDto["users"];
   onPageChange: (page: number) => void;
-  onResetPassword: (publicId: string) => void;
+  onResetPassword: (publicId: string, userName: string) => void;
   onViewDetail: (publicId: string) => void;
 }) {
   return (
@@ -1393,6 +1402,7 @@ function AdminUserListTable({
                   <td className="border-border border-b px-3 py-3 align-middle">
                     <div className="flex justify-end gap-2">
                       <Button
+                        aria-label={`查看${user.name}详情`}
                         variant="outline"
                         onClick={() => onViewDetail(user.publicId)}
                       >
@@ -1400,8 +1410,11 @@ function AdminUserListTable({
                         查看详情
                       </Button>
                       <Button
+                        aria-label={`重置${user.name}密码`}
                         variant="ghost"
-                        onClick={() => onResetPassword(user.publicId)}
+                        onClick={() =>
+                          onResetPassword(user.publicId, user.name)
+                        }
                       >
                         <RotateCcwKey aria-hidden="true" />
                         重置密码
@@ -1696,9 +1709,9 @@ function AdminUserDetailPanel({
   state,
 }: {
   detail: AdminUserDetailDto | null;
-  onDisableUser: (publicId: string) => void;
-  onEnableUser: (publicId: string) => void;
-  onResetPassword: (publicId: string) => void;
+  onDisableUser: (publicId: string, userName: string) => void;
+  onEnableUser: (publicId: string, userName: string) => void;
+  onResetPassword: (publicId: string, userName: string) => void;
   state: "idle" | "loading" | "ready" | "error";
 }) {
   if (state === "idle") {
@@ -1741,28 +1754,30 @@ function AdminUserDetailPanel({
               ? "无授权"
               : authStatusLabels[user.authStatus]}
           </p>
-          <PublicId value={user.publicId} />
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
+            aria-label={`重置${user.name}密码`}
             variant="outline"
-            onClick={() => onResetPassword(user.publicId)}
+            onClick={() => onResetPassword(user.publicId, user.name)}
           >
             <RotateCcwKey aria-hidden="true" />
             重置密码
           </Button>
           {user.status === "active" ? (
             <Button
+              aria-label={`停用用户 ${user.name}`}
               variant="destructive"
-              onClick={() => onDisableUser(user.publicId)}
+              onClick={() => onDisableUser(user.publicId, user.name)}
             >
               <UserX aria-hidden="true" />
               停用用户
             </Button>
           ) : (
             <Button
+              aria-label={`启用用户 ${user.name}`}
               variant="outline"
-              onClick={() => onEnableUser(user.publicId)}
+              onClick={() => onEnableUser(user.publicId, user.name)}
             >
               <UserCheck aria-hidden="true" />
               启用用户
@@ -1786,12 +1801,7 @@ function AdminUserDetailPanel({
                   "其他组织层级",
                 )}
               </p>
-              <div className="flex flex-wrap gap-2">
-                <PublicId value={detail.enterpriseBinding.employeePublicId} />
-                <PublicId
-                  value={detail.enterpriseBinding.organizationPublicId}
-                />
-              </div>
+              <p className="text-text-muted text-xs">员工账号已绑定当前组织</p>
             </div>
           )}
         </section>
@@ -1819,17 +1829,11 @@ function AdminUserDetailPanel({
                     {authStatusLabels[authorization.status]} / 购买方{" "}
                     {authorization.purchaserName ?? "个人"}
                   </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <PublicId value={authorization.publicId} />
-                    {authorization.organizationPublicIds.map(
-                      (organizationPublicId) => (
-                        <PublicId
-                          key={`${authorization.publicId}-${organizationPublicId}`}
-                          value={organizationPublicId}
-                        />
-                      ),
-                    )}
-                  </div>
+                  <p className="text-text-muted mt-2 text-xs">
+                    {authorization.organizationPublicIds.length === 0
+                      ? "个人范围"
+                      : `覆盖 ${authorization.organizationPublicIds.length} 个组织范围`}
+                  </p>
                 </article>
               ))
             )}
@@ -1859,10 +1863,10 @@ function AdminOpsConfirmationDialog({
     !isResetPassword ||
     /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(resetPasswordInput.trim());
   const title = isResetPassword
-    ? "确认重置用户密码？"
+    ? `确认重置${confirmationState.userName}的密码？`
     : isDisableUser
-      ? "确认停用用户？"
-      : "确认启用用户？";
+      ? `确认停用用户 ${confirmationState.userName}？`
+      : `确认启用用户 ${confirmationState.userName}？`;
   const confirmLabel = isResetPassword
     ? "确认重置"
     : isDisableUser
@@ -1885,9 +1889,9 @@ function AdminOpsConfirmationDialog({
         </div>
         <p className="text-text-muted text-sm">
           {isResetPassword
-            ? "重置只提交用户业务标识，响应不会返回明文密码。"
+            ? "新密码提交后不会在响应中返回明文。"
             : isDisableUser
-              ? "停用用户会提交业务标识，并撤销该用户现有会话。"
+              ? "停用后将撤销该用户现有会话。"
               : "启用用户只恢复账号状态，不创建新授权。"}
         </p>
         {isResetPassword ? (

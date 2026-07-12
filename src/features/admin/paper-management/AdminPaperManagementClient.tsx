@@ -90,10 +90,12 @@ type ActivePaperForm =
 type PendingPaperAction =
   | {
       kind: "publish";
+      paperName: string;
       publicId: string;
     }
   | {
       kind: "archive";
+      paperName: string;
       publicId: string;
     };
 
@@ -606,12 +608,12 @@ export function AdminPaperManagement({
   const initialPaperTargetMessage =
     initialPaperTarget === null
       ? null
-      : `已定位待审试卷草稿 ${initialPaperTarget.publicId}`;
+      : `已定位待审试卷草稿 ${initialPaperTarget.name}`;
   const initialPaperTargetError =
     initialPaperPublicId.length > 0 &&
     loadState === "ready" &&
     initialPaperTarget === null
-      ? `未找到待审试卷草稿 ${initialPaperPublicId}`
+      ? "未找到指定的待审试卷草稿"
       : null;
   const displayedActionMessage = actionMessage ?? initialPaperTargetMessage;
   const displayedActionError = actionError ?? initialPaperTargetError;
@@ -718,7 +720,7 @@ export function AdminPaperManagement({
             : paper,
         ),
       );
-      setActionMessage(`附件 ${paperAsset.publicId} 元数据已登记`);
+      setActionMessage(`附件“${paperAsset.fileName}”元数据已登记`);
       setActiveForm(null);
     } catch {
       setActionError("附件绑定失败，请刷新后重试。");
@@ -727,7 +729,7 @@ export function AdminPaperManagement({
     }
   }
 
-  async function handlePublishPaper(publicId: string) {
+  async function handlePublishPaper(publicId: string, paperName: string) {
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -757,10 +759,10 @@ export function AdminPaperManagement({
         ),
       ),
     );
-    setActionMessage(`试卷 ${publicId} 已发布`);
+    setActionMessage(`试卷“${paperName}”已发布`);
   }
 
-  async function handleArchivePaper(publicId: string) {
+  async function handleArchivePaper(publicId: string, paperName: string) {
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -790,10 +792,10 @@ export function AdminPaperManagement({
         ),
       ),
     );
-    setActionMessage(`试卷 ${publicId} 已下架`);
+    setActionMessage(`试卷“${paperName}”已下架`);
   }
 
-  async function handleCopyPaper(publicId: string) {
+  async function handleCopyPaper(publicId: string, paperName: string) {
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -820,12 +822,12 @@ export function AdminPaperManagement({
     setPapers((currentPapers) => upsertByPublicId(currentPapers, copiedPaper));
     if (disabledSourceQuestionCount > 0) {
       setActionMessage(
-        `试卷 ${copiedPaper.publicId} 已复制；包含已停用源题 ${disabledSourceQuestionCount} 道，请复核后再发布`,
+        `试卷“${paperName}”已复制；包含已停用源题 ${disabledSourceQuestionCount} 道，请复核后再发布`,
       );
       return;
     }
 
-    setActionMessage(`试卷 ${copiedPaper.publicId} 已复制`);
+    setActionMessage(`试卷“${paperName}”已复制`);
   }
 
   async function handleConfirmPendingPaperAction() {
@@ -837,11 +839,11 @@ export function AdminPaperManagement({
     setPendingPaperAction(null);
 
     if (currentAction.kind === "publish") {
-      await handlePublishPaper(currentAction.publicId);
+      await handlePublishPaper(currentAction.publicId, currentAction.paperName);
       return;
     }
 
-    await handleArchivePaper(currentAction.publicId);
+    await handleArchivePaper(currentAction.publicId, currentAction.paperName);
   }
 
   return (
@@ -969,8 +971,12 @@ export function AdminPaperManagement({
         emptyTitle={hasActivePaperFilters ? "没有匹配的试卷" : "暂无试卷"}
         rows={displayedPapers}
         selectedPublicId={selectedPaperPublicId}
-        onArchive={(publicId) =>
-          setPendingPaperAction({ kind: "archive", publicId })
+        onArchive={(paper) =>
+          setPendingPaperAction({
+            kind: "archive",
+            paperName: paper.name,
+            publicId: paper.publicId,
+          })
         }
         onBindAsset={(publicId) => {
           setActionError(null);
@@ -987,9 +993,13 @@ export function AdminPaperManagement({
             },
           });
         }}
-        onCopy={(publicId) => void handleCopyPaper(publicId)}
-        onPublish={(publicId) =>
-          setPendingPaperAction({ kind: "publish", publicId })
+        onCopy={(paper) => void handleCopyPaper(paper.publicId, paper.name)}
+        onPublish={(paper) =>
+          setPendingPaperAction({
+            kind: "publish",
+            paperName: paper.name,
+            publicId: paper.publicId,
+          })
         }
       />
 
@@ -1085,8 +1095,7 @@ function PaperConfirmationDialog({
           {isArchive ? "确认下架试卷？" : "确认发布试卷？"}
         </h2>
         <p className="text-text-secondary text-sm">
-          将提交 {action.publicId} 的{isArchive ? "下架" : "发布"}
-          操作；操作只使用业务标识。
+          将{isArchive ? "下架" : "发布"}试卷“{action.paperName}”。
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -1390,7 +1399,7 @@ function FilterPanel({
           <Input
             aria-label="关键词"
             className="h-9 pl-8"
-            placeholder="试卷名称、业务标识、校验结果或文件名"
+            placeholder="试卷名称、校验结果或文件名"
             value={keyword}
             onChange={(event) => onKeywordChange(event.target.value)}
           />
@@ -1544,10 +1553,10 @@ function PaperList({
   emptyTitle: string;
   rows: AdminPaperOpsSummaryDto[];
   selectedPublicId: string | null;
-  onArchive: (publicId: string) => void;
+  onArchive: (paper: AdminPaperOpsSummaryDto) => void;
   onBindAsset: (publicId: string) => void;
-  onCopy: (publicId: string) => void;
-  onPublish: (publicId: string) => void;
+  onCopy: (paper: AdminPaperOpsSummaryDto) => void;
+  onPublish: (paper: AdminPaperOpsSummaryDto) => void;
 }) {
   return (
     <AdminTableFrame ariaLabel="试卷列表" minWidthClassName="min-w-[72rem]">
@@ -1613,7 +1622,7 @@ function PaperList({
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
-                  aria-label={`查看试卷 ${paper.publicId}`}
+                  aria-label={`查看试卷 ${paper.name}`}
                   className="border-border bg-background hover:bg-muted focus-visible:ring-ring/50 inline-flex h-7 items-center gap-1 rounded-md border px-2.5 text-xs font-medium outline-none focus-visible:ring-3"
                   href={`/content/papers/${paper.publicId}`}
                 >
@@ -1621,7 +1630,7 @@ function PaperList({
                   查看试卷
                 </Link>
                 <Link
-                  aria-label={`组卷 ${paper.publicId}`}
+                  aria-label={`组卷 ${paper.name}`}
                   aria-disabled={!isDraft}
                   className={
                     isDraft
@@ -1639,40 +1648,40 @@ function PaperList({
                   组卷
                 </Link>
                 <Button
-                  aria-label={`发布 ${paper.publicId}`}
+                  aria-label={`发布 ${paper.name}`}
                   disabled={!isDraft}
                   size="sm"
                   type="button"
                   variant="outline"
-                  onClick={() => onPublish(paper.publicId)}
+                  onClick={() => onPublish(paper)}
                 >
                   <FileCheck aria-hidden="true" data-icon="inline-start" />
                   发布
                 </Button>
                 <Button
-                  aria-label={`下架 ${paper.publicId}`}
+                  aria-label={`下架 ${paper.name}`}
                   disabled={!isPublished}
                   size="sm"
                   type="button"
                   variant="destructive"
-                  onClick={() => onArchive(paper.publicId)}
+                  onClick={() => onArchive(paper)}
                 >
                   <Archive aria-hidden="true" data-icon="inline-start" />
                   下架
                 </Button>
                 <Button
-                  aria-label={`复制 ${paper.publicId}`}
+                  aria-label={`复制 ${paper.name}`}
                   disabled={!canCopy}
                   size="sm"
                   type="button"
                   variant="secondary"
-                  onClick={() => onCopy(paper.publicId)}
+                  onClick={() => onCopy(paper)}
                 >
                   <Copy aria-hidden="true" data-icon="inline-start" />
                   复制
                 </Button>
                 <Button
-                  aria-label={`绑定原始文件 ${paper.publicId}`}
+                  aria-label={`绑定原始文件 ${paper.name}`}
                   size="sm"
                   type="button"
                   variant="secondary"

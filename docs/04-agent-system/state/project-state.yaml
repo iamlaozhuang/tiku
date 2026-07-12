@@ -1,8 +1,48 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-role-error-boundary-2026-07-12
-updatedAt: "2026-07-12T03:04:00-07:00"
+currentPhase: 0704-admin-readable-identifiers-2026-07-12
+updatedAt: "2026-07-12T04:23:00-07:00"
+latest0704AdminReadableIdentifiers:
+  id: 0704-admin-readable-identifiers-2026-07-12
+  status: ready_for_closeout
+  result: pass_readable_business_semantics_and_sanitized_admin_controls
+  branch: codex/0704-admin-readable-identifiers
+  startSha: 6479cf45ef01b16b020c1e5eed856458daa8c3b4
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-admin-readable-identifiers.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-admin-readable-identifiers.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-readable-identifiers-audit.md
+  executionBoundary:
+    runtime: local_readable_business_semantics_and_sanitized_ui_only
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    schemaMigrationSeed: blocked
+    dependencyIntroduction: blocked
+    phoneDisplayChange: blocked_pending_A14_decision
+    redeemPlaintextRoleCapabilityChange: blocked_A15_protected
+  validationSummary:
+    status: pass_ready_for_commit_and_local_merge
+    redFocused: pass_expected_contract_and_ui_failures
+    greenFocused: pass_17_files_153_tests
+    fullUnitTests: pass_359_files_1963_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    formatting: pass_full_repository
+    diffCheck: pass
+    webpackBuild: pass_compile_type_generation_90_static_pages_and_traces
+    defaultTurbopackBuild: blocked_external_node_modules_junction_before_compile
+    localhostHealth: pass_http_200
+    localhostRoleAcceptance: deferred_original_0704db_not_mounted
+    moduleRunV2PreCommitHardening: pass_34_files_scanned
+    providerExecution: blocked_not_executed
+    envSecretAccess: blocked_not_executed
+    directDatabaseConnectionExecuted: false
+    dependencyOrLockfileChanged: false
+    repositorySchemaMigrationSeedChanged: false
+    releaseReadinessClaimed: false
+  nextRequiredTaskId: 0704-data-and-visual-polish-2026-07-12
 latest0704RoleErrorBoundary:
   id: 0704-role-error-boundary-2026-07-12
   status: ready_for_closeout
@@ -5091,13 +5131,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-role-error-boundary-2026-07-12
-  title: 0704 role error and edition boundary A04 A18 A19 B3
-  phase: 0704-role-error-boundary-2026-07-12
+  id: 0704-admin-readable-identifiers-2026-07-12
+  title: 0704 admin readable business semantics A08-A13 A16 A17 A26 A30 B4
+  phase: 0704-admin-readable-identifiers-2026-07-12
   status: ready_for_closeout
   priority: p2
   taskKind: implementation_bugfix
-  branch: codex/0704-role-error-boundary
+  branch: codex/0704-admin-readable-identifiers
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -5112,30 +5152,30 @@ currentTask:
     credentialMaterialOutput: blocked
     screenshot: approved_redacted_page_only
     rawDom: blocked
-  plannedAt: "2026-07-12T02:44:00-07:00"
-  claimedAt: "2026-07-12T02:44:00-07:00"
-  completedAt: "2026-07-12T03:07:00-07:00"
-  targetClosureItem: Separate unauthenticated, forbidden, runtime error, standard edition unavailable, and training list integrity states without expanding authorization.
-  behaviorBoundary: local_session_role_edition_and_training_list_integrity_ui_contract_only_no_provider_execution_credential_env_secret_formal_content_write_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
+  plannedAt: "2026-07-12T03:28:00-07:00"
+  claimedAt: "2026-07-12T03:28:00-07:00"
+  completedAt: "2026-07-12T04:23:00-07:00"
+  targetClosureItem: Replace operator-facing identifiers and internal governance wording with readable business semantics and uniquely named controls while preserving opaque identifier contracts and authorization boundaries.
+  behaviorBoundary: local_admin_readable_semantics_selectors_and_sanitized_audit_ui_only_no_phone_policy_or_redeem_plaintext_role_change_provider_execution_credential_env_secret_formal_content_write_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
   evidenceMode: redacted_role_label_route_label_state_category_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_provider_payload_prompt_ai_output_full_content_internal_ids
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-role-error-boundary.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-role-error-boundary.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-role-error-boundary-audit.md
-  nextRequiredTaskId: 0704-admin-readable-identifiers-2026-07-12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-admin-readable-identifiers.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-admin-readable-identifiers.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-readable-identifiers-audit.md
+  nextRequiredTaskId: 0704-data-and-visual-polish-2026-07-12
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    redFocused: pass_expected_9_of_35_failures
-    greenFocused: pass_5_files_36_tests
-    affectedRegression: pass_16_files_232_tests
-    fullUnitTests: pass_358_files_1954_tests
+    redFocused: pass_expected_contract_and_ui_failures
+    greenFocused: pass_17_files_153_tests
+    fullUnitTests: pass_359_files_1963_tests
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
-    webpackBuild: pass_compile_type_generation_89_static_pages_and_traces
+    webpackBuild: pass_compile_type_generation_90_static_pages_and_traces
+    defaultTurbopackBuild: blocked_external_node_modules_junction_before_compile
     formatting: pass_full_repository
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_15_files_scanned
     localhostHealth: pass_http_200
     localhostRoleAcceptance: deferred_original_0704db_not_mounted
+    moduleRunV2PreCommitHardening: pass_34_files_scanned
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed

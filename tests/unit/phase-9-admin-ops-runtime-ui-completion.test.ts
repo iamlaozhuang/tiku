@@ -805,7 +805,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(screen.queryByText("admin-session-token")).toBeNull();
     expect(screen.queryByText("AI 评分 / 调用成功")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "查看学员甲详情" }));
     expect(await screen.findByText("组织授权")).toBeInTheDocument();
 
     const visibleText = document.body.textContent ?? "";
@@ -840,10 +840,13 @@ describe("phase 9 admin ops runtime ui completion", () => {
       ).toBe(true);
     });
 
-    fireEvent.click(within(userRow).getByRole("button", { name: "重置密码" }));
-    expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "确认重置用户密码？",
+    fireEvent.click(
+      within(userRow).getByRole("button", { name: "重置学员甲密码" }),
     );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认重置学员甲的密码？",
+    );
+    expect(screen.getByRole("alertdialog")).not.toHaveTextContent("业务标识");
     fireEvent.change(screen.getByLabelText("reset-password-new-password"), {
       target: { value: "ResetPass2026" },
     });

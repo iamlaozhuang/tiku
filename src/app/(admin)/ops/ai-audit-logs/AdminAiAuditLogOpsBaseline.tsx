@@ -108,6 +108,8 @@ const adminOpsDisplayValueMap: Record<string, string> = {
   "model_provider.update": "更新模型供应商",
   "model_provider.enable": "启用模型供应商",
   "model_provider.disable": "停用模型供应商",
+  paper_question: "试卷题目",
+  "paper_question.add": "向试卷添加题目",
   organization: "企业组织",
   org_auth: "企业授权",
   "org_auth.create": "创建企业授权",
@@ -186,6 +188,14 @@ const auditTargetFilterOptions = [
 
 function formatAdminOpsDisplayValue(value: string) {
   return adminOpsDisplayValueMap[value] ?? value;
+}
+
+function formatAuditActionType(value: string) {
+  return adminOpsDisplayValueMap[value] ?? "其他操作";
+}
+
+function formatAuditTargetType(value: string) {
+  return adminOpsDisplayValueMap[value] ?? "其他对象";
 }
 
 const staticRuntimeData: AdminAiAuditRuntimeData = {
@@ -888,19 +898,24 @@ export function AdminAiAuditLogOpsBaseline({
           {displayedAuditLogs.map((auditLog) => (
             <AdminOpsSummaryRow
               key={auditLog.publicId}
-              label={formatAdminOpsDisplayValue(auditLog.actionType)}
+              label={formatAuditActionType(auditLog.actionType)}
               meta={[
-                "标识符已隐藏",
-                formatAdminOpsDisplayValue(auditLog.targetResourceType),
+                "对象信息已脱敏",
+                formatAuditTargetType(auditLog.targetResourceType),
                 formatAdminOpsDisplayValue(auditLog.resultStatus),
                 auditLog.metadataSummary ?? "已脱敏元数据",
               ].join(" / ")}
-              badges={["metadata-only", "redacted", "summary_only"]}
+              badges={["仅元数据", "已脱敏", "仅摘要"]}
               publicId={auditLog.publicId}
               testId={`admin-audit-log-${auditLog.publicId}`}
             >
               <AdminOpsDetailButton
                 label="查看脱敏详情"
+                accessibleLabel={`查看${formatAuditActionType(
+                  auditLog.actionType,
+                )}，${formatAuditTargetType(
+                  auditLog.targetResourceType,
+                )}，${formatAuditLogTimestamp(auditLog.createdAt)}的审计详情`}
                 onClick={() => setSelectedAuditLogPublicId(auditLog.publicId)}
               />
             </AdminOpsSummaryRow>
@@ -917,14 +932,19 @@ export function AdminAiAuditLogOpsBaseline({
                 aiCallLog.providerDisplayName,
                 aiCallLog.modelAlias,
                 formatAdminOpsDisplayValue(aiCallLog.callStatus),
-                `Token 数：${aiCallLog.totalTokenCount ?? 0}`,
-                aiCallLog.promptSummary ?? "Prompt 摘要已脱敏",
+                `用量：${aiCallLog.totalTokenCount ?? 0}`,
+                aiCallLog.promptSummary ?? "输入摘要不可用",
               ].join(" / ")}
               publicId={aiCallLog.publicId}
               testId={`admin-ai-call-log-${aiCallLog.publicId}`}
             >
               <AdminOpsDetailButton
                 label="查看脱敏详情"
+                accessibleLabel={`查看${formatAdminOpsDisplayValue(
+                  aiCallLog.aiFuncType,
+                )}，${aiCallLog.providerDisplayName} / ${
+                  aiCallLog.modelAlias
+                }，${formatAuditLogTimestamp(aiCallLog.startedAt)}的调用详情`}
                 onClick={() => setSelectedAiCallLogPublicId(aiCallLog.publicId)}
               />
             </AdminOpsSummaryRow>
@@ -1815,7 +1835,7 @@ function AdminAiCallLogToolbar({
 }) {
   return (
     <AdminListToolbar
-      description={`当前为${formatOpsLogRoleLabel(currentRole)}只读视角；成本仅作本地运营摘要，不构成 Cost Calibration 结论。`}
+      description={`当前为${formatOpsLogRoleLabel(currentRole)}只读视角；成本仅作本地运营摘要，不用于供应商计费校准。`}
       primaryAction={
         <Button
           disabled={
@@ -1991,10 +2011,10 @@ function AdminAuditLogTable({
                 {formatAdminOpsDisplayValue(auditLog.actorRole)}
               </td>
               <td className="text-text-primary px-4 py-3 leading-5">
-                {formatAdminOpsDisplayValue(auditLog.actionType)}
+                {formatAuditActionType(auditLog.actionType)}
               </td>
               <td className="text-text-secondary px-4 py-3 leading-5">
-                {formatAdminOpsDisplayValue(auditLog.targetResourceType)}
+                {formatAuditTargetType(auditLog.targetResourceType)}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">
                 <AdminAuditResultStatus status={auditLog.resultStatus} />
@@ -2005,6 +2025,13 @@ function AdminAuditLogTable({
               <td className="px-4 py-3">
                 <div className="flex justify-end">
                   <Button
+                    aria-label={`查看${formatAuditActionType(
+                      auditLog.actionType,
+                    )}，${formatAuditTargetType(
+                      auditLog.targetResourceType,
+                    )}，${formatAuditLogTimestamp(
+                      auditLog.createdAt,
+                    )}的审计详情`}
                     size="lg"
                     variant="outline"
                     onClick={(event) =>
@@ -2049,7 +2076,7 @@ function AdminAiCallLogTable({
             </th>
             <th className="px-4 py-3 font-medium">摘要</th>
             <th className="w-24 px-4 py-3 font-medium whitespace-nowrap">
-              Token
+              用量
             </th>
             <th className="w-32 px-4 py-3 text-right font-medium">操作</th>
           </tr>
@@ -2086,7 +2113,7 @@ function AdminAiCallLogTable({
                 <AdminAuditResultStatus status={aiCallLog.callStatus} />
               </td>
               <td className="text-text-muted px-4 py-3">
-                {aiCallLog.promptSummary ?? "Prompt 摘要已脱敏"}
+                {aiCallLog.promptSummary ?? "输入摘要不可用"}
               </td>
               <td className="text-text-secondary px-4 py-3">
                 {aiCallLog.totalTokenCount ?? 0}
@@ -2095,6 +2122,13 @@ function AdminAiCallLogTable({
                 <div className="flex justify-end">
                   <AdminOpsDetailButton
                     label="查看脱敏详情"
+                    accessibleLabel={`查看${formatAdminOpsDisplayValue(
+                      aiCallLog.aiFuncType,
+                    )}，${aiCallLog.providerDisplayName} / ${
+                      aiCallLog.modelAlias
+                    }，${formatAuditLogTimestamp(
+                      aiCallLog.startedAt,
+                    )}的调用详情`}
                     onClick={() => onSelectAiCallLog(aiCallLog.publicId)}
                   />
                 </div>
@@ -2141,7 +2175,7 @@ function AdminAiCallCostSummaryPanel({
         </div>
       )}
       <p className="text-text-muted mt-3 text-xs">
-        用量摘要不展示 Provider payload，也不构成 Cost Calibration 结论。
+        用量摘要不展示供应商请求或响应内容，也不用于供应商计费校准。
       </p>
     </AdminOpsPanel>
   );
@@ -2322,14 +2356,17 @@ function AdminOpsQueryControls({
 }
 
 function AdminOpsDetailButton({
+  accessibleLabel,
   label,
   onClick,
 }: {
+  accessibleLabel?: string;
   label: string;
   onClick: () => void;
 }) {
   return (
     <button
+      aria-label={accessibleLabel ?? label}
       type="button"
       className="border-border text-text-secondary hover:bg-muted flex h-9 shrink-0 items-center rounded-md border px-3 text-sm font-medium active:scale-[0.98]"
       onClick={onClick}
@@ -2412,11 +2449,11 @@ function AdminAuditLogDetailDrawer({
             />
             <AdminOpsReadonlyDetail
               label="动作"
-              value={formatAdminOpsDisplayValue(auditLog.actionType)}
+              value={formatAuditActionType(auditLog.actionType)}
             />
             <AdminOpsReadonlyDetail
               label="目标类别"
-              value={formatAdminOpsDisplayValue(auditLog.targetResourceType)}
+              value={formatAuditTargetType(auditLog.targetResourceType)}
             />
           </div>
           <div className="space-y-2">
@@ -2428,10 +2465,9 @@ function AdminAuditLogDetailDrawer({
             value={formatAuditMetadataSummary(auditLog.metadataSummary)}
           />
           <div className="border-border bg-muted/40 rounded-md border p-4">
-            <div className="flex flex-wrap gap-2">
-              <AdminOpsStatusBadge label="redacted" />
-              <AdminOpsStatusBadge label="summary_only" />
-            </div>
+            <p className="text-text-secondary text-sm font-medium">
+              仅展示已脱敏摘要
+            </p>
             <p className="text-text-muted mt-3 text-xs leading-5">
               原始请求体、凭证、会话、卡密明文、内部标识和完整业务内容不在此处展示。
             </p>
@@ -2457,11 +2493,11 @@ function AdminAuditLogDetailPanel({
         <div className="space-y-3">
           <AdminOpsReadonlyDetail
             label="动作"
-            value={formatAdminOpsDisplayValue(auditLog.actionType)}
+            value={formatAuditActionType(auditLog.actionType)}
           />
           <AdminOpsReadonlyDetail
             label="对象"
-            value={formatAdminOpsDisplayValue(auditLog.targetResourceType)}
+            value={formatAuditTargetType(auditLog.targetResourceType)}
           />
           <AdminOpsReadonlyDetail
             label="结果"
@@ -2472,9 +2508,9 @@ function AdminAuditLogDetailPanel({
             value={auditLog.metadataSummary ?? "已脱敏元数据"}
           />
           <div className="flex flex-wrap gap-1">
-            <AdminOpsStatusBadge label="metadata-only" />
-            <AdminOpsStatusBadge label="redacted" />
-            <AdminOpsStatusBadge label="summary_only" />
+            <AdminOpsStatusBadge label="仅元数据" />
+            <AdminOpsStatusBadge label="已脱敏" />
+            <AdminOpsStatusBadge label="仅摘要" />
           </div>
           <p className="text-text-muted text-xs">
             原始请求体、密钥、卡密、会话和内部自增 ID 不展示。
@@ -2512,19 +2548,19 @@ function AdminAiCallLogDetailPanel({
           />
           <AdminOpsReadonlyDetail
             label="输入摘要"
-            value={aiCallLog.promptSummary ?? "Prompt 摘要已脱敏"}
+            value={aiCallLog.promptSummary ?? "输入摘要不可用"}
           />
           <AdminOpsReadonlyDetail
             label="输出摘要"
             value={aiCallLog.outputSummary ?? "输出摘要已脱敏"}
           />
           <AdminOpsReadonlyDetail
-            label="Token"
+            label="用量"
             value={String(aiCallLog.totalTokenCount ?? 0)}
           />
           <div className="flex flex-wrap gap-1">
-            <AdminOpsStatusBadge label="redacted" />
-            <AdminOpsStatusBadge label="summary_only" />
+            <AdminOpsStatusBadge label="已脱敏" />
+            <AdminOpsStatusBadge label="仅摘要" />
           </div>
           <p className="text-text-muted text-xs">
             原始 Prompt、Provider 请求/响应、原始 AI

@@ -284,7 +284,9 @@ function AdminOpsSummaryRow({
         <p className="text-text-primary text-sm font-medium">{label}</p>
         <p className="text-text-muted text-xs">{meta}</p>
       </div>
-      <Button variant="outline">查看</Button>
+      <Button aria-label={`查看${label}`} variant="outline">
+        查看
+      </Button>
     </div>
   );
 }

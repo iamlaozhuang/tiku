@@ -1210,7 +1210,9 @@ describe("admin user organization authorization ops baseline", () => {
       "admin-org-auth-org-auth-public-001",
     );
     fireEvent.click(
-      within(activeOrgAuthRow).getByRole("button", { name: "取消授权" }),
+      within(activeOrgAuthRow).getByRole("button", {
+        name: "取消企业授权 杭州烟草企业授权",
+      }),
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认取消企业授权？",
@@ -1512,7 +1514,9 @@ describe("admin user organization authorization ops baseline", () => {
     const cityNode = await screen.findByTestId(
       "admin-organization-org-city-001",
     );
-    fireEvent.click(within(cityNode).getByRole("button", { name: "详情" }));
+    fireEvent.click(
+      within(cityNode).getByRole("button", { name: "查看杭州市烟草公司详情" }),
+    );
     fireEvent.click(
       await screen.findByTestId("organization-edit-org-city-001"),
     );
@@ -1557,7 +1561,9 @@ describe("admin user organization authorization ops baseline", () => {
       "admin-organization-org-city-001",
     );
     fireEvent.click(
-      within(refreshedCityNode).getByRole("button", { name: "详情" }),
+      within(refreshedCityNode).getByRole("button", {
+        name: "查看杭州市烟草公司详情",
+      }),
     );
     fireEvent.click(
       await screen.findByTestId("organization-disable-org-city-001"),
@@ -1581,7 +1587,9 @@ describe("admin user organization authorization ops baseline", () => {
     const organization = await screen.findByTestId(
       "admin-organization-organization-public-001",
     );
-    fireEvent.click(within(organization).getByRole("button", { name: "详情" }));
+    fireEvent.click(
+      within(organization).getByRole("button", { name: "查看杭州烟草详情" }),
+    );
 
     const organizationDetail = screen.getByTestId(
       "admin-organization-detail-organization-public-001",
@@ -1863,7 +1871,9 @@ describe("admin user organization authorization ops baseline", () => {
     const employee = await screen.findByTestId(
       "admin-employee-employee-public-001",
     );
-    fireEvent.click(within(employee).getByRole("button", { name: "转移员工" }));
+    fireEvent.click(
+      within(employee).getByRole("button", { name: /^转移员工 /u }),
+    );
     const transferBoundary = screen.getByTestId(
       "employee-transfer-session-review",
     );
@@ -1997,11 +2007,12 @@ describe("admin user organization authorization ops baseline", () => {
     const generationSummary = await screen.findByTestId(
       "redeem-code-generation-redacted-summary",
     );
-    expect(generationSummary).toHaveTextContent("redeem-code-batch-public-001");
+    expect(generationSummary).not.toHaveTextContent(
+      "redeem-code-batch-public-001",
+    );
     expect(generationSummary).toHaveTextContent("2");
-    expect(generationSummary).toHaveTextContent("edition_upgrade");
-    expect(generationSummary).toHaveTextContent("logistics");
-    expect(generationSummary).toHaveTextContent("4");
+    expect(generationSummary).toHaveTextContent("升级卡密");
+    expect(generationSummary).toHaveTextContent("物流 4级");
     expect(generationSummary).not.toHaveTextContent("LOCALTST");
     expect(
       screen.getByTestId("redeem-code-distribution-window"),
@@ -2038,7 +2049,9 @@ describe("admin user organization authorization ops baseline", () => {
     );
 
     fireEvent.click(
-      within(redeemCodeRow).getByRole("button", { name: "详情" }),
+      within(redeemCodeRow).getByRole("button", {
+        name: "查看卡密 RC-2026-**** 详情",
+      }),
     );
 
     const redeemCodeDetail = await screen.findByTestId(
@@ -2051,10 +2064,12 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(redeemCodeDetail).not.toHaveAttribute("data-id");
     expect(redeemCodeDetail).toHaveTextContent("RC-2026-DETAIL-PLAIN");
-    expect(redeemCodeDetail).toHaveTextContent("redeem-code-public-001");
-    expect(redeemCodeDetail).toHaveTextContent("redeem-code-batch-public-001");
+    expect(redeemCodeDetail).not.toHaveTextContent("redeem-code-public-001");
+    expect(redeemCodeDetail).not.toHaveTextContent(
+      "redeem-code-batch-public-001",
+    );
     expect(redeemCodeDetail).toHaveTextContent("365");
-    expect(redeemCodeDetail).toHaveTextContent("redacted");
+    expect(redeemCodeDetail).toHaveTextContent("已脱敏");
     expect(redeemCodeDetail).toHaveTextContent("校验值已隐藏，明文已授权显示");
     expect(redeemCodeDetail).toHaveTextContent("未兑换");
     expect(redeemCodeDetail).toHaveTextContent("2026-06-24");

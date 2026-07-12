@@ -998,7 +998,9 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
 
     const orgAuthRow = screen.getByTestId("admin-org-auth-org-auth-public-001");
     fireEvent.click(
-      within(orgAuthRow).getByRole("button", { name: "查看详情" }),
+      within(orgAuthRow).getByRole("button", {
+        name: /^查看企业授权 /u,
+      }),
     );
     expect(
       await screen.findByTestId("admin-org-auth-detail-org-auth-public-001"),
@@ -1059,7 +1061,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       "admin-employee-employee-public-001",
     );
     fireEvent.click(
-      within(employeeRow).getByRole("button", { name: "转移员工" }),
+      within(employeeRow).getByRole("button", { name: /^转移员工 /u }),
     );
     fireEvent.change(screen.getByLabelText("目标企业"), {
       target: { value: "org-target-001" },

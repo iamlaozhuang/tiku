@@ -281,6 +281,7 @@ export function AdminModelConfigManagement({
         <AdminModelConfigPanel
           form={configForm}
           modelConfigs={modelConfigs}
+          modelProviders={modelProviders}
           canManageModelConfig={canManageModelConfig}
           connectionTestsByConfig={connectionTestsByConfig}
           onChange={setConfigForm}
@@ -362,7 +363,12 @@ function createLocalModelConfig(
   modelProviders: ModelProviderSummaryDto[],
 ): ModelConfigSummaryDto {
   const modelName = form.modelName.trim();
-  const selectedProvider = modelProviders[0] ?? null;
+  const selectedProvider =
+    modelProviders.find(
+      (provider) => provider.publicId === form.modelProviderPublicId,
+    ) ??
+    modelProviders[0] ??
+    null;
   const modelProviderPublicId =
     readOptionalText(form.modelProviderPublicId) ??
     selectedProvider?.publicId ??
@@ -531,6 +537,7 @@ function AdminModelConfigPanel({
   connectionTestsByConfig,
   form,
   modelConfigs,
+  modelProviders,
   onChange,
   onSave,
   onTestConnection,
@@ -540,6 +547,7 @@ function AdminModelConfigPanel({
   connectionTestsByConfig: Record<string, ConnectionTestState>;
   form: typeof emptyConfigForm;
   modelConfigs: ModelConfigSummaryDto[];
+  modelProviders: ModelProviderSummaryDto[];
   onChange: (form: typeof emptyConfigForm) => void;
   onSave: () => void;
   onTestConnection: (publicId: string) => void;
@@ -559,8 +567,13 @@ function AdminModelConfigPanel({
       {canManageModelConfig ? (
         <AdminPanel title="配置表单">
           <div className="space-y-3">
-            <AdminTextField
-              label="供应商业务标识"
+            <AdminSelectField
+              label="模型供应商"
+              options={modelProviders.map((provider) => [
+                provider.publicId,
+                provider.displayName,
+              ])}
+              placeholder="请选择模型供应商"
               value={form.modelProviderPublicId}
               onChange={(value) =>
                 onChange({ ...form, modelProviderPublicId: value })
@@ -581,8 +594,13 @@ function AdminModelConfigPanel({
               value={form.displayName}
               onChange={(value) => onChange({ ...form, displayName: value })}
             />
-            <AdminTextField
-              label="备用模型配置业务标识"
+            <AdminSelectField
+              label="备用模型配置"
+              options={modelConfigs.map((modelConfig) => [
+                modelConfig.publicId,
+                modelConfig.displayName,
+              ])}
+              placeholder="无备用配置"
               value={form.fallbackModelConfigPublicId}
               onChange={(value) =>
                 onChange({ ...form, fallbackModelConfigPublicId: value })
@@ -610,6 +628,13 @@ function AdminModelConfigPanel({
             canManageModelConfig={canManageModelConfig}
             connectionTest={connectionTestsByConfig[modelConfig.publicId]}
             modelConfig={modelConfig}
+            fallbackDisplayName={
+              modelConfigs.find(
+                (candidate) =>
+                  candidate.publicId ===
+                  modelConfig.fallbackModelConfigPublicId,
+              )?.displayName ?? null
+            }
             onTestConnection={onTestConnection}
             onToggle={onToggle}
           />
@@ -739,6 +764,39 @@ function AdminTextField({
   );
 }
 
+function AdminSelectField({
+  label,
+  onChange,
+  options,
+  placeholder,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  options: Array<[string, string]>;
+  placeholder: string;
+  value: string;
+}) {
+  return (
+    <label className="text-text-secondary flex flex-col gap-1 text-sm font-medium">
+      <span>{label}</span>
+      <select
+        aria-label={label}
+        className="border-input bg-background text-text-primary h-8 rounded-lg border px-2.5 text-sm"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">{placeholder}</option>
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function AdminProviderRow({
   canManageModelConfig,
   onToggle,
@@ -768,7 +826,11 @@ function AdminProviderRow({
         </p>
       </div>
       {canManageModelConfig ? (
-        <Button variant="outline" onClick={() => onToggle(provider.publicId)}>
+        <Button
+          aria-label={`${actionLabel} ${provider.displayName}`}
+          variant="outline"
+          onClick={() => onToggle(provider.publicId)}
+        >
           {provider.isEnabled ? (
             <ToggleLeft aria-hidden="true" className="mr-2 size-4" />
           ) : (
@@ -784,12 +846,14 @@ function AdminProviderRow({
 function AdminConfigRow({
   canManageModelConfig,
   connectionTest,
+  fallbackDisplayName,
   modelConfig,
   onTestConnection,
   onToggle,
 }: {
   canManageModelConfig: boolean;
   connectionTest?: ConnectionTestState;
+  fallbackDisplayName: string | null;
   modelConfig: ModelConfigSummaryDto;
   onTestConnection: (publicId: string) => void;
   onToggle: (publicId: string) => void;
@@ -817,7 +881,9 @@ function AdminConfigRow({
   const fallbackText =
     modelConfig.fallbackModelConfigPublicId === null
       ? "备用：无"
-      : "备用：标识符已隐藏";
+      : fallbackDisplayName === null
+        ? "备用：配置不可用"
+        : `备用：${fallbackDisplayName}`;
   const connectionTestText = formatConnectionTestState(connectionTest);
 
   return (
@@ -853,6 +919,7 @@ function AdminConfigRow({
       <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
         {canManageModelConfig ? (
           <Button
+            aria-label={`测试 ${modelConfig.displayName} 的连接`}
             disabled={!canTestConnection || connectionTest === "testing"}
             variant="outline"
             onClick={() => onTestConnection(modelConfig.publicId)}
@@ -863,6 +930,7 @@ function AdminConfigRow({
         ) : null}
         {canManageModelConfig ? (
           <Button
+            aria-label={`${actionLabel} ${modelConfig.displayName}`}
             variant="outline"
             onClick={() => onToggle(modelConfig.publicId)}
           >

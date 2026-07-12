@@ -43,6 +43,21 @@ const adminSessionPayload = {
   },
 };
 
+const advancedAdminSessionWithoutOrganizationScopePayload = {
+  ...adminSessionPayload,
+  data: {
+    ...adminSessionPayload.data,
+    user: {
+      ...adminSessionPayload.data.user,
+      organizationPublicId: null,
+      adminWorkspaceCapability: {
+        ...adminSessionPayload.data.user.adminWorkspaceCapability,
+        organizationPublicId: null,
+      },
+    },
+  },
+};
+
 const standardAdminSessionPayload = {
   code: 0,
   message: "ok",
@@ -409,6 +424,49 @@ describe("AdminOrganizationAnalyticsPage", () => {
     expect(screen.queryByText("统计摘要加载失败。")).toBeNull();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  });
+
+  it("fails closed when an advanced organization session has no organization scope", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(
+          advancedAdminSessionWithoutOrganizationScopePayload,
+        );
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationAnalyticsPage));
+
+    expect(await screen.findByRole("alert")).toHaveAttribute(
+      "data-admin-ux-state",
+      "permission-denied",
+    );
+    expect(screen.queryByLabelText("组织业务标识")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not expose a manual organization identifier fallback", () => {
+    const source = readFileSync(
+      join(
+        process.cwd(),
+        "src",
+        "features",
+        "admin",
+        "organization-analytics",
+        "AdminOrganizationAnalyticsPage.tsx",
+      ),
+      "utf8",
+    );
+
+    expect(source).not.toContain('label="组织业务标识"');
   });
 
   it("loads scoped summary and employee statistics without manual organization id entry or hidden details", async () => {

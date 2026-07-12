@@ -511,7 +511,7 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(screen.queryByText("super_admin")).toBeNull();
 
     fireEvent.click(screen.getByRole("tab", { name: "学员与员工账号" }));
-    fireEvent.click(screen.getByRole("button", { name: "查看详情" }));
+    fireEvent.click(screen.getByRole("button", { name: "查看学员甲详情" }));
 
     const detailPanel = await screen.findByTestId(
       "admin-user-detail-user-public-001",
@@ -525,15 +525,17 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(within(detailPanel).getByText("组织授权")).toBeInTheDocument();
     expect(within(detailPanel).queryByText("personal_auth")).toBeNull();
     expect(within(detailPanel).queryByText("org_auth")).toBeNull();
-    expect(
-      within(detailPanel).getAllByText("organization-public-001").length,
-    ).toBeGreaterThan(0);
+    expect(detailPanel).not.toHaveTextContent("user-public-001");
+    expect(detailPanel).not.toHaveTextContent("employee-public-001");
+    expect(detailPanel).not.toHaveTextContent("organization-public-001");
+    expect(detailPanel).not.toHaveTextContent("personal-auth-public-001");
+    expect(detailPanel).not.toHaveTextContent("org-auth-public-001");
     expect(within(detailPanel).queryByText("auth_user_id")).toBeNull();
     expect(within(detailPanel).queryByText("password")).toBeNull();
     expect(within(detailPanel).queryByText("token")).toBeNull();
 
     fireEvent.click(
-      within(detailPanel).getByRole("button", { name: "停用用户" }),
+      within(detailPanel).getByRole("button", { name: "停用用户 学员甲" }),
     );
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
 

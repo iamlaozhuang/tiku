@@ -649,6 +649,30 @@ describe("admin ai and audit log ops baseline", () => {
                 requestIp: null,
                 createdAt: "2026-05-26T00:00:00.000Z",
               },
+              {
+                publicId: "runtime-audit-log-split-002",
+                actorPublicId: "admin-runtime-001",
+                actorRole: "content_admin",
+                actionType: "paper_question.add",
+                targetResourceType: "paper_question",
+                targetPublicId: null,
+                resultStatus: "success",
+                metadataSummary: null,
+                requestIp: null,
+                createdAt: "2026-05-26T00:01:00.000Z",
+              },
+              {
+                publicId: "runtime-audit-log-split-003",
+                actorPublicId: "admin-runtime-001",
+                actorRole: "ops_admin",
+                actionType: "future_action.internal_value",
+                targetResourceType: "future_target",
+                targetPublicId: null,
+                resultStatus: "success",
+                metadataSummary: null,
+                requestIp: null,
+                createdAt: "2026-05-26T00:02:00.000Z",
+              },
             ],
           },
           pagination: {
@@ -656,7 +680,7 @@ describe("admin ai and audit log ops baseline", () => {
             pageSize: 20,
             sortBy: "createdAt",
             sortOrder: "desc",
-            total: 1,
+            total: 3,
           },
         }),
       } as Response;
@@ -674,6 +698,20 @@ describe("admin ai and audit log ops baseline", () => {
     expect(
       screen.getByTestId("admin-audit-log-runtime-audit-log-split-001"),
     ).toHaveTextContent("redacted audit metadata");
+    expect(
+      screen.getByTestId("admin-audit-log-runtime-audit-log-split-002"),
+    ).toHaveTextContent("向试卷添加题目");
+    expect(
+      screen.getByTestId("admin-audit-log-runtime-audit-log-split-002"),
+    ).toHaveTextContent("试卷题目");
+    expect(
+      screen.getByTestId("admin-audit-log-runtime-audit-log-split-003"),
+    ).toHaveTextContent("其他操作");
+    expect(
+      screen.getByTestId("admin-audit-log-runtime-audit-log-split-003"),
+    ).toHaveTextContent("其他对象");
+    expect(document.body).not.toHaveTextContent("future_action.internal_value");
+    expect(document.body).not.toHaveTextContent("future_target");
     expect(screen.queryByText("AI 调用日志")).toBeNull();
     expect(screen.queryByRole("tab", { name: "模型配置" })).toBeNull();
     expect(screen.queryByRole("tab", { name: "Prompt 模板" })).toBeNull();
@@ -732,7 +770,11 @@ describe("admin ai and audit log ops baseline", () => {
     expect(auditTable).not.toHaveTextContent("2026-05-21T08:00:00.000Z");
 
     expect(screen.queryByRole("dialog", { name: "审计日志详情" })).toBeNull();
-    fireEvent.click(screen.getAllByRole("button", { name: "查看详情" })[0]);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /查看启用模型配置.*模型配置.*审计详情/u,
+      }),
+    );
 
     const detailDrawer = screen.getByRole("dialog", { name: "审计日志详情" });
     expect(detailDrawer).toHaveTextContent("仅展示脱敏元数据");
@@ -951,12 +993,28 @@ describe("admin ai and audit log ops baseline", () => {
     expect(
       screen.getByRole("table", { name: "AI 调用日志列表" }),
     ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("table", { name: "AI 调用日志列表" })).getByText(
+        "用量",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("table", { name: "AI 调用日志列表" }),
+      ).queryByText("Token"),
+    ).toBeNull();
     expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
       "显示 1-1 / 共 1 条 AI 调用日志",
     );
     expect(
       screen.getByTestId("admin-ai-call-log-runtime-ai-call-log-split-001"),
     ).toHaveTextContent("redacted prompt summary");
+    expect(
+      screen.getByRole("button", {
+        name: /查看AI 评分.*Local Mock.*调用详情/u,
+      }),
+    ).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("Cost Calibration");
     expect(screen.getByText("失败调用")).toBeInTheDocument();
     expect(screen.queryByText("审计日志只读")).toBeNull();
     expect(screen.queryByText("模型配置")).toBeNull();
@@ -1016,7 +1074,11 @@ describe("admin ai and audit log ops baseline", () => {
     const modelConfigRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );
-    fireEvent.click(screen.getByRole("button", { name: "禁用配置" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "禁用配置 通义千问评分模型",
+      }),
+    );
     expect(modelConfigRow).toHaveTextContent("已停用");
   });
 });

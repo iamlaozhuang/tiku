@@ -52,7 +52,9 @@ describe("admin model config management UI", () => {
     expect(document.body.textContent).not.toContain(syntheticSecret);
 
     fireEvent.click(
-      within(providerRow).getByRole("button", { name: "禁用供应商" }),
+      within(providerRow).getByRole("button", {
+        name: "禁用供应商 Local Mock",
+      }),
     );
     expect(providerRow).toHaveTextContent("已停用");
   });
@@ -130,20 +132,31 @@ describe("admin model config management UI", () => {
     expect(screen.getByRole("tab", { name: "模型配置" })).toHaveClass(
       "active:scale-[0.98]",
     );
+    expect(screen.getByLabelText("模型供应商")).toHaveValue("");
+    expect(screen.getByRole("option", { name: "Local Mock" })).toHaveValue(
+      "model-provider-public-001",
+    );
+    expect(screen.getByLabelText("备用模型配置")).toBeInTheDocument();
+    expect(screen.queryByText("供应商业务标识")).toBeNull();
+    expect(screen.queryByText("备用模型配置业务标识")).toBeNull();
     const configRow = screen.getByTestId(
       "admin-model-config-model-config-public-001",
     );
-    expect(configRow).toHaveTextContent("备用：标识符已隐藏");
+    expect(configRow).toHaveTextContent("备用：配置不可用");
     expect(configRow).not.toHaveTextContent("model-config-public-fallback");
     expect(configRow).toHaveTextContent("优先级： 10");
     expect(configRow).toHaveTextContent("脱敏元数据");
     fireEvent.click(
-      within(configRow).getByRole("button", { name: "测试连接" }),
+      within(configRow).getByRole("button", {
+        name: "测试 Local Explanation 的连接",
+      }),
     );
     expect(configRow).toHaveTextContent("连接测试：已通过");
 
     fireEvent.click(
-      within(configRow).getByRole("button", { name: "禁用配置" }),
+      within(configRow).getByRole("button", {
+        name: "禁用配置 Local Explanation",
+      }),
     );
     expect(configRow).toHaveTextContent("已停用");
 
