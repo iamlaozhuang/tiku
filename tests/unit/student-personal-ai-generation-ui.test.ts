@@ -30,6 +30,32 @@ import {
   createPersonalAiLearningSessionQuestion,
 } from "@/server/validators/personal-ai-generation-learning-session";
 
+vi.mock("@/features/student/studentRuntimeApi", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("@/features/student/studentRuntimeApi")
+    >();
+
+  return {
+    ...actual,
+    async fetchStudentApi<TData>(
+      path: string,
+      sessionToken: string | null,
+      init: RequestInit = {},
+    ) {
+      if (path === "/api/v1/ai-generation/availability") {
+        return {
+          code: 0,
+          message: "ok",
+          data: { generationAvailability: "available" } as TData,
+        };
+      }
+
+      return actual.fetchStudentApi<TData>(path, sessionToken, init);
+    },
+  };
+});
+
 const pageTitle = "AI训练";
 const aiPaperTabLabel = "AI组卷";
 const requestButtonLabel = "生成练习题草稿";

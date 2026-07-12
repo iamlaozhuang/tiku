@@ -20,7 +20,11 @@ function createJsonResponse(payload: unknown): Response {
   });
 }
 
-function createAdminSessionResponse() {
+function createAdminSessionResponse(
+  workspace: "content" | "organization" = "content",
+) {
+  const isOrganizationWorkspace = workspace === "organization";
+
   return {
     code: 0,
     message: "ok",
@@ -33,9 +37,23 @@ function createAdminSessionResponse() {
         status: "active",
         lockedUntilAt: null,
         employeePublicId: null,
-        organizationPublicId: null,
+        organizationPublicId: isOrganizationWorkspace
+          ? "organization_public_admin_ai_ui"
+          : null,
         adminPublicId: "admin_public_content_ai_ui",
-        adminRoles: ["content_admin"],
+        adminRoles: isOrganizationWorkspace
+          ? ["org_advanced_admin"]
+          : ["content_admin"],
+        adminWorkspaceCapability: isOrganizationWorkspace
+          ? {
+              adminRoles: ["org_advanced_admin"],
+              organizationPublicId: "organization_public_admin_ai_ui",
+              organizationEffectiveEdition: "advanced",
+              organizationAuthorizationSource: "org_auth",
+              capabilitySource: "service_computed",
+              canUseOrganizationAdvancedWorkspace: true,
+            }
+          : undefined,
       },
       session: {
         expiresAt: "2026-07-01T20:00:00.000Z",
@@ -44,12 +62,14 @@ function createAdminSessionResponse() {
   };
 }
 
-function createEmptyHistoryResponse() {
+function createEmptyHistoryResponse(
+  workspace: "content" | "organization" = "content",
+) {
   return {
     code: 0,
     message: "ok",
     data: {
-      workspace: "content",
+      workspace,
       latestTask: null,
       items: [],
       redactionStatus: "redacted",
@@ -201,9 +221,12 @@ function createGeneratedContractResponse(input?: { visibleContent?: string }) {
 }
 
 function mockAdminAiGenerationFetch(options?: {
+  generationAvailability?: "available" | "closed" | "error";
   requestResponse?: unknown;
   visibleContent?: string;
+  workspace?: "content" | "organization";
 }) {
+  const workspace = options?.workspace ?? "content";
   const fetchMock = vi.fn(
     async (requestInput: RequestInfo | URL, init?: RequestInit) => {
       const url =
@@ -214,11 +237,33 @@ function mockAdminAiGenerationFetch(options?: {
             : requestInput.toString();
 
       if (url === "/api/v1/sessions") {
-        return createJsonResponse(createAdminSessionResponse());
+        return createJsonResponse(createAdminSessionResponse(workspace));
       }
 
-      if (url.startsWith("/api/v1/content-ai-generation-requests?")) {
-        return createJsonResponse(createEmptyHistoryResponse());
+      if (url === "/api/v1/ai-generation/availability") {
+        if (options?.generationAvailability === "error") {
+          return createJsonResponse({
+            code: 500019,
+            message: "AI generation availability is temporarily unavailable.",
+            data: null,
+          });
+        }
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            generationAvailability:
+              options?.generationAvailability ?? "available",
+          },
+        });
+      }
+
+      if (
+        url.startsWith("/api/v1/content-ai-generation-requests?") ||
+        url.startsWith("/api/v1/organization-ai-generation-requests?")
+      ) {
+        return createJsonResponse(createEmptyHistoryResponse(workspace));
       }
 
       if (url.startsWith("/api/v1/ai-generation/knowledge-nodes?")) {
@@ -252,6 +297,8 @@ function mockAdminAiGenerationFetch(options?: {
   );
 
   vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
 }
 
 afterEach(() => {
@@ -261,6 +308,58 @@ afterEach(() => {
 });
 
 describe("AdminAiGenerationEntryPage", () => {
+  it.each([
+    ["content", "question", "生成题目草稿"],
+    ["organization", "paper", "生成训练试卷草稿"],
+  ] as const)(
+    "fails closed before submit for the %s admin workspace",
+    async (workspace, generationKind, submitLabel) => {
+      const fetchMock = mockAdminAiGenerationFetch({
+        generationAvailability: "closed",
+        workspace,
+      });
+
+      render(
+        <AdminAiGenerationEntryPage
+          generationKind={generationKind}
+          workspace={workspace}
+        />,
+      );
+
+      expect(
+        await screen.findByText("AI 生成服务当前未开放"),
+      ).toBeInTheDocument();
+      const submitButton = screen.getByRole("button", { name: submitLabel });
+      expect(submitButton).toBeDisabled();
+      fireEvent.click(submitButton);
+      expect(
+        fetchMock.mock.calls.filter(([, init]) => init?.method === "POST"),
+      ).toHaveLength(0);
+      expect(document.body).not.toHaveTextContent("Provider");
+    },
+  );
+
+  it("fails closed when the admin availability status cannot be loaded", async () => {
+    const fetchMock = mockAdminAiGenerationFetch({
+      generationAvailability: "error",
+    });
+
+    render(
+      <AdminAiGenerationEntryPage
+        generationKind="question"
+        workspace="content"
+      />,
+    );
+
+    expect(
+      await screen.findByText("AI 生成服务状态暂不可用"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("admin-ai-generation-submit")).toBeDisabled();
+    expect(
+      fetchMock.mock.calls.filter(([, init]) => init?.method === "POST"),
+    ).toHaveLength(0);
+  });
+
   it("falls back to route defaults when preserved admin parameter state is missing parameters", () => {
     const generationParameters = resolveAdminAiGenerationParameters(
       "question",

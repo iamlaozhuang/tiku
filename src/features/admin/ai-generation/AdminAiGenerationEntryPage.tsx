@@ -23,6 +23,7 @@ import type {
   ApiPagination,
   ApiResponse,
 } from "@/server/contracts/api-response";
+import type { AiGenerationAvailabilityDto } from "@/server/contracts/ai-generation-availability-contract";
 import type {
   AdminKnowledgeNodeOpsListDto,
   AdminKnowledgeNodeOpsSummaryDto,
@@ -78,6 +79,11 @@ type AdminAiGenerationRequestState =
   | "accepted"
   | "error";
 type AdminAiGenerationHistoryState = "loading" | "ready" | "empty" | "error";
+type AdminAiGenerationAvailabilityState =
+  | "loading"
+  | "available"
+  | "closed"
+  | "error";
 type AdminAiGenerationParameterState = {
   generationKind?: AdminAiGenerationKind;
   parameters?: Partial<AiGenerationRouteIntegratedGenerationParameters> | null;
@@ -3185,6 +3191,8 @@ export function AdminAiGenerationEntryPage({
   );
   const [historyState, setHistoryState] =
     useState<AdminAiGenerationHistoryState>("loading");
+  const [generationAvailabilityState, setGenerationAvailabilityState] =
+    useState<AdminAiGenerationAvailabilityState>("loading");
   const [localContractSummary, setLocalContractSummary] =
     useState<AdminAiGenerationLocalContractDto | null>(null);
   const [generationParameterState, setGenerationParameterState] =
@@ -3250,7 +3258,9 @@ export function AdminAiGenerationEntryPage({
     activeAdminAiKnowledgeNodeLoadState,
   );
   const isSubmitDisabled =
-    requestState === "submitting" || knowledgeScopeBlockedReason !== null;
+    generationAvailabilityState !== "available" ||
+    requestState === "submitting" ||
+    knowledgeScopeBlockedReason !== null;
 
   function handleGenerationParameterChange({
     checked,
@@ -3470,6 +3480,46 @@ export function AdminAiGenerationEntryPage({
     [generationKind, workspace],
   );
 
+  const refreshGenerationAvailability = useCallback(
+    async (sessionToken: string | null) => {
+      setGenerationAvailabilityState("loading");
+
+      try {
+        const response = await fetchAdminApi<AiGenerationAvailabilityDto>(
+          "/api/v1/ai-generation/availability",
+          sessionToken,
+          { method: "GET" },
+        );
+
+        if (isUnauthorizedResponse(response)) {
+          setLoadState("unauthorized");
+          setGenerationAvailabilityState("error");
+          return "unauthorized" as const;
+        }
+
+        const generationAvailability =
+          response.code === 0 && response.data !== null
+            ? response.data.generationAvailability
+            : null;
+
+        if (
+          generationAvailability !== "available" &&
+          generationAvailability !== "closed"
+        ) {
+          setGenerationAvailabilityState("error");
+          return "ready" as const;
+        }
+
+        setGenerationAvailabilityState(generationAvailability);
+        return "ready" as const;
+      } catch {
+        setGenerationAvailabilityState("error");
+        return "ready" as const;
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     let isActive = true;
     const requestLevel = generationParameters.level;
@@ -3597,6 +3647,13 @@ export function AdminAiGenerationEntryPage({
           return;
         }
 
+        const availabilityLoadState =
+          await refreshGenerationAvailability(sessionToken);
+
+        if (!isActive || availabilityLoadState === "unauthorized") {
+          return;
+        }
+
         const historyLoadState = await refreshTaskHistory(
           sessionToken,
           ADMIN_AI_GENERATION_HISTORY_PAGE,
@@ -3617,9 +3674,18 @@ export function AdminAiGenerationEntryPage({
     return () => {
       isActive = false;
     };
-  }, [generationKind, refreshTaskHistory, workspace]);
+  }, [
+    generationKind,
+    refreshGenerationAvailability,
+    refreshTaskHistory,
+    workspace,
+  ]);
 
   async function handleSubmitLocalContractRequest() {
+    if (generationAvailabilityState !== "available") {
+      return;
+    }
+
     const sessionToken = getStoredSessionToken();
 
     setRequestState("submitting");
@@ -3983,6 +4049,32 @@ export function AdminAiGenerationEntryPage({
           <ShieldCheck aria-hidden="true" className="size-5" />
         </div>
       </header>
+
+      {generationAvailabilityState === "closed" ? (
+        <section
+          aria-live="polite"
+          className="border-border bg-muted text-text-primary rounded-md border px-4 py-3"
+          data-testid="admin-ai-generation-availability"
+          role="status"
+        >
+          <h2 className="text-sm font-semibold">AI 生成服务当前未开放</h2>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            当前无法发起新的生成任务，已有任务记录仍可查看。
+          </p>
+        </section>
+      ) : generationAvailabilityState === "error" ? (
+        <section
+          aria-live="polite"
+          className="border-border bg-muted text-text-primary rounded-md border px-4 py-3"
+          data-testid="admin-ai-generation-availability"
+          role="status"
+        >
+          <h2 className="text-sm font-semibold">AI 生成服务状态暂不可用</h2>
+          <p className="text-text-secondary mt-1 text-sm leading-6">
+            暂不能确认生成能力，请稍后刷新；当前不会提交生成任务。
+          </p>
+        </section>
+      ) : null}
 
       <nav
         aria-label="工作台视图"

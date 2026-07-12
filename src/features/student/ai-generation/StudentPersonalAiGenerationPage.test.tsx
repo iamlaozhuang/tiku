@@ -10,6 +10,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StudentPersonalAiGenerationPage } from "./StudentPersonalAiGenerationPage";
+import type { EffectiveAuthorizationListDto } from "@/server/contracts/effective-authorization-contract";
 
 const studentRuntimeApiMock = vi.hoisted(() => ({
   COOKIE_BACKED_SESSION_MARKER: "__cookie_backed_session__",
@@ -76,7 +77,11 @@ function createRequestHistoryPayload() {
   ];
 }
 
-function createAdvancedAuthorizationListPayload() {
+function createAdvancedAuthorizationListPayload(
+  ownerType: "personal" | "organization" = "personal",
+): EffectiveAuthorizationListDto {
+  const isOrganizationOwner = ownerType === "organization";
+
   return {
     authorizations: [],
     effectiveAuthorizations: [],
@@ -90,13 +95,19 @@ function createAdvancedAuthorizationListPayload() {
         upgradeStatus: "none",
         expiresAt: "2027-06-14T00:00:00.000Z",
         displayStatus: "active",
-        authorizationSource: "personal_auth",
+        authorizationSource: isOrganizationOwner ? "org_auth" : "personal_auth",
         authorizationPublicId: "authorization_context_ui_501",
-        ownerType: "personal",
-        ownerPublicId: "student_public_ui_501",
-        organizationPublicId: null,
-        quotaOwnerType: "personal",
-        quotaOwnerPublicId: "student_public_ui_501",
+        ownerType,
+        ownerPublicId: isOrganizationOwner
+          ? "organization_public_ui_501"
+          : "student_public_ui_501",
+        organizationPublicId: isOrganizationOwner
+          ? "organization_public_ui_501"
+          : null,
+        quotaOwnerType: ownerType,
+        quotaOwnerPublicId: isOrganizationOwner
+          ? "organization_public_ui_501"
+          : "student_public_ui_501",
         blockedReason: null,
         capabilities: {
           canGenerateAiQuestion: true,
@@ -108,6 +119,30 @@ function createAdvancedAuthorizationListPayload() {
         },
       },
     ],
+  };
+}
+
+function createStandardAuthorizationListPayload(): EffectiveAuthorizationListDto {
+  const payload = createAdvancedAuthorizationListPayload();
+  const authorizationContext = payload.authorizationContexts?.[0];
+
+  return {
+    ...payload,
+    authorizationContexts:
+      authorizationContext === undefined
+        ? []
+        : [
+            {
+              ...authorizationContext,
+              edition: "standard",
+              effectiveEdition: "standard",
+              capabilities: {
+                ...authorizationContext.capabilities,
+                canGenerateAiQuestion: false,
+                canGenerateAiPaper: false,
+              },
+            },
+          ],
   };
 }
 
@@ -147,6 +182,10 @@ function mockAuthorizationAndResultHistoryResponse(
     message: "ok",
     data: [],
   },
+  options: {
+    authorizationPayload?: EffectiveAuthorizationListDto;
+    generationAvailability?: "available" | "closed" | "error";
+  } = {},
 ) {
   studentRuntimeApiMock.fetchStudentApi.mockImplementation(
     async (url: string) => {
@@ -154,7 +193,28 @@ function mockAuthorizationAndResultHistoryResponse(
         return {
           code: 0,
           message: "ok",
-          data: createAdvancedAuthorizationListPayload(),
+          data:
+            options.authorizationPayload ??
+            createAdvancedAuthorizationListPayload(),
+        };
+      }
+
+      if (url === "/api/v1/ai-generation/availability") {
+        if (options.generationAvailability === "error") {
+          return {
+            code: 500019,
+            message: "AI generation availability is temporarily unavailable.",
+            data: null,
+          };
+        }
+
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            generationAvailability:
+              options.generationAvailability ?? "available",
+          },
         };
       }
 
@@ -193,6 +253,14 @@ function mockResultHistoryAndDetailResponses({
           code: 0,
           message: "ok",
           data: createAdvancedAuthorizationListPayload(),
+        };
+      }
+
+      if (url === "/api/v1/ai-generation/availability") {
+        return {
+          code: 0,
+          message: "ok",
+          data: { generationAvailability: "available" },
         };
       }
 
@@ -270,7 +338,113 @@ describe("StudentPersonalAiGenerationPage", () => {
     );
   });
 
-  it("uses learner-facing AI training labels for question and paper generation", () => {
+  it.each([["personal"], ["organization"]] as const)(
+    "fails closed before submit for the %s authorization context",
+    async (ownerType) => {
+      mockAuthorizationAndResultHistoryResponse(
+        {
+          code: 0,
+          message: "ok",
+          data: {
+            runtimeStatus: "local_contract_only",
+            contentVisibility: "redacted_snapshot",
+            redactionStatus: "redacted",
+            formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+            results: [],
+          },
+        },
+        undefined,
+        {
+          authorizationPayload:
+            createAdvancedAuthorizationListPayload(ownerType),
+          generationAvailability: "closed",
+        },
+      );
+
+      render(<StudentPersonalAiGenerationPage />);
+
+      expect(
+        await screen.findByText("AI 生成服务当前未开放"),
+      ).toBeInTheDocument();
+      const submitButton = screen.getByRole("button", {
+        name: "生成练习题草稿",
+      });
+      expect(submitButton).toBeDisabled();
+      fireEvent.click(submitButton);
+      expect(studentRuntimeApiMock.fetchStudentApi).not.toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-requests",
+        expect.anything(),
+        expect.objectContaining({ method: "POST" }),
+      );
+      expect(document.body).not.toHaveTextContent("Provider");
+    },
+  );
+
+  it("fails closed when the learner availability status cannot be loaded", async () => {
+    mockAuthorizationAndResultHistoryResponse(
+      {
+        code: 0,
+        message: "ok",
+        data: {
+          runtimeStatus: "local_contract_only",
+          contentVisibility: "redacted_snapshot",
+          redactionStatus: "redacted",
+          formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+          results: [],
+        },
+      },
+      undefined,
+      { generationAvailability: "error" },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    expect(
+      await screen.findByText("AI 生成服务状态暂不可用"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "生成练习题草稿" }),
+    ).toBeDisabled();
+    expect(studentRuntimeApiMock.fetchStudentApi).not.toHaveBeenCalledWith(
+      "/api/v1/personal-ai-generation-requests",
+      expect.anything(),
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("keeps standard authorization unavailable without loading generation availability", async () => {
+    mockAuthorizationAndResultHistoryResponse(
+      {
+        code: 0,
+        message: "ok",
+        data: {
+          runtimeStatus: "local_contract_only",
+          contentVisibility: "redacted_snapshot",
+          redactionStatus: "redacted",
+          formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+          results: [],
+        },
+      },
+      undefined,
+      { authorizationPayload: createStandardAuthorizationListPayload() },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    expect(
+      await screen.findByText("当前授权暂未开放 AI 训练"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "生成练习题草稿" }),
+    ).not.toBeInTheDocument();
+    expect(studentRuntimeApiMock.fetchStudentApi).not.toHaveBeenCalledWith(
+      "/api/v1/ai-generation/availability",
+      expect.anything(),
+      expect.anything(),
+    );
+  });
+
+  it("uses learner-facing AI training labels for question and paper generation", async () => {
     render(<StudentPersonalAiGenerationPage />);
 
     expect(screen.getByRole("heading", { name: "AI训练" })).toBeInTheDocument();
@@ -278,7 +452,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       screen.getByRole("button", { name: "生成练习题草稿" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "AI组卷" }));
+    const paperTab = screen.getByRole("tab", { name: "AI组卷" });
+    await waitFor(() => expect(paperTab).not.toBeDisabled());
+    fireEvent.click(paperTab);
 
     expect(
       screen.getByRole("button", { name: "生成自测试卷" }),

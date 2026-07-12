@@ -15,6 +15,32 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdminAiGenerationEntryPage } from "@/features/admin/ai-generation/AdminAiGenerationEntryPage";
 import type { AdminRole } from "@/server/models/auth";
 
+vi.mock("@/features/admin/content-admin-runtime", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("@/features/admin/content-admin-runtime")
+    >();
+
+  return {
+    ...actual,
+    async fetchAdminApi<TData>(
+      path: string,
+      sessionToken: string | null,
+      init: RequestInit = {},
+    ) {
+      if (path === "/api/v1/ai-generation/availability") {
+        return {
+          code: 0,
+          message: "ok",
+          data: { generationAvailability: "available" } as TData,
+        };
+      }
+
+      return actual.fetchAdminApi<TData>(path, sessionToken, init);
+    },
+  };
+});
+
 const workspaceRoot = process.cwd();
 const diagnosticAdminLocalContractSummary =
   "redacted admin AI generation local contract summary";

@@ -41,6 +41,7 @@ import type {
   PersonalAiGenerationLearningSessionQuestionDto,
 } from "@/server/contracts/personal-ai-generation-learning-session-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
+import type { AiGenerationAvailabilityDto } from "@/server/contracts/ai-generation-availability-contract";
 import type {
   AdminKnowledgeNodeOpsListDto,
   AdminKnowledgeNodeOpsSummaryDto,
@@ -69,6 +70,12 @@ type StudentPersonalAiGenerationHistoryState =
   | "ready"
   | "error"
   | "unauthorized";
+
+type StudentAiGenerationAvailabilityState =
+  | "loading"
+  | "available"
+  | "closed"
+  | "error";
 
 type StudentPersonalAiGenerationResultDetailState =
   | "idle"
@@ -3257,6 +3264,8 @@ export function StudentPersonalAiGenerationPage() {
     useState<StudentPersonalAiGenerationPageState>(
       hasSessionToken ? "empty" : "checking",
     );
+  const [generationAvailabilityState, setGenerationAvailabilityState] =
+    useState<StudentAiGenerationAvailabilityState>("loading");
   const [experience, setExperience] =
     useState<PersonalAiGenerationLocalBrowserExperienceDto | null>(null);
   const [historyState, setHistoryState] =
@@ -3582,6 +3591,42 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
+      try {
+        const availabilityResponse =
+          await fetchStudentApi<AiGenerationAvailabilityDto>(
+            "/api/v1/ai-generation/availability",
+            sessionRequestToken,
+            { method: "GET" },
+          );
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(availabilityResponse)) {
+          markUnauthorized();
+          return;
+        }
+
+        const generationAvailability =
+          availabilityResponse.code === 0 && availabilityResponse.data !== null
+            ? availabilityResponse.data.generationAvailability
+            : null;
+
+        if (
+          generationAvailability !== "available" &&
+          generationAvailability !== "closed"
+        ) {
+          setGenerationAvailabilityState("error");
+        } else {
+          setGenerationAvailabilityState(generationAvailability);
+        }
+      } catch {
+        if (!isCancelled) {
+          setGenerationAvailabilityState("error");
+        }
+      }
+
       void fetchInitialRequestHistory();
       void fetchInitialResultHistory();
     }
@@ -3596,6 +3641,10 @@ export function StudentPersonalAiGenerationPage() {
   async function handleSubmitPersonalAiGenerationRequest(
     taskType: StudentPersonalAiGenerationTaskType,
   ) {
+    if (generationAvailabilityState !== "available") {
+      return;
+    }
+
     const sessionRequestToken = readStudentSessionRequestToken();
 
     function markUnauthorized() {
@@ -4095,6 +4144,7 @@ export function StudentPersonalAiGenerationPage() {
 
   const isAiGenerationBaseActionDisabled =
     !hasSessionToken ||
+    generationAvailabilityState !== "available" ||
     pageState === "checking" ||
     pageState === "loading" ||
     pageState === "unavailable";
@@ -4470,6 +4520,34 @@ export function StudentPersonalAiGenerationPage() {
             {copy.subtitle}
           </p>
         </div>
+
+        {shouldShowAiGenerationDetailControls &&
+        generationAvailabilityState === "closed" ? (
+          <section
+            aria-live="polite"
+            className="border-border bg-muted text-text-primary rounded-lg border px-4 py-3"
+            data-testid="student-ai-generation-availability"
+            role="status"
+          >
+            <h2 className="text-sm font-semibold">AI 生成服务当前未开放</h2>
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              当前无法发起新的生成任务，已有训练记录仍可查看。
+            </p>
+          </section>
+        ) : shouldShowAiGenerationDetailControls &&
+          generationAvailabilityState === "error" ? (
+          <section
+            aria-live="polite"
+            className="border-border bg-muted text-text-primary rounded-lg border px-4 py-3"
+            data-testid="student-ai-generation-availability"
+            role="status"
+          >
+            <h2 className="text-sm font-semibold">AI 生成服务状态暂不可用</h2>
+            <p className="text-text-secondary mt-1 text-sm leading-6">
+              暂不能确认生成能力，请稍后刷新；当前不会提交生成任务。
+            </p>
+          </section>
+        ) : null}
 
         {shouldShowAuthorizationContextSelector ? (
           <StudentPersonalAiGenerationAuthorizationContextSelector
