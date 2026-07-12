@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { MaterialDto } from "@/server/contracts/material-contract";
 import type { PaperDraftDto } from "@/server/contracts/paper-draft-contract";
 import type { QuestionDto } from "@/server/contracts/question-contract";
 
@@ -109,6 +110,21 @@ const materialQuestion: QuestionDto = {
   materialPublicId: "material_public_missing",
 };
 
+const availableMaterial: MaterialDto = {
+  publicId: "material_public_available",
+  title: "可选案例材料",
+  contentRichText: "<p>材料摘要</p>",
+  profession: "marketing",
+  level: 3,
+  subject: "theory",
+  status: "available",
+  isLocked: false,
+  lockedAt: null,
+  references: { papers: [], questions: [] },
+  createdAt: "2026-07-11T00:00:00.000Z",
+  updatedAt: "2026-07-11T00:00:00.000Z",
+};
+
 function jsonResponse(payload: unknown) {
   return new Response(JSON.stringify(payload), {
     headers: { "content-type": "application/json" },
@@ -118,6 +134,11 @@ function jsonResponse(payload: unknown) {
 function installComposerFetch(
   paperOverride: PaperDraftDto = paper,
   questions: QuestionDto[] = [],
+  materials: MaterialDto[] = [],
+  pageTwoFixtures: {
+    material?: MaterialDto;
+    question?: QuestionDto;
+  } = {},
 ) {
   return vi
     .spyOn(globalThis, "fetch")
@@ -150,14 +171,43 @@ function installComposerFetch(
       }
 
       if (url.startsWith("/api/v1/questions?")) {
+        const requestUrl = new URL(url, "http://localhost");
+        const page = Number(requestUrl.searchParams.get("page") ?? "1");
+        const rows =
+          page === 2 && pageTwoFixtures.question !== undefined
+            ? [pageTwoFixtures.question]
+            : questions;
         return jsonResponse({
           code: 0,
           message: "ok",
-          data: { questions },
+          data: rows,
           pagination: {
-            page: 1,
+            page,
             pageSize: 20,
-            total: questions.length,
+            total:
+              pageTwoFixtures.question === undefined ? questions.length : 21,
+            sortBy: "updatedAt",
+            sortOrder: "desc",
+          },
+        });
+      }
+
+      if (url.startsWith("/api/v1/materials?")) {
+        const requestUrl = new URL(url, "http://localhost");
+        const page = Number(requestUrl.searchParams.get("page") ?? "1");
+        const rows =
+          page === 2 && pageTwoFixtures.material !== undefined
+            ? [pageTwoFixtures.material]
+            : materials;
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: rows,
+          pagination: {
+            page,
+            pageSize: 20,
+            total:
+              pageTwoFixtures.material === undefined ? materials.length : 21,
             sortBy: "updatedAt",
             sortOrder: "desc",
           },
@@ -377,6 +427,96 @@ describe("AdminPaperComposerPage", () => {
       });
     });
     expect(screen.queryByLabelText("题目业务标识")).toBeNull();
+  });
+
+  it("loads the real material array envelope before selecting linked questions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "test-session");
+    const linkedQuestion = {
+      ...availableQuestion,
+      publicId: "question_public_linked",
+      stemRichText: "<p>材料关联题目</p>",
+      materialPublicId: availableMaterial.publicId,
+    };
+    const fetchMock = installComposerFetch(
+      paper,
+      [linkedQuestion],
+      [availableMaterial],
+    );
+
+    render(<AdminPaperComposerPage paperPublicId={paper.publicId} />);
+    await screen.findByRole("heading", { name: paper.name });
+    fireEvent.click(screen.getByRole("button", { name: "按材料选题" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: /可选案例材料/ }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: /材料关联题目/ }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "加入试卷" }));
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([input]) =>
+          String(input).includes(
+            `materialPublicId=${availableMaterial.publicId}`,
+          ),
+        ),
+      ).toBe(true);
+      const addCall = fetchMock.mock.calls.find(
+        ([input, init]) =>
+          String(input) === `/api/v1/papers/${paper.publicId}/questions` &&
+          init?.method === "POST",
+      );
+      expect(JSON.parse(String(addCall?.[1]?.body))).toMatchObject({
+        questionPublicId: linkedQuestion.publicId,
+        questionGroup: {
+          title: availableMaterial.title,
+          materialPublicId: availableMaterial.publicId,
+        },
+      });
+    });
+  });
+
+  it("requests real second pages for both question and material picker modes", async () => {
+    localStorage.setItem("tiku.localSessionToken", "test-session");
+    const pageTwoQuestion = {
+      ...availableQuestion,
+      publicId: "question_public_page_two",
+      stemRichText: "<p>第二页题目</p>",
+    };
+    const pageTwoMaterial = {
+      ...availableMaterial,
+      publicId: "material_public_page_two",
+      title: "第二页材料",
+    };
+    const fetchMock = installComposerFetch(
+      paper,
+      [availableQuestion],
+      [availableMaterial],
+      { material: pageTwoMaterial, question: pageTwoQuestion },
+    );
+
+    render(<AdminPaperComposerPage paperPublicId={paper.publicId} />);
+    await screen.findByRole("heading", { name: paper.name });
+    fireEvent.click(screen.getByRole("button", { name: "从题库选题" }));
+    await screen.findByRole("button", { name: /待加入题目/ });
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    expect(
+      await screen.findByRole("button", { name: /第二页题目/ }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭选择题目" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "按材料选题" }));
+    await screen.findByRole("button", { name: /可选案例材料/ });
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    expect(
+      await screen.findByRole("button", { name: /第二页材料/ }),
+    ).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(([input]) =>
+        String(input).startsWith("/api/v1/materials?page=2&"),
+      ),
+    ).toBe(true);
   });
 
   it("updates paper-scoped settings through PATCH with the target paper_section", async () => {

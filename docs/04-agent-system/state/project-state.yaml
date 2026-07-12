@@ -1,8 +1,40 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-acceptance-remediation-ledger-2026-07-11
-updatedAt: "2026-07-11T23:48:43-07:00"
+currentPhase: 0704-paper-picker-response-contract-2026-07-11
+updatedAt: "2026-07-12T00:16:17-07:00"
+latest0704PaperPickerResponseContract:
+  id: 0704-paper-picker-response-contract-2026-07-11
+  status: ready_for_closeout
+  result: pass_real_paginated_array_consumer_contract
+  branch: codex/0704-paper-picker-response-contract
+  startSha: 5798bb0a8d7234cdd9337ad6aa0487d4ba530b25
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-paper-picker-response-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-paper-picker-response-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-paper-picker-response-contract-audit.md
+  executionBoundary:
+    runtime: local_source_test_and_redacted_localhost_acceptance
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    directDatabaseConnection: blocked
+    schemaMigrationSeed: blocked
+    dependencyIntroduction: blocked
+    apiContractChange: blocked_consumer_alignment_only
+  validationSummary:
+    status: pass_ready_for_commit_and_local_merge
+    redTargetedTests: pass_expected_4_array_contract_failures_and_1_material_page_failure
+    greenTargetedTests: pass_1_file_10_tests
+    affectedRegression: pass_5_files_33_tests
+    fullUnitTests: pass_357_files_1931_tests
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    formatting: pass_full_repository
+    diffCheck: pass
+    moduleRunV2PreCommitHardening: pass_7_files_scanned
+    dependencyOrLockfileChanged: false
+    schemaMigrationSeedChanged: false
+    providerExecution: blocked_not_executed
 latest0704AcceptanceRemediationLedger:
   id: 0704-acceptance-remediation-ledger-2026-07-11
   status: ready_for_closeout
@@ -4875,13 +4907,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-acceptance-remediation-ledger-2026-07-11
-  title: 0704 acceptance remediation ledger B0
-  phase: 0704-acceptance-remediation-ledger-2026-07-11
+  id: 0704-paper-picker-response-contract-2026-07-11
+  title: 0704 paper picker response contract B1A
+  phase: 0704-paper-picker-response-contract-2026-07-11
   status: ready_for_closeout
   priority: p0
   taskKind: implementation_feature
-  branch: codex/0704-acceptance-remediation-ledger
+  branch: codex/0704-paper-picker-response-contract
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -4890,38 +4922,39 @@ currentTask:
     providerExecution: blocked
     envSecretAccess: blocked
     stagingProdDeploy: blocked
-    productLoginSessionProbe: deferred_to_later_batches
+    productLoginSessionProbe: approved_redacted_localhost_only
     directDatabaseConnection: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshotRawDom: blocked_not_needed_b0
-  plannedAt: "2026-07-11T23:48:43-07:00"
-  claimedAt: "2026-07-11T23:48:43-07:00"
-  targetClosureItem: Freeze A01-A30 and restore the default-concurrency master unit baseline before B1A.
-  behaviorBoundary: local_source_test_only_b0_ledger_stale_fixture_repair_test_stability_and_canonical_question_type_no_provider_env_secret_direct_database_schema_migration_seed_dependency_staging_prod_deploy_cost_calibration_browser_or_screenshot
+    screenshotRawDom: approved_redacted_only
+  plannedAt: "2026-07-11T23:56:36-07:00"
+  claimedAt: "2026-07-11T23:56:36-07:00"
+  targetClosureItem: Align paper composer question and material pickers with the real paginated array envelope.
+  behaviorBoundary: local_source_test_and_redacted_localhost_b1a_consumer_contract_only_no_api_service_repository_validator_provider_env_secret_direct_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
   evidenceMode: redacted_issue_id_status_fix_summary_command_name_test_count_only_no_secret_env_database_url_rows_internal_numeric_ids_provider_payload_prompt_ai_output_full_content_session_cookie_token_auth_header
-  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-acceptance-remediation-ledger.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-acceptance-remediation-ledger.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-acceptance-remediation-ledger-audit.md
-  nextRequiredTaskId: 0704-paper-picker-response-contract-2026-07-11
+  planPath: docs/05-execution-logs/task-plans/2026-07-11-0704-paper-picker-response-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-11-0704-paper-picker-response-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-11-0704-paper-picker-response-contract-audit.md
+  nextRequiredTaskId: 0704-training-lifecycle-read-repair-2026-07-11
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    redTargetedTests: pass_expected_8_stable_failures_and_3_concurrency_failures
-    greenTargetedTests: pass_focused_and_default_concurrency_full_suite
-    fullUnitTests: pass_357_files_1929_tests
+    redTargetedTests: pass_expected_4_array_contract_failures_and_1_material_page_failure
+    greenTargetedTests: pass_1_file_10_tests
+    affectedRegression: pass_5_files_33_tests
+    fullUnitTests: pass_357_files_1931_tests
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
     formatting: pass_full_repository
     diffCheck: pass
-    moduleRunV2PreCommitHardening: pass_16_files_scanned
+    moduleRunV2PreCommitHardening: pass_7_files_scanned
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
-    screenshotRawDomTrace: blocked_not_executed
+    screenshotRawDomTrace: pending_if_needed_redacted_only
     privateValueOutput: false
     dependencyOrLockfileChanged: false
-    apiServiceRepositoryValidatorChanged: scoped_canonical_question_type_only
+    apiServiceRepositoryValidatorChanged: false
     schemaMigrationSeedChanged: false
     releaseReadinessClaimed: false
 

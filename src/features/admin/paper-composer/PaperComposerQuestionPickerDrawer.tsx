@@ -128,7 +128,7 @@ export function PaperComposerQuestionPickerDrawer({
     if (mode === "material" && selectedMaterial === null) {
       const sessionToken = getStoredSessionToken();
       const searchParams = new URLSearchParams({
-        page: "1",
+        page: String(page),
         pageSize: "20",
         sortBy: "updatedAt",
         sortOrder: "desc",
@@ -138,7 +138,7 @@ export function PaperComposerQuestionPickerDrawer({
         status: "available",
       });
 
-      void fetchAdminApi<{ materials: MaterialDto[] }>(
+      void fetchAdminApi<MaterialDto[]>(
         `/api/v1/materials?${searchParams.toString()}`,
         sessionToken,
         { signal: abortController.signal },
@@ -148,7 +148,7 @@ export function PaperComposerQuestionPickerDrawer({
             setLoadState("error");
             return;
           }
-          setMaterials(response.data.materials);
+          setMaterials(response.data);
           setPagination(response.pagination ?? defaultPagination());
           setLoadState("ready");
         })
@@ -159,7 +159,7 @@ export function PaperComposerQuestionPickerDrawer({
     }
 
     const sessionToken = getStoredSessionToken();
-    void fetchAdminApi<{ questions: QuestionDto[] }>(
+    void fetchAdminApi<QuestionDto[]>(
       `/api/v1/questions?${queryString}`,
       sessionToken,
       { signal: abortController.signal },
@@ -169,7 +169,7 @@ export function PaperComposerQuestionPickerDrawer({
           setLoadState("error");
           return;
         }
-        setQuestions(response.data.questions);
+        setQuestions(response.data);
         setPagination(response.pagination ?? defaultPagination());
         setLoadState("ready");
       })
@@ -177,7 +177,7 @@ export function PaperComposerQuestionPickerDrawer({
         if (!abortController.signal.aborted) setLoadState("error");
       });
     return () => abortController.abort();
-  }, [mode, paper, queryString, selectedMaterial]);
+  }, [mode, page, paper, queryString, selectedMaterial]);
 
   async function handleSelectQuestion(question: QuestionDto) {
     setSelectedQuestion(question);
