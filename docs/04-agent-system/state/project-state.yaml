@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: user-led-b7-learner-comprehensive-experience-2026-07-12
-updatedAt: "2026-07-12T15:46:45-07:00"
+updatedAt: "2026-07-12T15:51:28-07:00"
 latestUserLedB7LearnerComprehensiveExperience:
   id: user-led-b7-learner-comprehensive-experience-2026-07-12
-  status: ready_for_closeout
+  status: closed_local_merged
   result: pass_learner_comprehensive_experience
   priority: p1
   branch: codex/user-led-b7-learner-ux
@@ -39,6 +39,11 @@ latestUserLedB7LearnerComprehensiveExperience:
     moduleRunV2PreCommitHardening: pass_11_files_scanned
     localCommit: pass_07bc6109f
     moduleRunV2ModuleCloseoutReadiness: pass
+    localMasterMerge: pass_ff_only_8a1a1bdae
+    masterFocusedTests: pass_6_files_98_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
 latestUserLedB6AiPaperOrganizationTrainingHandoff:
   id: user-led-b6-ai-paper-organization-training-handoff-2026-07-12
   status: closed_remote_synced
@@ -496,7 +501,7 @@ latest0704AcceptanceFixtureReadability:
   nextRequiredTaskId: 0704-redeem-filtered-empty-state-2026-07-12
 latest0704AdminReadableIdentifiers:
   id: 0704-admin-readable-identifiers-2026-07-12
-  status: ready_for_closeout
+  status: closed_local_merged
   result: pass_readable_business_semantics_and_sanitized_admin_controls
   branch: codex/0704-admin-readable-identifiers
   startSha: 6479cf45ef01b16b020c1e5eed856458daa8c3b4
@@ -5675,6 +5680,11 @@ currentTask:
     moduleRunV2PreCommitHardening: pass_11_files_scanned
     localCommit: pass_07bc6109f
     moduleRunV2ModuleCloseoutReadiness: pass
+    localMasterMerge: pass_ff_only_8a1a1bdae
+    masterFocusedTests: pass_6_files_98_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
 
 previousCurrentTaskBeforeUserLedB7LearnerComprehensiveExperience20260712:
   id: user-led-b6-ai-paper-organization-training-handoff-2026-07-12

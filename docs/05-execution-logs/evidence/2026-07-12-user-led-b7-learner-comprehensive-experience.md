@@ -55,7 +55,11 @@ result: pass
 | 浏览器/截图               | 未执行                            |
 | Module Run v2 pre-commit  | 通过，11 个文件范围与敏感信息扫描 |
 | 本地提交                  | `07bc6109f` 通过真实提交钩子      |
-| ff-only 合入/推送         | 待 closeout                       |
+| ff-only 合入              | `8a1a1bdae`                       |
+| master 定向复验           | `6 files / 98 tests` 通过         |
+| master lint/typecheck     | 通过                              |
+| master diff check         | 通过                              |
+| 推送                      | 待 pre-push closeout              |
 
 ## Module Run v2 锚点
 
@@ -63,6 +67,8 @@ result: pass
 - localFullLoopGate: pass
 - Test-ModuleRunV2PreCommitHardening: pass_11_files_scope_sensitive_terminology
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass
+- localMasterMerge: pass_ff_only_8a1a1bdae
+- masterPostMergeVerification: pass_6_files_98_tests_lint_typecheck_diff_check
 - threadRolloverGate: not_required；本批可在当前任务内完成串行 closeout。
 - Provider execution: blocked_not_executed
 - database connection: blocked_not_executed
