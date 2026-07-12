@@ -187,6 +187,10 @@ describe("dev seed dataset", () => {
     expect(seedDataset).toHaveProperty(
       "organizationTrainingAnswer",
       expect.objectContaining({
+        answerOrganizationSnapshot: expect.objectContaining({
+          organizationName: "本地省级烟草公司",
+          organizationPublicId: devSeedPublicIds.organization,
+        }),
         employeePublicId: "employee-dev-analytics",
         organizationPublicId: devSeedPublicIds.organization,
         organizationTrainingAnswerStatus: "submitted",

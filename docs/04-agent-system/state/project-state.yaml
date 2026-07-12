@@ -1,8 +1,51 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: 0704-admin-readable-identifiers-2026-07-12
-updatedAt: "2026-07-12T04:23:00-07:00"
+currentPhase: 0704-acceptance-fixture-readability-2026-07-12
+updatedAt: "2026-07-12T05:38:25-07:00"
+latest0704AcceptanceFixtureReadability:
+  id: 0704-acceptance-fixture-readability-2026-07-12
+  status: ready_for_closeout
+  result: pass_readable_bounded_fixture_sources
+  branch: codex/0704-acceptance-fixture-readability
+  startSha: 71f658fab24cc2c38776c43d9cae187a60890140
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-acceptance-fixture-readability.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-acceptance-fixture-readability.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-acceptance-fixture-readability-audit.md
+  executionBoundary:
+    runtime: local_fixture_source_readability_only
+    fixtureSourceChange: approved
+    fixtureExecution: blocked
+    directDatabaseConnection: blocked
+    databaseMutation: blocked
+    providerExecution: blocked
+    envSecretAccess: blocked
+    stagingProdDeploy: blocked
+    schemaMigrationSeed: blocked
+    dependencyIntroduction: blocked
+  validationSummary:
+    status: pass_ready_for_commit_and_local_merge
+    dependencyCliRecovery: pass_no_repository_diff
+    baselineDevSeedUnit: pass_1_file_3_tests_main_and_worktree
+    redFocused: pass_expected_3_of_5_failures
+    greenFocused: pass_2_files_5_tests
+    fullUnitTests: pass_360_files_1965_tests_max_workers_1
+    lint: pass_0_errors_0_warnings
+    typecheck: pass_tsc_no_emit
+    formatting: pass_full_repository
+    diffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass_10_files_scanned
+    hardeningCompatibilityFocused: pass_2_files_5_tests
+    hardeningCompatibilityTypecheck: pass_tsc_no_emit
+    initialSensitiveScan: blocked_4_preexisting_assignment_shapes_then_1_remaining_token_property
+    finalSensitiveScan: pass_zero_findings
+    databaseConnectionExecuted: false
+    databaseMutationExecuted: false
+    fixtureExecution: false
+    providerExecution: blocked_not_executed
+    dependencyOrLockfileChanged: false
+  nextRequiredTaskId: 0704-redeem-filtered-empty-state-2026-07-12
 latest0704AdminReadableIdentifiers:
   id: 0704-admin-readable-identifiers-2026-07-12
   status: ready_for_closeout
@@ -50,7 +93,7 @@ latest0704AdminReadableIdentifiers:
     dependencyOrLockfileChanged: false
     repositorySchemaMigrationSeedChanged: false
     releaseReadinessClaimed: false
-  nextRequiredTaskId: 0704-data-and-visual-polish-2026-07-12
+  nextRequiredTaskId: 0704-acceptance-fixture-readability-2026-07-12
 latest0704RoleErrorBoundary:
   id: 0704-role-error-boundary-2026-07-12
   status: ready_for_closeout
@@ -5139,13 +5182,14 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: 0704-admin-readable-identifiers-2026-07-12
-  title: 0704 admin readable business semantics A08-A13 A16 A17 A26 A30 B4
-  phase: 0704-admin-readable-identifiers-2026-07-12
+  id: 0704-acceptance-fixture-readability-2026-07-12
+  title: 0704 acceptance fixture readability A24 A25 B5A
+  phase: 0704-acceptance-fixture-readability-2026-07-12
   status: ready_for_closeout
-  priority: p2
-  taskKind: implementation_bugfix
-  branch: codex/0704-admin-readable-identifiers
+  result: pass_readable_bounded_fixture_sources
+  priority: p3
+  taskKind: fixture_source_polish
+  branch: codex/0704-acceptance-fixture-readability
   humanApprovalBoundary:
     implementation: current_user_approved_b0_to_b6_serial_remediation_goal_2026_07_11
     localCommit: approved_after_full_local_gate
@@ -5154,48 +5198,48 @@ currentTask:
     providerExecution: blocked
     envSecretAccess: blocked
     stagingProdDeploy: blocked
-    productLoginSessionProbe: approved_redacted_localhost_after_green
+    fixtureSourceChange: approved
+    fixtureExecution: blocked
+    browserRuntime: blocked_not_needed
     directDatabaseConnection: blocked
+    databaseMutation: blocked
     destructiveDbOperation: blocked
     credentialMaterialOutput: blocked
-    screenshot: approved_redacted_page_only
+    screenshot: blocked_not_needed
     rawDom: blocked
-  plannedAt: "2026-07-12T03:28:00-07:00"
-  claimedAt: "2026-07-12T03:28:00-07:00"
-  completedAt: "2026-07-12T04:23:00-07:00"
-  targetClosureItem: Replace operator-facing identifiers and internal governance wording with readable business semantics and uniquely named controls while preserving opaque identifier contracts and authorization boundaries.
-  behaviorBoundary: local_admin_readable_semantics_selectors_and_sanitized_audit_ui_only_no_phone_policy_or_redeem_plaintext_role_change_provider_execution_credential_env_secret_formal_content_write_database_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
-  evidenceMode: redacted_role_label_route_label_state_category_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_provider_payload_prompt_ai_output_full_content_internal_ids
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-admin-readable-identifiers.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-admin-readable-identifiers.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-admin-readable-identifiers-audit.md
-  nextRequiredTaskId: 0704-data-and-visual-polish-2026-07-12
+  plannedAt: "2026-07-12T05:15:00-07:00"
+  claimedAt: "2026-07-12T05:15:00-07:00"
+  completedAt: "2026-07-12T05:38:25-07:00"
+  targetClosureItem: Make the bounded 0704 organization and material acceptance fixture definitions readable in Chinese without changing production UI logic or mutating the existing localhost database.
+  behaviorBoundary: local_fixture_source_strings_and_unit_contract_only_no_fixture_execution_database_connection_or_write_production_ui_logic_provider_env_secret_schema_migration_seed_dependency_staging_prod_deploy_or_cost_calibration
+  evidenceMode: redacted_fixture_label_category_source_file_test_count_only_no_credentials_sessions_cookies_tokens_headers_env_values_database_rows_internal_ids_provider_payload_prompt_ai_output_or_full_sensitive_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-0704-acceptance-fixture-readability.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-0704-acceptance-fixture-readability.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-0704-acceptance-fixture-readability-audit.md
+  nextRequiredTaskId: 0704-redeem-filtered-empty-state-2026-07-12
   validationSummary:
     status: pass_ready_for_commit_and_local_merge
-    redFocused: pass_expected_contract_and_ui_failures
-    greenFocused: pass_17_files_153_tests
-    fullUnitTests: pass_359_files_1963_tests
+    dependencyCliRecovery: pass_no_repository_diff
+    baselineDevSeedUnit: pass_1_file_3_tests_main_and_worktree
+    redFocused: pass_expected_3_of_5_failures
+    greenFocused: pass_2_files_5_tests
+    fullUnitTests: pass_360_files_1965_tests_max_workers_1
     lint: pass_0_errors_0_warnings
     typecheck: pass_tsc_no_emit
-    webpackBuild: pass_compile_type_generation_90_static_pages_and_traces
-    defaultTurbopackBuild: blocked_external_node_modules_junction_before_compile
     formatting: pass_full_repository
     diffCheck: pass
-    localhostHealth: pass_http_200
-    localhostRoleAcceptance: deferred_original_0704db_not_mounted
-    moduleRunV2PreCommitHardening: pass_34_files_scanned
-    postMergeDefaultFullUnit: resource_contention_3_failures_2_timeouts_1_async_selector_race
-    postMergeIsolatedFailures: pass_3_files_47_tests_max_workers_1
-    selectorStability: pass_1_file_36_tests_three_consecutive_runs
-    masterPostMergeFullUnit: pass_359_files_1963_tests_max_workers_1
-    masterPostMergeLint: pass_0_errors_0_warnings
-    masterPostMergeTypecheck: pass_tsc_no_emit
-    masterPostMergeFormatting: pass_full_repository
-    masterPostMergeDiffCheck: pass
+    blockedPathDiffCheck: pass_no_output
+    moduleRunV2PreCommitHardening: pass_10_files_scanned
+    hardeningCompatibilityFocused: pass_2_files_5_tests
+    hardeningCompatibilityTypecheck: pass_tsc_no_emit
+    initialSensitiveScan: blocked_4_preexisting_assignment_shapes_then_1_remaining_token_property
+    finalSensitiveScan: pass_zero_findings
     providerExecution: blocked_not_executed
     envSecretAccess: blocked_not_executed
     stagingProdDeploy: blocked_not_executed
     directDatabaseConnectionExecuted: false
+    databaseMutationExecuted: false
+    fixtureExecution: false
     sensitiveOutput: false
     dependencyOrLockfileChanged: false
     repositorySchemaMigrationSeedChanged: false

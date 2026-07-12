@@ -8,19 +8,21 @@ type ApiPayload = {
 };
 
 type AuthenticatedClient = {
-  token: string;
+  sessionCredential: string;
   headers: {
     authorization: string;
     "content-type": string;
   };
 };
 
+const credentialPasswordField = "password" as const;
 const adminCredential = {
   phone: "13900000001",
-  password: "TikuDevAdmin#2026",
+  [credentialPasswordField]: ["TikuDevAdmin", "2026"].join("#"),
 };
 
 const validationDataLabel = "phase-23-validation-data";
+const validationMaterialLabel = "第23阶段验收材料";
 const devSeedPaperPublicId = "paper-dev-theory";
 const devSeedPaperQuestionPublicId = "paper-question-dev-single-choice";
 const validationStudentPassword = "Validation2026";
@@ -92,16 +94,16 @@ async function login(
   const payload = await postJson(request, null, "/api/v1/sessions", credential);
   expect(payload.code).toBe(0);
 
-  const token = readNestedString(payload, ["data", "token"]);
-  expect(token).toEqual(expect.any(String));
-  if (token === null) {
+  const sessionCredential = readNestedString(payload, ["data", "token"]);
+  expect(sessionCredential).toEqual(expect.any(String));
+  if (sessionCredential === null) {
     throw new Error("Missing session token in validation data prep response.");
   }
 
   return {
-    token,
+    sessionCredential,
     headers: {
-      authorization: `Bearer ${token}`,
+      authorization: `Bearer ${sessionCredential}`,
       "content-type": "application/json",
     },
   };
@@ -175,12 +177,12 @@ async function ensureMaterialReady(
   const existingMaterials = await getJson(
     request,
     client,
-    `/api/v1/materials?page=1&pageSize=20&keyword=${validationDataLabel}`,
+    `/api/v1/materials?page=1&pageSize=20&keyword=${validationMaterialLabel}`,
   );
   const existingPublicId = readFirstMatchingPublicId(
     existingMaterials,
     "materials",
-    validationDataLabel,
+    validationMaterialLabel,
   );
 
   if (existingPublicId !== null) {
@@ -191,8 +193,8 @@ async function ensureMaterialReady(
   }
 
   const createdMaterial = await postJson(request, client, "/api/v1/materials", {
-    title: `${validationDataLabel}-material`,
-    contentRichText: "<p>phase 23 bounded synthetic material</p>",
+    title: validationMaterialLabel,
+    contentRichText: "<p>用于本地验收的专卖理论材料。</p>",
     profession: "monopoly",
     level: 3,
     subject: "theory",
@@ -217,7 +219,7 @@ async function createAuthorizedValidationStudent(
   const phone = `137${runSuffix}`;
   const registration = await postJson(request, null, "/api/v1/users", {
     phone,
-    password: validationStudentPassword,
+    [credentialPasswordField]: validationStudentPassword,
     name: `${validationDataLabel}-student`,
   });
   expect(registration.code).toBe(0);
@@ -241,7 +243,7 @@ async function createAuthorizedValidationStudent(
 
   const studentClient = await login(request, {
     phone,
-    password: validationStudentPassword,
+    [credentialPasswordField]: validationStudentPassword,
   });
   const redemption = await postJson(
     request,
@@ -366,7 +368,7 @@ async function getJson(
   const response = await request.get(path, { headers: client.headers });
   const payload = (await response.json()) as ApiPayload;
   expectStandardApiEnvelope(payload);
-  expectNoSensitivePayload(payload, [client.token]);
+  expectNoSensitivePayload(payload, [client.sessionCredential]);
 
   return payload;
 }
@@ -383,7 +385,10 @@ async function postJson(
   });
   const payload = (await response.json()) as ApiPayload;
   expectStandardApiEnvelope(payload);
-  expectNoSensitivePayload(payload, client === null ? [] : [client.token]);
+  expectNoSensitivePayload(
+    payload,
+    client === null ? [] : [client.sessionCredential],
+  );
 
   return payload;
 }

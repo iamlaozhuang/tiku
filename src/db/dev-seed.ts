@@ -432,7 +432,7 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
     organizationTrainingAnswer: {
       answerOrganizationSnapshot: {
         capturedAt: baseIssuedAt,
-        organizationName: "Local Province Tobacco Company",
+        organizationName: "本地省级烟草公司",
         organizationPublicId: devSeedPublicIds.organization,
       },
       employeePublicId: devSeedPublicIds.employee,

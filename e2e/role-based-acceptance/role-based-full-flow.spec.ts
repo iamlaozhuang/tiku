@@ -33,6 +33,7 @@ type RuntimeInventory = {
 
 const acceptanceRunSuffix = String(Date.now()).slice(-8);
 const acceptanceRunLabel = `acceptance-20260524-role-flow-${acceptanceRunSuffix}`;
+const acceptanceMaterialLabel = `角色全流程验收材料-${acceptanceRunSuffix}`;
 const devSeedPaperPublicId = "paper-dev-theory";
 const devSeedPaperQuestionPublicId = "paper-question-dev-single-choice";
 const localSessionStorageKey = "tiku.localSessionToken";
@@ -746,12 +747,12 @@ async function ensureMaterialReady(
   const existingMaterials = await fetchJsonFromPage(
     page,
     sessionCredential,
-    `/api/v1/materials?page=1&pageSize=20&keyword=${acceptanceRunLabel}`,
+    `/api/v1/materials?page=1&pageSize=20&keyword=${acceptanceMaterialLabel}`,
   );
   const reusedMaterialPublicId = readFirstMatchingPublicId(
     existingMaterials.body,
     "materials",
-    acceptanceRunLabel,
+    acceptanceMaterialLabel,
   );
 
   if (reusedMaterialPublicId !== null) {
@@ -765,8 +766,8 @@ async function ensureMaterialReady(
     {
       method: "POST",
       body: JSON.stringify({
-        title: `${acceptanceRunLabel}-material`,
-        contentRichText: "<p>acceptance material bounded sample</p>",
+        title: acceptanceMaterialLabel,
+        contentRichText: "<p>用于角色全流程验收的专卖理论材料。</p>",
         profession: "monopoly",
         level: 3,
         subject: "theory",
