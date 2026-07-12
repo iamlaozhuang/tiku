@@ -65,7 +65,7 @@ type RedeemCodeBatchRequestResult =
     };
 
 type RedeemCodeDetailRouteContext = {
-  params: Promise<{ publicId: string }> | { publicId: string };
+  params: Promise<{ publicId: string }>;
 };
 
 const adminSessionRequiredResponse = createErrorResponse(

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
   createAdminRedeemCodeRuntimeRouteHandlers,
@@ -160,6 +160,22 @@ function getRedeemCodeDetailRouteHandlers(
 }
 
 describe("phase 8 admin redeem code runtime", () => {
+  it("exposes the Next 16 asynchronous detail route context contract", () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+    });
+
+    type DetailRouteContext = Parameters<
+      typeof handlers.redeemCodes.detail.GET
+    >[1];
+
+    expect(handlers.redeemCodes.detail.GET).toBeTypeOf("function");
+    expectTypeOf<DetailRouteContext>().toEqualTypeOf<{
+      params: Promise<{ publicId: string }>;
+    }>();
+  });
+
   it("requires an authenticated admin session before returning redeem_code data", async () => {
     const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
       repositories: createRepositories(),
