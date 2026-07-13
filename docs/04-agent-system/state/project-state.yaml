@@ -5,7 +5,7 @@ currentPhase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
 updatedAt: "2026-07-12T16:48:09-07:00"
 latestUserLedB1B2OrganizationTrainingRuntimeRecovery:
   id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
-  status: ready_for_push
+  status: ready_for_closeout
   priority: p0
   branch: codex/user-led-b1-b2-org-training-runtime
   startSha: 4ef7980845a7e6b0e9f28140e28acea230c1b4be
