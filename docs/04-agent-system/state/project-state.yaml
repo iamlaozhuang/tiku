@@ -1,8 +1,51 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-b9-ops-mobile-containment-repair-2026-07-12
-updatedAt: "2026-07-12T18:05:54-07:00"
+currentPhase: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+updatedAt: "2026-07-12T18:31:00-07:00"
+latestUserLedB9CumulativeAcceptanceCloseout:
+  id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+  status: ready_for_closeout
+  priority: p0
+  branch: codex/user-led-b9-cumulative-closeout
+  startSha: 150741cb3d56929c346e0147597e3049b4ab5025
+  approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b9-cumulative-acceptance-closeout-audit.md
+  executionBoundary:
+    localSourceChange: blocked_until_fresh_failure_new_batch
+    browserRuntime: approved_redacted_localhost_in_app_browser_only
+    screenshotCapture: approved_repo_external_redacted_page_only
+    rawDomCapture: blocked
+    privateCredentialRead: approved_0704_role_credential_index_and_referenced_catalog_in_memory
+    privateCredentialCatalogRead: approved_in_memory_by_current_user_2026_07_12
+    databaseDirectConnection: blocked
+    databaseMutation: blocked
+    schemaMigration: blocked
+    providerExecution: blocked
+    dependencyChange: blocked
+    stagingProdDeploy: blocked
+  verification:
+    fullTests: pass_360_files_1983_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    representativeRoles: pass_7_role_labels
+    providerClosedRoles: pass_4_role_labels
+    enterpriseTrainingAdmin: pass_no_500001_no_load_failure
+    enterpriseTrainingEmployee: pass_4_visible_items
+    operationsDesktopSpacing: pass_16px_targeted_tables
+    operations390Containment: pass_document_contained_inner_table_scroll
+    contentInternalAcceptanceCopy: pass_absent
+    cardAuditProtection: pass_controls_and_audit_present_no_plaintext_capture
+    browserConsoleErrors: pass_zero_error_like_entries
+    retainedScreenshotCount: 20_repo_external_only
+    providerExecution: blocked_not_executed
+    databaseConnection: blocked_not_executed_in_b9
+    databaseMutation: blocked_not_executed_in_b9
+    schemaMigration: blocked_not_executed_in_b9
 latestUserLedB9OpsMobileContainmentRepair:
   id: user-led-b9-ops-mobile-containment-repair-2026-07-12
   status: closed_remote_synced
@@ -5771,13 +5814,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: user-led-b9-ops-mobile-containment-repair-2026-07-12
-  title: User-led B9 operations mobile containment repair
-  phase: user-led-b9-ops-mobile-containment-repair-2026-07-12
-  status: closed
+  id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+  title: User-led B9 cumulative acceptance closeout
+  phase: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+  status: ready_for_closeout
   priority: p0
-  taskKind: fresh_browser_failure_minimum_layout_repair
-  branch: codex/b9-ops-mobile-containment
+  taskKind: cumulative_localhost_quality_role_uiux_acceptance_closeout
+  branch: codex/user-led-b9-cumulative-closeout
   humanApprovalBoundary:
     implementation: approved
     localCommit: approved
@@ -5785,6 +5828,9 @@ currentTask:
     push: approved_origin_master_only
     cleanup: approved_after_remote_sync
     approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+    browserRuntime: approved_in_app_browser_localhost_only
+    screenshotCapture: approved_repo_external_redacted_page_only
+    privateCredentialRead: approved_in_memory_by_current_user_2026_07_12
     databaseConnection: blocked
     databaseMutation: blocked
     schemaMigration: blocked
@@ -5792,15 +5838,15 @@ currentTask:
     stagingProdDeploy: blocked
     forcePush: blocked
     pullRequest: blocked
-  plannedAt: "2026-07-12T18:05:54-07:00"
-  claimedAt: "2026-07-12T18:05:54-07:00"
-  targetClosureItem: Restore 390px admin page containment so wide operations tables scroll only inside AdminTableFrame.
-  behaviorBoundary: shared_admin_layout_shrink_boundary_and_focused_test_only_no_business_api_database_provider_or_dependency_change
-  evidenceMode: redacted_role_route_viewport_width_test_status_and_commit_sha_only_no_credentials_tokens_env_values_database_urls_business_rows_or_provider_payload
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b9-ops-mobile-containment-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b9-ops-mobile-containment-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b9-ops-mobile-containment-repair-audit.md
-  nextRequiredTaskId: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+  plannedAt: "2026-07-12T17:33:43-07:00"
+  claimedAt: "2026-07-12T17:33:43-07:00"
+  targetClosureItem: Complete cumulative localhost quality, representative role and UI/UX acceptance across all user-led B1-B8 repairs plus the B9-discovered containment repair.
+  behaviorBoundary: redacted_localhost_cumulative_tests_build_in_app_browser_role_matrix_and_docs_closeout_only
+  evidenceMode: redacted_role_route_state_aggregate_test_status_and_commit_sha_only_no_credentials_tokens_env_values_database_urls_business_rows_raw_dom_or_provider_payload
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b9-cumulative-acceptance-closeout-audit.md
+  nextRequiredTaskId: null
 
 previousCurrentTaskBeforeUserLedB1B2OrganizationTrainingRuntimeRecovery20260712:
   id: user-led-b8-content-ops-interface-details-2026-07-12

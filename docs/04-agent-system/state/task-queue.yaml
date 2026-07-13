@@ -118,6 +118,120 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+    title: User-led B9 cumulative acceptance closeout
+    phase: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+    status: ready_for_closeout
+    priority: p0
+    sequenceOrder: 56
+    taskKind: cumulative_localhost_quality_role_uiux_acceptance_closeout
+    moduleRunVersion: 2
+    branch: codex/user-led-b9-cumulative-closeout
+    dependsOn:
+      - user-led-b9-ops-mobile-containment-repair-2026-07-12
+      - user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+      - user-led-b8-content-ops-interface-details-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b9-cumulative-acceptance-closeout-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+      - docs/05-execution-logs/evidence/2026-07-12-user-led-b9-cumulative-acceptance-closeout.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b9-cumulative-acceptance-closeout-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+    capabilities:
+      localSourceChange: blocked_until_fresh_failure_new_batch
+      fullUnitTest: approved
+      staticQualityGates: approved
+      webpackBuild: approved
+      browserRuntime: approved_redacted_localhost_in_app_browser_only
+      screenshot: approved_repo_external_redacted_page_only
+      rawDomCapture: blocked
+      privateCredentialRead: approved_0704_role_credential_index_and_referenced_catalog_in_memory
+      privateCredentialCatalogRead: approved_in_memory_by_current_user_2026_07_12
+      databaseConnection: blocked
+      databaseMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: approved_process_presence_checks_only_no_values
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+    acceptanceStandards:
+      - master and origin/master start equal at the declared SHA and the worktree is clean before governance files are added.
+      - B1-B8 and the B9-discovered containment repair remain closed; A14 remains protected_deferred_decision and A15 remains protected_requirement.
+      - Full unit, lint, typecheck, format, webpack build, and diff checks pass on the cumulative baseline.
+      - Localhost uses process-level 0704DB override and Provider remains closed with zero generation submission.
+      - Approved representative role surfaces have redacted desktop and 390px evidence.
+      - Standard direct routes fail closed; advanced role pages, enterprise training, Provider-closed history, redeem, content, and operations boundaries remain usable.
+      - No credentials, session, cookie, token, DB URL, env values, raw DOM, plaintext redeem code, business rows, or Provider payload enter artifacts or evidence.
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run --maxWorkers=25% --testTimeout=20000
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - corepack pnpm@10.26.1 exec next build --webpack
+      - git diff --check
+    validationSummary:
+      status: ready_for_closeout
+      fullTests: pass_360_files_1983_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      representativeRoles: pass_7_role_labels
+      providerClosedRoles: pass_4_role_labels
+      enterpriseTrainingAdmin: pass_no_500001_no_load_failure
+      enterpriseTrainingEmployee: pass_4_visible_items
+      operationsDesktopSpacing: pass_16px_targeted_tables
+      operations390Containment: pass_document_contained_inner_table_scroll
+      contentInternalAcceptanceCopy: pass_absent
+      cardAuditProtection: pass_controls_and_audit_present_no_plaintext_capture
+      browserConsoleErrors: pass_zero_error_like_entries
+      retainedScreenshotCount: 20_repo_external_only
+      providerExecution: blocked_not_executed
+      databaseConnection: blocked_not_executed_in_b9
+      databaseMutation: blocked_not_executed_in_b9
+      schemaMigration: blocked_not_executed_in_b9
   - id: user-led-b9-ops-mobile-containment-repair-2026-07-12
     title: User-led B9 operations mobile containment repair
     phase: user-led-b9-ops-mobile-containment-repair-2026-07-12
