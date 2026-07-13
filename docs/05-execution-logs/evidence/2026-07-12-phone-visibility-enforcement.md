@@ -35,6 +35,9 @@ result: pass
 - `corepack pnpm@10.26.1 run format:check`: pass.
 - `corepack pnpm@10.26.1 run build`: pass, 90 static pages.
 - `git diff --check`: pass.
+- Master ff-only merge: pass at `cb5ffc7659112f3ffa788ea0a061321a75188306`; master focused verification: pass, 2 files and 13 tests.
+- Master lint, typecheck, format check, and diff check: pass.
+- First ordinary `origin/master` push: pass at `cb5ffc7659112f3ffa788ea0a061321a75188306`; post-push comparison: 0 behind, 0 ahead.
 - The unrelated paginated admin-paper UI test exceeded its five-second default only in the fully concurrent suite. Its assertions are unchanged; its local timeout is 20 seconds. It passes in isolation and in the final full suite.
 - Browser and Playwright E2E automation were not run in this runtime-only task because the active task boundary blocks browser automation. No browser, screenshot, raw DOM, localhost runtime, private credential, database, Provider, environment, staging, production, deploy, or migration action occurred.
 - The fresh worktree required an offline frozen-lockfile installation of the already-locked dependencies so Turbopack could resolve its project-local package graph. No package, lockfile, dependency version, or build configuration changed.
@@ -50,10 +53,10 @@ result: pass
 - localFullLoopGate: implementation_commit_and_module_closeout_complete.
 - Test-ModuleRunV2PreCommitHardening: pass, 33 scoped files scanned.
 - Test-ModuleRunV2ModuleCloseoutReadiness: pass.
-- Test-ModuleRunV2PrePushReadiness: pass with the remote-ahead check deferred until the approved ordinary push.
+- Test-ModuleRunV2PrePushReadiness: pass before the ordinary push; the push hook reran it with `remoteAhead: 0` and passed.
 - Commit: `7e24d15d0de9f674efc4d8ffb7aef51b4263303e` (`fix(auth): enforce phone visibility policy`).
 - threadRolloverGate: not_required; the current thread retains the approved serial-task context.
-- nextModuleRunCandidate: `user-led-phone-visibility-validation-2026-07-12` only after this task is fully closed and synchronized.
+- nextModuleRunCandidate: `user-led-phone-visibility-validation-2026-07-12`; this task is closed after the final state record is synchronized.
 - blocked remainder: browser/E2E runtime, screenshots, raw DOM, private credentials, database direct action, data refresh, schema/migration, Provider execution, dependency change, staging, production, deploy, release readiness, Cost Calibration, PR, and force push remain blocked or require their own task boundary.
 - Cost Calibration Gate remains blocked.
 
