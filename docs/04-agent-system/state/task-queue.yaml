@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-c1-question-create-editor-2026-07-13
-  nextTaskId: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+  currentTaskId: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+  nextTaskId: content-admin-platform-c3-material-create-editor-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -57,7 +57,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-d3-list-return-recovery-2026-07-13
     - content-admin-platform-d4-cumulative-audit-2026-07-13
     - content-admin-platform-c0-editor-route-wireflow-2026-07-13
-  lastClosedTaskId: content-admin-platform-c0-editor-route-wireflow-2026-07-13
+    - content-admin-platform-c1-question-create-editor-2026-07-13
+  lastClosedTaskId: content-admin-platform-c1-question-create-editor-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -81,8 +82,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-d3-list-return-recovery-2026-07-13: closed
     content-admin-platform-d4-cumulative-audit-2026-07-13: closed
     content-admin-platform-c0-editor-route-wireflow-2026-07-13: closed
-    content-admin-platform-c1-question-create-editor-2026-07-13: ready_for_closeout
-    content-admin-platform-c2-question-edit-copy-lock-2026-07-13: pending
+    content-admin-platform-c1-question-create-editor-2026-07-13: closed
+    content-admin-platform-c2-question-edit-copy-lock-2026-07-13: ready_for_closeout
     content-admin-platform-c3-material-create-editor-2026-07-13: pending
     content-admin-platform-c4-material-edit-copy-lock-2026-07-13: pending
     content-admin-platform-c5-editor-navigation-recovery-2026-07-13: pending
@@ -112,20 +113,20 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-c1-question-create-editor-2026-07-13
-    title: Content admin platform question create editor
-    phase: content-admin-platform-c1-question-create-editor-2026-07-13
+  - id: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+    title: Content admin platform question edit copy lock
+    phase: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
     status: ready_for_closeout
     priority: p0
-    sequenceOrder: 91
-    taskKind: question_create_editor
+    sequenceOrder: 92
+    taskKind: question_edit_copy_lock
     moduleRunVersion: 3
-    branch: codex/content-admin-platform-c1-question-create-editor
+    branch: codex/content-admin-platform-c2-question-edit-copy-lock
     dependsOn:
-      - content-admin-platform-c0-editor-route-wireflow-2026-07-13
+      - content-admin-platform-c1-question-create-editor-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R1
+    executionProfile: R2
     focusedGates:
       - focused_unit
       - lint
@@ -140,23 +141,25 @@ activeTasks:
       - content_lifecycle
       - lock_copy
       - deployment
-    reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c1-question-create-editor.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c1-question-create-editor.md
-    auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c1-question-create-editor.md
+    reviewMode: independent_audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c2-question-edit-copy-lock.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c2-question-edit-copy-lock.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-c2-question-edit-copy-lock-audit.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/active-state-history-index.yaml
-      - src/app/(admin)/content/questions/new/page.tsx
+      - src/app/(admin)/content/questions/*/edit/page.tsx
+      - src/app/(admin)/content/materials/page.tsx
       - src/app/(admin)/content/questions/page.tsx
       - src/features/admin/question-material-management/AdminQuestionEditorForm.tsx
       - src/features/admin/question-material-management/AdminQuestionEditorPage.tsx
       - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
       - tests/unit/admin-question-editor-route.test.ts
       - tests/unit/admin-question-material-ui.test.ts
-      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c1-question-create-editor.md
-      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c1-question-create-editor.md
+      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c2-question-edit-copy-lock.md
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c2-question-edit-copy-lock.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-c2-question-edit-copy-lock-audit.md
       - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
     blockedFiles:
       - AGENTS.md
@@ -187,17 +190,17 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     validationCommands:
-      - npm.cmd run test:unit -- tests/unit/admin-question-editor-route.test.ts tests/unit/admin-question-material-ui.test.ts
+      - npm.cmd run test:unit -- tests/unit/admin-question-editor-route.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts src/server/services/question-route.test.ts src/server/services/question-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd exec -- prettier --check --ignore-unknown C1_CHANGED_FILES
+      - npm.cmd exec -- prettier --check --ignore-unknown C2_CHANGED_FILES
       - npm.cmd run build
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-c1-question-create-editor-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-c1-question-create-editor-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-c1-question-create-editor-2026-07-13 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-c2-question-edit-copy-lock-2026-07-13 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
       localCommit:
@@ -214,20 +217,20 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-  - id: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
-    title: Content admin platform question edit copy lock
-    phase: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+  - id: content-admin-platform-c3-material-create-editor-2026-07-13
+    title: Content admin platform material create editor
+    phase: content-admin-platform-c3-material-create-editor-2026-07-13
     status: pending
     priority: p0
-    sequenceOrder: 92
-    taskKind: question_edit_copy_lock
+    sequenceOrder: 93
+    taskKind: material_create_editor
     moduleRunVersion: 3
-    branch: not_created_until_c1_closeout
+    branch: not_created_until_c2_closeout
     dependsOn:
-      - content-admin-platform-c1-question-create-editor-2026-07-13
+      - content-admin-platform-c2-question-edit-copy-lock-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R2
+    executionProfile: R1
     focusedGates:
       - focused_unit
       - lint
@@ -242,7 +245,7 @@ activeTasks:
       - content_lifecycle
       - lock_copy
       - deployment
-    reviewMode: independent_audit
+    reviewMode: evidence_two_rounds
     capabilities:
       productRuntimeSourceChange: approved_within_task_plan
       productTestSourceChange: approved_within_task_plan

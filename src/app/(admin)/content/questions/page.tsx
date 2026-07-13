@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { AdminQuestionMaterialManagement } from "@/features/admin/question-material-management/AdminQuestionMaterialManagement";
 
 type QuestionsPageProps = {
@@ -10,6 +12,14 @@ export default async function QuestionsPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const knowledgeNodePublicId = resolvedSearchParams.knowledgeNodePublicId;
   const questionPublicId = resolvedSearchParams.questionPublicId;
+  const normalizedQuestionPublicId =
+    typeof questionPublicId === "string" ? questionPublicId.trim() : "";
+
+  if (normalizedQuestionPublicId !== "") {
+    redirect(
+      `/content/questions/${encodeURIComponent(normalizedQuestionPublicId)}/edit?publishDraft=1`,
+    );
+  }
 
   return (
     <AdminQuestionMaterialManagement
@@ -17,10 +27,7 @@ export default async function QuestionsPage({
       initialKnowledgeNodeFilter={
         typeof knowledgeNodePublicId === "string" ? knowledgeNodePublicId : ""
       }
-      initialQuestionPublicId={
-        typeof questionPublicId === "string" ? questionPublicId : ""
-      }
-      questionCreateRouteEnabled
+      questionEditorRoutesEnabled
     />
   );
 }

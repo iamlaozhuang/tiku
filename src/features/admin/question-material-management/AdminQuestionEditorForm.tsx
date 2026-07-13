@@ -1,6 +1,7 @@
 export {
   AdminQuestionEditorForm,
   createDefaultQuestionFormValues,
+  createQuestionFormValuesFromQuestion,
   createQuestionInput,
   useQuestionBindingOptions,
 } from "./AdminQuestionMaterialManagementClient";

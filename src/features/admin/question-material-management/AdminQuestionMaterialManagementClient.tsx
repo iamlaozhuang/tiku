@@ -202,7 +202,7 @@ export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
   initialKnowledgeNodeFilter?: string;
   initialQuestionPublicId?: string;
-  questionCreateRouteEnabled?: boolean;
+  questionEditorRoutesEnabled?: boolean;
 };
 
 export type QuestionFormValues = {
@@ -433,7 +433,7 @@ function createDefaultMaterialFormValues(): MaterialFormValues {
   };
 }
 
-function createQuestionFormValuesFromQuestion(
+export function createQuestionFormValuesFromQuestion(
   question: QuestionDto,
 ): QuestionFormValues {
   return {
@@ -913,7 +913,7 @@ export function AdminQuestionMaterialManagement({
   defaultView = "questions",
   initialKnowledgeNodeFilter = "",
   initialQuestionPublicId = "",
-  questionCreateRouteEnabled = false,
+  questionEditorRoutesEnabled = false,
 }: AdminQuestionMaterialManagementProps) {
   const [initialUrlQuery] = useState(() => readContentListUrlQuery());
   const [activeView, setActiveView] = useState<ViewMode>(
@@ -1462,7 +1462,9 @@ export function AdminQuestionMaterialManagement({
   async function handleQuestionAction(
     question: QuestionDto,
     action: "copy" | "disable",
-  ) {
+  ): Promise<QuestionDto | null> {
+    if (submissionInProgressRef.current) return null;
+
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -1471,9 +1473,10 @@ export function AdminQuestionMaterialManagement({
         title: "题目操作失败",
         tone: "error",
       });
-      return;
+      return null;
     }
 
+    submissionInProgressRef.current = true;
     setActionError(null);
     setActionMessage(null);
     setContentMutationFeedback(null);
@@ -1489,7 +1492,7 @@ export function AdminQuestionMaterialManagement({
         setContentMutationFeedback(
           createContentActionErrorFeedback("question", response.code),
         );
-        return;
+        return null;
       }
 
       const updatedQuestion = response.data.question;
@@ -1501,8 +1504,12 @@ export function AdminQuestionMaterialManagement({
         title: "题目已更新",
         tone: "success",
       });
+      return updatedQuestion;
     } catch {
       setContentMutationFeedback(createContentActionErrorFeedback("question"));
+      return null;
+    } finally {
+      submissionInProgressRef.current = false;
     }
   }
 
@@ -1751,7 +1758,7 @@ export function AdminQuestionMaterialManagement({
             按专业、等级和内容状态维护正式题目与材料，查看锁定和引用摘要后再执行写操作。
           </p>
         </div>
-        {activeView === "questions" && questionCreateRouteEnabled ? (
+        {activeView === "questions" && questionEditorRoutesEnabled ? (
           <QuestionCreateRouteActionBar />
         ) : (
           <ActionBar
@@ -1927,6 +1934,7 @@ export function AdminQuestionMaterialManagement({
         <div className="min-w-0">
           {activeView === "questions" ? (
             <QuestionList
+              editorRoutesEnabled={questionEditorRoutesEnabled}
               emptyTitle={
                 hasActiveContentFilters ? "没有匹配的题目" : "暂无题目"
               }
@@ -1935,7 +1943,7 @@ export function AdminQuestionMaterialManagement({
               }
               rows={displayedQuestions}
               selectedPublicId={selectedQuestionPublicId}
-              onCopy={(question) => void handleQuestionAction(question, "copy")}
+              onCopy={(question) => handleQuestionAction(question, "copy")}
               onDisable={(question) =>
                 setPendingContentAction({
                   kind: "questionDisable",
@@ -2215,6 +2223,7 @@ export function AdminQuestionEditorForm({
   bindingOptionsLoadState,
   isSubmitting,
   mode,
+  submitBlockedReason = null,
   submitLabel = "保存题目",
   values,
   onCancel,
@@ -2224,6 +2233,7 @@ export function AdminQuestionEditorForm({
   bindingOptionsLoadState: BindingOptionsLoadState;
   isSubmitting: boolean;
   mode: QuestionFormMode;
+  submitBlockedReason?: string | null;
   submitLabel?: string;
   values: QuestionFormValues;
   onCancel: () => void;
@@ -2234,6 +2244,9 @@ export function AdminQuestionEditorForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [initialValuesFingerprint] = useState(() => JSON.stringify(values));
   const disabledReasonId = useId();
+  const disabledReason = isSubmitting
+    ? "正在保存，请勿重复提交。"
+    : submitBlockedReason;
   const dirtyState = getAdminFormDirtyState(
     initialValuesFingerprint,
     JSON.stringify(formValues),
@@ -2908,8 +2921,10 @@ export function AdminQuestionEditorForm({
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button
-          aria-describedby={isSubmitting ? disabledReasonId : undefined}
-          disabled={isSubmitting}
+          aria-describedby={
+            disabledReason === null ? undefined : disabledReasonId
+          }
+          disabled={disabledReason !== null}
           type="submit"
         >
           {isSubmitting ? "保存中…" : submitLabel}
@@ -2924,7 +2939,7 @@ export function AdminQuestionEditorForm({
         </Button>
         <AdminFormDisabledReason
           id={disabledReasonId}
-          reason={isSubmitting ? "正在保存，请勿重复提交。" : null}
+          reason={disabledReason}
         />
       </div>
     </form>
@@ -3535,6 +3550,7 @@ function FilterPanel({
 }
 
 function QuestionList({
+  editorRoutesEnabled,
   emptyTitle,
   recommendationByQuestionPublicId,
   rows,
@@ -3546,6 +3562,7 @@ function QuestionList({
   onReviewRecommendation,
   onView,
 }: {
+  editorRoutesEnabled: boolean;
   emptyTitle: string;
   recommendationByQuestionPublicId: Record<
     string,
@@ -3553,7 +3570,7 @@ function QuestionList({
   >;
   rows: QuestionDto[];
   selectedPublicId: string | null;
-  onCopy: (question: QuestionDto) => void;
+  onCopy: (question: QuestionDto) => Promise<QuestionDto | null>;
   onDisable: (question: QuestionDto) => void;
   onEdit: (question: QuestionDto, trigger: HTMLButtonElement) => void;
   onRecommend: (question: QuestionDto) => void;
@@ -3617,18 +3634,22 @@ function QuestionList({
                   <Eye aria-hidden="true" data-icon="inline-start" />
                   查看题目
                 </Button>
-                <Button
-                  aria-label={`编辑题目 ${readableName}`}
-                  data-testid={`question-edit-${question.publicId}`}
-                  disabled={question.isLocked}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                  onClick={(event) => onEdit(question, event.currentTarget)}
-                >
-                  <Pencil aria-hidden="true" data-icon="inline-start" />
-                  编辑
-                </Button>
+                {editorRoutesEnabled ? (
+                  <QuestionRouteEditButton question={question} />
+                ) : (
+                  <Button
+                    aria-label={`编辑题目 ${readableName}`}
+                    data-testid={`question-edit-${question.publicId}`}
+                    disabled={question.isLocked}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={(event) => onEdit(question, event.currentTarget)}
+                  >
+                    <Pencil aria-hidden="true" data-icon="inline-start" />
+                    编辑
+                  </Button>
+                )}
                 {question.isLocked ? (
                   <span className="text-text-muted self-center text-xs">
                     已锁定题目只能复制新题后编辑
@@ -3644,16 +3665,23 @@ function QuestionList({
                   <ShieldOff aria-hidden="true" data-icon="inline-start" />
                   停用
                 </Button>
-                <Button
-                  aria-label={`复制题目 ${readableName}`}
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                  onClick={() => onCopy(question)}
-                >
-                  <Copy aria-hidden="true" data-icon="inline-start" />
-                  复制
-                </Button>
+                {editorRoutesEnabled ? (
+                  <QuestionCopyToEditorButton
+                    question={question}
+                    onCopy={onCopy}
+                  />
+                ) : (
+                  <Button
+                    aria-label={`复制题目 ${readableName}`}
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                    onClick={() => void onCopy(question)}
+                  >
+                    <Copy aria-hidden="true" data-icon="inline-start" />
+                    复制
+                  </Button>
+                )}
                 <Button
                   aria-label={`为题目 ${readableName} 推荐知识点`}
                   size="sm"
@@ -3681,6 +3709,70 @@ function QuestionList({
         })}
       </div>
     </AdminTableFrame>
+  );
+}
+
+function QuestionRouteEditButton({ question }: { question: QuestionDto }) {
+  const router = useRouter();
+
+  return (
+    <Button
+      aria-label={`编辑题目 ${createQuestionReadableName(question)}`}
+      data-testid={`question-edit-${question.publicId}`}
+      disabled={question.isLocked}
+      size="sm"
+      type="button"
+      variant="outline"
+      onClick={() =>
+        router.push(
+          `/content/questions/${encodeURIComponent(question.publicId)}/edit`,
+        )
+      }
+    >
+      <Pencil aria-hidden="true" data-icon="inline-start" />
+      编辑
+    </Button>
+  );
+}
+
+function QuestionCopyToEditorButton({
+  question,
+  onCopy,
+}: {
+  question: QuestionDto;
+  onCopy: (question: QuestionDto) => Promise<QuestionDto | null>;
+}) {
+  const router = useRouter();
+  const [isCopying, setIsCopying] = useState(false);
+
+  async function handleCopy() {
+    if (isCopying) return;
+
+    setIsCopying(true);
+    try {
+      const copiedQuestion = await onCopy(question);
+      if (copiedQuestion !== null) {
+        router.push(
+          `/content/questions/${encodeURIComponent(copiedQuestion.publicId)}/edit`,
+        );
+      }
+    } finally {
+      setIsCopying(false);
+    }
+  }
+
+  return (
+    <Button
+      aria-label={`复制题目 ${createQuestionReadableName(question)}`}
+      disabled={isCopying}
+      size="sm"
+      type="button"
+      variant="secondary"
+      onClick={() => void handleCopy()}
+    >
+      <Copy aria-hidden="true" data-icon="inline-start" />
+      {isCopying ? "复制中…" : "复制"}
+    </Button>
   );
 }
 

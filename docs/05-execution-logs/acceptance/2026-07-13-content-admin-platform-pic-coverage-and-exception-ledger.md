@@ -184,6 +184,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   C3-C5 own material routes and route recovery/dirty leave, and C6 owns cumulative promotion. PIC-13 remains unchanged;
   no authorization, lifecycle, AI, dependency, exception, credential or deployment boundary changed.
 
+### C2 Question Edit Copy Lock
+
+- `/content/questions/[publicId]/edit` now loads unlocked questions through the shared validation form, PATCHes the
+  existing API contract once, resets the clean baseline after success, and exposes safe missing/forbidden/error returns.
+- Locked deep links never mount an editable form. Explicit copy uses the existing POST endpoint and the returned public id
+  to enter the copied editor; a server lock race preserves authored input, blocks further PATCH and offers copy/return.
+- Product list create/edit/copy paths now use dedicated editors from both question/material entry pages. The existing
+  content-AI `questionPublicId` draft link redirects to the same route and retains explicit draft-publish wording/status;
+  no generation, Provider, ownership, authorization or superseded AI issue class was changed or reopened.
+- PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are partially proven for question create/edit/copy/lock. C3-C5 and C6 retain
+  material/navigation/cumulative ownership; PIC-13 remains unchanged and the exception ledger remains empty.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
