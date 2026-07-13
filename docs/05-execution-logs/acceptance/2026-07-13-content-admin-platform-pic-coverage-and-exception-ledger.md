@@ -196,6 +196,17 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are partially proven for question create/edit/copy/lock. C3-C5 and C6 retain
   material/navigation/cumulative ownership; PIC-13 remains unchanged and the exception ledger remains empty.
 
+### C3 Material Create Editor
+
+- The product material-list create action now opens `/content/materials/new` from both content entry pages; the dedicated
+  editor reuses the existing material semantic-validation form and POST API envelope instead of duplicating contracts.
+- Semantic-empty title/body, empty tables, invalid media, missing classification and body length above 30000 remain
+  blocked with accessible errors. Conflict/network failure preserves input, duplicate submission is blocked, and success
+  becomes a non-resubmittable completion until C4 supplies the dynamic edit route.
+- PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are partially proven for both create routes plus question edit/copy/lock. C4/C5 own
+  material edit/copy/lock and navigation recovery, and C6 owns cumulative promotion. PIC-13 and the empty exception ledger
+  remain unchanged; no authorization, lifecycle, dependency, credential, database, AI or deployment boundary changed.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

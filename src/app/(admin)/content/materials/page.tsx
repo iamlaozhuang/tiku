@@ -4,6 +4,7 @@ export default function MaterialsPage() {
   return (
     <AdminQuestionMaterialManagement
       defaultView="materials"
+      materialEditorRoutesEnabled
       questionEditorRoutesEnabled
     />
   );

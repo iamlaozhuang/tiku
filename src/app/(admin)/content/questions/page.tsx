@@ -27,6 +27,7 @@ export default async function QuestionsPage({
       initialKnowledgeNodeFilter={
         typeof knowledgeNodePublicId === "string" ? knowledgeNodePublicId : ""
       }
+      materialEditorRoutesEnabled
       questionEditorRoutesEnabled
     />
   );

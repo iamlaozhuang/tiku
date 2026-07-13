@@ -1,15 +1,15 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
-updatedAt: "2026-07-13T23:45:00-07:00"
+currentPhase: content-admin-platform-c3-material-create-editor-2026-07-13
+updatedAt: "2026-07-13T23:59:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
-  nextTaskId: content-admin-platform-c3-material-create-editor-2026-07-13
+  currentTaskId: content-admin-platform-c3-material-create-editor-2026-07-13
+  nextTaskId: content-admin-platform-c4-material-edit-copy-lock-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -62,7 +62,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-d4-cumulative-audit-2026-07-13
     - content-admin-platform-c0-editor-route-wireflow-2026-07-13
     - content-admin-platform-c1-question-create-editor-2026-07-13
-  lastClosedTaskId: content-admin-platform-c1-question-create-editor-2026-07-13
+    - content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+  lastClosedTaskId: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   coverageLedgerPath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
@@ -88,8 +89,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-d4-cumulative-audit-2026-07-13: closed
     content-admin-platform-c0-editor-route-wireflow-2026-07-13: closed
     content-admin-platform-c1-question-create-editor-2026-07-13: closed
-    content-admin-platform-c2-question-edit-copy-lock-2026-07-13: ready_for_closeout
-    content-admin-platform-c3-material-create-editor-2026-07-13: pending
+    content-admin-platform-c2-question-edit-copy-lock-2026-07-13: closed
+    content-admin-platform-c3-material-create-editor-2026-07-13: ready_for_closeout
     content-admin-platform-c4-material-edit-copy-lock-2026-07-13: pending
     content-admin-platform-c5-editor-navigation-recovery-2026-07-13: pending
     content-admin-platform-c6-cumulative-audit-2026-07-13: pending
@@ -204,6 +205,12 @@ contentAdminPlatformSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     content-admin-platform-c2-question-edit-copy-lock-2026-07-13:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    content-admin-platform-c3-material-create-editor-2026-07-13:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -228,18 +235,18 @@ contentAdminPlatformSerialProgram:
       status: accepted
       reason: current user explicitly authorized serial M1 then M2 before resuming B0
 currentTask:
-  id: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
-  title: Content admin platform question edit copy lock
-  phase: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+  id: content-admin-platform-c3-material-create-editor-2026-07-13
+  title: Content admin platform material create editor
+  phase: content-admin-platform-c3-material-create-editor-2026-07-13
   status: ready_for_closeout
   priority: p0
-  taskKind: question_edit_copy_lock
-  branch: codex/content-admin-platform-c2-question-edit-copy-lock
-  executionProfile: R2
-  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c2-question-edit-copy-lock.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c2-question-edit-copy-lock.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-c2-question-edit-copy-lock-audit.md
-  nextRequiredTaskId: content-admin-platform-c3-material-create-editor-2026-07-13
+  taskKind: material_create_editor
+  branch: codex/content-admin-platform-c3-material-create-editor
+  executionProfile: R1
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c3-material-create-editor.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c3-material-create-editor.md
+  auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c3-material-create-editor.md
+  nextRequiredTaskId: content-admin-platform-c4-material-edit-copy-lock-2026-07-13
 standingAuthorization:
   id: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   source: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
@@ -249,9 +256,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 785b93de8cb4e60f82229cd28686ef084b531c5f
-  lastKnownOriginMasterSha: 785b93de8cb4e60f82229cd28686ef084b531c5f
-  lastKnownRemoteMasterSha: 785b93de8cb4e60f82229cd28686ef084b531c5f
+  lastKnownMasterSha: 0e2b4a43cd9cc2b193807792d816981e71a85a8d
+  lastKnownOriginMasterSha: 0e2b4a43cd9cc2b193807792d816981e71a85a8d
+  lastKnownRemoteMasterSha: 0e2b4a43cd9cc2b193807792d816981e71a85a8d
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

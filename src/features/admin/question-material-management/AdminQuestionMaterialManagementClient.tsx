@@ -97,7 +97,7 @@ type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
 type QuestionTypeFilter = "all" | QuestionType;
 export type QuestionFormMode = "create" | "edit";
-type MaterialFormMode = "create" | "edit";
+export type MaterialFormMode = "create" | "edit";
 type RecommendationReviewStatus = "accepted" | "discarded";
 type AdminCommonSortOrder = "asc" | "desc";
 export type BindingOptionsLoadState = "idle" | "loading" | "ready" | "error";
@@ -202,6 +202,7 @@ export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
   initialKnowledgeNodeFilter?: string;
   initialQuestionPublicId?: string;
+  materialEditorRoutesEnabled?: boolean;
   questionEditorRoutesEnabled?: boolean;
 };
 
@@ -245,7 +246,7 @@ type QuestionBindingInput = {
   tagPublicIds: string[];
 };
 
-type MaterialFormValues = {
+export type MaterialFormValues = {
   title: string;
   contentRichText: string;
   profession: Profession | "";
@@ -423,7 +424,7 @@ export function createDefaultQuestionFormValues(): QuestionFormValues {
   };
 }
 
-function createDefaultMaterialFormValues(): MaterialFormValues {
+export function createDefaultMaterialFormValues(): MaterialFormValues {
   return {
     contentRichText: "",
     level: "",
@@ -899,7 +900,7 @@ function normalizeStandardAnswerForQuestionType(
   return standardAnswerRichText;
 }
 
-function createMaterialInput(values: MaterialFormValues) {
+export function createMaterialInput(values: MaterialFormValues) {
   return {
     title: values.title,
     contentRichText: values.contentRichText,
@@ -913,6 +914,7 @@ export function AdminQuestionMaterialManagement({
   defaultView = "questions",
   initialKnowledgeNodeFilter = "",
   initialQuestionPublicId = "",
+  materialEditorRoutesEnabled = false,
   questionEditorRoutesEnabled = false,
 }: AdminQuestionMaterialManagementProps) {
   const [initialUrlQuery] = useState(() => readContentListUrlQuery());
@@ -1760,6 +1762,8 @@ export function AdminQuestionMaterialManagement({
         </div>
         {activeView === "questions" && questionEditorRoutesEnabled ? (
           <QuestionCreateRouteActionBar />
+        ) : activeView === "materials" && materialEditorRoutesEnabled ? (
+          <MaterialCreateRouteActionBar />
         ) : (
           <ActionBar
             activeView={activeView}
@@ -2045,7 +2049,7 @@ export function AdminQuestionMaterialManagement({
                 onSubmit={handleSaveQuestion}
               />
             ) : (
-              <MaterialWriteForm
+              <AdminMaterialEditorForm
                 isSubmitting={isSubmitting}
                 key={`${displayedActiveForm.mode}-${
                   displayedActiveForm.publicId ?? "new"
@@ -2214,6 +2218,17 @@ function QuestionCreateRouteActionBar() {
     <ActionBar
       activeView="questions"
       onCreate={() => router.push("/content/questions/new")}
+    />
+  );
+}
+
+function MaterialCreateRouteActionBar() {
+  const router = useRouter();
+
+  return (
+    <ActionBar
+      activeView="materials"
+      onCreate={() => router.push("/content/materials/new")}
     />
   );
 }
@@ -3130,7 +3145,7 @@ function QuestionFormSelect({
   );
 }
 
-function MaterialWriteForm({
+export function AdminMaterialEditorForm({
   isSubmitting,
   mode,
   values,
