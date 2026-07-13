@@ -20,6 +20,7 @@ export default async function QuestionsPage({
       initialQuestionPublicId={
         typeof questionPublicId === "string" ? questionPublicId : ""
       }
+      questionCreateRouteEnabled
     />
   );
 }

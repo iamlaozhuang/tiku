@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowDownUp,
   Ban,
@@ -95,15 +96,15 @@ type StatusFilter = "all" | QuestionStatus | MaterialStatus;
 type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
 type QuestionTypeFilter = "all" | QuestionType;
-type QuestionFormMode = "create" | "edit";
+export type QuestionFormMode = "create" | "edit";
 type MaterialFormMode = "create" | "edit";
 type RecommendationReviewStatus = "accepted" | "discarded";
 type AdminCommonSortOrder = "asc" | "desc";
-type BindingOptionsLoadState = "idle" | "loading" | "ready" | "error";
+export type BindingOptionsLoadState = "idle" | "loading" | "ready" | "error";
 type QuestionKnowledgeRecommendationDto =
   QuestionKnowledgeRecommendationResultDto["recommendation"];
 
-type QuestionBindingOptions = {
+export type QuestionBindingOptions = {
   knowledgeNodes: Pick<
     AdminKnowledgeNodeOpsSummaryDto,
     "name" | "pathName" | "publicId"
@@ -201,9 +202,10 @@ export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
   initialKnowledgeNodeFilter?: string;
   initialQuestionPublicId?: string;
+  questionCreateRouteEnabled?: boolean;
 };
 
-type QuestionFormValues = {
+export type QuestionFormValues = {
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;
@@ -401,7 +403,7 @@ function createDefaultFillBlankAnswers(): FillBlankAnswerFormValue[] {
   return [{ score: "", standardAnswersText: "" }];
 }
 
-function createDefaultQuestionFormValues(): QuestionFormValues {
+export function createDefaultQuestionFormValues(): QuestionFormValues {
   return {
     analysisRichText: "",
     fillBlankAnswers: [],
@@ -620,7 +622,7 @@ const emptyQuestionBindingOptions: QuestionBindingOptions = {
   tags: [],
 };
 
-function useQuestionBindingOptions(enabled: boolean) {
+export function useQuestionBindingOptions(enabled: boolean) {
   const [loadState, setLoadState] = useState<BindingOptionsLoadState>("idle");
   const [options, setOptions] = useState<QuestionBindingOptions>(
     emptyQuestionBindingOptions,
@@ -752,7 +754,7 @@ function createContentActionErrorFeedback(
   };
 }
 
-function createQuestionInput(
+export function createQuestionInput(
   values: QuestionFormValues,
   bindings: QuestionBindingInput = {
     knowledgeNodePublicIds: parsePublicIdList(
@@ -911,6 +913,7 @@ export function AdminQuestionMaterialManagement({
   defaultView = "questions",
   initialKnowledgeNodeFilter = "",
   initialQuestionPublicId = "",
+  questionCreateRouteEnabled = false,
 }: AdminQuestionMaterialManagementProps) {
   const [initialUrlQuery] = useState(() => readContentListUrlQuery());
   const [activeView, setActiveView] = useState<ViewMode>(
@@ -1748,30 +1751,34 @@ export function AdminQuestionMaterialManagement({
             按专业、等级和内容状态维护正式题目与材料，查看锁定和引用摘要后再执行写操作。
           </p>
         </div>
-        <ActionBar
-          activeView={activeView}
-          onCreate={() => {
-            editReturnContextRef.current = null;
-            setActionError(null);
-            setActionMessage(null);
-            setContentMutationFeedback(null);
-            setActiveForm(
-              activeView === "questions"
-                ? {
-                    kind: "question",
-                    mode: "create",
-                    publicId: null,
-                    values: createDefaultQuestionFormValues(),
-                  }
-                : {
-                    kind: "material",
-                    mode: "create",
-                    publicId: null,
-                    values: createDefaultMaterialFormValues(),
-                  },
-            );
-          }}
-        />
+        {activeView === "questions" && questionCreateRouteEnabled ? (
+          <QuestionCreateRouteActionBar />
+        ) : (
+          <ActionBar
+            activeView={activeView}
+            onCreate={() => {
+              editReturnContextRef.current = null;
+              setActionError(null);
+              setActionMessage(null);
+              setContentMutationFeedback(null);
+              setActiveForm(
+                activeView === "questions"
+                  ? {
+                      kind: "question",
+                      mode: "create",
+                      publicId: null,
+                      values: createDefaultQuestionFormValues(),
+                    }
+                  : {
+                      kind: "material",
+                      mode: "create",
+                      publicId: null,
+                      values: createDefaultMaterialFormValues(),
+                    },
+              );
+            }}
+          />
+        )}
       </header>
 
       <QuestionMaterialLifecycleContextBand
@@ -2011,7 +2018,7 @@ export function AdminQuestionMaterialManagement({
               </p>
             </div>
             {displayedActiveForm.kind === "question" ? (
-              <QuestionWriteForm
+              <AdminQuestionEditorForm
                 bindingOptions={bindingOptions}
                 bindingOptionsLoadState={bindingOptionsLoadState}
                 isSubmitting={isSubmitting}
@@ -2192,7 +2199,18 @@ function ActionBar({
   );
 }
 
-function QuestionWriteForm({
+function QuestionCreateRouteActionBar() {
+  const router = useRouter();
+
+  return (
+    <ActionBar
+      activeView="questions"
+      onCreate={() => router.push("/content/questions/new")}
+    />
+  );
+}
+
+export function AdminQuestionEditorForm({
   bindingOptions,
   bindingOptionsLoadState,
   isSubmitting,

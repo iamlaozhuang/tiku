@@ -174,6 +174,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-05/PIC-06/PIC-07/PIC-09/PIC-10/PIC-13 remain unchanged: C0 is a docs-only design decision, C1-C5 own runtime
   proof, and C6 owns cumulative proof. No exception, authorization expansion or deployment was introduced.
 
+### C1 Question Create Editor
+
+- The product question-list create action now opens `/content/questions/new`; the dedicated editor reuses the existing
+  semantic-validation form contract and POST API envelope instead of duplicating either contract.
+- Empty semantic input is blocked with first-invalid focus. In-flight duplication is blocked, recoverable conflict/network
+  failure preserves authored input, and successful creation replaces the form with a non-resubmittable completion state.
+- PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are partially proven for question creation only. C2 owns question edit/copy/lock,
+  C3-C5 own material routes and route recovery/dirty leave, and C6 owns cumulative promotion. PIC-13 remains unchanged;
+  no authorization, lifecycle, AI, dependency, exception, credential or deployment boundary changed.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

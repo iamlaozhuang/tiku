@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-c0-editor-route-wireflow-2026-07-13
-  nextTaskId: content-admin-platform-c1-question-create-editor-2026-07-13
+  currentTaskId: content-admin-platform-c1-question-create-editor-2026-07-13
+  nextTaskId: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -56,7 +56,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-d2-material-list-consistency-2026-07-13
     - content-admin-platform-d3-list-return-recovery-2026-07-13
     - content-admin-platform-d4-cumulative-audit-2026-07-13
-  lastClosedTaskId: content-admin-platform-d4-cumulative-audit-2026-07-13
+    - content-admin-platform-c0-editor-route-wireflow-2026-07-13
+  lastClosedTaskId: content-admin-platform-c0-editor-route-wireflow-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -79,8 +80,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-d2-material-list-consistency-2026-07-13: closed
     content-admin-platform-d3-list-return-recovery-2026-07-13: closed
     content-admin-platform-d4-cumulative-audit-2026-07-13: closed
-    content-admin-platform-c0-editor-route-wireflow-2026-07-13: ready_for_closeout
-    content-admin-platform-c1-question-create-editor-2026-07-13: pending
+    content-admin-platform-c0-editor-route-wireflow-2026-07-13: closed
+    content-admin-platform-c1-question-create-editor-2026-07-13: ready_for_closeout
     content-admin-platform-c2-question-edit-copy-lock-2026-07-13: pending
     content-admin-platform-c3-material-create-editor-2026-07-13: pending
     content-admin-platform-c4-material-edit-copy-lock-2026-07-13: pending
@@ -111,104 +112,15 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-c0-editor-route-wireflow-2026-07-13
-    title: Content admin platform editor route wireflow
-    phase: content-admin-platform-c0-editor-route-wireflow-2026-07-13
-    status: ready_for_closeout
-    priority: p0
-    sequenceOrder: 90
-    taskKind: editor_route_wireflow
-    moduleRunVersion: 3
-    branch: codex/content-admin-platform-c0-editor-route-wireflow
-    dependsOn:
-      - content-admin-platform-d4-cumulative-audit-2026-07-13
-    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R0
-    focusedGates:
-      - guard
-      - scoped_format
-      - diff_check
-      - link_check
-    buildRequired: false
-    fullRegressionPolicy: skip
-    protectedDomains:
-      - a01_a30
-      - content_lifecycle
-      - lock_copy
-      - deployment
-    reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c0-editor-route-wireflow.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c0-editor-route-wireflow.md
-    auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c0-editor-route-wireflow.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c0-editor-route-wireflow.md
-      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c0-editor-route-wireflow.md
-      - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
-    blockedFiles:
-      - AGENTS.md
-      - package.json
-      - package-lock.json
-      - pnpm-lock.yaml
-      - yarn.lock
-      - src/**
-      - tests/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - .env*
-      - e2e/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    capabilities:
-      productRuntimeSourceChange: blocked
-      productTestSourceChange: blocked
-      dependencyIntroduction: blocked_without_fresh_approval
-      schemaMigration: blocked
-      databaseMutation: blocked
-      providerCall: blocked
-      stagingProdDeploy: blocked_requires_fresh_user_approval
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    validationCommands:
-      - npm.cmd exec -- prettier --check --ignore-unknown C0_CHANGED_FILES
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-c0-editor-route-wireflow-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-c0-editor-route-wireflow-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-c0-editor-route-wireflow-2026-07-13 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-      localCommit:
-        approved: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   - id: content-admin-platform-c1-question-create-editor-2026-07-13
     title: Content admin platform question create editor
     phase: content-admin-platform-c1-question-create-editor-2026-07-13
-    status: pending
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 91
     taskKind: question_create_editor
     moduleRunVersion: 3
-    branch: not_created_until_c0_closeout
+    branch: codex/content-admin-platform-c1-question-create-editor
     dependsOn:
       - content-admin-platform-c0-editor-route-wireflow-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
@@ -229,6 +141,108 @@ activeTasks:
       - lock_copy
       - deployment
     reviewMode: evidence_two_rounds
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c1-question-create-editor.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c1-question-create-editor.md
+    auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c1-question-create-editor.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/active-state-history-index.yaml
+      - src/app/(admin)/content/questions/new/page.tsx
+      - src/app/(admin)/content/questions/page.tsx
+      - src/features/admin/question-material-management/AdminQuestionEditorForm.tsx
+      - src/features/admin/question-material-management/AdminQuestionEditorPage.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - tests/unit/admin-question-editor-route.test.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-c1-question-create-editor.md
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-c1-question-create-editor.md
+      - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - yarn.lock
+      - src/app/api/**
+      - src/server/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - .env*
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      productRuntimeSourceChange: approved_within_task_plan
+      productTestSourceChange: approved_within_task_plan
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-question-editor-route.test.ts tests/unit/admin-question-material-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec -- prettier --check --ignore-unknown C1_CHANGED_FILES
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-c1-question-create-editor-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-c1-question-create-editor-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-c1-question-create-editor-2026-07-13 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+  - id: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+    title: Content admin platform question edit copy lock
+    phase: content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+    status: pending
+    priority: p0
+    sequenceOrder: 92
+    taskKind: question_edit_copy_lock
+    moduleRunVersion: 3
+    branch: not_created_until_c1_closeout
+    dependsOn:
+      - content-admin-platform-c1-question-create-editor-2026-07-13
+    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+    executionProfile: R2
+    focusedGates:
+      - focused_unit
+      - lint
+      - typecheck
+      - changed_format
+      - diff_check
+      - guard
+    buildRequired: true
+    fullRegressionPolicy: impact_triggered
+    protectedDomains:
+      - a01_a30
+      - content_lifecycle
+      - lock_copy
+      - deployment
+    reviewMode: independent_audit
     capabilities:
       productRuntimeSourceChange: approved_within_task_plan
       productTestSourceChange: approved_within_task_plan
