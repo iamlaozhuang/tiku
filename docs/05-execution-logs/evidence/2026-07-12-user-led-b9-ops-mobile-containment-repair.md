@@ -1,6 +1,12 @@
 # User-led B9 Operations Mobile Containment Repair Evidence
 
-status: implementation_verified_browser_post_merge_pending
+result: pass
+status: pass_ready_for_closeout
+
+## Batch range
+
+- B9 discovered repair: shared operations-admin mobile containment only.
+- No business API, authorization, Provider, database, schema, migration, fixture, dependency or environment behavior changed.
 
 ## Fresh failure record
 
@@ -32,6 +38,16 @@ status: implementation_verified_browser_post_merge_pending
 - Webpack build: passed, 90/90 static pages generated.
 - Provider, database, schema, migration, fixture, dependency and environment changes: none.
 
+## Validation commands
+
+- `corepack pnpm@10.26.1 exec vitest run src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx`: pass, 1 file / 8 tests; the recorded run also used conservative worker and timeout arguments.
+- `corepack pnpm@10.26.1 exec vitest run --maxWorkers=25% --testTimeout=20000`: pass, 360 files / 1983 tests.
+- `corepack pnpm@10.26.1 run lint`: pass.
+- `corepack pnpm@10.26.1 run typecheck`: pass.
+- `corepack pnpm@10.26.1 run format:check`: pass after scoped formatting of the new test.
+- `corepack pnpm@10.26.1 exec next build --webpack`: pass, 90/90 static pages.
+- `git diff --check`: pass.
+
 ## Implementation
 
 - `AdminDashboardLayout` main-area flex child now allows shrinking instead of inheriting wide table min-content width.
@@ -41,11 +57,34 @@ status: implementation_verified_browser_post_merge_pending
 ## Browser verification
 
 - RED evidence came from the approved B9 in-app browser session and repository-external screenshot set.
-- GREEN browser replay is intentionally deferred until the source commit is ff-only merged to local `master`, because the approved 0704DB localhost process serves the master checkout. No `.env.local` or alternate database target is introduced.
-- Final evidence will record both organization authorization and employee views at desktop and 390px before remote push.
+- Product commit `b2ed0c05d` was ff-only merged to local `master`; the existing process-level 0704DB localhost service hot-reloaded the shared layout. No `.env.local` or alternate database target was introduced.
+- At `/ops/organizations?view=org-auth`, 390px document width equals viewport width; the visible table frame owns horizontal scrolling with 325px client width and 1184px scroll width.
+- At `/ops/organizations?view=employees`, 390px document width equals viewport width; the visible table frame owns horizontal scrolling with 325px client width and 992px scroll width.
+- Both routes report no page-level horizontal overflow. Desktop employee view remains contained and fully usable.
+- Repository-external screenshots were inspected; no screenshot is stored in the repository or evidence document.
 
 ## Boundary
 
 - Localhost only; no staging, production, deploy, Cost Calibration or release-readiness claim.
 - A14 remains `protected_deferred_decision`.
 - A15 remains `protected_requirement`.
+
+## Module Run v2 anchors
+
+- batchEvidence: pass_fresh_390px_failure_reproduced_and_green_browser_replay_completed
+- RED: pass_expected_missing_shared_admin_shrink_boundary
+- GREEN: pass_1_file_8_tests
+- Commit: `b2ed0c05d`
+- batchCommitEvidence: pass_product_commit_b2ed0c05d_real_commit_hooks
+- localFullLoopGate: pass
+- Test-ModuleRunV2PreCommitHardening: pass_7_files_scope_sensitive_terminology
+- localMasterMerge: pass_ff_only_b2ed0c05d
+- masterPostMergeVerification: pass_4_files_54_tests_lint_typecheck_diff_and_browser
+- threadRolloverGate: not_required; this bounded repair can close in the current task.
+- Provider execution: blocked_not_executed
+- database connection: blocked_not_executed
+- database mutation: blocked_not_executed
+- schema migration: blocked_not_created_not_executed
+- blocked remainder: staging, production, deploy, Provider-enabled and Cost Calibration remain outside this localhost repair.
+- Cost Calibration Gate remains blocked
+- nextModuleRunCandidate: `user-led-b9-cumulative-acceptance-closeout-2026-07-12`

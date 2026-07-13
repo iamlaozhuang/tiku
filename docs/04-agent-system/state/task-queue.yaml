@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b9-ops-mobile-containment-repair-2026-07-12
     title: User-led B9 operations mobile containment repair
     phase: user-led-b9-ops-mobile-containment-repair-2026-07-12
-    status: in_progress
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 55
     taskKind: fresh_browser_failure_minimum_layout_repair
@@ -206,6 +206,24 @@ activeTasks:
       - corepack pnpm@10.26.1 run format:check
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
+    validationSummary:
+      status: ready_for_closeout
+      tddRed: pass_expected_missing_shrink_boundary
+      focusedTests: pass_4_files_54_tests
+      fullTests: pass_360_files_1983_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      browserOpsOrgAuth390: pass_document_contained_inner_table_scroll
+      browserOpsEmployees390: pass_document_contained_inner_table_scroll
+      browserDesktopRegression: pass
+      productCommit: pass_b2ed0c05d
+      localMasterMerge: pass_ff_only_b2ed0c05d
+      providerExecution: blocked_not_executed
+      databaseConnection: blocked_not_executed
+      databaseMutation: blocked_not_executed
+      schemaMigration: blocked_not_executed
   - id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
     title: User-led B1-B2 organization training runtime recovery
     phase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12

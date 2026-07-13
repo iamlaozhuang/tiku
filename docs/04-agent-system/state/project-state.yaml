@@ -5,7 +5,7 @@ currentPhase: user-led-b9-ops-mobile-containment-repair-2026-07-12
 updatedAt: "2026-07-12T18:05:54-07:00"
 latestUserLedB9OpsMobileContainmentRepair:
   id: user-led-b9-ops-mobile-containment-repair-2026-07-12
-  status: in_progress
+  status: ready_for_closeout
   priority: p0
   branch: codex/b9-ops-mobile-containment
   startSha: 03e3d7cf394d1ce5b621639c48011f5a6f20f572
@@ -25,6 +25,23 @@ latestUserLedB9OpsMobileContainmentRepair:
     providerExecution: blocked
     dependencyChange: blocked
     stagingProdDeploy: blocked
+  verification:
+    tddRed: pass_expected_missing_shrink_boundary
+    focusedTests: pass_4_files_54_tests
+    fullTests: pass_360_files_1983_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    browserOpsOrgAuth390: pass_document_contained_inner_table_scroll
+    browserOpsEmployees390: pass_document_contained_inner_table_scroll
+    browserDesktopRegression: pass
+    providerExecution: blocked_not_executed
+    databaseConnection: blocked_not_executed
+    databaseMutation: blocked_not_executed
+    schemaMigration: blocked_not_executed
+    productCommit: pass_b2ed0c05d
+    localMasterMerge: pass_ff_only_b2ed0c05d
 latestUserLedB1B2OrganizationTrainingRuntimeRecovery:
   id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
   status: closed_remote_synced
@@ -5752,7 +5769,7 @@ currentTask:
   id: user-led-b9-ops-mobile-containment-repair-2026-07-12
   title: User-led B9 operations mobile containment repair
   phase: user-led-b9-ops-mobile-containment-repair-2026-07-12
-  status: in_progress
+  status: ready_for_closeout
   priority: p0
   taskKind: fresh_browser_failure_minimum_layout_repair
   branch: codex/b9-ops-mobile-containment

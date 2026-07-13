@@ -1,6 +1,8 @@
 # User-led B9 Operations Mobile Containment Repair Audit
 
-status: implementation_pass_browser_post_merge_pending
+status: pass_ready_for_closeout
+
+APPROVE: the bounded repair is suitable for governance closeout, ordinary `origin/master` push and short-branch cleanup after the remaining Module Run v2 gates pass.
 
 ## First adversarial review: cause and scope
 
@@ -14,7 +16,7 @@ status: implementation_pass_browser_post_merge_pending
 - Focused tests protect authorized, unauthorized, organization-standard and organization-advanced workspace states.
 - Operations tests protect enterprise authorization, employee operations and A15 card capability/audit boundaries.
 - Full 360-file suite, lint, typecheck, format check and webpack build passed after the source change.
-- Browser GREEN proof remains a mandatory pre-push gate; the task cannot be declared closed before both 390px table views prove document containment and internal table scrolling.
+- Browser GREEN proof passed after local-master merge: both 390px operations views keep document width equal to viewport width and transfer overflow ownership to the visible `AdminTableFrame`; desktop remains contained.
 
 ## Taste compliance
 
@@ -24,6 +26,6 @@ status: implementation_pass_browser_post_merge_pending
 - [x] No API response, naming, secret, Provider or database boundary change.
 - [x] TDD RED/GREEN and adversarial review recorded.
 
-## Interim conclusion
+## Conclusion
 
-Implementation and deterministic gates pass. Keep the task in progress until local-master browser replay, Module Run v2 closeout, remote synchronization and cleanup complete.
+Implementation, deterministic gates and local-master browser replay pass. Proceed through Module Run v2 closeout, remote synchronization and cleanup before resuming B9.
