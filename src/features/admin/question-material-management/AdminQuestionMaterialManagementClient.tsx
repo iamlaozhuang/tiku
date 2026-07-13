@@ -1765,12 +1765,13 @@ export function AdminQuestionMaterialManagement({
         onRemove={handleRemoveFilter}
       />
 
-      {activeView === "questions" && refreshingView === "questions" ? (
+      {refreshingView === activeView ? (
         <AdminAsyncState
           className="border-border bg-surface text-text-secondary rounded-md border px-4 py-3 text-sm"
           variant="refreshing"
         >
-          正在刷新题目列表，当前结果仍可操作。
+          正在刷新{activeView === "questions" ? "题目" : "材料"}
+          列表，当前结果仍可操作。
         </AdminAsyncState>
       ) : null}
 

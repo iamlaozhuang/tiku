@@ -139,6 +139,14 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   D4 owns cumulative list proof, and E/F own family rollout/acceptance. No exception or protected-boundary expansion was
   introduced.
 
+### D2 Material List Consistency
+
+- Material filter/page revalidation now uses the same retained-row and accessible `refreshing` semantics as questions.
+- A stale material response cannot replace rows or clear the newer request state; only the latest intent finishes the
+  transition. Material lifecycle and locked-copy rules are unchanged.
+- PIC-02/PIC-03/PIC-04/PIC-10/PIC-11 remain `partial`: D3 owns browser/edit return recovery, D4 owns cumulative list
+  proof, and E/F own page-family rollout and acceptance. No exception or protected-boundary expansion was introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

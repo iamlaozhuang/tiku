@@ -1335,56 +1335,97 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toHaveAttribute("data-admin-async-state", "refreshing");
   });
 
-  it.fails(
-    "[D2 RED] retains material rows and announces refreshing while a filter request is pending",
-    async () => {
-      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-      const refreshResponse =
-        createDeferred<ReturnType<typeof createJsonResponse>>();
-      const fetchMock = vi.fn((url: RequestInfo | URL) => {
-        const path = String(url);
+  it("[D2] retains material rows and announces refreshing while a filter request is pending", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const disabledResponse =
+      createDeferred<ReturnType<typeof createJsonResponse>>();
+    const availableResponse =
+      createDeferred<ReturnType<typeof createJsonResponse>>();
+    const fetchMock = vi.fn((url: RequestInfo | URL) => {
+      const path = String(url);
 
-        if (path === "/api/v1/sessions") {
-          return Promise.resolve(createJsonResponse(adminSessionPayload));
+      if (path === "/api/v1/sessions") {
+        return Promise.resolve(createJsonResponse(adminSessionPayload));
+      }
+      if (path.startsWith("/api/v1/materials?")) {
+        if (path.includes("status=disabled")) {
+          return disabledResponse.promise;
         }
-        if (path.startsWith("/api/v1/materials?")) {
-          return path.includes("status=disabled")
-            ? refreshResponse.promise
-            : Promise.resolve(createJsonResponse(materialPayload));
+        if (path.includes("status=available")) {
+          return availableResponse.promise;
         }
+        return Promise.resolve(createJsonResponse(materialPayload));
+      }
 
-        return Promise.resolve(
-          createJsonResponse({ code: 404001, message: "missing", data: null }),
-        );
-      });
-      vi.stubGlobal("fetch", fetchMock);
-
-      render(
-        createElement(AdminQuestionMaterialManagement, {
-          defaultView: "materials",
-        }),
+      return Promise.resolve(
+        createJsonResponse({ code: 404001, message: "missing", data: null }),
       );
-      const currentRow = await screen.findByText("营销案例材料 A");
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
-      fireEvent.change(screen.getByLabelText("状态"), {
-        target: { value: "disabled" },
-      });
-      await waitFor(() =>
-        expect(
-          fetchMock.mock.calls.some(([url]) =>
-            String(url).includes("status=disabled"),
-          ),
-        ).toBe(true),
-      );
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+    const currentRow = await screen.findByText("营销案例材料 A");
 
-      expect(currentRow).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "disabled" },
+    });
+    await waitFor(() =>
       expect(
-        screen
-          .getByText("正在刷新材料列表，当前结果仍可操作。")
-          .closest('[role="status"]'),
-      ).toHaveAttribute("data-admin-async-state", "refreshing");
-    },
-  );
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("status=disabled"),
+        ),
+      ).toBe(true),
+    );
+
+    expect(currentRow).toBeInTheDocument();
+    expect(
+      screen
+        .getByText("正在刷新材料列表，当前结果仍可操作。")
+        .closest('[role="status"]'),
+    ).toHaveAttribute("data-admin-async-state", "refreshing");
+
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "available" },
+    });
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("status=available"),
+        ),
+      ).toBe(true),
+    );
+
+    disabledResponse.resolve(
+      createJsonResponse({
+        ...materialPayload,
+        data: [materialPayload.data[1]],
+        pagination: { ...materialPayload.pagination, total: 1 },
+      }),
+    );
+    await waitFor(() => expect(currentRow).toBeInTheDocument());
+    expect(
+      screen.getByText("正在刷新材料列表，当前结果仍可操作。"),
+    ).toBeInTheDocument();
+
+    availableResponse.resolve(
+      createJsonResponse({
+        ...materialPayload,
+        data: [materialPayload.data[0]],
+        pagination: { ...materialPayload.pagination, total: 1 },
+      }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByText("正在刷新材料列表，当前结果仍可操作。"),
+      ).toBeNull(),
+    );
+    expect(currentRow).toBeInTheDocument();
+    expect(screen.queryByText("已锁定物流材料 B")).toBeNull();
+  });
 
   it.fails(
     "[D3 RED] restores canonical list controls when browser history emits popstate",
