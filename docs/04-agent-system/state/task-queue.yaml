@@ -213,7 +213,7 @@ activeTasks:
         deleteShortBranch: true
         approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
     validationSummary:
-      status: passed_ready_for_closeout
+      status: passed_local_closeout_ready
       databasePreflight: pass_exact_legacy_ai_paper_scope
       externalBackup: pass_custom_format_verified
       databaseRefresh: pass_transactional_exact_counts

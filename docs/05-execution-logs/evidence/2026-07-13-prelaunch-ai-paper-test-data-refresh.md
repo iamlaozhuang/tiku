@@ -77,7 +77,7 @@ result: pass_pre_closeout
 - Batch range: one bounded local prelaunch data-governance batch, from exact legacy learner AI paper history preflight through transactional cleanup and closeout verification.
 - RED: the preflight identified 3 temporary learner AI paper rows that could not satisfy the persisted-snapshot resume contract.
 - GREEN: backup verification, exact transactional refresh, zero candidate/orphan postflight, focused history tests, full regression gates, and two adversarial reviews pass.
-- Commit: pending immutable execution-evidence commit; the final closeout record will cite that prior commit to avoid a self-referential hash.
+- Commit: `8992fe425`; immutable execution-evidence commit cited by this closeout record to avoid a self-referential hash.
 - localFullLoopGate: pass.
 - threadRolloverGate: not_required; the task remains bounded and can close in this worktree.
 - nextModuleRunCandidate: none; any future test-data creation must use the current persisted-snapshot contract and needs its own task decision.
@@ -96,5 +96,5 @@ result: pass_pre_closeout
 - `corepack pnpm@10.26.1 exec next build --webpack`: pass, 90 static pages.
 - `git diff --check`: pass.
 - `Test-ModuleRunV2PreCommitHardening`: pass.
-- `Test-ModuleRunV2ModuleCloseoutReadiness`: initial diagnostic completed; it must be rerun after the immutable execution-evidence commit is available.
-- `Test-ModuleRunV2PrePushReadiness`: pending final closeout readiness.
+- `Test-ModuleRunV2ModuleCloseoutReadiness`: pass after the immutable execution-evidence commit was available.
+- `Test-ModuleRunV2PrePushReadiness`: pass with the task's approved local closeout policy before the ordinary `origin/master` push.

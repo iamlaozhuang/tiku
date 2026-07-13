@@ -9,6 +9,7 @@ APPROVE: the approved prelaunch data refresh is bounded to the legacy learner AI
 ## Scope Audit
 
 - Repository changes are limited to task governance, the execution plan, evidence, and this audit.
+- The governance `currentTask` pointer was realigned to this approved task before commit; the repository hook then resolved the same bounded task scope.
 - The database mutation was limited to 3 legacy AI paper result chains in the canonical 0704 local acceptance target. It removed only their 2 direct sessions, 2 feedback rows, and 3 exclusive tasks.
 - No source, test, fixture, schema, migration, dependency, Provider, configuration, authorization, organization, formal-content, or deployment surface was changed.
 

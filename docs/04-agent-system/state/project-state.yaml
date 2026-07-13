@@ -1766,7 +1766,7 @@ latest0704OpsRedeemCodeManagementPolish:
     screenshotRawDomTrace: private_screenshot_reviewed_not_copied
     evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
   validationSummary:
-    status: pass_ready_for_closeout
+    status: pass_local_closeout_ready
     redTargetedTests: pass_expected_6_files_58_tests_9_failures_before_implementation
     greenTargetedTests: pass_6_files_58_tests
     lint: pass_0_errors_0_warnings
@@ -1785,7 +1785,7 @@ latest0704OpsRedeemCodeManagementPolish:
     releaseReadinessClaimed: false
 latest0704OpsOrganizationManagementSplit:
   id: 0704-ops-organization-management-split-2026-07-11
-  status: ready_for_closeout
+  status: closed_local_ready_for_ff_merge
   result: pass_localhost_ui_organization_management_split
   branch: codex/0704-ops-organization-management-split
   dependsOn: 0704-ops-log-duty-split-2026-07-11
@@ -1803,7 +1803,7 @@ latest0704OpsOrganizationManagementSplit:
     screenshotRawDomTrace: private_screenshot_reviewed_not_copied
     evidenceMode: redacted_role_route_status_problem_fix_test_counts_only
   validationSummary:
-    status: pass_ready_for_closeout
+    status: pass_local_closeout_ready
     redTargetedTests: pass_expected_4_failed_before_implementation
     greenTargetedTests: pass_4_files_43_tests
     lint: pass_0_errors_0_warnings
