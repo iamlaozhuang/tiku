@@ -165,6 +165,15 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-02/PIC-03/PIC-04/PIC-08/PIC-10/PIC-11 remain `partial` because C/E/F still own editor routes, page-family rollout
   and role acceptance. The exception ledger remains empty; no deployment or protected-boundary expansion occurred.
 
+### C0 Editor Route Wireflow
+
+- The canonical route decision is `/content/questions/new`, `/content/questions/[publicId]/edit`,
+  `/content/materials/new`, and `/content/materials/[publicId]/edit`; list-owned Detail Drawers remain read-only.
+- The C0 plan owns the validated same-family `returnTo`, one-shot non-sensitive return snapshot, explicit save/return,
+  dirty-leave, locked deep-link and copy-after-POST contracts plus exact C1-C5 source/test ownership.
+- PIC-05/PIC-06/PIC-07/PIC-09/PIC-10/PIC-13 remain unchanged: C0 is a docs-only design decision, C1-C5 own runtime
+  proof, and C6 owns cumulative proof. No exception, authorization expansion or deployment was introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
