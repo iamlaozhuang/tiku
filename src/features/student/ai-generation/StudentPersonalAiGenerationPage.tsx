@@ -4586,10 +4586,6 @@ export function StudentPersonalAiGenerationPage() {
     }
   }
 
-  const shouldPrioritizeResultHistory =
-    generationAvailabilityState === "closed" ||
-    generationAvailabilityState === "error";
-
   function renderResultHistoryZone() {
     return (
       <section
@@ -4785,8 +4781,6 @@ export function StudentPersonalAiGenerationPage() {
             />
           </section>
 
-          {shouldPrioritizeResultHistory ? renderResultHistoryZone() : null}
-
           <details
             className="border-border bg-surface rounded-xl border"
             data-testid="student-ai-generation-settings"
@@ -4847,6 +4841,11 @@ export function StudentPersonalAiGenerationPage() {
                   </>
                 )}
                 <button
+                  aria-describedby={
+                    generationAvailabilityState === "available"
+                      ? undefined
+                      : "student-ai-generation-disabled-reason"
+                  }
                   type="button"
                   disabled={isAiGenerationActionDisabled}
                   onClick={() =>
@@ -4866,6 +4865,16 @@ export function StudentPersonalAiGenerationPage() {
                   )}
                   {activeSubmitButtonLabel}
                 </button>
+                {generationAvailabilityState !== "available" ? (
+                  <p
+                    className="text-text-secondary text-sm leading-6"
+                    id="student-ai-generation-disabled-reason"
+                  >
+                    {generationAvailabilityState === "closed"
+                      ? "当前无法生成：AI 生成服务暂未开放。"
+                      : "当前无法生成：暂不能确认 AI 生成服务状态，请稍后刷新。"}
+                  </p>
+                ) : null}
               </section>
 
               <StudentAiGenerationBoundarySummary
@@ -4874,7 +4883,7 @@ export function StudentPersonalAiGenerationPage() {
             </div>
           </details>
 
-          {!shouldPrioritizeResultHistory ? renderResultHistoryZone() : null}
+          {renderResultHistoryZone()}
         </>
       ) : null}
 

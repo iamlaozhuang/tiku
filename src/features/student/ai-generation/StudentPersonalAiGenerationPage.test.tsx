@@ -445,10 +445,17 @@ describe("StudentPersonalAiGenerationPage", () => {
       "student-ai-generation-settings",
     );
     expect(
-      historyZone.compareDocumentPosition(generationSettings) &
+      generationSettings.compareDocumentPosition(historyZone) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(generationSettings).not.toHaveAttribute("open");
+    fireEvent.click(screen.getByText("生成设置"));
+    expect(
+      screen.getByText("当前无法生成：AI 生成服务暂未开放。"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "生成企业自测试卷" }),
+    ).toBeDisabled();
     expect(document.body).not.toHaveTextContent("Provider");
     expect(
       studentRuntimeApiMock.fetchStudentApi.mock.calls.some(

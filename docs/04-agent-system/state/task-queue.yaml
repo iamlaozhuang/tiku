@@ -118,6 +118,81 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-ai-training-settings-order-repair-2026-07-12
+    title: User-led AI training generation settings order repair
+    phase: user-led-ai-training-settings-order-repair-2026-07-12
+    status: in_progress
+    priority: p1
+    sequenceOrder: 57
+    taskKind: learner_ai_provider_closed_information_architecture_repair
+    moduleRunVersion: 2
+    branch: codex/ai-training-settings-order
+    dependsOn:
+      - user-led-b9-cumulative-acceptance-closeout-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-ai-training-settings-order-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-ai-training-settings-order-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-ai-training-settings-order-repair-audit.md
+    allowedFiles:
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-ai-training-settings-order-repair.md
+      - docs/05-execution-logs/evidence/2026-07-12-ai-training-settings-order-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-ai-training-settings-order-repair-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      <<: *low_risk_capabilities
+      browserRuntime: approved_redacted_localhost_in_app_browser_only
+      screenshotCapture: approved_repo_external_redacted_page_only
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+    acceptanceStandards:
+      - Provider-closed and error states render generation settings immediately after mode tabs and before history.
+      - Provider-closed settings remain collapsed by default but are visible without traversing history.
+      - Expanded settings retain all AI出题 and AI组卷 parameters, show a user-facing disabled reason, and cannot POST generation requests.
+      - Provider-available behavior remains expanded and functional; standard edition and direct URL boundaries remain fail-closed.
+      - Desktop and 390px layouts remain contained, keyboard-operable, token-driven, and free of sensitive data.
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - npm.cmd run test:unit -- --maxWorkers=50% --testTimeout=10000
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd exec -- next build --webpack
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12 -SkipRemoteAheadCheck
   - id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
     title: User-led B9 cumulative acceptance closeout
     phase: user-led-b9-cumulative-acceptance-closeout-2026-07-12
