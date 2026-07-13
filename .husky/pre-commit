@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1 -Phase pre_commit
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
 npm.cmd run lint-staged

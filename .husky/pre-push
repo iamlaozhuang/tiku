@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1 -Phase pre_push
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1

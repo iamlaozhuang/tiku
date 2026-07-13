@@ -1,6 +1,6 @@
 schemaVersion: 1
 generatedByTask: phase-64-advanced-code-stage-seeding-plan
-generatedAt: "2026-06-07T10:35:00-07:00"
+generatedAt: "2026-07-13T16:00:00-07:00"
 purpose: Lightweight navigation index for Tiku automation governance source-of-truth files. This index does not replace SOPs, state files, task queue entries, evidence, or audit reviews.
 mode:
   current: local_auto_candidate
@@ -15,10 +15,13 @@ canonicalStateFiles:
     role: concise human and Codex entry point for current advancement rules, source-of-truth policy, status policy, mechanism budget, push boundary, product closure contribution, blocked gates, and stop rules
   - id: project-state
     path: docs/04-agent-system/state/project-state.yaml
-    role: current phase, automation pointers, current task, handoff, standing unattended local closeout approval, local E2E validation approval, DB capability approvals
+    role: compact current Content Admin Platform Program, current task, recent closeout, standing authorization, repository checkpoint, and history pointers
   - id: task-queue
     path: docs/04-agent-system/state/task-queue.yaml
-    role: active queue and recent recovery window
+    role: compact current task and unique next task for the active Content Admin Platform Program
+  - id: active-state-history-index
+    path: docs/04-agent-system/state/active-state-history-index.yaml
+    role: hash-addressed navigation index for exact pre-M2 project-state and task-queue snapshots plus existing task and execution-log indexes; archive snapshots are not default recovery reads
   - id: task-history-index
     path: docs/04-agent-system/state/task-history-index.yaml
     role: lookup index for archived task queue entries
@@ -157,6 +160,12 @@ factOwnership:
       - scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
     rule: registration diagnostics verify both sources and must not silently replace either one.
 archiveIndexes:
+  - id: project-state-snapshot-2026-07-13-before-m2
+    path: docs/04-agent-system/state/archive/project-state-snapshot-2026-07-13-before-m2.yaml
+    kind: exact_project_state_snapshot
+  - id: task-queue-active-snapshot-2026-07-13-before-m2
+    path: docs/04-agent-system/state/archive/task-queue-active-snapshot-2026-07-13-before-m2.yaml
+    kind: exact_task_queue_snapshot
   - id: task-queue-archive-2026-05
     path: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     kind: task_queue_archive
@@ -219,6 +228,11 @@ sopGroups:
     - id: skill-dispatch-matrix
       path: docs/04-agent-system/sop/skill-dispatch-matrix.md
 scriptControls:
+  - id: content-admin-platform-recovery-surface-guard
+    path: scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.ps1
+    smokePath: scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
+    decisionOutput: recoverySurfaceResult
+    role: hard-block guard for compact active-state shape, current and unique next task recovery, standing authorization and deployment boundaries, archive links, byte lengths, SHA-256 integrity, and historical index continuity
   - id: tiku-project-status-diagnostic
     path: scripts/agent-system/Get-TikuProjectStatus.ps1
     smokePath: scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1

@@ -35,21 +35,24 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 2. `docs/03-standards/code-taste-ten-commandments.md`.
 3. `docs/02-architecture/adr/`.
 4. This manual.
-5. `docs/04-agent-system/state/project-state.yaml`.
-6. `docs/04-agent-system/state/task-queue.yaml`.
-7. `docs/04-agent-system/state/mechanism-source-of-truth-index.yaml`.
-8. Latest task plan, evidence, and audit review referenced by durable state.
-9. `docs/04-agent-system/sop/requirement-ssot-reading-governance.md` when the task may affect requirements, docs,
-   mechanism gates, acceptance, or implementation.
-10. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
-11. `docs/04-agent-system/sop/lean-module-run-v3-governance.md` when the active task belongs to the B–F Program.
+5. `docs/04-agent-system/state/project-state.yaml` (current Program and current-task pointer only).
+6. `docs/04-agent-system/state/task-queue.yaml` (current task and one next task only).
+7. `docs/04-agent-system/state/active-state-history-index.yaml` when a historical fact is needed; archive snapshots are
+   not part of default recovery.
+8. `docs/04-agent-system/state/mechanism-source-of-truth-index.yaml`.
+9. Latest task plan, evidence, and audit review referenced by durable state.
+10. `docs/04-agent-system/sop/requirement-ssot-reading-governance.md` when the task may affect requirements, docs,
+    mechanism gates, acceptance, or implementation.
+11. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
+12. `docs/04-agent-system/sop/lean-module-run-v3-governance.md` when the active task belongs to the B–F Program.
 
 ## Single Source Of Truth Rules
 
 - Task execution status is sourced from `docs/04-agent-system/state/task-queue.yaml`.
 - Module target mapping is sourced from `docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml`.
 - Module completion should be derived from queue status plus evidence, not manually duplicated in multiple active files.
-- `project-state.yaml` stores mode, current recovery pointer, approval boundaries, and accepted repository checkpoints.
+- `project-state.yaml` stores the current Program, current recovery pointer, standing authorization, recent closeout,
+  accepted repository checkpoint, and history index pointer. Historical blocks belong in indexed archives.
 - Evidence and audit reviews store observed validation and review conclusions.
 - Requirement SSOT is rooted in `docs/01-requirements/00-index.md`; advanced edition tasks must additionally read
   `docs/01-requirements/advanced-edition/00-index.md`.
@@ -77,8 +80,9 @@ blocked
 
 Legacy `done`, `merged`, and `pushed` may remain in historical or archived entries when evidence exists. Empty status in active entries is a diagnostic finding and must not be selected for new execution until repaired or explicitly grandfathered.
 
-Active queue slimming rules live in `docs/04-agent-system/sop/active-queue-slimming-plan.md`. That plan is
-planning-only until a future archival task is explicitly approved.
+Active queue slimming rules live in `docs/04-agent-system/sop/active-queue-slimming-plan.md`. The approved M2 archival
+task established the compact active surface; subsequent Batch closeout progressively archives history through the same
+index discipline.
 
 ## Task Selection Rule
 
