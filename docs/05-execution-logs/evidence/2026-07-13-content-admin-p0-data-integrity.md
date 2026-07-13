@@ -82,10 +82,13 @@ The first full unit run exposed two stale single-choice service test inputs with
 - Standalone lint, typecheck, and full format checks passed.
 - Standalone webpack production build passed and generated 90 static pages.
 - `git diff --check` passed.
-- The first pre-push readiness run correctly blocked because the task used the non-standard queue status `ready_for_push_cleanup`, which disabled the accepted-ancestor checkpoint policy. The task status was restored to the supported `ready_for_closeout` state; no repository SHA, product source, test, or remote ref was changed to bypass the gate.
+- Pre-push readiness correctly blocked the non-standard queue statuses `ready_for_push_cleanup` and `closed_remote_synced`, because they disabled the accepted-ancestor checkpoint policy. The task status was normalized first to `ready_for_closeout` and finally to the supported terminal state `closed`; detailed result fields retain the remote-synchronized meaning. No repository SHA, product source, test, or remote ref was changed to bypass the gate.
 
 ## Closeout Boundary
 
 - Implementation is committed, ff-only merged to `master`, and master post-merge gates passed.
 - The current user explicitly approved the Batch A local commit, ff-only merge to `master`, push of `master` to `origin/master`, and cleanup after remote synchronization on 2026-07-13.
-- Authorized next actions are limited to pushing `master` to `origin/master` and cleaning the merged short branch/worktree after remote synchronization. Force push, pull request, deployment, and every other remote target remain blocked.
+- Module Run v2 pre-push readiness passed both immediately before and inside the real push hook.
+- The ordinary push synchronized `master` to `origin/master` at `f24c47d53fc55340756c63a3c8333279ac9b1992`; the post-push comparison showed no ahead/behind difference.
+- The clean task worktree was removed from the repository-owned `.worktrees/` root, pruned, and the merged short branch was deleted.
+- Force push, pull request, deployment, and every other remote target remained blocked and were not executed.

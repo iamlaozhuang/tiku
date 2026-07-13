@@ -121,8 +121,8 @@ activeTasks:
   - id: content-admin-p0-data-integrity-2026-07-13
     title: Content admin P0 question and material data integrity
     phase: content-admin-p0-data-integrity-2026-07-13
-    status: ready_for_closeout
-    result: pass_master_post_merge_gates_ready_for_authorized_push_cleanup
+    status: closed
+    result: pass_closed_remote_synced_cleanup_complete
     priority: p0
     sequenceOrder: 64
     taskKind: approved_runtime_data_integrity_fix
@@ -223,7 +223,7 @@ activeTasks:
         deleteShortBranch: true
         approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
     validationSummary:
-      status: pass_master_post_merge_gates_ready_for_authorized_push_cleanup
+      status: pass_closed_remote_synced_cleanup_complete
       baselineFocusedTests: pass_3_files_52_tests
       tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
       focusedGreen: pass_6_files_94_tests
@@ -244,9 +244,15 @@ activeTasks:
       masterPostMergeWebpackBuild: pass_90_static_pages
       masterPostMergeDiffCheck: pass
       transientParallelGateInvestigation: pass_7_files_67_tests_serial_resource_contention_confirmed
+      moduleRunV2PrePushReadiness: pass_real_push_hook
+      remotePush: pass_origin_master_f24c47d53
+      remoteComparison: pass_master_equals_origin_master
+      shortBranchCleanup: pass
+      worktreeCleanup: pass
     localCommit: ebe14d4274a1730000705e7bfa1f29a2b96e371e
     localMasterMerge: pass_ff_only_ebe14d427
-    nextRequiredDecision: execute_authorized_push_and_cleanup
+    closeoutLedgerCommit: f24c47d53fc55340756c63a3c8333279ac9b1992
+    nextRequiredDecision: batch_b_requires_fresh_approval
   - id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
     title: Content admin P0 data integrity and platform interaction baseline ratification
     phase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13

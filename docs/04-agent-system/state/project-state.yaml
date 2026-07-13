@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: content-admin-p0-data-integrity-2026-07-13
-updatedAt: "2026-07-13T09:18:00-07:00"
+updatedAt: "2026-07-13T09:23:00-07:00"
 latestContentAdminP0DataIntegrity:
   id: content-admin-p0-data-integrity-2026-07-13
-  status: ready_for_authorized_push_cleanup
+  status: closed_remote_synced
   priority: p0
   branch: codex/content-admin-p0-data-integrity
   startSha: dadef0975c2e8c60343fb06286ceb6c8c622d818
@@ -52,7 +52,12 @@ latestContentAdminP0DataIntegrity:
   closeoutApprovalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
   localCommit: ebe14d4274a1730000705e7bfa1f29a2b96e371e
   localMasterMerge: pass_ff_only_ebe14d427
-  nextDecision: execute_authorized_push_and_cleanup
+  closeoutLedgerCommit: f24c47d53fc55340756c63a3c8333279ac9b1992
+  remotePush: pass_origin_master_f24c47d53
+  remoteComparison: pass_master_equals_origin_master
+  shortBranchCleanup: pass
+  worktreeCleanup: pass
+  nextDecision: batch_b_requires_fresh_approval
 latestContentAdminP0PlatformInteractionBaselineRatification:
   id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
   status: local_closeout_complete_push_blocked
@@ -1200,7 +1205,7 @@ latest0704Next16RedeemCodeRouteContextBuildRepair:
   nextRequiredTaskId: 0704-ai-provider-closed-state-contract-2026-07-12
 latest0704ResourceIdRoutingRepair:
   id: 0704-resource-id-routing-repair-2026-07-11
-  status: ready_for_closeout
+  status: closed_remote_synced
   result: pass_opaque_encoded_resource_route_contract_with_localhost_deferred
   branch: codex/0704-resource-id-routing-repair
   startSha: 454277e9478a2a7c49f8650d61c9706979f3a7ec
@@ -6209,7 +6214,7 @@ currentTask:
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
   nextRequiredTaskId: none
   validationSummary:
-    status: pass_master_post_merge_gates_ready_for_authorized_push_cleanup
+    status: pass_closed_remote_synced_cleanup_complete
     baselineFocusedTests: pass_3_files_52_tests
     tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
     focusedGreen: pass_6_files_94_tests
@@ -6230,6 +6235,11 @@ currentTask:
     masterPostMergeWebpackBuild: pass_90_static_pages
     masterPostMergeDiffCheck: pass
     transientParallelGateInvestigation: pass_7_files_67_tests_serial_resource_contention_confirmed
+    moduleRunV2PrePushReadiness: pass_real_push_hook
+    remotePush: pass_origin_master_f24c47d53
+    remoteComparison: pass_master_equals_origin_master
+    shortBranchCleanup: pass
+    worktreeCleanup: pass
 previousCurrentTaskBeforeContentAdminP0DataIntegrity20260713:
   id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
   status: local_closeout_complete_push_blocked
@@ -6395,7 +6405,7 @@ previousCurrentTaskBeforeUserLedB8ContentOpsInterfaceDetails20260712:
   id: user-led-b7-learner-comprehensive-experience-2026-07-12
   title: User-led B7 learner comprehensive experience
   phase: user-led-b7-learner-comprehensive-experience-2026-07-12
-  status: closed_remote_synced
+  status: closed
   priority: p1
   taskKind: targeted_learner_experience_repair
   branch: codex/user-led-b7-learner-ux
