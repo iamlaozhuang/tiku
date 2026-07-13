@@ -129,6 +129,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - No exception, authorization expansion, lifecycle change, skipped test, dependency, browser action, or deployment was
   introduced.
 
+### D1 Question List Consistency
+
+- Question filter/page revalidation now retains current rows and announces the shared accessible `refreshing` state;
+  initial loading remains distinct.
+- A stale question response cannot replace rows or clear the newer request's refreshing state. The current response
+  alone completes the transition, while existing URL, pagination, debounce and filter contracts stay green.
+- PIC-02/PIC-03/PIC-04/PIC-10/PIC-11 remain `partial`: D2 owns material parity, D3 owns browser/edit return recovery,
+  D4 owns cumulative list proof, and E/F own family rollout/acceptance. No exception or protected-boundary expansion was
+  introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

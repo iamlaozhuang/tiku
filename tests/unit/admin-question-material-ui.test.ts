@@ -1258,14 +1258,6 @@ describe("AdminQuestionMaterialManagement", () => {
       ).toBe(true),
     );
 
-    availableResponse.resolve(
-      createJsonResponse(createQuestionListPayload([questionPayload.data[0]])),
-    );
-    expect(
-      await screen.findByText("市场调研抽样方法的核心目标是什么？"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
-
     disabledResponse.resolve(
       createJsonResponse(createQuestionListPayload([questionPayload.data[1]])),
     );
@@ -1274,64 +1266,74 @@ describe("AdminQuestionMaterialManagement", () => {
         screen.getByText("市场调研抽样方法的核心目标是什么？"),
       ).toBeInTheDocument(),
     );
+    expect(
+      screen.getByText("正在刷新题目列表，当前结果仍可操作。"),
+    ).toBeInTheDocument();
+
+    availableResponse.resolve(
+      createJsonResponse(createQuestionListPayload([questionPayload.data[0]])),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByText("正在刷新题目列表，当前结果仍可操作。"),
+      ).toBeNull(),
+    );
+    expect(
+      screen.getByText("市场调研抽样方法的核心目标是什么？"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
   });
 
-  it.fails(
-    "[D1 RED] retains question rows and announces refreshing while a filter request is pending",
-    async () => {
-      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-      const refreshResponse =
-        createDeferred<ReturnType<typeof createJsonResponse>>();
-      const fetchMock = vi.fn((url: RequestInfo | URL) => {
-        const path = String(url);
+  it("[D1] retains question rows and announces refreshing while a filter request is pending", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const refreshResponse =
+      createDeferred<ReturnType<typeof createJsonResponse>>();
+    const fetchMock = vi.fn((url: RequestInfo | URL) => {
+      const path = String(url);
 
-        if (path === "/api/v1/sessions") {
-          return Promise.resolve(createJsonResponse(adminSessionPayload));
-        }
-        if (path.startsWith("/api/v1/questions?")) {
-          return path.includes("status=disabled")
-            ? refreshResponse.promise
-            : Promise.resolve(createJsonResponse(questionPayload));
-        }
-        if (path.startsWith("/api/v1/knowledge-nodes?")) {
-          return Promise.resolve(
-            createJsonResponse(knowledgeNodeOptionPayload),
-          );
-        }
-        if (path === "/api/v1/tags") {
-          return Promise.resolve(createJsonResponse(tagOptionPayload));
-        }
+      if (path === "/api/v1/sessions") {
+        return Promise.resolve(createJsonResponse(adminSessionPayload));
+      }
+      if (path.startsWith("/api/v1/questions?")) {
+        return path.includes("status=disabled")
+          ? refreshResponse.promise
+          : Promise.resolve(createJsonResponse(questionPayload));
+      }
+      if (path.startsWith("/api/v1/knowledge-nodes?")) {
+        return Promise.resolve(createJsonResponse(knowledgeNodeOptionPayload));
+      }
+      if (path === "/api/v1/tags") {
+        return Promise.resolve(createJsonResponse(tagOptionPayload));
+      }
 
-        return Promise.resolve(
-          createJsonResponse({ code: 404001, message: "missing", data: null }),
-        );
-      });
-      vi.stubGlobal("fetch", fetchMock);
-
-      render(createElement(AdminQuestionMaterialManagement));
-      const currentRow =
-        await screen.findByText("市场调研抽样方法的核心目标是什么？");
-
-      fireEvent.change(screen.getByLabelText("状态"), {
-        target: { value: "disabled" },
-      });
-      await waitFor(() =>
-        expect(
-          fetchMock.mock.calls.some(([url]) =>
-            String(url).includes("status=disabled"),
-          ),
-        ).toBe(true),
+      return Promise.resolve(
+        createJsonResponse({ code: 404001, message: "missing", data: null }),
       );
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
-      expect(currentRow).toBeInTheDocument();
+    render(createElement(AdminQuestionMaterialManagement));
+    const currentRow =
+      await screen.findByText("市场调研抽样方法的核心目标是什么？");
+
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "disabled" },
+    });
+    await waitFor(() =>
       expect(
-        screen
-          .getByText("正在刷新题目列表，当前结果仍可操作。")
-          .closest('[role="status"]'),
-      ).toHaveAttribute("data-admin-async-state", "refreshing");
-    },
-  );
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("status=disabled"),
+        ),
+      ).toBe(true),
+    );
+
+    expect(currentRow).toBeInTheDocument();
+    expect(
+      screen
+        .getByText("正在刷新题目列表，当前结果仍可操作。")
+        .closest('[role="status"]'),
+    ).toHaveAttribute("data-admin-async-state", "refreshing");
+  });
 
   it.fails(
     "[D2 RED] retains material rows and announces refreshing while a filter request is pending",

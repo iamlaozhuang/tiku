@@ -1,15 +1,15 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-platform-d0-list-request-contract-tests-2026-07-13
+currentPhase: content-admin-platform-d1-question-list-consistency-2026-07-13
 updatedAt: "2026-07-13T22:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-d0-list-request-contract-tests-2026-07-13
-  nextTaskId: content-admin-platform-d1-question-list-consistency-2026-07-13
+  currentTaskId: content-admin-platform-d1-question-list-consistency-2026-07-13
+  nextTaskId: content-admin-platform-d2-material-list-consistency-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -55,7 +55,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-b3-detail-feedback-primitives-2026-07-13
     - content-admin-platform-b4-form-contract-primitives-2026-07-13
     - content-admin-platform-b5-cumulative-audit-2026-07-13
-  lastClosedTaskId: content-admin-platform-b5-cumulative-audit-2026-07-13
+    - content-admin-platform-d0-list-request-contract-tests-2026-07-13
+  lastClosedTaskId: content-admin-platform-d0-list-request-contract-tests-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   coverageLedgerPath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
@@ -74,8 +75,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-b3-detail-feedback-primitives-2026-07-13: closed
     content-admin-platform-b4-form-contract-primitives-2026-07-13: closed
     content-admin-platform-b5-cumulative-audit-2026-07-13: closed
-    content-admin-platform-d0-list-request-contract-tests-2026-07-13: ready_for_closeout
-    content-admin-platform-d1-question-list-consistency-2026-07-13: pending
+    content-admin-platform-d0-list-request-contract-tests-2026-07-13: closed
+    content-admin-platform-d1-question-list-consistency-2026-07-13: ready_for_closeout
     content-admin-platform-d2-material-list-consistency-2026-07-13: pending
     content-admin-platform-d3-list-return-recovery-2026-07-13: pending
     content-admin-platform-d4-cumulative-audit-2026-07-13: pending
@@ -155,6 +156,12 @@ contentAdminPlatformSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     content-admin-platform-d0-list-request-contract-tests-2026-07-13:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    content-admin-platform-d1-question-list-consistency-2026-07-13:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -179,18 +186,18 @@ contentAdminPlatformSerialProgram:
       status: accepted
       reason: current user explicitly authorized serial M1 then M2 before resuming B0
 currentTask:
-  id: content-admin-platform-d0-list-request-contract-tests-2026-07-13
-  title: Content admin platform list request contract tests
-  phase: content-admin-platform-d0-list-request-contract-tests-2026-07-13
+  id: content-admin-platform-d1-question-list-consistency-2026-07-13
+  title: Content admin platform question list consistency
+  phase: content-admin-platform-d1-question-list-consistency-2026-07-13
   status: ready_for_closeout
   priority: p0
-  taskKind: list_request_contract_tests
-  branch: codex/content-admin-platform-d0-list-request-contract-tests
-  executionProfile: R2
-  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-d0-list-request-contract-tests.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d0-list-request-contract-tests.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-d0-list-request-contract-tests-audit.md
-  nextRequiredTaskId: content-admin-platform-d1-question-list-consistency-2026-07-13
+  taskKind: question_list_consistency
+  branch: codex/content-admin-platform-d1-question-list-consistency
+  executionProfile: R1
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-d1-question-list-consistency.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d1-question-list-consistency.md
+  auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d1-question-list-consistency.md
+  nextRequiredTaskId: content-admin-platform-d2-material-list-consistency-2026-07-13
 standingAuthorization:
   id: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   source: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
@@ -200,9 +207,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 816affe98109fea32c3787fef31d92483ecf74bb
-  lastKnownOriginMasterSha: 816affe98109fea32c3787fef31d92483ecf74bb
-  lastKnownRemoteMasterSha: 816affe98109fea32c3787fef31d92483ecf74bb
+  lastKnownMasterSha: a448b6edb8df21d42336a24dece81d9aa8e7bc58
+  lastKnownOriginMasterSha: a448b6edb8df21d42336a24dece81d9aa8e7bc58
+  lastKnownRemoteMasterSha: a448b6edb8df21d42336a24dece81d9aa8e7bc58
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

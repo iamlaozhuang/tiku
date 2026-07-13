@@ -33,6 +33,7 @@ import {
   AdminPagination,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
+import { AdminAsyncState } from "@/components/admin/AdminAsyncState";
 import { useAdminListDebouncedValue } from "@/hooks/useAdminListDebouncedValue";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
 import {
@@ -488,18 +489,24 @@ const defaultContentPagination: ApiPagination = {
 
 function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
   const [loadState, setLoadState] = useState<ContentLoadState>("loading");
+  const [refreshingView, setRefreshingView] = useState<ViewMode | null>(null);
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
   const [materials, setMaterials] = useState<MaterialDto[]>([]);
   const [pagination, setPagination] = useState(defaultContentPagination);
+  const loadedViewsRef = useRef(new Set<ViewMode>());
   const [latestIntent] = useState(() => createAdminListLatestIntent());
 
   useEffect(() => {
     const intent = latestIntent.begin();
+    setRefreshingView(
+      loadedViewsRef.current.has(activeView) ? activeView : null,
+    );
 
     async function loadContentData() {
       const sessionToken = getStoredSessionToken();
 
       if (sessionToken === null) {
+        setRefreshingView(null);
         setLoadState("unauthorized");
         return;
       }
@@ -520,6 +527,7 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
           sessionResponse.data === null ||
           !isAdminContext(sessionResponse.data)
         ) {
+          setRefreshingView(null);
           setLoadState("unauthorized");
           return;
         }
@@ -541,12 +549,15 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
             materialResponse.data === null ||
             materialResponse.pagination === undefined
           ) {
+            setRefreshingView(null);
             setLoadState("error");
             return;
           }
 
+          loadedViewsRef.current.add("materials");
           setMaterials(materialResponse.data);
           setPagination(materialResponse.pagination);
+          setRefreshingView(null);
           setLoadState("ready");
           return;
         }
@@ -561,15 +572,19 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
         }
 
         if (contentResponse.code !== 0 || contentResponse.data === null) {
+          setRefreshingView(null);
           setLoadState("error");
           return;
         }
 
+        loadedViewsRef.current.add("questions");
         setQuestions(contentResponse.data);
         setPagination(contentResponse.pagination ?? defaultContentPagination);
+        setRefreshingView(null);
         setLoadState("ready");
       } catch {
         if (intent.isCurrent()) {
+          setRefreshingView(null);
           setLoadState("error");
         }
       }
@@ -587,6 +602,7 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
     materials,
     pagination,
     questions,
+    refreshingView,
     setMaterials,
     setQuestions,
   };
@@ -1012,6 +1028,7 @@ export function AdminQuestionMaterialManagement({
     materials,
     pagination,
     questions,
+    refreshingView,
     setMaterials,
     setQuestions,
   } = useQuestionMaterialData(activeView, contentQueryString);
@@ -1747,6 +1764,15 @@ export function AdminQuestionMaterialManagement({
         filters={activeFilterChips}
         onRemove={handleRemoveFilter}
       />
+
+      {activeView === "questions" && refreshingView === "questions" ? (
+        <AdminAsyncState
+          className="border-border bg-surface text-text-secondary rounded-md border px-4 py-3 text-sm"
+          variant="refreshing"
+        >
+          正在刷新题目列表，当前结果仍可操作。
+        </AdminAsyncState>
+      ) : null}
 
       {displayedActionMessage === null ? null : (
         <p className="text-brand-primary text-sm" role="status">
