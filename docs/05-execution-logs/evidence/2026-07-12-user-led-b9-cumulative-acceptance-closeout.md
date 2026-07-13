@@ -78,8 +78,8 @@ status: ready_for_commit_and_closeout
 
 - RED: not_applicable_docs_and_runtime_closeout; the only fresh product failure was closed in its own recorded RED/GREEN repair batch.
 - GREEN: pass_360_files_1983_tests_and_representative_browser_matrix
-- Commit: pending_initial_b9_closeout_commit
-- batchCommitEvidence: pending_initial_b9_closeout_commit
+- Commit: `0bc19faba`
+- batchCommitEvidence: pass_initial_b9_closeout_commit_0bc19faba_real_commit_hooks
 - localFullLoopGate: pass
 - threadRolloverGate: not_required; B9 can complete in the current task.
 - Provider execution: blocked_not_executed

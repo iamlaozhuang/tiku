@@ -42,6 +42,7 @@ latestUserLedB9CumulativeAcceptanceCloseout:
     cardAuditProtection: pass_controls_and_audit_present_no_plaintext_capture
     browserConsoleErrors: pass_zero_error_like_entries
     retainedScreenshotCount: 20_repo_external_only
+    initialCloseoutCommit: pass_0bc19faba
     providerExecution: blocked_not_executed
     databaseConnection: blocked_not_executed_in_b9
     databaseMutation: blocked_not_executed_in_b9
