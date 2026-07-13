@@ -118,6 +118,86 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-phone-visibility-decision-2026-07-12
+    title: User-led phone visibility and prelaunch AI paper history decision
+    phase: user-led-phone-visibility-decision-2026-07-12
+    status: in_progress
+    priority: p0
+    sequenceOrder: 59
+    taskKind: docs_product_decision_and_requirement_alignment
+    moduleRunVersion: 2
+    branch: codex/phone-visibility-decision
+    dependsOn:
+      - user-led-ai-training-history-resume-repair-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-phone-visibility-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-decision-audit.md
+    allowedFiles:
+      - docs/01-requirements/modules/01-user-auth.md
+      - docs/01-requirements/modules/06-admin-ops.md
+      - docs/01-requirements/stories/epic-01-user-auth.md
+      - docs/01-requirements/stories/epic-06-admin-ops.md
+      - docs/01-requirements/traceability/2026-07-12-phone-visibility-and-prelaunch-ai-paper-history-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-decision.md
+      - docs/05-execution-logs/evidence/2026-07-12-phone-visibility-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-decision-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      <<: *docs_only_uiux_capabilities
+      docsRequirementAlignment: approved
+      docsStateEvidenceAudit: approved
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+    acceptanceStandards:
+      - Phone display, search, reveal, copy, export, audit, and import rules are unambiguous by actor and surface.
+      - The decision keeps phone login uniqueness and immutability unchanged and does not weaken the protected redeem_code plaintext requirement.
+      - Prelaunch AI paper records without a persisted assembly snapshot are explicitly excluded from restoration and are not reconstructed from current sources or Provider output.
+      - A later runtime task has a precise service-owned implementation boundary and a separate validation task has role, route, cache, export, audit, and mobile coverage requirements.
+      - Two adversarial document reviews and one self-review record conflict, authority, privacy, and regression checks.
+    validationCommands:
+      - corepack pnpm@10.26.1 run format:check
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-phone-visibility-decision-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-phone-visibility-decision-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-phone-visibility-decision-2026-07-12 -SkipRemoteAheadCheck
+    validationSummary:
+      status: pending
   - id: user-led-ai-training-history-resume-repair-2026-07-12
     title: User-led AI training history synchronization and paper resume repair
     phase: user-led-ai-training-history-resume-repair-2026-07-12

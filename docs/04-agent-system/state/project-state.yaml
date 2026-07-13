@@ -1,8 +1,26 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-ai-training-history-resume-repair-2026-07-12
-updatedAt: "2026-07-12T22:10:00-07:00"
+currentPhase: user-led-phone-visibility-decision-2026-07-12
+updatedAt: "2026-07-12T22:35:00-07:00"
+latestUserLedPhoneVisibilityDecision:
+  id: user-led-phone-visibility-decision-2026-07-12
+  status: in_progress
+  priority: p0
+  branch: codex/phone-visibility-decision
+  startSha: 396e73dc32d3399d156adf773e2a1c6494b1cfda
+  approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-decision.md
+  executionBoundary:
+    localSourceChange: blocked_docs_decision_only
+    databaseDirectConnection: blocked
+    databaseMutation: blocked
+    schemaMigration: blocked
+    providerExecution: blocked
+    dependencyChange: blocked
+    browserRuntime: blocked
+    stagingProdDeploy: blocked
+  nextTaskId: user-led-phone-visibility-enforcement-2026-07-12
 latestUserLedAiTrainingHistoryResumeRepair:
   id: user-led-ai-training-history-resume-repair-2026-07-12
   status: closed_remote_synced
@@ -5917,23 +5935,23 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: user-led-ai-training-history-resume-repair-2026-07-12
-  title: User-led AI training history synchronization and paper resume repair
-  phase: user-led-ai-training-history-resume-repair-2026-07-12
-  status: ready_for_closeout
+  id: user-led-phone-visibility-decision-2026-07-12
+  title: User-led phone visibility and prelaunch AI paper history decision
+  phase: user-led-phone-visibility-decision-2026-07-12
+  status: in_progress
   priority: p0
-  taskKind: learner_ai_history_and_learning_session_recovery
-  branch: codex/ai-training-history-resume
+  taskKind: docs_product_decision_and_requirement_alignment
+  branch: codex/phone-visibility-decision
   humanApprovalBoundary:
     implementation: approved
     localCommit: approved
     fastForwardMerge: approved_master_only
     push: approved_origin_master_only
     cleanup: approved_after_remote_sync
-    approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
-    browserRuntime: approved_in_app_browser_localhost_only
-    screenshotCapture: approved_repo_external_redacted_page_only
-    privateCredentialRead: approved_in_memory_by_current_user_2026_07_12
+    approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+    browserRuntime: blocked
+    screenshotCapture: blocked
+    privateCredentialRead: blocked
     databaseConnection: blocked
     databaseMutation: blocked
     schemaMigration: blocked
@@ -5941,23 +5959,15 @@ currentTask:
     stagingProdDeploy: blocked
     forcePush: blocked
     pullRequest: blocked
-  plannedAt: "2026-07-12T20:26:00-07:00"
-  claimedAt: "2026-07-12T20:26:00-07:00"
-  targetClosureItem: Keep AI mode, history filters, and persisted AI paper self-test recovery consistent for personal advanced and organization advanced employee roles.
-  behaviorBoundary: shared_learner_ai_history_and_server_owned_persisted_paper_learning_session_recovery_only
-  evidenceMode: redacted_role_route_state_test_status_and_commit_sha_only_no_credentials_tokens_env_values_database_urls_business_rows_raw_dom_or_provider_payload
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-ai-training-history-resume-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-ai-training-history-resume-repair.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-ai-training-history-resume-repair-audit.md
-  nextRequiredTaskId: null
-  finalCommit: 63d0f47865ee2024c27a650f92e79a863f4e4d1c
-  localFullLoopGate: pass
-  moduleRunV2ModuleCloseoutReadiness: pass
-  moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  localMasterMerge: pass_ff_only_f5767e0b1
-  remotePush: pass_origin_master_f5767e0b1
-  localRemoteComparison: pass_0_behind_0_ahead_after_first_sync
-  closeoutStatus: remote_synced_origin_master_f5767e0b1
+  plannedAt: "2026-07-12T22:35:00-07:00"
+  claimedAt: "2026-07-12T22:35:00-07:00"
+  targetClosureItem: Materialize the approved phone visibility policy and prelaunch AI paper history disposition without changing runtime behavior or test data.
+  behaviorBoundary: docs_only_phone_visibility_policy_and_prelaunch_ai_paper_history_disposition_no_runtime_or_database_change
+  evidenceMode: redacted_requirement_paths_role_matrix_policy_decisions_validation_status_and_commit_sha_only_no_phone_values_credentials_tokens_env_values_database_urls_business_rows_raw_dom_or_provider_payload
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-phone-visibility-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-decision-audit.md
+  nextRequiredTaskId: user-led-phone-visibility-enforcement-2026-07-12
 
 previousCurrentTaskBeforeUserLedB1B2OrganizationTrainingRuntimeRecovery20260712:
   id: user-led-b8-content-ops-interface-details-2026-07-12
