@@ -121,7 +121,8 @@ activeTasks:
   - id: user-led-ai-training-settings-order-repair-2026-07-12
     title: User-led AI training generation settings order repair
     phase: user-led-ai-training-settings-order-repair-2026-07-12
-    status: in_progress
+    status: ready_for_closeout
+    result: pass_shared_personal_and_enterprise_ai_settings_discoverability
     priority: p1
     sequenceOrder: 57
     taskKind: learner_ai_provider_closed_information_architecture_repair
@@ -193,6 +194,31 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12 -SkipRemoteAheadCheck
+    validationSummary:
+      status: passed
+      tddRed: pass_1_expected_dom_order_failure
+      focusedTests: pass_1_file_15_tests
+      fullTests: pass_360_files_1983_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      diffCheck: pass
+      browserEnterpriseAdvancedDesktop: pass
+      browserEnterpriseAdvanced390: pass
+      browserPersonalAdvancedDesktop: pass
+      providerCallExecuted: false
+      directDatabaseActionByAgent: false
+      dependencyPackageLockfileChanged: false
+      schemaMigrationSeedExecuted: false
+      stagingProdDeployExecuted: false
+      releaseReadinessClaimed: false
+      finalPassClaimed: false
+      costCalibrationExecuted: false
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      productCommit: d05d8f87fd0fcb01534125d4106d03cf10eca9d4
+    finalCommit: d05d8f87fd0fcb01534125d4106d03cf10eca9d4
   - id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
     title: User-led B9 cumulative acceptance closeout
     phase: user-led-b9-cumulative-acceptance-closeout-2026-07-12

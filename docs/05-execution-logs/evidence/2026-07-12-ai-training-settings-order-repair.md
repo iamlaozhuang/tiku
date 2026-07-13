@@ -6,7 +6,15 @@
 
 **基线：** `499a90e8744040af1af03d70651b65e80e110a54`
 
+**Evidence status:** pass
+
+**Result:** pass
+
+- result: pass
+
 ## 范围
+
+Batch range: single shared learner AI training information-architecture repair.
 
 - 修复个人高级版和企业高级版员工复用的 `/ai-generation` 页面。
 - Provider-closed/error 下，生成设置固定紧随 AI出题/AI组卷模式标签，历史记录随后展示。
@@ -15,8 +23,8 @@
 
 ## RED / GREEN
 
-- RED：把既有 B4 测试反转为“生成设置先于历史”，初次 focused 运行 1 个预期失败，失败点为旧 DOM 顺序。
-- GREEN：移除 closed/error 的历史前置分支，统一为“模式标签 → 生成设置 → 历史”；focused 1 文件 / 15 用例通过。
+- RED: 把既有 B4 测试反转为“生成设置先于历史”，初次 focused 运行 1 个预期失败，失败点为旧 DOM 顺序。
+- GREEN: 移除 closed/error 的历史前置分支，统一为“模式标签 → 生成设置 → 历史”；focused 1 文件 / 15 用例通过。
 - HARDEN：测试展开设置后显示“当前无法生成”原因，企业组卷生成按钮保持禁用，关闭状态仍为零生成 POST。
 
 ## 自动化验证
@@ -30,6 +38,19 @@
 | format:check     | pass                               |
 | webpack build    | pass，90/90 静态页面               |
 | git diff --check | pass                               |
+
+## Validation Results
+
+- `npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx`: pass，1 文件 / 15 用例。
+- `npm.cmd run test:unit -- --maxWorkers=50% --testTimeout=10000`: pass，360 文件 / 1983 用例。
+- `npm.cmd run lint`: pass。
+- `npm.cmd run typecheck`: pass。
+- `npm.cmd run format:check`: pass。
+- `npm.cmd exec -- next build --webpack`: pass，90/90 静态页面。
+- `git diff --check`: pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12`: pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12`: pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-ai-training-settings-order-repair-2026-07-12 -SkipRemoteAheadCheck`: pre-push gate command recorded for this task.
 
 ## 浏览器验证
 
@@ -54,3 +75,14 @@
 
 - 本结论只覆盖当前 localhost 代码和 Provider-closed 验收状态。
 - 不代表 staging、production、Provider-enabled、release readiness、生产可用性或 Cost Calibration。
+
+## Module Run v2 锚点
+
+- Commit: `d05d8f87fd0fcb01534125d4106d03cf10eca9d4`
+- localFullLoopGate: pass
+- Test-ModuleRunV2PreCommitHardening: pass；7 个任务文件通过 scope、敏感信息和术语扫描，真实 commit hook 再次通过。
+- Test-ModuleRunV2ModuleCloseoutReadiness: pass；evidence、audit、validation、RED/GREEN、commit、localFullLoopGate、blocked remainder 和 rollover 锚点通过。
+- threadRolloverGate: not_required；本批可在当前任务内完成 closeout。
+- nextModuleRunCandidate: none_current_scope_complete。
+- blocked remainder: production Provider 接入、Provider-enabled 验收、staging、production、deploy、release readiness、Cost Calibration、PR 与 force push remain blocked。
+- Cost Calibration Gate remains blocked
