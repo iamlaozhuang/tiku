@@ -8,6 +8,7 @@ $authorizationPath = "authorization.md"
 $taskInit = "content-admin-platform-program-init-2026-07-13"
 $taskB0 = "content-admin-platform-b0-contract-code-mapping-2026-07-13"
 $taskB1 = "content-admin-platform-b1-async-state-primitives-2026-07-13"
+$taskB5 = "content-admin-platform-b5-cumulative-audit-2026-07-13"
 $taskX1 = "content-admin-platform-x1-valid-ai-paper-test-data-2026-07-13"
 $taskX2 = "content-admin-platform-x2-fresh-baseline-defect-repair-2026-07-13"
 
@@ -18,7 +19,7 @@ function Write-CaseFiles {
         [Parameter(Mandatory = $true)][string]$QueueText,
         [Parameter(Mandatory = $true)][string]$PlanText,
         [Parameter(Mandatory = $true)][string]$EvidenceText,
-        [Parameter(Mandatory = $true)][string]$AuditText
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$AuditText
     )
 
     $root = Join-Path $smokeRoot $Name
@@ -29,7 +30,7 @@ function Write-CaseFiles {
     Set-Content -LiteralPath (Join-Path $root "evidence.md") -Value $EvidenceText -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $root "audit.md") -Value $AuditText -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $root $authorizationPath) -Value "Status: approved" -Encoding UTF8
-    Set-Content -LiteralPath (Join-Path $root "serial-plan.md") -Value "$taskInit`n$taskB0`n$taskB1" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $root "serial-plan.md") -Value $script:baseSerialPlan -Encoding UTF8
     Set-Content -LiteralPath (Join-Path $root "coverage-ledger.md") -Value "PIC-01 through PIC-13" -Encoding UTF8
     return $root
 }
@@ -58,13 +59,18 @@ function Assert-FailsWith {
         [Parameter(Mandatory = $true)][string]$Pattern
     )
 
+    $guardFailed = $false
     try {
         $output = Invoke-Guard -Root $Root -ChangedFiles $ChangedFiles
-        throw "Expected guard failure '$Pattern', but it passed.`n$($output -join "`n")"
     } catch {
+        $guardFailed = $true
         if ($_.Exception.Message -notmatch $Pattern) {
             throw "Expected '$Pattern', got:`n$($_.Exception.Message)"
         }
+    }
+
+    if (-not $guardFailed) {
+        throw "Negative guard fixture unexpectedly passed.`n$($output -join "`n")"
     }
 }
 
@@ -73,6 +79,7 @@ $orderedList = @"
     - $taskInit
     - $taskB0
     - $taskB1
+    - $taskB5
 "@
 
 $baseState = @"
@@ -96,6 +103,7 @@ $orderedList
     $taskInit`: in_progress
     $taskB0`: pending
     $taskB1`: pending
+    $taskB5`: pending
   closeoutCheckpoints:
     $taskInit`:
       taskCommit: pending
@@ -135,6 +143,7 @@ $orderedList
     $taskInit`: in_progress
     $taskB0`: pending
     $taskB1`: pending
+    $taskB5`: pending
   conditionalTasks:
     x1:
       taskId: $taskX1
@@ -147,6 +156,20 @@ $orderedList
 activeTasks:
   - id: $taskInit
     status: in_progress
+    executionProfile: R3
+    focusedGates:
+      - focused_script
+      - guard
+      - scoped_format
+      - diff_check
+      - module_closeout
+      - pre_push
+    buildRequired: false
+    fullRegressionPolicy: impact_triggered
+    protectedDomains:
+      - program_order
+      - deployment
+    reviewMode: independent_audit
     planPath: plan.md
     evidencePath: evidence.md
     auditReviewPath: audit.md
@@ -157,8 +180,14 @@ activeTasks:
       - plan.md
       - evidence.md
       - audit.md
+      - serial-plan.md
       - state.yaml
       - queue.yaml
+    blockedFiles:
+      - src/**
+    capabilities:
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      costCalibrationGate: blocked
     closeoutPolicy:
       authorizationSource: $authorizationPath
       localCommit:
@@ -216,12 +245,66 @@ Pass.
 Pass.
 "@
 
+$baseSerialPlan = @"
+# Serial Plan
+
+## Canonical Task Order And Lean v3 Profiles
+
+| Order | Task ID | executionProfile | focusedGates | buildRequired | fullRegressionPolicy | protectedDomains | reviewMode |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 00 | ``$taskInit`` | R3 | focused_script,guard,scoped_format,diff_check,module_closeout,pre_push | false | impact_triggered | program_order,deployment | independent_audit |
+| B0 | ``$taskB0`` | R0 | guard,scoped_format,diff_check,link_check | false | skip | program_order,deployment | evidence_two_rounds |
+| B1 | ``$taskB1`` | R2 | focused_unit,lint,typecheck,changed_format,diff_check,guard | impact_triggered | impact_triggered | content_lifecycle,a01_a30 | independent_audit |
+| B5 | ``$taskB5`` | R2 | full_unit,lint,typecheck,full_format,build,diff_check,guard | true | fixed_node | content_lifecycle,a01_a30 | independent_audit |
+"@
+
 try {
     $positiveRoot = Write-CaseFiles -Name "positive" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
     $positiveOutput = Invoke-Guard -Root $positiveRoot -ChangedFiles @("plan.md", "evidence.md")
     if (($positiveOutput -join "`n") -notmatch "programGuardResult: pass") {
         throw "Positive fixture did not report pass.`n$($positiveOutput -join "`n")"
     }
+
+    $evidenceReviewFocusedGates = @"
+    focusedGates:
+      - focused_unit
+      - lint
+      - typecheck
+      - changed_format
+      - diff_check
+      - guard
+"@
+    $independentFocusedGates = @"
+    focusedGates:
+      - focused_script
+      - guard
+      - scoped_format
+      - diff_check
+      - module_closeout
+      - pre_push
+"@
+    $evidenceReviewQueue = $baseQueue.Replace("executionProfile: R3", "executionProfile: R1").Replace($independentFocusedGates.TrimEnd(), $evidenceReviewFocusedGates.TrimEnd()).Replace("reviewMode: independent_audit", "reviewMode: evidence_two_rounds")
+    $evidenceReviewText = $baseEvidence + @"
+
+## Round 1 — Contract correctness
+
+Pass.
+
+## Round 2 — Regression attack
+
+Pass.
+"@
+    $evidenceReviewRoot = Write-CaseFiles -Name "evidence-review-positive" -StateText $baseState -QueueText $evidenceReviewQueue -PlanText $basePlan -EvidenceText $evidenceReviewText -AuditText ""
+    $evidenceReviewSerialPlan = $baseSerialPlan.Replace("| 00 | ``$taskInit`` | R3 | focused_script,guard,scoped_format,diff_check,module_closeout,pre_push | false | impact_triggered | program_order,deployment | independent_audit |", "| 00 | ``$taskInit`` | R1 | focused_unit,lint,typecheck,changed_format,diff_check,guard | false | impact_triggered | program_order,deployment | evidence_two_rounds |")
+    Set-Content -LiteralPath (Join-Path $evidenceReviewRoot "serial-plan.md") -Value $evidenceReviewSerialPlan -Encoding UTF8
+    $evidenceReviewOutput = Invoke-Guard -Root $evidenceReviewRoot -ChangedFiles @("plan.md", "evidence.md")
+    if (($evidenceReviewOutput -join "`n") -notmatch "programGuardResult: pass") {
+        throw "Evidence-review fixture did not report pass.`n$($evidenceReviewOutput -join "`n")"
+    }
+
+    $missingEvidenceReviewRoot = Write-CaseFiles -Name "missing-evidence-review" -StateText $baseState -QueueText $evidenceReviewQueue -PlanText $basePlan -EvidenceText ($evidenceReviewText -replace "(?ms)## Round 2.*$", "") -AuditText ""
+    Set-Content -LiteralPath (Join-Path $missingEvidenceReviewRoot "serial-plan.md") -Value $evidenceReviewSerialPlan -Encoding UTF8
+    Assert-FailsWith -Root $missingEvidenceReviewRoot -ChangedFiles @("evidence.md") -Pattern "PROGRAM_GUARD_ADVERSARIAL_REVIEW_MISSING.*round_2"
 
     $skipState = $baseState.Replace("currentTaskId: $taskInit", "currentTaskId: $taskB1").Replace("nextTaskId: $taskB0", "nextTaskId: ").Replace("$taskInit`: in_progress", "$taskInit`: pending").Replace("$taskB1`: pending", "$taskB1`: in_progress")
     $skipQueue = $baseQueue.Replace("currentTaskId: $taskInit", "currentTaskId: $taskB1").Replace("nextTaskId: $taskB0", "nextTaskId: ").Replace("$taskInit`: in_progress", "$taskInit`: pending").Replace("$taskB1`: pending", "$taskB1`: in_progress")
@@ -242,7 +325,11 @@ try {
     Assert-FailsWith -Root $missingReviewRoot -ChangedFiles @("audit.md") -Pattern "PROGRAM_GUARD_ADVERSARIAL_REVIEW_MISSING.*round_2"
 
     $scopeRoot = Write-CaseFiles -Name "scope" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
-    Assert-FailsWith -Root $scopeRoot -ChangedFiles @("src/app/page.tsx") -Pattern "PROGRAM_GUARD_ALLOWED_FILES_VIOLATION"
+    Assert-FailsWith -Root $scopeRoot -ChangedFiles @("src/app/page.tsx") -Pattern "PROGRAM_GUARD_BLOCKED_FILES_VIOLATION"
+
+    $sensitiveRoot = Write-CaseFiles -Name "sensitive-content" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
+    Set-Content -LiteralPath (Join-Path $sensitiveRoot "evidence.md") -Value ($baseEvidence + "`nsyntheticToken: " + "sk-" + ("a" * 24)) -Encoding UTF8
+    Assert-FailsWith -Root $sensitiveRoot -ChangedFiles @("evidence.md") -Pattern "PROGRAM_GUARD_SENSITIVE_CONTENT_DETECTED"
 
     $missingReadingRoot = Write-CaseFiles -Name "missing-reading" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText ($baseEvidence.Replace("targetTestsReviewed: true", "targetTestsReviewed: false")) -AuditText $baseAudit
     Assert-FailsWith -Root $missingReadingRoot -ChangedFiles @("evidence.md") -Pattern "PROGRAM_GUARD_READING_EVIDENCE_INCOMPLETE.*targetTestsReviewed: true"
@@ -260,7 +347,27 @@ try {
     $invalidStatusRoot = Write-CaseFiles -Name "invalid-status" -StateText $invalidStatusState -QueueText $invalidStatusQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
     Assert-FailsWith -Root $invalidStatusRoot -ChangedFiles @("state.yaml") -Pattern "PROGRAM_GUARD_UNSUPPORTED_STATUS"
 
-    Write-Output "Content admin platform serial program guard smoke passed: 1 positive, 8 negative"
+    $reorderedList = @"
+  orderedTaskIds:
+    - $taskInit
+    - $taskB1
+    - $taskB0
+    - $taskB5
+"@
+    $reorderedState = $baseState.Replace($orderedList, $reorderedList).Replace("nextTaskId: $taskB0", "nextTaskId: $taskB1")
+    $reorderedQueue = $baseQueue.Replace($orderedList, $reorderedList).Replace("nextTaskId: $taskB0", "nextTaskId: $taskB1")
+    $reorderedRoot = Write-CaseFiles -Name "silent-reorder" -StateText $reorderedState -QueueText $reorderedQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
+    Assert-FailsWith -Root $reorderedRoot -ChangedFiles @("state.yaml", "queue.yaml") -Pattern "PROGRAM_GUARD_CANONICAL_ORDER_MISMATCH"
+
+    $downgradedFullRoot = Write-CaseFiles -Name "downgraded-full-regression" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
+    Set-Content -LiteralPath (Join-Path $downgradedFullRoot "serial-plan.md") -Value ($baseSerialPlan.Replace("| B5 | ``$taskB5`` | R2 | full_unit,lint,typecheck,full_format,build,diff_check,guard | true | fixed_node |", "| B5 | ``$taskB5`` | R2 | focused_unit,lint,typecheck,changed_format,diff_check,guard | false | impact_triggered |")) -Encoding UTF8
+    Assert-FailsWith -Root $downgradedFullRoot -ChangedFiles @("serial-plan.md") -Pattern "PROGRAM_GUARD_FIXED_FULL_REGRESSION_POLICY_INVALID"
+
+    $downgradedFocusedRoot = Write-CaseFiles -Name "downgraded-focused-gates" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
+    Set-Content -LiteralPath (Join-Path $downgradedFocusedRoot "serial-plan.md") -Value ($baseSerialPlan.Replace("focused_unit,lint,typecheck,changed_format,diff_check,guard", "focused_unit")) -Encoding UTF8
+    Assert-FailsWith -Root $downgradedFocusedRoot -ChangedFiles @("serial-plan.md") -Pattern "PROGRAM_GUARD_FOCUSED_GATES_DOWNGRADED"
+
+    Write-Output "Content admin platform serial program guard smoke passed: 2 positive, 13 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

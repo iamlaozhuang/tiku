@@ -28,6 +28,13 @@ $programKey = "contentAdminPlatformSerialProgram"
 $expectedProgramId = "content-admin-platform-b-to-f-2026-07-13"
 $allowedTaskStatuses = @("pending", "claimed", "in_progress", "ready_for_closeout", "closed")
 $activeTaskStatuses = @("in_progress", "ready_for_closeout")
+$fixedFullRegressionTaskIds = @(
+    "content-admin-platform-b5-cumulative-audit-2026-07-13",
+    "content-admin-platform-d4-cumulative-audit-2026-07-13",
+    "content-admin-platform-c6-cumulative-audit-2026-07-13",
+    "content-admin-platform-e6-cumulative-audit-2026-07-13",
+    "content-admin-platform-f5-final-cumulative-audit-2026-07-13"
+)
 $findings = New-Object System.Collections.Generic.List[string]
 
 function Add-Finding {
@@ -280,6 +287,93 @@ function Test-TextContainsAll {
     }
 }
 
+function Get-CanonicalTaskProfiles {
+    param([Parameter(Mandatory = $true)][string]$PlanText)
+
+    $profiles = New-Object System.Collections.Generic.List[object]
+    foreach ($line in ($PlanText -split "`r?`n")) {
+        if ($line -notmatch '^\s*\|') {
+            continue
+        }
+
+        $cells = @($line.Split('|') | Select-Object -Skip 1 | Select-Object -SkipLast 1 | ForEach-Object { $_.Trim() })
+        if ($cells.Count -lt 8 -or $cells[0] -in @("Order", "---") -or $cells[1] -notmatch '^`?content-admin-platform-[a-z0-9-]+-2026-07-13`?$') {
+            continue
+        }
+
+        $profiles.Add([pscustomobject]@{
+            Order = $cells[0]
+            TaskId = $cells[1].Trim([char]96)
+            ExecutionProfile = $cells[2]
+            FocusedGates = @($cells[3].Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+            BuildRequired = $cells[4]
+            FullRegressionPolicy = $cells[5]
+            ProtectedDomains = @($cells[6].Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+            ReviewMode = $cells[7]
+        })
+    }
+
+    return $profiles.ToArray()
+}
+
+function Test-CanonicalTaskProfile {
+    param([Parameter(Mandatory = $true)][psobject]$Profile)
+
+    $taskId = $Profile.TaskId
+    if ($Profile.ExecutionProfile -notin @("R0", "R1", "R2", "R3")) {
+        Add-Finding "PROGRAM_GUARD_EXECUTION_PROFILE_INVALID $taskId"
+    }
+    if ($Profile.BuildRequired -notin @("true", "false", "impact_triggered")) {
+        Add-Finding "PROGRAM_GUARD_BUILD_REQUIRED_INVALID $taskId"
+    }
+    if ($Profile.FullRegressionPolicy -notin @("skip", "impact_triggered", "fixed_node")) {
+        Add-Finding "PROGRAM_GUARD_FULL_REGRESSION_POLICY_INVALID $taskId"
+    }
+    if ($Profile.ReviewMode -notin @("evidence_two_rounds", "independent_audit")) {
+        Add-Finding "PROGRAM_GUARD_REVIEW_MODE_INVALID $taskId"
+    }
+    if ($Profile.ProtectedDomains.Count -eq 0) {
+        Add-Finding "PROGRAM_GUARD_PROTECTED_DOMAINS_MISSING $taskId"
+    }
+
+    $requiredFocusedGates = @("guard", "diff_check")
+    if ($Profile.ExecutionProfile -eq "R0") {
+        $requiredFocusedGates += @("scoped_format", "link_check")
+    } elseif ($Profile.ExecutionProfile -eq "R1") {
+        $requiredFocusedGates += @("focused_unit", "lint", "typecheck", "changed_format")
+    } else {
+        $hasPrimaryGate = @($Profile.FocusedGates | Where-Object { $_ -in @("focused_unit", "focused_script", "focused_acceptance", "focused_preflight", "full_unit") }).Count -gt 0
+        if (-not $hasPrimaryGate) {
+            Add-Finding "PROGRAM_GUARD_FOCUSED_GATES_DOWNGRADED $taskId primary_gate"
+        }
+        if ($Profile.FocusedGates -notcontains "scoped_format" -and $Profile.FocusedGates -notcontains "changed_format" -and $Profile.FocusedGates -notcontains "full_format") {
+            Add-Finding "PROGRAM_GUARD_FOCUSED_GATES_DOWNGRADED $taskId format"
+        }
+    }
+    foreach ($requiredGate in $requiredFocusedGates) {
+        if ($Profile.FocusedGates -notcontains $requiredGate) {
+            Add-Finding "PROGRAM_GUARD_FOCUSED_GATES_DOWNGRADED $taskId $requiredGate"
+        }
+    }
+
+    if ($Profile.ExecutionProfile -in @("R2", "R3") -and $Profile.ReviewMode -ne "independent_audit") {
+        Add-Finding "PROGRAM_GUARD_REVIEW_MODE_DOWNGRADED $taskId"
+    }
+
+    if ($fixedFullRegressionTaskIds -contains $taskId) {
+        foreach ($requiredFullGate in @("full_unit", "lint", "typecheck", "full_format", "build", "guard", "diff_check")) {
+            if ($Profile.FocusedGates -notcontains $requiredFullGate) {
+                Add-Finding "PROGRAM_GUARD_FIXED_FULL_REGRESSION_POLICY_INVALID $taskId $requiredFullGate"
+            }
+        }
+        if ($Profile.FullRegressionPolicy -ne "fixed_node" -or $Profile.BuildRequired -ne "true") {
+            Add-Finding "PROGRAM_GUARD_FIXED_FULL_REGRESSION_POLICY_INVALID $taskId"
+        }
+    } elseif ($Profile.FullRegressionPolicy -eq "fixed_node") {
+        Add-Finding "PROGRAM_GUARD_UNPLANNED_FULL_REGRESSION_NODE $taskId"
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Get-Location).Path
 }
@@ -346,10 +440,34 @@ if (
     Add-Finding "PROGRAM_GUARD_TOP_LEVEL_CURRENT_TASK_MISMATCH"
 }
 
+$serialPlanPath = Get-ScalarValue -Block $stateProgram -Key "serialPlanPath"
+$serialPlanText = ""
+$canonicalProfiles = @()
+$canonicalTaskIds = @()
+if (-not [string]::IsNullOrWhiteSpace($serialPlanPath)) {
+    $serialPlanFullPath = Resolve-RepositoryPath -Root $RepositoryRoot -Path $serialPlanPath
+    if (Test-Path -LiteralPath $serialPlanFullPath) {
+        $serialPlanText = Get-Content -LiteralPath $serialPlanFullPath -Raw
+        $canonicalProfiles = @(Get-CanonicalTaskProfiles -PlanText $serialPlanText)
+        $canonicalTaskIds = @($canonicalProfiles | ForEach-Object { $_.TaskId })
+    }
+}
+if ($canonicalTaskIds.Count -eq 0) {
+    Add-Finding "PROGRAM_GUARD_CANONICAL_ORDER_MISSING"
+} elseif (($canonicalTaskIds | Select-Object -Unique).Count -ne $canonicalTaskIds.Count) {
+    Add-Finding "PROGRAM_GUARD_CANONICAL_ORDER_DUPLICATE_TASK"
+}
+foreach ($canonicalProfile in $canonicalProfiles) {
+    Test-CanonicalTaskProfile -Profile $canonicalProfile
+}
+
 $stateOrdered = @(Get-ListValues -Block $stateProgram -Key "orderedTaskIds")
 $queueOrdered = @(Get-ListValues -Block $queueProgram -Key "orderedTaskIds")
 if ($stateOrdered.Count -eq 0 -or ($stateOrdered -join "|") -ne ($queueOrdered -join "|")) {
     Add-Finding "PROGRAM_GUARD_ORDERED_TASKS_MISMATCH"
+}
+if (($stateOrdered -join "|") -ne ($canonicalTaskIds -join "|") -or ($queueOrdered -join "|") -ne ($canonicalTaskIds -join "|")) {
+    Add-Finding "PROGRAM_GUARD_CANONICAL_ORDER_MISMATCH"
 }
 if (($stateOrdered | Select-Object -Unique).Count -ne $stateOrdered.Count) {
     Add-Finding "PROGRAM_GUARD_DUPLICATE_TASK_ID"
@@ -484,7 +602,6 @@ if ([string]::IsNullOrWhiteSpace($stateAuthorization) -or $stateAuthorization -n
     }
 }
 
-$serialPlanPath = Get-ScalarValue -Block $stateProgram -Key "serialPlanPath"
 $coverageLedgerPath = Get-ScalarValue -Block $stateProgram -Key "coverageLedgerPath"
 foreach ($programArtifact in @(
     @{ Label = "serial_plan"; Path = $serialPlanPath },
@@ -497,8 +614,7 @@ foreach ($programArtifact in @(
         Add-Finding "PROGRAM_GUARD_PROGRAM_ARTIFACT_MISSING $($programArtifact.Label)"
     }
 }
-if (-not [string]::IsNullOrWhiteSpace($serialPlanPath) -and (Test-Path -LiteralPath (Resolve-RepositoryPath -Root $RepositoryRoot -Path $serialPlanPath))) {
-    $serialPlanText = Get-Content -LiteralPath (Resolve-RepositoryPath -Root $RepositoryRoot -Path $serialPlanPath) -Raw
+if (-not [string]::IsNullOrWhiteSpace($serialPlanText)) {
     foreach ($taskId in $stateOrdered) {
         if ($serialPlanText -notmatch [regex]::Escape($taskId)) {
             Add-Finding "PROGRAM_GUARD_SERIAL_PLAN_TASK_MISSING $taskId"
@@ -571,6 +687,33 @@ if ($taskBlock.Count -eq 0) {
     if ($stateTaskStatuses.ContainsKey($scopeTaskId) -and $recordedTaskStatus -ne $stateTaskStatuses[$scopeTaskId]) {
         Add-Finding "PROGRAM_GUARD_ACTIVE_TASK_STATUS_MISMATCH $scopeTaskId"
     }
+    $canonicalTaskProfile = @($canonicalProfiles | Where-Object { $_.TaskId -eq $scopeTaskId } | Select-Object -First 1)
+    $taskReviewMode = ""
+    if ($canonicalTaskProfile.Count -eq 0) {
+        Add-Finding "PROGRAM_GUARD_TASK_PROFILE_MISSING $scopeTaskId"
+    } else {
+        $canonicalTaskProfile = $canonicalTaskProfile[0]
+        $taskReviewMode = $canonicalTaskProfile.ReviewMode
+        foreach ($profileScalar in @(
+            @{ Key = "executionProfile"; Expected = $canonicalTaskProfile.ExecutionProfile },
+            @{ Key = "buildRequired"; Expected = $canonicalTaskProfile.BuildRequired },
+            @{ Key = "fullRegressionPolicy"; Expected = $canonicalTaskProfile.FullRegressionPolicy },
+            @{ Key = "reviewMode"; Expected = $canonicalTaskProfile.ReviewMode }
+        )) {
+            if ((Get-ScalarValue -Block $taskBlock -Key $profileScalar.Key) -ne $profileScalar.Expected) {
+                Add-Finding "PROGRAM_GUARD_TASK_PROFILE_MISMATCH $scopeTaskId $($profileScalar.Key)"
+            }
+        }
+        foreach ($profileList in @(
+            @{ Key = "focusedGates"; Expected = @($canonicalTaskProfile.FocusedGates) },
+            @{ Key = "protectedDomains"; Expected = @($canonicalTaskProfile.ProtectedDomains) }
+        )) {
+            $recordedValues = @(Get-ListValues -Block $taskBlock -Key $profileList.Key)
+            if (($recordedValues -join "|") -ne ($profileList.Expected -join "|")) {
+                Add-Finding "PROGRAM_GUARD_TASK_PROFILE_MISMATCH $scopeTaskId $($profileList.Key)"
+            }
+        }
+    }
     $taskAuthorization = (($taskBlock -join "`n").Replace("\", "/"))
     if ($taskAuthorization -notmatch [regex]::Escape((ConvertTo-NormalizedPath -Path $stateAuthorization))) {
         Add-Finding "PROGRAM_GUARD_TASK_AUTHORIZATION_NOT_MATERIALIZED $scopeTaskId"
@@ -592,16 +735,25 @@ if ($taskBlock.Count -eq 0) {
     if ((Get-ScalarValue -Block $cleanupPolicy -Key "deleteShortBranch") -ne "true") {
         Add-Finding "PROGRAM_GUARD_CLOSEOUT_POLICY_INVALID $scopeTaskId cleanup"
     }
+    $taskCapabilities = @(Get-SectionBlock -Block $taskBlock -Key "capabilities")
+    foreach ($blockedCapability in @("stagingProdDeploy", "costCalibrationGate")) {
+        if ((Get-ScalarValue -Block $taskCapabilities -Key $blockedCapability) -notmatch "^blocked") {
+            Add-Finding "PROGRAM_GUARD_BLOCKED_CAPABILITY_NOT_PRESERVED $scopeTaskId $blockedCapability"
+        }
+    }
 
     if ($currentTaskStatus -in @("in_progress", "ready_for_closeout")) {
         $planPath = Get-ScalarValue -Block $taskBlock -Key "planPath"
         $evidencePath = Get-ScalarValue -Block $taskBlock -Key "evidencePath"
         $auditPath = Get-ScalarValue -Block $taskBlock -Key "auditReviewPath"
-        foreach ($artifact in @(
+        $requiredArtifacts = @(
             @{ Label = "plan"; Path = $planPath },
-            @{ Label = "evidence"; Path = $evidencePath },
-            @{ Label = "audit"; Path = $auditPath }
-        )) {
+            @{ Label = "evidence"; Path = $evidencePath }
+        )
+        if ($taskReviewMode -eq "independent_audit") {
+            $requiredArtifacts += @{ Label = "audit"; Path = $auditPath }
+        }
+        foreach ($artifact in $requiredArtifacts) {
             if ([string]::IsNullOrWhiteSpace($artifact.Path) -or -not (Test-Path -LiteralPath (Resolve-RepositoryPath -Root $RepositoryRoot -Path $artifact.Path))) {
                 Add-Finding "PROGRAM_GUARD_TASK_ARTIFACT_MISSING $scopeTaskId $($artifact.Label)"
             }
@@ -654,9 +806,24 @@ if ($taskBlock.Count -eq 0) {
                     Add-Finding "PROGRAM_GUARD_READING_EVIDENCE_INCOMPLETE $scopeTaskId $readingMarker"
                 }
             }
+            if ($taskReviewMode -eq "evidence_two_rounds") {
+                if ($evidenceText -notmatch "(?m)^##\s+Round 1\b") {
+                    Add-Finding "PROGRAM_GUARD_ADVERSARIAL_REVIEW_MISSING $scopeTaskId round_1"
+                }
+                if ($evidenceText -notmatch "(?m)^##\s+Round 2\b") {
+                    Add-Finding "PROGRAM_GUARD_ADVERSARIAL_REVIEW_MISSING $scopeTaskId round_2"
+                }
+            }
+            if ($Phase -eq "pre_push") {
+                foreach ($closeoutMarker in @("validationStatus: pass", "reviewStatus: pass", "deploymentExecuted: false")) {
+                    if ($evidenceText -notmatch [regex]::Escape($closeoutMarker)) {
+                        Add-Finding "PROGRAM_GUARD_PRE_PUSH_EVIDENCE_INCOMPLETE $scopeTaskId $closeoutMarker"
+                    }
+                }
+            }
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($auditPath) -and (Test-Path -LiteralPath (Resolve-RepositoryPath -Root $RepositoryRoot -Path $auditPath))) {
+        if ($taskReviewMode -eq "independent_audit" -and -not [string]::IsNullOrWhiteSpace($auditPath) -and (Test-Path -LiteralPath (Resolve-RepositoryPath -Root $RepositoryRoot -Path $auditPath))) {
             $auditText = Get-Content -LiteralPath (Resolve-RepositoryPath -Root $RepositoryRoot -Path $auditPath) -Raw
             if ($auditText -notmatch "(?m)^##\s+Round 1\b") {
                 Add-Finding "PROGRAM_GUARD_ADVERSARIAL_REVIEW_MISSING $scopeTaskId round_1"
@@ -677,7 +844,15 @@ if ($taskBlock.Count -eq 0) {
     }
 
     $allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
+    $blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
     foreach ($changedFile in $filesToCheck) {
+        foreach ($blockedPattern in $blockedFiles) {
+            if (Test-PathPattern -Path $changedFile -Pattern $blockedPattern) {
+                Add-Finding "PROGRAM_GUARD_BLOCKED_FILES_VIOLATION $changedFile"
+                break
+            }
+        }
+
         $isAllowed = $false
         foreach ($allowedPattern in $allowedFiles) {
             if (Test-PathPattern -Path $changedFile -Pattern $allowedPattern) {
@@ -688,6 +863,25 @@ if ($taskBlock.Count -eq 0) {
 
         if (-not $isAllowed) {
             Add-Finding "PROGRAM_GUARD_ALLOWED_FILES_VIOLATION $changedFile"
+        }
+
+        $changedFullPath = Resolve-RepositoryPath -Root $RepositoryRoot -Path $changedFile
+        if (Test-Path -LiteralPath $changedFullPath -PathType Leaf) {
+            $changedExtension = [System.IO.Path]::GetExtension($changedFullPath).ToLowerInvariant()
+            if ($changedExtension -in @(".md", ".yaml", ".yml", ".json", ".ps1", ".sh", ".ts", ".tsx", ".js", ".jsx")) {
+                $changedText = Get-Content -LiteralPath $changedFullPath -Raw
+                foreach ($sensitivePattern in @(
+                    "-----BEGIN(?: [A-Z]+)? PRIVATE KEY-----",
+                    "(?i)Authorization:\s*Bearer\s+[A-Za-z0-9._~+/=-]{12,}",
+                    "(?i)postgres(?:ql)?://[^\s<]+",
+                    "(?i)\bsk-[A-Za-z0-9_-]{20,}\b"
+                )) {
+                    if ($changedText -match $sensitivePattern) {
+                        Add-Finding "PROGRAM_GUARD_SENSITIVE_CONTENT_DETECTED $changedFile"
+                        break
+                    }
+                }
+            }
         }
     }
 }

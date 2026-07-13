@@ -15,6 +15,7 @@ Status: `approved`
 ## Covered Scope
 
 - Program Init。
+- 在 B0 前串行执行的 M1 Lean Module Run v3 与 M2 活动状态瘦身；两者只改治理机制和活动记录，不修改产品功能。
 - Batch B、D、C、E、F 的全部已登记子任务。
 - 仅在仓库触发条件为真且有独立计划时的 X1/X2。
 - 任务范围内的源码、测试、治理文档与本地验证。
@@ -27,7 +28,7 @@ Status: `approved`
 2. 任务计划记录 required reading、目标 requirements、目标源码/测试、类似实现、allowed/blocked files 和风险防御。
 3. 功能或缺陷任务遵循 TDD；验证任务必须先声明可观察失败/停止标准。
 4. focused/full gates、敏感信息扫描、两轮对抗式审查、self-review、evidence/audit 完成。
-5. Program Guard、Module Run v2 与 Git hooks 通过。
+5. Program Guard、适用的 Lean Module Run v3 / Module Run v2 门禁与 Git hooks 通过。
 6. 当前任务完全关闭、远端同步和隔离资源清理后才推进下一任务。
 
 ## Actions Still Requiring Fresh Approval
@@ -57,3 +58,7 @@ deployment:
 ```
 
 普通 push 不等于部署，也不构成 staging、production、release readiness 或 final Pass。
+
+## Lean v3 Continuation
+
+M1、M2 完成后必须从 B0 继续，且只有 M1、M2、B0–B5、D0–D4、C0–C6、E0–E6、F0–F5 全部关闭，累计验收完成，`master` 与 `origin/master` 同步，工作区 clean，短分支和 worktree 清理后，Program 才可关闭。部署不属于本授权。

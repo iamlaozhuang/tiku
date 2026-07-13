@@ -7,6 +7,9 @@ mode:
   modeSourcePath: docs/04-agent-system/state/project-state.yaml
   modeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
 canonicalStateFiles:
+  - id: content-admin-platform-b-to-f-serial-plan
+    path: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
+    role: canonical task order and Lean Module Run v3 R0-R3 execution profiles for the active Content Admin Platform B-F Program; project-state and task-queue are guarded projections
   - id: operating-manual
     path: docs/04-agent-system/operating-manual.md
     role: concise human and Codex entry point for current advancement rules, source-of-truth policy, status policy, mechanism budget, push boundary, product closure contribution, blocked gates, and stop rules
@@ -59,6 +62,13 @@ canonicalStateFiles:
     path: docs/04-agent-system/state/stage-2-blocked-task-triage-register.yaml
     role: stage 2 triage summary for active non-terminal blocked queue items; records next-step classification only and does not replace task-queue as the owner of task status or blocked semantics
 factOwnership:
+  - fact: Content Admin Platform B-F Program canonical task order, executionProfile, focused gates, build requirement, full regression policy, protected domains, and review mode
+    sourcePath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
+    derivedSummaries:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
+    rule: state and queue must project the serial plan order exactly; editing both projections cannot authorize a reorder or a weaker task profile.
   - fact: task execution state, dependencies, allowed files, blocked files, validation commands, evidence path, audit review path
     sourcePath: docs/04-agent-system/state/task-queue.yaml
     derivedSummaries:
@@ -158,6 +168,8 @@ archiveIndexes:
     kind: execution_log_index
 sopGroups:
   lifecycle:
+    - id: lean-module-run-v3-governance
+      path: docs/04-agent-system/sop/lean-module-run-v3-governance.md
     - id: task-lifecycle-governance
       path: docs/04-agent-system/sop/task-lifecycle-governance.md
     - id: module-lifecycle-governance

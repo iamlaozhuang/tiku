@@ -14,13 +14,17 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 - Current local automation registration may be intentionally `PAUSED` while
   `project-state.yaml` records `plannedPauseStatus: active`.
 - Default rhythm: queue-first, local-first, evidence-first, guardian-first.
-- Default execution shape: one focused task, one focused local commit, then an explicit closeout decision.
+- Default execution shape: one focused task, one principal local commit, then the task-scoped closeout decision already materialized in the queue.
+- The active Content Admin Platform B–F Program uses Lean Module Run v3. Its serial plan owns canonical order and
+  per-task R0–R3 profiles; state and queue are guarded projections, not alternative order sources.
 - Bounded queue drain may continue across multiple low-risk batches in one wake when eligibility, startup, dispatcher,
   closeout, registry, and supervisor budgets remain green. Low-risk product-code implementation tasks default to
   `low_risk_local_code` drain eligibility when their task metadata satisfies the full local implementation gate.
 - Post-merge evidence-only commits are not required by default; use final handoff or `project-state.yaml` for final SHAs
   unless durable post-merge evidence is needed for recovery or a gate explicitly requires it.
-- Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary.
+- Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary. Lean Module
+  Run v3 narrows artifacts and gates by risk without weakening review, scope, sensitive-data, authorization, or deploy
+  boundaries.
 - Batch execution packages are the preferred shape for 3-5 serial tasks that share one verifiable closure. The package
   records approval boundaries, preflight, validation layering, and blocked gates up front, but each child task still
   keeps its own branch, plan, evidence, audit, validation, commit, and closeout decision.
@@ -38,6 +42,7 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 9. `docs/04-agent-system/sop/requirement-ssot-reading-governance.md` when the task may affect requirements, docs,
    mechanism gates, acceptance, or implementation.
 10. Relevant SOPs linked by `project-state.yaml` or `mechanism-source-of-truth-index.yaml`.
+11. `docs/04-agent-system/sop/lean-module-run-v3-governance.md` when the active task belongs to the B–F Program.
 
 ## Single Source Of Truth Rules
 
@@ -50,6 +55,9 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
   `docs/01-requirements/advanced-edition/00-index.md`.
 - `docs/05-execution-logs/` is evidence and history, not a standalone requirement source.
 - Chat memory is never a durable source of truth.
+- For the B–F Program, canonical order and task risk profiles are sourced only from
+  `docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md`; the Guard must reject
+  a state/queue reorder even when both projections are edited together.
 
 ## Active Queue Status Policy
 
@@ -157,6 +165,16 @@ Validation should be layered by changed surface:
 - source tasks run focused unit tests first, then lint/typecheck;
 - route smoke tasks avoid unrelated full validation unless shared source changed.
 
+Lean Module Run v3 refines that layering for the B–F Program:
+
+- R0 uses scoped document, link, diff, and Guard checks; it does not run unrelated product suites or builds.
+- R1 uses focused tests, lint, typecheck, changed-files format, diff, and Guard checks.
+- R2/R3 add impact-triggered gates for shared contracts and protected domains.
+- B5, D4, C6, E6, and F5 are fixed full-regression nodes. Shared runtime, core contracts, authorization, AI,
+  dependencies, build configuration, test infrastructure, or cross-domain failures may trigger extra full regression.
+- Heavy gates run serially. A successful ff-only merge of the same commit does not mechanically repeat the same full
+  suite.
+
 Queue slimming/self-repair v1 is diagnostic-only. `Get-ModuleRunV2QueueSlimmingSelfRepair.ps1` reports terminal
 active-queue archive candidates outside the recovery window and separates safe mechanism docs/state task-packet metadata
 repair candidates from high-risk blocked candidates. It must not move queue history, edit task packets, touch product
@@ -209,11 +227,19 @@ Every task closeout must record:
 - blocked remainder;
 - next task or stop reason.
 
+Artifact shape follows the active task profile: R0 avoids three mechanical long documents; R1 keeps a concise plan and
+evidence and may record both adversarial rounds in evidence; R2/R3, or any task with substantive findings, keeps an
+independent audit. A fact is recorded once and referenced elsewhere.
+
 Post-merge evidence-only commits are required only when validation or closeout facts were not already recorded, a failed
 merge/push/cleanup needs durable recovery facts, `project-state.yaml` or handoff SHA state must be repaired on disk, the
 task policy explicitly requires persistent post-merge evidence, or a downstream gate requires file-based evidence. In the
 ordinary successful case, record final SHAs and cleanup results in the final handoff or `project-state.yaml` instead of
 creating another evidence-only commit.
+
+Git-derived final SHA, ordinary push success, and clean status do not justify an extra commit. Pre-commit runs cheap,
+deterministic scope, structure, sensitive-content, and staged-file checks; pre-push verifies evidence and closeout
+readiness without rerunning the entire product suite.
 
 Docs-only work may claim governance completion only. It must not claim runtime behavior for `authorization`, `paper`, `mock_exam`, `redeem_code`, `audit_log`, or `ai_call_log` without task-specific runtime evidence.
 
