@@ -4,7 +4,7 @@
 
 ## Audit Result
 
-APPROVE for ff-only merge, master documentation verification, ordinary push, and cleanup. The next runtime task must re-read the decision, relevant source, contracts, and tests before implementation.
+APPROVE: ff-only merge, master documentation verification, and ordinary push completed. The final state-record commit may be pushed, then the merged short branch and worktree may be removed. The next runtime task must re-read the decision, relevant source, contracts, and tests before implementation.
 
 ## First Adversarial Review: Privacy And Authority
 

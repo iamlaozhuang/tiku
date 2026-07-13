@@ -121,7 +121,8 @@ activeTasks:
   - id: user-led-phone-visibility-decision-2026-07-12
     title: User-led phone visibility and prelaunch AI paper history decision
     phase: user-led-phone-visibility-decision-2026-07-12
-    status: ready_for_closeout
+    status: closed
+    result: pass_phone_visibility_and_prelaunch_ai_paper_history_policy_materialized
     priority: p0
     sequenceOrder: 59
     taskKind: docs_product_decision_and_requirement_alignment
@@ -197,7 +198,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-phone-visibility-decision-2026-07-12
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-phone-visibility-decision-2026-07-12 -SkipRemoteAheadCheck
     validationSummary:
-      status: ready_for_merge
+      status: closed_remote_synced
       formatCheck: pass
       gitDiffCheck: pass
       adversarialReview: pass_two_rounds
@@ -206,6 +207,11 @@ activeTasks:
       moduleRunV2ModuleCloseoutReadiness: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
       decisionCommit: pass_ce36018ea
+      localMasterMerge: pass_ff_only_fb8f6f4ae
+      masterFormatCheck: pass
+      masterDiffCheck: pass
+      remotePush: pass_origin_master_fb8f6f4ae
+      localRemoteComparison: pass_0_behind_0_ahead_after_first_sync
   - id: user-led-ai-training-history-resume-repair-2026-07-12
     title: User-led AI training history synchronization and paper resume repair
     phase: user-led-ai-training-history-resume-repair-2026-07-12
