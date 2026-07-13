@@ -4,7 +4,7 @@
 
 ## Audit Result
 
-APPROVE for ff-only merge, master verification, ordinary push, and cleanup.
+APPROVE: ff-only merge, master verification, and ordinary push completed. The final state-record commit may be pushed, then the merged short branch and worktree may be removed.
 
 ## First Adversarial Review: Authority and Data Integrity
 

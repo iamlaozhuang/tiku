@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: user-led-ai-training-history-resume-repair-2026-07-12
-updatedAt: "2026-07-12T21:40:00-07:00"
+updatedAt: "2026-07-12T22:10:00-07:00"
 latestUserLedAiTrainingHistoryResumeRepair:
   id: user-led-ai-training-history-resume-repair-2026-07-12
-  status: ready_for_closeout
+  status: closed_remote_synced
   priority: p0
   branch: codex/ai-training-history-resume
   startSha: 89a14a3e4271fa62714c37e4e593818660900dff
@@ -41,7 +41,14 @@ latestUserLedAiTrainingHistoryResumeRepair:
     moduleRunV2PreCommitHardening: pass
     moduleRunV2ModuleCloseoutReadiness: pass
     moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-    remotePush: pending
+    localMasterMerge: pass_ff_only_f5767e0b1
+    masterFocusedTests: pass_8_files_109_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterFormatCheck: pass
+    masterDiffCheck: pass
+    remotePush: pass_origin_master_f5767e0b1
+    localRemoteComparison: pass_0_behind_0_ahead_after_first_sync
 latestUserLedAiTrainingSettingsOrderRepair:
   id: user-led-ai-training-settings-order-repair-2026-07-12
   status: closed_remote_synced
@@ -863,7 +870,7 @@ latest0704RoleErrorBoundary:
   nextRequiredTaskId: 0704-admin-readable-identifiers-2026-07-12
 latest0704AiProviderClosedStateContract:
   id: 0704-ai-provider-closed-state-contract-2026-07-12
-  status: ready_for_closeout
+  status: closed
   result: pass_sanitized_availability_fail_closed_contract
   branch: codex/0704-ai-provider-closed-state-contract
   startSha: 608db98941dec06dc8e5ee443df79d31f5cea0b6
@@ -5947,7 +5954,10 @@ currentTask:
   localFullLoopGate: pass
   moduleRunV2ModuleCloseoutReadiness: pass
   moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  closeoutStatus: pending
+  localMasterMerge: pass_ff_only_f5767e0b1
+  remotePush: pass_origin_master_f5767e0b1
+  localRemoteComparison: pass_0_behind_0_ahead_after_first_sync
+  closeoutStatus: remote_synced_origin_master_f5767e0b1
 
 previousCurrentTaskBeforeUserLedB1B2OrganizationTrainingRuntimeRecovery20260712:
   id: user-led-b8-content-ops-interface-details-2026-07-12

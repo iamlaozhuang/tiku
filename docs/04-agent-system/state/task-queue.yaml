@@ -121,7 +121,8 @@ activeTasks:
   - id: user-led-ai-training-history-resume-repair-2026-07-12
     title: User-led AI training history synchronization and paper resume repair
     phase: user-led-ai-training-history-resume-repair-2026-07-12
-    status: ready_for_closeout
+    status: closed
+    result: pass_shared_personal_and_organization_employee_ai_history_resume
     priority: p0
     sequenceOrder: 58
     taskKind: learner_ai_history_and_learning_session_recovery
@@ -204,7 +205,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12 -SkipRemoteAheadCheck
     validationSummary:
-      status: ready_for_merge
+      status: closed_remote_synced
       baselineFocusedTests: pass_7_files_84_tests
       initialFullTests: incomplete_timeout_processes_terminated_no_failure_result
       tddRed: pass_9_expected_failures
@@ -228,6 +229,14 @@ activeTasks:
       moduleRunV2ModuleCloseoutReadiness: pass
       moduleRunV2PreCommitHardening: pass
       moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
+      localMasterMerge: pass_ff_only_f5767e0b1
+      masterFocusedTests: pass_8_files_109_tests
+      masterLint: pass
+      masterTypecheck: pass
+      masterFormatCheck: pass
+      masterDiffCheck: pass
+      remotePush: pass_origin_master_f5767e0b1
+      localRemoteComparison: pass_0_behind_0_ahead_after_first_sync
   - id: user-led-ai-training-settings-order-repair-2026-07-12
     title: User-led AI training generation settings order repair
     phase: user-led-ai-training-settings-order-repair-2026-07-12
