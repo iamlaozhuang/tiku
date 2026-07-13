@@ -286,6 +286,12 @@ const questionInput = {
       isCorrect: true,
       sortOrder: 1,
     },
+    {
+      label: "B",
+      contentRichText: "<p>直接办理</p>",
+      isCorrect: false,
+      sortOrder: 2,
+    },
   ],
   scoringPoints: [],
 };
@@ -416,6 +422,65 @@ describe("phase 9 content question material runtime", () => {
     expect(JSON.stringify(auditLogEntries)).not.toContain(
       "admin-session-token",
     );
+  });
+
+  it("rejects semantic-empty question and material payloads through the API envelope", async () => {
+    const auditLogEntries: unknown[] = [];
+    const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
+      repositories: createRepositories(auditLogEntries),
+      sessionService: createSessionService("content_admin"),
+    });
+    const headers = { authorization: "Bearer admin-session-token" };
+
+    const questionResponse = await handlers.questions.collection.POST(
+      new Request("http://localhost/api/v1/questions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          ...questionInput,
+          stemRichText: "<p><br></p>",
+        }),
+      }),
+    );
+    const materialResponse = await handlers.materials.collection.POST(
+      new Request("http://localhost/api/v1/materials", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          title: "Semantic empty material",
+          contentRichText:
+            "<table><tr><th></th></tr><tr><td></td></tr></table>",
+          profession: "monopoly",
+          level: 3,
+          subject: "skill",
+        }),
+      }),
+    );
+
+    await expect(questionResponse.json()).resolves.toEqual({
+      code: 422202,
+      message: "Invalid question input.",
+      data: null,
+    });
+    await expect(materialResponse.json()).resolves.toEqual({
+      code: 422201,
+      message: "Invalid material input.",
+      data: null,
+    });
+    expect(auditLogEntries).toEqual([
+      expect.objectContaining({
+        actionType: "question.create",
+        resultStatus: "failed",
+        targetPublicId: null,
+      }),
+      expect.objectContaining({
+        actionType: "material.create",
+        resultStatus: "failed",
+        targetPublicId: null,
+      }),
+    ]);
+    expect(JSON.stringify(auditLogEntries)).not.toContain("<table>");
+    expect(JSON.stringify(auditLogEntries)).not.toContain("<p><br></p>");
   });
 
   it("returns question, material, and knowledge-node data with public identifiers only", async () => {

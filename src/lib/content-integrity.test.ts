@@ -1,0 +1,100 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  getMeaningfulPlainText,
+  getQuestionIntegrityIssues,
+  hasMeaningfulRichText,
+  type QuestionIntegrityInput,
+} from "./content-integrity";
+
+function createValidQuestionIntegrityInput(
+  overrides: Partial<QuestionIntegrityInput> = {},
+): QuestionIntegrityInput {
+  return {
+    questionType: "single_choice",
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    stemRichText: "Synthetic stem",
+    analysisRichText: "Synthetic analysis",
+    standardAnswerRichText: "A",
+    scoringMethod: "auto_match",
+    questionOptions: [
+      { label: "A", contentRichText: "First answer", isCorrect: true },
+      { label: "B", contentRichText: "Second answer", isCorrect: false },
+    ],
+    scoringPoints: [],
+    fillBlankAnswers: [],
+    ...overrides,
+  };
+}
+
+describe("content integrity", () => {
+  it.each([
+    "&nbsp;",
+    "&ZeroWidthSpace;",
+    "&#8203;",
+    "&#x200b;",
+    "&#999999999999;",
+  ])(
+    "treats invisible or invalid entity content as empty without throwing: %s",
+    (value) => {
+      expect(() => getMeaningfulPlainText(value)).not.toThrow();
+      expect(getMeaningfulPlainText(value)).toBe("");
+    },
+  );
+
+  it("accepts only accessible managed images whose metadata and source agree", () => {
+    const validImage =
+      '<img src="/api/v1/paper-assets/paper-asset-public-1" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="paper-asset-public-1" alt="流程图" />';
+
+    expect(hasMeaningfulRichText(validImage)).toBe(true);
+    expect(
+      hasMeaningfulRichText(validImage.replace('alt="流程图"', 'alt=""')),
+    ).toBe(false);
+    expect(
+      hasMeaningfulRichText(
+        validImage.replace(
+          "/api/v1/paper-assets/paper-asset-public-1",
+          "/api/v1/paper-assets/paper-asset-other",
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      hasMeaningfulRichText(
+        validImage.replaceAll(
+          "paper-asset-public-1",
+          "../paper-asset-public-1",
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  it("distinguishes empty table markup from table content", () => {
+    expect(
+      hasMeaningfulRichText(
+        "<table><tr><th></th></tr><tr><td></td></tr></table>",
+      ),
+    ).toBe(false);
+    expect(
+      hasMeaningfulRichText("<table><tr><td>有效内容</td></tr></table>"),
+    ).toBe(true);
+  });
+
+  it("requires a positive half-point score for every persisted fill blank answer", () => {
+    const issues = getQuestionIntegrityIssues(
+      createValidQuestionIntegrityInput({
+        questionType: "fill_blank",
+        questionOptions: [],
+        standardAnswerRichText: "客户动机",
+        fillBlankAnswers: [{ standardAnswers: ["客户动机"], score: "0" }],
+      }),
+    );
+
+    expect(issues).toContainEqual({
+      field: "fillBlankAnswers",
+      message:
+        "逐空答案必须包含有效答案和正数、0.5 粒度的分值；自动匹配至少需要一空。",
+    });
+  });
+});

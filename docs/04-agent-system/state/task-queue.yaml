@@ -118,10 +118,129 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: content-admin-p0-data-integrity-2026-07-13
+    title: Content admin P0 question and material data integrity
+    phase: content-admin-p0-data-integrity-2026-07-13
+    status: ready_for_closeout
+    result: pass_local_verified_closeout_authorized
+    priority: p0
+    sequenceOrder: 64
+    taskKind: approved_runtime_data_integrity_fix
+    executionProfile: batch_a_tdd_client_api_question_type_integrity
+    moduleRunVersion: 2
+    branch: codex/content-admin-p0-data-integrity
+    dependsOn:
+      - content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+    approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+    requirementsContractPath: docs/01-requirements/traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-data-integrity.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-data-integrity.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-data-integrity.md
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-data-integrity.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
+      - src/lib/content-integrity.ts
+      - src/lib/content-integrity.test.ts
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/server/validators/question.ts
+      - src/server/validators/material.ts
+      - src/server/validators/question.test.ts
+      - src/server/validators/material.test.ts
+      - src/server/services/question-service.test.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/phase-9-content-question-material-runtime.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved_batch_a_only
+      testSourceChange: approved_batch_a_only
+      focusedUnitTest: approved
+      fullLocalGate: approved
+      browserRuntime: blocked
+      screenshotCapture: blocked
+      rawDomCapture: blocked
+      privateCredentialRead: blocked
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      fixtureSeedChange: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Implement P0-01 through P0-14 from the accepted 2026-07-13 contract without editor-route or broad platform refactoring.
+      - Use one semantic integrity rule in client and server; literal placeholder blacklists are forbidden.
+      - Cover single choice, multi choice, true false, fill blank, subjective scoring points, material integrity, accessibility errors, duplicate submission, and stable edit/copy/lock/binding behavior.
+      - Preserve API envelope, role and authorization boundaries, content lifecycle, redaction, and provider-disabled behavior.
+      - Produce RED then GREEN evidence, full gates, two adversarial reviews, self-review, and Module Run v2 evidence.
+    validationCommands:
+      - npm.cmd run test:unit -- src/lib/content-integrity.test.ts src/server/validators/question.test.ts src/server/validators/material.test.ts tests/unit/admin-question-material-ui.test.ts tests/unit/phase-9-content-question-material-runtime.test.ts
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd exec -- next build --webpack
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-p0-data-integrity-2026-07-13
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
+    validationSummary:
+      status: pass_local_verified_closeout_authorized
+      baselineFocusedTests: pass_3_files_52_tests
+      tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
+      focusedGreen: pass_6_files_94_tests
+      fullUnitTests: pass_363_files_2036_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      gitDiffCheck: pass
+      adversarialReview: pass_two_rounds
+      selfReview: pass
+      moduleRunV2PreCommitHardening: pass_15_files
+    nextRequiredDecision: execute_authorized_closeout
   - id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
     title: Content admin P0 data integrity and platform interaction baseline ratification
     phase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
-    status: approved_ready_for_local_closeout
+    status: local_closeout_complete_push_blocked
     result: approved_with_sequencing
     priority: p0
     sequenceOrder: 63
@@ -222,7 +341,11 @@ activeTasks:
       moduleRunV2PreCommitHardening: pass_eight_files_after_owner_approval
       adversarialReview: pass_two_rounds
       selfReview: pass
-    nextRequiredDecision: local_docs_closeout_then_start_batch_a
+    localCommit: dadef0975c2e8c60343fb06286ceb6c8c622d818
+    localMasterMerge: pass_ff_only_dadef0975
+    shortBranchCleanup: pass
+    push: blocked_not_executed
+    nextRequiredDecision: batch_a_started
   - id: user-led-prelaunch-test-data-refresh-2026-07-12
     title: User-led prelaunch AI paper test-data refresh
     phase: user-led-prelaunch-test-data-refresh-2026-07-13

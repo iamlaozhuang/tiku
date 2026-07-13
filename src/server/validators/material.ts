@@ -3,6 +3,10 @@ import {
   professionValues,
   subjectValues,
 } from "../models/paper";
+import {
+  getMaterialIntegrityIssues,
+  MAX_MATERIAL_RICH_TEXT_LENGTH,
+} from "../../lib/content-integrity";
 import type { NormalizedPagination } from "./pagination";
 import { normalizePagination } from "./pagination";
 
@@ -37,7 +41,6 @@ type ValidationResult<TValue> =
     };
 
 const INVALID_MATERIAL_INPUT_MESSAGE = "Invalid material input.";
-const MAX_MATERIAL_CONTENT_LENGTH = 30000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -119,11 +122,25 @@ export function normalizeCreateMaterialInput(
   if (
     title === null ||
     contentRichText === null ||
-    contentRichText.length > MAX_MATERIAL_CONTENT_LENGTH ||
+    contentRichText.length > MAX_MATERIAL_RICH_TEXT_LENGTH ||
     !isProfession(input.profession) ||
     level === null ||
     !isSubject(input.subject)
   ) {
+    return {
+      success: false,
+      message: INVALID_MATERIAL_INPUT_MESSAGE,
+    };
+  }
+
+  const integrityIssues = getMaterialIntegrityIssues({
+    title,
+    contentRichText,
+    profession: input.profession,
+    level,
+    subject: input.subject,
+  });
+  if (integrityIssues.length > 0) {
     return {
       success: false,
       message: INVALID_MATERIAL_INPUT_MESSAGE,

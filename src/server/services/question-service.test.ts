@@ -256,14 +256,14 @@ describe("question service", () => {
           isCorrect: true,
           sortOrder: 1,
         },
-      ],
-      scoringPoints: [
         {
-          description: "指出核对单据",
-          score: "2.5",
-          sortOrder: 1,
+          label: "B",
+          contentRichText: "<p>直接上架</p>",
+          isCorrect: false,
+          sortOrder: 2,
         },
       ],
+      scoringPoints: [],
       knowledgeNodePublicIds: ["knowledge_node_public_1"],
       tagPublicIds: ["tag_public_1"],
     };
@@ -424,6 +424,12 @@ describe("question service", () => {
           contentRichText: "<p>Synthetic option.</p>",
           isCorrect: true,
           sortOrder: 1,
+        },
+        {
+          label: "B",
+          contentRichText: "<p>Synthetic alternative.</p>",
+          isCorrect: false,
+          sortOrder: 2,
         },
       ],
       scoringPoints: [],

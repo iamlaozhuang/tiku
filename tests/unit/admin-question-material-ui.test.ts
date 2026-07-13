@@ -46,14 +46,27 @@ const questionPayload = {
       subject: "theory",
       stemRichText: "市场调研抽样方法的核心目标是什么？",
       analysisRichText: "抽样方法需要确保样本代表目标总体。",
-      standardAnswerRichText: "提高样本代表性。",
+      standardAnswerRichText: "A",
       status: "available",
       isLocked: false,
       lockedAt: null,
       multiChoiceRule: "all_correct_only",
       scoringMethod: "auto_match",
       materialPublicId: "material-marketing-001",
-      questionOptions: [],
+      questionOptions: [
+        {
+          label: "A",
+          contentRichText: "提高样本代表性",
+          isCorrect: true,
+          sortOrder: 1,
+        },
+        {
+          label: "B",
+          contentRichText: "降低样本代表性",
+          isCorrect: false,
+          sortOrder: 2,
+        },
+      ],
       scoringPoints: [],
       knowledgeNodePublicIds: ["knowledge-node-sampling"],
       tagPublicIds: ["tag-research"],
@@ -663,6 +676,34 @@ function expectAdminFetchAuthorization(
   );
 }
 
+function fillRequiredQuestionClassification(
+  questionForm: ReturnType<typeof within>,
+) {
+  fireEvent.change(questionForm.getByLabelText("专业"), {
+    target: { value: "marketing" },
+  });
+  fireEvent.change(questionForm.getByLabelText("等级"), {
+    target: { value: "3" },
+  });
+  fireEvent.change(questionForm.getByLabelText("科目"), {
+    target: { value: "theory" },
+  });
+}
+
+function fillNewSingleChoiceStructure(questionForm: ReturnType<typeof within>) {
+  fireEvent.change(questionForm.getByLabelText("题型"), {
+    target: { value: "single_choice" },
+  });
+  fillRequiredQuestionClassification(questionForm);
+  fireEvent.change(questionForm.getByLabelText("选项 A"), {
+    target: { value: "候选项 A" },
+  });
+  fireEvent.change(questionForm.getByLabelText("选项 B"), {
+    target: { value: "候选项 B" },
+  });
+  fireEvent.click(questionForm.getByLabelText("选项 A 正确"));
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -693,6 +734,9 @@ describe("AdminQuestionMaterialManagement", () => {
       screen.getByRole("button", { name: `编辑题目 ${questionName}` }),
     );
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    expect(
+      questionForm.getByText(/题型、专业、等级、科目/),
+    ).toBeInTheDocument();
 
     expect(questionForm.getByLabelText("关联材料")).toHaveValue(
       "material-marketing-001",
@@ -1348,6 +1392,63 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(lockedMaterial).not.toHaveTextContent('"id"');
   });
 
+  it("starts new question and material forms without submission defaults and blocks an empty save with accessible errors", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    expect(questionForm.getByLabelText("题型")).toHaveValue("");
+    expect(questionForm.getByLabelText("专业")).toHaveValue("");
+    expect(questionForm.getByLabelText("等级")).toHaveValue(null);
+    expect(questionForm.getByLabelText("科目")).toHaveValue("");
+    expect(questionForm.getByLabelText("题干")).toHaveValue("");
+    expect(questionForm.getByLabelText("标准答案")).toHaveValue("");
+    expect(questionForm.getByLabelText("老师解析")).toHaveValue("");
+
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    expect(questionForm.getByRole("alert")).toHaveTextContent(
+      "请修正以下内容后再保存",
+    );
+    expect(questionForm.getByLabelText("题型")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(questionForm.getByLabelText("题型")).toHaveFocus();
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/questions" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
+
+    fireEvent.click(questionForm.getByRole("button", { name: "取消" }));
+    cleanup();
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+    await screen.findByTestId("material-row-material-marketing-001");
+    fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
+
+    const materialForm = within(screen.getByRole("form", { name: "材料表单" }));
+    expect(
+      materialForm.getByText(/材料标题、专业、等级、科目/),
+    ).toBeInTheDocument();
+    expect(materialForm.getByLabelText("材料标题")).toHaveValue("");
+    expect(materialForm.getByLabelText("材料正文")).toHaveValue("");
+    expect(materialForm.getByLabelText("专业")).toHaveValue("");
+    expect(materialForm.getByLabelText("等级")).toHaveValue(null);
+    expect(materialForm.getByLabelText("科目")).toHaveValue("");
+  });
+
   it("creates, edits, disables, and copies questions through the protected runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockWritableContentFetch();
@@ -1356,6 +1457,10 @@ describe("AdminQuestionMaterialManagement", () => {
 
     await screen.findByText("市场调研抽样方法的核心目标是什么？");
     fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    const createQuestionForm = within(
+      screen.getByRole("form", { name: "题目表单" }),
+    );
+    fillNewSingleChoiceStructure(createQuestionForm);
     fireEvent.change(screen.getByLabelText("题干"), {
       target: { value: "新建题目题干" },
     });
@@ -1391,6 +1496,7 @@ describe("AdminQuestionMaterialManagement", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
 
+    expect(screen.queryByRole("alert")).toBeNull();
     expect(
       await screen.findByText("题目“单选题 编辑后的题干”已保存"),
     ).toBeInTheDocument();
@@ -1421,6 +1527,157 @@ describe("AdminQuestionMaterialManagement", () => {
       expect.objectContaining({ method: "POST" }),
     );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
+  it("deduplicates an in-progress save and explains why submission is disabled", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fallbackFetch = mockWritableContentFetch();
+    let resolveSave:
+      | ((response: ReturnType<typeof createJsonResponse>) => void)
+      | undefined;
+    const pendingSave = new Promise<ReturnType<typeof createJsonResponse>>(
+      (resolve) => {
+        resolveSave = resolve;
+      },
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/questions" && init?.method === "POST") {
+          return pendingSave;
+        }
+
+        return fallbackFetch(url, init);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminQuestionMaterialManagement));
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fillNewSingleChoiceStructure(questionForm);
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "待保存题干" },
+    });
+    fireEvent.change(questionForm.getByLabelText("标准答案"), {
+      target: { value: "A" },
+    });
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "待保存解析" },
+    });
+
+    const saveButton = questionForm.getByRole("button", { name: "保存题目" });
+    fireEvent.click(saveButton);
+    fireEvent.submit(screen.getByRole("form", { name: "题目表单" }));
+
+    expect(
+      questionForm.getByRole("button", { name: "保存中…" }),
+    ).toBeDisabled();
+    expect(questionForm.getByRole("status")).toHaveTextContent(
+      "正在保存，请勿重复提交。",
+    );
+    expect(
+      fetchMock.mock.calls.filter(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/questions" &&
+          requestInit?.method === "POST",
+      ),
+    ).toHaveLength(1);
+
+    resolveSave?.(
+      createJsonResponse({
+        code: 0,
+        message: "ok",
+        data: {
+          question: {
+            ...questionPayload.data[0],
+            publicId: "question-created-pending",
+            stemRichText: "待保存题干",
+          },
+        },
+      }),
+    );
+    await screen.findByText("题目“单选题 待保存题干”已保存");
+  });
+
+  it("keeps author input and distinguishes save conflicts from other failures", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const conflictFallbackFetch = mockWritableContentFetch();
+    const conflictFetch = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (
+          String(url) === "/api/v1/questions/question-marketing-001" &&
+          init?.method === "PATCH"
+        ) {
+          return createJsonResponse({
+            code: 409202,
+            message: "redacted conflict",
+            data: null,
+          });
+        }
+
+        return conflictFallbackFetch(url, init);
+      },
+    );
+    vi.stubGlobal("fetch", conflictFetch);
+
+    render(createElement(AdminQuestionMaterialManagement));
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `编辑题目 ${marketingQuestionReadableName}`,
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("题干"), {
+      target: { value: "发生冲突时保留的题干" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
+
+    expect(await screen.findByText(/题目保存冲突/)).toHaveTextContent(
+      "当前输入已保留",
+    );
+    expect(screen.getByLabelText("题干")).toHaveValue("发生冲突时保留的题干");
+
+    cleanup();
+    const failureFallbackFetch = mockWritableContentFetch();
+    const failureFetch = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/questions" && init?.method === "POST") {
+          return createJsonResponse({
+            code: 500001,
+            message: "redacted failure",
+            data: null,
+          });
+        }
+
+        return failureFallbackFetch(url, init);
+      },
+    );
+    vi.stubGlobal("fetch", failureFetch);
+
+    render(createElement(AdminQuestionMaterialManagement));
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fillNewSingleChoiceStructure(questionForm);
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "普通失败时保留的题干" },
+    });
+    fireEvent.change(questionForm.getByLabelText("标准答案"), {
+      target: { value: "A" },
+    });
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "普通失败时保留的解析" },
+    });
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    expect(await screen.findByText(/题目保存失败/)).toHaveTextContent(
+      "当前输入已保留",
+    );
+    expect(questionForm.getByLabelText("题干")).toHaveValue(
+      "普通失败时保留的题干",
+    );
+    expect(screen.queryByText(/题目保存冲突/)).toBeNull();
   });
 
   it("posts selected existing question type fields instead of hardcoded single_choice defaults", async () => {
@@ -1467,6 +1724,13 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.change(questionForm.getByLabelText("选项 B"), {
       target: { value: "候选项 B" },
     });
+    fireEvent.click(questionForm.getByRole("button", { name: "添加选项" }));
+    fireEvent.change(questionForm.getByLabelText("选项 C"), {
+      target: { value: "候选项 C" },
+    });
+    expect(
+      questionForm.getByRole("button", { name: "删除最后选项" }),
+    ).toBeEnabled();
     fireEvent.click(questionForm.getByLabelText("选项 A 正确"));
     fireEvent.click(questionForm.getByLabelText("选项 B 正确"));
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
@@ -1504,16 +1768,10 @@ describe("AdminQuestionMaterialManagement", () => {
         sortOrder: 2,
       },
       {
-        contentRichText: "C",
+        contentRichText: "候选项 C",
         isCorrect: false,
         label: "C",
         sortOrder: 3,
-      },
-      {
-        contentRichText: "D",
-        isCorrect: false,
-        label: "D",
-        sortOrder: 4,
       },
     ]);
     expect(requestBody.scoringPoints).toEqual([]);
@@ -1532,6 +1790,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.change(questionForm.getByLabelText("题型"), {
       target: { value: "true_false" },
     });
+    fillRequiredQuestionClassification(questionForm);
 
     expect(questionForm.getByLabelText("标准答案")).toHaveValue("A");
     expect(questionForm.getByLabelText("选项 A")).toHaveValue("正确");
@@ -1566,13 +1825,13 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(requestBody.questionOptions).toEqual([
       {
         contentRichText: "正确",
-        isCorrect: true,
+        isCorrect: false,
         label: "A",
         sortOrder: 1,
       },
       {
         contentRichText: "错误",
-        isCorrect: false,
+        isCorrect: true,
         label: "B",
         sortOrder: 2,
       },
@@ -1599,7 +1858,11 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBeInTheDocument();
     expect(
       questionForm.getByRole("button", { name: "保存题目" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+    expect(questionForm.getByRole("alert")).toHaveTextContent(
+      "题干超过 10000 字符，不能保存。",
+    );
 
     expect(
       fetchMock.mock.calls.some(
@@ -1651,6 +1914,7 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.change(questionForm.getByLabelText("题型"), {
       target: { value: "short_answer" },
     });
+    fillRequiredQuestionClassification(questionForm);
     fireEvent.change(questionForm.getByLabelText("评分方式"), {
       target: { value: "ai_scoring" },
     });
@@ -1659,6 +1923,9 @@ describe("AdminQuestionMaterialManagement", () => {
     });
     fireEvent.change(questionForm.getByLabelText("标准答案"), {
       target: { value: "简答题参考答案" },
+    });
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "简答题解析" },
     });
     fireEvent.change(questionForm.getByLabelText("评分点 1"), {
       target: { value: "说明关键步骤" },
@@ -1692,6 +1959,89 @@ describe("AdminQuestionMaterialManagement", () => {
     ]);
   });
 
+  it("preserves fill blank data across scoring-method changes and posts only valid active structures", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.change(questionForm.getByLabelText("题型"), {
+      target: { value: "fill_blank" },
+    });
+    fillRequiredQuestionClassification(questionForm);
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "客户需求分析应先识别客户____。" },
+    });
+    fireEvent.change(questionForm.getByLabelText("标准答案"), {
+      target: { value: "客户动机" },
+    });
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "识别真实客户动机。" },
+    });
+    fireEvent.change(questionForm.getByLabelText("第 1 空答案"), {
+      target: { value: "客户动机 | 购买动机" },
+    });
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+    expect(questionForm.getByRole("alert")).toHaveTextContent(
+      "逐空答案必须包含有效答案和正数、0.5 粒度的分值",
+    );
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/questions" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
+    fireEvent.change(questionForm.getByLabelText("第 1 空分值"), {
+      target: { value: "1.5" },
+    });
+
+    fireEvent.change(questionForm.getByLabelText("评分方式"), {
+      target: { value: "ai_scoring" },
+    });
+    expect(questionForm.getByLabelText("第 1 空答案")).toHaveValue(
+      "客户动机 | 购买动机",
+    );
+    expect(questionForm.getByLabelText("第 1 空分值")).toHaveValue("1.5");
+    fireEvent.change(questionForm.getByLabelText("评分点 1"), {
+      target: { value: "识别核心动机" },
+    });
+    fireEvent.change(questionForm.getByLabelText("评分点 1 分值"), {
+      target: { value: "1.5" },
+    });
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    await screen.findByText("题目“单选题 新建题目题干”已保存");
+    const requestBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/questions",
+      "POST",
+    );
+    expect(requestBody).toMatchObject({
+      questionType: "fill_blank",
+      scoringMethod: "ai_scoring",
+      questionOptions: [],
+    });
+    expect(requestBody.fillBlankAnswers).toEqual([
+      {
+        blankKey: "blank_1",
+        standardAnswers: ["客户动机", "购买动机"],
+        score: "1.5",
+        sortOrder: 1,
+      },
+    ]);
+    expect(requestBody.scoringPoints).toEqual([
+      {
+        description: "识别核心动机",
+        score: "1.5",
+        sortOrder: 1,
+      },
+    ]);
+  });
+
   it.each(["case_analysis", "calculation"] as const)(
     "posts %s through the subjective authoring path",
     async (questionType) => {
@@ -1708,6 +2058,7 @@ describe("AdminQuestionMaterialManagement", () => {
       fireEvent.change(questionForm.getByLabelText("题型"), {
         target: { value: questionType },
       });
+      fillRequiredQuestionClassification(questionForm);
 
       expect(questionForm.queryByLabelText("选项 A")).toBeNull();
       expect(questionForm.getByLabelText("评分点 1")).toBeInTheDocument();
@@ -2147,7 +2498,11 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBeInTheDocument();
     expect(
       materialForm.getByRole("button", { name: "保存材料" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
+    fireEvent.click(materialForm.getByRole("button", { name: "保存材料" }));
+    expect(materialForm.getByRole("alert")).toHaveTextContent(
+      "材料正文超过 30000 字符，不能保存。",
+    );
     expect(
       fetchMock.mock.calls.some(
         ([requestUrl, requestInit]) =>
@@ -2159,7 +2514,7 @@ describe("AdminQuestionMaterialManagement", () => {
 
   it("offers bounded rich text helpers for managed material paper_asset image references and table markup", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-    mockWritableContentFetch();
+    const fetchMock = mockWritableContentFetch();
 
     render(
       createElement(AdminQuestionMaterialManagement, {
@@ -2171,10 +2526,33 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
 
     const materialForm = within(screen.getByRole("form", { name: "材料表单" }));
+    fireEvent.change(materialForm.getByLabelText("材料标题"), {
+      target: { value: "受管图片材料" },
+    });
+    fireEvent.change(materialForm.getByLabelText("专业"), {
+      target: { value: "marketing" },
+    });
+    fireEvent.change(materialForm.getByLabelText("等级"), {
+      target: { value: "3" },
+    });
+    fireEvent.change(materialForm.getByLabelText("科目"), {
+      target: { value: "theory" },
+    });
+    fireEvent.click(materialForm.getByRole("button", { name: "插入表格模板" }));
+    fireEvent.click(materialForm.getByRole("button", { name: "保存材料" }));
+    expect(materialForm.getByRole("alert")).toHaveTextContent(
+      "请输入有效材料正文",
+    );
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/materials" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
     fireEvent.click(
       materialForm.getByRole("button", { name: "插入受管图片引用" }),
     );
-    fireEvent.click(materialForm.getByRole("button", { name: "插入表格模板" }));
 
     const contentInput = materialForm.getByLabelText(
       "材料正文",
@@ -2188,5 +2566,14 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(contentInput.value).not.toContain("local-image-placeholder");
     expect(contentInput.value).not.toContain("dev/paper-asset");
     expect(contentInput.value).toContain("<table>");
+    fireEvent.click(materialForm.getByRole("button", { name: "保存材料" }));
+    await screen.findByText("材料“新建案例材料”已保存");
+    expect(
+      fetchMock.mock.calls.filter(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/materials" &&
+          requestInit?.method === "POST",
+      ),
+    ).toHaveLength(1);
   });
 });

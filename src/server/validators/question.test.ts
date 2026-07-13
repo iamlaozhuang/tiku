@@ -34,7 +34,293 @@ function createSubjectiveQuestionInput(
   };
 }
 
+function createObjectiveQuestionInput(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    ...createSubjectiveQuestionInput(),
+    questionType: "single_choice",
+    scoringMethod: "auto_match",
+    standardAnswerRichText: "<p>A</p>",
+    questionOptions: [
+      {
+        label: "A",
+        contentRichText: "<p>First answer.</p>",
+        isCorrect: true,
+        sortOrder: 1,
+      },
+      {
+        label: "B",
+        contentRichText: "<p>Second answer.</p>",
+        isCorrect: false,
+        sortOrder: 2,
+      },
+    ],
+    scoringPoints: [],
+    ...overrides,
+  };
+}
+
 describe("question validator", () => {
+  it.each(["   ", "<p><br></p>", "<div>&nbsp;</div>", "<p>\u200B\u2060</p>"])(
+    "rejects semantically empty required rich text: %s",
+    (emptyRichText) => {
+      expect(
+        normalizeCreateQuestionInput(
+          createObjectiveQuestionInput({ stemRichText: emptyRichText }),
+        ),
+      ).toEqual({
+        success: false,
+        message: "Invalid question input.",
+      });
+    },
+  );
+
+  it("accepts a managed image with an accessible description as meaningful rich text", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createObjectiveQuestionInput({
+          stemRichText:
+            '<img src="/api/v1/paper-assets/paper-asset-public-1" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="paper-asset-public-1" alt="流程示意图" />',
+        }),
+      ),
+    ).toMatchObject({ success: true });
+  });
+
+  it.each([
+    {
+      name: "single choice with fewer than two options",
+      input: createObjectiveQuestionInput({
+        questionOptions: [
+          {
+            label: "A",
+            contentRichText: "Only answer.",
+            isCorrect: true,
+            sortOrder: 1,
+          },
+        ],
+      }),
+    },
+    {
+      name: "single choice with two correct options",
+      input: createObjectiveQuestionInput({
+        questionOptions: [
+          {
+            label: "A",
+            contentRichText: "First answer.",
+            isCorrect: true,
+            sortOrder: 1,
+          },
+          {
+            label: "B",
+            contentRichText: "Second answer.",
+            isCorrect: true,
+            sortOrder: 2,
+          },
+        ],
+      }),
+    },
+    {
+      name: "single choice with answer inconsistent with correct option",
+      input: createObjectiveQuestionInput({ standardAnswerRichText: "B" }),
+    },
+    {
+      name: "multi choice with fewer than two correct options",
+      input: createObjectiveQuestionInput({
+        questionType: "multi_choice",
+        standardAnswerRichText: "A",
+      }),
+    },
+    {
+      name: "multi choice with an inconsistent answer set",
+      input: createObjectiveQuestionInput({
+        questionType: "multi_choice",
+        standardAnswerRichText: "A,C",
+        questionOptions: [
+          {
+            label: "A",
+            contentRichText: "First answer.",
+            isCorrect: true,
+            sortOrder: 1,
+          },
+          {
+            label: "B",
+            contentRichText: "Second answer.",
+            isCorrect: true,
+            sortOrder: 2,
+          },
+        ],
+      }),
+    },
+    {
+      name: "duplicate option labels",
+      input: createObjectiveQuestionInput({
+        questionOptions: [
+          {
+            label: "A",
+            contentRichText: "First answer.",
+            isCorrect: true,
+            sortOrder: 1,
+          },
+          {
+            label: "A",
+            contentRichText: "Second answer.",
+            isCorrect: false,
+            sortOrder: 2,
+          },
+        ],
+      }),
+    },
+    {
+      name: "objective question with subjective scoring points",
+      input: createObjectiveQuestionInput({
+        scoringPoints: [
+          {
+            description: "Unexpected scoring point",
+            score: "1.0",
+            sortOrder: 1,
+          },
+        ],
+      }),
+    },
+  ])("rejects $name", ({ input }) => {
+    expect(normalizeCreateQuestionInput(input)).toEqual({
+      success: false,
+      message: "Invalid question input.",
+    });
+  });
+
+  it("accepts a multi-choice answer set regardless of label order", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createObjectiveQuestionInput({
+          questionType: "multi_choice",
+          standardAnswerRichText: "B,A",
+          questionOptions: [
+            {
+              label: "A",
+              contentRichText: "First answer.",
+              isCorrect: true,
+              sortOrder: 1,
+            },
+            {
+              label: "B",
+              contentRichText: "Second answer.",
+              isCorrect: true,
+              sortOrder: 2,
+            },
+          ],
+        }),
+      ),
+    ).toMatchObject({ success: true });
+  });
+
+  it("preserves the true-false A/B display and internal answer mapping", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createObjectiveQuestionInput({
+          questionType: "true_false",
+          standardAnswerRichText: "错误",
+          questionOptions: [
+            {
+              label: "A",
+              contentRichText: "正确",
+              isCorrect: false,
+              sortOrder: 1,
+            },
+            {
+              label: "B",
+              contentRichText: "错误",
+              isCorrect: true,
+              sortOrder: 2,
+            },
+          ],
+        }),
+      ),
+    ).toMatchObject({ success: true });
+
+    expect(
+      normalizeCreateQuestionInput(
+        createObjectiveQuestionInput({
+          questionType: "true_false",
+          questionOptions: [
+            {
+              label: "A",
+              contentRichText: "错误",
+              isCorrect: true,
+              sortOrder: 1,
+            },
+            {
+              label: "B",
+              contentRichText: "正确",
+              isCorrect: false,
+              sortOrder: 2,
+            },
+          ],
+        }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+  });
+
+  it("requires auto-match fill blanks and positive half-point scoring points", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          questionType: "fill_blank",
+          scoringMethod: "auto_match",
+          scoringPoints: [],
+          fillBlankAnswers: [],
+        }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          questionType: "fill_blank",
+          scoringMethod: "auto_match",
+          scoringPoints: [],
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: ["<p><br></p>"],
+              score: "1.0",
+              sortOrder: 1,
+            },
+          ],
+        }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          questionType: "fill_blank",
+          scoringMethod: "auto_match",
+          scoringPoints: [],
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: ["Synthetic answer"],
+              score: "0",
+              sortOrder: 1,
+            },
+          ],
+        }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          scoringPoints: [
+            { description: "Valid description", score: "0", sortOrder: 1 },
+          ],
+        }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+  });
+
   it.each(["case_analysis", "calculation"] as const)(
     "accepts %s as a subjective text-answer question with scoring points",
     (questionType) => {

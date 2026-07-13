@@ -1,11 +1,51 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
-updatedAt: "2026-07-13T07:36:04-07:00"
+currentPhase: content-admin-p0-data-integrity-2026-07-13
+updatedAt: "2026-07-13T09:05:00-07:00"
+latestContentAdminP0DataIntegrity:
+  id: content-admin-p0-data-integrity-2026-07-13
+  status: closeout_authorized_in_progress
+  priority: p0
+  branch: codex/content-admin-p0-data-integrity
+  startSha: dadef0975c2e8c60343fb06286ceb6c8c622d818
+  approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+  requirementsContractPath: docs/01-requirements/traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-data-integrity.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-data-integrity.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
+  executionBoundary:
+    runtimeSourceChange: approved_batch_a_only
+    testSourceChange: approved_batch_a_only
+    browserRuntime: blocked
+    screenshotCapture: blocked
+    rawDomCapture: blocked
+    privateCredentialRead: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    schemaMigration: blocked
+    providerExecution: blocked
+    dependencyChange: blocked
+    stagingProdDeploy: blocked
+    remoteWrite: approved_origin_master_only
+  verification:
+    baselineFocusedTests: pass_3_files_52_tests
+    tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
+    focusedGreen: pass_6_files_94_tests
+    fullUnitTests: pass_363_files_2036_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    gitDiffCheck: pass
+    adversarialReview: pass_two_rounds
+    selfReview: pass
+    moduleRunV2PreCommitHardening: pass_15_files
+  closeoutApprovalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
+  nextDecision: execute_authorized_closeout
 latestContentAdminP0PlatformInteractionBaselineRatification:
   id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
-  status: approved_ready_for_local_closeout
+  status: local_closeout_complete_push_blocked
   priority: p0
   branch: codex/content-admin-interaction-baseline
   startSha: 1bd47916acb5608faf5186175bfb659cd8509212
@@ -38,7 +78,11 @@ latestContentAdminP0PlatformInteractionBaselineRatification:
     moduleRunV2PreCommitHardening: pass_eight_files_after_owner_approval
     adversarialReview: pass_two_rounds
     selfReview: pass
-  nextDecision: local_docs_closeout_then_start_batch_a
+  localCommit: dadef0975c2e8c60343fb06286ceb6c8c622d818
+  localMasterMerge: pass_ff_only_dadef0975
+  shortBranchCleanup: pass
+  push: blocked_not_executed
+  nextDecision: batch_a_started
 latestUserLedPrelaunchTestDataRefresh:
   id: user-led-prelaunch-test-data-refresh-2026-07-12
   status: ready_for_closeout
@@ -6116,20 +6160,23 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
-  title: Content admin P0 data integrity and platform interaction baseline ratification
-  phase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
-  status: approved_ready_for_local_closeout
+  id: content-admin-p0-data-integrity-2026-07-13
+  title: Content admin P0 question and material data integrity
+  phase: content-admin-p0-data-integrity-2026-07-13
+  status: ready_for_closeout
   priority: p0
-  taskKind: docs_product_decision_and_requirement_alignment
-  branch: codex/content-admin-interaction-baseline
+  taskKind: approved_runtime_data_integrity_fix
+  branch: codex/content-admin-p0-data-integrity
   humanApprovalBoundary:
+    runtimeSourceChange: approved_batch_a_only
+    testSourceChange: approved_batch_a_only
+    focusedUnitTest: approved
+    fullLocalGate: approved
     localCommit: approved
     fastForwardMerge: approved_master_only
-    cleanup: approved_after_local_merge
-    push: blocked_requires_fresh_approval
-    runtimeSourceChange: blocked_docs_only
-    testSourceChange: blocked
+    cleanup: approved_after_remote_sync
+    push: approved_origin_master_only
+    approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
     databaseConnection: blocked
     databaseMutation: blocked
     schemaMigration: blocked
@@ -6142,25 +6189,36 @@ currentTask:
     stagingProdDeploy: blocked
     forcePush: blocked
     pullRequest: blocked
-  plannedAt: "2026-07-13T07:00:00-07:00"
-  claimedAt: "2026-07-13T07:00:00-07:00"
-  targetClosureItem: Ratify the owner-approved P0 integrity matrix, platform interaction contract, container exceptions, and Batch A-first sequence as stable requirements.
-  behaviorBoundary: docs_only_requirement_ratification_no_runtime_test_browser_database_provider_dependency_schema_fixture_deploy_or_remote_write
+  plannedAt: "2026-07-13T07:45:31-07:00"
+  claimedAt: "2026-07-13T07:45:31-07:00"
+  targetClosureItem: Enforce the accepted P0-01 through P0-14 question and material semantic integrity contract in the client and API through TDD.
+  behaviorBoundary: batch_a_question_material_client_api_integrity_only_no_editor_route_platform_rollout_browser_database_provider_dependency_schema_fixture_deploy_or_remote_write
   evidenceMode: source_path_test_count_and_decision_only_no_credentials_tokens_env_values_database_urls_raw_rows_raw_dom_or_full_ai_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
-  acceptancePath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-p0-platform-interaction-baseline-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification-audit.md
-  nextRequiredTaskId: content-admin-p0-data-integrity-2026-07-13
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-data-integrity.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-data-integrity.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
+  nextRequiredTaskId: none
   validationSummary:
-    status: passed_docs_only_approved_ready_for_local_closeout
-    focusedTests: pass_1_file_36_tests
-    formatCheck: pass_scoped_eight_files
+    status: pass_local_verified_closeout_authorized
+    baselineFocusedTests: pass_3_files_52_tests
+    tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
+    focusedGreen: pass_6_files_94_tests
+    fullUnitTests: pass_363_files_2036_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
     gitDiffCheck: pass
-    allowedFileInventory: pass_eight_expected_files_only
-    moduleRunV2PreCommitHardening: pass_eight_files_after_owner_approval
     adversarialReview: pass_two_rounds
     selfReview: pass
+    moduleRunV2PreCommitHardening: pass_15_files
+previousCurrentTaskBeforeContentAdminP0DataIntegrity20260713:
+  id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+  status: local_closeout_complete_push_blocked
+  branch: deleted_after_ff_only_merge
+  localCommit: dadef0975c2e8c60343fb06286ceb6c8c622d818
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification-audit.md
 previousCurrentTaskBeforeContentAdminP0PlatformInteractionBaselineRatification20260713:
   id: user-led-prelaunch-test-data-refresh-2026-07-12
   status: ready_for_closeout

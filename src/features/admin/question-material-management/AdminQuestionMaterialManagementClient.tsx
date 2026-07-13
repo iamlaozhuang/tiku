@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownUp,
   Ban,
@@ -42,6 +42,14 @@ import type {
   ScoringMethod,
   Subject,
 } from "@/server/models/paper";
+import {
+  getMeaningfulPlainText,
+  getMaterialIntegrityIssues,
+  getQuestionIntegrityIssues,
+  MAX_MATERIAL_RICH_TEXT_LENGTH,
+  MAX_QUESTION_RICH_TEXT_LENGTH,
+  type ContentIntegrityIssue,
+} from "@/lib/content-integrity";
 
 import {
   AdminErrorState,
@@ -174,15 +182,16 @@ type QuestionFormValues = {
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;
-  questionType: QuestionType;
-  profession: Profession;
+  questionType: QuestionType | "";
+  profession: Profession | "";
   level: string;
-  subject: Subject;
+  subject: Subject | "";
   materialPublicId: string;
   multiChoiceRule: MultiChoiceRule;
   scoringMethod: ScoringMethod;
   questionOptions: QuestionOptionFormValue[];
   scoringPoints: ScoringPointFormValue[];
+  fillBlankAnswers: FillBlankAnswerFormValue[];
   knowledgeNodePublicIdsText: string;
   tagPublicIdsText: string;
 };
@@ -198,6 +207,11 @@ type ScoringPointFormValue = {
   score: string;
 };
 
+type FillBlankAnswerFormValue = {
+  standardAnswersText: string;
+  score: string;
+};
+
 type QuestionBindingInput = {
   fillBlankAnswers?: QuestionDto["fillBlankAnswers"];
   knowledgeNodePublicIds: string[];
@@ -207,9 +221,9 @@ type QuestionBindingInput = {
 type MaterialFormValues = {
   title: string;
   contentRichText: string;
-  profession: Profession;
+  profession: Profession | "";
   level: string;
-  subject: Subject;
+  subject: Subject | "";
 };
 
 type ActiveContentForm =
@@ -311,8 +325,7 @@ const optionQuestionTypes = new Set<QuestionType>([
   "multi_choice",
   "true_false",
 ]);
-const MAX_QUESTION_RICH_TEXT_LENGTH = 10000;
-const MAX_MATERIAL_RICH_TEXT_LENGTH = 30000;
+const questionOptionLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 function readQuestionSummary(question: QuestionDto): string {
   return stripRichText(question.stemRichText);
@@ -348,43 +361,48 @@ function createDefaultQuestionOptions(
     ];
   }
 
-  return ["A", "B", "C", "D"].map((label, optionIndex) => ({
-    contentRichText: label,
-    isCorrect: questionType === "single_choice" && optionIndex === 0,
+  return ["A", "B"].map((label) => ({
+    contentRichText: "",
+    isCorrect: false,
     label,
   }));
 }
 
 function createDefaultScoringPoints(): ScoringPointFormValue[] {
-  return [{ description: "评分点", score: "1.0" }];
+  return [{ description: "", score: "" }];
+}
+
+function createDefaultFillBlankAnswers(): FillBlankAnswerFormValue[] {
+  return [{ score: "", standardAnswersText: "" }];
 }
 
 function createDefaultQuestionFormValues(): QuestionFormValues {
   return {
-    analysisRichText: "老师解析",
+    analysisRichText: "",
+    fillBlankAnswers: [],
     knowledgeNodePublicIdsText: "",
-    level: "3",
+    level: "",
     materialPublicId: "",
     multiChoiceRule: "all_correct_only",
-    profession: "monopoly",
-    questionOptions: createDefaultQuestionOptions("single_choice"),
-    questionType: "single_choice",
+    profession: "",
+    questionOptions: [],
+    questionType: "",
     scoringMethod: "auto_match",
-    scoringPoints: createDefaultScoringPoints(),
-    standardAnswerRichText: "A",
-    stemRichText: "新建题目题干",
-    subject: "theory",
+    scoringPoints: [],
+    standardAnswerRichText: "",
+    stemRichText: "",
+    subject: "",
     tagPublicIdsText: "",
   };
 }
 
 function createDefaultMaterialFormValues(): MaterialFormValues {
   return {
-    contentRichText: "新建材料正文",
-    level: "3",
-    profession: "monopoly",
-    subject: "skill",
-    title: "新建案例材料",
+    contentRichText: "",
+    level: "",
+    profession: "",
+    subject: "",
+    title: "",
   };
 }
 
@@ -393,6 +411,12 @@ function createQuestionFormValuesFromQuestion(
 ): QuestionFormValues {
   return {
     analysisRichText: stripRichText(question.analysisRichText),
+    fillBlankAnswers: (question.fillBlankAnswers ?? []).map(
+      (fillBlankAnswer) => ({
+        score: fillBlankAnswer.score,
+        standardAnswersText: fillBlankAnswer.standardAnswers.join(" | "),
+      }),
+    ),
     knowledgeNodePublicIdsText: formatPublicIdList(
       question.knowledgeNodePublicIds,
     ),
@@ -654,17 +678,29 @@ async function mutateAdminApi<TData>(
   };
 }
 
+function createContentSaveErrorMessage(
+  kind: "question" | "material",
+  responseCode: number,
+): string {
+  const contentLabel = kind === "question" ? "题目" : "材料";
+
+  return Math.floor(responseCode / 1000) === 409
+    ? `${contentLabel}保存冲突：内容已锁定或被其他操作更新。当前输入已保留，请刷新确认后重试。`
+    : `${contentLabel}保存失败：当前输入已保留，请检查后重试。`;
+}
+
 function createQuestionInput(
   values: QuestionFormValues,
   bindings: QuestionBindingInput = {
-    fillBlankAnswers: [],
     knowledgeNodePublicIds: parsePublicIdList(
       values.knowledgeNodePublicIdsText,
     ),
     tagPublicIds: parsePublicIdList(values.tagPublicIdsText),
   },
 ) {
-  const isOptionQuestion = optionQuestionTypes.has(values.questionType);
+  const isOptionQuestion = optionQuestionTypes.has(
+    values.questionType as QuestionType,
+  );
 
   return {
     questionType: values.questionType,
@@ -693,15 +729,49 @@ function createQuestionInput(
       : [],
     scoringPoints: isOptionQuestion
       ? []
-      : values.scoringPoints.map((scoringPoint, pointIndex) => ({
-          description: scoringPoint.description,
-          score: scoringPoint.score,
-          sortOrder: pointIndex + 1,
-        })),
-    fillBlankAnswers: bindings.fillBlankAnswers ?? [],
+      : getPersistableScoringPoints(values.scoringPoints).map(
+          (scoringPoint, pointIndex) => ({
+            description: scoringPoint.description,
+            score: scoringPoint.score,
+            sortOrder: pointIndex + 1,
+          }),
+        ),
+    fillBlankAnswers:
+      bindings.fillBlankAnswers ??
+      getPersistableFillBlankAnswers(values.fillBlankAnswers).map(
+        (fillBlankAnswer, blankIndex) => ({
+          blankKey: `blank_${blankIndex + 1}`,
+          standardAnswers: fillBlankAnswer.standardAnswersText
+            .split("|")
+            .map((answer) => answer.trim())
+            .filter((answer) => answer.length > 0),
+          score: fillBlankAnswer.score,
+          sortOrder: blankIndex + 1,
+        }),
+      ),
     knowledgeNodePublicIds: bindings.knowledgeNodePublicIds,
     tagPublicIds: bindings.tagPublicIds,
   };
+}
+
+function getPersistableScoringPoints(
+  scoringPoints: ScoringPointFormValue[],
+): ScoringPointFormValue[] {
+  return scoringPoints.filter(
+    (scoringPoint) =>
+      getMeaningfulPlainText(scoringPoint.description).length > 0 ||
+      scoringPoint.score.trim().length > 0,
+  );
+}
+
+function getPersistableFillBlankAnswers(
+  fillBlankAnswers: FillBlankAnswerFormValue[],
+): FillBlankAnswerFormValue[] {
+  return fillBlankAnswers.filter(
+    (fillBlankAnswer) =>
+      getMeaningfulPlainText(fillBlankAnswer.standardAnswersText).length > 0 ||
+      fillBlankAnswer.score.trim().length > 0,
+  );
 }
 
 function createQuestionInputFromQuestion(
@@ -742,7 +812,7 @@ function parsePublicIdList(value: string): string[] {
 }
 
 function normalizeStandardAnswerForQuestionType(
-  questionType: QuestionType,
+  questionType: QuestionType | "",
   standardAnswerRichText: string,
 ) {
   if (questionType !== "true_false") {
@@ -855,6 +925,7 @@ export function AdminQuestionMaterialManagement({
   const [pendingContentAction, setPendingContentAction] =
     useState<PendingContentAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submissionInProgressRef = useRef(false);
   const [
     isInitialQuestionTargetDismissed,
     setIsInitialQuestionTargetDismissed,
@@ -1039,11 +1110,16 @@ export function AdminQuestionMaterialManagement({
     const sessionToken = getStoredSessionToken();
     const shouldPublishInitialQuestionTarget = isInitialQuestionTargetPublish;
 
+    if (submissionInProgressRef.current) {
+      return;
+    }
+
     if (sessionToken === null || displayedActiveForm?.kind !== "question") {
       setActionError("管理员会话已失效，请重新登录后再操作。");
       return;
     }
 
+    submissionInProgressRef.current = true;
     setIsSubmitting(true);
     setActionError(null);
 
@@ -1059,14 +1135,8 @@ export function AdminQuestionMaterialManagement({
             return createQuestionInput(values);
           }
 
-          const currentQuestion =
-            questions.find(
-              (question) => question.publicId === displayedActiveForm.publicId,
-            ) ?? null;
-
           return {
             ...createQuestionInput(values, {
-              fillBlankAnswers: currentQuestion?.fillBlankAnswers ?? [],
               knowledgeNodePublicIds: parsePublicIdList(
                 values.knowledgeNodePublicIdsText,
               ),
@@ -1078,7 +1148,9 @@ export function AdminQuestionMaterialManagement({
       );
 
       if (response.code !== 0 || response.data === null) {
-        setActionError("题目保存失败，请刷新后重试。");
+        setActionError(
+          createContentSaveErrorMessage("question", response.code),
+        );
         return;
       }
 
@@ -1094,8 +1166,9 @@ export function AdminQuestionMaterialManagement({
       setActiveForm(null);
       setIsInitialQuestionTargetDismissed(true);
     } catch {
-      setActionError("题目保存失败，请刷新后重试。");
+      setActionError("题目保存失败：当前输入已保留，请检查网络后重试。");
     } finally {
+      submissionInProgressRef.current = false;
       setIsSubmitting(false);
     }
   }
@@ -1103,11 +1176,16 @@ export function AdminQuestionMaterialManagement({
   async function handleSaveMaterial(values: MaterialFormValues) {
     const sessionToken = getStoredSessionToken();
 
+    if (submissionInProgressRef.current) {
+      return;
+    }
+
     if (sessionToken === null || displayedActiveForm?.kind !== "material") {
       setActionError("管理员会话已失效，请重新登录后再操作。");
       return;
     }
 
+    submissionInProgressRef.current = true;
     setIsSubmitting(true);
     setActionError(null);
 
@@ -1127,7 +1205,9 @@ export function AdminQuestionMaterialManagement({
       );
 
       if (response.code !== 0 || response.data === null) {
-        setActionError("材料保存失败，请刷新后重试。");
+        setActionError(
+          createContentSaveErrorMessage("material", response.code),
+        );
         return;
       }
 
@@ -1138,8 +1218,9 @@ export function AdminQuestionMaterialManagement({
       setActionMessage(`材料“${savedMaterial.title}”已保存`);
       setActiveForm(null);
     } catch {
-      setActionError("材料保存失败，请刷新后重试。");
+      setActionError("材料保存失败：当前输入已保留，请检查网络后重试。");
     } finally {
+      submissionInProgressRef.current = false;
       setIsSubmitting(false);
     }
   }
@@ -1805,7 +1886,11 @@ function QuestionWriteForm({
   onSubmit: (values: QuestionFormValues) => void;
 }) {
   const [formValues, setFormValues] = useState(values);
-  const isOptionQuestion = optionQuestionTypes.has(formValues.questionType);
+  const [formIssues, setFormIssues] = useState<ContentIntegrityIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+  const isOptionQuestion = optionQuestionTypes.has(
+    formValues.questionType as QuestionType,
+  );
   const stemLengthExceeded =
     formValues.stemRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH;
   const analysisLengthExceeded =
@@ -1824,16 +1909,46 @@ function QuestionWriteForm({
     <form
       aria-label="题目表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      ref={formRef}
       onSubmit={(event) => {
         event.preventDefault();
+        const integrityIssues = getQuestionIntegrityIssues({
+          ...formValues,
+          fillBlankAnswers: getPersistableFillBlankAnswers(
+            formValues.fillBlankAnswers,
+          ).map((fillBlankAnswer) => ({
+            score: fillBlankAnswer.score,
+            standardAnswers: fillBlankAnswer.standardAnswersText
+              .split("|")
+              .map((answer) => answer.trim())
+              .filter((answer) => answer.length > 0),
+          })),
+          level: formValues.level,
+          scoringPoints: getPersistableScoringPoints(formValues.scoringPoints),
+        });
+        setFormIssues(integrityIssues);
+        if (integrityIssues.length > 0) {
+          formRef.current
+            ?.querySelector<HTMLElement>(
+              `[data-field="${integrityIssues[0]?.field}"]`,
+            )
+            ?.focus();
+          return;
+        }
         onSubmit(formValues);
       }}
     >
       <h2 className="text-text-primary text-base font-semibold">
         {mode === "create" ? "新建题目" : "编辑题目"}
       </h2>
+      <p className="text-text-secondary text-xs leading-5">
+        题型、专业、等级、科目、题干、标准答案和老师解析为必填；请按所选题型补全选项、逐空答案或评分点。
+      </p>
+      <FormErrorSummary issues={formIssues} />
       <div className="grid gap-3 md:grid-cols-4">
         <QuestionFormSelect
+          error={readFieldError(formIssues, "questionType")}
+          fieldName="questionType"
           label="题型"
           options={Object.entries(questionTypeLabels)}
           value={formValues.questionType}
@@ -1842,7 +1957,18 @@ function QuestionWriteForm({
 
             setFormValues({
               ...formValues,
+              fillBlankAnswers:
+                questionType !== "fill_blank"
+                  ? []
+                  : formValues.fillBlankAnswers.length === 0
+                    ? createDefaultFillBlankAnswers()
+                    : formValues.fillBlankAnswers,
               questionOptions: createDefaultQuestionOptions(questionType),
+              scoringPoints:
+                !optionQuestionTypes.has(questionType) &&
+                formValues.scoringPoints.length === 0
+                  ? createDefaultScoringPoints()
+                  : formValues.scoringPoints,
               questionType,
               standardAnswerRichText:
                 questionType === "true_false"
@@ -1852,6 +1978,8 @@ function QuestionWriteForm({
           }}
         />
         <QuestionFormSelect
+          error={readFieldError(formIssues, "profession")}
+          fieldName="profession"
           label="专业"
           options={Object.entries(professionLabels)}
           value={formValues.profession}
@@ -1866,6 +1994,13 @@ function QuestionWriteForm({
           <span className="text-text-secondary">等级</span>
           <Input
             aria-label="等级"
+            aria-describedby={
+              readFieldError(formIssues, "level") === null
+                ? undefined
+                : "question-level-error"
+            }
+            aria-invalid={readFieldError(formIssues, "level") !== null}
+            data-field="level"
             min={1}
             type="number"
             value={formValues.level}
@@ -1876,8 +2011,14 @@ function QuestionWriteForm({
               })
             }
           />
+          <FieldError
+            id="question-level-error"
+            message={readFieldError(formIssues, "level")}
+          />
         </label>
         <QuestionFormSelect
+          error={readFieldError(formIssues, "subject")}
+          fieldName="subject"
           label="科目"
           options={Object.entries(subjectLabels)}
           value={formValues.subject}
@@ -2003,7 +2144,15 @@ function QuestionWriteForm({
         </span>
         <textarea
           aria-label="题干"
+          aria-describedby={
+            readFieldError(formIssues, "stemRichText") === null
+              ? undefined
+              : "question-stem-error"
+          }
+          aria-invalid={readFieldError(formIssues, "stemRichText") !== null}
           className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+          data-field="stemRichText"
+          placeholder="输入题干；可使用下方工具插入受管图片或表格"
           value={formValues.stemRichText}
           onChange={(event) =>
             setFormValues({
@@ -2011,6 +2160,10 @@ function QuestionWriteForm({
               stemRichText: event.target.value,
             })
           }
+        />
+        <FieldError
+          id="question-stem-error"
+          message={readFieldError(formIssues, "stemRichText")}
         />
         {stemLengthExceeded ? (
           <span className="text-destructive text-xs">
@@ -2022,13 +2175,36 @@ function QuestionWriteForm({
         <span className="text-text-secondary">标准答案</span>
         <Input
           aria-label="标准答案"
+          aria-describedby={
+            readFieldError(formIssues, "standardAnswerRichText") === null
+              ? undefined
+              : "question-answer-error"
+          }
+          aria-invalid={
+            readFieldError(formIssues, "standardAnswerRichText") !== null
+          }
+          data-field="standardAnswerRichText"
+          placeholder="客观题填选项标号；主观题填参考答案"
           value={formValues.standardAnswerRichText}
           onChange={(event) =>
             setFormValues({
               ...formValues,
+              questionOptions:
+                formValues.questionType === "true_false"
+                  ? formValues.questionOptions.map((questionOption) => ({
+                      ...questionOption,
+                      isCorrect:
+                        questionOption.label ===
+                        event.target.value.trim().toUpperCase(),
+                    }))
+                  : formValues.questionOptions,
               standardAnswerRichText: event.target.value,
             })
           }
+        />
+        <FieldError
+          id="question-answer-error"
+          message={readFieldError(formIssues, "standardAnswerRichText")}
         />
       </label>
       <label className="grid gap-2 text-sm font-medium">
@@ -2040,7 +2216,15 @@ function QuestionWriteForm({
         </span>
         <textarea
           aria-label="老师解析"
+          aria-describedby={
+            readFieldError(formIssues, "analysisRichText") === null
+              ? undefined
+              : "question-analysis-error"
+          }
+          aria-invalid={readFieldError(formIssues, "analysisRichText") !== null}
           className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+          data-field="analysisRichText"
+          placeholder="输入面向老师的解析"
           value={formValues.analysisRichText}
           onChange={(event) =>
             setFormValues({
@@ -2048,6 +2232,10 @@ function QuestionWriteForm({
               analysisRichText: event.target.value,
             })
           }
+        />
+        <FieldError
+          id="question-analysis-error"
+          message={readFieldError(formIssues, "analysisRichText")}
         />
         {analysisLengthExceeded ? (
           <span className="text-destructive text-xs">
@@ -2076,7 +2264,7 @@ function QuestionWriteForm({
           onClick={() =>
             setFormValues({
               ...formValues,
-              stemRichText: `${formValues.stemRichText}\n\n<table><tr><th>项目</th><th>内容</th></tr><tr><td>示例</td><td>填写内容</td></tr></table>`,
+              stemRichText: `${formValues.stemRichText}\n\n<table><tr><th></th><th></th></tr><tr><td></td><td></td></tr></table>`,
             })
           }
         >
@@ -2088,10 +2276,23 @@ function QuestionWriteForm({
         文本或完整文件内容。
       </p>
       {isOptionQuestion ? (
-        <fieldset className="border-border grid gap-3 rounded-md border p-3">
+        <fieldset
+          aria-describedby={
+            readFieldError(formIssues, "questionOptions") === null
+              ? undefined
+              : "question-options-error"
+          }
+          aria-invalid={readFieldError(formIssues, "questionOptions") !== null}
+          className="border-border grid gap-3 rounded-md border p-3"
+          data-field="questionOptions"
+          tabIndex={-1}
+        >
           <legend className="text-text-secondary px-1 text-sm font-medium">
             选项
           </legend>
+          <p className="text-text-muted text-xs">
+            至少填写两个内容非空、标号唯一的选项，并让正确项与标准答案一致。
+          </p>
           <div className="grid gap-3 md:grid-cols-2">
             {formValues.questionOptions.map((questionOption, optionIndex) => (
               <div className="grid gap-2" key={questionOption.label}>
@@ -2151,12 +2352,82 @@ function QuestionWriteForm({
               </div>
             ))}
           </div>
+          {formValues.questionType === "true_false" ? null : (
+            <div className="flex flex-wrap gap-2">
+              {formValues.questionOptions.length <
+              questionOptionLabels.length ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const nextLabel =
+                      questionOptionLabels[formValues.questionOptions.length];
+                    if (nextLabel === undefined) {
+                      return;
+                    }
+                    setFormValues({
+                      ...formValues,
+                      questionOptions: [
+                        ...formValues.questionOptions,
+                        {
+                          contentRichText: "",
+                          isCorrect: false,
+                          label: nextLabel,
+                        },
+                      ],
+                    });
+                  }}
+                >
+                  添加选项
+                </Button>
+              ) : null}
+              {formValues.questionOptions.length > 2 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const remainingOptions = formValues.questionOptions.slice(
+                      0,
+                      -1,
+                    );
+                    setFormValues({
+                      ...formValues,
+                      questionOptions: remainingOptions,
+                      standardAnswerRichText: remainingOptions
+                        .filter((questionOption) => questionOption.isCorrect)
+                        .map((questionOption) => questionOption.label)
+                        .join(","),
+                    });
+                  }}
+                >
+                  删除最后选项
+                </Button>
+              ) : null}
+            </div>
+          )}
+          <FieldError
+            id="question-options-error"
+            message={readFieldError(formIssues, "questionOptions")}
+          />
         </fieldset>
       ) : (
-        <fieldset className="border-border grid gap-3 rounded-md border p-3">
+        <fieldset
+          aria-describedby={
+            readFieldError(formIssues, "scoringPoints") === null
+              ? undefined
+              : "question-scoring-points-error"
+          }
+          aria-invalid={readFieldError(formIssues, "scoringPoints") !== null}
+          className="border-border grid gap-3 rounded-md border p-3"
+          data-field="scoringPoints"
+          tabIndex={-1}
+        >
           <legend className="text-text-secondary px-1 text-sm font-medium">
             评分点
           </legend>
+          <p className="text-text-muted text-xs">
+            当前题型需要评分点时，描述必填，分值必须为正数且以 0.5 为粒度。
+          </p>
           {formValues.scoringPoints.map((scoringPoint, pointIndex) => (
             <div
               className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem]"
@@ -2208,15 +2479,101 @@ function QuestionWriteForm({
               </label>
             </div>
           ))}
+          <FieldError
+            id="question-scoring-points-error"
+            message={readFieldError(formIssues, "scoringPoints")}
+          />
         </fieldset>
       )}
+      {formValues.questionType === "fill_blank" ? (
+        <fieldset
+          aria-describedby={
+            readFieldError(formIssues, "fillBlankAnswers") === null
+              ? undefined
+              : "question-fill-blank-error"
+          }
+          aria-invalid={readFieldError(formIssues, "fillBlankAnswers") !== null}
+          className="border-border grid gap-3 rounded-md border p-3"
+          data-field="fillBlankAnswers"
+          tabIndex={-1}
+        >
+          <legend className="text-text-secondary px-1 text-sm font-medium">
+            自动匹配答案
+          </legend>
+          <p className="text-text-muted text-xs">
+            每空一行；同一空的可接受答案使用竖线分隔。切换评分方式不会清除已录入答案。
+          </p>
+          {formValues.fillBlankAnswers.map((fillBlankAnswer, blankIndex) => (
+            <div
+              className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem]"
+              key={`fill-blank-${blankIndex + 1}`}
+            >
+              <label className="grid gap-2 text-sm font-medium">
+                <span className="text-text-secondary">
+                  第 {blankIndex + 1} 空答案
+                </span>
+                <Input
+                  aria-label={`第 ${blankIndex + 1} 空答案`}
+                  value={fillBlankAnswer.standardAnswersText}
+                  onChange={(event) =>
+                    setFormValues({
+                      ...formValues,
+                      fillBlankAnswers: formValues.fillBlankAnswers.map(
+                        (currentAnswer, currentIndex) =>
+                          currentIndex === blankIndex
+                            ? {
+                                ...currentAnswer,
+                                standardAnswersText: event.target.value,
+                              }
+                            : currentAnswer,
+                      ),
+                    })
+                  }
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-medium">
+                <span className="text-text-secondary">分值</span>
+                <Input
+                  aria-label={`第 ${blankIndex + 1} 空分值`}
+                  value={fillBlankAnswer.score}
+                  onChange={(event) =>
+                    setFormValues({
+                      ...formValues,
+                      fillBlankAnswers: formValues.fillBlankAnswers.map(
+                        (currentAnswer, currentIndex) =>
+                          currentIndex === blankIndex
+                            ? { ...currentAnswer, score: event.target.value }
+                            : currentAnswer,
+                      ),
+                    })
+                  }
+                />
+              </label>
+            </div>
+          ))}
+          <FieldError
+            id="question-fill-blank-error"
+            message={readFieldError(formIssues, "fillBlankAnswers")}
+          />
+        </fieldset>
+      ) : null}
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting || isFormInvalid} type="submit">
-          {submitLabel}
+        <Button disabled={isSubmitting} type="submit">
+          {isSubmitting ? "保存中…" : submitLabel}
         </Button>
+        {isFormInvalid ? (
+          <p className="text-destructive text-xs">
+            富文本长度超出限制，请修正后保存。
+          </p>
+        ) : null}
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
+        {isSubmitting ? (
+          <p className="text-text-secondary text-xs" role="status">
+            正在保存，请勿重复提交。
+          </p>
+        ) : null}
       </div>
     </form>
   );
@@ -2266,6 +2623,39 @@ function QuestionBindingPreview({
           })),
         )}
       </p>
+    </div>
+  );
+}
+
+function readFieldError(
+  issues: ContentIntegrityIssue[],
+  field: string,
+): string | null {
+  return issues.find((issue) => issue.field === field)?.message ?? null;
+}
+
+function FieldError({ id, message }: { id: string; message: string | null }) {
+  return message === null ? null : (
+    <span className="text-destructive text-xs" id={id}>
+      {message}
+    </span>
+  );
+}
+
+function FormErrorSummary({ issues }: { issues: ContentIntegrityIssue[] }) {
+  return issues.length === 0 ? null : (
+    <div
+      className="border-destructive/40 bg-destructive/5 rounded-md border p-3"
+      role="alert"
+    >
+      <p className="text-destructive text-sm font-medium">
+        请修正以下内容后再保存
+      </p>
+      <ul className="text-text-secondary mt-2 list-disc space-y-1 pl-5 text-xs">
+        {issues.map((issue) => (
+          <li key={issue.field}>{issue.message}</li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -2364,11 +2754,15 @@ function formatBindingOptionNames(
 }
 
 function QuestionFormSelect({
+  error = null,
+  fieldName,
   label,
   options,
   value,
   onChange,
 }: {
+  error?: string | null;
+  fieldName?: string;
   label: string;
   options: [string, string][];
   value: string;
@@ -2379,16 +2773,25 @@ function QuestionFormSelect({
       <span className="text-text-secondary">{label}</span>
       <select
         aria-label={label}
+        aria-describedby={
+          error === null || fieldName === undefined
+            ? undefined
+            : `${fieldName}-error`
+        }
+        aria-invalid={error !== null}
         className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-3 py-1 text-sm outline-none focus-visible:ring-3"
+        data-field={fieldName}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
+        <option value="">请选择{label}</option>
         {options.map(([optionValue, optionLabel]) => (
           <option key={optionValue} value={optionValue}>
             {optionLabel}
           </option>
         ))}
       </select>
+      <FieldError id={`${fieldName ?? label}-error`} message={error} />
     </label>
   );
 }
@@ -2407,6 +2810,8 @@ function MaterialWriteForm({
   onSubmit: (values: MaterialFormValues) => void;
 }) {
   const [formValues, setFormValues] = useState(values);
+  const [formIssues, setFormIssues] = useState<ContentIntegrityIssue[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
   const materialLengthExceeded =
     formValues.contentRichText.length > MAX_MATERIAL_RICH_TEXT_LENGTH;
 
@@ -2414,18 +2819,41 @@ function MaterialWriteForm({
     <form
       aria-label="材料表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      ref={formRef}
       onSubmit={(event) => {
         event.preventDefault();
+        const integrityIssues = getMaterialIntegrityIssues(formValues);
+        setFormIssues(integrityIssues);
+        if (integrityIssues.length > 0) {
+          formRef.current
+            ?.querySelector<HTMLElement>(
+              `[data-field="${integrityIssues[0]?.field}"]`,
+            )
+            ?.focus();
+          return;
+        }
         onSubmit(formValues);
       }}
     >
       <h2 className="text-text-primary text-base font-semibold">
         {mode === "create" ? "新建材料" : "编辑材料"}
       </h2>
+      <p className="text-text-secondary text-xs leading-5">
+        材料标题、专业、等级、科目和正文均为必填；正文需包含有效文本或具备可访问描述的受管图片。
+      </p>
+      <FormErrorSummary issues={formIssues} />
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">材料标题</span>
         <Input
           aria-label="材料标题"
+          aria-describedby={
+            readFieldError(formIssues, "title") === null
+              ? undefined
+              : "material-title-error"
+          }
+          aria-invalid={readFieldError(formIssues, "title") !== null}
+          data-field="title"
+          placeholder="输入便于检索和复用的材料标题"
           value={formValues.title}
           onChange={(event) =>
             setFormValues({
@@ -2434,9 +2862,15 @@ function MaterialWriteForm({
             })
           }
         />
+        <FieldError
+          id="material-title-error"
+          message={readFieldError(formIssues, "title")}
+        />
       </label>
       <div className="grid gap-3 md:grid-cols-3">
         <QuestionFormSelect
+          error={readFieldError(formIssues, "profession")}
+          fieldName="profession"
           label="专业"
           options={Object.entries(professionLabels)}
           value={formValues.profession}
@@ -2451,6 +2885,13 @@ function MaterialWriteForm({
           <span className="text-text-secondary">等级</span>
           <Input
             aria-label="等级"
+            aria-describedby={
+              readFieldError(formIssues, "level") === null
+                ? undefined
+                : "material-level-error"
+            }
+            aria-invalid={readFieldError(formIssues, "level") !== null}
+            data-field="level"
             min={1}
             type="number"
             value={formValues.level}
@@ -2461,8 +2902,14 @@ function MaterialWriteForm({
               })
             }
           />
+          <FieldError
+            id="material-level-error"
+            message={readFieldError(formIssues, "level")}
+          />
         </label>
         <QuestionFormSelect
+          error={readFieldError(formIssues, "subject")}
+          fieldName="subject"
           label="科目"
           options={Object.entries(subjectLabels)}
           value={formValues.subject}
@@ -2483,7 +2930,15 @@ function MaterialWriteForm({
         </span>
         <textarea
           aria-label="材料正文"
+          aria-describedby={
+            readFieldError(formIssues, "contentRichText") === null
+              ? undefined
+              : "material-content-error"
+          }
+          aria-invalid={readFieldError(formIssues, "contentRichText") !== null}
           className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-24 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+          data-field="contentRichText"
+          placeholder="输入材料正文；可使用下方工具插入受管图片或表格"
           value={formValues.contentRichText}
           onChange={(event) =>
             setFormValues({
@@ -2491,6 +2946,10 @@ function MaterialWriteForm({
               contentRichText: event.target.value,
             })
           }
+        />
+        <FieldError
+          id="material-content-error"
+          message={readFieldError(formIssues, "contentRichText")}
         />
         {materialLengthExceeded ? (
           <span className="text-destructive text-xs">
@@ -2519,7 +2978,7 @@ function MaterialWriteForm({
           onClick={() =>
             setFormValues({
               ...formValues,
-              contentRichText: `${formValues.contentRichText}\n\n<table><tr><th>项目</th><th>内容</th></tr><tr><td>示例</td><td>填写内容</td></tr></table>`,
+              contentRichText: `${formValues.contentRichText}\n\n<table><tr><th></th><th></th></tr><tr><td></td><td></td></tr></table>`,
             })
           }
         >
@@ -2531,12 +2990,17 @@ function MaterialWriteForm({
         文本或完整文件内容。
       </p>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting || materialLengthExceeded} type="submit">
-          保存材料
+        <Button disabled={isSubmitting} type="submit">
+          {isSubmitting ? "保存中…" : "保存材料"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
+        {isSubmitting ? (
+          <p className="text-text-secondary text-xs" role="status">
+            正在保存，请勿重复提交。
+          </p>
+        ) : null}
       </div>
     </form>
   );

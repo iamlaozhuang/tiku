@@ -6,6 +6,11 @@ import {
   scoringMethodValues,
   subjectValues,
 } from "../models/paper";
+import {
+  getQuestionIntegrityIssues,
+  hasMeaningfulRichText,
+  MAX_QUESTION_RICH_TEXT_LENGTH,
+} from "../../lib/content-integrity";
 import type { NormalizedPagination } from "./pagination";
 import { normalizePagination } from "./pagination";
 
@@ -74,7 +79,6 @@ type ValidationResult<TValue> =
     };
 
 const INVALID_QUESTION_INPUT_MESSAGE = "Invalid question input.";
-const MAX_QUESTION_TEXT_LENGTH = 10000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -87,9 +91,15 @@ function normalizeRequiredText(value: unknown): string | null {
 
   const text = value.trim();
 
-  return text.length === 0 || text.length > MAX_QUESTION_TEXT_LENGTH
+  return text.length === 0 || text.length > MAX_QUESTION_RICH_TEXT_LENGTH
     ? null
     : text;
+}
+
+function normalizeRequiredRichText(value: unknown): string | null {
+  const richText = normalizeRequiredText(value);
+
+  return richText !== null && hasMeaningfulRichText(richText) ? richText : null;
 }
 
 function normalizeOptionalPublicId(value: unknown): string | null | undefined {
@@ -217,16 +227,6 @@ function isQuestionType(
   );
 }
 
-function isSubjectiveTextQuestionType(
-  questionType: (typeof questionTypeValues)[number],
-): boolean {
-  return (
-    questionType === "short_answer" ||
-    questionType === "case_analysis" ||
-    questionType === "calculation"
-  );
-}
-
 function isQuestionStatus(
   value: unknown,
 ): value is (typeof questionStatusValues)[number] {
@@ -271,7 +271,7 @@ function normalizeQuestionOptions(
     }
 
     const label = normalizeRequiredText(questionOption.label);
-    const contentRichText = normalizeRequiredText(
+    const contentRichText = normalizeRequiredRichText(
       questionOption.contentRichText,
     );
     const sortOrder = normalizePositiveInteger(questionOption.sortOrder);
@@ -314,7 +314,12 @@ function normalizeScoringPoints(
     const score = normalizeScore(scoringPoint.score);
     const sortOrder = normalizePositiveInteger(scoringPoint.sortOrder);
 
-    if (description === null || score === null || sortOrder === null) {
+    if (
+      description === null ||
+      score === null ||
+      Number(score) <= 0 ||
+      sortOrder === null
+    ) {
       return null;
     }
 
@@ -357,6 +362,7 @@ function normalizeFillBlankAnswers(
       blankKey === null ||
       standardAnswers === null ||
       score === null ||
+      Number(score) <= 0 ||
       sortOrder === null
     ) {
       return null;
@@ -386,9 +392,9 @@ export function normalizeCreateQuestionInput(
   }
 
   const level = normalizePositiveInteger(input.level);
-  const stemRichText = normalizeRequiredText(input.stemRichText);
-  const analysisRichText = normalizeRequiredText(input.analysisRichText);
-  const standardAnswerRichText = normalizeRequiredText(
+  const stemRichText = normalizeRequiredRichText(input.stemRichText);
+  const analysisRichText = normalizeRequiredRichText(input.analysisRichText);
+  const standardAnswerRichText = normalizeRequiredRichText(
     input.standardAnswerRichText,
   );
   const materialPublicId = normalizeOptionalPublicId(input.materialPublicId);
@@ -423,21 +429,21 @@ export function normalizeCreateQuestionInput(
     };
   }
 
-  if (
-    isSubjectiveTextQuestionType(input.questionType) &&
-    questionOptions.length > 0
-  ) {
-    return {
-      success: false,
-      message: INVALID_QUESTION_INPUT_MESSAGE,
-    };
-  }
+  const integrityIssues = getQuestionIntegrityIssues({
+    questionType: input.questionType,
+    profession: input.profession,
+    level,
+    subject: input.subject,
+    stemRichText,
+    analysisRichText,
+    standardAnswerRichText,
+    scoringMethod: input.scoringMethod,
+    questionOptions,
+    scoringPoints,
+    fillBlankAnswers,
+  });
 
-  if (
-    fillBlankAnswers.length > 0 &&
-    (input.questionType !== "fill_blank" ||
-      input.scoringMethod !== "auto_match")
-  ) {
+  if (integrityIssues.length > 0) {
     return {
       success: false,
       message: INVALID_QUESTION_INPUT_MESSAGE,

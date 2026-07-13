@@ -1,0 +1,69 @@
+import { describe, expect, it } from "vitest";
+
+import { normalizeCreateMaterialInput } from "./material";
+
+function createMaterialInput(overrides: Record<string, unknown> = {}) {
+  return {
+    title: "Synthetic material",
+    contentRichText: "<p>Synthetic material body.</p>",
+    profession: "monopoly",
+    level: 3,
+    subject: "skill",
+    ...overrides,
+  };
+}
+
+describe("material validator", () => {
+  it.each([
+    { title: "   " },
+    { contentRichText: "<p><br></p>" },
+    { contentRichText: "<div>&nbsp;</div>" },
+    { contentRichText: "<table><tr><th></th></tr><tr><td></td></tr></table>" },
+    {
+      contentRichText:
+        '<img data-paper-asset-public-id="paper-asset-public-1" alt="" />',
+    },
+  ])("rejects semantically empty material input %#", (overrides) => {
+    expect(
+      normalizeCreateMaterialInput(createMaterialInput(overrides)),
+    ).toEqual({
+      success: false,
+      message: "Invalid material input.",
+    });
+  });
+
+  it("accepts meaningful table text and an accessible managed image", () => {
+    expect(
+      normalizeCreateMaterialInput(
+        createMaterialInput({
+          contentRichText: "<table><tr><td>有效内容</td></tr></table>",
+        }),
+      ),
+    ).toMatchObject({ success: true });
+
+    expect(
+      normalizeCreateMaterialInput(
+        createMaterialInput({
+          contentRichText:
+            '<img src="/api/v1/paper-assets/paper-asset-public-1" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="paper-asset-public-1" alt="现场照片" />',
+        }),
+      ),
+    ).toMatchObject({ success: true });
+  });
+
+  it("enforces the material body length boundary", () => {
+    expect(
+      normalizeCreateMaterialInput(
+        createMaterialInput({ contentRichText: "材".repeat(30000) }),
+      ),
+    ).toMatchObject({ success: true });
+    expect(
+      normalizeCreateMaterialInput(
+        createMaterialInput({ contentRichText: "材".repeat(30001) }),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid material input.",
+    });
+  });
+});
