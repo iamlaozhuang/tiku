@@ -1277,6 +1277,177 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
   });
 
+  it.fails(
+    "[D1 RED] retains question rows and announces refreshing while a filter request is pending",
+    async () => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+      const refreshResponse =
+        createDeferred<ReturnType<typeof createJsonResponse>>();
+      const fetchMock = vi.fn((url: RequestInfo | URL) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return Promise.resolve(createJsonResponse(adminSessionPayload));
+        }
+        if (path.startsWith("/api/v1/questions?")) {
+          return path.includes("status=disabled")
+            ? refreshResponse.promise
+            : Promise.resolve(createJsonResponse(questionPayload));
+        }
+        if (path.startsWith("/api/v1/knowledge-nodes?")) {
+          return Promise.resolve(
+            createJsonResponse(knowledgeNodeOptionPayload),
+          );
+        }
+        if (path === "/api/v1/tags") {
+          return Promise.resolve(createJsonResponse(tagOptionPayload));
+        }
+
+        return Promise.resolve(
+          createJsonResponse({ code: 404001, message: "missing", data: null }),
+        );
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(createElement(AdminQuestionMaterialManagement));
+      const currentRow =
+        await screen.findByText("市场调研抽样方法的核心目标是什么？");
+
+      fireEvent.change(screen.getByLabelText("状态"), {
+        target: { value: "disabled" },
+      });
+      await waitFor(() =>
+        expect(
+          fetchMock.mock.calls.some(([url]) =>
+            String(url).includes("status=disabled"),
+          ),
+        ).toBe(true),
+      );
+
+      expect(currentRow).toBeInTheDocument();
+      expect(
+        screen
+          .getByText("正在刷新题目列表，当前结果仍可操作。")
+          .closest('[role="status"]'),
+      ).toHaveAttribute("data-admin-async-state", "refreshing");
+    },
+  );
+
+  it.fails(
+    "[D2 RED] retains material rows and announces refreshing while a filter request is pending",
+    async () => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+      const refreshResponse =
+        createDeferred<ReturnType<typeof createJsonResponse>>();
+      const fetchMock = vi.fn((url: RequestInfo | URL) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return Promise.resolve(createJsonResponse(adminSessionPayload));
+        }
+        if (path.startsWith("/api/v1/materials?")) {
+          return path.includes("status=disabled")
+            ? refreshResponse.promise
+            : Promise.resolve(createJsonResponse(materialPayload));
+        }
+
+        return Promise.resolve(
+          createJsonResponse({ code: 404001, message: "missing", data: null }),
+        );
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(
+        createElement(AdminQuestionMaterialManagement, {
+          defaultView: "materials",
+        }),
+      );
+      const currentRow = await screen.findByText("营销案例材料 A");
+
+      fireEvent.change(screen.getByLabelText("状态"), {
+        target: { value: "disabled" },
+      });
+      await waitFor(() =>
+        expect(
+          fetchMock.mock.calls.some(([url]) =>
+            String(url).includes("status=disabled"),
+          ),
+        ).toBe(true),
+      );
+
+      expect(currentRow).toBeInTheDocument();
+      expect(
+        screen
+          .getByText("正在刷新材料列表，当前结果仍可操作。")
+          .closest('[role="status"]'),
+      ).toHaveAttribute("data-admin-async-state", "refreshing");
+    },
+  );
+
+  it.fails(
+    "[D3 RED] restores canonical list controls when browser history emits popstate",
+    async () => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+      const fetchMock = mockContentFetch();
+
+      render(createElement(AdminQuestionMaterialManagement));
+      await screen.findByText("市场调研抽样方法的核心目标是什么？");
+
+      window.history.pushState(
+        null,
+        "",
+        "/content/questions?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&status=disabled",
+      );
+      window.dispatchEvent(new PopStateEvent("popstate"));
+
+      await waitFor(() =>
+        expect(screen.getByLabelText("状态")).toHaveValue("disabled"),
+      );
+      expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("page=2&pageSize=50"),
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it.fails(
+    "[D3 RED] restores the initiating edit control and captured scroll position on return",
+    async () => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+      mockWritableContentFetch();
+      const scrollToMock = vi.fn();
+      vi.stubGlobal("scrollTo", scrollToMock);
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 320,
+      });
+
+      render(createElement(AdminQuestionMaterialManagement));
+      await screen.findByText("市场调研抽样方法的核心目标是什么？");
+      const editButton = screen.getByRole("button", {
+        name: `编辑题目 ${marketingQuestionReadableName}`,
+      });
+      editButton.focus();
+      fireEvent.click(editButton);
+
+      const cancelButton = screen.getByRole("button", { name: "取消" });
+      cancelButton.focus();
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 0,
+      });
+      fireEvent.click(cancelButton);
+
+      expect.soft(editButton).toHaveFocus();
+      expect.soft(scrollToMock).toHaveBeenCalledWith({
+        behavior: "auto",
+        top: 320,
+      });
+    },
+  );
+
   it("filters questions by level, question type, knowledge_node, and tag", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockContentFetch();

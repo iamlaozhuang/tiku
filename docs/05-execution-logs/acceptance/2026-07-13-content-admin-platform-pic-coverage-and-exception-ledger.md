@@ -120,6 +120,15 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC statuses remain unchanged and partial according to D/C/E/F ownership; the exception ledger remains empty. B5 is a
   cumulative Batch B checkpoint, not route-family, authorization, AI, or final acceptance closure.
 
+### D0 List-Request Contract Tests
+
+- Existing canonical URL/latest-intent tests remain GREEN. Four additional executable expected-failure contracts capture
+  question/material context-preserving refreshing, popstate URL restore, and edit-return focus/scroll restore.
+- D1, D2, and D3 own conversion of their tagged `it.fails` cases into normal passing regressions. D0 changes no runtime
+  behavior and does not promote PIC-02/PIC-03/PIC-04/PIC-08/PIC-10/PIC-11.
+- No exception, authorization expansion, lifecycle change, skipped test, dependency, browser action, or deployment was
+  introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
