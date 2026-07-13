@@ -4,7 +4,7 @@
 
 ## Audit Result
 
-APPROVE: the scoped runtime change may proceed through the approved task commit, Module Run v2 closeout, ff-only master merge, master revalidation, ordinary push, and worktree cleanup. The next task remains blocked until this task is remotely synchronized.
+APPROVE: the scoped runtime change passed the task commit and Module Run v2 closeout/readiness gates and may proceed through the approved ff-only master merge, master revalidation, ordinary push, and worktree cleanup. The next task remains blocked until this task is remotely synchronized.
 
 ## First Adversarial Review: Privacy And Authority
 

@@ -6,9 +6,13 @@
 
 **Baseline:** `b5182af3944e0ec6a7974ef3cd4d1ddfa3ef1c57`
 
-**Evidence status:** pass_ready_for_commit
+**Evidence status:** ready_for_master_merge
 
 result: pass
+
+## Batch 1: Phone Visibility Runtime Enforcement
+
+- Batch range: this task only. It contains the approved server-side masking, explicit operations disclosure, audit, and regression coverage changes.
 
 ## Requirement Mapping Result
 
@@ -43,11 +47,11 @@ result: pass
 
 ## Module Run v2 Anchors
 
-- localFullLoopGate: pending_scoped_commit_then_module_run_closeout.
-- Test-ModuleRunV2PreCommitHardening: pending.
-- Test-ModuleRunV2ModuleCloseoutReadiness: pending.
-- Test-ModuleRunV2PrePushReadiness: pending with remote-ahead check deferred until ordinary push.
-- Commit: pending_scoped_commit.
+- localFullLoopGate: implementation_commit_and_module_closeout_complete.
+- Test-ModuleRunV2PreCommitHardening: pass, 33 scoped files scanned.
+- Test-ModuleRunV2ModuleCloseoutReadiness: pass.
+- Test-ModuleRunV2PrePushReadiness: pass with the remote-ahead check deferred until the approved ordinary push.
+- Commit: `7e24d15d0de9f674efc4d8ffb7aef51b4263303e` (`fix(auth): enforce phone visibility policy`).
 - threadRolloverGate: not_required; the current thread retains the approved serial-task context.
 - nextModuleRunCandidate: `user-led-phone-visibility-validation-2026-07-12` only after this task is fully closed and synchronized.
 - blocked remainder: browser/E2E runtime, screenshots, raw DOM, private credentials, database direct action, data refresh, schema/migration, Provider execution, dependency change, staging, production, deploy, release readiness, Cost Calibration, PR, and force push remain blocked or require their own task boundary.
