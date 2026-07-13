@@ -156,6 +156,15 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-02/PIC-08/PIC-10/PIC-11 remain `partial` until D4 cumulative proof and E/F rollout/acceptance. Dirty-leave remains
   C5-owned; no exception, authorization/lifecycle expansion or deployment was introduced.
 
+### D4 Batch D Cumulative Audit
+
+- D0-D3 commit/diff ownership reconciled; no executable expected-failure residue remains. The fixed full node passed 371
+  files / 2,073 tests, lint, typecheck, full format and production build.
+- Question/material lists now cumulatively prove canonical initial/popstate restore, pagination/filter state, retained-row
+  refreshing, stale-response rejection and edit-return focus/scroll fallback.
+- PIC-02/PIC-03/PIC-04/PIC-08/PIC-10/PIC-11 remain `partial` because C/E/F still own editor routes, page-family rollout
+  and role acceptance. The exception ledger remains empty; no deployment or protected-boundary expansion occurred.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
