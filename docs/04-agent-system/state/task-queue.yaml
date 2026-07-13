@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-b3-detail-feedback-primitives-2026-07-13
-  nextTaskId: content-admin-platform-b4-form-contract-primitives-2026-07-13
+  currentTaskId: content-admin-platform-b4-form-contract-primitives-2026-07-13
+  nextTaskId: content-admin-platform-b5-cumulative-audit-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -48,7 +48,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-b0-contract-code-mapping-2026-07-13
     - content-admin-platform-b1-async-state-primitives-2026-07-13
     - content-admin-platform-b2-list-query-primitives-2026-07-13
-  lastClosedTaskId: content-admin-platform-b2-list-query-primitives-2026-07-13
+    - content-admin-platform-b3-detail-feedback-primitives-2026-07-13
+  lastClosedTaskId: content-admin-platform-b3-detail-feedback-primitives-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -63,8 +64,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-b0-contract-code-mapping-2026-07-13: closed
     content-admin-platform-b1-async-state-primitives-2026-07-13: closed
     content-admin-platform-b2-list-query-primitives-2026-07-13: closed
-    content-admin-platform-b3-detail-feedback-primitives-2026-07-13: ready_for_closeout
-    content-admin-platform-b4-form-contract-primitives-2026-07-13: pending
+    content-admin-platform-b3-detail-feedback-primitives-2026-07-13: closed
+    content-admin-platform-b4-form-contract-primitives-2026-07-13: ready_for_closeout
     content-admin-platform-b5-cumulative-audit-2026-07-13: pending
     content-admin-platform-d0-list-request-contract-tests-2026-07-13: pending
     content-admin-platform-d1-question-list-consistency-2026-07-13: pending
@@ -103,17 +104,17 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-b3-detail-feedback-primitives-2026-07-13
-    title: Content admin platform shared detail and feedback primitives
-    phase: content-admin-platform-b3-detail-feedback-primitives-2026-07-13
+  - id: content-admin-platform-b4-form-contract-primitives-2026-07-13
+    title: Content admin platform shared form-contract primitives
+    phase: content-admin-platform-b4-form-contract-primitives-2026-07-13
     status: ready_for_closeout
     priority: p0
-    sequenceOrder: 71
-    taskKind: shared_detail_feedback_contract
+    sequenceOrder: 72
+    taskKind: shared_form_contract
     moduleRunVersion: 3
-    branch: codex/content-admin-platform-b3-detail-feedback-primitives
+    branch: codex/content-admin-platform-b4-form-contract-primitives
     dependsOn:
-      - content-admin-platform-b2-list-query-primitives-2026-07-13
+      - content-admin-platform-b3-detail-feedback-primitives-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
     executionProfile: R2
@@ -131,22 +132,21 @@ activeTasks:
       - content_lifecycle
       - deployment
     reviewMode: independent_audit
-    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b3-detail-feedback-primitives.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-b3-detail-feedback-primitives.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-b3-detail-feedback-primitives-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b4-form-contract-primitives.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-b4-form-contract-primitives.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-b4-form-contract-primitives-audit.md
     allowedFiles:
-      - src/lib/admin-object-state.ts
-      - src/lib/admin-object-state.test.ts
-      - src/components/admin/AdminDetailDrawer/**
-      - src/components/admin/AdminToast/**
+      - src/lib/admin-form-contract.ts
+      - src/lib/admin-form-contract.test.ts
+      - src/components/admin/AdminFormFeedback/**
       - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
       - tests/unit/admin-question-material-ui.test.ts
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b3-detail-feedback-primitives.md
-      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-b3-detail-feedback-primitives.md
-      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-b3-detail-feedback-primitives-audit.md
+      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b4-form-contract-primitives.md
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-b4-form-contract-primitives.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-b4-form-contract-primitives-audit.md
       - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
     blockedFiles:
       - AGENTS.md
@@ -186,16 +186,16 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     validationCommands:
-      - npm.cmd run test:unit -- src/lib/admin-object-state.test.ts src/components/admin/AdminDetailDrawer/AdminDetailDrawer.test.tsx src/components/admin/AdminToast/AdminToast.test.tsx src/features/admin/content-detail/AdminContentDetail.test.tsx src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx tests/unit/admin-question-material-ui.test.ts
+      - npm.cmd run test:unit -- src/lib/admin-form-contract.test.ts src/components/admin/AdminFormFeedback/AdminFormFeedback.test.tsx src/lib/content-integrity.test.ts tests/unit/admin-question-material-ui.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd exec -- prettier --check --ignore-unknown B3_CHANGED_FILES
+      - npm.cmd exec -- prettier --check --ignore-unknown B4_CHANGED_FILES
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-b3-detail-feedback-primitives-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-b3-detail-feedback-primitives-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-b3-detail-feedback-primitives-2026-07-13 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-b4-form-contract-primitives-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-b4-form-contract-primitives-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-b4-form-contract-primitives-2026-07-13 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
       localCommit:
@@ -212,29 +212,30 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-  - id: content-admin-platform-b4-form-contract-primitives-2026-07-13
-    title: Content admin platform shared form-contract primitives
-    phase: content-admin-platform-b4-form-contract-primitives-2026-07-13
+  - id: content-admin-platform-b5-cumulative-audit-2026-07-13
+    title: Content admin platform Batch B cumulative audit
+    phase: content-admin-platform-b5-cumulative-audit-2026-07-13
     status: pending
     priority: p0
-    sequenceOrder: 72
-    taskKind: shared_form_contract
+    sequenceOrder: 73
+    taskKind: cumulative_audit
     moduleRunVersion: 3
-    branch: not_created_until_b3_closeout
+    branch: not_created_until_b4_closeout
     dependsOn:
-      - content-admin-platform-b3-detail-feedback-primitives-2026-07-13
+      - content-admin-platform-b4-form-contract-primitives-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
     executionProfile: R2
     focusedGates:
-      - focused_unit
+      - full_unit
       - lint
       - typecheck
-      - changed_format
+      - full_format
+      - build
       - diff_check
       - guard
-    buildRequired: impact_triggered
-    fullRegressionPolicy: impact_triggered
+    buildRequired: true
+    fullRegressionPolicy: fixed_node
     protectedDomains:
       - a01_a30
       - content_lifecycle

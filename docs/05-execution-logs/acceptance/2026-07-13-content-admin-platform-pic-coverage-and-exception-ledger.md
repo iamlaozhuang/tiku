@@ -100,6 +100,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-05, PIC-07, PIC-08, and PIC-10 remain `partial`: B4/C/D/E still own disabled reasons, form contracts, route return/
   focus recovery, broad page-family rollout, and acceptance. No exception or authorization expansion was introduced.
 
+### B4 Shared Form-Contract Semantics
+
+- A narrow form contract now centralizes field-error lookup, selector-safe first-invalid focus, caller-owned dirty-state
+  fingerprints, accessible summaries/field errors, and visible disabled reasons.
+- Question and material create/edit forms continue using their original `content-integrity` functions, expose clean/dirty
+  state, and associate the in-flight save control with the duplicate-submit explanation.
+- PIC-05, PIC-06, PIC-07, and PIC-10 remain `partial`: C still owns dedicated editor routes, dirty-leave/return behavior,
+  and two-resource route proof; E/F own broader rollout and acceptance. PIC-09 was not claimed, and no exception or
+  authorization expansion was introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

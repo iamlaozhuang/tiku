@@ -745,6 +745,10 @@ describe("AdminQuestionMaterialManagement", () => {
       screen.getByRole("button", { name: `编辑题目 ${questionName}` }),
     );
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    expect(questionForm.getByLabelText("题型").closest("form")).toHaveAttribute(
+      "data-admin-form-dirty-state",
+      "clean",
+    );
     expect(
       questionForm.getByText(/题型、专业、等级、科目/),
     ).toBeInTheDocument();
@@ -1562,6 +1566,10 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
 
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    expect(questionForm.getByLabelText("题型").closest("form")).toHaveAttribute(
+      "data-admin-form-dirty-state",
+      "clean",
+    );
     expect(questionForm.getByLabelText("题型")).toHaveValue("");
     expect(questionForm.getByLabelText("专业")).toHaveValue("");
     expect(questionForm.getByLabelText("等级")).toHaveValue(null);
@@ -1569,6 +1577,13 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(questionForm.getByLabelText("题干")).toHaveValue("");
     expect(questionForm.getByLabelText("标准答案")).toHaveValue("");
     expect(questionForm.getByLabelText("老师解析")).toHaveValue("");
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "未完成解析草稿" },
+    });
+    expect(questionForm.getByLabelText("题型").closest("form")).toHaveAttribute(
+      "data-admin-form-dirty-state",
+      "dirty",
+    );
 
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
@@ -1600,6 +1615,9 @@ describe("AdminQuestionMaterialManagement", () => {
 
     const materialForm = within(screen.getByRole("form", { name: "材料表单" }));
     expect(
+      materialForm.getByLabelText("材料标题").closest("form"),
+    ).toHaveAttribute("data-admin-form-dirty-state", "clean");
+    expect(
       materialForm.getByText(/材料标题、专业、等级、科目/),
     ).toBeInTheDocument();
     expect(materialForm.getByLabelText("材料标题")).toHaveValue("");
@@ -1607,6 +1625,45 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(materialForm.getByLabelText("专业")).toHaveValue("");
     expect(materialForm.getByLabelText("等级")).toHaveValue(null);
     expect(materialForm.getByLabelText("科目")).toHaveValue("");
+    fireEvent.change(materialForm.getByLabelText("材料标题"), {
+      target: { value: "未完成材料草稿" },
+    });
+    expect(
+      materialForm.getByLabelText("材料标题").closest("form"),
+    ).toHaveAttribute("data-admin-form-dirty-state", "dirty");
+  });
+
+  it("uses the same integrity source for edit validation and focuses the first invalid field", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `编辑题目 ${marketingQuestionReadableName}`,
+      }),
+    );
+    const editForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.change(editForm.getByLabelText("题干"), {
+      target: { value: "<p>\u200b</p>" },
+    });
+    fireEvent.click(editForm.getByRole("button", { name: "保存题目" }));
+
+    expect(editForm.getByRole("alert")).toHaveTextContent("请输入有效题干。");
+    expect(editForm.getByLabelText("题干")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(editForm.getByLabelText("题干")).toHaveFocus();
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/questions/question-marketing-001" &&
+          requestInit?.method === "PATCH",
+      ),
+    ).toBe(false);
   });
 
   it("creates, edits, disables, and copies questions through the protected runtime", async () => {
@@ -1749,6 +1806,12 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(
       questionForm.getByRole("button", { name: "保存中…" }),
     ).toBeDisabled();
+    const disabledSave = questionForm.getByRole("button", { name: "保存中…" });
+    const disabledReasonId = disabledSave.getAttribute("aria-describedby");
+    expect(disabledReasonId).not.toBeNull();
+    expect(document.getElementById(disabledReasonId ?? "")).toHaveTextContent(
+      "正在保存，请勿重复提交。",
+    );
     expect(questionForm.getByRole("status")).toHaveTextContent(
       "正在保存，请勿重复提交。",
     );

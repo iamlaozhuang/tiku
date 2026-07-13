@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   ArrowDownUp,
   Ban,
@@ -24,6 +24,11 @@ import {
 } from "@/components/admin/AdminFilterChips";
 import { AdminToast, type AdminFeedback } from "@/components/admin/AdminToast";
 import {
+  AdminFieldError as FieldError,
+  AdminFormDisabledReason,
+  AdminFormErrorSummary as FormErrorSummary,
+} from "@/components/admin/AdminFormFeedback";
+import {
   AdminListToolbar,
   AdminPagination,
   AdminTableFrame,
@@ -36,6 +41,11 @@ import {
   parseAdminListUrlQuery,
 } from "@/lib/admin-list-query";
 import { upsertAdminObjectByPublicId } from "@/lib/admin-object-state";
+import {
+  focusFirstAdminFormIssue,
+  getAdminFormDirtyState,
+  readAdminFieldError as readFieldError,
+} from "@/lib/admin-form-contract";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -2094,6 +2104,12 @@ function QuestionWriteForm({
   const [formValues, setFormValues] = useState(values);
   const [formIssues, setFormIssues] = useState<ContentIntegrityIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const [initialValuesFingerprint] = useState(() => JSON.stringify(values));
+  const disabledReasonId = useId();
+  const dirtyState = getAdminFormDirtyState(
+    initialValuesFingerprint,
+    JSON.stringify(formValues),
+  );
   const isOptionQuestion = optionQuestionTypes.has(
     formValues.questionType as QuestionType,
   );
@@ -2115,6 +2131,7 @@ function QuestionWriteForm({
     <form
       aria-label="题目表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      data-admin-form-dirty-state={dirtyState.status}
       ref={formRef}
       onSubmit={(event) => {
         event.preventDefault();
@@ -2134,11 +2151,9 @@ function QuestionWriteForm({
         });
         setFormIssues(integrityIssues);
         if (integrityIssues.length > 0) {
-          formRef.current
-            ?.querySelector<HTMLElement>(
-              `[data-field="${integrityIssues[0]?.field}"]`,
-            )
-            ?.focus();
+          if (formRef.current !== null) {
+            focusFirstAdminFormIssue(formRef.current, integrityIssues);
+          }
           return;
         }
         onSubmit(formValues);
@@ -2764,7 +2779,11 @@ function QuestionWriteForm({
         </fieldset>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting} type="submit">
+        <Button
+          aria-describedby={isSubmitting ? disabledReasonId : undefined}
+          disabled={isSubmitting}
+          type="submit"
+        >
           {isSubmitting ? "保存中…" : submitLabel}
         </Button>
         {isFormInvalid ? (
@@ -2775,11 +2794,10 @@ function QuestionWriteForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
-        {isSubmitting ? (
-          <p className="text-text-secondary text-xs" role="status">
-            正在保存，请勿重复提交。
-          </p>
-        ) : null}
+        <AdminFormDisabledReason
+          id={disabledReasonId}
+          reason={isSubmitting ? "正在保存，请勿重复提交。" : null}
+        />
       </div>
     </form>
   );
@@ -2829,39 +2847,6 @@ function QuestionBindingPreview({
           })),
         )}
       </p>
-    </div>
-  );
-}
-
-function readFieldError(
-  issues: ContentIntegrityIssue[],
-  field: string,
-): string | null {
-  return issues.find((issue) => issue.field === field)?.message ?? null;
-}
-
-function FieldError({ id, message }: { id: string; message: string | null }) {
-  return message === null ? null : (
-    <span className="text-destructive text-xs" id={id}>
-      {message}
-    </span>
-  );
-}
-
-function FormErrorSummary({ issues }: { issues: ContentIntegrityIssue[] }) {
-  return issues.length === 0 ? null : (
-    <div
-      className="border-destructive/40 bg-destructive/5 rounded-md border p-3"
-      role="alert"
-    >
-      <p className="text-destructive text-sm font-medium">
-        请修正以下内容后再保存
-      </p>
-      <ul className="text-text-secondary mt-2 list-disc space-y-1 pl-5 text-xs">
-        {issues.map((issue) => (
-          <li key={issue.field}>{issue.message}</li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -3018,6 +3003,12 @@ function MaterialWriteForm({
   const [formValues, setFormValues] = useState(values);
   const [formIssues, setFormIssues] = useState<ContentIntegrityIssue[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const [initialValuesFingerprint] = useState(() => JSON.stringify(values));
+  const disabledReasonId = useId();
+  const dirtyState = getAdminFormDirtyState(
+    initialValuesFingerprint,
+    JSON.stringify(formValues),
+  );
   const materialLengthExceeded =
     formValues.contentRichText.length > MAX_MATERIAL_RICH_TEXT_LENGTH;
 
@@ -3025,17 +3016,16 @@ function MaterialWriteForm({
     <form
       aria-label="材料表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      data-admin-form-dirty-state={dirtyState.status}
       ref={formRef}
       onSubmit={(event) => {
         event.preventDefault();
         const integrityIssues = getMaterialIntegrityIssues(formValues);
         setFormIssues(integrityIssues);
         if (integrityIssues.length > 0) {
-          formRef.current
-            ?.querySelector<HTMLElement>(
-              `[data-field="${integrityIssues[0]?.field}"]`,
-            )
-            ?.focus();
+          if (formRef.current !== null) {
+            focusFirstAdminFormIssue(formRef.current, integrityIssues);
+          }
           return;
         }
         onSubmit(formValues);
@@ -3196,17 +3186,20 @@ function MaterialWriteForm({
         文本或完整文件内容。
       </p>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting} type="submit">
+        <Button
+          aria-describedby={isSubmitting ? disabledReasonId : undefined}
+          disabled={isSubmitting}
+          type="submit"
+        >
           {isSubmitting ? "保存中…" : "保存材料"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
-        {isSubmitting ? (
-          <p className="text-text-secondary text-xs" role="status">
-            正在保存，请勿重复提交。
-          </p>
-        ) : null}
+        <AdminFormDisabledReason
+          id={disabledReasonId}
+          reason={isSubmitting ? "正在保存，请勿重复提交。" : null}
+        />
       </div>
     </form>
   );
