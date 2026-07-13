@@ -49,7 +49,7 @@ analogousImplementationReviewed: true
 | `git diff --check`           | pass                            |
 | Module Run v2 pre-commit     | pass — 12 allowed files scanned |
 | Module Run v2 closeout       | pass                            |
-| Module Run v2 pre-push       | pending after closeout commit   |
+| Module Run v2 pre-push       | pass on the merged local branch |
 
 Validation command anchors:
 
@@ -63,7 +63,16 @@ Validation command anchors:
 - `git diff --check`: pass.
 - `Test-ModuleRunV2PreCommitHardening`: pass.
 - `Test-ModuleRunV2ModuleCloseoutReadiness`: pass after the initial governance RED and immutable task commit.
-- `Test-ModuleRunV2PrePushReadiness`: pending after the immutable task commit.
+- `Test-ModuleRunV2PrePushReadiness`: pass with the remote-ahead check intentionally deferred to the ordinary push boundary.
+
+### Master Post-merge Revalidation
+
+- Program Guard smoke and real-state validation: pass.
+- `git diff --check origin/master..master`: pass.
+- The first default-worker full-unit run produced one assertion failure in an unchanged organization-employee test; its exact isolated rerun passed 1 file/4 tests.
+- A second default-worker full-unit run produced seven wall-clock timeouts across four unchanged test files while using the machine's 15-worker default. This did not reproduce the first assertion and changed no source or test file.
+- The bounded-concurrency master rerun `npm.cmd run test:unit -- --maxWorkers=4` passed all 363 files and 2036 tests. Therefore X2 remains untriggered: there is no reproducible current-master product failure.
+- Master lint, typecheck, full-repository format check and production build passed; the build generated 90 pages.
 
 ## Program Materialization
 
@@ -89,7 +98,7 @@ Validation command anchors:
 - Cost Calibration Gate remains blocked.
 - blocked remainder: product feature implementation, database, Provider, dependency, schema/fixture, browser/account, staging, production, deployment, PR, force push and release-readiness claims remain blocked or task-specific.
 - task commit: pass — `2810a3722d25ea496121c74f8cbeadad3a1b1309`
-- master ff-only merge: pending
+- master ff-only merge: pass — local `master` reached `e7e8ce92375a8499824c19134f9a31097c77338a`
 - `origin/master` sync: pending
 - short branch/worktree cleanup: pending
 - next task: `content-admin-platform-b0-contract-code-mapping-2026-07-13`
