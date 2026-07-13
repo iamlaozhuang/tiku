@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-ai-training-history-resume-repair-2026-07-12
     title: User-led AI training history synchronization and paper resume repair
     phase: user-led-ai-training-history-resume-repair-2026-07-12
-    status: in_progress
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 58
     taskKind: learner_ai_history_and_learning_session_recovery
@@ -204,7 +204,7 @@ activeTasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12 -SkipRemoteAheadCheck
     validationSummary:
-      status: local_verified_pending_commit_closeout
+      status: ready_for_merge
       baselineFocusedTests: pass_7_files_84_tests
       initialFullTests: incomplete_timeout_processes_terminated_no_failure_result
       tddRed: pass_9_expected_failures
@@ -223,6 +223,11 @@ activeTasks:
       schemaMigration: blocked_not_executed
       dependencyChange: blocked_not_executed
       adversarialReview: pass_two_rounds
+      productCommit: pass_63d0f4786
+      localFullLoopGate: pass
+      moduleRunV2ModuleCloseoutReadiness: pass
+      moduleRunV2PreCommitHardening: pass
+      moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
   - id: user-led-ai-training-settings-order-repair-2026-07-12
     title: User-led AI training generation settings order repair
     phase: user-led-ai-training-settings-order-repair-2026-07-12

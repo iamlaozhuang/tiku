@@ -4,7 +4,7 @@
 
 ## Audit Result
 
-APPROVE pending Module Run v2 closeout and merge verification.
+APPROVE for ff-only merge, master verification, ordinary push, and cleanup.
 
 ## First Adversarial Review: Authority and Data Integrity
 
