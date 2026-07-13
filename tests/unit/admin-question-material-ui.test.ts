@@ -1427,69 +1427,117 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.queryByText("已锁定物流材料 B")).toBeNull();
   });
 
-  it.fails(
-    "[D3 RED] restores canonical list controls when browser history emits popstate",
-    async () => {
-      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-      const fetchMock = mockContentFetch();
+  it("[D3] restores canonical list controls when browser history emits popstate", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockContentFetch();
 
-      render(createElement(AdminQuestionMaterialManagement));
-      await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    render(createElement(AdminQuestionMaterialManagement));
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
 
-      window.history.pushState(
-        null,
-        "",
-        "/content/questions?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&status=disabled",
-      );
-      window.dispatchEvent(new PopStateEvent("popstate"));
+    window.history.pushState(
+      null,
+      "",
+      "/content/questions?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&status=disabled",
+    );
+    window.dispatchEvent(new PopStateEvent("popstate"));
 
-      await waitFor(() =>
-        expect(screen.getByLabelText("状态")).toHaveValue("disabled"),
-      );
-      expect(screen.getByLabelText("每页条数")).toHaveValue("50");
-      expect(
-        fetchMock.mock.calls.some(([url]) =>
-          String(url).includes("page=2&pageSize=50"),
-        ),
-      ).toBe(true);
-    },
-  );
+    await waitFor(() =>
+      expect(screen.getByLabelText("状态")).toHaveValue("disabled"),
+    );
+    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes("page=2&pageSize=50"),
+      ),
+    ).toBe(true);
+  });
 
-  it.fails(
-    "[D3 RED] restores the initiating edit control and captured scroll position on return",
-    async () => {
-      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
-      mockWritableContentFetch();
-      const scrollToMock = vi.fn();
-      vi.stubGlobal("scrollTo", scrollToMock);
-      Object.defineProperty(window, "scrollY", {
-        configurable: true,
-        value: 320,
-      });
+  it("[D3] restores the initiating edit control and captured scroll position on return", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+    const scrollToMock = vi.fn();
+    vi.stubGlobal("scrollTo", scrollToMock);
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      value: 320,
+    });
 
-      render(createElement(AdminQuestionMaterialManagement));
-      await screen.findByText("市场调研抽样方法的核心目标是什么？");
-      const editButton = screen.getByRole("button", {
-        name: `编辑题目 ${marketingQuestionReadableName}`,
-      });
-      editButton.focus();
-      fireEvent.click(editButton);
+    render(createElement(AdminQuestionMaterialManagement));
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    const editButton = screen.getByRole("button", {
+      name: `编辑题目 ${marketingQuestionReadableName}`,
+    });
+    editButton.focus();
+    fireEvent.click(editButton);
 
-      const cancelButton = screen.getByRole("button", { name: "取消" });
-      cancelButton.focus();
-      Object.defineProperty(window, "scrollY", {
-        configurable: true,
-        value: 0,
-      });
-      fireEvent.click(cancelButton);
+    const cancelButton = screen.getByRole("button", { name: "取消" });
+    cancelButton.focus();
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      value: 0,
+    });
+    fireEvent.click(cancelButton);
 
-      expect.soft(editButton).toHaveFocus();
-      expect.soft(scrollToMock).toHaveBeenCalledWith({
-        behavior: "auto",
-        top: 320,
-      });
-    },
-  );
+    expect.soft(editButton).toHaveFocus();
+    expect.soft(scrollToMock).toHaveBeenCalledWith({
+      behavior: "auto",
+      top: 320,
+    });
+  });
+
+  it("[D3] restores a material edit trigger and captured scroll position", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+    const scrollToMock = vi.fn();
+    vi.stubGlobal("scrollTo", scrollToMock);
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      value: 240,
+    });
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+    await screen.findByText("营销案例材料 A");
+    const editButton = screen.getByRole("button", {
+      name: `编辑材料 ${marketingMaterialReadableName}`,
+    });
+    fireEvent.click(editButton);
+
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      value: 0,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+
+    expect(editButton).toHaveFocus();
+    expect(scrollToMock).toHaveBeenCalledWith({
+      behavior: "auto",
+      top: 240,
+    });
+  });
+
+  it("[D3] falls back to the list toolbar when the edit trigger disconnects", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    const editButton = screen.getByRole("button", {
+      name: `编辑题目 ${marketingQuestionReadableName}`,
+    });
+    fireEvent.click(editButton);
+
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "disabled" },
+    });
+    await waitFor(() => expect(editButton.isConnected).toBe(false));
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+
+    expect(screen.getByLabelText("关键词")).toHaveFocus();
+  });
 
   it("filters questions by level, question type, knowledge_node, and tag", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");

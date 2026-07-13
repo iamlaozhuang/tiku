@@ -191,6 +191,12 @@ function createManagedPaperAssetImageMarkup({
 
 type ContentLoadState = "loading" | "ready" | "unauthorized" | "error";
 
+type ContentEditReturnContext = {
+  filterLabel: "题目筛选" | "材料筛选";
+  scrollY: number;
+  trigger: HTMLElement;
+};
+
 export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
   initialKnowledgeNodeFilter?: string;
@@ -963,6 +969,7 @@ export function AdminQuestionMaterialManagement({
     handlePageChange,
     handlePageSizeChange,
     handleReset,
+    handleRestoreQuery,
     handleSortChange,
     query,
   } = useAdminListInteraction({
@@ -973,6 +980,7 @@ export function AdminQuestionMaterialManagement({
     useState<PendingContentAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submissionInProgressRef = useRef(false);
+  const editReturnContextRef = useRef<ContentEditReturnContext | null>(null);
   const [
     isInitialQuestionTargetDismissed,
     setIsInitialQuestionTargetDismissed,
@@ -1054,6 +1062,43 @@ export function AdminQuestionMaterialManagement({
       `${window.location.pathname}?${routeSearchParams.toString()}`,
     );
   }, [contentQueryString, detailTarget]);
+
+  useEffect(() => {
+    function handlePopState() {
+      const restoredQuery = readContentListUrlQuery();
+
+      setKeyword(restoredQuery.keyword);
+      setKnowledgeNodeFilter(restoredQuery.knowledgeNodePublicId);
+      setLevelFilter(restoredQuery.level);
+      setProfession(restoredQuery.profession);
+      setQuestionType(restoredQuery.questionType);
+      setStatus(restoredQuery.status);
+      setSubject(restoredQuery.subject);
+      setTagFilter(restoredQuery.tagPublicId);
+      handleRestoreQuery(restoredQuery.list);
+      setDetailTarget(
+        activeView === "questions" &&
+          restoredQuery.questionDetailPublicId !== ""
+          ? {
+              kind: "question",
+              publicId: restoredQuery.questionDetailPublicId,
+            }
+          : activeView === "materials" &&
+              restoredQuery.materialDetailPublicId !== ""
+            ? {
+                kind: "material",
+                publicId: restoredQuery.materialDetailPublicId,
+              }
+            : null,
+      );
+    }
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [activeView, handleRestoreQuery]);
 
   const initialQuestionTarget = useMemo(() => {
     if (
@@ -1208,6 +1253,41 @@ export function AdminQuestionMaterialManagement({
   const displayedQuestions = questions;
   const displayedMaterials = materials;
 
+  function captureEditReturnContext(trigger: HTMLElement) {
+    editReturnContextRef.current = {
+      filterLabel: activeView === "questions" ? "题目筛选" : "材料筛选",
+      scrollY: window.scrollY,
+      trigger,
+    };
+  }
+
+  function closeActiveFormAndRestoreListContext() {
+    setActiveForm(null);
+
+    const returnContext = editReturnContextRef.current;
+    editReturnContextRef.current = null;
+
+    if (returnContext === null) {
+      return;
+    }
+
+    if (
+      window.scrollY !== returnContext.scrollY &&
+      typeof window.scrollTo === "function"
+    ) {
+      window.scrollTo({ behavior: "auto", top: returnContext.scrollY });
+    }
+
+    const focusTarget = returnContext.trigger.isConnected
+      ? returnContext.trigger
+      : document.querySelector<HTMLElement>(
+          `[aria-label="${returnContext.filterLabel}"] input, ` +
+            `[aria-label="${returnContext.filterLabel}"] select, ` +
+            `[aria-label="${returnContext.filterLabel}"] button`,
+        );
+    focusTarget?.focus({ preventScroll: true });
+  }
+
   if (loadState === "loading") {
     return (
       <AdminLoadingState
@@ -1296,7 +1376,7 @@ export function AdminQuestionMaterialManagement({
         title: shouldPublishInitialQuestionTarget ? "题目已发布" : "题目已保存",
         tone: "success",
       });
-      setActiveForm(null);
+      closeActiveFormAndRestoreListContext();
       setIsInitialQuestionTargetDismissed(true);
     } catch {
       setContentMutationFeedback({
@@ -1363,7 +1443,7 @@ export function AdminQuestionMaterialManagement({
         title: "材料已保存",
         tone: "success",
       });
-      setActiveForm(null);
+      closeActiveFormAndRestoreListContext();
     } catch {
       setContentMutationFeedback({
         message: "当前输入已保留，请检查网络后重试。",
@@ -1671,6 +1751,7 @@ export function AdminQuestionMaterialManagement({
         <ActionBar
           activeView={activeView}
           onCreate={() => {
+            editReturnContextRef.current = null;
             setActionError(null);
             setActionMessage(null);
             setContentMutationFeedback(null);
@@ -1855,7 +1936,8 @@ export function AdminQuestionMaterialManagement({
                   publicId: question.publicId,
                 })
               }
-              onEdit={(question) => {
+              onEdit={(question, trigger) => {
+                captureEditReturnContext(trigger);
                 setActionError(null);
                 setActionMessage(null);
                 setContentMutationFeedback(null);
@@ -1890,7 +1972,8 @@ export function AdminQuestionMaterialManagement({
                   publicId: material.publicId,
                 })
               }
-              onEdit={(material) => {
+              onEdit={(material, trigger) => {
+                captureEditReturnContext(trigger);
                 setActionError(null);
                 setActionMessage(null);
                 setContentMutationFeedback(null);
@@ -1941,7 +2024,7 @@ export function AdminQuestionMaterialManagement({
                 }
                 values={displayedActiveForm.values}
                 onCancel={() => {
-                  setActiveForm(null);
+                  closeActiveFormAndRestoreListContext();
                   setIsInitialQuestionTargetDismissed(true);
                 }}
                 onSubmit={handleSaveQuestion}
@@ -1955,7 +2038,7 @@ export function AdminQuestionMaterialManagement({
                 mode={displayedActiveForm.mode}
                 values={displayedActiveForm.values}
                 onCancel={() => {
-                  setActiveForm(null);
+                  closeActiveFormAndRestoreListContext();
                   setIsInitialQuestionTargetDismissed(true);
                 }}
                 onSubmit={handleSaveMaterial}
@@ -3454,7 +3537,7 @@ function QuestionList({
   selectedPublicId: string | null;
   onCopy: (question: QuestionDto) => void;
   onDisable: (question: QuestionDto) => void;
-  onEdit: (question: QuestionDto) => void;
+  onEdit: (question: QuestionDto, trigger: HTMLButtonElement) => void;
   onRecommend: (question: QuestionDto) => void;
   onReviewRecommendation: (
     questionPublicId: string,
@@ -3523,7 +3606,7 @@ function QuestionList({
                   size="sm"
                   type="button"
                   variant="outline"
-                  onClick={() => onEdit(question)}
+                  onClick={(event) => onEdit(question, event.currentTarget)}
                 >
                   <Pencil aria-hidden="true" data-icon="inline-start" />
                   编辑
@@ -3829,7 +3912,7 @@ function MaterialList({
   selectedPublicId: string | null;
   onCopy: (material: MaterialDto) => void;
   onDisable: (material: MaterialDto) => void;
-  onEdit: (material: MaterialDto) => void;
+  onEdit: (material: MaterialDto, trigger: HTMLButtonElement) => void;
   onView: (publicId: string) => void;
 }) {
   return (
@@ -3890,7 +3973,7 @@ function MaterialList({
                   size="sm"
                   type="button"
                   variant="outline"
-                  onClick={() => onEdit(material)}
+                  onClick={(event) => onEdit(material, event.currentTarget)}
                 >
                   <Pencil aria-hidden="true" data-icon="inline-start" />
                   编辑

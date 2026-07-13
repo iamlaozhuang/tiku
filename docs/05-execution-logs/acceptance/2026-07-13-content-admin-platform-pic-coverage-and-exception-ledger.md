@@ -147,6 +147,15 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-02/PIC-03/PIC-04/PIC-10/PIC-11 remain `partial`: D3 owns browser/edit return recovery, D4 owns cumulative list
   proof, and E/F own page-family rollout and acceptance. No exception or protected-boundary expansion was introduced.
 
+### D3 List Return Recovery
+
+- Browser popstate reparses the canonical list URL and restores filter, sort, page and pageSize state for a renewed
+  request; direct URL behavior remains unchanged.
+- Question/material existing-edit return restores captured scroll and the initiating control on cancel/save, with a
+  deterministic list-toolbar fallback if the trigger disappears.
+- PIC-02/PIC-08/PIC-10/PIC-11 remain `partial` until D4 cumulative proof and E/F rollout/acceptance. Dirty-leave remains
+  C5-owned; no exception, authorization/lifecycle expansion or deployment was introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

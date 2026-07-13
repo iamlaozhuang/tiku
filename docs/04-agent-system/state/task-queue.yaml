@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-d2-material-list-consistency-2026-07-13
-  nextTaskId: content-admin-platform-d3-list-return-recovery-2026-07-13
+  currentTaskId: content-admin-platform-d3-list-return-recovery-2026-07-13
+  nextTaskId: content-admin-platform-d4-cumulative-audit-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -53,7 +53,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-b5-cumulative-audit-2026-07-13
     - content-admin-platform-d0-list-request-contract-tests-2026-07-13
     - content-admin-platform-d1-question-list-consistency-2026-07-13
-  lastClosedTaskId: content-admin-platform-d1-question-list-consistency-2026-07-13
+    - content-admin-platform-d2-material-list-consistency-2026-07-13
+  lastClosedTaskId: content-admin-platform-d2-material-list-consistency-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -73,8 +74,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-b5-cumulative-audit-2026-07-13: closed
     content-admin-platform-d0-list-request-contract-tests-2026-07-13: closed
     content-admin-platform-d1-question-list-consistency-2026-07-13: closed
-    content-admin-platform-d2-material-list-consistency-2026-07-13: ready_for_closeout
-    content-admin-platform-d3-list-return-recovery-2026-07-13: pending
+    content-admin-platform-d2-material-list-consistency-2026-07-13: closed
+    content-admin-platform-d3-list-return-recovery-2026-07-13: ready_for_closeout
     content-admin-platform-d4-cumulative-audit-2026-07-13: pending
     content-admin-platform-c0-editor-route-wireflow-2026-07-13: pending
     content-admin-platform-c1-question-create-editor-2026-07-13: pending
@@ -108,20 +109,20 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-d2-material-list-consistency-2026-07-13
-    title: Content admin platform material list consistency
-    phase: content-admin-platform-d2-material-list-consistency-2026-07-13
+  - id: content-admin-platform-d3-list-return-recovery-2026-07-13
+    title: Content admin platform list return recovery
+    phase: content-admin-platform-d3-list-return-recovery-2026-07-13
     status: ready_for_closeout
     priority: p0
-    sequenceOrder: 82
-    taskKind: material_list_consistency
+    sequenceOrder: 83
+    taskKind: list_return_recovery
     moduleRunVersion: 3
-    branch: codex/content-admin-platform-d2-material-list-consistency
+    branch: codex/content-admin-platform-d3-list-return-recovery
     dependsOn:
-      - content-admin-platform-d1-question-list-consistency-2026-07-13
+      - content-admin-platform-d2-material-list-consistency-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R1
+    executionProfile: R2
     focusedGates:
       - focused_unit
       - lint
@@ -129,25 +130,27 @@ activeTasks:
       - changed_format
       - diff_check
       - guard
-    buildRequired: false
+    buildRequired: impact_triggered
     fullRegressionPolicy: impact_triggered
     protectedDomains:
       - a01_a30
       - content_lifecycle
       - pagination_contract
       - deployment
-    reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-d2-material-list-consistency.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d2-material-list-consistency.md
-    auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d2-material-list-consistency.md
+    reviewMode: independent_audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-d3-list-return-recovery.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d3-list-return-recovery.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-d3-list-return-recovery-audit.md
     allowedFiles:
       - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/hooks/useAdminListInteraction.ts
       - tests/unit/admin-question-material-ui.test.ts
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-d2-material-list-consistency.md
-      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d2-material-list-consistency.md
+      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-d3-list-return-recovery.md
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-d3-list-return-recovery.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-d3-list-return-recovery-audit.md
       - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
     blockedFiles:
       - AGENTS.md
@@ -185,13 +188,13 @@ activeTasks:
       - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd exec -- prettier --check --ignore-unknown D2_CHANGED_FILES
+      - npm.cmd exec -- prettier --check --ignore-unknown D3_CHANGED_FILES
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-d2-material-list-consistency-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-d2-material-list-consistency-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-d2-material-list-consistency-2026-07-13 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-d3-list-return-recovery-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-d3-list-return-recovery-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-d3-list-return-recovery-2026-07-13 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
       localCommit:
@@ -208,17 +211,17 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-  - id: content-admin-platform-d3-list-return-recovery-2026-07-13
-    title: Content admin platform list return recovery
-    phase: content-admin-platform-d3-list-return-recovery-2026-07-13
+  - id: content-admin-platform-d4-cumulative-audit-2026-07-13
+    title: Content admin platform Batch D cumulative audit
+    phase: content-admin-platform-d4-cumulative-audit-2026-07-13
     status: pending
     priority: p0
-    sequenceOrder: 83
-    taskKind: list_return_recovery
+    sequenceOrder: 84
+    taskKind: cumulative_audit
     moduleRunVersion: 3
-    branch: not_created_until_d2_closeout
+    branch: not_created_until_d3_closeout
     dependsOn:
-      - content-admin-platform-d2-material-list-consistency-2026-07-13
+      - content-admin-platform-d3-list-return-recovery-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
     executionProfile: R2
@@ -229,8 +232,8 @@ activeTasks:
       - changed_format
       - diff_check
       - guard
-    buildRequired: impact_triggered
-    fullRegressionPolicy: impact_triggered
+    buildRequired: true
+    fullRegressionPolicy: fixed_node
     protectedDomains:
       - a01_a30
       - content_lifecycle

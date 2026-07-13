@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import {
   applyAdminListFilter,
@@ -65,11 +65,19 @@ export function useAdminListInteraction({
     setQuery({ ...resetQueryRef.current });
   }
 
+  const handleRestoreQuery = useCallback(
+    (restoredQuery: Partial<AdminListQuery>) => {
+      setQuery(createAdminListQuery(restoredQuery));
+    },
+    [],
+  );
+
   return {
     handleFilterChange,
     handlePageChange,
     handlePageSizeChange,
     handleReset,
+    handleRestoreQuery,
     handleSortChange,
     query,
     refreshCount,
