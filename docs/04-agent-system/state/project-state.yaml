@@ -1,8 +1,111 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-p0-data-integrity-2026-07-13
-updatedAt: "2026-07-13T09:23:00-07:00"
+currentPhase: content-admin-platform-program-init-2026-07-13
+updatedAt: "2026-07-13T11:45:00-07:00"
+contentAdminPlatformSerialProgram:
+  programId: content-admin-platform-b-to-f-2026-07-13
+  status: in_progress
+  baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
+  currentTaskId: content-admin-platform-program-init-2026-07-13
+  nextTaskId: content-admin-platform-b0-contract-code-mapping-2026-07-13
+  orderedTaskIds:
+    - content-admin-platform-program-init-2026-07-13
+    - content-admin-platform-b0-contract-code-mapping-2026-07-13
+    - content-admin-platform-b1-async-state-primitives-2026-07-13
+    - content-admin-platform-b2-list-query-primitives-2026-07-13
+    - content-admin-platform-b3-detail-feedback-primitives-2026-07-13
+    - content-admin-platform-b4-form-contract-primitives-2026-07-13
+    - content-admin-platform-b5-cumulative-audit-2026-07-13
+    - content-admin-platform-d0-list-request-contract-tests-2026-07-13
+    - content-admin-platform-d1-question-list-consistency-2026-07-13
+    - content-admin-platform-d2-material-list-consistency-2026-07-13
+    - content-admin-platform-d3-list-return-recovery-2026-07-13
+    - content-admin-platform-d4-cumulative-audit-2026-07-13
+    - content-admin-platform-c0-editor-route-wireflow-2026-07-13
+    - content-admin-platform-c1-question-create-editor-2026-07-13
+    - content-admin-platform-c2-question-edit-copy-lock-2026-07-13
+    - content-admin-platform-c3-material-create-editor-2026-07-13
+    - content-admin-platform-c4-material-edit-copy-lock-2026-07-13
+    - content-admin-platform-c5-editor-navigation-recovery-2026-07-13
+    - content-admin-platform-c6-cumulative-audit-2026-07-13
+    - content-admin-platform-e0-route-family-inventory-2026-07-13
+    - content-admin-platform-e1-content-page-family-rollout-2026-07-13
+    - content-admin-platform-e2-operations-page-family-rollout-2026-07-13
+    - content-admin-platform-e3-organization-page-family-rollout-2026-07-13
+    - content-admin-platform-e4-learner-page-family-rollout-2026-07-13
+    - content-admin-platform-e5-cross-role-exception-closure-2026-07-13
+    - content-admin-platform-e6-cumulative-audit-2026-07-13
+    - content-admin-platform-f0-acceptance-readiness-2026-07-13
+    - content-admin-platform-f1-content-admin-acceptance-2026-07-13
+    - content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+    - content-admin-platform-f3-organization-acceptance-2026-07-13
+    - content-admin-platform-f4-learner-acceptance-2026-07-13
+    - content-admin-platform-f5-final-cumulative-audit-2026-07-13
+  completedTaskIds: []
+  lastClosedTaskId: ""
+  standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+  serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
+  coverageLedgerPath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
+  guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
+  deployment:
+    approved: false
+    status: blocked_requires_fresh_user_approval
+  taskStatusById:
+    content-admin-platform-program-init-2026-07-13: ready_for_closeout
+    content-admin-platform-b0-contract-code-mapping-2026-07-13: pending
+    content-admin-platform-b1-async-state-primitives-2026-07-13: pending
+    content-admin-platform-b2-list-query-primitives-2026-07-13: pending
+    content-admin-platform-b3-detail-feedback-primitives-2026-07-13: pending
+    content-admin-platform-b4-form-contract-primitives-2026-07-13: pending
+    content-admin-platform-b5-cumulative-audit-2026-07-13: pending
+    content-admin-platform-d0-list-request-contract-tests-2026-07-13: pending
+    content-admin-platform-d1-question-list-consistency-2026-07-13: pending
+    content-admin-platform-d2-material-list-consistency-2026-07-13: pending
+    content-admin-platform-d3-list-return-recovery-2026-07-13: pending
+    content-admin-platform-d4-cumulative-audit-2026-07-13: pending
+    content-admin-platform-c0-editor-route-wireflow-2026-07-13: pending
+    content-admin-platform-c1-question-create-editor-2026-07-13: pending
+    content-admin-platform-c2-question-edit-copy-lock-2026-07-13: pending
+    content-admin-platform-c3-material-create-editor-2026-07-13: pending
+    content-admin-platform-c4-material-edit-copy-lock-2026-07-13: pending
+    content-admin-platform-c5-editor-navigation-recovery-2026-07-13: pending
+    content-admin-platform-c6-cumulative-audit-2026-07-13: pending
+    content-admin-platform-e0-route-family-inventory-2026-07-13: pending
+    content-admin-platform-e1-content-page-family-rollout-2026-07-13: pending
+    content-admin-platform-e2-operations-page-family-rollout-2026-07-13: pending
+    content-admin-platform-e3-organization-page-family-rollout-2026-07-13: pending
+    content-admin-platform-e4-learner-page-family-rollout-2026-07-13: pending
+    content-admin-platform-e5-cross-role-exception-closure-2026-07-13: pending
+    content-admin-platform-e6-cumulative-audit-2026-07-13: pending
+    content-admin-platform-f0-acceptance-readiness-2026-07-13: pending
+    content-admin-platform-f1-content-admin-acceptance-2026-07-13: pending
+    content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13: pending
+    content-admin-platform-f3-organization-acceptance-2026-07-13: pending
+    content-admin-platform-f4-learner-acceptance-2026-07-13: pending
+    content-admin-platform-f5-final-cumulative-audit-2026-07-13: pending
+  closeoutCheckpoints:
+    content-admin-platform-program-init-2026-07-13:
+      taskCommit: pending
+      masterMerge: pending
+      originMasterSync: pending
+      worktreeCleanup: pending
+      shortBranchCleanup: pending
+  conditionalTasks:
+    x1:
+      taskId: content-admin-platform-x1-valid-ai-paper-test-data-2026-07-13
+      conditionSatisfied: false
+      status: pending
+      trigger: full-role acceptance requires a valid persisted paperAssembly resume sample and none exists
+    x2:
+      taskId: content-admin-platform-x2-fresh-baseline-defect-repair-2026-07-13
+      conditionSatisfied: false
+      status: pending
+      trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
+  amendments:
+    - id: initial-program-order-2026-07-13
+      status: accepted
+      reason: user-approved Program Init materialization; serial order is B then D then C then E then F
 latestContentAdminP0DataIntegrity:
   id: content-admin-p0-data-integrity-2026-07-13
   status: closed_remote_synced
@@ -6175,23 +6278,24 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: content-admin-p0-data-integrity-2026-07-13
-  title: Content admin P0 question and material data integrity
-  phase: content-admin-p0-data-integrity-2026-07-13
+  id: content-admin-platform-program-init-2026-07-13
+  title: Content admin platform Batch B-F serial program initialization
+  phase: content-admin-platform-program-init-2026-07-13
   status: ready_for_closeout
   priority: p0
-  taskKind: approved_runtime_data_integrity_fix
-  branch: codex/content-admin-p0-data-integrity
+  taskKind: mechanism_hardening
+  branch: codex/content-admin-platform-program-init
   humanApprovalBoundary:
-    runtimeSourceChange: approved_batch_a_only
-    testSourceChange: approved_batch_a_only
-    focusedUnitTest: approved
+    governanceSourceChange: approved_program_init_only
+    productRuntimeSourceChange: blocked
+    productTestSourceChange: blocked
+    guardScriptAndSmokeChange: approved
     fullLocalGate: approved
     localCommit: approved
     fastForwardMerge: approved_master_only
     cleanup: approved_after_remote_sync
     push: approved_origin_master_only
-    approvalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
+    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     databaseConnection: blocked
     databaseMutation: blocked
     schemaMigration: blocked
@@ -6204,20 +6308,22 @@ currentTask:
     stagingProdDeploy: blocked
     forcePush: blocked
     pullRequest: blocked
-  plannedAt: "2026-07-13T07:45:31-07:00"
-  claimedAt: "2026-07-13T07:45:31-07:00"
-  targetClosureItem: Enforce the accepted P0-01 through P0-14 question and material semantic integrity contract in the client and API through TDD.
-  behaviorBoundary: batch_a_question_material_client_api_integrity_only_no_editor_route_platform_rollout_browser_database_provider_dependency_schema_fixture_deploy_or_remote_write
+  plannedAt: "2026-07-13T11:45:00-07:00"
+  claimedAt: "2026-07-13T11:45:00-07:00"
+  targetClosureItem: Materialize the approved Batch B-F serial program as repository state, authorization, guard, tests, recovery checkpoints, and PIC coverage ledger.
+  behaviorBoundary: governance_and_agent_guard_only_no_product_runtime_test_database_provider_dependency_schema_fixture_browser_or_deploy
   evidenceMode: source_path_test_count_and_decision_only_no_credentials_tokens_env_values_database_urls_raw_rows_raw_dom_or_full_ai_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-data-integrity.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-data-integrity.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
-  nextRequiredTaskId: none
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-program-init.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-program-init.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-program-init-audit.md
+  nextRequiredTaskId: content-admin-platform-b0-contract-code-mapping-2026-07-13
   validationSummary:
-    status: pass_closed_remote_synced_cleanup_complete
-    baselineFocusedTests: pass_3_files_52_tests
-    tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
-    focusedGreen: pass_6_files_94_tests
+    status: pass_pre_closeout
+    requiredReading: pass
+    tddRed: pass_guard_missing_expected
+    guardSmoke: pass_1_positive_8_negative
+    guardRealState: pass
+    powerShellParse: pass
     fullUnitTests: pass_363_files_2036_tests
     lint: pass
     typecheck: pass
@@ -6226,20 +6332,6 @@ currentTask:
     gitDiffCheck: pass
     adversarialReview: pass_two_rounds
     selfReview: pass
-    moduleRunV2PreCommitHardening: pass_15_files
-    masterPostMergeFocusedTests: pass_6_files_94_tests
-    masterPostMergeFullUnitTests: pass_363_files_2036_tests_serial_rerun
-    masterPostMergeLint: pass
-    masterPostMergeTypecheck: pass
-    masterPostMergeFormatCheck: pass
-    masterPostMergeWebpackBuild: pass_90_static_pages
-    masterPostMergeDiffCheck: pass
-    transientParallelGateInvestigation: pass_7_files_67_tests_serial_resource_contention_confirmed
-    moduleRunV2PrePushReadiness: pass_real_push_hook
-    remotePush: pass_origin_master_f24c47d53
-    remoteComparison: pass_master_equals_origin_master
-    shortBranchCleanup: pass
-    worktreeCleanup: pass
 previousCurrentTaskBeforeContentAdminP0DataIntegrity20260713:
   id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
   status: local_closeout_complete_push_blocked
