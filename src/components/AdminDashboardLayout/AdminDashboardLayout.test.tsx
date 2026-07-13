@@ -205,6 +205,28 @@ describe("AdminDashboardLayout shared admin state templates", () => {
     expect(screen.getByText("ops page body")).toBeInTheDocument();
   });
 
+  it("keeps wide admin tables inside the content scroll boundary", async () => {
+    mockSessionResponse(
+      createAdminSessionResponse({
+        adminRoles: ["ops_admin"],
+      }),
+    );
+
+    render(
+      <AdminDashboardLayout>
+        <div>wide operations table</div>
+      </AdminDashboardLayout>,
+    );
+
+    expect(
+      await screen.findByText("wide operations table"),
+    ).toBeInTheDocument();
+
+    const content = screen.getByRole("main");
+    expect(content).toHaveClass("min-w-0");
+    expect(content.parentElement).toHaveClass("min-w-0");
+  });
+
   it("does not present organization workspace as an ordinary switch target for super admin without organization context", async () => {
     mockSessionResponse(
       createAdminSessionResponse({

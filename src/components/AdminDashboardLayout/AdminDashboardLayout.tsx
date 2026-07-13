@@ -830,7 +830,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Area */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* TopBar */}
         <header className="border-border bg-surface sticky top-0 z-30 flex h-14 items-center justify-between border-b px-6 shadow-sm">
           <span className="text-text-muted text-sm">{portalName}</span>
@@ -845,7 +845,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto p-6">
           <AdminWorkspaceContextBand
             capabilityLabel={getWorkspaceCapabilityLabel(
               workspace,
