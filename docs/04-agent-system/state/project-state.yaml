@@ -5,7 +5,7 @@ currentPhase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
 updatedAt: "2026-07-12T16:48:09-07:00"
 latestUserLedB1B2OrganizationTrainingRuntimeRecovery:
   id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
-  status: ready_for_closeout
+  status: ready_for_push
   priority: p0
   branch: codex/user-led-b1-b2-org-training-runtime
   startSha: 4ef7980845a7e6b0e9f28140e28acea230c1b4be
@@ -48,6 +48,13 @@ latestUserLedB1B2OrganizationTrainingRuntimeRecovery:
     adversarialReview: pass_2_rounds
     moduleRunV2PreCommitHardening: pass_7_files_scope_sensitive_terminology
     localCommit: pass_250c7a999
+    governanceCommit: pass_81dccc3d3
+    moduleRunV2ModuleCloseoutReadiness: pass
+    localMasterMerge: pass_ff_only_81dccc3d3
+    masterFocusedTests: pass_7_files_162_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
     providerExecution: blocked_not_executed
     schemaSourceChange: blocked_not_executed
     migrationGeneration: blocked_not_executed
