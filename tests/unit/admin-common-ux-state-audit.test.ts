@@ -41,6 +41,11 @@ describe("admin common UX state audit", () => {
 
     const loadingStatus = screen.getByRole("status");
     expect(loadingStatus).toHaveAttribute("data-admin-ux-state", "loading");
+    expect(loadingStatus).toHaveAttribute(
+      "data-admin-async-state",
+      "initial-loading",
+    );
+    expect(loadingStatus).toHaveAttribute("aria-busy", "true");
     expect(loadingStatus).toHaveTextContent("正在加载运营后台数据");
     expectRedactionSafe(loadingView.container);
 
@@ -56,6 +61,7 @@ describe("admin common UX state audit", () => {
 
     const emptyStatus = screen.getByRole("status");
     expect(emptyStatus).toHaveAttribute("data-admin-ux-state", "empty");
+    expect(emptyStatus).toHaveAttribute("data-admin-async-state", "empty");
     expect(emptyStatus).toHaveTextContent("暂无运营后台数据");
     expectRedactionSafe(emptyView.container);
   });
@@ -70,6 +76,7 @@ describe("admin common UX state audit", () => {
 
     const errorAlert = screen.getByRole("alert");
     expect(errorAlert).toHaveAttribute("data-admin-ux-state", "error");
+    expect(errorAlert).toHaveAttribute("data-admin-async-state", "error");
     expect(errorAlert).toHaveTextContent("运营后台数据加载失败");
     expectRedactionSafe(errorView.container);
 
@@ -81,6 +88,10 @@ describe("admin common UX state audit", () => {
     expect(permissionAlert).toHaveAttribute(
       "data-admin-ux-state",
       "permission-denied",
+    );
+    expect(permissionAlert).toHaveAttribute(
+      "data-admin-async-state",
+      "unauthorized",
     );
     expect(permissionAlert).toHaveTextContent("请先登录后台");
     expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
@@ -105,6 +116,10 @@ describe("admin common UX state audit", () => {
     expect(unavailableAlert).toHaveAttribute(
       "data-admin-ux-state",
       "standard-unavailable",
+    );
+    expect(unavailableAlert).toHaveAttribute(
+      "data-admin-async-state",
+      "edition-unavailable",
     );
     expect(unavailableAlert).toHaveTextContent("当前标准版组织授权暂不可用");
     expect(unavailableAlert).toHaveTextContent("高级版 org_auth");

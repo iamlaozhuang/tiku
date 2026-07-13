@@ -817,6 +817,10 @@ describe("AdminQuestionMaterialManagement", () => {
     render(createElement(AdminQuestionMaterialManagement));
 
     expect(screen.getByText("正在加载题库数据")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveAttribute(
+      "data-admin-async-state",
+      "initial-loading",
+    );
     expect(
       await screen.findByRole("heading", { name: "题库与材料管理" }),
     ).toBeInTheDocument();

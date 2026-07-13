@@ -436,6 +436,10 @@ describe("AdminPaperManagement", () => {
     render(createElement(AdminPaperManagement));
 
     expect(screen.getByText("正在加载试卷")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveAttribute(
+      "data-admin-async-state",
+      "initial-loading",
+    );
     expect(
       await screen.findByRole("heading", { name: "试卷管理" }),
     ).toBeInTheDocument();

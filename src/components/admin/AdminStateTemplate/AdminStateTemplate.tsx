@@ -10,6 +10,11 @@ import {
   LockKeyhole,
 } from "lucide-react";
 
+import {
+  AdminAsyncState,
+  type AdminAsyncStateVariant,
+} from "@/components/admin/AdminAsyncState";
+
 type AdminStateTemplateVariant =
   | "loading"
   | "empty"
@@ -39,6 +44,16 @@ const adminStateTemplateIcon = {
   unauthorized: <LockKeyhole aria-hidden="true" className="size-5" />,
 } satisfies Record<AdminStateTemplateVariant, ReactNode>;
 
+const adminStateTemplateAsyncVariant = {
+  empty: "empty",
+  error: "error",
+  forbidden: "forbidden",
+  loading: "initial-loading",
+  "missing-context": "missing-context",
+  "standard-unavailable": "edition-unavailable",
+  unauthorized: "unauthorized",
+} satisfies Record<AdminStateTemplateVariant, AdminAsyncStateVariant>;
+
 export function AdminStateTemplate({
   action,
   description,
@@ -54,9 +69,6 @@ export function AdminStateTemplate({
   variant: AdminStateTemplateVariant;
   withinWorkspace?: boolean;
 }) {
-  const isLoading = variant === "loading";
-  const isEmpty = variant === "empty";
-  const role = isLoading || isEmpty ? "status" : "alert";
   const Container = withinWorkspace ? "div" : "main";
 
   return (
@@ -65,11 +77,10 @@ export function AdminStateTemplate({
         withinWorkspace ? "min-h-full py-12" : "min-h-screen"
       }`}
     >
-      <section
-        aria-live={role === "status" ? "polite" : "assertive"}
+      <AdminAsyncState
         className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center"
         data-admin-ux-state={variant}
-        role={role}
+        variant={adminStateTemplateAsyncVariant[variant]}
       >
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
           {adminStateTemplateIcon[variant]}
@@ -107,7 +118,7 @@ export function AdminStateTemplate({
             </button>
           )
         ) : null}
-      </section>
+      </AdminAsyncState>
     </Container>
   );
 }

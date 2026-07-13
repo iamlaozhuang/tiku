@@ -67,6 +67,19 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 | practice/mock/report/AI        | learner            | E4           | partial           | mobile-first, authorization context, persisted snapshot       |
 | super admin cross-workspace    | operations/content | E5           | partial           | no authorization or lifecycle bypass                          |
 
+## Program Task Progress
+
+### B1 Shared Async-State Semantics
+
+- `AdminAsyncState` centralizes the accessible semantic matrix for initial loading, refreshing, empty, filtered empty,
+  error, forbidden, unauthorized, edition unavailable, missing context, and conflict.
+- `AdminStateTemplate` and `content-admin-runtime` delegate role, announcement priority, and busy state to that primitive;
+  question/material and paper focused tests prove two current workspace consumers receive the shared initial-loading
+  contract.
+- PIC-04 and PIC-10 remain `partial`: B1 establishes the semantic foundation, while B2/B3 and D/E must still prove real
+  refreshing, filtered-empty, conflict, focus, and route-family behavior. No exception or authorization expansion was
+  introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

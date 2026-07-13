@@ -4,6 +4,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 
+import {
+  AdminAsyncState,
+  type AdminAsyncStateVariant,
+} from "@/components/admin/AdminAsyncState";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { Profession, Subject } from "@/server/models/paper";
@@ -16,6 +20,16 @@ export type AdminLoadState =
   | "error";
 type AdminUxState = "loading" | "empty" | "error" | "permission-denied";
 type AdminUnavailableUxState = AdminUxState | "standard-unavailable";
+
+const adminSurfaceAsyncVariant = {
+  empty: "empty",
+  error: "error",
+  "permission-denied": "unauthorized",
+  "standard-unavailable": "edition-unavailable",
+} satisfies Record<
+  Exclude<AdminUnavailableUxState, "loading">,
+  AdminAsyncStateVariant
+>;
 
 export const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 export const COOKIE_BACKED_SESSION_TOKEN = "__cookie_backed_session__";
@@ -144,25 +158,24 @@ export function AdminSurfaceStatus({
   state: Exclude<AdminUnavailableUxState, "loading">;
   title: string;
 }) {
-  const role = state === "empty" ? "status" : "alert";
-
   return (
-    <main
-      aria-live={role === "status" ? "polite" : "assertive"}
-      className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"
-      data-admin-ux-state={state}
-      role={role}
-    >
-      <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
-        {icon}
-      </div>
-      <div className="space-y-2">
-        <h1 className="font-heading text-text-primary text-xl font-semibold">
-          {title}
-        </h1>
-        <p className="text-text-secondary text-sm leading-6">{description}</p>
-      </div>
-      {action}
+    <main>
+      <AdminAsyncState
+        className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"
+        data-admin-ux-state={state}
+        variant={adminSurfaceAsyncVariant[state]}
+      >
+        <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
+          {icon}
+        </div>
+        <div className="space-y-2">
+          <h1 className="font-heading text-text-primary text-xl font-semibold">
+            {title}
+          </h1>
+          <p className="text-text-secondary text-sm leading-6">{description}</p>
+        </div>
+        {action}
+      </AdminAsyncState>
     </main>
   );
 }
@@ -217,28 +230,29 @@ export function AdminUpgradeRequiredState({
 
 export function AdminLoadingState({ label }: { label: string }) {
   return (
-    <main
-      aria-live="polite"
-      className="space-y-4"
-      data-admin-ux-state="loading"
-      role="status"
-    >
-      <div className="text-text-secondary flex items-center gap-2 text-sm">
-        <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-        {label}
-      </div>
-      <div className="grid gap-4 xl:grid-cols-3">
-        {[0, 1, 2].map((itemIndex) => (
-          <div
-            className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
-            key={itemIndex}
-          >
-            <div className="bg-border h-4 w-2/3 animate-pulse rounded" />
-            <div className="bg-border mt-3 h-3 w-1/2 animate-pulse rounded" />
-            <div className="bg-border mt-5 h-14 w-full animate-pulse rounded-md" />
-          </div>
-        ))}
-      </div>
+    <main>
+      <AdminAsyncState
+        className="space-y-4"
+        data-admin-ux-state="loading"
+        variant="initial-loading"
+      >
+        <div className="text-text-secondary flex items-center gap-2 text-sm">
+          <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+          {label}
+        </div>
+        <div className="grid gap-4 xl:grid-cols-3">
+          {[0, 1, 2].map((itemIndex) => (
+            <div
+              className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
+              key={itemIndex}
+            >
+              <div className="bg-border h-4 w-2/3 animate-pulse rounded" />
+              <div className="bg-border mt-3 h-3 w-1/2 animate-pulse rounded" />
+              <div className="bg-border mt-5 h-14 w-full animate-pulse rounded-md" />
+            </div>
+          ))}
+        </div>
+      </AdminAsyncState>
     </main>
   );
 }
