@@ -118,6 +118,115 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-prelaunch-test-data-refresh-2026-07-12
+    title: User-led prelaunch AI paper test-data refresh
+    phase: user-led-prelaunch-test-data-refresh-2026-07-13
+    status: ready_for_closeout
+    priority: p0
+    sequenceOrder: 62
+    taskKind: approved_local_prelaunch_data_governance
+    executionProfile: exact_legacy_ai_paper_test_data_refresh_after_preflight
+    moduleRunVersion: 2
+    branch: codex/prelaunch-test-data-refresh
+    dependsOn:
+      - user-led-phone-visibility-validation-2026-07-12
+    approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-prelaunch-ai-paper-test-data-refresh-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+      - docs/05-execution-logs/evidence/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-prelaunch-ai-paper-test-data-refresh-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      runtimeSourceChange: blocked
+      sourceTestFixtureChange: blocked
+      directDatabaseConnection: approved_0704_only_local_container_connection_no_connection_output
+      databaseMutation: approved_after_exact_preflight_backup_and_transaction
+      destructiveDbOperation: approved_only_for_exact_legacy_ai_paper_test_data_chain
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      browserRuntime: approved_redacted_localhost_postflight_only
+      screenshotCapture: approved_repo_external_redacted_only_if_needed
+      rawDomCapture: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Confirm the canonical 0704 target without printing connection details, environment values, credentials, internal ids, or raw business rows.
+      - Identify only personal AI paper result rows whose persisted redacted snapshot lacks a complete paperAssembly object, plus every direct dependent learning-session and answer-feedback row.
+      - Stop without mutation unless aggregate dependency inventory, backup, and an exact transactional delete plan all succeed.
+      - If candidates exist, remove only the exact legacy AI paper test-data chain in one transaction; do not touch authorization, users, organizations, formal content, training, AI question results, unrelated AI tasks, or schema.
+      - Confirm no orphaned direct dependency remains, remaining AI paper history has no legacy no-snapshot row, Provider stays closed, and localhost route contracts remain stable.
+      - Record only aggregate counts, status categories, hashes, command categories, and public commit hashes in tracked evidence.
+      - Complete two adversarial reviews, self-review, approved commit, ff-only merge, ordinary push, and cleanup before any subsequent task.
+    validationCommands:
+      - 0704 aggregate metadata and dependency preflight through the approved local container connection
+      - repository-external backup verification before mutation
+      - exact transactional refresh with postflight aggregate verification
+      - corepack pnpm@10.26.1 run test:unit
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - corepack pnpm@10.26.1 exec next build --webpack
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-prelaunch-test-data-refresh-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-prelaunch-test-data-refresh-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-prelaunch-test-data-refresh-2026-07-12 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
+    validationSummary:
+      status: passed_ready_for_closeout
+      databasePreflight: pass_exact_legacy_ai_paper_scope
+      externalBackup: pass_custom_format_verified
+      databaseRefresh: pass_transactional_exact_counts
+      databasePostflight: pass_no_legacy_candidate_or_direct_orphan
+      focusedTests: pass_8_files_109_tests
+      fullUnitTests: pass_361_files_2001_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      gitDiffCheck: pass
+      adversarialReview: pass_two_rounds
+      selfReview: pass
   - id: user-led-phone-visibility-validation-2026-07-12
     title: User-led phone visibility validation
     phase: user-led-phone-visibility-validation-2026-07-12

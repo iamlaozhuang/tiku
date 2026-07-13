@@ -1,8 +1,48 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-phone-visibility-validation-2026-07-12-closeout
-updatedAt: "2026-07-13T02:05:00-07:00"
+currentPhase: user-led-prelaunch-test-data-refresh-2026-07-13
+updatedAt: "2026-07-13T03:10:00-07:00"
+latestUserLedPrelaunchTestDataRefresh:
+  id: user-led-prelaunch-test-data-refresh-2026-07-12
+  status: ready_for_closeout
+  priority: p0
+  branch: codex/prelaunch-test-data-refresh
+  startSha: 0233990b736b80b47e7afbaaf6e05283eb5c8b6a
+  approvalSource: current_user_approved_prelaunch_test_data_refresh_2026_07_13
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-prelaunch-ai-paper-test-data-refresh-audit.md
+  executionBoundary:
+    runtimeSourceChange: blocked
+    directDatabaseConnection: approved_0704_only_local_container_connection_no_connection_output
+    databaseMutation: approved_after_exact_preflight_backup_and_transaction
+    destructiveDbOperation: approved_only_for_exact_legacy_ai_paper_test_data_chain
+    schemaMigration: blocked
+    fixtureSeedSourceChange: blocked
+    providerExecution: blocked
+    envSecretAccess: blocked
+    privateCredentialRead: not_required_for_database_preflight
+    browserRuntime: approved_redacted_localhost_postflight_only
+    screenshotCapture: approved_repo_external_redacted_only_if_needed
+    rawDomCapture: blocked
+    dependencyChange: blocked
+    stagingProdDeploy: blocked
+  verification:
+    databasePreflight: pass_exact_legacy_ai_paper_scope
+    externalBackup: pass_custom_format_verified
+    databaseRefresh: pass_transactional_exact_counts
+    databasePostflight: pass_no_legacy_candidate_or_direct_orphan
+    focusedTests: pass_8_files_109_tests
+    fullUnitTests: pass_361_files_2001_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    gitDiffCheck: pass
+    adversarialReview: pass_two_rounds
+    selfReview: pass
+  nextTaskId: null
 latestUserLedPhoneVisibilityValidation:
   id: user-led-phone-visibility-validation-2026-07-12
   status: closed_local_ready_for_ff_merge
@@ -6040,6 +6080,56 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
+  id: user-led-prelaunch-test-data-refresh-2026-07-12
+  title: User-led prelaunch AI paper test-data refresh
+  phase: user-led-prelaunch-test-data-refresh-2026-07-13
+  status: ready_for_closeout
+  priority: p0
+  taskKind: approved_local_prelaunch_data_governance
+  branch: codex/prelaunch-test-data-refresh
+  humanApprovalBoundary:
+    databaseConnection: approved_0704_local_container_only_no_connection_output
+    databaseMutation: approved_exact_legacy_ai_paper_test_data_chain_only
+    localCommit: approved
+    fastForwardMerge: approved_master_only
+    push: approved_origin_master_only
+    cleanup: approved_after_remote_sync
+    runtimeSourceChange: blocked
+    schemaMigration: blocked
+    fixtureSeedSourceChange: blocked
+    providerExecution: blocked
+    envSecretAccess: blocked
+    browserRuntime: approved_redacted_localhost_postflight_only
+    screenshotCapture: approved_repo_external_redacted_only_if_needed
+    rawDomCapture: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pullRequest: blocked
+  plannedAt: "2026-07-13T02:20:00-07:00"
+  claimedAt: "2026-07-13T02:20:00-07:00"
+  targetClosureItem: Remove only the approved prelaunch learner AI paper result chains that lack a persisted resume snapshot, after verified backup and exact transactional preflight.
+  behaviorBoundary: exact_local_test_data_governance_only_no_runtime_source_schema_migration_fixture_dependency_provider_or_deploy_change
+  evidenceMode: aggregate_status_count_hash_and_commit_only_no_credentials_tokens_env_values_database_urls_internal_ids_raw_rows_or_full_ai_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-prelaunch-ai-paper-test-data-refresh-audit.md
+  nextRequiredTaskId: none
+  validationSummary:
+    status: pass_ready_for_closeout
+    databasePreflight: pass_exact_legacy_ai_paper_scope
+    externalBackup: pass_custom_format_verified
+    databaseRefresh: pass_transactional_exact_counts
+    databasePostflight: pass_no_legacy_candidate_or_direct_orphan
+    focusedTests: pass_8_files_109_tests
+    fullUnitTests: pass_361_files_2001_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    gitDiffCheck: pass
+    adversarialReview: pass_two_rounds
+    selfReview: pass
+previousCurrentTaskBeforeUserLedPrelaunchTestDataRefresh20260713:
   id: user-led-phone-visibility-validation-2026-07-12
   title: User-led phone visibility validation
   phase: user-led-phone-visibility-validation-2026-07-12
