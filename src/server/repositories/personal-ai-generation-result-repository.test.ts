@@ -5,6 +5,7 @@ import type {
   PersonalAiGenerationResultTaskGateway,
 } from "./personal-ai-generation-result-repository";
 import {
+  createPersonalAiGenerationResultByPublicIdCondition,
   createPersonalAiGenerationResultByTaskCondition,
   createPersonalAiGenerationResultHistoryCondition,
   createPersonalAiGenerationResultRepository,
@@ -131,6 +132,16 @@ function createGateway(
   const findResultByTaskPublicId = vi.fn(
     async () => options.existingRow ?? null,
   );
+  const findResultByPublicId = vi.fn(
+    async (query) =>
+      (options.rows ?? []).find(
+        (row) =>
+          row.public_id === query.resultPublicId &&
+          row.owner_public_id === query.ownerPublicId &&
+          row.actor_public_id === query.actorPublicId &&
+          row.result_status === "draft",
+      ) ?? null,
+  );
   const findTaskByPublicId = vi.fn(async () => options.taskRow ?? null);
   const insertDraftResultAndCompleteTask = vi.fn(
     async () => options.insertedRow ?? createPersistenceRow(),
@@ -138,6 +149,7 @@ function createGateway(
 
   const gateway: PersonalAiGenerationResultTaskGateway = {
     listResultRows,
+    findResultByPublicId,
     findResultByTaskPublicId,
     findTaskByPublicId,
     insertDraftResultAndCompleteTask,
@@ -146,6 +158,7 @@ function createGateway(
   return {
     gateway,
     listResultRows,
+    findResultByPublicId,
     findResultByTaskPublicId,
     findTaskByPublicId,
     insertDraftResultAndCompleteTask,
@@ -269,6 +282,54 @@ describe("personal AI generation result repository", () => {
     expect(containsText(condition, "organization_public_171")).toBe(true);
     expect(containsText(condition, "actor_public_id")).toBe(true);
     expect(containsText(condition, "employee_user_public_171")).toBe(true);
+  });
+
+  it("builds an actor- and owner-scoped draft result lookup by result public id", () => {
+    const condition = createPersonalAiGenerationResultByPublicIdCondition({
+      ownerType: "organization",
+      ownerPublicId: "organization_public_172",
+      actorPublicId: "employee_user_public_172",
+      resultPublicId: "personal_ai_result_public_172",
+    });
+
+    expect(containsText(condition, "owner_public_id")).toBe(true);
+    expect(containsText(condition, "organization_public_172")).toBe(true);
+    expect(containsText(condition, "actor_public_id")).toBe(true);
+    expect(containsText(condition, "employee_user_public_172")).toBe(true);
+    expect(containsText(condition, "owner_type")).toBe(true);
+    expect(containsText(condition, "organization")).toBe(true);
+    expect(containsText(condition, "public_id")).toBe(true);
+    expect(containsText(condition, "personal_ai_result_public_172")).toBe(true);
+    expect(containsText(condition, "draft")).toBe(true);
+  });
+
+  it("returns one persisted draft result only for the matching actor and owner", async () => {
+    const persistedRow = createPersistenceRow({
+      public_id: "personal_ai_result_public_173",
+      owner_public_id: "organization_public_173",
+      actor_public_id: "employee_user_public_173",
+      task_type: "ai_paper_generation",
+    });
+    const { gateway } = createGateway({ rows: [persistedRow] });
+    const repository = createPersonalAiGenerationResultRepository(gateway);
+
+    await expect(
+      repository.findDraftResultByPublicId({
+        ownerPublicId: "organization_public_173",
+        actorPublicId: "employee_user_public_173",
+        resultPublicId: persistedRow.public_id,
+      }),
+    ).resolves.toMatchObject({
+      resultPublicId: persistedRow.public_id,
+      taskType: "ai_paper_generation",
+    });
+    await expect(
+      repository.findDraftResultByPublicId({
+        ownerPublicId: "organization_public_173",
+        actorPublicId: "different_employee_public_173",
+        resultPublicId: persistedRow.public_id,
+      }),
+    ).resolves.toBeNull();
   });
 
   it("lists owner draft results newest first without exposing internal ids or snapshots", async () => {

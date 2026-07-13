@@ -12,6 +12,8 @@ import type {
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { AiPaperPlanAndSelectContainerDto } from "../contracts/ai-paper-plan-and-select-contract";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
+import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
+import type { PersonalAiGenerationResultLookupRepository } from "../repositories/personal-ai-generation-result-repository";
 import type {
   PersonalAiGenerationResultUserContext,
   PersonalAiGenerationResultUserResolver,
@@ -24,6 +26,7 @@ import {
 
 export type PersonalAiGenerationLearningSessionRouteDependencies = {
   repository?: PersonalAiGenerationLearningSessionRepository;
+  resultRepository?: PersonalAiGenerationResultLookupRepository;
   paperSourceQuestionResolver?: PersonalAiGenerationLearningPaperSourceQuestionResolver;
   now?: () => Date;
 };
@@ -227,12 +230,151 @@ type LearningSessionCreationRouteInput =
       input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto;
     };
 
-async function createLearningSessionInput(input: {
-  request: Request;
+type PersistedLearningResult = {
+  result: PersonalAiGenerationResultDto;
+  ownerScope: Pick<
+    PersonalAiGenerationLearningSessionCreationInputDto,
+    "ownerType" | "ownerPublicId" | "actorPublicId"
+  >;
+};
+
+function createLearningSessionPublicId(resultPublicId: string): string {
+  return `ai_learning_session_${resultPublicId}`;
+}
+
+async function findPersistedLearningResult(input: {
   userContext: PersonalAiGenerationResultUserContext;
+  resultPublicId: string;
+  resultRepository: PersonalAiGenerationResultLookupRepository;
+}): Promise<PersistedLearningResult | null> {
+  const ownerScopes: PersistedLearningResult["ownerScope"][] = [
+    {
+      ownerType: "personal",
+      ownerPublicId: input.userContext.userPublicId,
+      actorPublicId: input.userContext.userPublicId,
+    },
+  ];
+
+  if (
+    input.userContext.userType === "employee" &&
+    input.userContext.organizationPublicId !== null
+  ) {
+    ownerScopes.push({
+      ownerType: "organization",
+      ownerPublicId: input.userContext.organizationPublicId,
+      actorPublicId: input.userContext.userPublicId,
+    });
+  }
+
+  for (const ownerScope of ownerScopes) {
+    const result = await input.resultRepository.findDraftResultByPublicId({
+      ...ownerScope,
+      resultPublicId: input.resultPublicId,
+    });
+
+    if (result !== null) {
+      return { result, ownerScope };
+    }
+  }
+
+  return null;
+}
+
+async function createPersistedLearningSessionInput(input: {
+  body: Record<string, unknown>;
+  userContext: PersonalAiGenerationResultUserContext;
+  resultPublicId: string;
+  learningSessionRepository: PersonalAiGenerationLearningSessionRepository;
+  resultRepository: PersonalAiGenerationResultLookupRepository;
   paperSourceQuestionResolver:
     | PersonalAiGenerationLearningPaperSourceQuestionResolver
     | undefined;
+  now: () => Date;
+}): Promise<LearningSessionCreationRouteInput | null> {
+  const persistedLearningResult = await findPersistedLearningResult(input);
+
+  if (persistedLearningResult === null) {
+    return null;
+  }
+
+  const { result, ownerScope } = persistedLearningResult;
+  const sessionPublicId = createLearningSessionPublicId(result.resultPublicId);
+
+  if (result.taskType === "ai_question_generation") {
+    const visibleGeneratedContent = readVisibleGeneratedContent(input.body);
+
+    if (visibleGeneratedContent === null) {
+      return null;
+    }
+
+    return {
+      kind: "generated_questions",
+      input: {
+        sessionPublicId,
+        sourceResultPublicId: result.resultPublicId,
+        sourceTaskPublicId: result.taskPublicId,
+        visibleGeneratedContent,
+        createdAt: input.now(),
+        ...ownerScope,
+      },
+    };
+  }
+
+  const paperAssembly = result.paperAssembly;
+
+  if (
+    result.evidenceReference.evidenceStatus !== "sufficient" ||
+    result.evidenceReference.citationCount <= 0 ||
+    paperAssembly === null ||
+    paperAssembly.status !== "assembled" ||
+    paperAssembly.insufficiency !== null ||
+    paperAssembly.container.selectedQuestionCount <= 0
+  ) {
+    return null;
+  }
+
+  // A created session is its own immutable learning snapshot. Reuse it before
+  // resolving current question sources so later source changes cannot break resume.
+  const existingSession =
+    await input.learningSessionRepository.findSessionByPublicId(
+      sessionPublicId,
+    );
+
+  const sourceQuestions =
+    existingSession !== null || input.paperSourceQuestionResolver === undefined
+      ? []
+      : await input.paperSourceQuestionResolver({
+          userContext: input.userContext,
+          ownerScope,
+          sourceResultPublicId: result.resultPublicId,
+          sourceTaskPublicId: result.taskPublicId,
+          paperAssemblyContainer: paperAssembly.container,
+        });
+
+  return {
+    kind: "paper_assembly",
+    input: {
+      sessionPublicId,
+      sourceResultPublicId: result.resultPublicId,
+      sourceTaskPublicId: result.taskPublicId,
+      evidenceStatus: result.evidenceReference.evidenceStatus,
+      citationCount: result.evidenceReference.citationCount,
+      paperAssemblyContainer: paperAssembly.container,
+      sourceQuestions,
+      createdAt: input.now(),
+      ...ownerScope,
+    },
+  };
+}
+
+async function createLearningSessionInput(input: {
+  request: Request;
+  userContext: PersonalAiGenerationResultUserContext;
+  learningSessionRepository: PersonalAiGenerationLearningSessionRepository;
+  paperSourceQuestionResolver:
+    | PersonalAiGenerationLearningPaperSourceQuestionResolver
+    | undefined;
+  resultRepository: PersonalAiGenerationResultLookupRepository | undefined;
   now: () => Date;
 }): Promise<LearningSessionCreationRouteInput | null> {
   const body = await readJsonObject(input.request);
@@ -241,8 +383,25 @@ async function createLearningSessionInput(input: {
     return null;
   }
 
-  const sessionPublicId = readRequiredString(body, "sessionPublicId");
   const sourceResultPublicId = readRequiredString(body, "sourceResultPublicId");
+
+  if (sourceResultPublicId === null) {
+    return null;
+  }
+
+  if (input.resultRepository !== undefined) {
+    return createPersistedLearningSessionInput({
+      body,
+      userContext: input.userContext,
+      resultPublicId: sourceResultPublicId,
+      learningSessionRepository: input.learningSessionRepository,
+      resultRepository: input.resultRepository,
+      paperSourceQuestionResolver: input.paperSourceQuestionResolver,
+      now: input.now,
+    });
+  }
+
+  const sessionPublicId = readRequiredString(body, "sessionPublicId");
   const sourceTaskPublicId = readRequiredString(body, "sourceTaskPublicId");
   const visibleGeneratedContent = readVisibleGeneratedContent(body);
   const paperAssemblyContainer = readPaperAssemblyContainer(body);
@@ -360,8 +519,10 @@ export function createPersonalAiGenerationLearningSessionRouteHandlers(
           const creationInput = await createLearningSessionInput({
             request,
             userContext,
+            learningSessionRepository: repository,
             paperSourceQuestionResolver:
               dependencies.paperSourceQuestionResolver,
+            resultRepository: dependencies.resultRepository,
             now,
           });
 

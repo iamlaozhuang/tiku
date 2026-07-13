@@ -271,6 +271,74 @@ function createPaperAssemblySourceQuestions(): PersonalAiGenerationLearningPaper
 }
 
 describe("personal AI generation learning session service", () => {
+  it("reuses the first persisted paper session snapshot for repeated starts", async () => {
+    const repository = createInMemoryRepository();
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    }) as PaperAssemblyLearningSessionService;
+    const firstInput = {
+      sessionPublicId: "ai_learning_session_reuse_001",
+      sourceResultPublicId: "ai_generation_result_reuse_001",
+      sourceTaskPublicId: "ai_generation_task_reuse_001",
+      ownerType: "personal" as const,
+      ownerPublicId: "student_public_reuse_001",
+      actorPublicId: "student_public_reuse_001",
+      evidenceStatus: "sufficient" as const,
+      citationCount: 2,
+      paperAssemblyContainer: createPaperAssemblyContainer(),
+      sourceQuestions: createPaperAssemblySourceQuestions(),
+      createdAt: new Date("2026-07-12T10:00:00.000Z"),
+    };
+
+    const firstResult =
+      await service.createLearningSessionFromPaperAssembly(firstInput);
+    const repeatedResult = await service.createLearningSessionFromPaperAssembly(
+      {
+        ...firstInput,
+        sourceQuestions: firstInput.sourceQuestions.map((question) => ({
+          ...question,
+          questionStem: "changed source must not replace persisted snapshot",
+        })),
+        createdAt: new Date("2026-07-12T11:00:00.000Z"),
+      },
+    );
+
+    expect(firstResult.status).toBe("created");
+    expect(repeatedResult).toEqual(firstResult);
+  });
+
+  it("fails closed when a deterministic session id collides with another result context", async () => {
+    const repository = createInMemoryRepository();
+    const service = createPersonalAiGenerationLearningSessionService({
+      repository,
+    }) as PaperAssemblyLearningSessionService;
+    const input = {
+      sessionPublicId: "ai_learning_session_collision_001",
+      sourceResultPublicId: "ai_generation_result_collision_001",
+      sourceTaskPublicId: "ai_generation_task_collision_001",
+      ownerType: "personal" as const,
+      ownerPublicId: "student_public_collision_001",
+      actorPublicId: "student_public_collision_001",
+      evidenceStatus: "sufficient" as const,
+      citationCount: 2,
+      paperAssemblyContainer: createPaperAssemblyContainer(),
+      sourceQuestions: createPaperAssemblySourceQuestions(),
+      createdAt: new Date("2026-07-12T10:00:00.000Z"),
+    };
+
+    await service.createLearningSessionFromPaperAssembly(input);
+    const collision = await service.createLearningSessionFromPaperAssembly({
+      ...input,
+      sourceResultPublicId: "different_result_public_collision_001",
+    });
+
+    expect(collision).toEqual({
+      status: "blocked",
+      blockReason: "session_context_mismatch",
+      session: null,
+    });
+  });
+
   it("creates answerable learner sessions from locally selected paper assemblies and formal source question content", async () => {
     const service = createPersonalAiGenerationLearningSessionService({
       repository: createInMemoryRepository(),

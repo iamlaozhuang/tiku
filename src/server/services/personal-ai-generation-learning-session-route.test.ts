@@ -8,6 +8,7 @@ import type {
   PersonalAiGenerationLearningSessionRepository,
 } from "../contracts/personal-ai-generation-learning-session-contract";
 import type { AiGenerationRouteIntegratedVisibleGeneratedContent } from "../contracts/route-integrated-provider-execution-contract";
+import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import { createPersonalAiGenerationLearningSessionRouteHandlers } from "./personal-ai-generation-learning-session-route";
 
 const personalUserContext = {
@@ -164,6 +165,47 @@ function createPaperSourceQuestions(): PersonalAiGenerationLearningPaperSourceQu
   ];
 }
 
+function createPersistedPaperResult(
+  resultPublicId: string,
+): PersonalAiGenerationResultDto {
+  return {
+    resultPublicId,
+    taskPublicId: `task_${resultPublicId}`,
+    requestPublicId: `request_${resultPublicId}`,
+    taskType: "ai_paper_generation",
+    status: "draft",
+    persistedAt: "2026-07-12T10:00:00.000Z",
+    contentReference: {
+      contentDigest: "sha256:persisted-paper-result",
+      contentPreviewMasked: "persisted paper preview",
+      contentVisibility: "redacted_snapshot",
+      redactionStatus: "redacted",
+    },
+    evidenceReference: {
+      evidenceStatus: "sufficient",
+      citationCount: 2,
+      aiCallLogPublicId: null,
+      redactionStatus: "redacted",
+    },
+    formalAdoption: {
+      isBlocked: true,
+      status: "blocked",
+    },
+    paperAssembly: {
+      status: "assembled",
+      sourceDiagnostics: {
+        role: "personal_advanced_student",
+        platformQuestionCount: 1,
+        enterpriseQuestionCount: 1,
+        enterpriseSourceStatus: "resolved",
+      },
+      container: createPaperAssemblyContainer(),
+      insufficiency: null,
+      redactionStatus: "redacted",
+    },
+  };
+}
+
 function createPostRequest(body: Record<string, unknown>): Request {
   return new Request(
     "http://localhost/api/v1/personal-ai-generation-learning-sessions",
@@ -288,6 +330,174 @@ function getLearningSessionAnswerPostHandler(answers: unknown) {
 }
 
 describe("personal AI generation learning session route handlers", () => {
+  it.each([
+    {
+      label: "personal advanced learner",
+      userContext: personalUserContext,
+      ownerType: "personal",
+      ownerPublicId: personalUserContext.userPublicId,
+    },
+    {
+      label: "organization advanced employee",
+      userContext: employeeUserContext,
+      ownerType: "organization",
+      ownerPublicId: employeeUserContext.organizationPublicId,
+    },
+  ] as const)(
+    "starts or resumes a persisted paper for the $label without trusting browser assembly",
+    async ({ userContext, ownerType, ownerPublicId }) => {
+      const repository = createLearningSessionRepository();
+      const resultPublicId = `persisted_paper_result_${ownerType}_001`;
+      const persistedResult = createPersistedPaperResult(resultPublicId);
+      const resultLookupQueries: unknown[] = [];
+      const resolverInputs: unknown[] = [];
+      const { collection } =
+        createPersonalAiGenerationLearningSessionRouteHandlers(
+          async () => userContext,
+          {
+            repository,
+            resultRepository: {
+              async findDraftResultByPublicId(query: {
+                ownerType?: string;
+                ownerPublicId: string;
+              }) {
+                resultLookupQueries.push(query);
+                return query.ownerType === ownerType &&
+                  query.ownerPublicId === ownerPublicId
+                  ? persistedResult
+                  : null;
+              },
+            },
+            now: () => new Date("2026-07-12T10:30:00.000Z"),
+            paperSourceQuestionResolver: async (resolverInput) => {
+              resolverInputs.push(resolverInput);
+              return createPaperSourceQuestions();
+            },
+          },
+        );
+
+      const response = await getLearningSessionCollectionPostHandler(
+        collection,
+      )(
+        createPostRequest({
+          sourceResultPublicId: resultPublicId,
+          sessionPublicId: "browser_supplied_session_must_be_ignored",
+          sourceTaskPublicId: "browser_supplied_task_must_be_ignored",
+          visibleGeneratedContent: createVisibleGeneratedContent(),
+          paperAssemblyContainer: {
+            ...createPaperAssemblyContainer(),
+            title: "browser supplied assembly must be ignored",
+          },
+        }),
+      );
+      const payload = await response.json();
+
+      expect(payload).toMatchObject({
+        code: 0,
+        data: {
+          status: "created",
+          session: {
+            sessionPublicId: `ai_learning_session_${resultPublicId}`,
+            sourceResultPublicId: resultPublicId,
+            sourceTaskPublicId: persistedResult.taskPublicId,
+            ownerType,
+            ownerPublicId,
+            actorPublicId: userContext.userPublicId,
+          },
+        },
+      });
+      expect(resultLookupQueries).toEqual(
+        ownerType === "personal"
+          ? [
+              {
+                ownerType,
+                ownerPublicId,
+                actorPublicId: userContext.userPublicId,
+                resultPublicId,
+              },
+            ]
+          : [
+              {
+                ownerType: "personal",
+                ownerPublicId: userContext.userPublicId,
+                actorPublicId: userContext.userPublicId,
+                resultPublicId,
+              },
+              {
+                ownerType,
+                ownerPublicId,
+                actorPublicId: userContext.userPublicId,
+                resultPublicId,
+              },
+            ],
+      );
+      expect(resolverInputs).toEqual([
+        expect.objectContaining({
+          ownerScope: {
+            ownerType,
+            ownerPublicId,
+            actorPublicId: userContext.userPublicId,
+          },
+          sourceResultPublicId: resultPublicId,
+          sourceTaskPublicId: persistedResult.taskPublicId,
+          paperAssemblyContainer: persistedResult.paperAssembly?.container,
+        }),
+      ]);
+    },
+  );
+
+  it("resumes an existing persisted paper session without re-resolving changed question sources", async () => {
+    const repository = createLearningSessionRepository();
+    const resultPublicId = "persisted_paper_result_resume_001";
+    const persistedResult = createPersistedPaperResult(resultPublicId);
+    let resolverCallCount = 0;
+    const { collection } =
+      createPersonalAiGenerationLearningSessionRouteHandlers(
+        async () => personalUserContext,
+        {
+          repository,
+          resultRepository: {
+            async findDraftResultByPublicId() {
+              return persistedResult;
+            },
+          },
+          now: () => new Date("2026-07-12T10:30:00.000Z"),
+          paperSourceQuestionResolver: async () => {
+            resolverCallCount += 1;
+
+            if (resolverCallCount > 1) {
+              throw new Error("current source must not be resolved for resume");
+            }
+
+            return createPaperSourceQuestions();
+          },
+        },
+      );
+    const postHandler = getLearningSessionCollectionPostHandler(collection);
+
+    const createdResponse = await postHandler(
+      createPostRequest({ sourceResultPublicId: resultPublicId }),
+    );
+    const resumedResponse = await postHandler(
+      createPostRequest({ sourceResultPublicId: resultPublicId }),
+    );
+
+    await expect(createdResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: { status: "created" },
+    });
+    await expect(resumedResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        status: "created",
+        session: {
+          sessionPublicId: `ai_learning_session_${resultPublicId}`,
+        },
+      },
+    });
+    expect(resolverCallCount).toBe(1);
+  });
+
   it("creates an AI组卷 learning session from server-resolved formal source questions and ignores client-sent source content", async () => {
     const repository = createLearningSessionRepository();
     const resolverCalls: AiPaperPlanAndSelectContainerDto[] = [];

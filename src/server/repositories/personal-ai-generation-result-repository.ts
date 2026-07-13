@@ -42,6 +42,13 @@ export type ListPersonalAiGenerationResultQuery = {
 export type CreatePersonalAiGenerationResultInput =
   PersonalAiGenerationResultPersistenceInput;
 
+export type GetPersonalAiGenerationResultQuery = {
+  ownerType?: PersonalAiGenerationResultOwnerType;
+  ownerPublicId: string;
+  actorPublicId: string;
+  resultPublicId: string;
+};
+
 export type InsertPersonalAiGenerationDraftResultInput =
   CreatePersonalAiGenerationResultInput & {
     aiGenerationTaskId: number;
@@ -82,6 +89,12 @@ export type PersonalAiGenerationResultRepository = {
   ): Promise<PersonalAiGenerationResultPersistenceResult>;
 };
 
+export type PersonalAiGenerationResultLookupRepository = {
+  findDraftResultByPublicId(
+    query: GetPersonalAiGenerationResultQuery,
+  ): Promise<PersonalAiGenerationResultPersistenceResult["result"] | null>;
+};
+
 export type PersonalAiGenerationResultTaskGateway = {
   listResultRows(query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
@@ -99,6 +112,9 @@ export type PersonalAiGenerationResultTaskGateway = {
     actorPublicId?: string;
     taskType?: PersonalAiGenerationResultTaskType;
   }): Promise<number>;
+  findResultByPublicId(
+    query: GetPersonalAiGenerationResultQuery,
+  ): Promise<PersonalAiGenerationResultPersistenceRow | null>;
   findResultByTaskPublicId(query: {
     ownerType?: PersonalAiGenerationResultOwnerType;
     ownerPublicId: string;
@@ -187,10 +203,28 @@ export function createPersonalAiGenerationResultByTaskCondition(query: {
   return and(...conditions) as SQL;
 }
 
+export function createPersonalAiGenerationResultByPublicIdCondition(
+  query: GetPersonalAiGenerationResultQuery,
+): SQL {
+  return and(
+    eq(personalAiGenerationResult.owner_public_id, query.ownerPublicId),
+    eq(personalAiGenerationResult.public_id, query.resultPublicId),
+    eq(personalAiGenerationResult.result_status, "draft"),
+    eq(aiGenerationTask.owner_type, query.ownerType ?? "personal"),
+    eq(aiGenerationTask.actor_public_id, query.actorPublicId),
+  ) as SQL;
+}
+
 export function createPersonalAiGenerationResultRepository(
   gateway: PersonalAiGenerationResultTaskGateway,
-): PersonalAiGenerationResultRepository {
+): PersonalAiGenerationResultRepository &
+  PersonalAiGenerationResultLookupRepository {
   return {
+    async findDraftResultByPublicId(query) {
+      const row = await gateway.findResultByPublicId(query);
+
+      return row === null ? null : mapPersonalAiGenerationResultRowToDto(row);
+    },
     async listDraftResults(query) {
       const page = resolveResultHistoryPage(query.page);
       const pageSize = resolveResultHistoryLimit(query.pageSize ?? query.limit);
@@ -287,7 +321,8 @@ export function createPersonalAiGenerationResultRepository(
 
 export function createPostgresPersonalAiGenerationResultRepository(
   options: RuntimeDatabaseOptions = {},
-): PersonalAiGenerationResultRepository {
+): PersonalAiGenerationResultRepository &
+  PersonalAiGenerationResultLookupRepository {
   const getDatabase = createLazyRuntimeDatabaseGetter(
     options,
     "DATABASE_URL is required for personal AI generation result persistence.",
@@ -341,6 +376,24 @@ export function createPostgresPersonalAiGenerationResultRepository(
         );
 
       return totalRow?.value ?? 0;
+    },
+    async findResultByPublicId(query) {
+      const [row] = await getDatabase()
+        .select(personalAiGenerationResultSelection)
+        .from(personalAiGenerationResult)
+        .innerJoin(
+          aiGenerationTask,
+          eq(
+            personalAiGenerationResult.ai_generation_task_id,
+            aiGenerationTask.id,
+          ),
+        )
+        .where(createPersonalAiGenerationResultByPublicIdCondition(query))
+        .limit(1);
+
+      return (
+        (row as PersonalAiGenerationResultPersistenceRow | undefined) ?? null
+      );
     },
     async findResultByTaskPublicId(query) {
       return findResultByTaskPublicId(getDatabase(), query);

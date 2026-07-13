@@ -575,6 +575,10 @@ function createPersonalAiGenerationFetchMock(
       ownerPublicId: "student-public-ui-001",
       ownerType: "personal",
       path,
+      persistedSourceTaskPublicId:
+        readMockExperienceSourceTaskPublicId(experienceResponse),
+      persistedVisibleGeneratedContent:
+        readMockExperienceVisibleGeneratedContent(experienceResponse),
       state: learningSessionMockState,
     });
 
@@ -666,6 +670,10 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
       ownerPublicId: "student-public-ui-001",
       ownerType: "personal",
       path,
+      persistedSourceTaskPublicId:
+        readMockExperienceSourceTaskPublicId(experienceResponse),
+      persistedVisibleGeneratedContent:
+        readMockExperienceVisibleGeneratedContent(experienceResponse),
       state: learningSessionMockState,
     });
 
@@ -967,6 +975,8 @@ async function handlePersonalAiLearningSessionFetch(input: {
   ownerPublicId: string;
   ownerType: "personal" | "organization";
   path: string;
+  persistedSourceTaskPublicId?: string | null;
+  persistedVisibleGeneratedContent?: AiGenerationRouteIntegratedVisibleGeneratedContent | null;
   state: PersonalAiLearningSessionMockState;
 }): Promise<PersonalAiLearningSessionFetchResponse | null> {
   const basePath = "/api/v1/personal-ai-generation-learning-sessions";
@@ -981,15 +991,26 @@ async function handlePersonalAiLearningSessionFetch(input: {
     const body = readPersonalAiLearningSessionJsonBody(input.init);
     input.onSessionCreateBody?.(body);
 
-    const sessionPublicId = String(body.sessionPublicId);
     const sourceResultPublicId = String(body.sourceResultPublicId);
-    const sourceTaskPublicId = String(body.sourceTaskPublicId);
+    const sessionPublicId =
+      typeof body.sessionPublicId === "string"
+        ? body.sessionPublicId
+        : `ai_learning_session_${sourceResultPublicId}`;
+    const sourceTaskPublicId =
+      typeof body.sourceTaskPublicId === "string"
+        ? body.sourceTaskPublicId
+        : (input.persistedSourceTaskPublicId ?? "persisted_task_public_id");
     const visibleGeneratedContent =
-      body.visibleGeneratedContent as AiGenerationRouteIntegratedVisibleGeneratedContent;
-    const questions = createPersonalAiLearningSessionQuestions({
-      sessionPublicId,
-      visibleGeneratedContent,
-    });
+      (body.visibleGeneratedContent as
+        | AiGenerationRouteIntegratedVisibleGeneratedContent
+        | undefined) ?? input.persistedVisibleGeneratedContent;
+    const questions =
+      visibleGeneratedContent == null
+        ? []
+        : createPersonalAiLearningSessionQuestions({
+            sessionPublicId,
+            visibleGeneratedContent,
+          });
     const session: PersonalAiLearningSessionMockSession = {
       actorPublicId: input.actorPublicId,
       answerFeedbacksByQuestionPublicId: new Map(),
@@ -1111,6 +1132,53 @@ async function handlePersonalAiLearningSessionFetch(input: {
   }
 
   return null;
+}
+
+function readMockExperienceVisibleGeneratedContent(
+  experienceResponse: unknown,
+): AiGenerationRouteIntegratedVisibleGeneratedContent | null {
+  if (typeof experienceResponse !== "object" || experienceResponse === null) {
+    return null;
+  }
+
+  const data = (experienceResponse as { data?: unknown }).data;
+
+  if (typeof data !== "object" || data === null) {
+    return null;
+  }
+
+  const runtimeBridge = (data as { runtimeBridge?: unknown }).runtimeBridge;
+
+  if (typeof runtimeBridge !== "object" || runtimeBridge === null) {
+    return null;
+  }
+
+  return (runtimeBridge as { visibleGeneratedContent?: unknown })
+    .visibleGeneratedContent as AiGenerationRouteIntegratedVisibleGeneratedContent | null;
+}
+
+function readMockExperienceSourceTaskPublicId(
+  experienceResponse: unknown,
+): string | null {
+  if (typeof experienceResponse !== "object" || experienceResponse === null) {
+    return null;
+  }
+
+  const data = (experienceResponse as { data?: unknown }).data;
+
+  if (typeof data !== "object" || data === null) {
+    return null;
+  }
+
+  const resultState = (data as { resultState?: unknown }).resultState;
+
+  if (typeof resultState !== "object" || resultState === null) {
+    return null;
+  }
+
+  const taskPublicId = (resultState as { taskPublicId?: unknown }).taskPublicId;
+
+  return typeof taskPublicId === "string" ? taskPublicId : null;
 }
 
 function createPersonalAiLearningSessionQuestions(input: {
@@ -1390,6 +1458,8 @@ describe("StudentPersonalAiGenerationPage", () => {
       screen.getByRole("button", { name: paperButtonLabel }),
     ).toBeInTheDocument();
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
       "GET",
       "GET",
       "GET",
@@ -2669,8 +2739,10 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByRole("button", { name: "提交作答" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "查看解析" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "重试生成" })).toBeDisabled();
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(5);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
       "GET",
       "GET",
       "GET",
@@ -4075,6 +4147,11 @@ describe("StudentPersonalAiGenerationPage", () => {
             ownerPublicId: "organization-public-123",
             ownerType: "organization",
             path,
+            persistedSourceTaskPublicId:
+              paperVisibleResponse.data.resultState.taskPublicId,
+            persistedVisibleGeneratedContent: paperVisibleResponse.data
+              .runtimeBridge
+              .visibleGeneratedContent as AiGenerationRouteIntegratedVisibleGeneratedContent,
             state: learningSessionMockState,
           });
 
@@ -4579,6 +4656,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     await waitFor(() =>
       expect(progressUrls).toEqual([
         `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
       ]),
     );
     expect(document.body.textContent).not.toContain("unit-test-session-token");
@@ -4995,6 +5073,27 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
+        if (
+          path ===
+          `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () =>
+              createLearningProgressResponse({
+                actorPublicId: "employee-session-user-public-123",
+                answerFeedbacks: [],
+                ownerPublicId: "organization-public-123",
+                ownerType: "organization",
+                questionCount: 1,
+                sessionPublicId,
+                sourceResultPublicId,
+                sourceTaskPublicId,
+              }),
+          };
+        }
+
         throw new Error(`Unexpected fetch path: ${path}`);
       },
     );
@@ -5026,30 +5125,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       await screen.findByText("synthetic server employee paper stem"),
     ).toBeInTheDocument();
     await waitFor(() => expect(sessionCreateBodies).toHaveLength(1));
-    expect(sessionCreateBodies[0]).toMatchObject({
-      sessionPublicId,
-      sourceResultPublicId,
-      sourceTaskPublicId,
-      ownerType: "organization",
-      ownerPublicId: "organization-public-123",
-      paperAssemblyContainer: {
-        selectedQuestionCount: 1,
-        sourceComposition: {
-          enterpriseTrainingSnapshotCount: 1,
-          platformFormalQuestionCount: 0,
-        },
-        sections: [
-          {
-            selectedQuestionCount: 1,
-            selectedQuestions: [
-              {
-                sourceKind: "enterprise_training_snapshot",
-              },
-            ],
-          },
-        ],
-      },
-    });
+    expect(sessionCreateBodies).toEqual([{ sourceResultPublicId }]);
 
     fireEvent.click(
       screen.getByRole("radio", {

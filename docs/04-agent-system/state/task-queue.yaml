@@ -118,6 +118,111 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-ai-training-history-resume-repair-2026-07-12
+    title: User-led AI training history synchronization and paper resume repair
+    phase: user-led-ai-training-history-resume-repair-2026-07-12
+    status: in_progress
+    priority: p0
+    sequenceOrder: 58
+    taskKind: learner_ai_history_and_learning_session_recovery
+    moduleRunVersion: 2
+    branch: codex/ai-training-history-resume
+    dependsOn:
+      - user-led-ai-training-settings-order-repair-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-ai-training-history-resume-repair.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-ai-training-history-resume-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-ai-training-history-resume-repair-audit.md
+    allowedFiles:
+      - src/app/api/v1/personal-ai-generation-learning-sessions/route.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/server/contracts/personal-ai-generation-learning-session-contract.ts
+      - src/server/models/personal-ai-generation-learning-session.ts
+      - src/server/repositories/personal-ai-generation-result-repository.ts
+      - src/server/repositories/personal-ai-generation-result-repository.test.ts
+      - src/server/services/personal-ai-generation-learning-session-route.ts
+      - src/server/services/personal-ai-generation-learning-session-route.test.ts
+      - src/server/services/personal-ai-generation-learning-session-service.ts
+      - src/server/services/personal-ai-generation-learning-session-service.test.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-ai-training-history-resume-repair.md
+      - docs/05-execution-logs/evidence/2026-07-12-ai-training-history-resume-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-ai-training-history-resume-repair-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      <<: *low_risk_capabilities
+      browserRuntime: approved_redacted_localhost_in_app_browser_only
+      screenshotCapture: approved_repo_external_redacted_page_only
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_fresh_approved_branch_commit_merge_push_cleanup_2026_07_12
+    acceptanceStandards:
+      - AI mode selection and both history filters always agree, including Provider-closed state and rapid switching.
+      - A persisted assembled AI paper result can start or continue one actor-scoped learning session after refresh.
+      - Personal and organization employee owner boundaries remain fail-closed; browser-supplied paper assembly cannot replace the persisted result assembly.
+      - Repeated actions are idempotent, existing feedback is restored, and insufficient or inaccessible sources remain blocked.
+      - AI question generation remains backward compatible; no Provider or formal-write boundary is opened.
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/repositories/personal-ai-generation-result-repository.test.ts src/server/repositories/personal-ai-generation-learning-session-repository.test.ts src/server/services/personal-ai-generation-result-history-service.test.ts src/server/services/personal-ai-generation-learning-session-route.test.ts src/server/services/personal-ai-generation-learning-session-service.test.ts src/server/services/personal-ai-generation-learning-session-paper-source-resolver.test.ts --reporter=dot --maxWorkers=4
+      - corepack pnpm@10.26.1 exec vitest run --reporter=dot --maxWorkers=50% --testTimeout=10000
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - corepack pnpm@10.26.1 exec next build --webpack
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-ai-training-history-resume-repair-2026-07-12 -SkipRemoteAheadCheck
+    validationSummary:
+      status: local_verified_pending_commit_closeout
+      baselineFocusedTests: pass_7_files_84_tests
+      initialFullTests: incomplete_timeout_processes_terminated_no_failure_result
+      tddRed: pass_9_expected_failures
+      focusedTests: pass_8_files_108_tests_preformat_and_3_files_69_tests_postformat
+      fullTests: pass_360_files_1993_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      gitDiffCheck: pass
+      browserPersonalAdvanced: pass_provider_closed_mode_history_sync
+      browserOrganizationAdvancedEmployee: pass_provider_closed_mode_history_sync
+      browserMobile390: blocked_browser_attach_timeout_after_viewport_override_shared_ui_tests_pass
+      providerExecution: blocked_not_executed
+      databaseDirectConnection: blocked_not_executed
+      schemaMigration: blocked_not_executed
+      dependencyChange: blocked_not_executed
+      adversarialReview: pass_two_rounds
   - id: user-led-ai-training-settings-order-repair-2026-07-12
     title: User-led AI training generation settings order repair
     phase: user-led-ai-training-settings-order-repair-2026-07-12

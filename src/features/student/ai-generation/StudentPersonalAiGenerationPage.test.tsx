@@ -61,6 +61,78 @@ function createResultHistoryPayload() {
   };
 }
 
+function createPaperResultHistoryPayload() {
+  const resultPublicId = "personal_ai_paper_result_public_ui_601";
+  const taskPublicId = "ai_generation_paper_task_public_ui_601";
+
+  return {
+    resultPublicId,
+    taskPublicId,
+    payload: {
+      ...createResultHistoryPayload(),
+      results: [
+        {
+          ...createResultHistoryPayload().results[0],
+          resultPublicId,
+          taskPublicId,
+          taskType: "ai_paper_generation",
+          evidenceReference: {
+            ...createResultHistoryPayload().results[0].evidenceReference,
+            evidenceStatus: "sufficient",
+            citationCount: 2,
+          },
+          paperAssembly: {
+            status: "assembled",
+            sourceDiagnostics: {
+              role: "personal_advanced_student",
+              platformQuestionCount: 1,
+              enterpriseQuestionCount: 0,
+              enterpriseSourceStatus: "not_applicable",
+            },
+            container: {
+              title: "persisted self-test paper",
+              profession: "monopoly",
+              level: 3,
+              subject: "theory",
+              requestedQuestionCount: 1,
+              selectedQuestionCount: 1,
+              sourceComposition: {
+                platformFormalQuestionCount: 1,
+                enterpriseTrainingSnapshotCount: 0,
+              },
+              matchQuality: "fully_matched",
+              sections: [
+                {
+                  sectionKey: "single-choice",
+                  title: "单选题",
+                  questionType: "single_choice",
+                  targetQuestionCount: 1,
+                  selectedQuestionCount: 1,
+                  selectedQuestions: [
+                    {
+                      questionPublicId: "question_public_ui_601",
+                      sourceKind: "platform_formal_question",
+                      matchTier: "exact",
+                      score: 2,
+                    },
+                  ],
+                  degradationSummary: {
+                    exactCount: 1,
+                    nearbyKnowledgeCount: 0,
+                    sameScopeCount: 0,
+                  },
+                },
+              ],
+            },
+            insufficiency: null,
+            redactionStatus: "redacted",
+          },
+        },
+      ],
+    },
+  };
+}
+
 function createRequestHistoryPayload() {
   return [
     {
@@ -439,6 +511,14 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(paperTab).not.toBeDisabled();
     fireEvent.click(paperTab);
     expect(paperTab).toHaveAttribute("aria-selected", "true");
+    await waitFor(() => {
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        "/api/v1/personal-ai-generation-results?taskType=ai_paper_generation&page=1&pageSize=10",
+        "local-session-token",
+        { method: "GET" },
+      );
+    });
+    expect(screen.getAllByText("当前筛选：AI组卷").length).toBeGreaterThan(0);
 
     const historyZone = screen.getByTestId("student-ai-zone-result-history");
     const generationSettings = screen.getByTestId(
@@ -464,6 +544,237 @@ describe("StudentPersonalAiGenerationPage", () => {
       ),
     ).toBe(false);
   });
+
+  it("ignores a stale history response after rapid mode switching", async () => {
+    let resolvePaperHistory!: (value: unknown) => void;
+    const delayedPaperHistory = new Promise((resolve) => {
+      resolvePaperHistory = resolve;
+    });
+    let questionHistoryRequestCount = 0;
+
+    studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+      async (url: string) => {
+        if (url === "/api/v1/authorizations") {
+          return {
+            code: 0,
+            message: "ok",
+            data: createAdvancedAuthorizationListPayload(),
+          };
+        }
+
+        if (url === "/api/v1/ai-generation/availability") {
+          return {
+            code: 0,
+            message: "ok",
+            data: { generationAvailability: "closed" },
+          };
+        }
+
+        if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
+          return { code: 0, message: "ok", data: [] };
+        }
+
+        if (url.includes("taskType=ai_paper_generation")) {
+          return delayedPaperHistory;
+        }
+
+        if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+          questionHistoryRequestCount += 1;
+          const payload = createResultHistoryPayload();
+
+          return {
+            code: 0,
+            message: "ok",
+            data:
+              questionHistoryRequestCount === 1
+                ? { ...payload, results: [] }
+                : {
+                    ...payload,
+                    results: [
+                      {
+                        ...payload.results[0],
+                        contentReference: {
+                          ...payload.results[0].contentReference,
+                          contentPreviewMasked: "latest question history",
+                        },
+                      },
+                    ],
+                  },
+          };
+        }
+
+        return { code: 500019, message: "unexpected", data: null };
+      },
+    );
+
+    render(<StudentPersonalAiGenerationPage />);
+    const paperTab = await screen.findByRole("tab", { name: "AI组卷" });
+    fireEvent.click(paperTab);
+    fireEvent.click(screen.getByRole("tab", { name: "AI出题" }));
+
+    expect(
+      await screen.findByText("latest question history"),
+    ).toBeInTheDocument();
+    resolvePaperHistory({
+      code: 0,
+      message: "ok",
+      data: {
+        ...createResultHistoryPayload(),
+        results: [
+          {
+            ...createResultHistoryPayload().results[0],
+            contentReference: {
+              ...createResultHistoryPayload().results[0].contentReference,
+              contentPreviewMasked: "stale paper history",
+            },
+          },
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText("stale paper history")).not.toBeInTheDocument();
+    });
+    expect(screen.getAllByText("当前筛选：AI出题").length).toBeGreaterThan(0);
+  });
+
+  it.each(["personal", "organization"] as const)(
+    "starts or resumes a persisted AI paper after refresh for the %s owner",
+    async (ownerType) => {
+      const paperHistory = createPaperResultHistoryPayload();
+      const sessionPublicId = `ai_learning_session_${paperHistory.resultPublicId}`;
+      const sessionQuestion = {
+        sessionQuestionPublicId: `${sessionPublicId}_q_1`,
+        sourceDraftNumber: 1,
+        questionType: "single_choice",
+        difficulty: "medium",
+        knowledgeNodeLabels: ["专卖基础"],
+        questionStem: "服务端恢复的自测题目",
+        questionOptions: [
+          { optionLabel: "A", optionText: "正确选项", isCorrect: null },
+          { optionLabel: "B", optionText: "干扰选项", isCorrect: null },
+        ],
+        standardAnswerLabels: [],
+        standardAnswerText: null,
+        analysis: null,
+        maxScore: "2.0",
+        reviewStatus: "draft_review_required",
+      };
+      const postBodies: unknown[] = [];
+
+      studentRuntimeApiMock.fetchStudentApi.mockImplementation(
+        async (url: string, _token: string | null, init?: RequestInit) => {
+          if (url === "/api/v1/authorizations") {
+            return {
+              code: 0,
+              message: "ok",
+              data: createAdvancedAuthorizationListPayload(ownerType),
+            };
+          }
+
+          if (url === "/api/v1/ai-generation/availability") {
+            return {
+              code: 0,
+              message: "ok",
+              data: { generationAvailability: "closed" },
+            };
+          }
+
+          if (url.startsWith("/api/v1/personal-ai-generation-requests")) {
+            return { code: 0, message: "ok", data: [] };
+          }
+
+          if (url.startsWith("/api/v1/personal-ai-generation-results?")) {
+            return {
+              code: 0,
+              message: "ok",
+              data: url.includes("taskType=ai_paper_generation")
+                ? paperHistory.payload
+                : { ...paperHistory.payload, results: [] },
+            };
+          }
+
+          if (
+            url === "/api/v1/personal-ai-generation-learning-sessions" &&
+            init?.method === "POST"
+          ) {
+            postBodies.push(JSON.parse(String(init.body)));
+            return {
+              code: 0,
+              message: "ok",
+              data: {
+                status: "created",
+                blockReason: null,
+                session: {
+                  sessionPublicId,
+                  contentDomain: "personal_ai_learning",
+                  sourceResultPublicId: paperHistory.resultPublicId,
+                  sourceTaskPublicId: paperHistory.taskPublicId,
+                  ownerType,
+                  ownerPublicId:
+                    ownerType === "organization"
+                      ? "organization_public_ui_501"
+                      : "student_public_ui_501",
+                  actorPublicId: "student_public_ui_501",
+                  evidenceStatus: "sufficient",
+                  citationCount: 2,
+                  questionCount: 1,
+                  questions: [sessionQuestion],
+                  formalWriteBoundary: {
+                    questionWriteStatus: "blocked",
+                    paperWriteStatus: "blocked",
+                    practiceWriteStatus: "blocked",
+                    answerRecordWriteStatus: "blocked",
+                    examReportWriteStatus: "blocked",
+                    mistakeBookWriteStatus: "blocked",
+                  },
+                  createdAt: "2026-07-12T10:30:00.000Z",
+                },
+              },
+            };
+          }
+
+          if (
+            url ===
+            `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`
+          ) {
+            return {
+              code: 0,
+              message: "ok",
+              data: {
+                status: "ready",
+                blockReason: null,
+                progress: {
+                  answerFeedbacks: [],
+                },
+              },
+            };
+          }
+
+          return { code: 500019, message: "unexpected", data: null };
+        },
+      );
+
+      render(<StudentPersonalAiGenerationPage />);
+      const paperTab = await screen.findByRole("tab", { name: "AI组卷" });
+      fireEvent.click(paperTab);
+      fireEvent.click(
+        await screen.findByRole("button", { name: "开始或继续自测" }),
+      );
+
+      expect(
+        await screen.findByText("服务端恢复的自测题目"),
+      ).toBeInTheDocument();
+      expect(postBodies).toEqual([
+        { sourceResultPublicId: paperHistory.resultPublicId },
+      ]);
+      expect(studentRuntimeApiMock.fetchStudentApi).toHaveBeenCalledWith(
+        `/api/v1/personal-ai-generation-learning-sessions/${sessionPublicId}/progress`,
+        "local-session-token",
+        { method: "GET" },
+      );
+    },
+  );
 
   it("localizes profession and learner-facing dates", async () => {
     mockAuthorizationAndResultHistoryResponse(

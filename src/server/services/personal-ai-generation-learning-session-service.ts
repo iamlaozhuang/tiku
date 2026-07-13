@@ -39,6 +39,12 @@ async function createLearningSession(
   repository: PersonalAiGenerationLearningSessionRepository,
   input: PersonalAiGenerationLearningSessionCreationInputDto,
 ): Promise<PersonalAiGenerationLearningSessionCreationResultDto> {
+  const existingResult = await reuseExistingLearningSession(repository, input);
+
+  if (existingResult !== null) {
+    return existingResult;
+  }
+
   const groundingSummary = input.visibleGeneratedContent.groundingSummary;
 
   if (
@@ -117,6 +123,12 @@ async function createLearningSessionFromPaperAssembly(
   repository: PersonalAiGenerationLearningSessionRepository,
   input: PersonalAiGenerationLearningPaperAssemblySessionCreationInputDto,
 ): Promise<PersonalAiGenerationLearningSessionCreationResultDto> {
+  const existingResult = await reuseExistingLearningSession(repository, input);
+
+  if (existingResult !== null) {
+    return existingResult;
+  }
+
   if (input.evidenceStatus !== "sufficient") {
     return blockCreation("insufficient_grounding_evidence");
   }
@@ -161,6 +173,43 @@ async function createLearningSessionFromPaperAssembly(
     status: "created",
     blockReason: null,
     session,
+  };
+}
+
+async function reuseExistingLearningSession(
+  repository: PersonalAiGenerationLearningSessionRepository,
+  input: Pick<
+    PersonalAiGenerationLearningSessionCreationInputDto,
+    | "sessionPublicId"
+    | "sourceResultPublicId"
+    | "sourceTaskPublicId"
+    | "ownerType"
+    | "ownerPublicId"
+    | "actorPublicId"
+  >,
+): Promise<PersonalAiGenerationLearningSessionCreationResultDto | null> {
+  const existingSession = await repository.findSessionByPublicId(
+    input.sessionPublicId,
+  );
+
+  if (existingSession === null) {
+    return null;
+  }
+
+  if (
+    existingSession.sourceResultPublicId !== input.sourceResultPublicId ||
+    existingSession.sourceTaskPublicId !== input.sourceTaskPublicId ||
+    existingSession.ownerType !== input.ownerType ||
+    existingSession.ownerPublicId !== input.ownerPublicId ||
+    existingSession.actorPublicId !== input.actorPublicId
+  ) {
+    return blockCreation("session_context_mismatch");
+  }
+
+  return {
+    status: "created",
+    blockReason: null,
+    session: existingSession,
   };
 }
 

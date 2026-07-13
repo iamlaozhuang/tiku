@@ -42,7 +42,8 @@ export type PersonalAiGenerationLearningSessionCreationBlockReason =
   | "structured_preview_not_parsed"
   | "no_usable_generated_questions"
   | "no_usable_selected_questions"
-  | "selected_question_source_missing";
+  | "selected_question_source_missing"
+  | "session_context_mismatch";
 
 export type PersonalAiGenerationLearningAnswerBlockReason =
   | "session_not_found"
