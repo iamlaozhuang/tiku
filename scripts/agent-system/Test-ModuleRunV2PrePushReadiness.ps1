@@ -369,6 +369,27 @@ if ($taskBlock.Count -eq 0) {
 $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
 $executionProfile = Get-ScalarValue -Block $taskBlock -Key "executionProfile"
 
+if ($taskStatus -eq "claimed") {
+    $claimTransitionScopeTaskId = Get-ScalarValue -Block $taskBlock -Key "claimTransitionScopeTaskId"
+    if (-not [string]::IsNullOrWhiteSpace($claimTransitionScopeTaskId)) {
+        $programCurrentTaskId = Get-ProjectScalar -Lines $projectStateLines -Key "currentTaskId"
+        $programLastClosedTaskId = Get-ProjectScalar -Lines $projectStateLines -Key "lastClosedTaskId"
+        $claimTransitionScopeTaskBlock = @(Get-TaskBlock -Lines $queueLines -Id $claimTransitionScopeTaskId)
+        if ($TaskId -ne $programCurrentTaskId -or $claimTransitionScopeTaskId -ne $programLastClosedTaskId) {
+            Add-Finding "HARD_BLOCK_CLAIM_TRANSITION_PROGRAM_POINTER_MISMATCH $TaskId $claimTransitionScopeTaskId"
+        } elseif ($claimTransitionScopeTaskBlock.Count -eq 0 -or (Get-ScalarValue -Block $claimTransitionScopeTaskBlock -Key "status") -ne "closed") {
+            Add-Finding "HARD_BLOCK_CLAIM_TRANSITION_SCOPE_TASK_INVALID $claimTransitionScopeTaskId"
+        } else {
+            Write-Output "claimTransitionTaskId: $TaskId"
+            Write-Output "claimTransitionScopeTaskId: $claimTransitionScopeTaskId"
+            $TaskId = $claimTransitionScopeTaskId
+            $taskBlock = $claimTransitionScopeTaskBlock
+            $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
+            $executionProfile = Get-ScalarValue -Block $taskBlock -Key "executionProfile"
+        }
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
     $EvidencePath = Get-ScalarValue -Block $taskBlock -Key "evidencePath"
 }

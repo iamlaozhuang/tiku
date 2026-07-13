@@ -4,7 +4,7 @@ Date: 2026-07-13
 
 Task: `content-admin-platform-program-init-2026-07-13`
 
-Verdict: `PASS — ready for scoped Git closeout`
+Verdict: `PASS — Program Init closed; B0 may remain claimed without implying implementation start`
 
 Subagents were not used because repository instructions prohibit them without explicit approval. Both reviews are performed serially against the full diff and executed gates.
 
@@ -47,11 +47,47 @@ Verified results:
 - Repository-only recovery identifies the 32 ordered tasks, current/next pointers, two conditional tasks, authorization source, deployment block, PIC ledger and guard path.
 - The serial plan defines task content, acceptance, cumulative audits, stop conditions, B -> D -> C -> E -> F order and X1/X2 triggers. State and queue carry the same IDs and statuses.
 - PIC statuses start as `accepted_baseline` or `partial`; Program Init does not claim a route is compliant.
-- The changed-file inventory contains only the 12 approved governance/hook/script files. There is no product source/test, dependency, schema, fixture, environment or private path.
+- The changed-file inventory contains only the 13 approved governance/hook/script files. There is no product source/test, dependency, schema, fixture, environment or private path.
 - A01-A30, Provider-disabled behavior, historical `paperAssembly` recovery, phone masking/reveal, plaintext `redeem_code` product exception, `effectiveEdition` derivation and organization-training ownership remain explicit protection rows.
 - Full unit (363 files/2036 tests), lint, typecheck, full format, webpack build (90 pages), PowerShell parse, guard smoke and whitespace checks pass.
 
 Result: pass. No sensitive value or product-function change was found; no Critical or Important residual finding remains.
+
+## Round 3 — Physical Cleanup And Claimed-successor Handoff
+
+Attack surface:
+
+- record branch/worktree cleanup before it physically occurs;
+- advance B0 before Program Init commit, ff-only merge or remote synchronization;
+- let the Program Guard pass but have the existing Module Run v2 pre-push gate reject the same legal state transition;
+- treat `claimed` as proof that B0 required reading or implementation has started.
+
+Finding and repair:
+
+- The original Program Init branch/worktree was removed only after `master == origin/master == 621b83ce459392b123e6ee5f301d0315c4a067c3` was verified.
+- A real RED proved the Module Run v2 pre-push gate still evaluated B0's claimed status and rejected the predecessor SHA checkpoints. The repair lets a claimed task name one explicit predecessor closeout scope; it does not relax ordinary claimed-task SHA checks.
+- The first claim-transition pre-commit gate also rejected a missing `blockedFiles` contract. B0 now materializes the full product/private/runtime blocklist before the transition commit.
+- Program Init is now `closed` with all five checkpoints `pass`; B0 is only `claimed`, has five pending checkpoints, and explicitly says its required reading and implementation have not started.
+
+Result: pass. The Program pointer cannot advance unless the predecessor is closed, recorded in `completedTaskIds`, and has all closeout checkpoints complete.
+
+## Round 4 — Handoff Bypass And Cross-program Contamination
+
+Attack surface:
+
+- add a claim-transition marker to an unrelated task and inherit a permissive predecessor state;
+- point the marker at an arbitrary historical closed task;
+- preserve a stale current/last-closed pointer mismatch;
+- use handoff mechanics to authorize deployment, product code, DB, Provider, browser or dependency changes.
+
+Verified results:
+
+- The pre-push gate honors the marker only when the claimed task equals the Program `currentTaskId`, the scope equals `lastClosedTaskId`, and the scoped queue task is actually `closed`; otherwise it hard-blocks.
+- Program Guard independently verifies sequential order, completed-task membership, all predecessor checkpoints, one active task, allowed files and deployment blocking.
+- The handoff diff remains governance-only. B0's product/runtime/test/DB/Provider/browser/dependency/schema/deploy capabilities are blocked until its required reading, precise plan and task-specific scope are materialized.
+- X1/X2 remain untriggered, and the bounded-concurrency 363-file/2036-test pass leaves no reproducible current-master product defect.
+
+Result: pass. No Critical or Important residual finding remains after the post-cleanup handoff reviews.
 
 ## Taste Compliance Checklist
 

@@ -33,6 +33,10 @@ analogousImplementationReviewed: true
 - RED: before the guard implementation existed, the smoke test failed with `RED_EXPECTED_PROGRAM_GUARD_MISSING`.
 - GREEN: the implemented smoke suite passed one valid fixture and eight explicit invalid fixtures. It proves rejection of skipped tasks, advancement before prior remote synchronization, missing review round two, allowed-file escape, incomplete reading evidence, deployment auto-authorization, X1 without its trigger, and unsupported status values.
 - The real repository Program record also passed the guard in manual mode.
+- Handoff RED: after the predecessor was physically synchronized and cleaned, the legacy Module Run v2 pre-push gate still evaluated the newly `claimed` B0 task and rejected both repository SHA checkpoints.
+- Handoff GREEN: the pre-push gate now accepts an explicit `claimTransitionScopeTaskId` only when it matches the Program's current/last-closed pointers and the scoped predecessor is `closed`; the same B0 claim transition then passed while unrelated claimed tasks retain the original fail-closed behavior.
+- Handoff adversarial negative: pointing the marker at an unrelated closed Batch A task produced `HARD_BLOCK_CLAIM_TRANSITION_PROGRAM_POINTER_MISMATCH`; restoring Program Init as the exact predecessor returned GREEN.
+- Claim-scope hardening: the first Module Run v2 pre-commit check rejected an empty `blockedFiles` contract for the claimed B0 transition; the transition record now carries an explicit fail-closed product/private/runtime blocklist and the five-file scope check passes.
 
 ## Validation Results
 
@@ -47,7 +51,7 @@ analogousImplementationReviewed: true
 | Full repository format check | pass                            |
 | Webpack production build     | pass — 90 static pages          |
 | `git diff --check`           | pass                            |
-| Module Run v2 pre-commit     | pass — 12 allowed files scanned |
+| Module Run v2 pre-commit     | pass — scoped allowed files     |
 | Module Run v2 closeout       | pass                            |
 | Module Run v2 pre-push       | pass on the merged local branch |
 
@@ -64,6 +68,7 @@ Validation command anchors:
 - `Test-ModuleRunV2PreCommitHardening`: pass.
 - `Test-ModuleRunV2ModuleCloseoutReadiness`: pass after the initial governance RED and immutable task commit.
 - `Test-ModuleRunV2PrePushReadiness`: pass with the remote-ahead check intentionally deferred to the ordinary push boundary.
+- Claimed-successor handoff rerun: pass with B0 identified as the claim transition and Program Init identified as the only predecessor closeout scope.
 
 ### Master Post-merge Revalidation
 
@@ -84,7 +89,7 @@ Validation command anchors:
 
 ## Scope And Sensitive-data Check
 
-- Changed scope is limited to two hooks, two Program Guard scripts, project state, task queue, two task plans, two acceptance records, this evidence and the audit.
+- Changed scope is limited to two hooks, two Program Guard scripts, one bounded Module Run v2 claimed-successor handoff adjustment, project state, task queue, two task plans, two acceptance records, this evidence and the audit.
 - No product runtime, product test, package/lockfile, schema, migration, fixture, seed, environment, database, Provider, browser, screenshot, raw DOM, staging, production or deployment action occurred.
 - No credential, phone, session, cookie, token, database URL, raw row, plaintext `redeem_code` or complete AI content entered evidence.
 
@@ -98,11 +103,11 @@ Validation command anchors:
 - Cost Calibration Gate remains blocked.
 - blocked remainder: product feature implementation, database, Provider, dependency, schema/fixture, browser/account, staging, production, deployment, PR, force push and release-readiness claims remain blocked or task-specific.
 - task commit: pass — `2810a3722d25ea496121c74f8cbeadad3a1b1309`
-- master ff-only merge: pass — local `master` reached `e7e8ce92375a8499824c19134f9a31097c77338a`
-- `origin/master` sync: pending
-- short branch/worktree cleanup: pending
-- next task: `content-admin-platform-b0-contract-code-mapping-2026-07-13`
+- master ff-only merge: pass — local `master` reached `621b83ce459392b123e6ee5f301d0315c4a067c3`
+- `origin/master` sync: pass — local and remote both reached `621b83ce459392b123e6ee5f301d0315c4a067c3`
+- original Program Init short branch/worktree cleanup: pass
+- next task: `content-admin-platform-b0-contract-code-mapping-2026-07-13`, status `claimed`; required reading and B0 implementation have not started
 - X1/X2: not triggered
 - deployment: blocked pending fresh user approval
 
-The Program pointer will not advance to B0 until this task is committed, ff-only merged, synchronized, and its branch/worktree cleanup is physically complete. B0 claim is a subsequent state transition, not an optimistic pre-cleanup assertion.
+The Program pointer advanced only after the Program Init commit, ff-only merge, remote synchronization, and original branch/worktree cleanup were physically complete. The claim transition does not assert that B0 required reading or implementation has started.

@@ -121,8 +121,8 @@ contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: in_progress
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-program-init-2026-07-13
-  nextTaskId: content-admin-platform-b0-contract-code-mapping-2026-07-13
+  currentTaskId: content-admin-platform-b0-contract-code-mapping-2026-07-13
+  nextTaskId: content-admin-platform-b1-async-state-primitives-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-b0-contract-code-mapping-2026-07-13
@@ -156,14 +156,16 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-f3-organization-acceptance-2026-07-13
     - content-admin-platform-f4-learner-acceptance-2026-07-13
     - content-admin-platform-f5-final-cumulative-audit-2026-07-13
-  completedTaskIds: []
+  completedTaskIds:
+    - content-admin-platform-program-init-2026-07-13
+  lastClosedTaskId: content-admin-platform-program-init-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   deployment:
     approved: false
     status: blocked_requires_fresh_user_approval
   taskStatusById:
-    content-admin-platform-program-init-2026-07-13: ready_for_closeout
-    content-admin-platform-b0-contract-code-mapping-2026-07-13: pending
+    content-admin-platform-program-init-2026-07-13: closed
+    content-admin-platform-b0-contract-code-mapping-2026-07-13: claimed
     content-admin-platform-b1-async-state-primitives-2026-07-13: pending
     content-admin-platform-b2-list-query-primitives-2026-07-13: pending
     content-admin-platform-b3-detail-feedback-primitives-2026-07-13: pending
@@ -206,10 +208,87 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
+  - id: content-admin-platform-b0-contract-code-mapping-2026-07-13
+    title: Content admin platform PIC contract-to-code mapping
+    phase: content-admin-platform-b0-contract-code-mapping-2026-07-13
+    status: claimed
+    priority: p0
+    sequenceOrder: 66
+    taskKind: task_claim_transition
+    moduleRunVersion: 2
+    branch: codex/content-admin-platform-b0-contract-code-mapping
+    dependsOn:
+      - content-admin-platform-program-init-2026-07-13
+    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+    claimTransitionArtifactScope: predecessor_program_init_closeout_only_replace_before_b0_in_progress
+    claimTransitionScopeTaskId: content-admin-platform-program-init-2026-07-13
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-program-init.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-program-init-audit.md
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-program-init.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-platform-program-init-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      claimTransitionOnly: approved
+      productRuntimeSourceChange: blocked
+      productTestSourceChange: blocked
+      browserRuntime: blocked
+      databaseConnection: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      fixtureSeedChange: blocked
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   - id: content-admin-platform-program-init-2026-07-13
     title: Content admin platform Batch B-F serial program initialization
     phase: content-admin-platform-program-init-2026-07-13
-    status: ready_for_closeout
+    status: closed
+    result: pass_closed_remote_synced_cleanup_complete_b0_claimed
     priority: p0
     sequenceOrder: 65
     taskKind: mechanism_hardening
@@ -229,6 +308,7 @@ activeTasks:
       - .husky/pre-push
       - scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
       - scripts/agent-system/Test-ContentAdminPlatformSerialProgram.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-program-init.md
