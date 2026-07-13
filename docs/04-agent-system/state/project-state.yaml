@@ -1,8 +1,44 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-prelaunch-test-data-refresh-2026-07-13
-updatedAt: "2026-07-13T03:10:00-07:00"
+currentPhase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+updatedAt: "2026-07-13T07:36:04-07:00"
+latestContentAdminP0PlatformInteractionBaselineRatification:
+  id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+  status: approved_ready_for_local_closeout
+  priority: p0
+  branch: codex/content-admin-interaction-baseline
+  startSha: 1bd47916acb5608faf5186175bfb659cd8509212
+  approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+  requirementsContractPath: docs/01-requirements/traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-p0-platform-interaction-baseline-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification-audit.md
+  executionBoundary:
+    runtimeSourceChange: blocked_docs_only
+    testSourceChange: blocked
+    browserRuntime: blocked
+    screenshotCapture: blocked
+    rawDomCapture: blocked
+    privateCredentialRead: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
+    schemaMigration: blocked
+    providerExecution: blocked
+    dependencyChange: blocked
+    stagingProdDeploy: blocked
+    localDocsCommitAndFfMerge: approved
+    remoteWrite: blocked_requires_fresh_approval
+  verification:
+    currentBaselineFocusedTests: pass_1_file_36_tests
+    formatCheck: pass_scoped_eight_files
+    gitDiffCheck: pass
+    allowedFileInventory: pass_eight_expected_files_only
+    moduleRunV2PreCommitHardening: pass_eight_files_after_owner_approval
+    adversarialReview: pass_two_rounds
+    selfReview: pass
+  nextDecision: local_docs_closeout_then_start_batch_a
 latestUserLedPrelaunchTestDataRefresh:
   id: user-led-prelaunch-test-data-refresh-2026-07-12
   status: ready_for_closeout
@@ -6080,55 +6116,57 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: user-led-prelaunch-test-data-refresh-2026-07-12
-  title: User-led prelaunch AI paper test-data refresh
-  phase: user-led-prelaunch-test-data-refresh-2026-07-13
-  status: ready_for_closeout
+  id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+  title: Content admin P0 data integrity and platform interaction baseline ratification
+  phase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+  status: approved_ready_for_local_closeout
   priority: p0
-  taskKind: approved_local_prelaunch_data_governance
-  branch: codex/prelaunch-test-data-refresh
+  taskKind: docs_product_decision_and_requirement_alignment
+  branch: codex/content-admin-interaction-baseline
   humanApprovalBoundary:
-    databaseConnection: approved_0704_local_container_only_no_connection_output
-    databaseMutation: approved_exact_legacy_ai_paper_test_data_chain_only
     localCommit: approved
     fastForwardMerge: approved_master_only
-    push: approved_origin_master_only
-    cleanup: approved_after_remote_sync
-    runtimeSourceChange: blocked
+    cleanup: approved_after_local_merge
+    push: blocked_requires_fresh_approval
+    runtimeSourceChange: blocked_docs_only
+    testSourceChange: blocked
+    databaseConnection: blocked
+    databaseMutation: blocked
     schemaMigration: blocked
     fixtureSeedSourceChange: blocked
     providerExecution: blocked
     envSecretAccess: blocked
-    browserRuntime: approved_redacted_localhost_postflight_only
-    screenshotCapture: approved_repo_external_redacted_only_if_needed
+    browserRuntime: blocked
+    screenshotCapture: blocked
     rawDomCapture: blocked
     stagingProdDeploy: blocked
     forcePush: blocked
     pullRequest: blocked
-  plannedAt: "2026-07-13T02:20:00-07:00"
-  claimedAt: "2026-07-13T02:20:00-07:00"
-  targetClosureItem: Remove only the approved prelaunch learner AI paper result chains that lack a persisted resume snapshot, after verified backup and exact transactional preflight.
-  behaviorBoundary: exact_local_test_data_governance_only_no_runtime_source_schema_migration_fixture_dependency_provider_or_deploy_change
-  evidenceMode: aggregate_status_count_hash_and_commit_only_no_credentials_tokens_env_values_database_urls_internal_ids_raw_rows_or_full_ai_content
-  planPath: docs/05-execution-logs/task-plans/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-prelaunch-ai-paper-test-data-refresh-audit.md
-  nextRequiredTaskId: none
+  plannedAt: "2026-07-13T07:00:00-07:00"
+  claimedAt: "2026-07-13T07:00:00-07:00"
+  targetClosureItem: Ratify the owner-approved P0 integrity matrix, platform interaction contract, container exceptions, and Batch A-first sequence as stable requirements.
+  behaviorBoundary: docs_only_requirement_ratification_no_runtime_test_browser_database_provider_dependency_schema_fixture_deploy_or_remote_write
+  evidenceMode: source_path_test_count_and_decision_only_no_credentials_tokens_env_values_database_urls_raw_rows_raw_dom_or_full_ai_content
+  planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+  acceptancePath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-p0-platform-interaction-baseline-approval-package.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification-audit.md
+  nextRequiredTaskId: content-admin-p0-data-integrity-2026-07-13
   validationSummary:
-    status: pass_ready_for_closeout
-    databasePreflight: pass_exact_legacy_ai_paper_scope
-    externalBackup: pass_custom_format_verified
-    databaseRefresh: pass_transactional_exact_counts
-    databasePostflight: pass_no_legacy_candidate_or_direct_orphan
-    focusedTests: pass_8_files_109_tests
-    fullUnitTests: pass_361_files_2001_tests
-    lint: pass
-    typecheck: pass
-    formatCheck: pass
-    webpackBuild: pass_90_static_pages
+    status: passed_docs_only_approved_ready_for_local_closeout
+    focusedTests: pass_1_file_36_tests
+    formatCheck: pass_scoped_eight_files
     gitDiffCheck: pass
+    allowedFileInventory: pass_eight_expected_files_only
+    moduleRunV2PreCommitHardening: pass_eight_files_after_owner_approval
     adversarialReview: pass_two_rounds
     selfReview: pass
+previousCurrentTaskBeforeContentAdminP0PlatformInteractionBaselineRatification20260713:
+  id: user-led-prelaunch-test-data-refresh-2026-07-12
+  status: ready_for_closeout
+  branch: codex/prelaunch-test-data-refresh
+  evidencePath: docs/05-execution-logs/evidence/2026-07-13-prelaunch-ai-paper-test-data-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-prelaunch-ai-paper-test-data-refresh-audit.md
 previousCurrentTaskBeforeUserLedPrelaunchTestDataRefresh20260713:
   id: user-led-phone-visibility-validation-2026-07-12
   title: User-led phone visibility validation

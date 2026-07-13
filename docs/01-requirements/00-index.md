@@ -110,6 +110,10 @@
 [Full-role UI/UX Source Implementation Entry](./traceability/2026-07-07-full-role-uiux-source-implementation-entry.md)。
 该入口把全角色 UI 整改汇总、六批 UI/UX 基线、仓库外本地设计板与复核结论固化为后续源码实现的必读门禁；源码分支必须在任务计划中引用实际实施的 P1/P2/P3 项、相关角色/页面族、设计板方向、明确延期项和边界防护。
 
+2026-07-13 起，内容后台 `question` / `material` P0 数据完整性修复以及后续平台交互一致性任务还必须读取
+[Content Admin P0 Data Integrity And Platform Interaction Contract](./traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md)。
+该合同固化 P0-01 至 P0-14、PIC-01 至 PIC-13、任务容器例外机制和分批顺序；Batch A 必须独立于 editor route 重构和全平台推广。
+
 这些 traceability 文件只记录设计基线、缺口、决策和对账口径，不批准产品源码、测试、数据库、Provider、Prompt 编辑后台、浏览器验收、部署、Cost Calibration、release readiness 或 final Pass。
 
 ---

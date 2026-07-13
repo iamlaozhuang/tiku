@@ -118,6 +118,111 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+    title: Content admin P0 data integrity and platform interaction baseline ratification
+    phase: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+    status: approved_ready_for_local_closeout
+    result: approved_with_sequencing
+    priority: p0
+    sequenceOrder: 63
+    taskKind: docs_product_decision_and_requirement_alignment
+    executionProfile: docs_only_current_baseline_risk_and_contract_ratification
+    moduleRunVersion: 2
+    branch: codex/content-admin-interaction-baseline
+    dependsOn: []
+    approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+    requirementsContractPath: docs/01-requirements/traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+    acceptancePath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-p0-platform-interaction-baseline-approval-package.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification-audit.md
+    allowedFiles:
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+      - docs/05-execution-logs/acceptance/2026-07-13-content-admin-p0-platform-interaction-baseline-approval-package.md
+      - docs/05-execution-logs/evidence/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification.md
+      - docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-platform-interaction-baseline-ratification-audit.md
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - compose.yaml
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: blocked
+      testSourceChange: blocked
+      focusedUnitTest: approved_existing_suite_only
+      browserRuntime: blocked
+      screenshotCapture: blocked
+      rawDomCapture: blocked
+      privateCredentialRead: blocked
+      databaseMutation: blocked
+      directDatabaseConnection: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      destructiveDbOperation: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Classify the content-admin default-value save risk from current source and current tests without writing business data or reopening A01-A30.
+      - Define a P0 acceptance matrix that covers client, API, question-type semantics, material integrity, edit/copy/lock regression, and accessibility behavior.
+      - Normalize the platform interaction contract into MUST, SHOULD, and explicit exception classes without changing role, edition, authorization, AI, organization-training, or redaction boundaries.
+      - Split future implementation into independently approved, tested, reviewable, and reversible batches; no source implementation begins in this task.
+      - Complete two adversarial reviews, self-review, scoped formatting, diff, allowed-file inventory, and Module Run v2 documentation gates.
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/admin-question-material-ui.test.ts
+      - scoped prettier check for the eight allowed files
+      - git diff --check
+      - allowed-file and blocked-path diff inventory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+      push:
+        approved: false
+        target: origin/master
+        approvalSource: fresh_push_approval_required
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_three_items_start_batch_a_2026_07_13
+    validationSummary:
+      status: passed_docs_only_approved_ready_for_local_closeout
+      currentBaselineFocusedTests: pass_1_file_36_tests
+      formatCheck: pass_scoped_eight_files
+      gitDiffCheck: pass
+      allowedFileInventory: pass_eight_expected_files_only
+      moduleRunV2PreCommitHardening: pass_eight_files_after_owner_approval
+      adversarialReview: pass_two_rounds
+      selfReview: pass
+    nextRequiredDecision: local_docs_closeout_then_start_batch_a
   - id: user-led-prelaunch-test-data-refresh-2026-07-12
     title: User-led prelaunch AI paper test-data refresh
     phase: user-led-prelaunch-test-data-refresh-2026-07-13
