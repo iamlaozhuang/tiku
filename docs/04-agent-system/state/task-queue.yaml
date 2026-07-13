@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-m2-active-state-slimming-2026-07-13
-  nextTaskId: content-admin-platform-b0-contract-code-mapping-2026-07-13
+  currentTaskId: content-admin-platform-b0-contract-code-mapping-2026-07-13
+  nextTaskId: content-admin-platform-b1-async-state-primitives-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -44,7 +44,8 @@ contentAdminPlatformSerialProgram:
   completedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
-  lastClosedTaskId: content-admin-platform-m1-lean-module-run-v3-2026-07-13
+    - content-admin-platform-m2-active-state-slimming-2026-07-13
+  lastClosedTaskId: content-admin-platform-m2-active-state-slimming-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -55,8 +56,8 @@ contentAdminPlatformSerialProgram:
   taskStatusById:
     content-admin-platform-program-init-2026-07-13: closed
     content-admin-platform-m1-lean-module-run-v3-2026-07-13: closed
-    content-admin-platform-m2-active-state-slimming-2026-07-13: ready_for_closeout
-    content-admin-platform-b0-contract-code-mapping-2026-07-13: pending
+    content-admin-platform-m2-active-state-slimming-2026-07-13: closed
+    content-admin-platform-b0-contract-code-mapping-2026-07-13: ready_for_closeout
     content-admin-platform-b1-async-state-primitives-2026-07-13: pending
     content-admin-platform-b2-list-query-primitives-2026-07-13: pending
     content-admin-platform-b3-detail-feedback-primitives-2026-07-13: pending
@@ -99,128 +100,15 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-m2-active-state-slimming-2026-07-13
-    title: Content admin platform active state slimming
-    phase: content-admin-platform-m2-active-state-slimming-2026-07-13
-    status: ready_for_closeout
-    priority: p0
-    sequenceOrder: 67
-    taskKind: mechanism_state_archival
-    moduleRunVersion: 3
-    branch: codex/active-state-slimming
-    dependsOn:
-      - content-admin-platform-m1-lean-module-run-v3-2026-07-13
-    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R2
-    focusedGates:
-      - focused_script
-      - scoped_format
-      - diff_check
-      - guard
-      - archive_integrity
-      - link_check
-    buildRequired: false
-    fullRegressionPolicy: skip
-    protectedDomains:
-      - program_order
-      - deployment
-      - a01_a30
-    reviewMode: independent_audit
-    planPath: docs/05-execution-logs/task-plans/2026-07-13-active-state-slimming.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-13-active-state-slimming.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-active-state-slimming-audit.md
-    allowedFiles:
-      - .husky/pre-commit
-      - .husky/pre-push
-      - scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.ps1
-      - scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
-      - docs/04-agent-system/operating-manual.md
-      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/04-agent-system/state/archive/project-state-snapshot-2026-07-13-before-m2.yaml
-      - docs/04-agent-system/state/archive/task-queue-active-snapshot-2026-07-13-before-m2.yaml
-      - docs/05-execution-logs/task-plans/2026-07-13-active-state-slimming.md
-      - docs/05-execution-logs/evidence/2026-07-13-active-state-slimming.md
-      - docs/05-execution-logs/audits-reviews/2026-07-13-active-state-slimming-audit.md
-    blockedFiles:
-      - AGENTS.md
-      - .env*
-      - package.json
-      - package-lock.yaml
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - compose.yaml
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-      - D:/tiku-local-private/**
-      - D:\tiku-local-private\**
-    capabilities:
-      governanceSourceChange: approved_m2_only
-      exactStateArchive: approved
-      evidenceDeletion: blocked
-      historySemanticRewrite: blocked
-      productRuntimeSourceChange: blocked
-      productTestSourceChange: blocked
-      browserRuntime: blocked
-      databaseConnection: blocked
-      databaseMutation: blocked
-      providerCall: blocked
-      envSecretAccess: blocked
-      dependencyIntroduction: blocked
-      schemaMigration: blocked
-      fixtureSeedChange: blocked
-      stagingProdDeploy: blocked_requires_fresh_user_approval
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.Smoke.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - npm.cmd exec -- prettier --check --ignore-unknown M2_CHANGED_FILES
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-m2-active-state-slimming-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-m2-active-state-slimming-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-m2-active-state-slimming-2026-07-13 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-      localCommit:
-        approved: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   - id: content-admin-platform-b0-contract-code-mapping-2026-07-13
     title: Content admin platform PIC contract-to-code mapping
     phase: content-admin-platform-b0-contract-code-mapping-2026-07-13
-    status: pending
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 68
     taskKind: read_only_contract_mapping
     moduleRunVersion: 3
-    branch: not_created_until_m2_closeout
+    branch: codex/content-admin-platform-b0-contract-code-mapping
     dependsOn:
       - content-admin-platform-m2-active-state-slimming-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
@@ -238,6 +126,9 @@ activeTasks:
       - content_lifecycle
       - deployment
     reviewMode: evidence_two_rounds
+    planPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b0-contract-code-mapping.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-b0-contract-code-mapping.md
+    auditReviewPath: docs/05-execution-logs/evidence/2026-07-13-content-admin-platform-b0-contract-code-mapping.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -281,6 +172,70 @@ activeTasks:
       forcePush: blocked
       pr: blocked
       costCalibrationGate: blocked
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
+      - npm.cmd exec -- prettier --check --ignore-unknown B0_CHANGED_FILES
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-b0-contract-code-mapping-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-b0-contract-code-mapping-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-b0-contract-code-mapping-2026-07-13 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+  - id: content-admin-platform-b1-async-state-primitives-2026-07-13
+    title: Content admin platform shared async-state primitives
+    phase: content-admin-platform-b1-async-state-primitives-2026-07-13
+    status: pending
+    priority: p0
+    sequenceOrder: 69
+    taskKind: shared_ui_contract
+    moduleRunVersion: 3
+    branch: not_created_until_b0_closeout
+    dependsOn:
+      - content-admin-platform-b0-contract-code-mapping-2026-07-13
+    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+    executionProfile: R2
+    focusedGates:
+      - focused_unit
+      - lint
+      - typecheck
+      - changed_format
+      - diff_check
+      - guard
+    buildRequired: impact_triggered
+    fullRegressionPolicy: impact_triggered
+    protectedDomains:
+      - a01_a30
+      - content_lifecycle
+      - deployment
+    reviewMode: independent_audit
+    capabilities:
+      productRuntimeSourceChange: approved_within_task_plan
+      productTestSourceChange: approved_within_task_plan
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
       localCommit:
