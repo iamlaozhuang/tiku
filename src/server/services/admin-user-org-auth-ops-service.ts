@@ -18,6 +18,7 @@ import {
   type AdminUserListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { AdminRole } from "../models/auth";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 
 export type AdminOpsRole = AdminRole;
 
@@ -331,6 +332,7 @@ function toUserSummary(
 
   return {
     ...user,
+    phone: maskPhoneForDisplay(user.phone),
     canResetPassword: canManage,
     canDisable: canManage && user.status === "active",
     canEnable: canManage && user.status === "disabled",
@@ -400,7 +402,12 @@ export function createAdminUserOrgAuthOpsService({
     },
     async getUserDetail(publicId) {
       return createSuccessResponse(
-        publicId === sampleUserDetail.user.publicId ? sampleUserDetail : null,
+        publicId === sampleUserDetail.user.publicId
+          ? {
+              ...sampleUserDetail,
+              user: toUserSummary(sampleUserDetail.user, actor),
+            }
+          : null,
       );
     },
     async listOrganizations(query) {

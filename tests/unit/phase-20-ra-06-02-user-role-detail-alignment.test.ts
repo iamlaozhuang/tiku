@@ -378,7 +378,15 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     );
     const payload = await response.json();
 
-    expect(payload).toEqual(createOkPayload(userDetailPayload));
+    expect(payload).toEqual(
+      createOkPayload({
+        ...userDetailPayload,
+        user: {
+          ...userDetailPayload.user,
+          phone: "139****0002",
+        },
+      }),
+    );
     expect(collectObjectKeys(payload)).not.toContain("id");
     expect(collectObjectKeys(payload)).not.toContain("userId");
     expect(JSON.stringify(payload)).not.toContain("password");

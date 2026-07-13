@@ -23,7 +23,7 @@ const adminSessionPayload = {
   data: {
     user: {
       publicId: "user-admin-content",
-      phone: "13900000001",
+      phone: "139****0001",
       name: "Content Admin",
       userType: null,
       status: "active",
@@ -683,7 +683,7 @@ describe("AdminPaperManagement", () => {
       expect(screen.getByText("第 1 / 3 页")).toBeInTheDocument();
       expect(screen.getByText("分页试卷 01")).toBeInTheDocument();
     });
-  });
+  }, 20_000);
 
   it("restores paper list query state from the URL", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");

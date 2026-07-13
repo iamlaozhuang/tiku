@@ -40,6 +40,7 @@ import type {
   AdminUserListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { AdminRole } from "../models/auth";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
@@ -64,6 +65,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
   getUserDetail?(publicId: string): Promise<AdminUserDetailDto | null>;
+  getUserPhoneForDisclosure?(publicId: string): Promise<string | null>;
   createAdminAccount?(
     input: AdminAccountCreationInputDto,
   ): Promise<AdminAccountCreationRepositoryResult>;
@@ -344,7 +346,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
               publicId: linkedOrganization.public_id,
             }),
           ),
-          phone: adminAccount.phone,
+          phone: maskPhoneForDisplay(adminAccount.phone),
           publicId: adminAccount.public_id,
           registeredAt: adminAccount.created_at.toISOString(),
           status: adminAccount.status,
@@ -406,7 +408,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       return {
         users: mergeAdminUserListRows(rows).map((row) => ({
           publicId: row.public_id,
-          phone: row.phone,
+          phone: maskPhoneForDisplay(row.phone),
           name: row.name,
           registeredAt: row.created_at.toISOString(),
           status: row.status,
@@ -581,7 +583,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       return {
         user: {
           publicId: userDetailRow.public_id,
-          phone: userDetailRow.phone,
+          phone: maskPhoneForDisplay(userDetailRow.phone),
           name: userDetailRow.name,
           registeredAt: userDetailRow.created_at.toISOString(),
           status: userDetailRow.status,
@@ -605,6 +607,16 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
               },
         authorizations,
       };
+    },
+    async getUserPhoneForDisclosure(publicId) {
+      const database = getDatabase();
+      const [userRow] = await database
+        .select({ phone: user.phone })
+        .from(user)
+        .where(eq(user.public_id, publicId))
+        .limit(1);
+
+      return userRow?.phone ?? null;
     },
     async createAdminAccount(input) {
       const database = getDatabase();

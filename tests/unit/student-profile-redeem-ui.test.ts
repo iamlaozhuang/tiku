@@ -19,7 +19,7 @@ const sessionPayload = {
   data: {
     user: {
       publicId: "user-dev-student",
-      phone: "13900000002",
+      phone: "139****0002",
       name: "Dev Student",
       userType: "personal",
       status: "active",

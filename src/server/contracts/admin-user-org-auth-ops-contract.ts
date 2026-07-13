@@ -211,6 +211,10 @@ export type AdminUserDetailDto = {
   authorizations: AdminUserAuthorizationSummaryDto[];
 };
 
+export type UserPhoneRevealDto = {
+  phone: string;
+};
+
 export type OrganizationTreeNodeDto = {
   publicId: string;
   name: string;

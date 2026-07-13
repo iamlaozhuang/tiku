@@ -37,6 +37,7 @@ import {
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
 import type { EmployeeAccountResultDto } from "../contracts/employee-account-contract";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import {
   createEmployeeAccountService,
   type EmployeeAccountService,
@@ -603,6 +604,15 @@ function mapEmployeeAccountResultToEmployeeSummary(
   };
 }
 
+function maskEmployeeSummaryPhone(
+  employeeSummary: EmployeeSummaryDto,
+): EmployeeSummaryDto {
+  return {
+    ...employeeSummary,
+    phone: maskPhoneForDisplay(employeeSummary.phone),
+  };
+}
+
 function mapEmployeeAccountImportFailureReason(
   result: ApiResponse<EmployeeAccountResultDto | null>,
 ): EmployeeImportResultDto["rejectedRows"][number]["reason"] {
@@ -670,7 +680,7 @@ async function importEmployeeAccounts(input: {
       if (typeof result.data.generatedInitialPassword === "string") {
         generatedInitialPasswords.push({
           rowNumber,
-          phone: employeeAccountInput.phone,
+          phone: maskPhoneForDisplay(employeeAccountInput.phone),
           name: employeeAccountInput.name,
           organizationPublicId: employeeAccountInput.organizationPublicId,
           initialPassword: result.data.generatedInitialPassword,
@@ -1574,7 +1584,9 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           return createJsonResponse(
             createPaginatedResponse(
-              { employees: result.employees },
+              {
+                employees: result.employees.map(maskEmployeeSummaryPhone),
+              },
               result.pagination,
             ),
           );

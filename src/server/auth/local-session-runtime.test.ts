@@ -219,7 +219,7 @@ describe("local session runtime", () => {
         [TEST_TOKEN_FIELD]: "opaque-student-session-token",
         user: {
           publicId: "user-dev-student",
-          phone: "13900000002",
+          phone: "139****0002",
           name: "本地学员",
           userType: "personal",
           status: "active",
@@ -304,7 +304,7 @@ describe("local session runtime", () => {
       data: {
         user: {
           publicId: "user-registered-student",
-          phone: "13900000003",
+          phone: "139****0003",
           name: "新学员",
           userType: "personal",
           status: "active",
@@ -403,7 +403,7 @@ describe("local session runtime", () => {
       data: {
         user: {
           publicId: "admin-dev-super-admin",
-          phone: "13900000001",
+          phone: "139****0001",
           name: "本地超级管理员",
           userType: null,
           status: "active",
@@ -466,7 +466,7 @@ describe("local session runtime", () => {
         [TEST_TOKEN_FIELD]: "opaque-org-standard-admin-token",
         user: {
           publicId: "admin-org-standard-public-001",
-          phone: "13900000004",
+          phone: "139****0004",
           userType: null,
           organizationPublicId: "organization-standard-public-001",
           adminPublicId: "admin-org-standard-public-001",
@@ -523,7 +523,7 @@ describe("local session runtime", () => {
       data: {
         user: {
           publicId: "admin-org-advanced-public-001",
-          phone: "13900000005",
+          phone: "139****0005",
           userType: null,
           organizationPublicId: "organization-advanced-public-001",
           adminPublicId: "admin-org-advanced-public-001",

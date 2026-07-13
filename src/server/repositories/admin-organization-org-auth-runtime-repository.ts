@@ -51,6 +51,7 @@ import type {
   OrganizationDto,
 } from "../contracts/organization-auth-contract";
 import type { AuthUpgradeStatus, AuthorizationEdition } from "../models/auth";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import type { NormalizedCreateOrgAuthInput } from "../validators/org-auth";
 import type {
   NormalizedCreateOrganizationInput,
@@ -687,7 +688,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         employees: rows.map((row) => ({
           publicId: row.public_id,
           userPublicId: row.user_public_id,
-          phone: row.phone,
+          phone: maskPhoneForDisplay(row.phone),
           name: row.name,
           organizationPublicId: row.organization_public_id,
           organizationName: row.organization_name,
@@ -1145,7 +1146,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
       return {
         publicId: employeeRow.public_id,
         userPublicId: userRow.public_id,
-        phone: userRow.phone,
+        phone: maskPhoneForDisplay(userRow.phone),
         name: userRow.name,
         organizationPublicId: organizationRow.public_id,
         status: "active",
@@ -2789,7 +2790,7 @@ async function importEmployeesWithDatabase(
       {
         publicId: employeePublicId,
         userPublicId: userRow.public_id,
-        phone: userRow.phone,
+        phone: maskPhoneForDisplay(userRow.phone),
         name: userRow.name,
         organizationPublicId: organizationRow.public_id,
         status: "active",

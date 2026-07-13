@@ -118,6 +118,124 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-phone-visibility-enforcement-2026-07-12
+    title: User-led phone visibility runtime enforcement
+    phase: user-led-phone-visibility-enforcement-2026-07-12
+    status: ready_for_closeout
+    priority: p0
+    sequenceOrder: 60
+    taskKind: runtime_privacy_enforcement
+    moduleRunVersion: 2
+    branch: codex/phone-visibility-enforcement
+    dependsOn:
+      - user-led-phone-visibility-decision-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-enforcement.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-phone-visibility-enforcement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-enforcement-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-enforcement.md
+      - docs/05-execution-logs/evidence/2026-07-12-phone-visibility-enforcement.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-enforcement-audit.md
+      - src/app/api/v1/users/*/reveal-phone/route.ts
+      - src/app/api/v1/users/*/copy-phone/route.ts
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/server/contracts/admin-user-org-auth-ops-contract.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/mappers/auth-mapper.ts
+      - src/server/mappers/employee-account-mapper.ts
+      - src/server/mappers/phone-display-mapper.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/organization-portal-overview-repository.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/services/admin-user-org-auth-ops-service.ts
+      - tests/unit/phone-visibility-enforcement.test.ts
+      - tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/admin-paper-ui.test.ts
+      - tests/unit/student-profile-redeem-ui.test.ts
+      - tests/unit/phase-11-auth-session-account-hardening.test.ts
+      - tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/server/mappers/auth-mapper.test.ts
+      - src/server/mappers/employee-account-mapper.test.ts
+      - src/server/repositories/admin-flow-runtime-repository.test.ts
+      - src/server/services/auth-service.test.ts
+      - src/server/services/session-service.test.ts
+      - src/server/services/user-registration-service.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+      - D:/tiku-local-private/**
+      - D:\tiku-local-private\**
+    capabilities:
+      localSourceChange: approved
+      focusedUnitTest: approved
+      fullUnitTest: approved
+      lintTypecheckBuild: approved
+      browserRuntime: blocked_task_2_runtime_implementation_only
+      databaseConnection: blocked
+      databaseMutation: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      envSecretAccess: blocked
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - Covered normal APIs return only masked phones while exact search remains server-side.
+      - Only ops_admin or super_admin may request a full phone through a single-record no-store reveal action and a separately audited copy-request action.
+      - Disclosure failures are fail-closed, redacted, and do not expand existing organization visibility.
+      - Audit metadata, ordinary audit DTOs, import feedback, session DTOs, lists, ordinary details, and client cache do not retain full phones.
+      - A15 plaintext redeem_code behavior, login input, uniqueness, immutability, and authorization boundaries remain unchanged.
+      - Focused/full gates, two adversarial reviews, a self-review, master revalidation, ordinary push, and short-branch cleanup complete before task 3 begins.
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/phone-visibility-enforcement.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts src/server/mappers/auth-mapper.test.ts src/server/mappers/employee-account-mapper.test.ts
+      - corepack pnpm@10.26.1 run test
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - corepack pnpm@10.26.1 run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId user-led-phone-visibility-enforcement-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId user-led-phone-visibility-enforcement-2026-07-12
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId user-led-phone-visibility-enforcement-2026-07-12 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
   - id: user-led-phone-visibility-decision-2026-07-12
     title: User-led phone visibility and prelaunch AI paper history decision
     phase: user-led-phone-visibility-decision-2026-07-12

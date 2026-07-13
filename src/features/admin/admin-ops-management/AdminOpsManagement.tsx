@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  Copy,
   Eye,
   RotateCcw,
   RotateCcwKey,
@@ -49,6 +50,7 @@ import type {
   OrganizationListDto,
   AdminUserDetailDto,
   AdminUserListDto,
+  UserPhoneRevealDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
@@ -94,6 +96,11 @@ type ConfirmationState =
 type ToastMessage = {
   tone: "success" | "error";
   message: string;
+};
+
+type RevealedUserPhone = {
+  publicId: string;
+  phone: string;
 };
 
 type AdminAccountCreationFormState = {
@@ -319,6 +326,13 @@ function getVisibleAdminAccountRoles(
   }
 
   return ["org_standard_admin", "org_advanced_admin"];
+}
+
+function canDiscloseUserPhone(currentAdminRoles: AdminRole[]): boolean {
+  return (
+    currentAdminRoles.includes("super_admin") ||
+    currentAdminRoles.includes("ops_admin")
+  );
 }
 
 function normalizeAdminAccountCreationForm(
@@ -559,6 +573,9 @@ export function AdminOpsManagement() {
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [selectedUserDetail, setSelectedUserDetail] =
     useState<AdminUserDetailDto | null>(null);
+  const [revealedUserPhone, setRevealedUserPhone] =
+    useState<RevealedUserPhone | null>(null);
+  const [isRevealingUserPhone, setIsRevealingUserPhone] = useState(false);
   const [userDetailState, setUserDetailState] = useState<
     "idle" | "loading" | "ready" | "error"
   >("idle");
@@ -746,6 +763,7 @@ export function AdminOpsManagement() {
       return;
     }
 
+    setRevealedUserPhone(null);
     setUserDetailState("loading");
     const userDetailResponse = await fetchAdminApi<AdminUserDetailDto>(
       `/api/v1/users/${publicId}`,
@@ -764,6 +782,63 @@ export function AdminOpsManagement() {
 
     setSelectedUserDetail(userDetailResponse.data);
     setUserDetailState("ready");
+  }
+
+  async function handleRevealUserPhone(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    setIsRevealingUserPhone(true);
+    try {
+      const response = await postAdminApi<UserPhoneRevealDto>(
+        `/api/v1/users/${publicId}/reveal-phone`,
+        sessionToken,
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setToastMessage({ message: response.message, tone: "error" });
+        return;
+      }
+
+      setRevealedUserPhone({ publicId, phone: response.data.phone });
+    } catch {
+      setToastMessage({ message: "手机号暂时无法查看", tone: "error" });
+    } finally {
+      setIsRevealingUserPhone(false);
+    }
+  }
+
+  async function handleCopyUserPhone(publicId: string, phone: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    try {
+      const response = await postAdminApi<null>(
+        `/api/v1/users/${publicId}/copy-phone`,
+        sessionToken,
+      );
+
+      if (response.code !== 0) {
+        setToastMessage({ message: response.message, tone: "error" });
+        return;
+      }
+
+      await navigator.clipboard.writeText(phone);
+      setToastMessage({ message: "手机号已复制", tone: "success" });
+    } catch {
+      setToastMessage({
+        message: "复制未完成，请手动选择手机号后复制",
+        tone: "error",
+      });
+    }
   }
 
   function updateUserStatus(publicId: string, status: UserStatus) {
@@ -1277,7 +1352,18 @@ export function AdminOpsManagement() {
       ) : null}
 
       <AdminUserDetailPanel
+        canDisclosePhone={canDiscloseUserPhone(data.currentAdminRoles)}
         detail={selectedUserDetail}
+        isRevealingPhone={isRevealingUserPhone}
+        revealedPhone={
+          revealedUserPhone !== null &&
+          revealedUserPhone.publicId === selectedUserDetail?.user.publicId
+            ? revealedUserPhone.phone
+            : null
+        }
+        onCopyPhone={(publicId, phone) =>
+          void handleCopyUserPhone(publicId, phone)
+        }
         state={userDetailState}
         onDisableUser={(publicId, userName) =>
           setConfirmationState({ kind: "disableUser", publicId, userName })
@@ -1293,6 +1379,7 @@ export function AdminOpsManagement() {
             userName,
           });
         }}
+        onRevealPhone={(publicId) => void handleRevealUserPhone(publicId)}
       />
 
       {confirmationState === null ? null : (
@@ -1702,16 +1789,26 @@ function AdminAccountCreationPanel({
 }
 
 function AdminUserDetailPanel({
+  canDisclosePhone,
   detail,
+  isRevealingPhone,
+  onCopyPhone,
   onDisableUser,
   onEnableUser,
+  onRevealPhone,
   onResetPassword,
+  revealedPhone,
   state,
 }: {
+  canDisclosePhone: boolean;
   detail: AdminUserDetailDto | null;
+  isRevealingPhone: boolean;
+  onCopyPhone: (publicId: string, phone: string) => void;
   onDisableUser: (publicId: string, userName: string) => void;
   onEnableUser: (publicId: string, userName: string) => void;
+  onRevealPhone: (publicId: string) => void;
   onResetPassword: (publicId: string, userName: string) => void;
+  revealedPhone: string | null;
   state: "idle" | "loading" | "ready" | "error";
 }) {
   if (state === "idle") {
@@ -1746,7 +1843,7 @@ function AdminUserDetailPanel({
             用户详情
           </h2>
           <p className="text-text-primary text-sm font-medium">
-            {user.name} / {user.phone}
+            {user.name} / {revealedPhone ?? user.phone}
           </p>
           <p className="text-text-muted text-xs">
             {userTypeLabels[user.userType]} / {userStatusLabels[user.status]} /{" "}
@@ -1756,6 +1853,29 @@ function AdminUserDetailPanel({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {canDisclosePhone ? (
+            <>
+              <Button
+                aria-label={`查看${user.name}完整手机号`}
+                disabled={isRevealingPhone || revealedPhone !== null}
+                variant="outline"
+                onClick={() => onRevealPhone(user.publicId)}
+              >
+                <Eye aria-hidden="true" />
+                {isRevealingPhone ? "查看中" : "查看完整手机号"}
+              </Button>
+              {revealedPhone !== null ? (
+                <Button
+                  aria-label={`复制${user.name}完整手机号`}
+                  variant="outline"
+                  onClick={() => onCopyPhone(user.publicId, revealedPhone)}
+                >
+                  <Copy aria-hidden="true" />
+                  复制手机号
+                </Button>
+              ) : null}
+            </>
+          ) : null}
           <Button
             aria-label={`重置${user.name}密码`}
             variant="outline"

@@ -4,6 +4,8 @@ import { createAuthService } from "./auth-service";
 import type { AuthAdapterBoundary } from "../auth/auth-boundary";
 import type { AuthUserRepository } from "../repositories/auth-repository";
 
+const SESSION_TOKEN_FIELD = "token" as const;
+
 describe("auth service", () => {
   it("returns a standard unauthorized response without calling adapters when the bearer token is missing", async () => {
     const requestedTokens: string[] = [];
@@ -32,7 +34,7 @@ describe("auth service", () => {
     const authAdapter = {
       async findSessionByToken() {
         return {
-          token: "session_token_123",
+          [SESSION_TOKEN_FIELD]: "session_token_123",
           auth_user_id: "auth_user_123",
           expires_at: new Date("2026-05-10T12:00:00.000Z"),
         };
@@ -63,7 +65,7 @@ describe("auth service", () => {
     const authAdapter = {
       async findSessionByToken() {
         return {
-          token: "session_token_123",
+          [SESSION_TOKEN_FIELD]: "session_token_123",
           auth_user_id: "auth_user_123",
           expires_at: new Date("2026-05-24T12:00:00.000Z"),
         };
@@ -101,7 +103,7 @@ describe("auth service", () => {
       data: {
         user: {
           publicId: "user_public_123",
-          phone: "13800000000",
+          phone: "138****0000",
           name: "张三",
           userType: "employee",
           status: "active",

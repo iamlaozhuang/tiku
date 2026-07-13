@@ -47,7 +47,7 @@ function createAdminSessionService(
           },
           user: {
             publicId: "admin-user-public-001",
-            phone: "13900000001",
+            phone: "139****0001",
             name: "运营管理员",
             userType: null,
             status: "active",
@@ -186,12 +186,20 @@ function mockAdminOpsFetch() {
       return Response.json(createOkPayload(null));
     }
 
+    if (url.startsWith("/api/v1/users/user-public-001/reveal-phone")) {
+      return Response.json(createOkPayload({ phone: "13900000002" }));
+    }
+
+    if (url.startsWith("/api/v1/users/user-public-001/copy-phone")) {
+      return Response.json(createOkPayload(null));
+    }
+
     if (url === "/api/v1/users/user-public-001") {
       return Response.json(
         createOkPayload({
           user: {
             publicId: "user-public-001",
-            phone: "13900000002",
+            phone: "139****0002",
             name: "学员甲",
             registeredAt: now,
             status: "active",
@@ -228,7 +236,7 @@ function mockAdminOpsFetch() {
           users: [
             {
               publicId: "user-public-001",
-              phone: "13900000002",
+              phone: "139****0002",
               name: "学员甲",
               registeredAt: now,
               status: "active",
@@ -282,7 +290,7 @@ function mockAdminOpsFetch() {
             {
               publicId: "employee-public-001",
               userPublicId: "user-public-001",
-              phone: "13900000002",
+              phone: "139****0002",
               name: "员工甲",
               organizationPublicId: "organization-public-001",
               status: "active",
@@ -791,7 +799,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
     ).toBeInTheDocument();
 
     const userRow = screen.getByRole("row", {
-      name: /学员甲 \/ 13900000002/,
+      name: /学员甲 \/ 139\*\*\*\*0002/,
     });
     expect(userRow).not.toHaveAttribute("data-public-id");
     expect(userRow).not.toHaveAttribute("data-id");
@@ -886,6 +894,41 @@ describe("phase 9 admin ops runtime ui completion", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("ABCDEFG2")).not.toBeInTheDocument();
     expect(screen.queryByText("admin-session-token")).toBeNull();
+  });
+
+  it("keeps normal phone displays masked and requires an explicit audited reveal", async () => {
+    const fetchMock = mockAdminOpsFetch();
+
+    render(createElement(AdminOpsManagement));
+
+    const userRow = await screen.findByRole("row", {
+      name: /学员甲 \/ 139\*\*\*\*0002/,
+    });
+    expect(userRow).toHaveTextContent("139****0002");
+    expect(document.body).not.toHaveTextContent("13900000002");
+
+    fireEvent.click(screen.getByRole("button", { name: "查看学员甲详情" }));
+    const revealButton = await screen.findByRole("button", {
+      name: "查看学员甲完整手机号",
+    });
+    expect(document.body).not.toHaveTextContent("13900000002");
+
+    fireEvent.click(revealButton);
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(
+          ([input, init]) =>
+            String(input).includes(
+              "/api/v1/users/user-public-001/reveal-phone",
+            ) && init?.method === "POST",
+        ),
+      ).toBe(true);
+    });
+    expect(await screen.findByText("学员甲 / 13900000002")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "复制学员甲完整手机号" }),
+    ).toBeInTheDocument();
   });
 
   it("renders super admin account creation on a bootstrap-only ops workspace", async () => {

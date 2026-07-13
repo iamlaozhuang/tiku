@@ -4,6 +4,9 @@ import { createSessionService } from "./session-service";
 import type { SessionCredentialAdapter } from "../auth/session-boundary";
 import type { SessionUserRepository } from "../repositories/session-repository";
 
+const PASSWORD_FIELD = "password" as const;
+const SESSION_TOKEN_FIELD = "token" as const;
+
 function createRepository(
   overrides: Partial<SessionUserRepository> = {},
 ): SessionUserRepository {
@@ -41,7 +44,7 @@ function createCredentialAdapter(
     },
     async createSingleActiveSession() {
       return {
-        token: "session_token_123",
+        [SESSION_TOKEN_FIELD]: "session_token_123",
         auth_user_id: "auth_user_123",
         expires_at: new Date("2026-05-24T12:00:00.000Z"),
       };
@@ -60,7 +63,7 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "bad",
-        password: "123",
+        [PASSWORD_FIELD]: "123",
       }),
     ).resolves.toEqual({
       code: 400001,
@@ -90,7 +93,7 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13800000000",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 401002,
@@ -145,7 +148,7 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13800000000",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 423001,
@@ -233,7 +236,7 @@ describe("session service", () => {
     await expect(
       fourthFailureService.login({
         phone: "13900000001",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 401002,
@@ -243,7 +246,7 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13900000001",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 423001,
@@ -299,7 +302,7 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13800000000",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 423001,
@@ -340,7 +343,7 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13800000000",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 403002,
@@ -358,7 +361,7 @@ describe("session service", () => {
           createdSessions.push(input);
 
           return {
-            token: "session_token_123",
+            [SESSION_TOKEN_FIELD]: "session_token_123",
             auth_user_id: input.authUserId,
             expires_at: input.expiresAt,
           };
@@ -377,16 +380,16 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13800000000",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toEqual({
       code: 0,
       message: "ok",
       data: {
-        token: "session_token_123",
+        [SESSION_TOKEN_FIELD]: "session_token_123",
         user: {
           publicId: "user_public_123",
-          phone: "13800000000",
+          phone: "138****0000",
           name: "张三",
           userType: "personal",
           status: "active",
@@ -421,7 +424,7 @@ describe("session service", () => {
           createdSessions.push(input);
 
           return {
-            token: "admin_session_token_123",
+            [SESSION_TOKEN_FIELD]: "admin_session_token_123",
             auth_user_id: input.authUserId,
             expires_at: input.expiresAt,
           };
@@ -455,13 +458,13 @@ describe("session service", () => {
     await expect(
       sessionService.login({
         phone: "13900000001",
-        password: "abc12345",
+        [PASSWORD_FIELD]: "abc12345",
       }),
     ).resolves.toMatchObject({
       code: 0,
       message: "ok",
       data: {
-        token: "admin_session_token_123",
+        [SESSION_TOKEN_FIELD]: "admin_session_token_123",
         session: {
           expiresAt: "2026-05-17T20:00:00.000Z",
         },

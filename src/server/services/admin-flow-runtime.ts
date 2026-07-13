@@ -23,8 +23,11 @@ import {
   type AdminAccountCreationRole,
   type AdminAccountCreationConflictDto,
   type AdminAccountCreationResultDto,
+  type AdminAccountListItemDto,
   type AdminAccountListQuery,
   type AdminAccountListSortField,
+  type AdminUserDetailDto,
+  type AdminUserSummaryDto,
   type OrganizationAdminAccountCreationRole,
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   createAdminAccountListQuery,
@@ -32,7 +35,9 @@ import {
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
+  type UserPhoneRevealDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { adminRoleValues, type AdminRole } from "../models/auth";
 import { knStatusValues, resourceStatusValues } from "../models/ai-rag";
 import {
@@ -114,9 +119,24 @@ const organizationNotFoundResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
   "Organization does not exist.",
 );
+const userPhoneDisclosureUnavailableResponse = createErrorResponse(
+  503606,
+  "User phone disclosure runtime is not configured.",
+);
+const userPhoneDisclosureValidationFailedResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "User identifier is invalid.",
+);
+const USER_PUBLIC_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/u;
+const NO_STORE_HEADERS = {
+  "cache-control": "no-store",
+} as const;
 
-function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
-  return Response.json(response);
+function createJsonResponse<TData>(
+  response: ApiResponse<TData>,
+  init?: ResponseInit,
+): Response {
+  return Response.json(response, init);
 }
 
 async function readJsonBody(request: Request): Promise<unknown> {
@@ -190,6 +210,48 @@ function canReadUserManagement(actor: AdminFlowActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
+}
+
+function canDiscloseUserPhone(actor: AdminFlowActor): boolean {
+  return canReadUserManagement(actor);
+}
+
+async function readUserPublicId(context: {
+  params: Promise<{ publicId: string }>;
+}): Promise<string | null> {
+  const { publicId } = await context.params;
+  const normalizedPublicId = publicId.trim();
+
+  return USER_PUBLIC_ID_PATTERN.test(normalizedPublicId)
+    ? normalizedPublicId
+    : null;
+}
+
+function maskAdminUserSummaryPhone(
+  user: AdminUserSummaryDto,
+): AdminUserSummaryDto {
+  return {
+    ...user,
+    phone: maskPhoneForDisplay(user.phone),
+  };
+}
+
+function maskAdminUserDetailPhone(
+  detail: AdminUserDetailDto,
+): AdminUserDetailDto {
+  return {
+    ...detail,
+    user: maskAdminUserSummaryPhone(detail.user),
+  };
+}
+
+function maskAdminAccountPhone(
+  account: AdminAccountListItemDto,
+): AdminAccountListItemDto {
+  return {
+    ...account,
+    phone: maskPhoneForDisplay(account.phone),
+  };
 }
 
 function canReadContentKnowledge(actor: AdminFlowActor): boolean {
@@ -416,6 +478,27 @@ async function appendUserLifecycleAuditLog(input: {
   actor: AdminFlowActor;
   actionType: "user.disable" | "user.enable";
   targetPublicId: string;
+  resultStatus: "success" | "failed";
+  metadataSummary: string;
+}): Promise<void> {
+  await input.repositories.auditLogRepository.appendAuditLog({
+    actorPublicId: input.actor.publicId,
+    actorRole: input.actor.roles[0],
+    actionType: input.actionType,
+    targetResourceType: "user",
+    targetPublicId: input.targetPublicId,
+    resultStatus: input.resultStatus,
+    metadataSummary: input.metadataSummary,
+    requestIp: readRequestIp(input.request),
+  });
+}
+
+async function appendUserPhoneDisclosureAuditLog(input: {
+  repositories: AdminFlowRuntimeRepositories;
+  request: Request;
+  actor: AdminFlowActor;
+  actionType: "user.phone_reveal" | "user.phone_copy";
+  targetPublicId: string | null;
   resultStatus: "success" | "failed";
   metadataSummary: string;
 }): Promise<void> {
@@ -658,7 +741,7 @@ export function createAdminFlowRuntimeRouteHandlers(
 
     return createJsonResponse(
       createPaginatedResponse(
-        { adminAccounts: result.adminAccounts },
+        { adminAccounts: result.adminAccounts.map(maskAdminAccountPhone) },
         result.pagination,
       ),
     );
@@ -743,6 +826,113 @@ export function createAdminFlowRuntimeRouteHandlers(
     );
   }
 
+  async function handleUserPhoneDisclosure(input: {
+    request: Request;
+    context: { params: Promise<{ publicId: string }> };
+    actionType: "user.phone_reveal" | "user.phone_copy";
+  }): Promise<Response> {
+    const actor = await requireAdminActor(input.request);
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    const publicId = await readUserPublicId(input.context);
+
+    if (!canDiscloseUserPhone(actor)) {
+      await appendUserPhoneDisclosureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted phone disclosure permission denial metadata",
+      });
+
+      return createJsonResponse(adminUserPermissionDeniedResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (publicId === null) {
+      await appendUserPhoneDisclosureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: null,
+        resultStatus: "failed",
+        metadataSummary: "redacted phone disclosure validation metadata",
+      });
+
+      return createJsonResponse(userPhoneDisclosureValidationFailedResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (
+      repositories.userOrgAuthRepository.getUserPhoneForDisclosure === undefined
+    ) {
+      await appendUserPhoneDisclosureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted phone disclosure unavailable metadata",
+      });
+
+      return createJsonResponse(userPhoneDisclosureUnavailableResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    const phone =
+      await repositories.userOrgAuthRepository.getUserPhoneForDisclosure(
+        publicId,
+      );
+
+    if (phone === null) {
+      await appendUserPhoneDisclosureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted phone disclosure not found metadata",
+      });
+
+      return createJsonResponse(userNotFoundResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    await appendUserPhoneDisclosureAuditLog({
+      repositories,
+      request: input.request,
+      actor,
+      actionType: input.actionType,
+      targetPublicId: publicId,
+      resultStatus: "success",
+      metadataSummary:
+        input.actionType === "user.phone_reveal"
+          ? "redacted phone reveal metadata"
+          : "redacted phone copy request metadata",
+    });
+
+    return createJsonResponse(
+      input.actionType === "user.phone_reveal"
+        ? createSuccessResponse<UserPhoneRevealDto>({ phone })
+        : createSuccessResponse(null),
+      { headers: NO_STORE_HEADERS },
+    );
+  }
+
   return createRouteHandlersWithErrorEnvelope({
     adminAccounts: {
       collection: {
@@ -768,7 +958,10 @@ export function createAdminFlowRuntimeRouteHandlers(
           );
 
           return createJsonResponse(
-            createPaginatedResponse({ users: result.users }, result.pagination),
+            createPaginatedResponse(
+              { users: result.users.map(maskAdminUserSummaryPhone) },
+              result.pagination,
+            ),
           );
         },
       },
@@ -798,8 +991,32 @@ export function createAdminFlowRuntimeRouteHandlers(
           return createJsonResponse(
             userDetail === null
               ? userNotFoundResponse
-              : createSuccessResponse(userDetail),
+              : createSuccessResponse(maskAdminUserDetailPhone(userDetail)),
           );
+        },
+      },
+      revealPhone: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          return handleUserPhoneDisclosure({
+            request,
+            context,
+            actionType: "user.phone_reveal",
+          });
+        },
+      },
+      copyPhone: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          return handleUserPhoneDisclosure({
+            request,
+            context,
+            actionType: "user.phone_copy",
+          });
         },
       },
       resetPassword: {

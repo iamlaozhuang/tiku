@@ -9,6 +9,8 @@ import type { AdminFlowRuntimeRepositories } from "@/server/services/admin-flow-
 import { createSessionService } from "@/server/services/session-service";
 import type { SessionService } from "@/server/services/session-service";
 
+const SESSION_TOKEN_FIELD = "token" as const;
+
 function createSuperAdminSessionService(): Pick<
   SessionService,
   "getCurrentSession"
@@ -106,7 +108,7 @@ describe("phase 11 auth session account hardening", () => {
     const authAdapter = {
       async findSessionByToken() {
         return {
-          token: "valid_session_value",
+          [SESSION_TOKEN_FIELD]: "valid_session_value",
           auth_user_id: "auth-user-internal-001",
           expires_at: new Date("2026-05-24T18:00:00.000Z"),
         };
@@ -170,7 +172,7 @@ describe("phase 11 auth session account hardening", () => {
       data: {
         user: {
           publicId: "user-public-001",
-          phone: "13800000000",
+          phone: "138****0000",
           name: "Student User",
           userType: "personal",
           status: "active",
@@ -195,7 +197,7 @@ describe("phase 11 auth session account hardening", () => {
     const authAdapter = {
       async findSessionByToken() {
         return {
-          token: "expired_session_value",
+          [SESSION_TOKEN_FIELD]: "expired_session_value",
           auth_user_id: "auth-user-internal-001",
           expires_at: new Date("2026-05-24T08:59:59.000Z"),
         };

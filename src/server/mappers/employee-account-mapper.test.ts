@@ -42,7 +42,7 @@ describe("mapEmployeeAccountToApi", () => {
         },
         user: {
           publicId: "user_public_123",
-          phone: "13800000000",
+          phone: "138****0000",
           name: "李四",
           userType: "employee",
           status: "active",

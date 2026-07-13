@@ -14,6 +14,7 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
 import type { OrganizationPortalOverviewDto } from "../contracts/organization-portal-overview-contract";
+import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 import type {
   OrganizationPortalOverviewRepository,
@@ -47,16 +48,6 @@ function createLazyDatabaseGetter(
 
     return cachedDatabase;
   };
-}
-
-function maskPhone(phone: string): string {
-  const normalizedPhone = phone.trim();
-
-  if (normalizedPhone.length < 7) {
-    return "已脱敏";
-  }
-
-  return `${normalizedPhone.slice(0, 3)}****${normalizedPhone.slice(-4)}`;
 }
 
 export function createPostgresOrganizationPortalOverviewRepository(
@@ -180,7 +171,7 @@ async function readEmployeePreview(
 
   return rows.map((row) => ({
     employeeDisplayName: row.name,
-    phoneMasked: maskPhone(row.phone),
+    phoneMasked: maskPhoneForDisplay(row.phone),
     status: row.status,
   }));
 }

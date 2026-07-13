@@ -1,5 +1,6 @@
 import type { EmployeeAccountResultDto } from "../contracts/employee-account-contract";
 import type { EmployeeAccountResult } from "../repositories/employee-account-repository";
+import { maskPhoneForDisplay } from "./phone-display-mapper";
 
 function formatNullableTimestamp(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
@@ -19,7 +20,7 @@ export function mapEmployeeAccountToApi(
       },
       user: {
         publicId: employeeAccount.user.public_id,
-        phone: employeeAccount.user.phone,
+        phone: maskPhoneForDisplay(employeeAccount.user.phone),
         name: employeeAccount.user.name,
         userType: employeeAccount.user.user_type,
         status: employeeAccount.user.status,

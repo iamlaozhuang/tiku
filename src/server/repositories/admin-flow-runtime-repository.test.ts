@@ -67,7 +67,7 @@ describe("admin flow runtime repository backend accounts", () => {
       adminAccounts: [
         {
           publicId: "admin-public-read-model",
-          phone: "redacted-account",
+          phone: "已绑定手机号",
           name: "组织管理员",
           adminRole: "org_standard_admin",
           status: "active",

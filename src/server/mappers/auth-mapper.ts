@@ -7,6 +7,7 @@ import type {
 } from "../contracts/auth-contract";
 import type { AdminRole } from "../models/auth";
 import type { AuthUserAccessRow } from "../repositories/auth-repository";
+import { maskPhoneForDisplay } from "./phone-display-mapper";
 
 export type ResolvedAuthContext = {
   session: AuthSessionSnapshot;
@@ -71,7 +72,7 @@ export function mapAuthenticatedUserToApi(
 ): AuthenticatedUserDto {
   const authenticatedUser: AuthenticatedUserDto = {
     publicId: authUser.public_id,
-    phone: authUser.phone,
+    phone: maskPhoneForDisplay(authUser.phone),
     name: authUser.name,
     userType: authUser.user_type,
     status: authUser.status,

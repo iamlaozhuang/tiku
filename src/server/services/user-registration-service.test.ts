@@ -174,7 +174,7 @@ describe("user registration service", () => {
       data: {
         user: {
           publicId: "user_public_123",
-          phone: "13800000000",
+          phone: "138****0000",
           name: "张三",
           userType: "personal",
           status: "active",

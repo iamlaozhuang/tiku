@@ -1,8 +1,42 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-phone-visibility-decision-2026-07-12
-updatedAt: "2026-07-12T22:35:00-07:00"
+currentPhase: user-led-phone-visibility-enforcement-2026-07-12
+updatedAt: "2026-07-13T00:05:00-07:00"
+latestUserLedPhoneVisibilityEnforcement:
+  id: user-led-phone-visibility-enforcement-2026-07-12
+  status: ready_for_closeout
+  priority: p0
+  branch: codex/phone-visibility-enforcement
+  startSha: b5182af3944e0ec6a7974ef3cd4d1ddfa3ef1c57
+  approvalSource: current_user_approved_serial_phone_visibility_decision_implementation_and_validation_2026_07_12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-enforcement.md
+  executionBoundary:
+    localSourceChange: approved_exact_server_owned_phone_masking_reveal_copy_audit
+    browserRuntime: blocked_task_2_runtime_implementation_only
+    databaseDirectConnection: blocked
+    databaseMutation: blocked
+    schemaMigration: blocked
+    providerExecution: blocked
+    dependencyChange: blocked
+    stagingProdDeploy: blocked
+  verification:
+    tddRed: pass_missing_shared_mapper_expected_failure
+    focusedTests: pass_15_files_92_tests_then_1_file_7_tests
+    fullUnitTests: pass_361_files_2001_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    adversarialReview: pass_two_rounds
+    selfReview: pass
+    browserRuntime: blocked_not_executed
+    databaseDirectConnection: blocked_not_executed
+    databaseMutation: blocked_not_executed
+    schemaMigration: blocked_not_executed
+    providerExecution: blocked_not_executed
+    dependencyChange: false
+  nextTaskId: user-led-phone-visibility-validation-2026-07-12
 latestUserLedPhoneVisibilityDecision:
   id: user-led-phone-visibility-decision-2026-07-12
   status: closed_remote_synced
@@ -5951,13 +5985,13 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
-  id: user-led-phone-visibility-decision-2026-07-12
-  title: User-led phone visibility and prelaunch AI paper history decision
-  phase: user-led-phone-visibility-decision-2026-07-12
+  id: user-led-phone-visibility-enforcement-2026-07-12
+  title: User-led phone visibility runtime enforcement
+  phase: user-led-phone-visibility-enforcement-2026-07-12
   status: ready_for_closeout
   priority: p0
-  taskKind: docs_product_decision_and_requirement_alignment
-  branch: codex/phone-visibility-decision
+  taskKind: runtime_privacy_enforcement
+  branch: codex/phone-visibility-enforcement
   humanApprovalBoundary:
     implementation: approved
     localCommit: approved
@@ -5975,24 +6009,35 @@ currentTask:
     stagingProdDeploy: blocked
     forcePush: blocked
     pullRequest: blocked
-  plannedAt: "2026-07-12T22:35:00-07:00"
-  claimedAt: "2026-07-12T22:35:00-07:00"
-  targetClosureItem: Materialize the approved phone visibility policy and prelaunch AI paper history disposition without changing runtime behavior or test data.
-  behaviorBoundary: docs_only_phone_visibility_policy_and_prelaunch_ai_paper_history_disposition_no_runtime_or_database_change
-  evidenceMode: redacted_requirement_paths_role_matrix_policy_decisions_validation_status_and_commit_sha_only_no_phone_values_credentials_tokens_env_values_database_urls_business_rows_raw_dom_or_provider_payload
-  planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-12-phone-visibility-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-decision-audit.md
-  nextRequiredTaskId: user-led-phone-visibility-enforcement-2026-07-12
-  finalCommit: ce36018ead7d833d547f13a03f1146079c37dcf9
-  localFullLoopGate: pass
-  moduleRunV2PreCommitHardening: pass
-  moduleRunV2ModuleCloseoutReadiness: pass
-  moduleRunV2PrePushReadiness: pass_skip_remote_ahead_check
-  localMasterMerge: pass_ff_only_fb8f6f4ae
-  remotePush: pass_origin_master_fb8f6f4ae
-  localRemoteComparison: pass_0_behind_0_ahead_after_first_sync
-  closeoutStatus: remote_synced_origin_master_fb8f6f4ae
+  plannedAt: "2026-07-12T22:55:00-07:00"
+  claimedAt: "2026-07-12T22:55:00-07:00"
+  targetClosureItem: Enforce default phone masking at server DTO boundaries and provide only the approved auditable operations disclosure actions.
+  behaviorBoundary: exact_server_owned_phone_masking_reveal_copy_audit_no_schema_data_provider_dependency_browser_staging_production_or_deploy
+  evidenceMode: redacted_command_status_count_and_commit_sha_only_no_full_phone_values_credentials_tokens_env_values_database_urls_business_rows_raw_dom_or_provider_payload
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-phone-visibility-enforcement.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-phone-visibility-enforcement.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-phone-visibility-enforcement-audit.md
+  nextRequiredTaskId: user-led-phone-visibility-validation-2026-07-12
+  validationSummary:
+    status: pass_ready_for_closeout
+    tddRed: pass_missing_shared_mapper_expected_failure
+    focusedTests: pass_15_files_92_tests_then_1_file_7_tests
+    fullUnitTests: pass_361_files_2001_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    adversarialReview: pass_two_rounds
+    selfReview: pass
+    browserRuntimeExecuted: false
+    directDatabaseConnectionExecuted: false
+    directDatabaseMutationExecuted: false
+    schemaMigrationChanged: false
+    providerExecution: blocked_not_executed
+    dependencyOrLockfileChanged: false
+    releaseReadinessClaimed: false
+    finalPassClaimed: false
+    productionUsabilityClaimed: false
 
 previousCurrentTaskBeforeUserLedB1B2OrganizationTrainingRuntimeRecovery20260712:
   id: user-led-b8-content-ops-interface-details-2026-07-12

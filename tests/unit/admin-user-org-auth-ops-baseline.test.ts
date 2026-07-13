@@ -825,7 +825,7 @@ describe("admin user organization authorization ops baseline", () => {
       userList.data?.users.find((user) => user.publicId === "user-public-001"),
     ).toMatchObject({
       publicId: "user-public-001",
-      phone: "13800000000",
+      phone: "138****0000",
       userType: "employee",
       organizationName: "杭州烟草",
       authStatus: "active",

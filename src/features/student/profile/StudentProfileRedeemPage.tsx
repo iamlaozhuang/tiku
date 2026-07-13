@@ -92,16 +92,6 @@ function formatDate(value: string | null): string {
   return value === null ? "未设置" : value.slice(0, 10);
 }
 
-function maskPhoneForDisplay(phone: string): string {
-  const normalizedPhone = phone.trim();
-
-  if (/^\d{11}$/u.test(normalizedPhone)) {
-    return `${normalizedPhone.slice(0, 3)}****${normalizedPhone.slice(-4)}`;
-  }
-
-  return "登录账号已绑定";
-}
-
 function formatScopeLabel(input: {
   profession: Profession;
   level: number;
@@ -222,7 +212,7 @@ function ProfileHeader({
               {authContext.user.name}
             </h1>
             <p className="text-text-secondary text-sm">
-              {maskPhoneForDisplay(authContext.user.phone)}
+              {authContext.user.phone}
             </p>
           </div>
           <Button
