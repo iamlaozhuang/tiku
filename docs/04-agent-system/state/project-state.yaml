@@ -1,8 +1,57 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: user-led-b8-content-ops-interface-details-2026-07-12
-updatedAt: "2026-07-12T16:39:27-07:00"
+currentPhase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+updatedAt: "2026-07-12T16:48:09-07:00"
+latestUserLedB1B2OrganizationTrainingRuntimeRecovery:
+  id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+  status: ready_for_closeout
+  priority: p0
+  branch: codex/user-led-b1-b2-org-training-runtime
+  startSha: 4ef7980845a7e6b0e9f28140e28acea230c1b4be
+  finalCommit: 250c7a999
+  approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+  migrationApprovalSource: current_user_approved_safe_migration_if_missing_2026_07_12
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery-audit.md
+  executionBoundary:
+    databaseTarget: local_0704_only_process_override
+    databaseMetadataRead: approved_minimal_column_index_and_migration_status
+    databaseBackup: approved_repo_external_redacted
+    schemaMigrationExecution: approved_existing_reviewed_20260710110500_only_if_missing
+    migrationExecutionMode: single_transaction_from_reviewed_file_due_missing_journal
+    schemaSourceChange: blocked
+    migrationGeneration: blocked
+    destructiveDatabaseOperation: blocked
+    browserRuntime: approved_existing_session_api_envelope_only
+    screenshotCapture: blocked_not_required
+    rawDomCapture: blocked
+    providerExecution: blocked
+    dependencyChange: blocked
+    stagingProdDeploy: blocked
+  verification:
+    migrationPreflight: pass_column_index_and_journal_missing
+    repoExternalBackup: pass_header_and_sha256_verified
+    reviewedMigrationTransaction: pass_committed
+    migrationPostflight: pass_column_and_index_present_no_journal_synthesis
+    employeeVisibleListRuntime: pass_standard_success_envelope
+    adminListRuntime: covered_by_shared_query_path_and_focused_tests_b9_role_runtime_pending
+    tddRed: pass_2_expected_failures
+    focusedTests: pass_7_files_162_tests
+    fullTests: pass_360_files_1982_tests
+    lint: pass
+    typecheck: pass
+    formatCheck: pass
+    webpackBuild: pass_90_static_pages
+    diffCheck: pass
+    adversarialReview: pass_2_rounds
+    moduleRunV2PreCommitHardening: pass_7_files_scope_sensitive_terminology
+    localCommit: pass_250c7a999
+    providerExecution: blocked_not_executed
+    schemaSourceChange: blocked_not_executed
+    migrationGeneration: blocked_not_executed
+  nextRequiredTaskId: user-led-b9-cumulative-acceptance-closeout-2026-07-12
 latestUserLedB8ContentOpsInterfaceDetails:
   id: user-led-b8-content-ops-interface-details-2026-07-12
   status: closed_remote_synced
@@ -5668,6 +5717,43 @@ previousCurrentTaskBeforeContentAiFormalDraftDetailEntry20260709:
     masterPostMergeDiffCheck: pass
     mergePushApproval: granted_current_user_approved_goal_serial_merge_push_cleanup_2026_07_09
 currentTask:
+  id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+  title: User-led B1-B2 organization training runtime recovery
+  phase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+  status: in_progress
+  priority: p0
+  taskKind: targeted_local_database_migration_and_training_error_experience_repair
+  branch: codex/user-led-b1-b2-org-training-runtime
+  humanApprovalBoundary:
+    implementation: approved
+    localCommit: approved
+    fastForwardMerge: approved_master_only
+    push: approved_origin_master_only
+    cleanup: approved_after_remote_sync
+    approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+    local0704DatabaseMetadataRead: approved
+    local0704DatabaseBackup: approved
+    existingMigrationExecution: approved_20260710110500_only_if_confirmed_missing
+    migrationExecutionMode: single_transaction_from_reviewed_file_due_missing_journal
+    migrationApprovalSource: current_user_approved_safe_migration_if_missing_2026_07_12
+    schemaSourceChange: blocked
+    newMigrationGeneration: blocked
+    destructiveDatabaseOperation: blocked
+    providerExecution: blocked
+    stagingProdDeploy: blocked
+    forcePush: blocked
+    pullRequest: blocked
+  plannedAt: "2026-07-12T16:48:09-07:00"
+  claimedAt: "2026-07-12T16:48:09-07:00"
+  targetClosureItem: Restore advanced organization admin and employee training list runtime while preserving deadline semantics and user-friendly recovery states.
+  behaviorBoundary: local_0704_metadata_backup_existing_migration_and_targeted_training_ui_test_governance_only
+  evidenceMode: redacted_status_count_command_and_commit_sha_only_no_credentials_tokens_env_values_database_urls_training_content_or_provider_payload
+  planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery-audit.md
+  nextRequiredTaskId: user-led-b9-cumulative-acceptance-closeout-2026-07-12
+
+previousCurrentTaskBeforeUserLedB1B2OrganizationTrainingRuntimeRecovery20260712:
   id: user-led-b8-content-ops-interface-details-2026-07-12
   title: User-led B8 content and operations interface details
   phase: user-led-b8-content-ops-interface-details-2026-07-12

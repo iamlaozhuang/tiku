@@ -118,6 +118,131 @@ postPeripheralValidationBlockedFiles: &post_peripheral_validation_blocked_files
   - D:/tiku-local-private/**
   - D:\tiku-local-private\**
 activeTasks:
+  - id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+    title: User-led B1-B2 organization training runtime recovery
+    phase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
+    status: ready_for_closeout
+    priority: p0
+    sequenceOrder: 54
+    taskKind: targeted_local_database_migration_and_training_error_experience_repair
+    moduleRunVersion: 2
+    branch: codex/user-led-b1-b2-org-training-runtime
+    dependsOn:
+      - user-led-b8-content-ops-interface-details-2026-07-12
+    planPath: docs/05-execution-logs/task-plans/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+      - docs/05-execution-logs/evidence/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery.md
+      - docs/05-execution-logs/audits-reviews/2026-07-12-user-led-b1-b2-organization-training-runtime-recovery-audit.md
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
+      - tests/unit/organization-training-admin-entry-surface.test.ts
+      - tests/unit/organization-training-employee-entry-surface.test.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/db/schema/organization-training.test.ts
+    blockedFiles:
+      - .env*
+      - package.json
+      - package-lock.yaml
+      - package-lock.json
+      - pnpm-lock.yaml
+      - src/db/schema/organization-training.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+      - D:/tiku-local-private/**
+    capabilities:
+      localSourceChange: approved_ui_error_copy_only
+      focusedUnitTest: approved
+      databaseConnection: approved_local_0704_metadata_and_migration_only
+      databaseBackup: approved_repo_external
+      schemaMigration: approved_existing_20260710110500_execution_only_if_missing
+      migrationExecutionMode: single_transaction_from_reviewed_file_due_missing_journal
+      migrationGeneration: blocked
+      schemaSourceChange: blocked
+      destructiveDatabaseOperation: blocked
+      browserRuntime: approved_existing_session_api_envelope_only
+      screenshot: blocked_not_required
+      rawDomCapture: blocked
+      providerCall: blocked
+      envSecretAccess: approved_in_memory_process_inheritance_no_output
+      dependencyIntroduction: blocked
+      stagingProdDeploy: blocked
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit:
+        approved: true
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current_user_approved_execute_full_remediation_plan_2026_07_12
+      databaseMigration:
+        approved: true
+        target: local_0704_process_override_only
+        migration: 20260710110500_add_organization_training_answer_deadline
+        executionMode: single_transaction_from_reviewed_file_due_missing_journal
+        approvalSource: current_user_approved_safe_migration_if_missing_2026_07_12
+    acceptanceStandards:
+      - Metadata preflight proves the deadline column or index is missing before migration executes.
+      - A repo-external local backup succeeds before the reviewed additive migration executes.
+      - The existing migration adds only nullable answer_deadline_at and its named index; no repository migration file changes.
+      - Admin and employee training list routes return standard success envelopes after migration.
+      - UI recovery copy does not expose numeric runtime codes to non-technical users.
+      - Standard roles remain fail-closed and organization scope, deadline, takedown, duplicate-submit, redaction, and formal-domain separation remain protected.
+    validationCommands:
+      - corepack pnpm@10.26.1 exec vitest run tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts src/server/repositories/organization-training-repository.test.ts src/server/services/organization-training-route.test.ts src/server/services/organization-training-service.test.ts src/server/mappers/organization-training-mapper.test.ts src/db/schema/organization-training.test.ts
+      - corepack pnpm@10.26.1 exec vitest run --maxWorkers=25% --testTimeout=20000
+      - corepack pnpm@10.26.1 run lint
+      - corepack pnpm@10.26.1 run typecheck
+      - corepack pnpm@10.26.1 run format:check
+      - corepack pnpm@10.26.1 exec next build --webpack
+      - git diff --check
+    result: pass_local_0704_migration_and_training_recovery
+    verification:
+      migrationPreflight: pass_column_index_and_journal_missing
+      repoExternalBackup: pass_header_and_sha256_verified
+      reviewedMigrationTransaction: pass_committed
+      migrationPostflight: pass_column_and_index_present_no_journal_synthesis
+      employeeVisibleListRuntime: pass_standard_success_envelope
+      adminListRuntime: covered_by_shared_query_path_and_focused_tests_b9_role_runtime_pending
+      tddRed: pass_2_expected_failures
+      focusedTests: pass_7_files_162_tests
+      fullTests: pass_360_files_1982_tests
+      lint: pass
+      typecheck: pass
+      formatCheck: pass
+      webpackBuild: pass_90_static_pages
+      diffCheck: pass
+      adversarialReview: pass_2_rounds
+      moduleRunV2PreCommitHardening: pass_7_files_scope_sensitive_terminology
+      localCommit: pass_250c7a999
+      providerExecution: blocked_not_executed
+      schemaSourceChange: blocked_not_executed
+      migrationGeneration: blocked_not_executed
+    nextModuleRunCandidate: user-led-b9-cumulative-acceptance-closeout-2026-07-12
   - id: user-led-b8-content-ops-interface-details-2026-07-12
     title: User-led B8 content and operations interface details
     phase: user-led-b8-content-ops-interface-details-2026-07-12
