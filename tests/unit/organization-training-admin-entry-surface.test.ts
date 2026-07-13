@@ -381,6 +381,7 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "企业训练列表加载失败",
     );
+    expect(screen.getByRole("alert")).not.toHaveTextContent("503001");
     expect(screen.getByRole("button", { name: "新建企业训练" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "新建企业训练" }));
     expect(screen.queryByRole("form", { name: "企业训练配置表单" })).toBeNull();
@@ -2250,6 +2251,7 @@ describe("AdminOrganizationTrainingPage", () => {
 
     const mutationAlert = await screen.findByRole("alert");
     expect(mutationAlert).toHaveTextContent("企业训练草稿创建失败");
+    expect(mutationAlert).not.toHaveTextContent("500001");
   });
 
   it("shows submitting copy while creating an organization training draft", async () => {

@@ -266,15 +266,6 @@ async function fetchAdminOrganizationTrainingApi<TData>(
   return (await response.json()) as ApiResponse<TData | null>;
 }
 
-function createApiErrorMessage(
-  fallbackMessage: string,
-  response: ApiResponse<unknown> | null,
-) {
-  return response === null
-    ? fallbackMessage
-    : `${fallbackMessage}（code: ${response.code}）`;
-}
-
 function createAdminLifecycleListPath({
   contentKind,
   page,
@@ -1017,9 +1008,7 @@ export function AdminOrganizationTrainingPage() {
           setIsCreateWizardOpen(false);
           setTrainingItems([]);
           setTrainingPagination(null);
-          setTrainingListMessage(
-            createApiErrorMessage("企业训练列表加载失败", response),
-          );
+          setTrainingListMessage("企业训练列表加载失败");
           setTrainingListState("error");
           return;
         }
@@ -1147,9 +1136,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage(
-          createApiErrorMessage("企业训练草稿创建失败", response),
-        );
+        setErrorMessage("企业训练草稿创建失败");
         return;
       }
 
@@ -1191,7 +1178,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage(createApiErrorMessage("企业训练复制失败", response));
+        setErrorMessage("企业训练复制失败");
         return;
       }
 
@@ -1260,7 +1247,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage(createApiErrorMessage("企业训练下架失败", response));
+        setErrorMessage("企业训练下架失败");
         return;
       }
 
@@ -1351,7 +1338,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage(createApiErrorMessage("企业训练发布失败", response));
+        setErrorMessage("企业训练发布失败");
         return;
       }
 
@@ -1665,7 +1652,7 @@ function TrainingListPanel({
 
       if (response.code !== 0 || response.data === null) {
         setDetailState("error");
-        setDetailMessage(createApiErrorMessage("训练详情加载失败", response));
+        setDetailMessage("训练详情加载失败");
         return;
       }
 
