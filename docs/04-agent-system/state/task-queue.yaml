@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
     title: User-led B1-B2 organization training runtime recovery
     phase: user-led-b1-b2-organization-training-runtime-recovery-2026-07-12
-    status: ready_for_closeout
+    status: closed
     priority: p0
     sequenceOrder: 54
     taskKind: targeted_local_database_migration_and_training_error_experience_repair
@@ -246,6 +246,9 @@ activeTasks:
       masterLint: pass
       masterTypecheck: pass
       masterDiffCheck: pass
+      moduleRunV2PrePushReadiness: pass_real_push_hook
+      remotePush: pass_origin_master_74aef7167
+      localRemoteComparison: pass_0_behind_0_ahead
       providerExecution: blocked_not_executed
       schemaSourceChange: blocked_not_executed
       migrationGeneration: blocked_not_executed

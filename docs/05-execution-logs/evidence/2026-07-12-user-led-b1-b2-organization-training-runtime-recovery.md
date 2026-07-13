@@ -76,6 +76,9 @@ result: pass
 - localMasterMerge: pass_ff_only_81dccc3d3
 - masterPostMergeVerification: pass_7_files_162_tests_lint_typecheck_diff_check
 - 首次 pre-push readiness 因全局 repository SHA checkpoint 尚未更新而按预期硬阻断；已将 master/origin checkpoint 对齐到本批真实本地与远端状态，不改变产品代码或测试结论。
+- Test-ModuleRunV2PrePushReadiness: pass_real_push_hook
+- remotePush: pass_origin_master_74aef7167
+- localRemoteComparison: pass_0_behind_0_ahead
 - threadRolloverGate: not_required；本批可在当前任务内串行 closeout。
 - nextModuleRunCandidate: `user-led-b9-cumulative-acceptance-closeout-2026-07-12`
 - Cost Calibration Gate remains blocked。
