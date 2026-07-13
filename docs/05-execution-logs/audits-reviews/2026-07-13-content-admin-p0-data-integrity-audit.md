@@ -58,6 +58,13 @@ Verified protections:
 
 Round 2 residual findings: none at Critical or Important severity.
 
+## Master Post-Merge Adversarial Gate
+
+- A concurrent all-gates run caused 11 timeout-only failures across 7 unrelated test files.
+- The same 7 files passed 67/67 without competing processes, and the complete suite then passed 2036/2036 when run standalone.
+- No assertion failure, source change, timeout increase, retry masking, or test weakening was used. The evidence supports host resource contention as the root cause.
+- Standalone lint, typecheck, format, webpack build, and diff checks passed after the ff-only merge.
+
 ## Self-Review From First Principles
 
 - Persisted content must prove explicit author intent and valid structure; UI appearance alone is not authority.

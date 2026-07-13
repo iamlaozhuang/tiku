@@ -72,8 +72,20 @@ The first full unit run exposed two stale single-choice service test inputs with
 - Governance: current task state/queue, plan, evidence, audit.
 - No package, lockfile, environment, schema, migration, fixture, seed, or remote change.
 
+## Master Post-Merge Gates
+
+- Local implementation commit: `ebe14d4274a1730000705e7bfa1f29a2b96e371e`.
+- `master` accepted the task branch with `--ff-only`; the task commit is an ancestor of `master`.
+- Focused regression: 6 files, 94 tests passed.
+- The first master full-unit attempt ran concurrently with lint, typecheck, and full-repository formatting and produced 11 timeouts across 7 unrelated files. No assertion or Batch A semantic failure occurred.
+- Adversarial diagnosis reran exactly those 7 files without competing gates: 67 tests passed. A subsequent standalone full-unit run passed 363 files and 2036 tests, confirming resource contention rather than a product regression; no timeout or test source was changed.
+- Standalone lint, typecheck, and full format checks passed.
+- Standalone webpack production build passed and generated 90 static pages.
+- `git diff --check` passed.
+- The first pre-push readiness run correctly blocked because the task used the non-standard queue status `ready_for_push_cleanup`, which disabled the accepted-ancestor checkpoint policy. The task status was restored to the supported `ready_for_closeout` state; no repository SHA, product source, test, or remote ref was changed to bypass the gate.
+
 ## Closeout Boundary
 
-- Implementation is locally verified and ready to commit.
+- Implementation is committed, ff-only merged to `master`, and master post-merge gates passed.
 - The current user explicitly approved the Batch A local commit, ff-only merge to `master`, push of `master` to `origin/master`, and cleanup after remote synchronization on 2026-07-13.
-- Force push, pull request, deployment, and every other remote target remain blocked.
+- Authorized next actions are limited to pushing `master` to `origin/master` and cleaning the merged short branch/worktree after remote synchronization. Force push, pull request, deployment, and every other remote target remain blocked.

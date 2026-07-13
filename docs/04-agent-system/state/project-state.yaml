@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: content-admin-p0-data-integrity-2026-07-13
-updatedAt: "2026-07-13T09:05:00-07:00"
+updatedAt: "2026-07-13T09:18:00-07:00"
 latestContentAdminP0DataIntegrity:
   id: content-admin-p0-data-integrity-2026-07-13
-  status: closeout_authorized_in_progress
+  status: ready_for_authorized_push_cleanup
   priority: p0
   branch: codex/content-admin-p0-data-integrity
   startSha: dadef0975c2e8c60343fb06286ceb6c8c622d818
@@ -41,8 +41,18 @@ latestContentAdminP0DataIntegrity:
     adversarialReview: pass_two_rounds
     selfReview: pass
     moduleRunV2PreCommitHardening: pass_15_files
+    masterPostMergeFocusedTests: pass_6_files_94_tests
+    masterPostMergeFullUnitTests: pass_363_files_2036_tests_serial_rerun
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeFormatCheck: pass
+    masterPostMergeWebpackBuild: pass_90_static_pages
+    masterPostMergeDiffCheck: pass
+    transientParallelGateInvestigation: pass_7_files_67_tests_serial_resource_contention_confirmed
   closeoutApprovalSource: current_user_approved_batch_a_commit_ff_only_master_push_origin_master_cleanup_2026_07_13
-  nextDecision: execute_authorized_closeout
+  localCommit: ebe14d4274a1730000705e7bfa1f29a2b96e371e
+  localMasterMerge: pass_ff_only_ebe14d427
+  nextDecision: execute_authorized_push_and_cleanup
 latestContentAdminP0PlatformInteractionBaselineRatification:
   id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
   status: local_closeout_complete_push_blocked
@@ -85,7 +95,7 @@ latestContentAdminP0PlatformInteractionBaselineRatification:
   nextDecision: batch_a_started
 latestUserLedPrelaunchTestDataRefresh:
   id: user-led-prelaunch-test-data-refresh-2026-07-12
-  status: ready_for_closeout
+  status: ready_for_push_cleanup
   priority: p0
   branch: codex/prelaunch-test-data-refresh
   startSha: 0233990b736b80b47e7afbaaf6e05283eb5c8b6a
@@ -6199,7 +6209,7 @@ currentTask:
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-13-content-admin-p0-data-integrity-audit.md
   nextRequiredTaskId: none
   validationSummary:
-    status: pass_local_verified_closeout_authorized
+    status: pass_master_post_merge_gates_ready_for_authorized_push_cleanup
     baselineFocusedTests: pass_3_files_52_tests
     tddRed: pass_expected_14_failures_plus_duplicate_submit_mutation_proof
     focusedGreen: pass_6_files_94_tests
@@ -6212,6 +6222,14 @@ currentTask:
     adversarialReview: pass_two_rounds
     selfReview: pass
     moduleRunV2PreCommitHardening: pass_15_files
+    masterPostMergeFocusedTests: pass_6_files_94_tests
+    masterPostMergeFullUnitTests: pass_363_files_2036_tests_serial_rerun
+    masterPostMergeLint: pass
+    masterPostMergeTypecheck: pass
+    masterPostMergeFormatCheck: pass
+    masterPostMergeWebpackBuild: pass_90_static_pages
+    masterPostMergeDiffCheck: pass
+    transientParallelGateInvestigation: pass_7_files_67_tests_serial_resource_contention_confirmed
 previousCurrentTaskBeforeContentAdminP0DataIntegrity20260713:
   id: content-admin-p0-platform-interaction-baseline-ratification-2026-07-13
   status: local_closeout_complete_push_blocked
