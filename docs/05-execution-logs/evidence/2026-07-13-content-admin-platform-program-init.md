@@ -36,19 +36,20 @@ analogousImplementationReviewed: true
 
 ## Validation Results
 
-| Gate                            | Result                          |
-| ------------------------------- | ------------------------------- |
-| Program Guard smoke             | pass — 1 positive, 8 negative   |
-| Program Guard real state        | pass                            |
-| PowerShell parser               | pass — guard and smoke scripts  |
-| Full unit suite                 | pass — 363 files, 2036 tests    |
-| Lint                            | pass                            |
-| Typecheck                       | pass                            |
-| Full repository format check    | pass                            |
-| Webpack production build        | pass — 90 static pages          |
-| `git diff --check`              | pass                            |
-| Module Run v2 pre-commit        | pass — 12 allowed files scanned |
-| Module Run v2 closeout/pre-push | pending after task commit       |
+| Gate                         | Result                          |
+| ---------------------------- | ------------------------------- |
+| Program Guard smoke          | pass — 1 positive, 8 negative   |
+| Program Guard real state     | pass                            |
+| PowerShell parser            | pass — guard and smoke scripts  |
+| Full unit suite              | pass — 363 files, 2036 tests    |
+| Lint                         | pass                            |
+| Typecheck                    | pass                            |
+| Full repository format check | pass                            |
+| Webpack production build     | pass — 90 static pages          |
+| `git diff --check`           | pass                            |
+| Module Run v2 pre-commit     | pass — 12 allowed files scanned |
+| Module Run v2 closeout       | pass                            |
+| Module Run v2 pre-push       | pending after closeout commit   |
 
 Validation command anchors:
 
@@ -61,7 +62,7 @@ Validation command anchors:
 - `npm.cmd exec -- next build --webpack`: pass; the equivalent locked local Next executable generated 90 pages.
 - `git diff --check`: pass.
 - `Test-ModuleRunV2PreCommitHardening`: pass.
-- `Test-ModuleRunV2ModuleCloseoutReadiness`: initial governance RED recorded; final rerun follows the immutable task commit.
+- `Test-ModuleRunV2ModuleCloseoutReadiness`: pass after the initial governance RED and immutable task commit.
 - `Test-ModuleRunV2PrePushReadiness`: pending after the immutable task commit.
 
 ## Program Materialization
@@ -81,13 +82,13 @@ Validation command anchors:
 ## Closeout Checkpoint
 
 - Batch range: one governance-only Program Init task.
-- Commit: pending until the immutable task commit is created; it will be recorded before final closeout readiness.
+- Commit: `2810a3722d25ea496121c74f8cbeadad3a1b1309`.
 - localFullLoopGate: pass for Guard smoke/real state, PowerShell parse, full unit, lint, typecheck, format, webpack build and diff check.
 - threadRolloverGate: not required; repository state is the recovery source and this bounded closeout remains in the current task.
 - nextModuleRunCandidate: `content-admin-platform-b0-contract-code-mapping-2026-07-13`, claim only after physical Program Init branch/worktree cleanup.
 - Cost Calibration Gate remains blocked.
 - blocked remainder: product feature implementation, database, Provider, dependency, schema/fixture, browser/account, staging, production, deployment, PR, force push and release-readiness claims remain blocked or task-specific.
-- task commit: pending
+- task commit: pass — `2810a3722d25ea496121c74f8cbeadad3a1b1309`
 - master ff-only merge: pending
 - `origin/master` sync: pending
 - short branch/worktree cleanup: pending
