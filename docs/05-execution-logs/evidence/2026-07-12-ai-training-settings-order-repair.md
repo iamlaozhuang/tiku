@@ -86,3 +86,11 @@ Batch range: single shared learner AI training information-architecture repair.
 - nextModuleRunCandidate: none_current_scope_complete。
 - blocked remainder: production Provider 接入、Provider-enabled 验收、staging、production、deploy、release readiness、Cost Calibration、PR 与 force push remain blocked。
 - Cost Calibration Gate remains blocked
+
+## 合入与远端同步
+
+- `master` ff-only 合入：pass，`499a90e87` → `4c528311e`。
+- `master` 复验：focused 1 文件 / 15 用例、lint、typecheck、`git diff --check` 通过。
+- Test-ModuleRunV2PrePushReadiness: pass；显式门禁与真实 push hook 均通过。
+- 普通推送 `origin/master`：pass，远端同步至 `4c528311e3eb83f0265a3f1753ab00aa9510959f`。
+- 首次推送后 `master` 与 `origin/master`：0 behind / 0 ahead。

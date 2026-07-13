@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-ai-training-settings-order-repair-2026-07-12
     title: User-led AI training generation settings order repair
     phase: user-led-ai-training-settings-order-repair-2026-07-12
-    status: ready_for_closeout
+    status: closed
     result: pass_shared_personal_and_enterprise_ai_settings_discoverability
     priority: p1
     sequenceOrder: 57
@@ -217,8 +217,17 @@ activeTasks:
       costCalibrationExecuted: false
       moduleRunV2PreCommitHardening: pass
       moduleRunV2ModuleCloseoutReadiness: pass
+      localMasterMerge: pass_ff_only_4c528311e
+      masterFocusedTests: pass_1_file_15_tests
+      masterLint: pass
+      masterTypecheck: pass
+      masterDiffCheck: pass
+      moduleRunV2PrePushReadiness: pass_real_push_hook
+      remotePush: pass_origin_master_4c528311e
+      localRemoteComparison: pass_0_behind_0_ahead
       productCommit: d05d8f87fd0fcb01534125d4106d03cf10eca9d4
     finalCommit: d05d8f87fd0fcb01534125d4106d03cf10eca9d4
+    closeoutStatus: remote_synced_origin_master_4c528311e
   - id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
     title: User-led B9 cumulative acceptance closeout
     phase: user-led-b9-cumulative-acceptance-closeout-2026-07-12

@@ -2,10 +2,10 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: user-led-ai-training-settings-order-repair-2026-07-12
-updatedAt: "2026-07-12T19:05:00-07:00"
+updatedAt: "2026-07-12T19:48:00-07:00"
 latestUserLedAiTrainingSettingsOrderRepair:
   id: user-led-ai-training-settings-order-repair-2026-07-12
-  status: ready_for_closeout
+  status: closed_remote_synced
   priority: p1
   branch: codex/ai-training-settings-order
   startSha: 499a90e8744040af1af03d70651b65e80e110a54
@@ -42,6 +42,14 @@ latestUserLedAiTrainingSettingsOrderRepair:
     dependencyChange: blocked_not_executed
     productCommit: pass_d05d8f87f
     moduleRunV2ModuleCloseoutReadiness: pass
+    localMasterMerge: pass_ff_only_4c528311e
+    masterFocusedTests: pass_1_file_15_tests
+    masterLint: pass
+    masterTypecheck: pass
+    masterDiffCheck: pass
+    moduleRunV2PrePushReadiness: pass_real_push_hook
+    remotePush: pass_origin_master_4c528311e
+    localRemoteComparison: pass_0_behind_0_ahead
 latestUserLedB9CumulativeAcceptanceCloseout:
   id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
   status: closed_remote_synced
@@ -5866,7 +5874,7 @@ currentTask:
   id: user-led-ai-training-settings-order-repair-2026-07-12
   title: User-led AI training generation settings order repair
   phase: user-led-ai-training-settings-order-repair-2026-07-12
-  status: ready_for_closeout
+  status: closed
   priority: p1
   taskKind: learner_ai_provider_closed_information_architecture_repair
   branch: codex/ai-training-settings-order
@@ -5899,6 +5907,7 @@ currentTask:
   finalCommit: d05d8f87fd0fcb01534125d4106d03cf10eca9d4
   localFullLoopGate: pass
   moduleRunV2ModuleCloseoutReadiness: pass
+  closeoutStatus: remote_synced_origin_master_4c528311e
 
 previousCurrentTaskBeforeUserLedB1B2OrganizationTrainingRuntimeRecovery20260712:
   id: user-led-b8-content-ops-interface-details-2026-07-12
