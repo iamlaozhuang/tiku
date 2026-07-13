@@ -110,6 +110,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   and two-resource route proof; E/F own broader rollout and acceptance. PIC-09 was not claimed, and no exception or
   authorization expansion was introduced.
 
+### B5 Batch B Cumulative Audit
+
+- Exact post-M2 Batch B net diff and all B0-B4 claims were reconciled. Shared async, list-query, Drawer/Toast/object, and
+  form contracts remain separate and narrow; no blocking duplicate or universal-framework finding remained.
+- Fixed full node passed 371 test files / 2,067 tests, lint, typecheck, full-repository format, and production build. The
+  build used the clean root checkout at the same product commit after Turbopack rejected only the worktree dependency
+  junction; no source or dependency repair was required.
+- PIC statuses remain unchanged and partial according to D/C/E/F ownership; the exception ledger remains empty. B5 is a
+  cumulative Batch B checkpoint, not route-family, authorization, AI, or final acceptance closure.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
