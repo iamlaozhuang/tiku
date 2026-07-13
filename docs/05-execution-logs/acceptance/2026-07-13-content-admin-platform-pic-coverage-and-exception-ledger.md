@@ -90,6 +90,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   focus restoration, and cumulative list-family proof; E/F still own wider rollout and acceptance. No exception or
   authorization expansion was introduced.
 
+### B3 Shared Detail And Feedback Semantics
+
+- Detail Drawer now proves mount-scoped initial focus, forward/reverse focus loop, Escape handling, nested-modal respect,
+  current-callback invocation, and trigger restoration across direct, content-detail, and paper-composer tests.
+- A shared Toast distinguishes polite success from assertive error/conflict; question/material save, copy, and disable
+  paths update only server-returned objects, retain list state on action failure, preserve form input on save failure, and
+  retain the existing duplicate-save guard.
+- PIC-05, PIC-07, PIC-08, and PIC-10 remain `partial`: B4/C/D/E still own disabled reasons, form contracts, route return/
+  focus recovery, broad page-family rollout, and acceptance. No exception or authorization expansion was introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

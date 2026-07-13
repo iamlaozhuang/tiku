@@ -22,6 +22,7 @@ import {
   AdminFilterChips,
   type AdminFilterChip,
 } from "@/components/admin/AdminFilterChips";
+import { AdminToast, type AdminFeedback } from "@/components/admin/AdminToast";
 import {
   AdminListToolbar,
   AdminPagination,
@@ -34,6 +35,7 @@ import {
   createAdminListSearchParams,
   parseAdminListUrlQuery,
 } from "@/lib/admin-list-query";
+import { upsertAdminObjectByPublicId } from "@/lib/admin-object-state";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -685,15 +687,37 @@ async function mutateAdminApi<TData>(
   };
 }
 
-function createContentSaveErrorMessage(
+function createContentSaveErrorFeedback(
   kind: "question" | "material",
   responseCode: number,
-): string {
+): AdminFeedback {
   const contentLabel = kind === "question" ? "题目" : "材料";
+  const isConflict = Math.floor(responseCode / 1000) === 409;
 
-  return Math.floor(responseCode / 1000) === 409
-    ? `${contentLabel}保存冲突：内容已锁定或被其他操作更新。当前输入已保留，请刷新确认后重试。`
-    : `${contentLabel}保存失败：当前输入已保留，请检查后重试。`;
+  return {
+    message: isConflict
+      ? "内容已锁定或被其他操作更新。当前输入已保留，请刷新确认后重试。"
+      : "当前输入已保留，请检查后重试。",
+    title: isConflict ? `${contentLabel}保存冲突` : `${contentLabel}保存失败`,
+    tone: isConflict ? "conflict" : "error",
+  };
+}
+
+function createContentActionErrorFeedback(
+  kind: "question" | "material",
+  responseCode?: number,
+): AdminFeedback {
+  const contentLabel = kind === "question" ? "题目" : "材料";
+  const isConflict =
+    responseCode !== undefined && Math.floor(responseCode / 1000) === 409;
+
+  return {
+    message: isConflict
+      ? "内容状态已被其他操作更新，请刷新确认后重试。"
+      : "操作未完成，当前列表保持不变，请稍后重试。",
+    title: isConflict ? `${contentLabel}操作冲突` : `${contentLabel}操作失败`,
+    tone: isConflict ? "conflict" : "error",
+  };
 }
 
 function createQuestionInput(
@@ -851,19 +875,6 @@ function createMaterialInput(values: MaterialFormValues) {
   };
 }
 
-function upsertByPublicId<TItem extends { publicId: string }>(
-  items: TItem[],
-  nextItem: TItem,
-) {
-  if (items.some((item) => item.publicId === nextItem.publicId)) {
-    return items.map((item) =>
-      item.publicId === nextItem.publicId ? nextItem : item,
-    );
-  }
-
-  return [nextItem, ...items];
-}
-
 export function AdminQuestionMaterialManagement({
   defaultView = "questions",
   initialKnowledgeNodeFilter = "",
@@ -919,6 +930,8 @@ export function AdminQuestionMaterialManagement({
   const [activeForm, setActiveForm] = useState<ActiveContentForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [contentMutationFeedback, setContentMutationFeedback] =
+    useState<AdminFeedback | null>(null);
   const {
     handleFilterChange,
     handlePageChange,
@@ -1200,13 +1213,19 @@ export function AdminQuestionMaterialManagement({
     }
 
     if (sessionToken === null || displayedActiveForm?.kind !== "question") {
-      setActionError("管理员会话已失效，请重新登录后再操作。");
+      setContentMutationFeedback({
+        message: "管理员会话已失效，请重新登录后再操作。",
+        title: "题目保存失败",
+        tone: "error",
+      });
       return;
     }
 
     submissionInProgressRef.current = true;
     setIsSubmitting(true);
     setActionError(null);
+    setActionMessage(null);
+    setContentMutationFeedback(null);
 
     try {
       const response = await mutateAdminApi<{ question: QuestionDto }>(
@@ -1233,25 +1252,31 @@ export function AdminQuestionMaterialManagement({
       );
 
       if (response.code !== 0 || response.data === null) {
-        setActionError(
-          createContentSaveErrorMessage("question", response.code),
+        setContentMutationFeedback(
+          createContentSaveErrorFeedback("question", response.code),
         );
         return;
       }
 
       const savedQuestion = response.data.question;
       setQuestions((currentQuestions) =>
-        upsertByPublicId(currentQuestions, savedQuestion),
+        upsertAdminObjectByPublicId(currentQuestions, savedQuestion),
       );
-      setActionMessage(
-        shouldPublishInitialQuestionTarget
+      setContentMutationFeedback({
+        message: shouldPublishInitialQuestionTarget
           ? `题目“${createQuestionReadableName(savedQuestion)}”已发布为正式题目`
           : `题目“${createQuestionReadableName(savedQuestion)}”已保存`,
-      );
+        title: shouldPublishInitialQuestionTarget ? "题目已发布" : "题目已保存",
+        tone: "success",
+      });
       setActiveForm(null);
       setIsInitialQuestionTargetDismissed(true);
     } catch {
-      setActionError("题目保存失败：当前输入已保留，请检查网络后重试。");
+      setContentMutationFeedback({
+        message: "当前输入已保留，请检查网络后重试。",
+        title: "题目保存失败",
+        tone: "error",
+      });
     } finally {
       submissionInProgressRef.current = false;
       setIsSubmitting(false);
@@ -1266,13 +1291,19 @@ export function AdminQuestionMaterialManagement({
     }
 
     if (sessionToken === null || displayedActiveForm?.kind !== "material") {
-      setActionError("管理员会话已失效，请重新登录后再操作。");
+      setContentMutationFeedback({
+        message: "管理员会话已失效，请重新登录后再操作。",
+        title: "材料保存失败",
+        tone: "error",
+      });
       return;
     }
 
     submissionInProgressRef.current = true;
     setIsSubmitting(true);
     setActionError(null);
+    setActionMessage(null);
+    setContentMutationFeedback(null);
 
     try {
       const response = await mutateAdminApi<{ material: MaterialDto }>(
@@ -1290,20 +1321,28 @@ export function AdminQuestionMaterialManagement({
       );
 
       if (response.code !== 0 || response.data === null) {
-        setActionError(
-          createContentSaveErrorMessage("material", response.code),
+        setContentMutationFeedback(
+          createContentSaveErrorFeedback("material", response.code),
         );
         return;
       }
 
       const savedMaterial = response.data.material;
       setMaterials((currentMaterials) =>
-        upsertByPublicId(currentMaterials, savedMaterial),
+        upsertAdminObjectByPublicId(currentMaterials, savedMaterial),
       );
-      setActionMessage(`材料“${savedMaterial.title}”已保存`);
+      setContentMutationFeedback({
+        message: `材料“${savedMaterial.title}”已保存`,
+        title: "材料已保存",
+        tone: "success",
+      });
       setActiveForm(null);
     } catch {
-      setActionError("材料保存失败：当前输入已保留，请检查网络后重试。");
+      setContentMutationFeedback({
+        message: "当前输入已保留，请检查网络后重试。",
+        title: "材料保存失败",
+        tone: "error",
+      });
     } finally {
       submissionInProgressRef.current = false;
       setIsSubmitting(false);
@@ -1317,27 +1356,44 @@ export function AdminQuestionMaterialManagement({
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
-      setActionError("管理员会话已失效，请重新登录后再操作。");
+      setContentMutationFeedback({
+        message: "管理员会话已失效，请重新登录后再操作。",
+        title: "题目操作失败",
+        tone: "error",
+      });
       return;
     }
 
     setActionError(null);
-    const response = await mutateAdminApi<{ question: QuestionDto }>(
-      `/api/v1/questions/${question.publicId}/${action}`,
-      sessionToken,
-      "POST",
-    );
+    setActionMessage(null);
+    setContentMutationFeedback(null);
 
-    if (response.code !== 0 || response.data === null) {
-      setActionError("题目操作失败，请刷新后重试。");
-      return;
+    try {
+      const response = await mutateAdminApi<{ question: QuestionDto }>(
+        `/api/v1/questions/${question.publicId}/${action}`,
+        sessionToken,
+        "POST",
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setContentMutationFeedback(
+          createContentActionErrorFeedback("question", response.code),
+        );
+        return;
+      }
+
+      const updatedQuestion = response.data.question;
+      setQuestions((currentQuestions) =>
+        upsertAdminObjectByPublicId(currentQuestions, updatedQuestion),
+      );
+      setContentMutationFeedback({
+        message: `题目“${createQuestionReadableName(updatedQuestion)}”已更新`,
+        title: "题目已更新",
+        tone: "success",
+      });
+    } catch {
+      setContentMutationFeedback(createContentActionErrorFeedback("question"));
     }
-
-    const updatedQuestion = response.data.question;
-    setQuestions((currentQuestions) =>
-      upsertByPublicId(currentQuestions, updatedQuestion),
-    );
-    setActionMessage(`题目“${createQuestionReadableName(question)}”已更新`);
   }
 
   async function handleRecommendKnowledgeNodes(question: QuestionDto) {
@@ -1423,7 +1479,7 @@ export function AdminQuestionMaterialManagement({
 
       const savedQuestion = response.data.question;
       setQuestions((currentQuestions) =>
-        upsertByPublicId(currentQuestions, savedQuestion),
+        upsertAdminObjectByPublicId(currentQuestions, savedQuestion),
       );
       setActionError(null);
     }
@@ -1474,27 +1530,44 @@ export function AdminQuestionMaterialManagement({
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
-      setActionError("管理员会话已失效，请重新登录后再操作。");
+      setContentMutationFeedback({
+        message: "管理员会话已失效，请重新登录后再操作。",
+        title: "材料操作失败",
+        tone: "error",
+      });
       return;
     }
 
     setActionError(null);
-    const response = await mutateAdminApi<{ material: MaterialDto }>(
-      `/api/v1/materials/${material.publicId}/${action}`,
-      sessionToken,
-      "POST",
-    );
+    setActionMessage(null);
+    setContentMutationFeedback(null);
 
-    if (response.code !== 0 || response.data === null) {
-      setActionError("材料操作失败，请刷新后重试。");
-      return;
+    try {
+      const response = await mutateAdminApi<{ material: MaterialDto }>(
+        `/api/v1/materials/${material.publicId}/${action}`,
+        sessionToken,
+        "POST",
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setContentMutationFeedback(
+          createContentActionErrorFeedback("material", response.code),
+        );
+        return;
+      }
+
+      const updatedMaterial = response.data.material;
+      setMaterials((currentMaterials) =>
+        upsertAdminObjectByPublicId(currentMaterials, updatedMaterial),
+      );
+      setContentMutationFeedback({
+        message: `材料“${updatedMaterial.title}”已更新`,
+        title: "材料已更新",
+        tone: "success",
+      });
+    } catch {
+      setContentMutationFeedback(createContentActionErrorFeedback("material"));
     }
-
-    const updatedMaterial = response.data.material;
-    setMaterials((currentMaterials) =>
-      upsertByPublicId(currentMaterials, updatedMaterial),
-    );
-    setActionMessage(`材料“${material.title}”已更新`);
   }
 
   async function handleConfirmPendingContentAction() {
@@ -1573,6 +1646,7 @@ export function AdminQuestionMaterialManagement({
           onCreate={() => {
             setActionError(null);
             setActionMessage(null);
+            setContentMutationFeedback(null);
             setActiveForm(
               activeView === "questions"
                 ? {
@@ -1675,6 +1749,13 @@ export function AdminQuestionMaterialManagement({
         </p>
       )}
 
+      {contentMutationFeedback === null ? null : (
+        <AdminToast
+          feedback={contentMutationFeedback}
+          onDismiss={() => setContentMutationFeedback(null)}
+        />
+      )}
+
       <div
         aria-label="题库资源类型"
         className="border-border bg-surface inline-flex rounded-md border p-1"
@@ -1740,6 +1821,7 @@ export function AdminQuestionMaterialManagement({
               onEdit={(question) => {
                 setActionError(null);
                 setActionMessage(null);
+                setContentMutationFeedback(null);
                 setIsInitialQuestionTargetDismissed(true);
                 setActiveForm({
                   kind: "question",
@@ -1774,6 +1856,7 @@ export function AdminQuestionMaterialManagement({
               onEdit={(material) => {
                 setActionError(null);
                 setActionMessage(null);
+                setContentMutationFeedback(null);
                 setIsInitialQuestionTargetDismissed(true);
                 setActiveForm({
                   kind: "material",

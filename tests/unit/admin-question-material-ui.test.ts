@@ -1635,6 +1635,11 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(
       await screen.findByText("题目“单选题 新建题目题干”已保存"),
     ).toBeInTheDocument();
+    expect(
+      screen
+        .getByText("题目“单选题 新建题目题干”已保存")
+        .closest('[role="status"]'),
+    ).toHaveAttribute("data-admin-feedback-tone", "success");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/questions",
       expect.objectContaining({
@@ -1672,11 +1677,22 @@ describe("AdminQuestionMaterialManagement", () => {
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认停用题目？");
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
+
+    const disabledQuestionRow = await screen.findByTestId(
+      "question-row-question-marketing-001",
+    );
+    await waitFor(() =>
+      expect(disabledQuestionRow).toHaveTextContent("已停用"),
+    );
     fireEvent.click(
-      screen.getByRole("button", {
-        name: "复制题目 单选题 编辑后的题干",
+      within(disabledQuestionRow).getByRole("button", {
+        name: /复制题目/,
       }),
     );
+
+    expect(
+      await screen.findByTestId("question-row-question-marketing-001-copy"),
+    ).toBeInTheDocument();
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/questions/question-marketing-001/disable",
@@ -1760,6 +1776,41 @@ describe("AdminQuestionMaterialManagement", () => {
     await screen.findByText("题目“单选题 待保存题干”已保存");
   });
 
+  it("keeps the current object when a copy request fails", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fallbackFetch = mockWritableContentFetch();
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (
+          String(url) === "/api/v1/questions/question-marketing-001/copy" &&
+          init?.method === "POST"
+        ) {
+          throw new Error("synthetic network failure");
+        }
+
+        return fallbackFetch(url, init);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminQuestionMaterialManagement));
+    const currentRow = await screen.findByTestId(
+      "question-row-question-marketing-001",
+    );
+
+    fireEvent.click(
+      within(currentRow).getByRole("button", { name: /复制题目/ }),
+    );
+
+    const feedback = await screen.findByRole("alert");
+    expect(feedback).toHaveAttribute("data-admin-feedback-tone", "error");
+    expect(feedback).toHaveTextContent("当前列表保持不变");
+    expect(currentRow).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("question-row-question-marketing-001-copy"),
+    ).toBeNull();
+  });
+
   it("keeps author input and distinguishes save conflicts from other failures", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const conflictFallbackFetch = mockWritableContentFetch();
@@ -1793,8 +1844,11 @@ describe("AdminQuestionMaterialManagement", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
 
-    expect(await screen.findByText(/题目保存冲突/)).toHaveTextContent(
-      "当前输入已保留",
+    const conflictFeedback = await screen.findByRole("alert");
+    expect(conflictFeedback).toHaveTextContent("当前输入已保留");
+    expect(conflictFeedback).toHaveAttribute(
+      "data-admin-feedback-tone",
+      "conflict",
     );
     expect(screen.getByLabelText("题干")).toHaveValue("发生冲突时保留的题干");
 
@@ -1831,7 +1885,7 @@ describe("AdminQuestionMaterialManagement", () => {
     });
     fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
 
-    expect(await screen.findByText(/题目保存失败/)).toHaveTextContent(
+    expect(await screen.findByRole("alert")).toHaveTextContent(
       "当前输入已保留",
     );
     expect(questionForm.getByLabelText("题干")).toHaveValue(
@@ -2554,6 +2608,9 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(
       await screen.findByText("材料“新建案例材料”已保存"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("材料“新建案例材料”已保存").closest('[role="status"]'),
+    ).toHaveAttribute("data-admin-feedback-tone", "success");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/materials",
       expect.objectContaining({
@@ -2617,11 +2674,22 @@ describe("AdminQuestionMaterialManagement", () => {
     );
     expect(screen.getByRole("alertdialog")).toHaveTextContent("确认停用材料？");
     fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
+
+    const disabledMaterialRow = await screen.findByTestId(
+      "material-row-material-marketing-001",
+    );
+    await waitFor(() =>
+      expect(disabledMaterialRow).toHaveTextContent("已停用"),
+    );
     fireEvent.click(
-      screen.getByRole("button", {
-        name: "复制材料 编辑后的材料（可用）",
+      within(disabledMaterialRow).getByRole("button", {
+        name: /复制材料/,
       }),
     );
+
+    expect(
+      await screen.findByTestId("material-row-material-marketing-001-copy"),
+    ).toBeInTheDocument();
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/materials/material-marketing-001/disable",

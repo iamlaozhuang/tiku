@@ -20,6 +20,11 @@ export function AdminDetailDrawer({
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     const previouslyFocusedElement =
@@ -30,8 +35,21 @@ export function AdminDetailDrawer({
     closeButtonRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
+      const eventDialog =
+        event.target instanceof Element
+          ? event.target.closest('[role="dialog"][aria-modal="true"]')
+          : null;
+
+      if (
+        event.defaultPrevented ||
+        (eventDialog !== null && eventDialog !== drawerRef.current)
+      ) {
+        return;
+      }
+
       if (event.key === "Escape") {
-        onClose();
+        event.preventDefault();
+        onCloseRef.current();
         return;
       }
 
@@ -46,15 +64,24 @@ export function AdminDetailDrawer({
       );
       const firstElement = focusableElements[0];
       const lastElement = focusableElements.at(-1);
+      const activeElement = document.activeElement;
 
       if (firstElement === undefined || lastElement === undefined) {
         return;
       }
 
-      if (event.shiftKey && document.activeElement === firstElement) {
+      if (
+        event.shiftKey &&
+        (activeElement === firstElement ||
+          !drawerRef.current.contains(activeElement))
+      ) {
         event.preventDefault();
         lastElement.focus();
-      } else if (!event.shiftKey && document.activeElement === lastElement) {
+      } else if (
+        !event.shiftKey &&
+        (activeElement === lastElement ||
+          !drawerRef.current.contains(activeElement))
+      ) {
         event.preventDefault();
         firstElement.focus();
       }
@@ -64,9 +91,11 @@ export function AdminDetailDrawer({
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      previouslyFocusedElement?.focus();
+      if (previouslyFocusedElement?.isConnected) {
+        previouslyFocusedElement.focus();
+      }
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50">
