@@ -277,6 +277,17 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
+function createDeferred<TValue>() {
+  let resolve!: (value: TValue | PromiseLike<TValue>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<TValue>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+
+  return { promise, reject, resolve };
+}
+
 function createQuestionListPayload(
   data: Array<Record<string, unknown>> = questionPayload.data,
 ) {
@@ -1105,6 +1116,9 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.getByRole("table", { name: "材料列表" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("关键词"), {
+      target: { value: "营" },
+    });
+    fireEvent.change(screen.getByLabelText("关键词"), {
       target: { value: "营销案例" },
     });
 
@@ -1114,7 +1128,149 @@ describe("AdminQuestionMaterialManagement", () => {
         expect.anything(),
       ),
     );
+    expect(
+      fetchMock.mock.calls
+        .map(([url]) => String(url))
+        .filter((url) => url.startsWith("/api/v1/materials?"))
+        .map((url) =>
+          new URL(url, "http://localhost").searchParams.get("keyword"),
+        )
+        .filter((keywordValue) => keywordValue !== null),
+    ).toEqual(["营销案例"]);
+    expect(
+      screen.getByRole("button", { name: "移除筛选 关键词：营销案例" }),
+    ).toBeEnabled();
+    expect(new URLSearchParams(window.location.search).get("keyword")).toBe(
+      "营销案例",
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "移除筛选 关键词：营销案例" }),
+    );
+
+    expect(screen.getByLabelText("关键词")).toHaveValue("");
+    await waitFor(() =>
+      expect(new URLSearchParams(window.location.search).get("keyword")).toBe(
+        null,
+      ),
+    );
     expect(screen.getByText("第 1 / 1 页")).toBeInTheDocument();
+  });
+
+  it("restores canonical material list state from the URL", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/content/materials?page=3&pageSize=50&sortBy=updatedAt&sortOrder=asc&profession=marketing&keyword=%E8%90%A5%E9%94%80%E6%A1%88%E4%BE%8B",
+    );
+    const fetchMock = mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    expect(await screen.findByText("营销案例材料 A")).toBeInTheDocument();
+    expect(screen.getByLabelText("关键词")).toHaveValue("营销案例");
+    expect(screen.getByLabelText("专业")).toHaveValue("marketing");
+    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expectAdminFetchAuthorization(
+      fetchMock,
+      "/api/v1/materials?page=3&pageSize=50&sortBy=updatedAt&sortOrder=asc&keyword=%E8%90%A5%E9%94%80%E6%A1%88%E4%BE%8B&profession=marketing",
+    );
+  });
+
+  it("keeps the latest question filter response when requests finish out of order", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const disabledResponse =
+      createDeferred<ReturnType<typeof createJsonResponse>>();
+    const availableResponse =
+      createDeferred<ReturnType<typeof createJsonResponse>>();
+    const fetchMock = vi.fn((url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return Promise.resolve(createJsonResponse(adminSessionPayload));
+      }
+
+      if (path.startsWith("/api/v1/questions?")) {
+        const status = new URL(path, "http://localhost").searchParams.get(
+          "status",
+        );
+
+        if (status === "disabled") {
+          return disabledResponse.promise;
+        }
+
+        if (status === "available") {
+          return availableResponse.promise;
+        }
+
+        return Promise.resolve(createJsonResponse(questionPayload));
+      }
+
+      if (path.startsWith("/api/v1/materials?")) {
+        return Promise.resolve(createJsonResponse(materialPayload));
+      }
+
+      if (path.startsWith("/api/v1/knowledge-nodes?")) {
+        return Promise.resolve(createJsonResponse(knowledgeNodeOptionPayload));
+      }
+
+      if (path === "/api/v1/tags") {
+        return Promise.resolve(createJsonResponse(tagOptionPayload));
+      }
+
+      return Promise.resolve(
+        createJsonResponse({ code: 404001, message: "missing", data: null }),
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "disabled" },
+    });
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("status=disabled"),
+        ),
+      ).toBe(true),
+    );
+
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "available" },
+    });
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("status=available"),
+        ),
+      ).toBe(true),
+    );
+
+    availableResponse.resolve(
+      createJsonResponse(createQuestionListPayload([questionPayload.data[0]])),
+    );
+    expect(
+      await screen.findByText("市场调研抽样方法的核心目标是什么？"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
+
+    disabledResponse.resolve(
+      createJsonResponse(createQuestionListPayload([questionPayload.data[1]])),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByText("市场调研抽样方法的核心目标是什么？"),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
   });
 
   it("filters questions by level, question type, knowledge_node, and tag", async () => {

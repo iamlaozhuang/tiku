@@ -19,11 +19,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  AdminFilterChips,
+  type AdminFilterChip,
+} from "@/components/admin/AdminFilterChips";
+import {
   AdminListToolbar,
   AdminPagination,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
+import { useAdminListDebouncedValue } from "@/hooks/useAdminListDebouncedValue";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import {
+  createAdminListLatestIntent,
+  createAdminListSearchParams,
+  parseAdminListUrlQuery,
+} from "@/lib/admin-list-query";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -121,8 +131,6 @@ function readContentListUrlQuery(): {
   const searchParams = new URLSearchParams(
     typeof window === "undefined" ? "" : window.location.search,
   );
-  const page = Number(searchParams.get("page"));
-  const pageSize = Number(searchParams.get("pageSize"));
   const profession = searchParams.get("profession");
   const subject = searchParams.get("subject");
   const status = searchParams.get("status");
@@ -151,12 +159,10 @@ function readContentListUrlQuery(): {
       : "all",
     tagPublicId: searchParams.get("tagPublicId") ?? "",
     questionDetailPublicId: searchParams.get("questionDetail") ?? "",
-    list: {
-      page: Number.isInteger(page) && page > 0 ? page : 1,
-      pageSize: pageSize === 50 || pageSize === 100 ? pageSize : 20,
-      sortBy: "updatedAt",
-      sortOrder: searchParams.get("sortOrder") === "asc" ? "asc" : "desc",
-    } as const,
+    list: parseAdminListUrlQuery(searchParams, {
+      allowedSortBy: ["updatedAt"],
+      defaultSortBy: "updatedAt",
+    }),
   };
 }
 
@@ -473,9 +479,10 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
   const [materials, setMaterials] = useState<MaterialDto[]>([]);
   const [pagination, setPagination] = useState(defaultContentPagination);
+  const [latestIntent] = useState(() => createAdminListLatestIntent());
 
   useEffect(() => {
-    let isActive = true;
+    const intent = latestIntent.begin();
 
     async function loadContentData() {
       const sessionToken = getStoredSessionToken();
@@ -491,7 +498,7 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
           sessionToken,
         );
 
-        if (!isActive) {
+        if (!intent.isCurrent()) {
           return;
         }
 
@@ -513,7 +520,7 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
             sessionToken,
           );
 
-          if (!isActive) {
+          if (!intent.isCurrent()) {
             return;
           }
 
@@ -537,7 +544,7 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
           sessionToken,
         );
 
-        if (!isActive) {
+        if (!intent.isCurrent()) {
           return;
         }
 
@@ -550,7 +557,7 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
         setPagination(contentResponse.pagination ?? defaultContentPagination);
         setLoadState("ready");
       } catch {
-        if (isActive) {
+        if (intent.isCurrent()) {
           setLoadState("error");
         }
       }
@@ -559,9 +566,9 @@ function useQuestionMaterialData(activeView: ViewMode, queryString: string) {
     void loadContentData();
 
     return () => {
-      isActive = false;
+      intent.cancel();
     };
-  }, [activeView, queryString]);
+  }, [activeView, latestIntent, queryString]);
 
   return {
     loadState,
@@ -884,6 +891,7 @@ export function AdminQuestionMaterialManagement({
   );
   const [status, setStatus] = useState<StatusFilter>(initialUrlQuery.status);
   const [tagFilter, setTagFilter] = useState(initialUrlQuery.tagPublicId);
+  const debouncedKeyword = useAdminListDebouncedValue(keyword);
   const [detailTarget, setDetailTarget] =
     useState<AdminContentDetailTarget | null>(() => {
       if (
@@ -935,14 +943,16 @@ export function AdminQuestionMaterialManagement({
     setRecommendationsByQuestionPublicId,
   ] = useState<Record<string, KnowledgeRecommendationReviewState>>({});
   const contentQueryString = useMemo(() => {
-    const searchParams = new URLSearchParams({
-      page: String(query.page),
-      pageSize: String(query.pageSize),
+    const searchParams = createAdminListSearchParams({
+      page: query.page,
+      pageSize: query.pageSize,
       sortBy: query.sortBy,
       sortOrder: query.sortOrder,
     });
 
-    if (keyword.trim() !== "") searchParams.set("keyword", keyword.trim());
+    if (debouncedKeyword.trim() !== "") {
+      searchParams.set("keyword", debouncedKeyword.trim());
+    }
     if (profession !== "all") searchParams.set("profession", profession);
     if (subject !== "all") searchParams.set("subject", subject);
     if (levelFilter.trim() !== "")
@@ -961,7 +971,7 @@ export function AdminQuestionMaterialManagement({
     return searchParams.toString();
   }, [
     activeView,
-    keyword,
+    debouncedKeyword,
     knowledgeNodeFilter,
     levelFilter,
     profession,
@@ -1080,6 +1090,81 @@ export function AdminQuestionMaterialManagement({
       (questionType !== "all" ||
         knowledgeNodeFilter.trim() !== "" ||
         tagFilter.trim() !== ""));
+  const activeFilterChips = useMemo<AdminFilterChip[]>(() => {
+    const filters: AdminFilterChip[] = [];
+
+    if (keyword.trim() !== "") {
+      filters.push({ id: "keyword", label: "关键词", value: keyword.trim() });
+    }
+    if (profession !== "all") {
+      filters.push({
+        id: "profession",
+        label: "专业",
+        value: professionLabels[profession],
+      });
+    }
+    if (levelFilter.trim() !== "") {
+      filters.push({
+        id: "level",
+        label: "等级",
+        value: `${levelFilter.trim()}级`,
+      });
+    }
+    if (subject !== "all") {
+      filters.push({
+        id: "subject",
+        label: "科目",
+        value: subjectLabels[subject],
+      });
+    }
+    if (status !== "all") {
+      filters.push({
+        id: "status",
+        label: "状态",
+        value: statusLabels[status],
+      });
+    }
+    if (activeView === "questions" && questionType !== "all") {
+      filters.push({
+        id: "questionType",
+        label: "题型",
+        value: questionTypeLabels[questionType],
+      });
+    }
+    if (activeView === "questions" && knowledgeNodeFilter.trim() !== "") {
+      const knowledgeNode = bindingOptions.knowledgeNodes.find(
+        (option) => option.publicId === knowledgeNodeFilter,
+      );
+      filters.push({
+        id: "knowledgeNodePublicId",
+        label: "知识点",
+        value: knowledgeNode?.pathName || knowledgeNode?.name || "名称不可用",
+      });
+    }
+    if (activeView === "questions" && tagFilter.trim() !== "") {
+      filters.push({
+        id: "tagPublicId",
+        label: "标签",
+        value:
+          bindingOptions.tags.find((tag) => tag.publicId === tagFilter)?.name ??
+          "名称不可用",
+      });
+    }
+
+    return filters;
+  }, [
+    activeView,
+    bindingOptions.knowledgeNodes,
+    bindingOptions.tags,
+    keyword,
+    knowledgeNodeFilter,
+    levelFilter,
+    profession,
+    questionType,
+    status,
+    subject,
+    tagFilter,
+  ]);
   const displayedQuestions = questions;
   const displayedMaterials = materials;
 
@@ -1438,6 +1523,39 @@ export function AdminQuestionMaterialManagement({
     }
   }
 
+  function handleRemoveFilter(filterId: string) {
+    switch (filterId) {
+      case "keyword":
+        setKeyword("");
+        break;
+      case "profession":
+        setProfession("all");
+        break;
+      case "level":
+        setLevelFilter("");
+        break;
+      case "subject":
+        setSubject("all");
+        break;
+      case "status":
+        setStatus("all");
+        break;
+      case "questionType":
+        setQuestionType("all");
+        break;
+      case "knowledgeNodePublicId":
+        setKnowledgeNodeFilter("");
+        break;
+      case "tagPublicId":
+        setTagFilter("");
+        break;
+      default:
+        return;
+    }
+
+    handleFilterChange(filterId);
+  }
+
   return (
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -1539,6 +1657,11 @@ export function AdminQuestionMaterialManagement({
           setTagFilter(value);
           handleFilterChange("tagPublicId");
         }}
+      />
+
+      <AdminFilterChips
+        filters={activeFilterChips}
+        onRemove={handleRemoveFilter}
       />
 
       {displayedActionMessage === null ? null : (

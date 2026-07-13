@@ -80,6 +80,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   refreshing, filtered-empty, conflict, focus, and route-family behavior. No exception or authorization expansion was
   introduced.
 
+### B2 Shared List-Query Semantics
+
+- A canonical URL codec, 250 ms keyword debounce, monotonic latest-intent gate, and accessible active-filter chips are
+  now shared by the question and material consumers.
+- Focused tests prove validated URL restore, final-keyword-only requests, one-chip removal, and stale question response
+  rejection after a newer filter request has completed.
+- PIC-02, PIC-03, and PIC-10 remain `partial`: D0-D4 still own explicit request-contract coverage, browser return/scroll/
+  focus restoration, and cumulative list-family proof; E/F still own wider rollout and acceptance. No exception or
+  authorization expansion was introduced.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
