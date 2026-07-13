@@ -121,7 +121,7 @@ activeTasks:
   - id: user-led-b9-cumulative-acceptance-closeout-2026-07-12
     title: User-led B9 cumulative acceptance closeout
     phase: user-led-b9-cumulative-acceptance-closeout-2026-07-12
-    status: ready_for_closeout
+    status: closed
     priority: p0
     sequenceOrder: 56
     taskKind: cumulative_localhost_quality_role_uiux_acceptance_closeout
@@ -212,7 +212,7 @@ activeTasks:
       - corepack pnpm@10.26.1 exec next build --webpack
       - git diff --check
     validationSummary:
-      status: ready_for_closeout
+      status: closed_remote_synced
       fullTests: pass_360_files_1983_tests
       lint: pass
       typecheck: pass
@@ -229,10 +229,20 @@ activeTasks:
       browserConsoleErrors: pass_zero_error_like_entries
       retainedScreenshotCount: 20_repo_external_only
       initialCloseoutCommit: pass_0bc19faba
+      closeoutReadinessCommit: pass_a4f567820
+      moduleRunV2ModuleCloseoutReadiness: pass
+      localMasterMerge: pass_ff_only_a4f567820
+      masterLint: pass
+      masterTypecheck: pass
+      masterDiffCheck: pass
+      moduleRunV2PrePushReadiness: pass_real_push_hook
+      remotePush: pass_origin_master_a4f567820
+      localRemoteComparison: pass_0_behind_0_ahead
       providerExecution: blocked_not_executed
       databaseConnection: blocked_not_executed_in_b9
       databaseMutation: blocked_not_executed_in_b9
       schemaMigration: blocked_not_executed_in_b9
+    nextRequiredTaskId: null
   - id: user-led-b9-ops-mobile-containment-repair-2026-07-12
     title: User-led B9 operations mobile containment repair
     phase: user-led-b9-ops-mobile-containment-repair-2026-07-12
