@@ -310,6 +310,19 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   PIC promotion remains E6/F-owned. The approved exception count remains zero, and no authorization, edition, AI, phone,
   `redeem_code`, audit-redaction, historical-paper or deployment boundary changed.
 
+### E6 Batch E Cumulative Audit
+
+- The exact C6-to-E5 range contains six canonical commits and 46 files, including 25 product/test files. No dependency,
+  API/server, DB/schema, migration, environment or build-config surface entered Batch E. All 45 current page entries map
+  to 45 unique E0 routes with no omission or collision.
+- Cross-family protection passed 27 files / 310 tests; the fixed node passed 377 files / 2,159 tests, lint, typecheck,
+  full-repository format and a 92-route production build. The build metadata proves `/design-system` is a 404 even though
+  Next reports the source route during compilation.
+- Content, operations, organization, learner and cross-workspace implementation families are cumulatively proven;
+  E0-G01 through E0-G04 are closed. F0-F4 retain representative role acceptance and F5 retains final Program promotion,
+  so global PIC completion is not overclaimed. The approved exception count remains zero and all historical protection
+  boundaries remain in force.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
