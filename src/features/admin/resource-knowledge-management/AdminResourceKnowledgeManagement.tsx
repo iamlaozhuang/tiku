@@ -17,6 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
 import {
   AdminListToolbar,
   AdminPagination,
@@ -24,6 +25,7 @@ import {
   adminListControlClassName,
   adminListFilterLabelClassName,
 } from "@/components/admin/AdminList";
+import { AdminToast } from "@/components/admin/AdminToast/AdminToast";
 import type { ResourceVectorRebuildResultDto } from "@/server/contracts/ai-rag-contract";
 import type {
   ApiPagination,
@@ -1601,7 +1603,15 @@ export function AdminResourceKnowledgeManagement() {
       )}
 
       {toastMessage === null ? null : (
-        <AdminResourceToast message={toastMessage} />
+        <AdminToast
+          feedback={{
+            message: toastMessage.message,
+            title:
+              toastMessage.tone === "success" ? "资料操作成功" : "资料操作失败",
+            tone: toastMessage.tone,
+          }}
+          onDismiss={() => setToastMessage(null)}
+        />
       )}
     </section>
   );
@@ -2112,32 +2122,21 @@ function ResourceDetailDialog({
       : null;
 
   return (
-    <div
-      aria-label="资料详情"
-      aria-modal="true"
-      className="border-border bg-surface fixed top-16 right-4 bottom-4 z-50 w-[min(720px,calc(100vw-2rem))] overflow-y-auto rounded-md border p-5 shadow-lg"
-      role="dialog"
+    <AdminDetailDrawer
+      ariaLabel="资料详情"
+      description="只读查看解析内容、检索状态与安全时间线。"
+      eyebrow="资料详情"
+      title={detail.resource.title}
+      onClose={onClose}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-brand-primary text-xs font-medium">资料详情</p>
-          <h2 className="text-text-primary mt-1 text-lg font-semibold">
-            {detail.resource.title}
-          </h2>
-        </div>
-        <Button aria-label="关闭资料详情" variant="outline" onClick={onClose}>
-          关闭
-        </Button>
-      </div>
-
       {detail.status === "loading" ? (
-        <p className="text-text-secondary mt-6 text-sm">正在加载资料详情</p>
+        <p className="text-text-secondary text-sm">正在加载资料详情</p>
       ) : detail.status === "error" ? (
-        <p className="text-destructive mt-6 text-sm">
+        <p className="text-destructive text-sm">
           资料详情加载失败，请稍后重试。
         </p>
       ) : (
-        <div className="mt-6 space-y-6">
+        <div className="space-y-6">
           <dl className="grid gap-3 sm:grid-cols-2">
             <DetailMetric
               label="资料类型"
@@ -2218,7 +2217,7 @@ function ResourceDetailDialog({
           </section>
         </div>
       )}
-    </div>
+    </AdminDetailDrawer>
   );
 }
 
@@ -2526,21 +2525,6 @@ function MarkdownReviewDialog({
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function AdminResourceToast({ message }: { message: ToastMessage }) {
-  return (
-    <div
-      className={
-        message.tone === "success"
-          ? "bg-secondary text-secondary-foreground fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-          : "bg-destructive/10 text-destructive fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-      }
-      role={message.tone === "success" ? "status" : "alert"}
-    >
-      {message.message}
     </div>
   );
 }

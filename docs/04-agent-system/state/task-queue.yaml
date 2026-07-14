@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-e0-route-family-inventory-2026-07-13
-  nextTaskId: content-admin-platform-e1-content-page-family-rollout-2026-07-13
+  currentTaskId: content-admin-platform-e1-content-page-family-rollout-2026-07-13
+  nextTaskId: content-admin-platform-e2-operations-page-family-rollout-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -63,7 +63,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-c4-material-edit-copy-lock-2026-07-13
     - content-admin-platform-c5-editor-navigation-recovery-2026-07-13
     - content-admin-platform-c6-cumulative-audit-2026-07-13
-  lastClosedTaskId: content-admin-platform-c6-cumulative-audit-2026-07-13
+    - content-admin-platform-e0-route-family-inventory-2026-07-13
+  lastClosedTaskId: content-admin-platform-e0-route-family-inventory-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -93,8 +94,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-c4-material-edit-copy-lock-2026-07-13: closed
     content-admin-platform-c5-editor-navigation-recovery-2026-07-13: closed
     content-admin-platform-c6-cumulative-audit-2026-07-13: closed
-    content-admin-platform-e0-route-family-inventory-2026-07-13: ready_for_closeout
-    content-admin-platform-e1-content-page-family-rollout-2026-07-13: pending
+    content-admin-platform-e0-route-family-inventory-2026-07-13: closed
+    content-admin-platform-e1-content-page-family-rollout-2026-07-13: ready_for_closeout
     content-admin-platform-e2-operations-page-family-rollout-2026-07-13: pending
     content-admin-platform-e3-organization-page-family-rollout-2026-07-13: pending
     content-admin-platform-e4-learner-page-family-rollout-2026-07-13: pending
@@ -118,42 +119,55 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-e0-route-family-inventory-2026-07-13
-    title: Content admin platform route-family inventory
-    phase: content-admin-platform-e0-route-family-inventory-2026-07-13
+  - id: content-admin-platform-e1-content-page-family-rollout-2026-07-13
+    title: Content admin platform content page-family rollout
+    phase: content-admin-platform-e1-content-page-family-rollout-2026-07-13
     status: ready_for_closeout
     priority: p0
-    sequenceOrder: 97
-    taskKind: route_family_inventory
+    sequenceOrder: 98
+    taskKind: page_family_rollout
     moduleRunVersion: 3
-    branch: codex/content-admin-platform-e0-route-family-inventory
+    branch: codex/content-admin-platform-e1-content-page-family-rollout
     dependsOn:
-      - content-admin-platform-c6-cumulative-audit-2026-07-13
+      - content-admin-platform-e0-route-family-inventory-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R0
+    executionProfile: R3
+    requiredReadingProfiles:
+      - advanced_authorization
+      - ai_generation
     focusedGates:
-      - guard
-      - scoped_format
+      - focused_unit
+      - lint
+      - typecheck
+      - changed_format
       - diff_check
-      - link_check
-    buildRequired: false
-    fullRegressionPolicy: skip
+      - guard
+      - security_boundary
+    buildRequired: true
+    fullRegressionPolicy: impact_triggered
     protectedDomains:
       - a01_a30
-      - program_order
+      - ai
+      - content_lifecycle
       - deployment
-    reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e0-route-family-inventory.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e0-route-family-inventory.md
-    auditReviewPath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e0-route-family-inventory.md
+    reviewMode: independent_audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e1-content-page-family-rollout.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e1-content-page-family-rollout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-e1-content-page-family-rollout-audit.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e0-route-family-inventory.md
-      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e0-route-family-inventory.md
+      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e1-content-page-family-rollout.md
+      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e1-content-page-family-rollout.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-e1-content-page-family-rollout-audit.md
       - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
+      - src/features/admin/paper-management/AdminPaperManagementClient.tsx
+      - src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx
+      - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/admin-paper-ui.test.ts
     blockedFiles:
       - AGENTS.md
       - package.json
@@ -172,8 +186,8 @@ activeTasks:
       - .next/**
       - .runtime/**
     capabilities:
-      productRuntimeSourceChange: blocked
-      productTestSourceChange: blocked
+      productRuntimeSourceChange: approved_within_task_plan
+      productTestSourceChange: approved_within_task_plan
       dependencyIntroduction: blocked_without_fresh_approval
       schemaMigration: blocked
       databaseMutation: blocked
@@ -183,13 +197,18 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     validationCommands:
-      - npm.cmd exec prettier -- --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/active-state-history-index.yaml docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e0-route-family-inventory.md docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e0-route-family-inventory.md docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
+      - npm.cmd run test:unit -- --maxWorkers=1 src/components/admin/AdminToast/AdminToast.test.tsx src/components/admin/AdminDetailDrawer/AdminDetailDrawer.test.tsx tests/unit/admin-role-overview-ui.test.ts src/features/admin/paper-management/AdminPaperManagementClient.test.tsx tests/unit/admin-paper-ui.test.ts src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/admin-resource-knowledge-ui-layout.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/admin-question-material-ui.test.ts tests/unit/admin-question-editor-route.test.ts tests/unit/admin-material-editor-route.test.ts tests/unit/admin-editor-navigation-recovery.test.ts
+      - npm.cmd run test:unit -- --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd exec prettier -- --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/active-state-history-index.yaml docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e1-content-page-family-rollout.md docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e1-content-page-family-rollout.md docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-e1-content-page-family-rollout-audit.md docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md src/features/admin/paper-management/AdminPaperManagementClient.tsx src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/admin-paper-ui.test.ts
+      - npm.cmd run build
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-e0-route-family-inventory-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-e0-route-family-inventory-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-e0-route-family-inventory-2026-07-13 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-e1-content-page-family-rollout-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-e1-content-page-family-rollout-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-e1-content-page-family-rollout-2026-07-13 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
       localCommit:
@@ -206,20 +225,22 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-  - id: content-admin-platform-e1-content-page-family-rollout-2026-07-13
-    title: Content admin platform content page-family rollout
-    phase: content-admin-platform-e1-content-page-family-rollout-2026-07-13
+  - id: content-admin-platform-e2-operations-page-family-rollout-2026-07-13
+    title: Content admin platform operations page-family rollout
+    phase: content-admin-platform-e2-operations-page-family-rollout-2026-07-13
     status: pending
     priority: p0
-    sequenceOrder: 98
+    sequenceOrder: 99
     taskKind: page_family_rollout
     moduleRunVersion: 3
-    branch: not_created_until_e0_closeout
+    branch: not_created_until_e1_closeout
     dependsOn:
-      - content-admin-platform-e0-route-family-inventory-2026-07-13
+      - content-admin-platform-e1-content-page-family-rollout-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
     executionProfile: R3
+    requiredReadingProfiles:
+      - advanced_authorization
     focusedGates:
       - focused_unit
       - lint
@@ -232,8 +253,11 @@ activeTasks:
     fullRegressionPolicy: impact_triggered
     protectedDomains:
       - a01_a30
-      - ai
-      - content_lifecycle
+      - authorization
+      - edition
+      - phone
+      - redeem_code
+      - audit_redaction
       - deployment
     reviewMode: independent_audit
     capabilities:

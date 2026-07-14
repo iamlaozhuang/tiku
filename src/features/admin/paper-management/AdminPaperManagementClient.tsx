@@ -23,6 +23,10 @@ import {
   AdminPagination,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
+import {
+  AdminToast,
+  type AdminFeedback,
+} from "@/components/admin/AdminToast/AdminToast";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
 import type { ApiPagination } from "@/server/contracts/api-response";
 import type {
@@ -615,8 +619,24 @@ export function AdminPaperManagement({
     initialPaperTarget === null
       ? "未找到指定的待审试卷草稿"
       : null;
-  const displayedActionMessage = actionMessage ?? initialPaperTargetMessage;
-  const displayedActionError = actionError ?? initialPaperTargetError;
+  const actionFeedback: AdminFeedback | null =
+    actionError !== null
+      ? {
+          message: actionError,
+          title: "试卷操作失败",
+          tone: "error",
+        }
+      : actionMessage !== null
+        ? {
+            message: actionMessage,
+            title: "试卷操作成功",
+            tone: "success",
+          }
+        : null;
+  const displayedInitialTargetMessage =
+    actionFeedback === null ? initialPaperTargetMessage : null;
+  const displayedInitialTargetError =
+    actionFeedback === null ? initialPaperTargetError : null;
   const selectedPaperPublicId = initialPaperTarget?.publicId ?? null;
   const hasActivePaperFilters =
     keyword.trim() !== "" ||
@@ -937,15 +957,25 @@ export function AdminPaperManagement({
 
       <SummaryRail rows={displayedPapers} />
 
-      {displayedActionMessage === null ? null : (
+      {displayedInitialTargetMessage === null ? null : (
         <p className="text-brand-primary text-sm" role="status">
-          {displayedActionMessage}
+          {displayedInitialTargetMessage}
         </p>
       )}
-      {displayedActionError === null ? null : (
+      {displayedInitialTargetError === null ? null : (
         <p className="text-destructive text-sm" role="alert">
-          {displayedActionError}
+          {displayedInitialTargetError}
         </p>
+      )}
+
+      {actionFeedback === null ? null : (
+        <AdminToast
+          feedback={actionFeedback}
+          onDismiss={() => {
+            setActionError(null);
+            setActionMessage(null);
+          }}
+        />
       )}
 
       {activeForm?.kind === "paper" ? (

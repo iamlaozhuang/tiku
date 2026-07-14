@@ -902,6 +902,11 @@ describe("admin content and knowledge ops baseline", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "知识点节点已新增",
     );
+    expect(
+      screen.getByRole("button", { name: "关闭操作反馈" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭操作反馈" }));
+    expect(screen.queryByRole("status")).toBeNull();
     expect(screen.getAllByText("营销/新增知识点").length).toBeGreaterThan(0);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/knowledge-nodes",
@@ -1526,13 +1531,18 @@ describe("admin content and knowledge ops baseline", () => {
     const resourceRow = await screen.findByTestId(
       "resource-row-resource-legacy-segment-mode-view",
     );
-    fireEvent.click(
-      within(resourceRow).getByRole("button", { name: /^查看资料 /u }),
-    );
+    const resourceDetailTrigger = within(resourceRow).getByRole("button", {
+      name: /^查看资料 /u,
+    });
+    resourceDetailTrigger.focus();
+    fireEvent.click(resourceDetailTrigger);
     expect(
       await screen.findByRole("dialog", { name: "资料详情" }),
     ).toHaveTextContent("营销知识库讲义");
-    fireEvent.click(screen.getByRole("button", { name: "关闭资料详情" }));
+    expect(screen.getByRole("button", { name: "关闭资料详情" })).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "资料详情" })).toBeNull();
+    expect(resourceDetailTrigger).toHaveFocus();
 
     fireEvent.click(
       within(resourceRow).getByRole("button", { name: /^校对内容 /u }),
@@ -1542,6 +1552,10 @@ describe("admin content and knowledge ops baseline", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "解析草稿已保存",
     );
+    expect(
+      screen.getByRole("button", { name: "关闭操作反馈" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭操作反馈" }));
 
     fireEvent.click(
       within(resourceRow).getByRole("button", { name: /^发布资料 /u }),

@@ -5,6 +5,7 @@ import { GitBranch, Move, Pencil, Plus, Search, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminToast } from "@/components/admin/AdminToast/AdminToast";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -544,7 +545,17 @@ export function AdminKnowledgeNodeManagement() {
       ) : null}
 
       {toastMessage === null ? null : (
-        <KnowledgeNodeToast message={toastMessage} />
+        <AdminToast
+          feedback={{
+            message: toastMessage.message,
+            title:
+              toastMessage.tone === "success"
+                ? "知识点操作成功"
+                : "知识点操作失败",
+            tone: toastMessage.tone,
+          }}
+          onDismiss={() => setToastMessage(null)}
+        />
       )}
     </section>
   );
@@ -1031,21 +1042,6 @@ function KnowledgeNodeMoveForm({
           }
         />
       </label>
-    </div>
-  );
-}
-
-function KnowledgeNodeToast({ message }: { message: ToastMessage }) {
-  return (
-    <div
-      className={
-        message.tone === "success"
-          ? "bg-secondary text-secondary-foreground fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-          : "bg-destructive/10 text-destructive fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-      }
-      role={message.tone === "success" ? "status" : "alert"}
-    >
-      {message.message}
     </div>
   );
 }

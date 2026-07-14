@@ -828,6 +828,10 @@ describe("AdminPaperManagement", () => {
     expect(
       await screen.findByText("草稿已保存，正在进入组卷工作台。"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "关闭操作反馈" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭操作反馈" }));
     expect(navigationPush).toHaveBeenCalledWith(
       "/content/papers/paper-created-001/compose",
     );
