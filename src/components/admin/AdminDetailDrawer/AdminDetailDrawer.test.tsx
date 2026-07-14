@@ -91,4 +91,51 @@ describe("AdminDetailDrawer", () => {
     expect(firstClose).not.toHaveBeenCalled();
     expect(nextClose).toHaveBeenCalledTimes(1);
   });
+
+  it("does not consume Escape from a nested modal alert dialog", () => {
+    const handleClose = vi.fn();
+
+    render(
+      <AdminDetailDrawer
+        ariaLabel="用户详情"
+        onClose={handleClose}
+        title="用户详情"
+      >
+        <div aria-modal="true" role="alertdialog">
+          <button type="button">确认停用</button>
+        </div>
+      </AdminDetailDrawer>,
+    );
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "确认停用" }), {
+      key: "Escape",
+    });
+
+    expect(handleClose).not.toHaveBeenCalled();
+  });
+
+  it("does not close while a sibling modal alert dialog owns the interaction", () => {
+    const handleClose = vi.fn();
+
+    render(
+      <>
+        <AdminDetailDrawer
+          ariaLabel="用户详情"
+          onClose={handleClose}
+          title="用户详情"
+        >
+          <button type="button">停用用户</button>
+        </AdminDetailDrawer>
+        <div aria-modal="true" role="alertdialog">
+          <button type="button">确认停用</button>
+        </div>
+      </>,
+    );
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "停用用户" }), {
+      key: "Escape",
+    });
+
+    expect(handleClose).not.toHaveBeenCalled();
+  });
 });

@@ -770,11 +770,11 @@ describe("admin ai and audit log ops baseline", () => {
     expect(auditTable).not.toHaveTextContent("2026-05-21T08:00:00.000Z");
 
     expect(screen.queryByRole("dialog", { name: "审计日志详情" })).toBeNull();
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /查看启用模型配置.*模型配置.*审计详情/u,
-      }),
-    );
+    const detailTrigger = screen.getByRole("button", {
+      name: /查看启用模型配置.*模型配置.*审计详情/u,
+    });
+    detailTrigger.focus();
+    fireEvent.click(detailTrigger);
 
     const detailDrawer = screen.getByRole("dialog", { name: "审计日志详情" });
     expect(detailDrawer).toHaveTextContent("仅展示脱敏元数据");
@@ -786,9 +786,13 @@ describe("admin ai and audit log ops baseline", () => {
     expect(detailDrawer).not.toHaveTextContent(
       "personal_ai_result_public_admin_901",
     );
+    expect(
+      screen.getByRole("button", { name: "关闭审计日志详情" }),
+    ).toHaveFocus();
 
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog", { name: "审计日志详情" })).toBeNull();
+    expect(detailTrigger).toHaveFocus();
   });
 
   it("sends complete audit filters through the existing contract and resets them", async () => {

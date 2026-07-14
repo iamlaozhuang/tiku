@@ -7,9 +7,8 @@ import {
   Eye,
   LoaderCircle,
   RotateCcw,
-  X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   AdminModelConfigManagement,
@@ -17,6 +16,7 @@ import {
   type ModelProviderFormInput,
 } from "@/features/admin/model-config-management/AdminModelConfigManagement";
 import { adminDataTableClassName } from "@/components/admin/admin-layout-primitives";
+import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
 import {
   AdminListToolbar,
   AdminPagination,
@@ -355,7 +355,6 @@ export function AdminAuditLogOpsPage({
   const [selectedAuditLogPublicId, setSelectedAuditLogPublicId] = useState<
     string | null
   >(null);
-  const detailTriggerRef = useRef<HTMLButtonElement | null>(null);
   const shouldLoadRuntimeData = runtimeEnabled && state === "ready";
   const effectiveRuntimeState = shouldLoadRuntimeData ? runtimeState : state;
   const runtimeQuery = useMemo(
@@ -469,10 +468,7 @@ export function AdminAuditLogOpsPage({
       <AdminAuditLogTable
         auditLogs={displayedAuditLogs}
         hasActiveFilters={hasActiveAuditLogFilters(query)}
-        onSelectAuditLog={(publicId, trigger) => {
-          detailTriggerRef.current = trigger;
-          setSelectedAuditLogPublicId(publicId);
-        }}
+        onSelectAuditLog={setSelectedAuditLogPublicId}
       />
 
       <AdminPagination
@@ -488,10 +484,7 @@ export function AdminAuditLogOpsPage({
       {selectedAuditLog === null ? null : (
         <AdminAuditLogDetailDrawer
           auditLog={selectedAuditLog}
-          onClose={() => {
-            setSelectedAuditLogPublicId(null);
-            queueMicrotask(() => detailTriggerRef.current?.focus());
-          }}
+          onClose={() => setSelectedAuditLogPublicId(null)}
         />
       )}
     </main>
@@ -1961,7 +1954,7 @@ function AdminAuditLogTable({
 }: {
   auditLogs: AuditLogListDto["auditLogs"];
   hasActiveFilters: boolean;
-  onSelectAuditLog: (publicId: string, trigger: HTMLButtonElement) => void;
+  onSelectAuditLog: (publicId: string) => void;
 }) {
   return (
     <AdminTableFrame ariaLabel="审计日志列表" minWidthClassName="min-w-[72rem]">
@@ -2034,9 +2027,7 @@ function AdminAuditLogTable({
                     )}的审计详情`}
                     size="lg"
                     variant="outline"
-                    onClick={(event) =>
-                      onSelectAuditLog(auditLog.publicId, event.currentTarget)
-                    }
+                    onClick={() => onSelectAuditLog(auditLog.publicId)}
                   >
                     <Eye aria-hidden="true" />
                     查看详情
@@ -2384,97 +2375,51 @@ function AdminAuditLogDetailDrawer({
   auditLog: AuditLogSummaryDto;
   onClose: () => void;
 }) {
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", handleKeyDown);
-    closeButtonRef.current?.focus();
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose]);
-
   return (
-    <div
-      className="bg-foreground/30 fixed inset-0 z-50 flex justify-end"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
+    <AdminDetailDrawer
+      ariaLabel="审计日志详情"
+      description="仅展示脱敏元数据"
+      eyebrow="审计日志"
+      onClose={onClose}
+      title="审计日志详情"
     >
-      <aside
-        aria-label="审计日志详情"
-        aria-modal="true"
-        className="bg-surface border-border flex h-full w-full max-w-lg flex-col border-l shadow-xl"
-        role="dialog"
-      >
-        <header className="border-border flex items-start justify-between gap-4 border-b p-5">
-          <div className="space-y-1">
-            <h2 className="text-text-primary text-lg font-semibold">
-              审计日志详情
-            </h2>
-            <p className="text-text-muted text-sm">仅展示脱敏元数据</p>
-          </div>
-          <Button
-            ref={closeButtonRef}
-            aria-label="关闭审计日志详情"
-            size="icon-lg"
-            variant="ghost"
-            onClick={onClose}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </header>
-        <div className="flex-1 space-y-5 overflow-y-auto p-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <AdminOpsReadonlyDetail
-              label="发生时间"
-              value={formatAuditLogTimestamp(auditLog.createdAt)}
-            />
-            <AdminOpsReadonlyDetail
-              label="操作者角色"
-              value={formatAdminOpsDisplayValue(auditLog.actorRole)}
-            />
-            <AdminOpsReadonlyDetail
-              label="动作"
-              value={formatAuditActionType(auditLog.actionType)}
-            />
-            <AdminOpsReadonlyDetail
-              label="目标类别"
-              value={formatAuditTargetType(auditLog.targetResourceType)}
-            />
-          </div>
-          <div className="space-y-2">
-            <p className="text-text-muted text-xs">执行结果</p>
-            <AdminAuditResultStatus status={auditLog.resultStatus} />
-          </div>
+      <div className="space-y-5">
+        <div className="grid gap-4 sm:grid-cols-2">
           <AdminOpsReadonlyDetail
-            label="脱敏摘要"
-            value={formatAuditMetadataSummary(auditLog.metadataSummary)}
+            label="发生时间"
+            value={formatAuditLogTimestamp(auditLog.createdAt)}
           />
-          <div className="border-border bg-muted/40 rounded-md border p-4">
-            <p className="text-text-secondary text-sm font-medium">
-              仅展示已脱敏摘要
-            </p>
-            <p className="text-text-muted mt-3 text-xs leading-5">
-              原始请求体、凭证、会话、卡密明文、内部标识和完整业务内容不在此处展示。
-            </p>
-          </div>
+          <AdminOpsReadonlyDetail
+            label="操作者角色"
+            value={formatAdminOpsDisplayValue(auditLog.actorRole)}
+          />
+          <AdminOpsReadonlyDetail
+            label="动作"
+            value={formatAuditActionType(auditLog.actionType)}
+          />
+          <AdminOpsReadonlyDetail
+            label="目标类别"
+            value={formatAuditTargetType(auditLog.targetResourceType)}
+          />
         </div>
-      </aside>
-    </div>
+        <div className="space-y-2">
+          <p className="text-text-muted text-xs">执行结果</p>
+          <AdminAuditResultStatus status={auditLog.resultStatus} />
+        </div>
+        <AdminOpsReadonlyDetail
+          label="脱敏摘要"
+          value={formatAuditMetadataSummary(auditLog.metadataSummary)}
+        />
+        <div className="border-border bg-muted/40 rounded-md border p-4">
+          <p className="text-text-secondary text-sm font-medium">
+            仅展示已脱敏摘要
+          </p>
+          <p className="text-text-muted mt-3 text-xs leading-5">
+            原始请求体、凭证、会话、卡密明文、内部标识和完整业务内容不在此处展示。
+          </p>
+        </div>
+      </div>
+    </AdminDetailDrawer>
   );
 }
 

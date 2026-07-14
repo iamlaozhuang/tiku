@@ -1188,6 +1188,7 @@ describe("admin user organization authorization ops baseline", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "企业授权已创建",
     );
+    expect(screen.getByRole("status")).toHaveTextContent("企业管理操作成功");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/org-auths",
       expect.objectContaining({
@@ -1221,6 +1222,10 @@ describe("admin user organization authorization ops baseline", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent(
       "企业授权已取消",
+    );
+    expect(screen.getByRole("status")).toHaveAttribute(
+      "data-admin-feedback-tone",
+      "success",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/org-auths/org-auth-public-001/cancel",
@@ -2048,14 +2053,18 @@ describe("admin user organization authorization ops baseline", () => {
       "admin-redeem-code-redeem-code-public-001",
     );
 
-    fireEvent.click(
-      within(redeemCodeRow).getByRole("button", {
-        name: "查看卡密 RC-2026-**** 详情",
-      }),
-    );
+    const detailTrigger = within(redeemCodeRow).getByRole("button", {
+      name: "查看卡密 RC-2026-**** 详情",
+    });
+    detailTrigger.focus();
+    fireEvent.click(detailTrigger);
 
     const redeemCodeDetail = await screen.findByTestId(
       "admin-redeem-code-detail-redeem-code-public-001",
+    );
+
+    expect(screen.getByRole("dialog", { name: "卡密详情" })).toContainElement(
+      redeemCodeDetail,
     );
 
     expect(redeemCodeDetail).toHaveAttribute(
@@ -2083,11 +2092,76 @@ describe("admin user organization authorization ops baseline", () => {
       }),
     );
 
-    fireEvent.click(
-      within(redeemCodeDetail).getByRole("button", { name: "关闭" }),
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "关闭卡密详情" }),
+      ).toHaveFocus(),
     );
+    fireEvent.keyDown(document, { key: "Escape" });
     expect(
       screen.queryByTestId("admin-redeem-code-detail-redeem-code-public-001"),
     ).not.toBeInTheDocument();
+    expect(detailTrigger).toHaveFocus();
+  });
+
+  it("opens organization authorization details in the shared focus-managed drawer", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetch();
+    const originalImplementation = fetchMock.getMockImplementation();
+    fetchMock.mockImplementation(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/org-auths/org-auth-public-001") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              orgAuth: {
+                ...orgAuthPayload.data.orgAuths[0],
+                purchaserOrganization: {
+                  publicId: "organization-public-001",
+                  name: "杭州烟草",
+                },
+                coveredOrganizations: [
+                  {
+                    publicId: "organization-public-001",
+                    name: "杭州烟草",
+                    employeeCount: 42,
+                  },
+                ],
+                occupancy: { availableQuota: 58 },
+              },
+            },
+          });
+        }
+
+        if (originalImplementation === undefined) {
+          throw new Error("Expected the system ops fetch fixture.");
+        }
+
+        return originalImplementation(url, init);
+      },
+    );
+
+    render(createElement(AdminOrgAuthPage));
+    await openOpsOrganizationManagementView("ops-organization-view-org-auth");
+    const row = await screen.findByTestId("admin-org-auth-org-auth-public-001");
+    const detailTrigger = within(row).getByRole("button", {
+      name: "查看企业授权 杭州烟草企业授权",
+    });
+    detailTrigger.focus();
+    fireEvent.click(detailTrigger);
+
+    const detailDrawer = await screen.findByRole("dialog", {
+      name: "企业授权详情",
+    });
+    expect(detailDrawer).toHaveTextContent("杭州烟草企业授权");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "关闭企业授权详情" }),
+      ).toHaveFocus(),
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "企业授权详情" })).toBeNull();
+    expect(detailTrigger).toHaveFocus();
   });
 });

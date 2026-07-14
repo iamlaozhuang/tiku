@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminToast } from "@/components/admin/AdminToast";
 import {
   AdminErrorState,
   AdminLoadingState,
@@ -416,14 +417,19 @@ export function AdminContactConfigPage() {
 
       <OperationsContactConfigSummaryFirstBand contactConfig={contactConfig} />
 
-      {toastMessage !== null ? (
-        <div
-          className="border-border bg-surface rounded-md border px-3 py-2 text-sm shadow-sm"
-          data-testid="admin-contact-config-toast"
-        >
-          {toastMessage.message}
-        </div>
-      ) : null}
+      {toastMessage === null ? null : (
+        <AdminToast
+          feedback={{
+            message: toastMessage.message,
+            title:
+              toastMessage.tone === "success"
+                ? "购买联系方式已更新"
+                : "购买联系方式操作失败",
+            tone: toastMessage.tone,
+          }}
+          onDismiss={() => setToastMessage(null)}
+        />
+      )}
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(24rem,0.75fr)]">
         <form

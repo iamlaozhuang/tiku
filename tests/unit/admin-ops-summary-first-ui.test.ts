@@ -154,6 +154,21 @@ function stubFetchForSummaryFirstPages({
         });
       }
 
+      if (path === "/api/v1/users/user-admin-ui-01") {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              ...createAdminUser(1),
+              authStatus: "active",
+            },
+            enterpriseBinding: null,
+            authorizations: [],
+          },
+        });
+      }
+
       if (path.startsWith("/api/v1/users")) {
         const url = new URL(path, "http://localhost");
         const page = Number(url.searchParams.get("page") ?? "1");
@@ -355,6 +370,24 @@ describe("admin ops summary-first UI", () => {
       within(userWorkArea).getByRole("columnheader", { name: "操作" }),
     ).toBeInTheDocument();
     expect(screen.queryByText(visibleUser.publicId)).toBeNull();
+
+    const detailTrigger = within(userWorkArea).getByRole("button", {
+      name: "查看分页用户 1详情",
+    });
+    detailTrigger.focus();
+    fireEvent.click(detailTrigger);
+    const userDetailDrawer = await screen.findByRole("dialog", {
+      name: "用户详情",
+    });
+    expect(userDetailDrawer).toHaveTextContent("分页用户 1");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "关闭用户详情" }),
+      ).toHaveFocus(),
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "用户详情" })).toBeNull();
+    expect(detailTrigger).toHaveFocus();
 
     const accountTabs = screen.getByRole("tablist", { name: "账号类型" });
     fireEvent.click(within(accountTabs).getByRole("tab", { name: "后台账号" }));
@@ -832,5 +865,10 @@ describe("admin ops summary-first UI", () => {
         }),
       ],
     });
+    const feedback = screen.getByRole("status");
+    expect(feedback).toHaveTextContent("购买联系方式已更新");
+    expect(feedback).toHaveAttribute("data-admin-feedback-tone", "success");
+    fireEvent.click(screen.getByRole("button", { name: "关闭操作反馈" }));
+    expect(screen.queryByRole("status")).toBeNull();
   });
 });

@@ -35,15 +35,13 @@ export function AdminDetailDrawer({
     closeButtonRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
-      const eventDialog =
-        event.target instanceof Element
-          ? event.target.closest('[role="dialog"][aria-modal="true"]')
-          : null;
+      const hasCompetingModal = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[role="dialog"][aria-modal="true"], [role="alertdialog"][aria-modal="true"]',
+        ),
+      ).some((dialog) => dialog !== drawerRef.current);
 
-      if (
-        event.defaultPrevented ||
-        (eventDialog !== null && eventDialog !== drawerRef.current)
-      ) {
+      if (event.defaultPrevented || hasCompetingModal) {
         return;
       }
 

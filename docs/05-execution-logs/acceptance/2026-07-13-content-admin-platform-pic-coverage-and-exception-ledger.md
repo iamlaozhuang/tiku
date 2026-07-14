@@ -62,7 +62,7 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 | question/material editor       | content            | C            | compliant      | lock/copy/published reference                                 |
 | paper/knowledge/resource       | content            | E1           | compliant      | publish snapshot, RAG/resource boundary                       |
 | content AI draft/review        | content            | E1           | compliant      | formal content separation, Provider closed                    |
-| user/org/auth/redeem/log       | operations         | E2           | partial        | phone masking, plaintext redeem UI exception, audit redaction |
+| user/org/auth/redeem/log       | operations         | E2           | compliant      | phone masking, plaintext redeem UI exception, audit redaction |
 | organization admin/training/AI | organization       | E3           | partial        | organization scope, edition, non-formal training domain       |
 | practice/mock/report/AI        | learner            | E4           | partial        | mobile-first, authorization context, persisted snapshot       |
 | super admin cross-workspace    | operations/content | E5           | partial        | no authorization or lifecycle bypass                          |
@@ -263,6 +263,17 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - `paper/knowledge/resource` and `content AI draft/review` are compliant for the E1 implementation family. Global PIC
   statuses remain unchanged pending E2-E6 and F acceptance; PIC-06/PIC-09 remain scoped to the closed editor family, and
   the exception ledger remains empty.
+
+### E2 Operations Page-Family Rollout
+
+- User, enterprise-authorization, card and audit read-only details now consume the shared focus-managed Drawer; user,
+  organization/authorization/card and purchase-contact mutations consume the shared accessible Toast. Existing API,
+  role, edition, quota, phone, card and audit contracts remain unchanged.
+- Two RED-first regressions harden Drawer coordination with both nested and sibling confirmation `alertdialog` instances,
+  preventing Escape/Tab ownership from moving behind the active modal. Protected phone, role and redaction regressions
+  plus the impact-triggered full suite pass.
+- `user/org/auth/redeem/log` is compliant for the E2 implementation family only. Global PIC statuses remain unchanged
+  pending E3-E6 and F acceptance; E5 retains cross-workspace aliases and the exception ledger remains empty.
 
 ## Exception Ledger
 

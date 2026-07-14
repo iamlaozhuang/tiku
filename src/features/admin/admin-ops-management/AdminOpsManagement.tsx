@@ -21,6 +21,8 @@ import {
   AdminPagination,
   AdminTableFrame,
 } from "@/components/admin/AdminList";
+import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
+import { AdminToast } from "@/components/admin/AdminToast";
 import {
   AdminEmptyState,
   AdminErrorState,
@@ -1364,6 +1366,11 @@ export function AdminOpsManagement() {
         onCopyPhone={(publicId, phone) =>
           void handleCopyUserPhone(publicId, phone)
         }
+        onClose={() => {
+          setSelectedUserDetail(null);
+          setRevealedUserPhone(null);
+          setUserDetailState("idle");
+        }}
         state={userDetailState}
         onDisableUser={(publicId, userName) =>
           setConfirmationState({ kind: "disableUser", publicId, userName })
@@ -1392,7 +1399,17 @@ export function AdminOpsManagement() {
         />
       )}
 
-      {toastMessage === null ? null : <AdminOpsToast message={toastMessage} />}
+      {toastMessage === null ? null : (
+        <AdminToast
+          feedback={{
+            message: toastMessage.message,
+            title:
+              toastMessage.tone === "success" ? "用户操作成功" : "用户操作失败",
+            tone: toastMessage.tone,
+          }}
+          onDismiss={() => setToastMessage(null)}
+        />
+      )}
     </main>
   );
 }
@@ -1792,6 +1809,7 @@ function AdminUserDetailPanel({
   canDisclosePhone,
   detail,
   isRevealingPhone,
+  onClose,
   onCopyPhone,
   onDisableUser,
   onEnableUser,
@@ -1803,6 +1821,7 @@ function AdminUserDetailPanel({
   canDisclosePhone: boolean;
   detail: AdminUserDetailDto | null;
   isRevealingPhone: boolean;
+  onClose: () => void;
   onCopyPhone: (publicId: string, phone: string) => void;
   onDisableUser: (publicId: string, userName: string) => void;
   onEnableUser: (publicId: string, userName: string) => void;
@@ -1831,136 +1850,147 @@ function AdminUserDetailPanel({
   const user = detail.user;
 
   return (
-    <section
-      aria-label="用户详情"
-      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
-      data-public-id={user.publicId}
-      data-testid={`admin-user-detail-${user.publicId}`}
+    <AdminDetailDrawer
+      ariaLabel="用户详情"
+      description="手机号明文只在当前角色通过受控接口授权后显示。"
+      eyebrow="用户管理"
+      onClose={onClose}
+      title="用户详情"
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-2">
-          <h2 className="text-text-primary text-base font-semibold">
-            用户详情
-          </h2>
-          <p className="text-text-primary text-sm font-medium">
-            {user.name} / {revealedPhone ?? user.phone}
-          </p>
-          <p className="text-text-muted text-xs">
-            {userTypeLabels[user.userType]} / {userStatusLabels[user.status]} /{" "}
-            {user.authStatus === null
-              ? "无授权"
-              : authStatusLabels[user.authStatus]}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {canDisclosePhone ? (
-            <>
-              <Button
-                aria-label={`查看${user.name}完整手机号`}
-                disabled={isRevealingPhone || revealedPhone !== null}
-                variant="outline"
-                onClick={() => onRevealPhone(user.publicId)}
-              >
-                <Eye aria-hidden="true" />
-                {isRevealingPhone ? "查看中" : "查看完整手机号"}
-              </Button>
-              {revealedPhone !== null ? (
+      <div
+        className="space-y-5"
+        data-public-id={user.publicId}
+        data-testid={`admin-user-detail-${user.publicId}`}
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 space-y-2">
+            <p className="text-text-primary text-sm font-medium">
+              {user.name} / {revealedPhone ?? user.phone}
+            </p>
+            <p className="text-text-muted text-xs">
+              {userTypeLabels[user.userType]} / {userStatusLabels[user.status]}{" "}
+              /{" "}
+              {user.authStatus === null
+                ? "无授权"
+                : authStatusLabels[user.authStatus]}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {canDisclosePhone ? (
+              <>
                 <Button
-                  aria-label={`复制${user.name}完整手机号`}
+                  aria-label={`查看${user.name}完整手机号`}
+                  disabled={isRevealingPhone || revealedPhone !== null}
                   variant="outline"
-                  onClick={() => onCopyPhone(user.publicId, revealedPhone)}
+                  onClick={() => onRevealPhone(user.publicId)}
                 >
-                  <Copy aria-hidden="true" />
-                  复制手机号
+                  <Eye aria-hidden="true" />
+                  {isRevealingPhone ? "查看中" : "查看完整手机号"}
                 </Button>
-              ) : null}
-            </>
-          ) : null}
-          <Button
-            aria-label={`重置${user.name}密码`}
-            variant="outline"
-            onClick={() => onResetPassword(user.publicId, user.name)}
-          >
-            <RotateCcwKey aria-hidden="true" />
-            重置密码
-          </Button>
-          {user.status === "active" ? (
+                {revealedPhone !== null ? (
+                  <Button
+                    aria-label={`复制${user.name}完整手机号`}
+                    variant="outline"
+                    onClick={() => onCopyPhone(user.publicId, revealedPhone)}
+                  >
+                    <Copy aria-hidden="true" />
+                    复制手机号
+                  </Button>
+                ) : null}
+              </>
+            ) : null}
             <Button
-              aria-label={`停用用户 ${user.name}`}
-              variant="destructive"
-              onClick={() => onDisableUser(user.publicId, user.name)}
-            >
-              <UserX aria-hidden="true" />
-              停用用户
-            </Button>
-          ) : (
-            <Button
-              aria-label={`启用用户 ${user.name}`}
+              aria-label={`重置${user.name}密码`}
               variant="outline"
-              onClick={() => onEnableUser(user.publicId, user.name)}
+              onClick={() => onResetPassword(user.publicId, user.name)}
             >
-              <UserCheck aria-hidden="true" />
-              启用用户
+              <RotateCcwKey aria-hidden="true" />
+              重置密码
             </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <section className="border-border rounded-md border p-3">
-          <h3 className="text-text-primary text-sm font-semibold">企业绑定</h3>
-          {detail.enterpriseBinding === null ? (
-            <p className="text-text-muted mt-2 text-sm">未绑定企业</p>
-          ) : (
-            <div className="mt-2 space-y-2">
-              <p className="text-text-primary text-sm">
-                {detail.enterpriseBinding.organizationName} /{" "}
-                {formatMappedLabel(
-                  orgTierLabels,
-                  detail.enterpriseBinding.orgTier,
-                  "其他组织层级",
-                )}
-              </p>
-              <p className="text-text-muted text-xs">员工账号已绑定当前组织</p>
-            </div>
-          )}
-        </section>
-
-        <section className="border-border rounded-md border p-3">
-          <h3 className="text-text-primary text-sm font-semibold">授权列表</h3>
-          <div className="mt-2 space-y-3">
-            {detail.authorizations.length === 0 ? (
-              <p className="text-text-muted text-sm">暂无授权</p>
+            {user.status === "active" ? (
+              <Button
+                aria-label={`停用用户 ${user.name}`}
+                variant="destructive"
+                onClick={() => onDisableUser(user.publicId, user.name)}
+              >
+                <UserX aria-hidden="true" />
+                停用用户
+              </Button>
             ) : (
-              detail.authorizations.map((authorization) => (
-                <article
-                  key={authorization.publicId}
-                  className="border-border border-t pt-3 first:border-t-0 first:pt-0"
-                >
-                  <p className="text-text-primary text-sm font-medium">
-                    {formatMappedLabel(
-                      authorizationTypeLabels,
-                      authorization.authorizationType,
-                      "其他授权",
-                    )}
-                  </p>
-                  <p className="text-text-muted text-xs">
-                    {formatProfessionLevel(authorization)} /{" "}
-                    {authStatusLabels[authorization.status]} / 购买方{" "}
-                    {authorization.purchaserName ?? "个人"}
-                  </p>
-                  <p className="text-text-muted mt-2 text-xs">
-                    {authorization.organizationPublicIds.length === 0
-                      ? "个人范围"
-                      : `覆盖 ${authorization.organizationPublicIds.length} 个组织范围`}
-                  </p>
-                </article>
-              ))
+              <Button
+                aria-label={`启用用户 ${user.name}`}
+                variant="outline"
+                onClick={() => onEnableUser(user.publicId, user.name)}
+              >
+                <UserCheck aria-hidden="true" />
+                启用用户
+              </Button>
             )}
           </div>
-        </section>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <section className="border-border rounded-md border p-3">
+            <h3 className="text-text-primary text-sm font-semibold">
+              企业绑定
+            </h3>
+            {detail.enterpriseBinding === null ? (
+              <p className="text-text-muted mt-2 text-sm">未绑定企业</p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                <p className="text-text-primary text-sm">
+                  {detail.enterpriseBinding.organizationName} /{" "}
+                  {formatMappedLabel(
+                    orgTierLabels,
+                    detail.enterpriseBinding.orgTier,
+                    "其他组织层级",
+                  )}
+                </p>
+                <p className="text-text-muted text-xs">
+                  员工账号已绑定当前组织
+                </p>
+              </div>
+            )}
+          </section>
+
+          <section className="border-border rounded-md border p-3">
+            <h3 className="text-text-primary text-sm font-semibold">
+              授权列表
+            </h3>
+            <div className="mt-2 space-y-3">
+              {detail.authorizations.length === 0 ? (
+                <p className="text-text-muted text-sm">暂无授权</p>
+              ) : (
+                detail.authorizations.map((authorization) => (
+                  <article
+                    key={authorization.publicId}
+                    className="border-border border-t pt-3 first:border-t-0 first:pt-0"
+                  >
+                    <p className="text-text-primary text-sm font-medium">
+                      {formatMappedLabel(
+                        authorizationTypeLabels,
+                        authorization.authorizationType,
+                        "其他授权",
+                      )}
+                    </p>
+                    <p className="text-text-muted text-xs">
+                      {formatProfessionLevel(authorization)} /{" "}
+                      {authStatusLabels[authorization.status]} / 购买方{" "}
+                      {authorization.purchaserName ?? "个人"}
+                    </p>
+                    <p className="text-text-muted mt-2 text-xs">
+                      {authorization.organizationPublicIds.length === 0
+                        ? "个人范围"
+                        : `覆盖 ${authorization.organizationPublicIds.length} 个组织范围`}
+                    </p>
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
       </div>
-    </section>
+    </AdminDetailDrawer>
   );
 }
 
@@ -2038,21 +2068,6 @@ function AdminOpsConfirmationDialog({
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function AdminOpsToast({ message }: { message: ToastMessage }) {
-  return (
-    <div
-      className={
-        message.tone === "success"
-          ? "bg-secondary text-secondary-foreground fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-          : "bg-destructive/10 text-destructive fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-      }
-      role={message.tone === "success" ? "status" : "alert"}
-    >
-      {message.message}
     </div>
   );
 }

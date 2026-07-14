@@ -63,6 +63,8 @@ import {
   AdminTableFrame,
 } from "@/components/admin/AdminList";
 import { adminDataTableClassName } from "@/components/admin/admin-layout-primitives";
+import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
+import { AdminToast } from "@/components/admin/AdminToast";
 import {
   ADMIN_PAGE_SIZE_OPTIONS,
   type AdminListQuery,
@@ -2651,17 +2653,22 @@ function OrgAuthDetailPanel({
   orgAuth: OrgAuthDetailDto;
 }) {
   return (
-    <section
-      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
-      data-public-id={orgAuth.publicId}
-      data-testid={`admin-org-auth-detail-${orgAuth.publicId}`}
+    <AdminDetailDrawer
+      ariaLabel="企业授权详情"
+      description="只展示公开编号关联的授权摘要、覆盖企业和额度信息。"
+      eyebrow="企业授权"
+      onClose={onClose}
+      title="企业授权详情"
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <div
+        className="space-y-4"
+        data-public-id={orgAuth.publicId}
+        data-testid={`admin-org-auth-detail-${orgAuth.publicId}`}
+      >
         <div className="space-y-2">
-          <p className="text-brand-primary text-xs font-medium">企业授权</p>
-          <h2 className="text-text-primary text-base font-semibold">
+          <h3 className="text-text-primary text-base font-semibold">
             {orgAuth.name}
-          </h2>
+          </h3>
           <div className="text-text-secondary grid gap-1 text-sm md:grid-cols-2">
             <p>购买主体 {orgAuth.purchaserOrganization.name}</p>
             <p>授权范围 {authScopeTypeLabels[orgAuth.authScopeType]}</p>
@@ -2685,15 +2692,8 @@ function OrgAuthDetailPanel({
             ))}
           </div>
         </div>
-        <button
-          type="button"
-          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-          onClick={onClose}
-        >
-          关闭
-        </button>
       </div>
-    </section>
+    </AdminDetailDrawer>
   );
 }
 
@@ -3649,23 +3649,27 @@ function RedeemCodeDetailPanel({
       : null;
 
   return (
-    <section
-      aria-label="卡密详情"
-      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
-      data-public-id={redeemCode.publicId}
-      data-testid={`admin-redeem-code-detail-${redeemCode.publicId}`}
+    <AdminDetailDrawer
+      ariaLabel="卡密详情"
+      description="详情不展示哈希或内部标识；明文只在接口明确授权时显示。"
+      eyebrow="卡密管理"
+      onClose={onClose}
+      title="卡密详情"
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1">
-          <p className="text-brand-primary text-xs font-medium">卡密详情</p>
-          <h2 className="text-text-primary font-mono text-base font-semibold">
-            {visiblePlainText ?? redeemCode.codeDisplay}
-          </h2>
-          <p className="text-text-secondary text-sm leading-6">
-            详情视图不展示哈希或内部标识；明文只在接口明确授权时显示。
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <div
+        className="space-y-4"
+        data-public-id={redeemCode.publicId}
+        data-testid={`admin-redeem-code-detail-${redeemCode.publicId}`}
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <h3 className="text-text-primary font-mono text-base font-semibold">
+              {visiblePlainText ?? redeemCode.codeDisplay}
+            </h3>
+            <p className="text-text-secondary text-sm leading-6">
+              详情视图不展示哈希或内部标识；明文只在接口明确授权时显示。
+            </p>
+          </div>
           {visiblePlainText === null ? null : (
             <button
               aria-label={`复制卡密 ${redeemCode.codeDisplay} 明文`}
@@ -3677,94 +3681,91 @@ function RedeemCodeDetailPanel({
               复制明文
             </button>
           )}
-          <button
-            type="button"
-            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
-            onClick={onClose}
-          >
-            关闭
-          </button>
         </div>
+        <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">卡密类型</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {redeemCodeTypeLabels[redeemCode.redeemCodeType]}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">状态</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {redeemCodeStatusLabels[redeemCode.status]}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">授权范围</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {formatProfessionLevel(redeemCode)}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">兑换用户</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {redeemCode.redeemedUserPublicId === null ? "未兑换" : "已兑换"}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">兑换截止</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {formatDate(redeemCode.redeemDeadlineAt)}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">创建时间</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {formatDate(redeemCode.createdAt)}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">生成来源</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              受控批量生成
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">有效天数</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {redeemCode.durationDay}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">兑换时间</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {redeemCode.redeemedAt === null
+                ? "未兑换"
+                : formatDate(redeemCode.redeemedAt)}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">更新时间</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              {formatDate(redeemCode.updatedAt)}
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">脱敏状态</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium">
+              已脱敏
+            </dd>
+          </div>
+          <div className="bg-background rounded-md p-3">
+            <dt className="text-text-muted text-xs">脱敏原因</dt>
+            <dd className="text-text-primary mt-1 text-sm font-medium break-all">
+              {redeemCodeRedactionReasonLabels[redeemCode.redactionReason]}
+            </dd>
+          </div>
+        </dl>
+        <p className="text-text-muted mt-3 text-xs">
+          明文状态：
+          {visiblePlainText === null
+            ? "当前接口未返回明文"
+            : "可由运营复制分发"}
+        </p>
       </div>
-      <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">卡密类型</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {redeemCodeTypeLabels[redeemCode.redeemCodeType]}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">状态</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {redeemCodeStatusLabels[redeemCode.status]}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">授权范围</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {formatProfessionLevel(redeemCode)}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">兑换用户</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {redeemCode.redeemedUserPublicId === null ? "未兑换" : "已兑换"}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">兑换截止</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {formatDate(redeemCode.redeemDeadlineAt)}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">创建时间</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {formatDate(redeemCode.createdAt)}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">生成来源</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            受控批量生成
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">有效天数</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {redeemCode.durationDay}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">兑换时间</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {redeemCode.redeemedAt === null
-              ? "未兑换"
-              : formatDate(redeemCode.redeemedAt)}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">更新时间</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">
-            {formatDate(redeemCode.updatedAt)}
-          </dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">脱敏状态</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium">已脱敏</dd>
-        </div>
-        <div className="bg-background rounded-md p-3">
-          <dt className="text-text-muted text-xs">脱敏原因</dt>
-          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
-            {redeemCodeRedactionReasonLabels[redeemCode.redactionReason]}
-          </dd>
-        </div>
-      </dl>
-      <p className="text-text-muted mt-3 text-xs">
-        明文状态：
-        {visiblePlainText === null ? "当前接口未返回明文" : "可由运营复制分发"}
-      </p>
-    </section>
+    </AdminDetailDrawer>
   );
 }
 
@@ -3869,21 +3870,6 @@ function RedeemCodePlainTextUnavailableNotice() {
         </div>
       </div>
     </section>
-  );
-}
-
-function AdminToast({ toastMessage }: { toastMessage: ToastMessage }) {
-  return (
-    <div
-      className={
-        toastMessage.tone === "success"
-          ? "bg-secondary text-secondary-foreground fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-          : "bg-destructive/10 text-destructive fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
-      }
-      role={toastMessage.tone === "success" ? "status" : "alert"}
-    >
-      {toastMessage.message}
-    </div>
   );
 }
 
@@ -6766,7 +6752,17 @@ export function AdminOrgAuthPage() {
       )}
 
       {toastMessage === null ? null : (
-        <AdminToast toastMessage={toastMessage} />
+        <AdminToast
+          feedback={{
+            message: toastMessage.message,
+            title:
+              toastMessage.tone === "success"
+                ? "企业管理操作成功"
+                : "企业管理操作失败",
+            tone: toastMessage.tone,
+          }}
+          onDismiss={() => setToastMessage(null)}
+        />
       )}
     </main>
   );
@@ -7075,7 +7071,15 @@ export function AdminRedeemCodePage() {
       )}
 
       {toastMessage === null ? null : (
-        <AdminToast toastMessage={toastMessage} />
+        <AdminToast
+          feedback={{
+            message: toastMessage.message,
+            title:
+              toastMessage.tone === "success" ? "卡密操作成功" : "卡密操作失败",
+            tone: toastMessage.tone,
+          }}
+          onDismiss={() => setToastMessage(null)}
+        />
       )}
     </main>
   );
