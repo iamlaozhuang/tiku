@@ -67,6 +67,9 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 | practice/mock/report/AI        | learner            | E4           | partial           | mobile-first, authorization context, persisted snapshot       |
 | super admin cross-workspace    | operations/content | E5           | partial           | no authorization or lifecycle bypass                          |
 
+45 个当前 page entry、68 个脱敏 role/page view、E1-E5 owner、proof root、风险与验证方式的唯一精确清单见
+`docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e0-route-family-inventory.md`；本台账不复制该事实表。
+
 ## Program Task Progress
 
 ### B1 Shared Async-State Semantics
@@ -240,6 +243,14 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   remain outside the delta.
 - PIC-06 and PIC-09 are compliant for the question/material editor family. PIC-05/PIC-07/PIC-10 remain partial for E/F
   rollout and role acceptance; PIC-13 and the empty exception ledger remain unchanged.
+
+### E0 Route-Family Inventory
+
+- All 45 current page entries and all 68 sanitized role/page views have an exact E1-E5 owner, source/test proof root,
+  applicable current PIC status, protected risk and later validation method in the E0 evidence.
+- E0 promotes no PIC status. It records four later-task gap candidates, including production reachability proof for the
+  source-comment-only `/design-system` route and cross-workspace alias/direct-URL checks; none is an approved exception.
+- Product source/tests, A01-A30, closed AI issue classes and deployment remain unchanged; the exception ledger is empty.
 
 ## Exception Ledger
 
