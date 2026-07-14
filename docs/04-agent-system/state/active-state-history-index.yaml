@@ -4,8 +4,8 @@ createdByTask: content-admin-platform-m2-active-state-slimming-2026-07-13
 policy: archive_exact_bytes_index_by_hash_do_not_rewrite_history
 currentProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
-  currentTaskId: content-admin-platform-e6-cumulative-audit-2026-07-13
-  nextTaskId: content-admin-platform-f0-acceptance-readiness-2026-07-13
+  currentTaskId: content-admin-platform-f0-acceptance-readiness-2026-07-13
+  nextTaskId: content-admin-platform-f1-content-admin-acceptance-2026-07-13
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
 archives:

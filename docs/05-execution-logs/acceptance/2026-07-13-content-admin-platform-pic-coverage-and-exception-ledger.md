@@ -323,6 +323,16 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   so global PIC completion is not overclaimed. The approved exception count remains zero and all historical protection
   boundaries remain in force.
 
+### F0 Acceptance Readiness
+
+- The canonical process-only 0704DB target passed nine-role login and authorization-context readiness; four eligible AI
+  roles are Provider-closed, all temporary sessions were revoked and no business data/fixture mutation occurred.
+- Nineteen bounded product GET probes materialize the F1-F4 matrix. Resource, personal advanced report and personal AI
+  history are truthful empty states; later tasks must validate those states rather than fabricate acceptance data.
+- No valid persisted personal `paperAssembly` resume sample exists, but F0 does not require one, so X1 remains
+  untriggered. PIC statuses are not promoted before F1-F4 role acceptance and F5 final reconciliation. Exception count
+  remains zero; deployment remains blocked.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
