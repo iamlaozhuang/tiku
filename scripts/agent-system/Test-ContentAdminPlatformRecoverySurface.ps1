@@ -18,6 +18,7 @@ $ErrorActionPreference = "Stop"
 
 $expectedProgramId = "content-admin-platform-b-to-f-2026-07-13"
 $expectedPolicy = "lean_v3_current_program_only"
+$terminalTaskId = "content-admin-platform-f5-final-cumulative-audit-2026-07-13"
 $findings = New-Object System.Collections.Generic.List[string]
 
 function Add-Finding {
@@ -252,28 +253,45 @@ $currentTaskId = Get-ScalarValue -Block $stateProgram -Key "currentTaskId"
 $queueCurrentTaskId = Get-ScalarValue -Block $queueProgram -Key "currentTaskId"
 $nextTaskId = Get-ScalarValue -Block $stateProgram -Key "nextTaskId"
 $queueNextTaskId = Get-ScalarValue -Block $queueProgram -Key "nextTaskId"
+$stateProgramStatus = Get-ScalarValue -Block $stateProgram -Key "status"
+$queueProgramStatus = Get-ScalarValue -Block $queueProgram -Key "status"
+$isTerminalTask = $currentTaskId -eq $terminalTaskId
 if ([string]::IsNullOrWhiteSpace($currentTaskId) -or $currentTaskId -ne $queueCurrentTaskId) {
     Add-Finding "RECOVERY_SURFACE_CURRENT_TASK_MISMATCH"
 }
-if ([string]::IsNullOrWhiteSpace($nextTaskId) -or $nextTaskId -ne $queueNextTaskId) {
+if ($nextTaskId -ne $queueNextTaskId -or ($isTerminalTask -and -not [string]::IsNullOrWhiteSpace($nextTaskId)) -or (-not $isTerminalTask -and [string]::IsNullOrWhiteSpace($nextTaskId))) {
     Add-Finding "RECOVERY_SURFACE_NEXT_TASK_MISMATCH"
+}
+if ($stateProgramStatus -notin @("in_progress", "closed") -or $stateProgramStatus -ne $queueProgramStatus) {
+    Add-Finding "RECOVERY_SURFACE_PROGRAM_STATUS_INVALID"
 }
 
 $topCurrentTask = @(Get-TopLevelBlock -Lines $stateLines -Key "currentTask")
 $currentStatus = Get-ScalarValue -Block $topCurrentTask -Key "status"
-if ((Get-ScalarValue -Block $topCurrentTask -Key "id") -ne $currentTaskId -or $currentStatus -notin @("in_progress", "ready_for_closeout")) {
+if ((Get-ScalarValue -Block $topCurrentTask -Key "id") -ne $currentTaskId -or $currentStatus -notin @("in_progress", "ready_for_closeout", "closed")) {
     Add-Finding "RECOVERY_SURFACE_CURRENT_TASK_RECORD_INVALID"
+}
+if (
+    ($stateProgramStatus -eq "closed" -and (-not $isTerminalTask -or $currentStatus -ne "closed")) -or
+    ($stateProgramStatus -eq "in_progress" -and $currentStatus -eq "closed")
+) {
+    Add-Finding "RECOVERY_SURFACE_TERMINAL_STATUS_INVALID"
 }
 
 $activeTasksBlock = @(Get-TopLevelBlock -Lines $queueLines -Key "activeTasks")
 $activeTaskItems = @(Get-ListItemBlocks -Block $activeTasksBlock)
-if ($activeTaskItems.Count -ne 2 -or $activeTaskItems[0].Id -ne $currentTaskId -or $activeTaskItems[1].Id -ne $nextTaskId) {
+$expectedActiveTaskCount = if ($isTerminalTask) { 1 } else { 2 }
+if (
+    $activeTaskItems.Count -ne $expectedActiveTaskCount -or
+    $activeTaskItems[0].Id -ne $currentTaskId -or
+    (-not $isTerminalTask -and $activeTaskItems[1].Id -ne $nextTaskId)
+) {
     Add-Finding "RECOVERY_SURFACE_ACTIVE_TASKS_INVALID"
 } else {
     if ((Get-ScalarValue -Block $activeTaskItems[0].Block -Key "status") -ne $currentStatus) {
         Add-Finding "RECOVERY_SURFACE_CURRENT_TASK_STATUS_MISMATCH"
     }
-    if ((Get-ScalarValue -Block $activeTaskItems[1].Block -Key "status") -ne "pending") {
+    if (-not $isTerminalTask -and (Get-ScalarValue -Block $activeTaskItems[1].Block -Key "status") -ne "pending") {
         Add-Finding "RECOVERY_SURFACE_NEXT_TASK_STATUS_INVALID"
     }
 }
@@ -313,7 +331,7 @@ if (-not [string]::IsNullOrWhiteSpace($stateSerialPlan)) {
     $serialPlanFullPath = Resolve-RepositoryPath -Root $RepositoryRoot -Path $stateSerialPlan
     if (Test-Path -LiteralPath $serialPlanFullPath) {
         $serialPlanText = Get-Content -LiteralPath $serialPlanFullPath -Raw
-        foreach ($taskId in @($currentTaskId, $nextTaskId)) {
+        foreach ($taskId in @($currentTaskId, $nextTaskId) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) {
             if ($serialPlanText -notmatch [regex]::Escape($taskId)) {
                 Add-Finding "RECOVERY_SURFACE_SERIAL_PLAN_TASK_MISSING $taskId"
             }

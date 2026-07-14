@@ -16,21 +16,21 @@ Requirement SSOT: `docs/01-requirements/traceability/2026-07-13-content-admin-p0
 
 ## PIC Coverage Matrix
 
-| PIC    | Initial status    | Primary batches   | Required proof                                    | Current exception |
-| ------ | ----------------- | ----------------- | ------------------------------------------------- | ----------------- |
-| PIC-01 | accepted_baseline | B0, E1-E5, F      | workspace/role/org context + server auth tests    | none              |
-| PIC-02 | partial           | B2, D0-D4, E, F   | URL filter/sort/page/pageSize restore             | none              |
-| PIC-03 | partial           | B2, D0-D4         | debounce + stale cancellation/latest intent       | none              |
-| PIC-04 | partial           | B1, D, E          | distinct state matrix and announcements           | none              |
-| PIC-05 | partial           | B3/B4, C, E       | primary/secondary/destructive/disabled reason     | none              |
-| PIC-06 | partial           | B4, C             | shared create/edit business validation            | none              |
-| PIC-07 | partial           | B3/B4, C, E       | duplicate prevention, preserve input, conflict    | none              |
-| PIC-08 | partial           | B3, D3, E         | Drawer focus loop/Escape/restore                  | none              |
-| PIC-09 | accepted_baseline | C0-C6             | dedicated editor route + dirty/return/refresh     | none              |
-| PIC-10 | partial           | B1-B4, C, D, E, F | keyboard/focus/labels/errors/state/target size    | none              |
-| PIC-11 | partial           | D, E, F           | no page overflow, table-local scroll              | none              |
-| PIC-12 | accepted_baseline | B0, E, F          | consistent terms/states/actions, distinct clients | none              |
-| PIC-13 | accepted_baseline | every task        | AI/edition/auth/org/phone/redeem boundary review  | none              |
+| PIC    | Initial status    | Primary batches   | Required proof                                    | Final status | Current exception |
+| ------ | ----------------- | ----------------- | ------------------------------------------------- | ------------ | ----------------- |
+| PIC-01 | accepted_baseline | B0, E1-E5, F      | workspace/role/org context + server auth tests    | compliant    | none              |
+| PIC-02 | partial           | B2, D0-D4, E, F   | URL filter/sort/page/pageSize restore             | compliant    | none              |
+| PIC-03 | partial           | B2, D0-D4         | debounce + stale cancellation/latest intent       | compliant    | none              |
+| PIC-04 | partial           | B1, D, E          | distinct state matrix and announcements           | compliant    | none              |
+| PIC-05 | partial           | B3/B4, C, E       | primary/secondary/destructive/disabled reason     | compliant    | none              |
+| PIC-06 | partial           | B4, C             | shared create/edit business validation            | compliant    | none              |
+| PIC-07 | partial           | B3/B4, C, E       | duplicate prevention, preserve input, conflict    | compliant    | none              |
+| PIC-08 | partial           | B3, D3, E         | Drawer focus loop/Escape/restore                  | compliant    | none              |
+| PIC-09 | accepted_baseline | C0-C6             | dedicated editor route + dirty/return/refresh     | compliant    | none              |
+| PIC-10 | partial           | B1-B4, C, D, E, F | keyboard/focus/labels/errors/state/target size    | compliant    | none              |
+| PIC-11 | partial           | D, E, F           | no page overflow, table-local scroll              | compliant    | none              |
+| PIC-12 | accepted_baseline | B0, E, F          | consistent terms/states/actions, distinct clients | compliant    | none              |
+| PIC-13 | accepted_baseline | every task        | AI/edition/auth/org/phone/redeem boundary review  | compliant    | none              |
 
 Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅表示已有历史实现证据，后续任务仍须对其目标 route 重新验证。
 
@@ -380,6 +380,17 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - The learner route family is representative-role compliant. F4 contributes PIC-01/04/05/10/11/12/13 proof; focused
   regression protects formal-learning isolation and persisted-snapshot-only resume. F5 retains global reconciliation,
   the approved exception count remains zero and deployment remains blocked.
+
+### F5 Final Program Cumulative Audit
+
+- M1/M2 and all B0-B5, D0-D4, C0-C6, E0-E6 and F0-F4 task artifacts, commit order and closeout checkpoints reconcile
+  without omission. The F5 fixed full node and terminal recovery proof close the final cumulative validation surface.
+- PIC-01 through PIC-13 are globally `compliant`: shared state/query/feedback/form primitives, list consistency,
+  dedicated editor routes, all 45 page routes, role/edition/organization boundaries and representative content,
+  operations, organization and learner acceptance form one continuous proof chain.
+- Approved exception count is zero. X1/X2 remain untriggered; A01-A30 and superseded AI issues remain closed; Provider
+  and deployment remain blocked. The repository-external private catalog drift is a deferred maintenance candidate, not
+  a PIC exception or an active Program task.
 
 ## Exception Ledger
 
