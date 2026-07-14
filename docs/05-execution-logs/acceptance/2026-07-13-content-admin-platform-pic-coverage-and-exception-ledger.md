@@ -357,6 +357,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   focused and full regression protect closed list/editor contracts. F5 retains global reconciliation, the approved
   exception count remains zero and deployment remains blocked.
 
+### F3 Organization Representative Acceptance
+
+- Canonical 0704DB standard/advanced organization-admin and employee sessions passed portal, training, analytics and
+  organization-AI routes. Standard roles failed closed; advanced admin exposed truthful draft/published lifecycle and
+  aggregate-only analytics; advanced employee exposed four pending assignments without save or submit.
+- Organization scope stayed server-owned. Analytics export and all Provider/generation/copy-to-training/formal-adoption
+  actions remained disabled or unexecuted; no employee answer, training lifecycle, authorization or account mutation
+  occurred. Current submitted/read-only behavior remains protected by the focused employee lifecycle regressions.
+- The organization route family is representative-role compliant. F3 contributes PIC-01/04/05/10/11/12/13 proof;
+  focused regression protects closed shared contracts. F5 retains global reconciliation, the approved exception count
+  remains zero and deployment remains blocked.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
