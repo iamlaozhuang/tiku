@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 
 import { AdminPagination } from "@/components/admin/AdminList";
+import {
+  AdminToast,
+  type AdminFeedback,
+} from "@/components/admin/AdminToast/AdminToast";
 import type { AdminAiGenerationFormalAdoptionResult } from "@/server/contracts/admin-ai-generation-formal-adoption-contract";
 import type { AdminWorkspaceCapabilitySummary } from "@/server/contracts/admin-workspace-role-guard-contract";
 import type {
@@ -2286,7 +2290,6 @@ function ContentAdminGenerationTraceabilitySummaryPanel({
 
 function AdminAiGenerationTaskHistoryPanel({
   adminWorkspaceCapabilitySummary,
-  copyActionErrorMessageByResultPublicId,
   copyActionStateByResultPublicId,
   currentLocalContractSummary,
   generationParameters,
@@ -2301,7 +2304,6 @@ function AdminAiGenerationTaskHistoryPanel({
   workspace,
 }: {
   adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
-  copyActionErrorMessageByResultPublicId: Record<string, string>;
   copyActionStateByResultPublicId: Record<
     string,
     OrganizationAiTrainingDraftCopyState
@@ -2588,11 +2590,6 @@ function AdminAiGenerationTaskHistoryPanel({
                             taskItem.generatedResult.resultPublicId
                           ] ?? "idle"
                         }
-                        actionErrorMessage={
-                          copyActionErrorMessageByResultPublicId[
-                            taskItem.generatedResult.resultPublicId
-                          ] ?? null
-                        }
                         adminWorkspaceCapabilitySummary={
                           adminWorkspaceCapabilitySummary
                         }
@@ -2626,14 +2623,12 @@ function AdminAiGenerationTaskHistoryPanel({
 
 function OrganizationAiGenerationDraftNextStepPanel({
   actionState,
-  actionErrorMessage,
   adminWorkspaceCapabilitySummary,
   generationParameters,
   taskItem,
   onCopyToTrainingDraft,
 }: {
   actionState: OrganizationAiTrainingDraftCopyState;
-  actionErrorMessage: string | null;
   adminWorkspaceCapabilitySummary: AdminWorkspaceCapabilitySummary | null;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters;
   taskItem: AdminAiGenerationTaskHistoryItemDto;
@@ -2679,10 +2674,8 @@ function OrganizationAiGenerationDraftNextStepPanel({
       : copyReadiness === "weak_confirmation_required"
         ? "确认资料较少并创建训练草稿"
         : "创建企业训练草稿";
-  const actionMessage = resolveOrganizationAiTrainingDraftCopyActionMessage(
-    actionState,
-    actionErrorMessage,
-  );
+  const actionMessage =
+    resolveOrganizationAiTrainingDraftCopyActionMessage(actionState);
   const draftActionLabels =
     taskItem.generationKind === "paper"
       ? ["编辑试卷", "调整题目", "预览员工视角", "保存草稿", "发布训练"]
@@ -2786,21 +2779,9 @@ function OrganizationAiGenerationDraftNextStepPanel({
 
 function resolveOrganizationAiTrainingDraftCopyActionMessage(
   actionState: OrganizationAiTrainingDraftCopyState,
-  actionErrorMessage: string | null,
 ): string | null {
   if (actionState === "copying") {
     return "正在创建企业训练草稿";
-  }
-
-  if (actionState === "copied") {
-    return "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。";
-  }
-
-  if (actionState === "error") {
-    return (
-      actionErrorMessage ??
-      "创建企业训练草稿失败，请确认企业授权和组织范围后重试。"
-    );
   }
 
   return null;
@@ -3213,10 +3194,8 @@ export function AdminAiGenerationEntryPage({
   ] = useState<Record<string, ContentAdminReviewActionState>>({});
   const [copyActionStateByResultPublicId, setCopyActionStateByResultPublicId] =
     useState<Record<string, OrganizationAiTrainingDraftCopyState>>({});
-  const [
-    copyActionErrorMessageByResultPublicId,
-    setCopyActionErrorMessageByResultPublicId,
-  ] = useState<Record<string, string>>({});
+  const [organizationTrainingFeedback, setOrganizationTrainingFeedback] =
+    useState<AdminFeedback | null>(null);
   const [adminWorkspaceCapabilitySummary, setAdminWorkspaceCapabilitySummary] =
     useState<AdminWorkspaceCapabilitySummary | null>(null);
   const [adminAiKnowledgeNodeOptions, setAdminAiKnowledgeNodeOptions] =
@@ -3818,10 +3797,11 @@ export function AdminAiGenerationEntryPage({
         ...currentState,
         [resultPublicId]: "error",
       }));
-      setCopyActionErrorMessageByResultPublicId((currentState) => ({
-        ...currentState,
-        [resultPublicId]: message,
-      }));
+      setOrganizationTrainingFeedback({
+        message,
+        title: "企业训练草稿创建失败",
+        tone: "error",
+      });
     };
     const copyReadiness =
       getOrganizationAiTrainingCopyReadiness(generatedResult);
@@ -3856,11 +3836,7 @@ export function AdminAiGenerationEntryPage({
       ...currentState,
       [resultPublicId]: "copying",
     }));
-    setCopyActionErrorMessageByResultPublicId((currentState) => {
-      const nextState = { ...currentState };
-      delete nextState[resultPublicId];
-      return nextState;
-    });
+    setOrganizationTrainingFeedback(null);
 
     try {
       const draftTitle = createOrganizationAiTrainingDraftTitle({
@@ -3982,6 +3958,12 @@ export function AdminAiGenerationEntryPage({
         ...currentState,
         [resultPublicId]: "copied",
       }));
+      setOrganizationTrainingFeedback({
+        message:
+          "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。",
+        title: "企业训练草稿已创建",
+        tone: "success",
+      });
     } catch {
       setCopyActionError("创建企业训练草稿失败：请求未完成，请稍后重试。");
     }
@@ -4030,6 +4012,12 @@ export function AdminAiGenerationEntryPage({
 
   return (
     <section className="space-y-6" data-testid="admin-ai-generation-entry">
+      {organizationTrainingFeedback === null ? null : (
+        <AdminToast
+          feedback={organizationTrainingFeedback}
+          onDismiss={() => setOrganizationTrainingFeedback(null)}
+        />
+      )}
       <header
         className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"
         data-testid="admin-ai-generation-zone-context"
@@ -4284,9 +4272,6 @@ export function AdminAiGenerationEntryPage({
           </div>
           <AdminAiGenerationTaskHistoryPanel
             adminWorkspaceCapabilitySummary={adminWorkspaceCapabilitySummary}
-            copyActionErrorMessageByResultPublicId={
-              copyActionErrorMessageByResultPublicId
-            }
             copyActionStateByResultPublicId={copyActionStateByResultPublicId}
             currentLocalContractSummary={localContractSummary}
             generationParameters={generationParameters}

@@ -192,6 +192,7 @@ function openCreateWizard() {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -589,10 +590,12 @@ describe("AdminOrganizationTrainingPage", () => {
       within(publishedCard).queryByRole("button", { name: "发布" }),
     ).toBeNull();
 
-    fireEvent.click(
-      within(publishedCard).getByRole("button", { name: "查看" }),
-    );
-    const detailPanel = await screen.findByRole("complementary", {
+    const viewButton = within(publishedCard).getByRole("button", {
+      name: "查看",
+    });
+    viewButton.focus();
+    fireEvent.click(viewButton);
+    const detailPanel = await screen.findByRole("dialog", {
       name: "训练详情",
     });
     expect(detailPanel).toHaveTextContent("已发布版本为只读");
@@ -614,6 +617,15 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(detailPanel.textContent).not.toContain(
       "organization-training-question-detail-ui-001",
     );
+
+    expect(
+      within(detailPanel).getByRole("button", { name: "关闭训练详情" }),
+    ).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "训练详情" })).toBeNull(),
+    );
+    expect(viewButton).toHaveFocus();
 
     fireEvent.click(within(filterGroup).getByRole("button", { name: "草稿" }));
     expect(await screen.findByText("列表草稿")).toBeInTheDocument();
@@ -984,7 +996,7 @@ describe("AdminOrganizationTrainingPage", () => {
     render(createElement(AdminOrganizationTrainingPage));
 
     expect(await screen.findByText("分页训练 01")).toBeInTheDocument();
-    expect(screen.getByText("共 12 条")).toBeInTheDocument();
+    expect(screen.getByText("显示 1-10 / 共 12 条训练")).toBeInTheDocument();
     expect(screen.getByText("第 1 / 2 页")).toBeInTheDocument();
     expect(screen.queryByText("分页训练 11")).toBeNull();
 
@@ -993,18 +1005,14 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       await screen.findByRole("form", { name: "企业训练配置表单" }),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("complementary", { name: "训练详情" }),
-    ).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "训练详情" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "下一页" }));
 
     const listPanel = screen.getByRole("region", { name: "企业训练列表" });
     expect(await screen.findByText("分页训练 11")).toBeInTheDocument();
     expect(within(listPanel).queryByText("分页训练 01")).toBeNull();
-    expect(
-      screen.queryByRole("complementary", { name: "训练详情" }),
-    ).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "训练详情" })).toBeNull();
     expect(screen.getByText("第 2 / 2 页")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "下一页" })).toBeDisabled();
 
@@ -1257,9 +1265,14 @@ describe("AdminOrganizationTrainingPage", () => {
       within(publishedCard).getByRole("button", { name: "复制为新草稿" }),
     );
 
-    expect(
-      await screen.findByText("已复制为新的企业训练草稿"),
-    ).toBeInTheDocument();
+    const copyFeedback = await screen.findByRole("status");
+    expect(copyFeedback).toHaveAttribute("data-admin-feedback-tone", "success");
+    expect(copyFeedback).toHaveTextContent("企业训练复制完成");
+    expect(copyFeedback).toHaveTextContent("已复制为新的企业训练草稿");
+    fireEvent.click(
+      within(copyFeedback).getByRole("button", { name: "关闭操作反馈" }),
+    );
+    expect(screen.queryByText("已复制为新的企业训练草稿")).toBeNull();
     expect(
       readJsonRequestBody(
         fetchMock,
@@ -1911,17 +1924,10 @@ describe("AdminOrganizationTrainingPage", () => {
       within(persistedDraftCard).getByRole("button", { name: "继续配置" }),
     );
 
-    const detailPanel = await screen.findByRole("complementary", {
-      name: "训练详情",
-    });
-    expect(detailPanel).toHaveTextContent("试卷训练");
-    expect(detailPanel).toHaveTextContent("单选题部分");
-    expect(detailPanel).toHaveTextContent("synthetic AI paper source stem");
-    expect(detailPanel).not.toHaveTextContent("synthetic AI paper analysis");
-
     const publishForm = within(
       await screen.findByRole("form", { name: "企业训练发布表单" }),
     );
+    expect(screen.queryByRole("dialog", { name: "训练详情" })).toBeNull();
     await waitFor(() =>
       expect(publishForm.getByLabelText("第 1 题题干")).toHaveValue(
         "synthetic AI paper source stem",
@@ -2250,8 +2256,96 @@ describe("AdminOrganizationTrainingPage", () => {
     );
 
     const mutationAlert = await screen.findByRole("alert");
+    expect(mutationAlert).toHaveAttribute("data-admin-feedback-tone", "error");
+    expect(mutationAlert).toHaveTextContent("企业训练操作失败");
     expect(mutationAlert).toHaveTextContent("企业训练草稿创建失败");
     expect(mutationAlert).not.toHaveTextContent("500001");
+  });
+
+  it("restores allow-listed training filters and page from URL and browser history", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    window.history.replaceState(
+      null,
+      "",
+      "/organization/organization-training?status=published&sourceKind=ai_paper&contentKind=paper_training&page=2",
+    );
+    const requestedQueries: string[] = [];
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (isOrganizationTrainingListGet(url)) {
+        requestedQueries.push(getRequestSearchParams(url).toString());
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            items: [
+              {
+                publicId: "organization-training-url-state-001",
+                resourceType: "organization_training_version",
+                organizationPublicId: "organization-admin-scope-001",
+                title: "URL 状态训练",
+                status: "published",
+                sourceKind: "ai_paper",
+                contentKind: "paper_training",
+                availableActions: ["copy_to_new_draft"],
+              },
+            ],
+            redactionStatus: "metadata_only",
+            integrityStatus: "complete",
+            warningCode: null,
+          },
+          pagination: { page: 2, pageSize: 10, total: 42 },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminOrganizationTrainingPage));
+
+    await waitFor(() =>
+      expect(requestedQueries).toContain(
+        "page=2&pageSize=10&status=published&sourceKind=ai_paper&contentKind=paper_training",
+      ),
+    );
+    expect(screen.getByRole("button", { name: "已发布" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("region", { name: "列表分页" })).toHaveTextContent(
+      "第 2 / 5 页",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "草稿" }));
+    await waitFor(() => {
+      const searchParams = new URLSearchParams(window.location.search);
+      expect(searchParams.get("status")).toBe("draft");
+      expect(searchParams.get("page")).toBeNull();
+    });
+
+    window.history.pushState(
+      null,
+      "",
+      "/organization/organization-training?status=taken_down&sourceKind=manual_group&contentKind=question_training&page=3",
+    );
+    fireEvent(window, new PopStateEvent("popstate"));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "已下架" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      ),
+    );
+    expect(requestedQueries.at(-1)).toBe(
+      "page=3&pageSize=10&status=taken_down&sourceKind=manual_group&contentKind=question_training",
+    );
   });
 
   it("shows submitting copy while creating an organization training draft", async () => {

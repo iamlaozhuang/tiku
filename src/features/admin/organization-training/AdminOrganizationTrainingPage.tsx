@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
   ClipboardList,
@@ -11,6 +11,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
+import { AdminPagination } from "@/components/admin/AdminList";
+import {
+  AdminToast,
+  type AdminFeedback,
+} from "@/components/admin/AdminToast/AdminToast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type {
@@ -31,6 +37,14 @@ import type {
 } from "@/server/contracts/organization-training-contract";
 import type { OrganizationTrainingPublishInput } from "@/server/models/organization-training";
 import type { Profession, Subject } from "@/server/models/paper";
+
+import {
+  createOrganizationTrainingListSearch,
+  parseOrganizationTrainingListSearch,
+  type OrganizationTrainingLifecycleContentKindFilter,
+  type OrganizationTrainingLifecycleSourceKindFilter,
+  type OrganizationTrainingLifecycleStatusFilter,
+} from "./organization-training-list-url";
 
 import {
   AdminErrorState,
@@ -60,20 +74,6 @@ type AdminOrganizationTrainingLoadState =
 type OrganizationTrainingListState = "loading" | "ready" | "partial" | "error";
 
 type OrganizationTrainingDetailState = "idle" | "loading" | "ready" | "error";
-
-type OrganizationTrainingLifecycleStatusFilter =
-  | "all"
-  | "draft"
-  | "published"
-  | "taken_down";
-
-type OrganizationTrainingLifecycleSourceKindFilter =
-  | "all"
-  | OrganizationTrainingAdminLifecycleSourceKind;
-
-type OrganizationTrainingLifecycleContentKindFilter =
-  | "all"
-  | OrganizationTrainingAdminLifecycleContentKind;
 
 type TrainingContentShape = "question_set" | "paper_like";
 
@@ -872,6 +872,11 @@ function createPublishTrainingInput({
 }
 
 export function AdminOrganizationTrainingPage() {
+  const [initialLifecycleUrlState] = useState(() =>
+    parseOrganizationTrainingListSearch(
+      typeof window === "undefined" ? "" : window.location.search,
+    ),
+  );
   const [loadState, setLoadState] =
     useState<AdminOrganizationTrainingLoadState>("loading");
   const [draftFormValues, setDraftFormValues] = useState(
@@ -902,21 +907,80 @@ export function AdminOrganizationTrainingPage() {
   const [trainingPagination, setTrainingPagination] =
     useState<ApiPagination | null>(null);
   const [selectedLifecycleStatusFilter, setSelectedLifecycleStatusFilter] =
-    useState<OrganizationTrainingLifecycleStatusFilter>("all");
+    useState<OrganizationTrainingLifecycleStatusFilter>(
+      initialLifecycleUrlState.status,
+    );
   const [
     selectedLifecycleSourceKindFilter,
     setSelectedLifecycleSourceKindFilter,
-  ] = useState<OrganizationTrainingLifecycleSourceKindFilter>("all");
+  ] = useState<OrganizationTrainingLifecycleSourceKindFilter>(
+    initialLifecycleUrlState.sourceKind,
+  );
   const [
     selectedLifecycleContentKindFilter,
     setSelectedLifecycleContentKindFilter,
-  ] = useState<OrganizationTrainingLifecycleContentKindFilter>("all");
-  const [selectedLifecyclePage, setSelectedLifecyclePage] = useState(1);
+  ] = useState<OrganizationTrainingLifecycleContentKindFilter>(
+    initialLifecycleUrlState.contentKind,
+  );
+  const [selectedLifecyclePage, setSelectedLifecyclePage] = useState(
+    initialLifecycleUrlState.page,
+  );
   const [selectedPublishDraft, setSelectedPublishDraft] =
     useState<OrganizationTrainingAdminLifecycleItemDto | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function showTrainingError(message: string) {
+    setFeedback({
+      message,
+      title: "企业训练操作失败",
+      tone: "error",
+    });
+  }
+
+  function showTrainingSuccess(message: string, title = "企业训练操作完成") {
+    setFeedback({ message, title, tone: "success" });
+  }
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const search = createOrganizationTrainingListSearch({
+      contentKind: selectedLifecycleContentKindFilter,
+      page: selectedLifecyclePage,
+      sourceKind: selectedLifecycleSourceKindFilter,
+      status: selectedLifecycleStatusFilter,
+    });
+    const nextUrl = `${window.location.pathname}${
+      search === "" ? "" : `?${search}`
+    }${window.location.hash}`;
+
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [
+    selectedLifecycleContentKindFilter,
+    selectedLifecyclePage,
+    selectedLifecycleSourceKindFilter,
+    selectedLifecycleStatusFilter,
+  ]);
+
+  useEffect(() => {
+    function handlePopState() {
+      const restoredState = parseOrganizationTrainingListSearch(
+        window.location.search,
+      );
+
+      setSelectedLifecycleContentKindFilter(restoredState.contentKind);
+      setSelectedLifecyclePage(restoredState.page);
+      setSelectedLifecycleSourceKindFilter(restoredState.sourceKind);
+      setSelectedLifecycleStatusFilter(restoredState.status);
+    }
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -1113,17 +1177,16 @@ export function AdminOrganizationTrainingPage() {
     const sessionToken = getStoredSessionToken();
 
     setIsSubmitting(true);
-    setErrorMessage(null);
-    setMessage(null);
+    setFeedback(null);
 
     try {
       if (trainingListState !== "ready") {
-        setErrorMessage("企业训练列表尚未完整加载，暂不能新建训练");
+        showTrainingError("企业训练列表尚未完整加载，暂不能新建训练");
         return;
       }
 
       if (capabilitySummary === null) {
-        setErrorMessage("企业训练权限上下文缺失");
+        showTrainingError("企业训练权限上下文缺失");
         return;
       }
 
@@ -1136,7 +1199,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练草稿创建失败");
+        showTrainingError("企业训练草稿创建失败");
         return;
       }
 
@@ -1149,9 +1212,9 @@ export function AdminOrganizationTrainingPage() {
           createLifecycleItemFromDraft(createdDraft),
         ),
       );
-      setMessage("企业训练草稿已创建");
+      showTrainingSuccess("企业训练草稿已创建");
     } catch {
-      setErrorMessage("企业训练草稿创建失败");
+      showTrainingError("企业训练草稿创建失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -1165,8 +1228,7 @@ export function AdminOrganizationTrainingPage() {
       draftFormValues.authorizationPublicId;
 
     setIsSubmitting(true);
-    setErrorMessage(null);
-    setMessage(null);
+    setFeedback(null);
 
     try {
       const response = await mutateAdminOrganizationTrainingApi<{
@@ -1178,7 +1240,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练复制失败");
+        showTrainingError("企业训练复制失败");
         return;
       }
 
@@ -1191,9 +1253,9 @@ export function AdminOrganizationTrainingPage() {
           createLifecycleItemFromDraft(copiedDraft),
         ),
       );
-      setMessage("已复制为新的企业训练草稿");
+      showTrainingSuccess("已复制为新的企业训练草稿", "企业训练复制完成");
     } catch {
-      setErrorMessage("企业训练复制失败");
+      showTrainingError("企业训练复制失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -1211,8 +1273,7 @@ export function AdminOrganizationTrainingPage() {
   async function handleTakeDownVersion(
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) {
-    setErrorMessage(null);
-    setMessage(null);
+    setFeedback(null);
 
     const isConfirmed = window.confirm(
       "确认下架该企业训练？下架后员工端不再展示该训练。",
@@ -1226,7 +1287,7 @@ export function AdminOrganizationTrainingPage() {
     const takedownReason = rawReason?.trim() ?? "";
 
     if (takedownReason.length === 0) {
-      setErrorMessage("请输入下架原因");
+      showTrainingError("请输入下架原因");
       return;
     }
 
@@ -1247,7 +1308,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练下架失败");
+        showTrainingError("企业训练下架失败");
         return;
       }
 
@@ -1260,9 +1321,9 @@ export function AdminOrganizationTrainingPage() {
           createLifecycleItemFromVersion(takenDownVersion),
         ),
       );
-      setMessage("企业训练已下架");
+      showTrainingSuccess("企业训练已下架");
     } catch {
-      setErrorMessage("企业训练下架失败");
+      showTrainingError("企业训练下架失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -1302,19 +1363,18 @@ export function AdminOrganizationTrainingPage() {
     const sessionToken = getStoredSessionToken();
 
     setIsSubmitting(true);
-    setErrorMessage(null);
-    setMessage(null);
+    setFeedback(null);
 
     try {
       if (capabilitySummary === null || selectedPublishDraft === null) {
-        setErrorMessage("企业训练发布上下文缺失");
+        showTrainingError("企业训练发布上下文缺失");
         return;
       }
 
       const publishBlockMessage = resolvePublishBlockMessage(values);
 
       if (publishBlockMessage !== null) {
-        setErrorMessage(publishBlockMessage);
+        showTrainingError(publishBlockMessage);
         return;
       }
 
@@ -1325,7 +1385,7 @@ export function AdminOrganizationTrainingPage() {
       });
 
       if (publishInput === null) {
-        setErrorMessage("企业训练发布内容不完整");
+        showTrainingError("企业训练发布内容不完整");
         return;
       }
 
@@ -1338,7 +1398,7 @@ export function AdminOrganizationTrainingPage() {
       );
 
       if (response.code !== 0 || response.data === null) {
-        setErrorMessage("企业训练发布失败");
+        showTrainingError("企业训练发布失败");
         return;
       }
 
@@ -1352,9 +1412,9 @@ export function AdminOrganizationTrainingPage() {
         ),
       );
       setSelectedPublishDraft(null);
-      setMessage("企业训练已发布");
+      showTrainingSuccess("企业训练已发布");
     } catch {
-      setErrorMessage("企业训练发布失败");
+      showTrainingError("企业训练发布失败");
     } finally {
       setIsSubmitting(false);
     }
@@ -1378,21 +1438,8 @@ export function AdminOrganizationTrainingPage() {
         </div>
       </header>
 
-      {message === null ? null : (
-        <div
-          className="bg-success/10 text-success rounded-md px-4 py-3 text-sm"
-          role="status"
-        >
-          {message}
-        </div>
-      )}
-      {errorMessage === null ? null : (
-        <div
-          className="bg-destructive/10 text-destructive rounded-md px-4 py-3 text-sm"
-          role="alert"
-        >
-          {errorMessage}
-        </div>
+      {feedback === null ? null : (
+        <AdminToast feedback={feedback} onDismiss={() => setFeedback(null)} />
       )}
 
       <TrainingListPanel
@@ -1616,17 +1663,7 @@ function TrainingListPanel({
     item: OrganizationTrainingAdminLifecycleItemDto,
   ) {
     clearSelectedDetail();
-    const detail = await onContinueDraft(item);
-
-    if (detail === null) {
-      return;
-    }
-
-    detailRequestSerial.current += 1;
-    setSelectedDetailPublicId(item.publicId);
-    setSelectedDetail(detail);
-    setDetailMessage(null);
-    setDetailState("ready");
+    await onContinueDraft(item);
   }
 
   async function handleViewItem(
@@ -1844,50 +1881,33 @@ function TrainingListPanel({
         )}
       </div>
       {shouldShowLifecycleControls ? (
-        <div
-          aria-label="企业训练分页"
-          className="text-text-secondary mt-3 flex flex-col gap-2 text-sm md:flex-row md:items-center md:justify-between"
-          role="navigation"
-        >
-          <div className="flex flex-wrap gap-3">
-            <span>共 {totalItemCount} 条</span>
-            <span>
-              第 {clampedSelectedPage} / {totalPageCount} 页
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              disabled={clampedSelectedPage <= 1}
-              onClick={() => {
-                clearSelectedDetail();
-                onSelectPage(Math.max(1, clampedSelectedPage - 1));
-              }}
-              type="button"
-              variant="outline"
-            >
-              上一页
-            </Button>
-            <Button
-              disabled={clampedSelectedPage >= totalPageCount}
-              onClick={() => {
-                clearSelectedDetail();
-                onSelectPage(Math.min(totalPageCount, clampedSelectedPage + 1));
-              }}
-              type="button"
-              variant="outline"
-            >
-              下一页
-            </Button>
-          </div>
+        <div className="mt-3">
+          <AdminPagination
+            itemLabel="条训练"
+            page={clampedSelectedPage}
+            pageSize={pagination?.pageSize ?? organizationTrainingListPageSize}
+            total={totalItemCount}
+            onPageChange={(page) => {
+              clearSelectedDetail();
+              onSelectPage(page);
+            }}
+          />
         </div>
       ) : null}
       {selectedDetailItem === null ? null : (
-        <TrainingLifecycleDetailPanel
-          detail={selectedDetail}
-          detailMessage={detailMessage}
-          detailState={detailState}
-          item={selectedDetailItem}
-        />
+        <AdminDetailDrawer
+          ariaLabel="训练详情"
+          description={selectedDetailItem.title}
+          onClose={clearSelectedDetail}
+          title="训练详情"
+        >
+          <TrainingLifecycleDetailPanel
+            detail={selectedDetail}
+            detailMessage={detailMessage}
+            detailState={detailState}
+            item={selectedDetailItem}
+          />
+        </AdminDetailDrawer>
       )}
     </section>
   );
@@ -2022,23 +2042,16 @@ function TrainingLifecycleDetailPanel({
     : (item.totalScore ?? 0);
 
   return (
-    <aside
-      aria-label="训练详情"
-      className="border-border bg-muted/30 mt-4 rounded-md border p-4"
-    >
-      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1">
-          <h3 className="text-text-primary text-sm font-semibold">训练详情</h3>
-          <p className="text-text-secondary text-sm">{item.title}</p>
-        </div>
+    <section aria-label="训练详情内容" className="space-y-4">
+      <div className="flex justify-end">
         <span className="bg-surface text-text-secondary border-border inline-flex h-7 items-center rounded-md border px-2 text-xs font-medium">
           {resolveLifecycleStatusLabel(item)}
         </span>
       </div>
-      <p className="text-text-secondary mt-3 text-sm">
+      <p className="text-text-secondary text-sm">
         已发布版本为只读；如需调整内容，请复制为新草稿后再发布。
       </p>
-      <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+      <dl className="grid gap-2 text-sm sm:grid-cols-3">
         <div className="bg-surface rounded-md p-3">
           <dt className="text-text-secondary">来源</dt>
           <dd className="text-text-primary font-medium">
@@ -2071,7 +2084,7 @@ function TrainingLifecycleDetailPanel({
         detailMessage={detailMessage}
         detailState={detailState}
       />
-    </aside>
+    </section>
   );
 }
 

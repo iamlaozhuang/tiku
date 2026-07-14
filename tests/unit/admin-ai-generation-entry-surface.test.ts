@@ -3833,11 +3833,25 @@ describe("admin AI generation entry surfaces", () => {
 
     fireEvent.click(copyAction);
 
+    const copyFeedbackMessage = await screen.findByText(
+      "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。",
+    );
+    const copyFeedback = copyFeedbackMessage.closest('[role="status"]');
+    expect(copyFeedback).toBeInstanceOf(HTMLElement);
+    if (!(copyFeedback instanceof HTMLElement)) {
+      throw new Error("Expected organization training copy feedback");
+    }
+    expect(copyFeedback).toHaveAttribute("data-admin-feedback-tone", "success");
+    expect(copyFeedback).toHaveTextContent("企业训练草稿已创建");
+    expect(copyFeedback).toHaveTextContent(
+      "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。",
+    );
+    fireEvent.click(
+      within(copyFeedback).getByRole("button", { name: "关闭操作反馈" }),
+    );
     expect(
-      await screen.findByText(
-        "已创建企业训练草稿并关联本次 AI 任务；发布前仍需编辑、预览和校验。",
-      ),
-    ).toBeInTheDocument();
+      screen.getByTestId("organization-ai-training-copy-action"),
+    ).toBeDisabled();
 
     const draftBody = JSON.parse(
       String(
@@ -3964,11 +3978,12 @@ describe("admin AI generation entry surfaces", () => {
       await screen.findByTestId("organization-ai-training-copy-action"),
     );
 
-    expect(
-      await screen.findByText(
-        "创建企业训练草稿失败（code: 403079）：Organization training manual draft lineage is unavailable.",
-      ),
-    ).toBeInTheDocument();
+    const copyAlert = await screen.findByRole("alert");
+    expect(copyAlert).toHaveAttribute("data-admin-feedback-tone", "error");
+    expect(copyAlert).toHaveTextContent("企业训练草稿创建失败");
+    expect(copyAlert).toHaveTextContent(
+      "创建企业训练草稿失败（code: 403079）：Organization training manual draft lineage is unavailable.",
+    );
   });
 
   it("requires explicit weak-evidence wording before copying organization AI results and blocks none evidence", async () => {

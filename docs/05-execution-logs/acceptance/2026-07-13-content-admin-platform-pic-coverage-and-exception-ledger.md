@@ -63,7 +63,7 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 | paper/knowledge/resource       | content            | E1           | compliant      | publish snapshot, RAG/resource boundary                       |
 | content AI draft/review        | content            | E1           | compliant      | formal content separation, Provider closed                    |
 | user/org/auth/redeem/log       | operations         | E2           | compliant      | phone masking, plaintext redeem UI exception, audit redaction |
-| organization admin/training/AI | organization       | E3           | partial        | organization scope, edition, non-formal training domain       |
+| organization admin/training/AI | organization       | E3           | compliant      | organization scope, edition, non-formal training domain       |
 | practice/mock/report/AI        | learner            | E4           | partial        | mobile-first, authorization context, persisted snapshot       |
 | super admin cross-workspace    | operations/content | E5           | partial        | no authorization or lifecycle bypass                          |
 
@@ -274,6 +274,17 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   plus the impact-triggered full suite pass.
 - `user/org/auth/redeem/log` is compliant for the E2 implementation family only. Global PIC statuses remain unchanged
   pending E3-E6 and F acceptance; E5 retains cross-workspace aliases and the exception ledger remains empty.
+
+### E3 Organization Page-Family Rollout
+
+- Organization-training list intent now has one allow-listed canonical URL contract, shared pagination and a shared
+  focus-managed read-only Drawer. Create/copy/publish/takedown and organization-AI copy terminal results use the shared
+  accessible Toast without changing request, scope, edition or data-domain contracts.
+- Focused proof covers portal, training, analytics, organization AI, standard/advanced direct routes, Drawer focus and
+  protected authorization/AI/training boundaries. Portal stays read-only, analytics aggregate-only and no-export, and AI
+  adoption remains organization-private non-formal training content.
+- `organization admin/training/AI` is compliant for the E3 implementation family only. Global PIC statuses remain
+  unchanged pending E4-E6 and F acceptance; E5 retains cross-workspace aliases and the exception ledger remains empty.
 
 ## Exception Ledger
 
