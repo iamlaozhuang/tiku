@@ -64,8 +64,8 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 | content AI draft/review        | content            | E1           | compliant      | formal content separation, Provider closed                    |
 | user/org/auth/redeem/log       | operations         | E2           | compliant      | phone masking, plaintext redeem UI exception, audit redaction |
 | organization admin/training/AI | organization       | E3           | compliant      | organization scope, edition, non-formal training domain       |
-| practice/mock/report/AI        | learner            | E4           | partial        | mobile-first, authorization context, persisted snapshot       |
-| super admin cross-workspace    | operations/content | E5           | partial        | no authorization or lifecycle bypass                          |
+| practice/mock/report/AI        | learner            | E4           | compliant      | mobile-first, authorization context, persisted snapshot       |
+| super admin cross-workspace    | operations/content | E5           | compliant      | no authorization or lifecycle bypass                          |
 
 45 个当前 page entry、68 个脱敏 role/page view、E1-E5 owner、proof root、风险与验证方式的唯一精确清单见
 `docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e0-route-family-inventory.md`；本台账不复制该事实表。
@@ -297,6 +297,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - `learner practice/mock/report/AI/organization-training` is compliant for the E4 implementation family only. Global PIC
   statuses remain unchanged pending E5/E6 and F acceptance; E5 retains cross-workspace aliases and the exception ledger
   remains empty.
+
+### E5 Cross-Role Exception Closure
+
+- The URL-transparent `(dev)` group now has a server production gate; production build metadata proves
+  `/design-system` returns 404 while exact development remains available. The legacy content organization-portal entry
+  redirects into the canonical organization route instead of rendering organization UI under content ownership.
+- Operations resource and AI-audit compatibility aliases retain exact content/redacted-log destinations. Direct-route,
+  empty-role, contaminated-role, missing-organization-context and super-admin matrices prove public discovery and UI
+  consistency never replace server-session and service authorization.
+- E0-G01 through E0-G04 are closed. `super admin cross-workspace` is compliant for the E5 implementation family; global
+  PIC promotion remains E6/F-owned. The approved exception count remains zero, and no authorization, edition, AI, phone,
+  `redeem_code`, audit-redaction, historical-paper or deployment boundary changed.
 
 ## Exception Ledger
 

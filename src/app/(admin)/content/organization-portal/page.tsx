@@ -1,5 +1,5 @@
-import { AdminOrganizationPortalPage } from "@/features/admin/organization-portal/AdminOrganizationPortalPage";
+import { redirect } from "next/navigation";
 
 export default function AdminOrganizationPortalRoutePage() {
-  return <AdminOrganizationPortalPage />;
+  redirect("/organization/portal");
 }

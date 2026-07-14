@@ -1,15 +1,15 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: content-admin-platform-e4-learner-page-family-rollout-2026-07-13
-updatedAt: "2026-07-13T21:29:16-07:00"
+currentPhase: content-admin-platform-e5-cross-role-exception-closure-2026-07-13
+updatedAt: "2026-07-13T22:05:59-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-e4-learner-page-family-rollout-2026-07-13
-  nextTaskId: content-admin-platform-e5-cross-role-exception-closure-2026-07-13
+  currentTaskId: content-admin-platform-e5-cross-role-exception-closure-2026-07-13
+  nextTaskId: content-admin-platform-e6-cumulative-audit-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -71,7 +71,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-e1-content-page-family-rollout-2026-07-13
     - content-admin-platform-e2-operations-page-family-rollout-2026-07-13
     - content-admin-platform-e3-organization-page-family-rollout-2026-07-13
-  lastClosedTaskId: content-admin-platform-e3-organization-page-family-rollout-2026-07-13
+    - content-admin-platform-e4-learner-page-family-rollout-2026-07-13
+  lastClosedTaskId: content-admin-platform-e4-learner-page-family-rollout-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   coverageLedgerPath: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
@@ -106,8 +107,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-e1-content-page-family-rollout-2026-07-13: closed
     content-admin-platform-e2-operations-page-family-rollout-2026-07-13: closed
     content-admin-platform-e3-organization-page-family-rollout-2026-07-13: closed
-    content-admin-platform-e4-learner-page-family-rollout-2026-07-13: ready_for_closeout
-    content-admin-platform-e5-cross-role-exception-closure-2026-07-13: pending
+    content-admin-platform-e4-learner-page-family-rollout-2026-07-13: closed
+    content-admin-platform-e5-cross-role-exception-closure-2026-07-13: ready_for_closeout
     content-admin-platform-e6-cumulative-audit-2026-07-13: pending
     content-admin-platform-f0-acceptance-readiness-2026-07-13: pending
     content-admin-platform-f1-content-admin-acceptance-2026-07-13: pending
@@ -267,6 +268,12 @@ contentAdminPlatformSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     content-admin-platform-e4-learner-page-family-rollout-2026-07-13:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    content-admin-platform-e5-cross-role-exception-closure-2026-07-13:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -291,18 +298,18 @@ contentAdminPlatformSerialProgram:
       status: accepted
       reason: current user explicitly authorized serial M1 then M2 before resuming B0
 currentTask:
-  id: content-admin-platform-e4-learner-page-family-rollout-2026-07-13
-  title: Content admin platform learner page-family rollout
-  phase: content-admin-platform-e4-learner-page-family-rollout-2026-07-13
+  id: content-admin-platform-e5-cross-role-exception-closure-2026-07-13
+  title: Content admin platform cross-role exception closure
+  phase: content-admin-platform-e5-cross-role-exception-closure-2026-07-13
   status: ready_for_closeout
   priority: p0
   taskKind: page_family_rollout
-  branch: codex/content-admin-platform-e4-learner-page-family-rollout
+  branch: codex/content-admin-platform-e5-cross-role-exception-closure
   executionProfile: R3
-  planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e4-learner-page-family-rollout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e4-learner-page-family-rollout.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-e4-learner-page-family-rollout-audit.md
-  nextRequiredTaskId: content-admin-platform-e5-cross-role-exception-closure-2026-07-13
+  planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-e5-cross-role-exception-closure.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-e5-cross-role-exception-closure.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-e5-cross-role-exception-closure-audit.md
+  nextRequiredTaskId: content-admin-platform-e6-cumulative-audit-2026-07-13
 standingAuthorization:
   id: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   source: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
@@ -312,9 +319,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: e1a5797f3155f45ccfa020b67c01036d781e021b
-  lastKnownOriginMasterSha: e1a5797f3155f45ccfa020b67c01036d781e021b
-  lastKnownRemoteMasterSha: e1a5797f3155f45ccfa020b67c01036d781e021b
+  lastKnownMasterSha: 71565460493c28e1f18e457256c8713f17d77775
+  lastKnownOriginMasterSha: 71565460493c28e1f18e457256c8713f17d77775
+  lastKnownRemoteMasterSha: 71565460493c28e1f18e457256c8713f17d77775
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass
