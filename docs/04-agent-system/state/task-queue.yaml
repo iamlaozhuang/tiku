@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-f3-organization-acceptance-2026-07-13
-  nextTaskId: content-admin-platform-f4-learner-acceptance-2026-07-13
+  currentTaskId: content-admin-platform-f4-learner-acceptance-2026-07-13
+  nextTaskId: content-admin-platform-f5-final-cumulative-audit-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -73,7 +73,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-f0-acceptance-readiness-2026-07-13
     - content-admin-platform-f1-content-admin-acceptance-2026-07-13
     - content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
-  lastClosedTaskId: content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+    - content-admin-platform-f3-organization-acceptance-2026-07-13
+  lastClosedTaskId: content-admin-platform-f3-organization-acceptance-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -113,8 +114,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-f0-acceptance-readiness-2026-07-13: closed
     content-admin-platform-f1-content-admin-acceptance-2026-07-13: closed
     content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13: closed
-    content-admin-platform-f3-organization-acceptance-2026-07-13: ready_for_closeout
-    content-admin-platform-f4-learner-acceptance-2026-07-13: pending
+    content-admin-platform-f3-organization-acceptance-2026-07-13: closed
+    content-admin-platform-f4-learner-acceptance-2026-07-13: ready_for_closeout
     content-admin-platform-f5-final-cumulative-audit-2026-07-13: pending
   conditionalTasks:
     x1:
@@ -128,17 +129,17 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-f3-organization-acceptance-2026-07-13
-    title: Content admin platform organization acceptance
-    phase: content-admin-platform-f3-organization-acceptance-2026-07-13
+  - id: content-admin-platform-f4-learner-acceptance-2026-07-13
+    title: Content admin platform learner acceptance
+    phase: content-admin-platform-f4-learner-acceptance-2026-07-13
     status: ready_for_closeout
     priority: p0
-    sequenceOrder: 107
+    sequenceOrder: 108
     taskKind: role_acceptance
     moduleRunVersion: 3
-    branch: codex/content-admin-platform-f3-organization-acceptance
+    branch: codex/content-admin-platform-f4-learner-acceptance
     dependsOn:
-      - content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+      - content-admin-platform-f3-organization-acceptance-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
     executionProfile: R3
@@ -159,21 +160,20 @@ activeTasks:
       - a01_a30
       - authorization
       - edition
-      - organization_scope
-      - organization_training
       - ai
+      - historical_paper_assembly
       - deployment
     reviewMode: independent_audit
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f3-organization-acceptance.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f3-organization-acceptance.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f3-organization-acceptance-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f4-learner-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f4-learner-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f4-learner-acceptance-audit.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f3-organization-acceptance.md
-      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f3-organization-acceptance.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f3-organization-acceptance-audit.md
+      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f4-learner-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f4-learner-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f4-learner-acceptance-audit.md
       - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
     blockedFiles:
       - AGENTS.md
@@ -201,7 +201,7 @@ activeTasks:
       privateCredentialRead: approved_0704_index_and_canonical_catalog_in_memory
       productLoginSessionUse: approved_localhost_only_no_session_output
       productSessionLifecycle: approved_temporary_login_logout_only
-      productDataRead: approved_bounded_redacted_organization_routes_only
+      productDataRead: approved_bounded_redacted_learner_routes_only
       browserAutomation: approved_redacted_no_retained_artifacts
       envSecretAccess: approved_process_memory_only_no_value_output
       directDatabaseConnection: blocked
@@ -216,26 +216,26 @@ activeTasks:
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - canonical standard/advanced organization-admin and employee sessions pass representative portal, training, analytics and organization-AI routes.
-      - organization context and scope remain server-owned; no cross-organization row, employee answer or aggregate detail leaks.
-      - standard edition remains limited and advanced routes fail closed with truthful upgrade guidance; advanced capability does not erase role separation.
-      - organization training preserves draft/publish/take-down and employee pending/submitted/read-only lifecycle semantics without executing any mutation.
-      - organization AI remains Provider-closed and organization-private; no generation, copy-to-training, formal adoption or content-domain action is executed.
-      - no unexpected browser console or product request failure remains, all temporary sessions are revoked, and the isolated runtime and port are cleaned.
-      - no credential, session, cookie, token, env value, DB URL, raw row, identifier, employee answer, private content, screenshot, DOM or trace enters evidence.
+      - canonical personal standard and advanced student sessions pass representative home, practice, mock-exam, report, profile and personal-AI routes.
+      - authorization context and edition remain server-owned; standard users cannot gain advanced AI capability and advanced capability does not alter formal learning records.
+      - practice, mock-exam and report states remain truthful without starting, answering, saving, submitting, retrying or otherwise mutating a learner record.
+      - personal AI remains Provider-closed and isolated from formal practice, mock-exam, report and mistake-book records; current empty history is not fabricated.
+      - historical paperAssembly resume remains persisted-snapshot-only; X1 is triggered only if representative F4 acceptance proves a valid persisted sample indispensable.
+      - no unexpected browser console or product request failure remains, both temporary sessions are revoked, and the isolated runtime and port are cleaned.
+      - no credential, session, cookie, token, env value, DB URL, raw row, identifier, answer, report content, screenshot, DOM or trace enters evidence.
     validationCommands:
-      - redacted Playwright organization standard/advanced admin and employee localhost representative route and interaction acceptance
+      - redacted Playwright personal standard/advanced student localhost representative route and interaction acceptance
       - redacted process-only 0704DB Provider-closed and cleanup verification
-      - node D:\tiku\node_modules\vitest\vitest.mjs run --maxWorkers=1 tests/unit/organization-admin-standard-advanced-workspace-source-contract.test.ts tests/unit/organization-portal-admin-entry-surface.test.ts tests/unit/organization-training-admin-entry-surface.test.ts tests/unit/organization-training-employee-entry-surface.test.ts tests/unit/organization-analytics-admin-entry-surface.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts tests/unit/ai-generation-availability-route.test.ts
+      - node D:\tiku\node_modules\vitest\vitest.mjs run --maxWorkers=1 tests/unit/student-home-ui.test.ts tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-profile-redeem-ui.test.ts tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx tests/unit/ai-generation-availability-route.test.ts src/server/services/personal-ai-generation-learning-session-route.test.ts src/server/services/personal-ai-generation-result-history-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - node D:\tiku\node_modules\prettier\bin\prettier.cjs --check F3_CHANGED_DOCS
+      - node D:\tiku\node_modules\prettier\bin\prettier.cjs --check F4_CHANGED_DOCS
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-f3-organization-acceptance-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-f3-organization-acceptance-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-f3-organization-acceptance-2026-07-13 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-f4-learner-acceptance-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-f4-learner-acceptance-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-f4-learner-acceptance-2026-07-13 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
       localCommit:
@@ -252,17 +252,17 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-  - id: content-admin-platform-f4-learner-acceptance-2026-07-13
-    title: Content admin platform learner acceptance
-    phase: content-admin-platform-f4-learner-acceptance-2026-07-13
+  - id: content-admin-platform-f5-final-cumulative-audit-2026-07-13
+    title: Content admin platform final cumulative audit
+    phase: content-admin-platform-f5-final-cumulative-audit-2026-07-13
     status: pending
     priority: p0
-    sequenceOrder: 108
-    taskKind: role_acceptance
+    sequenceOrder: 109
+    taskKind: cumulative_audit
     moduleRunVersion: 3
-    branch: not_created_until_f3_closeout
+    branch: not_created_until_f4_closeout
     dependsOn:
-      - content-admin-platform-f3-organization-acceptance-2026-07-13
+      - content-admin-platform-f4-learner-acceptance-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
     executionProfile: R3
@@ -283,9 +283,13 @@ activeTasks:
       - a01_a30
       - authorization
       - edition
-      - personal_auth
       - ai
-      - historical_resume
+      - organization_scope
+      - organization_training
+      - phone
+      - redeem_code
+      - audit_redaction
+      - historical_paper_assembly
       - deployment
     reviewMode: independent_audit
     capabilities:

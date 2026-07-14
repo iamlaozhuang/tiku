@@ -369,6 +369,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   focused regression protects closed shared contracts. F5 retains global reconciliation, the approved exception count
   remains zero and deployment remains blocked.
 
+### F4 Learner Representative Acceptance
+
+- Canonical 0704DB personal standard/advanced learners passed home, practice/mock entry guards, report, profile and
+  personal-AI representative routes. Standard learning/report data was non-empty and read-only; advanced report and
+  personal-AI histories remained truthful empty states rather than fabricated fixtures.
+- Authorization and edition stayed server-owned. Standard personal AI failed closed with no advanced controls; advanced
+  personal AI retained four accountable zones while Provider closure disabled generation. No practice, mock, report,
+  redeem, AI-learning or formal-content mutation occurred, and no historical resume sample was fabricated.
+- The learner route family is representative-role compliant. F4 contributes PIC-01/04/05/10/11/12/13 proof; focused
+  regression protects formal-learning isolation and persisted-snapshot-only resume. F5 retains global reconciliation,
+  the approved exception count remains zero and deployment remains blocked.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
