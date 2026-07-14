@@ -476,7 +476,7 @@ export function createQuestionFormValuesFromQuestion(
   };
 }
 
-function createMaterialFormValuesFromMaterial(
+export function createMaterialFormValuesFromMaterial(
   material: MaterialDto,
 ): MaterialFormValues {
   return {
@@ -1645,7 +1645,9 @@ export function AdminQuestionMaterialManagement({
   async function handleMaterialAction(
     material: MaterialDto,
     action: "copy" | "disable",
-  ) {
+  ): Promise<MaterialDto | null> {
+    if (submissionInProgressRef.current) return null;
+
     const sessionToken = getStoredSessionToken();
 
     if (sessionToken === null) {
@@ -1654,9 +1656,11 @@ export function AdminQuestionMaterialManagement({
         title: "材料操作失败",
         tone: "error",
       });
-      return;
+      return null;
     }
 
+    submissionInProgressRef.current = true;
+    setIsSubmitting(true);
     setActionError(null);
     setActionMessage(null);
     setContentMutationFeedback(null);
@@ -1672,7 +1676,7 @@ export function AdminQuestionMaterialManagement({
         setContentMutationFeedback(
           createContentActionErrorFeedback("material", response.code),
         );
-        return;
+        return null;
       }
 
       const updatedMaterial = response.data.material;
@@ -1684,8 +1688,13 @@ export function AdminQuestionMaterialManagement({
         title: "材料已更新",
         tone: "success",
       });
+      return updatedMaterial;
     } catch {
       setContentMutationFeedback(createContentActionErrorFeedback("material"));
+      return null;
+    } finally {
+      submissionInProgressRef.current = false;
+      setIsSubmitting(false);
     }
   }
 
@@ -1975,6 +1984,25 @@ export function AdminQuestionMaterialManagement({
                 void handleRecommendKnowledgeNodes(question)
               }
               onReviewRecommendation={handleReviewKnowledgeRecommendation}
+            />
+          ) : materialEditorRoutesEnabled ? (
+            <MaterialListWithEditorRoutes
+              emptyTitle={
+                hasActiveContentFilters ? "没有匹配的材料" : "暂无材料"
+              }
+              rows={displayedMaterials}
+              selectedPublicId={selectedMaterialPublicId}
+              onCopy={(material) => handleMaterialAction(material, "copy")}
+              onDisable={(material) =>
+                setPendingContentAction({
+                  kind: "materialDisable",
+                  readableName: createMaterialReadableName(material),
+                  publicId: material.publicId,
+                })
+              }
+              onView={(publicId) =>
+                setDetailTarget({ kind: "material", publicId })
+              }
             />
           ) : (
             <MaterialList
@@ -3148,12 +3176,14 @@ function QuestionFormSelect({
 export function AdminMaterialEditorForm({
   isSubmitting,
   mode,
+  submitBlockedReason = null,
   values,
   onCancel,
   onSubmit,
 }: {
   isSubmitting: boolean;
   mode: MaterialFormMode;
+  submitBlockedReason?: string | null;
   values: MaterialFormValues;
   onCancel: () => void;
   onSubmit: (values: MaterialFormValues) => void;
@@ -3169,6 +3199,9 @@ export function AdminMaterialEditorForm({
   );
   const materialLengthExceeded =
     formValues.contentRichText.length > MAX_MATERIAL_RICH_TEXT_LENGTH;
+  const disabledReason = isSubmitting
+    ? "正在保存，请勿重复提交。"
+    : submitBlockedReason;
 
   return (
     <form
@@ -3345,8 +3378,10 @@ export function AdminMaterialEditorForm({
       </p>
       <div className="flex flex-wrap gap-2">
         <Button
-          aria-describedby={isSubmitting ? disabledReasonId : undefined}
-          disabled={isSubmitting}
+          aria-describedby={
+            disabledReason === null ? undefined : disabledReasonId
+          }
+          disabled={disabledReason !== null}
           type="submit"
         >
           {isSubmitting ? "保存中…" : "保存材料"}
@@ -3356,7 +3391,7 @@ export function AdminMaterialEditorForm({
         </Button>
         <AdminFormDisabledReason
           id={disabledReasonId}
-          reason={isSubmitting ? "正在保存，请勿重复提交。" : null}
+          reason={disabledReason}
         />
       </div>
     </form>
@@ -4020,6 +4055,49 @@ function KnowledgeRecommendationReviewPanel({
         </div>
       )}
     </section>
+  );
+}
+
+function MaterialListWithEditorRoutes({
+  emptyTitle,
+  onCopy,
+  onDisable,
+  onView,
+  rows,
+  selectedPublicId,
+}: {
+  emptyTitle: string;
+  onCopy: (material: MaterialDto) => Promise<MaterialDto | null>;
+  onDisable: (material: MaterialDto) => void;
+  onView: (publicId: string) => void;
+  rows: MaterialDto[];
+  selectedPublicId: string | null;
+}) {
+  const router = useRouter();
+
+  return (
+    <MaterialList
+      emptyTitle={emptyTitle}
+      rows={rows}
+      selectedPublicId={selectedPublicId}
+      onCopy={(material) => {
+        void (async () => {
+          const copiedMaterial = await onCopy(material);
+          if (copiedMaterial !== null) {
+            router.replace(
+              `/content/materials/${encodeURIComponent(copiedMaterial.publicId)}/edit`,
+            );
+          }
+        })();
+      }}
+      onDisable={onDisable}
+      onEdit={(material) =>
+        router.push(
+          `/content/materials/${encodeURIComponent(material.publicId)}/edit`,
+        )
+      }
+      onView={onView}
+    />
   );
 }
 

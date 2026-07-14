@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Copy, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { AdminAsyncState } from "@/components/admin/AdminAsyncState";
 import { AdminToast, type AdminFeedback } from "@/components/admin/AdminToast";
 import { Button } from "@/components/ui/button";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import type { MaterialResultDto } from "@/server/contracts/material-contract";
+import type {
+  MaterialDto,
+  MaterialResultDto,
+} from "@/server/contracts/material-contract";
 
 import {
   fetchAdminApi,
@@ -19,20 +22,35 @@ import {
 import {
   AdminMaterialEditorForm,
   createDefaultMaterialFormValues,
+  createMaterialFormValuesFromMaterial,
   createMaterialInput,
   type MaterialFormValues,
 } from "./AdminMaterialEditorForm";
 
-type EditorLoadState = "loading" | "ready" | "unauthorized" | "error";
+type EditorLoadState =
+  | "loading"
+  | "ready"
+  | "unauthorized"
+  | "forbidden"
+  | "not_found"
+  | "error";
 
-export function AdminMaterialEditorPage() {
+const MATERIAL_LOCKED_CODE = 409201;
+
+export function AdminMaterialEditorPage({
+  materialPublicId,
+}: {
+  materialPublicId?: string;
+}) {
   const router = useRouter();
+  const isEditMode = materialPublicId !== undefined;
   const [loadState, setLoadState] = useState<EditorLoadState>("loading");
+  const [material, setMaterial] = useState<MaterialDto | null>(null);
   const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [createdMaterialTitle, setCreatedMaterialTitle] = useState<
-    string | null
-  >(null);
+  const [isCopying, setIsCopying] = useState(false);
+  const [lockConflict, setLockConflict] = useState(false);
+  const [formRevision, setFormRevision] = useState(0);
   const submissionInProgressRef = useRef(false);
 
   useEffect(() => {
@@ -41,9 +59,11 @@ export function AdminMaterialEditorPage() {
     async function loadEditor() {
       submissionInProgressRef.current = false;
       setLoadState("loading");
+      setMaterial(null);
       setFeedback(null);
       setIsSubmitting(false);
-      setCreatedMaterialTitle(null);
+      setIsCopying(false);
+      setLockConflict(false);
       const sessionToken = getStoredSessionToken();
       if (sessionToken === null) {
         if (isActive) setLoadState("unauthorized");
@@ -67,6 +87,35 @@ export function AdminMaterialEditorPage() {
           return;
         }
 
+        if (!isEditMode) {
+          setLoadState("ready");
+          return;
+        }
+
+        const detailResponse = await fetchAdminApi<MaterialResultDto>(
+          `/api/v1/materials/${encodeURIComponent(materialPublicId)}`,
+          sessionToken,
+        );
+        if (!isActive) return;
+
+        if (isUnauthorizedResponse(detailResponse)) {
+          setLoadState("unauthorized");
+          return;
+        }
+        if (String(detailResponse.code).startsWith("403")) {
+          setLoadState("forbidden");
+          return;
+        }
+        if (detailResponse.code === 404201) {
+          setLoadState("not_found");
+          return;
+        }
+        if (detailResponse.code !== 0 || detailResponse.data === null) {
+          setLoadState("error");
+          return;
+        }
+
+        setMaterial(detailResponse.data.material);
         setLoadState("ready");
       } catch {
         if (isActive) setLoadState("error");
@@ -77,14 +126,68 @@ export function AdminMaterialEditorPage() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [isEditMode, materialPublicId]);
 
   function handleReturnToList() {
     router.push("/content/materials");
   }
 
+  async function handleCopyMaterial() {
+    if (materialPublicId === undefined || submissionInProgressRef.current) {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+    if (sessionToken === null) {
+      setFeedback({
+        message: "管理员会话已失效，请重新登录后再操作。",
+        title: "材料复制失败",
+        tone: "error",
+      });
+      return;
+    }
+
+    submissionInProgressRef.current = true;
+    setIsCopying(true);
+    setFeedback(null);
+    let navigationStarted = false;
+
+    try {
+      const response = await fetchAdminApi<MaterialResultDto>(
+        `/api/v1/materials/${encodeURIComponent(materialPublicId)}/copy`,
+        sessionToken,
+        { method: "POST" },
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setFeedback({
+          message: "当前页面保持不变，请检查冲突或稍后重试。",
+          title: "材料复制失败",
+          tone: String(response.code).startsWith("409") ? "conflict" : "error",
+        });
+        return;
+      }
+
+      navigationStarted = true;
+      router.replace(
+        `/content/materials/${encodeURIComponent(response.data.material.publicId)}/edit`,
+      );
+    } catch {
+      setFeedback({
+        message: "当前页面保持不变，请检查网络后重试。",
+        title: "材料复制失败",
+        tone: "error",
+      });
+    } finally {
+      if (!navigationStarted) {
+        submissionInProgressRef.current = false;
+        setIsCopying(false);
+      }
+    }
+  }
+
   async function handleSaveMaterial(values: MaterialFormValues) {
-    if (submissionInProgressRef.current) return;
+    if (submissionInProgressRef.current || lockConflict) return;
 
     const sessionToken = getStoredSessionToken();
     if (sessionToken === null) {
@@ -99,16 +202,35 @@ export function AdminMaterialEditorPage() {
     submissionInProgressRef.current = true;
     setIsSubmitting(true);
     setFeedback(null);
+    let navigationStarted = false;
+
     try {
       const response = await fetchAdminApi<MaterialResultDto>(
-        "/api/v1/materials",
+        isEditMode
+          ? `/api/v1/materials/${encodeURIComponent(materialPublicId)}`
+          : "/api/v1/materials",
         sessionToken,
         {
-          method: "POST",
+          method: isEditMode ? "PATCH" : "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(createMaterialInput(values)),
+          body: JSON.stringify(
+            isEditMode
+              ? { ...createMaterialInput(values), status: "available" }
+              : createMaterialInput(values),
+          ),
         },
       );
+
+      if (response.code === MATERIAL_LOCKED_CODE && isEditMode) {
+        setLockConflict(true);
+        setFeedback({
+          message:
+            "服务端已锁定该材料，当前输入仍保留；不能继续覆盖，请复制新材料或返回列表。",
+          title: "材料保存冲突",
+          tone: "conflict",
+        });
+        return;
+      }
 
       if (response.code !== 0 || response.data === null) {
         setFeedback({
@@ -119,9 +241,18 @@ export function AdminMaterialEditorPage() {
         return;
       }
 
-      setCreatedMaterialTitle(response.data.material.title);
+      if (!isEditMode) {
+        navigationStarted = true;
+        router.replace(
+          `/content/materials/${encodeURIComponent(response.data.material.publicId)}/edit`,
+        );
+        return;
+      }
+
+      setMaterial(response.data.material);
+      setFormRevision((currentRevision) => currentRevision + 1);
       setFeedback({
-        message: `材料“${response.data.material.title}”已保存。`,
+        message: "材料内容与适用范围已更新。",
         title: "材料已保存",
         tone: "success",
       });
@@ -132,8 +263,10 @@ export function AdminMaterialEditorPage() {
         tone: "error",
       });
     } finally {
-      submissionInProgressRef.current = false;
-      setIsSubmitting(false);
+      if (!navigationStarted) {
+        submissionInProgressRef.current = false;
+        setIsSubmitting(false);
+      }
     }
   }
 
@@ -146,18 +279,28 @@ export function AdminMaterialEditorPage() {
   }
 
   if (loadState !== "ready") {
-    const stateContent =
-      loadState === "unauthorized"
-        ? {
-            title: "无权访问材料编辑器",
-            description: "请使用具备内容后台权限的管理员会话后重试。",
-            variant: "unauthorized" as const,
-          }
-        : {
-            title: "材料编辑器加载失败",
-            description: "请稍后刷新页面，或返回材料列表重新进入。",
-            variant: "error" as const,
-          };
+    const stateContent = {
+      unauthorized: {
+        title: "无权访问材料编辑器",
+        description: "请使用具备内容后台权限的管理员会话后重试。",
+        variant: "unauthorized" as const,
+      },
+      forbidden: {
+        title: "无权编辑该材料",
+        description: "服务端拒绝了当前操作，请返回材料列表选择可访问内容。",
+        variant: "forbidden" as const,
+      },
+      not_found: {
+        title: "未找到材料",
+        description: "材料可能已不存在，请返回材料列表重新选择。",
+        variant: "error" as const,
+      },
+      error: {
+        title: "材料编辑器加载失败",
+        description: "请稍后刷新页面，或返回材料列表重新进入。",
+        variant: "error" as const,
+      },
+    }[loadState];
 
     return (
       <AdminAsyncState
@@ -182,6 +325,12 @@ export function AdminMaterialEditorPage() {
     );
   }
 
+  const lockedMaterial = material?.isLocked === true;
+  const editorValues =
+    material === null
+      ? createDefaultMaterialFormValues()
+      : createMaterialFormValuesFromMaterial(material);
+
   return (
     <section className="space-y-6" data-testid="material-editor-page">
       <header className="space-y-3">
@@ -194,7 +343,7 @@ export function AdminMaterialEditorPage() {
             内容后台 · 材料库
           </p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            新建材料
+            {isEditMode ? "编辑材料" : "新建材料"}
           </h1>
           <p className="text-text-secondary max-w-3xl text-sm">
             独立维护可复用材料正文和适用范围；保存前使用与 API
@@ -207,32 +356,94 @@ export function AdminMaterialEditorPage() {
         <AdminToast feedback={feedback} onDismiss={() => setFeedback(null)} />
       )}
 
-      {createdMaterialTitle === null ? (
-        <AdminMaterialEditorForm
-          isSubmitting={isSubmitting}
-          mode="create"
-          values={createDefaultMaterialFormValues()}
-          onCancel={handleReturnToList}
-          onSubmit={(values) => void handleSaveMaterial(values)}
+      {lockedMaterial ? (
+        <MaterialLockBlocker
+          isCopying={isCopying}
+          onCopy={() => void handleCopyMaterial()}
+          onReturn={handleReturnToList}
         />
       ) : (
-        <section
-          aria-live="polite"
-          className="bg-surface border-border rounded-md border p-6 text-center shadow-sm"
-          data-testid="material-create-completion"
-          role="status"
-        >
-          <h2 className="text-text-primary text-lg font-semibold">
-            材料已创建
-          </h2>
-          <p className="text-text-secondary mt-2 text-sm">
-            “{createdMaterialTitle}”已进入材料库，可返回列表继续管理。
-          </p>
-          <Button className="mt-4" type="button" onClick={handleReturnToList}>
-            返回材料列表
-          </Button>
-        </section>
+        <>
+          {lockConflict ? (
+            <section
+              className="border-warning/30 bg-warning/10 rounded-md border p-4"
+              data-testid="material-lock-conflict-actions"
+            >
+              <p className="text-text-secondary text-sm">
+                当前输入仍在表单中。该材料已不能覆盖，请复制服务端材料为新材料，或返回列表。
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  disabled={isCopying}
+                  type="button"
+                  onClick={() => void handleCopyMaterial()}
+                >
+                  <Copy aria-hidden="true" data-icon="inline-start" />
+                  {isCopying ? "复制中…" : "复制为新材料并编辑"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleReturnToList}
+                >
+                  返回材料列表
+                </Button>
+              </div>
+            </section>
+          ) : null}
+          <AdminMaterialEditorForm
+            isSubmitting={isSubmitting}
+            key={
+              material === null
+                ? "create"
+                : `${material.publicId}:${formRevision}`
+            }
+            mode={isEditMode ? "edit" : "create"}
+            submitBlockedReason={
+              lockConflict
+                ? "材料已在服务端锁定，请复制新材料或返回列表。"
+                : null
+            }
+            values={editorValues}
+            onCancel={handleReturnToList}
+            onSubmit={(values) => void handleSaveMaterial(values)}
+          />
+        </>
       )}
     </section>
+  );
+}
+
+function MaterialLockBlocker({
+  isCopying,
+  onCopy,
+  onReturn,
+}: {
+  isCopying: boolean;
+  onCopy: () => void;
+  onReturn: () => void;
+}) {
+  return (
+    <AdminAsyncState
+      className="bg-surface border-border rounded-md border p-6 text-center shadow-sm"
+      variant="conflict"
+    >
+      <ShieldAlert aria-hidden="true" className="text-warning mx-auto size-7" />
+      <h2 className="text-text-primary mt-3 text-lg font-semibold">
+        材料已锁定
+      </h2>
+      <p className="text-text-secondary mx-auto mt-2 max-w-2xl text-sm">
+        该材料已被已发布试卷引用，服务端禁止覆盖。可显式复制为独立新材料后继续编辑。
+      </p>
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
+        <Button disabled={isCopying} type="button" onClick={onCopy}>
+          <Copy aria-hidden="true" data-icon="inline-start" />
+          {isCopying ? "复制中…" : "复制为新材料并编辑"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onReturn}>
+          返回材料列表
+        </Button>
+      </div>
+    </AdminAsyncState>
   );
 }

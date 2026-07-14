@@ -4,9 +4,12 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+import type { MaterialDto } from "@/server/contracts/material-contract";
 
 const { navigationPush, navigationReplace } = vi.hoisted(() => ({
   navigationPush: vi.fn(),
@@ -41,7 +44,7 @@ const adminSessionPayload = {
   },
 };
 
-const createdMaterial = {
+const createdMaterial: MaterialDto = {
   publicId: "material-created-001",
   title: "独立编辑器材料",
   contentRichText: "包含有效正文的材料",
@@ -56,13 +59,30 @@ const createdMaterial = {
   updatedAt: "2026-07-13T20:00:00.000Z",
 };
 
+const editableMaterial: MaterialDto = {
+  ...createdMaterial,
+  publicId: "material-edit-001",
+  title: "待编辑材料",
+  contentRichText: "待编辑材料正文",
+};
+
 function createJsonResponse(payload: unknown) {
   return { json: async () => payload } as Response;
 }
 
 function mockMaterialEditorFetch({
+  copyCode = 0,
   createCode = 0,
-}: { createCode?: number } = {}) {
+  detailMaterial = editableMaterial,
+  listMaterials = [],
+  patchCode = 0,
+}: {
+  copyCode?: number;
+  createCode?: number;
+  detailMaterial?: typeof editableMaterial | null;
+  listMaterials?: (typeof editableMaterial)[];
+  patchCode?: number;
+} = {}) {
   const fetchMock = vi.fn(
     async (requestUrl: string | URL | Request, init?: RequestInit) => {
       const path = String(requestUrl);
@@ -81,16 +101,58 @@ function mockMaterialEditorFetch({
             : { code: createCode, message: "conflict", data: null },
         );
       }
+      if (path === "/api/v1/materials/material-edit-001") {
+        if (init?.method === "PATCH") {
+          return createJsonResponse(
+            patchCode === 0
+              ? {
+                  code: 0,
+                  message: "ok",
+                  data: {
+                    material: {
+                      ...editableMaterial,
+                      title: "编辑后的材料",
+                      updatedAt: "2026-07-13T20:05:00.000Z",
+                    },
+                  },
+                }
+              : { code: patchCode, message: "conflict", data: null },
+          );
+        }
+        return createJsonResponse(
+          detailMaterial === null
+            ? { code: 404201, message: "missing", data: null }
+            : { code: 0, message: "ok", data: { material: detailMaterial } },
+        );
+      }
+      if (path === "/api/v1/materials/material-edit-001/copy") {
+        return createJsonResponse(
+          copyCode === 0
+            ? {
+                code: 0,
+                message: "ok",
+                data: {
+                  material: {
+                    ...editableMaterial,
+                    publicId: "material-copy-001",
+                    isLocked: false,
+                    lockedAt: null,
+                  },
+                },
+              }
+            : { code: copyCode, message: "copy failed", data: null },
+        );
+      }
       if (path.startsWith("/api/v1/materials?")) {
         return createJsonResponse({
           code: 0,
           message: "ok",
-          data: [],
+          data: listMaterials,
           pagination: {
             page: 1,
             pageSize: 20,
-            total: 0,
-            totalPages: 0,
+            total: listMaterials.length,
+            totalPages: listMaterials.length === 0 ? 0 : 1,
           },
         });
       }
@@ -173,7 +235,7 @@ describe("AdminMaterialEditorPage", () => {
     ).toBe(false);
   });
 
-  it("posts valid input once and replaces the form with a non-resubmittable completion", async () => {
+  it("posts valid input once and replaces the create URL with the returned edit route", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockMaterialEditorFetch();
 
@@ -182,11 +244,11 @@ describe("AdminMaterialEditorPage", () => {
     fireEvent.click(form.getByRole("button", { name: "保存材料" }));
     fireEvent.click(form.getByRole("button", { name: "保存中…" }));
 
-    expect(
-      await screen.findByRole("heading", { level: 2, name: "材料已创建" }),
-    ).toBeInTheDocument();
-    expect(screen.queryByRole("form", { name: "材料表单" })).toBeNull();
-    expect(navigationReplace).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(navigationReplace).toHaveBeenCalledWith(
+        "/content/materials/material-created-001/edit",
+      ),
+    );
     const postCalls = fetchMock.mock.calls.filter(
       ([url, init]) =>
         String(url) === "/api/v1/materials" && init?.method === "POST",
@@ -251,9 +313,11 @@ describe("AdminMaterialEditorPage", () => {
 
     fireEvent.click(form.getByRole("button", { name: "插入受管图片引用" }));
     fireEvent.click(form.getByRole("button", { name: "保存材料" }));
-    expect(
-      await screen.findByRole("heading", { level: 2, name: "材料已创建" }),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(navigationReplace).toHaveBeenCalledWith(
+        "/content/materials/material-created-001/edit",
+      ),
+    );
     expect(
       fetchMock.mock.calls.filter(
         ([url, init]) =>
@@ -284,6 +348,135 @@ describe("AdminMaterialEditorPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "返回材料列表" }));
     expect(navigationPush).toHaveBeenCalledWith("/content/materials");
   });
+
+  it("loads an unlocked material and patches the shared form contract", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockMaterialEditorFetch();
+
+    render(
+      createElement(AdminMaterialEditorPage, {
+        materialPublicId: editableMaterial.publicId,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "编辑材料" }),
+    ).toBeInTheDocument();
+    const form = within(screen.getByRole("form", { name: "材料表单" }));
+    expect(form.getByLabelText("材料标题")).toHaveValue(editableMaterial.title);
+    fireEvent.change(form.getByLabelText("材料标题"), {
+      target: { value: "编辑后的材料" },
+    });
+    fireEvent.click(form.getByRole("button", { name: "保存材料" }));
+
+    expect(await screen.findByText("材料已保存")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/materials/material-edit-001",
+      expect.objectContaining({ method: "PATCH" }),
+    );
+    expect(screen.getByRole("form", { name: "材料表单" })).toHaveAttribute(
+      "data-admin-form-dirty-state",
+      "clean",
+    );
+  });
+
+  it("does not mount a form for a locked deep link and copies only after an explicit action", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockMaterialEditorFetch({
+      detailMaterial: {
+        ...editableMaterial,
+        isLocked: true,
+        lockedAt: "2026-07-13T20:10:00.000Z",
+      },
+    });
+
+    render(
+      createElement(AdminMaterialEditorPage, {
+        materialPublicId: editableMaterial.publicId,
+      }),
+    );
+
+    expect(await screen.findByText("材料已锁定")).toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "材料表单" })).toBeNull();
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).endsWith("/copy")),
+    ).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "复制为新材料并编辑" }));
+    await waitFor(() =>
+      expect(navigationReplace).toHaveBeenCalledWith(
+        "/content/materials/material-copy-001/edit",
+      ),
+    );
+  });
+
+  it("keeps a locked page recoverable when copy fails", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockMaterialEditorFetch({
+      copyCode: 409201,
+      detailMaterial: { ...editableMaterial, isLocked: true },
+    });
+
+    render(
+      createElement(AdminMaterialEditorPage, {
+        materialPublicId: editableMaterial.publicId,
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "复制为新材料并编辑" }),
+    );
+
+    expect(await screen.findByText("材料复制失败")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "复制为新材料并编辑" }),
+    ).toBeEnabled();
+    expect(navigationReplace).not.toHaveBeenCalled();
+  });
+
+  it("preserves input and blocks further patches after a server lock race", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockMaterialEditorFetch({ patchCode: 409201 });
+
+    render(
+      createElement(AdminMaterialEditorPage, {
+        materialPublicId: editableMaterial.publicId,
+      }),
+    );
+    const form = within(await screen.findByRole("form", { name: "材料表单" }));
+    fireEvent.change(form.getByLabelText("材料标题"), {
+      target: { value: "锁定竞态保留输入" },
+    });
+    fireEvent.click(form.getByRole("button", { name: "保存材料" }));
+
+    expect(await screen.findByText("材料保存冲突")).toBeInTheDocument();
+    expect(form.getByLabelText("材料标题")).toHaveValue("锁定竞态保留输入");
+    expect(form.getByRole("button", { name: "保存材料" })).toBeDisabled();
+    fireEvent.click(form.getByRole("button", { name: "保存材料" }));
+    expect(
+      fetchMock.mock.calls.filter(
+        ([url, init]) =>
+          String(url) === "/api/v1/materials/material-edit-001" &&
+          init?.method === "PATCH",
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("offers a deterministic list return for a missing material", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockMaterialEditorFetch({ detailMaterial: null });
+
+    render(
+      createElement(AdminMaterialEditorPage, {
+        materialPublicId: editableMaterial.publicId,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "未找到材料" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "返回材料列表" }));
+    expect(navigationPush).toHaveBeenCalledWith("/content/materials");
+  });
 });
 
 describe("material create route entry", () => {
@@ -296,6 +489,39 @@ describe("material create route entry", () => {
     fireEvent.click(await screen.findByRole("button", { name: "新建材料" }));
     expect(navigationPush).toHaveBeenCalledWith("/content/materials/new");
     expect(screen.queryByRole("form", { name: "材料表单" })).toBeNull();
+  });
+
+  it("routes product list edit and copy to the canonical material editor", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockMaterialEditorFetch({
+      listMaterials: [editableMaterial],
+    });
+
+    render(createElement(MaterialsPage));
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "编辑材料 待编辑材料（可用）",
+      }),
+    );
+    expect(navigationPush).toHaveBeenCalledWith(
+      "/content/materials/material-edit-001/edit",
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "复制材料 待编辑材料（可用）",
+      }),
+    );
+    await waitFor(() =>
+      expect(navigationReplace).toHaveBeenCalledWith(
+        "/content/materials/material-copy-001/edit",
+      ),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/materials/material-edit-001/copy",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 
   it("keeps the material create route when entering the material tab from questions", async () => {

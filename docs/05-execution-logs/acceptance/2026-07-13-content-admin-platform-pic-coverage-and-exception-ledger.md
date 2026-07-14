@@ -207,6 +207,17 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   material edit/copy/lock and navigation recovery, and C6 owns cumulative promotion. PIC-13 and the empty exception ledger
   remain unchanged; no authorization, lifecycle, dependency, credential, database, AI or deployment boundary changed.
 
+### C4 Material Edit Copy Lock
+
+- `/content/materials/[publicId]/edit` now loads unlocked materials into the shared semantic form, PATCHes the unchanged
+  API contract, resets the clean baseline after success, and exposes safe missing/forbidden/error returns.
+- Locked deep links never mount a form. Explicit copy enters only the server-returned material editor; a service lock race
+  preserves authored input, blocks further PATCH, and offers copy/return. Product list edit/copy paths use the same route,
+  while Detail Drawer and lifecycle/authorization service rules remain unchanged.
+- PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are partially proven across both resource create/edit/copy/lock flows. C5 retains
+  dirty-leave/return/focus/scroll recovery and C6 retains cumulative promotion. PIC-13 and the empty exception ledger
+  remain unchanged; no authorization, dependency, database, AI, credential or deployment boundary changed.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
