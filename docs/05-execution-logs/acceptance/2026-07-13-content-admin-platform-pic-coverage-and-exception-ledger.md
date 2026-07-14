@@ -58,7 +58,7 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 
 | Route/page family              | Workspace          | Target batch | Current status | Protected boundary                                            |
 | ------------------------------ | ------------------ | ------------ | -------------- | ------------------------------------------------------------- |
-| question/material list         | content            | B/D          | partial        | content lifecycle, P0 semantic integrity                      |
+| question/material list         | content            | B/D/F1       | compliant      | content lifecycle, P0 semantic integrity                      |
 | question/material editor       | content            | C            | compliant      | lock/copy/published reference                                 |
 | paper/knowledge/resource       | content            | E1           | compliant      | publish snapshot, RAG/resource boundary                       |
 | content AI draft/review        | content            | E1           | compliant      | formal content separation, Provider closed                    |
@@ -332,6 +332,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - No valid persisted personal `paperAssembly` resume sample exists, but F0 does not require one, so X1 remains
   untriggered. PIC statuses are not promoted before F1-F4 role acceptance and F5 final reconciliation. Exception count
   remains zero; deployment remains blocked.
+
+### F1 Content-Admin Representative Acceptance
+
+- One canonical 0704DB `content_admin` passed question/material list-detail-clean-editor entry, paper
+  list-detail-composer entry, truthful resource empty/upload-affordance, non-empty knowledge selection and both
+  Provider-closed content AI history/review/formal-state paths. No business mutation or Provider call occurred.
+- Seven representative content routes had zero unexpected console/request errors and no page-level horizontal overflow;
+  the live detail Drawer proved focus capture, Escape close and initiating-control restoration. Direct operations route
+  access failed closed to the content overview.
+- The content route family is representative-role compliant. F1 contributes PIC-01/04/05/08/10/11/12/13 proof while
+  focused regression protects closed PIC-02/03/06/07/09 behavior. F5 retains global reconciliation; approved exception
+  count remains zero and deployment remains blocked.
 
 ## Exception Ledger
 
