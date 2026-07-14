@@ -59,7 +59,7 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 | Route/page family              | Workspace          | Target batch | Current status    | Protected boundary                                            |
 | ------------------------------ | ------------------ | ------------ | ----------------- | ------------------------------------------------------------- |
 | question/material list         | content            | B/D          | partial           | content lifecycle, P0 semantic integrity                      |
-| question/material editor       | content            | C            | accepted_baseline | lock/copy/published reference                                 |
+| question/material editor       | content            | C            | compliant         | lock/copy/published reference                                 |
 | paper/knowledge/resource       | content            | E1           | accepted_baseline | publish snapshot, RAG/resource boundary                       |
 | content AI draft/review        | content            | E1           | partial           | formal content separation, Provider closed                    |
 | user/org/auth/redeem/log       | operations         | E2           | partial           | phone masking, plaintext redeem UI exception, audit redaction |
@@ -229,6 +229,17 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are now partially proven across both complete editor route families. C6 retains
   cumulative promotion and fixed full-regression ownership. PIC-13 and the empty exception ledger remain unchanged; no
   authorization, lifecycle, dependency, database, AI, credential or deployment boundary changed.
+
+### C6 Batch C Cumulative Audit
+
+- C0-C5 ownership, the exact Batch C product/test delta and the four canonical routes were reconciled. A second-round
+  attack found that same-origin dashboard links could bypass dirty confirmation; C6 added a narrow link guard and four
+  RED-first regressions without changing authorization or introducing a router framework.
+- The fixed full node passed 375 files / 2,142 tests, lint, typecheck, full format and production build. All focused C
+  suites contain no skipped or expected-failure residue; API/service/schema/dependency/AI/database/deployment files
+  remain outside the delta.
+- PIC-06 and PIC-09 are compliant for the question/material editor family. PIC-05/PIC-07/PIC-10 remain partial for E/F
+  rollout and role acceptance; PIC-13 and the empty exception ledger remain unchanged.
 
 ## Exception Ledger
 

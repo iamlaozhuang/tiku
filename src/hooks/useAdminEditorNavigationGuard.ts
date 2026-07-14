@@ -12,6 +12,12 @@ import {
 
 const DISCARD_CONFIRMATION = "当前修改尚未保存，确定放弃修改并离开吗？";
 
+type AdminEditorNavigationMode = "push" | "replace";
+type AdminEditorNavigationOptions = {
+  mode?: AdminEditorNavigationMode;
+  skipConfirmation?: boolean;
+};
+
 export function useAdminEditorNavigationGuard({
   resource,
   returnTo,
@@ -24,7 +30,10 @@ export function useAdminEditorNavigationGuard({
     validateAdminEditorListUrl(resource, returnTo) ?? `/content/${resource}`;
   const dirtyRef = useRef(false);
   const sentinelActiveRef = useRef(false);
-  const pendingNavigationRef = useRef<string | null>(null);
+  const pendingNavigationRef = useRef<{
+    mode: AdminEditorNavigationMode;
+    target: string;
+  } | null>(null);
 
   const pushSentinel = useCallback(() => {
     const currentHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -45,16 +54,22 @@ export function useAdminEditorNavigationGuard({
   }, []);
 
   const navigate = useCallback(
-    (target: string, { skipConfirmation = false } = {}) => {
+    (
+      target: string,
+      {
+        mode = "replace",
+        skipConfirmation = false,
+      }: AdminEditorNavigationOptions = {},
+    ) => {
       if (pendingNavigationRef.current !== null) return false;
       if (!skipConfirmation && !canDiscard()) return false;
 
       dirtyRef.current = false;
       if (sentinelActiveRef.current) {
-        pendingNavigationRef.current = target;
+        pendingNavigationRef.current = { mode, target };
         window.history.back();
       } else {
-        router.replace(target);
+        router[mode](target);
       }
       return true;
     },
@@ -73,6 +88,53 @@ export function useAdminEditorNavigationGuard({
       event.returnValue = "";
     }
 
+    function handleDocumentClick(event: MouseEvent) {
+      if (
+        !dirtyRef.current ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        !(event.target instanceof Element)
+      ) {
+        return;
+      }
+
+      const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
+      if (
+        anchor === null ||
+        anchor.hasAttribute("download") ||
+        (anchor.target !== "" && anchor.target !== "_self")
+      ) {
+        return;
+      }
+
+      let destination: URL;
+      try {
+        destination = new URL(anchor.href, window.location.href);
+      } catch {
+        return;
+      }
+      if (
+        destination.origin !== window.location.origin ||
+        (destination.pathname === window.location.pathname &&
+          destination.search === window.location.search)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      if (!canDiscard()) return;
+
+      navigate(
+        `${destination.pathname}${destination.search}${destination.hash}`,
+        { mode: "push", skipConfirmation: true },
+      );
+    }
+
     function handlePopState() {
       if (!sentinelActiveRef.current) return;
       sentinelActiveRef.current = false;
@@ -80,7 +142,7 @@ export function useAdminEditorNavigationGuard({
       const pendingNavigation = pendingNavigationRef.current;
       pendingNavigationRef.current = null;
       if (pendingNavigation !== null) {
-        router.replace(pendingNavigation);
+        router[pendingNavigation.mode](pendingNavigation.target);
         return;
       }
 
@@ -95,11 +157,13 @@ export function useAdminEditorNavigationGuard({
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("popstate", handlePopState);
+    document.addEventListener("click", handleDocumentClick, true);
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("click", handleDocumentClick, true);
     };
-  }, [pushSentinel, router]);
+  }, [canDiscard, navigate, pushSentinel, router]);
 
   return { canDiscard, navigate, navigateToList, onDirtyStateChange };
 }

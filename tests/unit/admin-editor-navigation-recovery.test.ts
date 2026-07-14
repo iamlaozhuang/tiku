@@ -9,12 +9,13 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { navigationReplace } = vi.hoisted(() => ({
+const { navigationPush, navigationReplace } = vi.hoisted(() => ({
+  navigationPush: vi.fn(),
   navigationReplace: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: navigationReplace }),
+  useRouter: () => ({ push: navigationPush, replace: navigationReplace }),
 }));
 
 import {
@@ -48,6 +49,7 @@ function GuardHarness({ resource }: { resource: "materials" | "questions" }) {
       { onClick: () => guard.navigateToList() },
       "return",
     ),
+    createElement("a", { href: "/content/papers" }, "other admin page"),
   );
 }
 
@@ -84,6 +86,7 @@ function ListRecoveryHarness({
 
 afterEach(() => {
   cleanup();
+  navigationPush.mockReset();
   navigationReplace.mockReset();
   sessionStorage.clear();
   vi.restoreAllMocks();
@@ -152,6 +155,47 @@ describe.each(["questions", "materials"] as const)(
 
       expect(confirmMock).toHaveBeenCalledOnce();
       expect(pushStateMock).toHaveBeenCalledTimes(2);
+      expect(navigationReplace).not.toHaveBeenCalled();
+    });
+
+    it("blocks a same-origin admin link when dirty discard is cancelled", () => {
+      window.history.replaceState(null, "", `/content/${resource}/new`);
+      const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
+      render(createElement(GuardHarness, { resource }));
+      fireEvent.click(screen.getByRole("button", { name: "clean" }));
+
+      const navigationEvent = new MouseEvent("click", {
+        bubbles: true,
+        button: 0,
+        cancelable: true,
+      });
+      const dispatched = screen
+        .getByRole("link", { name: "other admin page" })
+        .dispatchEvent(navigationEvent);
+
+      expect(dispatched).toBe(false);
+      expect(confirmMock).toHaveBeenCalledOnce();
+      expect(navigationPush).not.toHaveBeenCalled();
+      expect(navigationReplace).not.toHaveBeenCalled();
+    });
+
+    it("continues a confirmed same-origin admin link after removing the dirty sentinel", async () => {
+      window.history.replaceState(null, "", `/content/${resource}/new`);
+      vi.spyOn(window, "confirm").mockReturnValue(true);
+      const backMock = vi
+        .spyOn(window.history, "back")
+        .mockImplementation(() => {
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        });
+      render(createElement(GuardHarness, { resource }));
+      fireEvent.click(screen.getByRole("button", { name: "clean" }));
+
+      fireEvent.click(screen.getByRole("link", { name: "other admin page" }));
+
+      await waitFor(() =>
+        expect(navigationPush).toHaveBeenCalledWith("/content/papers"),
+      );
+      expect(backMock).toHaveBeenCalledOnce();
       expect(navigationReplace).not.toHaveBeenCalled();
     });
   },
