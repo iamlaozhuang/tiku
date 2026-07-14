@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   AlertCircle,
+  ArrowLeft,
   CheckCircle2,
   ClipboardCheck,
   ClipboardList,
@@ -29,6 +30,8 @@ type StudentOrganizationTrainingLoadState =
   | "ready"
   | "empty"
   | "unauthorized"
+  | "standard_unavailable"
+  | "missing_context"
   | "unavailable"
   | "error";
 
@@ -51,11 +54,26 @@ type AnswerItemFormValue = {
   textAnswer: string;
 };
 
+type AnswerPendingAction = "saving" | "submitting" | "loading_result";
+
+type AnswerFeedback = {
+  kind: "error" | "success";
+  text: string;
+};
+
 type AnswerUiState = {
   answer: EmployeeOrganizationTrainingAnswerDto | null;
-  message: string | null;
+  feedback: AnswerFeedback | null;
+  pendingAction: AnswerPendingAction | null;
   values: AnswerFormValues;
 };
+
+type TrainingOverviewItem = {
+  label: string;
+  value: number;
+};
+
+const dueSoonWindowMilliseconds = 7 * 24 * 60 * 60 * 1000;
 
 const emptyAnswerFormValues: AnswerFormValues = {
   answerItemsByQuestionPublicId: {},
@@ -80,10 +98,8 @@ function readStudentSessionRequestToken(): StudentSessionRequestToken {
     : storedSessionValue;
 }
 
-function isStudentAccessDeniedResponse(payload: { code: number }): boolean {
-  return (
-    (payload.code >= 403000 && payload.code < 404000) || payload.code === 409076
-  );
+function isStudentForbiddenResponse(payload: { code: number }): boolean {
+  return payload.code >= 403000 && payload.code < 404000;
 }
 
 function createEmptyAnswerItemValue(): AnswerItemFormValue {
@@ -115,9 +131,91 @@ function createInitialAnswerState(
 ): AnswerUiState {
   return {
     answer: null,
-    message: null,
+    feedback: null,
+    pendingAction: null,
     values: createInitialAnswerValues(version),
   };
+}
+
+function isReadonlyTraining(
+  version: OrganizationTrainingPublishedVersionDto,
+  answer: EmployeeOrganizationTrainingAnswerDto | null,
+): boolean {
+  return (
+    version.employeeAnswerStatus === "submitted" ||
+    version.employeeAnswerStatus === "read_only" ||
+    answer?.answerStatus === "submitted" ||
+    answer?.answerStatus === "read_only"
+  );
+}
+
+function isTrainingDueSoon(
+  version: OrganizationTrainingPublishedVersionDto,
+  currentTime = Date.now(),
+): boolean {
+  if (
+    version.employeeAnswerStatus === "submitted" ||
+    version.employeeAnswerStatus === "read_only" ||
+    typeof version.answerDeadlineAt !== "string"
+  ) {
+    return false;
+  }
+
+  const deadlineTime = Date.parse(version.answerDeadlineAt);
+
+  return (
+    Number.isFinite(deadlineTime) &&
+    deadlineTime >= currentTime &&
+    deadlineTime <= currentTime + dueSoonWindowMilliseconds
+  );
+}
+
+function createTrainingOverview(
+  versions: OrganizationTrainingPublishedVersionDto[],
+): TrainingOverviewItem[] {
+  return [
+    { label: "已分配", value: versions.length },
+    {
+      label: "即将到期",
+      value: versions.filter((version) => isTrainingDueSoon(version)).length,
+    },
+    {
+      label: "进行中",
+      value: versions.filter(
+        (version) => version.employeeAnswerStatus === "in_progress",
+      ).length,
+    },
+    {
+      label: "已提交",
+      value: versions.filter(
+        (version) =>
+          version.employeeAnswerStatus === "submitted" ||
+          version.employeeAnswerStatus === "read_only",
+      ).length,
+    },
+    {
+      label: "未开始",
+      value: versions.filter(
+        (version) =>
+          version.employeeAnswerStatus === undefined ||
+          version.employeeAnswerStatus === "not_started",
+      ).length,
+    },
+  ];
+}
+
+function getTrainingPrimaryActionLabel(
+  status: OrganizationTrainingPublishedVersionDto["employeeAnswerStatus"],
+): string {
+  if (status === "submitted" || status === "read_only") {
+    return "查看结果";
+  }
+
+  if (status === "in_progress") {
+    return "继续训练";
+  }
+
+  return "开始训练";
 }
 
 function readAnswerItemValue(
@@ -254,6 +352,8 @@ export function StudentOrganizationTrainingPage() {
   const [versions, setVersions] = useState<
     OrganizationTrainingPublishedVersionDto[]
   >([]);
+  const [selectedTrainingVersionPublicId, setSelectedTrainingVersionPublicId] =
+    useState<string | null>(null);
   const [answerStateByVersionPublicId, setAnswerStateByVersionPublicId] =
     useState<Record<string, AnswerUiState>>({});
 
@@ -281,7 +381,17 @@ export function StudentOrganizationTrainingPage() {
           return;
         }
 
-        if (isStudentAccessDeniedResponse(response)) {
+        if (response.code === 409076) {
+          setLoadState("standard_unavailable");
+          return;
+        }
+
+        if (response.code === 403074) {
+          setLoadState("missing_context");
+          return;
+        }
+
+        if (isStudentForbiddenResponse(response)) {
           setLoadState("unavailable");
           return;
         }
@@ -345,6 +455,24 @@ export function StudentOrganizationTrainingPage() {
     );
   }
 
+  if (loadState === "standard_unavailable") {
+    return (
+      <StudentOrganizationTrainingStatusMessage
+        title="企业训练需要高级版"
+        description="当前组织授权为标准版，此功能需要高级版企业授权。"
+      />
+    );
+  }
+
+  if (loadState === "missing_context") {
+    return (
+      <StudentOrganizationTrainingStatusMessage
+        title="缺少组织上下文"
+        description="当前账号未绑定可用组织上下文。"
+      />
+    );
+  }
+
   if (loadState === "unavailable") {
     return (
       <StudentOrganizationTrainingStatusMessage
@@ -376,6 +504,58 @@ export function StudentOrganizationTrainingPage() {
     }));
   }
 
+  function updateVersionAnswerStatus(
+    trainingVersionPublicId: string,
+    answer: EmployeeOrganizationTrainingAnswerDto,
+  ) {
+    setVersions((currentVersions) =>
+      currentVersions.map((version) => {
+        if (version.publicId !== trainingVersionPublicId) {
+          return version;
+        }
+
+        return {
+          ...version,
+          employeeAnswerStatus:
+            answer.answerStatus === "submitted" ||
+            answer.answerStatus === "read_only"
+              ? answer.answerStatus
+              : "in_progress",
+          submittedScoreSummary:
+            answer.scoreSummary ?? version.submittedScoreSummary,
+        };
+      }),
+    );
+  }
+
+  function handleActionAccessDenied(
+    trainingVersionPublicId: string,
+    response: { code: number },
+  ): boolean {
+    if (response.code === 409076) {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        feedback: {
+          kind: "error",
+          text: "当前训练已不能继续作答，请返回列表刷新状态。",
+        },
+      }));
+      return true;
+    }
+
+    if (response.code === 403074) {
+      setLoadState("missing_context");
+      return true;
+    }
+
+    if (isStudentForbiddenResponse(response)) {
+      setLoadState("unavailable");
+      return true;
+    }
+
+    return false;
+  }
+
   async function handleSaveDraft(
     version: OrganizationTrainingPublishedVersionDto,
   ) {
@@ -385,45 +565,70 @@ export function StudentOrganizationTrainingPage() {
     const currentState =
       answerStateByVersionPublicId[trainingVersionPublicId] ??
       createInitialAnswerState(version);
-    const response = await fetchStudentApi<AnswerPayload>(
-      `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/draft-save`,
-      sessionValue,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(
-          createAnswerRequestBody(version, currentState.values),
-        ),
-      },
-    );
-
-    if (isStudentUnauthorizedResponse(response)) {
-      setLoadState("unauthorized");
+    if (
+      currentState.pendingAction !== null ||
+      isReadonlyTraining(version, currentState.answer)
+    ) {
       return;
     }
-
-    if (isStudentAccessDeniedResponse(response)) {
-      setLoadState("unavailable");
-      return;
-    }
-
-    if (response.code !== 0 || response.data === null) {
-      updateAnswerState(trainingVersionPublicId, (state) => ({
-        ...state,
-        message: "草稿保存失败",
-      }));
-      return;
-    }
-
-    const savedAnswer = response.data.answer;
 
     updateAnswerState(trainingVersionPublicId, (state) => ({
       ...state,
-      answer: savedAnswer,
-      message: "草稿已保存",
+      feedback: null,
+      pendingAction: "saving",
     }));
+
+    try {
+      const response = await fetchStudentApi<AnswerPayload>(
+        `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/draft-save`,
+        sessionValue,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(
+            createAnswerRequestBody(version, currentState.values),
+          ),
+        },
+      );
+
+      if (isStudentUnauthorizedResponse(response)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (handleActionAccessDenied(trainingVersionPublicId, response)) {
+        return;
+      }
+
+      if (response.code !== 0 || response.data === null) {
+        updateAnswerState(trainingVersionPublicId, (state) => ({
+          ...state,
+          feedback: { kind: "error", text: "草稿保存失败" },
+        }));
+        return;
+      }
+
+      const savedAnswer = response.data.answer;
+
+      updateVersionAnswerStatus(trainingVersionPublicId, savedAnswer);
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        answer: savedAnswer,
+        feedback: { kind: "success", text: "草稿已保存" },
+      }));
+    } catch {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        feedback: { kind: "error", text: "草稿保存失败" },
+      }));
+    } finally {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        pendingAction: null,
+      }));
+    }
   }
 
   async function handleSubmit(
@@ -435,84 +640,152 @@ export function StudentOrganizationTrainingPage() {
     const currentState =
       answerStateByVersionPublicId[trainingVersionPublicId] ??
       createInitialAnswerState(version);
-    const response = await fetchStudentApi<AnswerPayload>(
-      `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/submit`,
-      sessionValue,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(
-          createSubmitRequestBody(version, currentState.values),
-        ),
-      },
-    );
-
-    if (isStudentUnauthorizedResponse(response)) {
-      setLoadState("unauthorized");
+    if (
+      currentState.pendingAction !== null ||
+      isReadonlyTraining(version, currentState.answer)
+    ) {
       return;
     }
-
-    if (isStudentAccessDeniedResponse(response)) {
-      setLoadState("unavailable");
-      return;
-    }
-
-    if (response.code !== 0 || response.data === null) {
-      updateAnswerState(trainingVersionPublicId, (state) => ({
-        ...state,
-        message: "提交失败",
-      }));
-      return;
-    }
-
-    const submittedAnswer = response.data.answer;
 
     updateAnswerState(trainingVersionPublicId, (state) => ({
       ...state,
-      answer: submittedAnswer,
-      message: "提交成功",
+      feedback: null,
+      pendingAction: "submitting",
     }));
+
+    try {
+      const response = await fetchStudentApi<AnswerPayload>(
+        `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/submit`,
+        sessionValue,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(
+            createSubmitRequestBody(version, currentState.values),
+          ),
+        },
+      );
+
+      if (isStudentUnauthorizedResponse(response)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (handleActionAccessDenied(trainingVersionPublicId, response)) {
+        return;
+      }
+
+      if (response.code !== 0 || response.data === null) {
+        updateAnswerState(trainingVersionPublicId, (state) => ({
+          ...state,
+          feedback: { kind: "error", text: "提交失败" },
+        }));
+        return;
+      }
+
+      const submittedAnswer = response.data.answer;
+
+      updateVersionAnswerStatus(trainingVersionPublicId, submittedAnswer);
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        answer: submittedAnswer,
+        feedback: { kind: "success", text: "提交成功" },
+      }));
+    } catch {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        feedback: { kind: "error", text: "提交失败" },
+      }));
+    } finally {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        pendingAction: null,
+      }));
+    }
   }
 
   async function handleLoadReadonlySummary(trainingVersionPublicId: string) {
     const sessionValue = readStudentSessionRequestToken();
+    const currentState =
+      answerStateByVersionPublicId[trainingVersionPublicId] ??
+      createInitialAnswerState();
 
-    const response = await fetchStudentApi<AnswerPayload>(
-      `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/readonly-summary`,
-      sessionValue,
-      {
-        method: "GET",
-      },
-    );
-
-    if (isStudentUnauthorizedResponse(response)) {
-      setLoadState("unauthorized");
+    if (currentState.pendingAction !== null) {
       return;
     }
-
-    if (isStudentAccessDeniedResponse(response)) {
-      setLoadState("unavailable");
-      return;
-    }
-
-    if (response.code !== 0 || response.data === null) {
-      updateAnswerState(trainingVersionPublicId, (state) => ({
-        ...state,
-        message: "结果加载失败",
-      }));
-      return;
-    }
-
-    const readonlyAnswer = response.data.answer;
 
     updateAnswerState(trainingVersionPublicId, (state) => ({
       ...state,
-      answer: readonlyAnswer,
-      message: "结果已加载",
+      feedback: null,
+      pendingAction: "loading_result",
     }));
+
+    try {
+      const response = await fetchStudentApi<AnswerPayload>(
+        `/api/v1/organization-trainings/${trainingVersionPublicId}/employee-answers/readonly-summary`,
+        sessionValue,
+        {
+          method: "GET",
+        },
+      );
+
+      if (isStudentUnauthorizedResponse(response)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (handleActionAccessDenied(trainingVersionPublicId, response)) {
+        return;
+      }
+
+      if (response.code !== 0 || response.data === null) {
+        updateAnswerState(trainingVersionPublicId, (state) => ({
+          ...state,
+          feedback: { kind: "error", text: "结果加载失败" },
+        }));
+        return;
+      }
+
+      const readonlyAnswer = response.data.answer;
+
+      updateVersionAnswerStatus(trainingVersionPublicId, readonlyAnswer);
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        answer: readonlyAnswer,
+        feedback: { kind: "success", text: "结果已加载" },
+      }));
+    } catch {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        feedback: { kind: "error", text: "结果加载失败" },
+      }));
+    } finally {
+      updateAnswerState(trainingVersionPublicId, (state) => ({
+        ...state,
+        pendingAction: null,
+      }));
+    }
   }
+
+  function handleSelectTraining(
+    version: OrganizationTrainingPublishedVersionDto,
+  ) {
+    setSelectedTrainingVersionPublicId(version.publicId);
+
+    const answerState =
+      answerStateByVersionPublicId[version.publicId] ??
+      createInitialAnswerState(version);
+
+    if (isReadonlyTraining(version, answerState.answer)) {
+      void handleLoadReadonlySummary(version.publicId);
+    }
+  }
+
+  const selectedVersion = versions.find(
+    (version) => version.publicId === selectedTrainingVersionPublicId,
+  );
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -531,36 +804,147 @@ export function StudentOrganizationTrainingPage() {
         </div>
       </header>
 
-      <div className="space-y-3">
-        {versions.map((version) => (
-          <TrainingVersionCard
-            answerState={
-              answerStateByVersionPublicId[version.publicId] ??
-              createInitialAnswerState(version)
-            }
-            key={version.publicId}
-            version={version}
-            onChangeValues={(values) =>
-              updateAnswerState(version.publicId, (state) => ({
-                ...state,
-                values,
-              }))
-            }
-            onLoadReadonlySummary={() =>
-              void handleLoadReadonlySummary(version.publicId)
-            }
-            onSaveDraft={() => void handleSaveDraft(version)}
-            onSubmit={() => void handleSubmit(version)}
-          />
-        ))}
-      </div>
+      {selectedVersion === undefined ? (
+        <>
+          <section
+            aria-label="企业训练概览"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-5"
+            role="region"
+          >
+            {createTrainingOverview(versions).map((item) => (
+              <div
+                className="bg-surface ring-border rounded-xl p-3 shadow-sm ring-1"
+                key={item.label}
+              >
+                <p className="text-text-secondary text-xs">{item.label}</p>
+                <p className="text-text-primary mt-1 text-xl font-semibold">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </section>
+
+          <div className="space-y-3">
+            {versions.map((version) => (
+              <TrainingVersionSummaryCard
+                key={version.publicId}
+                version={version}
+                onSelect={() => handleSelectTraining(version)}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <TrainingVersionWorkspace
+          answerState={
+            answerStateByVersionPublicId[selectedVersion.publicId] ??
+            createInitialAnswerState(selectedVersion)
+          }
+          version={selectedVersion}
+          onBack={() => setSelectedTrainingVersionPublicId(null)}
+          onChangeValues={(values) =>
+            updateAnswerState(selectedVersion.publicId, (state) => ({
+              ...state,
+              values,
+            }))
+          }
+          onLoadReadonlySummary={() =>
+            void handleLoadReadonlySummary(selectedVersion.publicId)
+          }
+          onSaveDraft={() => void handleSaveDraft(selectedVersion)}
+          onSubmit={() => void handleSubmit(selectedVersion)}
+        />
+      )}
     </section>
   );
 }
 
-function TrainingVersionCard({
+function TrainingVersionSummaryCard({
+  onSelect,
+  version,
+}: {
+  onSelect: () => void;
+  version: OrganizationTrainingPublishedVersionDto;
+}) {
+  const answerStatusLabel = getAnswerStatusLabel(version.employeeAnswerStatus);
+
+  return (
+    <article
+      className="bg-surface ring-border space-y-4 rounded-xl p-4 shadow-sm ring-1"
+      data-public-id={version.publicId}
+      data-testid={`organization-training-row-${version.publicId}`}
+    >
+      <TrainingVersionHeader
+        answerStatusLabel={answerStatusLabel}
+        version={version}
+      />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-text-secondary text-sm">
+          训练进度：{answerStatusLabel}
+        </p>
+        <button
+          className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          type="button"
+          onClick={onSelect}
+        >
+          {getTrainingPrimaryActionLabel(version.employeeAnswerStatus)}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function TrainingVersionHeader({
+  answerStatusLabel,
+  version,
+}: {
+  answerStatusLabel: string;
+  version: OrganizationTrainingPublishedVersionDto;
+}) {
+  const organizationName = version.organizationName ?? "当前组织节点";
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="space-y-2">
+        <h2 className="font-heading text-text-primary text-lg font-semibold">
+          {version.title}
+        </h2>
+        <div className="text-text-secondary flex flex-wrap gap-2 text-xs">
+          <span className="bg-muted rounded-md px-2 py-1">
+            {professionLabels[version.profession] ?? version.profession}
+          </span>
+          <span className="bg-muted rounded-md px-2 py-1">
+            {version.level} 级
+          </span>
+          <span className="bg-muted rounded-md px-2 py-1">
+            {subjectLabels[version.subject] ?? version.subject}
+          </span>
+          <span className="bg-muted rounded-md px-2 py-1">
+            第 {version.versionNumber} 版
+          </span>
+          <span className="bg-muted rounded-md px-2 py-1">
+            {organizationName}
+          </span>
+          <span className="bg-muted rounded-md px-2 py-1">
+            共 {version.questionCount} 题
+          </span>
+          <span className="bg-muted rounded-md px-2 py-1">
+            截止 {formatDateLabel(version.answerDeadlineAt)}
+          </span>
+        </div>
+      </div>
+      <span className="bg-success/10 text-success inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium">
+        <CheckCircle2 aria-hidden="true" className="size-3.5" />
+        {answerStatusLabel}
+      </span>
+    </div>
+  );
+}
+
+function TrainingVersionWorkspace({
   answerState,
   version,
+  onBack,
   onChangeValues,
   onLoadReadonlySummary,
   onSaveDraft,
@@ -568,6 +952,7 @@ function TrainingVersionCard({
 }: {
   answerState: AnswerUiState;
   version: OrganizationTrainingPublishedVersionDto;
+  onBack: () => void;
   onChangeValues: (values: AnswerFormValues) => void;
   onLoadReadonlySummary: () => void;
   onSaveDraft: () => void;
@@ -608,49 +993,35 @@ function TrainingVersionCard({
   }
 
   const questions = version.questions ?? [];
-  const organizationName = version.organizationName ?? "当前组织节点";
-  const answerStatusLabel = getAnswerStatusLabel(version.employeeAnswerStatus);
+  const isReadonly = isReadonlyTraining(version, answerState.answer);
+  const answerStatusLabel = isReadonly
+    ? "已提交"
+    : answerState.answer?.answerStatus === "in_progress" ||
+        version.employeeAnswerStatus === "in_progress"
+      ? "进行中"
+      : "未开始";
+  const isPending = answerState.pendingAction !== null;
 
   return (
     <article
+      aria-busy={isPending}
       className="bg-surface ring-border space-y-4 rounded-xl p-4 shadow-sm ring-1"
       data-public-id={version.publicId}
-      data-testid={`organization-training-row-${version.publicId}`}
+      data-testid={`organization-training-workspace-${version.publicId}`}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <h2 className="font-heading text-text-primary text-lg font-semibold">
-            {version.title}
-          </h2>
-          <div className="text-text-secondary flex flex-wrap gap-2 text-xs">
-            <span className="bg-muted rounded-md px-2 py-1">
-              {professionLabels[version.profession] ?? version.profession}
-            </span>
-            <span className="bg-muted rounded-md px-2 py-1">
-              {version.level} 级
-            </span>
-            <span className="bg-muted rounded-md px-2 py-1">
-              {subjectLabels[version.subject] ?? version.subject}
-            </span>
-            <span className="bg-muted rounded-md px-2 py-1">
-              第 {version.versionNumber} 版
-            </span>
-            <span className="bg-muted rounded-md px-2 py-1">
-              {organizationName}
-            </span>
-            <span className="bg-muted rounded-md px-2 py-1">
-              共 {version.questionCount} 题
-            </span>
-            <span className="bg-muted rounded-md px-2 py-1">
-              截止 {formatDateLabel(version.answerDeadlineAt)}
-            </span>
-          </div>
-        </div>
-        <span className="bg-success/10 text-success inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium">
-          <CheckCircle2 aria-hidden="true" className="size-3.5" />
-          {answerStatusLabel}
-        </span>
-      </div>
+      <button
+        className="border-border text-text-primary hover:bg-muted inline-flex h-9 items-center gap-2 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+        type="button"
+        onClick={onBack}
+      >
+        <ArrowLeft aria-hidden="true" className="size-4" />
+        返回训练列表
+      </button>
+
+      <TrainingVersionHeader
+        answerStatusLabel={answerStatusLabel}
+        version={version}
+      />
 
       <div
         aria-label="企业训练作答区"
@@ -662,8 +1033,9 @@ function TrainingVersionCard({
           作答区
         </div>
         <p className="text-text-secondary text-sm">
-          已作答 {answeredQuestionCount} / {version.questionCount}{" "}
-          题，提交前可保存草稿。
+          {isReadonly
+            ? `已提交，共 ${version.questionCount} 题，只读查看。`
+            : `已作答 ${answeredQuestionCount} / ${version.questionCount} 题，提交前可保存草稿。`}
         </p>
         <div className="bg-surface h-2 overflow-hidden rounded-full">
           <div
@@ -683,6 +1055,7 @@ function TrainingVersionCard({
                   answerState.values,
                   question.publicId,
                 )}
+                disabled={isReadonly}
                 key={question.publicId}
                 question={question}
                 onChange={(updater) =>
@@ -696,31 +1069,43 @@ function TrainingVersionCard({
 
       <TrainingResultPanel answer={answerState.answer} version={version} />
 
-      <div className="grid grid-cols-3 gap-2">
-        <button
-          className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
-          type="button"
-          onClick={onSaveDraft}
-        >
-          保存草稿
-        </button>
-        <button
-          className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
-          type="button"
-          onClick={handleSubmitClick}
-        >
-          提交
-        </button>
-        <button
-          className="border-border text-text-primary hover:bg-muted flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
-          type="button"
-          onClick={onLoadReadonlySummary}
-        >
-          查看结果
-        </button>
+      <div
+        className={isReadonly ? "flex justify-end" : "grid grid-cols-2 gap-2"}
+      >
+        {isReadonly ? (
+          <button
+            className="border-border text-text-primary hover:bg-muted flex h-9 items-center justify-center rounded-lg border bg-transparent px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isPending}
+            type="button"
+            onClick={onLoadReadonlySummary}
+          >
+            {answerState.pendingAction === "loading_result"
+              ? "正在加载结果"
+              : "查看结果"}
+          </button>
+        ) : (
+          <>
+            <button
+              className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isPending}
+              type="button"
+              onClick={onSaveDraft}
+            >
+              {answerState.pendingAction === "saving" ? "正在保存" : "保存草稿"}
+            </button>
+            <button
+              className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isPending}
+              type="button"
+              onClick={handleSubmitClick}
+            >
+              {answerState.pendingAction === "submitting" ? "正在提交" : "提交"}
+            </button>
+          </>
+        )}
       </div>
 
-      {isSubmitConfirming ? (
+      {isSubmitConfirming && !isReadonly ? (
         <div
           aria-label="企业训练提交确认"
           className="border-warning/30 bg-warning/10 grid gap-3 rounded-md border p-3 text-sm"
@@ -739,6 +1124,7 @@ function TrainingVersionCard({
             </button>
             <button
               className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+              disabled={isPending}
               type="button"
               onClick={() => {
                 setIsSubmitConfirming(false);
@@ -751,8 +1137,20 @@ function TrainingVersionCard({
         </div>
       ) : null}
 
-      {answerState.message === null ? null : (
-        <p className="text-brand-primary text-sm">{answerState.message}</p>
+      {answerState.feedback === null ? null : (
+        <p
+          aria-live={
+            answerState.feedback.kind === "error" ? "assertive" : "polite"
+          }
+          className={
+            answerState.feedback.kind === "error"
+              ? "text-destructive text-sm"
+              : "text-brand-primary text-sm"
+          }
+          role={answerState.feedback.kind === "error" ? "alert" : "status"}
+        >
+          {answerState.feedback.text}
+        </p>
       )}
     </article>
   );
@@ -760,10 +1158,12 @@ function TrainingVersionCard({
 
 function QuestionAnswerField({
   answerItem,
+  disabled,
   onChange,
   question,
 }: {
   answerItem: AnswerItemFormValue;
+  disabled: boolean;
   onChange: (
     updater: (value: AnswerItemFormValue) => AnswerItemFormValue,
   ) => void;
@@ -793,7 +1193,10 @@ function QuestionAnswerField({
   }
 
   return (
-    <fieldset className="border-border bg-surface space-y-3 rounded-md border p-3">
+    <fieldset
+      className="border-border bg-surface space-y-3 rounded-md border p-3 disabled:opacity-80"
+      disabled={disabled}
+    >
       <legend className="text-text-primary px-1 text-sm font-semibold">
         第 {question.sequenceNumber} 题 ·{" "}
         {getQuestionTypeLabel(question.questionType)} · {question.score} 分

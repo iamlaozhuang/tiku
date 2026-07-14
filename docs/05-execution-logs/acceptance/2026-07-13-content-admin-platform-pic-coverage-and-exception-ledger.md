@@ -286,6 +286,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
 - `organization admin/training/AI` is compliant for the E3 implementation family only. Global PIC statuses remain
   unchanged pending E4-E6 and F acceptance; E5 retains cross-workspace aliases and the exception ledger remains empty.
 
+### E4 Learner Page-Family Rollout
+
+- Employee organization training now defaults to five summary metrics and compact assignments; selecting one training
+  exposes exactly one mobile-first answer/result workspace. Submitted/read-only assignments cannot render mutation
+  controls, and pending actions suppress duplicate requests.
+- Focused proof covers learner shell, home, practice, mock/report, mistake-book, profile, auth, personal AI, organization
+  training and protected authorization/training services. Standard and missing organization contexts fail closed;
+  personal-AI context/history and historical paper resume contracts remain unchanged.
+- `learner practice/mock/report/AI/organization-training` is compliant for the E4 implementation family only. Global PIC
+  statuses remain unchanged pending E5/E6 and F acceptance; E5 retains cross-workspace aliases and the exception ledger
+  remains empty.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：
