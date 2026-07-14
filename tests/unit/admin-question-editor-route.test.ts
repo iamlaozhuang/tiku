@@ -240,11 +240,54 @@ function fillValidSingleChoiceQuestion() {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  sessionStorage.clear();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+  vi.restoreAllMocks();
+  window.history.replaceState(null, "", "/content/questions");
 });
 
 describe("AdminQuestionEditorPage", () => {
+  it("uses the validated filtered return target on a clean direct editor", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockQuestionEditorFetch();
+    window.history.replaceState(
+      null,
+      "",
+      "/content/questions/new?returnTo=%2Fcontent%2Fquestions%3Fpage%3D2%26pageSize%3D50%26sortBy%3DupdatedAt%26sortOrder%3Dasc%26status%3Ddisabled",
+    );
+
+    render(createElement(AdminQuestionEditorPage));
+    await screen.findByRole("form", { name: "题目表单" });
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "返回题目列表" })[0]!,
+    );
+
+    expect(navigationReplace).toHaveBeenCalledWith(
+      "/content/questions?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&status=disabled",
+    );
+  });
+
+  it("preserves authored question input when dirty leave is cancelled", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockQuestionEditorFetch();
+    window.history.replaceState(null, "", "/content/questions/new");
+    const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
+
+    render(createElement(AdminQuestionEditorPage));
+    const form = within(await screen.findByRole("form", { name: "题目表单" }));
+    fireEvent.change(form.getByLabelText("题干"), {
+      target: { value: "不得丢失的题干" },
+    });
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "返回题目列表" })[0]!,
+    );
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(navigationReplace).not.toHaveBeenCalled();
+    expect(form.getByLabelText("题干")).toHaveValue("不得丢失的题干");
+  });
+
   it("renders a dedicated create editor and blocks semantic-empty submission", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockQuestionEditorFetch();
@@ -283,7 +326,7 @@ describe("AdminQuestionEditorPage", () => {
 
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
-        "/content/questions/question-created-001/edit",
+        "/content/questions/question-created-001/edit?returnTo=%2Fcontent%2Fquestions",
       ),
     );
     expect(
@@ -322,7 +365,19 @@ describe("AdminQuestionEditorPage", () => {
     await screen.findByRole("heading", { name: "题库与材料管理" });
     fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
 
-    expect(navigationPush).toHaveBeenCalledWith("/content/questions/new");
+    expect(navigationPush).toHaveBeenCalledWith(
+      "/content/questions/new?returnTo=%2Fcontent%2Fquestions%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
+    );
+    expect(
+      JSON.parse(
+        sessionStorage.getItem("tiku.adminEditorReturn.questions") ?? "null",
+      ),
+    ).toMatchObject({
+      initiatingControl: "create",
+      returnTo:
+        "/content/questions?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+      version: 1,
+    });
     expect(screen.queryByRole("form", { name: "题目表单" })).toBeNull();
   });
 
@@ -384,7 +439,7 @@ describe("AdminQuestionEditorPage", () => {
 
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
-        "/content/questions/question-copy-001/edit",
+        "/content/questions/question-copy-001/edit?returnTo=%2Fcontent%2Fquestions",
       ),
     );
     expect(
@@ -433,7 +488,7 @@ describe("AdminQuestionEditorPage", () => {
       await screen.findByRole("heading", { name: "未找到题目" }),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "返回题目列表" }));
-    expect(navigationPush).toHaveBeenCalledWith("/content/questions");
+    expect(navigationReplace).toHaveBeenCalledWith("/content/questions");
   });
 
   it("preserves authored input and blocks repeat PATCH after a lock race", async () => {
@@ -458,6 +513,17 @@ describe("AdminQuestionEditorPage", () => {
       screen.getByRole("button", { name: "复制为新题并编辑" }),
     ).toBeInTheDocument();
 
+    const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
+    fireEvent.click(screen.getByRole("button", { name: "复制为新题并编辑" }));
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(
+      fetchMock.mock.calls.filter(
+        ([requestUrl, init]) =>
+          String(requestUrl).endsWith("/copy") && init?.method === "POST",
+      ),
+    ).toHaveLength(0);
+    expect(form.getByLabelText("题干")).toHaveValue("锁定冲突前的本地输入");
+
     fireEvent.click(form.getByRole("button", { name: "保存题目" }));
     await waitFor(() =>
       expect(
@@ -481,13 +547,13 @@ describe("AdminQuestionEditorPage", () => {
     await screen.findByTestId("question-row-question-edit-001");
     fireEvent.click(screen.getByRole("button", { name: /编辑题目/ }));
     expect(navigationPush).toHaveBeenCalledWith(
-      "/content/questions/question-edit-001/edit",
+      "/content/questions/question-edit-001/edit?returnTo=%2Fcontent%2Fquestions%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
     );
 
     fireEvent.click(screen.getByRole("button", { name: /复制题目/ }));
     await waitFor(() =>
       expect(navigationPush).toHaveBeenCalledWith(
-        "/content/questions/question-copy-001/edit",
+        "/content/questions/question-copy-001/edit?returnTo=%2Fcontent%2Fquestions%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
       ),
     );
     expect(

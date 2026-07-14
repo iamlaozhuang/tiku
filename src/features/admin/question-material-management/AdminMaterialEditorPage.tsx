@@ -2,11 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Copy, ShieldAlert } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { AdminAsyncState } from "@/components/admin/AdminAsyncState";
 import { AdminToast, type AdminFeedback } from "@/components/admin/AdminToast";
 import { Button } from "@/components/ui/button";
+import { useAdminEditorNavigationGuard } from "@/hooks/useAdminEditorNavigationGuard";
+import {
+  createAdminEditorHref,
+  resolveAdminEditorReturnTo,
+} from "@/lib/admin-editor-navigation";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
   MaterialDto,
@@ -42,8 +46,16 @@ export function AdminMaterialEditorPage({
 }: {
   materialPublicId?: string;
 }) {
-  const router = useRouter();
   const isEditMode = materialPublicId !== undefined;
+  const [returnTo] = useState(() =>
+    typeof window === "undefined"
+      ? "/content/materials"
+      : resolveAdminEditorReturnTo("materials", window.location.search),
+  );
+  const navigationGuard = useAdminEditorNavigationGuard({
+    resource: "materials",
+    returnTo,
+  });
   const [loadState, setLoadState] = useState<EditorLoadState>("loading");
   const [material, setMaterial] = useState<MaterialDto | null>(null);
   const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
@@ -129,13 +141,14 @@ export function AdminMaterialEditorPage({
   }, [isEditMode, materialPublicId]);
 
   function handleReturnToList() {
-    router.push("/content/materials");
+    navigationGuard.navigateToList();
   }
 
   async function handleCopyMaterial() {
     if (materialPublicId === undefined || submissionInProgressRef.current) {
       return;
     }
+    if (!navigationGuard.canDiscard()) return;
 
     const sessionToken = getStoredSessionToken();
     if (sessionToken === null) {
@@ -169,8 +182,13 @@ export function AdminMaterialEditorPage({
       }
 
       navigationStarted = true;
-      router.replace(
-        `/content/materials/${encodeURIComponent(response.data.material.publicId)}/edit`,
+      navigationGuard.navigate(
+        createAdminEditorHref({
+          publicId: response.data.material.publicId,
+          resource: "materials",
+          returnTo,
+        }),
+        { skipConfirmation: true },
       );
     } catch {
       setFeedback({
@@ -243,8 +261,13 @@ export function AdminMaterialEditorPage({
 
       if (!isEditMode) {
         navigationStarted = true;
-        router.replace(
-          `/content/materials/${encodeURIComponent(response.data.material.publicId)}/edit`,
+        navigationGuard.navigate(
+          createAdminEditorHref({
+            publicId: response.data.material.publicId,
+            resource: "materials",
+            returnTo,
+          }),
+          { skipConfirmation: true },
         );
         return;
       }
@@ -406,6 +429,7 @@ export function AdminMaterialEditorPage({
             }
             values={editorValues}
             onCancel={handleReturnToList}
+            onDirtyStateChange={navigationGuard.onDirtyStateChange}
             onSubmit={(values) => void handleSaveMaterial(values)}
           />
         </>

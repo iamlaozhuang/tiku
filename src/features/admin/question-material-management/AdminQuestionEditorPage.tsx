@@ -2,11 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Copy, ShieldAlert } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { AdminAsyncState } from "@/components/admin/AdminAsyncState";
 import { AdminToast, type AdminFeedback } from "@/components/admin/AdminToast";
 import { Button } from "@/components/ui/button";
+import { useAdminEditorNavigationGuard } from "@/hooks/useAdminEditorNavigationGuard";
+import {
+  createAdminEditorHref,
+  resolveAdminEditorReturnTo,
+} from "@/lib/admin-editor-navigation";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type {
   QuestionDto,
@@ -45,8 +49,16 @@ export function AdminQuestionEditorPage({
   publishDraft?: boolean;
   questionPublicId?: string;
 }) {
-  const router = useRouter();
   const isEditMode = questionPublicId !== undefined;
+  const [returnTo] = useState(() =>
+    typeof window === "undefined"
+      ? "/content/questions"
+      : resolveAdminEditorReturnTo("questions", window.location.search),
+  );
+  const navigationGuard = useAdminEditorNavigationGuard({
+    resource: "questions",
+    returnTo,
+  });
   const [loadState, setLoadState] = useState<EditorLoadState>("loading");
   const [question, setQuestion] = useState<QuestionDto | null>(null);
   const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
@@ -136,13 +148,14 @@ export function AdminQuestionEditorPage({
   }, [isEditMode, questionPublicId]);
 
   function handleReturnToList() {
-    router.push("/content/questions");
+    navigationGuard.navigateToList();
   }
 
   async function handleCopyQuestion() {
     if (questionPublicId === undefined || submissionInProgressRef.current) {
       return;
     }
+    if (!navigationGuard.canDiscard()) return;
 
     const sessionToken = getStoredSessionToken();
     if (sessionToken === null) {
@@ -176,8 +189,13 @@ export function AdminQuestionEditorPage({
       }
 
       navigationStarted = true;
-      router.replace(
-        `/content/questions/${encodeURIComponent(response.data.question.publicId)}/edit`,
+      navigationGuard.navigate(
+        createAdminEditorHref({
+          publicId: response.data.question.publicId,
+          resource: "questions",
+          returnTo,
+        }),
+        { skipConfirmation: true },
       );
     } catch {
       setFeedback({
@@ -250,8 +268,13 @@ export function AdminQuestionEditorPage({
 
       if (!isEditMode) {
         navigationStarted = true;
-        router.replace(
-          `/content/questions/${encodeURIComponent(response.data.question.publicId)}/edit`,
+        navigationGuard.navigate(
+          createAdminEditorHref({
+            publicId: response.data.question.publicId,
+            resource: "questions",
+            returnTo,
+          }),
+          { skipConfirmation: true },
         );
         return;
       }
@@ -421,6 +444,7 @@ export function AdminQuestionEditorPage({
             }
             values={editorValues}
             onCancel={handleReturnToList}
+            onDirtyStateChange={navigationGuard.onDirtyStateChange}
             onSubmit={(values) => void handleSaveQuestion(values)}
           />
         </>

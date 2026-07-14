@@ -204,11 +204,54 @@ async function fillValidMaterial() {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  sessionStorage.clear();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+  vi.restoreAllMocks();
+  window.history.replaceState(null, "", "/content/materials");
 });
 
 describe("AdminMaterialEditorPage", () => {
+  it("uses the validated filtered return target on a clean direct editor", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockMaterialEditorFetch();
+    window.history.replaceState(
+      null,
+      "",
+      "/content/materials/new?returnTo=%2Fcontent%2Fmaterials%3Fpage%3D2%26pageSize%3D50%26sortBy%3DupdatedAt%26sortOrder%3Dasc%26status%3Ddisabled",
+    );
+
+    render(createElement(AdminMaterialEditorPage));
+    await screen.findByRole("form", { name: "材料表单" });
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "返回材料列表" })[0]!,
+    );
+
+    expect(navigationReplace).toHaveBeenCalledWith(
+      "/content/materials?page=2&pageSize=50&sortBy=updatedAt&sortOrder=asc&status=disabled",
+    );
+  });
+
+  it("preserves authored material input when dirty leave is cancelled", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockMaterialEditorFetch();
+    window.history.replaceState(null, "", "/content/materials/new");
+    const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
+
+    render(createElement(AdminMaterialEditorPage));
+    const form = within(await screen.findByRole("form", { name: "材料表单" }));
+    fireEvent.change(form.getByLabelText("材料正文"), {
+      target: { value: "不得丢失的材料正文" },
+    });
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "返回材料列表" })[0]!,
+    );
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(navigationReplace).not.toHaveBeenCalled();
+    expect(form.getByLabelText("材料正文")).toHaveValue("不得丢失的材料正文");
+  });
+
   it("renders a dedicated create editor and blocks semantic-empty submission", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockMaterialEditorFetch();
@@ -246,7 +289,7 @@ describe("AdminMaterialEditorPage", () => {
 
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
-        "/content/materials/material-created-001/edit",
+        "/content/materials/material-created-001/edit?returnTo=%2Fcontent%2Fmaterials",
       ),
     );
     const postCalls = fetchMock.mock.calls.filter(
@@ -315,7 +358,7 @@ describe("AdminMaterialEditorPage", () => {
     fireEvent.click(form.getByRole("button", { name: "保存材料" }));
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
-        "/content/materials/material-created-001/edit",
+        "/content/materials/material-created-001/edit?returnTo=%2Fcontent%2Fmaterials",
       ),
     );
     expect(
@@ -346,7 +389,7 @@ describe("AdminMaterialEditorPage", () => {
       }),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "返回材料列表" }));
-    expect(navigationPush).toHaveBeenCalledWith("/content/materials");
+    expect(navigationReplace).toHaveBeenCalledWith("/content/materials");
   });
 
   it("loads an unlocked material and patches the shared form contract", async () => {
@@ -405,7 +448,7 @@ describe("AdminMaterialEditorPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "复制为新材料并编辑" }));
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
-        "/content/materials/material-copy-001/edit",
+        "/content/materials/material-copy-001/edit?returnTo=%2Fcontent%2Fmaterials",
       ),
     );
   });
@@ -451,6 +494,18 @@ describe("AdminMaterialEditorPage", () => {
     expect(await screen.findByText("材料保存冲突")).toBeInTheDocument();
     expect(form.getByLabelText("材料标题")).toHaveValue("锁定竞态保留输入");
     expect(form.getByRole("button", { name: "保存材料" })).toBeDisabled();
+
+    const confirmMock = vi.spyOn(window, "confirm").mockReturnValue(false);
+    fireEvent.click(screen.getByRole("button", { name: "复制为新材料并编辑" }));
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(
+      fetchMock.mock.calls.filter(
+        ([url, init]) =>
+          String(url).endsWith("/copy") && init?.method === "POST",
+      ),
+    ).toHaveLength(0);
+    expect(form.getByLabelText("材料标题")).toHaveValue("锁定竞态保留输入");
+
     fireEvent.click(form.getByRole("button", { name: "保存材料" }));
     expect(
       fetchMock.mock.calls.filter(
@@ -475,7 +530,7 @@ describe("AdminMaterialEditorPage", () => {
       await screen.findByRole("heading", { level: 1, name: "未找到材料" }),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "返回材料列表" }));
-    expect(navigationPush).toHaveBeenCalledWith("/content/materials");
+    expect(navigationReplace).toHaveBeenCalledWith("/content/materials");
   });
 });
 
@@ -487,7 +542,19 @@ describe("material create route entry", () => {
     render(createElement(MaterialsPage));
 
     fireEvent.click(await screen.findByRole("button", { name: "新建材料" }));
-    expect(navigationPush).toHaveBeenCalledWith("/content/materials/new");
+    expect(navigationPush).toHaveBeenCalledWith(
+      "/content/materials/new?returnTo=%2Fcontent%2Fmaterials%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
+    );
+    expect(
+      JSON.parse(
+        sessionStorage.getItem("tiku.adminEditorReturn.materials") ?? "null",
+      ),
+    ).toMatchObject({
+      initiatingControl: "create",
+      returnTo:
+        "/content/materials?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+      version: 1,
+    });
     expect(screen.queryByRole("form", { name: "材料表单" })).toBeNull();
   });
 
@@ -505,7 +572,7 @@ describe("material create route entry", () => {
       }),
     );
     expect(navigationPush).toHaveBeenCalledWith(
-      "/content/materials/material-edit-001/edit",
+      "/content/materials/material-edit-001/edit?returnTo=%2Fcontent%2Fmaterials%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
     );
 
     fireEvent.click(
@@ -515,7 +582,7 @@ describe("material create route entry", () => {
     );
     await waitFor(() =>
       expect(navigationReplace).toHaveBeenCalledWith(
-        "/content/materials/material-copy-001/edit",
+        "/content/materials/material-copy-001/edit?returnTo=%2Fcontent%2Fmaterials%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
       ),
     );
     expect(fetchMock).toHaveBeenCalledWith(
@@ -536,7 +603,9 @@ describe("material create route entry", () => {
 
     fireEvent.click(await screen.findByRole("tab", { name: "材料" }));
     fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
-    expect(navigationPush).toHaveBeenCalledWith("/content/materials/new");
+    expect(navigationPush).toHaveBeenCalledWith(
+      "/content/materials/new?returnTo=%2Fcontent%2Fmaterials%3Fpage%3D1%26pageSize%3D20%26sortBy%3DupdatedAt%26sortOrder%3Ddesc",
+    );
     expect(screen.queryByRole("form", { name: "材料表单" })).toBeNull();
   });
 });

@@ -218,6 +218,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   dirty-leave/return/focus/scroll recovery and C6 retains cumulative promotion. PIC-13 and the empty exception ledger
   remain unchanged; no authorization, dependency, database, AI, credential or deployment boundary changed.
 
+### C5 Editor Navigation Recovery
+
+- Question/material list create, edit and copy entries now carry one validated same-family `returnTo` plus a bounded,
+  one-shot, non-sensitive session snapshot. Return restores URL-owned list state, scroll and initiating control, with a
+  deterministic toolbar fallback for missing or disabled targets.
+- Both dedicated editors now block dirty cancel/return/copy and browser history until discard is confirmed; refresh/tab
+  close uses `beforeunload`. Failed mutation and lock conflict preserve authored input, while successful create/save/copy
+  retains the return target without replaying POST.
+- PIC-05/PIC-06/PIC-07/PIC-09/PIC-10 are now partially proven across both complete editor route families. C6 retains
+  cumulative promotion and fixed full-regression ownership. PIC-13 and the empty exception ledger remain unchanged; no
+  authorization, lifecycle, dependency, database, AI, credential or deployment boundary changed.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

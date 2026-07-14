@@ -36,7 +36,15 @@ import {
 } from "@/components/admin/AdminList";
 import { AdminAsyncState } from "@/components/admin/AdminAsyncState";
 import { useAdminListDebouncedValue } from "@/hooks/useAdminListDebouncedValue";
+import { useAdminEditorListReturnRecovery } from "@/hooks/useAdminEditorNavigationGuard";
 import { useAdminListInteraction } from "@/hooks/useAdminListInteraction";
+import {
+  createAdminEditorHref,
+  validateAdminEditorListUrl,
+  writeAdminEditorReturnSnapshot,
+  type AdminEditorInitiatingControl,
+  type AdminEditorResource,
+} from "@/lib/admin-editor-navigation";
 import {
   createAdminListLatestIntent,
   createAdminListSearchParams,
@@ -178,6 +186,33 @@ function readContentListUrlQuery(): {
       defaultSortBy: "updatedAt",
     }),
   };
+}
+
+function createEditorEntryHref({
+  initiatingControl,
+  publicId,
+  resource,
+}: {
+  initiatingControl: AdminEditorInitiatingControl;
+  publicId?: string;
+  resource: AdminEditorResource;
+}) {
+  const listRoot = `/content/${resource}`;
+  const returnTo =
+    validateAdminEditorListUrl(
+      resource,
+      `${window.location.pathname}${window.location.search}`,
+    ) ?? listRoot;
+  const scrollY = Number.isFinite(window.scrollY)
+    ? Math.max(0, Math.trunc(window.scrollY))
+    : 0;
+  writeAdminEditorReturnSnapshot(window.sessionStorage, resource, {
+    createdAt: Date.now(),
+    initiatingControl,
+    returnTo,
+    scrollY,
+  });
+  return createAdminEditorHref({ publicId, resource, returnTo });
 }
 
 function createManagedPaperAssetImageMarkup({
@@ -1049,6 +1084,13 @@ export function AdminQuestionMaterialManagement({
     useQuestionBindingOptions(
       loadState === "ready" && activeView === "questions",
     );
+  useAdminEditorListReturnRecovery({
+    ready:
+      loadState === "ready" &&
+      ((activeView === "questions" && questionEditorRoutesEnabled) ||
+        (activeView === "materials" && materialEditorRoutesEnabled)),
+    resource: activeView,
+  });
 
   useEffect(() => {
     const routeSearchParams = new URLSearchParams(contentQueryString);
@@ -2213,9 +2255,11 @@ function ContentDangerConfirmationDialog({
 
 function ActionBar({
   activeView,
+  editorEntryIdentity,
   onCreate,
 }: {
   activeView: ViewMode;
+  editorEntryIdentity?: AdminEditorInitiatingControl;
   onCreate: () => void;
 }) {
   const noun = activeView === "questions" ? "题目" : "材料";
@@ -2223,7 +2267,10 @@ function ActionBar({
   return (
     <div className="max-w-xl space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Button onClick={onCreate}>
+        <Button
+          data-admin-editor-entry={editorEntryIdentity}
+          onClick={onCreate}
+        >
           <Plus aria-hidden="true" data-icon="inline-start" />
           新建{noun}
         </Button>
@@ -2245,7 +2292,15 @@ function QuestionCreateRouteActionBar() {
   return (
     <ActionBar
       activeView="questions"
-      onCreate={() => router.push("/content/questions/new")}
+      editorEntryIdentity="create"
+      onCreate={() =>
+        router.push(
+          createEditorEntryHref({
+            initiatingControl: "create",
+            resource: "questions",
+          }),
+        )
+      }
     />
   );
 }
@@ -2256,7 +2311,15 @@ function MaterialCreateRouteActionBar() {
   return (
     <ActionBar
       activeView="materials"
-      onCreate={() => router.push("/content/materials/new")}
+      editorEntryIdentity="create"
+      onCreate={() =>
+        router.push(
+          createEditorEntryHref({
+            initiatingControl: "create",
+            resource: "materials",
+          }),
+        )
+      }
     />
   );
 }
@@ -2270,6 +2333,7 @@ export function AdminQuestionEditorForm({
   submitLabel = "保存题目",
   values,
   onCancel,
+  onDirtyStateChange,
   onSubmit,
 }: {
   bindingOptions: QuestionBindingOptions;
@@ -2280,6 +2344,7 @@ export function AdminQuestionEditorForm({
   submitLabel?: string;
   values: QuestionFormValues;
   onCancel: () => void;
+  onDirtyStateChange?: (isDirty: boolean) => void;
   onSubmit: (values: QuestionFormValues) => void;
 }) {
   const [formValues, setFormValues] = useState(values);
@@ -2310,6 +2375,10 @@ export function AdminQuestionEditorForm({
     formValues.knowledgeNodePublicIdsText,
   );
   const previewTagPublicIds = parsePublicIdList(formValues.tagPublicIdsText);
+
+  useEffect(() => {
+    onDirtyStateChange?.(dirtyState.status === "dirty");
+  }, [dirtyState.status, onDirtyStateChange]);
 
   return (
     <form
@@ -3179,6 +3248,7 @@ export function AdminMaterialEditorForm({
   submitBlockedReason = null,
   values,
   onCancel,
+  onDirtyStateChange,
   onSubmit,
 }: {
   isSubmitting: boolean;
@@ -3186,6 +3256,7 @@ export function AdminMaterialEditorForm({
   submitBlockedReason?: string | null;
   values: MaterialFormValues;
   onCancel: () => void;
+  onDirtyStateChange?: (isDirty: boolean) => void;
   onSubmit: (values: MaterialFormValues) => void;
 }) {
   const [formValues, setFormValues] = useState(values);
@@ -3202,6 +3273,10 @@ export function AdminMaterialEditorForm({
   const disabledReason = isSubmitting
     ? "正在保存，请勿重复提交。"
     : submitBlockedReason;
+
+  useEffect(() => {
+    onDirtyStateChange?.(dirtyState.status === "dirty");
+  }, [dirtyState.status, onDirtyStateChange]);
 
   return (
     <form
@@ -3768,6 +3843,7 @@ function QuestionRouteEditButton({ question }: { question: QuestionDto }) {
   return (
     <Button
       aria-label={`编辑题目 ${createQuestionReadableName(question)}`}
+      data-admin-editor-entry={`edit:${question.publicId}`}
       data-testid={`question-edit-${question.publicId}`}
       disabled={question.isLocked}
       size="sm"
@@ -3775,7 +3851,11 @@ function QuestionRouteEditButton({ question }: { question: QuestionDto }) {
       variant="outline"
       onClick={() =>
         router.push(
-          `/content/questions/${encodeURIComponent(question.publicId)}/edit`,
+          createEditorEntryHref({
+            initiatingControl: `edit:${question.publicId}`,
+            publicId: question.publicId,
+            resource: "questions",
+          }),
         )
       }
     >
@@ -3803,7 +3883,11 @@ function QuestionCopyToEditorButton({
       const copiedQuestion = await onCopy(question);
       if (copiedQuestion !== null) {
         router.push(
-          `/content/questions/${encodeURIComponent(copiedQuestion.publicId)}/edit`,
+          createEditorEntryHref({
+            initiatingControl: `edit:${question.publicId}`,
+            publicId: copiedQuestion.publicId,
+            resource: "questions",
+          }),
         );
       }
     } finally {
@@ -4085,7 +4169,11 @@ function MaterialListWithEditorRoutes({
           const copiedMaterial = await onCopy(material);
           if (copiedMaterial !== null) {
             router.replace(
-              `/content/materials/${encodeURIComponent(copiedMaterial.publicId)}/edit`,
+              createEditorEntryHref({
+                initiatingControl: `edit:${material.publicId}`,
+                publicId: copiedMaterial.publicId,
+                resource: "materials",
+              }),
             );
           }
         })();
@@ -4093,7 +4181,11 @@ function MaterialListWithEditorRoutes({
       onDisable={onDisable}
       onEdit={(material) =>
         router.push(
-          `/content/materials/${encodeURIComponent(material.publicId)}/edit`,
+          createEditorEntryHref({
+            initiatingControl: `edit:${material.publicId}`,
+            publicId: material.publicId,
+            resource: "materials",
+          }),
         )
       }
       onView={onView}
@@ -4171,6 +4263,7 @@ function MaterialList({
                 </Button>
                 <Button
                   aria-label={`编辑材料 ${readableName}`}
+                  data-admin-editor-entry={`edit:${material.publicId}`}
                   data-testid={`material-edit-${material.publicId}`}
                   disabled={material.isLocked}
                   size="sm"
