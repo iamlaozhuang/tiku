@@ -1,6 +1,8 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AdminAiCallLogOpsPage } from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
+
 import { AdminDashboardLayout } from "./AdminDashboardLayout";
 
 let mockedPathname = "/ops/users";
@@ -203,6 +205,30 @@ describe("AdminDashboardLayout shared admin state templates", () => {
       screen.getByTestId("admin-workspace-context-band"),
     ).toHaveTextContent("用户、企业、授权、卡密与审计治理归属于运营后台。");
     expect(screen.getByText("ops page body")).toBeInTheDocument();
+  });
+
+  it("keeps the authenticated super-admin role truthful inside split log pages", async () => {
+    mockedPathname = "/ops/ai-call-logs";
+    mockSessionResponse(
+      createAdminSessionResponse({
+        adminRoles: ["super_admin"],
+      }),
+    );
+
+    render(
+      <AdminDashboardLayout>
+        <AdminAiCallLogOpsPage />
+      </AdminDashboardLayout>,
+    );
+
+    const toolbar = await screen.findByRole("region", {
+      name: "AI 调用日志筛选",
+    });
+    expect(toolbar).toHaveTextContent("当前为超级管理员只读视角");
+    expect(toolbar).not.toHaveTextContent("当前为运营管理员只读视角");
+    expect(
+      screen.getByTestId("ops-ai-call-log-summary-band"),
+    ).toHaveTextContent("超级管理员");
   });
 
   it("keeps wide admin tables inside the content scroll boundary", async () => {

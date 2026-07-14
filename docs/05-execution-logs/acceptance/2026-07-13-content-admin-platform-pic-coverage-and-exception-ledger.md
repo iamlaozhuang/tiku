@@ -345,6 +345,18 @@ Batch A 完成 P0-01~14，不等于 PIC-01~13 已全平台完成。`partial` 仅
   focused regression protects closed PIC-02/03/06/07/09 behavior. F5 retains global reconciliation; approved exception
   count remains zero and deployment remains blocked.
 
+### F2 Operations And Super-Admin Representative Acceptance
+
+- Canonical 0704DB `ops_admin` and `super_admin` sessions passed representative account, organization, authorization,
+  employee, `redeem_code`, contact and split-log routes. Optional authorization and AI-call-log empty states remained
+  truthful; audit data was non-empty and redacted. No disclosure/copy, write, Provider or model-health action occurred.
+- Direct unrelated workspace access failed closed for `ops_admin`; super-admin breadth retained organization-context
+  gating and content-lifecycle ownership. Browser acceptance exposed and F2 repaired one same-scope presentation defect:
+  split log pages now derive their role label from the authenticated layout while explicit test overrides remain valid.
+- The operations route family is representative-role compliant. F2 contributes PIC-01/04/05/08/10/11/12/13 proof;
+  focused and full regression protect closed list/editor contracts. F5 retains global reconciliation, the approved
+  exception count remains zero and deployment remains blocked.
+
 ## Exception Ledger
 
 当前无 Program 批准例外。任何新增例外必须填写：

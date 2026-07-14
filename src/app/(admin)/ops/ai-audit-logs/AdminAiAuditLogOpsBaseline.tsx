@@ -17,6 +17,7 @@ import {
 } from "@/features/admin/model-config-management/AdminModelConfigManagement";
 import { adminDataTableClassName } from "@/components/admin/admin-layout-primitives";
 import { AdminDetailDrawer } from "@/components/admin/AdminDetailDrawer";
+import { useAdminDashboardRoles } from "@/components/AdminDashboardLayout/AdminDashboardLayout";
 import {
   AdminListToolbar,
   AdminPagination,
@@ -338,7 +339,7 @@ const staticAiCallLogRuntimeData = {
 };
 
 export function AdminAuditLogOpsPage({
-  currentRole = "ops_admin",
+  currentRole,
   runtimeEnabled = false,
   state = "ready",
 }: {
@@ -346,6 +347,10 @@ export function AdminAuditLogOpsPage({
   runtimeEnabled?: boolean;
   state?: AdminAiAuditLogOpsState;
 }) {
+  const dashboardRoles = useAdminDashboardRoles();
+  const effectiveCurrentRole =
+    currentRole ??
+    (dashboardRoles.includes("super_admin") ? "super_admin" : "ops_admin");
   const [runtimeState, setRuntimeState] =
     useState<AdminAiAuditLogOpsState>(state);
   const [runtimeData, setRuntimeData] = useState(staticAuditLogRuntimeData);
@@ -456,7 +461,7 @@ export function AdminAuditLogOpsPage({
       />
 
       <AdminAuditLogToolbar
-        currentRole={currentRole}
+        currentRole={effectiveCurrentRole}
         query={query}
         total={totalCount}
         onChange={(nextQuery) => {
@@ -492,7 +497,7 @@ export function AdminAuditLogOpsPage({
 }
 
 export function AdminAiCallLogOpsPage({
-  currentRole = "ops_admin",
+  currentRole,
   runtimeEnabled = false,
   state = "ready",
 }: {
@@ -500,6 +505,10 @@ export function AdminAiCallLogOpsPage({
   runtimeEnabled?: boolean;
   state?: AdminAiAuditLogOpsState;
 }) {
+  const dashboardRoles = useAdminDashboardRoles();
+  const effectiveCurrentRole =
+    currentRole ??
+    (dashboardRoles.includes("super_admin") ? "super_admin" : "ops_admin");
   const [runtimeState, setRuntimeState] =
     useState<AdminAiAuditLogOpsState>(state);
   const [runtimeData, setRuntimeData] = useState(staticAiCallLogRuntimeData);
@@ -619,13 +628,13 @@ export function AdminAiCallLogOpsPage({
           { label: "失败调用", value: failedAiCallCount },
           { label: "用量摘要", value: runtimeData.costSummaries.length },
         ]}
-        roleLabel={formatOpsLogRoleLabel(currentRole)}
+        roleLabel={formatOpsLogRoleLabel(effectiveCurrentRole)}
         testId="ops-ai-call-log-summary-band"
         title="AI 调用日志只读"
       />
 
       <AdminAiCallLogToolbar
-        currentRole={currentRole}
+        currentRole={effectiveCurrentRole}
         query={query}
         total={totalCount}
         onChange={(nextQuery) => {

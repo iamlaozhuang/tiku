@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
@@ -143,6 +143,7 @@ type WorkspaceReturnAction = {
 };
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
+const AdminDashboardRolesContext = createContext<readonly string[]>([]);
 const ADMIN_ROLE_LABELS: Record<string, string> = {
   content_admin: "内容管理员",
   ops_admin: "运营管理员",
@@ -150,6 +151,10 @@ const ADMIN_ROLE_LABELS: Record<string, string> = {
   org_standard_admin: "标准版组织管理员",
   super_admin: "超级管理员",
 };
+
+export function useAdminDashboardRoles(): readonly string[] {
+  return useContext(AdminDashboardRolesContext);
+}
 
 function getWorkspaceFromPath(pathname: string): AdminWorkspace {
   if (pathname.startsWith("/admin")) {
@@ -865,7 +870,9 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
               withinWorkspace
             />
           ) : (
-            children
+            <AdminDashboardRolesContext.Provider value={adminRoles}>
+              {children}
+            </AdminDashboardRolesContext.Provider>
           )}
         </main>
       </div>

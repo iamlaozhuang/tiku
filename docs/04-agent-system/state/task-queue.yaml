@@ -4,8 +4,8 @@ contentAdminPlatformSerialProgram:
   status: in_progress
   activityStatePolicy: lean_v3_current_program_only
   baselineSha: c674b188a6313b34f963dbef7ba140e89504f942
-  currentTaskId: content-admin-platform-f1-content-admin-acceptance-2026-07-13
-  nextTaskId: content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+  currentTaskId: content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+  nextTaskId: content-admin-platform-f3-organization-acceptance-2026-07-13
   orderedTaskIds:
     - content-admin-platform-program-init-2026-07-13
     - content-admin-platform-m1-lean-module-run-v3-2026-07-13
@@ -71,7 +71,8 @@ contentAdminPlatformSerialProgram:
     - content-admin-platform-e5-cross-role-exception-closure-2026-07-13
     - content-admin-platform-e6-cumulative-audit-2026-07-13
     - content-admin-platform-f0-acceptance-readiness-2026-07-13
-  lastClosedTaskId: content-admin-platform-f0-acceptance-readiness-2026-07-13
+    - content-admin-platform-f1-content-admin-acceptance-2026-07-13
+  lastClosedTaskId: content-admin-platform-f1-content-admin-acceptance-2026-07-13
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-13-content-admin-platform-b-to-f-serial-program.md
   guardScriptPath: scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
@@ -109,8 +110,8 @@ contentAdminPlatformSerialProgram:
     content-admin-platform-e5-cross-role-exception-closure-2026-07-13: closed
     content-admin-platform-e6-cumulative-audit-2026-07-13: closed
     content-admin-platform-f0-acceptance-readiness-2026-07-13: closed
-    content-admin-platform-f1-content-admin-acceptance-2026-07-13: ready_for_closeout
-    content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13: pending
+    content-admin-platform-f1-content-admin-acceptance-2026-07-13: closed
+    content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13: ready_for_closeout
     content-admin-platform-f3-organization-acceptance-2026-07-13: pending
     content-admin-platform-f4-learner-acceptance-2026-07-13: pending
     content-admin-platform-f5-final-cumulative-audit-2026-07-13: pending
@@ -126,135 +127,15 @@ contentAdminPlatformSerialProgram:
       status: pending
       trigger: fresh reproducible current-master failure evidence exists outside the active task root cause
 activeTasks:
-  - id: content-admin-platform-f1-content-admin-acceptance-2026-07-13
-    title: Content admin platform content-admin acceptance
-    phase: content-admin-platform-f1-content-admin-acceptance-2026-07-13
-    status: ready_for_closeout
-    priority: p0
-    sequenceOrder: 105
-    taskKind: role_acceptance
-    moduleRunVersion: 3
-    branch: codex/content-admin-platform-f1-content-admin-acceptance
-    dependsOn:
-      - content-admin-platform-f0-acceptance-readiness-2026-07-13
-    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-    executionProfile: R3
-    requiredReadingProfiles:
-      - advanced_authorization
-      - ai_generation
-    focusedGates:
-      - focused_acceptance
-      - lint
-      - typecheck
-      - changed_format
-      - diff_check
-      - guard
-      - security_boundary
-    buildRequired: impact_triggered
-    fullRegressionPolicy: impact_triggered
-    protectedDomains:
-      - a01_a30
-      - ai
-      - content_lifecycle
-      - deployment
-    reviewMode: independent_audit
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f1-content-admin-acceptance.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f1-content-admin-acceptance.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f1-content-admin-acceptance-audit.md
-    allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f1-content-admin-acceptance.md
-      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f1-content-admin-acceptance.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f1-content-admin-acceptance-audit.md
-      - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
-    blockedFiles:
-      - AGENTS.md
-      - package.json
-      - package-lock.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - yarn.lock
-      - src/**
-      - tests/**
-      - e2e/**
-      - src/db/schema/**
-      - drizzle/**
-      - migrations/**
-      - seed/**
-      - .env*
-      - D:/tiku-local-private/**
-      - playwright-report/**
-      - test-results/**
-      - .next/**
-      - .runtime/**
-    capabilities:
-      docsStateEvidenceAudit: approved
-      localhostRuntime: approved_process_only_0704_target_provider_disabled
-      privateCredentialRead: approved_0704_index_and_canonical_catalog_in_memory
-      productLoginSessionUse: approved_localhost_only_no_session_output
-      productSessionLifecycle: approved_temporary_login_logout_only
-      productDataRead: approved_bounded_redacted_content_routes_only
-      browserAutomation: approved_redacted_no_retained_artifacts
-      envSecretAccess: approved_process_memory_only_no_value_output
-      directDatabaseConnection: blocked
-      dependencyIntroduction: blocked_without_fresh_approval
-      schemaMigration: blocked
-      databaseMutation: blocked_except_transient_product_session_lifecycle
-      productRuntimeSourceChange: blocked_validation_only_route_x2_on_fresh_defect
-      productTestSourceChange: blocked_validation_only_route_x2_on_fresh_defect
-      providerCall: blocked
-      stagingProdDeploy: blocked_requires_fresh_user_approval
-      forcePush: blocked
-      pr: blocked
-      costCalibrationGate: blocked
-    acceptanceStandards:
-      - the canonical content_admin passes one representative localhost route matrix for question, material, paper, resource, knowledge and content AI surfaces.
-      - nonempty inputs are represented truthfully; the empty resource category proves empty state and create affordance without fabricating data.
-      - details and clean editor or composer entries are inspectable without any business save, publish, copy, disable, upload, generation or adoption mutation.
-      - AI history is nonempty, draft/review/formal separation remains visible and Provider availability remains closed without a generation submit.
-      - no unexpected browser console or product request failure remains, the temporary session is revoked, and the isolated runtime and port are cleaned.
-      - no credential, session, cookie, token, env value, DB URL, raw row, identifier, private content, screenshot, DOM or trace enters evidence.
-    validationCommands:
-      - redacted Playwright CLI content_admin localhost representative route and interaction acceptance
-      - redacted process-only 0704DB Provider-closed and cleanup verification
-      - node D:\tiku\node_modules\vitest\vitest.mjs run --maxWorkers=1 tests/unit/admin-question-material-ui.test.ts tests/unit/admin-question-editor-route.test.ts tests/unit/admin-material-editor-route.test.ts tests/unit/admin-paper-ui.test.ts src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/admin-resource-knowledge-ui-layout.test.ts tests/unit/admin-ai-generation-entry-surface.test.ts src/features/admin/ai-generation/AdminAiGenerationEntryPage.test.tsx tests/unit/ai-generation-availability-route.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - node D:\tiku\node_modules\prettier\bin\prettier.cjs --check F1_CHANGED_DOCS
-      - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-f1-content-admin-acceptance-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-f1-content-admin-acceptance-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-f1-content-admin-acceptance-2026-07-13 -SkipRemoteAheadCheck
-    closeoutPolicy:
-      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
-      localCommit:
-        approved: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      fastForwardMerge:
-        approved: true
-        targetBranch: master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      push:
-        approved: true
-        target: origin/master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-      cleanup:
-        deleteShortBranch: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
   - id: content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
     title: Content admin platform operations and super-admin acceptance
     phase: content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
-    status: pending
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 106
     taskKind: role_acceptance
     moduleRunVersion: 3
-    branch: not_created_until_f1_closeout
+    branch: codex/content-admin-platform-f2-operations-super-admin-acceptance
     dependsOn:
       - content-admin-platform-f1-content-admin-acceptance-2026-07-13
     approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
@@ -280,6 +161,132 @@ activeTasks:
       - phone
       - redeem_code
       - audit_redaction
+      - deployment
+    reviewMode: independent_audit
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f2-operations-super-admin-acceptance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f2-operations-super-admin-acceptance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f2-operations-super-admin-acceptance-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/active-state-history-index.yaml
+      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f2-operations-super-admin-acceptance.md
+      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f2-operations-super-admin-acceptance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f2-operations-super-admin-acceptance-audit.md
+      - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - .env*
+      - D:/tiku-local-private/**
+      - playwright-report/**
+      - test-results/**
+      - .next/**
+      - .runtime/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      localhostRuntime: approved_process_only_0704_target_provider_disabled
+      privateCredentialRead: approved_0704_index_and_canonical_catalog_in_memory
+      productLoginSessionUse: approved_localhost_only_no_session_output
+      productSessionLifecycle: approved_temporary_login_logout_only
+      productDataRead: approved_bounded_redacted_operations_routes_only
+      browserAutomation: approved_redacted_no_retained_artifacts
+      envSecretAccess: approved_process_memory_only_no_value_output
+      directDatabaseConnection: blocked
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked
+      databaseMutation: blocked_except_transient_product_session_lifecycle
+      productRuntimeSourceChange: approved_bounded_f2_same_scope_role_label_repair
+      productTestSourceChange: approved_bounded_f2_same_scope_role_label_regression
+      providerCall: blocked
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    acceptanceStandards:
+      - canonical ops_admin and super_admin sessions pass representative user, backend-account, organization, authorization, employee, redeem-code, contact and split-log routes.
+      - ordinary user and employee views remain masked; no reveal or copy action is executed, and role/account-domain distinctions remain truthful.
+      - eligible card plaintext state is proven without retaining or copying a value; non-eligible and evidence/log boundaries stay redacted.
+      - operations writes, model health, Provider, export and destructive actions remain unexecuted while role-specific capability and disabled reasons stay visible.
+      - unrelated workspaces fail closed for ops_admin and super-admin breadth does not erase organization-context or content-lifecycle guards.
+      - no unexpected browser console or product request failure remains, both temporary sessions are revoked, and the isolated runtime and port are cleaned.
+      - no credential, session, cookie, token, env value, DB URL, raw row, phone, card value, identifier, private content, screenshot, DOM or trace enters evidence.
+    validationCommands:
+      - redacted Playwright CLI ops_admin and super_admin localhost representative route and interaction acceptance
+      - redacted process-only 0704DB Provider-closed and cleanup verification
+      - node D:\tiku\node_modules\vitest\vitest.mjs run --maxWorkers=1 tests/unit/admin-ops-summary-first-ui.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/admin-workspace-role-guard-contract.test.ts tests/unit/phone-visibility-enforcement.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts tests/unit/admin-common-ux-state-audit.test.ts src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - node D:\tiku\node_modules\prettier\bin\prettier.cjs --check F2_CHANGED_DOCS
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13 -SkipRemoteAheadCheck
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+  - id: content-admin-platform-f3-organization-acceptance-2026-07-13
+    title: Content admin platform organization acceptance
+    phase: content-admin-platform-f3-organization-acceptance-2026-07-13
+    status: pending
+    priority: p0
+    sequenceOrder: 107
+    taskKind: role_acceptance
+    moduleRunVersion: 3
+    branch: not_created_until_f2_closeout
+    dependsOn:
+      - content-admin-platform-f2-operations-super-admin-acceptance-2026-07-13
+    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+    executionProfile: R3
+    requiredReadingProfiles:
+      - advanced_authorization
+      - ai_generation
+    focusedGates:
+      - focused_acceptance
+      - lint
+      - typecheck
+      - changed_format
+      - diff_check
+      - guard
+      - security_boundary
+    buildRequired: impact_triggered
+    fullRegressionPolicy: impact_triggered
+    protectedDomains:
+      - a01_a30
+      - authorization
+      - edition
+      - organization_scope
+      - organization_training
+      - ai
       - deployment
     reviewMode: independent_audit
     capabilities:
