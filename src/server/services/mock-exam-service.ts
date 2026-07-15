@@ -22,6 +22,7 @@ import type {
   MockExamRepository,
   MockExamRow,
 } from "../repositories/mock-exam-repository";
+import type { EnqueueAiScoringTaskInput } from "../repositories/ai-scoring-task-repository";
 import {
   normalizeMockExamAnswerInput,
   normalizeStartMockExamInput,
@@ -80,6 +81,9 @@ export type MockExamAiScoringStatus =
 export type MockExamAiScoringRuntimeContext = {
   userPublicId: string;
   mockExamPublicId: string;
+  profession: MockExamRow["profession"];
+  level: number;
+  subject: MockExamRow["subject"];
   answerRecordPublicId: string;
   paperQuestionPublicId: string;
   questionPublicId: string;
@@ -128,6 +132,12 @@ export type MockExamAiScoringQueue = {
   ): Promise<MockExamAiScoringQueueReceipt>;
 };
 
+export type MockExamAiScoringTaskPreparer = {
+  prepareTask(
+    context: MockExamAiScoringRuntimeContext,
+  ): Promise<EnqueueAiScoringTaskInput>;
+};
+
 export type MockExamAiScoringQueueDrainResult =
   | {
       status: "empty";
@@ -148,6 +158,7 @@ export type DeterministicMockExamAiScoringQueue = MockExamAiScoringQueue & {
 export type MockExamServiceOptions = {
   aiScoringRuntime?: MockExamAiScoringRuntime;
   aiScoringQueue?: MockExamAiScoringQueue;
+  aiScoringTaskPreparer?: MockExamAiScoringTaskPreparer;
 };
 
 type MockExamQuestionSnapshot = {
@@ -790,6 +801,9 @@ function buildAiScoringRuntimeContext(input: {
   return {
     userPublicId: input.userContext.userPublicId,
     mockExamPublicId: input.mockExam.public_id,
+    profession: input.mockExam.profession,
+    level: input.mockExam.level,
+    subject: input.mockExam.subject,
     answerRecordPublicId: input.answerRecord.public_id,
     paperQuestionPublicId: input.question.paperQuestionPublicId,
     questionPublicId: input.question.questionPublicId,
@@ -1069,14 +1083,50 @@ async function submitReadableMockExam(
   const shouldQueueAiScoring =
     options.aiScoringRuntime !== undefined &&
     options.aiScoringQueue !== undefined;
-  const queueableSubjectiveAnswerRecords = shouldQueueAiScoring
+  const shouldPersistAiScoring = options.aiScoringTaskPreparer !== undefined;
+  const shouldUseAsyncAiScoring =
+    shouldQueueAiScoring || shouldPersistAiScoring;
+  const queueableSubjectiveAnswerRecords = shouldUseAsyncAiScoring
     ? listQueueableSubjectiveAnswerRecords({
         answerByPaperQuestion,
         questions,
       })
     : [];
+  let aiScoringTasks: EnqueueAiScoringTaskInput[] = [];
+
+  if (shouldPersistAiScoring && options.aiScoringTaskPreparer !== undefined) {
+    try {
+      aiScoringTasks = await Promise.all(
+        queueableSubjectiveAnswerRecords.map((answerRecord) => {
+          const question = questions.find(
+            (candidate) =>
+              candidate.paperQuestionPublicId ===
+              answerRecord.paper_question_public_id,
+          );
+
+          if (question === undefined) {
+            throw new Error("AI scoring task question snapshot is missing.");
+          }
+
+          return options.aiScoringTaskPreparer!.prepareTask(
+            buildAiScoringRuntimeContext({
+              userContext,
+              mockExam,
+              question,
+              answerRecord,
+            }),
+          );
+        }),
+      );
+    } catch {
+      return createErrorResponse(
+        503318,
+        "AI scoring configuration is unavailable.",
+      );
+    }
+  }
   const subjectiveResults =
-    options.aiScoringRuntime === undefined || shouldQueueAiScoring
+    options.aiScoringRuntime === undefined || shouldUseAsyncAiScoring
       ? []
       : await scoreSubjectiveQuestions({
           aiScoringRuntime: options.aiScoringRuntime,
@@ -1088,14 +1138,14 @@ async function submitReadableMockExam(
           onlyFailedRecords: false,
         });
   const subjectiveScore =
-    options.aiScoringRuntime === undefined || shouldQueueAiScoring
+    options.aiScoringRuntime === undefined || shouldUseAsyncAiScoring
       ? null
       : calculateSubjectiveScore(subjectiveResults);
   const examStatus =
-    options.aiScoringRuntime === undefined
-      ? "completed"
-      : shouldQueueAiScoring && queueableSubjectiveAnswerRecords.length > 0
-        ? "scoring"
+    shouldUseAsyncAiScoring && queueableSubjectiveAnswerRecords.length > 0
+      ? "scoring"
+      : options.aiScoringRuntime === undefined
+        ? "completed"
         : calculateExamStatus(subjectiveResults);
   const totalScore = formatScore(
     objectiveScore +
@@ -1109,6 +1159,7 @@ async function submitReadableMockExam(
     subjectiveScore,
     totalScore,
     unansweredCount,
+    aiScoringTasks,
     answerRecordResults: [
       ...questions.flatMap((question) => {
         const answerRecord = answerByPaperQuestion.get(
@@ -1117,14 +1168,14 @@ async function submitReadableMockExam(
 
         if (
           answerRecord === undefined ||
-          (!shouldQueueAiScoring &&
+          (!shouldUseAsyncAiScoring &&
             options.aiScoringRuntime !== undefined &&
             isAiScoringQuestion(question))
         ) {
           return [];
         }
 
-        if (shouldQueueAiScoring && isAiScoringQuestion(question)) {
+        if (shouldUseAsyncAiScoring && isAiScoringQuestion(question)) {
           const studentAnswer = getStudentAnswer(answerRecord.answer_snapshot);
 
           return studentAnswer.trim().length === 0
@@ -1584,7 +1635,11 @@ export function createMockExamService(
     },
 
     async retryMockExamScoring(userContext, publicId) {
-      if (options.aiScoringRuntime === undefined) {
+      const usesDurableScoringTasks =
+        options.aiScoringTaskPreparer !== undefined;
+      const aiScoringRuntime = options.aiScoringRuntime;
+
+      if (!usesDurableScoringTasks && aiScoringRuntime === undefined) {
         return createErrorResponse(
           422315,
           "AI scoring retry is not configured.",
@@ -1610,6 +1665,38 @@ export function createMockExamService(
         );
       }
 
+      if (usesDurableScoringTasks) {
+        if (repository.retryFailedAiScoringTasks === undefined) {
+          return createErrorResponse(
+            503318,
+            "Durable AI scoring retry is unavailable.",
+          );
+        }
+
+        const retryResult = await repository.retryFailedAiScoringTasks({
+          userPublicId: userContext.userPublicId,
+          mockExamPublicId: publicId,
+          retriedAt: now,
+        });
+
+        if (retryResult === null) {
+          return createMockExamNotFoundResponse();
+        }
+
+        return createSuccessResponse({
+          mockExam: mapMockExamToApi(retryResult.mockExam, now),
+          retriedCount: retryResult.retriedCount,
+          failedCount: retryResult.failedCount,
+        });
+      }
+
+      if (aiScoringRuntime === undefined) {
+        return createErrorResponse(
+          422315,
+          "AI scoring retry is not configured.",
+        );
+      }
+
       const answerRecords = await repository.listMockExamAnswerRecords({
         userPublicId: userContext.userPublicId,
         mockExamPublicId: mockExam.public_id,
@@ -1628,7 +1715,7 @@ export function createMockExamService(
         ]),
       );
       const subjectiveResults = await scoreSubjectiveQuestions({
-        aiScoringRuntime: options.aiScoringRuntime,
+        aiScoringRuntime,
         userContext,
         mockExam,
         answerByPaperQuestion,

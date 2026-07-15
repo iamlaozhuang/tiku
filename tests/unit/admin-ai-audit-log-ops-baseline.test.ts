@@ -1059,7 +1059,11 @@ describe("admin ai and audit log ops baseline", () => {
     expect(screen.getByRole("heading")).toHaveTextContent("AI");
 
     cleanup();
-    render(createElement(AdminAiAuditLogOpsBaseline));
+    render(
+      createElement(AdminAiAuditLogOpsBaseline, {
+        currentRole: "super_admin",
+      }),
+    );
 
     expect(
       screen.getByRole("heading", { level: 1, name: /AI/ }),

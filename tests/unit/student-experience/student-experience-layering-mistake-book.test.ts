@@ -224,7 +224,7 @@ describe("unified repair student experience layering and mistake book scope", ()
     });
   });
 
-  it("blocks provider-gated student operations without calling provider runtime", async () => {
+  it("delegates durable scoring retry without calling a Provider in the request", async () => {
     const routeHandlersSourcePath = expectAllowedSourceExists(
       "src/server/services/student-experience/route-handlers.ts",
     );
@@ -233,16 +233,25 @@ describe("unified repair student experience layering and mistake book scope", ()
     );
     let retryScoringCalled = false;
     const handlers = createStudentExperienceRouteHandlers({
-      repository: {
-        async retryMockExamScoring() {
-          retryScoringCalled = true;
+      legacyFlowRouteHandlers: {
+        mockExams: {
+          retryScoring: {
+            async POST() {
+              retryScoringCalled = true;
 
-          return null;
+              return Response.json({
+                code: 0,
+                message: "ok",
+                data: {
+                  mockExam: { publicId: "mock-exam-public-001" },
+                  retriedCount: 1,
+                  failedCount: 0,
+                },
+              });
+            },
+          },
         },
       },
-      resolveUserContext: async () => ({
-        userPublicId: "user-public-001",
-      }),
     });
 
     const response = await handlers.mockExams.retryScoring.POST(
@@ -254,15 +263,15 @@ describe("unified repair student experience layering and mistake book scope", ()
     );
 
     await expect(response.json()).resolves.toEqual({
-      code: 423101,
+      code: 0,
+      message: "ok",
       data: {
-        blockedGate: "provider_model_request_quota",
-        operation: "mock_exam.retry_scoring",
-        status: "blocked",
+        mockExam: { publicId: "mock-exam-public-001" },
+        retriedCount: 1,
+        failedCount: 0,
       },
-      message: "Provider-gated mock_exam scoring requires separate approval.",
     });
-    expect(retryScoringCalled).toBe(false);
+    expect(retryScoringCalled).toBe(true);
   });
 
   it(

@@ -184,7 +184,7 @@ p0RemediationSerialProgram:
     p0-remediation-rc-03-authorization-object-scope-2026-07-14: closed
     p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: closed
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: closed
-    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: in_progress
+    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: ready_for_closeout
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: pending
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
@@ -192,7 +192,7 @@ activeTasks:
   - id: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
     title: P0 RC-06 AI config execution and provenance
     phase: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
-    status: in_progress
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 6
     taskKind: implementation
@@ -265,10 +265,14 @@ activeTasks:
       - src/server/repositories/mock-exam-repository.ts
       - src/server/repositories/student-flow-runtime-repository.ts
       - src/server/services/admin-ai-audit-log-runtime.ts
+      - src/server/services/ai-mock-provider-runtime.ts
       - src/server/services/ai-scoring-task-runtime.ts
+      - src/server/services/ai-scoring-task-runtime.test.ts
       - src/server/services/ai-scoring-service.ts
       - src/server/services/ai-scoring-service.test.ts
       - src/server/services/model-config-runtime.ts
+      - src/server/services/model-config-connection-test-executor.ts
+      - src/server/services/model-config-connection-test-executor.test.ts
       - src/server/services/model-provider-secret-store.ts
       - src/server/services/model-provider-secret-store.test.ts
       - src/server/services/mock-exam-service.ts
@@ -282,6 +286,8 @@ activeTasks:
       - src/server/services/student-flow-runtime.ts
       - src/server/services/student-mistake-book-runtime.test.ts
       - src/server/services/student-mistake-book-runtime.ts
+      - src/server/services/mistake-book-service.ts
+      - src/server/services/mistake-book-service.test.ts
       - src/app/(admin)/ops/ai-governance/page.tsx
       - src/app/(admin)/ops/ai-governance/AdminAiGovernancePage.tsx
       - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
@@ -290,12 +296,18 @@ activeTasks:
       - src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx
       - src/features/admin/admin-role-overview/AdminRoleOverviewPage.tsx
       - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+      - src/features/student/practice/StudentPracticePage.tsx
       - tests/unit/admin-ai-governance-route.test.ts
       - tests/unit/admin-model-config-management-ui.test.ts
+      - tests/unit/student-practice-ui.test.ts
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
       - tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts
       - tests/unit/phase-11-model-config-fallback-runtime.test.ts
       - tests/unit/phase-12-model-config-local-mock-runtime.test.ts
       - tests/unit/phase-12-model-config-server-runtime.test.ts
+      - tests/unit/phase-8-student-mistake-book-runtime.test.ts
+      - tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts
       - tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts
       - tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts
       - tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts

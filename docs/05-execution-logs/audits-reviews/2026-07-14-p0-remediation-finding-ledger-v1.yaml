@@ -80,8 +80,8 @@ findings:
     riskConsequence:
       businessImpact: 管理员暴力破解防线可通过进程重启、冷启动或把请求分散到不同实例绕过；攻击者获得的尝试次数不再受五次失败阈值约束，最终可能导致高权限账号接管。
       blastRadius: 五类后台管理员账号；其中super_admin、ops_admin和content_admin可触达全局运营、内容、AI或授权能力，组织管理员可触达组织范围数据与高级能力。
-    currentRevalidationStatus: baseline_changed
-    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e；RC-04/05 修改了 mock/student/scoring 相关装配，但当前默认 runner 仍按答案长度产出分数，生产仍缺持久 FIFO、单题 timeout 与统一 retry owner。原问题未关闭，按受影响项重基线为 baseline_changed。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
     rootCauseCluster:
       id: RC-01
       name: 身份、session 与后台账号生命周期
@@ -174,7 +174,7 @@ findings:
         org_auth。数据库中的used_quota不会随创建/启停可靠刷新，也不参与有效授权查询，导致商业授权额度被稳定绕过并可能让运营界面长期显示虚假的剩余额度。
       blastRadius: 所有通过super_admin或ops_admin单建、启用、绑定、导入或调动进入组织的员工，以及覆盖这些节点的全部standard/advanced org_auth；多实例、批量导入和多专业/等级授权会放大超额和used_quota陈旧。
     currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e，但审计后没有代码变更挂载模型配置/Prompt Registry 正式路由或恢复菜单入口；原静态反证仍成立，保持 confirmed。
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
     rootCauseCluster:
       id: RC-02
       name: organization 拓扑、授权范围、额度与员工生命周期
@@ -273,7 +273,7 @@ findings:
         owner、取消/终止影响和后续显式升级路径产生歧义；高级消费者还可能从重复上下文中选到更高edition。
       blastRadius: 所有同时使用current_and_descendants与specified_nodes的企业授权，受交集节点覆盖的管理员和员工，以及依赖唯一org_auth来源的edition、quota、训练、学习和终止消费者。
     currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e，但审计后没有代码变更建立 secret writer/resolver、写入 api_key_secret_ref 或让连接测试/执行消费受治理凭据；last4/configured 与 local_mock/环境变量分叉仍在，保持 confirmed。
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
     rootCauseCluster:
       id: RC-02
       name: organization 拓扑、授权范围、额度与员工生命周期
@@ -1196,8 +1196,8 @@ findings:
         当前默认运行时没有调用真实评分Provider，而是按答案长度占40字符的比例分配首个评分点并返回“本地确定性”评语；装配层又只注入该runtime、不注入aiScoringQueue，因此交卷HTTP逐题串行等待伪评分并直接完成或部分失败，而不是进入FIFO异步评分。单题60秒超时没有执行边界，顶层retry-scoring路由却固定返回Provider
         blocked。系统会把与内容正确性无关的伪造分数作为成绩持久化，同时用户无法按合同重试失败项。
       blastRadius: 四类学员所有含short_answer、case_analysis或calculation等AI评分题的模拟考试成绩、排名外分析、报告和学习建议。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-04/05 已改变 mock/student/scoring 相关装配，但 RC-06 领取时默认 runner 仍按答案长度产出分数，生产仍缺持久 FIFO、单题 timeout 与统一任务 owner；按受影响项定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-06
       name: model_config、AI 任务执行与结果真实性
@@ -2243,7 +2243,7 @@ findings:
       businessImpact: 稳定需求把模型供应商、模型配置和Prompt Registry定义为super_admin治理能力，并要求ops_admin可看脱敏摘要；仓库虽然存在API和一个完整基线组件，但生产路由只挂载拆分后的审计日志页面，完整组件没有任何路由或导航入口。两个P0治理用例因此无法从可见UI发现或执行，运维人员只能绕过产品界面直接调用接口。
       blastRadius: super_admin模型和Prompt治理、ops_admin治理摘要、密钥轮换与连接测试可发现性，以及后续所有AI能力的运营闭环。
     currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    revalidationRationale: RC-06 领取时审计后代码仍未挂载模型配置/Prompt Registry 正式路由或恢复菜单入口；原静态反证继续成立，保持 confirmed。
     rootCauseCluster:
       id: RC-06
       name: model_config、AI 任务执行与结果真实性
@@ -2332,7 +2332,7 @@ findings:
       businessImpact: super_admin提交供应商密钥后，服务端仅计算并保存last4和configured状态，既未写入schema已有的secret reference，也没有安全密钥存储；真实内容、个人和组织AI执行仍固定读取ALIBABA_API_KEY环境变量。界面会把已被丢弃的输入显示为“已配置”，形成危险的成功假象，密钥轮换不会影响运行时，错误环境变量又可能跨配置驱动全部AI请求。
       blastRadius: 所有内容、个人和组织AI请求，模型轮换、故障切换、连接测试、审计可追溯性及生产密钥治理。
     currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    revalidationRationale: RC-06 领取时仍无受保护 secret writer/ref 消费闭环，连接测试未调用 adapter，last4/configured 与 local_mock/环境变量执行分叉继续成立，保持 confirmed。
     rootCauseCluster:
       id: RC-06
       name: model_config、AI 任务执行与结果真实性

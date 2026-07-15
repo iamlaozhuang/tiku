@@ -90,7 +90,7 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
     expect(JSON.stringify(selection)).not.toContain("bodyPreviewMasked");
   });
 
-  it("uses persisted model_config loader for default local ai scoring runtime", async () => {
+  it("uses persisted model_config loader with an explicitly injected scoring runner", async () => {
     const appendedAiCallLogs: unknown[] = [];
     const appendedAiScoringAttempts: unknown[] = [];
     const runtime = createDefaultAiScoringRuntime(
@@ -153,11 +153,26 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
           };
         },
       },
+      async (input) => ({
+        scoringPoints: input.scoringPoints.map((scoringPoint) => ({
+          scoringPointPublicId: scoringPoint.scoringPointPublicId,
+          isHit: true,
+          score: scoringPoint.maxScore,
+          reason: "Explicit test runner result.",
+        })),
+        overallComment: "Explicit test runner completed.",
+        improvementSuggestion: null,
+        providerRequestPayload: null,
+        providerResponsePayload: null,
+      }),
     );
 
     const result = await runtime.scoreSubjectiveAnswer({
       userPublicId: "user-public-001",
       mockExamPublicId: "mock-exam-public-001",
+      profession: "marketing",
+      level: 3,
+      subject: "theory",
       answerRecordPublicId: "answer-record-public-001",
       paperQuestionPublicId: "paper-question-public-001",
       questionPublicId: "question-public-001",

@@ -669,7 +669,7 @@ export function AdminAiCallLogOpsPage({
 }
 
 export function AdminAiAuditLogOpsBaseline({
-  currentRole = "super_admin",
+  currentRole = "ops_admin",
   runtimeEnabled = false,
   state = "ready",
 }: {

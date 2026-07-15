@@ -15,6 +15,7 @@ export const ADMIN_AI_AUDIT_LOG_ERROR_CODES = {
   resourceNotFound: 404641,
   concurrentConflict: 409641,
   validationFailed: 422641,
+  secretStoreUnavailable: 503641,
 } as const;
 
 export type AdminAiAuditLogPageSize =
@@ -63,6 +64,7 @@ export type ModelConfigConnectionTestFailureCategory =
   | "missing_secret"
   | "model_config_incomplete"
   | "permission_denied"
+  | "provider_adapter_unavailable"
   | "synthetic_health_check_failed";
 
 export type ModelConfigConnectionTestDto = {
@@ -100,10 +102,11 @@ export type ModelConfigRuntimeAlignmentDto = {
     | "fallback_model_config_not_found"
     | "fallback_model_config_disabled"
     | "fallback_ai_func_type_mismatch"
+    | "fixture_not_allowed"
     | null;
   promptTemplateKey: string | null;
   promptTemplateVersion: number | null;
-  providerMode: "local_mock";
+  providerMode: "governed_provider" | "local_fixture" | "local_mock";
 };
 
 const adminAiFunctionTypes = [

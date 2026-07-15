@@ -38,6 +38,16 @@ import type {
   NormalizedPromptTemplateInput,
 } from "../validators/ai-rag";
 
+export type PersistedModelProviderInput = Omit<
+  NormalizedModelProviderInput,
+  "secretValue" | "hasSecretUpdate" | "apiKeyLastFour"
+> & {
+  apiKeySecretRef?: string | null;
+  apiKeyLastFour?: string | null;
+  secretStatus?: "not_configured" | "configured";
+  lastRotatedAt?: Date | null;
+};
+
 type AdminAiAuditLogRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
 export type AdminAiAuditLogRuntimeRepositoryOptions = {
@@ -80,16 +90,17 @@ export type AdminAiAuditLogRuntimeRepositories = {
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<ModelProviderListDto>>;
   createModelProvider?(
-    input: NormalizedModelProviderInput,
+    input: PersistedModelProviderInput,
   ): Promise<ModelProviderSummaryDto>;
   updateModelProvider?(
     publicId: string,
-    input: NormalizedModelProviderInput,
+    input: PersistedModelProviderInput,
   ): Promise<ModelProviderSummaryDto | null>;
   setModelProviderEnabled?(
     publicId: string,
     isEnabled: boolean,
   ): Promise<boolean>;
+  getModelConfigSecretReference?(publicId: string): Promise<string | null>;
   listModelConfigs(
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<ModelConfigListDto>>;
@@ -311,9 +322,11 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             public_id,
             provider_key,
             display_name,
+            api_key_secret_ref,
             api_key_last_four,
             base_url,
             secret_status,
+            last_rotated_at,
             provider_metadata,
             is_enabled,
             created_at,
@@ -323,9 +336,11 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             ${publicId},
             ${input.providerKey},
             ${input.displayName},
-            ${input.apiKeyLastFour},
+            ${input.apiKeySecretRef ?? null},
+            ${input.apiKeyLastFour ?? null},
             ${input.baseUrl},
-            ${input.secretStatus},
+            ${input.secretStatus ?? "not_configured"},
+            ${input.lastRotatedAt ?? null},
             ${JSON.stringify({ secretStorage: "external_ref_required" })}::jsonb,
             ${input.isEnabled},
             now(),
@@ -356,9 +371,27 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           set
             provider_key = ${input.providerKey},
             display_name = ${input.displayName},
-            api_key_last_four = ${input.apiKeyLastFour},
+            api_key_secret_ref = ${
+              input.apiKeySecretRef === undefined
+                ? sql`api_key_secret_ref`
+                : input.apiKeySecretRef
+            },
+            api_key_last_four = ${
+              input.apiKeyLastFour === undefined
+                ? sql`api_key_last_four`
+                : input.apiKeyLastFour
+            },
             base_url = ${input.baseUrl},
-            secret_status = ${input.secretStatus},
+            secret_status = ${
+              input.secretStatus === undefined
+                ? sql`secret_status`
+                : input.secretStatus
+            },
+            last_rotated_at = ${
+              input.lastRotatedAt === undefined
+                ? sql`last_rotated_at`
+                : input.lastRotatedAt
+            },
             is_enabled = ${input.isEnabled},
             updated_at = now()
           where public_id = ${publicId}
@@ -385,6 +418,22 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
         publicId,
         isEnabled,
       );
+    },
+
+    async getModelConfigSecretReference(publicId) {
+      const database = getDatabase();
+      const rows = await executeSql<{ api_key_secret_ref: string | null }>(
+        database,
+        sql`
+          select mp.api_key_secret_ref
+          from model_config mc
+          inner join model_provider mp on mp.id = mc.model_provider_id
+          where mc.public_id = ${publicId}
+          limit 1
+        `,
+      );
+
+      return rows[0]?.api_key_secret_ref ?? null;
     },
 
     async listModelConfigs(query) {

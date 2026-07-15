@@ -11,12 +11,16 @@ import { createDefaultAiGenerationRouteIntegratedKnowledgeScope } from "../contr
 type RuntimeEnv = Partial<
   Pick<
     NodeJS.ProcessEnv,
-    | "ALIBABA_API_KEY"
     | "NODE_ENV"
     | "TIKU_OWNER_PREVIEW_PROVIDER_GATE"
     | "TIKU_OWNER_PREVIEW_PROVIDER_TARGET"
   >
 >;
+
+type OwnerPreviewQwenRuntimeControlOptions = {
+  runtimeGate: RuntimeEnv;
+  readProviderCredential: () => Promise<string | null> | string | null;
+};
 
 const ownerPreviewProviderGate = {
   enabled: "enabled",
@@ -35,14 +39,6 @@ function isOwnerPreviewQwenRuntimeEnabled(env: RuntimeEnv): boolean {
     env.TIKU_OWNER_PREVIEW_PROVIDER_GATE === ownerPreviewProviderGate.enabled &&
     env.TIKU_OWNER_PREVIEW_PROVIDER_TARGET === ownerPreviewProviderGate.target
   );
-}
-
-function readAlibabaApiKeyFromRuntimeEnv(env: RuntimeEnv): string | null {
-  const credential = env.ALIBABA_API_KEY;
-
-  return typeof credential === "string" && credential.trim().length > 0
-    ? credential.trim()
-    : null;
 }
 
 function createFallbackGenerationParameters(): AiGenerationRouteIntegratedGenerationParameters {
@@ -134,9 +130,12 @@ async function resolveOwnerPreviewGroundingContext(input: {
 }
 
 export function createOwnerPreviewQwenPersonalRuntimeBridgeControl(
-  env: RuntimeEnv = process.env,
+  options?: OwnerPreviewQwenRuntimeControlOptions,
 ): PersonalAiGenerationRuntimeBridgeControl | undefined {
-  if (!isOwnerPreviewQwenRuntimeEnabled(env)) {
+  if (
+    options === undefined ||
+    !isOwnerPreviewQwenRuntimeEnabled(options.runtimeGate)
+  ) {
     return undefined;
   }
 
@@ -151,15 +150,18 @@ export function createOwnerPreviewQwenPersonalRuntimeBridgeControl(
       maxOutputTokens: qwenRouteIntegratedProviderLimits.maxOutputTokens,
       timeoutMs: qwenRouteIntegratedProviderLimits.timeoutMs,
       resolveGroundingContext: resolveOwnerPreviewGroundingContext,
-      readProviderCredential: () => readAlibabaApiKeyFromRuntimeEnv(env),
+      readProviderCredential: options.readProviderCredential,
     },
   };
 }
 
 export function createOwnerPreviewQwenAdminRuntimeBridgeControl(
-  env: RuntimeEnv = process.env,
+  options?: OwnerPreviewQwenRuntimeControlOptions,
 ): AdminAiGenerationRuntimeBridgeControl | undefined {
-  if (!isOwnerPreviewQwenRuntimeEnabled(env)) {
+  if (
+    options === undefined ||
+    !isOwnerPreviewQwenRuntimeEnabled(options.runtimeGate)
+  ) {
     return undefined;
   }
 
@@ -174,7 +176,7 @@ export function createOwnerPreviewQwenAdminRuntimeBridgeControl(
       maxOutputTokens: qwenRouteIntegratedProviderLimits.maxOutputTokens,
       timeoutMs: qwenRouteIntegratedProviderLimits.timeoutMs,
       resolveGroundingContext: resolveOwnerPreviewGroundingContext,
-      readProviderCredential: () => readAlibabaApiKeyFromRuntimeEnv(env),
+      readProviderCredential: options.readProviderCredential,
     },
   };
 }

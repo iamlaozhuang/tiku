@@ -336,8 +336,8 @@ describe("mistake book service", () => {
         requestedFromClientAt: "2026-05-19T09:05:00.000Z",
       }),
     ).resolves.toEqual({
-      code: 422331,
-      message: "AI explanation is not available for mistake book in Phase 4.",
+      code: 503331,
+      message: "Mistake book AI explanation is not configured.",
       data: null,
     });
   });

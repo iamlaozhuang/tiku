@@ -90,6 +90,7 @@ const OPS_MENU: MenuItem[] = [
   { href: "/ops/redeem-codes", label: "卡密管理", Icon: KeyRound },
   { href: "/ops/audit-logs", label: "审计日志", Icon: ScrollText },
   { href: "/ops/ai-call-logs", label: "AI 调用日志", Icon: WandSparkles },
+  { href: "/ops/ai-governance", label: "AI 治理", Icon: WandSparkles },
 ];
 
 const ORGANIZATION_MENU: MenuItem[] = [

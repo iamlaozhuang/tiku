@@ -87,8 +87,12 @@ describe("phase 12 model config server runtime", () => {
             displayName: input.displayName,
             baseUrl: input.baseUrl,
             isEnabled: input.isEnabled,
-            secretStatus: input.secretStatus,
-            maskedSecret: input.maskedSecret,
+            secretStatus: input.secretStatus ?? "not_configured",
+            maskedSecret:
+              input.apiKeyLastFour === undefined ||
+              input.apiKeyLastFour === null
+                ? null
+                : `****${input.apiKeyLastFour}`,
             providerMetadata: { runtime: "local_mock" },
             updatedAt: "2026-05-26T00:00:00.000Z",
           };
@@ -137,6 +141,13 @@ describe("phase 12 model config server runtime", () => {
         },
       },
       sessionService: createAdminSessionService("super_admin"),
+      modelProviderSecretStore: {
+        async write() {
+          return {
+            apiKeySecretRef: "secret-ref/model-provider/local-mock/current",
+          };
+        },
+      },
     });
 
     const response = await handlers.modelProviders.POST(
@@ -175,11 +186,12 @@ describe("phase 12 model config server runtime", () => {
       expect.objectContaining({
         providerKey: "local_mock",
         displayName: "Local Mock",
+        apiKeySecretRef: "secret-ref/model-provider/local-mock/current",
         apiKeyLastFour: "3456",
         secretStatus: "configured",
-        maskedSecret: "****3456",
       }),
     ]);
+    expect(JSON.stringify(mutationCalls)).not.toContain(syntheticSecret);
     expect(auditLogEntries).toEqual([
       expect.objectContaining({
         actorPublicId: "admin-public-001",

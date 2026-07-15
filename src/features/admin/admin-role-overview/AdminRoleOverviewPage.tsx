@@ -129,6 +129,12 @@ const operationsEntries: OverviewEntry[] = [
     Icon: WandSparkles,
   },
   {
+    label: "AI 治理",
+    description: "查看模型配置、连接状态与只读 Prompt 注册表。",
+    href: "/ops/ai-governance",
+    Icon: WandSparkles,
+  },
+  {
     label: "购买联系方式",
     description: "维护学员端购买与支持联系信息。",
     href: "/ops/contact-config",

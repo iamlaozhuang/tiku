@@ -22,63 +22,102 @@ const explicitLocalOwnerPreviewProviderGate = {
   TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
 } as const;
 
+function createOwnerPreviewOptions(
+  runtimeGate: Record<string, string>,
+  credential: string | null = null,
+) {
+  return {
+    runtimeGate,
+    readProviderCredential: () => credential,
+  };
+}
+
 describe("owner preview Qwen visible AI runtime control", () => {
+  it("stays disabled without an explicitly injected credential resolver", () => {
+    expect(
+      createOwnerPreviewQwenPersonalRuntimeBridgeControl(),
+    ).toBeUndefined();
+    expect(createOwnerPreviewQwenAdminRuntimeBridgeControl()).toBeUndefined();
+  });
+
   it("does not enable route-integrated provider execution in production", () => {
     expect(
-      createOwnerPreviewQwenPersonalRuntimeBridgeControl({
-        ALIBABA_API_KEY: "synthetic-runtime-key",
-        NODE_ENV: "production",
-        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
-        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
-      }),
+      createOwnerPreviewQwenPersonalRuntimeBridgeControl(
+        createOwnerPreviewOptions(
+          {
+            NODE_ENV: "production",
+            TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+            TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
+          },
+          "synthetic-runtime-key",
+        ),
+      ),
     ).toBeUndefined();
     expect(
-      createOwnerPreviewQwenAdminRuntimeBridgeControl({
-        ALIBABA_API_KEY: "synthetic-runtime-key",
-        NODE_ENV: "production",
-        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
-        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
-      }),
+      createOwnerPreviewQwenAdminRuntimeBridgeControl(
+        createOwnerPreviewOptions(
+          {
+            NODE_ENV: "production",
+            TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+            TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
+          },
+          "synthetic-runtime-key",
+        ),
+      ),
     ).toBeUndefined();
   });
 
   it("keeps owner-preview provider disabled by default even when a runtime key exists", () => {
     expect(
-      createOwnerPreviewQwenPersonalRuntimeBridgeControl({
-        ALIBABA_API_KEY: "synthetic-runtime-key",
-        NODE_ENV: "development",
-      }),
+      createOwnerPreviewQwenPersonalRuntimeBridgeControl(
+        createOwnerPreviewOptions(
+          {
+            NODE_ENV: "development",
+          },
+          "synthetic-runtime-key",
+        ),
+      ),
     ).toBeUndefined();
     expect(
-      createOwnerPreviewQwenAdminRuntimeBridgeControl({
-        ALIBABA_API_KEY: "synthetic-runtime-key",
-        NODE_ENV: "test",
-      }),
+      createOwnerPreviewQwenAdminRuntimeBridgeControl(
+        createOwnerPreviewOptions(
+          {
+            NODE_ENV: "test",
+          },
+          "synthetic-runtime-key",
+        ),
+      ),
     ).toBeUndefined();
   });
 
   it("requires an explicit local owner-preview provider gate", () => {
     expect(
-      createOwnerPreviewQwenAdminRuntimeBridgeControl({
-        NODE_ENV: "development",
-        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "disabled",
-        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
-      }),
+      createOwnerPreviewQwenAdminRuntimeBridgeControl(
+        createOwnerPreviewOptions({
+          NODE_ENV: "development",
+          TIKU_OWNER_PREVIEW_PROVIDER_GATE: "disabled",
+          TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "local",
+        }),
+      ),
     ).toBeUndefined();
     expect(
-      createOwnerPreviewQwenPersonalRuntimeBridgeControl({
-        NODE_ENV: "development",
-        TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
-        TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "preview",
-      }),
+      createOwnerPreviewQwenPersonalRuntimeBridgeControl(
+        createOwnerPreviewOptions({
+          NODE_ENV: "development",
+          TIKU_OWNER_PREVIEW_PROVIDER_GATE: "enabled",
+          TIKU_OWNER_PREVIEW_PROVIDER_TARGET: "preview",
+        }),
+      ),
     ).toBeUndefined();
   });
 
   it("reads only the runtime Alibaba key through the injected credential reader", async () => {
-    const control = createOwnerPreviewQwenAdminRuntimeBridgeControl({
-      ...explicitLocalOwnerPreviewProviderGate,
-      ALIBABA_API_KEY: " synthetic-runtime-key ",
-    });
+    const control = createOwnerPreviewQwenAdminRuntimeBridgeControl(
+      createOwnerPreviewOptions(
+        explicitLocalOwnerPreviewProviderGate,
+        "synthetic-runtime-key",
+      ),
+    );
 
     expect(control).toMatchObject({
       bridgeMode: "controlled_runner",
@@ -99,9 +138,9 @@ describe("owner preview Qwen visible AI runtime control", () => {
   });
 
   it("returns null credentials when the runtime key is absent", async () => {
-    const control = createOwnerPreviewQwenPersonalRuntimeBridgeControl({
-      ...explicitLocalOwnerPreviewProviderGate,
-    });
+    const control = createOwnerPreviewQwenPersonalRuntimeBridgeControl(
+      createOwnerPreviewOptions(explicitLocalOwnerPreviewProviderGate),
+    );
 
     expect(control).not.toBeUndefined();
     await expect(
@@ -160,10 +199,12 @@ describe("owner preview Qwen visible AI runtime control", () => {
           ],
         }),
       );
-      const control = createOwnerPreviewQwenAdminRuntimeBridgeControl({
-        ...explicitLocalOwnerPreviewProviderGate,
-        ALIBABA_API_KEY: "synthetic-runtime-key",
-      });
+      const control = createOwnerPreviewQwenAdminRuntimeBridgeControl(
+        createOwnerPreviewOptions(
+          explicitLocalOwnerPreviewProviderGate,
+          "synthetic-runtime-key",
+        ),
+      );
       const resolveGroundingContext =
         control?.providerExecution?.resolveGroundingContext;
       const generationKind =

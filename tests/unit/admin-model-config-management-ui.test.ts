@@ -15,6 +15,30 @@ afterEach(() => {
 });
 
 describe("admin model config management UI", () => {
+  it("never fabricates provider success when the runtime callback is absent", async () => {
+    render(
+      createElement(AdminModelConfigManagement, {
+        canManageModelConfig: true,
+      }),
+    );
+
+    fireEvent.change(screen.getByLabelText("供应商标识"), {
+      target: { value: "qwen" },
+    });
+    fireEvent.change(screen.getByLabelText("供应商显示名称"), {
+      target: { value: "Qwen" },
+    });
+    fireEvent.change(screen.getByLabelText("密钥值"), {
+      target: { value: "synthetic-credential" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存供应商" }));
+
+    expect(await screen.findByText("模型供应商保存失败。")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("admin-model-provider-qwen"),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders loading, empty, and error states", () => {
     render(createElement(AdminModelConfigManagement, { state: "loading" }));
     expect(screen.getByText("正在加载模型配置")).toBeInTheDocument();
@@ -28,10 +52,25 @@ describe("admin model config management UI", () => {
     expect(screen.getByText("模型配置加载失败")).toBeInTheDocument();
   });
 
-  it("creates model providers with short-lived secret input and only renders masked state", () => {
+  it("creates model providers through an injected runtime and only renders masked state", async () => {
     const syntheticSecret = ["sk-test", "synthetic", "123456"].join("-");
 
-    render(createElement(AdminModelConfigManagement));
+    render(
+      createElement(AdminModelConfigManagement, {
+        canManageModelConfig: true,
+        onSaveProvider: async (form) => ({
+          publicId: `model-provider-${form.providerKey}`,
+          providerKey: form.providerKey,
+          displayName: form.displayName,
+          baseUrl: null,
+          isEnabled: true,
+          secretStatus: "configured",
+          maskedSecret: "****3456",
+          providerMetadata: { source: "test_adapter" },
+          updatedAt: "2026-05-26T00:00:00.000Z",
+        }),
+      }),
+    );
 
     fireEvent.change(screen.getByLabelText("供应商标识"), {
       target: { value: "local_mock" },
@@ -44,7 +83,9 @@ describe("admin model config management UI", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "保存供应商" }));
 
-    const providerRow = screen.getByTestId("admin-model-provider-local_mock");
+    const providerRow = await screen.findByTestId(
+      "admin-model-provider-local_mock",
+    );
     expect(providerRow).toHaveTextContent("Local Mock");
     expect(providerRow).toHaveTextContent("已配置");
     expect(providerRow).toHaveTextContent("****3456");
@@ -59,11 +100,12 @@ describe("admin model config management UI", () => {
     expect(providerRow).toHaveTextContent("已停用");
   });
 
-  it("shows model config fallback controls and prompt template metadata without raw prompt bodies", () => {
+  it("shows model config fallback controls and prompt template metadata without raw prompt bodies", async () => {
     const rawPromptBody = "RAW_PROMPT_BODY_DO_NOT_RENDER";
 
     render(
       createElement(AdminModelConfigManagement, {
+        canManageModelConfig: true,
         initialModelProviders: [
           {
             publicId: "model-provider-public-001",
@@ -122,6 +164,22 @@ describe("admin model config management UI", () => {
           },
         ],
         canViewPromptFullText: false,
+        onTestConnection: async (publicId) => ({
+          modelConfigPublicId: publicId,
+          status: "succeeded",
+          testedAt: "2026-05-26T00:00:00.000Z",
+          testedByPublicId: "admin-public-001",
+          durationMs: 12,
+          failureCategory: "none",
+          redactionStatus: "redacted",
+          actionType: "model_config_health_check",
+          requestBodyStored: false,
+          responseBodyStored: false,
+          providerPayloadStored: false,
+          rawPromptStored: false,
+          rawUserDataStored: false,
+          modelDisabledByTest: false,
+        }),
       }),
     );
 
@@ -151,7 +209,7 @@ describe("admin model config management UI", () => {
         name: "测试 Local Explanation 的连接",
       }),
     );
-    expect(configRow).toHaveTextContent("连接测试：已通过");
+    expect(await screen.findByText(/连接测试：已通过/)).toBeInTheDocument();
 
     fireEvent.click(
       within(configRow).getByRole("button", {
@@ -187,6 +245,7 @@ describe("admin model config management UI", () => {
 
     render(
       createElement(AdminModelConfigManagement, {
+        canViewPromptFullText: true,
         initialPromptTemplates: [
           {
             publicId: "prompt-template-public-full-text",
@@ -218,10 +277,9 @@ describe("admin model config management UI", () => {
     expect(screen.queryByText("导出")).not.toBeInTheDocument();
   });
 
-  it("hides provider and model config mutation actions in read-only role mode", () => {
+  it("defaults to read-only when role capabilities are omitted", () => {
     render(
       createElement(AdminModelConfigManagement, {
-        canManageModelConfig: false,
         initialModelProviders: [
           {
             publicId: "model-provider-public-readonly",

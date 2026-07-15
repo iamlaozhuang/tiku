@@ -87,8 +87,8 @@ export function AdminModelConfigManagement({
   initialModelProviders = emptyModelProviders,
   initialModelConfigs = emptyModelConfigs,
   initialPromptTemplates = emptyPromptTemplates,
-  canManageModelConfig = true,
-  canViewPromptFullText = true,
+  canManageModelConfig = false,
+  canViewPromptFullText = false,
   onSaveConfig,
   onSaveProvider,
   onTestConnection,
@@ -137,10 +137,11 @@ export function AdminModelConfigManagement({
     }
 
     try {
-      const provider =
-        onSaveProvider === undefined
-          ? createLocalProvider(providerForm)
-          : await onSaveProvider(providerForm);
+      if (onSaveProvider === undefined) {
+        throw new Error("model_provider runtime callback is unavailable");
+      }
+
+      const provider = await onSaveProvider(providerForm);
 
       setModelProviders((current) => [...current, provider]);
       setProviderForm(emptyProviderForm);
@@ -159,10 +160,11 @@ export function AdminModelConfigManagement({
     }
 
     try {
-      const modelConfig =
-        onSaveConfig === undefined
-          ? createLocalModelConfig(configForm, modelProviders)
-          : await onSaveConfig(configForm);
+      if (onSaveConfig === undefined) {
+        throw new Error("model_config runtime callback is unavailable");
+      }
+
+      const modelConfig = await onSaveConfig(configForm);
 
       setModelConfigs((current) => [...current, modelConfig]);
       setConfigForm(emptyConfigForm);
@@ -187,10 +189,11 @@ export function AdminModelConfigManagement({
     }));
 
     try {
-      const connectionTest =
-        onTestConnection === undefined
-          ? createLocalConnectionTest(modelConfig)
-          : await onTestConnection(publicId);
+      if (onTestConnection === undefined) {
+        throw new Error("model_config connection test callback is unavailable");
+      }
+
+      const connectionTest = await onTestConnection(publicId);
 
       setConnectionTestsByConfig((current) => ({
         ...current,
@@ -335,101 +338,6 @@ function AdminModelConfigStatePanel({ title }: { title: string }) {
       <h1 className="text-text-primary text-base font-semibold">{title}</h1>
     </section>
   );
-}
-
-function createLocalProvider(
-  form: ModelProviderFormInput,
-): ModelProviderSummaryDto {
-  const providerKey = form.providerKey.trim();
-  const lastFour = readLastFour(form.secretValue);
-
-  return {
-    publicId: `model-provider-${providerKey}`,
-    providerKey,
-    displayName: form.displayName.trim(),
-    baseUrl: readOptionalText(form.baseUrl),
-    isEnabled: true,
-    secretStatus: lastFour === null ? "not_configured" : "configured",
-    maskedSecret: lastFour === null ? null : `****${lastFour}`,
-    providerMetadata: {
-      source: "admin_ui",
-    },
-    updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
-  };
-}
-
-function createLocalModelConfig(
-  form: ModelConfigFormInput,
-  modelProviders: ModelProviderSummaryDto[],
-): ModelConfigSummaryDto {
-  const modelName = form.modelName.trim();
-  const selectedProvider =
-    modelProviders.find(
-      (provider) => provider.publicId === form.modelProviderPublicId,
-    ) ??
-    modelProviders[0] ??
-    null;
-  const modelProviderPublicId =
-    readOptionalText(form.modelProviderPublicId) ??
-    selectedProvider?.publicId ??
-    "model-provider-local";
-  const providerDisplayName = selectedProvider?.displayName ?? "Local Mock";
-  const providerKey = selectedProvider?.providerKey ?? "local_mock";
-  const maskedSecret = selectedProvider?.maskedSecret ?? null;
-  const secretStatus =
-    selectedProvider?.secretStatus ?? ("not_configured" as const);
-
-  return {
-    publicId: `model-config-${modelName}`,
-    providerPublicId: modelProviderPublicId,
-    providerDisplayName,
-    providerKey,
-    modelName,
-    modelAlias: form.modelAlias.trim() || modelName,
-    displayName: form.displayName.trim(),
-    aiFuncType: form.aiFuncType,
-    apiKeyDisplay: maskedSecret,
-    secretStatus,
-    maskedSecret,
-    fallbackModelConfigPublicId: readOptionalText(
-      form.fallbackModelConfigPublicId,
-    ),
-    isEnabled: true,
-    status: "enabled",
-    fallbackPriority: Number.parseInt(form.fallbackPriority, 10) || 0,
-    snapshotPolicy: "redacted_metadata",
-    configVersion: 1,
-    timeoutSecond: 15,
-    maxRetryCount: 1,
-    updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
-  };
-}
-
-function createLocalConnectionTest(
-  modelConfig: ModelConfigSummaryDto,
-): ModelConfigConnectionTestDto {
-  const isConfigured =
-    modelConfig.secretStatus === "configured" &&
-    modelConfig.maskedSecret !== null &&
-    modelConfig.isEnabled &&
-    modelConfig.status === "enabled";
-
-  return {
-    modelConfigPublicId: modelConfig.publicId,
-    status: isConfigured ? "succeeded" : "missing_secret",
-    testedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
-    testedByPublicId: null,
-    durationMs: isConfigured ? 12 : 0,
-    failureCategory: isConfigured ? "none" : "missing_secret",
-    redactionStatus: "redacted",
-    actionType: "model_config_health_check",
-    requestBodyStored: false,
-    responseBodyStored: false,
-    providerPayloadStored: false,
-    rawPromptStored: false,
-    rawUserDataStored: false,
-    modelDisabledByTest: false,
-  };
 }
 
 function AdminModelConfigTab({
@@ -1037,16 +945,4 @@ function AdminPromptTemplateRow({
       </Button>
     </div>
   );
-}
-
-function readLastFour(value: string): string | null {
-  const trimmedValue = value.trim();
-
-  return trimmedValue.length < 4 ? null : trimmedValue.slice(-4);
-}
-
-function readOptionalText(value: string): string | null {
-  const trimmedValue = value.trim();
-
-  return trimmedValue.length === 0 ? null : trimmedValue;
 }

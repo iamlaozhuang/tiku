@@ -5,6 +5,7 @@ import type {
   AnswerRecordStatus,
   ExamStatus,
 } from "../models/student-experience";
+import type { EnqueueAiScoringTaskInput } from "./ai-scoring-task-repository";
 
 export type MockExamAuthorizationScopeRow = {
   profession: Profession;
@@ -97,6 +98,7 @@ export type SubmitMockExamInput = {
   subjectiveScore: string | null;
   totalScore: string;
   unansweredCount: number;
+  aiScoringTasks: EnqueueAiScoringTaskInput[];
   answerRecordResults: {
     paperQuestionPublicId: string;
     answerRecordStatus: AnswerRecordStatus;
@@ -129,6 +131,12 @@ export type TerminateMockExamInput = {
   terminationReason: string;
 };
 
+export type RetryFailedMockExamAiScoringTasksResult = {
+  mockExam: MockExamRow;
+  retriedCount: number;
+  failedCount: number;
+};
+
 export type MockExamRepository = {
   listEffectiveAuthorizationScopes(query: {
     userPublicId: string;
@@ -157,5 +165,10 @@ export type MockExamRepository = {
   applyMockExamScoringResults(
     input: ApplyMockExamScoringResultsInput,
   ): Promise<MockExamRow | null>;
+  retryFailedAiScoringTasks?(input: {
+    userPublicId: string;
+    mockExamPublicId: string;
+    retriedAt: Date;
+  }): Promise<RetryFailedMockExamAiScoringTasksResult | null>;
   terminateMockExam(input: TerminateMockExamInput): Promise<MockExamRow | null>;
 };

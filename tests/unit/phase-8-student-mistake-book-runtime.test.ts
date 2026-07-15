@@ -372,7 +372,7 @@ describe("phase 8 student mistake_book runtime", () => {
     ]);
   });
 
-  it("returns local deterministic ai_explanation without calling a real provider", async () => {
+  it("returns honest unavailable when no governed ai_explanation runtime is injected", async () => {
     const handlers = createHandlers();
     const response = await handlers.aiExplanation.POST(
       new Request(
@@ -394,20 +394,14 @@ describe("phase 8 student mistake_book runtime", () => {
       },
     );
 
-    await expect(readJson(response)).resolves.toMatchObject({
-      code: 0,
-      data: {
-        aiExplanation: {
-          explanationStatus: "explained",
-          promptTemplateKey: "ai_explanation_v1",
-          promptTemplateVersion: 1,
-          citations: [],
-        },
-      },
+    await expect(readJson(response)).resolves.toEqual({
+      code: 503331,
+      message: "Mistake book AI explanation is not configured.",
+      data: null,
     });
   });
 
-  it("uses the configured ai_explanation fallback model_config in the student runtime", async () => {
+  it("does not execute a local fixture model_config in the student runtime", async () => {
     const aiCallLogEntries: unknown[] = [];
     const handlers = createStudentMistakeBookRuntimeRouteHandlers({
       mistakeBookRepository: createRepository(),
@@ -477,27 +471,12 @@ describe("phase 8 student mistake_book runtime", () => {
       },
     );
 
-    await expect(readJson(response)).resolves.toMatchObject({
-      code: 0,
-      data: {
-        aiExplanation: {
-          explanationStatus: "explained",
-          promptTemplateKey: "ai_explanation_v1",
-          promptTemplateVersion: 1,
-        },
-      },
+    await expect(readJson(response)).resolves.toEqual({
+      code: 503331,
+      message: "Mistake book AI explanation is not configured.",
+      data: null,
     });
-    expect(aiCallLogEntries).toEqual([
-      expect.objectContaining({
-        aiFuncType: "ai_explanation",
-        modelConfigSnapshot: expect.objectContaining({
-          modelConfigPublicId: "model-config-dev-ai-explanation-fallback",
-          aiFuncType: "explanation",
-          promptTemplateKey: "ai_explanation_v1",
-          promptTemplateVersion: 1,
-        }),
-      }),
-    ]);
+    expect(aiCallLogEntries).toEqual([]);
     expect(JSON.stringify(aiCallLogEntries)).not.toContain(
       "student-session-token",
     );

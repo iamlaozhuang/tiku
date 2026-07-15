@@ -1,6 +1,5 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
-import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
 import { createAdminAiAuditLogListQuery } from "../contracts/admin-ai-audit-log-ops-contract";
 import type { EvidenceStatus } from "../models/ai-rag";
@@ -25,8 +24,11 @@ import {
   createPostgresStudentFlowRepositories,
   type StudentFlowRuntimeRepositoryOptions,
 } from "../repositories/student-flow-runtime-repository";
-import { createAiMockProviderRuntime } from "./ai-mock-provider-runtime";
-import { createAiScoringService } from "./ai-scoring-service";
+import {
+  createAiScoringService,
+  type AiScoringRunner,
+} from "./ai-scoring-service";
+import { createAiScoringTaskEnqueueInputFactory } from "./ai-scoring-task-runtime";
 import {
   createExamReportRouteHandlers,
   type ExamReportUserResolver,
@@ -44,6 +46,7 @@ import {
   createMockExamService,
   type MockExamAiScoringRuntime,
   type MockExamAiScoringRuntimeContext,
+  type MockExamAiScoringTaskPreparer,
   type MockExamPublicIdFactory,
 } from "./mock-exam-service";
 import {
@@ -56,7 +59,6 @@ import {
 } from "./practice-service";
 import type { SessionService } from "./session-service";
 import {
-  createLocalModelConfigRuntimeCatalog,
   createModelConfigRuntimeResolver,
   createPersistedModelConfigRuntimeCatalog,
   type ModelConfigRuntimeCatalog,
@@ -87,6 +89,8 @@ export type StudentFlowRuntimeOptions = StudentFlowRuntimeRepositoryOptions & {
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
   localResourceStorageRoot?: string;
   ragRetrievalRuntime?: StudentFlowRagRetrievalRuntime;
+  aiScoringTaskPreparer?: MockExamAiScoringTaskPreparer;
+  modelConfigRuntimeCatalogLoader?: ModelConfigRuntimeCatalogLoader;
   createPublicId?: (prefix: StudentFlowPublicIdPrefix) => string;
 };
 
@@ -106,32 +110,6 @@ type StudentFlowUserResolver = StudentPaperUserResolver &
 
 function createDefaultPublicId(prefix: StudentFlowPublicIdPrefix): string {
   return `${prefix}_${crypto.randomUUID()}`;
-}
-
-function createDefaultLearningSuggestionOptions(
-  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
-): ExamReportLearningSuggestionOptions {
-  const modelConfigSelection = createModelConfigRuntimeResolver(
-    modelConfigRuntimeCatalog ?? createLocalModelConfigRuntimeCatalog(),
-  ).resolve({
-    aiFuncType: "learning_suggestion",
-    allowFallback: true,
-  });
-
-  if (modelConfigSelection.status !== "selected") {
-    throw new Error(
-      `Local learning_suggestion model_config is unavailable: ${modelConfigSelection.reason}`,
-    );
-  }
-
-  return {
-    learningSuggestionRuntime: createAiMockProviderRuntime({
-      provider: createMockAiProvider(),
-      aiCallLogRepository: createPostgresAdminAiAuditLogRuntimeRepositories(),
-    }),
-    modelConfigSnapshot: modelConfigSelection.modelConfigSnapshot,
-    promptTemplate: modelConfigSelection.promptTemplate,
-  };
 }
 
 export async function loadPersistedModelConfigRuntimeCatalog(
@@ -182,7 +160,10 @@ async function resolveModelConfigRuntimeCatalog(
 
   return (
     (await modelConfigRuntimeCatalogLoader()) ??
-    createLocalModelConfigRuntimeCatalog()
+    createPersistedModelConfigRuntimeCatalog({
+      modelConfigs: [],
+      promptTemplates: [],
+    })
   );
 }
 
@@ -292,43 +273,11 @@ export function createDefaultAiScoringRuntime(
     "appendAiCallLog"
   > = createPostgresAdminAiAuditLogRuntimeRepositories(),
   aiScoringAttemptRepository: AiScoringAttemptRepository = createPostgresAiScoringAttemptRepository(),
+  runner: AiScoringRunner = async () => {
+    throw new Error("Governed AI scoring executor is unavailable.");
+  },
 ): MockExamAiScoringRuntime {
-  const aiScoringService = createAiScoringService({
-    async runner(input) {
-      const scoringPointMaxScoreTotal = input.scoringPoints.reduce(
-        (scoreTotal, scoringPoint) => scoreTotal + scoringPoint.maxScore,
-        0,
-      );
-      const answerLengthRatio = Math.min(
-        1,
-        input.studentAnswer.trim().length / 40,
-      );
-      const earnedScore = Math.min(
-        scoringPointMaxScoreTotal,
-        Math.max(0.5, scoringPointMaxScoreTotal * answerLengthRatio),
-      );
-
-      return {
-        scoringPoints: input.scoringPoints.map((scoringPoint, index) => ({
-          scoringPointPublicId: scoringPoint.scoringPointPublicId,
-          isHit: earnedScore > 0 && index === 0,
-          score: index === 0 ? earnedScore : 0,
-          reason: "Local deterministic scoring based on answer completeness.",
-        })),
-        overallComment: "本地确定性 AI 评分完成。",
-        improvementSuggestion: "围绕评分点补充法规依据和步骤说明。",
-        providerRequestPayload: {
-          model: input.modelConfigSnapshot.modelName,
-          promptTemplateKey: input.promptTemplate.promptTemplateKey,
-          answerLength: input.studentAnswer.length,
-        },
-        providerResponsePayload: {
-          requestId: "mock-ai-scoring-request-dev-001",
-          output: "local deterministic scoring result",
-        },
-      };
-    },
-  });
+  const aiScoringService = createAiScoringService({ runner });
 
   return {
     async scoreSubjectiveAnswer(context: MockExamAiScoringRuntimeContext) {
@@ -449,6 +398,74 @@ export function createDefaultAiScoringRuntime(
   };
 }
 
+export function createDefaultAiScoringTaskPreparer(
+  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
+  ragRetrievalRuntime: StudentFlowRagRetrievalRuntime = createDefaultStudentFlowRagRetrievalRuntime(),
+  modelConfigRuntimeCatalogLoader: ModelConfigRuntimeCatalogLoader = loadPersistedModelConfigRuntimeCatalog,
+  now: () => Date = () => new Date(),
+): MockExamAiScoringTaskPreparer {
+  const enqueueInputFactory = createAiScoringTaskEnqueueInputFactory({ now });
+
+  return {
+    async prepareTask(context) {
+      const selection = createModelConfigRuntimeResolver(
+        await resolveModelConfigRuntimeCatalog(
+          modelConfigRuntimeCatalog,
+          modelConfigRuntimeCatalogLoader,
+        ),
+      ).resolve({
+        aiFuncType: "scoring",
+        allowFallback: false,
+      });
+
+      if (
+        selection.status !== "selected" ||
+        selection.executionMode !== "governed_provider"
+      ) {
+        throw new Error("Governed AI scoring model_config is unavailable.");
+      }
+
+      const ragRetrievalResult =
+        await ragRetrievalRuntime.retrieveForAiScoring(context);
+
+      return enqueueInputFactory.create({
+        answerRecordPublicId: context.answerRecordPublicId,
+        mockExamPublicId: context.mockExamPublicId,
+        actorPublicId: context.userPublicId,
+        idempotencyKey: `${context.mockExamPublicId}:${context.answerRecordPublicId}`,
+        modelConfigSnapshot: {
+          ...selection.modelConfigSnapshot,
+          executionMode: selection.executionMode,
+        },
+        promptTemplateKey: selection.promptTemplate.promptTemplateKey,
+        promptTemplateVersion: selection.promptTemplate.version,
+        promptTemplateHash: selection.promptTemplate.templateHash,
+        inputSnapshot: {
+          questionPublicId: context.questionPublicId,
+          paperQuestionPublicId: context.paperQuestionPublicId,
+          questionSnapshot: context.questionSnapshot,
+          answerSnapshot: context.answerSnapshot,
+          questionText: context.questionText,
+          standardAnswer: context.standardAnswer,
+          studentAnswer: context.studentAnswer,
+          maxScore: context.maxScore,
+          scoringPoints: context.scoringPoints,
+        },
+        authorizationSnapshot: {
+          actorPublicId: context.userPublicId,
+          mockExamPublicId: context.mockExamPublicId,
+          profession: context.profession,
+          level: context.level,
+          subject: context.subject,
+          checkedAt: now().toISOString(),
+          authorizationBoundary: "mock_exam_submit_guard",
+        },
+        ragSnapshot: ragRetrievalResult,
+      });
+    },
+  };
+}
+
 function isSuccessfulSessionResponse(
   response: Awaited<ReturnType<SessionService["getCurrentSession"]>>,
 ): response is ApiResponse<NonNullable<typeof response.data>> & {
@@ -518,13 +535,18 @@ export function createStudentFlowRuntimeRouteHandlers(
           createPublicId: (prefix) => createPublicId(prefix),
         },
         {
-          aiScoringRuntime: createDefaultAiScoringRuntime(
-            options.modelConfigRuntimeCatalog,
-            options.ragRetrievalRuntime ??
-              createDefaultStudentFlowRagRetrievalRuntime(
-                options.localResourceStorageRoot,
-              ),
-          ),
+          aiScoringTaskPreparer:
+            options.aiScoringTaskPreparer ??
+            createDefaultAiScoringTaskPreparer(
+              options.modelConfigRuntimeCatalog,
+              options.ragRetrievalRuntime ??
+                createDefaultStudentFlowRagRetrievalRuntime(
+                  options.localResourceStorageRoot,
+                ),
+              options.modelConfigRuntimeCatalogLoader ??
+                loadPersistedModelConfigRuntimeCatalog,
+              options.now,
+            ),
         },
       ),
       resolveUserContext,
@@ -536,10 +558,7 @@ export function createStudentFlowRuntimeRouteHandlers(
         {
           createPublicId: (prefix) => createPublicId(prefix),
         },
-        options.examReportLearningSuggestionOptions ??
-          createDefaultLearningSuggestionOptions(
-            options.modelConfigRuntimeCatalog,
-          ),
+        options.examReportLearningSuggestionOptions,
       ),
       resolveUserContext,
     ),

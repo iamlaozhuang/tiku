@@ -1,8 +1,6 @@
 import { createStudentMistakeBookRuntimeRouteHandlers } from "@/server/services/student-mistake-book-runtime";
 import { createStudentFlowRuntimeRouteHandlers } from "@/server/services/student-flow-runtime";
 import type {
-  ProviderBlockedData,
-  ProviderBlockedOperation,
   StudentExperienceApiEnvelope,
   StudentExperienceUserContext,
 } from "@/server/contracts/student-experience/student-experience-contract";
@@ -54,24 +52,6 @@ function createUserSessionRequiredResponse() {
       message: "User session is required.",
     },
     { status: 401 },
-  );
-}
-
-function createProviderBlockedResponse(
-  operation: ProviderBlockedOperation,
-  message: string,
-) {
-  return createJsonResponse<ProviderBlockedData>(
-    {
-      code: 423101,
-      data: {
-        blockedGate: "provider_model_request_quota",
-        operation,
-        status: "blocked",
-      },
-      message,
-    },
-    { status: 423 },
   );
 }
 
@@ -222,10 +202,10 @@ export function createStudentExperienceRouteHandlers(
           readLegacyFlowRouteHandlers().mockExams.detail.GET(request, context),
       },
       retryScoring: {
-        POST: () =>
-          createProviderBlockedResponse(
-            "mock_exam.retry_scoring",
-            "Provider-gated mock_exam scoring requires separate approval.",
+        POST: (request: Request, context: RouteContext) =>
+          readLegacyFlowRouteHandlers().mockExams.retryScoring.POST(
+            request,
+            context,
           ),
       },
       submit: {

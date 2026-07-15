@@ -14,6 +14,7 @@ describe("phase 11 model_config fallback runtime", () => {
     const selection = resolver.resolve({
       aiFuncType: "learning_suggestion",
       allowFallback: true,
+      allowFixture: true,
     });
 
     expect(selection).toMatchObject({
@@ -51,6 +52,7 @@ describe("phase 11 model_config fallback runtime", () => {
     const selection = resolver.resolve({
       aiFuncType: "explanation",
       allowFallback: true,
+      allowFixture: true,
     });
 
     expect(selection).toMatchObject({
@@ -82,6 +84,7 @@ describe("phase 11 model_config fallback runtime", () => {
     const selection = resolver.resolve({
       aiFuncType: "scoring",
       allowFallback: true,
+      allowFixture: true,
     });
 
     expect(selection).toEqual({
@@ -107,6 +110,7 @@ describe("phase 11 model_config fallback runtime", () => {
     const selection = resolver.resolve({
       aiFuncType: "explanation",
       allowFallback: true,
+      allowFixture: true,
     });
 
     expect(selection).toEqual({

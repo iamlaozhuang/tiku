@@ -948,12 +948,10 @@ describe("practice service", () => {
           standardAnswerRichText: "<p>A</p>",
           analysisRichText: "<p>解析</p>",
           mistakeBookPublicId: "mistake_book_public_2",
-          aiExplanationStatus: "explained",
-          aiExplanationText:
-            "Local AI explanation: compare your answer with the standard answer and teacher analysis.",
-          aiExplanationLearningSuggestion:
-            "Review this knowledge point and retry a similar objective question.",
-          aiExplanationEvidenceStatus: "none",
+          aiExplanationStatus: "unavailable",
+          aiExplanationText: null,
+          aiExplanationLearningSuggestion: null,
+          aiExplanationEvidenceStatus: null,
           aiExplanationCitations: [],
           aiHintStatus: null,
           aiHintText: null,
@@ -983,7 +981,7 @@ describe("practice service", () => {
     ]);
   });
 
-  it("exposes manual ai_explanation trigger for correct objective answers", async () => {
+  it("keeps teacher analysis separate and rejects unavailable AI explanation", async () => {
     const answerInputs: unknown[] = [];
     const service = createPracticeService(
       createRepository({
@@ -1020,7 +1018,7 @@ describe("practice service", () => {
       data: {
         feedback: {
           isCorrect: true,
-          aiExplanationStatus: "available",
+          aiExplanationStatus: "unavailable",
           aiExplanationText: null,
         },
       },
@@ -1063,19 +1061,10 @@ describe("practice service", () => {
         aiExplanationTrigger: "manual_request",
         savedFromClientAt: "2026-05-19T08:00:00.000Z",
       }),
-    ).resolves.toMatchObject({
-      code: 0,
-      data: {
-        feedback: {
-          answerRecordPublicId: "answer_record_public_existing",
-          isCorrect: true,
-          score: "1.0",
-          aiExplanationStatus: "explained",
-          aiExplanationText:
-            "Local AI explanation: compare your answer with the standard answer and teacher analysis.",
-          aiExplanationEvidenceStatus: "none",
-        },
-      },
+    ).resolves.toEqual({
+      code: 503303,
+      message: "Practice AI explanation is not configured.",
+      data: null,
     });
   });
 
@@ -1378,7 +1367,7 @@ describe("practice service", () => {
     expect(mistakeBookInputs).toHaveLength(1);
   });
 
-  it("returns a redacted local AI hint and one retry budget for a subjective practice answer", async () => {
+  it("does not fabricate an AI hint for a subjective practice answer", async () => {
     const service = createPracticeService(
       createRepository({
         async findPracticeByPublicId() {
@@ -1406,11 +1395,11 @@ describe("practice service", () => {
           isCorrect: null,
           score: null,
           maxScore: "10.0",
-          aiHintStatus: "hinted",
-          aiHintText: expect.stringContaining("AI 提示"),
-          aiHintEvidenceStatus: "none",
+          aiHintStatus: "unavailable",
+          aiHintText: null,
+          aiHintEvidenceStatus: null,
           aiHintCitations: [],
-          retryRemainingCount: 1,
+          retryRemainingCount: 0,
         },
       },
     });
@@ -1444,8 +1433,8 @@ describe("practice service", () => {
             isCorrect: null,
             score: null,
             maxScore: "10.0",
-            aiHintStatus: "hinted",
-            retryRemainingCount: 1,
+            aiHintStatus: "unavailable",
+            retryRemainingCount: 0,
           },
         },
       });
@@ -1496,8 +1485,8 @@ describe("practice service", () => {
       code: 0,
       data: {
         feedback: {
-          score: "6.0",
-          aiHintStatus: null,
+          score: null,
+          aiHintStatus: "unavailable",
           retryRemainingCount: 0,
         },
       },
@@ -1570,7 +1559,7 @@ describe("practice service", () => {
     });
   });
 
-  it("returns final local AI scoring for a subjective practice retry", async () => {
+  it("keeps a subjective retry unscored when governed AI is unavailable", async () => {
     const createdAnswerInputs: unknown[] = [];
     const retryService = createPracticeService(
       createRepository({
@@ -1634,22 +1623,22 @@ describe("practice service", () => {
       data: {
         feedback: {
           isCorrect: null,
-          score: "10.0",
+          score: null,
           maxScore: "10.0",
-          aiHintStatus: null,
+          aiHintStatus: "unavailable",
           retryRemainingCount: 0,
         },
       },
     });
     expect(createdAnswerInputs).toMatchObject([
       {
-        answerRecordStatus: "scored",
-        score: "10.0",
+        answerRecordStatus: "submitted",
+        score: null,
       },
     ]);
   });
 
-  it("returns final local AI scoring from a direct subjective scoring request", async () => {
+  it("rejects a direct subjective scoring request when governed AI is unavailable", async () => {
     const directScoreService = createPracticeService(
       createRepository({
         async findPracticeByPublicId() {
@@ -1695,16 +1684,10 @@ describe("practice service", () => {
           aiScoringTrigger: "manual_request",
         },
       ),
-    ).resolves.toMatchObject({
-      code: 0,
-      data: {
-        feedback: {
-          score: "10.0",
-          maxScore: "10.0",
-          aiHintStatus: null,
-          retryRemainingCount: 0,
-        },
-      },
+    ).resolves.toEqual({
+      code: 503304,
+      message: "Practice AI scoring is not configured.",
+      data: null,
     });
   });
 

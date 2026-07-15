@@ -96,10 +96,6 @@ type PracticeQuestionSnapshot = {
 const practiceContractTerm = "practice";
 const answerRecordContractTerm = "answer_record";
 const mistakeBookContractTerm = "mistake_book";
-const objectiveAiExplanationText =
-  "Local AI explanation: compare your answer with the standard answer and teacher analysis.";
-const objectiveAiExplanationLearningSuggestion =
-  "Review this knowledge point and retry a similar objective question.";
 const inFlightFreshPracticeByUserPaper = new Map<
   string,
   Promise<PracticeRow>
@@ -500,78 +496,6 @@ function createEmptyAiFeedback(): Pick<
   };
 }
 
-function createSubjectiveAiHintFeedback(
-  retryRemainingCount: number,
-): Pick<
-  PracticeAnswerFeedbackRow,
-  | "ai_explanation_text"
-  | "ai_explanation_learning_suggestion"
-  | "ai_explanation_evidence_status"
-  | "ai_explanation_citations"
-  | "ai_hint_text"
-  | "ai_hint_improvement_directions"
-  | "ai_hint_evidence_status"
-  | "ai_hint_citations"
-  | "retry_remaining_count"
-> {
-  return {
-    ai_explanation_text: null,
-    ai_explanation_learning_suggestion: null,
-    ai_explanation_evidence_status: null,
-    ai_explanation_citations: [],
-    ai_hint_text: "AI 提示：补充事实核对、处理依据、沟通动作和后续跟进闭环。",
-    ai_hint_improvement_directions: [
-      "补充事实核对",
-      "说明处理依据",
-      "写清后续跟进",
-    ],
-    ai_hint_evidence_status: "none",
-    ai_hint_citations: [],
-    retry_remaining_count: retryRemainingCount,
-  };
-}
-
-function createObjectiveAiExplanationFeedback(): Pick<
-  PracticeAnswerFeedbackRow,
-  | "ai_explanation_text"
-  | "ai_explanation_learning_suggestion"
-  | "ai_explanation_evidence_status"
-  | "ai_explanation_citations"
-  | "ai_hint_text"
-  | "ai_hint_improvement_directions"
-  | "ai_hint_evidence_status"
-  | "ai_hint_citations"
-  | "retry_remaining_count"
-> {
-  return {
-    ai_explanation_text: objectiveAiExplanationText,
-    ai_explanation_learning_suggestion:
-      objectiveAiExplanationLearningSuggestion,
-    ai_explanation_evidence_status: "none",
-    ai_explanation_citations: [],
-    ai_hint_text: null,
-    ai_hint_improvement_directions: [],
-    ai_hint_evidence_status: null,
-    ai_hint_citations: [],
-    retry_remaining_count: 0,
-  };
-}
-
-function createObjectiveManualExplanationFeedback(): Pick<
-  PracticeAnswerFeedbackRow,
-  | "ai_explanation_text"
-  | "ai_explanation_learning_suggestion"
-  | "ai_explanation_evidence_status"
-  | "ai_explanation_citations"
-  | "ai_hint_text"
-  | "ai_hint_improvement_directions"
-  | "ai_hint_evidence_status"
-  | "ai_hint_citations"
-  | "retry_remaining_count"
-> {
-  return createEmptyAiFeedback();
-}
-
 function isCorrectObjectiveAnswer(
   question: PracticeQuestionSnapshot,
   input: NormalizedPracticeAnswerInput,
@@ -690,31 +614,6 @@ function calculateObjectiveScore(
     isCorrect,
     score: formatScore(partialScore),
   };
-}
-
-function calculateSubjectiveAiScore(
-  question: PracticeQuestionSnapshot,
-  input: NormalizedPracticeAnswerInput,
-): string {
-  const maxScore = Number.parseFloat(question.score);
-
-  if (!Number.isFinite(maxScore) || maxScore <= 0) {
-    return "0.0";
-  }
-
-  const answerLength = input.textAnswer?.trim().length ?? 0;
-
-  if (answerLength === 0) {
-    return "0.0";
-  }
-
-  const answerLengthRatio = Math.min(1, answerLength / 40);
-  const earnedScore = Math.min(
-    maxScore,
-    Math.max(0.5, maxScore * answerLengthRatio),
-  );
-
-  return formatScore(earnedScore);
 }
 
 function buildAnswerSnapshot(
@@ -1062,21 +961,10 @@ export function createPracticeService(
 
       if (existingAnswer !== null && isObjectiveQuestion(question)) {
         if (normalizedInput.aiExplanationTrigger === "manual_request") {
-          return createSuccessResponse({
-            feedback: mapPracticeAnswerFeedbackToApi({
-              answer_record_public_id: existingAnswer.public_id,
-              is_correct: existingAnswer.is_correct,
-              score: existingAnswer.score,
-              max_score: existingAnswer.max_score,
-              standard_answer_rich_text: question.standardAnswerRichText,
-              analysis_rich_text: question.analysisRichText,
-              mistake_book_public_id: null,
-              ai_explanation_status: "explained",
-              ai_hint_status: null,
-              ...createObjectiveAiExplanationFeedback(),
-              answered_at: existingAnswer.answered_at,
-            }),
-          });
+          return createErrorResponse(
+            503303,
+            "Practice AI explanation is not configured.",
+          );
         }
 
         return createErrorResponse(
@@ -1105,16 +993,21 @@ export function createPracticeService(
         );
       }
 
+      if (
+        isSubjectiveQuestion(question) &&
+        normalizedInput.aiScoringTrigger === "manual_request"
+      ) {
+        return createErrorResponse(
+          503304,
+          "Practice AI scoring is not configured.",
+        );
+      }
+
       const { isCorrect, score } = calculateObjectiveScore(
         question,
         normalizedInput,
       );
-      const subjectiveFinalScore =
-        isSubjectiveQuestion(question) &&
-        (subjectiveAnswerCount >= 1 ||
-          normalizedInput.aiScoringTrigger === "manual_request")
-          ? calculateSubjectiveAiScore(question, normalizedInput)
-          : null;
+      const subjectiveFinalScore = null;
       const answerSnapshot = buildAnswerSnapshot(normalizedInput);
       const answerRecord = await repository.createPracticeAnswerRecord({
         publicId: publicIdFactory.createPublicId("answer_record"),
@@ -1155,26 +1048,14 @@ export function createPracticeService(
               latestWrongAt: now,
             })
           : null;
-      const retryRemainingCount = isSubjectiveQuestion(question)
-        ? subjectiveFinalScore === null
-          ? Math.max(0, 1 - subjectiveAnswerCount)
-          : 0
-        : 0;
-      const aiFeedback = isSubjectiveQuestion(question)
-        ? subjectiveFinalScore === null
-          ? createSubjectiveAiHintFeedback(retryRemainingCount)
-          : createEmptyAiFeedback()
-        : isObjectiveQuestion(question) && answerRecord.is_correct === false
-          ? createObjectiveAiExplanationFeedback()
-          : isObjectiveQuestion(question) && answerRecord.is_correct === true
-            ? createObjectiveManualExplanationFeedback()
-            : createEmptyAiFeedback();
-      const aiExplanationStatus =
-        isObjectiveQuestion(question) && answerRecord.is_correct === false
-          ? "explained"
-          : isObjectiveQuestion(question) && answerRecord.is_correct === true
-            ? "available"
-            : null;
+      const aiFeedback = createEmptyAiFeedback();
+      const aiExplanationStatus = isObjectiveQuestion(question)
+        ? "unavailable"
+        : null;
+      const aiHintStatus = isSubjectiveQuestion(question)
+        ? "unavailable"
+        : null;
+      const retryRemainingCount = 0;
 
       return createSuccessResponse({
         feedback: mapPracticeAnswerFeedbackToApi({
@@ -1186,11 +1067,9 @@ export function createPracticeService(
           analysis_rich_text: question.analysisRichText,
           mistake_book_public_id: mistakeBook?.public_id ?? null,
           ai_explanation_status: aiExplanationStatus,
-          ai_hint_status:
-            isSubjectiveQuestion(question) && subjectiveFinalScore === null
-              ? "hinted"
-              : null,
+          ai_hint_status: aiHintStatus,
           ...aiFeedback,
+          retry_remaining_count: retryRemainingCount,
           answered_at: answerRecord.answered_at,
         }),
       });

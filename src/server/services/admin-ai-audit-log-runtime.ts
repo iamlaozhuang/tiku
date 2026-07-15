@@ -27,6 +27,7 @@ import {
   type AdminAiAuditLogRuntimeRepositories,
   type AdminAiAuditLogRuntimeRepositoryOptions,
   type AppendModelConfigAuditLogInput,
+  type PersistedModelProviderInput,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
 import {
   normalizeModelConfigFallbackOrderInput,
@@ -34,6 +35,15 @@ import {
   normalizeModelProviderInput,
 } from "../validators/ai-rag";
 import { attachModelConfigRuntimeAlignment } from "./model-config-runtime";
+import {
+  runModelConfigConnectionTest,
+  type ModelConfigConnectionTestExecutor,
+} from "./model-config-connection-test-executor";
+import {
+  ModelProviderSecretStoreUnavailableError,
+  prepareModelProviderSecretWrite,
+  type ModelProviderSecretStore,
+} from "./model-provider-secret-store";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
@@ -43,6 +53,8 @@ export type AdminAiAuditLogRuntimeOptions =
   AdminAiAuditLogRuntimeRepositoryOptions & {
     repositories?: AdminAiAuditLogRuntimeRepositories;
     sessionService?: Pick<SessionService, "getCurrentSession">;
+    modelProviderSecretStore?: ModelProviderSecretStore | null;
+    modelConfigConnectionTestExecutor?: ModelConfigConnectionTestExecutor | null;
   };
 
 type AdminAiAuditLogRole = "super_admin" | "ops_admin" | "content_admin";
@@ -81,6 +93,10 @@ const validationFailedResponse = createErrorResponse(
 const mutationNotAvailableResponse = createErrorResponse(
   ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
   "Requested admin AI resource does not exist.",
+);
+const secretStoreUnavailableResponse = createErrorResponse(
+  ADMIN_AI_AUDIT_LOG_ERROR_CODES.secretStoreUnavailable,
+  "Protected model provider secret storage is unavailable.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -423,35 +439,6 @@ function findPromptTemplateForModelConfig(input: {
   );
 }
 
-function createConnectionTestResult(input: {
-  actorPublicId: string;
-  modelConfig: ModelConfigSummaryDto;
-  now: Date;
-}): ModelConfigConnectionTestDto {
-  const isConfigured =
-    input.modelConfig.secretStatus === "configured" &&
-    input.modelConfig.maskedSecret !== null &&
-    input.modelConfig.isEnabled &&
-    input.modelConfig.status === "enabled";
-
-  return {
-    modelConfigPublicId: input.modelConfig.publicId,
-    status: isConfigured ? "succeeded" : "missing_secret",
-    testedAt: input.now.toISOString(),
-    testedByPublicId: input.actorPublicId,
-    durationMs: isConfigured ? 12 : 0,
-    failureCategory: isConfigured ? "none" : "missing_secret",
-    redactionStatus: "redacted",
-    actionType: "model_config_health_check",
-    requestBodyStored: false,
-    responseBodyStored: false,
-    providerPayloadStored: false,
-    rawPromptStored: false,
-    rawUserDataStored: false,
-    modelDisabledByTest: false,
-  };
-}
-
 export function createAdminAiAuditLogRuntimeRouteHandlers(
   options: AdminAiAuditLogRuntimeOptions = {},
 ) {
@@ -459,6 +446,49 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     options.repositories ??
     createPostgresAdminAiAuditLogRuntimeRepositories(options);
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const modelProviderSecretStore = options.modelProviderSecretStore ?? null;
+  const modelConfigConnectionTestExecutor =
+    options.modelConfigConnectionTestExecutor ?? null;
+
+  async function preparePersistedModelProviderInput(
+    input: NonNullable<ReturnType<typeof normalizeModelProviderInput>>,
+    operation: "create" | "update",
+  ): Promise<PersistedModelProviderInput> {
+    const {
+      secretValue,
+      hasSecretUpdate,
+      apiKeyLastFour: _apiKeyLastFour,
+      ...metadata
+    } = input;
+
+    void _apiKeyLastFour;
+
+    if (!hasSecretUpdate) {
+      return operation === "create"
+        ? {
+            ...metadata,
+            apiKeySecretRef: null,
+            apiKeyLastFour: null,
+            secretStatus: "not_configured",
+            lastRotatedAt: null,
+          }
+        : metadata;
+    }
+
+    if (secretValue === null) {
+      throw new ModelProviderSecretStoreUnavailableError();
+    }
+
+    return {
+      ...metadata,
+      ...(await prepareModelProviderSecretWrite({
+        providerKey: input.providerKey,
+        secretValue,
+        secretStore: modelProviderSecretStore,
+        now: new Date(),
+      })),
+    };
+  }
 
   async function requireReadableAdminActor(
     request: Request,
@@ -809,7 +839,32 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(validationFailedResponse);
         }
 
-        const modelProvider = await repositories.createModelProvider(input);
+        let persistedInput: PersistedModelProviderInput;
+
+        try {
+          persistedInput = await preparePersistedModelProviderInput(
+            input,
+            "create",
+          );
+        } catch (error) {
+          if (!(error instanceof ModelProviderSecretStoreUnavailableError)) {
+            throw error;
+          }
+
+          await appendMutationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "model_provider.create",
+            targetResourceType: "model_provider",
+            targetPublicId: null,
+            resultStatus: "failed",
+          });
+
+          return createJsonResponse(secretStoreUnavailableResponse);
+        }
+
+        const modelProvider =
+          await repositories.createModelProvider(persistedInput);
 
         await appendMutationAuditLog({
           request,
@@ -845,9 +900,33 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(validationFailedResponse);
         }
 
+        let persistedInput: PersistedModelProviderInput;
+
+        try {
+          persistedInput = await preparePersistedModelProviderInput(
+            input,
+            "update",
+          );
+        } catch (error) {
+          if (!(error instanceof ModelProviderSecretStoreUnavailableError)) {
+            throw error;
+          }
+
+          await appendMutationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "model_provider.update",
+            targetResourceType: "model_provider",
+            targetPublicId: publicId,
+            resultStatus: "failed",
+          });
+
+          return createJsonResponse(secretStoreUnavailableResponse);
+        }
+
         const modelProvider = await repositories.updateModelProvider(
           publicId,
-          input,
+          persistedInput,
         );
 
         await appendMutationAuditLog({
@@ -1110,9 +1189,13 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
             modelConfig,
             promptTemplates,
           });
-          const connectionTest = createConnectionTestResult({
+          const apiKeySecretRef =
+            await repositories.getModelConfigSecretReference?.(publicId);
+          const connectionTest = await runModelConfigConnectionTest({
             actorPublicId: actorOrError.publicId,
             modelConfig,
+            apiKeySecretRef: apiKeySecretRef ?? null,
+            executor: modelConfigConnectionTestExecutor,
             now,
           });
           const succeeded = connectionTest.status === "succeeded";

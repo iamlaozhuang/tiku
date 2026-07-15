@@ -14,6 +14,7 @@ import type {
 } from "@/server/repositories/mistake-book-repository";
 import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
 import { createStudentMistakeBookRuntimeRouteHandlers } from "@/server/services/student-mistake-book-runtime";
+import { createPersistedModelConfigRuntimeCatalog } from "@/server/services/model-config-runtime";
 import type { SessionService } from "@/server/services/session-service";
 
 const now = "2026-05-24T09:30:00.000Z";
@@ -387,6 +388,61 @@ describe("phase 11 ai_call_log coverage hardening", () => {
     const handlers = createStudentMistakeBookRuntimeRouteHandlers({
       mistakeBookRepository: createMistakeBookRepository(),
       sessionService: createStudentSessionService(),
+      modelConfigRuntimeCatalog: createPersistedModelConfigRuntimeCatalog({
+        modelConfigs: [
+          {
+            publicId: "model-config-public-explanation",
+            providerPublicId: "model-provider-public-governed",
+            providerDisplayName: "Governed Provider",
+            providerKey: "qwen",
+            modelName: "qwen-plus",
+            modelAlias: "qwen-plus",
+            displayName: "Governed explanation",
+            aiFuncType: "ai_explanation",
+            apiKeyDisplay: "****3456",
+            secretStatus: "configured",
+            maskedSecret: "****3456",
+            fallbackModelConfigPublicId: null,
+            isEnabled: true,
+            status: "enabled",
+            fallbackPriority: 0,
+            snapshotPolicy: "redacted_metadata",
+            configVersion: 2,
+            timeoutSecond: 60,
+            maxRetryCount: 3,
+            updatedAt: now,
+          },
+        ],
+        promptTemplates: [
+          {
+            publicId: "prompt-template-public-explanation",
+            promptTemplateKey: "ai_explanation_v1",
+            aiFuncType: "ai_explanation",
+            version: 2,
+            title: "Explanation v2",
+            description: null,
+            bodyDigest: "sha256:explanation-v2",
+            bodyPreviewMasked: "[redacted]",
+            bodyFullText: null,
+            status: "active",
+            isActive: true,
+            registrationSource: "runtime_registry",
+            catalogGapStatus: "registered",
+            canViewFullText: false,
+            requiredVariables: ["question", "learnerAnswer"],
+            updatedAt: now,
+          },
+        ],
+      }),
+      async explanationRunner() {
+        return {
+          explanationText: "Explicit governed test explanation.",
+          keyPoints: ["Governed test key point"],
+          learningSuggestion: "Explicit governed test suggestion.",
+          providerRequestPayload: { request: "provider request marker" },
+          providerResponsePayload: { response: "provider response marker" },
+        };
+      },
       aiCallLogRepository: {
         async appendAiCallLog(aiCallLogInput) {
           aiCallLogEntries.push(aiCallLogInput);

@@ -12,7 +12,10 @@ import {
   createPostgresAdminAiAuditLogRuntimeRepositories,
   type AdminAiAuditLogRuntimeRepositories,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
-import { createAiExplanationHintService } from "./ai-explanation-hint-service";
+import {
+  createAiExplanationHintService,
+  type AiExplanationRunner,
+} from "./ai-explanation-hint-service";
 import {
   createMistakeBookRouteHandlers,
   type MistakeBookUserResolver,
@@ -23,7 +26,6 @@ import {
   type MistakeBookAiExplanationRuntimeContext,
 } from "./mistake-book-service";
 import {
-  createLocalModelConfigRuntimeCatalog,
   createModelConfigRuntimeResolver,
   type ModelConfigRuntimeCatalog,
 } from "./model-config-runtime";
@@ -44,6 +46,8 @@ export type StudentMistakeBookRuntimeOptions =
     modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
     localResourceStorageRoot?: string;
     ragRetrievalRuntime?: MistakeBookRagRetrievalRuntime;
+    aiExplanationRuntime?: MistakeBookAiExplanationRuntime;
+    explanationRunner?: AiExplanationRunner;
   };
 
 type MistakeBookRagRetrievalRuntime = {
@@ -94,7 +98,8 @@ function createEmptyRagRetrievalResult(): RagRetrievalResultDto {
       generationPublicIds: [],
       chunkIndexes: [],
       textHashes: [],
-      queryHash: "local-deterministic-query",
+      queryHash:
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       maxScore: null,
       retrievalMode: "fusion_sort",
     },
@@ -179,12 +184,13 @@ function estimateTokenCount(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
 
-function createDefaultAiExplanationRuntime(input: {
+export function createGovernedMistakeBookAiExplanationRuntime(input: {
   aiCallLogRepository?: Pick<
     AdminAiAuditLogRuntimeRepositories,
     "appendAiCallLog"
   >;
-  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
+  modelConfigRuntimeCatalog: ModelConfigRuntimeCatalog;
+  explanationRunner: AiExplanationRunner;
   ragRetrievalRuntime?: MistakeBookRagRetrievalRuntime;
   localResourceStorageRoot?: string;
 }): MistakeBookAiExplanationRuntime {
@@ -192,16 +198,17 @@ function createDefaultAiExplanationRuntime(input: {
     input.aiCallLogRepository ??
     createPostgresAdminAiAuditLogRuntimeRepositories();
   const modelConfigSelection = createModelConfigRuntimeResolver(
-    input.modelConfigRuntimeCatalog ?? createLocalModelConfigRuntimeCatalog(),
+    input.modelConfigRuntimeCatalog,
   ).resolve({
     aiFuncType: "explanation",
     allowFallback: true,
   });
 
-  if (modelConfigSelection.status !== "selected") {
-    throw new Error(
-      `Local ai_explanation model_config is unavailable: ${modelConfigSelection.reason}`,
-    );
+  if (
+    modelConfigSelection.status !== "selected" ||
+    modelConfigSelection.executionMode !== "governed_provider"
+  ) {
+    throw new Error("Governed ai_explanation model_config is unavailable.");
   }
 
   const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
@@ -210,40 +217,9 @@ function createDefaultAiExplanationRuntime(input: {
     input.ragRetrievalRuntime ??
     createDefaultMistakeBookRagRetrievalRuntime(input.localResourceStorageRoot);
   const explanationHintService = createAiExplanationHintService({
-    async explanationRunner(input) {
-      return {
-        explanationText:
-          "本地确定性 AI 讲解：先核对题干关键词，再对照标准答案和老师解析定位错误原因。",
-        keyPoints: [
-          "题干关键词",
-          input.isCorrect ? "正确项巩固" : "错误项排查",
-        ],
-        learningSuggestion: "复习本题对应知识点并完成一道同类题。",
-        providerRequestPayload: {
-          model: input.modelConfigSnapshot.modelName,
-          promptTemplateKey: input.promptTemplate.promptTemplateKey,
-          triggerReason: input.triggerReason,
-        },
-        providerResponsePayload: {
-          requestId: "mock-ai-explanation-request-dev-001",
-          output: "local deterministic explanation result",
-        },
-      };
-    },
-    async hintRunner(input) {
-      return {
-        hintText:
-          "本地确定性 AI 提示：补充推理步骤和法规依据，不直接给出标准答案。",
-        improvementDirections: input.scoringPointLabels,
-        providerRequestPayload: {
-          model: input.modelConfigSnapshot.modelName,
-          promptTemplateKey: input.promptTemplate.promptTemplateKey,
-        },
-        providerResponsePayload: {
-          requestId: "mock-ai-hint-request-dev-001",
-          output: "local deterministic hint result",
-        },
-      };
+    explanationRunner: input.explanationRunner,
+    async hintRunner() {
+      throw new Error("Mistake book hint execution is not configured.");
     },
   });
 
@@ -325,15 +301,22 @@ export function createStudentMistakeBookRuntimeRouteHandlers(
     createPostgresMistakeBookRepository(options);
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
   const clock = options.now === undefined ? undefined : { now: options.now };
+  const aiExplanationRuntime =
+    options.aiExplanationRuntime ??
+    (options.explanationRunner !== undefined &&
+    options.modelConfigRuntimeCatalog !== undefined
+      ? createGovernedMistakeBookAiExplanationRuntime({
+          aiCallLogRepository: options.aiCallLogRepository,
+          modelConfigRuntimeCatalog: options.modelConfigRuntimeCatalog,
+          explanationRunner: options.explanationRunner,
+          ragRetrievalRuntime: options.ragRetrievalRuntime,
+          localResourceStorageRoot: options.localResourceStorageRoot,
+        })
+      : undefined);
 
   return createMistakeBookRouteHandlers(
     createMistakeBookService(repository, clock, {
-      aiExplanationRuntime: createDefaultAiExplanationRuntime({
-        aiCallLogRepository: options.aiCallLogRepository,
-        modelConfigRuntimeCatalog: options.modelConfigRuntimeCatalog,
-        ragRetrievalRuntime: options.ragRetrievalRuntime,
-        localResourceStorageRoot: options.localResourceStorageRoot,
-      }),
+      aiExplanationRuntime,
     }),
     createStudentMistakeBookUserResolver(sessionService),
   );

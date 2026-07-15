@@ -4,9 +4,9 @@ import type { AiFuncType } from "../models/ai-rag";
 export type NormalizedModelProviderInput = {
   providerKey: string;
   displayName: string;
+  secretValue: string | null;
+  hasSecretUpdate: boolean;
   apiKeyLastFour: string | null;
-  secretStatus: "not_configured" | "configured";
-  maskedSecret: string | null;
   baseUrl: string | null;
   isEnabled: boolean;
 };
@@ -128,10 +128,6 @@ function normalizeApiKeyLastFour(value: unknown): string | null {
   return credentialValue.slice(-4);
 }
 
-function createMaskedSecret(lastFour: string | null): string | null {
-  return lastFour === null ? null : `****${lastFour}`;
-}
-
 function normalizeTimeoutSecond(value: unknown): number | null {
   const timeoutSecond = normalizePositiveInteger(value);
 
@@ -187,20 +183,30 @@ export function normalizeModelProviderInput(
 
   const providerKey = normalizeRequiredString(input.providerKey);
   const displayName = normalizeRequiredString(input.displayName);
-  const apiKeyLastFour = normalizeApiKeyLastFour(
-    input.secretValue ?? input.apiKey,
+  const hasSecretUpdate =
+    Object.prototype.hasOwnProperty.call(input, "secretValue") ||
+    Object.prototype.hasOwnProperty.call(input, "apiKey");
+  const secretValue = normalizeOptionalString(
+    Object.prototype.hasOwnProperty.call(input, "secretValue")
+      ? input.secretValue
+      : input.apiKey,
   );
+  const apiKeyLastFour = normalizeApiKeyLastFour(secretValue);
 
-  if (providerKey === null || displayName === null) {
+  if (
+    providerKey === null ||
+    displayName === null ||
+    (hasSecretUpdate && apiKeyLastFour === null)
+  ) {
     return null;
   }
 
   return {
     providerKey,
     displayName,
+    secretValue,
+    hasSecretUpdate,
     apiKeyLastFour,
-    secretStatus: apiKeyLastFour === null ? "not_configured" : "configured",
-    maskedSecret: createMaskedSecret(apiKeyLastFour),
     baseUrl: normalizeOptionalString(input.baseUrl),
     isEnabled: normalizeBoolean(input.isEnabled, false),
   };

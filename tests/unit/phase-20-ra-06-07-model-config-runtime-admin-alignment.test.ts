@@ -85,7 +85,7 @@ describe("phase 20 RA-06-07 model_config runtime admin alignment", () => {
         unavailableReason: null,
         promptTemplateKey: "ai_explanation_admin_v2",
         promptTemplateVersion: 2,
-        providerMode: "local_mock",
+        providerMode: "governed_provider",
       },
     });
     expect(alignedModelConfigs[1]).toMatchObject({

@@ -17,6 +17,7 @@ describe("phase 12 local mock model config runtime", () => {
     const selection = resolver.resolve({
       aiFuncType: "kn_recommendation",
       allowFallback: true,
+      allowFixture: true,
     });
 
     expect(selection).toMatchObject({
@@ -30,7 +31,7 @@ describe("phase 12 local mock model config runtime", () => {
         promptTemplateKey: "kn_recommendation_v1",
         promptTemplateVersion: 1,
         snapshotPolicy: "redacted_metadata",
-        providerMode: "local_mock",
+        providerMode: "local_fixture",
       },
     });
     expect(JSON.stringify(selection)).not.toContain("secret");
@@ -39,9 +40,9 @@ describe("phase 12 local mock model config runtime", () => {
 
   it("adds redaction-safe model config metadata to mock ai call logs", async () => {
     const appendedInputs: unknown[] = [];
-    const rawPrompt = "RAW_PROMPT_DO_NOT_STORE";
-    const rawAnswer = "RAW_ANSWER_DO_NOT_STORE";
-    const rawProviderPayload = "RAW_PROVIDER_PAYLOAD_DO_NOT_STORE";
+    const rawPrompt = "prompt-fixture";
+    const rawAnswer = "answer-fixture";
+    const rawProviderPayload = "payload-fixture";
     const modelConfigSnapshot = createModelConfigSnapshot({
       providerPublicId: "model-provider-dev-mock",
       providerKey: "mock",
@@ -119,8 +120,10 @@ describe("phase 12 local mock model config runtime", () => {
     expect(appendedInputs).toHaveLength(1);
     expect(appendedInputs[0]).toMatchObject({
       requestRedactedSnapshot: {
-        modelConfig:
-          createRedactedModelConfigRuntimeSnapshot(modelConfigSnapshot),
+        modelConfig: createRedactedModelConfigRuntimeSnapshot(
+          modelConfigSnapshot,
+          "local_fixture",
+        ),
       },
     });
     expect(JSON.stringify(appendedInputs)).not.toContain(rawPrompt);

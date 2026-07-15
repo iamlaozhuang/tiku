@@ -69,6 +69,7 @@ export class PaperSnapshotIntegrityError extends Error {
 }
 
 const {
+  aiScoringTask,
   answerRecord,
   examReport,
   mistakeBook,
@@ -767,23 +768,32 @@ function createPostgresMockExamRepository(
     },
     async submitMockExam(input) {
       const database = getDatabase();
-      const [row] = await database
-        .update(mockExam)
-        .set({
-          exam_status: input.examStatus,
-          submitted_at: input.submittedAt,
-          objective_score: input.objectiveScore,
-          subjective_score: input.subjectiveScore,
-          total_score: input.totalScore,
-          updated_at: input.submittedAt,
-        })
-        .where(eq(mockExam.public_id, input.publicId))
-        .returning();
+      return database.transaction(async (transaction) => {
+        const [row] = await transaction
+          .update(mockExam)
+          .set({
+            exam_status: input.examStatus,
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            updated_at: input.submittedAt,
+          })
+          .where(
+            and(
+              eq(mockExam.public_id, input.publicId),
+              eq(mockExam.exam_status, "in_progress"),
+            ),
+          )
+          .returning();
 
-      if (row !== undefined) {
+        if (row === undefined) {
+          return null;
+        }
+
         await Promise.all(
           input.answerRecordResults.map((answerRecordResult) =>
-            database
+            transaction
               .update(answerRecord)
               .set({
                 answer_record_status: answerRecordResult.answerRecordStatus,
@@ -803,11 +813,92 @@ function createPostgresMockExamRepository(
               ),
           ),
         );
-      }
 
-      return row === undefined
-        ? null
-        : mapMockExamRow(row, await countMockExamAnswers(database, row.id));
+        if (input.aiScoringTasks.length > 0) {
+          if (
+            input.aiScoringTasks.some(
+              (task) => task.mockExamPublicId !== input.publicId,
+            )
+          ) {
+            throw new Error("AI scoring task mock_exam scope mismatch.");
+          }
+
+          const answerRecordPublicIds = input.aiScoringTasks.map(
+            (task) => task.answerRecordPublicId,
+          );
+          const answerRecordLinks = await transaction
+            .select({
+              id: answerRecord.id,
+              public_id: answerRecord.public_id,
+            })
+            .from(answerRecord)
+            .where(
+              and(
+                eq(answerRecord.mock_exam_id, row.id),
+                inArray(answerRecord.public_id, answerRecordPublicIds),
+              ),
+            );
+          const answerRecordIdByPublicId = new Map(
+            answerRecordLinks.map((link) => [link.public_id, link.id]),
+          );
+
+          if (
+            new Set(answerRecordPublicIds).size !==
+              input.aiScoringTasks.length ||
+            answerRecordLinks.length !== input.aiScoringTasks.length
+          ) {
+            throw new Error("AI scoring task answer_record scope is invalid.");
+          }
+
+          await transaction
+            .insert(aiScoringTask)
+            .values(
+              input.aiScoringTasks.map((task) => ({
+                public_id: task.publicId,
+                answer_record_id: answerRecordIdByPublicId.get(
+                  task.answerRecordPublicId,
+                )!,
+                mock_exam_public_id: task.mockExamPublicId,
+                actor_public_id: task.actorPublicId,
+                idempotency_key_hash: task.idempotencyKeyHash,
+                task_status: "pending" as const,
+                attempt_count: 0,
+                max_attempt_count: task.maxAttemptCount,
+                timeout_second: task.timeoutSecond,
+                model_config_snapshot: task.modelConfigSnapshot,
+                prompt_template_key: task.promptTemplateKey,
+                prompt_template_version: task.promptTemplateVersion,
+                prompt_template_hash: task.promptTemplateHash,
+                input_snapshot: task.inputSnapshot,
+                authorization_snapshot: task.authorizationSnapshot,
+                rag_snapshot: task.ragSnapshot,
+                result_snapshot: null,
+                ai_call_log_id: null,
+                failure_code: null,
+                failure_message_digest: null,
+                scheduled_at: task.scheduledAt,
+                claimed_at: null,
+                lease_expires_at: null,
+                worker_public_id: null,
+                completed_at: null,
+              })),
+            )
+            .onConflictDoNothing({
+              target: [
+                aiScoringTask.answer_record_id,
+                aiScoringTask.idempotency_key_hash,
+              ],
+            });
+        }
+
+        return mapMockExamRow(
+          row,
+          await countMockExamAnswers(
+            transaction as StudentFlowRuntimeDatabase,
+            row.id,
+          ),
+        );
+      });
     },
     async applyMockExamScoringResults(input) {
       const database = getDatabase();
@@ -850,6 +941,140 @@ function createPostgresMockExamRepository(
       return row === undefined
         ? null
         : mapMockExamRow(row, await countMockExamAnswers(database, row.id));
+    },
+    async retryFailedAiScoringTasks(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+
+      if (userId === null) {
+        return null;
+      }
+
+      return database.transaction(async (transaction) => {
+        const [ownedMockExam] = await transaction
+          .select()
+          .from(mockExam)
+          .where(
+            and(
+              eq(mockExam.public_id, input.mockExamPublicId),
+              eq(mockExam.user_id, userId),
+            ),
+          )
+          .for("update")
+          .limit(1);
+
+        if (ownedMockExam === undefined) {
+          return null;
+        }
+
+        if (ownedMockExam.exam_status !== "scoring_partial_failed") {
+          return {
+            mockExam: mapMockExamRow(
+              ownedMockExam,
+              await countMockExamAnswers(
+                transaction as StudentFlowRuntimeDatabase,
+                ownedMockExam.id,
+              ),
+            ),
+            retriedCount: 0,
+            failedCount: 0,
+          };
+        }
+
+        const failedTasks = await transaction
+          .select({
+            id: aiScoringTask.id,
+            answer_record_id: aiScoringTask.answer_record_id,
+            attempt_count: aiScoringTask.attempt_count,
+            max_attempt_count: aiScoringTask.max_attempt_count,
+          })
+          .from(aiScoringTask)
+          .innerJoin(
+            answerRecord,
+            eq(answerRecord.id, aiScoringTask.answer_record_id),
+          )
+          .where(
+            and(
+              eq(aiScoringTask.mock_exam_public_id, input.mockExamPublicId),
+              eq(aiScoringTask.actor_public_id, input.userPublicId),
+              eq(aiScoringTask.task_status, "failed"),
+              eq(answerRecord.mock_exam_id, ownedMockExam.id),
+              eq(answerRecord.user_id, userId),
+              eq(answerRecord.answer_record_status, "scoring_failed"),
+            ),
+          )
+          .orderBy(asc(aiScoringTask.id))
+          .for("update");
+        const retryableTasks = failedTasks.filter(
+          (task) => task.attempt_count < task.max_attempt_count,
+        );
+
+        if (retryableTasks.length === 0) {
+          return {
+            mockExam: mapMockExamRow(
+              ownedMockExam,
+              await countMockExamAnswers(
+                transaction as StudentFlowRuntimeDatabase,
+                ownedMockExam.id,
+              ),
+            ),
+            retriedCount: 0,
+            failedCount: failedTasks.length,
+          };
+        }
+
+        const retryableTaskIds = retryableTasks.map((task) => task.id);
+        const retryableAnswerRecordIds = retryableTasks.map(
+          (task) => task.answer_record_id,
+        );
+
+        await transaction
+          .update(aiScoringTask)
+          .set({
+            task_status: "pending",
+            failure_code: null,
+            failure_message_digest: null,
+            scheduled_at: input.retriedAt,
+            claimed_at: null,
+            lease_expires_at: null,
+            worker_public_id: null,
+            completed_at: null,
+            updated_at: input.retriedAt,
+          })
+          .where(inArray(aiScoringTask.id, retryableTaskIds));
+        await transaction
+          .update(answerRecord)
+          .set({
+            answer_record_status: "submitted",
+            score: null,
+            updated_at: input.retriedAt,
+          })
+          .where(inArray(answerRecord.id, retryableAnswerRecordIds));
+        const [updatedMockExam] = await transaction
+          .update(mockExam)
+          .set({
+            exam_status: "scoring",
+            updated_at: input.retriedAt,
+          })
+          .where(eq(mockExam.id, ownedMockExam.id))
+          .returning();
+
+        if (updatedMockExam === undefined) {
+          throw new Error("Mock exam scoring retry lost its owner row.");
+        }
+
+        return {
+          mockExam: mapMockExamRow(
+            updatedMockExam,
+            await countMockExamAnswers(
+              transaction as StudentFlowRuntimeDatabase,
+              updatedMockExam.id,
+            ),
+          ),
+          retriedCount: retryableTasks.length,
+          failedCount: failedTasks.length - retryableTasks.length,
+        };
+      });
     },
     async terminateMockExam(input) {
       const [row] = await getDatabase()

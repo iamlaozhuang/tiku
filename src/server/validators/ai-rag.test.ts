@@ -8,7 +8,7 @@ import {
 } from "./ai-rag";
 
 describe("AI/RAG model config and prompt template validators", () => {
-  it("normalizes provider input without retaining raw API keys", () => {
+  it("preserves a write-only provider secret only for the service handoff", () => {
     expect(
       normalizeModelProviderInput({
         providerKey: " qwen ",
@@ -20,11 +20,25 @@ describe("AI/RAG model config and prompt template validators", () => {
     ).toEqual({
       providerKey: "qwen",
       displayName: "Qwen",
+      secretValue: "sk-test-123456",
+      hasSecretUpdate: true,
       apiKeyLastFour: "3456",
-      secretStatus: "configured",
-      maskedSecret: "****3456",
       baseUrl: null,
       isEnabled: true,
+    });
+  });
+
+  it("distinguishes an omitted secret update from an explicit secret", () => {
+    expect(
+      normalizeModelProviderInput({
+        providerKey: "qwen",
+        displayName: "Qwen",
+        isEnabled: false,
+      }),
+    ).toMatchObject({
+      secretValue: null,
+      hasSecretUpdate: false,
+      apiKeyLastFour: null,
     });
   });
 

@@ -373,6 +373,46 @@ describe("StudentPracticePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders governed AI unavailability instead of an indefinite pending state", () => {
+    const unavailableFeedback = {
+      ...studentPracticeFixture.practices[1].feedbackByPaperQuestionPublicId[
+        "paper-question-skill-001"
+      ],
+      score: null,
+      aiHintStatus: "unavailable",
+      aiHintText: null,
+      retryRemainingCount: 0,
+    };
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-skill-001",
+        practices: [
+          {
+            practice: studentPracticeFixture.practices[1].practice,
+            feedbackByPaperQuestionPublicId: {
+              "paper-question-skill-001": unavailableFeedback,
+            },
+          },
+        ],
+      }),
+    );
+
+    fireEvent.change(screen.getByLabelText("主观题答案"), {
+      target: { value: "先核验现场事实，再说明处理依据和后续跟进。" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(
+      screen.getByText("AI 提示与评分暂不可用，答案已安全保存。"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("AI 提示生成中")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "AI 提示并重答一次" }),
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "直接查看评分" })).toBeDisabled();
+  });
+
   it("renders loading, error, authorization expired, and empty states", () => {
     render(createElement(StudentPracticePage, { state: "loading" }));
     expect(screen.getByText("正在加载练习进度")).toBeInTheDocument();

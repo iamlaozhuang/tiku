@@ -372,8 +372,8 @@ export function createMistakeBookService(
       }
 
       return createErrorResponse(
-        422331,
-        "AI explanation is not available for mistake book in Phase 4.",
+        503331,
+        "Mistake book AI explanation is not configured.",
       );
     },
   };

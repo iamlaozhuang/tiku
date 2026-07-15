@@ -205,6 +205,10 @@ describe("AdminDashboardLayout shared admin state templates", () => {
       screen.getByTestId("admin-workspace-context-band"),
     ).toHaveTextContent("用户、企业、授权、卡密与审计治理归属于运营后台。");
     expect(screen.getByText("ops page body")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "AI 治理" })).toHaveAttribute(
+      "href",
+      "/ops/ai-governance",
+    );
   });
 
   it("keeps the authenticated super-admin role truthful inside split log pages", async () => {

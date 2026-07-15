@@ -900,6 +900,14 @@ function AiExplanationFeedback({
   feedback: PracticeAnswerFeedbackDto;
   onRequestAiExplanation(): void;
 }) {
+  if (feedback.aiExplanationStatus === "unavailable") {
+    return (
+      <p className="text-text-secondary text-sm">
+        AI 讲解暂不可用，老师解析仍可正常查看。
+      </p>
+    );
+  }
+
   if (
     feedback.aiExplanationStatus !== "explained" &&
     feedback.aiExplanationStatus !== "available"
@@ -1019,6 +1027,10 @@ function SubjectiveQuestionPanel({
             <p className="text-text-primary text-sm font-semibold">
               Final score: {feedback.score} / {feedback.maxScore}
             </p>
+          ) : feedback.aiHintStatus === "unavailable" ? (
+            <p className="text-text-secondary text-sm">
+              AI 提示与评分暂不可用，答案已安全保存。
+            </p>
           ) : feedback.aiHintText === null ? (
             <p className="text-text-secondary text-sm">AI 提示生成中</p>
           ) : (
@@ -1041,7 +1053,9 @@ function SubjectiveQuestionPanel({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
-              disabled={!canRetryWithHint}
+              disabled={
+                !canRetryWithHint || feedback.aiHintStatus === "unavailable"
+              }
               onClick={onRetryWithHint}
               className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -1050,7 +1064,9 @@ function SubjectiveQuestionPanel({
             <button
               type="button"
               onClick={onRequestAiScoring}
-              disabled={hasFinalScore}
+              disabled={
+                hasFinalScore || feedback.aiHintStatus === "unavailable"
+              }
               className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
             >
               直接查看评分

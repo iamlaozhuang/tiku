@@ -21,6 +21,7 @@ export type ModelConfigRuntimeRecord = {
   promptTemplate: ModelConfigRuntimePromptTemplate;
   isEnabled: boolean;
   priority: number;
+  executionMode: "governed_provider" | "local_fixture";
 };
 
 export type RedactedModelConfigRuntimeSnapshot = {
@@ -38,7 +39,7 @@ export type RedactedModelConfigRuntimeSnapshot = {
   promptTemplateKey: string;
   promptTemplateVersion: number;
   snapshotPolicy: "redacted_metadata";
-  providerMode: "local_mock";
+  providerMode: "governed_provider" | "local_fixture" | "local_mock";
 };
 
 export type ModelConfigRuntimeCatalog = {
@@ -67,6 +68,7 @@ export type ModelConfigRuntimeSelection =
       modelConfigSnapshot: ModelConfigSnapshot;
       redactedModelConfigMetadata: RedactedModelConfigRuntimeSnapshot;
       promptTemplate: ModelConfigRuntimePromptTemplate;
+      executionMode: "governed_provider" | "local_fixture";
     }
   | {
       status: "unavailable";
@@ -76,7 +78,8 @@ export type ModelConfigRuntimeSelection =
         | "fallback_not_allowed_for_ai_func_type"
         | "fallback_model_config_not_found"
         | "fallback_model_config_disabled"
-        | "fallback_ai_func_type_mismatch";
+        | "fallback_ai_func_type_mismatch"
+        | "fixture_not_allowed";
       primaryModelConfigPublicId: string | null;
       fallbackModelConfigPublicId?: string;
     };
@@ -85,6 +88,7 @@ export type ResolveModelConfigRuntimeInput = {
   aiFuncType: AiFuncType;
   preferredModelConfigPublicId?: string;
   allowFallback: boolean;
+  allowFixture?: boolean;
 };
 
 const fallbackAllowedAiFuncTypes = new Set<AiFuncType>([
@@ -135,11 +139,13 @@ function createLocalRecord(input: {
     },
     isEnabled: input.isEnabled,
     priority: input.priority,
+    executionMode: "local_fixture",
   };
 }
 
 export function createRedactedModelConfigRuntimeSnapshot(
   snapshot: ModelConfigSnapshot,
+  providerMode: RedactedModelConfigRuntimeSnapshot["providerMode"] = "governed_provider",
 ): RedactedModelConfigRuntimeSnapshot {
   return {
     providerPublicId: snapshot.providerPublicId,
@@ -156,7 +162,7 @@ export function createRedactedModelConfigRuntimeSnapshot(
     promptTemplateKey: snapshot.promptTemplateKey,
     promptTemplateVersion: snapshot.promptTemplateVersion,
     snapshotPolicy: "redacted_metadata",
-    providerMode: "local_mock",
+    providerMode,
   };
 }
 
@@ -247,6 +253,7 @@ export function createPersistedModelConfigRuntimeCatalog(
         },
         isEnabled: modelConfig.isEnabled && modelConfig.status === "enabled",
         priority: modelConfig.fallbackPriority,
+        executionMode: "governed_provider",
       };
     }),
   };
@@ -285,7 +292,7 @@ export function attachModelConfigRuntimeAlignment(
             unavailableReason: null,
             promptTemplateKey: selection.promptTemplate.promptTemplateKey,
             promptTemplateVersion: selection.promptTemplate.version,
-            providerMode: "local_mock",
+            providerMode: selection.executionMode,
           }
         : {
             isRuntimeSelected: false,
@@ -295,7 +302,7 @@ export function attachModelConfigRuntimeAlignment(
             unavailableReason: selection.reason,
             promptTemplateKey: null,
             promptTemplateVersion: null,
-            providerMode: "local_mock",
+            providerMode: "governed_provider",
           },
     );
   }
@@ -490,8 +497,10 @@ function selectRecord(
     modelConfigSnapshot: record.modelConfigSnapshot,
     redactedModelConfigMetadata: createRedactedModelConfigRuntimeSnapshot(
       record.modelConfigSnapshot,
+      record.executionMode,
     ),
     promptTemplate: record.promptTemplate,
+    executionMode: record.executionMode,
   };
 }
 
@@ -520,6 +529,17 @@ export function createModelConfigRuntimeResolver(
         return {
           status: "unavailable",
           reason: "model_config_not_found",
+          primaryModelConfigPublicId,
+        };
+      }
+
+      if (
+        primaryRecord.executionMode === "local_fixture" &&
+        input.allowFixture !== true
+      ) {
+        return {
+          status: "unavailable",
+          reason: "fixture_not_allowed",
           primaryModelConfigPublicId,
         };
       }

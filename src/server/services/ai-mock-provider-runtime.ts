@@ -81,6 +81,7 @@ export function createAiMockProviderRuntime(
         requestRedactedSnapshot: {
           modelConfig: createRedactedModelConfigRuntimeSnapshot(
             context.modelConfigSnapshot,
+            "local_fixture",
           ),
           prompt: redactedSnapshots.prompt,
           userAnswer: redactedSnapshots.userAnswer,
