@@ -1,7 +1,8 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -73,6 +74,13 @@ export const mistakeBookStatusValues = [
   "mastered",
   "removed",
 ] as const;
+export const mockExamDeadlineTaskStatusValues = [
+  "pending",
+  "running",
+  "completed",
+  "failed",
+  "cancelled",
+] as const;
 
 export const examModeEnum = pgEnum("exam_mode", examModeValues);
 export const examStatusEnum = pgEnum("exam_status", examStatusValues);
@@ -91,6 +99,10 @@ export const mistakeBookSourceEnum = pgEnum(
 export const mistakeBookStatusEnum = pgEnum(
   "mistake_book_status",
   mistakeBookStatusValues,
+);
+export const mockExamDeadlineTaskStatusEnum = pgEnum(
+  "mock_exam_deadline_task_status",
+  mockExamDeadlineTaskStatusValues,
 );
 
 export const practice = pgTable(
@@ -164,6 +176,51 @@ export const mockExam = pgTable(
   ],
 );
 
+export const mockExamDeadlineTask = pgTable(
+  "mock_exam_deadline_task",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    mock_exam_id: bigint("mock_exam_id", { mode: "number" })
+      .notNull()
+      .references(() => mockExam.id, { onDelete: "restrict" }),
+    task_status: mockExamDeadlineTaskStatusEnum("task_status")
+      .default("pending")
+      .notNull(),
+    scheduled_at: timestampColumn("scheduled_at"),
+    attempt_count: integer("attempt_count").default(0).notNull(),
+    max_attempt_count: integer("max_attempt_count").default(5).notNull(),
+    claimed_at: nullableTimestampColumn("claimed_at"),
+    lease_expires_at: nullableTimestampColumn("lease_expires_at"),
+    worker_public_id: text("worker_public_id"),
+    failure_message_digest: text("failure_message_digest"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    check(
+      "chk_mock_exam_deadline_task_attempt_count",
+      sql`${table.attempt_count} >= 0 and ${table.attempt_count} <= ${table.max_attempt_count}`,
+    ),
+    check(
+      "chk_mock_exam_deadline_task_max_attempt_count",
+      sql`${table.max_attempt_count} > 0`,
+    ),
+    uniqueIndex("udx_mock_exam_deadline_task_public_id").on(table.public_id),
+    uniqueIndex("udx_mock_exam_deadline_task_mock_exam_id").on(
+      table.mock_exam_id,
+    ),
+    index("idx_mock_exam_deadline_task_task_status_scheduled_at").on(
+      table.task_status,
+      table.scheduled_at,
+    ),
+    index("idx_mock_exam_deadline_task_lease_expires_at").on(
+      table.lease_expires_at,
+    ),
+  ],
+);
+
 export const answerRecord = pgTable(
   "answer_record",
   {
@@ -185,6 +242,9 @@ export const answerRecord = pgTable(
     question_public_id: text("question_public_id").notNull(),
     question_snapshot: jsonb("question_snapshot").notNull(),
     answer_snapshot: jsonb("answer_snapshot").notNull(),
+    answer_revision: integer("answer_revision").default(1).notNull(),
+    client_operation_id: text("client_operation_id"),
+    client_saved_at: nullableTimestampColumn("client_saved_at"),
     answer_record_status: answerRecordStatusEnum("answer_record_status")
       .default("draft")
       .notNull(),
@@ -197,7 +257,14 @@ export const answerRecord = pgTable(
     updated_at: updatedAtColumn(),
   },
   (table) => [
+    check(
+      "chk_answer_record_answer_revision",
+      sql`${table.answer_revision} > 0`,
+    ),
     uniqueIndex("udx_answer_record_public_id").on(table.public_id),
+    uniqueIndex("udx_answer_record_mock_exam_id_client_operation_id")
+      .on(table.mock_exam_id, table.client_operation_id)
+      .where(sql`${table.client_operation_id} is not null`),
     index("idx_answer_record_user_id").on(table.user_id),
     index("idx_answer_record_practice_id").on(table.practice_id),
     index("idx_answer_record_mock_exam_id").on(table.mock_exam_id),
@@ -218,6 +285,7 @@ export const examReport = pgTable(
     paper_id: paperIdColumn("paper_id"),
     paper_public_id: text("paper_public_id").notNull(),
     report_snapshot: jsonb("report_snapshot").notNull(),
+    report_revision: integer("report_revision").default(1).notNull(),
     exam_status: examStatusEnum("exam_status").notNull(),
     profession: professionEnum("profession").notNull(),
     level: integer("level").notNull(),
@@ -232,6 +300,7 @@ export const examReport = pgTable(
     updated_at: updatedAtColumn(),
   },
   (table) => [
+    check("chk_exam_report_report_revision", sql`${table.report_revision} > 0`),
     uniqueIndex("udx_exam_report_public_id").on(table.public_id),
     uniqueIndex("udx_exam_report_mock_exam_id").on(table.mock_exam_id),
     index("idx_exam_report_user_id").on(table.user_id),
@@ -296,6 +365,7 @@ export const practiceRelations = relations(practice, ({ many, one }) => ({
 
 export const mockExamRelations = relations(mockExam, ({ many, one }) => ({
   answerRecords: many(answerRecord),
+  deadlineTask: one(mockExamDeadlineTask),
   examReport: one(examReport),
   paper: one(paper, {
     fields: [mockExam.paper_id],
@@ -306,6 +376,16 @@ export const mockExamRelations = relations(mockExam, ({ many, one }) => ({
     references: [user.id],
   }),
 }));
+
+export const mockExamDeadlineTaskRelations = relations(
+  mockExamDeadlineTask,
+  ({ one }) => ({
+    mockExam: one(mockExam, {
+      fields: [mockExamDeadlineTask.mock_exam_id],
+      references: [mockExam.id],
+    }),
+  }),
+);
 
 export const answerRecordRelations = relations(answerRecord, ({ one }) => ({
   mockExam: one(mockExam, {
