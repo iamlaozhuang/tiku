@@ -64,6 +64,23 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
     organizationId: 501,
     orgAuthId: 601,
   })),
+  findOrganizationAuthorizationContext: vi.fn(
+    async ({
+      authorizationPublicId,
+      organizationPublicId,
+    }: {
+      authorizationPublicId: string;
+      organizationPublicId: string;
+    }) =>
+      createOrgEffectiveAuthorizationContext({
+        profession: "logistics",
+        level: 4,
+        authorizationPublicId,
+        ownerPublicId: organizationPublicId,
+        organizationPublicId,
+        quotaOwnerPublicId: organizationPublicId,
+      }),
+  ),
   lookupVersionOrganizationPublicId: vi.fn(
     async () => "organization_route_public_401",
   ),
@@ -306,6 +323,7 @@ function createPublishedVersion(
     draftPublicId: publishPathPublicId,
     versionNumber: 1,
     organizationPublicId: "organization_route_public_401",
+    authorizationPublicId: "org_auth_effective_route_401",
     publishScopeSnapshot: {
       organizationPublicIds: [],
       capturedAt: "2026-06-15T10:00:00.000Z",
@@ -407,6 +425,15 @@ function createEmployeeVisibleVersion(
   });
 }
 
+function createPublicEmployeeVisibleVersion(
+  overrides: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  const version = createEmployeeVisibleVersion(overrides);
+  delete version.authorizationPublicId;
+
+  return version;
+}
+
 function createAdminDetailVersion(
   overrides: Partial<OrganizationTrainingAdminPublishedVersionDetailDto> = {},
 ): OrganizationTrainingAdminPublishedVersionDetailDto {
@@ -478,6 +505,7 @@ function createOrganizationAdminWorkspaceCapability(
       "org_advanced_admin",
     ] as unknown as AdminWorkspaceCapabilitySummary["adminRoles"],
     organizationPublicId: "organization_route_public_401",
+    organizationAuthorizationPublicId: "org_auth_route_public_401",
     organizationEffectiveEdition: "advanced",
     organizationAuthorizationSource: "org_auth",
     capabilitySource: "service_computed",
@@ -1664,6 +1692,45 @@ describe("organization training draft source-context route handlers", () => {
     );
   });
 
+  it("rejects a manual draft that borrows an org_auth other than the session-selected authorization", async () => {
+    runtimeRepositoryMock.createManualDraft.mockClear();
+    runtimeRepositoryMock.lookupTrustedPersistenceLineage.mockClear();
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService: createCurrentSessionService({
+        code: 0,
+        message: "ok",
+        data: createAdminAuthContext(),
+      }),
+    });
+
+    const response = await handlers.manualDraft.POST(
+      createManualDraftRequest({
+        organizationPublicId: "organization_route_public_401",
+        authorizationPublicId: "org_auth_borrowed_route_public_999",
+        profession: "logistics",
+        level: 4,
+        subject: "theory",
+        title: "Borrowed scope draft",
+        description: null,
+        capabilityContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canCreateOrganizationTraining: true,
+        },
+      }),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403079,
+      message: "Organization training manual draft lineage is unavailable.",
+      data: null,
+    });
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).not.toHaveBeenCalled();
+    expect(runtimeRepositoryMock.createManualDraft).not.toHaveBeenCalled();
+  });
+
   it("copies a source version to a new draft after resolving version metadata", async () => {
     const sessionService = createCurrentSessionService({
       code: 0,
@@ -1920,7 +1987,7 @@ describe("organization training publish route handlers", () => {
     expect(
       runtimeRepositoryMock.lookupTrustedPersistenceLineage,
     ).toHaveBeenCalledWith({
-      adminContext: trustedAdminContext,
+      adminContext: expect.objectContaining(trustedAdminContext),
       authorizationPublicId: "org_auth_route_public_401",
       organizationPublicId: "organization_route_public_401",
     });
@@ -1992,7 +2059,7 @@ describe("organization training publish route handlers", () => {
     expect(
       runtimeRepositoryMock.lookupTrustedPersistenceLineage,
     ).toHaveBeenCalledWith({
-      adminContext: trustedAdminContext,
+      adminContext: expect.objectContaining(trustedAdminContext),
       authorizationPublicId: "org_auth_route_public_401",
       organizationPublicId: "organization_route_public_401",
     });
@@ -2144,7 +2211,7 @@ describe("organization training publish route handlers", () => {
     expect(
       runtimeRepositoryMock.lookupTrustedPersistenceLineage,
     ).toHaveBeenCalledWith({
-      adminContext: trustedAdminContext,
+      adminContext: expect.objectContaining(trustedAdminContext),
       authorizationPublicId: "org_auth_route_public_401",
       organizationPublicId: "organization_route_public_401",
     });
@@ -2640,7 +2707,7 @@ describe("organization training employee answer route handlers", () => {
       code: 0,
       message: "ok",
       data: {
-        versions: [createEmployeeVisibleVersion()],
+        versions: [createPublicEmployeeVisibleVersion()],
         integrityStatus: "complete",
         warningCode: null,
       },
@@ -2683,7 +2750,7 @@ describe("organization training employee answer route handlers", () => {
       code: 0,
       message: "ok",
       data: {
-        versions: [createEmployeeVisibleVersion()],
+        versions: [createPublicEmployeeVisibleVersion()],
         integrityStatus: "partial",
         warningCode: "historical_version_unavailable",
       },
@@ -2788,7 +2855,13 @@ describe("organization training employee answer route handlers", () => {
       code: 0,
       message: "ok",
       data: {
-        versions: [matchingMarketingVersion],
+        versions: [
+          createPublicEmployeeVisibleVersion({
+            publicId: "organization_training_version_marketing_401",
+            profession: "marketing",
+            level: 2,
+          }),
+        ],
         integrityStatus: "complete",
         warningCode: null,
       },

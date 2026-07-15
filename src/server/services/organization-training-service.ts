@@ -46,6 +46,7 @@ import {
   type OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
 import { subjectValues, type Subject } from "../models/paper";
+import { selectAuthorizationObjectScope } from "./authorization-object-scope";
 import {
   invalidOrganizationTrainingAuditLogReferenceInputMessage,
   normalizeOrganizationTrainingAuditLogReferenceInput,
@@ -185,6 +186,7 @@ export type OrganizationTrainingSourceContextBlockedReason =
 export type OrganizationTrainingAdminContext = {
   adminPublicId: string;
   visibleOrganizationPublicIds: readonly string[];
+  authorizationPublicId?: string;
 };
 
 export type OrganizationTrainingEmployeeContext = {
@@ -192,6 +194,7 @@ export type OrganizationTrainingEmployeeContext = {
   currentOrganizationPublicId: string;
   visibleOrganizationPublicIds: readonly string[];
   authorizationContext: EffectiveAuthorizationContextDto;
+  authorizationContexts?: readonly EffectiveAuthorizationContextDto[];
 };
 
 export type OrganizationTrainingManualDraftInput = {
@@ -1277,6 +1280,7 @@ type NormalizedEmployeeContext = {
   currentOrganizationPublicId: string;
   visibleOrganizationPublicIds: string[];
   authorizationContext: EffectiveAuthorizationContextDto;
+  authorizationContexts: EffectiveAuthorizationContextDto[];
 };
 
 function normalizeEmployeeContext(
@@ -1306,6 +1310,11 @@ function normalizeEmployeeContext(
     currentOrganizationPublicId,
     visibleOrganizationPublicIds,
     authorizationContext: employeeContext.authorizationContext,
+    authorizationContexts:
+      employeeContext.authorizationContexts === undefined ||
+      employeeContext.authorizationContexts.length === 0
+        ? [employeeContext.authorizationContext]
+        : [...employeeContext.authorizationContexts],
   };
 }
 
@@ -1317,9 +1326,56 @@ function isVersionVisibleToEmployee(
     version.publishScopeSnapshot.organizationPublicIds,
   );
 
-  return employeeContext.visibleOrganizationPublicIds.some(
-    (visibleOrganizationPublicId) =>
-      publishScopeOrganizationPublicIds.includes(visibleOrganizationPublicId),
+  const isOrganizationVisible =
+    employeeContext.visibleOrganizationPublicIds.some(
+      (visibleOrganizationPublicId) =>
+        publishScopeOrganizationPublicIds.includes(visibleOrganizationPublicId),
+    );
+  const authorizationPublicId =
+    typeof version.authorizationPublicId === "string"
+      ? normalizeRequiredText(version.authorizationPublicId)
+      : null;
+
+  if (!isOrganizationVisible || authorizationPublicId === null) {
+    return false;
+  }
+
+  const selectedAuthorizationContexts =
+    employeeContext.authorizationContexts.filter(
+      (authorizationContext) =>
+        authorizationContext.authorizationPublicId === authorizationPublicId,
+    );
+
+  if (selectedAuthorizationContexts.length !== 1) {
+    return false;
+  }
+
+  const [selectedAuthorizationContext] = selectedAuthorizationContexts;
+  const authorizationOrganizationPublicId =
+    selectedAuthorizationContext?.organizationPublicId ?? null;
+
+  if (
+    selectedAuthorizationContext === undefined ||
+    authorizationOrganizationPublicId === null ||
+    !employeeContext.visibleOrganizationPublicIds.includes(
+      authorizationOrganizationPublicId,
+    )
+  ) {
+    return false;
+  }
+
+  return (
+    selectAuthorizationObjectScope([selectedAuthorizationContext], {
+      authorizationPublicId,
+      authorizationSource: "org_auth",
+      ownerType: "organization",
+      ownerPublicId: authorizationOrganizationPublicId,
+      organizationPublicId: authorizationOrganizationPublicId,
+      profession: version.profession,
+      level: version.level,
+      requiredCapability: "canAnswerOrganizationTraining",
+      allowedBlockedReasons: ["production_enablement_blocked"],
+    }) !== null
   );
 }
 
@@ -1839,8 +1895,11 @@ function normalizePublishMetadata(
 function copyPublishedVersion(
   sourceVersion: OrganizationTrainingPublishedVersionDto,
 ): OrganizationTrainingPublishedVersionDto {
+  const publicVersion = { ...sourceVersion };
+  delete publicVersion.authorizationPublicId;
+
   return {
-    ...sourceVersion,
+    ...publicVersion,
     answerDeadlineAt: sourceVersion.answerDeadlineAt ?? null,
     publishScopeSnapshot: {
       organizationPublicIds: [

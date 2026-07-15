@@ -387,6 +387,24 @@ async function postLocalContractRequest(input: {
       organizationPublicId:
         input.organizationPublicId ?? "organization_public_123",
     });
+  const defaultAuthorizationContextRepository =
+    createOrganizationTrainingRepository({
+      organizationPublicId:
+        input.organizationPublicId ?? "organization_public_123",
+    });
+  const routeOrganizationTrainingRepository = {
+    ...organizationTrainingRepository,
+    findOrganizationAuthorizationContext:
+      (
+        organizationTrainingRepository as Partial<
+          Pick<
+            OrganizationTrainingRepository,
+            "findOrganizationAuthorizationContext"
+          >
+        >
+      ).findOrganizationAuthorizationContext ??
+      defaultAuthorizationContextRepository.findOrganizationAuthorizationContext,
+  };
   const routeOptions = {
     sessionService: createAdminSessionService({
       adminRoles: input.adminRoles,
@@ -406,7 +424,7 @@ async function postLocalContractRequest(input: {
       ? { paperAssemblyResolver: input.paperAssemblyResolver }
       : {}),
     questionRepository,
-    organizationTrainingRepository,
+    organizationTrainingRepository: routeOrganizationTrainingRepository,
   } as unknown as Parameters<
     typeof createAdminAiGenerationLocalContractRouteHandlers
   >[1];
@@ -526,13 +544,52 @@ function createQuestionRepository(
 
 function createOrganizationTrainingRepository(input: {
   organizationPublicId: string;
+  authorizationPublicId?: string;
+  authorizationProfession?: "monopoly" | "marketing" | "logistics";
+  authorizationLevel?: number;
 }): Pick<
   OrganizationTrainingRepository,
   | "listAdminLifecycleVersions"
   | "listAdminVisibleQuestionSnapshotsForAiPaperSource"
   | "listEmployeeVisibleVersions"
+  | "findOrganizationAuthorizationContext"
 > {
   return {
+    async findOrganizationAuthorizationContext({
+      authorizationPublicId,
+      organizationPublicId,
+    }) {
+      if (
+        (input.authorizationPublicId !== undefined &&
+          authorizationPublicId !== input.authorizationPublicId) ||
+        organizationPublicId !== input.organizationPublicId
+      ) {
+        return null;
+      }
+
+      return {
+        profession: input.authorizationProfession ?? "marketing",
+        level: input.authorizationLevel ?? 3,
+        contextDisplayStatus: "display_only",
+        effectiveEdition: "advanced",
+        authorizationSource: "org_auth",
+        authorizationPublicId,
+        ownerType: "organization",
+        ownerPublicId: organizationPublicId,
+        organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: organizationPublicId,
+        capabilities: {
+          canGenerateAiQuestion: true,
+          canGenerateAiPaper: true,
+          canCreateOrganizationTraining: true,
+          canAnswerOrganizationTraining: true,
+          canViewOrganizationTrainingSummary: true,
+          canManageAuthorizationQuota: false,
+        },
+        blockedReason: null,
+      };
+    },
     async listAdminLifecycleVersions() {
       return [
         createTrainingVersion({
@@ -2450,6 +2507,97 @@ describe("admin AI generation local contract route handlers", () => {
     ).toBe("org_auth_route_public_123");
     expect(serializedPayload).not.toContain("org_auth_local_contract");
     expect(serializedPayload).not.toContain("OMITTED_FIXTURE_O");
+  });
+
+  it("denies organization AI generation when the selected org_auth does not cover the requested profession and level", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const response = await postLocalContractRequest({
+      workspace: "organization",
+      adminRoles: ["org_advanced_admin"],
+      organizationPublicId: "organization_public_123",
+      organizationTrainingRepository: createOrganizationTrainingRepository({
+        organizationPublicId: "organization_public_123",
+        authorizationProfession: "monopoly",
+        authorizationLevel: 4,
+      }),
+      taskPersistenceRepository: taskPersistenceRecorder.repository,
+      body: {
+        generationKind: "question",
+        generationParameters: defaultAdminGenerationParameters,
+      },
+    });
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403011,
+      message: "Admin AI generation is not available for this role.",
+      data: null,
+    });
+    expect(taskPersistenceRecorder.calls).toEqual([]);
+  });
+
+  it("does not reuse one request identity across selected org_auth scopes", async () => {
+    const taskPersistenceRecorder = createTaskPersistenceRecorder();
+    const providerInputs: AdminAiGenerationRouteIntegratedProviderExecutionInput[] =
+      [];
+    const requestPublicId = "admin_ai_generation_request_shared_scope_key";
+
+    for (const requestScope of [
+      {
+        authorizationPublicId: "org_auth_marketing_public_123",
+        profession: "marketing",
+        level: 3,
+      },
+      {
+        authorizationPublicId: "org_auth_monopoly_public_456",
+        profession: "monopoly",
+        level: 4,
+      },
+    ] as const) {
+      const response = await postLocalContractRequest({
+        workspace: "organization",
+        adminRoles: ["org_advanced_admin"],
+        adminWorkspaceCapability: {
+          adminRoles: ["org_advanced_admin"],
+          organizationAuthorizationPublicId: requestScope.authorizationPublicId,
+          organizationPublicId: "organization_public_123",
+          organizationEffectiveEdition: "advanced",
+          organizationAuthorizationSource: "org_auth",
+          capabilitySource: "service_computed",
+          canUseOrganizationAdvancedWorkspace: true,
+        },
+        organizationPublicId: "organization_public_123",
+        organizationTrainingRepository: createOrganizationTrainingRepository({
+          organizationPublicId: "organization_public_123",
+          authorizationPublicId: requestScope.authorizationPublicId,
+          authorizationProfession: requestScope.profession,
+          authorizationLevel: requestScope.level,
+        }),
+        taskPersistenceRepository: taskPersistenceRecorder.repository,
+        runtimeBridgeControl:
+          createFakeProviderRuntimeBridgeControl(providerInputs),
+        requestPublicId,
+        body: {
+          generationKind: "question",
+          generationParameters: {
+            ...defaultAdminGenerationParameters,
+            profession: requestScope.profession,
+            level: requestScope.level,
+          },
+        },
+      });
+
+      expect(response.status).toBe(200);
+    }
+
+    expect(taskPersistenceRecorder.calls).toHaveLength(2);
+    expect(providerInputs).toHaveLength(2);
+    const [firstCall, secondCall] = taskPersistenceRecorder.calls;
+    expect(firstCall.localContract.taskRequest.taskPublicId).not.toBe(
+      secondCall.localContract.taskRequest.taskPublicId,
+    );
+    expect(firstCall.localContract.taskRequest.idempotency.keyHash).not.toBe(
+      secondCall.localContract.taskRequest.idempotency.keyHash,
+    );
   });
 
   it("denies organization advanced admin direct POST when service-computed capability is absent", async () => {

@@ -15,6 +15,7 @@ import type {
   CreatePersonalAiGenerationRequestInput,
   PersonalAiGenerationRequestOwnerType,
   PersonalAiGenerationRequestRepository,
+  PersonalAiGenerationTaskType,
 } from "../repositories/personal-ai-generation-request-repository";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
 import type { OrganizationTrainingRepository } from "../repositories/organization-training-repository";
@@ -25,6 +26,7 @@ import {
   type AiGenerationSharedTaskType,
 } from "../contracts/ai-generation-task-spec-contract";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import { professionValues, type Profession } from "../models/auth";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
 import {
   createRouteHandlerWithErrorEnvelope,
@@ -39,6 +41,7 @@ import { isRouteIntegratedVisibleGeneratedContentAcceptableForDraft } from "./ro
 import type { EffectiveAuthorizationService } from "./effective-authorization-service";
 import type { SessionService } from "./session-service";
 import { resolveAndAssembleAiPaperFromRoute } from "./ai-paper-route-plan-select-wiring-service";
+import { selectAuthorizationObjectScope } from "./authorization-object-scope";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -537,6 +540,83 @@ function isUsablePersonalAiGenerationAuthorizationContext(
   );
 }
 
+type PersonalAiGenerationRequestedAuthorizationScope = {
+  profession: Profession;
+  level: number;
+};
+
+function readPersonalAiGenerationRequestedAuthorizationScope(
+  requestInput: Record<string, unknown>,
+): PersonalAiGenerationRequestedAuthorizationScope | null {
+  const generationParameters = requestInput.generationParameters;
+
+  if (!isRecord(generationParameters)) {
+    return null;
+  }
+
+  const profession = generationParameters.profession;
+  const level = generationParameters.level;
+
+  if (
+    typeof profession !== "string" ||
+    !professionValues.includes(profession as Profession) ||
+    typeof level !== "number" ||
+    !Number.isInteger(level) ||
+    level < 1
+  ) {
+    return null;
+  }
+
+  return {
+    profession: profession as Profession,
+    level,
+  };
+}
+
+function selectPersonalAiGenerationAuthorizationContext(input: {
+  authorizationContexts: EffectiveAuthorizationContextDto[];
+  authorizationPublicId: string;
+  requestedScope: PersonalAiGenerationRequestedAuthorizationScope | null;
+  taskType: CreatePersonalAiGenerationRequestInput["taskType"];
+  userContext: PersonalAiGenerationRequestUserContext;
+}): EffectiveAuthorizationContextDto | null {
+  if (input.requestedScope === null) {
+    return (
+      input.authorizationContexts.find((authorizationContext) =>
+        isUsablePersonalAiGenerationAuthorizationContext(authorizationContext, {
+          userContext: input.userContext,
+          authorizationPublicId: input.authorizationPublicId,
+          taskType: input.taskType,
+        }),
+      ) ?? null
+    );
+  }
+
+  const isEmployee = input.userContext.userType === "employee";
+  const ownerPublicId = isEmployee
+    ? input.userContext.organizationPublicId
+    : input.userContext.userPublicId;
+
+  if (ownerPublicId === null) {
+    return null;
+  }
+
+  return selectAuthorizationObjectScope(input.authorizationContexts, {
+    authorizationPublicId: input.authorizationPublicId,
+    authorizationSource: isEmployee ? "org_auth" : "personal_auth",
+    ownerType: isEmployee ? "organization" : "personal",
+    ownerPublicId,
+    organizationPublicId: isEmployee ? ownerPublicId : null,
+    profession: input.requestedScope.profession,
+    level: input.requestedScope.level,
+    requiredCapability:
+      input.taskType === "ai_question_generation"
+        ? "canGenerateAiQuestion"
+        : "canGenerateAiPaper",
+    allowedBlockedReasons: ["production_enablement_blocked"],
+  });
+}
+
 function createRequestInputWithEffectiveAuthorizationContext(
   input: Record<string, unknown>,
   authorizationContext: EffectiveAuthorizationContextDto,
@@ -588,16 +668,17 @@ async function resolvePersonalAiGenerationAuthorizationContext(input: {
     return null;
   }
 
-  return (
-    readAuthorizationContexts(authorizationResponse.data).find(
-      (authorizationContext) =>
-        isUsablePersonalAiGenerationAuthorizationContext(authorizationContext, {
-          userContext: input.userContext,
-          authorizationPublicId,
-          taskType,
-        }),
-    ) ?? null
-  );
+  return selectPersonalAiGenerationAuthorizationContext({
+    authorizationContexts: readAuthorizationContexts(
+      authorizationResponse.data,
+    ),
+    authorizationPublicId,
+    requestedScope: readPersonalAiGenerationRequestedAuthorizationScope(
+      input.requestInput,
+    ),
+    taskType,
+    userContext: input.userContext,
+  });
 }
 
 function createPersistentRequestInput(
@@ -622,7 +703,9 @@ function createPersistentRequestInput(
   const quotaOwnerPublicId = normalizeRequiredText(input.quotaOwnerPublicId);
   const effectiveEdition = normalizeRequiredText(input.effectiveEdition);
   const questionPublicId = normalizeRequiredText(input.questionPublicId);
-  const idempotencyKeyHash = normalizeRequiredText(input.idempotencyKeyHash);
+  const clientIdempotencyKeyHash = normalizeRequiredText(
+    input.idempotencyKeyHash,
+  );
   const evidenceStatus = normalizeRequiredText(input.evidenceStatus);
   const citationCount = normalizeCitationCount(input.citationCount);
   const isAuthorizationActive = normalizeBoolean(input.isAuthorizationActive);
@@ -644,7 +727,7 @@ function createPersistentRequestInput(
     quotaOwnerPublicId === null ||
     effectiveEdition === null ||
     questionPublicId === null ||
-    idempotencyKeyHash === null ||
+    clientIdempotencyKeyHash === null ||
     !isEvidenceStatus(evidenceStatus) ||
     citationCount === null ||
     isAuthorizationActive === null ||
@@ -667,6 +750,22 @@ function createPersistentRequestInput(
   ) {
     return null;
   }
+
+  const requestedAuthorizationScope =
+    readPersonalAiGenerationRequestedAuthorizationScope(input);
+  const idempotencyKeyHash =
+    requestedAuthorizationScope === null
+      ? clientIdempotencyKeyHash
+      : createAuthorizationScopedIdempotencyKeyHash({
+          authorizationPublicId,
+          clientIdempotencyKeyHash,
+          level: requestedAuthorizationScope.level,
+          organizationPublicId,
+          ownerPublicId,
+          ownerType,
+          profession: requestedAuthorizationScope.profession,
+          taskType,
+        });
 
   return {
     requestPublicId,
@@ -696,6 +795,30 @@ function createPersistentRequestInput(
     isQuotaAvailable,
     isRuntimeConfigReady,
   };
+}
+
+function createAuthorizationScopedIdempotencyKeyHash(input: {
+  authorizationPublicId: string;
+  clientIdempotencyKeyHash: string;
+  level: number;
+  organizationPublicId: string | null;
+  ownerPublicId: string;
+  ownerType: PersonalAiGenerationRequestOwnerType;
+  profession: Profession;
+  taskType: PersonalAiGenerationTaskType;
+}): string {
+  const scopeIdentity = JSON.stringify([
+    input.clientIdempotencyKeyHash,
+    input.taskType,
+    input.ownerType,
+    input.ownerPublicId,
+    input.organizationPublicId,
+    input.authorizationPublicId,
+    input.profession,
+    input.level,
+  ]);
+
+  return `sha256:${createHash("sha256").update(scopeIdentity).digest("hex")}`;
 }
 
 function createVisibleContentDigest(

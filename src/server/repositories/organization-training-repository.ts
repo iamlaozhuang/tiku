@@ -4,7 +4,9 @@ import {
   admin,
   adminAiGenerationTaskMetadata,
   adminOrganization,
+  authUpgrade,
   employee,
+  employeeOrgAuth,
   type OrganizationTrainingAnswerItemSnapshotValue,
   type OrganizationTrainingAnswerOrganizationSnapshotValue,
   type OrganizationTrainingQuestionResultSnapshotValue,
@@ -17,8 +19,20 @@ import {
   organizationTrainingVersion,
   paper,
   paperQuestion,
+  user,
 } from "@/db/schema";
-import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 
 import type {
@@ -35,6 +49,7 @@ import type {
   OrganizationTrainingSourceContextAttachmentDto,
   OrganizationTrainingVersionListReadResult,
 } from "../contracts/organization-training-contract";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import { organizationTrainingQuestionTypeValues } from "../models/organization-training";
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
@@ -130,6 +145,11 @@ export type OrganizationTrainingTrustedPersistenceLineageLookupInput = {
   organizationPublicId: string;
   authorizationPublicId: string;
 };
+
+export type OrganizationAuthorizationContextLookupInput =
+  OrganizationTrainingTrustedPersistenceLineageLookupInput & {
+    now: Date;
+  };
 
 export type OrganizationTrainingDraftPersistenceLineageLookupInput = {
   draftPublicId: string;
@@ -293,6 +313,9 @@ export type OrganizationTrainingVersionGateway = {
   findTrustedPersistenceLineageByPublicIds(
     input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
+  findOrganizationAuthorizationContextByPublicIds?(
+    input: OrganizationAuthorizationContextLookupInput,
+  ): Promise<EffectiveAuthorizationContextDto | null>;
   findDraftPersistenceLineageByPublicIds(
     input: OrganizationTrainingDraftPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingDraftPersistenceLineage | null>;
@@ -356,6 +379,9 @@ export type OrganizationTrainingRepository = {
   lookupTrustedPersistenceLineage(
     input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
+  findOrganizationAuthorizationContext(
+    input: OrganizationAuthorizationContextLookupInput,
+  ): Promise<EffectiveAuthorizationContextDto | null>;
   lookupVersionOrganizationPublicId(
     input: OrganizationTrainingVersionOrganizationLookupInput,
   ): Promise<string | null>;
@@ -568,7 +594,7 @@ export function createOrganizationTrainingRepository(
         normalizedInput,
       );
     const versions = rows
-      .map(tryMapOrganizationTrainingVersionRowToDto)
+      .map(tryMapAuthorizationScopedOrganizationTrainingVersionRowToDto)
       .filter(
         (version): version is OrganizationTrainingPublishedVersionDto =>
           version !== null,
@@ -640,6 +666,36 @@ export function createOrganizationTrainingRepository(
       return persistenceLineage === null
         ? null
         : normalizeTrustedPersistenceLineage(persistenceLineage);
+    },
+
+    async findOrganizationAuthorizationContext(input) {
+      if (
+        gateway.findOrganizationAuthorizationContextByPublicIds === undefined
+      ) {
+        return null;
+      }
+
+      const organizationPublicId = normalizeRequiredText(
+        input.organizationPublicId,
+      );
+      const authorizationPublicId = normalizeRequiredText(
+        input.authorizationPublicId,
+      );
+
+      if (
+        organizationPublicId === null ||
+        authorizationPublicId === null ||
+        !(input.now instanceof Date) ||
+        !Number.isFinite(input.now.getTime())
+      ) {
+        return null;
+      }
+
+      return gateway.findOrganizationAuthorizationContextByPublicIds({
+        organizationPublicId,
+        authorizationPublicId,
+        now: input.now,
+      });
     },
 
     async lookupVersionOrganizationPublicId(input) {
@@ -744,7 +800,7 @@ export function createOrganizationTrainingRepository(
       }
 
       const [version] = await attachPaperSourceQuestionSnapshotsToVersions(
-        [mapOrganizationTrainingVersionRowToDto(row)],
+        [mapAuthorizationScopedOrganizationTrainingVersionRowToDto(row)],
         gateway,
       );
 
@@ -973,6 +1029,28 @@ export function createOrganizationTrainingRepository(
   };
 }
 
+function mapAuthorizationScopedOrganizationTrainingVersionRowToDto(
+  row: OrganizationTrainingVersionRow,
+): OrganizationTrainingPublishedVersionDto {
+  return {
+    ...mapOrganizationTrainingVersionRowToDto(row),
+    authorizationPublicId: row.authorization_public_id,
+  };
+}
+
+function tryMapAuthorizationScopedOrganizationTrainingVersionRowToDto(
+  row: OrganizationTrainingVersionRow,
+): OrganizationTrainingPublishedVersionDto | null {
+  const version = tryMapOrganizationTrainingVersionRowToDto(row);
+
+  return version === null
+    ? null
+    : {
+        ...version,
+        authorizationPublicId: row.authorization_public_id,
+      };
+}
+
 export function createPostgresOrganizationTrainingRepository(
   options: RuntimeDatabaseOptions = {},
 ): OrganizationTrainingRepository {
@@ -990,6 +1068,12 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async findTrustedPersistenceLineageByPublicIds(input) {
       return findTrustedPersistenceLineageByPublicIds(getDatabase(), input);
+    },
+    async findOrganizationAuthorizationContextByPublicIds(input) {
+      return findOrganizationAuthorizationContextByPublicIds(
+        getDatabase(),
+        input,
+      );
     },
     async findDraftPersistenceLineageByPublicIds(input) {
       return findDraftPersistenceLineageByPublicIds(getDatabase(), input);
@@ -2762,6 +2846,8 @@ async function findTrustedPersistenceLineageByPublicIds(
   database: RuntimeDatabase,
   input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
 ): Promise<OrganizationTrainingTrustedPersistenceLineage | null> {
+  const now = new Date();
+  const activeUpgradeExists = createActiveAdvancedOrgAuthUpgradeExistsSql(now);
   const [row] = await database
     .select({
       organization_id: organization.id,
@@ -2780,7 +2866,12 @@ async function findTrustedPersistenceLineageByPublicIds(
     .where(
       and(
         eq(organization.public_id, input.organizationPublicId),
+        eq(organization.status, "active"),
         eq(orgAuth.public_id, input.authorizationPublicId),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, now),
+        gt(orgAuth.expires_at, now),
+        or(eq(orgAuth.edition, "advanced"), activeUpgradeExists),
       ),
     )
     .limit(1);
@@ -2793,6 +2884,90 @@ async function findTrustedPersistenceLineageByPublicIds(
     organizationId: row.organization_id,
     orgAuthId: row.org_auth_id,
   };
+}
+
+async function findOrganizationAuthorizationContextByPublicIds(
+  database: RuntimeDatabase,
+  input: OrganizationAuthorizationContextLookupInput,
+): Promise<EffectiveAuthorizationContextDto | null> {
+  const activeUpgradeExists = createActiveAdvancedOrgAuthUpgradeExistsSql(
+    input.now,
+  );
+  const [row] = await database
+    .select({
+      authorization_public_id: orgAuth.public_id,
+      edition: orgAuth.edition,
+      expires_at: orgAuth.expires_at,
+      level: orgAuth.level,
+      organization_public_id: organization.public_id,
+      profession: orgAuth.profession,
+    })
+    .from(orgAuth)
+    .innerJoin(
+      organization,
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
+    )
+    .where(
+      and(
+        eq(organization.public_id, input.organizationPublicId),
+        eq(organization.status, "active"),
+        eq(orgAuth.public_id, input.authorizationPublicId),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, input.now),
+        gt(orgAuth.expires_at, input.now),
+        or(eq(orgAuth.edition, "advanced"), activeUpgradeExists),
+      ),
+    )
+    .limit(1);
+
+  if (row === undefined) {
+    return null;
+  }
+
+  return {
+    profession: row.profession,
+    level: row.level,
+    contextDisplayStatus: "display_only",
+    edition: row.edition,
+    effectiveEdition: "advanced",
+    upgradeStatus: row.edition === "advanced" ? "none" : "active",
+    expiresAt: row.expires_at.toISOString(),
+    displayStatus: "active",
+    authorizationSource: "org_auth",
+    authorizationPublicId: row.authorization_public_id,
+    ownerType: "organization",
+    ownerPublicId: row.organization_public_id,
+    organizationPublicId: row.organization_public_id,
+    quotaOwnerType: "organization",
+    quotaOwnerPublicId: row.organization_public_id,
+    capabilities: {
+      canGenerateAiQuestion: true,
+      canGenerateAiPaper: true,
+      canCreateOrganizationTraining: true,
+      canAnswerOrganizationTraining: true,
+      canViewOrganizationTrainingSummary: true,
+      canManageAuthorizationQuota: false,
+    },
+    blockedReason: null,
+  };
+}
+
+function createActiveAdvancedOrgAuthUpgradeExistsSql(now: Date): SQL {
+  return sql<boolean>`exists (
+    select 1
+    from ${authUpgrade}
+    where ${authUpgrade.org_auth_id} = ${orgAuth.id}
+      and ${authUpgrade.status} = 'active'
+      and ${authUpgrade.target_edition} = 'advanced'
+      and ${authUpgrade.revoked_at} is null
+      and ${authUpgrade.starts_at} <= ${now}
+      and ${authUpgrade.expires_at} > ${now}
+  )`;
 }
 
 async function findDraftPersistenceLineageByPublicIds(
@@ -2906,6 +3081,8 @@ async function listPublishedVersionsForEmployeeOrganization(
   database: RuntimeDatabase,
   input: OrganizationTrainingEmployeeVisibleVersionListInput,
 ): Promise<OrganizationTrainingVersionRow[]> {
+  const now = new Date();
+  const activeUpgradeExists = createActiveAdvancedOrgAuthUpgradeExistsSql(now);
   const visibleOrganizationPublicIds =
     input.visibleOrganizationPublicIds?.length === undefined ||
     input.visibleOrganizationPublicIds.length === 0
@@ -2918,11 +3095,35 @@ async function listPublishedVersionsForEmployeeOrganization(
       employee,
       eq(employee.organization_id, organizationTrainingVersion.organization_id),
     )
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(
+      employeeOrgAuth,
+      and(
+        eq(employeeOrgAuth.employee_id, employee.id),
+        eq(
+          employeeOrgAuth.org_auth_id,
+          organizationTrainingVersion.org_auth_id,
+        ),
+      ),
+    )
+    .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
     .innerJoin(organization, eq(employee.organization_id, organization.id))
     .where(
       and(
         eq(employee.public_id, input.employeePublicId),
+        eq(user.status, "active"),
         eq(organization.public_id, input.organizationPublicId),
+        eq(organization.status, "active"),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, now),
+        gt(orgAuth.expires_at, now),
+        or(eq(orgAuth.edition, "advanced"), activeUpgradeExists),
+        eq(
+          organizationTrainingVersion.authorization_public_id,
+          orgAuth.public_id,
+        ),
+        eq(organizationTrainingVersion.profession, orgAuth.profession),
+        eq(organizationTrainingVersion.level, orgAuth.level),
         eq(organizationTrainingVersion.version_status, "published"),
         sql`${organizationTrainingVersion.publish_scope_snapshot}->'organizationPublicIds' ?| ${createOrganizationTrainingVisibleOrganizationPublicIdArraySql(visibleOrganizationPublicIds)}`,
       ),
@@ -3199,6 +3400,8 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
   database: RuntimeDatabase,
   input: OrganizationTrainingEmployeeAnswerPersistenceLineageLookupInput,
 ): Promise<OrganizationTrainingEmployeeAnswerPersistenceLineage | null> {
+  const now = new Date();
+  const activeUpgradeExists = createActiveAdvancedOrgAuthUpgradeExistsSql(now);
   const [row] = await database
     .select({
       organization_training_version_id: organizationTrainingVersion.id,
@@ -3210,6 +3413,18 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
     })
     .from(organizationTrainingVersion)
     .innerJoin(employee, eq(employee.public_id, input.employeePublicId))
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(
+      employeeOrgAuth,
+      and(
+        eq(employeeOrgAuth.employee_id, employee.id),
+        eq(
+          employeeOrgAuth.org_auth_id,
+          organizationTrainingVersion.org_auth_id,
+        ),
+      ),
+    )
+    .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
     .innerJoin(organization, eq(employee.organization_id, organization.id))
     .where(
       and(
@@ -3218,6 +3433,18 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
           input.trainingVersionPublicId,
         ),
         eq(organization.public_id, input.organizationPublicId),
+        eq(user.status, "active"),
+        eq(organization.status, "active"),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, now),
+        gt(orgAuth.expires_at, now),
+        or(eq(orgAuth.edition, "advanced"), activeUpgradeExists),
+        eq(
+          organizationTrainingVersion.authorization_public_id,
+          orgAuth.public_id,
+        ),
+        eq(organizationTrainingVersion.profession, orgAuth.profession),
+        eq(organizationTrainingVersion.level, orgAuth.level),
         eq(organizationTrainingVersion.version_status, "published"),
       ),
     )

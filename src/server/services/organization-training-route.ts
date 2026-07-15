@@ -81,6 +81,7 @@ import {
   type EffectiveAuthorizationService,
 } from "./effective-authorization-service";
 import type { SessionService } from "./session-service";
+import { selectAuthorizationObjectScope } from "./authorization-object-scope";
 
 export type OrganizationTrainingPublishRouteContext = {
   params: Promise<{
@@ -154,7 +155,20 @@ export type OrganizationTrainingRouteOptions = {
   resolveVersionQuestionTypeSummary?: OrganizationTrainingVersionQuestionTypeSummaryResolver;
   resolveAdminDetailVersion?: OrganizationTrainingAdminDetailVersionResolver;
   resolveAdminDraftDetailQuestions?: OrganizationTrainingAdminDraftDetailQuestionsResolver;
+  resolveOrganizationAuthorizationContext?: OrganizationTrainingAuthorizationContextResolver;
 };
+
+export type OrganizationTrainingAuthorizationContextResolverInput = {
+  adminContext: OrganizationTrainingAdminContext;
+  authorizationPublicId: string;
+  organizationPublicId: string;
+  profession: EffectiveAuthorizationContextDto["profession"];
+  level: number;
+};
+
+export type OrganizationTrainingAuthorizationContextResolver = (
+  input: OrganizationTrainingAuthorizationContextResolverInput,
+) => Promise<EffectiveAuthorizationContextDto | null>;
 
 export type OrganizationTrainingVersionOrganizationPublicIdResolverInput = {
   request: Request;
@@ -192,6 +206,7 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
     "listEffectiveAuthorizations"
   >;
   resolveVisibleOrganizationScope?: OrganizationTrainingVisibleOrganizationScopeResolver;
+  resolveOrganizationAuthorizationContext?: OrganizationTrainingAuthorizationContextResolver;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
 
@@ -655,6 +670,7 @@ function isOrganizationTrainingRuntimeAdminRole(
 function canUseServiceComputedOrganizationTrainingCapability(
   capabilitySummary: AdminWorkspaceCapabilitySummary | undefined,
 ): capabilitySummary is AdminWorkspaceCapabilitySummary & {
+  organizationAuthorizationPublicId: string;
   organizationPublicId: string;
   organizationEffectiveEdition: "advanced";
   organizationAuthorizationSource: "org_auth";
@@ -665,6 +681,8 @@ function canUseServiceComputedOrganizationTrainingCapability(
     capabilitySummary !== undefined &&
     capabilitySummary.capabilitySource === "service_computed" &&
     capabilitySummary.organizationAuthorizationSource === "org_auth" &&
+    typeof capabilitySummary.organizationAuthorizationPublicId === "string" &&
+    capabilitySummary.organizationAuthorizationPublicId.trim().length > 0 &&
     capabilitySummary.organizationPublicId !== null &&
     capabilitySummary.organizationEffectiveEdition === "advanced" &&
     capabilitySummary.canUseOrganizationAdvancedWorkspace === true
@@ -746,6 +764,8 @@ function createSessionBackedOrganizationAdminContextResolver(
     return {
       adminPublicId,
       visibleOrganizationPublicIds,
+      authorizationPublicId:
+        adminWorkspaceCapability.organizationAuthorizationPublicId.trim(),
     };
   };
 }
@@ -786,6 +806,41 @@ function createOrganizationTrainingAdminAuthorizationContext(input: {
   };
 }
 
+async function resolveOrganizationTrainingAdminAuthorizationContext(input: {
+  adminContext: OrganizationTrainingAdminContext;
+  authorizationPublicId: string;
+  organizationPublicId: string;
+  profession: EffectiveAuthorizationContextDto["profession"];
+  level: number;
+  capabilityContext: {
+    effectiveEdition: "advanced";
+    authorizationSource: "org_auth";
+    canCreateOrganizationTraining: true;
+  };
+  resolveAuthorizationContext:
+    | OrganizationTrainingAuthorizationContextResolver
+    | undefined;
+}): Promise<EffectiveAuthorizationContextDto | null> {
+  if (input.adminContext.authorizationPublicId === undefined) {
+    return createOrganizationTrainingAdminAuthorizationContext(input);
+  }
+
+  if (
+    input.adminContext.authorizationPublicId !== input.authorizationPublicId ||
+    input.resolveAuthorizationContext === undefined
+  ) {
+    return null;
+  }
+
+  return input.resolveAuthorizationContext({
+    adminContext: input.adminContext,
+    authorizationPublicId: input.authorizationPublicId,
+    organizationPublicId: input.organizationPublicId,
+    profession: input.profession,
+    level: input.level,
+  });
+}
+
 function isOrganizationEmployeeAuthContext(
   authorizationContext: EffectiveAuthorizationContextDto,
   organizationPublicId: string,
@@ -819,24 +874,15 @@ function canUseEmployeeOrganizationTrainingAnswerContext(
   );
 }
 
-function selectEmployeeOrganizationTrainingAuthorizationContext(
+function listEmployeeOrganizationTrainingAuthorizationContexts(
   authorizationContexts: EffectiveAuthorizationContextDto[],
   organizationPublicId: string,
-): EffectiveAuthorizationContextDto | null {
-  const organizationAuthContexts = authorizationContexts.filter(
-    (authorizationContext) =>
-      isOrganizationEmployeeAuthContext(
-        authorizationContext,
-        organizationPublicId,
-      ),
-  );
-
-  return (
-    organizationAuthContexts.find(
-      isAdvancedOrganizationTrainingAnswerContext,
-    ) ??
-    organizationAuthContexts[0] ??
-    null
+): EffectiveAuthorizationContextDto[] {
+  return authorizationContexts.filter((authorizationContext) =>
+    isOrganizationEmployeeAuthContext(
+      authorizationContext,
+      organizationPublicId,
+    ),
   );
 }
 
@@ -891,11 +937,16 @@ function createSessionBackedOrganizationTrainingEmployeeContextResolver(
       return null;
     }
 
-    const authorizationContext =
-      selectEmployeeOrganizationTrainingAuthorizationContext(
+    const authorizationContexts =
+      listEmployeeOrganizationTrainingAuthorizationContexts(
         readAuthorizationContexts(authorizationResponse.data),
         organizationPublicId,
       );
+    const advancedAuthorizationContexts = authorizationContexts.filter(
+      isAdvancedOrganizationTrainingAnswerContext,
+    );
+    const authorizationContext =
+      advancedAuthorizationContexts[0] ?? authorizationContexts[0] ?? null;
 
     if (authorizationContext === null) {
       return null;
@@ -906,6 +957,7 @@ function createSessionBackedOrganizationTrainingEmployeeContextResolver(
       currentOrganizationPublicId: organizationPublicId,
       visibleOrganizationPublicIds: [organizationPublicId],
       authorizationContext,
+      authorizationContexts: advancedAuthorizationContexts,
     };
   };
 }
@@ -959,6 +1011,38 @@ function createRepositoryBackedVisibleOrganizationScopeResolver(
 ): OrganizationTrainingVisibleOrganizationScopeResolver {
   return async ({ adminPublicId }) =>
     repository.lookupVisibleOrganizationScope({ adminPublicId });
+}
+
+function createRepositoryBackedOrganizationAuthorizationContextResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "findOrganizationAuthorizationContext"
+  >,
+): OrganizationTrainingAuthorizationContextResolver {
+  return async (input) => {
+    const authorizationContext =
+      await repository.findOrganizationAuthorizationContext({
+        authorizationPublicId: input.authorizationPublicId,
+        organizationPublicId: input.organizationPublicId,
+        now: new Date(),
+      });
+
+    if (authorizationContext === null) {
+      return null;
+    }
+
+    return selectAuthorizationObjectScope([authorizationContext], {
+      authorizationPublicId: input.authorizationPublicId,
+      authorizationSource: "org_auth",
+      ownerType: "organization",
+      ownerPublicId: input.organizationPublicId,
+      organizationPublicId: input.organizationPublicId,
+      profession: input.profession,
+      level: input.level,
+      requiredCapability: "canCreateOrganizationTraining",
+      allowedBlockedReasons: [],
+    });
+  };
 }
 
 function createRepositoryBackedVersionOrganizationPublicIdResolver(
@@ -1507,6 +1591,8 @@ export function createOrganizationTrainingRouteHandlers(
   const resolveVersionQuestionTypeSummary =
     options.resolveVersionQuestionTypeSummary ??
     defaultResolveVersionQuestionTypeSummary;
+  const resolveOrganizationAuthorizationContext =
+    options.resolveOrganizationAuthorizationContext;
 
   return createRouteHandlersWithErrorEnvelope({
     adminDetail: {
@@ -1657,6 +1743,24 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        const authorizationContext =
+          await resolveOrganizationTrainingAdminAuthorizationContext({
+            adminContext,
+            authorizationPublicId: input.value.authorizationPublicId,
+            organizationPublicId: input.value.organizationPublicId,
+            profession: input.value.profession,
+            level: input.value.level,
+            capabilityContext: input.value.capabilityContext,
+            resolveAuthorizationContext:
+              resolveOrganizationAuthorizationContext,
+          });
+
+        if (authorizationContext === null) {
+          return createJsonResponse(
+            createManualDraftLineageUnavailableResponse(),
+          );
+        }
+
         const lineage =
           lookupTrustedPersistenceLineage === undefined
             ? null
@@ -1674,8 +1778,7 @@ export function createOrganizationTrainingRouteHandlers(
 
         const result = await createManualDraftService({
           adminContext,
-          authorizationContext:
-            createOrganizationTrainingAdminAuthorizationContext(input.value),
+          authorizationContext,
           draftInput: {
             organizationPublicId: input.value.organizationPublicId,
             sourceTaskPublicId: input.value.sourceTaskPublicId,
@@ -1772,6 +1875,22 @@ export function createOrganizationTrainingRouteHandlers(
           return createJsonResponse(
             createPublishAdminContextUnavailableResponse(),
           );
+        }
+
+        const authorizationContext =
+          await resolveOrganizationTrainingAdminAuthorizationContext({
+            adminContext,
+            authorizationPublicId: input.value.authorizationPublicId,
+            organizationPublicId: input.value.organizationPublicId,
+            profession: input.value.profession,
+            level: input.value.level,
+            capabilityContext: input.value.capabilityContext,
+            resolveAuthorizationContext:
+              resolveOrganizationAuthorizationContext,
+          });
+
+        if (authorizationContext === null) {
+          return createJsonResponse(createPublishLineageUnavailableResponse());
         }
 
         const persistenceLineage = await resolvePersistenceLineage({
@@ -1909,6 +2028,26 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        const authorizationContext =
+          await resolveOrganizationTrainingAdminAuthorizationContext({
+            adminContext,
+            authorizationPublicId: input.value.authorizationPublicId,
+            organizationPublicId: sourceVersion.organizationPublicId,
+            profession: sourceVersion.profession,
+            level: sourceVersion.level,
+            capabilityContext: {
+              effectiveEdition: "advanced",
+              authorizationSource: "org_auth",
+              canCreateOrganizationTraining: true,
+            },
+            resolveAuthorizationContext:
+              resolveOrganizationAuthorizationContext,
+          });
+
+        if (authorizationContext === null) {
+          return createJsonResponse(createCopyLineageUnavailableResponse());
+        }
+
         const sourceQuestionTypeSummary =
           await resolveVersionQuestionTypeSummary({
             request,
@@ -1991,6 +2130,24 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        const authorizationContext =
+          await resolveOrganizationTrainingAdminAuthorizationContext({
+            adminContext,
+            authorizationPublicId: input.value.authorizationPublicId,
+            organizationPublicId: input.value.organizationPublicId,
+            profession: input.value.profession,
+            level: input.value.level,
+            capabilityContext: input.value.capabilityContext,
+            resolveAuthorizationContext:
+              resolveOrganizationAuthorizationContext,
+          });
+
+        if (authorizationContext === null) {
+          return createJsonResponse(
+            createSourceContextLineageUnavailableResponse(),
+          );
+        }
+
         const lineage =
           lookupTrustedPersistenceLineage === undefined
             ? null
@@ -2008,8 +2165,7 @@ export function createOrganizationTrainingRouteHandlers(
 
         const result = await attachSourceContextService({
           adminContext,
-          authorizationContext:
-            createOrganizationTrainingAdminAuthorizationContext(input.value),
+          authorizationContext,
           draftPublicId: input.value.draftPublicId,
           organizationPublicId: input.value.organizationPublicId,
           sourceContexts: input.value.sourceContexts,
@@ -2262,6 +2418,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       sessionService,
       resolveVisibleOrganizationScope,
     );
+  const resolveOrganizationAuthorizationContext =
+    options.resolveOrganizationAuthorizationContext ??
+    createRepositoryBackedOrganizationAuthorizationContextResolver(repository);
   const resolveVersionOrganizationPublicId =
     options.resolveVersionOrganizationPublicId ??
     createRepositoryBackedVersionOrganizationPublicIdResolver(repository);
@@ -2310,6 +2469,7 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
     ),
     {
       resolveOrganizationAdminContext,
+      resolveOrganizationAuthorizationContext,
       resolveVersionOrganizationPublicId,
       resolveEmployeeContext,
       listAdminLifecycleDrafts,

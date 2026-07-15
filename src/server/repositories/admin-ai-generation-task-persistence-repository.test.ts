@@ -290,6 +290,44 @@ async function createAcceptedLocalContract(input: {
         createRepositoryTestInsufficientPaperAssembly(
           workspace === "content" ? "content_admin" : "org_advanced_admin",
         ),
+      organizationTrainingRepository: {
+        async findOrganizationAuthorizationContext({
+          authorizationPublicId,
+          organizationPublicId,
+        }) {
+          return {
+            profession: "marketing",
+            level: 3,
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId,
+            ownerType: "organization",
+            ownerPublicId: organizationPublicId,
+            organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: organizationPublicId,
+            capabilities: {
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+              canCreateOrganizationTraining: true,
+              canAnswerOrganizationTraining: true,
+              canViewOrganizationTrainingSummary: true,
+              canManageAuthorizationQuota: false,
+            },
+            blockedReason: null,
+          };
+        },
+        async listAdminLifecycleVersions() {
+          return [];
+        },
+        async listAdminVisibleQuestionSnapshotsForAiPaperSource() {
+          return [];
+        },
+        async listEmployeeVisibleVersions() {
+          return [];
+        },
+      },
       taskPersistenceRepository: taskPersistenceRecorder.repository,
       resultPersistenceRepository:
         createLocalContractRouteResultPersistenceRepository(),

@@ -82,6 +82,7 @@ export type OrganizationTrainingPublishedVersionDto = {
   draftPublicId: string;
   versionNumber: number;
   organizationPublicId: string;
+  authorizationPublicId?: string;
   organizationName?: string | null;
   publishScopeSnapshot: OrganizationTrainingScopeSnapshotDto;
   profession: Profession;

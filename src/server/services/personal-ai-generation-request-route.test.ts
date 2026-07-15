@@ -861,6 +861,139 @@ describe("personal AI generation request route handlers", () => {
     expect(serializedPayload).not.toContain("synthetic-test-credential");
   });
 
+  it("rejects employee AI generation when the selected authorization does not cover the requested profession and level", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          {
+            profession: "monopoly",
+            level: 3,
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_advanced_public_123",
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+            capabilities: {
+              ...disabledAiCapabilities,
+              canGenerateAiQuestion: true,
+            },
+            blockedReason: null,
+          },
+        ]),
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        authorizationPublicId: "org_auth_advanced_public_123",
+        generationParameters: {
+          ...sufficientGroundingContext.generationParameters,
+          profession: "marketing",
+          level: 4,
+        },
+      }),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403057,
+      message:
+        "Personal AI generation is not available for this authorization.",
+      data: null,
+    });
+    expect(requestRepository.createCalls).toHaveLength(0);
+  });
+
+  it("does not reuse the same client idempotency key across authorization scopes", async () => {
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => employeeUserContext,
+      {
+        requestRepository,
+        effectiveAuthorizationService: createEffectiveAuthorizationService([
+          {
+            profession: "monopoly",
+            level: 3,
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_monopoly_public_123",
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+            capabilities: {
+              ...disabledAiCapabilities,
+              canGenerateAiQuestion: true,
+            },
+            blockedReason: null,
+          },
+          {
+            profession: "marketing",
+            level: 4,
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_marketing_public_456",
+            ownerType: "organization",
+            ownerPublicId: employeeUserContext.organizationPublicId,
+            organizationPublicId: employeeUserContext.organizationPublicId,
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: employeeUserContext.organizationPublicId,
+            capabilities: {
+              ...disabledAiCapabilities,
+              canGenerateAiQuestion: true,
+            },
+            blockedReason: null,
+          },
+        ]),
+      },
+    );
+
+    for (const requestScope of [
+      {
+        authorizationPublicId: "org_auth_monopoly_public_123",
+        profession: "monopoly",
+        level: 3,
+      },
+      {
+        authorizationPublicId: "org_auth_marketing_public_456",
+        profession: "marketing",
+        level: 4,
+      },
+    ] as const) {
+      const response = await collection.POST(
+        createPostRequest({
+          ...createBaseFlowBody(),
+          authorizationPublicId: requestScope.authorizationPublicId,
+          generationParameters: {
+            ...sufficientGroundingContext.generationParameters,
+            profession: requestScope.profession,
+            level: requestScope.level,
+          },
+        }),
+      );
+
+      expect(response.status).toBe(200);
+    }
+
+    expect(requestRepository.createCalls).toHaveLength(2);
+    expect(requestRepository.createCalls[0]?.idempotencyKeyHash).not.toBe(
+      requestRepository.createCalls[1]?.idempotencyKeyHash,
+    );
+    expect(requestRepository.createCalls[0]?.idempotencyKeyHash).not.toBe(
+      createBaseFlowBody().idempotencyKeyHash,
+    );
+  });
+
   it("allows advanced employee local browser POST when only production enablement is blocked", async () => {
     const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(

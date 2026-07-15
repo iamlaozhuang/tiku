@@ -360,6 +360,7 @@ function createPublishedVersion(
     draftPublicId: "training_draft_public_123",
     versionNumber: 1,
     organizationPublicId: "organization_public_123",
+    authorizationPublicId: "org_auth_public_123",
     publishScopeSnapshot: {
       organizationPublicIds: [
         "organization_public_123",
@@ -381,6 +382,15 @@ function createPublishedVersion(
     takedownReason: null,
     ...overrides,
   };
+}
+
+function createPublicPublishedVersion(
+  overrides: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  const version = createPublishedVersion(overrides);
+  delete version.authorizationPublicId;
+
+  return version;
 }
 
 function createSubmittedEmployeeAnswer(
@@ -2272,7 +2282,7 @@ describe("organization training service", () => {
         sourceVersionPublicId: "training_version_public_123",
         organizationPublicId: "organization_public_123",
         authorizationPublicId: "org_auth_public_123",
-        sourceVersion: sourceVersionBeforeCopy,
+        sourceVersion: createPublicPublishedVersion(),
         sourceQuestionTypeSummary: {
           singleChoice: 1,
           multiChoice: 0,
@@ -2369,8 +2379,111 @@ describe("organization training service", () => {
 
     expect(result).toEqual({
       success: true,
-      versions: [createPublishedVersion()],
+      versions: [createPublicPublishedVersion()],
     });
+  });
+
+  it("intersects every training version with the employee's exact authorization public id, profession and level", async () => {
+    const { service } = createServiceFixture();
+    const matchingAuthorizationContext = createAdvancedOrgAuthContext({
+      authorizationPublicId: "org_auth_matching_public_456",
+      profession: "logistics",
+      level: 4,
+    });
+    const result = await service.listEmployeeVisibleVersions({
+      employeeContext: {
+        employeePublicId: "employee_public_123",
+        currentOrganizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+        authorizationContexts: [
+          createAdvancedOrgAuthContext(),
+          matchingAuthorizationContext,
+        ],
+      },
+      sourceVersions: [
+        createPublishedVersion({
+          publicId: "training_version_matching_scope_public_456",
+          authorizationPublicId: "org_auth_matching_public_456",
+          profession: "logistics",
+          level: 4,
+        }),
+        createPublishedVersion({
+          publicId: "training_version_wrong_profession_public_789",
+          authorizationPublicId: "org_auth_matching_public_456",
+          profession: "marketing",
+          level: 4,
+        }),
+        createPublishedVersion({
+          publicId: "training_version_wrong_auth_public_999",
+          authorizationPublicId: "org_auth_unassigned_public_999",
+        }),
+      ],
+    });
+
+    expect(result).toEqual({
+      success: true,
+      versions: [
+        createPublicPublishedVersion({
+          publicId: "training_version_matching_scope_public_456",
+          profession: "logistics",
+          level: 4,
+        }),
+      ],
+    });
+  });
+
+  it("blocks employee answer writes when the version lineage is outside every current authorization scope", async () => {
+    const { service, getSavedAnswerDrafts, getSubmittedAnswers } =
+      createServiceFixture();
+    const employeeContext = {
+      employeePublicId: "employee_public_123",
+      currentOrganizationPublicId: "organization_branch_public_456",
+      visibleOrganizationPublicIds: [
+        "organization_branch_public_456",
+        "organization_public_123",
+      ],
+      authorizationContext: createAdvancedOrgAuthContext(),
+      authorizationContexts: [createAdvancedOrgAuthContext()],
+    };
+    const mismatchedVersion = createPublishedVersion({
+      authorizationPublicId: "org_auth_unassigned_public_999",
+    });
+
+    const draftResult = await service.saveEmployeeAnswerDraft({
+      employeeContext,
+      version: mismatchedVersion,
+      answerInput: {
+        trainingVersionPublicId: mismatchedVersion.publicId,
+        answeredQuestionCount: 1,
+      },
+      existingAnswer: null,
+    });
+    const submitResult = await service.submitEmployeeAnswer({
+      employeeContext,
+      version: mismatchedVersion,
+      answerInput: {
+        trainingVersionPublicId: mismatchedVersion.publicId,
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      },
+      existingAnswer: null,
+    });
+
+    expect(draftResult).toEqual({
+      success: false,
+      reason: "version_not_visible",
+      message: "Organization training employee answer is blocked.",
+    });
+    expect(submitResult).toEqual(draftResult);
+    expect(getSavedAnswerDrafts()).toEqual([]);
+    expect(getSubmittedAnswers()).toEqual([]);
   });
 
   it("excludes expired answer-deadline training from employee visible versions while keeping no-deadline training answerable", async () => {
@@ -2405,11 +2518,11 @@ describe("organization training service", () => {
     expect(result).toEqual({
       success: true,
       versions: [
-        createPublishedVersion({
+        createPublicPublishedVersion({
           publicId: "training_version_future_deadline_public_123",
           answerDeadlineAt: "2026-06-16T00:00:00.000Z",
         }),
-        createPublishedVersion({
+        createPublicPublishedVersion({
           publicId: "training_version_no_deadline_public_789",
           answerDeadlineAt: null,
         }),

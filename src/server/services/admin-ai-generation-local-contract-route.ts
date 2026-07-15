@@ -36,6 +36,7 @@ import type {
   CreateAdminAiGenerationResultInput,
 } from "../contracts/admin-ai-generation-result-persistence-contract";
 import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
+import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type {
   AdminAiGenerationRouteIntegratedProviderExecutionControl,
   AdminAiGenerationRuntimeBridgeDto,
@@ -98,6 +99,7 @@ import {
   isRouteIntegratedVisibleGeneratedContentAcceptableForDraft,
 } from "./route-integrated-provider-execution-service";
 import type { SessionService } from "./session-service";
+import { selectAuthorizationObjectScope } from "./authorization-object-scope";
 
 export type { AdminAiGenerationWorkspace };
 
@@ -156,6 +158,7 @@ type AdminAiGenerationPaperAssemblyOrganizationTrainingRepository = Pick<
   | "listAdminLifecycleVersions"
   | "listAdminVisibleQuestionSnapshotsForAiPaperSource"
   | "listEmployeeVisibleVersions"
+  | "findOrganizationAuthorizationContext"
 >;
 
 type OrganizationTrainingPaperDraftDetailSnapshot = {
@@ -528,7 +531,7 @@ function resolveTaskType(
 function createTaskPublicId(input: {
   actorPublicId: string;
   generationKind: AdminAiGenerationKind;
-  requestPublicId: string;
+  requestScopeIdentity: string;
   workspace: AdminAiGenerationWorkspace;
 }): string {
   return [
@@ -536,7 +539,7 @@ function createTaskPublicId(input: {
     input.workspace,
     input.generationKind,
     input.actorPublicId,
-    createPublicIdScopeSegment(input.requestPublicId),
+    createPublicIdScopeSegment(input.requestScopeIdentity),
   ].join("_");
 }
 
@@ -559,19 +562,30 @@ function createDefaultRequestPublicId(
 function createAdminAiGenerationPolicyInput(input: {
   actor: AdminAiGenerationActor;
   generationKind: AdminAiGenerationKind;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
+  organizationAuthorizationContext?: EffectiveAuthorizationContextDto;
   requestPublicId: string;
   workspace: AdminAiGenerationWorkspace;
 }) {
   const taskType = resolveTaskType(input.generationKind);
+  const authorizationPublicId =
+    input.workspace === "content"
+      ? "admin_role_content_ai_generation"
+      : (input.organizationAuthorizationContext?.authorizationPublicId ?? null);
+  const requestScopeIdentity = JSON.stringify([
+    input.requestPublicId,
+    authorizationPublicId,
+    input.generationParameters?.profession ?? null,
+    input.generationParameters?.level ?? null,
+  ]);
   const taskPublicId = createTaskPublicId({
     actorPublicId: input.actor.publicId,
     generationKind: input.generationKind,
-    requestPublicId: input.requestPublicId,
+    requestScopeIdentity,
     workspace: input.workspace,
   });
-  const idempotencyScopeSegment = createPublicIdScopeSegment(
-    input.requestPublicId,
-  );
+  const idempotencyScopeSegment =
+    createPublicIdScopeSegment(requestScopeIdentity);
 
   if (input.workspace === "content") {
     return {
@@ -579,7 +593,7 @@ function createAdminAiGenerationPolicyInput(input: {
       taskType,
       actorPublicId: input.actor.publicId,
       authorizationSource: "admin_role",
-      authorizationPublicId: "admin_role_content_ai_generation",
+      authorizationPublicId,
       ownerType: "platform",
       ownerPublicId: "platform_content_review_pool",
       organizationPublicId: null,
@@ -603,8 +617,13 @@ function createAdminAiGenerationPolicyInput(input: {
 
   const organizationCapability =
     resolveServiceComputedOrganizationAiGenerationCapability(input.actor);
+  const organizationAuthorizationContext =
+    input.organizationAuthorizationContext;
 
-  if (organizationCapability === null) {
+  if (
+    organizationCapability === null ||
+    organizationAuthorizationContext === undefined
+  ) {
     return null;
   }
 
@@ -614,12 +633,12 @@ function createAdminAiGenerationPolicyInput(input: {
     actorPublicId: input.actor.publicId,
     authorizationSource: "org_auth",
     authorizationPublicId:
-      organizationCapability.organizationAuthorizationPublicId,
+      organizationAuthorizationContext.authorizationPublicId,
     ownerType: "organization",
-    ownerPublicId: organizationCapability.organizationPublicId,
-    organizationPublicId: organizationCapability.organizationPublicId,
+    ownerPublicId: organizationAuthorizationContext.ownerPublicId,
+    organizationPublicId: organizationAuthorizationContext.organizationPublicId,
     quotaOwnerType: "organization",
-    quotaOwnerPublicId: organizationCapability.organizationPublicId,
+    quotaOwnerPublicId: organizationAuthorizationContext.quotaOwnerPublicId,
     effectiveEdition: "advanced",
     isAuthorizationActive: true,
     isScopeAllowed: true,
@@ -634,6 +653,49 @@ function createAdminAiGenerationPolicyInput(input: {
     auditLogPublicId: null,
     aiCallLogPublicId: null,
   };
+}
+
+async function resolveOrganizationAiGenerationAuthorizationContext(input: {
+  actor: AdminAiGenerationActor;
+  generationKind: AdminAiGenerationKind;
+  generationParameters: AiGenerationRouteIntegratedGenerationParameters;
+  now: Date;
+  organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+}): Promise<EffectiveAuthorizationContextDto | null> {
+  const capability = resolveServiceComputedOrganizationAiGenerationCapability(
+    input.actor,
+  );
+  const findAuthorizationContext =
+    input.organizationTrainingRepository.findOrganizationAuthorizationContext;
+
+  if (capability === null || typeof findAuthorizationContext !== "function") {
+    return null;
+  }
+
+  const authorizationContext = await findAuthorizationContext({
+    authorizationPublicId: capability.organizationAuthorizationPublicId,
+    organizationPublicId: capability.organizationPublicId,
+    now: input.now,
+  });
+
+  if (authorizationContext === null) {
+    return null;
+  }
+
+  return selectAuthorizationObjectScope([authorizationContext], {
+    authorizationPublicId: capability.organizationAuthorizationPublicId,
+    authorizationSource: "org_auth",
+    ownerType: "organization",
+    ownerPublicId: capability.organizationPublicId,
+    organizationPublicId: capability.organizationPublicId,
+    profession: input.generationParameters.profession,
+    level: input.generationParameters.level,
+    requiredCapability:
+      input.generationKind === "question"
+        ? "canGenerateAiQuestion"
+        : "canGenerateAiPaper",
+    allowedBlockedReasons: [],
+  });
 }
 
 function resolveAdminAiGenerationTaskHistoryQuery(input: {
@@ -874,6 +936,7 @@ async function buildAdminAiGenerationLocalContract(input: {
   generationKind: AdminAiGenerationKind;
   generationParameters: AiGenerationRouteIntegratedGenerationParameters | null;
   organizationTrainingRepository: AdminAiGenerationPaperAssemblyOrganizationTrainingRepository;
+  organizationAuthorizationContext?: EffectiveAuthorizationContextDto;
   questionRepository: AdminAiGenerationPaperAssemblyQuestionRepository;
   requestClock: () => Date;
   runtimeBridgeControl: AdminAiGenerationRuntimeBridgeControl | undefined;
@@ -2089,6 +2152,25 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
           return createJsonResponse(adminAiGenerationPermissionDeniedResponse);
         }
 
+        const requestedAt = requestClock();
+        const organizationAuthorizationContext =
+          workspace === "organization"
+            ? await resolveOrganizationAiGenerationAuthorizationContext({
+                actor,
+                generationKind,
+                generationParameters,
+                now: requestedAt,
+                organizationTrainingRepository,
+              })
+            : undefined;
+
+        if (
+          workspace === "organization" &&
+          organizationAuthorizationContext === null
+        ) {
+          return createJsonResponse(adminAiGenerationPermissionDeniedResponse);
+        }
+
         return createJsonResponse(
           await buildAdminAiGenerationLocalContract({
             actor,
@@ -2096,9 +2178,11 @@ export function createAdminAiGenerationLocalContractRouteHandlers(
             generationKind,
             generationParameters,
             organizationTrainingRepository,
+            organizationAuthorizationContext:
+              organizationAuthorizationContext ?? undefined,
             paperAssemblyResolver,
             questionRepository,
-            requestClock,
+            requestClock: () => requestedAt,
             resultPersistenceRepository,
             runtimeBridgeControl: options.runtimeBridgeControl,
             taskPersistenceRepository,
