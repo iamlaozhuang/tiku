@@ -433,10 +433,11 @@ if ($stateNextTaskId -ne $queueNextTaskId) {
 }
 
 $topLevelCurrentTask = @(Get-TopLevelBlock -Lines $stateLines -Key "currentTask")
-if (
+$ownsGlobalActivity = $stateStatus -eq "in_progress"
+if ($ownsGlobalActivity -and (
     $topLevelCurrentTask.Count -eq 0 -or
     (Get-ScalarValue -Block $topLevelCurrentTask -Key "id") -ne $stateCurrentTaskId
-) {
+)) {
     Add-Finding "PROGRAM_GUARD_TOP_LEVEL_CURRENT_TASK_MISMATCH"
 }
 
@@ -506,6 +507,7 @@ foreach ($taskId in $stateOrdered) {
     }
 }
 if (
+    $ownsGlobalActivity -and
     $topLevelCurrentTask.Count -gt 0 -and
     $stateTaskStatuses.ContainsKey($stateCurrentTaskId) -and
     (Get-ScalarValue -Block $topLevelCurrentTask -Key "status") -ne $stateTaskStatuses[$stateCurrentTaskId]

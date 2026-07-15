@@ -1,0 +1,3300 @@
+schemaVersion: "1.0"
+packageId: P0-REMEDIATION-STARTUP-V1
+scope: docs-only startup package; no business-code change; no runtime acceptance
+sourceBaseline:
+  repository: D:\tiku
+  branch: master
+  head: 7aac83765ca4b650b73b1612013e26a0111775ae
+  tree: a1961f75ce6fdec455be0b028e314eb39c122d33
+  auditBaselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+  changedFilesSinceAuditBaseline: []
+auditBaseline:
+  repository: D:\tiku-readonly-audit
+  branch: feat/calibration
+  head: a84224fa12ec85b28e6acd945deba2afa28c6c02
+  tree: 668acf31e8579410b9969c1370f2405485b8fdd4
+  findingRegisterSha256: CDB8CE059566ABEDDA3D4C723E3F048ECFA677697053FB7765D6EF46273752F2
+statusSemantics:
+  confirmed: 静态证据在当前相同基线上再次成立。
+  baseline_changed: 相关代码已变化，必须定向重基线后再判定。
+  root_cause_alias: 与另一 finding 共享修复原语，但独立风险/验收义务成立；不等于 duplicate/resolved。
+  duplicate_candidate: 仅为待对抗式确认的重复候选，不改变原 finding。
+  false_positive_candidate: 仅为待证明的误报候选，不得据此关闭。
+  runtime_evidence_required: 静态证据不能完成判定，须按批准执行 runtime validation。
+countSummary:
+  p0Total: 35
+  confirmed: 30
+  rootCauseAlias: 5
+  baselineChanged: 0
+  duplicateCandidate: 0
+  falsePositiveCandidate: 0
+  runtimeEvidenceRequired: 0
+normalizationRules:
+  - 35 个 P0 全部来自只读 finding-register.yaml，原始 status/risk/关系不改写。
+  - stateMachineIds 与 crossRoleDependencyIds 来自 AP-XR-002 全局 reconciliation；空列表表示该矩阵无直接关联，不表示无状态风险。
+  - likelyAffectedP1P2FindingIds 仅按共享代码锚点/横向能力形成定向影响候选；不得视为已复验、已覆盖或已解决。
+  - root_cause_alias 仍是 independently confirmed finding，不用于减少数量。
+findings:
+  - findingId: F-0002
+    title: 管理员登录失败计数和锁定状态仅存于进程内存，无法满足五次失败锁定十五分钟
+    problemEssence: admin模型未物化登录失败状态，默认仓储用进程内Map补齐接口语义；服务层测试验证了算法，却未验证默认运行时在重启和多实例拓扑下的安全不变量。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-SF-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - content_admin
+      - org_standard_admin
+      - org_advanced_admin
+    useCases:
+      - UC-SUPER-001
+      - UC-OPS-001
+      - UC-CONTENT-001
+      - UC-ORGSTDADM-001
+      - UC-ORGADVADM-001
+    businessChain:
+      - 攻击者持续向POST /api/v1/sessions提交某管理员手机号和不同密码。
+      - 每个实例只在模块级Map中累计该实例见到的失败次数；数据库admin表没有失败计数或锁定时间字段。
+      - 请求跨实例分散或实例重启后，计数从零开始；已形成的锁定也随进程消失。
+      - 服务层五次失败策略本身仍返回正确业务状态，但生产运行时没有持久、共享、原子计数载体。
+    horizontalCapabilities:
+      - SC-IDENTITY-SESSION
+    stateMachineIds:
+      - SM-ADMIN-ACCOUNT
+    crossRoleDependencyIds:
+      - DEP-003
+      - DEP-004
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/auth/local-session-runtime.ts:118-121 定义模块级localAdminLoginFailureState Map。
+      - src/server/auth/local-session-runtime.ts:197-203,218-221 管理员失败记录与清零只写该Map；学员才写数据库。
+      - src/server/auth/local-session-runtime.ts:806-846 管理员登录读取该Map，缺失时直接视为0次失败且未锁定。
+      - src/db/schema/auth.ts:222-243 admin表没有login_failed_count或locked_until_at字段。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/06-admin-ops.md:350-358 要求后台账号连续登录失败5次后锁定15分钟。
+      - docs/01-requirements/stories/epic-06-admin-ops.md:251-256 将相同规则列为后台用户会话安全验收标准。
+    riskConsequence:
+      businessImpact: 管理员暴力破解防线可通过进程重启、冷启动或把请求分散到不同实例绕过；攻击者获得的尝试次数不再受五次失败阈值约束，最终可能导致高权限账号接管。
+      blastRadius: 五类后台管理员账号；其中super_admin、ops_admin和content_admin可触达全局运营、内容、AI或授权能力，组织管理员可触达组织范围数据与高级能力。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-01
+      name: 身份、session 与后台账号生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0045
+        - F-0130
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0001
+      - F-0131
+      - F-0049
+      - F-0129
+      - F-0030
+      - F-0048
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-01
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - src/server/services/session-service.test.ts:167-266 覆盖5次/15分钟策略计算，但使用可注入仓储桩，不证明默认运行时持久化。
+        - 全仓rate limit、throttle、captcha、lockout、login_failed与middleware/proxy搜索未发现共享限流或外部强制层。
+        - 全仓模块级Map横向搜索表明只有该Map承载安全状态；其余Map/Set用于请求内聚合或静态集合。
+      runtimeValidationIds:
+        - RV-0006
+        - RV-0019
+      runtimeValidationTitles:
+        - 身份边界修复后跨账号域冲突、锁定持久性与九角色退出闭环回归
+        - 标准版组织管理员只读工作区、范围名单、授权集合与拒绝语义修复后回归
+      nextAction: 当前波次执行同类安全状态横向扩散检查；修复线程应使用持久且并发安全的共享计数/锁定机制，并增加默认运行时跨实例或重建实例测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0005
+    title: 员工创建、启用、绑定、导入和部分调动绕过企业账号额度，且有效授权查询不校验超额状态
+    problemEssence: 额度实现从“员工生命周期的授权不变量”退化为org_auth创建时的初始统计和UI摘要；后续员工写入口由独立employeeAccountService及历史兼容repository分叉，未共享同一原子quota command。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-SF-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-003
+      - UC-SUPER-005
+      - UC-SUPER-006
+      - UC-OPS-002
+      - UC-OPS-005
+      - UC-OPS-006
+      - UC-OPS-007
+      - UC-ORGSTDEMP-002
+      - UC-ORGADVEMP-002
+    businessChain:
+      - 某有效org_auth的account_quota已经用满，或两个并发请求只剩一个可用名额。
+      - 调用员工单建/导入/启用接口，或调动到同时存在多条授权且仅部分有余量的组织；创建与启用路径不做额度校验，调动路径只要求任意一条目标授权有余量。
+      - 新user/employee被写成active employee，相关org_auth.used_quota没有刷新；并发请求也没有共享数据库锁。
+      - effective authorization查询只按employee组织绑定、user类型/状态和org_auth状态/有效期求交，不读取account_quota或used_quota，因此超额员工获得与额度内员工相同的组织授权能力。
+    horizontalCapabilities:
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ATOMICITY-IDEMPOTENCY
+    stateMachineIds:
+      - SM-EMPLOYEE
+    crossRoleDependencyIds:
+      - DEP-005
+      - DEP-006
+      - DEP-009
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/employee-account-service.ts:66-135 单建与绑定只做输入、organization和手机号/绑定检查，没有quota契约或错误分支。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:1579-1790 的新账号创建和既有账号绑定事务直接写user/employee，没有lockOrgAuthQuotaScope、额度计数、account_quota比较或used_quota刷新。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:1096-1154 的既有用户单建路径同样直接插入employee；2660-2804 的批量绑定路径在事务内循环写入，但完全没有额度校验。
+      - src/server/services/admin-organization-org-auth-runtime.ts:648-704 的账号导入逐行调用同一无额度保护服务，因此可部分成功且并发超额。
+      - src/server/repositories/admin-flow-runtime-repository.ts:799-817 的用户重新启用仅把status改为active，没有识别employee、校验相关授权额度或刷新used_quota；员工停用路径也未刷新额度摘要。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:1261-1329 虽逐条检查调入组织授权，但以hasTargetQuota实现“任意一条有余量即可”，而员工会继承该组织覆盖的全部有效授权。
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts:118-153 的组织有效授权查询只校验绑定与user状态，不读取account_quota、used_quota或额度占用结果。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/01-user-auth.md:359-371 规定覆盖范围内active员工占用总账号额度，创建/启用必须拒绝超额，且额度校验必须在数据库层原子执行。
+      - docs/01-requirements/stories/epic-01-user-auth.md:198-214 将企业授权额度原子防超额列为P0验收标准。
+      - catalog/roles/super-admin.yaml与ops-admin.yaml中的UC-SUPER-005、UC-OPS-005要求员工单建/导入原子占用org quota。
+    riskConsequence:
+      businessImpact:
+        企业购买的account_quota不能约束后续员工生命周期。平台运营可通过单建、重新启用、把个人账号绑定为员工、两种导入路径，或调入一个“至少一条授权尚有额度但其他授权已满”的组织，使任意数量的active employee继承覆盖组织的standard或advanced
+        org_auth。数据库中的used_quota不会随创建/启停可靠刷新，也不参与有效授权查询，导致商业授权额度被稳定绕过并可能让运营界面长期显示虚假的剩余额度。
+      blastRadius: 所有通过super_admin或ops_admin单建、启用、绑定、导入或调动进入组织的员工，以及覆盖这些节点的全部standard/advanced org_auth；多实例、批量导入和多专业/等级授权会放大超额和used_quota陈旧。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-02
+      name: organization 拓扑、授权范围、额度与员工生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0006
+        - F-0109
+        - F-0111
+        - F-0113
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0007
+      - F-0012
+      - F-0015
+      - F-0115
+      - F-0009
+      - F-0112
+      - F-0008
+      - F-0114
+      - F-0004
+      - F-0107
+      - F-0140
+      - F-0116
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-02
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 调动员工路径在src/server/repositories/admin-organization-org-auth-runtime-repository.ts:1205-1391会锁定目标授权范围并重新计数，证明可用原子模式存在；但其OR式hasTargetQuota无法保证全部继承授权均有额度，不能作为完整反证。
+        - 管理后台导入预览会根据已加载的usedQuota禁用按钮，tests/unit/admin-user-org-auth-ops-baseline.test.ts:1801-1833覆盖该体验；它是可绕过且会过期的客户端快照，不能替代服务端并发门禁。
+        - tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts只静态检查“创建org_auth时当前员工数不高于新额度”，未覆盖授权存在后的员工新增竞争。
+        - tests/unit/phase-20-ra-01-04-employee-import.test.ts:304-406只用桩服务模拟quota错误映射，默认employeeAccountService和repository不会产生该错误。
+        - 全仓account_quota、used_quota、员工insert/update及lock/refresh调用横向搜索确认：额度锁仅用于org_auth创建和员工调动，刷新仅用于调动/解绑，没有第二个员工创建强制层。
+      runtimeValidationIds:
+        - RV-0018
+        - RV-0021
+      runtimeValidationTitles:
+        - 组织树、员工、企业授权、卡密与终止修复后数据库浏览器对抗回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应把所有employee激活/绑定/导入/调动统一到数据库事务内的quota命令，锁定全部受影响原子授权范围、逐范围拒绝超额、写入或可靠重算used_quota，并让有效授权消费者只接受可证明的额度内绑定；补单建、既有账号绑定、两类导入、多授权范围及并发竞争测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0006
+    title: 企业授权重叠判断错误地要求auth_scope_type相同，允许不同覆盖方式重复授权同一有效企业范围
+    problemEssence: 实现把“组织覆盖的输入表达方式”误当成原子授权身份的一部分；测试沿用实现字段清单而未从实际effective organization交集构造对抗样例。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-SF-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - org_standard_admin
+      - org_advanced_admin
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-006
+      - UC-OPS-007
+      - UC-ORGSTDADM-004
+      - UC-ORGADVADM-004
+      - UC-ORGSTDEMP-002
+      - UC-ORGADVEMP-002
+    businessChain:
+      - 已存在以current_and_descendants覆盖企业A的active org_auth，范围为某profession、level和有效期。
+      - 运营提交specified_nodes授权并显式包含企业A，保持相同profession/level且有效期重叠。
+      - repository正确展开两次请求的实际organizationIds并取得相同范围锁，但重叠查询额外要求旧、新auth_scope_type相等，因此把旧记录排除。
+      - 第二条org_auth写入成功；员工有效授权查询按实际org_auth_organization关联返回两条上下文，后续额度、版本和取消路径不再有唯一来源。
+    horizontalCapabilities:
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ATOMICITY-IDEMPOTENCY
+    stateMachineIds: []
+    crossRoleDependencyIds:
+      - DEP-007
+      - DEP-009
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:2442-2465 会把specified_nodes和current_and_descendants都展开成实际organizationIds。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:2468-2489 的advisory lock按organization、profession、level序列化，说明并发锁键已基于实际范围而非覆盖方式。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:2492-2520 的最终重叠查询却包含eq(orgAuth.auth_scope_type, input.authScopeType)，使跨覆盖方式的实际交集不计为重叠。
+      - src/db/schema/auth.ts:382-439 的org_auth与org_auth_organization没有数据库排他约束兜底。
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts:118-153 对每条匹配org_auth均返回有效上下文，不做同范围唯一性消歧。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/01-user-auth.md:373-382 规定同profession/level、有效期重叠且覆盖同一企业节点即禁止保存，并明确一名员工同范围最多匹配一条org_auth。
+      - docs/01-requirements/modules/01-user-auth.md:350 明确auth_scope_type只描述组织覆盖方式，不得成为专业、等级、科目或版本范围维度。
+      - docs/01-requirements/stories/epic-01-user-auth.md:198-214 将企业授权重叠阻断列为P0验收标准。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md:77-79 以实际effective organization定义原子范围和显式关闭动作。
+    riskConsequence:
+      businessImpact:
+        运营可以先创建current_and_descendants授权，再用specified_nodes创建覆盖其中同一企业、同profession、同level和重叠有效期的第二条授权，或反向操作。两条记录都会被视为active并被同一员工继承，破坏“一名员工在同范围最多匹配一条企业授权”的不变量，使edition来源、quota
+        owner、取消/终止影响和后续显式升级路径产生歧义；高级消费者还可能从重复上下文中选到更高edition。
+      blastRadius: 所有同时使用current_and_descendants与specified_nodes的企业授权，受交集节点覆盖的管理员和员工，以及依赖唯一org_auth来源的edition、quota、训练、学习和终止消费者。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-02
+      name: organization 拓扑、授权范围、额度与员工生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0005
+        - F-0109
+        - F-0111
+        - F-0113
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0140
+      - F-0007
+      - F-0009
+      - F-0112
+      - F-0004
+      - F-0008
+      - F-0114
+      - F-0012
+      - F-0015
+      - F-0115
+      - F-0117
+      - F-0110
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-02
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 服务在写前检查并在取得advisory transaction lock后再次检查重叠，可阻止同auth_scope_type的竞态，但同一个错误谓词被两次复用，不能阻止本发现的跨类型重叠。
+        - tests/unit/phase-21-authorization-overlap-concurrency-proof.test.ts:20-66只做源码字符串断言，且把eq(orgAuth.auth_scope_type, input.authScopeType)错误地当作必要维度；没有current_and_descendants与specified_nodes交叉用例。
+        - 全仓hasOverlappingOrgAuth反向搜索未发现服务端或数据库的第二个有效范围交集校验层。
+      runtimeValidationIds:
+        - RV-0018
+        - RV-0021
+      runtimeValidationTitles:
+        - 组织树、员工、企业授权、卡密与终止修复后数据库浏览器对抗回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应按展开后的实际organization、profession、level、适用subject/edition规则和时间窗定义唯一原子范围，移除auth_scope_type等输入表达差异，并用数据库事务锁或约束保证并发；增加两种覆盖方式双向交叉、包含/部分交集和并发测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0011
+    title: 企业训练写链只校验授权归属关系，允许借用无效或越范围org_auth持久化高级训练
+    problemEssence: 组织级“可进入高级工作区”与对象级“本次训练由哪条原子授权支撑”被拆成两套不相交的校验；后者的trusted命名只代表公开标识转内部ID，却没有复用effective authorization计算，也没有与会话已验证来源绑定。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-SF-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - org_advanced_admin
+      - org_advanced_employee
+    useCases:
+      - UC-ORGADVADM-005
+      - UC-ORGADVADM-006
+      - UC-ORGADVEMP-011
+      - UC-ORGADVEMP-012
+    businessChain:
+      - org_advanced_admin所在组织同时存在一条可使会话获得高级工作区资格的有效org_auth，以及另一条同组织映射但无效、标准版或不同profession/level的org_auth。
+      - 调用方把第二条authorizationPublicId、任意profession/level和固定为advanced/true的capabilityContext提交到企业训练写接口。
+      - 会话门禁只验证组织级汇总能力；route随后接受客户端capabilityContext，并调用lineage lookup。
+      - lineage查询只按organization.public_id与org_auth.public_id关联命中，返回内部ID；写服务据此持久化训练草稿/版本，没有重新计算该目标授权的状态、时间窗、edition、upgrade和原子范围。
+    horizontalCapabilities:
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ORG-TRAINING-LIFECYCLE
+    stateMachineIds:
+      - SM-ORG-TRAINING-VERSION
+    crossRoleDependencyIds: []
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/auth/local-session-runtime.ts:871-945 会话只选择一条有效org_auth形成组织级高级工作区汇总，并保留所选organizationAuthorizationPublicId。
+      - src/server/services/organization-training-route.ts:691-750 门禁只使用组织级汇总，返回的adminContext丢弃会话已验证的authorizationPublicId。
+      - src/server/validators/organization-training.ts:498-517 只核对客户端capabilityContext是否声称advanced、org_auth和canCreate=true；744-815等写输入继续接受客户端authorizationPublicId及profession/level。
+      - src/server/services/organization-training-route.ts:753-786 直接用客户端字段构造看似有效的EffectiveAuthorizationContextDto；1639-1688和1961-2016只要求lineage lookup非空后执行写链。
+      - src/server/repositories/organization-training-repository.ts:2761-2791 的trusted lineage查询只比较organization和org_auth公开标识关联，不检查organization/org_auth状态、有效期、edition、auth_upgrade、profession或level。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md:14-23 要求org_advanced_admin只能在有效高级org_auth及组织范围内创建企业训练，员工仅在有效高级授权覆盖时可见。
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md:5-16 要求actor持有有效高级org_auth，系统在创建前检查组织范围和effective authorization。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md:23-31,93-100 规定effectiveEdition必须由服务端按来源状态、时间、升级和scope计算；缺失、无效、过期、取消或越范围来源不得产生有效上下文。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md:104-125 要求上下文携带真实source public id与profession/level，且不得仅为获得更高edition切换来源。
+    riskConsequence:
+      businessImpact: 只要组织管理员的会话因任意一条有效高级org_auth获得高级工作区资格，就可以在企业训练创建、发布或来源挂接请求中提交同组织的另一条org_auth公开标识，并自行声明高级capabilityContext。服务端所谓trusted lineage只确认两条公开标识存在关联，不校验该org_auth是否active、在有效期内、effectiveEdition为advanced，或其profession/level是否匹配训练。结果可把高级训练持久化到已取消、过期、尚未生效、标准版或不覆盖该专业等级的授权上，绕过商业授权范围并污染后续员工可见性、取消终止和审计归因。
+      blastRadius: 同一组织存在多条org_auth的企业高级客户最易触发；违规训练版本会下发给范围内org_advanced_employee，并影响训练答案、统计、取消/到期处理、quota owner和审计证据链。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-03
+      name: 显式 authorization 上下文与对象级范围校验
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0014
+        - F-0016
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0146
+      - F-0143
+      - F-0025
+      - F-0148
+      - F-0158
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-03
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 会话层确实拒绝没有任何有效高级组织授权的standard管理员，并校验组织绑定；本发现要求攻击者本来具有某条高级来源，但可把另一条不合格来源用于具体训练scope和持久化lineage。
+        - 训练schema会保存org_auth_id、authorizationPublicId、profession、level和subject，增强了事后可追踪性，但没有数据库约束保证这些字段与目标授权一致。
+        - organization-training route/repository测试覆盖standard角色拒绝、service-computed汇总、组织可见性和lineage存在性；未发现取消、过期、未生效、standard、不同profession/level或会话授权ID不一致的对抗测试。
+      runtimeValidationIds:
+        - RV-0020
+      runtimeValidationTitles:
+        - 高级组织训练、版本下架与隐私统计修复后数据库浏览器对抗回归
+      nextAction: 修复线程应让每个企业训练写命令只接受授权公开标识，并在同一服务端查询中重新验证该目标org_auth的组织覆盖、状态、时间窗、effectiveEdition、profession/level/subject兼容和能力；禁止信任客户端capabilityContext，且把验证后的原子授权lineage贯穿草稿、发布、员工可见性、终止、额度和审计。补全部无效来源及TOCTOU并发测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0014
+    title: 个人与企业AI生成未核对请求专业等级与选定授权范围，任一高级授权可跨范围出题组卷
+    problemEssence: AI请求链把“找到一条具备AI capability的高级授权”误当成“该授权覆盖本次生成范围”；通用effective authorization上下文虽携带profession/level，路由的授权适配器却只消费了edition、capability和owner字段，并提前把scope结论标为通过。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-SF-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_advanced_student
+      - org_advanced_admin
+      - org_advanced_employee
+    useCases:
+      - UC-PADV-007
+      - UC-PADV-008
+      - UC-PADV-009
+      - UC-ORGADVADM-009
+      - UC-ORGADVADM-010
+      - UC-ORGADVEMP-007
+      - UC-ORGADVEMP-008
+      - UC-ORGADVEMP-009
+    businessChain:
+      - 学员持有例如profession=monopoly、level=3的有效高级personal_auth或org_auth，并取得其authorizationPublicId。
+      - 调用AI出题或AI组卷POST时保留该授权ID，但把generationParameters改成另一profession或level。
+      - route从effective authorization列表精确找到授权ID，只验证advanced、capability和个人/组织owner边界，不比较请求范围。
+      - route随后保留原generationParameters，却把effectiveEdition和isScopeAllowed等服务端标志写成通过；validator、service和repository均不再做范围交叉校验，任务进入持久化和执行链。
+      - 企业高级管理员路径同样只从会话中取得一条“任意有效高级org_auth”的ID，POST接受任意generationParameters后把isScopeAllowed设为true；会话能力摘要甚至不携带profession/level。
+    horizontalCapabilities:
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-AI-TASK-LIFECYCLE
+      - SC-KNOWLEDGE-RAG-SCOPE
+    stateMachineIds:
+      - SM-AI-GENERATION-TASK
+      - SM-AUTHORIZATION
+    crossRoleDependencyIds:
+      - DEP-008
+      - DEP-010
+      - DEP-038
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/contracts/effective-authorization-contract.ts:54-71 的授权上下文本身明确包含profession和level，可供对象级范围比较。
+      - src/server/services/personal-ai-generation-request-route.ts:515-537 的可用授权判断只比较authorizationPublicId、advanced、blockedReason、capability和owner边界，未读取generationParameters或比较profession/level。
+      - src/server/services/personal-ai-generation-request-route.ts:540-554 保留客户端input中的generationParameters，仅覆盖授权来源、owner、quota owner和edition；448-457及1118-1129随后把isScopeAllowed等标志强制为true。
+      - src/server/validators/personal-ai-generation-request.ts:175-205 分别规范化generationParameters的profession/level，228-256及322-341只验证owner边界，没有与authorization
+        context联结。
+      - src/server/services/personal-ai-generation-request-service.ts:15-43 原样映射generationParameters；src/server/repositories/personal-ai-generation-request-repository.ts:317-358
+        原样持久化上游is_scope_allowed等结论，没有第二道范围校验。
+      - src/server/auth/local-session-runtime.ts:871-945 为组织管理员从覆盖组织的有效授权中择一，仅返回authorization ID和effective edition；src/server/contracts/admin-workspace-role-guard-contract.ts:29-37
+        的能力摘要没有profession或level。
+      - src/server/services/admin-ai-generation-local-contract-route.ts:474-506 仅校验组织级高级能力，604-636沿用会话授权ID并把isScopeAllowed固定为true，2062-2106接受generationParameters后没有授权范围比较即进入生成链。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md:16-21 要求个人高级功能只能在personal_auth允许范围内，企业员工只能在所属组织有效org_auth允许范围内使用，且上下文必须显式。
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md:5-18 要求AI出题和AI组卷在执行前检查有效高级授权及effective authorization。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md:23-32,93-100 规定effectiveEdition按请求scope计算，越出请求profession/level的来源不得形成有效上下文。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md:104-125 要求显式上下文携带authorization source、profession和level，且不得为获得能力或额度静默切换或错配来源。
+    riskConsequence:
+      businessImpact: 个人高级学员、企业高级管理员或企业高级员工只需拥有一条可用advanced授权，即可把generationParameters中的profession和level改成该授权未覆盖的范围。学员路由验证授权ID、owner和高级能力，组织管理路由则使用登录时挑选的一条组织高级授权；两者随后都把isScopeAllowed强制设为true，请求范围不会与授权范围比较。因而单一高级授权可被用于跨专业或跨等级AI出题、AI组卷及后续RAG/题源处理，绕过付费范围和组织授权边界，并使持久任务中的授权归因与实际生成范围不一致。
+      blastRadius: 所有personal_advanced_student、org_advanced_admin与org_advanced_employee的AI出题、AI组卷及依赖其generationParameters的RAG检索和正式题筛选；企业场景还可把组织额度用于授权包之外的专业等级。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-03
+      name: 显式 authorization 上下文与对象级范围校验
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0011
+        - F-0016
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0149
+      - F-0025
+      - F-0148
+      - F-0036
+      - F-0154
+      - F-0143
+      - F-0151
+      - F-0153
+      - F-0170
+      - F-0157
+      - F-0158
+      - F-0146
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-03
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - effective authorization service会正确把每条personal_auth或org_auth的profession/level放入上下文，并过滤无效状态和时间窗；缺口发生在消费者没有使用这两个范围字段。
+        - personal-ai-generation route和validator测试覆盖高级能力、owner边界、数量、个人/企业路径及生成成功，但未发现授权scope与generationParameters不一致的拒绝用例。
+        - 后续RAG和本地组卷可能按generationParameters限制知识点或题源，这只能约束目标范围内部的数据选择，不能证明调用方对该目标范围本身具有授权。
+      runtimeValidationIds: []
+      runtimeValidationTitles: []
+      nextAction: 修复线程应在服务端用请求profession/level选择或验证唯一有效authorization context，禁止信任客户端scope结论；只有范围、owner、edition和capability全部匹配后才能设置isScopeAllowed。对个人和企业AI出题/组卷补跨profession、跨level、多授权显式选择、取消/到期并发及RAG范围测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0016
+    title: 企业训练员工入口只要求任意高级组织授权，未按训练版本专业等级和授权血缘过滤查看与作答
+    problemEssence: 企业训练员工能力被建模为组织级布尔值，resolver在知道目标训练之前就挑选任意高级授权；后续可见性沿用组织assignment模型，没有把version中已持久化的原子授权lineage纳入对象级校验。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-SF-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - org_advanced_employee
+    useCases:
+      - UC-ORGADVEMP-009
+      - UC-ORGADVEMP-011
+      - UC-ORGADVEMP-012
+    businessChain:
+      - 员工在当前组织持有例如marketing 3级的有效advanced org_auth；组织同时发布了由另一条logistics 5级授权支撑的训练版本。
+      - employee context resolver从所有组织授权上下文中选择第一条advanced记录，不接收目标训练或目标profession/level。
+      - 列表repository只按employee当前组织、published状态和publish_scope_snapshot中的组织ID返回版本，未按org_auth_id、authorization_public_id、profession或level过滤。
+      - service只确认上下文为advanced org_auth且训练组织可见，随后允许保存/提交；版本与授权范围不一致仍能形成正式organization_training_answer。
+    horizontalCapabilities:
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ORG-TRAINING-LIFECYCLE
+      - SC-ANSWER-SESSION
+    stateMachineIds: []
+    crossRoleDependencyIds:
+      - DEP-023
+      - DEP-040
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/organization-training-route.ts:822-840 从当前组织contexts中选择任意第一条advanced授权；849-909 的resolver未接收目标版本或scope。
+      - src/server/repositories/organization-training-repository.ts:557-582,2901-2928 的员工可见版本查询只校验employee组织、published和publish_scope_snapshot组织列表，没有org_auth、profession或level条件。
+      - src/server/services/organization-training-service.ts:1182-1204 只校验advanced/org_auth/capability；1312-1324 的版本可见性只比较组织列表；2407-2431、2434-2511和2514-2595
+        的列表、保存、提交均未比较version与authorizationContext的profession/level/publicId。
+      - src/db/schema/organization-training.ts:336-380 的version已保存org_auth_id、authorization_public_id、profession和level，说明精确联结所需数据存在但未被消费。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md:14-23 要求员工仅在有效高级org_auth覆盖的组织授权范围内查看和作答企业训练。
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md:20-32 要求系统按组织范围和有效授权检查员工训练可见性与提交。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md:31-32,75-82 要求profession、level、有效期、取消和审计归因到原子授权范围，员工能力从覆盖组织的active
+        org_auth派生。
+      - catalog/roles/org-advanced-employee.yaml:218-255 的UC-ORGADVEMP-011/012要求有效高级组织上下文、本人被覆盖的训练assignment以及assignment组织边界。
+    riskConsequence:
+      businessImpact: 企业员工只要在当前组织拥有任意一条advanced org_auth，就会被选中为企业训练上下文。训练列表、草稿保存、提交和结果读取仅校验组织发布范围、版本状态和本人答案，不比较该上下文的profession/level或authorizationPublicId与训练版本保存的原子授权血缘。因此一条高级授权可解锁同组织内其他专业、等级甚至由另一授权包发布的全部训练；员工可以读取题目快照、保存答案并正式提交，绕过已购买的内容范围。
+      blastRadius: 同一组织拥有多个profession/level或多个授权包的org_advanced_employee；一条高级授权可能暴露该组织范围内所有已发布训练题目快照并允许跨范围提交答案。
+    currentRevalidationStatus: root_cause_alias
+    revalidationRationale: 与 F-0011 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    rootCauseCluster:
+      id: RC-03
+      name: 显式 authorization 上下文与对象级范围校验
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0011
+        - F-0014
+      rootCauseAliasOf: F-0011
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0146
+      - F-0143
+      - F-0025
+      - F-0148
+      - F-0157
+      - F-0158
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-03
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - effective authorization service会过滤取消、过期、未生效和组织不匹配的org_auth；本发现不是无授权用户进入，而是任意一个有效高级scope被扩大为组织内全部训练scope。
+        - 训练版本下架、截止时间、员工本人和组织publish snapshot校验均存在，能阻断跨组织和非本人答案，但不能阻断同组织跨专业/等级或跨授权包访问。
+        - organization-training route/service/repository测试覆盖standard拒绝、组织可见、截止、下架和一次提交；未发现授权context与version的profession、level或authorizationPublicId不一致的对抗用例。
+      runtimeValidationIds:
+        - RV-0020
+      runtimeValidationTitles:
+        - 高级组织训练、版本下架与隐私统计修复后数据库浏览器对抗回归
+      nextAction: 修复线程应让列表按员工全部有效advanced原子授权集合与version的authorizationPublicId、profession、level和组织覆盖求交；详情、保存、提交和结果读取逐请求重验目标version的同一lineage。补同组织跨scope、多授权、取消/到期、调动和并发失效测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0045
+    title: 后台账号创建后没有任何详情或管理动作，角色组织变更、停启和密码重置均不可执行
+    problemEssence: 账号创建修复只新增admin collection写入和列表，把既有users管理动作误当成可复用生命周期；但两个账号域使用不同表和publicId，且admin schema从未演进为角色赋权/绑定可变模型。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - content_admin
+      - org_standard_admin
+      - org_advanced_admin
+    useCases:
+      - UC-SUPER-002
+      - UC-OPS-001
+      - UC-OPS-003
+      - UC-CONTENT-001
+      - UC-ORGSTDADM-001
+      - UC-ORGADVADM-001
+    businessChain:
+      - super_admin创建ops_admin/content_admin/组织管理员，账号立即可登录并获得对应高权限。
+      - 后续账号泄露、人员离职、角色错误或组织绑定错误，操作者在后台账号列表只看到“暂无操作”的禁用按钮。
+      - 直接调用users/{adminPublicId}/disable、enable或reset-password时，repository只在user表查找，因此admin账号不变且会话不撤销。
+      - 没有其他admin详情、角色、组织或credential mutation路由；唯一可行处置只能绕过产品直接改库或等待外部流程，不能形成审计闭环。
+      - 若人工、迁移或后续写路径为同一组织管理员留下多条admin_organization，数据库允许全部落库，登录和旧会话重校验只按organization.public_id排序取第一条；唯一组织上下文被静默改成数据排序结果。
+    horizontalCapabilities:
+      - SC-IDENTITY-SESSION
+      - SC-WORKSPACE-BOUNDARY
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-AUDIT-LOG
+    stateMachineIds:
+      - SM-ADMIN-ACCOUNT
+      - SM-ORGANIZATION
+    crossRoleDependencyIds:
+      - DEP-001
+      - DEP-002
+      - DEP-003
+      - DEP-004
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx:1559-1639 的后台账号表只有disabled“暂无操作”，创建面板之外没有详情、编辑、停启或重置入口。
+      - src/app/api/v1/admin-accounts/route.ts:1-6 只导出collection GET和POST；全仓没有admin-account detail、update、disable、enable或reset路由。
+      - src/server/repositories/admin-flow-runtime-repository.ts:749-789 的resetUserPassword、disableUser、enableUser和revokeUserSessions均委托user域；799-846
+        的实现只查询/更新user表。
+      - src/db/schema/auth.ts:222-243 让一个auth_user_id只对应一条admin记录且只有单值admin_role；全仓未发现update(admin)、delete(admin)或adminOrganization变更代码。
+      - src/db/schema/auth.ts:273-291仅唯一约束(admin_id, organization_id)，不约束admin_id只能绑定一个organization；src/server/auth/local-session-runtime.ts:726-768,806-831对多行绑定按organization.public_id排序后limit(1)，既不拒绝歧义也不记录选择原因。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/06-admin-ops.md:310-348 要求超级管理员维护后台用户，支持新建、编辑角色、停用，并要求组织管理员角色/组织变更、停用和重置密码进入audit_log。
+      - docs/01-requirements/stories/epic-06-admin-ops.md:249-258 要求一个后台用户可有多个角色，并可编辑角色、停用账号及保持工作区拒绝边界。
+      - catalog/roles/super-admin.yaml的UC-SUPER-002与catalog/roles/ops-admin.yaml的UC-OPS-003明确包含角色/组织变更、停启、重置和会话撤销。
+    riskConsequence:
+      businessImpact: 超级管理员和运营管理员可以创建并列出后台/组织管理员账号，但列表的唯一操作永久禁用，服务端也只有collection GET/POST。现有重置、停用和启用接口只查询和更新学员/员工user表，对admin publicId必然返回未找到；角色与组织绑定没有任何mutation。管理员凭据泄露、人员离职、职责调整或组织迁移后，系统无法通过产品流程撤销后台访问、重置密码、修改角色或更换组织。schema又把每个auth_user_id唯一绑定到单个admin_role，与“一个后台用户可拥有多个角色”冲突。
+      blastRadius: 五类后台管理员账号的完整生命周期；super_admin、ops_admin和content_admin泄露后可持续访问全局运营或内容能力，组织管理员错误绑定后可持续访问组织范围数据。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-01
+      name: 身份、session 与后台账号生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0002
+        - F-0130
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0001
+      - F-0049
+      - F-0048
+      - F-0131
+      - F-0046
+      - F-0030
+      - F-0129
+      - F-0047
+      - F-0106
+      - F-0041
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-01
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - users表的学员/员工详情、停启和重置UI/API存在，且停用会撤销user会话；它们不能命中admin表，不能作为后台账号管理能力。
+        - 登录路径会检查admin.status=active，因此一旦有受治理的停用写路径即可拒绝访问；当前缺口正是没有任何产品写路径。
+        - 2026-07-04历史运行只证明super_admin成功创建ops_admin/content_admin，没有执行创建后的重置、停用、角色/组织变更或旧会话拒绝；历史“creation flow pass”不覆盖本发现。
+      runtimeValidationIds:
+        - RV-0010
+        - RV-0016
+        - RV-0019
+      runtimeValidationTitles:
+        - 后台账号创建与生命周期修复后并发、会话和故障恢复回归
+        - 平台账号、用户、手机号与购买联系配置修复后浏览器数据库并发回归
+        - 标准版组织管理员只读工作区、范围名单、授权集合与拒绝语义修复后回归
+      nextAction: 修复线程应建立admin-domain详情和受授权命令，原子处理角色赋权、单组织绑定、credential、session撤销与audit_log；禁止复用只操作user表的接口。补创建后重置/停用/启用/角色和组织变更、旧会话重放、并发更新、最后super_admin保护及多角色测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0050
+    title: 题目和材料编辑器加载时剥离全部富文本标记，普通保存会不可逆覆盖表格、图片和格式
+    problemEssence: 旧列表内表单曾把rich_text当普通文本展示，专用编辑页复用了为摘要/输入简化而写的stripRichText转换，却仍采用整对象PATCH合同，没有建立保真富文本编辑模型。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - content_admin
+    useCases:
+      - UC-CONTENT-003
+      - UC-CONTENT-004
+    businessChain:
+      - 已存在题目或材料包含段落格式、基础表格或受管图片标记。
+      - 编辑页GET详情后由createQuestionFormValuesFromQuestion或createMaterialFormValuesFromMaterial调用stripRichText，把全部标签删除。
+      - 操作者修改任意无关字段并点击保存；createQuestionInput或createMaterialInput发送被剥离后的整对象。
+      - repository覆盖原rich_text列，后续详情、复制和试卷快照只能得到已损坏内容；图片唯一内容则在客户端语义校验处变为空而卡住。
+    horizontalCapabilities:
+      - SC-CONTENT-LIFECYCLE
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-INTERACTION-STATE-CONTRACT
+      - SC-FILE-AND-CONTENT-PRIVACY
+    stateMachineIds:
+      - SM-MATERIAL
+    crossRoleDependencyIds: []
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx:409-410的stripRichText用正则删除全部标签；472-523对题干、解析、答案、选项和材料正文全部调用该函数。
+      - src/features/admin/question-material-management/AdminQuestionEditorPage.tsx:232-246和AdminMaterialEditorPage.tsx:225-239把上述表单值作为完整PATCH发送，未保留原rich_text或执行结构化合并。
+      - src/server/repositories/question-repository.ts:254-303和material-repository.ts:173-195按请求整列覆盖内容；不存在可恢复的内容版本或差异快照。
+    violatedBusinessInvariants:
+      - docs/01-requirements/stories/epic-02-question-paper.md:15-21要求结构化题目表单和可插图、表格的富文本题干、答案与解析，93-96要求材料富文本、表格和图片在锁定/快照边界内稳定。
+      - docs/01-requirements/traceability/2026-07-13-content-admin-p0-platform-interaction-contract.md:P0-12要求既有编辑、复制和绑定行为保持覆盖，P0-02/P0-10把有效媒体和表格视为受支持语义节点。
+      - catalog/roles/content-admin.yaml的UC-CONTENT-003/004要求保存体现作者意图的七类题目和可复用材料，失败不得静默改写内容。
+    riskConsequence:
+      businessImpact: 专用编辑页把题干、标准答案、解析、选项内容和材料正文中的全部HTML先转成纯文本，再把同一表单作为完整PATCH提交。操作者即使只修改标题或一个分类字段，也会永久删除加粗、段落、表格和受管图片；仅含有效图片的内容会被加载成空值并无法再保存。该行为直接破坏作者意图和既有正式题源，且服务端无法区分主动改写与编辑器造成的数据损失。
+      blastRadius: 所有含格式、表格或图片的题干、解析、答案、选项和材料正文；任何未锁定对象的一次普通编辑都可能造成不可逆内容退化，并污染之后的新试卷快照和学习展示。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-04
+      name: 内容与 paper 聚合、事务、发布快照完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0051
+        - F-0092
+        - F-0093
+        - F-0171
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0055
+      - F-0052
+      - F-0053
+      - F-0056
+      - F-0058
+      - F-0073
+      - F-0024
+      - F-0096
+      - F-0094
+      - F-0095
+      - F-0100
+      - F-0155
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-04
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - repository复制题目/材料会原样复制rich_text，服务层测试也能保存HTML；这只能证明后端可保留传入标记，不能挽救编辑页在请求前主动剥离。
+        - 2026-07-13 C2/C4 evidence和专用编辑器测试使用纯文本详情fixture，只断言修改后的纯文本PATCH，没有HTML、表格、图片或无关字段保存的往返断言。
+        - StudentRichText能够安全渲染部分HTML，但渲染能力不改变编辑器加载阶段的数据损失。
+      runtimeValidationIds:
+        - RV-0011
+      runtimeValidationTitles:
+        - 七题型、富文本媒体、绑定和并发修复后端到端回归
+      nextAction: 修复线程应让编辑模型无损承载受支持富文本AST或原始安全HTML，PATCH保留未修改字段并增加版本条件；补题目与材料的段落、格式、表格、图片、纯图片及无关字段编辑往返测试，禁止使用剥标签结果覆盖持久化内容。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0051
+    title: question_type与scoring_method未形成联合合同，主观题可默认不评分且客观题可被重复计分
+    problemEssence: scoring_method被建模为独立全局枚举而非由question_type判别的联合类型，UI、validator和下游各自使用不同判定规则，导致同一持久化状态在不同消费者中含义不一致。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-CONTENT-003
+      - UC-CONTENT-006
+      - UC-CONTENT-007
+      - UC-PSTD-005
+      - UC-PSTD-007
+      - UC-PADV-003
+      - UC-PADV-004
+      - UC-ORGSTDEMP-004
+      - UC-ORGSTDEMP-006
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-012
+    businessChain:
+      - 内容管理员在空白表单选择short_answer、case_analysis或calculation，补齐评分点但保留默认auto_match后保存，服务端接受并进入正式题库。
+      - 题目进入试卷快照；mock_exam只用题型识别客观题、只用scoringMethod识别AI题。
+      - 主观auto_match题不进入任一路径，提交时主观分缺失但exam_status可为completed。
+      - 直接API还可给single_choice、multi_choice或true_false设置ai_scoring；同一题会同时累计objectiveScore并进入AI结果，最终总分可能重复包含该题。
+    horizontalCapabilities:
+      - SC-CONTENT-LIFECYCLE
+      - SC-PAPER-SNAPSHOT
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-ANSWER-SESSION
+    stateMachineIds:
+      - SM-ORG-TRAINING-VALIDATION
+      - SM-QUESTION
+    crossRoleDependencyIds:
+      - DEP-026
+      - DEP-027
+      - DEP-011
+      - DEP-017
+      - DEP-018
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx:442-459把scoringMethod默认设为auto_match，2429-2451切换题型时不调整评分方式，2507-2529对所有题型均展示scoringMethod和multiChoiceRule。
+      - src/lib/content-integrity.ts:223-350只按题型检查选项和评分点，未拒绝客观题ai_scoring或主观题auto_match；src/server/validators/question.ts:409-470因此接受两类非法联合值。
+      - src/server/services/mock-exam-service.ts:509-536按题型识别客观题却只按scoringMethod识别AI题；941-994分别累加两路分数，1009-1031和1058-1084会把ai_scoring客观题再次作为主观结果处理。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/02-question-paper.md:81-115和155-169限定评分方式选择属于fill_blank，简答、案例分析、步骤计算及AI填空属于主观题评分点合同。
+      - docs/01-requirements/stories/epic-02-question-paper.md:56-79分别限定多选评分规则和填空评分方式，docs/01-requirements/stories/epic-04-ai-scoring.md:7-19要求模拟考试统一异步评分所有主观题。
+      - catalog/roles/content-admin.yaml的UC-CONTENT-003要求七题型参数完整且语义正确，下游正式学习不能自行猜测非法组合。
+    riskConsequence:
+      businessImpact: 表单对所有七种题型展示同一个评分方式控件，新建默认auto_match且切换到简答、案例分析或计算题时不改默认值；服务端只校验枚举，不校验题型组合。因此标准操作可创建scoring_method=auto_match的主观题，模拟考试把它既不当客观题也不送AI评分，却仍可能把考试标为completed并给主观题0分或null。反向提交ai_scoring的选择/判断题时，它既计入客观分又进入AI评分队列，可能重复计分并覆盖答题状态。
+      blastRadius: 七类正式题、所有新试卷快照、个人与组织模拟考试评分和报告；默认主观题路径尤其容易生成不可评分数据，恶意或错误API调用可制造总分失真。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-04
+      name: 内容与 paper 聚合、事务、发布快照完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0050
+        - F-0092
+        - F-0093
+        - F-0171
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0052
+      - F-0053
+      - F-0056
+      - F-0057
+      - F-0058
+      - F-0098
+      - F-0055
+      - F-0074
+      - F-0094
+      - F-0096
+      - F-0155
+      - F-0073
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-04
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - validator测试为主观题fixture显式提供ai_scoring、为客观题显式提供auto_match，并证明各自happy path；没有反向组合拒绝矩阵。
+        - UI七题型测试在主观题场景主动选择ai_scoring，绕过了空白表单默认值，没有断言题型变化会得到唯一合法评分合同。
+        - paper发布校验按题型或ai_scoring识别评分点，但不能修复mock_exam下游对同一非法组合的漏评或双计分。
+      runtimeValidationIds:
+        - RV-0011
+        - RV-0012
+        - RV-0015
+        - RV-0021
+      runtimeValidationTitles:
+        - 七题型、富文本媒体、绑定和并发修复后端到端回归
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 试卷草稿、分组快照、附件、发布下架与跨角色消费者修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应定义并在schema/validator/UI统一执行题型判别合同，客观题固定auto_match、主观题固定AI评分、仅fill_blank可显式切换，多选规则仅multi_choice有效；拒绝非法历史/新数据并迁移或隔离存量，补七型正反联合矩阵和模拟考试漏评/双计分回归。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0059
+    title: 学员试卷、练习、模拟考试和个人AI训练响应在作答前暴露答案解析，模拟考试缓存还缺少用户隔离
+    problemEssence: 发布快照、评分快照和学员作答视图复用了同一个无类型JSON对象，缺少“交卷前安全投影”和按用户生命周期治理的客户端缓存边界。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-003
+      - UC-PSTD-004
+      - UC-PSTD-005
+      - UC-PSTD-007
+      - UC-PADV-003
+      - UC-PADV-004
+      - UC-PADV-010
+      - UC-ORGSTDEMP-003
+      - UC-ORGSTDEMP-004
+      - UC-ORGSTDEMP-006
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-004
+    businessChain:
+      - 学员查看发布试卷详情、开始练习或开始/恢复模拟考试，服务端构造包含答案、解析和正确选项标记的完整快照。
+      - student paper、practice和mock exam映射都没有交卷前/答题前安全投影，直接把完整paper_snapshot放入响应。
+      - 个人高级学员以AI result创建或恢复学习session；服务端把用于评分的正确选项、标准答案和解析放在session.questions中随首次响应返回，尚未提交任何答案即可读取。
+      - 前端把完整MockExamDto写入以paper公开标识为键的localStorage，并把原始答案写入以mock公开标识为键的队列。
+      - 用户通过开发者工具读取答案，或退出后另一用户在网络失败时命中同一缓存；logout没有清理这两类键。
+    horizontalCapabilities:
+      - SC-PAPER-SNAPSHOT
+      - SC-FILE-AND-CONTENT-PRIVACY
+      - SC-ANSWER-SESSION
+      - SC-IDENTITY-SESSION
+      - SC-AI-DOMAIN-SEPARATION
+    stateMachineIds:
+      - SM-PERSONAL-AI-RESULT
+    crossRoleDependencyIds:
+      - DEP-027
+      - DEP-017
+      - DEP-018
+      - DEP-034
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/repositories/paper-draft-repository.ts:1087-1147构造快照时读取并保存analysis_rich_text、standard_answer_rich_text、option.is_correct和fill_blank_answers。
+      - src/server/repositories/student-flow-runtime-repository.ts:1219-1274从paper_question快照重建学员详情，并显式回填standardAnswerRichText和analysisRichText；student-paper
+        detail不做安全投影。
+      - src/server/services/practice-service.ts:250-301从同一快照解析正确选项、标准答案、解析和填空答案，762-763把完整paper_snapshot保存到练习；practice DTO继续返回该快照。
+      - src/server/mappers/mock-exam-mapper.ts:35-52将mockExam.paper_snapshot原样映射为paperSnapshot；src/server/contracts/mock-exam-contract.ts:13-28把它定义为任意Record。
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx:90-193以paper/mock标识构造无用户范围的localStorage键并持久化整个DTO及待同步答案，1339-1411在网络失败时直接恢复。
+      - src/features/student/profile/StudentProfileRedeemPage.tsx:858-866和studentRuntimeApi.ts:74-76退出时只删除session token；全仓未发现清理mockExam cache/answerQueue前缀的生产代码。
+      - src/server/contracts/personal-ai-generation-learning-session-contract.ts:35-70把isCorrect、standardAnswerLabels、standardAnswerText和analysis定义在session
+        question DTO中；src/server/services/personal-ai-generation-learning-session-service.ts:93-119、150-176在创建响应中返回完整session。
+      - src/server/services/personal-ai-generation-learning-session-route.ts:506-548把上述creation result直接封装为成功响应；UI仅延迟渲染反馈，网络调用方仍能读取评分事实。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/03-student-experience.md:135-143要求模拟考试作答中不显示答案、解析，并以绑定用户的服务端会话恢复。
+      - docs/01-requirements/stories/epic-03-student-experience.md:83-100把交卷前不泄露答案和跨设备用户绑定列为P0验收标准。
+      - UC-PSTD-007把answers和timing标为敏感数据，并要求考试中不显示答案解析。
+      - docs/01-requirements/traceability/2026-07-06-ai-generation-recontract-requirements-materialization.md:202-209要求个人高级AI组卷先显示自测试卷预览，预览与作答完成前不得显示答案或解析。
+    riskConsequence:
+      businessImpact: 学员在试卷目录查看详情、开始练习或开始模拟考试时都会收到完整paper_snapshot，其中含standardAnswerRichText、analysisRichText、questionOptions.isCorrect和fillBlankAnswers；个人AI学习session的创建与恢复响应也直接返回questions，其中含questionOptions.isCorrect、standardAnswerLabels、standardAnswerText和analysis。页面是否暂不渲染不能保护网络响应。模拟考试前端又把整个DTO和待同步原始作答持久化到按paper或mock标识命名、但不含用户或会话范围的localStorage；退出只删除会话标记。学员可在作答前直接读取答案与解析，共用浏览器的后一账号还可能在断网回退时看到前一账号的考试内容和作答，直接破坏练习反馈时序、考试公平与隐私隔离。
+      blastRadius: 四类学员的试卷目录、理论/技能练习、全部模拟考试题型、材料和待同步答案，以及个人高级AI私有训练的题目与组卷session；共用终端、离线恢复和开放开发者工具的场景风险最高。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-07
+      name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0060
+        - F-0061
+        - F-0064
+        - F-0066
+        - F-0136
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0162
+      - F-0164
+      - F-0013
+      - F-0026
+      - F-0027
+      - F-0079
+      - F-0152
+      - F-0020
+      - F-0169
+      - F-0172
+      - F-0003
+      - F-0034
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-07
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 模拟考试页面在交卷前不渲染标准答案和解析，练习页面在答题后需要反馈答案；两者都不能证明答题前把教师态字段发送到浏览器是安全的。student paper详情也没有独立学员态快照合同。
+        - 个人AI页面只在answerFeedback后显示标准答案与解析，但服务端首次session响应已含同一字段；前端显示时序不是服务端数据最小化边界。
+        - UI测试只断言页面文本不出现答案，并明确断言完整mock DTO已缓存；它只检查缓存不含session token，未检查答案、解析或跨账号残留。
+        - paper_snapshot不可变性保护历史内容正确，却不等于可以把教师态完整快照暴露给考试中的学员；需要按状态生成最小DTO。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0015
+        - RV-0021
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 试卷草稿、分组快照、附件、发布下架与跨角色消费者修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应区分学员试卷目录、练习/AI训练答题前后和模拟考试交卷前后DTO，服务端只在合法反馈终态返回答案、解析、正确标记等字段；评分快照保留在服务端，客户端缓存必须按稳定用户范围隔离、最小化或加密并在退出/终态清除。补四类网络响应、localStorage、共用浏览器账号切换和离线回退反例测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0060
+    title: 模拟考试倒计时在页面加载后冻结且超时交卷只由后续请求惰性触发
+    problemEssence: “服务器权威时间”被误实现成“服务器响应里的一次性时间样本”，超时状态转换没有持久化任务/调度所有者，UI也没有以deadline和单调本地时钟持续派生显示。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-007
+      - UC-PADV-004
+      - UC-ORGSTDEMP-006
+      - UC-ORGADVEMP-004
+    businessChain:
+      - 学员打开有时长的模拟考试，响应携带固定serverNow和serverDeadlineAt。
+      - 页面渲染时计算一次remainingMinute，随后没有interval、服务器校时或到零提交effect。
+      - 到达deadline后页面仍允许继续编辑；若没有新API请求，服务端没有机会执行isDeadlineReached。
+      - 只有再次读取或再次开始考试时才惰性交卷，提交时间、离线补交和报告出现时间均偏离真实期限。
+    horizontalCapabilities:
+      - SC-ANSWER-SESSION
+      - SC-ACCESS-TERMINATION
+      - SC-INTERACTION-STATE-CONTRACT
+    stateMachineIds: []
+    crossRoleDependencyIds: []
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx:749-758只计算deadlineTime减响应serverTime，1524和2017-2024仅在渲染时展示；文件中没有setInterval或自动提交effect。
+      - src/server/services/mock-exam-service.ts:1131-1165只在getReadableMockExam被调用时检测deadline并submit，1299-1314在再次start时重复相同惰性逻辑。
+      - 当前repository/schema只保存server_deadline_at，没有可见的到期任务认领、调度或outbox消费者。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/03-student-experience.md:141-166要求倒计时持续、按服务器时间恢复并在超时后无确认自动交卷。
+      - docs/01-requirements/stories/epic-03-student-experience.md:87-100把服务器倒计时、超时自动交卷和退出恢复列为P0。
+    riskConsequence:
+      businessImpact: 前端只用响应中的serverDeadlineAt与当次serverNow计算一次剩余分钟，没有运行时钟或到零自动提交；服务端也没有调度器，只在读取/开始等后续请求时发现deadline并交卷。保持页面打开的考试会永远显示初始剩余时间且不会在到点交卷，关闭页面后若用户不再访问，记录可长期停留in_progress并缺席历史报告，计时和成绩边界均不可依赖。
+      blastRadius: 所有有时长的四类学员模拟考试，以及依赖超时交卷开始的评分、报告和记录列表。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-07
+      name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0059
+        - F-0061
+        - F-0064
+        - F-0066
+        - F-0136
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0013
+      - F-0020
+      - F-0026
+      - F-0027
+      - F-0065
+      - F-0172
+      - F-0067
+      - F-0079
+      - F-0135
+      - F-0161
+      - F-0018
+      - F-0019
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-07
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 服务端不信任客户端时间并在每次读取时重算，是正确纵深防线；它无法保证没有后续请求时按时交卷。
+        - 单元测试通过推进假时钟后主动调用service证明“下次请求会交卷”，没有证明打开页面的持续倒计时或无请求调度。
+        - 用户在页面上保存答案会触发请求并可能间接交卷，但不保证恰在deadline发生，且之后的写请求可能被拒绝而没有友好切换到已提交状态。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0021
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应为deadline建立可重入的服务端到期命令和可靠调度/扫描机制，UI以服务器校准偏移持续显示并在到零刷新权威状态；提交必须幂等。补页面保持开启、后台标签、关闭浏览器、无后续请求、重启和调度重试测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0061
+    title: 模拟考试切题不自动保存且离线队列不自动补交并可用陈旧答案覆盖新值
+    problemEssence: 前端把“本地已暂存”当成“服务端已保存”，服务端则把自动保存建模为无版本upsert；离线恢复和终态补交没有共同的同步协议、缺失判定或报告重建机制。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-007
+      - UC-PSTD-008
+      - UC-PADV-004
+      - UC-PADV-005
+      - UC-ORGSTDEMP-006
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-004
+      - UC-ORGADVEMP-005
+    businessChain:
+      - 用户录入答案后直接点击下一题或答题卡，当前答案没有调用保存函数即从可见表单切走。
+      - 保存请求断网时前端把答案标记为已保存并计入已答数量，只显示手工重试按钮；交卷仍可直接POST submit。
+      - 同题在另一设备更新后，旧队列恢复并晚到，repository按public_id无条件update，忽略savedFromClientAt的顺序。
+      - 若服务器已因超时或读取而交卷，getWritableMockExam统一返回409，缺失题补交、补充评分和报告更新均没有入口。
+    horizontalCapabilities:
+      - SC-ANSWER-SESSION
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-INTERACTION-STATE-CONTRACT
+    stateMachineIds:
+      - SM-ANSWER-RECORD
+      - SM-MOCK-EXAM
+      - SM-PRACTICE
+    crossRoleDependencyIds:
+      - DEP-027
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx:2082-2121的切题动作只setCurrentQuestionIndex；1610-1654只有显式保存按钮调用API。
+      - 同文件1596-1608把失败请求加入队列同时标为saved，1656-1693只提供手工重试，1853-1911交卷前不flush当前值或pending队列。
+      - src/server/services/mock-exam-service.ts:636-643保存savedFromClientAt，但student-flow-runtime-repository.ts:662-732更新时不比较它或版本。
+      - src/server/services/mock-exam-service.ts:1168-1191对所有非in_progress记录拒绝写入；未发现补缺失答案、重算增量分数或更新报告的专用命令。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/03-student-experience.md:168-182要求切题自动保存、网络恢复自动提交、已自动交卷后只补缺失题且纳入补评分和报告更新。
+      - docs/01-requirements/stories/epic-03-student-experience.md:95-116把离线自动提交和切题保存列为P0。
+    riskConsequence:
+      businessImpact: 切题和答题卡只改变前端索引，必须手动点“保存本题作答”才写服务器；网络失败后队列仅在用户点“重试保存”时发送，没有联网自动重试，且交卷前不冲洗当前答案或队列。服务端保存虽携带savedFromClientAt却不比较版本，任意晚到的旧设备/旧队列请求都无条件覆盖新答案；自动交卷后又统一拒绝保存，没有“仅补服务端缺失题目并触发补评分/更新报告”的合同。用户可静默丢题、被陈旧值覆盖，或永远无法完成需求规定的离线补交。
+      blastRadius: 四类学员的所有模拟考试答案、超时交卷、AI评分和历史报告；弱网、多设备与后台标签页场景最易触发。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-07
+      name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0059
+        - F-0060
+        - F-0064
+        - F-0066
+        - F-0136
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0026
+      - F-0027
+      - F-0013
+      - F-0020
+      - F-0065
+      - F-0067
+      - F-0172
+      - F-0079
+      - F-0135
+      - F-0137
+      - F-0161
+      - F-0163
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-07
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 本地队列能在单次页面内避免立即丢失部分答案，是正向补偿；没有online事件、后台重试或提交屏障，不能满足自动恢复。
+        - pending对象按题目键去重可避免同一浏览器队列内重复项，但不能处理多设备、旧标签页和服务器已有更新的顺序冲突。
+        - F-0027已记录repository保存/交卷事务与并发根因；本finding登记切题、自动重试、版本顺序和终态补交这一不同的客户端—服务端恢复合同，不重复其原子性结论。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0021
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应先定义每题幂等版本/客户端时间与服务端序号协议，切题和交卷屏障自动保存；联网自动重试只能补缺失或提交更新版本，终态补交采用专用原子命令并增量重评分、重建报告。补乱序、多设备、断网跨deadline和响应丢失矩阵。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0062
+    title: 当前模拟考试主观题以答案长度伪评分并同步阻塞交卷且失败重试入口被统一封锁
+    problemEssence: 开发期确定性fixture被提升为默认正式装配，Provider审批门禁只覆盖重试而未覆盖首次提交；队列与超时接口停留在可注入测试抽象，没有可运行的生产所有者。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-008
+      - UC-PADV-005
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-005
+    businessChain:
+      - 学员提交含主观题的模拟考试，生产装配创建默认AI scoring runtime但没有队列。
+      - submitReadableMockExam因queue缺失走同步scoreSubjectiveQuestions，按题逐个await。
+      - runner只看studentAnswer长度并把得分给第一个评分点，不调用配置的Provider；返回结果仍按成功评分写入成绩和日志。
+      - 若评分失败，UI调用retry-scoring，但顶层route在进入已有service前直接返回423 blocked；60秒超时和FIFO任务均无可执行载体。
+    horizontalCapabilities:
+      - SC-AI-TASK-LIFECYCLE
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-AI-CALL-LOG-REDACTION
+      - SC-ATOMICITY-IDEMPOTENCY
+    stateMachineIds:
+      - SM-AI-SCORING-ATTEMPT
+      - SM-MOCK-EXAM
+    crossRoleDependencyIds:
+      - DEP-027
+      - DEP-047
+      - DEP-048
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/student-flow-runtime.ts:277-323的默认runner只按answer length ratio计算并返回Local deterministic结果。
+      - 同文件506-523装配mockExamService时只传aiScoringRuntime，没有传aiScoringQueue。
+      - src/server/services/mock-exam-service.ts:751-815逐题串行await；960-990在queue缺失时同步评分并直接决定completed/partial状态。
+      - src/server/services/student-experience/route-handlers.ts:224-229把retryScoring固定映射为Provider blocked，而submit仍转发到上述legacy默认runtime。
+      - ai-scoring-service.ts和当前runtime未发现使用model_config.timeout_second、AbortSignal或Promise.race实施单题超时。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/04-ai-scoring.md:22-40要求AI自动评分进入成绩且模拟考试整卷异步评分、成功结果固定。
+      - 同文档67-102要求失败可重试、单题60秒超时、评分中页面和异步处理。
+      - docs/01-requirements/stories/epic-04-ai-scoring.md:9-63要求保存评分证据、FIFO异步队列、刷新和重试入口。
+    riskConsequence:
+      businessImpact:
+        当前默认运行时没有调用真实评分Provider，而是按答案长度占40字符的比例分配首个评分点并返回“本地确定性”评语；装配层又只注入该runtime、不注入aiScoringQueue，因此交卷HTTP逐题串行等待伪评分并直接完成或部分失败，而不是进入FIFO异步评分。单题60秒超时没有执行边界，顶层retry-scoring路由却固定返回Provider
+        blocked。系统会把与内容正确性无关的伪造分数作为成绩持久化，同时用户无法按合同重试失败项。
+      blastRadius: 四类学员所有含short_answer、case_analysis或calculation等AI评分题的模拟考试成绩、排名外分析、报告和学习建议。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-06
+      name: model_config、AI 任务执行与结果真实性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0101
+        - F-0102
+        - F-0134
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0063
+      - F-0039
+      - F-0174
+      - F-0177
+      - F-0160
+      - F-0150
+      - F-0178
+      - F-0021
+      - F-0038
+      - F-0091
+      - F-0103
+      - F-0105
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-06
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - mockExamService支持注入aiScoringQueue，单元测试也可用fixture队列证明抽象存在；应用默认装配没有注入，不能代表当前可执行路径。
+        - 默认runtime会执行RAG检索并写脱敏日志，但runner完全不消费检索内容判断答案正确性，不能把日志存在视为真实AI评分。
+        - Provider gate保护未获批准的外部调用是安全边界；submit没有一致阻断而继续产生伪成绩，形成比明确不可用更危险的语义。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0021
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应移除任何会产生成绩的伪评分默认值；未配置Provider时明确阻断且不提交伪成绩。建立持久FIFO任务认领、单题可取消超时、状态刷新和一致的审批门禁，首次与重试共用同一真实runtime和幂等结果。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0064
+    title: 主观题评分证据在持久化时被丢弃且报告缺少解析评分点原因引用与模型信息
+    problemEssence: AI评分输出被当成临时计算对象，只把标量score写入通用answer_record；报告又另建简化投影，没有以版本化评分结果快照作为唯一事实源。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-008
+      - UC-PSTD-009
+      - UC-PADV-005
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-005
+    businessChain:
+      - AI runtime返回结构化scoringSnapshot，service放入每题提交结果。
+      - repository更新answer_record时忽略aiScoringSnapshot，只有总分数落库；attempt日志也没有被报告repository join。
+      - generate report从已降级记录构造永久快照，缺失的评分证据无法恢复；主观题standardAnswerRichText和stemRichText也未映射到questionResults。
+      - UI类型只接受简化questionResults并忽略questionDetails，用户看不到需求规定的评分依据和引用。
+    horizontalCapabilities:
+      - SC-AI-TASK-LIFECYCLE
+      - SC-PAPER-SNAPSHOT
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-AI-CALL-LOG-REDACTION
+    stateMachineIds:
+      - SM-AI-SCORING-ATTEMPT
+      - SM-ANSWER-RECORD
+      - SM-MOCK-EXAM
+      - SM-PRACTICE
+    crossRoleDependencyIds:
+      - DEP-027
+      - DEP-047
+      - DEP-048
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/repositories/mock-exam-repository.ts:89-123的提交和评分输入声明aiScoringSnapshot，mock-exam-service.ts:706-731实际构造它。
+      - src/server/repositories/student-flow-runtime-repository.ts:741-825更新answer_record时完全忽略aiScoringSnapshot；src/db/schema/student-experience.ts:167-207没有评分结果快照列。
+      - src/server/services/exam-report-service.ts:336-387只复制answer_record基础字段，551-594只生成简化questionResults并读取不存在于当前快照主路径的title/stemText，主观标准答案未读取standardAnswerRichText。
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx:223-268的前端类型没有评分证据字段，2491-2557只渲染题名、计分方式、作答、标准答案和分数。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/04-ai-scoring.md:37-65要求固定保存每评分点命中、得分、原因、总评、改进、引用、模型和Prompt版本。
+      - docs/01-requirements/modules/03-student-experience.md:201-249要求报告包含每题作答、答案、解析、评分点和RAG引用并快照保存。
+      - docs/01-requirements/stories/epic-04-ai-scoring.md:13-26及epic-03-student-experience.md:122-135把这些字段列为P0验收。
+    riskConsequence:
+      businessImpact:
+        评分service已构造含评分点、原因、总评、改进建议和citation的aiScoringSnapshot，但submit/apply repository更新answer_record时只保存status/isCorrect/score并丢弃该字段，schema也没有承载列。报告随后只从answer_record和paper快照构建简化questionResults：主观标准答案为空、标题读取错误字段而常降级为Question
+        n，UI仅显示作答、标准答案和分数，不展示解析、评分点命中/实得分/原因、总评、改进建议、模型、Prompt版本或RAG引用。成绩无法解释和复核，P0报告合同不成立。
+      blastRadius: 四类学员所有主观题成绩、完整报告、学习建议输入、RAG引用展示和后续争议追溯。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-07
+      name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0059
+        - F-0060
+        - F-0061
+        - F-0066
+        - F-0136
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0065
+      - F-0067
+      - F-0079
+      - F-0018
+      - F-0020
+      - F-0026
+      - F-0137
+      - F-0172
+      - F-0176
+      - F-0175
+      - F-0027
+      - F-0013
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-07
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - ai_scoring_attempt和ai_call_log可保留部分脱敏运行记录，但报告repository没有反查它们，且治理日志不能替代面向用户的不可变评分结果快照。
+        - reportSnapshot包含完整paperSnapshot和questionDetails，理论上仍有题干/解析；前端不消费，且AI评分点结果在上游已丢失。
+        - 总分、题型/大题/知识点聚合已有实现，是正向基础；没有可解释的单题证据时仍不能证明总分来源正确。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0021
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应建立版本化ai_scoring结果实体或不可变快照，与answer_record和attempt原子关联；报告生成只消费已保存证据并完整投影题干、答案、解析、评分点、总评、模型/Prompt和citation。补字段级血缘和历史快照不变测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0066
+    title: 评分中和已完成考试重载后仍进入答题页且记录列表把mock标识当报告标识跳转
+    problemEssence: 答题、评分进度和报告被实现为页面内临时阶段状态，没有用持久mock_exam状态驱动路由；记录行又复用了同一publicId字段承载两种实体标识。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-CAL-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-008
+      - UC-PSTD-009
+      - UC-PADV-005
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-005
+    businessChain:
+      - 用户交卷进入评分中后刷新、关闭页面或稍后从记录列表返回。
+      - mock详情GET返回scoring/partial/completed，但组件isSubmitted初始仍为false且加载effect只保存DTO，不恢复评分状态。
+      - 记录列表对无report行生成链接，使用mock公开标识代替report公开标识。
+      - report detail按exam_report公开标识查询不到，返回404；失败重试与刷新结果入口因此不可达。
+    horizontalCapabilities:
+      - SC-AI-TASK-LIFECYCLE
+      - SC-LEARNER-LIST-CONTRACT
+      - SC-PUBLIC-ID-OBJECT-AUTH
+      - SC-INTERACTION-STATE-CONTRACT
+    stateMachineIds:
+      - SM-AI-SCORING-ATTEMPT
+      - SM-MOCK-EXAM
+    crossRoleDependencyIds:
+      - DEP-027
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/student/mock-exam/StudentMockExamReportPage.tsx:1299-1326把isSubmitted和runtimeScoringProgress初始为false/null，1330-1411加载后只设置runtimeMockExams和缓存，未按examStatus恢复。
+      - 同文件2780-2844对所有非terminated行链接到examReportPublicId ?? publicId。
+      - src/server/repositories/student-flow-runtime-repository.ts:1566-1601在无report时把public_id设为attempt.public_id且exam_report_public_id为null。
+      - exam-report-service.ts:783-796的detail调用getAuthorizedReport按真实报告标识读取，没有接受mock标识并生成/恢复报告的分支。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/04-ai-scoring.md:85-102要求评分中页可离开并稍后从记录进入，刷新后按真实状态显示完成或失败重试。
+      - docs/01-requirements/stories/epic-04-ai-scoring.md:51-63把可离开后返回、刷新和失败重试列为P0。
+      - docs/01-requirements/stories/epic-03-student-experience.md:139-150要求记录列表正确表示四种状态。
+    riskConsequence:
+      businessImpact: 直接加载mock_exam详情时，页面不根据返回的examStatus初始化isSubmitted或scoring progress，scoring、partial和completed记录只要带题目快照就继续显示可编辑答题页，随后保存/交卷得到409。历史列表又对所有非terminated记录显示“查看报告”；尚未生成report时repository用mock_exam.public_id构造合成行并令examReportPublicId=null，链接回退到row.publicId，报告详情却只接受真实exam_report.public_id，必然404。用户离开提交页后无法从要求的记录入口返回评分中、重试或生成报告。
+      blastRadius: 四类学员全部异步或部分失败评分、响应丢失、刷新和跨设备恢复；也影响完成后尚未创建报告的记录。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-07
+      name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0059
+        - F-0060
+        - F-0061
+        - F-0064
+        - F-0136
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0020
+      - F-0018
+      - F-0065
+      - F-0027
+      - F-0137
+      - F-0172
+      - F-0013
+      - F-0026
+      - F-0079
+      - F-0019
+      - F-0165
+      - F-0023
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-07
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 同一次未刷新提交流程会把runtimeScoringProgress保存在React state，刷新按钮和重试控件因此局部可用；持久恢复后该状态消失。
+        - completed状态在首次提交响应后会立即调用generate report，正常网络happy path可得到链接；响应丢失、异步完成或页面离开后没有等价入口。
+        - UI测试可传入带真实report public ID的fixture展示partial状态，但生产list repository在报告尚不存在时明确返回null，fixture未覆盖真实标识契约。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0021
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应建立以mock_exam为稳定入口的状态路由：in_progress进答题，scoring/partial进进度，completed幂等查建报告，terminated只读提示；列表不得混用实体ID。补刷新、深链、跨设备、响应丢失和无report行测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0068
+    title: 知识点父子关系不校验专业与知识库一致性且现有测试把跨专业移动固化为成功路径
+    problemEssence: 知识点范围被重复编码为三个可独立写字段，却没有选择单一事实源或在同一事务内实施父子/知识库一致性约束；测试只验证公开标识和UI成功反馈，反而批准了非法拓扑。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+    useCases:
+      - UC-SUPER-013
+      - UC-CONTENT-003
+      - UC-CONTENT-008
+      - UC-CONTENT-009
+    businessChain:
+      - 内容管理员选中营销知识点并打开移动对话框，选择物流专业的父节点。
+      - UI向同一PATCH发送物流父节点公开标识；repository全局解析父节点且只检查自环/后代环。
+      - UPDATE保留当前节点profession和knowledge_base_id，却把parent和path_name改到物流树下；直接API还可只改profession，进一步使三个范围字段分叉。
+      - 列表按profession筛选、路径展示、资源知识库关联和推荐候选筛选分别消费不同字段，错误分类可长期传播。
+    horizontalCapabilities:
+      - SC-CONTENT-LIFECYCLE
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-PUBLIC-ID-OBJECT-AUTH
+    stateMachineIds:
+      - SM-KNOWLEDGE-NODE
+    crossRoleDependencyIds: []
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/repositories/rag-resource-knowledge-runtime-repository.ts:386-423创建时按input.profession选择knowledge_base，却全局解析parent且不比较父节点profession或knowledge_base_id。
+      - 同文件442-493更新时全局解析parent，并可写profession，但lookup不读取knowledge_base_id且UPDATE从不修改knowledge_base_id。
+      - src/db/schema/ai-rag.ts:817-853分别定义base、parent和profession外键/字段，没有约束三者范围一致。
+      - src/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement.tsx:998-1030的移动下拉列出所有parentOptions，不按当前节点专业过滤。
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts:75-103构造跨专业父子fixture，990-1032选择物流父节点并断言营销节点跨专业移动成功。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/05-rag-knowledge.md:352-378规定知识点树按专业维护且每个专业拥有当前树。
+      - docs/01-requirements/stories/epic-05-rag-knowledge.md:124-136要求按专业维护、移动后使用最新路径并保持历史语义。
+      - catalog/roles/content-admin.yaml:155-172把按profession维护最多五级树和正确题目绑定定义为P0用例。
+    riskConsequence:
+      businessImpact: knowledge_node同时保存profession、knowledge_base_id和parent，但创建/移动只按父节点公开标识全局查找，不证明父子属于同一专业和知识库；更新还允许只改profession而不改knowledge_base_id。正常UI移动框列出所有专业节点，focused测试明确把营销节点移到物流父节点并期待成功。一次普通操作即可形成“路径属于物流、节点专业属于营销、知识库仍属于原专业”的互相矛盾事实，随后题目绑定、AI推荐、RAG范围和专业统计会按不同字段得到不同结果。
+      blastRadius: 平台三专业知识树、题目知识点绑定、资源关联、AI知识点推荐、AI出题/组卷知识范围、报告统计和所有依赖path_name的展示。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-05
+      name: knowledge_node、resource、RAG 与 citation 事实链
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0075
+        - F-0076
+        - F-0080
+        - F-0081
+        - F-0084
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0070
+      - F-0069
+      - F-0071
+      - F-0072
+      - F-0083
+      - F-0088
+      - F-0090
+      - F-0040
+      - F-0031
+      - F-0097
+      - F-0032
+      - F-0054
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-05
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 创建表单初次渲染会按当前profession过滤父节点，但先选父节点再切专业可保留旧值；移动对话框完全不筛选，服务端也不能依赖UI防线。
+        - repository能拒绝直接自环和把节点移到后代之下，说明部分树不变量存在；它没有覆盖专业/knowledge_base这一独立结构不变量。
+        - 一个专业一个knowledge_base的唯一索引只约束base表，不约束knowledge_node的profession、base和parent彼此一致。
+      runtimeValidationIds:
+        - RV-0013
+      runtimeValidationTitles:
+        - 正式内容知识树、引用、推荐与报告修复后端到端回归
+      nextAction: 修复线程应选定knowledge_base_id为范围事实源并在创建/移动/改专业的单一事务中锁定父节点、验证同base同profession；禁止原地跨专业迁移或用显式整棵树迁移命令。增加数据库约束/触发器或等价不可绕过防线，并把现有跨专业成功测试改为API与repository拒绝反例。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0075
+    title: 知识点推荐生产路径是本地字符串匹配和首节点兜底，却被包装成模型与引用结果
+    problemEssence: 为局部UI验收建立的确定性fixture runner被直接装配到生产route，并通过伪model_config和候选快照日志模拟真实AI/RAG证据，未与正式Provider/RAG执行面隔离。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+    useCases:
+      - UC-SUPER-013
+      - UC-CONTENT-003
+      - UC-CONTENT-009
+    businessChain:
+      - 对任意不包含知识点名称/路径词语的题目点击AI推荐。
+      - route只取首100个active节点并调用localKnowledgeRecommendationRunner。
+      - runner找不到高匹配时仍保留index===0的首节点，返回low及通用英文原因。
+      - service把候选节点本身写入citation摘要并返回伪模型配置；UI显示推荐并允许采纳为正式绑定。
+    horizontalCapabilities:
+      - SC-AI-TASK-LIFECYCLE
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-MODEL-PROMPT-GOVERNANCE
+      - SC-AI-CALL-LOG-REDACTION
+    stateMachineIds:
+      - SM-EVIDENCE-STATUS
+      - SM-KNOWLEDGE-RECOMMENDATION
+    crossRoleDependencyIds:
+      - DEP-026
+      - DEP-013
+      - DEP-044
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/content-question-material-runtime.ts:347-367硬编码local_deterministic model/prompt快照。
+      - 同文件369-414只做字符串includes匹配，无命中仍保留第一项；没有rag retrieval或Provider调用。
+      - 同文件739-769只取首100个节点并直接注入本地runner，没有解析当前model_config。
+      - src/server/services/knowledge-recommendation-service.ts:185-245把eligible knowledgeNodeSnapshots作为citations，结果类型没有evidence_status或chunk citation。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/05-rag-knowledge.md:343-350要求基于题干、参考答案和RAG检索结果生成1至5项置信度候选。
+      - docs/01-requirements/modules/05-rag-knowledge.md:40-71规定Top3、evidence_status和无证据降级边界。
+      - catalog/roles/content-admin.yaml:176-193要求检索授权内容、RAG结果、置信度、ai_call_log和无证据处理。
+    riskConsequence:
+      businessImpact:
+        当前可达route不解析启用的model_config、不调用Provider、不执行chunk检索，也不使用evidence_status/citation；它把题干、解析和答案拼接后做名称/路径子串匹配，只要无直接命中就推荐排序第一的知识点并给低置信度。结果仍附带硬编码“Local
+        deterministic provider/model/prompt”快照，日志还把所有候选knowledge_node快照包装为citation。内容人员会把没有RAG证据且可能完全无关的首节点当成AI推荐，错误绑定再进入题库、组卷和报告。
+      blastRadius: 所有正式题的知识点推荐和采纳绑定、知识点统计、AI生成范围、RAG治理日志及内容人员对系统证据的信任。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-05
+      name: knowledge_node、resource、RAG 与 citation 事实链
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0068
+        - F-0076
+        - F-0080
+        - F-0081
+        - F-0084
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0078
+      - F-0031
+      - F-0071
+      - F-0077
+      - F-0054
+      - F-0035
+      - F-0029
+      - F-0032
+      - F-0069
+      - F-0070
+      - F-0072
+      - F-0083
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-05
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 通用RAG retrieval、model_config和Provider基础设施在仓库其他模块存在，但本route没有导入或调用，能力存在不等于链路接通。
+        - 历史docs/05-execution-logs/evidence/2026-06-18-provider-rag-quota-governance-packet.md明确只把该用例标为local-only experience_closed；2026-06-22 evidence也明确无真实RAG/Provider质量声明。
+        - 低置信度标签能提示不确定性，但“始终选第一项”没有相关性证据，且日志中的citation名称会制造并不存在的检索来源。
+      runtimeValidationIds:
+        - RV-0013
+      runtimeValidationTitles:
+        - 正式内容知识树、引用、推荐与报告修复后端到端回归
+      nextAction: 修复线程应删除任何可写正式绑定的伪推荐默认路径；未配置真实可用model_config/RAG时明确返回不可用且不伪造citation。正式执行应消费受控Top3 chunks、evidence_status、真实Prompt版本和Provider结果，无证据不得用排序首项填充。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0076
+    title: 知识点推荐没有自动触发、持久任务或候选审核事实，六状态闭环只存在于页面内存
+    problemEssence: 推荐被实现成同步计算API加页面演示状态，而不是以题目版本为owner的持久异步任务与审核聚合；通用question update被误当成完整采纳工作流。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+    useCases:
+      - UC-SUPER-013
+      - UC-CONTENT-003
+      - UC-CONTENT-009
+    businessChain:
+      - 首次保存题目，route只调用questionService.createQuestion并返回，没有推荐副作用或任务标识。
+      - 用户手工点击推荐，单个HTTP请求同步计算并把候选返回浏览器；数据库只可能追加ai_call_log。
+      - 页面用内存Map保存候选和本地审查状态；丢弃仅更新Map，刷新后全部消失。
+      - 同题编辑、停用或重复推荐时没有持久版本认领/取消；晚到旧响应可覆盖新候选，报告也无从读取“AI推荐待确认”。
+    horizontalCapabilities:
+      - SC-AI-TASK-LIFECYCLE
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-AUDIT-LOG
+    stateMachineIds:
+      - SM-KNOWLEDGE-RECOMMENDATION
+    crossRoleDependencyIds:
+      - DEP-013
+      - DEP-045
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/content-question-material-runtime.ts:577-601的题目创建路径只保存和审计，没有推荐任务；703-830的手工route同步await并直接返回结果。
+      - src/db/schema/ai-rag.ts:64-86的ai_generation_task类型不含kn_recommendation；仓库搜索未发现知识点推荐结果/审核状态表或repository。
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx:1029-1031只用React state保存推荐；1560-1685的discard标记为local_review_only且无服务端请求。
+      - 同文件3948-4141从内存计算待确认/已采纳/已丢弃，刷新恢复和历史入口均不存在。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/05-rag-knowledge.md:343-350要求首次保存自动或手工触发、候选确认/修改/忽略，未确认推荐仍参与报告且标注待确认。
+      - catalog/roles/content-admin.yaml:176-193定义异步触发及pending、succeeded、failed、superseded、confirmed、ignored六状态。
+      - docs/01-requirements/stories/epic-05-rag-knowledge.md:124-149要求推荐与统计闭环及空树正常结果。
+    riskConsequence:
+      businessImpact: 创建题目只保存question并返回，不自动创建推荐任务；手工推荐在HTTP请求内同步执行且没有task/result/review表。候选、pending/accepted/discarded只保存在React state，刷新或离开页面即消失；discard不调用服务端也无audit，未确认候选不可能参与报告。题目编辑/停用、重复触发和乱序响应没有可持久superseded状态或幂等键。需求定义的pending、succeeded、failed、superseded、confirmed、ignored全生命周期无法恢复、查询或对账。
+      blastRadius: 所有知识点推荐触发、失败恢复、人工审核、审计、待确认统计和报告/AI生成下游。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-05
+      name: knowledge_node、resource、RAG 与 citation 事实链
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0068
+        - F-0075
+        - F-0080
+        - F-0081
+        - F-0084
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0077
+      - F-0078
+      - F-0031
+      - F-0054
+      - F-0071
+      - F-0088
+      - F-0029
+      - F-0040
+      - F-0069
+      - F-0032
+      - F-0035
+      - F-0085
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-05
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - ai_call_log能记录一次脱敏调用，不是具备状态、版本、候选和人工决策的任务事实源，也无法支撑恢复或报告统计。
+        - 采纳会通过通用question PATCH把知识点写成正式绑定，是一段正向末端；没有推荐实体就不能证明采纳来自哪次题目版本，也不能保存忽略/修改决策。
+        - 历史phase-20和2026-06-21 evidence明确把丢弃称为local_review_only，并说明未新增route/schema/Provider，不能作为持久闭环证据。
+      runtimeValidationIds:
+        - RV-0013
+      runtimeValidationTitles:
+        - 正式内容知识树、引用、推荐与报告修复后端到端回归
+      nextAction: 修复线程应建立以question revision和幂等键为核心的持久kn_recommendation task/result/review模型；首次保存事务后可靠投递，手工触发复用同一命令，旧版本/停用自动supersede，确认/替换/忽略由服务端条件命令落库并审计，报告读取同一事实源。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0080
+    title: 重建检索索引只切分文本便宣告rag_ready，生产路径没有向量、关键词索引或语义检索
+    problemEssence: 局部演示用的文本切分和确定性重合率被直接提升为生产“向量重建/RAG可用”状态，索引持久层与真实检索适配器从未成为状态迁移的成功条件。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-014
+      - UC-CONTENT-009
+      - UC-CONTENT-011
+      - UC-CONTENT-012
+      - UC-CONTENT-014
+      - UC-PSTD-008
+      - UC-PADV-008
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-008
+    businessChain:
+      - 内容管理员发布任意资料并点击重建检索索引。
+      - service同步调用buildResourceChunks后立即把resource状态写成rag_ready；数据库只更新resource一行。
+      - chunkCount和textHashes传入repository但没有落库，schema也没有chunk、embedding、关键词索引或索引代际表。
+      - AI消费者只读取本地catalog；检索将token重合率同时写为关键词分和语义分，页面和日志仍把结果当作RAG证据。
+    horizontalCapabilities:
+      - SC-RESOURCE-PIPELINE
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-AI-TASK-LIFECYCLE
+    stateMachineIds:
+      - SM-EVIDENCE-STATUS
+      - SM-KNOWLEDGE-RECOMMENDATION
+      - SM-RESOURCE
+    crossRoleDependencyIds:
+      - DEP-015
+      - DEP-016
+      - DEP-014
+      - DEP-013
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/rag-resource-knowledge-runtime.ts:684-741仅同步切分文本、标记indexing后立即保存success，没有embedding、关键词索引或外部索引调用。
+      - src/server/repositories/rag-resource-knowledge-runtime-repository.ts:307-337完全不使用传入的chunkCount和textHashes，只更新resource状态、错误和is_vector_stale。
+      - src/db/schema/ai-rag.ts:775-878只有resource和knowledge_node_resource，没有chunk、embedding、vector或index generation事实表。
+      - src/server/services/rag-retrieval-service.ts:89-114把同一tokenScore同时赋给keywordScore和semanticScore。
+      - src/server/services/local-rag-mock-embedding-pipeline.ts虽生成8维hash mock embedding，但全仓生产代码没有导入；测试是唯一消费者。
+    violatedBusinessInvariants:
+      - docs/01-requirements/stories/epic-05-rag-knowledge.md:15-19要求关键词加向量语义召回、去重、rerank和Top3。
+      - docs/01-requirements/stories/epic-05-rag-knowledge.md:95-101要求异步写入向量库、原子切换和失败保留旧向量。
+      - docs/01-requirements/modules/05-rag-knowledge.md:271-304规定chunk、向量库、关键词索引及索引代际语义。
+    riskConsequence:
+      businessImpact: “重建检索索引”成功只证明Markdown被同步切成若干字符串；数据库不保存chunk、embedding、关键词索引或索引代际，repository还丢弃chunkCount和textHashes。实际检索把同一token重合率同时伪装成keywordScore和semanticScore，再做本地字符串rerank。系统因此可显示“RAG可用”并向AI返回evidence_status/citation，却没有需求所称的向量语义检索和持久检索索引，命中质量、重启恢复和跨实例一致性均无事实基础。
+      blastRadius: 所有AI出题、AI组卷、AI评分、AI讲解、知识点推荐、学习建议及任何依赖RAG citation/evidence_status的角色。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-05
+      name: knowledge_node、resource、RAG 与 citation 事实链
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0068
+        - F-0075
+        - F-0076
+        - F-0081
+        - F-0084
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0083
+      - F-0085
+      - F-0088
+      - F-0090
+      - F-0031
+      - F-0032
+      - F-0089
+      - F-0037
+      - F-0069
+      - F-0070
+      - F-0082
+      - F-0086
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-05
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - scripts/db/init/001-enable-pgvector.sql启用了扩展，但没有schema、写入或查询消费，扩展存在不能证明向量检索接通。
+        - 本地catalog可保存activeChunkSnapshot，证明字符串快照存在；它不是向量或关键词索引，也不能补足数据库资源路径。
+        - 历史2026-07-10资源RAG验收明确把真实embedding/vector基础设施排除在范围外，不能推翻当前静态断链。
+      runtimeValidationIds:
+        - RV-0014
+      runtimeValidationTitles:
+        - 资源转换、私有存储、索引代际、中文RAG与停用修复后端到端回归
+      nextAction: 修复线程应建立持久chunk、关键词索引、embedding/vector及索引generation模型；重建由持久任务执行，只有真实索引写入和原子generation切换成功才可进入rag_ready。检索必须消费真实关键词与向量分数，禁止用同一字符串分数冒充两个通道。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0081
+    title: 禁用资料仍可调用重建接口并被错误恢复为rag_ready，直接绕过停用终止边界
+    problemEssence: 重建命令没有以状态机作为服务端前置条件，失败分支又把“保留旧代”错误等价为“恢复rag_ready”，混淆索引代际可保留与业务资源可重新启用。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-014
+      - UC-CONTENT-011
+      - UC-CONTENT-012
+      - UC-CONTENT-014
+      - UC-PADV-008
+      - UC-ORGADVEMP-008
+    businessChain:
+      - 将一个已有activeChunkSnapshot的rag_ready资料停用。
+      - 直接POST该资料的rebuild-vector接口，或从仍可用的通用按钮触发。
+      - buildResourceChunks因disabled状态拒绝切分。
+      - 失败分支因检测到旧快照把resourceStatus写为rag_ready，同时返回错误并把audit_log标记failed。
+      - 新的AI检索按rag_ready过滤后再次消费该资料，停用失效。
+    horizontalCapabilities:
+      - SC-RESOURCE-PIPELINE
+      - SC-ACCESS-TERMINATION
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-AUDIT-LOG
+    stateMachineIds:
+      - SM-EVIDENCE-STATUS
+      - SM-RESOURCE
+    crossRoleDependencyIds:
+      - DEP-015
+      - DEP-016
+      - DEP-014
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx:2031-2063对所有resourceStatus启用重建按钮。
+      - src/server/services/rag-resource-knowledge-runtime.ts:1020-1050在skipped分支将有activeChunkSnapshot的任何资源写成rag_ready。
+      - src/server/services/rag-resource-knowledge-runtime.ts:1179-1204的新检索仅按rag_ready过滤，故错误状态立即生效。
+      - src/server/services/rag-resource-knowledge-runtime.ts:1487-1503对失败响应写failed审计，与已改成rag_ready的业务事实分叉。
+      - src/server/repositories/rag-resource-knowledge-runtime-repository.ts:307-337的数据库路径同样可把任意非法源状态直接改成index_failed或rag_ready。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/05-rag-knowledge.md:255-267规定合法状态转换及任何状态到disabled、disabled恢复到停用前状态。
+      - docs/01-requirements/modules/05-rag-knowledge.md:298-304规定停用资料不得参与新的RAG检索，恢复必须显式检查旧chunk。
+      - docs/01-requirements/traceability/2026-07-02-content-resource-management-ui-ux-contract.md:188-190要求停用后移出新检索，恢复是独立动作。
+    riskConsequence:
+      businessImpact: UI对任何状态都开放“重建检索索引”，服务端也未限制合法源状态。对带旧chunk快照的disabled本地资料调用该接口时，chunking因状态不合法返回skipped，但失败分支反而把资料改成rag_ready；响应和audit记录失败，资料却重新进入后续检索。禁用这一关键终止动作可被同一内容角色的直接API或误操作绕过，且业务状态与审计结果相反。
+      blastRadius: 所有资料停用、内容撤回、错误资料隔离以及后续AI/RAG消费者；审计日志可信度同步受损。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-05
+      name: knowledge_node、resource、RAG 与 citation 事实链
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0068
+        - F-0075
+        - F-0076
+        - F-0080
+        - F-0084
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0090
+      - F-0083
+      - F-0088
+      - F-0082
+      - F-0031
+      - F-0085
+      - F-0032
+      - F-0069
+      - F-0037
+      - F-0070
+      - F-0086
+      - F-0087
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-05
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - buildResourceChunks自身会拒绝非published/rag_ready，说明底层有局部防线；上层失败状态处理把该防线反转成重新启用。
+        - 正常enable接口存在并检查disabledFromStatus，但rebuild-vector没有调用或复用该恢复合同。
+        - 现有测试覆盖published重建和一般失败，没有disabled加旧快照的反例。
+      runtimeValidationIds:
+        - RV-0014
+      runtimeValidationTitles:
+        - 资源转换、私有存储、索引代际、中文RAG与停用修复后端到端回归
+      nextAction: 修复线程应在rebuild命令入口原子限制published或允许重建的rag_ready状态，disabled必须稳定409且绝不改状态；旧generation保留不得改变资源可用性。补全部九状态直接API矩阵、并发停用/重建和审计一致性测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0084
+    title: 资源知识点关系没有受控生产者，跨专业任意字符串可落catalog且后代范围只靠测试伪造
+    problemEssence: 资源知识关系被实现为本地DTO附带字符串数组，正式关系表、树祖先解析和范围资格没有进入上传/编辑事务，测试则直接构造消费者期望字段。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-014
+      - UC-CONTENT-009
+      - UC-CONTENT-010
+      - UC-CONTENT-011
+      - UC-CONTENT-012
+      - UC-CONTENT-014
+      - UC-PSTD-008
+      - UC-PADV-008
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-008
+    businessChain:
+      - 在上传表单选择营销专业，同时从未过滤的前100节点中选择物流节点，或直接提交任意publicId字符串。
+      - 服务端只去空白和重复后写入catalog，不查询knowledge_node或knowledge_base。
+      - 正常上传把knowledgeNodeAncestorPublicIds固定为[]，数据库关系表也没有被正常上传写入或RAG读取。
+      - AI以父节点加includeDescendants检索时无法命中绑定到子节点的正常资源；错误跨专业绑定又无法被治理查询发现。
+    horizontalCapabilities:
+      - SC-RESOURCE-PIPELINE
+      - SC-KNOWLEDGE-RAG-SCOPE
+      - SC-PUBLIC-ID-OBJECT-AUTH
+    stateMachineIds:
+      - SM-EVIDENCE-STATUS
+      - SM-KNOWLEDGE-RECOMMENDATION
+      - SM-RESOURCE
+    crossRoleDependencyIds:
+      - DEP-015
+      - DEP-016
+      - DEP-014
+      - DEP-013
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx:735-779只加载pageSize=100 active节点，无profession参数；1729-1865也不按uploadState.profession过滤。
+      - src/server/services/rag-resource-knowledge-runtime.ts:520-527、839-840仅规范化任意字符串并把ancestor数组固定为空。
+      - 同文件1213-1231的includeDescendants完全依赖resource.knowledgeNodeAncestorPublicIds。
+      - src/server/repositories/rag-resource-knowledge-runtime-repository.ts:645-666对数据库资源固定返回空关系；全仓生产检索不读取knowledge_node_resource。
+      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts的后代范围用例手工构造knowledgeNodeAncestorPublicIds，未经过上传生产者。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/05-rag-knowledge.md:176-196规定资源专业、等级范围和检索优先级。
+      - docs/01-requirements/stories/epic-05-rag-knowledge.md:15-19、31-34要求检索前按专业、等级、状态和授权过滤。
+      - catalog/roles/content-admin.yaml:176-193、197-237要求知识点选择能实际约束RAG并保持关系完整。
+    riskConsequence:
+      businessImpact: 上传UI只取前100个active知识点且不按所选专业过滤，服务端把任意字符串直接存入本地JSON，不验证节点存在、启用、可推荐、同专业或同knowledge_base，也不写knowledge_node_resource。后代检索依赖knowledgeNodeAncestorPublicIds，但正常上传永远写空数组；唯一通过的后代测试手工伪造该字段。AI按父知识点请求includeDescendants时会漏掉真实子节点资源，跨专业伪绑定又会让范围、citation和内容治理失真。
+      blastRadius: AI出题/组卷范围、知识点推荐、AI评分/讲解、引用证据、资源治理及所有按父节点包含后代的查询。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-05
+      name: knowledge_node、resource、RAG 与 citation 事实链
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0068
+        - F-0075
+        - F-0076
+        - F-0080
+        - F-0081
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0090
+      - F-0082
+      - F-0083
+      - F-0088
+      - F-0031
+      - F-0032
+      - F-0085
+      - F-0087
+      - F-0037
+      - F-0069
+      - F-0070
+      - F-0086
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-05
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - schema存在knowledge_node_resource唯一关系表，owner-preview导入会写它；正常上传和生产RAG均不消费，表存在不是闭环证据。
+        - 检索会再次按resource.profession过滤，可减少某些跨专业暴露；它不能修复错误关系、后代漏检或数据库关系不可见。
+        - 选择器只显示active节点是局部正向边界，但固定100条、跨专业和直接API均可绕过。
+      runtimeValidationIds:
+        - RV-0014
+      runtimeValidationTitles:
+        - 资源转换、私有存储、索引代际、中文RAG与停用修复后端到端回归
+      nextAction: 修复线程应把knowledge_node_resource作为唯一关系事实，在事务内验证active、同knowledge_base/同profession和完整选择集；检索从树关系递归解析后代，不在资源行缓存不可维护的祖先数组。补第101项、跨专业、停用、父子树移动和直接API测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0092
+    title: 试卷聚合的草稿写入、发布、下架与开考缺少同一事务内的状态条件和版本控制
+    problemEssence: paper被按多个service方法的“先查后写”对象处理，而没有作为带revision和条件命令的聚合根；发布、下架与学习端开考也未共享一个可由数据库原子强制的状态边界。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-013
+      - UC-CONTENT-005
+      - UC-CONTENT-006
+      - UC-CONTENT-007
+      - UC-PSTD-004
+      - UC-PSTD-005
+      - UC-PSTD-007
+      - UC-PADV-003
+      - UC-PADV-004
+      - UC-ORGSTDEMP-003
+      - UC-ORGSTDEMP-004
+      - UC-ORGSTDEMP-006
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-004
+    businessChain:
+      - 两个请求同时读取同一draft及题量/总分，其中一个执行发布或两个都认为第100题仍可加入。
+      - add/update/remove repository不在事务内重新检查paper_status或revision，publish UPDATE也只按publicId，不要求旧状态仍为draft。
+      - 晚到写入可落到已发布行；发布请求锁定的sourceQuestionPublicIds又来自旧快照，竞态新增题未被校验或锁定。
+      - 学员先读到published快照，内容管理员随后下架并终止当时已有作答；学员请求再插入practice/mock_exam，repository插入时不复核paper状态，新会话绕过下架终止。
+      - 删除题目先提交DELETE再单独更新大题小计，第二步失败会留下题已删但小计陈旧的部分状态。
+    horizontalCapabilities:
+      - SC-CONTENT-LIFECYCLE
+      - SC-PAPER-SNAPSHOT
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-ACCESS-TERMINATION
+    stateMachineIds:
+      - SM-PAPER
+    crossRoleDependencyIds:
+      - DEP-020
+      - DEP-019
+      - DEP-027
+      - DEP-011
+      - DEP-017
+      - DEP-018
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/paper-draft-service.ts:406-464、473-550、563-601分别先findPaperByPublicId再调用更新/加题/发布/下架/删除，命令不携带revision或expectedStatus。
+      - src/server/repositories/paper-draft-repository.ts:331-343更新paper只按public_id；359-451在事务外读取paper/source并在事务内直接插题；571-616发布只按public_id更新状态。
+      - src/server/repositories/paper-draft-repository.ts:548-568删题和重算大题分值不在同一事务；619-655下架只按public_id更新后扫描现有practice/mock_exam。
+      - src/server/repositories/student-flow-runtime-repository.ts:262-279、628-646创建practice/mock_exam时只解析paper id并插入，不把paper_status条件纳入原子写。
+      - src/db/schema/paper.ts:275-388没有revision、状态条件约束、每卷题量约束或同卷顺序唯一约束；现有测试只覆盖串行第101题和理想发布，没有并发/响应丢失断言。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/02-question-paper.md:440-475规定草稿可改、发布锁定、下架立即阻止新开考并终止在途记录，以及发布强校验。
+      - docs/01-requirements/traceability/2026-06-21-paper-question-count-and-type-policy.md规定草稿0至100题、发布1至100题，边界必须对并发写仍成立。
+      - governance/audit-charter.md:56-60把发布、不可逆/高影响状态和主要跨模块闭环列为P0/P1完整追踪对象。
+    riskConsequence:
+      businessImpact: 所有“仅草稿可改”“发布后锁定”“最多100题”“下架后不可新开考”都先在service读取旧快照判断，随后repository按publicId无条件写入。并发加题可突破100题；加题、改元数据或删题可在另一请求发布后继续落到published试卷；发布可跳过竞态新增题的分值、总分和来源锁校验；下架与学员开考竞态又可在终止扫描后创建新的in_progress记录。响应丢失重试还会重复创建草稿、复制卷或加入题目，发布快照和学员事实不再可信。
+      blastRadius: 手工和AI形成的所有正式试卷、题量/总分/锁定事实、发布不可变性、复制来源、练习和模拟考试开考及下架终止。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-04
+      name: 内容与 paper 聚合、事务、发布快照完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0050
+        - F-0051
+        - F-0093
+        - F-0171
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0074
+      - F-0094
+      - F-0098
+      - F-0055
+      - F-0096
+      - F-0155
+      - F-0057
+      - F-0095
+      - F-0100
+      - F-0024
+      - F-0053
+      - F-0052
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-04
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - add/update内部部分子写使用数据库事务，publish也把来源锁与状态更新放在事务中；事务开始前读取的paper状态、题量和待锁集合仍没有锁或条件写，不能防TOCTOU。
+        - practice/mock_exam有外键且下架事务会终止当时存在的在途记录；外键不表达published资格，也不能捕获扫描结束后的新插入。
+        - 未发现paper revision、SELECT FOR UPDATE、advisory lock、状态谓词UPDATE、幂等键、唯一命令键或并发测试。
+      runtimeValidationIds:
+        - RV-0015
+        - RV-0021
+      runtimeValidationTitles:
+        - 试卷草稿、分组快照、附件、发布下架与跨角色消费者修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应给paper聚合建立revision/expectedStatus条件命令，把题量、结构、分值校验和发布状态切换置于同一锁定事务；开考插入必须原子要求paper仍published。删除与小计重算同事务，创建/复制/加题/发布使用幂等键，并补并发交错与响应丢失测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0093
+    title: 材料题组生产者每次加题都新建题组且服务端允许题组材料与题目实际材料不一致
+    problemEssence: question_group没有稳定公开身份，前端和repository共同把可变排序值当成组身份；加入命令又未定义“现有组/新组”和题目材料一致性不变量。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FC-003
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-013
+      - UC-CONTENT-006
+      - UC-CONTENT-007
+      - UC-PSTD-005
+      - UC-PSTD-007
+      - UC-PADV-003
+      - UC-PADV-004
+      - UC-ORGSTDEMP-004
+      - UC-ORGSTDEMP-006
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-004
+    businessChain:
+      - 内容管理员按同一材料先后选择两道关联题目，第一次创建group sortOrder=N，第二次始终提交N+1。
+      - upsertQuestionGroup仅在paper、section、material、sortOrder四项相同时复用，因此第二题创建新group而不是加入原组。
+      - 具备内容权限的调用方也可直接提交另一materialPublicId；sourceQuestion的materialSnapshot仍取母题实际材料，而group材料取请求参数。
+      - 发布只汇总题分与锁定两个材料来源，不校验group材料、question material和子题集合一致性，坏结构进入正式快照。
+    horizontalCapabilities:
+      - SC-CONTENT-LIFECYCLE
+      - SC-PAPER-SNAPSHOT
+      - SC-ATOMICITY-IDEMPOTENCY
+    stateMachineIds:
+      - SM-PAPER
+    crossRoleDependencyIds:
+      - DEP-020
+      - DEP-019
+      - DEP-027
+      - DEP-011
+      - DEP-012
+      - DEP-017
+      - DEP-018
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/paper-composer/PaperComposerQuestionPickerDrawer.tsx:265-284每次加入材料题都用全卷questionGroups最大sortOrder加1。
+      - src/server/repositories/paper-draft-repository.ts:365-385从母题取得真实material快照，但393-401把客户端questionGroup独立交给upsertQuestionGroup。
+      - src/server/repositories/paper-draft-repository.ts:1221-1276只按请求materialPublicId解析材料，并以paper/section/material/sortOrder查找组；没有与sourceQuestion.material_id对账。
+      - src/db/schema/paper.ts:330-388没有“组材料必须等于子题材料”的约束或同组子题关系约束。
+      - src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx:462-509只验证单道材料题可提交；repository测试只验证已有group移动原子性，没有两子题生产或错材料反例。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/02-question-paper.md:286-314规定材料可被多道题/试卷复用，加入草稿时关联材料一并快照。
+      - docs/01-requirements/modules/02-question-paper.md:316-334规定材料题组本身不计分、由多个子题计分并由系统计算小计。
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md:251-257要求技能流程在存在material、question_group和paper_section时按这些结构分组。
+    riskConsequence:
+      businessImpact: 材料题组应由一份材料和多个子题组成并自动计算小计，但工作台每加入一道材料题都把group sortOrder设为“当前最大值+1”；repository又把sortOrder作为复用条件，因此同一材料的两道题稳定落入两个单题题组。直接API还可让questionGroup指向任意存在材料，repository不会验证它等于母题实际material；最终group保存A材料，而paper_question快照保存B材料，发布校验也不拦截。学员展示、题组小计、移动和报告统计会在结构上互相矛盾。
+      blastRadius: 所有技能卷材料题、手工组卷、AI正式草稿复用的paper writer、学员练习/考试展示、题组移动、小计和结构化报告。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-04
+      name: 内容与 paper 聚合、事务、发布快照完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0050
+        - F-0051
+        - F-0092
+        - F-0171
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0094
+      - F-0055
+      - F-0074
+      - F-0096
+      - F-0098
+      - F-0155
+      - F-0057
+      - F-0095
+      - F-0053
+      - F-0052
+      - F-0056
+      - F-0058
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-04
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - UI按所选材料过滤题目且缺失材料时阻止提交，是正常路径的局部防线；它仍为同一材料每题生成新sortOrder，直接API也可绕过选择器。
+        - 移动已存在材料组时repository会整体移动子题，这是正向防线；生产路径无法可靠形成多子题组，且错误材料组同样会被整体移动。
+        - 发布允许跨专业/等级材料并只提示是稳定需求；本finding不是跨范围提示，而是同一子题同时被两个不同材料事实描述。
+      runtimeValidationIds:
+        - RV-0015
+        - RV-0021
+      runtimeValidationTitles:
+        - 试卷草稿、分组快照、附件、发布下架与跨角色消费者修复后端到端回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应为question_group建立稳定publicId和显式创建/加入命令，数据库/事务校验子题实际material与组material一致；同材料是否允许多个组必须由显式组身份决定而非sortOrder。补同材料两子题、不同组、错材料、跨页、并发加入与发布反例。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0101
+    title: 模型配置与Prompt Registry只存在于未挂载组件，super/ops没有任何可发现UI入口
+    problemEssence: 早期一体化基线页面在拆分日志路由时只迁移了两个日志子页面，模型与Prompt治理区域既未独立路由化，也未从角色菜单恢复。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+    useCases:
+      - UC-SUPER-011
+      - UC-SUPER-012
+      - UC-OPS-011
+    businessChain:
+      - super_admin或ops_admin从后台菜单进入AI日志或审计日志。
+      - /ops/ai-audit-logs立即重定向到/ops/audit-logs，另一个AI日志路由只挂载拆分日志页。
+      - 唯一包含AdminModelConfigManagement和Prompt Registry的AdminAiAuditLogOpsBaseline未被任何生产路由导入。
+      - 菜单与角色总览也没有模型或Prompt入口，用户无法知道相关API存在，更无法完成治理闭环。
+    horizontalCapabilities:
+      - SC-MODEL-PROMPT-GOVERNANCE
+      - SC-INTERACTION-STATE-CONTRACT
+    stateMachineIds:
+      - SM-MODEL-CONFIG
+      - SM-PROMPT-TEMPLATE
+    crossRoleDependencyIds:
+      - DEP-024
+      - DEP-025
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/app/(admin)/ops/ai-audit-logs/page.tsx:1-5只执行redirect('/ops/audit-logs')。
+      - src/app/(admin)/ops/audit-logs/page.tsx与src/app/(admin)/ops/ai-call-logs/page.tsx分别只挂载AdminAuditLogOpsPage和AdminAiCallLogOpsPage。
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx:878-886是生产代码中唯一挂载AdminModelConfigManagement的位置，但全仓没有路由或组件导入AdminAiAuditLogOpsBaseline。
+      - src/components/admin/AdminDashboardLayout.tsx:85-93的OPS_MENU与src/components/admin/AdminRoleOverviewPage.tsx:100-137均没有模型配置或Prompt Registry入口。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/05-platform-operations.md将模型供应商、模型配置和Prompt Registry列为平台治理能力，并区分super_admin写权限与ops_admin脱敏只读权限。
+      - catalog/roles/super-admin.yaml中的UC-SUPER-011和UC-SUPER-012要求有可视入口、状态与失败反馈。
+      - catalog/roles/ops-admin.yaml中的UC-OPS-011要求查看模型与Prompt治理摘要。
+    riskConsequence:
+      businessImpact: 稳定需求把模型供应商、模型配置和Prompt Registry定义为super_admin治理能力，并要求ops_admin可看脱敏摘要；仓库虽然存在API和一个完整基线组件，但生产路由只挂载拆分后的审计日志页面，完整组件没有任何路由或导航入口。两个P0治理用例因此无法从可见UI发现或执行，运维人员只能绕过产品界面直接调用接口。
+      blastRadius: super_admin模型和Prompt治理、ops_admin治理摘要、密钥轮换与连接测试可发现性，以及后续所有AI能力的运营闭环。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-06
+      name: model_config、AI 任务执行与结果真实性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0062
+        - F-0102
+        - F-0134
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0038
+      - F-0104
+      - F-0021
+      - F-0091
+      - F-0103
+      - F-0105
+      - F-0156
+      - F-0177
+      - F-0178
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-06
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 模型供应商、模型配置、连接测试和Prompt读取API均存在，说明后端并非完全缺失；没有可发现UI仍不能满足角色用例。
+        - 拆分后的审计日志和AI日志页面可正常挂载，但它们刻意不包含治理组件。
+        - 未发现隐藏菜单、动态路由、feature flag或从其他页面跳转到完整基线组件的生产引用。
+      runtimeValidationIds:
+        - RV-0017
+      runtimeValidationTitles:
+        - 审计日志、AI日志、模型密钥、fallback与Prompt治理修复后真实运行时验收
+      nextAction: 修复线程应将模型供应商、模型配置和Prompt Registry接入受角色保护的正式路由与导航，super_admin获得规定写动作，ops_admin只见脱敏摘要；补路由挂载、菜单可达、直接URL授权和各交互状态测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0102
+    title: 模型供应商API Key输入后只保存后四位并标记已配置，真实AI执行仍只读环境变量
+    problemEssence: 为通过“响应不回显密钥”验收，输入在validator边界被过早销毁；密钥存储和运行时模型选择从未接入，UI状态却沿用理想化configured语义。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - content_admin
+      - personal_advanced_student
+      - org_advanced_admin
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-011
+      - UC-CONTENT-012
+      - UC-CONTENT-014
+      - UC-PADV-008
+      - UC-PADV-009
+      - UC-ORGADVADM-009
+      - UC-ORGADVADM-010
+      - UC-ORGADVEMP-008
+      - UC-ORGADVEMP-009
+    businessChain:
+      - super_admin在模型供应商表单输入或轮换API Key并提交。
+      - validator从secretValue/apiKey只派生后四位，repository写last4和configured元数据，不持久化密钥或secret reference。
+      - 查询端随后显示已配置，使运营方相信新密钥已经生效。
+      - 实际AI出题、AI组卷等Provider调用继续从进程环境读取ALIBABA_API_KEY，轮换无效且模型配置与真实执行凭据分叉。
+    horizontalCapabilities:
+      - SC-MODEL-PROMPT-GOVERNANCE
+      - SC-AI-TASK-LIFECYCLE
+      - SC-FILE-AND-CONTENT-PRIVACY
+    stateMachineIds:
+      - SM-MODEL-CONFIG
+    crossRoleDependencyIds:
+      - DEP-024
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/validators/ai-rag.ts:181-206读取secretValue或apiKey后只返回configured、masked与last4，不保留可供安全存储的密钥值。
+      - src/server/repositories/admin-ai-audit-log-runtime-repository.ts:303-379创建或更新时只写last4和状态，并标记external_ref_required；从未写api_key_secret_ref。
+      - src/db/schema/ai-rag.ts:168-190定义了api_key_secret_ref，但生产搜索仅见schema或开发seed，没有写入和解析消费者。
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts:42,156,179以及内容和个人AI生成bridge仍直接读取ALIBABA_API_KEY。
+      - src/server/services/model-config-runtime.ts:141-160,211-320解析模型元数据后仍把providerMode固定为local_mock，未把治理配置选择与真实Provider凭据连接起来。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/05-platform-operations.md要求API Key只写入、受保护保存、轮换后由对应模型配置使用，读取只展示状态和last4。
+      - docs/01-requirements/advanced-edition/edition-aware-authorization-requirements.md要求个人与组织高级版AI执行在授权和模型治理边界内运行。
+      - catalog/roles/super-admin.yaml的UC-SUPER-011将供应商密钥配置与连接验证列为P0治理闭环。
+    riskConsequence:
+      businessImpact: super_admin提交供应商密钥后，服务端仅计算并保存last4和configured状态，既未写入schema已有的secret reference，也没有安全密钥存储；真实内容、个人和组织AI执行仍固定读取ALIBABA_API_KEY环境变量。界面会把已被丢弃的输入显示为“已配置”，形成危险的成功假象，密钥轮换不会影响运行时，错误环境变量又可能跨配置驱动全部AI请求。
+      blastRadius: 所有内容、个人和组织AI请求，模型轮换、故障切换、连接测试、审计可追溯性及生产密钥治理。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-06
+      name: model_config、AI 任务执行与结果真实性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0062
+        - F-0101
+        - F-0134
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0105
+      - F-0038
+      - F-0177
+      - F-0178
+      - F-0091
+      - F-0104
+      - F-0160
+      - F-0021
+      - F-0039
+      - F-0156
+      - F-0103
+      - F-0150
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-06
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - tests/unit/phase-12-ai-audit-log-model-governance.test.ts:142-194确认响应和持久化对象不含原始密钥，这是必要防泄漏测试；它同时证明当前实现只保留last4，并未验证安全写入或运行时使用。
+        - schema预留api_key_secret_ref，说明设计意识存在；没有任何生产写入、vault适配器或解析路径，不能构成实现。
+        - 环境变量可让单一部署运行Provider，但无法兑现多供应商、多配置、轮换和治理状态语义。
+      runtimeValidationIds:
+        - RV-0017
+      runtimeValidationTitles:
+        - 审计日志、AI日志、模型密钥、fallback与Prompt治理修复后真实运行时验收
+      nextAction: 修复线程应引入经审批的密钥存储适配器，只持久化不可逆secret reference和last4；模型解析必须按任务类型选择已启用配置并在调用时安全取密钥。轮换、撤销、引用缺失和日志脱敏需做真实但最小化Provider回归。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0109
+    title: 组织通用编辑向ops_admin开放父级、层级和状态，可绕过移动/停启命令并构造循环树
+    problemEssence: “编辑组织”被实现成可覆盖全部可变列的通用CRUD，节点移动和状态转换没有建模为独立受权领域命令；层级校验只看新边的一跳，未把整棵树、revision和终止副作用纳入同一事务不变量。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - org_standard_admin
+      - org_advanced_admin
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-004
+      - UC-SUPER-005
+      - UC-SUPER-006
+      - UC-OPS-004
+      - UC-OPS-005
+      - UC-OPS-007
+    businessChain:
+      - ops_admin打开组织编辑表单；页面虽提示“节点移动仅超级管理员”，仍可选择企业层级、任意非自身父节点和状态。
+      - 选择当前节点的后代作为新父级，并把当前节点层级改成该后代允许的子层级；客户端只校验父级直接层级，服务端使用相同局部规则。
+      - PATCH成功更新当前节点，但不重验后代原有父子关系，形成循环或整棵子树层级失配；并发请求还可最后写入覆盖彼此结果。
+      - 或直接把status改成disabled/active；专用disable/enable路径未执行，级联、practice/mock_exam终止和受影响节点摘要被跳过。
+    horizontalCapabilities:
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-ACCESS-TERMINATION
+      - SC-AUDIT-LOG
+    stateMachineIds: []
+    crossRoleDependencyIds:
+      - DEP-055
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx:4038-4164提示移动受限却始终渲染可编辑orgTier、parent和status；父级候选只排除当前节点，不排除后代。
+      - 同文件:1179-1231只检查非自身和直接父级层级；5750-5764把现有parent/tier/status全部装入编辑表单，5895-5909整体PATCH提交。
+      - src/server/services/admin-organization-org-auth-runtime.ts:261-264把super_admin与ops_admin等同为organization manager；1163-1234的PATCH没有move或status专用授权分支。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:746-789只拒绝self-parent并校验新父级直接层级，随后无revision地更新parent、tier和status；未查询后代或重验子树。
+      - 同文件:791-837的专用disable才执行级联和terminateOrganizationActiveFlows，839-852的enable只更新当前节点；通用PATCH完全绕过这些语义。
+      - src/db/schema/auth.ts:246-270只有自引用外键和普通索引，没有防环、层级或状态命令约束。
+    violatedBusinessInvariants:
+      - docs/01-requirements/stories/epic-06-admin-ops.md:53-64要求无环组织树，节点移动仅super_admin，ops_admin只可新增、编辑、停用和启用。
+      - docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md:304-314要求阻止循环父级、最大四级并在范围动作前展示当前节点与下级影响。
+      - docs/01-requirements/modules/01-user-auth.md:294-312要求停启保留数据、终止企业授权作答，并在停用和启用时选择是否包含下级。
+    riskConsequence:
+      businessImpact: ops_admin被需求禁止移动组织节点，但生产通用编辑表单和PATCH允许其同时修改parent、orgTier与status。repository只校验新父级的直接层级和非自身，不排除后代、不校验整棵子树，也没有revision；把祖先改成后代所需层级并挂到后代即可形成环和既有子节点层级失配。通过PATCH把status改为disabled或active还会绕过专用停启命令的级联选择、在途作答终止和影响摘要，使组织结构、授权范围、员工上下文和终止状态不可再可信。
+      blastRadius: 全部组织树、admin_organization和employee绑定、current_and_descendants授权、组织后台范围、企业训练、统计、学习授权及依赖组织停用的访问终止。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-02
+      name: organization 拓扑、授权范围、额度与员工生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0005
+        - F-0006
+        - F-0111
+        - F-0113
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0007
+      - F-0009
+      - F-0115
+      - F-0015
+      - F-0112
+      - F-0012
+      - F-0008
+      - F-0116
+      - F-0117
+      - F-0114
+      - F-0010
+      - F-0110
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-02
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - src/server/validators/organization.test.ts:79-123覆盖合法直接层级和一个错层级样例，不覆盖后代父级、变更祖先层级、循环、ops移动或PATCH状态旁路。
+        - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts:69-88只证明读取祖先路径时会限制畸形循环遍历，不能阻止写入循环。
+        - tests/unit/phase-11-system-ops-organization-management-loop.test.ts与phase-20-ra-06-03只验证ops基本CRUD、专用停启和固定输入，没有服务端角色差异或并发/循环反例。
+      runtimeValidationIds:
+        - RV-0018
+      runtimeValidationTitles:
+        - 组织树、员工、企业授权、卡密与终止修复后数据库浏览器对抗回归
+      nextAction: 修复线程应把普通资料编辑、super-only节点移动、停用和启用拆成独立命令；服务端按角色授权，在同一事务锁定相关节点并验证无环、四级、整棵子树层级和revision，停启统一执行可选级联、lineage终止与审计。补祖先挂后代、ops直接PATCH、并发移动/停用和重复命令测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0111
+    title: current_and_descendants授权只在创建时展开快照，组织新增或移动后产生跨树漏授权与残留授权
+    problemEssence: 实现把current_and_descendants的动态覆盖语义物化成无版本、无维护协议的创建时快照，组织树命令与授权范围命令之间没有共同事务、领域事件或可重建投影。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - org_standard_admin
+      - org_advanced_admin
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-004
+      - UC-SUPER-005
+      - UC-SUPER-006
+      - UC-OPS-004
+      - UC-OPS-005
+      - UC-OPS-006
+      - UC-OPS-007
+      - UC-ORGSTDEMP-002
+      - UC-ORGSTDEMP-003
+      - UC-ORGSTDEMP-004
+      - UC-ORGSTDEMP-005
+      - UC-ORGSTDEMP-006
+      - UC-ORGSTDEMP-007
+      - UC-ORGSTDEMP-008
+      - UC-ORGSTDEMP-009
+      - UC-ORGSTDEMP-010
+      - UC-ORGADVEMP-002
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-004
+      - UC-ORGADVEMP-005
+      - UC-ORGADVEMP-006
+      - UC-ORGADVEMP-011
+      - UC-ORGADVEMP-012
+    businessChain:
+      - 为组织A创建current_and_descendants org_auth；repository展开当时A、B、C并插入三条关联。
+      - 之后在A下新增D，或super_admin把另一个节点移入A；组织写路径不新增对应org_auth_organization。
+      - 反向把B移出A，旧关联也不删除；B及其员工继续匹配A购买的org_auth。
+      - session、effective authorization、practice/mock、组织后台和训练消费者按employee.organization_id连接静态关联，分别产生漏授权或跨树残留授权。
+    horizontalCapabilities:
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ACCESS-TERMINATION
+    stateMachineIds:
+      - SM-ORGANIZATION
+    crossRoleDependencyIds:
+      - DEP-007
+      - DEP-009
+      - DEP-055
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:2442-2465仅在处理创建输入时递归列出当时后代；864-975随后一次性插入org_auth和org_auth_organization。
+      - 同文件:702-789的组织create/update只写organization表；全仓orgAuthOrganization写入搜索除org_auth创建外没有组织变更维护路径。
+      - src/db/schema/auth.ts:382-439把org_auth和organization通过持久关联表连接，没有动态树谓词、有效期版本或维护触发器。
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts:118-153与student-flow-runtime-repository.ts:1109-1137按org_auth_organization精确连接员工当前organization，静态集合直接决定访问。
+      - src/server/auth/local-session-runtime.ts:877-927的组织管理员工作区能力同样依赖该关联或购买主体，移出节点残留可继续授予工作区版本能力。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/01-user-auth.md:314-334把授权范围定义为“某企业及全部下级”或“指定企业列表”。
+      - docs/01-requirements/traceability/2026-06-21-org-auth-scope-product-decision.md:13-19明确current_and_descendants是组织覆盖方式，effective organization属于原子授权范围。
+      - docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md:296-313要求员工从组织节点继承active org_auth，并在树操作中说明继承影响。
+    riskConsequence:
+      businessImpact: current_and_descendants按产品语义应覆盖根组织及当前树下全部后代，但创建org_auth时只把当时后代写入org_auth_organization，之后组织新增、层级/父级变更和移动均不维护该集合。新建下级不会继承既有授权；移入节点不获授权；移出节点仍保留旧树授权。有效授权、组织后台、学习、训练和AI消费者都把这张静态关联表当权威，因此一次组织调整可造成跨企业残留访问或合法员工失去已购权益。
+      blastRadius: 所有current_and_descendants企业授权及覆盖的组织管理员、员工、quota、edition、学习、企业训练、组织AI和终止消费者；组织移动会放大为跨企业访问。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-02
+      name: organization 拓扑、授权范围、额度与员工生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0005
+        - F-0006
+        - F-0109
+        - F-0113
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0140
+      - F-0007
+      - F-0008
+      - F-0114
+      - F-0119
+      - F-0009
+      - F-0112
+      - F-0004
+      - F-0012
+      - F-0015
+      - F-0110
+      - F-0115
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-02
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - specified_nodes本来就是显式静态列表；本finding仅针对语义为current_and_descendants的记录。
+        - listOrganizationAndDescendantIds在授权创建、组织停用等单次命令中可正确读取当前后代，但没有任何组织变更后的重算、事件或数据库约束。
+        - F-0006覆盖不同auth_scope_type重叠检查；本finding覆盖同一记录随树拓扑变化后的范围漂移，根因和修复边界不同。
+      runtimeValidationIds:
+        - RV-0018
+        - RV-0019
+        - RV-0020
+        - RV-0021
+      runtimeValidationTitles:
+        - 组织树、员工、企业授权、卡密与终止修复后数据库浏览器对抗回归
+        - 标准版组织管理员只读工作区、范围名单、授权集合与拒绝语义修复后回归
+        - 高级组织训练、版本下架与隐私统计修复后数据库浏览器对抗回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应明确动态覆盖的权威模型：查询时按无环版本化树计算，或由组织变更事务/可靠outbox原子维护可重建投影；移动前展示授权影响并锁定范围，移入移出、新增和失败重放均需测试，消费者只接受当前树版本。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0113
+    title: 兼容员工导入忽略页面选定目标并直接迁移/复活账号，绕过调动、额度、会话和训练终止闭环
+    problemEssence: 为兼容旧userPublicId绑定合同保留了能指定每行组织的批量upsert，而新UI在其外层叠加“单一目标组织”预览；两个合同没有收敛到统一员工生命周期命令。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-002
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - super_admin
+      - ops_admin
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-SUPER-005
+      - UC-OPS-005
+      - UC-OPS-006
+      - UC-ORGSTDEMP-001
+      - UC-ORGSTDEMP-002
+      - UC-ORGSTDEMP-005
+      - UC-ORGSTDEMP-009
+      - UC-ORGSTDEMP-010
+      - UC-ORGADVEMP-001
+      - UC-ORGADVEMP-002
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-004
+      - UC-ORGADVEMP-011
+      - UC-ORGADVEMP-012
+    businessChain:
+      - 操作员在导入抽屉选择有额度的组织A，粘贴两列兼容行，第二列却填写组织B。
+      - 客户端预览用A的data.orgAuths计算并允许提交；buildEmployeeImportInput将每行B原样放进employees，完全不携带或校验A。
+      - 服务端选择existing_user_bind分支，repository在一个批次事务中直接把既有employee.organization_id更新为B并把disabled/personal用户改为active employee。
+      - 专用transfer路径的目标授权校验、锁、session撤销、旧组织training read_only和quota刷新均未执行；旧会话可继续携带陈旧组织上下文。
+    horizontalCapabilities:
+      - SC-ORG-SCOPE-ISOLATION
+      - SC-EFFECTIVE-AUTHORIZATION
+      - SC-EDITION-QUOTA-CONTEXT
+      - SC-ACCESS-TERMINATION
+      - SC-ATOMICITY-IDEMPOTENCY
+    stateMachineIds:
+      - SM-EMPLOYEE
+      - SM-SESSION
+    crossRoleDependencyIds:
+      - DEP-005
+      - DEP-006
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx:1234-1307虽强制选择targetOrganizationPublicId，兼容分支却把每行organizationPublicId原样返回并忽略target。
+      - 同文件:1310-1382的兼容预览按target组织计算授权和额度，却只显示将解析行数，不核对行内组织是否等于target。
+      - src/server/services/admin-organization-org-auth-runtime.ts:327-373把employees数组分流为existing_user_bind；1668-1752直接调用repositories.importEmployees。
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts:2660-2804对已有employee直接更新organization_id，并无quota、session或training处理；同时把user_type/status设为employee/active。
+      - 同文件:1205-1391的专用transfer才执行授权范围锁、额度检查、训练read_only、session删除和双边quota刷新，证明兼容导入绕过了完整命令。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/06-admin-ops.md:163-168要求目标organization由运营显式选择，导入输入不得携带员工级授权范围。
+      - docs/01-requirements/modules/01-user-auth.md:395-425要求调动原子释放/占用额度、撤销会话并阻断旧组织未提交训练；解绑保留个人账号语义。
+      - docs/01-requirements/traceability/2026-07-02-ops-authorization-ui-ux-contract.md:258-266要求先选目标、逐行预览再确认；281-300把调动/解绑定义为受控独立动作。
+    riskConsequence:
+      businessImpact:
+        员工导入UI要求先选目标组织并用该组织的授权/额度生成预览，但两列userPublicId,organizationPublicId兼容格式会忽略选中的目标，逐行接受任意组织。repository对已有employee直接改organization_id并把user复活为active
+        employee，不走专用transfer的目标额度锁、session撤销、旧组织未提交训练只读和双边quota刷新。运营可在“导入”确认组织A的影响后实际把员工迁到组织B，形成跨组织授权、额度和在途状态旁路。
+      blastRadius: 所有已绑定、已停用或已解绑员工及任意目标组织的org_auth、quota、会话、训练和历史上下文。
+    currentRevalidationStatus: root_cause_alias
+    revalidationRationale: 与 F-0005 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    rootCauseCluster:
+      id: RC-02
+      name: organization 拓扑、授权范围、额度与员工生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0005
+        - F-0006
+        - F-0109
+        - F-0111
+      rootCauseAliasOf: F-0005
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0007
+      - F-0009
+      - F-0115
+      - F-0008
+      - F-0112
+      - F-0012
+      - F-0015
+      - F-0116
+      - F-0110
+      - F-0114
+      - F-0117
+      - F-0010
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-02
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 整个兼容批次包在单个数据库事务中，可防止该分支内部SQL部分提交；但事务并未包含调动必须的业务不变量。
+        - F-0005已覆盖所有导入路径的quota绕过；本finding新增选定目标与实际目标错位、跨组织迁移、账号复活、session和训练生命周期旁路，不是重复额度finding。
+        - tests/unit/phase-20-ra-01-04-employee-import.test.ts重点覆盖账号CSV解析和桩错误；未发现兼容行目标不一致、已有employee迁移、旧session或training测试。
+      runtimeValidationIds:
+        - RV-0018
+        - RV-0021
+      runtimeValidationTitles:
+        - 组织树、员工、企业授权、卡密与终止修复后数据库浏览器对抗回归
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应删除生产兼容入口或把每行迁移统一委托给受控transfer/bind命令；请求只允许一个显式target，服务端preflight和提交按同一签名范围执行，并对旧session、训练、quota及响应重试做对抗测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0121
+    title: 企业训练发布不读取目标草稿且把请求题目与依据状态直接作为权威，可跳过草稿和来源状态机
+    problemEssence: 为快速打通前端预览发布，把publish DTO同时当作编辑载荷和服务端canonical snapshot，草稿表只承担列表元数据，导致命令端没有可加载、可比较、可条件转换的聚合根。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-004
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - org_advanced_admin
+      - org_advanced_employee
+    useCases:
+      - UC-ORGADVADM-005
+      - UC-ORGADVADM-006
+      - UC-ORGADVADM-007
+      - UC-ORGADVADM-009
+      - UC-ORGADVADM-010
+      - UC-ORGADVADM-011
+      - UC-ORGADVEMP-011
+      - UC-ORGADVEMP-012
+    businessChain:
+      - 有效org_advanced_admin直接POST任意路径公开标识，并在body中使用相同draftPublicId、当前组织和一条可关联org_auth。
+      - route只校验路径与body字符串相等、组织可见及organization/org_auth关联，不查询目标草稿。
+      - service只校验题目字段自洽、none/weak请求标记和发布范围包含owner，随后原样复制请求中的题干、答案、解析、evidenceStatus和citationCount。
+      - repository把任意draftPublicId写入organization_training_version；schema不以外键约束真实草稿，版本立即进入published并可被员工消费。
+    horizontalCapabilities:
+      - SC-ORG-TRAINING-LIFECYCLE
+      - SC-PUBLIC-ID-OBJECT-AUTH
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-PAPER-SNAPSHOT
+      - SC-AUDIT-LOG
+    stateMachineIds:
+      - SM-ADMIN-AI-RESULT
+      - SM-ORG-TRAINING-DRAFT
+      - SM-ORG-TRAINING-VALIDATION
+      - SM-ORG-TRAINING-VERSION
+    crossRoleDependencyIds:
+      - DEP-039
+      - DEP-046
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/organization-training-route.ts:1416-1444的publish lineage resolver只解析organizationPublicId和authorizationPublicId；1746-1801发布handler没有加载draft或source
+        snapshot。
+      - src/server/services/organization-training-service.ts:1644-1705只检查请求题目和请求evidence字段，1791-1836归一化请求元数据，2177-2255直接把这些值构造为published version。
+      - src/db/schema/organization-training.ts:336-400把draft_public_id定义为普通text并仅建立(draft_public_id, version_number)唯一索引，没有指向organization_training_draft的外键。
+      - src/server/repositories/organization-training-repository.ts:1115-1155直接插入调用方派生的draftPublicId和questionSnapshot；另有findDraftPersistenceLineageByPublicIds只供source-context持久化使用，发布路径未调用。
+      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx:637-708在浏览器合成题目公开标识并传递表单evidenceStatus，2768-2787允许把依据状态直接改为none/weak/sufficient。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md:39-60要求四步向导先形成可维护草稿，none阻断、weak显式确认，并从可信复制快照发布不可变版本。
+      - catalog/roles/org-advanced-admin.yaml的UC-ORGADVADM-006要求草稿属于当前组织、校验完整性与依据后发布，并输出可追踪timeline和audit_log。
+      - catalog/shared-capability-catalog.yaml的SC-ORG-TRAINING-LIFECYCLE与SC-PUBLIC-ID-OBJECT-AUTH要求对象归属和当前状态在服务端重算。
+    riskConsequence:
+      businessImpact: 发布命令没有加载路径中的organization_training_draft，也不核对草稿内容、来源快照、validation/evidence状态或组织授权血缘；只要调用者拥有某组织的高级训练能力，就可以提交任意非空draftPublicId、任意题目快照，并自行把evidenceStatus标为sufficient。数据库version.draft_public_id又没有外键，因此可创建没有真实草稿、没有可信来源和没有可复核依据的已发布训练。员工随后把该请求内容当作不可变正式版本作答，发布、统计和追责基础失真。
+      blastRadius: 所有手工、平台paper、组织AI出题和AI组卷训练发布，以及员工可见版本、作答结果、组织统计和审计追责。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-08
+      name: organization training 草稿、发布、作答与统计完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0123
+        - F-0145
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0122
+      - F-0028
+      - F-0022
+      - F-0099
+      - F-0124
+      - F-0166
+      - F-0167
+      - F-0147
+      - F-0125
+      - F-0033
+      - F-0042
+      - F-0144
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-08
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 路径与body draftPublicId不一致会被拒绝，组织和org_auth关联也会查询数据库；这只能阻止字符串错配，不能证明draft存在、归属、内容或状态。
+        - version快照落库后本身不可直接编辑，但不可变性保护的是未经可信草稿验证的请求内容，不能替代发布前状态条件。
+        - F-0011覆盖无效或错范围org_auth血缘，F-0099覆盖平台paper来源；本finding覆盖所有来源共用的发布命令绕过草稿及依据事实源。
+      runtimeValidationIds:
+        - RV-0020
+      runtimeValidationTitles:
+        - 高级组织训练、版本下架与隐私统计修复后数据库浏览器对抗回归
+      nextAction: 修复线程应让草稿成为服务端canonical聚合：持久化完整版本化内容与来源血缘；publish在单事务中按draft publicId、organization、org_auth、状态和revision读取并条件转换，服务端重算evidence/citation和全部汇总字段，拒绝任意客户端快照替换，并写同事务outbox/audit。补不存在、跨组织、已发布、已丢弃、来源漂移、伪造evidence和响应丢失测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0123
+    title: 企业训练发布不消耗草稿且缺少幂等和并发版本锁，同一草稿可重复发布或竞态失败
+    problemEssence: version_number被当作展示序号而非受状态机保护的命令结果，草稿和版本分属两次无关联写入，缺少聚合锁、idempotency key与条件状态迁移。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-OO-004
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - org_advanced_admin
+      - org_advanced_employee
+    useCases:
+      - UC-ORGADVADM-006
+      - UC-ORGADVADM-007
+      - UC-ORGADVEMP-011
+    businessChain:
+      - 管理员发布某草稿；service只插入organization_training_version，不更新organization_training_draft。
+      - 同一请求因响应丢失被重试，repository查询该draft最新版本号并插入下一版本，形成第二个已发布版本。
+      - 两个并发发布都可能读到相同latest version number并生成相同next number；数据库唯一约束使其中一个抛出通用持久化错误，没有幂等结果或业务冲突响应。
+      - admin生命周期列表仍读取所有retention_status=active草稿并与版本拼接，用户无法判断哪个草稿已消费，后续还可继续发布。
+    horizontalCapabilities:
+      - SC-ORG-TRAINING-LIFECYCLE
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-AUDIT-LOG
+    stateMachineIds:
+      - SM-ORG-TRAINING-VERSION
+    crossRoleDependencyIds: []
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/organization-training-service.ts:2177-2260发布只调用trainingStore.publishVersion，没有草稿状态条件或更新。
+      - src/server/repositories/organization-training-repository.ts:817-832先独立findLatestVersionNumberByDraftPublicId再insert；2745-2758的latest查询没有事务锁。
+      - src/db/schema/organization-training.ts:397-400只用(draft_public_id, version_number)唯一索引抵御同号插入；draft表没有发布状态/revision。
+      - src/server/repositories/organization-training-repository.ts:3054-3073继续返回全部active草稿；service 857-896把草稿和版本共同列出。
+    violatedBusinessInvariants:
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md:59-61要求published版本不可变，修改只能复制成新草稿发布新版本。
+      - catalog/roles/org-advanced-admin.yaml的UC-ORGADVADM-006/007要求发布失败保留草稿、并发操作冲突和版本时间线可解释。
+      - catalog/shared-capability-catalog.yaml的SC-ATOMICITY-IDEMPOTENCY要求重复命令和并发状态转换安全。
+    riskConsequence:
+      businessImpact:
+        发布成功后草稿没有状态转换、revision更新或归档，刷新列表仍同时出现原草稿与已发布版本。重复请求会为同一draftPublicId继续创建version 2、3，而不是返回同一结果或明确要求复制新草稿；两个并发请求又各自先读相同latest
+        version number，再争用唯一索引，至少一个以持久化异常失败。响应丢失、双击或重试因此可能产生意外多版本或不可恢复错误，违背“published不可变、修改需复制新草稿”的核心合同。
+      blastRadius: 所有企业训练发布、版本历史、员工分配、统计和审计；网络重试或多人并发即可触发。
+    currentRevalidationStatus: root_cause_alias
+    revalidationRationale: 与 F-0121 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    rootCauseCluster:
+      id: RC-08
+      name: organization training 草稿、发布、作答与统计完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0121
+        - F-0145
+      rootCauseAliasOf: F-0121
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0028
+      - F-0122
+      - F-0167
+      - F-0022
+      - F-0124
+      - F-0125
+      - F-0147
+      - F-0166
+      - F-0099
+      - F-0144
+      - F-0033
+      - F-0042
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-08
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 唯一索引可防止两个相同版本号同时落库，但不会把重复意图映射为同一结果，也不会阻止顺序重试创建新版本。
+        - UI一次成功后会在当前内存中替换一条lifecycle item，但刷新重新读取数据库时草稿仍存在；客户端投影不能代替服务端状态转换。
+      runtimeValidationIds:
+        - RV-0020
+      runtimeValidationTitles:
+        - 高级组织训练、版本下架与隐私统计修复后数据库浏览器对抗回归
+      nextAction: 修复线程应在一个事务中锁定草稿或用revision条件更新draft状态，插入唯一新版本并写outbox/audit；命令携带幂等键，重复请求返回原版本，并发陈旧请求返回可恢复conflict。只有copy命令可从published版本产生新的draft聚合。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0130
+    title: 学员与员工登录失败计数采用读后覆盖写，并发失败可丢计数而绕过三次锁定
+    problemEssence: 锁定被实现为service快照上的派生值，再由repository盲写，而不是数据库内的条件状态转换。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FL-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-001
+      - UC-PADV-001
+      - UC-ORGSTDEMP-001
+      - UC-ORGADVEMP-001
+    businessChain:
+      - 同一学员或员工账号当前login_failed_count为0，攻击者并发发送多个错误密码请求。
+      - 各请求先读取0并在service本地计算1。
+      - repository以普通UPDATE把login_failed_count设为1，没有原子自增、行锁或CAS；多个失败只累计一次。
+      - 重复并发批次获得远多于三次尝试；同时成功登录的reset与失败更新还会按最后写入者决定最终状态。
+    horizontalCapabilities:
+      - SC-IDENTITY-SESSION
+      - SC-ATOMICITY-IDEMPOTENCY
+    stateMachineIds:
+      - SM-SESSION
+    crossRoleDependencyIds:
+      - DEP-005
+      - DEP-006
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/session-service.ts:107-153读取login_failed_count后在内存加一并决定lockedUntilAt。
+      - src/server/auth/local-session-runtime.ts:197-215把调用方计算的计数直接覆盖写入；218-233成功路径同样用普通更新清零。
+      - src/server/services/session-service.test.ts以预构造计数验证单请求分支，没有两个并发失败或成功/失败交错。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/01-user-auth.md:62-66和stories/epic-01-user-auth.md:36-37规定连续失败3次锁定5分钟。
+      - catalog/roles/personal-standard-student.yaml的UC-PSTD-001要求锁定边界，SC-IDENTITY-SESSION与SC-ATOMICITY-IDEMPOTENCY要求并发状态可强制。
+    riskConsequence:
+      businessImpact: 多个错误密码请求可同时读取相同旧计数并各自覆盖写同一个加一值，实际失败次数大于持久计数；攻击者可用并发批次持续猜测而推迟或规避三次失败锁定。正确登录的重置写还可与失败写交错，导致成功后重新出现失败计数或失败被错误清零，锁定策略不再是数据库上的确定不变量。
+      blastRadius: 所有个人学员与企业员工的密码登录、暴力破解防护、锁定提示、成功重置和安全审计。
+    currentRevalidationStatus: root_cause_alias
+    revalidationRationale: 与 F-0002 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    rootCauseCluster:
+      id: RC-01
+      name: 身份、session 与后台账号生命周期
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0002
+        - F-0045
+      rootCauseAliasOf: F-0002
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0001
+      - F-0129
+      - F-0131
+      - F-0030
+      - F-0049
+      - F-0047
+      - F-0048
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-01
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - user.login_failed_count持久化在数据库，单实例重启不会像管理员内存计数那样完全丢失；问题是并发原子性而非持久性。
+        - 未发现UPDATE count=count+1 RETURNING、SELECT FOR UPDATE、version条件、按账号互斥或数据库触发器。
+      runtimeValidationIds:
+        - RV-0021
+      runtimeValidationTitles:
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应在数据库事务内原子递增并返回计数/锁定截止，定义成功重置与失败递增的序列化或CAS规则；补多实例并发、恰好第三次、锁定边界和成功/失败交错测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0134
+    title: 学员练习与错题本默认“AI”输出是本地固定文案和答案长度打分，却作为真实讲解、提示与评分展示
+    problemEssence: 早期本地验收stub被直接设为默认生产依赖，类型合同没有区分mock/stub/unavailable/real provider，UI也没有阻止占位结果进入用户可见成绩语义。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FL-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-004
+      - UC-PSTD-005
+      - UC-PSTD-010
+      - UC-PADV-003
+      - UC-PADV-006
+      - UC-ORGSTDEMP-003
+      - UC-ORGSTDEMP-004
+      - UC-ORGSTDEMP-008
+      - UC-ORGADVEMP-003
+      - UC-ORGADVEMP-004
+      - UC-ORGADVEMP-006
+    businessChain:
+      - 学员在技能练习提交任意足够长的无关文本。
+      - calculateSubjectiveAiScore只按长度比例计算得分，达到约40字符即可接近或获得满分，不读取standard_answer、analysis或scoring_point。
+      - 提示和客观讲解返回固定文本，未执行Provider或RAG；UI显示“AI提示”“Final score”“AI explanation”。
+      - 错题本默认explanationRunner同样返回本地确定性文案和伪造requestId/output，调用者无法从产品状态区分真实模型、受控stub或占位实现。
+    horizontalCapabilities:
+      - SC-ANSWER-SESSION
+      - SC-AI-TASK-LIFECYCLE
+      - SC-AI-CALL-LOG-REDACTION
+      - SC-KNOWLEDGE-RAG-SCOPE
+    stateMachineIds:
+      - SM-ANSWER-RECORD
+      - SM-MISTAKE-BOOK
+      - SM-PRACTICE
+    crossRoleDependencyIds:
+      - DEP-015
+      - DEP-016
+      - DEP-025
+      - DEP-026
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/services/practice-service.ts:98-101硬编码英文客观讲解，433-460硬编码主观提示，625-648按答案长度计算所谓AI分数。
+      - src/server/services/student-mistake-book-runtime.ts:173-241的默认runner返回“本地确定性 AI”文案，并构造mock requestId和local deterministic provider output。
+      - src/features/student/practice/StudentPracticePage.tsx:896-939、1013-1057把上述结果直接标为AI explanation、evidence和Final score。
+      - tests/unit/phase-8-student-mistake-book-runtime.test.ts:375明确断言无需真实Provider返回确定性讲解；practice-service.test.ts断言本地AI文案和长度评分。
+    violatedBusinessInvariants:
+      - docs/01-requirements/stories/epic-03-student-experience.md:34-54要求客观题AI讲解、技能题AI评分点、提示和一次重答成为真实学习反馈。
+      - docs/01-requirements/stories/epic-04-ai-scoring.md:9-40要求按评分点结构化评分、未答零分、失败可识别，不能用答案长度替代业务判断。
+      - catalog/roles/personal-standard-student.yaml的UC-PSTD-004、005、010要求RAG证据、scoring_point结果和可失败AI链路。
+    riskConsequence:
+      businessImpact:
+        生产默认路径把固定模板称为AI讲解/提示，并仅按主观答案字符长度给出最终分数；内容正确性、评分点和知识证据都不影响结果。学员可通过填充无关文本获得高分，错误解释和伪造的evidence状态会被界面当作学习反馈；错题本默认运行时还构造假的Provider
+        request/response标识并写AI调用链。核心学习结论和考试准备由虚假证据驱动。
+      blastRadius: 所有理论/技能练习、错题复习及复用同一练习服务的个人和企业学员；影响分数可信度、学习建议、AI日志真实性与RAG验收。
+    currentRevalidationStatus: root_cause_alias
+    revalidationRationale: 与 F-0062 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    rootCauseCluster:
+      id: RC-06
+      name: model_config、AI 任务执行与结果真实性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0062
+        - F-0101
+        - F-0102
+      rootCauseAliasOf: F-0062
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0178
+      - F-0150
+      - F-0177
+      - F-0039
+      - F-0174
+      - F-0160
+      - F-0021
+      - F-0038
+      - F-0063
+      - F-0091
+      - F-0103
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-06
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 错题本runtime装配了model_config选择、RAG入口和ai_call_log外形，说明接口可容纳真实实现；默认runner仍没有任何Provider调用且返回伪造响应。
+        - 模拟考试另有评分链路并由F-0062至F-0065覆盖；本finding限定练习与错题本生产默认消费者，避免重复模拟考试根因。
+      runtimeValidationIds:
+        - RV-0021
+      runtimeValidationTitles:
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应让默认生产装配只接受真实受治理Provider或显式unavailable，禁止mock runner进入生产；评分按快照scoring_point和证据执行，60秒/三次重试/失败状态可见，日志只记真实调用脱敏事实。补无关长文本、Provider失败、弱/无证据、重试和stub拒绝启动测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0136
+    title: 技能练习把材料题组和大题扁平化，主观题最终评分后又没有“下一题”动作导致主流程中断
+    problemEssence: 首版练习UI以统一单题数组为核心，技能题只增加材料和两个AI动作，没有建立question_group页面状态或完成后的导航合同。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FL-001
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-PSTD-005
+      - UC-PADV-003
+      - UC-ORGSTDEMP-004
+      - UC-ORGADVEMP-003
+    businessChain:
+      - 学员进入含同材料多子题的已发布技能卷。
+      - extractPracticeQuestions对所有paperSection执行flatMap，只保留每题的section标题和材料字段，不构造题组页面。
+      - 学员完成第一道主观题并选择直接查看评分或完成一次重答。
+      - SubjectiveQuestionPanel渲染最终分数，但props和按钮中没有下一题；父组件也未传递handleNextQuestion，后续题不可达。
+    horizontalCapabilities:
+      - SC-ANSWER-SESSION
+      - SC-PAPER-SNAPSHOT
+      - SC-INTERACTION-STATE-CONTRACT
+    stateMachineIds: []
+    crossRoleDependencyIds:
+      - DEP-026
+      - DEP-017
+      - DEP-018
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/student/practice/StudentPracticePage.tsx:433-460把所有section的paperQuestions扁平化为单题数组，没有读取questionGroups或构造组页面。
+      - 同文件942-1062的SubjectiveQuestionPanel props和控件没有onNextQuestion/hasNextQuestion；1737-1747父组件只传提交、提示与评分回调。
+      - F-0098已证明上游published paper snapshot会丢question_group层级；即使上游补齐，当前消费者也没有组模型或前进动作。
+    violatedBusinessInvariants:
+      - docs/01-requirements/stories/epic-03-student-experience.md:47-54要求按材料题组/大题一组一页，材料置顶并完成AI提示、评分和一次重答。
+      - docs/01-requirements/modules/02-student-experience.md:109-119规定技能练习按材料和题组展开主流程。
+      - catalog/roles/personal-standard-student.yaml的UC-PSTD-005要求material/question_group/paper_section结构化展示。
+    riskConsequence:
+      businessImpact: 技能卷要求按material/question_group/paper_section一组一页完成多道主观题，但客户端只从paperSections抽取paperQuestions并压平成单题数组，既没有question_group模型也无法在同页维持同材料多子题。更直接的是SubjectiveQuestionPanel无onNextQuestion或完成动作：第一道主观题得到最终分数后只能看到已禁用的评分/重答按钮，无法进入下一题，整份技能练习在正常路径中死锁。
+      blastRadius: 所有含一题以上主观题或材料题组的技能练习，直接阻断个人与企业学员完成训练。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-07
+      name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0059
+        - F-0060
+        - F-0061
+        - F-0064
+        - F-0066
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0135
+      - F-0138
+      - F-0161
+      - F-0162
+      - F-0169
+      - F-0172
+      - F-0013
+      - F-0018
+      - F-0019
+      - F-0020
+      - F-0023
+      - F-0026
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-07
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - 单题可显示materialTitle/materialRichText并折叠材料，证明基本材料字段可见；这不等于同材料多题的组级一页交互。
+        - 客观题和填空题面板具备下一题按钮，反向证明主观面板遗漏不是全局导航设计选择。
+      runtimeValidationIds:
+        - RV-0021
+      runtimeValidationTitles:
+        - 个人与企业学员身份、兑换、授权上下文、正式学习和高级能力拒绝修复后对抗回归
+      nextAction: 修复线程应先恢复published快照的paper_section/question_group/material层级，再以组为页面单元维护多题答案和组级进度；主观最终状态必须提供下一组/完成动作。补同材料2题、多大题、混合题型、最后组和刷新恢复组件测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0145
+    title: 企业训练提交信任员工端作答计数和分数且不执行服务端评分，可伪造正式成绩并污染组织统计
+    problemEssence: 首版把“答卷元数据和分数摘要”当成可信提交结果，而没有把answerItems定义为唯一输入、把answered count/score/question results定义为服务端派生事实；客观评分和short_answer AI评分均未进入提交状态机。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-FL-004
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - org_advanced_employee
+      - org_advanced_admin
+    useCases:
+      - UC-ORGADVEMP-012
+      - UC-ORGADVADM-008
+    businessChain:
+      - 员工读取任一可见训练版本及其totalScore，直接调用employee-answers/submit。
+      - 请求声明answeredQuestionCount为1至questionCount任意值，省略answerItems或提交不属于题目的option publicId，并把score设为版本满分。
+      - validator和service不比较计数与实际非空答案、不验证选项属于对应题目/题型，也不计算客观题或触发short_answer AI评分；区间检查通过后接受请求。
+      - repository把客户端score写入organization_training_answer，同时为命中的questionResults全部写0分；readonly结果与组织analytics读取伪造总分。
+      - 正常UI则始终发送score=0，因此不绕过API的诚实员工无论答案正确与否都得到0分，short_answer默认AI评分承诺同样不可达。
+    horizontalCapabilities:
+      - SC-ORG-TRAINING-LIFECYCLE
+      - SC-ANSWER-SESSION
+      - SC-ATOMICITY-IDEMPOTENCY
+      - SC-ORG-ANALYTICS-PRIVACY
+    stateMachineIds:
+      - SM-ANSWER-RECORD
+      - SM-ORG-TRAINING-ANSWER
+      - SM-ORG-TRAINING-VALIDATION
+      - SM-PRACTICE
+    crossRoleDependencyIds:
+      - DEP-021
+      - DEP-022
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx:244-295由客户端计算answeredQuestionCount，并在createSubmitRequestBody中固定发送score:0与版本totalScore；974-1135不校验全部题目已答即可确认提交。
+      - src/server/validators/organization-training.ts:903-978要求客户端scoreSummary并只做整数规范化；对应测试825-896明确接受answeredQuestionCount=2但只有一个answerItem的载荷。
+      - src/server/services/organization-training-service.ts:1394-1472只做总分区间、计数上界和题目publicId集合检查；2514-2595原样持久化客户端score并把questionResults置空，未验证option归属、题型答案或完整性。
+      - src/server/repositories/organization-training-repository.ts:2371-2418、2467-2512继续复制客户端score；2554-2571只按出现的questionPublicId生成结果且把每题score硬编码为0。
+      - src/server/services/organization-training-service.test.ts:2712-2790和route.test.ts:2862-2920在answerItems为空时仍断言客户端4/5分提交成功；repository.test.ts:1684-1811同时断言总分4而每题分数均为0，测试固化而非反驳缺口。
+      - src/server/repositories/organization-analytics-repository.ts:342-390直接读取organization_training_answer.score与total_score作为正式统计输入。
+    violatedBusinessInvariants:
+      - docs/01-requirements/traceability/2026-07-02-organization-training-ui-ux-contract.md:211-233要求真实题目作答、未答校验，并明确UI不得依赖员工输入answeredQuestionCount、score或totalScore，分数必须是系统结果。
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md:56-65要求四类题型、short_answer默认AI评分、一人一版本一次提交及本人结果，且训练不写正式mock/report/mistake。
+      - docs/01-requirements/traceability/2026-07-02-role-auth-training-ops-decision-package.md:263-274要求真实作答、系统结果和主观评分点原因；organization analytics以这些结果作为管理输入。
+    riskConsequence:
+      businessImpact: 员工可在submit请求中自行提交answeredQuestionCount、score和totalScore；服务端只检查计数为正且不大于题数、总分等于版本总分、分数位于区间内，不从answerItems重算已答数，也不按题型、选项、标准答案或评分点执行任何评分。直接API可不提交任何答案却自授满分并持久化为正式submitted成绩；相反，官方UI把所有真实答案固定提交为0分。repository为每道结果硬编码score=0，却同时保存客户端总分，形成总成绩与逐题结果自相矛盾；组织统计随后直接消费该分数。企业训练成绩、本人结果和管理决策的核心完整性完全由不可信客户端控制。
+      blastRadius: 所有企业高级员工训练成绩、本人结果、组织完成/均分统计、小样本判断和后续任何以训练分数驱动的能力；可被直接API系统性伪造，也会让正常UI成绩恒为0。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-08
+      name: organization training 草稿、发布、作答与统计完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0121
+        - F-0123
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0125
+      - F-0028
+      - F-0144
+      - F-0147
+      - F-0022
+      - F-0122
+      - F-0124
+      - F-0166
+      - F-0126
+      - F-0167
+      - F-0099
+      - F-0127
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-08
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - service会拒绝负分、超过总分或totalScore与版本不一致，并把答案限制到版本中的question publicId；这些边界不能证明分数来源可信，也不能防止空答案满分、错误option或计数伪造。
+        - 前端当前固定发送0而不是提供可见分数输入，减少普通UI主动作弊，却使合法评分恒错；直接API仍完全可达，UI约束不是服务端完整性边界。
+        - repository questionResultSnapshot复制标准答案、解析并隐藏管理员原始答案，隐私投影局部成立；逐题0分与客户端总分不一致反而直接证明没有评分事实源。
+      runtimeValidationIds:
+        - RV-0020
+      runtimeValidationTitles:
+        - 高级组织训练、版本下架与隐私统计修复后数据库浏览器对抗回归
+      nextAction: 修复线程应从客户端契约移除answeredQuestionCount和scoreSummary，仅接受版本化answerItems；服务端按快照验证题目唯一性、option归属、题型与必答规则，重算计数和客观分，short_answer进入有幂等attempt、超时、失败与证据快照的AI评分状态机。总分、逐题结果和analytics必须只消费同一可信评分结果，并补空答案满分、非法option、部分作答、全题正确/错误、主观评分失败、篡改总分及并发首次提交测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null
+  - findingId: F-0171
+    title: 正式试卷学员快照未复制paper_scoring_point，所有主观题评分规则会退化为单个overall评分点
+    problemEssence: 试卷评分点被建模为paper_question的独立关系，但学员快照构造沿用只复制question_snapshot的最小读模型；mock评分为容忍旧fixture增加overall fallback，随后把缺字段转化成看似合法的评分规则而非fail-closed。
+    originalEvidence:
+      status: validated
+      riskLevel: P0
+      sourcePacketId: AP-AI-005
+      baselineId: baseline-2026-07-14-01
+      baselineCommit: 7aac83765ca4b650b73b1612013e26a0111775ae
+      runtimeEvidenceNeeded: false
+    roles:
+      - content_admin
+      - personal_standard_student
+      - personal_advanced_student
+      - org_standard_employee
+      - org_advanced_employee
+    useCases:
+      - UC-CONTENT-006
+      - UC-CONTENT-007
+      - UC-PSTD-008
+      - UC-PADV-005
+      - UC-ORGSTDEMP-007
+      - UC-ORGADVEMP-005
+    businessChain:
+      - 内容管理员把含多个评分点的主观题加入草稿，并在试卷内调整评分点描述或分值后发布。
+      - paper_scoring_point行正确存在，草稿管理DTO也可显示；学员查询published paper时buildPaperSnapshot只读取paper_section和paper_question。
+      - paper_question.question_snapshot来自母题基础快照，构造函数未包含题目评分点；试卷级paper_scoring_point也未被join或映射。
+      - mock提交构建AI scoring context时读取question.snapshot.scoringPoints得到空数组，自动替换为`${paperQuestionPublicId}_scoring_point_1`、label=overall、maxScore=整题分。
+      - AI结果和attempt从此只知道伪造单点规则；报告即使修复F-0064也无法恢复已丢失的正式评分点。
+    horizontalCapabilities:
+      - SC-PAPER-SNAPSHOT
+      - SC-AI-TASK-LIFECYCLE
+      - SC-ANSWER-SESSION
+    stateMachineIds:
+      - SM-AI-SCORING-ATTEMPT
+      - SM-ANSWER-RECORD
+      - SM-MOCK-EXAM
+      - SM-PRACTICE
+    crossRoleDependencyIds:
+      - DEP-027
+      - DEP-042
+    affectedModulesFilesClassesFunctionsOrApis:
+      - src/server/repositories/paper-draft-repository.ts:1118-1147的buildQuestionSnapshot只复制题目基础字段、答案、解析、scoringMethod和填空答案，没有scoringPoints；评分点实际另存paper_scoring_point。
+      - src/server/mappers/paper-draft-mapper.ts:16-33把paperQuestion.questionSnapshot与paperQuestion.scoring_points映射为两个并列字段，证明评分点不在基础snapshot内。
+      - src/server/repositories/student-flow-runtime-repository.ts:1186-1244构造学员paperSnapshot只查询paperSection和paperQuestion，未查询paperScoringPoint；1247-1274映射时也未增加scoringPoints。
+      - src/server/services/mock-exam-service.ts:590-633只尝试读取question.snapshot.scoringPoints，空时静默构造一个overall评分点；678-703把该退化结果作为唯一正式评分输入。
+    violatedBusinessInvariants:
+      - docs/01-requirements/modules/02-question-paper.md:108-150要求主观题逐评分点保存描述和分值、允许部分得分且题目得分为评分点合计。
+      - 同文档244-277要求试卷内可调整评分点，母题默认评分点复制后成为该卷独立评分规则；496要求复制试卷时保留源试卷调整后的评分点。
+      - docs/01-requirements/modules/04-ai-scoring.md:37-65与stories/epic-04-ai-scoring.md:13-25要求AI按每个评分点返回命中、得分、原因并固定保存。
+    riskConsequence:
+      businessImpact: 内容管理员在试卷内调整后的主观题评分点保存在独立paper_scoring_point表和草稿DTO中，但学员开考时构造的正式paper_snapshot只查询paper_question并复制question_snapshot，不查询或嵌入paper_scoring_point。mock评分运行时寻找snapshot.scoringPoints失败后静默构造一个满分等于整题分值的overall评分点。简答、案例分析和计算题原本逐评分点的描述、分值与试卷内调整全部消失；当前长度伪评分会在错误单点规则上产生成绩，未来即使接入真实Provider也无法按正式卷评分规则评分、解释或复核。
+      blastRadius: 所有正式发布试卷中的AI评分填空、简答、案例分析和计算题，覆盖四类学员的模拟考试成绩、评分attempt、报告解释、学习建议及任何基于评分点的统计。
+    currentRevalidationStatus: confirmed
+    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    rootCauseCluster:
+      id: RC-04
+      name: 内容与 paper 聚合、事务、发布快照完整性
+    p0Relations:
+      sameRootCauseClusterFindingIds:
+        - F-0050
+        - F-0051
+        - F-0092
+        - F-0093
+      rootCauseAliasOf: null
+      duplicateCandidateOf: null
+      supersededBy: null
+    likelyAffectedP1P2FindingIds:
+      - F-0098
+      - F-0074
+      - F-0094
+      - F-0024
+      - F-0055
+      - F-0155
+    p1P2ImpactMapRef: 2026-07-14-p0-remediation-startup-package-v1.md#p1p2-impact-rc-04
+    testAndRuntimeEntrypoints:
+      staticOrTestEvidenceSearched:
+        - paper_scoring_point schema、草稿repository和管理端mapper均存在，证明内容生产侧能保存规则；学员snapshot生产者没有消费这些行，持久存在不等于进入评分链。
+        - mock-exam与ai-scoring单元测试可手工在fixture的question snapshot中放scoringPoints并证明纯函数happy path；正式buildPaperSnapshot不会生成同构字段，fixture不能证明生产字段血缘。
+        - F-0064覆盖AI评分结果在answer_record/report阶段丢失，本finding发生在Provider之前并丢失输入评分规则，修复结果持久化不能恢复它。
+      runtimeValidationIds:
+        - RV-0012
+        - RV-0015
+      runtimeValidationTitles:
+        - 模拟考试计时、离线同步、真实异步AI评分和报告修复后端到端回归
+        - 试卷草稿、分组快照、附件、发布下架与跨角色消费者修复后端到端回归
+      nextAction: 修复线程应把试卷级paper_scoring_point作为不可变published paper snapshot的一等字段，使用稳定public id、描述、分值和顺序；开考前校验评分点非空且合计等于题分，缺失时拒绝而非构造overall。评分、attempt、报告和学习建议消费同一版本化规则。补母题默认、卷内增删改、复制卷、三类主观题及历史快照不变测试。
+    originalFindingRelations:
+      duplicateOf: null
+      acceptedRiskApproval: null

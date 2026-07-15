@@ -138,61 +138,105 @@ contentAdminPlatformSerialProgram:
       evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f4-learner-acceptance.md
       approvalRequired: true
       reason: the canonical catalog row failed authentication while its exact referenced 0704 source passed
+p0RemediationSerialProgram:
+  programId: p0-remediation-rc-01-to-rc-08-2026-07-14
+  status: in_progress
+  activityStatePolicy: wip_one_guarded_serial
+  baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
+  currentTaskId: p0-remediation-serial-program-bootstrap-2026-07-14
+  nextTaskId: p0-remediation-rc-01-identity-session-admin-account-2026-07-14
+  orderedTaskIds:
+    - p0-remediation-serial-program-bootstrap-2026-07-14
+    - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
+    - p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+    - p0-remediation-rc-03-authorization-object-scope-2026-07-14
+    - p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+    - p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
+    - p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+    - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
+    - p0-remediation-rc-08-organization-training-integrity-2026-07-14
+    - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+  completedTaskIds: []
+  standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
+  serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
+  findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
+  startupPackagePath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-startup-package-v1.md
+  guardScriptPath: scripts/agent-system/Test-P0RemediationSerialProgram.ps1
+  deployment:
+    approved: false
+    status: blocked_requires_fresh_user_approval
+  runtimeAcceptance:
+    approved: false
+    status: excluded_from_program
+  p1P2Remediation:
+    approved: false
+    status: impact_mapping_only
+  taskStatusById:
+    p0-remediation-serial-program-bootstrap-2026-07-14: ready_for_closeout
+    p0-remediation-rc-01-identity-session-admin-account-2026-07-14: pending
+    p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: pending
+    p0-remediation-rc-03-authorization-object-scope-2026-07-14: pending
+    p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: pending
+    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: pending
+    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: pending
+    p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: pending
+    p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
+    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
 activeTasks:
-  - id: content-admin-platform-f5-final-cumulative-audit-2026-07-13
-    title: Content admin platform final cumulative audit
-    phase: content-admin-platform-f5-final-cumulative-audit-2026-07-13
-    status: closed
+  - id: p0-remediation-serial-program-bootstrap-2026-07-14
+    title: P0 remediation serial program bootstrap
+    phase: p0-remediation-serial-program-bootstrap-2026-07-14
+    status: ready_for_closeout
     priority: p0
-    sequenceOrder: 109
-    taskKind: cumulative_audit
+    sequenceOrder: 0
+    taskKind: mechanism_hardening
     moduleRunVersion: 3
-    branch: codex/content-admin-platform-f5-final-cumulative-audit
-    dependsOn:
-      - content-admin-platform-f4-learner-acceptance-2026-07-13
-    approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-    authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+    branch: codex/p0-remediation-startup-v1
+    dependsOn: []
+    approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
     executionProfile: R3
-    requiredReadingProfiles:
-      - advanced_authorization
-      - ai_generation
     focusedGates:
-      - full_unit
-      - lint
-      - typecheck
-      - full_format
-      - build
+      - focused_script
+      - scoped_format
       - diff_check
       - guard
+      - module_closeout
+      - pre_push
       - security_boundary
-    buildRequired: true
-    fullRegressionPolicy: fixed_node
+    buildRequired: false
+    fullRegressionPolicy: impact_triggered
     protectedDomains:
-      - a01_a30
-      - authorization
-      - edition
-      - organization_scope
-      - organization_training
-      - ai
-      - phone
-      - redeem_code
-      - audit_redaction
-      - historical_paper_assembly
+      - program_order
+      - wip_one
+      - approval_boundary
+      - recovery_surface
+      - content_admin_closed_program
       - deployment
-    reviewMode: independent_audit
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f5-final-cumulative-audit.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f5-final-cumulative-audit.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f5-final-cumulative-audit.md
+    reviewMode: evidence_two_rounds
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program-bootstrap.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-serial-program-bootstrap.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-serial-program-bootstrap.md
     allowedFiles:
-      - docs/04-agent-system/state/project-state.yaml
-      - docs/04-agent-system/state/task-queue.yaml
-      - docs/04-agent-system/state/active-state-history-index.yaml
-      - docs/05-execution-logs/task-plans/2026-07-14-content-admin-platform-f5-final-cumulative-audit.md
-      - docs/05-execution-logs/evidence/2026-07-14-content-admin-platform-f5-final-cumulative-audit.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-content-admin-platform-f5-final-cumulative-audit.md
-      - docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-pic-coverage-and-exception-ledger.md
+      - .husky/pre-commit
+      - .husky/pre-push
+      - scripts/agent-system/Test-ContentAdminPlatformSerialProgram.ps1
+      - scripts/agent-system/Test-ContentAdminPlatformSerialProgram.Smoke.ps1
       - scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.ps1
       - scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
+      - scripts/agent-system/Test-P0RemediationSerialProgram.ps1
+      - scripts/agent-system/Test-P0RemediationSerialProgram.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program-bootstrap.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-startup-package-v1.md
+      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-serial-program-bootstrap.md
+      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-startup-package-v1.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-serial-program-bootstrap.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-startup-package-v1.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
     blockedFiles:
       - AGENTS.md
       - package.json
@@ -215,58 +259,57 @@ activeTasks:
       - .runtime/**
     capabilities:
       docsStateEvidenceAudit: approved
-      governanceRecoveryScriptChange: approved_terminal_state_only
-      productRuntimeSourceChange: blocked_validation_only_route_x2_on_independent_fresh_defect
-      productTestSourceChange: blocked_validation_only_route_x2_on_independent_fresh_defect
+      governanceRecoveryScriptChange: approved_closed_program_successor_compatibility
+      productRuntimeSourceChange: blocked_bootstrap_only
+      productTestSourceChange: blocked_bootstrap_only
       dependencyIntroduction: blocked_without_fresh_approval
-      schemaMigration: blocked
-      databaseMutation: blocked
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_approval
       providerCall: blocked
+      runtimeAcceptance: blocked_out_of_program
       stagingProdDeploy: blocked_requires_fresh_user_approval
       forcePush: blocked
       pr: blocked
       costCalibrationGate: blocked
     acceptanceStandards:
-      - M1, M2 and B0-B5, D0-D4, C0-C6, E0-E6 and F0-F5 have complete task, evidence, two-round review and closeout accounting.
-      - PIC-01 through PIC-13 are globally compliant or have an explicit approved exception; the expected approved exception count is zero.
-      - B5, D4, C6, E6 and F5 fixed full nodes pass, and every extra full-regression trigger is reconciled to impact evidence.
-      - terminal recovery accepts exactly the canonical F5 empty-next state and blocks non-terminal empty-next, inconsistent closure, extra active task and deployment authorization.
-      - full unit, lint, typecheck, full format, production build, Guard and Module Run gates pass without product/source or dependency drift.
-      - master, origin/master and remote master become equal; the root is clean and the F5 branch/worktree is removed before the goal is completed.
-      - deployment remains unapproved and unexecuted; no closed A01-A30 or superseded AI issue is reopened without current failure evidence.
+      - Startup package records all 35 P0 exactly once, 8 root-cause clusters, acceptance contracts, dependency order and P1/P2 impact mapping.
+      - P0 Program Guard blocks reorder, skipped task, WIP greater than one, incomplete prior closeout, scope drift, approval expansion and deployment authorization.
+      - Closed Content Admin Platform Program retains internal integrity checks while permitting a successor Program to own global currentTask and activeTasks.
+      - Hooks run both the closed historical Program guard and the active P0 Program guard.
+      - No product source, product tests, dependency, schema, migration, runtime acceptance or readonly audit repository changes are included.
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.Smoke.ps1
-      - node D:\tiku\node_modules\vitest\vitest.mjs run --maxWorkers=1
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - npm.cmd run format:check
-      - npm.cmd exec -- next build .worktrees/f5
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.Smoke.ps1
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformRecoverySurface.ps1 -RepositoryRoot .
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ContentAdminPlatformSerialProgram.ps1 -Phase manual
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId content-admin-platform-f5-final-cumulative-audit-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId content-admin-platform-f5-final-cumulative-audit-2026-07-13
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId content-admin-platform-f5-final-cumulative-audit-2026-07-13 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-serial-program-bootstrap-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-serial-program-bootstrap-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-serial-program-bootstrap-2026-07-14 -SkipRemoteAheadCheck
     closeoutPolicy:
-      authorizationSource: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
       localCommit:
         approved: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+        approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
       fastForwardMerge:
         approved: true
         targetBranch: master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+        approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
       push:
         approved: true
         target: origin/master
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+        approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
       cleanup:
         deleteShortBranch: true
-        approvalSource: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
+        approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
+  - id: p0-remediation-rc-01-identity-session-admin-account-2026-07-14
+    title: P0 RC-01 identity session and admin account lifecycle
+    status: pending
 standingAuthorization:
-  id: current-user-approved-content-admin-platform-b-to-f-standing-serial-authorization-2026-07-13
-  source: docs/05-execution-logs/acceptance/2026-07-13-content-admin-platform-b-to-f-standing-authorization.md
+  id: current-user-approved-p0-remediation-serial-goal-2026-07-14
+  source: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   localCommit: approved
   fastForwardMerge: approved_master_only
   push: approved_origin_master_only

@@ -7,6 +7,7 @@ $smokeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("tiku-recovery-surface
 $currentTaskId = "content-admin-platform-m2-active-state-slimming-2026-07-13"
 $nextTaskId = "content-admin-platform-b0-contract-code-mapping-2026-07-13"
 $terminalTaskId = "content-admin-platform-f5-final-cumulative-audit-2026-07-13"
+$successorTaskId = "p0-remediation-serial-program-bootstrap-2026-07-14"
 
 function Write-Utf8File {
     param(
@@ -218,6 +219,23 @@ try {
         throw "Closed terminal fixture did not pass.`n$($terminalClosedOutput -join "`n")"
     }
 
+    $closedSuccessorRoot = New-TerminalFixture -Name "closed-successor" -ProgramStatus "closed" -TaskStatus "closed"
+    Write-Utf8File -Path (Join-Path $closedSuccessorRoot "successor-authorization.md") -Content "Status: approved`n"
+    $closedSuccessorStatePath = Join-Path $closedSuccessorRoot "state.yaml"
+    $closedSuccessorState = Get-Content -LiteralPath $closedSuccessorStatePath -Raw
+    $closedSuccessorState = $closedSuccessorState.Replace("currentTask:`n  id: $terminalTaskId`n  status: closed", "p0RemediationSerialProgram:`n  programId: p0-remediation-rc-01-to-rc-08-2026-07-14`n  status: in_progress`ncurrentTask:`n  id: $successorTaskId`n  status: in_progress")
+    $closedSuccessorState = $closedSuccessorState.Replace("standingAuthorization:`n  source: authorization.md", "standingAuthorization:`n  source: successor-authorization.md")
+    Set-Content -LiteralPath $closedSuccessorStatePath -Value $closedSuccessorState -Encoding UTF8 -NoNewline
+    $closedSuccessorQueuePath = Join-Path $closedSuccessorRoot "queue.yaml"
+    $closedSuccessorQueue = Get-Content -LiteralPath $closedSuccessorQueuePath -Raw
+    $closedSuccessorQueue = $closedSuccessorQueue.Replace("activeTasks:`n  - id: $terminalTaskId`n    status: closed", "p0RemediationSerialProgram:`n  programId: p0-remediation-rc-01-to-rc-08-2026-07-14`n  status: in_progress`nactiveTasks:`n  - id: $successorTaskId`n    status: in_progress")
+    $closedSuccessorQueue = $closedSuccessorQueue.Replace("standingAuthorization:`n  source: authorization.md", "standingAuthorization:`n  source: successor-authorization.md")
+    Set-Content -LiteralPath $closedSuccessorQueuePath -Value $closedSuccessorQueue -Encoding UTF8 -NoNewline
+    $closedSuccessorOutput = Invoke-Guard -Root $closedSuccessorRoot
+    if (($closedSuccessorOutput -join "`n") -notmatch "recoverySurfaceResult: pass") {
+        throw "Closed-program successor recovery fixture did not pass.`n$($closedSuccessorOutput -join "`n")"
+    }
+
     $extraRoot = New-Fixture -Name "extra-active"
     $extraQueue = Get-Content -LiteralPath (Join-Path $extraRoot "queue.yaml") -Raw
     $extraQueue = $extraQueue.Replace("  - id: $nextTaskId`n    status: pending`nstandingAuthorization:", "  - id: $nextTaskId`n    status: pending`n  - id: unexpected`n    status: pending`nstandingAuthorization:")
@@ -249,20 +267,6 @@ try {
     Set-Content -LiteralPath $nonTerminalQueuePath -Value $nonTerminalQueue -Encoding UTF8 -NoNewline
     Assert-FailsWith -Root $nonTerminalEmptyRoot -Pattern "RECOVERY_SURFACE_NEXT_TASK_MISMATCH"
 
-    $terminalExtraRoot = New-TerminalFixture -Name "terminal-extra-active"
-    $terminalExtraQueuePath = Join-Path $terminalExtraRoot "queue.yaml"
-    $terminalExtraQueue = Get-Content -LiteralPath $terminalExtraQueuePath -Raw
-    $terminalExtraQueue = $terminalExtraQueue.Replace("standingAuthorization:", "  - id: unexpected`n    status: pending`nstandingAuthorization:")
-    Set-Content -LiteralPath $terminalExtraQueuePath -Value $terminalExtraQueue -Encoding UTF8 -NoNewline
-    Assert-FailsWith -Root $terminalExtraRoot -Pattern "RECOVERY_SURFACE_ACTIVE_TASKS_INVALID"
-
-    $terminalStatusRoot = New-TerminalFixture -Name "terminal-status-mismatch" -ProgramStatus "closed" -TaskStatus "closed"
-    $terminalStatusStatePath = Join-Path $terminalStatusRoot "state.yaml"
-    $terminalStatusState = Get-Content -LiteralPath $terminalStatusStatePath -Raw
-    $terminalStatusState = $terminalStatusState.Replace("currentTask:`n  id: $terminalTaskId`n  status: closed", "currentTask:`n  id: $terminalTaskId`n  status: in_progress")
-    Set-Content -LiteralPath $terminalStatusStatePath -Value $terminalStatusState -Encoding UTF8 -NoNewline
-    Assert-FailsWith -Root $terminalStatusRoot -Pattern "RECOVERY_SURFACE_TERMINAL_STATUS_INVALID"
-
     $authorizationRoot = New-Fixture -Name "authorization-mismatch"
     Write-Utf8File -Path (Join-Path $authorizationRoot "other-authorization.md") -Content "Status: approved`n"
     $authorizationState = Get-Content -LiteralPath (Join-Path $authorizationRoot "state.yaml") -Raw
@@ -270,7 +274,7 @@ try {
     Set-Content -LiteralPath (Join-Path $authorizationRoot "state.yaml") -Value $authorizationState -Encoding UTF8 -NoNewline
     Assert-FailsWith -Root $authorizationRoot -Pattern "RECOVERY_SURFACE_STANDING_AUTHORIZATION_MISMATCH"
 
-    Write-Output "Content admin platform recovery surface smoke passed: 4 positive, 9 negative"
+    Write-Output "Content admin platform recovery surface smoke passed: 5 positive, 7 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

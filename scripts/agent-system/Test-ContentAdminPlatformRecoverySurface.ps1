@@ -177,6 +177,7 @@ function Test-AllowedTopLevelKeys {
     param(
         [Parameter(Mandatory = $true)][string[]]$Keys,
         [Parameter(Mandatory = $true)][string[]]$Allowed,
+        [Parameter(Mandatory = $false)][string[]]$Required = @(),
         [Parameter(Mandatory = $true)][string]$Label
     )
 
@@ -185,7 +186,7 @@ function Test-AllowedTopLevelKeys {
             Add-Finding "RECOVERY_SURFACE_TOP_LEVEL_BLOAT $Label $key"
         }
     }
-    foreach ($requiredKey in $Allowed) {
+    foreach ($requiredKey in $Required) {
         if ($Keys -notcontains $requiredKey) {
             Add-Finding "RECOVERY_SURFACE_REQUIRED_KEY_MISSING $Label $requiredKey"
         }
@@ -210,7 +211,7 @@ $queueLines = @(Get-Content -LiteralPath $queueFullPath)
 $stateProgram = @(Get-TopLevelBlock -Lines $stateLines -Key "contentAdminPlatformSerialProgram")
 $queueProgram = @(Get-TopLevelBlock -Lines $queueLines -Key "contentAdminPlatformSerialProgram")
 
-Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $stateLines) -Allowed @(
+$requiredStateKeys = @(
     "schemaVersion",
     "project",
     "currentPhase",
@@ -220,14 +221,22 @@ Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $stateLines) -Allowed @
     "standingAuthorization",
     "repositoryCheckpoint",
     "historyPointers"
-) -Label "project-state"
-Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $queueLines) -Allowed @(
+)
+Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $stateLines) -Allowed @(
+    $requiredStateKeys
+    "p0RemediationSerialProgram"
+) -Required $requiredStateKeys -Label "project-state"
+$requiredQueueKeys = @(
     "schemaVersion",
     "contentAdminPlatformSerialProgram",
     "activeTasks",
     "standingAuthorization",
     "historyPointers"
-) -Label "task-queue"
+)
+Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $queueLines) -Allowed @(
+    $requiredQueueKeys
+    "p0RemediationSerialProgram"
+) -Required $requiredQueueKeys -Label "task-queue"
 
 foreach ($programBlock in @($stateProgram, $queueProgram)) {
     if ($programBlock.Count -eq 0) {
@@ -256,6 +265,7 @@ $queueNextTaskId = Get-ScalarValue -Block $queueProgram -Key "nextTaskId"
 $stateProgramStatus = Get-ScalarValue -Block $stateProgram -Key "status"
 $queueProgramStatus = Get-ScalarValue -Block $queueProgram -Key "status"
 $isTerminalTask = $currentTaskId -eq $terminalTaskId
+$isClosedProgram = $stateProgramStatus -eq "closed"
 if ([string]::IsNullOrWhiteSpace($currentTaskId) -or $currentTaskId -ne $queueCurrentTaskId) {
     Add-Finding "RECOVERY_SURFACE_CURRENT_TASK_MISMATCH"
 }
@@ -265,29 +275,32 @@ if ($nextTaskId -ne $queueNextTaskId -or ($isTerminalTask -and -not [string]::Is
 if ($stateProgramStatus -notin @("in_progress", "closed") -or $stateProgramStatus -ne $queueProgramStatus) {
     Add-Finding "RECOVERY_SURFACE_PROGRAM_STATUS_INVALID"
 }
+if ($stateProgramStatus -eq "closed" -and -not $isTerminalTask) {
+    Add-Finding "RECOVERY_SURFACE_TERMINAL_STATUS_INVALID"
+}
 
 $topCurrentTask = @(Get-TopLevelBlock -Lines $stateLines -Key "currentTask")
 $currentStatus = Get-ScalarValue -Block $topCurrentTask -Key "status"
-if ((Get-ScalarValue -Block $topCurrentTask -Key "id") -ne $currentTaskId -or $currentStatus -notin @("in_progress", "ready_for_closeout", "closed")) {
+if (-not $isClosedProgram -and ((Get-ScalarValue -Block $topCurrentTask -Key "id") -ne $currentTaskId -or $currentStatus -notin @("in_progress", "ready_for_closeout", "closed"))) {
     Add-Finding "RECOVERY_SURFACE_CURRENT_TASK_RECORD_INVALID"
 }
-if (
+if (-not $isClosedProgram -and (
     ($stateProgramStatus -eq "closed" -and (-not $isTerminalTask -or $currentStatus -ne "closed")) -or
     ($stateProgramStatus -eq "in_progress" -and $currentStatus -eq "closed")
-) {
+)) {
     Add-Finding "RECOVERY_SURFACE_TERMINAL_STATUS_INVALID"
 }
 
 $activeTasksBlock = @(Get-TopLevelBlock -Lines $queueLines -Key "activeTasks")
 $activeTaskItems = @(Get-ListItemBlocks -Block $activeTasksBlock)
 $expectedActiveTaskCount = if ($isTerminalTask) { 1 } else { 2 }
-if (
+if (-not $isClosedProgram -and (
     $activeTaskItems.Count -ne $expectedActiveTaskCount -or
     $activeTaskItems[0].Id -ne $currentTaskId -or
     (-not $isTerminalTask -and $activeTaskItems[1].Id -ne $nextTaskId)
-) {
+)) {
     Add-Finding "RECOVERY_SURFACE_ACTIVE_TASKS_INVALID"
-} else {
+} elseif (-not $isClosedProgram) {
     if ((Get-ScalarValue -Block $activeTaskItems[0].Block -Key "status") -ne $currentStatus) {
         Add-Finding "RECOVERY_SURFACE_CURRENT_TASK_STATUS_MISMATCH"
     }
@@ -320,10 +333,10 @@ foreach ($pairedSource in @(
     }
 }
 
-if (
+if (-not $isClosedProgram -and (
     (Get-ScalarValue -Block $stateStandingAuthorization -Key "source") -ne $stateAuthorization -or
     (Get-ScalarValue -Block $queueStandingAuthorization -Key "source") -ne $stateAuthorization
-) {
+)) {
     Add-Finding "RECOVERY_SURFACE_STANDING_AUTHORIZATION_MISMATCH"
 }
 

@@ -11,6 +11,7 @@ $taskB1 = "content-admin-platform-b1-async-state-primitives-2026-07-13"
 $taskB5 = "content-admin-platform-b5-cumulative-audit-2026-07-13"
 $taskX1 = "content-admin-platform-x1-valid-ai-paper-test-data-2026-07-13"
 $taskX2 = "content-admin-platform-x2-fresh-baseline-defect-repair-2026-07-13"
+$successorTask = "p0-remediation-serial-program-bootstrap-2026-07-14"
 
 function Write-CaseFiles {
     param(
@@ -258,11 +259,96 @@ $baseSerialPlan = @"
 | B5 | ``$taskB5`` | R2 | full_unit,lint,typecheck,full_format,build,diff_check,guard | true | fixed_node | content_lifecycle,a01_a30 | independent_audit |
 "@
 
+$closedTaskIds = @($taskInit, $taskB0, $taskB1, $taskB5)
+$closedCompleted = ($closedTaskIds | ForEach-Object { "    - $_" }) -join "`n"
+$closedStatuses = ($closedTaskIds | ForEach-Object { "    $_`: closed" }) -join "`n"
+$closedCheckpoints = ($closedTaskIds | ForEach-Object {
+        @"
+    $_`:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+"@.TrimEnd()
+    }) -join "`n"
+$closedState = @"
+schemaVersion: 1
+contentAdminPlatformSerialProgram:
+  programId: content-admin-platform-b-to-f-2026-07-13
+  status: closed
+  baselineSha: 0123456789abcdef0123456789abcdef01234567
+  currentTaskId: $taskB5
+  nextTaskId: ""
+$orderedList
+  completedTaskIds:
+$closedCompleted
+  lastClosedTaskId: $taskB5
+  standingAuthorizationSource: $authorizationPath
+  serialPlanPath: serial-plan.md
+  coverageLedgerPath: coverage-ledger.md
+  deployment:
+    approved: false
+    status: blocked_requires_fresh_user_approval
+  taskStatusById:
+$closedStatuses
+  closeoutCheckpoints:
+$closedCheckpoints
+  conditionalTasks:
+    x1:
+      taskId: $taskX1
+      conditionSatisfied: false
+      status: pending
+    x2:
+      taskId: $taskX2
+      conditionSatisfied: false
+      status: pending
+currentTask:
+  id: $successorTask
+  status: in_progress
+"@
+$closedQueue = @"
+schemaVersion: 1
+contentAdminPlatformSerialProgram:
+  programId: content-admin-platform-b-to-f-2026-07-13
+  status: closed
+  baselineSha: 0123456789abcdef0123456789abcdef01234567
+  currentTaskId: $taskB5
+  nextTaskId: ""
+$orderedList
+  completedTaskIds:
+$closedCompleted
+  standingAuthorizationSource: $authorizationPath
+  deployment:
+    approved: false
+    status: blocked_requires_fresh_user_approval
+  taskStatusById:
+$closedStatuses
+  conditionalTasks:
+    x1:
+      taskId: $taskX1
+      conditionSatisfied: false
+      status: pending
+    x2:
+      taskId: $taskX2
+      conditionSatisfied: false
+      status: pending
+activeTasks:
+  - id: $successorTask
+    status: in_progress
+"@
+
 try {
     $positiveRoot = Write-CaseFiles -Name "positive" -StateText $baseState -QueueText $baseQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
     $positiveOutput = Invoke-Guard -Root $positiveRoot -ChangedFiles @("plan.md", "evidence.md")
     if (($positiveOutput -join "`n") -notmatch "programGuardResult: pass") {
         throw "Positive fixture did not report pass.`n$($positiveOutput -join "`n")"
+    }
+
+    $closedSuccessorRoot = Write-CaseFiles -Name "closed-successor-positive" -StateText $closedState -QueueText $closedQueue -PlanText $basePlan -EvidenceText $baseEvidence -AuditText $baseAudit
+    $closedSuccessorOutput = Invoke-Guard -Root $closedSuccessorRoot -ChangedFiles @("state.yaml", "queue.yaml")
+    if (($closedSuccessorOutput -join "`n") -notmatch "programGuardResult: pass_closed_program") {
+        throw "Closed-program successor fixture did not report pass.`n$($closedSuccessorOutput -join "`n")"
     }
 
     $evidenceReviewFocusedGates = @"
@@ -367,7 +453,7 @@ Pass.
     Set-Content -LiteralPath (Join-Path $downgradedFocusedRoot "serial-plan.md") -Value ($baseSerialPlan.Replace("focused_unit,lint,typecheck,changed_format,diff_check,guard", "focused_unit")) -Encoding UTF8
     Assert-FailsWith -Root $downgradedFocusedRoot -ChangedFiles @("serial-plan.md") -Pattern "PROGRAM_GUARD_FOCUSED_GATES_DOWNGRADED"
 
-    Write-Output "Content admin platform serial program guard smoke passed: 2 positive, 13 negative"
+    Write-Output "Content admin platform serial program guard smoke passed: 3 positive, 13 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force
