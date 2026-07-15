@@ -80,8 +80,8 @@ findings:
     riskConsequence:
       businessImpact: 管理员暴力破解防线可通过进程重启、冷启动或把请求分散到不同实例绕过；攻击者获得的尝试次数不再受五次失败阈值约束，最终可能导致高权限账号接管。
       blastRadius: 五类后台管理员账号；其中super_admin、ops_admin和content_admin可触达全局运营、内容、AI或授权能力，组织管理员可触达组织范围数据与高级能力。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e；RC-04/05 修改了 mock/student/scoring 相关装配，但当前默认 runner 仍按答案长度产出分数，生产仍缺持久 FIFO、单题 timeout 与统一 retry owner。原问题未关闭，按受影响项重基线为 baseline_changed。
     rootCauseCluster:
       id: RC-01
       name: 身份、session 与后台账号生命周期
@@ -174,7 +174,7 @@ findings:
         org_auth。数据库中的used_quota不会随创建/启停可靠刷新，也不参与有效授权查询，导致商业授权额度被稳定绕过并可能让运营界面长期显示虚假的剩余额度。
       blastRadius: 所有通过super_admin或ops_admin单建、启用、绑定、导入或调动进入组织的员工，以及覆盖这些节点的全部standard/advanced org_auth；多实例、批量导入和多专业/等级授权会放大超额和used_quota陈旧。
     currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e，但审计后没有代码变更挂载模型配置/Prompt Registry 正式路由或恢复菜单入口；原静态反证仍成立，保持 confirmed。
     rootCauseCluster:
       id: RC-02
       name: organization 拓扑、授权范围、额度与员工生命周期
@@ -273,7 +273,7 @@ findings:
         owner、取消/终止影响和后续显式升级路径产生歧义；高级消费者还可能从重复上下文中选到更高edition。
       blastRadius: 所有同时使用current_and_descendants与specified_nodes的企业授权，受交集节点覆盖的管理员和员工，以及依赖唯一org_auth来源的edition、quota、训练、学习和终止消费者。
     currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e，但审计后没有代码变更建立 secret writer/resolver、写入 api_key_secret_ref 或让连接测试/执行消费受治理凭据；last4/configured 与 local_mock/环境变量分叉仍在，保持 confirmed。
     rootCauseCluster:
       id: RC-02
       name: organization 拓扑、授权范围、额度与员工生命周期
@@ -2997,7 +2997,7 @@ findings:
         request/response标识并写AI调用链。核心学习结论和考试准备由虚假证据驱动。
       blastRadius: 所有理论/技能练习、错题复习及复用同一练习服务的个人和企业学员；影响分数可信度、学习建议、AI日志真实性与RAG验收。
     currentRevalidationStatus: root_cause_alias
-    revalidationRationale: 与 F-0062 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    revalidationRationale: 当前源 HEAD 已推进到 f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e；RC-05 改变了 retrieval 装配，但练习/错题默认固定 AI 文案、答案长度评分和伪 request/output provenance 仍存在。与 F-0062 共享修复原语但验收义务独立，保持 root_cause_alias，不等于重复或已解决。
     rootCauseCluster:
       id: RC-06
       name: model_config、AI 任务执行与结果真实性

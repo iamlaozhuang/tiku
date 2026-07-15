@@ -141,3 +141,12 @@ Cost Calibration Gate remains blocked.
 threadRolloverGate: continue_same_goal_after_rc_05_closeout
 
 nextModuleRunCandidate: `p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14`
+
+## Serial Closeout Projection
+
+- RC-05 closeout record commit：`f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e`。
+- `master`、`origin/master` 与实时 `refs/heads/master` 均为上述 SHA；ahead/behind = `0/0`。
+- RC-05 worktree `D:\tiku\.worktrees\p0-rc-05` 不存在，短分支 `codex/p0-rc-05-knowledge-resource-rag-citation` 不存在。
+- `D:\tiku` clean；只读审计仓库保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02` 且 clean。
+
+localFullLoopGate: pass_fresh_master_origin_sync_and_cleanup

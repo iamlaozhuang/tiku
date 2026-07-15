@@ -143,8 +143,8 @@ p0RemediationSerialProgram:
   status: in_progress
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
-  currentTaskId: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-  nextTaskId: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  currentTaskId: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  nextTaskId: p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
   orderedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -162,6 +162,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
     - p0-remediation-rc-03-authorization-object-scope-2026-07-14
     - p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+    - p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -182,34 +183,36 @@ p0RemediationSerialProgram:
     p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: closed
     p0-remediation-rc-03-authorization-object-scope-2026-07-14: closed
     p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: closed
-    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: ready_for_closeout
-    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: pending
+    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: closed
+    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: in_progress
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: pending
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
 activeTasks:
-  - id: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-    title: P0 RC-05 knowledge resource RAG and citation
-    phase: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-    status: ready_for_closeout
+  - id: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+    title: P0 RC-06 AI config execution and provenance
+    phase: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+    status: in_progress
     priority: p0
-    sequenceOrder: 5
+    sequenceOrder: 6
     taskKind: implementation
     moduleRunVersion: 3
-    branch: codex/p0-rc-05-knowledge-resource-rag-citation
+    branch: codex/p0-rc-06-ai-config-execution-provenance
     dependsOn:
-      - p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+      - p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
     approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
     freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
     executionProfile: R3
     focusedGates:
-      - knowledge_scope_transaction
-      - resource_relation_authority
-      - durable_index_generation
-      - real_hybrid_retrieval
-      - durable_recommendation_review
-      - citation_provenance
+      - governed_model_config_selection
+      - write_only_secret_reference
+      - real_connection_test_adapter
+      - mounted_role_guarded_governance_ui
+      - durable_ai_scoring_fifo
+      - timeout_retry_idempotency
+      - model_prompt_result_provenance
+      - production_fixture_rejection
       - idempotency
       - schema_migration_source
       - scoped_format
@@ -219,85 +222,85 @@ activeTasks:
       - pre_push
       - security_boundary
     buildRequired: true
-    fullRegressionPolicy: required_shared_content_ai_rag_student_retrieval_contract
+    fullRegressionPolicy: required_shared_model_prompt_ai_scoring_student_admin_contract
     protectedDomains:
-      - knowledge_base
-      - knowledge_node
-      - resource
-      - knowledge_node_resource
-      - resource_index_generation
-      - resource_chunk
-      - kn_recommendation
+      - model_provider
       - model_config
       - prompt_template
-      - rag
-      - citation
+      - api_key_secret_ref
+      - ai_scoring_task
+      - ai_scoring_attempt
+      - answer_record
+      - mock_exam
+      - practice
+      - mistake_book
+      - ai_call_log
       - transaction_atomicity
       - audit_log
       - program_order
       - approval_boundary
       - deployment
     reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
-      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
-      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
       - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
+      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
       - src/db/schema/ai-rag.ts
       - src/db/schema/ai-rag.test.ts
-      - src/db/schema/paper.ts
-      - src/rag/retrieval.ts
-      - src/rag/retrieval.test.ts
-      - src/server/contracts/admin-content-knowledge-ops-contract.ts
-      - src/server/contracts/ai-rag-contract.ts
-      - src/server/contracts/question-contract.ts
-      - src/server/models/ai-rag.ts
-      - src/server/validators/rag-resource-knowledge.ts
-      - src/server/repositories/question-repository.ts
-      - src/server/repositories/question-repository.test.ts
-      - src/server/repositories/content-knowledge-node-runtime-repository.ts
-      - src/server/repositories/knowledge-recommendation-runtime-repository.ts
-      - src/server/repositories/knowledge-recommendation-runtime-repository.test.ts
-      - src/server/repositories/rag-resource-knowledge-runtime-repository.ts
-      - src/server/services/content-question-material-runtime.ts
-      - src/server/services/ai-explanation-hint-service.test.ts
+      - src/server/contracts/admin-ai-audit-log-ops-contract.ts
+      - src/server/contracts/student-experience/mock-exam.ts
+      - src/server/validators/ai-rag.ts
+      - src/server/validators/ai-rag.test.ts
+      - src/server/repositories/admin-ai-audit-log-runtime-repository.ts
+      - src/server/repositories/ai-scoring-attempt-repository.ts
+      - src/server/repositories/ai-scoring-task-repository.ts
+      - src/server/repositories/mock-exam-repository.ts
+      - src/server/repositories/student-flow-runtime-repository.ts
+      - src/server/services/admin-ai-audit-log-runtime.ts
+      - src/server/services/ai-scoring-task-runtime.ts
+      - src/server/services/ai-scoring-service.ts
       - src/server/services/ai-scoring-service.test.ts
-      - src/server/services/knowledge-recommendation-service.ts
-      - src/server/services/knowledge-recommendation-service.test.ts
-      - src/server/services/mistake-book-service.test.ts
-      - src/server/services/rag-resource-knowledge-runtime.ts
-      - src/server/services/rag-retrieval-service.ts
-      - src/server/services/admin-content-knowledge-ops-service.ts
+      - src/server/services/model-config-runtime.ts
+      - src/server/services/model-provider-secret-store.ts
+      - src/server/services/model-provider-secret-store.test.ts
+      - src/server/services/mock-exam-service.ts
+      - src/server/services/mock-exam-service.test.ts
       - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
       - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
-      - src/server/services/rag-retrieval-service.test.ts
+      - src/server/services/practice-service.ts
+      - src/server/services/practice-service.test.ts
+      - src/server/services/student-experience/route-handlers.ts
       - src/server/services/student-flow-runtime.test.ts
-      - src/server/services/student-mistake-book-runtime.test.ts
       - src/server/services/student-flow-runtime.ts
+      - src/server/services/student-mistake-book-runtime.test.ts
       - src/server/services/student-mistake-book-runtime.ts
-      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
-      - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
-      - tests/unit/admin-question-material-ui.test.ts
-      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
-      - tests/unit/admin-resource-knowledge-ui-layout.test.ts
-      - tests/unit/phase-9-content-question-material-runtime.test.ts
-      - tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts
+      - src/app/(admin)/ops/ai-governance/page.tsx
+      - src/app/(admin)/ops/ai-governance/AdminAiGovernancePage.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.test.tsx
+      - src/features/admin/admin-role-overview/AdminRoleOverviewPage.tsx
+      - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+      - tests/unit/admin-ai-governance-route.test.ts
+      - tests/unit/admin-model-config-management-ui.test.ts
       - tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts
-      - tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts
-      - tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts
-      - tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts
-      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - tests/unit/phase-11-model-config-fallback-runtime.test.ts
+      - tests/unit/phase-12-model-config-local-mock-runtime.test.ts
+      - tests/unit/phase-12-model-config-server-runtime.test.ts
       - tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts
-      - tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts
-      - tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts
-      - tests/unit/p0-rc-05-schema-migration-source.test.ts
-      - drizzle/*_p0_rc_05_*.sql
+      - tests/unit/phase-20-ra-06-07-model-config-runtime-admin-alignment.test.ts
+      - tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts
+      - tests/unit/p0-rc-06-schema-migration-source.test.ts
+      - drizzle/*_p0_rc_06_*.sql
       - drizzle/meta/*_snapshot.json
       - drizzle/meta/_journal.json
     blockedFiles:
@@ -324,7 +327,9 @@ activeTasks:
       dependencyIntroduction: blocked_without_fresh_approval
       schemaMigration: approved_source_authoring_test_and_commit_only
       databaseMutation: blocked_without_fresh_approval
+      secretEnvironmentAccess: blocked
       providerCall: blocked
+      workerRuntimeActivation: blocked
       runtimeAcceptance: blocked_out_of_program
       stagingProdDeploy: blocked_requires_fresh_user_approval
       forcePush: blocked
@@ -334,28 +339,28 @@ activeTasks:
       status: satisfied
       reason: approved_schema_migration_source_authoring_test_and_commit_only_for_current_p0_goal
       approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
-      resumeAction: execute_rc_05_tdd_schema_migration_source_implementation_two_round_review_and_closeout_without_database_apply_provider_call_or_runtime_acceptance
+      resumeAction: execute_rc_06_tdd_schema_migration_source_implementation_two_round_review_and_closeout_without_database_apply_secret_access_provider_call_worker_activation_or_runtime_acceptance
     acceptanceStandards:
-      - F-0068 knowledge_node parent and knowledge_base scope are transactionally locked and same-base/same-profession; cross-scope move fails closed and schema constraints backstop races.
-      - F-0075 production recommendation never uses string matching, first-node fallback, fake model/prompt or synthesized citations; unavailable executors return an honest unavailable or durable pending state.
-      - F-0076 each current question revision has one durable recommendation task with candidates, supersession and conditional confirm/ignore review facts; create/update/disable and manual retry are idempotent.
-      - F-0080 resource indexing persists immutable generations and real chunks with independent keyword/vector facts; only a complete atomic generation becomes active and rag_ready.
-      - F-0081 disabled resources reject rebuild without state change; old active generation remains readable during rebuild and failed or stale generations never replace it.
-      - F-0084 knowledge_node_resource is the sole resource-scope fact and validates the complete same-base/same-profession active set without first-page truncation; descendant retrieval uses persisted relations.
-      - API responses preserve public ids, camelCase, standard envelope, null and empty-list semantics and never expose internal ids, raw prompts, provider payloads or fabricated citation facts.
-      - Database apply/read/write, fixture/seed, runtime/browser/e2e, dependencies, Provider calls, PR, force push and deployment remain outside this task.
+      - F-0101 model provider/config and read-only Prompt Registry are mounted at a discoverable protected route; super_admin has governed write/test actions while ops_admin sees only redacted read-only summaries.
+      - F-0102 a submitted API key is passed only to an injected protected secret writer and persisted as an opaque secret reference plus last4/status; default execution never reads process environment or claims a discarded secret is configured.
+      - Connection tests use an injected minimal synthetic Provider adapter, never user/private content, and persist only redacted outcome metadata; absent adapter or secret fails honestly without auto-disabling config.
+      - F-0062 mock-exam subjective scoring enters a durable FIFO task with immutable model/prompt/input/authorization snapshots; single-answer timeout, max-three retry, idempotent success reuse and failed/partial state are enforceable from persisted facts.
+      - F-0134 practice and mistake-book production defaults never return fixed “AI” prose, answer-length scores, fake request ids, fake citations or local_mock success; unavailable governed execution is explicit and non-scoring.
+      - Production model selection rejects local fixture catalogs; successful scoring/explanation facts identify selected model config, prompt template version, attempt/task and redacted call provenance.
+      - API responses preserve public ids, camelCase, standard envelope, null and empty-list semantics and never expose internal ids, secrets, raw prompts, Provider payloads or fabricated provenance.
+      - Database apply/read/write, real secret/env access, fixture/seed, worker activation, runtime/browser/e2e, dependencies, Provider calls, PR, force push and deployment remain outside this task.
     validationCommands:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual
-      - corepack pnpm@10.15.1 exec vitest run tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts tests/unit/p0-rc-05-schema-migration-source.test.ts --reporter=dot
+      - corepack pnpm@10.15.1 exec vitest run tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts tests/unit/p0-rc-06-schema-migration-source.test.ts --reporter=dot
       - corepack pnpm@10.15.1 run test:unit
       - corepack pnpm@10.15.1 run lint
       - corepack pnpm@10.15.1 run typecheck
       - corepack pnpm@10.15.1 run format:check
       - corepack pnpm@10.15.1 run build
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
       localCommit:
@@ -372,8 +377,8 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
-  - id: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
-    title: P0 RC-06 AI config execution and provenance
+  - id: p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
+    title: P0 RC-07 answer mock scoring and report
     status: pending
 standingAuthorization:
   id: current-user-approved-p0-remediation-serial-goal-2026-07-14

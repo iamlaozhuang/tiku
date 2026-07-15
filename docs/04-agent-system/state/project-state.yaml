@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-updatedAt: "2026-07-15T11:56:48-07:00"
+currentPhase: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+updatedAt: "2026-07-15T12:38:29-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -352,8 +352,8 @@ p0RemediationSerialProgram:
   status: in_progress
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
-  currentTaskId: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-  nextTaskId: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  currentTaskId: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  nextTaskId: p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
   orderedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -371,6 +371,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
     - p0-remediation-rc-03-authorization-object-scope-2026-07-14
     - p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+    - p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -391,8 +392,8 @@ p0RemediationSerialProgram:
     p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: closed
     p0-remediation-rc-03-authorization-object-scope-2026-07-14: closed
     p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: closed
-    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: ready_for_closeout
-    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: pending
+    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: closed
+    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: in_progress
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: pending
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
@@ -430,27 +431,33 @@ p0RemediationSerialProgram:
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14:
       taskCommit: pass
       masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14:
+      taskCommit: pending
+      masterMerge: pending
       originMasterSync: pending
       worktreeCleanup: pending
       shortBranchCleanup: pending
 currentTask:
-  id: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-  title: P0 RC-05 knowledge resource RAG and citation
-  phase: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-  status: ready_for_closeout
+  id: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  title: P0 RC-06 AI config execution and provenance
+  phase: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  status: in_progress
   priority: p0
   taskKind: implementation
-  branch: codex/p0-rc-05-knowledge-resource-rag-citation
+  branch: codex/p0-rc-06-ai-config-execution-provenance
   executionProfile: R3
-  planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
-  nextRequiredTaskId: p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
+  planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+  nextRequiredTaskId: p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
   currentExecutionGate:
     status: satisfied
     reason: approved_schema_migration_source_authoring_test_and_commit_only_for_current_p0_goal
     approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
-    resumeAction: execute RC-05 TDD, schema/migration source, implementation, two-round review and closeout without database apply, Provider calls or runtime acceptance
+    resumeAction: execute RC-06 TDD, schema/migration source, implementation, two-round review and closeout without database apply, real secret access, Provider calls or runtime acceptance
 standingAuthorization:
   id: current-user-approved-p0-remediation-serial-goal-2026-07-14
   source: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
@@ -460,9 +467,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 5b5319b511e0eb7bc9a1b8e3e4adadf9193bb88c
-  lastKnownOriginMasterSha: d8ea27882f98679db8f83992316cd9c6661bee3d
-  lastKnownRemoteMasterSha: d8ea27882f98679db8f83992316cd9c6661bee3d
+  lastKnownMasterSha: f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e
+  lastKnownOriginMasterSha: f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e
+  lastKnownRemoteMasterSha: f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass
