@@ -10,6 +10,121 @@ export type KnowledgeNodeMutationInput = {
 
 export type KnowledgeNodeUpdateInput = Partial<KnowledgeNodeMutationInput>;
 
+type ScopedKnowledgeNode = {
+  id: number;
+  knowledgeBaseId: number;
+  profession: Profession;
+};
+
+type ResourceKnowledgeNodeScope = ScopedKnowledgeNode & {
+  publicId: string;
+  knStatus: "active" | "disabled";
+};
+
+export type KnowledgeNodeParentScopeValidationResult =
+  | { status: "valid" }
+  | {
+      status: "invalid";
+      reason: "self_parent" | "knowledge_base_mismatch" | "profession_mismatch";
+    };
+
+export type ResourceKnowledgeNodeScopeValidationResult =
+  | { status: "valid"; knowledgeNodeIds: number[] }
+  | {
+      status: "invalid";
+      reason:
+        | "duplicate_knowledge_node_public_id"
+        | "knowledge_node_set_mismatch"
+        | "knowledge_base_mismatch"
+        | "profession_mismatch"
+        | "knowledge_node_disabled";
+    };
+
+export function validateKnowledgeNodeParentScope(input: {
+  current: ScopedKnowledgeNode;
+  parent: ScopedKnowledgeNode | null;
+}): KnowledgeNodeParentScopeValidationResult {
+  if (input.parent === null) {
+    return { status: "valid" };
+  }
+
+  if (input.parent.id === input.current.id) {
+    return { status: "invalid", reason: "self_parent" };
+  }
+
+  if (input.parent.knowledgeBaseId !== input.current.knowledgeBaseId) {
+    return { status: "invalid", reason: "knowledge_base_mismatch" };
+  }
+
+  if (input.parent.profession !== input.current.profession) {
+    return { status: "invalid", reason: "profession_mismatch" };
+  }
+
+  return { status: "valid" };
+}
+
+export function validateResourceKnowledgeNodeScope(input: {
+  resource: Pick<ScopedKnowledgeNode, "knowledgeBaseId" | "profession">;
+  requestedKnowledgeNodePublicIds: string[];
+  knowledgeNodes: ResourceKnowledgeNodeScope[];
+}): ResourceKnowledgeNodeScopeValidationResult {
+  const uniqueRequestedPublicIds = new Set(
+    input.requestedKnowledgeNodePublicIds,
+  );
+
+  if (
+    uniqueRequestedPublicIds.size !==
+    input.requestedKnowledgeNodePublicIds.length
+  ) {
+    return {
+      status: "invalid",
+      reason: "duplicate_knowledge_node_public_id",
+    };
+  }
+
+  const knowledgeNodeByPublicId = new Map(
+    input.knowledgeNodes.map((knowledgeNode) => [
+      knowledgeNode.publicId,
+      knowledgeNode,
+    ]),
+  );
+
+  if (
+    knowledgeNodeByPublicId.size !== uniqueRequestedPublicIds.size ||
+    [...uniqueRequestedPublicIds].some(
+      (publicId) => !knowledgeNodeByPublicId.has(publicId),
+    )
+  ) {
+    return { status: "invalid", reason: "knowledge_node_set_mismatch" };
+  }
+
+  const knowledgeNodeIds: number[] = [];
+
+  for (const publicId of input.requestedKnowledgeNodePublicIds) {
+    const knowledgeNode = knowledgeNodeByPublicId.get(publicId);
+
+    if (knowledgeNode === undefined) {
+      return { status: "invalid", reason: "knowledge_node_set_mismatch" };
+    }
+
+    if (knowledgeNode.knowledgeBaseId !== input.resource.knowledgeBaseId) {
+      return { status: "invalid", reason: "knowledge_base_mismatch" };
+    }
+
+    if (knowledgeNode.profession !== input.resource.profession) {
+      return { status: "invalid", reason: "profession_mismatch" };
+    }
+
+    if (knowledgeNode.knStatus !== "active") {
+      return { status: "invalid", reason: "knowledge_node_disabled" };
+    }
+
+    knowledgeNodeIds.push(knowledgeNode.id);
+  }
+
+  return { status: "valid", knowledgeNodeIds };
+}
+
 export function parseKnowledgeNodeMutationInput(
   value: unknown,
 ): KnowledgeNodeMutationInput | null {

@@ -311,6 +311,22 @@ export function isResourceRagEligible(status: ResourceStatus): boolean {
   return status === "rag_ready";
 }
 
+export function canRequestResourceIndexRebuild(
+  status: ResourceStatus,
+): boolean {
+  return (
+    status === "published" ||
+    status === "index_failed" ||
+    status === "rag_ready"
+  );
+}
+
+export function resolveResourceStatusAfterIndexFailure(
+  hasActiveGeneration: boolean,
+): Extract<ResourceStatus, "rag_ready" | "index_failed"> {
+  return hasActiveGeneration ? "rag_ready" : "index_failed";
+}
+
 export function assertKnowledgeNodeDepth(depth: number): void {
   if (!Number.isInteger(depth) || depth < 1 || depth > maxKnowledgeNodeDepth) {
     throw new Error("knowledge_node depth must be between 1 and 5");

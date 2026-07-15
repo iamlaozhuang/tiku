@@ -52,38 +52,42 @@ export type QuestionResultDto = {
 };
 
 export type QuestionKnowledgeRecommendationItemDto = {
+  candidatePublicId: string;
   knowledgeNodePublicId: string;
   name: string;
   pathName: string;
   confidence: "high" | "medium" | "low";
   reason: string;
   source: "ai_recommended";
-  confirmationStatus: "pending_confirmation";
+  confirmationStatus: "pending_confirmation" | "confirmed" | "ignored";
+  confidenceBasisPoint: number;
+  citationCount: number;
 };
 
 export type QuestionKnowledgeRecommendationReviewStateDto = {
   questionUpdatedAt: string;
+  currentQuestionUpdatedAt: string;
+  taskPublicId: string;
+  taskStatus: "pending" | "running" | "succeeded" | "failed" | "superseded";
   staleCheck: "question_updated_at_mismatch";
   bindingMode: "durable_question_binding";
 };
 
 export type QuestionKnowledgeRecommendationDto = {
   questionPublicId: string;
-  recommendationStatus: "recommended" | "recommendation_failed";
+  recommendationStatus:
+    | "pending"
+    | "running"
+    | "recommended"
+    | "recommendation_failed"
+    | "superseded";
   reviewState: QuestionKnowledgeRecommendationReviewStateDto;
   recommendations: QuestionKnowledgeRecommendationItemDto[];
+  evidenceStatus: "sufficient" | "weak" | "none" | null;
   modelConfig: {
     modelConfigPublicId: string;
-    providerPublicId: string;
-    providerDisplayName: string;
-    providerKey: string;
-    modelName: string;
-    displayName: string;
-    aiFuncType: "kn_recommendation";
-    configVersion: number;
-    promptTemplateKey: string;
-    promptTemplateVersion: number;
-  };
+    promptTemplatePublicId: string;
+  } | null;
   failureReason: string | null;
 };
 

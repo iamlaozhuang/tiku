@@ -155,7 +155,7 @@ describe("RAG evidence retrieval", () => {
     expect(noneResult.citations).toEqual([]);
   });
 
-  it("reranks authorized hybrid candidates with local deterministic query relevance", () => {
+  it("uses persisted rerank scores after filtering unauthorized candidates", () => {
     const result = createRagRetrievalResult({
       query: "customer permit renewal",
       profession: "marketing",
@@ -173,6 +173,7 @@ describe("RAG evidence retrieval", () => {
           text: "General market operations without the requested phrase.",
           keywordScore: 0.95,
           semanticScore: 0.95,
+          rerankScore: 0.2,
         },
         {
           ...baseCandidate,
@@ -181,6 +182,7 @@ describe("RAG evidence retrieval", () => {
           text: "Customer permit renewal evidence appears in this passage.",
           keywordScore: 0.4,
           semanticScore: 0.35,
+          rerankScore: 0.99,
         },
         {
           ...baseCandidate,
@@ -189,6 +191,7 @@ describe("RAG evidence retrieval", () => {
           text: "Customer permit renewal evidence must be filtered first.",
           keywordScore: 1,
           semanticScore: 1,
+          rerankScore: 1,
         },
       ],
     });

@@ -105,6 +105,7 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
               citationCount: 0,
               resourcePublicIds: [],
               chunkPublicIds: [],
+              generationPublicIds: [],
               chunkIndexes: [],
               textHashes: [],
               queryHash: "local-test-query",

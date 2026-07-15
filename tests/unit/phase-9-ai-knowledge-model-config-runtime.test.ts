@@ -126,7 +126,7 @@ function createQuestionRecommendationRepositories(input: {
         return {
           knowledgeNodes: [
             {
-              publicId: "knowledge-node-public-license",
+              publicId: "knowledge-node-public-authorization",
               parentKnowledgeNodePublicId: null,
               profession:
                 query.profession === "all" ? "monopoly" : query.profession,
@@ -195,11 +195,33 @@ function createQuestionRecommendationRepositories(input: {
         };
       },
     },
+    knowledgeRecommendationRepository: {
+      async requestKnowledgeRecommendation() {
+        return {
+          taskPublicId: "kn-recommendation-task-public-001",
+          questionPublicId: "question-public-001",
+          questionUpdatedAt: createdAt.toISOString(),
+          currentQuestionUpdatedAt: createdAt.toISOString(),
+          taskStatus: "pending",
+          evidenceStatus: null,
+          modelConfigPublicId: null,
+          promptTemplatePublicId: null,
+          failureCode: null,
+          candidates: [],
+        };
+      },
+      async completeKnowledgeRecommendationTask() {
+        throw new Error("not used");
+      },
+      async reviewKnowledgeRecommendationTask() {
+        throw new Error("not used");
+      },
+    },
   } as ContentQuestionMaterialRuntimeRepositories;
 }
 
 describe("phase 9 AI knowledge and model config runtime", () => {
-  it("recommends knowledge nodes through a local deterministic question action and writes safe logs", async () => {
+  it("creates a durable pending recommendation task without fabricated model output", async () => {
     const auditLogEntries: unknown[] = [];
     const aiCallLogEntries: unknown[] = [];
     const handlers = createContentQuestionMaterialRuntimeRouteHandlers({
@@ -228,20 +250,13 @@ describe("phase 9 AI knowledge and model config runtime", () => {
       data: {
         recommendation: {
           questionPublicId: "question-public-001",
-          recommendationStatus: "recommended",
-          modelConfig: {
-            aiFuncType: "kn_recommendation",
-            promptTemplateKey: "kn_recommendation_v1",
-            promptTemplateVersion: 1,
+          recommendationStatus: "pending",
+          reviewState: {
+            taskPublicId: "kn-recommendation-task-public-001",
+            taskStatus: "pending",
           },
-          recommendations: [
-            {
-              knowledgeNodePublicId: "knowledge-node-public-license",
-              confidence: "high",
-              source: "ai_recommended",
-              confirmationStatus: "pending_confirmation",
-            },
-          ],
+          modelConfig: null,
+          recommendations: [],
         },
       },
     });
@@ -257,16 +272,7 @@ describe("phase 9 AI knowledge and model config runtime", () => {
         resultStatus: "success",
       }),
     ]);
-    expect(aiCallLogEntries).toEqual([
-      expect.objectContaining({
-        userPublicId: "admin-user-public-001",
-        questionPublicId: "question-public-001",
-        aiFuncType: "kn_recommendation",
-        callStatus: "success",
-        promptTemplateKey: "kn_recommendation_v1",
-        promptTemplateVersion: 1,
-      }),
-    ]);
+    expect(aiCallLogEntries).toEqual([]);
     expect(JSON.stringify(aiCallLogEntries)).not.toContain("许可证办理需要");
     expect(JSON.stringify(aiCallLogEntries)).not.toContain("核验申请材料");
   });

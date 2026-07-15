@@ -318,19 +318,6 @@ type PendingContentAction =
 
 type KnowledgeRecommendationReviewState = {
   recommendation: QuestionKnowledgeRecommendationDto;
-  reviewActionByKnowledgeNodePublicId: Record<
-    string,
-    {
-      auditAction: "local_review_only" | "question.update";
-      knowledgeNodePublicId: string;
-      reviewStatus: RecommendationReviewStatus;
-      targetQuestionPublicId: string;
-    }
-  >;
-  reviewStatusByKnowledgeNodePublicId: Record<
-    string,
-    RecommendationReviewStatus
-  >;
 };
 
 const statusLabels: Record<QuestionStatus | MaterialStatus, string> = {
@@ -348,8 +335,8 @@ const recommendationReviewStatusLabels: Record<
 };
 
 const recommendationConfirmationStatusLabels: Record<string, string> = {
-  accepted: "已采纳",
-  discarded: "已丢弃",
+  confirmed: "已采纳",
+  ignored: "已丢弃",
   pending_confirmation: "待确认",
 };
 
@@ -891,31 +878,6 @@ function getPersistableFillBlankAnswers(
       getMeaningfulPlainText(fillBlankAnswer.standardAnswersText).length > 0 ||
       fillBlankAnswer.score.trim().length > 0,
   );
-}
-
-function createQuestionInputFromQuestion(
-  question: QuestionDto,
-  knowledgeNodePublicIds: string[],
-) {
-  return {
-    questionType: question.questionType,
-    profession: question.profession,
-    level: question.level,
-    subject: question.subject,
-    stemRichText: question.stemRichText,
-    analysisRichText: question.analysisRichText,
-    standardAnswerRichText: question.standardAnswerRichText,
-    multiChoiceRule: question.multiChoiceRule,
-    scoringMethod: question.scoringMethod,
-    materialPublicId: question.materialPublicId,
-    questionOptions: question.questionOptions,
-    scoringPoints: question.scoringPoints,
-    fillBlankAnswers: question.fillBlankAnswers ?? [],
-    knowledgeNodePublicIds,
-    expectedUpdatedAt: question.updatedAt,
-    tagPublicIds: question.tagPublicIds,
-    status: question.status,
-  };
 }
 
 function formatPublicIdList(publicIds: string[]): string {
@@ -1617,12 +1579,13 @@ export function AdminQuestionMaterialManagement({
       ...currentRecommendations,
       [question.publicId]: {
         recommendation: recommendationResult.recommendation,
-        reviewActionByKnowledgeNodePublicId: {},
-        reviewStatusByKnowledgeNodePublicId: {},
       },
     }));
     setActionMessage(
-      `题目“${createQuestionReadableName(question)}”的知识点推荐已生成`,
+      recommendationResult.recommendation.recommendationStatus === "pending" ||
+        recommendationResult.recommendation.recommendationStatus === "running"
+        ? `题目“${createQuestionReadableName(question)}”的知识点推荐任务已创建`
+        : `题目“${createQuestionReadableName(question)}”的知识点推荐已加载`,
     );
   }
 
@@ -1635,80 +1598,74 @@ export function AdminQuestionMaterialManagement({
     const currentQuestion =
       questions.find((question) => question.publicId === questionPublicId) ??
       null;
+    const currentRecommendationState =
+      recommendationsByQuestionPublicId[questionPublicId] ?? null;
     const recommendationItem =
-      recommendationsByQuestionPublicId[
-        questionPublicId
-      ]?.recommendation.recommendations.find(
+      currentRecommendationState?.recommendation.recommendations.find(
         (recommendation) =>
           recommendation.knowledgeNodePublicId === knowledgeNodePublicId,
       ) ?? null;
     const recommendationName = recommendationItem?.name.trim() || "该知识点";
 
-    if (reviewStatus === "accepted") {
-      if (sessionToken === null || currentQuestion === null) {
-        setActionError("Admin session expired. Sign in again before retrying.");
-        return;
-      }
-
-      const nextKnowledgeNodePublicIds =
-        currentQuestion.knowledgeNodePublicIds.includes(knowledgeNodePublicId)
-          ? currentQuestion.knowledgeNodePublicIds
-          : [...currentQuestion.knowledgeNodePublicIds, knowledgeNodePublicId];
-      const response = await mutateAdminApi<{ question: QuestionDto }>(
-        `/api/v1/questions/${questionPublicId}`,
-        sessionToken,
-        "PATCH",
-        createQuestionInputFromQuestion(
-          currentQuestion,
-          nextKnowledgeNodePublicIds,
-        ),
-      );
-
-      if (response.code !== 0 || response.data === null) {
-        setActionError(
-          "Knowledge node binding save failed. Refresh and retry.",
-        );
-        return;
-      }
-
-      const savedQuestion = response.data.question;
-      setQuestions((currentQuestions) =>
-        upsertAdminObjectByPublicId(currentQuestions, savedQuestion),
-      );
-      setActionError(null);
+    if (
+      sessionToken === null ||
+      currentQuestion === null ||
+      currentRecommendationState === null ||
+      recommendationItem === null ||
+      currentRecommendationState.recommendation.reviewState.taskStatus !==
+        "succeeded"
+    ) {
+      setActionError("知识点推荐状态已变化，请刷新后重试。");
+      return;
     }
 
-    setRecommendationsByQuestionPublicId((currentRecommendations) => {
-      const currentRecommendation =
-        currentRecommendations[questionPublicId] ?? null;
-
-      if (currentRecommendation === null) {
-        return currentRecommendations;
-      }
-
-      return {
-        ...currentRecommendations,
-        [questionPublicId]: {
-          ...currentRecommendation,
-          reviewActionByKnowledgeNodePublicId: {
-            ...currentRecommendation.reviewActionByKnowledgeNodePublicId,
-            [knowledgeNodePublicId]: {
-              auditAction:
-                reviewStatus === "accepted"
-                  ? "question.update"
-                  : "local_review_only",
-              knowledgeNodePublicId,
-              reviewStatus,
-              targetQuestionPublicId: questionPublicId,
-            },
-          },
-          reviewStatusByKnowledgeNodePublicId: {
-            ...currentRecommendation.reviewStatusByKnowledgeNodePublicId,
-            [knowledgeNodePublicId]: reviewStatus,
-          },
+    const recommendation = currentRecommendationState.recommendation;
+    const action = reviewStatus === "accepted" ? "confirm" : "ignore";
+    const candidatePublicIds = [recommendationItem.candidatePublicId];
+    const response =
+      await mutateAdminApi<QuestionKnowledgeRecommendationResultDto>(
+        `/api/v1/questions/${questionPublicId}/recommend-knowledge-nodes`,
+        sessionToken,
+        "POST",
+        {
+          action,
+          taskPublicId: recommendation.reviewState.taskPublicId,
+          expectedQuestionUpdatedAt:
+            recommendation.reviewState.questionUpdatedAt,
+          candidatePublicIds,
         },
-      };
-    });
+      );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("知识点推荐审查保存失败，请刷新后重试。");
+      return;
+    }
+
+    const reviewedRecommendation = response.data.recommendation;
+    setRecommendationsByQuestionPublicId((currentRecommendations) => ({
+      ...currentRecommendations,
+      [questionPublicId]: { recommendation: reviewedRecommendation },
+    }));
+
+    if (action === "confirm") {
+      const confirmedKnowledgeNodePublicIds =
+        reviewedRecommendation.recommendations
+          .filter((candidate) => candidate.confirmationStatus === "confirmed")
+          .map((candidate) => candidate.knowledgeNodePublicId);
+      setQuestions((currentQuestions) =>
+        currentQuestions.map((question) =>
+          question.publicId === questionPublicId
+            ? {
+                ...question,
+                knowledgeNodePublicIds: confirmedKnowledgeNodePublicIds,
+                updatedAt:
+                  reviewedRecommendation.reviewState.currentQuestionUpdatedAt,
+              }
+            : question,
+        ),
+      );
+    }
+    setActionError(null);
 
     setActionMessage(
       reviewStatus === "accepted"
@@ -4031,24 +3988,24 @@ function KnowledgeRecommendationReviewPanel({
     reviewState.recommendation.reviewState.questionUpdatedAt !==
     question.updatedAt;
   const reviewStatuses = reviewState.recommendation.recommendations.map(
-    (recommendation) =>
-      reviewState.reviewStatusByKnowledgeNodePublicId[
-        recommendation.knowledgeNodePublicId
-      ] ?? recommendation.confirmationStatus,
+    (recommendation) => recommendation.confirmationStatus,
   );
   const acceptedCount = reviewStatuses.filter(
-    (reviewStatus) => reviewStatus === "accepted",
+    (reviewStatus) => reviewStatus === "confirmed",
   ).length;
   const discardedCount = reviewStatuses.filter(
-    (reviewStatus) => reviewStatus === "discarded",
+    (reviewStatus) => reviewStatus === "ignored",
   ).length;
   const pendingCount =
     reviewState.recommendation.recommendations.length -
     acceptedCount -
     discardedCount;
-  const reviewActions = Object.values(
-    reviewState.reviewActionByKnowledgeNodePublicId,
-  );
+  const reviewedRecommendations =
+    reviewState.recommendation.recommendations.filter(
+      (recommendation) =>
+        recommendation.confirmationStatus === "confirmed" ||
+        recommendation.confirmationStatus === "ignored",
+    );
 
   return (
     <section
@@ -4062,7 +4019,14 @@ function KnowledgeRecommendationReviewPanel({
             知识点推荐审查
           </h3>
           <p className="text-text-secondary text-xs leading-5">
-            {isStale ? "已过期：题目在推荐后发生更新" : "当前推荐待确认"}
+            {isStale
+              ? "已过期：题目在推荐后发生更新"
+              : reviewState.recommendation.reviewState.taskStatus ===
+                    "pending" ||
+                  reviewState.recommendation.reviewState.taskStatus ===
+                    "running"
+                ? "推荐任务处理中"
+                : "当前推荐待确认"}
           </p>
         </div>
         <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
@@ -4087,29 +4051,18 @@ function KnowledgeRecommendationReviewPanel({
         className="text-text-secondary mt-3 grid gap-1 text-xs leading-5"
         data-testid={`knowledge-recommendation-review-trace-${question.publicId}`}
       >
-        {reviewActions.length === 0 ? (
-          <li>暂无本地审查操作</li>
+        {reviewedRecommendations.length === 0 ? (
+          <li>暂无持久化审查操作</li>
         ) : (
-          reviewActions.map((reviewAction) => {
-            const reviewedRecommendation =
-              reviewState.recommendation.recommendations.find(
-                (recommendation) =>
-                  recommendation.knowledgeNodePublicId ===
-                  reviewAction.knowledgeNodePublicId,
-              );
-            const reviewedName =
-              reviewedRecommendation?.name.trim() || "不可用推荐项";
-
-            return (
-              <li key={reviewAction.knowledgeNodePublicId}>
-                {recommendationReviewStatusLabels[reviewAction.reviewStatus]}{" "}
-                {reviewedName} ·{" "}
-                {reviewAction.auditAction === "question.update"
-                  ? "已保存题目绑定"
-                  : "仅记录本地审查"}
-              </li>
-            );
-          })
+          reviewedRecommendations.map((reviewedRecommendation) => (
+            <li key={reviewedRecommendation.knowledgeNodePublicId}>
+              {reviewedRecommendation.confirmationStatus === "confirmed"
+                ? recommendationReviewStatusLabels.accepted
+                : recommendationReviewStatusLabels.discarded}{" "}
+              {reviewedRecommendation.name.trim() || "不可用推荐项"} ·
+              已持久化审查
+            </li>
+          ))
         )}
       </ul>
 
@@ -4120,10 +4073,8 @@ function KnowledgeRecommendationReviewPanel({
       ) : (
         <div className="mt-3 grid gap-2">
           {reviewState.recommendation.recommendations.map((recommendation) => {
-            const reviewStatus =
-              reviewState.reviewStatusByKnowledgeNodePublicId[
-                recommendation.knowledgeNodePublicId
-              ] ?? recommendation.confirmationStatus;
+            const reviewStatus = recommendation.confirmationStatus;
+            const isReviewPending = reviewStatus === "pending_confirmation";
             const isReadableRecommendation =
               recommendation.name.trim().length > 0 &&
               recommendation.pathName.trim().length > 0;
@@ -4164,7 +4115,7 @@ function KnowledgeRecommendationReviewPanel({
                   <div className="flex flex-wrap gap-2">
                     <Button
                       aria-label={`采纳推荐 ${recommendationName}`}
-                      disabled={!isReadableRecommendation}
+                      disabled={!isReadableRecommendation || !isReviewPending}
                       size="sm"
                       type="button"
                       variant="secondary"
@@ -4177,11 +4128,11 @@ function KnowledgeRecommendationReviewPanel({
                       }
                     >
                       <Check aria-hidden="true" data-icon="inline-start" />
-                      采纳
+                      采纳此项并结束
                     </Button>
                     <Button
                       aria-label={`丢弃推荐 ${recommendationName}`}
-                      disabled={!isReadableRecommendation}
+                      disabled={!isReadableRecommendation || !isReviewPending}
                       size="sm"
                       type="button"
                       variant="outline"

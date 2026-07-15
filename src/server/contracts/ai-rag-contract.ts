@@ -154,6 +154,7 @@ export type KnowledgeNodeResultDto = {
 
 export type RagCitationDto = {
   chunkPublicId: string;
+  generationPublicId: string | null;
   resourcePublicId: string;
   resourceTitle: string;
   headingPath: string[];
@@ -166,6 +167,7 @@ export type RagCitationDto = {
 
 export type RagCitationSourceDto = {
   chunkPublicId: string;
+  generationPublicId: string | null;
   resourcePublicId: string;
   resourceTitle: string;
   headingPath: string[];
@@ -178,6 +180,7 @@ export type RagRetrievalEvidenceSummaryDto = {
   citationCount: number;
   resourcePublicIds: string[];
   chunkPublicIds: string[];
+  generationPublicIds: string[];
   chunkIndexes: number[];
   textHashes: string[];
   staleCitationCount?: number;
@@ -196,6 +199,8 @@ export type RagRetrievalResultDto = {
 export type ResourceVectorRebuildDto = {
   resourcePublicId: string;
   resourceStatus: ResourceStatus;
+  generationPublicId: string | null;
+  requestReplayed: boolean;
   chunkCount: number;
   evidenceSummary: {
     chunkCount: number;

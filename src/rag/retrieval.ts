@@ -4,10 +4,11 @@ import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
 import { isResourceRagEligible } from "@/server/models/ai-rag";
 
 export type EvidenceStatus = "sufficient" | "weak" | "none";
-export type RagRetrievalMode = "fusion_sort" | "hybrid_rerank";
+export type RagRetrievalMode = "keyword_only" | "fusion_sort" | "hybrid_rerank";
 
 export type RagRetrievalCandidate = {
   chunkPublicId: string;
+  generationPublicId?: string;
   resourcePublicId: string;
   resourceTitle: string;
   resourceStatus: ResourceStatus;
@@ -19,7 +20,8 @@ export type RagRetrievalCandidate = {
   textHash: string;
   isStale?: boolean;
   keywordScore: number;
-  semanticScore: number;
+  semanticScore: number | null;
+  rerankScore?: number | null;
 };
 
 export type RagRetrievalInput = {
@@ -34,6 +36,7 @@ export type RagRetrievalInput = {
 
 export type RagCitation = {
   chunkPublicId: string;
+  generationPublicId: string | null;
   resourcePublicId: string;
   resourceTitle: string;
   headingPath: string[];
@@ -48,7 +51,10 @@ export type RagRetrievalResult = {
   evidenceStatus: EvidenceStatus;
   citations: RagCitation[];
   retrievalMode: RagRetrievalMode;
-  fallbackReason: "rerank_unavailable_fusion_sort" | null;
+  fallbackReason:
+    | "semantic_unavailable_keyword_only"
+    | "rerank_unavailable_fusion_sort"
+    | null;
 };
 
 export type RagRetrievalEvidenceSummary = {
@@ -56,6 +62,7 @@ export type RagRetrievalEvidenceSummary = {
   citationCount: number;
   resourcePublicIds: string[];
   chunkPublicIds: string[];
+  generationPublicIds: string[];
   chunkIndexes: number[];
   textHashes: string[];
   staleCitationCount: number;
@@ -107,7 +114,11 @@ export function createRagRetrievalResult(
     citations,
     retrievalMode,
     fallbackReason:
-      retrievalMode === "fusion_sort" ? "rerank_unavailable_fusion_sort" : null,
+      retrievalMode === "keyword_only"
+        ? "semantic_unavailable_keyword_only"
+        : retrievalMode === "fusion_sort"
+          ? "rerank_unavailable_fusion_sort"
+          : null,
   };
 }
 
@@ -122,6 +133,15 @@ export function summarizeRagRetrievalForEvidence(
       ...new Set(result.citations.map((citation) => citation.resourcePublicId)),
     ],
     chunkPublicIds: result.citations.map((citation) => citation.chunkPublicId),
+    generationPublicIds: [
+      ...new Set(
+        result.citations.flatMap((citation) =>
+          citation.generationPublicId === null
+            ? []
+            : [citation.generationPublicId],
+        ),
+      ),
+    ],
     chunkIndexes: result.citations.map((citation) => citation.chunkIndex),
     textHashes: result.citations.map((citation) => citation.textHash),
     staleCitationCount: result.citations.filter((citation) => citation.isStale)
@@ -182,6 +202,10 @@ function calculateLevelRank(
 }
 
 function calculateFusionScore(candidate: RagRetrievalCandidate): number {
+  if (candidate.semanticScore === null) {
+    return clampScore(candidate.keywordScore);
+  }
+
   return (
     (clampScore(candidate.keywordScore) + clampScore(candidate.semanticScore)) /
     2
@@ -190,66 +214,20 @@ function calculateFusionScore(candidate: RagRetrievalCandidate): number {
 
 function calculateCandidateScore(
   candidate: RagRetrievalCandidate,
-  query: string,
+  _query: string,
   retrievalMode: RagRetrievalMode,
 ): number {
+  if (retrievalMode === "keyword_only") {
+    return clampScore(candidate.keywordScore);
+  }
+
   const fusionScore = calculateFusionScore(candidate);
 
   if (retrievalMode === "fusion_sort") {
     return fusionScore;
   }
 
-  return clampScore(
-    fusionScore * 0.35 + calculateLocalRerankScore(query, candidate) * 0.65,
-  );
-}
-
-function calculateLocalRerankScore(
-  query: string,
-  candidate: RagRetrievalCandidate,
-): number {
-  const normalizedQuery = query.trim().toLowerCase();
-
-  if (normalizedQuery.length === 0) {
-    return 0;
-  }
-
-  const searchableText = [
-    candidate.resourceTitle,
-    candidate.headingPath.join(" "),
-    candidate.text,
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  if (searchableText.includes(normalizedQuery)) {
-    return 1;
-  }
-
-  const queryTokens = tokenizeForLocalRerank(query);
-
-  if (queryTokens.length === 0) {
-    return 0;
-  }
-
-  const searchableTokens = new Set(tokenizeForLocalRerank(searchableText));
-  const matchedTokenCount = queryTokens.filter((token) =>
-    searchableTokens.has(token),
-  ).length;
-
-  return matchedTokenCount / queryTokens.length;
-}
-
-function tokenizeForLocalRerank(value: string): string[] {
-  return [
-    ...new Set(
-      value
-        .toLowerCase()
-        .split(/[^\p{Letter}\p{Number}]+/u)
-        .map((token) => token.trim())
-        .filter((token) => token.length > 0),
-    ),
-  ];
+  return clampScore(candidate.rerankScore ?? fusionScore);
 }
 
 function calculateQualityRank(score: number): number {
@@ -310,6 +288,7 @@ function compareRankedCandidates(
 function createCitation(candidate: RankedRetrievalCandidate): RagCitation {
   return {
     chunkPublicId: candidate.chunkPublicId,
+    generationPublicId: candidate.generationPublicId ?? null,
     resourcePublicId: candidate.resourcePublicId,
     resourceTitle: candidate.resourceTitle,
     headingPath: [...candidate.headingPath],

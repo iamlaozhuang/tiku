@@ -60,4 +60,13 @@ describe("admin resource knowledge UI layout", () => {
     expect(knowledgeNodeSource).toContain("推荐绑定");
     expect(knowledgeNodeSource).toContain("路径变更需复核");
   });
+
+  it("fails closed for non-indexable resource states and reports rebuild as pending", () => {
+    const source = readSourceFile(adminResourceKnowledgeSourcePath);
+
+    expect(source).toContain("canRequestResourceIndexRebuild");
+    expect(source).toContain('"idempotency-key": requestPublicId');
+    expect(source).toContain("检索索引重建请求已受理");
+    expect(source).not.toContain("检索索引重建完成，已生成");
+  });
 });

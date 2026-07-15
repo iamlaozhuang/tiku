@@ -83,9 +83,6 @@ function createRuntimeRepositories(input: {
       async publishResourceMarkdown() {
         throw new Error("not used");
       },
-      async markResourceIndexingStarted() {
-        return undefined;
-      },
       async findResourceForIndexing(publicId) {
         if (publicId !== "resource-public-001") {
           return null;
@@ -107,24 +104,13 @@ function createRuntimeRepositories(input: {
           updatedAt: createdAt,
         };
       },
-      async saveResourceIndexingResult(result) {
+      async requestResourceIndexRebuild(resourcePublicId) {
         return {
-          publicId: result.resourcePublicId,
-          title: "专卖教材",
-          resourceType: "textbook",
-          resourceStatus:
-            result.status === "success" ? "rag_ready" : "index_failed",
-          profession: "monopoly",
-          level: 3,
-          knowledgeNodePublicIds: ["knowledge-node-public-permit"],
-          originalFileName: "monopoly.md",
-          downloadAvailable: true,
-          markdownPreviewAvailable: true,
-          isVectorStale: false,
-          publishedAt: createdAt.toISOString(),
-          indexingErrorSummary: result.indexingErrorMessage,
-          uploadedAt: createdAt.toISOString(),
-          updatedAt: createdAt.toISOString(),
+          status: "accepted",
+          generationPublicId: "resource-index-generation-public-001",
+          resourcePublicId,
+          resourceStatus: "indexing",
+          replayed: false,
         };
       },
     },
@@ -207,7 +193,7 @@ describe("phase 9 RAG resource knowledge runtime", () => {
     expect(auditLogEntries).toEqual([]);
   });
 
-  it("rebuilds resource chunks locally and returns redaction-safe resource evidence", async () => {
+  it("creates a durable resource index generation without fabricating ready chunks", async () => {
     const auditLogEntries: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
       repositories: createRuntimeRepositories({ auditLogEntries }),
@@ -219,7 +205,10 @@ describe("phase 9 RAG resource knowledge runtime", () => {
         "http://localhost/api/v1/resources/resource-public-001/rebuild-vector",
         {
           method: "POST",
-          headers: { authorization: "Bearer admin-session-token" },
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "idempotency-key": "resource-index-request-public-001",
+          },
         },
       ),
       { params: Promise.resolve({ publicId: "resource-public-001" }) },
@@ -232,11 +221,13 @@ describe("phase 9 RAG resource knowledge runtime", () => {
       data: {
         resourceVector: {
           resourcePublicId: "resource-public-001",
-          resourceStatus: "rag_ready",
-          chunkCount: 2,
+          resourceStatus: "indexing",
+          generationPublicId: "resource-index-generation-public-001",
+          requestReplayed: false,
+          chunkCount: 0,
           evidenceSummary: {
-            chunkCount: 2,
-            resourcePublicIds: ["resource-public-001"],
+            chunkCount: 0,
+            resourcePublicIds: [],
           },
         },
       },
@@ -251,6 +242,56 @@ describe("phase 9 RAG resource knowledge runtime", () => {
         targetResourceType: "resource",
         targetPublicId: "resource-public-001",
         resultStatus: "success",
+      }),
+    ]);
+  });
+
+  it("rejects a disabled resource rebuild without invoking the generation writer", async () => {
+    const auditLogEntries: unknown[] = [];
+    const repositories = createRuntimeRepositories({ auditLogEntries });
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      repositories: {
+        ...repositories,
+        resourceRepository: {
+          ...repositories.resourceRepository,
+          async findResourceForIndexing(publicId) {
+            const source =
+              await repositories.resourceRepository.findResourceForIndexing(
+                publicId,
+              );
+            return source === null
+              ? null
+              : { ...source, resourceStatus: "disabled" };
+          },
+          async requestResourceIndexRebuild() {
+            throw new Error("disabled resource must not reach writer");
+          },
+        },
+      },
+      sessionService: createAdminSessionService("content_admin"),
+    });
+
+    const response = await handlers.resources.rebuildVector.POST(
+      new Request(
+        "http://localhost/api/v1/resources/resource-public-001/rebuild-vector",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-token" },
+        },
+      ),
+      { params: Promise.resolve({ publicId: "resource-public-001" }) },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409621,
+      message: "Resource status does not allow index rebuild.",
+      data: null,
+    });
+    expect(auditLogEntries).toEqual([
+      expect.objectContaining({
+        actionType: "resource.rebuild_vector",
+        targetPublicId: "resource-public-001",
+        resultStatus: "failed",
       }),
     ]);
   });

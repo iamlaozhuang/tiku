@@ -27,8 +27,10 @@ import {
   createModelConfigRuntimeResolver,
   type ModelConfigRuntimeCatalog,
 } from "./model-config-runtime";
-import { defaultLocalUploadStorageRoot } from "./local-paper-asset-storage";
-import { buildLocalResourceRagRetrievalResult } from "./rag-resource-knowledge-runtime";
+import {
+  buildLocalResourceRagRetrievalResult,
+  buildResourceRagRetrievalResult,
+} from "./rag-resource-knowledge-runtime";
 import type { SessionService } from "./session-service";
 
 export type StudentMistakeBookRuntimeOptions =
@@ -89,6 +91,7 @@ function createEmptyRagRetrievalResult(): RagRetrievalResultDto {
       citationCount: 0,
       resourcePublicIds: [],
       chunkPublicIds: [],
+      generationPublicIds: [],
       chunkIndexes: [],
       textHashes: [],
       queryHash: "local-deterministic-query",
@@ -146,7 +149,7 @@ function createAiExplanationRetrievalQuery(
 }
 
 function createDefaultMistakeBookRagRetrievalRuntime(
-  storageRoot: string,
+  storageRoot?: string,
 ): MistakeBookRagRetrievalRuntime {
   return {
     async retrieveForAiExplanation(context) {
@@ -156,12 +159,18 @@ function createDefaultMistakeBookRagRetrievalRuntime(
         return createEmptyRagRetrievalResult();
       }
 
-      return buildLocalResourceRagRetrievalResult({
-        storageRoot,
+      const retrievalInput = {
         query: createAiExplanationRetrievalQuery(context),
         profession,
         level: readSnapshotLevel(context.questionSnapshot),
-      });
+      };
+
+      return storageRoot === undefined
+        ? buildResourceRagRetrievalResult(retrievalInput)
+        : buildLocalResourceRagRetrievalResult({
+            ...retrievalInput,
+            storageRoot,
+          });
     },
   };
 }
@@ -199,9 +208,7 @@ function createDefaultAiExplanationRuntime(input: {
   const promptTemplate = modelConfigSelection.promptTemplate;
   const ragRetrievalRuntime =
     input.ragRetrievalRuntime ??
-    createDefaultMistakeBookRagRetrievalRuntime(
-      input.localResourceStorageRoot ?? defaultLocalUploadStorageRoot,
-    );
+    createDefaultMistakeBookRagRetrievalRuntime(input.localResourceStorageRoot);
   const explanationHintService = createAiExplanationHintService({
     async explanationRunner(input) {
       return {

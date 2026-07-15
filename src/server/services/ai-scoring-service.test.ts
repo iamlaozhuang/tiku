@@ -61,6 +61,7 @@ const context: AiScoringContext = {
     citations: [
       {
         chunkPublicId: "chunk_public_123",
+        generationPublicId: "resource-index-generation-public-123",
         resourcePublicId: "resource_public_123",
         resourceTitle: "专卖教材",
         headingPath: ["行政处罚"],
@@ -75,6 +76,7 @@ const context: AiScoringContext = {
       citationCount: 1,
       resourcePublicIds: ["resource_public_123"],
       chunkPublicIds: ["chunk_public_123"],
+      generationPublicIds: ["resource-index-generation-public-123"],
       chunkIndexes: [2],
       textHashes: ["chunk_hash_123"],
       queryHash: "query_hash_123",
@@ -123,6 +125,7 @@ describe("ai scoring service", () => {
           citationCount: 0,
           resourcePublicIds: [],
           chunkPublicIds: [],
+          generationPublicIds: [],
           chunkIndexes: [],
           textHashes: [],
           maxScore: null,
@@ -298,6 +301,7 @@ describe("ai scoring service", () => {
           citationCount: 0,
           resourcePublicIds: [],
           chunkPublicIds: [],
+          generationPublicIds: [],
           chunkIndexes: [],
           textHashes: [],
           maxScore: 0.42,

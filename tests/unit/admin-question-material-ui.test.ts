@@ -520,6 +520,28 @@ function mockWritableContentFetch(
           "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes" &&
         method === "POST"
       ) {
+        const requestBody =
+          init?.body === undefined
+            ? null
+            : (JSON.parse(String(init.body)) as Record<string, unknown>);
+        const isConfirmed = requestBody?.action === "confirm";
+        const isIgnored = requestBody?.action === "ignore";
+        const selectedCandidatePublicIds = new Set(
+          Array.isArray(requestBody?.candidatePublicIds)
+            ? requestBody.candidatePublicIds.filter(
+                (publicId): publicId is string => typeof publicId === "string",
+              )
+            : [],
+        );
+        const resolveConfirmationStatus = (candidatePublicId: string) =>
+          isConfirmed
+            ? selectedCandidatePublicIds.has(candidatePublicId)
+              ? "confirmed"
+              : "ignored"
+            : isIgnored && selectedCandidatePublicIds.has(candidatePublicId)
+              ? "ignored"
+              : "pending_confirmation";
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -529,49 +551,61 @@ function mockWritableContentFetch(
               recommendationStatus: "recommended",
               reviewState: {
                 questionUpdatedAt: "2026-05-19T06:20:00.000Z",
+                currentQuestionUpdatedAt: "2026-05-19T06:20:00.000Z",
+                taskPublicId: "kn-recommendation-task-public-001",
+                taskStatus: "succeeded",
                 staleCheck: "question_updated_at_mismatch",
                 bindingMode: "durable_question_binding",
               },
               recommendations: [
                 {
+                  candidatePublicId: "kn-recommendation-candidate-public-001",
                   knowledgeNodePublicId: "knowledge-node-sampling-v2",
                   name: "Sampling v2",
                   pathName: "Marketing / Research / Sampling v2",
                   confidence: "high",
                   reason: "bounded local fixture reason",
                   source: "ai_recommended",
-                  confirmationStatus: "pending_confirmation",
+                  confirmationStatus: resolveConfirmationStatus(
+                    "kn-recommendation-candidate-public-001",
+                  ),
+                  confidenceBasisPoint: 9_000,
+                  citationCount: 2,
                 },
                 {
+                  candidatePublicId: "kn-recommendation-candidate-public-002",
                   knowledgeNodePublicId: "knowledge-node-segmentation",
                   name: "Segmentation",
                   pathName: "Marketing / Research / Segmentation",
                   confidence: "low",
                   reason: "bounded local fallback reason",
                   source: "ai_recommended",
-                  confirmationStatus: "pending_confirmation",
+                  confirmationStatus: resolveConfirmationStatus(
+                    "kn-recommendation-candidate-public-002",
+                  ),
+                  confidenceBasisPoint: 4_000,
+                  citationCount: 1,
                 },
                 {
+                  candidatePublicId: "kn-recommendation-candidate-public-003",
                   knowledgeNodePublicId: "knowledge-node-unreadable-marker",
                   name: "",
                   pathName: "",
                   confidence: "medium",
                   reason: "bounded incomplete recommendation fixture",
                   source: "ai_recommended",
-                  confirmationStatus: "pending_confirmation",
+                  confirmationStatus: resolveConfirmationStatus(
+                    "kn-recommendation-candidate-public-003",
+                  ),
+                  confidenceBasisPoint: 6_000,
+                  citationCount: 1,
                 },
               ],
+              evidenceStatus: "sufficient",
               modelConfig: {
                 modelConfigPublicId: "model-config-dev-kn-recommendation",
-                providerPublicId: "model-provider-dev-local",
-                providerDisplayName: "Local deterministic provider",
-                providerKey: "local_deterministic",
-                modelName: "local-kn-recommendation-v1",
-                displayName: "Local knowledge recommendation model",
-                aiFuncType: "kn_recommendation",
-                configVersion: 1,
-                promptTemplateKey: "kn_recommendation_v1",
-                promptTemplateVersion: 1,
+                promptTemplatePublicId:
+                  "prompt-template-kn-recommendation-public-001",
               },
               failureReason: null,
             },
@@ -659,10 +693,14 @@ function readJsonRequestBody(
   path: string,
   method: string,
 ) {
-  const matchedCall = fetchMock.mock.calls.find(
-    ([requestUrl, requestInit]) =>
-      String(requestUrl) === path && requestInit?.method === method,
-  );
+  const matchedCall = fetchMock.mock.calls
+    .filter(
+      ([requestUrl, requestInit]) =>
+        String(requestUrl) === path &&
+        requestInit?.method === method &&
+        typeof requestInit.body === "string",
+    )
+    .at(-1);
 
   expect(matchedCall).toBeDefined();
 
@@ -2824,19 +2862,44 @@ describe("AdminQuestionMaterialManagement", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
+        name: "丢弃推荐 Segmentation",
+      }),
+    );
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes",
+        "POST",
+      ),
+    ).toEqual({
+      action: "ignore",
+      taskPublicId: "kn-recommendation-task-public-001",
+      expectedQuestionUpdatedAt: "2026-05-19T06:20:00.000Z",
+      candidatePublicIds: ["kn-recommendation-candidate-public-002"],
+    });
+    await waitFor(() => {
+      expect(reviewSummary).toHaveTextContent("已采纳：0");
+      expect(reviewSummary).toHaveTextContent("已丢弃：1");
+      expect(reviewSummary).toHaveTextContent("待确认： 2");
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", {
         name: "采纳推荐 Sampling v2",
       }),
     );
 
     const acceptedRecommendationBody = readJsonRequestBody(
       fetchMock,
-      "/api/v1/questions/question-marketing-001",
-      "PATCH",
+      "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes",
+      "POST",
     );
-    expect(acceptedRecommendationBody.knowledgeNodePublicIds).toEqual([
-      "knowledge-node-sampling",
-      "knowledge-node-sampling-v2",
-    ]);
+    expect(acceptedRecommendationBody).toEqual({
+      action: "confirm",
+      taskPublicId: "kn-recommendation-task-public-001",
+      expectedQuestionUpdatedAt: "2026-05-19T06:20:00.000Z",
+      candidatePublicIds: ["kn-recommendation-candidate-public-001"],
+    });
     await waitFor(() =>
       expect(
         screen.getByTestId("question-row-question-marketing-001"),
@@ -2846,33 +2909,28 @@ describe("AdminQuestionMaterialManagement", () => {
       screen.getByTestId("question-row-question-marketing-001"),
     ).not.toHaveTextContent("knowledge-node-sampling-v2");
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "丢弃推荐 Segmentation",
-      }),
-    );
     expect(
       screen.getByTestId(
         "knowledge-recommendation-row-knowledge-node-segmentation",
       ),
     ).toHaveTextContent("已丢弃");
     expect(reviewSummary).toHaveTextContent("已采纳：1");
-    expect(reviewSummary).toHaveTextContent("已丢弃：1");
-    expect(reviewSummary).toHaveTextContent("待确认： 1");
+    expect(reviewSummary).toHaveTextContent("已丢弃：2");
+    expect(reviewSummary).toHaveTextContent("待确认： 0");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-review-trace-question-marketing-001",
       ),
-    ).toHaveTextContent("已采纳 Sampling v2 · 已保存题目绑定");
+    ).toHaveTextContent("已采纳 Sampling v2 · 已持久化审查");
     expect(
       screen.getByTestId(
         "knowledge-recommendation-review-trace-question-marketing-001",
       ),
-    ).toHaveTextContent("已丢弃 Segmentation · 仅记录本地审查");
+    ).toHaveTextContent("已丢弃 Segmentation · 已持久化审查");
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "编辑题目 单选题 编辑后的题干",
+        name: `编辑题目 ${marketingQuestionReadableName}`,
       }),
     );
     fireEvent.change(screen.getByLabelText("题干"), {

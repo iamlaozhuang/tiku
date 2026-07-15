@@ -175,15 +175,17 @@ const resourceVectorRebuildPayload = {
   data: {
     resourceVector: {
       resourcePublicId: "resource-public-001",
-      resourceStatus: "rag_ready",
-      chunkCount: 2,
+      resourceStatus: "indexing",
+      generationPublicId: "resource-index-generation-public-001",
+      requestReplayed: false,
+      chunkCount: 0,
       evidenceSummary: {
-        chunkCount: 2,
-        resourcePublicIds: ["resource-public-001"],
-        chunkIndexes: [0, 1],
-        textHashes: ["hash-one", "hash-two"],
-        totalCharLength: 180,
-        headingPaths: [["第一章", "第一节"]],
+        chunkCount: 0,
+        resourcePublicIds: [],
+        chunkIndexes: [],
+        textHashes: [],
+        totalCharLength: 0,
+        headingPaths: [],
       },
     },
   },
@@ -1099,12 +1101,15 @@ describe("admin content and knowledge ops baseline", () => {
     fireEvent.click(screen.getByRole("button", { name: "确认重建" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "检索索引重建完成，已生成 2 段可检索内容",
+      "检索索引重建请求已受理，代际 resource-index-generation-public-001 正在处理",
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001/rebuild-vector",
       expect.objectContaining({
-        headers: { authorization: "Bearer unit-test-admin-token" },
+        headers: expect.objectContaining({
+          authorization: "Bearer unit-test-admin-token",
+          "idempotency-key": expect.stringMatching(/^resource-index-request-/u),
+        }),
         method: "POST",
       }),
     );
@@ -1570,7 +1575,7 @@ describe("admin content and knowledge ops baseline", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "确认重建" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "检索索引重建完成",
+      "检索索引重建请求已受理",
     );
 
     fireEvent.click(

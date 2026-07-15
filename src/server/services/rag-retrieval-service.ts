@@ -4,6 +4,7 @@ import {
   type RagRetrievalCandidate,
   type RagCitation,
   type RagRetrievalEvidenceSummary,
+  type RagRetrievalMode,
 } from "@/rag/retrieval";
 import type { RagCitationSourceDto } from "@/server/contracts/ai-rag-contract";
 import type { EvidenceStatus } from "@/rag/retrieval";
@@ -25,6 +26,7 @@ export type RagRetrievalServiceResult = {
 
 export type RagRetrievalChunkInput = {
   chunkPublicId: string;
+  generationPublicId?: string;
   resourcePublicId: string;
   resourceTitle: string;
   resourceStatus: ResourceStatus;
@@ -37,11 +39,25 @@ export type RagRetrievalChunkInput = {
   isStale?: boolean;
 };
 
+export type PersistedRagRetrievalChunkInput = RagRetrievalChunkInput & {
+  keywordScore: number;
+  semanticScore: number | null;
+  rerankScore?: number | null;
+};
+
 export type RagRetrievalFromChunksInput = Omit<
   RagRetrievalServiceInput,
   "candidates"
 > & {
   chunks: RagRetrievalChunkInput[];
+};
+
+export type RagRetrievalFromPersistedChunksInput = Omit<
+  RagRetrievalServiceInput,
+  "candidates"
+> & {
+  chunks: PersistedRagRetrievalChunkInput[];
+  retrievalMode?: RagRetrievalMode;
 };
 
 export function buildRagRetrievalContextForAi(
@@ -62,15 +78,52 @@ export function buildRagRetrievalContextForAi(
 export function buildRagRetrievalContextFromChunks(
   input: RagRetrievalFromChunksInput,
 ): RagRetrievalServiceResult {
-  return buildRagRetrievalContextForAi({
+  const retrievalResult = createRagRetrievalResult({
     query: input.query,
     profession: input.profession,
     level: input.level,
     authorizedResourcePublicIds: input.authorizedResourcePublicIds,
+    retrievalMode: "keyword_only",
     candidates: input.chunks.map((chunk) =>
-      createDeterministicRetrievalCandidate(input.query, chunk),
+      createKeywordOnlyRetrievalCandidate(input.query, chunk),
     ),
   });
+
+  return {
+    evidenceStatus: retrievalResult.evidenceStatus,
+    citations: retrievalResult.citations,
+    evidenceSummary: summarizeRagRetrievalForEvidence(
+      retrievalResult,
+      input.query,
+    ),
+  };
+}
+
+export function buildRagRetrievalContextFromPersistedChunks(
+  input: RagRetrievalFromPersistedChunksInput,
+): RagRetrievalServiceResult {
+  const retrievalMode =
+    input.retrievalMode === undefined &&
+    input.chunks.every((chunk) => chunk.semanticScore === null)
+      ? "keyword_only"
+      : (input.retrievalMode ?? "fusion_sort");
+  const retrievalResult = createRagRetrievalResult({
+    query: input.query,
+    profession: input.profession,
+    level: input.level,
+    authorizedResourcePublicIds: input.authorizedResourcePublicIds,
+    retrievalMode,
+    candidates: input.chunks,
+  });
+
+  return {
+    evidenceStatus: retrievalResult.evidenceStatus,
+    citations: retrievalResult.citations,
+    evidenceSummary: summarizeRagRetrievalForEvidence(
+      retrievalResult,
+      input.query,
+    ),
+  };
 }
 
 export function createRagCitationSourceDtos(
@@ -78,6 +131,7 @@ export function createRagCitationSourceDtos(
 ): RagCitationSourceDto[] {
   return citations.map((citation) => ({
     chunkPublicId: citation.chunkPublicId,
+    generationPublicId: citation.generationPublicId,
     resourcePublicId: citation.resourcePublicId,
     resourceTitle: citation.resourceTitle,
     headingPath: [...citation.headingPath],
@@ -86,7 +140,7 @@ export function createRagCitationSourceDtos(
   }));
 }
 
-function createDeterministicRetrievalCandidate(
+function createKeywordOnlyRetrievalCandidate(
   query: string,
   chunk: RagRetrievalChunkInput,
 ): RagRetrievalCandidate {
@@ -95,7 +149,7 @@ function createDeterministicRetrievalCandidate(
   return {
     ...chunk,
     keywordScore: tokenScore,
-    semanticScore: tokenScore,
+    semanticScore: null,
   };
 }
 

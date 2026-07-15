@@ -1,8 +1,7 @@
 import type { AdminAiGenerationRuntimeBridgeControl } from "./admin-ai-generation-local-contract-route";
 import type { PersonalAiGenerationRuntimeBridgeControl } from "./personal-ai-generation-runtime-bridge-service";
 import { qwenRouteIntegratedProviderLimits } from "./route-integrated-provider-execution-service";
-import { defaultLocalUploadStorageRoot } from "./local-paper-asset-storage";
-import { buildLocalResourceRagRetrievalResult } from "./rag-resource-knowledge-runtime";
+import { buildResourceRagRetrievalResult } from "./rag-resource-knowledge-runtime";
 import type {
   AiGenerationRouteIntegratedGenerationParameters,
   AiGenerationRouteIntegratedGroundingContext,
@@ -108,8 +107,7 @@ async function resolveOwnerPreviewGroundingContext(input: {
   }
 
   const taskType = resolveTaskType(input.requestContext);
-  const retrievalResult = await buildLocalResourceRagRetrievalResult({
-    storageRoot: defaultLocalUploadStorageRoot,
+  const retrievalResult = await buildResourceRagRetrievalResult({
     query: createGroundingRetrievalQuery({
       generationParameters,
       taskType,

@@ -421,6 +421,7 @@ describe("phase 11 ai_call_log coverage hardening", () => {
             citations: [
               {
                 chunkPublicId: "chunk-public-001",
+                generationPublicId: "resource-index-generation-public-001",
                 resourcePublicId: "resource-public-001",
                 resourceTitle: "Local Citation Resource",
                 headingPath: ["Marketing Citation"],
@@ -431,6 +432,7 @@ describe("phase 11 ai_call_log coverage hardening", () => {
               },
               {
                 chunkPublicId: "chunk-public-002",
+                generationPublicId: "resource-index-generation-public-001",
                 resourcePublicId: "resource-public-001",
                 resourceTitle: "Local Citation Resource",
                 headingPath: ["Retail Rule"],
@@ -445,6 +447,7 @@ describe("phase 11 ai_call_log coverage hardening", () => {
               citationCount: 2,
               resourcePublicIds: ["resource-public-001"],
               chunkPublicIds: ["chunk-public-001", "chunk-public-002"],
+              generationPublicIds: ["resource-index-generation-public-001"],
               chunkIndexes: [1, 2],
               textHashes: ["chunk-text-hash-001", "chunk-text-hash-002"],
               queryHash: "redacted-query-hash",

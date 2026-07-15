@@ -68,13 +68,7 @@ function createLocalOnlyRepositories(): RagResourceKnowledgeRuntimeRepositoriesW
       async publishResourceMarkdown() {
         return { status: "not_found" };
       },
-      async markResourceIndexingStarted() {
-        return undefined;
-      },
       async findResourceForIndexing() {
-        return null;
-      },
-      async saveResourceIndexingResult() {
         return null;
       },
     },

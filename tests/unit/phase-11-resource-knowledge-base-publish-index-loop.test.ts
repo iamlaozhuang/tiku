@@ -115,26 +115,6 @@ function createRepositories(input: {
           updatedAt,
         };
       },
-      async saveResourceIndexingResult(result) {
-        return {
-          publicId: result.resourcePublicId,
-          title: "安全知识库草稿",
-          resourceType: "knowledge_doc",
-          resourceStatus:
-            result.status === "success" ? "rag_ready" : "index_failed",
-          profession: "marketing",
-          level: 3,
-          knowledgeNodePublicIds: [],
-          originalFileName: "safe-knowledge.md",
-          downloadAvailable: true,
-          markdownPreviewAvailable: true,
-          isVectorStale: false,
-          publishedAt: updatedAt.toISOString(),
-          indexingErrorSummary: result.indexingErrorMessage,
-          uploadedAt: createdAt.toISOString(),
-          updatedAt: updatedAt.toISOString(),
-        };
-      },
       async publishResourceMarkdown(publicId) {
         input.publishCalls.push(publicId);
 
@@ -163,8 +143,14 @@ function createRepositories(input: {
           },
         };
       },
-      async markResourceIndexingStarted() {
-        return undefined;
+      async requestResourceIndexRebuild(resourcePublicId) {
+        return {
+          status: "accepted",
+          generationPublicId: "resource-index-generation-public-draft",
+          resourcePublicId,
+          resourceStatus: "indexing",
+          replayed: false,
+        };
       },
     },
     knowledgeNodeRepository: {
@@ -315,6 +301,7 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
     expect(citationSources).toEqual([
       {
         chunkPublicId: "chunk-public-ready",
+        generationPublicId: null,
         resourcePublicId: "resource-public-ready",
         resourceTitle: "营销资料",
         headingPath: ["客户需求"],
@@ -326,7 +313,7 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
     expect(serializedSources).not.toContain("raw-text-hash");
   });
 
-  it("records indexing before saving the final vector rebuild result", async () => {
+  it("records a durable pending index generation without claiming completion", async () => {
     const lifecycleEvents: string[] = [];
     const auditLogEntries: unknown[] = [];
     const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
@@ -335,29 +322,16 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
         resourceRepository: {
           ...createRepositories({ auditLogEntries, publishCalls: [] })
             .resourceRepository,
-          async markResourceIndexingStarted(publicId: string) {
-            lifecycleEvents.push(`indexing:${publicId}`);
-          },
-          async saveResourceIndexingResult(result) {
-            lifecycleEvents.push(`${result.status}:${result.resourcePublicId}`);
-
+          async requestResourceIndexRebuild(resourcePublicId, requestPublicId) {
+            lifecycleEvents.push(
+              `requested:${resourcePublicId}:${requestPublicId}`,
+            );
             return {
-              publicId: result.resourcePublicId,
-              title: "安全知识库草稿",
-              resourceType: "knowledge_doc",
-              resourceStatus:
-                result.status === "success" ? "rag_ready" : "index_failed",
-              profession: "marketing",
-              level: 3,
-              knowledgeNodePublicIds: [],
-              originalFileName: "safe-knowledge.md",
-              downloadAvailable: true,
-              markdownPreviewAvailable: true,
-              isVectorStale: false,
-              publishedAt: updatedAt.toISOString(),
-              indexingErrorSummary: result.indexingErrorMessage,
-              uploadedAt: createdAt.toISOString(),
-              updatedAt: updatedAt.toISOString(),
+              status: "accepted",
+              generationPublicId: "resource-index-generation-public-draft",
+              resourcePublicId,
+              resourceStatus: "indexing",
+              replayed: false,
             };
           },
         },
@@ -370,7 +344,10 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
         "http://localhost/api/v1/resources/resource-public-draft/rebuild-vector",
         {
           method: "POST",
-          headers: { authorization: "Bearer admin-session-token" },
+          headers: {
+            authorization: "Bearer admin-session-token",
+            "idempotency-key": "resource-index-request-public-draft",
+          },
         },
       ),
       {
@@ -383,13 +360,15 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       data: {
         resourceVector: {
           resourcePublicId: "resource-public-draft",
-          resourceStatus: "rag_ready",
+          resourceStatus: "indexing",
+          generationPublicId: "resource-index-generation-public-draft",
+          requestReplayed: false,
+          chunkCount: 0,
         },
       },
     });
     expect(lifecycleEvents).toEqual([
-      "indexing:resource-public-draft",
-      "success:resource-public-draft",
+      "requested:resource-public-draft:resource-index-request-public-draft",
     ]);
   });
 

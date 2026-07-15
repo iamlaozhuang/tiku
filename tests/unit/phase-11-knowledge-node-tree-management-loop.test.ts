@@ -60,13 +60,7 @@ function createRuntimeRepositories(input: {
       async publishResourceMarkdown() {
         throw new Error("resource publish is not used in this test");
       },
-      async markResourceIndexingStarted() {
-        throw new Error("resource indexing is not used in this test");
-      },
       async findResourceForIndexing() {
-        throw new Error("resource indexing is not used in this test");
-      },
-      async saveResourceIndexingResult() {
         throw new Error("resource indexing is not used in this test");
       },
     },

@@ -43,6 +43,10 @@ import {
   type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
+import {
+  enqueueKnowledgeRecommendationTask,
+  supersedeKnowledgeRecommendationTasks,
+} from "./knowledge-recommendation-runtime-repository";
 
 export type QuestionOptionAccessRow = {
   id: number;
@@ -235,6 +239,15 @@ export function createPostgresQuestionRepository(
           throw new Error("Created question could not be loaded.");
         }
 
+        await enqueueKnowledgeRecommendationTask(
+          transaction as RuntimeDatabase,
+          {
+            questionId: createdQuestion.id,
+            questionUpdatedAt: createdQuestion.updated_at,
+            requestedByUserPublicId: null,
+          },
+        );
+
         return createdQuestion;
       });
     },
@@ -313,6 +326,15 @@ export function createPostgresQuestionRepository(
           throw new Error("Updated question children could not be loaded.");
         }
 
+        await enqueueKnowledgeRecommendationTask(
+          transaction as RuntimeDatabase,
+          {
+            questionId: reloadedQuestion.id,
+            questionUpdatedAt: reloadedQuestion.updated_at,
+            requestedByUserPublicId: null,
+          },
+        );
+
         return reloadedQuestion;
       });
     },
@@ -320,19 +342,28 @@ export function createPostgresQuestionRepository(
     async disableQuestion(publicId, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .update(question)
-        .set({
-          status: "disabled",
-          updated_at: new Date(),
-          updated_by_admin_id: actorAdminId,
-        })
-        .where(eq(question.public_id, publicId))
-        .returning({ public_id: question.public_id });
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const [row] = await scopedDatabase
+          .update(question)
+          .set({
+            status: "disabled",
+            updated_at: new Date(),
+            updated_by_admin_id: actorAdminId,
+          })
+          .where(eq(question.public_id, publicId))
+          .returning({
+            id: question.id,
+            public_id: question.public_id,
+          });
 
-      return row === undefined
-        ? null
-        : findQuestionByPublicId(database, row.public_id);
+        if (row === undefined) {
+          return null;
+        }
+
+        await supersedeKnowledgeRecommendationTasks(scopedDatabase, row.id);
+        return findQuestionByPublicId(scopedDatabase, row.public_id);
+      });
     },
 
     async copyQuestion(publicId, context) {
@@ -397,6 +428,15 @@ export function createPostgresQuestionRepository(
         if (copiedQuestion === null) {
           throw new Error("Copied question could not be loaded.");
         }
+
+        await enqueueKnowledgeRecommendationTask(
+          transaction as RuntimeDatabase,
+          {
+            questionId: copiedQuestion.id,
+            questionUpdatedAt: copiedQuestion.updated_at,
+            requestedByUserPublicId: null,
+          },
+        );
 
         return copiedQuestion;
       });

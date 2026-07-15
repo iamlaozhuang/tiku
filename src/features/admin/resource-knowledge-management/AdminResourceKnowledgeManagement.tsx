@@ -37,7 +37,11 @@ import {
   type AdminResourceOpsSummaryDto,
 } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import type { ResourceStatus, ResourceType } from "@/server/models/ai-rag";
+import {
+  canRequestResourceIndexRebuild,
+  type ResourceStatus,
+  type ResourceType,
+} from "@/server/models/ai-rag";
 import type { Profession } from "@/server/models/paper";
 
 import {
@@ -95,10 +99,12 @@ type RebuildState =
       status: "idle";
     }
   | {
+      requestPublicId: string;
       resource: AdminResourceOpsSummaryDto;
       status: "confirming";
     }
   | {
+      requestPublicId: string;
       resource: AdminResourceOpsSummaryDto;
       status: "submitting";
     };
@@ -482,12 +488,16 @@ function formatDateTime(value: string) {
 
 async function postResourceVectorRebuild(
   resourcePublicId: string,
+  requestPublicId: string,
   sessionToken: string,
 ): Promise<ResourceVectorRebuildResultDto | null> {
   const response = await fetch(
     createResourcePath(resourcePublicId, "rebuild-vector"),
     {
-      headers: createAdminAuthHeaders(sessionToken),
+      headers: {
+        ...createAdminAuthHeaders(sessionToken),
+        "idempotency-key": requestPublicId,
+      },
       method: "POST",
     },
   );
@@ -935,7 +945,8 @@ export function AdminResourceKnowledgeManagement() {
 
     if (
       sessionToken === null ||
-      !hasResourcePublicId(rebuildState.resource.publicId)
+      !hasResourcePublicId(rebuildState.resource.publicId) ||
+      !canRequestResourceIndexRebuild(rebuildState.resource.resourceStatus)
     ) {
       setRebuildState({ status: "idle" });
       setToastMessage({
@@ -945,11 +956,16 @@ export function AdminResourceKnowledgeManagement() {
       return;
     }
 
-    setRebuildState({ resource: rebuildState.resource, status: "submitting" });
+    setRebuildState({
+      requestPublicId: rebuildState.requestPublicId,
+      resource: rebuildState.resource,
+      status: "submitting",
+    });
 
     try {
       const rebuildResult = await postResourceVectorRebuild(
         rebuildState.resource.publicId,
+        rebuildState.requestPublicId,
         sessionToken,
       );
 
@@ -961,8 +977,19 @@ export function AdminResourceKnowledgeManagement() {
         return;
       }
 
+      setResources((currentResources) =>
+        currentResources.map((resource) =>
+          resource.publicId === rebuildResult.resourceVector.resourcePublicId
+            ? {
+                ...resource,
+                resourceStatus: rebuildResult.resourceVector.resourceStatus,
+                isVectorStale: true,
+              }
+            : resource,
+        ),
+      );
       setToastMessage({
-        message: `检索索引重建完成，已生成 ${rebuildResult.resourceVector.chunkCount} 段可检索内容`,
+        message: `检索索引重建请求已受理，代际 ${rebuildResult.resourceVector.generationPublicId ?? "待分配"} 正在处理`,
         tone: "success",
       });
     } catch {
@@ -1491,7 +1518,11 @@ export function AdminResourceKnowledgeManagement() {
           }}
           onRequestRebuild={(resource) => {
             setToastMessage(null);
-            setRebuildState({ resource, status: "confirming" });
+            setRebuildState({
+              requestPublicId: `resource-index-request-${crypto.randomUUID()}`,
+              resource,
+              status: "confirming",
+            });
           }}
           onRequestDisable={(resource) => {
             setToastMessage(null);
@@ -2034,7 +2065,10 @@ function ResourceList({
                         ? `重建检索索引 ${resource.title}`
                         : `资料编号异常 ${resource.title}`
                     }
-                    disabled={!hasResourcePublicId(resource.publicId)}
+                    disabled={
+                      !hasResourcePublicId(resource.publicId) ||
+                      !canRequestResourceIndexRebuild(resource.resourceStatus)
+                    }
                     variant={
                       resource.resourceStatus === "published" ||
                       resource.isVectorStale

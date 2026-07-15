@@ -16,11 +16,6 @@ import {
 } from "../contracts/admin-content-knowledge-ops-contract";
 import type { QuestionKnowledgeRecommendationResultDto } from "../contracts/question-contract";
 import {
-  createKnowledgeNodeSnapshot,
-  createModelConfigSnapshot,
-  type KnowledgeNodeSnapshot,
-} from "../models/ai-rag";
-import {
   createPostgresContentKnowledgeNodeRuntimeRepository,
   type ContentKnowledgeNodeRuntimeRepository,
 } from "../repositories/content-knowledge-node-runtime-repository";
@@ -28,6 +23,11 @@ import {
   createPostgresMaterialRepository,
   type MaterialRepository,
 } from "../repositories/material-repository";
+import {
+  createPostgresKnowledgeRecommendationRuntimeRepository,
+  type KnowledgeRecommendationRuntimeRepository,
+  type KnowledgeRecommendationTaskView,
+} from "../repositories/knowledge-recommendation-runtime-repository";
 import {
   createPostgresQuestionRepository,
   type QuestionRepository,
@@ -44,10 +44,6 @@ import {
   createPostgresAdminAiAuditLogRuntimeRepositories,
   type AppendAiCallLogInput,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
-import {
-  createKnowledgeRecommendationService,
-  type KnowledgeRecommendationRunner,
-} from "./knowledge-recommendation-service";
 import { createMaterialService } from "./material-service";
 import { createQuestionService } from "./question-service";
 import type { SessionService } from "./session-service";
@@ -82,6 +78,7 @@ export type ContentQuestionMaterialRuntimeRepositories = {
   tagRepository?: TagRepository;
   auditLogRepository: ContentAuditLogRepository;
   aiCallLogRepository?: ContentAiCallLogRepository;
+  knowledgeRecommendationRepository?: KnowledgeRecommendationRuntimeRepository;
 };
 
 export type ContentQuestionMaterialRuntimeOptions = {
@@ -100,6 +97,10 @@ const adminPermissionDeniedResponse = createErrorResponse(
 const questionNotFoundResponse = createErrorResponse(
   404202,
   "Question does not exist.",
+);
+const validationFailedResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
+  "Request validation failed.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -243,6 +244,8 @@ function createDefaultRepositories(): ContentQuestionMaterialRuntimeRepositories
     tagRepository: createPostgresTagRepository(),
     auditLogRepository: adminFlowRepositories.auditLogRepository,
     aiCallLogRepository: adminAiAuditLogRepositories,
+    knowledgeRecommendationRepository:
+      createPostgresKnowledgeRecommendationRuntimeRepository(),
   };
 }
 
@@ -308,157 +311,111 @@ function extractMaterialPublicId(
   return null;
 }
 
-function stripHtml(value: string): string {
-  return value
-    .replace(/<[^>]*>/gu, " ")
-    .replace(/\s+/gu, " ")
-    .trim();
-}
+function mapKnowledgeRecommendationTaskToApi(
+  task: KnowledgeRecommendationTaskView,
+): QuestionKnowledgeRecommendationResultDto {
+  const recommendationStatus =
+    task.taskStatus === "succeeded"
+      ? "recommended"
+      : task.taskStatus === "failed"
+        ? "recommendation_failed"
+        : task.taskStatus;
 
-function splitKnowledgeNodePath(pathName: string): string[] {
-  return pathName
-    .split(/[/>]/u)
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
-}
-
-function mapKnowledgeNodeDtoToSnapshot(
-  knowledgeNodeDto: Awaited<
-    ReturnType<ContentKnowledgeNodeRuntimeRepository["listKnowledgeNodes"]>
-  >["knowledgeNodes"][number],
-): KnowledgeNodeSnapshot {
-  const pathParts = splitKnowledgeNodePath(knowledgeNodeDto.pathName);
-
-  return createKnowledgeNodeSnapshot({
-    public_id: knowledgeNodeDto.publicId,
-    parent_knowledge_node_public_id:
-      knowledgeNodeDto.parentKnowledgeNodePublicId,
-    profession: knowledgeNodeDto.profession,
-    level_list: knowledgeNodeDto.levelList,
-    name: knowledgeNodeDto.name,
-    path_name: knowledgeNodeDto.pathName,
-    depth: Math.max(1, Math.min(pathParts.length, 5)),
-    sort_order: knowledgeNodeDto.sortOrder,
-    kn_status: knowledgeNodeDto.knStatus,
-    is_recommendable: knowledgeNodeDto.isRecommendable,
-  });
-}
-
-const knowledgeRecommendationModelConfig = createModelConfigSnapshot({
-  providerPublicId: "model-provider-dev-local",
-  providerKey: "local_deterministic",
-  providerDisplayName: "Local deterministic provider",
-  modelConfigPublicId: "model-config-dev-kn-recommendation",
-  aiFuncType: "kn_recommendation",
-  modelName: "local-kn-recommendation-v1",
-  displayName: "Local knowledge recommendation model",
-  configVersion: 1,
-  timeoutSecond: 10,
-  maxRetryCount: 0,
-  fallbackModelConfigPublicId: null,
-  promptTemplateKey: "kn_recommendation_v1",
-  promptTemplateVersion: 1,
-});
-
-const knowledgeRecommendationPromptTemplate = {
-  promptTemplateKey: "kn_recommendation_v1",
-  version: 1,
-  templateHash: "kn_recommendation_v1_baseline",
-};
-
-const localKnowledgeRecommendationRunner: KnowledgeRecommendationRunner =
-  async (input) => {
-    const questionPlainText = [
-      input.questionText,
-      input.analysis ?? "",
-      input.standardAnswer ?? "",
-    ]
-      .join(" ")
-      .toLowerCase();
-    const recommendations = input.knowledgeNodeSnapshots
-      .map((knowledgeNodeSnapshot) => {
-        const pathParts = splitKnowledgeNodePath(
-          knowledgeNodeSnapshot.pathName,
-        );
-        const directMatch = [knowledgeNodeSnapshot.name, ...pathParts].some(
-          (term) =>
-            term.length > 0 && questionPlainText.includes(term.toLowerCase()),
-        );
-
-        return {
-          knowledgeNodePublicId: knowledgeNodeSnapshot.publicId,
-          confidence: directMatch ? "high" : "low",
-          reason: directMatch
-            ? "Local deterministic matcher found related question terms."
-            : "Local deterministic fallback candidate.",
-        };
-      })
-      .filter(
-        (recommendation, index) =>
-          recommendation.confidence === "high" || index === 0,
-      )
-      .slice(0, 5);
-
-    return {
-      recommendations,
-      providerRequestPayload: {
-        model: input.modelConfigSnapshot.modelName,
-        promptTemplateKey: input.promptTemplate.promptTemplateKey,
-        questionText: input.questionText,
-        knowledgeNodeCount: input.knowledgeNodeSnapshots.length,
-      },
-      providerResponsePayload: {
-        recommendations,
-      },
-    };
-  };
-
-function mapKnowledgeRecommendationToApi(input: {
-  questionPublicId: string;
-  questionUpdatedAt: string;
-  result: Awaited<
-    ReturnType<
-      ReturnType<
-        typeof createKnowledgeRecommendationService
-      >["recommendKnowledgeNodes"]
-    >
-  >;
-}): QuestionKnowledgeRecommendationResultDto {
   return {
     recommendation: {
-      questionPublicId: input.questionPublicId,
-      recommendationStatus: input.result.recommendationStatus,
+      questionPublicId: task.questionPublicId,
+      recommendationStatus,
       reviewState: {
-        questionUpdatedAt: input.questionUpdatedAt,
+        questionUpdatedAt: task.questionUpdatedAt,
+        currentQuestionUpdatedAt: task.currentQuestionUpdatedAt,
+        taskPublicId: task.taskPublicId,
+        taskStatus: task.taskStatus,
         staleCheck: "question_updated_at_mismatch",
         bindingMode: "durable_question_binding",
       },
-      recommendations: input.result.recommendations.map((recommendation) => ({
-        knowledgeNodePublicId: recommendation.knowledgeNodeSnapshot.publicId,
-        name: recommendation.knowledgeNodeSnapshot.name,
-        pathName: recommendation.knowledgeNodeSnapshot.pathName,
-        confidence: recommendation.confidence,
-        reason: recommendation.reason,
-        source: recommendation.source,
-        confirmationStatus: recommendation.confirmationStatus,
+      recommendations: task.candidates.map((candidate) => ({
+        candidatePublicId: candidate.candidatePublicId,
+        knowledgeNodePublicId: candidate.knowledgeNodePublicId,
+        name: candidate.name,
+        pathName: candidate.pathName,
+        confidence:
+          candidate.confidenceBasisPoint >= 8_000
+            ? "high"
+            : candidate.confidenceBasisPoint >= 5_000
+              ? "medium"
+              : "low",
+        reason: candidate.reasonSummary,
+        source: "ai_recommended",
+        confirmationStatus:
+          candidate.reviewStatus === "pending"
+            ? "pending_confirmation"
+            : candidate.reviewStatus,
+        confidenceBasisPoint: candidate.confidenceBasisPoint,
+        citationCount: candidate.citationCount,
       })),
-      modelConfig: {
-        modelConfigPublicId:
-          input.result.modelConfigSnapshot.modelConfigPublicId,
-        providerPublicId: input.result.modelConfigSnapshot.providerPublicId,
-        providerDisplayName:
-          input.result.modelConfigSnapshot.providerDisplayName,
-        providerKey: input.result.modelConfigSnapshot.providerKey,
-        modelName: input.result.modelConfigSnapshot.modelName,
-        displayName: input.result.modelConfigSnapshot.displayName,
-        aiFuncType: "kn_recommendation",
-        configVersion: input.result.modelConfigSnapshot.configVersion,
-        promptTemplateKey: input.result.promptTemplateKey,
-        promptTemplateVersion: input.result.promptTemplateVersion,
-      },
-      failureReason: input.result.failureReason ?? null,
+      evidenceStatus: task.evidenceStatus,
+      modelConfig:
+        task.modelConfigPublicId === null ||
+        task.promptTemplatePublicId === null
+          ? null
+          : {
+              modelConfigPublicId: task.modelConfigPublicId,
+              promptTemplatePublicId: task.promptTemplatePublicId,
+            },
+      failureReason: task.failureCode,
     },
   };
+}
+
+type KnowledgeRecommendationCommand =
+  | { action: "request" }
+  | {
+      action: "confirm" | "ignore";
+      taskPublicId: string;
+      expectedQuestionUpdatedAt: Date;
+      candidatePublicIds: string[];
+    };
+
+function parseKnowledgeRecommendationCommand(
+  value: unknown,
+): KnowledgeRecommendationCommand | null {
+  if (value === null) {
+    return { action: "request" };
+  }
+
+  if (typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const command = value as Record<string, unknown>;
+
+  if (command.action === undefined || command.action === "request") {
+    return { action: "request" };
+  }
+
+  if (
+    (command.action !== "confirm" && command.action !== "ignore") ||
+    typeof command.taskPublicId !== "string" ||
+    command.taskPublicId.length === 0 ||
+    typeof command.expectedQuestionUpdatedAt !== "string" ||
+    !Array.isArray(command.candidatePublicIds) ||
+    !command.candidatePublicIds.every(
+      (publicId) => typeof publicId === "string" && publicId.length > 0,
+    )
+  ) {
+    return null;
+  }
+
+  const expectedQuestionUpdatedAt = new Date(command.expectedQuestionUpdatedAt);
+
+  return Number.isNaN(expectedQuestionUpdatedAt.getTime())
+    ? null
+    : {
+        action: command.action,
+        taskPublicId: command.taskPublicId,
+        expectedQuestionUpdatedAt,
+        candidatePublicIds: command.candidatePublicIds as string[],
+      };
 }
 
 export function createContentQuestionMaterialRuntimeRouteHandlers(
@@ -736,71 +693,43 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             return createJsonResponse(questionNotFoundResponse);
           }
 
-          const knowledgeNodePage =
-            await repositories.knowledgeNodeRepository.listKnowledgeNodes(
-              createAdminContentKnowledgeListQuery({
-                page: 1,
-                pageSize: 100,
-                profession: question.profession,
-                level: question.level,
-                status: "active",
-                sortBy: "sortOrder",
-                sortOrder: "asc",
-              }),
-            );
-          const recommendationService = createKnowledgeRecommendationService({
-            runner: localKnowledgeRecommendationRunner,
-          });
-          const result = await recommendationService.recommendKnowledgeNodes({
-            userPublicId: actorOrError.userPublicId,
-            questionPublicId: question.public_id,
-            questionRevisionPublicId: `${question.public_id}:${question.updated_at.toISOString()}`,
-            questionText: stripHtml(question.stem_rich_text),
-            analysis: stripHtml(question.analysis_rich_text) || null,
-            standardAnswer:
-              stripHtml(question.standard_answer_rich_text) || null,
-            profession: question.profession,
-            level: question.level,
-            knowledgeNodeSnapshots: knowledgeNodePage.knowledgeNodes.map(
-              mapKnowledgeNodeDtoToSnapshot,
-            ),
-            modelConfigSnapshot: knowledgeRecommendationModelConfig,
-            promptTemplate: knowledgeRecommendationPromptTemplate,
-          });
-          const startedAt = new Date();
-          const completedAt = new Date();
+          const command = parseKnowledgeRecommendationCommand(
+            await readRequestJson(request),
+          );
 
-          if (
-            result.aiCallLogDraft !== null &&
-            repositories.aiCallLogRepository !== undefined
-          ) {
-            await repositories.aiCallLogRepository.appendAiCallLog({
-              userPublicId: actorOrError.userPublicId,
-              answerRecordPublicId: null,
-              mockExamPublicId: null,
-              questionPublicId: question.public_id,
-              aiFuncType: "kn_recommendation",
-              callStatus: result.aiCallLogDraft.callStatus,
-              modelConfigSnapshot: result.aiCallLogDraft.modelConfigSnapshot,
-              promptTemplateKey: result.aiCallLogDraft.promptTemplateKey,
-              promptTemplateVersion:
-                result.aiCallLogDraft.promptTemplateVersion,
-              requestRedactedSnapshot:
-                result.aiCallLogDraft.requestRedactedSnapshot,
-              responseRedactedSnapshot:
-                result.aiCallLogDraft.responseRedactedSnapshot,
-              errorRedactedSnapshot:
-                result.aiCallLogDraft.errorRedactedSnapshot,
-              citationRedactedSnapshot:
-                result.aiCallLogDraft.citationRedactedSnapshot,
-              promptTokenCount: null,
-              completionTokenCount: null,
-              totalTokenCount: null,
-              latencyMs: completedAt.getTime() - startedAt.getTime(),
-              startedAt,
-              completedAt,
-            });
+          if (command === null) {
+            return createJsonResponse(validationFailedResponse);
           }
+
+          const recommendationRepository =
+            repositories.knowledgeRecommendationRepository;
+
+          if (recommendationRepository === undefined) {
+            return createJsonResponse(
+              createErrorResponse(
+                ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+                "Durable knowledge recommendation is unavailable.",
+              ),
+            );
+          }
+
+          const task =
+            command.action === "request"
+              ? await recommendationRepository.requestKnowledgeRecommendation(
+                  question.public_id,
+                  actorOrError.userPublicId,
+                )
+              : await recommendationRepository.reviewKnowledgeRecommendationTask(
+                  {
+                    taskPublicId: command.taskPublicId,
+                    questionPublicId: publicId,
+                    expectedQuestionUpdatedAt:
+                      command.expectedQuestionUpdatedAt,
+                    action: command.action,
+                    candidatePublicIds: command.candidatePublicIds,
+                    reviewedByUserPublicId: actorOrError.userPublicId,
+                  },
+                );
 
           await appendAuditLog(
             repositories.auditLogRepository,
@@ -810,23 +739,21 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
               actionType: "question.recommend_knowledge_nodes",
               targetResourceType: "question",
               targetPublicId: question.public_id,
-              resultStatus:
-                result.recommendationStatus === "recommended"
-                  ? "success"
-                  : "failed",
+              resultStatus: task === null ? "failed" : "success",
               metadataSummary:
                 "redacted knowledge recommendation operation metadata",
             },
           );
 
           return createJsonResponse(
-            createSuccessResponse(
-              mapKnowledgeRecommendationToApi({
-                questionPublicId: question.public_id,
-                questionUpdatedAt: question.updated_at.toISOString(),
-                result,
-              }),
-            ),
+            task === null
+              ? createErrorResponse(
+                  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+                  "Knowledge recommendation state changed.",
+                )
+              : createSuccessResponse(
+                  mapKnowledgeRecommendationTaskToApi(task),
+                ),
           );
         },
       },

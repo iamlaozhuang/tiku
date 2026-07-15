@@ -6,14 +6,14 @@ import {
   createOwnerPreviewQwenPersonalRuntimeBridgeControl,
 } from "./owner-preview-qwen-visible-ai-runtime-control";
 
-const localResourceRetrievalMock = vi.hoisted(() => vi.fn());
+const resourceRetrievalMock = vi.hoisted(() => vi.fn());
 
 vi.mock("./rag-resource-knowledge-runtime", () => ({
-  buildLocalResourceRagRetrievalResult: localResourceRetrievalMock,
+  buildResourceRagRetrievalResult: resourceRetrievalMock,
 }));
 
 beforeEach(() => {
-  localResourceRetrievalMock.mockReset();
+  resourceRetrievalMock.mockReset();
 });
 
 const explicitLocalOwnerPreviewProviderGate = {
@@ -123,7 +123,7 @@ describe("owner preview Qwen visible AI runtime control", () => {
     async ({ taskType, expectedTaskToken }) => {
       const { buildRagRetrievalContextFromChunks } =
         await import("./rag-retrieval-service");
-      localResourceRetrievalMock.mockImplementationOnce(async (input) =>
+      resourceRetrievalMock.mockImplementationOnce(async (input) =>
         buildRagRetrievalContextFromChunks({
           query: input.query,
           profession: input.profession,
@@ -213,7 +213,7 @@ describe("owner preview Qwen visible AI runtime control", () => {
         evidenceStatus: "sufficient",
         citationCount: 2,
       });
-      const retrievalInput = localResourceRetrievalMock.mock.calls[0]?.[0];
+      const retrievalInput = resourceRetrievalMock.mock.calls[0]?.[0];
       expect(retrievalInput.query).toContain(expectedTaskToken);
       expect(retrievalInput.query).toContain("marketing");
       expect(retrievalInput.query).toContain("level 3");

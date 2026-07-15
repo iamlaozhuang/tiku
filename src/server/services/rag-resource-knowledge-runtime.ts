@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 
@@ -25,8 +25,12 @@ import type {
   RagRetrievalResultDto,
   ResourceVectorRebuildResultDto,
 } from "../contracts/ai-rag-contract";
-import type { ResourceStatus, ResourceType } from "../models/ai-rag";
-import { canTransitionResourceStatus } from "../models/ai-rag";
+import {
+  canRequestResourceIndexRebuild,
+  canTransitionResourceStatus,
+  type ResourceStatus,
+  type ResourceType,
+} from "../models/ai-rag";
 import type { Profession } from "../models/auth";
 import type { Subject } from "../models/paper";
 import {
@@ -53,7 +57,10 @@ import {
   type LocalTextDocumentEvidenceSummary,
 } from "./local-text-document-parser";
 import { buildResourceChunks } from "./rag-chunking-service";
-import { buildRagRetrievalContextFromChunks } from "./rag-retrieval-service";
+import {
+  buildRagRetrievalContextFromChunks,
+  buildRagRetrievalContextFromPersistedChunks,
+} from "./rag-retrieval-service";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
@@ -162,6 +169,14 @@ export type LocalResourceRagRetrievalInput = {
   includeDescendants?: boolean;
 };
 
+export type ResourceRagRetrievalInput = Omit<
+  LocalResourceRagRetrievalInput,
+  "storageRoot"
+> & {
+  queryEmbedding?: number[] | null;
+  resourceRepository?: RagResourceRuntimeRepository;
+};
+
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
@@ -201,6 +216,16 @@ async function readRequestJson(request: Request): Promise<unknown> {
   } catch {
     return null;
   }
+}
+
+function readResourceIndexRequestPublicId(request: Request): string {
+  const idempotencyKey = request.headers.get("idempotency-key")?.trim();
+
+  return idempotencyKey !== undefined &&
+    idempotencyKey.length > 0 &&
+    idempotencyKey.length <= 128
+    ? idempotencyKey
+    : `resource-index-request-${randomUUID()}`;
 }
 
 function isContentAdminRole(role: string): role is ContentAdminRole {
@@ -654,13 +679,42 @@ function createResourceVectorResult(
   resourcePublicId: string,
   resourceStatus: ResourceVectorRebuildResultDto["resourceVector"]["resourceStatus"],
   chunkingResult: ReturnType<typeof buildResourceChunks>,
+  generationPublicId: string | null,
+  requestReplayed: boolean,
 ): ResourceVectorRebuildResultDto {
   return {
     resourceVector: {
       resourcePublicId,
       resourceStatus,
+      generationPublicId,
+      requestReplayed,
       chunkCount: chunkingResult.chunks.length,
       evidenceSummary: chunkingResult.evidenceSummary,
+    },
+  };
+}
+
+function createPendingResourceVectorResult(
+  resourcePublicId: string,
+  resourceStatus: ResourceVectorRebuildResultDto["resourceVector"]["resourceStatus"],
+  generationPublicId: string,
+  requestReplayed: boolean,
+): ResourceVectorRebuildResultDto {
+  return {
+    resourceVector: {
+      resourcePublicId,
+      resourceStatus,
+      generationPublicId,
+      requestReplayed,
+      chunkCount: 0,
+      evidenceSummary: {
+        chunkCount: 0,
+        resourcePublicIds: [],
+        chunkIndexes: [],
+        textHashes: [],
+        totalCharLength: 0,
+        headingPaths: [],
+      },
     },
   };
 }
@@ -682,18 +736,29 @@ function createLocalVectorChunkSnapshot(
 }
 
 async function rebuildResourceVector(input: {
+  allowLocalResourceAdapter: boolean;
   localResourceStorageRoot: string;
   resourceRepository: RagResourceRuntimeRepository;
   publicId: string;
+  requestPublicId: string;
 }): Promise<ApiResponse<ResourceVectorRebuildResultDto | null>> {
   const resourceForIndexing =
     await input.resourceRepository.findResourceForIndexing(input.publicId);
 
   if (resourceForIndexing === null) {
-    return rebuildLocalResourceVector({
-      publicId: input.publicId,
-      storageRoot: input.localResourceStorageRoot,
-    });
+    return input.allowLocalResourceAdapter
+      ? rebuildLocalResourceVector({
+          publicId: input.publicId,
+          storageRoot: input.localResourceStorageRoot,
+        })
+      : resourceNotFoundResponse;
+  }
+
+  if (!canRequestResourceIndexRebuild(resourceForIndexing.resourceStatus)) {
+    return createErrorResponse(
+      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+      "Resource status does not allow index rebuild.",
+    );
   }
 
   const chunkingResult = buildResourceChunks({
@@ -707,41 +772,48 @@ async function rebuildResourceVector(input: {
   });
 
   if (chunkingResult.status === "skipped") {
-    await input.resourceRepository.saveResourceIndexingResult({
-      resourcePublicId: input.publicId,
-      status: "failed",
-      chunkCount: 0,
-      textHashes: [],
-      indexingErrorMessage: chunkingResult.skippedReason,
-    });
-
     return createErrorResponse(
       ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
       "Resource is not ready for vector rebuild.",
     );
   }
 
-  await input.resourceRepository.markResourceIndexingStarted(input.publicId);
+  if (input.resourceRepository.requestResourceIndexRebuild === undefined) {
+    return createErrorResponse(
+      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+      "Durable resource index generation is unavailable.",
+    );
+  }
 
-  const savedResource =
-    await input.resourceRepository.saveResourceIndexingResult({
-      resourcePublicId: input.publicId,
-      status: "success",
-      chunkCount: chunkingResult.chunks.length,
-      textHashes: chunkingResult.chunks.map((chunk) => chunk.textHash),
-      indexingErrorMessage: null,
-    });
+  const generationRequest =
+    await input.resourceRepository.requestResourceIndexRebuild(
+      input.publicId,
+      input.requestPublicId,
+    );
+
+  if (generationRequest.status === "not_found") {
+    return resourceNotFoundResponse;
+  }
+
+  if (generationRequest.status === "conflict") {
+    return createErrorResponse(
+      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+      "Resource index generation request conflicts with current state.",
+    );
+  }
 
   return createSuccessResponse(
-    createResourceVectorResult(
+    createPendingResourceVectorResult(
       resourceForIndexing.publicId,
-      savedResource?.resourceStatus ?? "rag_ready",
-      chunkingResult,
+      generationRequest.resourceStatus,
+      generationRequest.generationPublicId,
+      generationRequest.replayed,
     ),
   );
 }
 
 async function publishResourceMarkdown(input: {
+  allowLocalResourceAdapter: boolean;
   localResourceStorageRoot: string;
   resourceRepository: RagResourceRuntimeRepository;
   publicId: string;
@@ -751,10 +823,12 @@ async function publishResourceMarkdown(input: {
   );
 
   if (publishResult.status === "not_found") {
-    return publishLocalResourceMarkdown({
-      publicId: input.publicId,
-      storageRoot: input.localResourceStorageRoot,
-    });
+    return input.allowLocalResourceAdapter
+      ? publishLocalResourceMarkdown({
+          publicId: input.publicId,
+          storageRoot: input.localResourceStorageRoot,
+        })
+      : resourceNotFoundResponse;
   }
 
   if (publishResult.status === "conflict") {
@@ -766,8 +840,123 @@ async function publishResourceMarkdown(input: {
   return createSuccessResponse({ resource: publishResult.resource });
 }
 
-async function uploadLocalResource(input: {
+async function getResourceDetail(input: {
+  allowLocalResourceAdapter: boolean;
+  publicId: string;
+  resourceRepository: RagResourceRuntimeRepository;
+  storageRoot: string;
+}): Promise<ApiResponse<LocalResourceDetailDto | null>> {
+  if (input.resourceRepository.findResourceDetail !== undefined) {
+    const detail = await input.resourceRepository.findResourceDetail(
+      input.publicId,
+    );
+
+    if (detail !== null) {
+      return createSuccessResponse({
+        resource: detail.resource,
+        localOnly: false,
+        markdownContent: detail.markdownContent,
+      });
+    }
+  }
+
+  return input.allowLocalResourceAdapter
+    ? getLocalResourceDetail(input)
+    : resourceNotFoundResponse;
+}
+
+async function updateResourceMarkdown(input: {
+  allowLocalResourceAdapter: boolean;
+  publicId: string;
   request: Request;
+  resourceRepository: RagResourceRuntimeRepository;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  const requestBody = await readRequestJson(input.request);
+  const markdownContent =
+    typeof requestBody === "object" &&
+    requestBody !== null &&
+    typeof (requestBody as { markdownContent?: unknown }).markdownContent ===
+      "string"
+      ? (requestBody as { markdownContent: string }).markdownContent.trim()
+      : "";
+
+  if (markdownContent.length === 0) {
+    return validationFailedResponse;
+  }
+
+  if (input.resourceRepository.updateResourceMarkdown !== undefined) {
+    const resourceSummary =
+      await input.resourceRepository.updateResourceMarkdown(
+        input.publicId,
+        markdownContent,
+        createMarkdownContentHash(markdownContent),
+      );
+
+    if (resourceSummary !== null) {
+      return createSuccessResponse({ resource: resourceSummary });
+    }
+  }
+
+  return input.allowLocalResourceAdapter
+    ? updateLocalResourceMarkdown({
+        publicId: input.publicId,
+        request: new Request(input.request.url, {
+          method: input.request.method,
+          headers: input.request.headers,
+          body: JSON.stringify({ markdownContent }),
+        }),
+        storageRoot: input.storageRoot,
+      })
+    : resourceNotFoundResponse;
+}
+
+async function disableResource(input: {
+  allowLocalResourceAdapter: boolean;
+  publicId: string;
+  resourceRepository: RagResourceRuntimeRepository;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  if (input.resourceRepository.disableResource !== undefined) {
+    const resourceSummary = await input.resourceRepository.disableResource(
+      input.publicId,
+    );
+
+    if (resourceSummary !== null) {
+      return createSuccessResponse({ resource: resourceSummary });
+    }
+  }
+
+  return input.allowLocalResourceAdapter
+    ? disableLocalResource(input)
+    : resourceNotFoundResponse;
+}
+
+async function enableResource(input: {
+  allowLocalResourceAdapter: boolean;
+  publicId: string;
+  resourceRepository: RagResourceRuntimeRepository;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  if (input.resourceRepository.enableResource !== undefined) {
+    const resourceSummary = await input.resourceRepository.enableResource(
+      input.publicId,
+    );
+
+    if (resourceSummary !== null) {
+      return createSuccessResponse({ resource: resourceSummary });
+    }
+  }
+
+  return input.allowLocalResourceAdapter
+    ? enableLocalResource(input)
+    : resourceEnableConflictResponse;
+}
+
+async function uploadLocalResource(input: {
+  allowLocalResourceAdapter: boolean;
+  request: Request;
+  resourceRepository: RagResourceRuntimeRepository;
   storageRoot: string;
 }): Promise<
   ApiResponse<{
@@ -841,17 +1030,58 @@ async function uploadLocalResource(input: {
     activeMarkdownContentHash: null,
     activeChunkSnapshot: [],
   };
-  const nextCatalog = {
-    resources: [
-      entry,
-      ...catalog.resources.filter((resource) => resource.publicId !== publicId),
-    ],
-  };
+  let resourceSummary = mapLocalResourceEntry(entry);
 
-  await writeLocalResourceCatalog(input.storageRoot, nextCatalog);
+  if (input.allowLocalResourceAdapter) {
+    const nextCatalog = {
+      resources: [
+        entry,
+        ...catalog.resources.filter(
+          (resource) => resource.publicId !== publicId,
+        ),
+      ],
+    };
+
+    await writeLocalResourceCatalog(input.storageRoot, nextCatalog);
+  } else {
+    if (input.resourceRepository.createResourceFromUpload === undefined) {
+      return createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+        "Durable resource storage is unavailable.",
+      );
+    }
+
+    const persistedResource =
+      await input.resourceRepository.createResourceFromUpload({
+        publicId: entry.publicId,
+        resourceType: entry.resourceType,
+        resourceStatus:
+          entry.resourceStatus === "draft" ? "draft" : "conversion_failed",
+        title: entry.title,
+        originalFileName: entry.originalFileName,
+        objectStoragePath: entry.objectKey,
+        contentHash: entry.fileHash,
+        fileSizeByte: entry.fileSizeByte,
+        profession: entry.profession,
+        level: entry.level,
+        markdownContent: entry.markdownContent,
+        markdownContentHash: entry.markdownContentHash,
+        conversionErrorMessage: entry.indexingErrorMessage,
+        knowledgeNodePublicIds: entry.knowledgeNodePublicIds,
+      });
+
+    if (persistedResource === null) {
+      return createErrorResponse(
+        ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
+        "Resource scope validation failed.",
+      );
+    }
+
+    resourceSummary = persistedResource;
+  }
 
   return createSuccessResponse({
-    resource: mapLocalResourceEntry(entry),
+    resource: resourceSummary,
     localResource: createLocalUploadSummary(
       parsedResource?.evidenceSummary ?? null,
       parseResult.status === "skipped" ? parseResult.skippedReason : null,
@@ -1073,6 +1303,8 @@ async function rebuildLocalResourceVector(input: {
       readyResource.publicId,
       readyResource.resourceStatus,
       chunkingResult,
+      null,
+      false,
     ),
   );
 }
@@ -1164,6 +1396,50 @@ async function enableLocalResource(input: {
 
   return createSuccessResponse({
     resource: mapLocalResourceEntry(nextResource),
+  });
+}
+
+export async function buildResourceRagRetrievalResult({
+  authorizedResourcePublicIds,
+  includeDescendants = false,
+  knowledgeNodePublicIds = [],
+  level,
+  profession,
+  query,
+  queryEmbedding = null,
+  resourceRepository = createPostgresRagResourceKnowledgeRuntimeRepositories()
+    .resourceRepository,
+}: ResourceRagRetrievalInput): Promise<RagRetrievalResultDto> {
+  if (resourceRepository.retrieveResourceChunks === undefined) {
+    return buildRagRetrievalContextFromPersistedChunks({
+      query,
+      profession,
+      level,
+      authorizedResourcePublicIds: authorizedResourcePublicIds ?? [],
+      chunks: [],
+      retrievalMode: "keyword_only",
+    });
+  }
+
+  const chunks = await resourceRepository.retrieveResourceChunks({
+    query,
+    queryEmbedding,
+    profession,
+    level,
+    authorizedResourcePublicIds: authorizedResourcePublicIds ?? null,
+    knowledgeNodePublicIds,
+    includeDescendants,
+  });
+  const authorizedPublicIds = authorizedResourcePublicIds ?? [
+    ...new Set(chunks.map((chunk) => chunk.resourcePublicId)),
+  ];
+
+  return buildRagRetrievalContextFromPersistedChunks({
+    query,
+    profession,
+    level,
+    authorizedResourcePublicIds: authorizedPublicIds,
+    chunks,
   });
 }
 
@@ -1285,6 +1561,8 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
 ) {
   const repositories = options.repositories ?? createDefaultRepositories();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const allowLocalResourceAdapter =
+    options.localResourceStorageRoot !== undefined;
   const localResourceStorageRoot =
     options.localResourceStorageRoot ?? defaultLocalUploadStorageRoot;
 
@@ -1328,19 +1606,19 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
 
           void actorOrError;
           const listQuery = readListQuery(request);
-          const localCatalog = await readLocalResourceCatalog(
-            localResourceStorageRoot,
-          );
-          const localResources = localCatalog.resources
-            .map(mapLocalResourceEntry)
-            .filter((resource) =>
-              matchesLocalResourceQuery(resource, listQuery),
-            );
-          const result = await listMergedResourcePage({
-            localResources,
-            query: listQuery,
-            repository: repositories.resourceRepository,
-          });
+          const result = allowLocalResourceAdapter
+            ? await listMergedResourcePage({
+                localResources: (
+                  await readLocalResourceCatalog(localResourceStorageRoot)
+                ).resources
+                  .map(mapLocalResourceEntry)
+                  .filter((resource) =>
+                    matchesLocalResourceQuery(resource, listQuery),
+                  ),
+                query: listQuery,
+                repository: repositories.resourceRepository,
+              })
+            : await repositories.resourceRepository.listResources(listQuery);
 
           return createJsonResponse(
             createPaginatedResponse(
@@ -1361,7 +1639,9 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           const response = await uploadLocalResource({
+            allowLocalResourceAdapter,
             request,
+            resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
           });
 
@@ -1393,8 +1673,10 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           void actorOrError;
 
           return createJsonResponse(
-            await getLocalResourceDetail({
+            await getResourceDetail({
+              allowLocalResourceAdapter,
               publicId,
+              resourceRepository: repositories.resourceRepository,
               storageRoot: localResourceStorageRoot,
             }),
           );
@@ -1414,9 +1696,11 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await updateLocalResourceMarkdown({
+          const response = await updateResourceMarkdown({
+            allowLocalResourceAdapter,
             publicId,
             request,
+            resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
           });
 
@@ -1450,6 +1734,7 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           const response = await publishResourceMarkdown({
+            allowLocalResourceAdapter,
             localResourceStorageRoot,
             resourceRepository: repositories.resourceRepository,
             publicId,
@@ -1485,9 +1770,11 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           const response = await rebuildResourceVector({
+            allowLocalResourceAdapter,
             localResourceStorageRoot,
             resourceRepository: repositories.resourceRepository,
             publicId,
+            requestPublicId: readResourceIndexRequestPublicId(request),
           });
 
           await appendAuditLog(
@@ -1519,8 +1806,10 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await disableLocalResource({
+          const response = await disableResource({
+            allowLocalResourceAdapter,
             publicId,
+            resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
           });
 
@@ -1553,8 +1842,10 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          const response = await enableLocalResource({
+          const response = await enableResource({
+            allowLocalResourceAdapter,
             publicId,
+            resourceRepository: repositories.resourceRepository,
             storageRoot: localResourceStorageRoot,
           });
 

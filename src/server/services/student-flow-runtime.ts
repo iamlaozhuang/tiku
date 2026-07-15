@@ -61,8 +61,10 @@ import {
   createPersistedModelConfigRuntimeCatalog,
   type ModelConfigRuntimeCatalog,
 } from "./model-config-runtime";
-import { defaultLocalUploadStorageRoot } from "./local-paper-asset-storage";
-import { buildLocalResourceRagRetrievalResult } from "./rag-resource-knowledge-runtime";
+import {
+  buildLocalResourceRagRetrievalResult,
+  buildResourceRagRetrievalResult,
+} from "./rag-resource-knowledge-runtime";
 import {
   createStudentPaperRouteHandlers,
   type StudentPaperUserResolver,
@@ -195,6 +197,7 @@ function createEmptyRagRetrievalResult(
       citationCount: 0,
       resourcePublicIds: [],
       chunkPublicIds: [],
+      generationPublicIds: [],
       chunkIndexes: [],
       textHashes: [],
       queryHash: "local-deterministic-query",
@@ -250,7 +253,7 @@ function createAiScoringRetrievalQuery(
 }
 
 function createDefaultStudentFlowRagRetrievalRuntime(
-  storageRoot: string,
+  storageRoot?: string,
 ): StudentFlowRagRetrievalRuntime {
   return {
     async retrieveForAiScoring(context) {
@@ -260,12 +263,18 @@ function createDefaultStudentFlowRagRetrievalRuntime(
         return createEmptyRagRetrievalResult();
       }
 
-      return buildLocalResourceRagRetrievalResult({
-        storageRoot,
+      const retrievalInput = {
         query: createAiScoringRetrievalQuery(context),
         profession,
         level: readSnapshotLevel(context.questionSnapshot),
-      });
+      };
+
+      return storageRoot === undefined
+        ? buildResourceRagRetrievalResult(retrievalInput)
+        : buildLocalResourceRagRetrievalResult({
+            ...retrievalInput,
+            storageRoot,
+          });
     },
   };
 }
@@ -276,9 +285,7 @@ function estimateTokenCount(value: string): number {
 
 export function createDefaultAiScoringRuntime(
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
-  ragRetrievalRuntime: StudentFlowRagRetrievalRuntime = createDefaultStudentFlowRagRetrievalRuntime(
-    defaultLocalUploadStorageRoot,
-  ),
+  ragRetrievalRuntime: StudentFlowRagRetrievalRuntime = createDefaultStudentFlowRagRetrievalRuntime(),
   modelConfigRuntimeCatalogLoader: ModelConfigRuntimeCatalogLoader = loadPersistedModelConfigRuntimeCatalog,
   aiCallLogRepository: Pick<
     AdminAiAuditLogRuntimeRepositories,
@@ -515,8 +522,7 @@ export function createStudentFlowRuntimeRouteHandlers(
             options.modelConfigRuntimeCatalog,
             options.ragRetrievalRuntime ??
               createDefaultStudentFlowRagRetrievalRuntime(
-                options.localResourceStorageRoot ??
-                  defaultLocalUploadStorageRoot,
+                options.localResourceStorageRoot,
               ),
           ),
         },
