@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   admin,
   adminOrganization,
+  adminRoleAssignment,
   adminRoleValues,
   authAccount,
   authSession,
@@ -192,9 +193,31 @@ describe("auth schema baseline", () => {
     );
     expect(getIndexNames(adminOrganization)).toEqual(
       expect.arrayContaining([
+        "udx_admin_organization_admin_id",
         "udx_admin_organization_admin_id_organization_id",
         "idx_admin_organization_admin_id",
         "idx_admin_organization_organization_id",
+      ]),
+    );
+  });
+
+  it("persists admin lock state and multi-role assignments as database invariants", () => {
+    expect(getColumnNames(admin)).toEqual(
+      expect.arrayContaining([
+        "login_failed_count",
+        "locked_until_at",
+        "disabled_at",
+      ]),
+    );
+    expect(getTableName(adminRoleAssignment)).toBe("admin_role_assignment");
+    expect(getColumnNames(adminRoleAssignment)).toEqual(
+      expect.arrayContaining(["id", "admin_id", "admin_role", "created_at"]),
+    );
+    expect(getIndexNames(adminRoleAssignment)).toEqual(
+      expect.arrayContaining([
+        "udx_admin_role_assignment_admin_id_admin_role",
+        "idx_admin_role_assignment_admin_id",
+        "idx_admin_role_assignment_admin_role",
       ]),
     );
   });

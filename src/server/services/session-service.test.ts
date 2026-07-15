@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { createSessionService } from "./session-service";
-import type { SessionCredentialAdapter } from "../auth/session-boundary";
+import {
+  SessionAccountStateError,
+  type SessionCredentialAdapter,
+} from "../auth/session-boundary";
 import type { SessionUserRepository } from "../repositories/session-repository";
 
 const PASSWORD_FIELD = "password" as const;
@@ -29,8 +32,12 @@ function createRepository(
         login_failure_user_id: 42,
       };
     },
-    async recordLoginFailure() {},
-    async resetLoginFailures() {},
+    async recordLoginFailure() {
+      return null;
+    },
+    async resetLoginFailures() {
+      return true;
+    },
     ...overrides,
   };
 }
@@ -83,6 +90,7 @@ describe("session service", () => {
       createRepository({
         async recordLoginFailure(failure) {
           recordedFailures.push(failure);
+          return { loginFailedCount: 1, lockedUntilAt: null };
         },
       }),
       {
@@ -103,8 +111,9 @@ describe("session service", () => {
     expect(recordedFailures).toEqual([
       {
         userId: 42,
-        loginFailedCount: 1,
-        lockedUntilAt: null,
+        userKind: undefined,
+        lockThreshold: 3,
+        lockUntilAt: new Date("2026-05-17T12:05:00.000Z"),
       },
     ]);
   });
@@ -138,6 +147,10 @@ describe("session service", () => {
         },
         async recordLoginFailure(failure) {
           recordedFailures.push(failure);
+          return {
+            loginFailedCount: 3,
+            lockedUntilAt: new Date("2026-05-17T12:05:00.000Z"),
+          };
         },
       }),
       {
@@ -158,8 +171,9 @@ describe("session service", () => {
     expect(recordedFailures).toEqual([
       {
         userId: 42,
-        loginFailedCount: 3,
-        lockedUntilAt: new Date("2026-05-17T12:05:00.000Z"),
+        userKind: undefined,
+        lockThreshold: 3,
+        lockUntilAt: new Date("2026-05-17T12:05:00.000Z"),
       },
     ]);
   });
@@ -189,10 +203,12 @@ describe("session service", () => {
             admin_public_id: "admin_public_123",
             admin_roles: ["super_admin"],
             login_failure_user_id: 7,
+            login_failure_user_kind: "admin",
           };
         },
         async recordLoginFailure(failure) {
           recordedFailures.push(failure);
+          return { loginFailedCount: 4, lockedUntilAt: null };
         },
       }),
       {
@@ -222,10 +238,15 @@ describe("session service", () => {
             admin_public_id: "admin_public_123",
             admin_roles: ["super_admin"],
             login_failure_user_id: 7,
+            login_failure_user_kind: "admin",
           };
         },
         async recordLoginFailure(failure) {
           recordedFailures.push(failure);
+          return {
+            loginFailedCount: 5,
+            lockedUntilAt: new Date("2026-05-17T12:15:00.000Z"),
+          };
         },
       }),
       {
@@ -256,15 +277,181 @@ describe("session service", () => {
     expect(recordedFailures).toEqual([
       {
         userId: 7,
-        loginFailedCount: 4,
-        lockedUntilAt: null,
+        userKind: "admin",
+        lockThreshold: 5,
+        lockUntilAt: new Date("2026-05-17T12:15:00.000Z"),
       },
       {
         userId: 7,
-        loginFailedCount: 5,
-        lockedUntilAt: new Date("2026-05-17T12:15:00.000Z"),
+        userKind: "admin",
+        lockThreshold: 5,
+        lockUntilAt: new Date("2026-05-17T12:15:00.000Z"),
       },
     ]);
+  });
+
+  it("uses the atomic repository transition result instead of a stale login snapshot", async () => {
+    const observedInputs: unknown[] = [];
+    const recordLoginFailure = async (input: unknown) => {
+      observedInputs.push(input);
+
+      return {
+        loginFailedCount: 3,
+        lockedUntilAt: new Date("2026-05-17T12:05:00.000Z"),
+      };
+    };
+    const sessionService = createSessionService(
+      createCredentialAdapter({
+        async verifyPasswordCredential() {
+          return false;
+        },
+      }),
+      createRepository({
+        recordLoginFailure:
+          recordLoginFailure as unknown as SessionUserRepository["recordLoginFailure"],
+      }),
+      {
+        now: () => new Date("2026-05-17T12:00:00.000Z"),
+      },
+    );
+
+    await expect(
+      sessionService.login({
+        phone: "13800000000",
+        [PASSWORD_FIELD]: "abc12345",
+      }),
+    ).resolves.toEqual({
+      code: 423001,
+      message: "Account locked.",
+      data: null,
+    });
+    expect(observedInputs).toEqual([
+      {
+        userId: 42,
+        userKind: undefined,
+        lockThreshold: 3,
+        lockUntilAt: new Date("2026-05-17T12:05:00.000Z"),
+      },
+    ]);
+  });
+
+  it("returns one lock transition when concurrent failures share a stale snapshot", async () => {
+    let persistedFailureCount = 0;
+    const sessionService = createSessionService(
+      createCredentialAdapter({
+        async verifyPasswordCredential() {
+          return false;
+        },
+      }),
+      createRepository({
+        async recordLoginFailure(input) {
+          persistedFailureCount += 1;
+
+          return {
+            loginFailedCount: persistedFailureCount,
+            lockedUntilAt:
+              persistedFailureCount >= input.lockThreshold
+                ? input.lockUntilAt
+                : null,
+          };
+        },
+      }),
+      {
+        now: () => new Date("2026-05-17T12:00:00.000Z"),
+      },
+    );
+
+    const responses = await Promise.all(
+      Array.from({ length: 3 }, () =>
+        sessionService.login({
+          phone: "13800000000",
+          [PASSWORD_FIELD]: "abc12345",
+        }),
+      ),
+    );
+
+    expect(responses.map((response) => response.code).sort()).toEqual([
+      401002, 401002, 423001,
+    ]);
+    expect(persistedFailureCount).toBe(3);
+  });
+
+  it("does not erase a concurrent failed attempt when a successful login resets by compare-and-set", async () => {
+    let persistedFailureCount = 0;
+    let releaseSuccessfulVerification: () => void = () => undefined;
+    const failureRecorded = new Promise<void>((resolve) => {
+      releaseSuccessfulVerification = resolve;
+    });
+    const sessionService = createSessionService(
+      createCredentialAdapter({
+        async verifyPasswordCredential(input) {
+          if (input.password === "ValidPassword1") {
+            await failureRecorded;
+            return true;
+          }
+
+          return false;
+        },
+      }),
+      createRepository({
+        async findLoginUserByPhone() {
+          const snapshotFailureCount = persistedFailureCount;
+
+          return {
+            id: 42,
+            auth_user_id: "auth_user_123",
+            public_id: "user_public_123",
+            phone: "13800000000",
+            name: "张三",
+            user_type: "personal",
+            status: "active",
+            login_failed_count: snapshotFailureCount,
+            locked_until_at: null,
+            employee_public_id: null,
+            organization_public_id: null,
+            admin_public_id: null,
+            admin_roles: [],
+            login_failure_user_id: 42,
+          };
+        },
+        async recordLoginFailure(input) {
+          persistedFailureCount += 1;
+          releaseSuccessfulVerification();
+
+          return {
+            loginFailedCount: persistedFailureCount,
+            lockedUntilAt:
+              persistedFailureCount >= input.lockThreshold
+                ? input.lockUntilAt
+                : null,
+          };
+        },
+        async resetLoginFailures(input) {
+          if (persistedFailureCount !== input.expectedLoginFailedCount) {
+            return false;
+          }
+
+          persistedFailureCount = 0;
+          return true;
+        },
+      }),
+      { now: () => new Date("2026-05-17T12:00:00.000Z") },
+    );
+
+    const [successfulResponse, failedResponse] = await Promise.all([
+      sessionService.login({
+        phone: "13800000000",
+        [PASSWORD_FIELD]: "ValidPassword1",
+      }),
+      sessionService.login({
+        phone: "13800000000",
+        [PASSWORD_FIELD]: "WrongPassword1",
+      }),
+    ]);
+
+    expect(successfulResponse.code).toBe(0);
+    expect(failedResponse.code).toBe(401002);
+    expect(persistedFailureCount).toBe(1);
   });
 
   it("rejects login while the account is locked", async () => {
@@ -354,7 +541,7 @@ describe("session service", () => {
 
   it("creates a seven-day single active session after successful password verification", async () => {
     const createdSessions: unknown[] = [];
-    const resetUserIds: number[] = [];
+    const resetInputs: unknown[] = [];
     const sessionService = createSessionService(
       createCredentialAdapter({
         async createSingleActiveSession(input) {
@@ -368,8 +555,9 @@ describe("session service", () => {
         },
       }),
       createRepository({
-        async resetLoginFailures(userId) {
-          resetUserIds.push(userId);
+        async resetLoginFailures(input) {
+          resetInputs.push(input);
+          return true;
         },
       }),
       {
@@ -408,9 +596,16 @@ describe("session service", () => {
       {
         authUserId: "auth_user_123",
         expiresAt: new Date("2026-05-24T12:00:00.000Z"),
+        passwordForReverification: "abc12345",
       },
     ]);
-    expect(resetUserIds).toEqual([42]);
+    expect(resetInputs).toEqual([
+      {
+        expectedLoginFailedCount: 0,
+        userId: 42,
+        userKind: undefined,
+      },
+    ]);
   });
 
   it("creates an eight-hour multi-session token for admin login", async () => {
@@ -480,7 +675,53 @@ describe("session service", () => {
       {
         authUserId: "auth_admin_123",
         expiresAt: new Date("2026-05-17T20:00:00.000Z"),
+        passwordForReverification: "abc12345",
       },
     ]);
+  });
+
+  it("fails closed when an account is disabled while credential verification is in flight", async () => {
+    const sessionService = createSessionService(
+      createCredentialAdapter({
+        async createSingleActiveSession() {
+          throw new SessionAccountStateError("disabled");
+        },
+      }),
+      createRepository(),
+    );
+
+    await expect(
+      sessionService.login({
+        phone: "13800000000",
+        [PASSWORD_FIELD]: "abc12345",
+      }),
+    ).resolves.toEqual({
+      code: 403002,
+      message: "Account disabled.",
+      data: null,
+    });
+  });
+
+  it("fails closed when the credential state changes while password verification is in flight", async () => {
+    const sessionService = createSessionService(
+      createCredentialAdapter({
+        async createSingleActiveSession(input) {
+          expect(input.passwordForReverification).toBe("abc12345");
+          throw new SessionAccountStateError("changed");
+        },
+      }),
+      createRepository(),
+    );
+
+    await expect(
+      sessionService.login({
+        phone: "13800000000",
+        [PASSWORD_FIELD]: "abc12345",
+      }),
+    ).resolves.toEqual({
+      code: 401002,
+      message: "Invalid phone or password.",
+      data: null,
+    });
   });
 });

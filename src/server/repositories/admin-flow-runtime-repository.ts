@@ -6,9 +6,12 @@ import {
   count,
   desc,
   eq,
+  exists,
   ilike,
   inArray,
   isNotNull,
+  notExists,
+  notInArray,
   or,
   sql,
   type SQL,
@@ -33,13 +36,15 @@ import type {
   AdminAccountCreationInputDto,
   AdminAccountCreationNotFoundReason,
   AdminAccountCreationResultDto,
+  AdminAccountDetailDto,
   AdminAccountListDto,
   AdminAccountListQuery,
+  AdminAccountMutationConflictReason,
   AdminAuthOperationListQuery,
   AdminUserDetailDto,
   AdminUserListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { AdminRole } from "../models/auth";
+import { adminRoleValues, type AdminRole } from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
@@ -69,6 +74,19 @@ export type AdminUserOrgAuthRuntimeRepository = {
   createAdminAccount?(
     input: AdminAccountCreationInputDto,
   ): Promise<AdminAccountCreationRepositoryResult>;
+  getAdminAccountDetail?(
+    publicId: string,
+    visibleAdminRoles: readonly AdminRole[],
+  ): Promise<AdminAccountDetailDto | null>;
+  updateAdminAccount?(
+    input: AdminAccountUpdateRepositoryInput,
+  ): Promise<AdminAccountMutationRepositoryResult>;
+  setAdminAccountStatus?(
+    input: AdminAccountStatusRepositoryInput,
+  ): Promise<AdminAccountMutationRepositoryResult>;
+  resetAdminAccountPassword?(
+    input: AdminAccountPasswordResetRepositoryInput,
+  ): Promise<AdminAccountMutationRepositoryResult>;
   resetUserPassword?(
     publicId: string,
     input: UserPasswordResetRepositoryInput,
@@ -80,6 +98,42 @@ export type AdminUserOrgAuthRuntimeRepository = {
     publicId: string,
   ): Promise<UserActiveFlowTerminationResult>;
 };
+
+export type AdminAccountLifecycleRepositoryActor = {
+  publicId: string;
+  roles: readonly AdminRole[];
+  requestIp: string | null;
+};
+
+export type AdminAccountUpdateRepositoryInput = {
+  actor: AdminAccountLifecycleRepositoryActor;
+  publicId: string;
+  name: string;
+  adminRoles: AdminRole[];
+  organizationPublicId: string | null;
+  expectedUpdatedAt: Date;
+};
+
+export type AdminAccountStatusRepositoryInput = {
+  actor: AdminAccountLifecycleRepositoryActor;
+  publicId: string;
+  status: "active" | "disabled";
+};
+
+export type AdminAccountPasswordResetRepositoryInput = {
+  actor: AdminAccountLifecycleRepositoryActor;
+  publicId: string;
+  newPassword: string;
+};
+
+export type AdminAccountMutationRepositoryResult =
+  | ({ status: "updated" } & AdminAccountDetailDto)
+  | { status: "not_found" }
+  | { status: "forbidden" }
+  | {
+      status: "conflict";
+      reason: AdminAccountMutationConflictReason;
+    };
 
 export type UserPasswordResetRepositoryInput = {
   newPassword: string;
@@ -133,6 +187,8 @@ export type AdminFlowRuntimeRepositories = {
 const {
   admin,
   adminOrganization,
+  adminRoleAssignment,
+  auditLog,
   authAccount,
   authSession,
   authUser,
@@ -244,6 +300,109 @@ function mergeAdminUserListRows(rows: AdminUserListRow[]): AdminUserListRow[] {
   return Array.from(rowsByPublicId.values());
 }
 
+function sortAdminRoles(adminRoles: readonly AdminRole[]): AdminRole[] {
+  const roleOrder = new Map(
+    adminRoleValues.map((adminRole, index) => [adminRole, index]),
+  );
+
+  return [...adminRoles].sort(
+    (leftRole, rightRole) =>
+      (roleOrder.get(leftRole) ?? Number.MAX_SAFE_INTEGER) -
+      (roleOrder.get(rightRole) ?? Number.MAX_SAFE_INTEGER),
+  );
+}
+
+function createAdminRoleVisibilityCondition(
+  database: AdminFlowRuntimeDatabase,
+  visibleAdminRoles: readonly AdminRole[],
+): SQL {
+  const visibleRoleQuery = database
+    .select({ admin_id: adminRoleAssignment.admin_id })
+    .from(adminRoleAssignment)
+    .where(
+      and(
+        eq(adminRoleAssignment.admin_id, admin.id),
+        inArray(adminRoleAssignment.admin_role, [...visibleAdminRoles]),
+      ),
+    );
+  const forbiddenRoleQuery = database
+    .select({ admin_id: adminRoleAssignment.admin_id })
+    .from(adminRoleAssignment)
+    .where(
+      and(
+        eq(adminRoleAssignment.admin_id, admin.id),
+        notInArray(adminRoleAssignment.admin_role, [...visibleAdminRoles]),
+      ),
+    );
+
+  return and(exists(visibleRoleQuery), notExists(forbiddenRoleQuery))!;
+}
+
+async function findAdminAccountDetail(
+  database: AdminFlowRuntimeDatabase,
+  publicId: string,
+  visibleAdminRoles: readonly AdminRole[],
+): Promise<AdminAccountDetailDto | null> {
+  const adminAccount = await database.query.admin.findFirst({
+    columns: {
+      created_at: true,
+      name: true,
+      phone: true,
+      public_id: true,
+      status: true,
+      updated_at: true,
+    },
+    where: and(
+      eq(admin.public_id, publicId),
+      createAdminRoleVisibilityCondition(database, visibleAdminRoles),
+    ),
+    with: {
+      adminRoleAssignments: {
+        columns: {
+          admin_role: true,
+        },
+      },
+      adminOrganizations: {
+        with: {
+          organization: {
+            columns: {
+              name: true,
+              public_id: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (adminAccount === undefined) {
+    return null;
+  }
+
+  return {
+    adminAccount: {
+      accountDomain: "admin",
+      adminRoles: sortAdminRoles(
+        adminAccount.adminRoleAssignments.map(
+          (assignment) => assignment.admin_role,
+        ),
+      ),
+      name: adminAccount.name,
+      organizations: adminAccount.adminOrganizations.map(
+        ({ organization: linkedOrganization }) => ({
+          name: linkedOrganization.name,
+          publicId: linkedOrganization.public_id,
+        }),
+      ),
+      phone: adminAccount.phone,
+      publicId: adminAccount.public_id,
+      registeredAt: adminAccount.created_at.toISOString(),
+      status: adminAccount.status,
+      updatedAt: adminAccount.updated_at.toISOString(),
+    },
+  };
+}
+
 export function createPostgresAdminFlowRuntimeRepositories(
   options: AdminFlowRuntimeRepositoryOptions = {},
 ): AdminFlowRuntimeRepositories {
@@ -268,7 +427,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     async listAdminAccounts(query, visibleAdminRoles) {
       const database = getDatabase();
       const conditions: SQL[] = [
-        inArray(admin.admin_role, [...visibleAdminRoles]),
+        createAdminRoleVisibilityCondition(database, visibleAdminRoles),
       ];
 
       if (query.keyword !== null) {
@@ -281,7 +440,19 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       }
 
       if (query.adminRole !== "all") {
-        conditions.push(eq(admin.admin_role, query.adminRole));
+        conditions.push(
+          exists(
+            database
+              .select({ admin_id: adminRoleAssignment.admin_id })
+              .from(adminRoleAssignment)
+              .where(
+                and(
+                  eq(adminRoleAssignment.admin_id, admin.id),
+                  eq(adminRoleAssignment.admin_role, query.adminRole),
+                ),
+              ),
+          ),
+        );
       }
 
       if (query.status !== "all") {
@@ -306,18 +477,23 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       const sortDirection = query.sortOrder === "asc" ? asc : desc;
       const adminAccounts = await database.query.admin.findMany({
         columns: {
-          admin_role: true,
           created_at: true,
           name: true,
           phone: true,
           public_id: true,
           status: true,
+          updated_at: true,
         },
         limit: query.pageSize,
         offset: (query.page - 1) * query.pageSize,
         orderBy: [sortDirection(sortColumn), sortDirection(admin.id)],
         where: and(...conditions),
         with: {
+          adminRoleAssignments: {
+            columns: {
+              admin_role: true,
+            },
+          },
           adminOrganizations: {
             with: {
               organization: {
@@ -338,7 +514,11 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       return {
         adminAccounts: adminAccounts.map((adminAccount) => ({
           accountDomain: "admin",
-          adminRole: adminAccount.admin_role,
+          adminRoles: sortAdminRoles(
+            adminAccount.adminRoleAssignments.map(
+              (assignment) => assignment.admin_role,
+            ),
+          ),
           name: adminAccount.name,
           organizations: adminAccount.adminOrganizations.map(
             ({ organization: linkedOrganization }) => ({
@@ -350,9 +530,19 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           publicId: adminAccount.public_id,
           registeredAt: adminAccount.created_at.toISOString(),
           status: adminAccount.status,
+          updatedAt: adminAccount.updated_at.toISOString(),
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
+    },
+    async getAdminAccountDetail(publicId, visibleAdminRoles) {
+      const detail = await findAdminAccountDetail(
+        getDatabase(),
+        publicId,
+        visibleAdminRoles,
+      );
+
+      return detail;
     },
     async listUsers(query) {
       const database = getDatabase();
@@ -719,6 +909,14 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           })
           .returning({ id: admin.id });
 
+        if (createdAdminRow !== undefined) {
+          await transaction.insert(adminRoleAssignment).values({
+            admin_id: createdAdminRow.id,
+            admin_role: input.adminRole,
+            created_at: now,
+          });
+        }
+
         if (
           targetOrganizationRow !== null &&
           targetOrganizationRow !== undefined &&
@@ -745,6 +943,15 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         },
         status: "created",
       };
+    },
+    async updateAdminAccount(input) {
+      return updateAdminAccount(getDatabase(), input);
+    },
+    async setAdminAccountStatus(input) {
+      return setAdminAccountStatus(getDatabase(), input);
+    },
+    async resetAdminAccountPassword(input) {
+      return resetAdminAccountPassword(getDatabase(), input);
     },
     async resetUserPassword(publicId, input) {
       const database = getDatabase();
@@ -794,6 +1001,494 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
 
 function formatNullableDate(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
+}
+
+type AdminFlowRuntimeTransaction = Parameters<
+  Parameters<AdminFlowRuntimeDatabase["transaction"]>[0]
+>[0];
+
+type LockedAdminAccount = {
+  authUserId: string | null;
+  currentOrganizationId: number | null;
+  currentOrganizationPublicId: string | null;
+  currentRoles: AdminRole[];
+  id: number;
+  publicId: string;
+  status: "active" | "disabled";
+  updatedAt: Date;
+};
+
+const LAST_ACTIVE_SUPER_ADMIN_LOCK_KEY = 7011401;
+
+function isOrganizationAdminRole(adminRole: AdminRole): boolean {
+  return (
+    adminRole === "org_standard_admin" || adminRole === "org_advanced_admin"
+  );
+}
+
+export function canManageAdminAccountRoles(input: {
+  actorRoles: readonly AdminRole[];
+  currentRoles: readonly AdminRole[];
+  desiredRoles?: readonly AdminRole[];
+}): boolean {
+  if (input.actorRoles.includes("super_admin")) {
+    return true;
+  }
+
+  const desiredRoles = input.desiredRoles ?? input.currentRoles;
+
+  return (
+    input.actorRoles.includes("ops_admin") &&
+    input.currentRoles.length > 0 &&
+    desiredRoles.length > 0 &&
+    input.currentRoles.every(isOrganizationAdminRole) &&
+    desiredRoles.every(isOrganizationAdminRole)
+  );
+}
+
+export function isAdminAccountOrganizationBindingValid(input: {
+  adminRoles: readonly AdminRole[];
+  organizationPublicId: string | null;
+}): boolean {
+  const hasOrganizationRole = input.adminRoles.some(isOrganizationAdminRole);
+
+  return hasOrganizationRole === (input.organizationPublicId !== null);
+}
+
+function areAdminRolesEqual(
+  leftRoles: readonly AdminRole[],
+  rightRoles: readonly AdminRole[],
+): boolean {
+  const sortedLeftRoles = sortAdminRoles(leftRoles);
+  const sortedRightRoles = sortAdminRoles(rightRoles);
+
+  return (
+    sortedLeftRoles.length === sortedRightRoles.length &&
+    sortedLeftRoles.every(
+      (adminRole, index) => adminRole === sortedRightRoles[index],
+    )
+  );
+}
+
+async function readLockedAdminAccount(
+  transaction: AdminFlowRuntimeTransaction,
+  publicId: string,
+): Promise<LockedAdminAccount | null> {
+  await transaction.execute(
+    sql`select ${admin.id} from ${admin} where ${admin.public_id} = ${publicId} for update`,
+  );
+  const [adminRow] = await transaction
+    .select({
+      auth_user_id: admin.auth_user_id,
+      id: admin.id,
+      public_id: admin.public_id,
+      status: admin.status,
+      updated_at: admin.updated_at,
+    })
+    .from(admin)
+    .where(eq(admin.public_id, publicId))
+    .limit(1);
+
+  if (adminRow === undefined) {
+    return null;
+  }
+
+  const roleRows = await transaction
+    .select({ admin_role: adminRoleAssignment.admin_role })
+    .from(adminRoleAssignment)
+    .where(eq(adminRoleAssignment.admin_id, adminRow.id));
+  const [organizationRow] = await transaction
+    .select({
+      id: organization.id,
+      public_id: organization.public_id,
+    })
+    .from(adminOrganization)
+    .innerJoin(
+      organization,
+      eq(organization.id, adminOrganization.organization_id),
+    )
+    .where(eq(adminOrganization.admin_id, adminRow.id))
+    .limit(1);
+
+  return {
+    authUserId: adminRow.auth_user_id,
+    currentOrganizationId: organizationRow?.id ?? null,
+    currentOrganizationPublicId: organizationRow?.public_id ?? null,
+    currentRoles: sortAdminRoles(roleRows.map((row) => row.admin_role)),
+    id: adminRow.id,
+    publicId: adminRow.public_id,
+    status: adminRow.status,
+    updatedAt: adminRow.updated_at,
+  };
+}
+
+async function preservesLastActiveSuperAdmin(
+  transaction: AdminFlowRuntimeTransaction,
+): Promise<boolean> {
+  await transaction.execute(
+    sql`select pg_advisory_xact_lock(${LAST_ACTIVE_SUPER_ADMIN_LOCK_KEY})`,
+  );
+  const [activeSuperAdminCount] = await transaction
+    .select({ value: count() })
+    .from(adminRoleAssignment)
+    .innerJoin(admin, eq(admin.id, adminRoleAssignment.admin_id))
+    .where(
+      and(
+        eq(adminRoleAssignment.admin_role, "super_admin"),
+        eq(admin.status, "active"),
+      ),
+    );
+
+  return (activeSuperAdminCount?.value ?? 0) > 1;
+}
+
+async function lockAdminAccountSessionLifecycle(
+  transaction: AdminFlowRuntimeTransaction,
+  target: LockedAdminAccount,
+): Promise<void> {
+  if (target.authUserId === null) {
+    return;
+  }
+
+  await transaction.execute(
+    sql`select pg_advisory_xact_lock(hashtext(${target.authUserId}))`,
+  );
+}
+
+async function appendAtomicAdminAccountAudit(input: {
+  transaction: AdminFlowRuntimeTransaction;
+  actor: AdminAccountLifecycleRepositoryActor;
+  actionType:
+    | "admin_account.update"
+    | "admin_account.disable"
+    | "admin_account.enable"
+    | "admin_account.reset_password";
+  targetPublicId: string;
+  now: Date;
+}): Promise<void> {
+  await input.transaction.insert(auditLog).values({
+    action_type: input.actionType,
+    actor_public_id: input.actor.publicId,
+    actor_role: input.actor.roles[0] ?? "unknown",
+    created_at: input.now,
+    metadata_summary: `redacted ${input.actionType} metadata`,
+    public_id: `audit-log-${randomUUID()}`,
+    request_ip: input.actor.requestIp,
+    result_status: "success",
+    target_public_id: input.targetPublicId,
+    target_resource_type: "admin",
+  });
+}
+
+async function loadUpdatedAdminAccountResult(
+  database: AdminFlowRuntimeDatabase,
+  publicId: string,
+): Promise<AdminAccountMutationRepositoryResult> {
+  const detail = await findAdminAccountDetail(
+    database,
+    publicId,
+    adminRoleValues,
+  );
+
+  return detail === null
+    ? { status: "not_found" }
+    : { status: "updated", ...detail };
+}
+
+async function updateAdminAccount(
+  database: AdminFlowRuntimeDatabase,
+  input: AdminAccountUpdateRepositoryInput,
+): Promise<AdminAccountMutationRepositoryResult> {
+  const desiredRoles = sortAdminRoles(input.adminRoles);
+
+  if (desiredRoles.length === 0) {
+    return { status: "forbidden" };
+  }
+
+  if (
+    !isAdminAccountOrganizationBindingValid({
+      adminRoles: desiredRoles,
+      organizationPublicId: input.organizationPublicId,
+    })
+  ) {
+    return { status: "forbidden" };
+  }
+
+  const compatibilityAdminRole = desiredRoles[0];
+  const transactionResult = await database.transaction<
+    | Exclude<AdminAccountMutationRepositoryResult, { status: "updated" }>
+    | { status: "updated" }
+  >(async (transaction) => {
+    const target = await readLockedAdminAccount(transaction, input.publicId);
+
+    if (target === null) {
+      return { status: "not_found" };
+    }
+
+    await lockAdminAccountSessionLifecycle(transaction, target);
+
+    if (
+      !canManageAdminAccountRoles({
+        actorRoles: input.actor.roles,
+        currentRoles: target.currentRoles,
+        desiredRoles,
+      })
+    ) {
+      return { status: "forbidden" };
+    }
+
+    if (target.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
+      return { status: "conflict", reason: "concurrent_update" };
+    }
+
+    const removesActiveSuperAdmin =
+      target.status === "active" &&
+      target.currentRoles.includes("super_admin") &&
+      !desiredRoles.includes("super_admin");
+
+    if (
+      removesActiveSuperAdmin &&
+      !(await preservesLastActiveSuperAdmin(transaction))
+    ) {
+      return { status: "conflict", reason: "last_active_super_admin" };
+    }
+
+    let targetOrganizationId: number | null = null;
+
+    if (input.organizationPublicId !== null) {
+      const [targetOrganization] = await transaction
+        .select({ id: organization.id })
+        .from(organization)
+        .where(
+          and(
+            eq(organization.public_id, input.organizationPublicId),
+            eq(organization.status, "active"),
+          ),
+        )
+        .limit(1);
+
+      if (targetOrganization === undefined) {
+        return { status: "not_found" };
+      }
+
+      targetOrganizationId = targetOrganization.id;
+    }
+
+    const now = new Date();
+    const updatedRows = await transaction
+      .update(admin)
+      .set({
+        admin_role: compatibilityAdminRole,
+        name: input.name,
+        updated_at: now,
+      })
+      .where(
+        and(
+          eq(admin.id, target.id),
+          eq(admin.updated_at, input.expectedUpdatedAt),
+        ),
+      )
+      .returning({ id: admin.id });
+
+    if (updatedRows.length === 0) {
+      return { status: "conflict", reason: "concurrent_update" };
+    }
+
+    await transaction
+      .delete(adminRoleAssignment)
+      .where(eq(adminRoleAssignment.admin_id, target.id));
+    await transaction.insert(adminRoleAssignment).values(
+      desiredRoles.map((adminRole) => ({
+        admin_id: target.id,
+        admin_role: adminRole,
+        created_at: now,
+      })),
+    );
+    await transaction
+      .delete(adminOrganization)
+      .where(eq(adminOrganization.admin_id, target.id));
+
+    if (targetOrganizationId !== null) {
+      await transaction.insert(adminOrganization).values({
+        admin_id: target.id,
+        organization_id: targetOrganizationId,
+        created_at: now,
+      });
+    }
+
+    const authorizationChanged =
+      !areAdminRolesEqual(target.currentRoles, desiredRoles) ||
+      target.currentOrganizationPublicId !== input.organizationPublicId;
+
+    if (authorizationChanged && target.authUserId !== null) {
+      await transaction
+        .delete(authSession)
+        .where(eq(authSession.user_id, target.authUserId));
+    }
+
+    await appendAtomicAdminAccountAudit({
+      transaction,
+      actor: input.actor,
+      actionType: "admin_account.update",
+      targetPublicId: input.publicId,
+      now,
+    });
+
+    return { status: "updated" };
+  });
+
+  return transactionResult.status === "updated"
+    ? loadUpdatedAdminAccountResult(database, input.publicId)
+    : transactionResult;
+}
+
+async function setAdminAccountStatus(
+  database: AdminFlowRuntimeDatabase,
+  input: AdminAccountStatusRepositoryInput,
+): Promise<AdminAccountMutationRepositoryResult> {
+  const transactionResult = await database.transaction<
+    | Exclude<AdminAccountMutationRepositoryResult, { status: "updated" }>
+    | { status: "updated" }
+  >(async (transaction) => {
+    const target = await readLockedAdminAccount(transaction, input.publicId);
+
+    if (target === null) {
+      return { status: "not_found" };
+    }
+
+    await lockAdminAccountSessionLifecycle(transaction, target);
+
+    if (
+      !canManageAdminAccountRoles({
+        actorRoles: input.actor.roles,
+        currentRoles: target.currentRoles,
+      })
+    ) {
+      return { status: "forbidden" };
+    }
+
+    const disablesActiveSuperAdmin =
+      input.status === "disabled" &&
+      target.status === "active" &&
+      target.currentRoles.includes("super_admin");
+
+    if (
+      disablesActiveSuperAdmin &&
+      !(await preservesLastActiveSuperAdmin(transaction))
+    ) {
+      return { status: "conflict", reason: "last_active_super_admin" };
+    }
+
+    const now = new Date();
+
+    if (target.status !== input.status) {
+      await transaction
+        .update(admin)
+        .set({
+          disabled_at: input.status === "disabled" ? now : null,
+          locked_until_at: input.status === "active" ? null : undefined,
+          login_failed_count: input.status === "active" ? 0 : undefined,
+          status: input.status,
+          updated_at: now,
+        })
+        .where(eq(admin.id, target.id));
+    }
+
+    if (input.status === "disabled" && target.authUserId !== null) {
+      await transaction
+        .delete(authSession)
+        .where(eq(authSession.user_id, target.authUserId));
+    }
+
+    await appendAtomicAdminAccountAudit({
+      transaction,
+      actor: input.actor,
+      actionType:
+        input.status === "disabled"
+          ? "admin_account.disable"
+          : "admin_account.enable",
+      targetPublicId: input.publicId,
+      now,
+    });
+
+    return { status: "updated" };
+  });
+
+  return transactionResult.status === "updated"
+    ? loadUpdatedAdminAccountResult(database, input.publicId)
+    : transactionResult;
+}
+
+async function resetAdminAccountPassword(
+  database: AdminFlowRuntimeDatabase,
+  input: AdminAccountPasswordResetRepositoryInput,
+): Promise<AdminAccountMutationRepositoryResult> {
+  const passwordHash = await hashPassword(input.newPassword);
+  const transactionResult = await database.transaction<
+    | Exclude<AdminAccountMutationRepositoryResult, { status: "updated" }>
+    | { status: "updated" }
+  >(async (transaction) => {
+    const target = await readLockedAdminAccount(transaction, input.publicId);
+
+    if (target === null || target.authUserId === null) {
+      return { status: "not_found" };
+    }
+
+    await lockAdminAccountSessionLifecycle(transaction, target);
+
+    if (
+      !canManageAdminAccountRoles({
+        actorRoles: input.actor.roles,
+        currentRoles: target.currentRoles,
+      })
+    ) {
+      return { status: "forbidden" };
+    }
+
+    const now = new Date();
+    const updatedCredentials = await transaction
+      .update(authAccount)
+      .set({
+        [authPasswordColumn]: passwordHash,
+        updated_at: now,
+      })
+      .where(
+        and(
+          eq(authAccount.user_id, target.authUserId),
+          eq(authAccount.provider_id, credentialProviderId),
+        ),
+      )
+      .returning({ id: authAccount.id });
+
+    if (updatedCredentials.length === 0) {
+      return { status: "not_found" };
+    }
+
+    await transaction
+      .update(admin)
+      .set({
+        locked_until_at: null,
+        login_failed_count: 0,
+        updated_at: now,
+      })
+      .where(eq(admin.id, target.id));
+    await transaction
+      .delete(authSession)
+      .where(eq(authSession.user_id, target.authUserId));
+    await appendAtomicAdminAccountAudit({
+      transaction,
+      actor: input.actor,
+      actionType: "admin_account.reset_password",
+      targetPublicId: input.publicId,
+      now,
+    });
+
+    return { status: "updated" };
+  });
+
+  return transactionResult.status === "updated"
+    ? loadUpdatedAdminAccountResult(database, input.publicId)
+    : transactionResult;
 }
 
 async function updateUserStatus(

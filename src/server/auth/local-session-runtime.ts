@@ -23,6 +23,7 @@ import type {
   PasswordCredentialInput,
   SessionCredentialAdapter,
 } from "./session-boundary";
+import { SessionAccountStateError } from "./session-boundary";
 import type { UserRegistrationSessionCredentialAdapter } from "./user-registration-boundary";
 import { createUserRegistrationRouteHandlers } from "./user-registration-route";
 import {
@@ -99,6 +100,7 @@ export type LocalUserRegistrationRuntimeOptions = {
 const {
   admin,
   adminOrganization,
+  adminRoleAssignment,
   authUpgrade,
   authAccount,
   authSession,
@@ -115,10 +117,6 @@ const SESSION_RUNTIME_UNAVAILABLE_CODE = 503001;
 const CREDENTIAL_PROVIDER_ID = "credential";
 const PASSWORD_FIELD = "password";
 const SESSION_TOKEN_FIELD = "token";
-const localAdminLoginFailureState = new Map<
-  number,
-  { loginFailedCount: number; lockedUntilAt: Date | null }
->();
 
 function createRuntimeUnavailableResponse<TData>(): ApiResponse<TData | null> {
   return createErrorResponse(
@@ -178,7 +176,7 @@ function createPostgresAuthUserRepository(
   };
 }
 
-function createPostgresSessionUserRepository(
+export function createPostgresSessionUserRepository(
   getDatabase: () => LocalSessionRuntimeDatabase,
   getNow: () => Date,
 ): SessionUserRepository {
@@ -195,48 +193,148 @@ function createPostgresSessionUserRepository(
     },
 
     async recordLoginFailure(input: LoginFailureInput) {
-      if (input.userKind === "admin") {
-        localAdminLoginFailureState.set(input.userId, {
-          loginFailedCount: input.loginFailedCount,
-          lockedUntilAt: input.lockedUntilAt,
-        });
-        return;
-      }
-
       const database = getDatabase();
 
-      await database
+      if (input.userKind === "admin") {
+        const [transition] = await database
+          .update(admin)
+          .set({
+            locked_until_at: sql<Date | null>`case
+              when ${admin.login_failed_count} + 1 >= ${input.lockThreshold}
+              then ${input.lockUntilAt}
+              else null
+            end`,
+            login_failed_count: sql<number>`${admin.login_failed_count} + 1`,
+            updated_at: sql<Date>`clock_timestamp()`,
+          })
+          .where(eq(admin.id, input.userId))
+          .returning({
+            lockedUntilAt: admin.locked_until_at,
+            loginFailedCount: admin.login_failed_count,
+          });
+
+        return transition ?? null;
+      }
+
+      const [transition] = await database
         .update(user)
         .set({
-          locked_until_at: input.lockedUntilAt,
-          login_failed_count: input.loginFailedCount,
-          updated_at: new Date(),
+          locked_until_at: sql<Date | null>`case
+            when ${user.login_failed_count} + 1 >= ${input.lockThreshold}
+            then ${input.lockUntilAt}
+            else null
+          end`,
+          login_failed_count: sql<number>`${user.login_failed_count} + 1`,
+          updated_at: sql<Date>`clock_timestamp()`,
         })
-        .where(eq(user.id, input.userId));
+        .where(eq(user.id, input.userId))
+        .returning({
+          lockedUntilAt: user.locked_until_at,
+          loginFailedCount: user.login_failed_count,
+        });
+
+      return transition ?? null;
     },
 
-    async resetLoginFailures(userId, userKind) {
-      if (userKind === "admin") {
-        localAdminLoginFailureState.delete(userId);
-        return;
-      }
-
+    async resetLoginFailures(input) {
       const database = getDatabase();
+      const accountTable = input.userKind === "admin" ? admin : user;
 
-      await database
-        .update(user)
+      const resetRows = await database
+        .update(accountTable)
         .set({
           locked_until_at: null,
           login_failed_count: 0,
-          updated_at: new Date(),
+          updated_at: sql<Date>`clock_timestamp()`,
         })
-        .where(eq(user.id, userId));
+        .where(
+          and(
+            eq(accountTable.id, input.userId),
+            eq(accountTable.login_failed_count, input.expectedLoginFailedCount),
+          ),
+        )
+        .returning({ id: accountTable.id });
+
+      return resetRows.length > 0;
     },
   };
 }
 
+type LocalSessionRuntimeTransaction = Parameters<
+  Parameters<LocalSessionRuntimeDatabase["transaction"]>[0]
+>[0];
+
+async function assertAccountCanCreateSession(
+  transaction: LocalSessionRuntimeTransaction,
+  authUserId: string,
+  now: Date,
+): Promise<void> {
+  await transaction.execute(
+    sql`select pg_advisory_xact_lock(hashtext(${authUserId}))`,
+  );
+  const [adminAccount] = await transaction
+    .select({
+      locked_until_at: admin.locked_until_at,
+      status: admin.status,
+    })
+    .from(admin)
+    .where(eq(admin.auth_user_id, authUserId))
+    .limit(1);
+  const account =
+    adminAccount ??
+    (
+      await transaction
+        .select({
+          locked_until_at: user.locked_until_at,
+          status: user.status,
+        })
+        .from(user)
+        .where(eq(user.auth_user_id, authUserId))
+        .limit(1)
+    )[0];
+
+  if (account === undefined || account.status !== "active") {
+    throw new SessionAccountStateError("disabled");
+  }
+
+  if (account.locked_until_at !== null && account.locked_until_at > now) {
+    throw new SessionAccountStateError("locked");
+  }
+}
+
+async function assertPasswordCredentialStillValid(
+  transaction: LocalSessionRuntimeTransaction,
+  input: PasswordCredentialInput,
+  verifyPasswordHash: (input: VerifyPasswordHashInput) => Promise<boolean>,
+): Promise<void> {
+  const [row] = await transaction
+    .select({
+      [PASSWORD_FIELD]: authAccount.password,
+    })
+    .from(authAccount)
+    .where(
+      and(
+        eq(authAccount.user_id, input.authUserId),
+        eq(authAccount.provider_id, CREDENTIAL_PROVIDER_ID),
+      ),
+    )
+    .limit(1);
+  const storedPasswordHash = row?.password;
+
+  if (
+    typeof storedPasswordHash !== "string" ||
+    !(await verifyPasswordHash({
+      hash: storedPasswordHash,
+      [PASSWORD_FIELD]: input.password,
+    }))
+  ) {
+    throw new SessionAccountStateError("changed");
+  }
+}
+
 function createPostgresSessionCredentialAdapter(
   getDatabase: () => LocalSessionRuntimeDatabase,
+  getNow: () => Date,
   options: Required<
     Pick<
       LocalSessionRuntimeOptions,
@@ -275,6 +373,21 @@ function createPostgresSessionCredentialAdapter(
       const database = getDatabase();
 
       return database.transaction(async (transaction) => {
+        await assertAccountCanCreateSession(
+          transaction,
+          input.authUserId,
+          getNow(),
+        );
+        if (input.passwordForReverification !== undefined) {
+          await assertPasswordCredentialStillValid(
+            transaction,
+            {
+              authUserId: input.authUserId,
+              [PASSWORD_FIELD]: input.passwordForReverification,
+            },
+            options.verifyPasswordHash,
+          );
+        }
         await transaction
           .delete(authSession)
           .where(eq(authSession.user_id, input.authUserId));
@@ -305,27 +418,45 @@ function createPostgresSessionCredentialAdapter(
 
     async createSession(input: CreateSingleActiveSessionInput) {
       const database = getDatabase();
-      const [row] = await database
-        .insert(authSession)
-        .values({
-          expires_at: input.expiresAt,
-          id: options.createSessionId(),
-          ip_address: null,
-          [SESSION_TOKEN_FIELD]: options.createToken(),
-          user_agent: null,
-          user_id: input.authUserId,
-        })
-        .returning({
-          auth_user_id: authSession.user_id,
-          expires_at: authSession.expires_at,
-          [SESSION_TOKEN_FIELD]: authSession.token,
-        });
 
-      if (row === undefined) {
-        throw new Error("Session insert did not return a row.");
-      }
+      return database.transaction(async (transaction) => {
+        await assertAccountCanCreateSession(
+          transaction,
+          input.authUserId,
+          getNow(),
+        );
+        if (input.passwordForReverification !== undefined) {
+          await assertPasswordCredentialStillValid(
+            transaction,
+            {
+              authUserId: input.authUserId,
+              [PASSWORD_FIELD]: input.passwordForReverification,
+            },
+            options.verifyPasswordHash,
+          );
+        }
+        const [row] = await transaction
+          .insert(authSession)
+          .values({
+            expires_at: input.expiresAt,
+            id: options.createSessionId(),
+            ip_address: null,
+            [SESSION_TOKEN_FIELD]: options.createToken(),
+            user_agent: null,
+            user_id: input.authUserId,
+          })
+          .returning({
+            auth_user_id: authSession.user_id,
+            expires_at: authSession.expires_at,
+            [SESSION_TOKEN_FIELD]: authSession.token,
+          });
 
-      return row;
+        if (row === undefined) {
+          throw new Error("Session insert did not return a row.");
+        }
+
+        return row;
+      });
     },
 
     async findSessionByToken(sessionToken) {
@@ -531,7 +662,7 @@ function createRuntimeService(
   const getNow = () => options.now?.() ?? new Date();
   const baseCredentialAdapter =
     options.credentialAdapter ??
-    createPostgresSessionCredentialAdapter(getDatabase, {
+    createPostgresSessionCredentialAdapter(getDatabase, getNow, {
       createSessionId: options.createSessionId ?? createDefaultSessionId,
       createToken: options.createToken ?? createDefaultToken,
       verifyPasswordHash:
@@ -730,9 +861,10 @@ async function findActiveAdminAccountByAuthUserId(
 ): Promise<AuthUserAccessRow | null> {
   const [row] = await database
     .select({
-      admin_role: admin.admin_role,
+      admin_roles: createAdminRolesSql(),
       auth_user_id: admin.auth_user_id,
       id: admin.id,
+      locked_until_at: admin.locked_until_at,
       name: admin.name,
       organization_id: organization.id,
       organization_public_id: organization.public_id,
@@ -810,9 +942,11 @@ async function findLoginAdminAccountByPhone(
 ): Promise<SessionLoginUserRow | null> {
   const [row] = await database
     .select({
-      admin_role: admin.admin_role,
+      admin_roles: createAdminRolesSql(),
       auth_user_id: admin.auth_user_id,
       id: admin.id,
+      locked_until_at: admin.locked_until_at,
+      login_failed_count: admin.login_failed_count,
       name: admin.name,
       organization_id: organization.id,
       organization_public_id: organization.public_id,
@@ -833,24 +967,16 @@ async function findLoginAdminAccountByPhone(
   if (row === undefined) {
     return null;
   }
-  const loginFailureState = localAdminLoginFailureState.get(row.id) ?? {
-    loginFailedCount: 0,
-    lockedUntilAt: null,
-  };
-
   const adminAccountRow = await hydrateOrganizationAdminWorkspaceCapability(
     database,
-    mapAdminAccountRow({
-      ...row,
-      locked_until_at: loginFailureState.lockedUntilAt,
-    }),
+    mapAdminAccountRow(row),
     row.organization_id,
     now,
   );
 
   return {
     ...adminAccountRow,
-    login_failed_count: loginFailureState.loginFailedCount,
+    login_failed_count: row.login_failed_count,
     login_failure_user_id: row.id,
     login_failure_user_kind: "admin",
   };
@@ -1008,11 +1134,20 @@ function mapUserAccountRow(row: {
   };
 }
 
+function createAdminRolesSql() {
+  return sql<AdminRole[]>`array(
+    select ${adminRoleAssignment.admin_role}
+    from ${adminRoleAssignment}
+    where ${adminRoleAssignment.admin_id} = ${admin.id}
+    order by ${adminRoleAssignment.admin_role}
+  )`;
+}
+
 function mapAdminAccountRow(row: {
-  admin_role: AdminRole;
+  admin_roles: AdminRole[];
   auth_user_id: string | null;
   id: number;
-  locked_until_at?: Date | null;
+  locked_until_at: Date | null;
   name: string;
   organization_public_id?: string | null;
   phone: string;
@@ -1025,13 +1160,13 @@ function mapAdminAccountRow(row: {
 
   return {
     admin_public_id: row.public_id,
-    admin_roles: normalizeAdminRoles([row.admin_role]),
+    admin_roles: normalizeAdminRoles(row.admin_roles),
     auth_user_id: row.auth_user_id,
     employee_public_id: null,
     id: row.id,
-    locked_until_at: row.locked_until_at ?? null,
+    locked_until_at: row.locked_until_at,
     name: row.name,
-    organization_public_id: isOrganizationAdminRole(row.admin_role)
+    organization_public_id: row.admin_roles.some(isOrganizationAdminRole)
       ? (row.organization_public_id ?? null)
       : null,
     phone: row.phone,

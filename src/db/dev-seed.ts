@@ -186,11 +186,22 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       status: "active",
     },
   ] as const;
-  const adminOrganizationAssignments = adminAccounts.map((adminAccount) => ({
+  const adminRoleAssignments = adminAccounts.map((adminAccount) => ({
     adminPublicId: adminAccount.publicId,
+    adminRoles: [adminAccount.adminRole],
     createdAt: baseIssuedAt,
-    organizationPublicId: devSeedPublicIds.organization,
   }));
+  const adminOrganizationAssignments = adminAccounts
+    .filter(
+      (adminAccount) =>
+        adminAccount.adminRole === "org_standard_admin" ||
+        adminAccount.adminRole === "org_advanced_admin",
+    )
+    .map((adminAccount) => ({
+      adminPublicId: adminAccount.publicId,
+      createdAt: baseIssuedAt,
+      organizationPublicId: devSeedPublicIds.organization,
+    }));
 
   return {
     admin: {
@@ -201,12 +212,8 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       publicId: devSeedPublicIds.superAdmin,
       status: "active",
     },
-    adminOrganization: {
-      adminPublicId: devSeedPublicIds.superAdmin,
-      createdAt: baseIssuedAt,
-      organizationPublicId: devSeedPublicIds.organization,
-    },
     adminOrganizations: adminOrganizationAssignments,
+    adminRoleAssignments,
     admins: adminAccounts,
     employee: {
       createdAt: baseIssuedAt,
@@ -611,7 +618,7 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
     for (const seedAdmin of seedDataset.admins) {
       const seedAdminId = await getRequiredId(
         sql`
-          insert into admin (public_id, auth_user_id, phone, name, admin_role, status, created_at, updated_at)
+          insert into admin (public_id, auth_user_id, phone, name, admin_role, status, login_failed_count, locked_until_at, disabled_at, created_at, updated_at)
           values (
             ${seedAdmin.publicId},
             ${seedAdmin.authUserId},
@@ -619,6 +626,9 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
             ${seedAdmin.name},
             ${seedAdmin.adminRole},
             ${seedAdmin.status},
+            ${0},
+            ${null},
+            ${null},
             ${baseIssuedAt},
             ${baseIssuedAt}
           )
@@ -628,6 +638,9 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
             name = excluded.name,
             admin_role = excluded.admin_role,
             status = excluded.status,
+            login_failed_count = excluded.login_failed_count,
+            locked_until_at = excluded.locked_until_at,
+            disabled_at = excluded.disabled_at,
             updated_at = excluded.updated_at
           returning id::text as id
         `,
@@ -635,6 +648,26 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       );
 
       adminIdsByPublicId.set(seedAdmin.publicId, seedAdminId);
+    }
+
+    for (const roleAssignment of seedDataset.adminRoleAssignments) {
+      const assignedAdminId = adminIdsByPublicId.get(
+        roleAssignment.adminPublicId,
+      );
+
+      if (assignedAdminId === undefined) {
+        throw new Error(
+          `Missing seeded row: admin ${roleAssignment.adminPublicId}`,
+        );
+      }
+
+      for (const adminRole of roleAssignment.adminRoles) {
+        await sql`
+          insert into admin_role_assignment (admin_id, admin_role, created_at)
+          values (${assignedAdminId}, ${adminRole}, ${roleAssignment.createdAt})
+          on conflict (admin_id, admin_role) do nothing
+        `;
+      }
     }
 
     const adminId = adminIdsByPublicId.get(devSeedPublicIds.superAdmin);
@@ -1590,6 +1623,7 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
       select
         (select count(*)::int from auth_user where id in (${devSeedPublicIds.superAdminAuthUser}, ${devSeedPublicIds.orgStandardAdminAuthUser}, ${devSeedPublicIds.orgAdvancedAdminAuthUser}, ${devSeedPublicIds.contentAdminAuthUser}, ${devSeedPublicIds.opsAdminAuthUser}, ${devSeedPublicIds.studentAuthUser}, ${devSeedPublicIds.employeeAuthUser})) as auth_user_count,
         (select count(*)::int from admin where public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}, ${devSeedPublicIds.contentAdmin}, ${devSeedPublicIds.opsAdmin})) as admin_count,
+        (select count(*)::int from admin_role_assignment ara inner join admin a on ara.admin_id = a.id where a.public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}, ${devSeedPublicIds.contentAdmin}, ${devSeedPublicIds.opsAdmin})) as admin_role_assignment_count,
         (select count(*)::int from admin_organization ao inner join admin a on ao.admin_id = a.id inner join organization o on ao.organization_id = o.id where a.public_id in (${devSeedPublicIds.superAdmin}, ${devSeedPublicIds.orgStandardAdmin}, ${devSeedPublicIds.orgAdvancedAdmin}, ${devSeedPublicIds.contentAdmin}, ${devSeedPublicIds.opsAdmin}) and o.public_id = ${devSeedPublicIds.organization}) as admin_organization_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.studentUser}) as student_user_count,
         (select count(*)::int from "user" where public_id = ${devSeedPublicIds.employeeUser}) as employee_user_count,

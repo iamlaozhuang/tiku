@@ -155,6 +155,13 @@
       "when": 1783706700000,
       "tag": "20260710110500_add_organization_training_answer_deadline",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1784098891479,
+      "tag": "20260715070131_p0_rc_01_admin_account_lifecycle",
+      "breakpoints": true
     }
   ]
 }

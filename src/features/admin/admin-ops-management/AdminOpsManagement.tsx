@@ -47,7 +47,9 @@ import type {
 import type {
   AdminAccountCreationRole,
   AdminAccountCreationResultDto,
+  AdminAccountDetailDto,
   AdminAccountListDto,
+  AdminAccountPasswordResetResultDto,
   OrganizationAdminAccountCreationRole,
   OrganizationListDto,
   AdminUserDetailDto,
@@ -93,6 +95,14 @@ type ConfirmationState =
       publicId: string;
       userName: string;
     }
+  | {
+      kind:
+        | "disableAdminAccount"
+        | "enableAdminAccount"
+        | "resetAdminAccountPassword";
+      publicId: string;
+      userName: string;
+    }
   | null;
 
 type ToastMessage = {
@@ -111,6 +121,19 @@ type AdminAccountCreationFormState = {
   name: string;
   organizationPublicId: string;
   phone: string;
+};
+
+type AdminAccountEditState = {
+  adminRoles: AdminRole[];
+  expectedUpdatedAt: string;
+  name: string;
+  organizationPublicId: string;
+  publicId: string;
+};
+
+type AdminAccountOneTimePasswordState = {
+  oneTimePasswordPlainText: string;
+  publicId: string;
 };
 
 type AdminOpsLoadResult =
@@ -295,7 +318,7 @@ function hasAdminOpsWorkspaceContext(data: AdminOpsData): boolean {
 }
 
 function isOrganizationAdminAccountCreationRole(
-  role: AdminAccountCreationRole,
+  role: AdminRole,
 ): role is OrganizationAdminAccountCreationRole {
   return role === "org_standard_admin" || role === "org_advanced_admin";
 }
@@ -413,6 +436,23 @@ async function postAdminApi<TData>(
     },
     method: "POST",
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+
+  return (await response.json()) as ApiResponse<TData | null>;
+}
+
+async function patchAdminApi<TData>(
+  path: string,
+  sessionToken: string,
+  body: Record<string, unknown>,
+): Promise<ApiResponse<TData | null>> {
+  const response = await fetch(path, {
+    body: JSON.stringify(body),
+    headers: {
+      authorization: `Bearer ${sessionToken}`,
+      "content-type": "application/json",
+    },
+    method: "PATCH",
   });
 
   return (await response.json()) as ApiResponse<TData | null>;
@@ -572,6 +612,11 @@ export function AdminOpsManagement() {
   const [isCreatingAdminAccount, setIsCreatingAdminAccount] = useState(false);
   const [isAdminAccountCreationOpen, setIsAdminAccountCreationOpen] =
     useState(false);
+  const [adminAccountEditState, setAdminAccountEditState] =
+    useState<AdminAccountEditState | null>(null);
+  const [adminAccountOneTimePassword, setAdminAccountOneTimePassword] =
+    useState<AdminAccountOneTimePasswordState | null>(null);
+  const [isSavingAdminAccount, setIsSavingAdminAccount] = useState(false);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [selectedUserDetail, setSelectedUserDetail] =
     useState<AdminUserDetailDto | null>(null);
@@ -928,7 +973,65 @@ export function AdminOpsManagement() {
       return;
     }
 
+    const isDisableAdminAccount =
+      confirmationState.kind === "disableAdminAccount";
+    const isEnableAdminAccount =
+      confirmationState.kind === "enableAdminAccount";
+    const isResetAdminAccountPassword =
+      confirmationState.kind === "resetAdminAccountPassword";
+    const actionPath = isDisableAdminAccount
+      ? "disable"
+      : isEnableAdminAccount
+        ? "enable"
+        : "reset-password";
+    let adminActionResponse: ApiResponse<
+      AdminAccountDetailDto | AdminAccountPasswordResetResultDto | null
+    >;
+
+    try {
+      adminActionResponse = await postAdminApi<
+        AdminAccountDetailDto | AdminAccountPasswordResetResultDto
+      >(
+        `/api/v1/admin-accounts/${confirmationState.publicId}/${actionPath}`,
+        sessionToken,
+      );
+    } catch {
+      setConfirmationState(null);
+      setToastMessage({
+        message: "后台账号操作暂时失败，请重试",
+        tone: "error",
+      });
+      return;
+    }
+
     setConfirmationState(null);
+
+    if (adminActionResponse.code !== 0 || adminActionResponse.data === null) {
+      setToastMessage({
+        message: adminActionResponse.message,
+        tone: "error",
+      });
+      return;
+    }
+
+    if (isResetAdminAccountPassword) {
+      const resetResult =
+        adminActionResponse.data as AdminAccountPasswordResetResultDto;
+      setAdminAccountOneTimePassword({
+        oneTimePasswordPlainText: resetResult.oneTimePasswordPlainText,
+        publicId: resetResult.adminAccountPublicId,
+      });
+    }
+
+    await refreshAdminAccountList(sessionToken);
+    setToastMessage({
+      message: isDisableAdminAccount
+        ? "后台账号已停用，会话已撤销"
+        : isEnableAdminAccount
+          ? "后台账号已启用"
+          : "后台账号密码已重置，请立即安全分发一次性密码",
+      tone: "success",
+    });
   }
 
   async function refreshAdminAccountList(sessionToken: string) {
@@ -953,6 +1056,81 @@ export function AdminOpsManagement() {
         ),
     }));
     setAdminAccountLoadState("ready");
+  }
+
+  function handleEditAdminAccount(
+    adminAccount: AdminAccountListDto["adminAccounts"][number],
+  ) {
+    setAdminAccountEditState({
+      adminRoles: [...adminAccount.adminRoles],
+      expectedUpdatedAt: adminAccount.updatedAt,
+      name: adminAccount.name,
+      organizationPublicId: adminAccount.organizations[0]?.publicId ?? "",
+      publicId: adminAccount.publicId,
+    });
+  }
+
+  async function handleSaveAdminAccount() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || adminAccountEditState === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    const hasOrganizationRole = adminAccountEditState.adminRoles.some(
+      (adminRole) => isOrganizationAdminAccountCreationRole(adminRole),
+    );
+
+    if (
+      adminAccountEditState.adminRoles.length === 0 ||
+      (hasOrganizationRole &&
+        adminAccountEditState.organizationPublicId.length === 0)
+    ) {
+      setToastMessage({
+        message: "至少选择一个角色；组织管理员角色必须绑定一个组织",
+        tone: "error",
+      });
+      return;
+    }
+
+    setIsSavingAdminAccount(true);
+    let updateResponse: ApiResponse<AdminAccountDetailDto | null>;
+
+    try {
+      updateResponse = await patchAdminApi<AdminAccountDetailDto>(
+        `/api/v1/admin-accounts/${adminAccountEditState.publicId}`,
+        sessionToken,
+        {
+          adminRoles: adminAccountEditState.adminRoles,
+          expectedUpdatedAt: adminAccountEditState.expectedUpdatedAt,
+          name: adminAccountEditState.name,
+          organizationPublicId: hasOrganizationRole
+            ? adminAccountEditState.organizationPublicId
+            : null,
+        },
+      );
+    } catch {
+      setToastMessage({
+        message: "后台账号更新暂时失败，请重试",
+        tone: "error",
+      });
+      return;
+    } finally {
+      setIsSavingAdminAccount(false);
+    }
+
+    if (updateResponse.code !== 0 || updateResponse.data === null) {
+      setToastMessage({ message: updateResponse.message, tone: "error" });
+      return;
+    }
+
+    setAdminAccountEditState(null);
+    await refreshAdminAccountList(sessionToken);
+    setToastMessage({
+      message: "后台账号角色与组织范围已更新，相关会话已撤销",
+      tone: "success",
+    });
   }
 
   async function handleCreateAdminAccount() {
@@ -1327,7 +1505,31 @@ export function AdminOpsManagement() {
           ) : null}
           {adminAccountLoadState === "ready" ? (
             <>
-              <AdminBackendAccountTable adminAccounts={data.adminAccounts} />
+              <AdminBackendAccountTable
+                adminAccounts={data.adminAccounts}
+                onDisable={(publicId, userName) =>
+                  setConfirmationState({
+                    kind: "disableAdminAccount",
+                    publicId,
+                    userName,
+                  })
+                }
+                onEdit={handleEditAdminAccount}
+                onEnable={(publicId, userName) =>
+                  setConfirmationState({
+                    kind: "enableAdminAccount",
+                    publicId,
+                    userName,
+                  })
+                }
+                onResetPassword={(publicId, userName) =>
+                  setConfirmationState({
+                    kind: "resetAdminAccountPassword",
+                    publicId,
+                    userName,
+                  })
+                }
+              />
               <AdminPagination
                 itemLabel="个后台账号"
                 page={adminAccountsPagination.page}
@@ -1335,6 +1537,17 @@ export function AdminOpsManagement() {
                 total={adminAccountsPagination.total}
                 onPageChange={handleAdminAccountPageChange}
               />
+              {adminAccountEditState === null ? null : (
+                <AdminAccountEditPanel
+                  allowedRoles={visibleAdminAccountRoles}
+                  editState={adminAccountEditState}
+                  isSaving={isSavingAdminAccount}
+                  organizations={data.organizations}
+                  onCancel={() => setAdminAccountEditState(null)}
+                  onChange={setAdminAccountEditState}
+                  onSave={() => void handleSaveAdminAccount()}
+                />
+              )}
             </>
           ) : null}
           <AdminAccountSecurityPolicyPanel />
@@ -1397,6 +1610,29 @@ export function AdminOpsManagement() {
           onConfirm={() => void handleConfirmAction()}
           onResetPasswordInputChange={setResetPasswordInput}
         />
+      )}
+
+      {adminAccountOneTimePassword === null ? null : (
+        <section
+          aria-label="后台账号一次性密码"
+          className="border-warning/40 bg-warning/10 rounded-md border p-4"
+          role="region"
+        >
+          <h2 className="text-text-primary font-semibold">一次性密码</h2>
+          <p className="text-text-secondary mt-2 text-sm">
+            仅本次显示，请通过安全渠道分发；关闭后不能再次查看。
+          </p>
+          <code className="bg-surface text-text-primary mt-3 block rounded-md px-3 py-2 text-sm">
+            {adminAccountOneTimePassword.oneTimePasswordPlainText}
+          </code>
+          <Button
+            className="mt-3"
+            variant="outline"
+            onClick={() => setAdminAccountOneTimePassword(null)}
+          >
+            我已安全保存
+          </Button>
+        </section>
       )}
 
       {toastMessage === null ? null : (
@@ -1558,8 +1794,16 @@ function formatAdminAccountRegisteredAt(registeredAt: string): string {
 
 function AdminBackendAccountTable({
   adminAccounts,
+  onDisable,
+  onEdit,
+  onEnable,
+  onResetPassword,
 }: {
   adminAccounts: AdminAccountListDto["adminAccounts"];
+  onDisable: (publicId: string, userName: string) => void;
+  onEdit: (adminAccount: AdminAccountListDto["adminAccounts"][number]) => void;
+  onEnable: (publicId: string, userName: string) => void;
+  onResetPassword: (publicId: string, userName: string) => void;
 }) {
   return (
     <AdminTableFrame ariaLabel="后台账号列表" minWidthClassName="min-w-[64rem]">
@@ -1605,9 +1849,16 @@ function AdminBackendAccountTable({
                   </p>
                 </td>
                 <td className="border-border border-b px-4 py-3">
-                  <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
-                    {adminRoleLabels[adminAccount.adminRole]}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {adminAccount.adminRoles.map((adminRole) => (
+                      <span
+                        className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs"
+                        key={adminRole}
+                      >
+                        {adminRoleLabels[adminRole]}
+                      </span>
+                    ))}
+                  </div>
                 </td>
                 <td className="border-border text-text-secondary border-b px-4 py-3">
                   {adminAccount.organizations.length === 0
@@ -1625,9 +1876,51 @@ function AdminBackendAccountTable({
                   {formatAdminAccountRegisteredAt(adminAccount.registeredAt)}
                 </td>
                 <td className="border-border border-b px-4 py-3 text-right">
-                  <Button disabled size="sm" variant="ghost">
-                    暂无操作
-                  </Button>
+                  <div className="flex flex-wrap justify-end gap-1">
+                    <Button
+                      aria-label={`编辑后台账号：${adminAccount.name}`}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onEdit(adminAccount)}
+                    >
+                      编辑角色
+                    </Button>
+                    <Button
+                      aria-label={`重置后台账号密码：${adminAccount.name}`}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        onResetPassword(
+                          adminAccount.publicId,
+                          adminAccount.name,
+                        )
+                      }
+                    >
+                      重置密码
+                    </Button>
+                    {adminAccount.status === "active" ? (
+                      <Button
+                        aria-label={`停用后台账号：${adminAccount.name}`}
+                        size="sm"
+                        variant="destructive"
+                        onClick={() =>
+                          onDisable(adminAccount.publicId, adminAccount.name)
+                        }
+                      >
+                        停用
+                      </Button>
+                    ) : (
+                      <Button
+                        aria-label={`启用后台账号：${adminAccount.name}`}
+                        size="sm"
+                        onClick={() =>
+                          onEnable(adminAccount.publicId, adminAccount.name)
+                        }
+                      >
+                        启用
+                      </Button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))
@@ -1635,6 +1928,115 @@ function AdminBackendAccountTable({
         </tbody>
       </table>
     </AdminTableFrame>
+  );
+}
+
+function AdminAccountEditPanel({
+  allowedRoles,
+  editState,
+  isSaving,
+  organizations,
+  onCancel,
+  onChange,
+  onSave,
+}: {
+  allowedRoles: AdminRole[];
+  editState: AdminAccountEditState;
+  isSaving: boolean;
+  organizations: OrganizationListDto["organizations"];
+  onCancel: () => void;
+  onChange: (state: AdminAccountEditState) => void;
+  onSave: () => void;
+}) {
+  const hasOrganizationRole = editState.adminRoles.some((adminRole) =>
+    isOrganizationAdminAccountCreationRole(adminRole),
+  );
+
+  return (
+    <section
+      aria-label="后台账号编辑"
+      className="bg-surface border-border space-y-4 rounded-md border p-4 shadow-sm"
+      role="region"
+    >
+      <div>
+        <h2 className="text-text-primary font-semibold">编辑后台账号</h2>
+        <p className="text-text-secondary mt-1 text-sm">
+          角色或组织范围变化后会立即撤销该账号的全部活跃 session。
+        </p>
+      </div>
+      <label className="text-text-secondary block space-y-1 text-sm">
+        <span>姓名</span>
+        <Input
+          aria-label="后台账号姓名"
+          value={editState.name}
+          onChange={(event) =>
+            onChange({ ...editState, name: event.currentTarget.value })
+          }
+        />
+      </label>
+      <fieldset className="space-y-2">
+        <legend className="text-text-secondary text-sm">后台角色</legend>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {allowedRoles.map((adminRole) => {
+            const isChecked = editState.adminRoles.includes(adminRole);
+
+            return (
+              <label
+                className="border-border text-text-primary flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                key={adminRole}
+              >
+                <input
+                  checked={isChecked}
+                  type="checkbox"
+                  onChange={() =>
+                    onChange({
+                      ...editState,
+                      adminRoles: isChecked
+                        ? editState.adminRoles.filter(
+                            (selectedRole) => selectedRole !== adminRole,
+                          )
+                        : [...editState.adminRoles, adminRole],
+                    })
+                  }
+                />
+                {adminRoleLabels[adminRole]}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+      {hasOrganizationRole ? (
+        <label className="text-text-secondary block space-y-1 text-sm">
+          <span>绑定组织</span>
+          <select
+            aria-label="后台账号绑定组织"
+            className={adminListControlClassName}
+            value={editState.organizationPublicId}
+            onChange={(event) =>
+              onChange({
+                ...editState,
+                organizationPublicId: event.currentTarget.value,
+              })
+            }
+          >
+            <option value="">请选择组织</option>
+            {organizations.map((organization) => (
+              <option key={organization.publicId} value={organization.publicId}>
+                {organization.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      <div className="flex gap-2">
+        <Button disabled={isSaving} onClick={onSave}>
+          {isSaving ? "保存中" : "保存账号变更"}
+        </Button>
+        <Button disabled={isSaving} variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </section>
   );
 }
 
@@ -2007,19 +2409,25 @@ function AdminOpsConfirmationDialog({
   onConfirm: () => void;
   onResetPasswordInputChange: (value: string) => void;
 }) {
-  const isResetPassword = confirmationState.kind === "resetPassword";
-  const isDisableUser = confirmationState.kind === "disableUser";
+  const isUserResetPassword = confirmationState.kind === "resetPassword";
+  const isAdminResetPassword =
+    confirmationState.kind === "resetAdminAccountPassword";
+  const isResetPassword = isUserResetPassword || isAdminResetPassword;
+  const isDisable =
+    confirmationState.kind === "disableUser" ||
+    confirmationState.kind === "disableAdminAccount";
+  const isAdminAccountAction = confirmationState.kind.includes("AdminAccount");
   const canConfirm =
-    !isResetPassword ||
+    !isUserResetPassword ||
     /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(resetPasswordInput.trim());
   const title = isResetPassword
     ? `确认重置${confirmationState.userName}的密码？`
-    : isDisableUser
-      ? `确认停用用户 ${confirmationState.userName}？`
-      : `确认启用用户 ${confirmationState.userName}？`;
+    : isDisable
+      ? `确认停用${isAdminAccountAction ? "后台账号" : "用户"} ${confirmationState.userName}？`
+      : `确认启用${isAdminAccountAction ? "后台账号" : "用户"} ${confirmationState.userName}？`;
   const confirmLabel = isResetPassword
     ? "确认重置"
-    : isDisableUser
+    : isDisable
       ? "确认停用"
       : "确认启用";
 
@@ -2039,12 +2447,14 @@ function AdminOpsConfirmationDialog({
         </div>
         <p className="text-text-muted text-sm">
           {isResetPassword
-            ? "新密码提交后不会在响应中返回明文。"
-            : isDisableUser
-              ? "停用后将撤销该用户现有会话。"
+            ? isAdminResetPassword
+              ? "系统将生成只显示一次的临时密码，并撤销该后台账号全部活跃 session。"
+              : "新密码提交后不会在响应中返回明文。"
+            : isDisable
+              ? `停用后将撤销该${isAdminAccountAction ? "后台账号" : "用户"}现有会话。`
               : "启用用户只恢复账号状态，不创建新授权。"}
         </p>
-        {isResetPassword ? (
+        {isUserResetPassword ? (
           <Input
             aria-label="reset-password-new-password"
             autoComplete="new-password"
@@ -2058,7 +2468,7 @@ function AdminOpsConfirmationDialog({
         <div className="flex gap-2">
           <Button
             disabled={!canConfirm}
-            variant={isDisableUser ? "destructive" : "default"}
+            variant={isDisable ? "destructive" : "default"}
             onClick={onConfirm}
           >
             {confirmLabel}

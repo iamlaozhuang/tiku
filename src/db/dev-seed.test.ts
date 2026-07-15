@@ -133,22 +133,22 @@ describe("dev seed dataset", () => {
       publicId: devSeedPublicIds.organization,
       status: "active",
     });
-    expect(seedDataset).toHaveProperty(
-      "adminOrganization",
+    expect(seedDataset.adminOrganizations).toEqual([
       expect.objectContaining({
-        adminPublicId: devSeedPublicIds.superAdmin,
+        adminPublicId: devSeedPublicIds.orgStandardAdmin,
         organizationPublicId: devSeedPublicIds.organization,
       }),
-    );
-    expect(seedDataset.adminOrganizations).toEqual(
+      expect.objectContaining({
+        adminPublicId: devSeedPublicIds.orgAdvancedAdmin,
+        organizationPublicId: devSeedPublicIds.organization,
+      }),
+    ]);
+    expect(seedDataset.adminRoleAssignments).toHaveLength(5);
+    expect(seedDataset.adminRoleAssignments).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          adminPublicId: devSeedPublicIds.orgStandardAdmin,
-          organizationPublicId: devSeedPublicIds.organization,
-        }),
-        expect.objectContaining({
-          adminPublicId: devSeedPublicIds.orgAdvancedAdmin,
-          organizationPublicId: devSeedPublicIds.organization,
+          adminPublicId: devSeedPublicIds.superAdmin,
+          adminRoles: ["super_admin"],
         }),
       ]),
     );

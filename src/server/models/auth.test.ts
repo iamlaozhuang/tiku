@@ -62,6 +62,9 @@ describe("auth domain models", () => {
       name: "运营管理员",
       admin_role: "ops_admin",
       status: "active",
+      login_failed_count: 0,
+      locked_until_at: null,
+      disabled_at: null,
       created_at: new Date("2026-05-17T00:00:00.000Z"),
       updated_at: new Date("2026-05-17T00:00:00.000Z"),
     } satisfies AdminRow;

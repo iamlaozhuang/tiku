@@ -231,6 +231,9 @@ export const admin = pgTable(
     name: text("name").notNull(),
     admin_role: adminRoleEnum("admin_role").notNull(),
     status: userStatusEnum("status").default("active").notNull(),
+    login_failed_count: integer("login_failed_count").default(0).notNull(),
+    locked_until_at: timestamp("locked_until_at", { withTimezone: true }),
+    disabled_at: timestamp("disabled_at", { withTimezone: true }),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -240,6 +243,26 @@ export const admin = pgTable(
     uniqueIndex("udx_admin_phone").on(table.phone),
     index("idx_admin_admin_role").on(table.admin_role),
     index("idx_admin_status").on(table.status),
+  ],
+);
+
+export const adminRoleAssignment = pgTable(
+  "admin_role_assignment",
+  {
+    id: idColumn(),
+    admin_id: bigint("admin_id", { mode: "number" })
+      .notNull()
+      .references(() => admin.id, { onDelete: "cascade" }),
+    admin_role: adminRoleEnum("admin_role").notNull(),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_admin_role_assignment_admin_id_admin_role").on(
+      table.admin_id,
+      table.admin_role,
+    ),
+    index("idx_admin_role_assignment_admin_id").on(table.admin_id),
+    index("idx_admin_role_assignment_admin_role").on(table.admin_role),
   ],
 );
 
@@ -283,6 +306,7 @@ export const adminOrganization = pgTable(
     created_at: createdAtColumn(),
   },
   (table) => [
+    uniqueIndex("udx_admin_organization_admin_id").on(table.admin_id),
     uniqueIndex("udx_admin_organization_admin_id_organization_id").on(
       table.admin_id,
       table.organization_id,
@@ -529,6 +553,7 @@ export const studentRelations = relations(student, ({ one }) => ({
 
 export const adminRelations = relations(admin, ({ many, one }) => ({
   adminOrganizations: many(adminOrganization),
+  adminRoleAssignments: many(adminRoleAssignment),
   authUser: one(authUser, {
     fields: [admin.auth_user_id],
     references: [authUser.id],
@@ -540,6 +565,16 @@ export const adminRelations = relations(admin, ({ many, one }) => ({
     relationName: "auth_upgrade_revoked_by_admin",
   }),
 }));
+
+export const adminRoleAssignmentRelations = relations(
+  adminRoleAssignment,
+  ({ one }) => ({
+    admin: one(admin, {
+      fields: [adminRoleAssignment.admin_id],
+      references: [admin.id],
+    }),
+  }),
+);
 
 export const organizationRelations = relations(
   organization,

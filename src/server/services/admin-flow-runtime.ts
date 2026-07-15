@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import {
@@ -23,9 +25,13 @@ import {
   type AdminAccountCreationRole,
   type AdminAccountCreationConflictDto,
   type AdminAccountCreationResultDto,
+  type AdminAccountDetailDto,
   type AdminAccountListItemDto,
   type AdminAccountListQuery,
   type AdminAccountListSortField,
+  type AdminAccountMutationConflictDto,
+  type AdminAccountMutationResultDto,
+  type AdminAccountPasswordResetResultDto,
   type AdminUserDetailDto,
   type AdminUserSummaryDto,
   type OrganizationAdminAccountCreationRole,
@@ -50,9 +56,11 @@ import {
 import {
   createPostgresAdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositories,
+  type AdminAccountMutationRepositoryResult,
   type AdminFlowRuntimeRepositoryOptions,
 } from "../repositories/admin-flow-runtime-repository";
 import { normalizeAdminAccountCreationInput } from "../validators/admin-account-creation";
+import { normalizeAdminAccountUpdateInput } from "../validators/admin-account-lifecycle";
 import { normalizeUserPasswordResetInput } from "../validators/user-password-reset";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
@@ -60,6 +68,7 @@ import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 export type { AdminFlowRuntimeRepositories };
 
 export type AdminFlowRuntimeOptions = AdminFlowRuntimeRepositoryOptions & {
+  createOneTimeAdminPassword?: () => string;
   repositories?: AdminFlowRuntimeRepositories;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
@@ -110,6 +119,22 @@ const adminAccountCreationUnavailableResponse = createErrorResponse(
 const adminAccountListUnavailableResponse = createErrorResponse(
   503605,
   "Admin account list runtime is not configured.",
+);
+const adminAccountDetailUnavailableResponse = createErrorResponse(
+  503607,
+  "Admin account detail runtime is not configured.",
+);
+const adminAccountMutationUnavailableResponse = createErrorResponse(
+  503608,
+  "Admin account lifecycle runtime is not configured.",
+);
+const adminAccountNotFoundResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+  "Admin account does not exist.",
+);
+const adminAccountUpdateValidationFailedResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Invalid admin account update input.",
 );
 const adminAccountCreationValidationFailedResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
@@ -254,6 +279,14 @@ function maskAdminAccountPhone(
   };
 }
 
+function maskAdminAccountDetailPhone(
+  detail: AdminAccountDetailDto,
+): AdminAccountDetailDto {
+  return {
+    adminAccount: maskAdminAccountPhone(detail.adminAccount),
+  };
+}
+
 function canReadContentKnowledge(actor: AdminFlowActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("content_admin")
@@ -277,6 +310,12 @@ function canCreateAdminAccount(
   return (
     actor.roles.includes("ops_admin") &&
     isOrganizationAdminAccountCreationRole(targetRole)
+  );
+}
+
+function canManageAdminAccount(actor: AdminFlowActor): boolean {
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
 }
 
@@ -534,6 +573,47 @@ async function appendAdminAccountCreationAuditLog(input: {
   });
 }
 
+async function appendAdminAccountLifecycleFailureAuditLog(input: {
+  repositories: AdminFlowRuntimeRepositories;
+  request: Request;
+  actor: AdminFlowActor;
+  actionType:
+    | "admin_account.update"
+    | "admin_account.disable"
+    | "admin_account.enable"
+    | "admin_account.reset_password";
+  targetPublicId: string | null;
+  metadataSummary: string;
+}): Promise<void> {
+  await input.repositories.auditLogRepository.appendAuditLog({
+    actorPublicId: input.actor.publicId,
+    actorRole: input.actor.roles[0],
+    actionType: input.actionType,
+    targetResourceType: "admin",
+    targetPublicId: input.targetPublicId,
+    resultStatus: "failed",
+    metadataSummary: input.metadataSummary,
+    requestIp: readRequestIp(input.request),
+  });
+}
+
+function createAdminAccountMutationConflictResponse(
+  reason: AdminAccountMutationConflictDto["reason"],
+): ApiResponse<AdminAccountMutationConflictDto> {
+  return {
+    code: ADMIN_AUTH_OPERATION_ERROR_CODES.concurrentConflict,
+    data: { reason },
+    message:
+      reason === "last_active_super_admin"
+        ? "The last active super administrator must be preserved."
+        : "Admin account was changed by another request.",
+  };
+}
+
+function createDefaultOneTimeAdminPassword(): string {
+  return `${randomBytes(12).toString("base64url")}A1`;
+}
+
 function createAdminAccountCreationConflictResponse(
   data: AdminAccountCreationConflictDto,
 ): ApiResponse<AdminAccountCreationConflictDto> {
@@ -613,6 +693,8 @@ export function createAdminFlowRuntimeRouteHandlers(
   const repositories =
     options.repositories ?? createPostgresAdminFlowRuntimeRepositories(options);
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const createOneTimeAdminPassword =
+    options.createOneTimeAdminPassword ?? createDefaultOneTimeAdminPassword;
 
   async function requireAdminActor(request: Request) {
     return resolveAdminActor(request, sessionService);
@@ -744,6 +826,339 @@ export function createAdminFlowRuntimeRouteHandlers(
         { adminAccounts: result.adminAccounts.map(maskAdminAccountPhone) },
         result.pagination,
       ),
+    );
+  }
+
+  async function getAdminAccountDetail(
+    request: Request,
+    context: { params: Promise<{ publicId: string }> },
+  ): Promise<Response> {
+    const actor = await requireAdminActor(request);
+    const { publicId: rawPublicId } = await context.params;
+    const publicId = rawPublicId.trim();
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse);
+    }
+
+    if (!canManageAdminAccount(actor)) {
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    if (!USER_PUBLIC_ID_PATTERN.test(publicId)) {
+      return createJsonResponse(adminAccountUpdateValidationFailedResponse);
+    }
+
+    if (
+      repositories.userOrgAuthRepository.getAdminAccountDetail === undefined
+    ) {
+      return createJsonResponse(adminAccountDetailUnavailableResponse);
+    }
+
+    const detail =
+      await repositories.userOrgAuthRepository.getAdminAccountDetail(
+        publicId,
+        getVisibleAdminAccountRoles(actor),
+      );
+
+    return createJsonResponse(
+      detail === null
+        ? adminAccountNotFoundResponse
+        : createSuccessResponse(maskAdminAccountDetailPhone(detail)),
+    );
+  }
+
+  async function createAdminAccountMutationResponse(input: {
+    request: Request;
+    actor: AdminFlowActor;
+    actionType:
+      | "admin_account.update"
+      | "admin_account.disable"
+      | "admin_account.enable"
+      | "admin_account.reset_password";
+    targetPublicId: string;
+    result: AdminAccountMutationRepositoryResult;
+    responseInit?: ResponseInit;
+  }): Promise<Response> {
+    if (input.result.status === "updated") {
+      return createJsonResponse<AdminAccountMutationResultDto>(
+        createSuccessResponse(
+          maskAdminAccountDetailPhone({
+            adminAccount: input.result.adminAccount,
+          }),
+        ),
+        input.responseInit,
+      );
+    }
+
+    await appendAdminAccountLifecycleFailureAuditLog({
+      repositories,
+      request: input.request,
+      actor: input.actor,
+      actionType: input.actionType,
+      targetPublicId: input.targetPublicId,
+      metadataSummary: `redacted ${input.actionType} ${input.result.status} metadata`,
+    });
+
+    if (input.result.status === "not_found") {
+      return createJsonResponse(
+        adminAccountNotFoundResponse,
+        input.responseInit,
+      );
+    }
+
+    if (input.result.status === "forbidden") {
+      return createJsonResponse(
+        adminUserPermissionDeniedResponse,
+        input.responseInit,
+      );
+    }
+
+    return createJsonResponse(
+      createAdminAccountMutationConflictResponse(input.result.reason),
+      input.responseInit,
+    );
+  }
+
+  async function updateAdminAccount(
+    request: Request,
+    context: { params: Promise<{ publicId: string }> },
+  ): Promise<Response> {
+    const actor = await requireAdminActor(request);
+    const { publicId: rawPublicId } = await context.params;
+    const publicId = rawPublicId.trim();
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse);
+    }
+
+    if (!canManageAdminAccount(actor)) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request,
+        actor,
+        actionType: "admin_account.update",
+        targetPublicId: publicId || null,
+        metadataSummary:
+          "redacted admin account update permission denial metadata",
+      });
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    const updateInput = normalizeAdminAccountUpdateInput(
+      await readJsonBody(request),
+    );
+
+    if (!USER_PUBLIC_ID_PATTERN.test(publicId) || !updateInput.success) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request,
+        actor,
+        actionType: "admin_account.update",
+        targetPublicId: publicId || null,
+        metadataSummary: "redacted admin account update validation metadata",
+      });
+      return createJsonResponse(adminAccountUpdateValidationFailedResponse);
+    }
+
+    if (repositories.userOrgAuthRepository.updateAdminAccount === undefined) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request,
+        actor,
+        actionType: "admin_account.update",
+        targetPublicId: publicId,
+        metadataSummary: "redacted admin account update unavailable metadata",
+      });
+      return createJsonResponse(adminAccountMutationUnavailableResponse);
+    }
+
+    return createAdminAccountMutationResponse({
+      request,
+      actor,
+      actionType: "admin_account.update",
+      targetPublicId: publicId,
+      result: await repositories.userOrgAuthRepository.updateAdminAccount({
+        actor: {
+          publicId: actor.publicId,
+          roles: actor.roles,
+          requestIp: readRequestIp(request),
+        },
+        publicId,
+        ...updateInput.value,
+      }),
+    });
+  }
+
+  async function setAdminAccountStatus(input: {
+    request: Request;
+    context: { params: Promise<{ publicId: string }> };
+    status: "active" | "disabled";
+  }): Promise<Response> {
+    const actor = await requireAdminActor(input.request);
+    const { publicId: rawPublicId } = await input.context.params;
+    const publicId = rawPublicId.trim();
+    const actionType =
+      input.status === "disabled"
+        ? "admin_account.disable"
+        : "admin_account.enable";
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse);
+    }
+
+    if (!canManageAdminAccount(actor)) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType,
+        targetPublicId: publicId || null,
+        metadataSummary:
+          "redacted admin account status permission denial metadata",
+      });
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    if (!USER_PUBLIC_ID_PATTERN.test(publicId)) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType,
+        targetPublicId: publicId || null,
+        metadataSummary: "redacted admin account status validation metadata",
+      });
+      return createJsonResponse(adminAccountUpdateValidationFailedResponse);
+    }
+
+    if (
+      repositories.userOrgAuthRepository.setAdminAccountStatus === undefined
+    ) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType,
+        targetPublicId: publicId,
+        metadataSummary: "redacted admin account status unavailable metadata",
+      });
+      return createJsonResponse(adminAccountMutationUnavailableResponse);
+    }
+
+    return createAdminAccountMutationResponse({
+      request: input.request,
+      actor,
+      actionType,
+      targetPublicId: publicId,
+      result: await repositories.userOrgAuthRepository.setAdminAccountStatus({
+        actor: {
+          publicId: actor.publicId,
+          roles: actor.roles,
+          requestIp: readRequestIp(input.request),
+        },
+        publicId,
+        status: input.status,
+      }),
+    });
+  }
+
+  async function resetAdminAccountPassword(
+    request: Request,
+    context: { params: Promise<{ publicId: string }> },
+  ): Promise<Response> {
+    const actor = await requireAdminActor(request);
+    const { publicId: rawPublicId } = await context.params;
+    const publicId = rawPublicId.trim();
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (!canManageAdminAccount(actor)) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request,
+        actor,
+        actionType: "admin_account.reset_password",
+        targetPublicId: publicId || null,
+        metadataSummary:
+          "redacted admin account credential reset permission denial metadata",
+      });
+      return createJsonResponse(adminUserPermissionDeniedResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (!USER_PUBLIC_ID_PATTERN.test(publicId)) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request,
+        actor,
+        actionType: "admin_account.reset_password",
+        targetPublicId: publicId || null,
+        metadataSummary:
+          "redacted admin account credential reset validation metadata",
+      });
+      return createJsonResponse(adminAccountUpdateValidationFailedResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    if (
+      repositories.userOrgAuthRepository.resetAdminAccountPassword === undefined
+    ) {
+      await appendAdminAccountLifecycleFailureAuditLog({
+        repositories,
+        request,
+        actor,
+        actionType: "admin_account.reset_password",
+        targetPublicId: publicId,
+        metadataSummary:
+          "redacted admin account credential reset unavailable metadata",
+      });
+      return createJsonResponse(adminAccountMutationUnavailableResponse, {
+        headers: NO_STORE_HEADERS,
+      });
+    }
+
+    const oneTimePasswordPlainText = createOneTimeAdminPassword();
+    const result =
+      await repositories.userOrgAuthRepository.resetAdminAccountPassword({
+        actor: {
+          publicId: actor.publicId,
+          roles: actor.roles,
+          requestIp: readRequestIp(request),
+        },
+        publicId,
+        newPassword: oneTimePasswordPlainText,
+      });
+
+    if (result.status !== "updated") {
+      return createAdminAccountMutationResponse({
+        request,
+        actor,
+        actionType: "admin_account.reset_password",
+        targetPublicId: publicId,
+        result,
+        responseInit: { headers: NO_STORE_HEADERS },
+      });
+    }
+
+    return createJsonResponse<AdminAccountPasswordResetResultDto>(
+      createSuccessResponse({
+        adminAccountPublicId: publicId,
+        oneTimePasswordPlainText,
+        distributionWindow: {
+          visibleOnce: true,
+          sessionRevocation: "revoked_active_sessions",
+          redactionNotice:
+            "The one-time password is returned once and must not be logged.",
+        },
+      }),
+      { headers: NO_STORE_HEADERS },
     );
   }
 
@@ -938,6 +1353,37 @@ export function createAdminFlowRuntimeRouteHandlers(
       collection: {
         GET: listAdminAccounts,
         POST: createAdminAccount,
+      },
+      detail: {
+        GET: getAdminAccountDetail,
+        PATCH: updateAdminAccount,
+      },
+      disable: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          return setAdminAccountStatus({
+            request,
+            context,
+            status: "disabled",
+          });
+        },
+      },
+      enable: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          return setAdminAccountStatus({
+            request,
+            context,
+            status: "active",
+          });
+        },
+      },
+      resetPassword: {
+        POST: resetAdminAccountPassword,
       },
     },
     users: {

@@ -64,9 +64,10 @@ export type AdminAccountListItemDto = {
   publicId: string;
   phone: string;
   name: string;
-  adminRole: AdminRole;
+  adminRoles: AdminRole[];
   status: UserStatus;
   registeredAt: string;
+  updatedAt: string;
   accountDomain: "admin";
   organizations: AdminAccountOrganizationSummaryDto[];
 };
@@ -495,6 +496,37 @@ export type AdminAccountCreationConflictDto = {
 };
 
 export type AdminAccountCreationNotFoundReason = "organization_not_found";
+
+export type AdminAccountDetailDto = {
+  adminAccount: AdminAccountListItemDto;
+};
+
+export type AdminAccountUpdateInputDto = {
+  name: string;
+  adminRoles: AdminRole[];
+  organizationPublicId: string | null;
+  expectedUpdatedAt: string;
+};
+
+export type AdminAccountMutationResultDto = AdminAccountDetailDto;
+
+export type AdminAccountPasswordResetResultDto = {
+  adminAccountPublicId: string;
+  oneTimePasswordPlainText: string;
+  distributionWindow: {
+    visibleOnce: true;
+    sessionRevocation: "revoked_active_sessions";
+    redactionNotice: string;
+  };
+};
+
+export type AdminAccountMutationConflictReason =
+  | "concurrent_update"
+  | "last_active_super_admin";
+
+export type AdminAccountMutationConflictDto = {
+  reason: AdminAccountMutationConflictReason;
+};
 
 export function createAdminAuthOperationListQuery(
   overrides: Partial<AdminAuthOperationListQuery> = {},

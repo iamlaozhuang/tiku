@@ -542,9 +542,10 @@ function mockOpsAdminOrganizationAdminCreationFetch() {
     publicId: "admin-public-created-org-standard",
     phone: "13900009010",
     name: "组织管理员",
-    adminRole: "org_standard_admin",
+    adminRoles: ["org_standard_admin"],
     status: "active",
     registeredAt: now,
+    updatedAt: now,
     accountDomain: "admin",
     organizations: [
       {

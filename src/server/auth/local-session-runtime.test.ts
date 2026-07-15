@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   createLocalSessionRuntime,
   createLocalUserRegistrationRuntime,
+  createPostgresSessionUserRepository,
 } from "./local-session-runtime";
+import { SQL } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
+import { admin as adminTable } from "@/db/schema/auth";
 import type { AdminRole } from "../models/auth";
 import type { AuthUserRepository } from "../repositories/auth-repository";
 import type { SessionUserRepository } from "../repositories/session-repository";
@@ -29,11 +33,20 @@ type TransactionDatabase = {
       returning(selection?: unknown): Promise<unknown[]>;
     };
   };
+  execute(query?: unknown): Promise<unknown>;
+  select(selection?: unknown): SelectBuilder;
 };
 
 type SequentialRuntimeDatabase = {
   insert(table?: unknown): ReturnType<TransactionDatabase["insert"]>;
   select(selection?: unknown): SelectBuilder;
+  update(table?: unknown): {
+    set(values: Record<string, unknown>): {
+      where(condition?: unknown): {
+        returning(selection?: unknown): Promise<unknown[]>;
+      };
+    };
+  };
   transaction<T>(
     callback: (transaction: TransactionDatabase) => Promise<T> | T,
   ): Promise<T>;
@@ -64,11 +77,23 @@ function createSelectBuilder(rows: unknown[]): SelectBuilder {
   return builder;
 }
 
-function createSequentialRuntimeDatabase(rowsBySelectCall: unknown[][]): {
+function createSequentialRuntimeDatabase(
+  rowsBySelectCall: unknown[][],
+  transactionAccountRow: Record<string, unknown> = {
+    locked_until_at: null,
+    status: "active",
+  },
+  transactionCredentialRow: Record<string, unknown> = {
+    [TEST_PASSWORD_FIELD]: "stored-admin-password-hash",
+  },
+): {
   database: SequentialRuntimeDatabase;
   getSelectCallCount(): number;
+  getTransactionInsertCount(): number;
 } {
   let selectCallCount = 0;
+  let transactionInsertCount = 0;
+  let transactionSelectCallCount = 0;
   const transactionDatabase: TransactionDatabase = {
     delete() {
       return {
@@ -82,6 +107,7 @@ function createSequentialRuntimeDatabase(rowsBySelectCall: unknown[][]): {
         values(row) {
           return {
             async returning() {
+              transactionInsertCount += 1;
               return [
                 {
                   auth_user_id: row.user_id,
@@ -93,6 +119,18 @@ function createSequentialRuntimeDatabase(rowsBySelectCall: unknown[][]): {
           };
         },
       };
+    },
+    async execute() {
+      return [];
+    },
+    select() {
+      const row =
+        transactionSelectCallCount % 2 === 0
+          ? transactionAccountRow
+          : transactionCredentialRow;
+      transactionSelectCallCount += 1;
+
+      return createSelectBuilder([row]);
     },
   };
   const database: SequentialRuntimeDatabase = {
@@ -110,6 +148,21 @@ function createSequentialRuntimeDatabase(rowsBySelectCall: unknown[][]): {
 
       return createSelectBuilder(rows);
     },
+    update() {
+      return {
+        set() {
+          return {
+            where() {
+              return {
+                async returning() {
+                  return [];
+                },
+              };
+            },
+          };
+        },
+      };
+    },
     async transaction(callback) {
       return callback(transactionDatabase);
     },
@@ -120,22 +173,30 @@ function createSequentialRuntimeDatabase(rowsBySelectCall: unknown[][]): {
     getSelectCallCount() {
       return selectCallCount;
     },
+    getTransactionInsertCount() {
+      return transactionInsertCount;
+    },
   };
 }
 
 function createAdminAccountRow(input: {
-  adminRole: AdminRole;
+  adminRole?: AdminRole;
+  adminRoles?: AdminRole[];
   authUserId: string;
   id: number;
+  lockedUntilAt?: Date | null;
+  loginFailedCount?: number;
   organizationId?: number | null;
   organizationPublicId: string | null;
   phone: string;
   publicId: string;
 }): Record<string, unknown> {
   return {
-    admin_role: input.adminRole,
+    admin_roles: input.adminRoles ?? [input.adminRole],
     auth_user_id: input.authUserId,
     id: input.id,
+    locked_until_at: input.lockedUntilAt ?? null,
+    login_failed_count: input.loginFailedCount ?? 0,
     name: "Organization Admin",
     organization_id:
       input.organizationPublicId === null
@@ -149,6 +210,185 @@ function createAdminAccountRow(input: {
 }
 
 describe("local session runtime", () => {
+  it("persists admin failure transitions through one atomic database update", async () => {
+    const updatedTables: unknown[] = [];
+    const updatedValues: Record<string, unknown>[] = [];
+    const database = {
+      update(table: unknown) {
+        updatedTables.push(table);
+
+        return {
+          set(values: Record<string, unknown>) {
+            updatedValues.push(values);
+
+            return {
+              where() {
+                return {
+                  async returning() {
+                    return [
+                      {
+                        loginFailedCount: 5,
+                        lockedUntilAt: new Date("2026-07-14T20:15:00.000Z"),
+                      },
+                    ];
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
+    };
+    const repository = createPostgresSessionUserRepository(
+      () => database as never,
+      () => new Date("2026-07-14T20:00:00.000Z"),
+    );
+
+    await expect(
+      repository.recordLoginFailure({
+        userId: 7,
+        userKind: "admin",
+        lockThreshold: 5,
+        lockUntilAt: new Date("2026-07-14T20:15:00.000Z"),
+      }),
+    ).resolves.toEqual({
+      loginFailedCount: 5,
+      lockedUntilAt: new Date("2026-07-14T20:15:00.000Z"),
+    });
+    expect(updatedTables).toEqual([adminTable]);
+    expect(updatedValues).toHaveLength(1);
+    expect(updatedValues[0]?.updated_at).toBeInstanceOf(SQL);
+  });
+
+  it("uses the observed failure count as a compare-and-set guard before a successful reset", async () => {
+    let resetCondition: SQL | undefined;
+    const database = {
+      update() {
+        return {
+          set() {
+            return {
+              where(condition: SQL) {
+                resetCondition = condition;
+
+                return {
+                  async returning() {
+                    return [{ id: 7 }];
+                  },
+                };
+              },
+            };
+          },
+        };
+      },
+    };
+    const repository = createPostgresSessionUserRepository(
+      () => database as never,
+      () => new Date("2026-07-14T20:00:00.000Z"),
+    );
+
+    await expect(
+      repository.resetLoginFailures({
+        expectedLoginFailedCount: 2,
+        userId: 7,
+        userKind: "admin",
+      }),
+    ).resolves.toBe(true);
+
+    expect(resetCondition).toBeDefined();
+    const query = new PgDialect().sqlToQuery(resetCondition as SQL);
+    expect(query.sql.replace(/\s+/g, " ")).toContain(
+      '"admin"."id" = $1 and "admin"."login_failed_count" = $2',
+    );
+    expect(query.params).toEqual([7, 2]);
+  });
+
+  it("reads a persisted admin lock after the runtime is reconstructed", async () => {
+    const { database, getSelectCallCount } = createSequentialRuntimeDatabase([
+      [],
+      [
+        createAdminAccountRow({
+          adminRole: "super_admin",
+          authUserId: "auth-user-locked-admin",
+          id: 109,
+          lockedUntilAt: new Date("2026-07-14T20:15:00.000Z"),
+          loginFailedCount: 5,
+          organizationPublicId: null,
+          phone: "13900000009",
+          publicId: "admin-locked-public-009",
+        }),
+      ],
+    ]);
+    const runtimeAfterRestart = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-07-14T20:05:00.000Z"),
+      verifyPasswordHash: async () => {
+        throw new Error("locked account must not verify credentials");
+      },
+    });
+
+    await expect(
+      runtimeAfterRestart.login({
+        phone: "13900000009",
+        [TEST_PASSWORD_FIELD]: "WrongPassword1",
+      }),
+    ).resolves.toEqual({
+      code: 423001,
+      data: null,
+      message: "Account locked.",
+    });
+    expect(getSelectCallCount()).toBe(2);
+  });
+
+  it("rejects an old verified password when the admin account state changed before session creation", async () => {
+    const { database, getSelectCallCount, getTransactionInsertCount } =
+      createSequentialRuntimeDatabase(
+        [
+          [],
+          [
+            createAdminAccountRow({
+              adminRole: "super_admin",
+              authUserId: "auth-user-password-reset-admin",
+              id: 110,
+              organizationPublicId: null,
+              phone: "13900000010",
+              publicId: "admin-password-reset-public-010",
+            }),
+          ],
+          [
+            {
+              [TEST_PASSWORD_FIELD]: "stored-pre-reset-password-hash",
+            },
+          ],
+        ],
+        {
+          locked_until_at: null,
+          status: "active",
+        },
+        {
+          [TEST_PASSWORD_FIELD]: "stored-post-reset-password-hash",
+        },
+      );
+    const runtime = createLocalSessionRuntime({
+      createDatabase: () => database as never,
+      now: () => new Date("2026-07-14T20:02:00.000Z"),
+      verifyPasswordHash: async ({ hash }) =>
+        hash === "stored-pre-reset-password-hash",
+    });
+
+    await expect(
+      runtime.login({
+        phone: "13900000010",
+        [TEST_PASSWORD_FIELD]: "PasswordBeforeReset1",
+      }),
+    ).resolves.toEqual({
+      code: 401002,
+      data: null,
+      message: "Invalid phone or password.",
+    });
+    expect(getSelectCallCount()).toBe(3);
+    expect(getTransactionInsertCount()).toBe(0);
+  });
+
   it("creates an opaque single active session for a seeded student credential login", async () => {
     const verifiedCredentials: unknown[] = [];
     const resetUserIds: number[] = [];
@@ -201,8 +441,9 @@ describe("local session runtime", () => {
         async recordLoginFailure() {
           throw new Error("login failure should not be recorded");
         },
-        async resetLoginFailures(userId) {
-          resetUserIds.push(userId);
+        async resetLoginFailures(input) {
+          resetUserIds.push(input.userId);
+          return true;
         },
       },
     });
@@ -550,7 +791,7 @@ describe("local session runtime", () => {
       [],
       [
         createAdminAccountRow({
-          adminRole: "org_advanced_admin",
+          adminRoles: ["content_admin", "org_advanced_admin"],
           authUserId: "auth-user-org-advanced-admin",
           id: 102,
           organizationId: 302,
@@ -584,9 +825,9 @@ describe("local session runtime", () => {
           userType: null,
           organizationPublicId: "organization-advanced-public-001",
           adminPublicId: "admin-org-advanced-public-001",
-          adminRoles: ["org_advanced_admin"],
+          adminRoles: ["content_admin", "org_advanced_admin"],
           adminWorkspaceCapability: {
-            adminRoles: ["org_advanced_admin"],
+            adminRoles: ["content_admin", "org_advanced_admin"],
             organizationAuthorizationPublicId: "org-auth-advanced-public-001",
             organizationPublicId: "organization-advanced-public-001",
             organizationEffectiveEdition: "advanced",

@@ -405,4 +405,230 @@ describe("createAdminFlowRuntimeRouteHandlers", () => {
     });
     expect(paperListCallCount).toBe(0);
   });
+
+  it("returns a multi-role backend account detail to a super administrator", async () => {
+    const repositories = createTestRepositories();
+    repositories.userOrgAuthRepository.getAdminAccountDetail = async () => ({
+      adminAccount: {
+        accountDomain: "admin",
+        adminRoles: ["content_admin", "org_advanced_admin"],
+        name: "区域内容管理员",
+        organizations: [
+          {
+            name: "示例组织",
+            publicId: "organization-public-001",
+          },
+        ],
+        phone: "13900000008",
+        publicId: "admin-public-008",
+        registeredAt: "2026-07-14T19:00:00.000Z",
+        status: "active",
+        updatedAt: "2026-07-14T20:00:00.000Z",
+      },
+    });
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories,
+      sessionService: {
+        async getCurrentSession() {
+          return {
+            code: 0,
+            message: "ok",
+            data: createTestAdminContext(["super_admin"]),
+          };
+        },
+      },
+    });
+    const adminAccountHandlers = handlers.adminAccounts as unknown as {
+      detail: {
+        GET(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response>;
+      };
+    };
+
+    const response = await adminAccountHandlers.detail.GET(
+      new Request("http://localhost/api/v1/admin-accounts/admin-public-008", {
+        headers: {
+          cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
+        },
+      }),
+      { params: Promise.resolve({ publicId: "admin-public-008" }) },
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        adminAccount: {
+          adminRoles: ["content_admin", "org_advanced_admin"],
+          phone: "139****0008",
+          publicId: "admin-public-008",
+        },
+      },
+    });
+  });
+
+  it("returns a one-time password with no-store after an atomic admin reset", async () => {
+    const observedInputs: unknown[] = [];
+    const repositories = createTestRepositories();
+    repositories.userOrgAuthRepository.resetAdminAccountPassword = async (
+      input,
+    ) => {
+      observedInputs.push(input);
+
+      return {
+        status: "updated",
+        adminAccount: {
+          accountDomain: "admin",
+          adminRoles: ["content_admin"],
+          name: "内容管理员",
+          organizations: [],
+          phone: "139****0008",
+          publicId: "admin-public-008",
+          registeredAt: "2026-07-14T19:00:00.000Z",
+          status: "active",
+          updatedAt: "2026-07-14T20:00:00.000Z",
+        },
+      };
+    };
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      createOneTimeAdminPassword: () => "TemporaryA123456",
+      repositories,
+      sessionService: {
+        async getCurrentSession() {
+          return {
+            code: 0,
+            message: "ok",
+            data: createTestAdminContext(["super_admin"]),
+          };
+        },
+      },
+    } as never);
+    const adminAccountHandlers = handlers.adminAccounts as unknown as {
+      resetPassword: {
+        POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response>;
+      };
+    };
+
+    const response = await adminAccountHandlers.resetPassword.POST(
+      new Request(
+        "http://localhost/api/v1/admin-accounts/admin-public-008/reset-password",
+        {
+          method: "POST",
+          headers: {
+            cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
+          },
+        },
+      ),
+      { params: Promise.resolve({ publicId: "admin-public-008" }) },
+    );
+
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        adminAccountPublicId: "admin-public-008",
+        oneTimePasswordPlainText: "TemporaryA123456",
+        distributionWindow: {
+          visibleOnce: true,
+          sessionRevocation: "revoked_active_sessions",
+        },
+      },
+    });
+    expect(observedInputs).toEqual([
+      expect.objectContaining({
+        newPassword: "TemporaryA123456",
+        publicId: "admin-public-008",
+      }),
+    ]);
+  });
+
+  it("keeps operations admins denied when a target has any platform role", async () => {
+    const auditedActions: string[] = [];
+    const repositories = createTestRepositories();
+    repositories.userOrgAuthRepository.updateAdminAccount = async () => ({
+      status: "forbidden",
+    });
+    repositories.auditLogRepository.appendAuditLog = async (input) => {
+      auditedActions.push(input.actionType);
+    };
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories,
+      sessionService: {
+        async getCurrentSession() {
+          return {
+            code: 0,
+            message: "ok",
+            data: createTestAdminContext(["ops_admin"]),
+          };
+        },
+      },
+    });
+
+    const response = await handlers.adminAccounts.detail.PATCH(
+      new Request("http://localhost/api/v1/admin-accounts/admin-public-008", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
+        },
+        body: JSON.stringify({
+          name: "Mixed Role Target",
+          adminRoles: ["org_standard_admin"],
+          organizationPublicId: "organization-public-001",
+          expectedUpdatedAt: "2026-07-14T20:00:00.000Z",
+        }),
+      }),
+      { params: Promise.resolve({ publicId: "admin-public-008" }) },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403601,
+      message: "Admin permission denied.",
+      data: null,
+    });
+    expect(auditedActions).toEqual(["admin_account.update"]);
+  });
+
+  it("reports a conflict instead of disabling the last active super administrator", async () => {
+    const repositories = createTestRepositories();
+    repositories.userOrgAuthRepository.setAdminAccountStatus = async () => ({
+      status: "conflict",
+      reason: "last_active_super_admin",
+    });
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories,
+      sessionService: {
+        async getCurrentSession() {
+          return {
+            code: 0,
+            message: "ok",
+            data: createTestAdminContext(["super_admin"]),
+          };
+        },
+      },
+    });
+
+    const response = await handlers.adminAccounts.disable.POST(
+      new Request(
+        "http://localhost/api/v1/admin-accounts/admin-public-001/disable",
+        {
+          method: "POST",
+          headers: {
+            cookie: `${SESSION_COOKIE_NAME}=${testSessionCredential}`,
+          },
+        },
+      ),
+      { params: Promise.resolve({ publicId: "admin-public-001" }) },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409601,
+      message: "The last active super administrator must be preserved.",
+      data: { reason: "last_active_super_admin" },
+    });
+  });
 });

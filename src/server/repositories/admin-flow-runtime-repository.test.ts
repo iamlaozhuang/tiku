@@ -1,8 +1,235 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createPostgresAdminFlowRuntimeRepositories } from "./admin-flow-runtime-repository";
+import {
+  canManageAdminAccountRoles,
+  createPostgresAdminFlowRuntimeRepositories,
+  isAdminAccountOrganizationBindingValid,
+} from "./admin-flow-runtime-repository";
+import { sql } from "drizzle-orm";
+import {
+  admin as adminTable,
+  auditLog as auditLogTable,
+  authSession as authSessionTable,
+} from "@/db/schema";
+
+function createAwaitableSelectBuilder(rows: unknown[]) {
+  const builder = {
+    from() {
+      return builder;
+    },
+    getSQL() {
+      return sql`select 1`;
+    },
+    innerJoin() {
+      return builder;
+    },
+    limit() {
+      return Promise.resolve(rows);
+    },
+    then<TResult1 = unknown[], TResult2 = never>(
+      onFulfilled?:
+        | ((value: unknown[]) => TResult1 | PromiseLike<TResult1>)
+        | null,
+      onRejected?:
+        | ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+        | null,
+    ) {
+      return Promise.resolve(rows).then(onFulfilled, onRejected);
+    },
+    where() {
+      return builder;
+    },
+  };
+
+  return builder;
+}
+
+function createAdminLifecycleDatabase(input: {
+  activeSuperAdminCount?: number;
+  auditFailure?: boolean;
+  roles: Array<
+    | "super_admin"
+    | "ops_admin"
+    | "content_admin"
+    | "org_standard_admin"
+    | "org_advanced_admin"
+  >;
+  status?: "active" | "disabled";
+}) {
+  const executedQueries: unknown[] = [];
+  const insertedTables: unknown[] = [];
+  const deletedTables: unknown[] = [];
+  const updatedTables: unknown[] = [];
+  const transactionSelectRows: unknown[][] = [
+    [
+      {
+        auth_user_id: "auth-user-target-001",
+        id: 101,
+        public_id: "admin-public-target-001",
+        status: input.status ?? "active",
+        updated_at: new Date("2026-07-14T20:00:00.000Z"),
+      },
+    ],
+    input.roles.map((adminRole) => ({ admin_role: adminRole })),
+    [],
+  ];
+
+  if (input.roles.includes("super_admin")) {
+    transactionSelectRows.push([{ value: input.activeSuperAdminCount ?? 2 }]);
+  }
+
+  let transactionSelectIndex = 0;
+  const transaction = {
+    delete(table: unknown) {
+      deletedTables.push(table);
+
+      return {
+        async where() {
+          return undefined;
+        },
+      };
+    },
+    async execute(query: unknown) {
+      executedQueries.push(query);
+      return [];
+    },
+    insert(table: unknown) {
+      insertedTables.push(table);
+
+      return {
+        async values() {
+          if (input.auditFailure === true && table === auditLogTable) {
+            throw new Error("simulated audit insert failure");
+          }
+
+          return undefined;
+        },
+      };
+    },
+    select() {
+      const rows = transactionSelectRows[transactionSelectIndex];
+
+      if (rows === undefined) {
+        throw new Error(
+          `Unexpected lifecycle transaction select ${transactionSelectIndex + 1}.`,
+        );
+      }
+
+      transactionSelectIndex += 1;
+      return createAwaitableSelectBuilder(rows);
+    },
+    update(table: unknown) {
+      updatedTables.push(table);
+
+      return {
+        set() {
+          return {
+            async where() {
+              return undefined;
+            },
+          };
+        },
+      };
+    },
+  };
+  const database = {
+    query: {
+      admin: {
+        async findFirst() {
+          const now = new Date("2026-07-14T20:00:00.000Z");
+
+          return {
+            created_at: now,
+            name: "Target Admin",
+            phone: "13900000008",
+            public_id: "admin-public-target-001",
+            status: "disabled",
+            updated_at: now,
+            adminRoleAssignments: input.roles.map((adminRole) => ({
+              admin_role: adminRole,
+            })),
+            adminOrganizations: [],
+          };
+        },
+      },
+    },
+    select() {
+      return createAwaitableSelectBuilder([]);
+    },
+    async transaction<T>(
+      callback: (transactionValue: typeof transaction) => Promise<T>,
+    ) {
+      return callback(transaction);
+    },
+  };
+
+  return {
+    database,
+    deletedTables,
+    executedQueries,
+    insertedTables,
+    updatedTables,
+  };
+}
 
 describe("admin flow runtime repository backend accounts", () => {
+  it("fails closed when an operations admin targets a platform or mixed-role account", () => {
+    expect(
+      canManageAdminAccountRoles({
+        actorRoles: ["ops_admin"],
+        currentRoles: ["content_admin"],
+      }),
+    ).toBe(false);
+    expect(
+      canManageAdminAccountRoles({
+        actorRoles: ["ops_admin"],
+        currentRoles: ["org_standard_admin", "content_admin"],
+        desiredRoles: ["org_advanced_admin"],
+      }),
+    ).toBe(false);
+    expect(
+      canManageAdminAccountRoles({
+        actorRoles: ["ops_admin"],
+        currentRoles: ["org_standard_admin"],
+        desiredRoles: ["org_advanced_admin"],
+      }),
+    ).toBe(true);
+    expect(
+      canManageAdminAccountRoles({
+        actorRoles: ["super_admin"],
+        currentRoles: ["content_admin"],
+        desiredRoles: ["ops_admin", "content_admin"],
+      }),
+    ).toBe(true);
+  });
+
+  it("fails closed when role and organization binding invariants diverge", () => {
+    expect(
+      isAdminAccountOrganizationBindingValid({
+        adminRoles: ["org_standard_admin"],
+        organizationPublicId: null,
+      }),
+    ).toBe(false);
+    expect(
+      isAdminAccountOrganizationBindingValid({
+        adminRoles: ["content_admin"],
+        organizationPublicId: "organization-public-001",
+      }),
+    ).toBe(false);
+    expect(
+      isAdminAccountOrganizationBindingValid({
+        adminRoles: ["org_advanced_admin"],
+        organizationPublicId: "organization-public-001",
+      }),
+    ).toBe(true);
+    expect(
+      isAdminAccountOrganizationBindingValid({
+        adminRoles: ["ops_admin", "content_admin"],
+        organizationPublicId: null,
+      }),
+    ).toBe(true);
+  });
+
   it("maps relation-loaded organizations without credential or numeric id fields", async () => {
     const now = new Date("2026-07-11T00:00:00.000Z");
     const findMany = vi.fn().mockResolvedValue([
@@ -12,7 +239,10 @@ describe("admin flow runtime repository backend accounts", () => {
         auth_user_id: "auth-user-internal",
         phone: "redacted-account",
         name: "组织管理员",
-        admin_role: "org_standard_admin",
+        adminRoleAssignments: [
+          { admin_role: "org_standard_admin" },
+          { admin_role: "content_admin" },
+        ],
         status: "active",
         created_at: now,
         updated_at: now,
@@ -69,9 +299,10 @@ describe("admin flow runtime repository backend accounts", () => {
           publicId: "admin-public-read-model",
           phone: "已绑定手机号",
           name: "组织管理员",
-          adminRole: "org_standard_admin",
+          adminRoles: ["content_admin", "org_standard_admin"],
           status: "active",
           registeredAt: now.toISOString(),
+          updatedAt: now.toISOString(),
           accountDomain: "admin",
           organizations: [
             {
@@ -93,5 +324,94 @@ describe("admin flow runtime repository backend accounts", () => {
     expect(JSON.stringify(result)).not.toContain('"id"');
     expect(JSON.stringify(result)).not.toContain("password");
     expect(JSON.stringify(result)).not.toContain("session");
+  });
+
+  it("revokes sessions and appends the success audit inside the admin disable transaction", async () => {
+    const fixture = createAdminLifecycleDatabase({
+      roles: ["content_admin"],
+    });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    const result =
+      await repositories.userOrgAuthRepository.setAdminAccountStatus?.({
+        actor: {
+          publicId: "admin-actor-super-001",
+          requestIp: "127.0.0.1",
+          roles: ["super_admin"],
+        },
+        publicId: "admin-public-target-001",
+        status: "disabled",
+      });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: "updated",
+        adminAccount: expect.objectContaining({
+          publicId: "admin-public-target-001",
+          status: "disabled",
+        }),
+      }),
+    );
+    expect(fixture.executedQueries).toHaveLength(2);
+    expect(fixture.updatedTables).toEqual([adminTable]);
+    expect(fixture.deletedTables).toEqual([authSessionTable]);
+    expect(fixture.insertedTables).toEqual([auditLogTable]);
+  });
+
+  it("keeps the last active super administrator unchanged in the production repository path", async () => {
+    const fixture = createAdminLifecycleDatabase({
+      activeSuperAdminCount: 1,
+      roles: ["super_admin"],
+    });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    const result =
+      await repositories.userOrgAuthRepository.setAdminAccountStatus?.({
+        actor: {
+          publicId: "admin-actor-super-001",
+          requestIp: null,
+          roles: ["super_admin"],
+        },
+        publicId: "admin-public-target-001",
+        status: "disabled",
+      });
+
+    expect(result).toEqual({
+      reason: "last_active_super_admin",
+      status: "conflict",
+    });
+    expect(fixture.executedQueries).toHaveLength(3);
+    expect(fixture.updatedTables).toEqual([]);
+    expect(fixture.deletedTables).toEqual([]);
+    expect(fixture.insertedTables).toEqual([]);
+  });
+
+  it("aborts the lifecycle transaction when its atomic audit write fails", async () => {
+    const fixture = createAdminLifecycleDatabase({
+      auditFailure: true,
+      roles: ["content_admin"],
+    });
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.setAdminAccountStatus?.({
+        actor: {
+          publicId: "admin-actor-super-001",
+          requestIp: null,
+          roles: ["super_admin"],
+        },
+        publicId: "admin-public-target-001",
+        status: "disabled",
+      }),
+    ).rejects.toThrow("simulated audit insert failure");
+    expect(fixture.updatedTables).toEqual([adminTable]);
+    expect(fixture.deletedTables).toEqual([authSessionTable]);
+    expect(fixture.insertedTables).toEqual([auditLogTable]);
   });
 });

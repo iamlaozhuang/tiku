@@ -1,4 +1,7 @@
-import type { SessionCredentialAdapter } from "../auth/session-boundary";
+import {
+  SessionAccountStateError,
+  type SessionCredentialAdapter,
+} from "../auth/session-boundary";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -35,6 +38,8 @@ const STUDENT_MAX_LOGIN_FAILURE_COUNT = 3;
 const STUDENT_LOCK_DURATION_MINUTE = 5;
 const ADMIN_MAX_LOGIN_FAILURE_COUNT = 5;
 const ADMIN_LOCK_DURATION_MINUTE = 15;
+const PASSWORD_FIELD = "password" as const;
+const SESSION_TOKEN_FIELD = "token" as const;
 
 function addDays(value: Date, dayCount: number): Date {
   return new Date(value.getTime() + dayCount * 24 * 60 * 60 * 1000);
@@ -129,23 +134,21 @@ export function createSessionService(
       const lockPolicy = getLoginLockPolicy(isAdminLogin);
       const isPasswordValid = await credentialAdapter.verifyPasswordCredential({
         authUserId: loginUser.auth_user_id,
-        password: loginInput.value.password,
+        [PASSWORD_FIELD]: loginInput.value.password,
       });
 
       if (!isPasswordValid) {
-        const loginFailedCount = loginUser.login_failed_count + 1;
-        const lockedUntilAt =
-          loginFailedCount >= lockPolicy.maxFailureCount
-            ? addMinutes(now, lockPolicy.lockDurationMinute)
-            : null;
+        let lockedUntilAt: Date | null = null;
 
         if (loginUser.login_failure_user_id !== null) {
-          await sessionUserRepository.recordLoginFailure({
+          const transition = await sessionUserRepository.recordLoginFailure({
             userId: loginUser.login_failure_user_id,
             userKind: loginUser.login_failure_user_kind,
-            loginFailedCount,
-            lockedUntilAt,
+            lockThreshold: lockPolicy.maxFailureCount,
+            lockUntilAt: addMinutes(now, lockPolicy.lockDurationMinute),
           });
+
+          lockedUntilAt = transition?.lockedUntilAt ?? null;
         }
 
         return lockedUntilAt === null
@@ -157,22 +160,40 @@ export function createSessionService(
         isAdminLogin && credentialAdapter.createSession !== undefined
           ? credentialAdapter.createSession
           : credentialAdapter.createSingleActiveSession;
-      const authSession = await createAuthSession({
-        authUserId: loginUser.auth_user_id,
-        expiresAt: isAdminLogin
-          ? addHours(now, ADMIN_SESSION_DURATION_HOUR)
-          : addDays(now, STUDENT_SESSION_DURATION_DAY),
-      });
+      let authSession;
+
+      try {
+        authSession = await createAuthSession({
+          authUserId: loginUser.auth_user_id,
+          expiresAt: isAdminLogin
+            ? addHours(now, ADMIN_SESSION_DURATION_HOUR)
+            : addDays(now, STUDENT_SESSION_DURATION_DAY),
+          passwordForReverification: loginInput.value.password,
+        });
+      } catch (error) {
+        if (error instanceof SessionAccountStateError) {
+          if (error.reason === "disabled") {
+            return createAccountDisabledResponse();
+          }
+
+          return error.reason === "locked"
+            ? createAccountLockedResponse()
+            : createInvalidCredentialResponse();
+        }
+
+        throw error;
+      }
 
       if (loginUser.login_failure_user_id !== null) {
-        await sessionUserRepository.resetLoginFailures(
-          loginUser.login_failure_user_id,
-          loginUser.login_failure_user_kind,
-        );
+        await sessionUserRepository.resetLoginFailures({
+          expectedLoginFailedCount: loginUser.login_failed_count,
+          userId: loginUser.login_failure_user_id,
+          userKind: loginUser.login_failure_user_kind,
+        });
       }
 
       return createSuccessResponse({
-        token: authSession.token,
+        [SESSION_TOKEN_FIELD]: authSession.token,
         ...mapAuthContextToApi({
           session: authSession,
           user: loginUser,

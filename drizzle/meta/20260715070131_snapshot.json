@@ -1,6 +1,6 @@
 {
-  "id": "b180ad72-cd46-4987-a63e-7c3c28181c26",
-  "prevId": "d3b8546b-1dda-4d2a-a0bb-74582cb8e7cc",
+  "id": "e5d78767-a0b3-4ae9-88cb-d6df71877fb6",
+  "prevId": "b180ad72-cd46-4987-a63e-7c3c28181c26",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -63,6 +63,25 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'active'"
+        },
+        "login_failed_count": {
+          "name": "login_failed_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "locked_until_at": {
+          "name": "locked_until_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "disabled_at": {
+          "name": "disabled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -215,6 +234,21 @@
         }
       },
       "indexes": {
+        "udx_admin_organization_admin_id": {
+          "name": "udx_admin_organization_admin_id",
+          "columns": [
+            {
+              "expression": "admin_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "udx_admin_organization_admin_id_organization_id": {
           "name": "udx_admin_organization_admin_id_organization_id",
           "columns": [
@@ -284,6 +318,118 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.admin_role_assignment": {
+      "name": "admin_role_assignment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "admin_role_assignment_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "admin_id": {
+          "name": "admin_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "admin_role": {
+          "name": "admin_role",
+          "type": "admin_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "udx_admin_role_assignment_admin_id_admin_role": {
+          "name": "udx_admin_role_assignment_admin_id_admin_role",
+          "columns": [
+            {
+              "expression": "admin_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "admin_role",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_admin_role_assignment_admin_id": {
+          "name": "idx_admin_role_assignment_admin_id",
+          "columns": [
+            {
+              "expression": "admin_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_admin_role_assignment_admin_role": {
+          "name": "idx_admin_role_assignment_admin_role",
+          "columns": [
+            {
+              "expression": "admin_role",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "admin_role_assignment_admin_id_admin_id_fk": {
+          "name": "admin_role_assignment_admin_id_admin_id_fk",
+          "tableFrom": "admin_role_assignment",
+          "tableTo": "admin",
+          "columnsFrom": ["admin_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -10871,6 +11017,21 @@
           "method": "btree",
           "with": {}
         },
+        "idx_organization_training_version_answer_deadline": {
+          "name": "idx_organization_training_version_answer_deadline",
+          "columns": [
+            {
+              "expression": "answer_deadline_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "idx_organization_training_version_profession_level_subject": {
           "name": "idx_organization_training_version_profession_level_subject",
           "columns": [
@@ -10888,21 +11049,6 @@
             },
             {
               "expression": "subject",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_organization_training_version_answer_deadline": {
-          "name": "idx_organization_training_version_answer_deadline",
-          "columns": [
-            {
-              "expression": "answer_deadline_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

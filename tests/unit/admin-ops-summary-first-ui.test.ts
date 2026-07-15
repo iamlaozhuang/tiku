@@ -20,6 +20,7 @@ import {
   AdminRedeemCodePage,
 } from "@/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage";
 import type { AdminUserListDto } from "@/server/contracts/admin-user-org-auth-ops-contract";
+import type { AdminRole } from "@/server/models/auth";
 
 afterEach(() => {
   cleanup();
@@ -83,9 +84,10 @@ function createBackendAdminAccount(index: number) {
     publicId: `admin-public-ui-${String(index).padStart(2, "0")}`,
     phone: `admin-account-${String(index).padStart(2, "0")}`,
     name: `后台账号 ${index}`,
-    adminRole: index % 2 === 0 ? "org_standard_admin" : "content_admin",
+    adminRoles: index % 2 === 0 ? ["org_standard_admin"] : ["content_admin"],
     status: "active",
     registeredAt: "2026-05-20T08:00:00.000Z",
+    updatedAt: "2026-05-20T08:00:00.000Z",
     accountDomain: "admin",
     organizations:
       index % 2 === 0
@@ -117,8 +119,9 @@ function stubFetchForSummaryFirstPages({
   users?: AdminUserListDto["users"];
 } = {}) {
   const fetchMock = vi.fn(
-    async (...[url]: [RequestInfo | URL, RequestInit?]) => {
+    async (...[url, init]: [RequestInfo | URL, RequestInit?]) => {
       const path = String(url);
+      const method = init?.method ?? "GET";
 
       if (path === "/api/v1/sessions") {
         return jsonResponse(adminSessionPayload);
@@ -130,6 +133,56 @@ function stubFetchForSummaryFirstPages({
             code: 503605,
             message: "Admin account list unavailable.",
             data: null,
+          });
+        }
+
+        if (method === "PATCH") {
+          const body = JSON.parse(String(init?.body ?? "{}")) as {
+            adminRoles: AdminRole[];
+            name: string;
+          };
+          const targetAccount = adminAccounts[0];
+
+          return jsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              adminAccount: {
+                ...targetAccount,
+                adminRoles: body.adminRoles,
+                name: body.name,
+                updatedAt: "2026-07-14T21:00:00.000Z",
+              },
+            },
+          });
+        }
+
+        if (method === "POST" && path.endsWith("/reset-password")) {
+          return jsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              adminAccountPublicId: adminAccounts[0]?.publicId,
+              oneTimePasswordPlainText: "TemporaryA123456",
+              distributionWindow: {
+                visibleOnce: true,
+                sessionRevocation: "revoked_active_sessions",
+                redactionNotice: "shown once",
+              },
+            },
+          });
+        }
+
+        if (
+          method === "POST" &&
+          (path.endsWith("/disable") || path.endsWith("/enable"))
+        ) {
+          return jsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              adminAccount: adminAccounts[0],
+            },
           });
         }
 
@@ -637,6 +690,131 @@ describe("admin ops summary-first UI", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.queryByLabelText("初始密码")).toBeNull();
+  });
+
+  it("edits multi-role backend accounts and exposes reset secrets only once", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token-backend-lifecycle",
+    );
+    const backendAccount = createBackendAdminAccount(2);
+    const fetchMock = stubFetchForSummaryFirstPages({
+      adminAccounts: [backendAccount],
+      users: [createAdminUser(1)],
+    });
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+    fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));
+    await screen.findByText("后台账号 2 / admin-account-02");
+    fireEvent.click(
+      screen.getByRole("button", { name: "编辑后台账号：后台账号 2" }),
+    );
+
+    const editRegion = screen.getByRole("region", { name: "后台账号编辑" });
+    fireEvent.click(
+      within(editRegion).getByRole("checkbox", {
+        name: "高级版组织管理员",
+      }),
+    );
+    fireEvent.click(
+      within(editRegion).getByRole("button", { name: "保存账号变更" }),
+    );
+
+    await waitFor(() => {
+      const patchCall = fetchMock.mock.calls.find(
+        ([url, init]) =>
+          String(url) === `/api/v1/admin-accounts/${backendAccount.publicId}` &&
+          init?.method === "PATCH",
+      );
+      const body = JSON.parse(String(patchCall?.[1]?.body ?? "{}")) as {
+        adminRoles?: string[];
+        organizationPublicId?: string;
+      };
+
+      expect(body.adminRoles).toEqual([
+        "org_standard_admin",
+        "org_advanced_admin",
+      ]);
+      expect(body.organizationPublicId).toBe("organization-public-001");
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "重置后台账号密码：后台账号 2",
+      }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认重置" }));
+
+    const passwordRegion = await screen.findByRole("region", {
+      name: "后台账号一次性密码",
+    });
+    expect(within(passwordRegion).getByText("TemporaryA123456")).toBeVisible();
+    fireEvent.click(
+      within(passwordRegion).getByRole("button", { name: "我已安全保存" }),
+    );
+    expect(
+      screen.queryByRole("region", { name: "后台账号一次性密码" }),
+    ).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "停用后台账号：后台账号 2" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(
+          ([url, init]) =>
+            String(url) ===
+              `/api/v1/admin-accounts/${backendAccount.publicId}/disable` &&
+            init?.method === "POST",
+        ),
+      ).toBe(true);
+    });
+  });
+
+  it("recovers from a backend account lifecycle network failure", async () => {
+    localStorage.setItem(
+      "tiku.localSessionToken",
+      "unit-test-admin-token-backend-network-failure",
+    );
+    const backendAccount = createBackendAdminAccount(2);
+    const fetchMock = stubFetchForSummaryFirstPages({
+      adminAccounts: [backendAccount],
+      users: [createAdminUser(1)],
+    });
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+    fireEvent.click(screen.getByRole("tab", { name: "后台账号" }));
+    await screen.findByText("后台账号 2 / admin-account-02");
+
+    const baseFetch = fetchMock.getMockImplementation();
+    expect(baseFetch).toBeDefined();
+    fetchMock.mockImplementation(async (...args) => {
+      const [url, init] = args;
+
+      if (
+        String(url).endsWith(`/${backendAccount.publicId}/disable`) &&
+        init?.method === "POST"
+      ) {
+        throw new Error("simulated network failure");
+      }
+
+      return baseFetch!(...args);
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "停用后台账号：后台账号 2" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "后台账号操作暂时失败，请重试",
+    );
+    expect(screen.queryByRole("button", { name: "确认停用" })).toBeNull();
   });
 
   it("isolates a backend account list failure from learner and employee accounts", async () => {
