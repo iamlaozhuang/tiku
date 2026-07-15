@@ -4,7 +4,11 @@ import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
 
 import {
+  paper,
+  paperCommand,
+  paperScoringPoint,
   question,
+  questionGroup,
   questionKnowledgeNode,
   questionTag,
   questionTypeValues,
@@ -80,6 +84,45 @@ describe("paper schema question_type enum", () => {
   it("stores fill_blank per-blank answer scoring details on source questions", () => {
     expect(getColumnNames(question)).toEqual(
       expect.arrayContaining(["fill_blank_answers"]),
+    );
+  });
+
+  it("persists paper aggregate concurrency and stable child identities", () => {
+    expect(getColumnNames(paper)).toEqual(expect.arrayContaining(["revision"]));
+    expect(getColumnNames(questionGroup)).toEqual(
+      expect.arrayContaining(["public_id"]),
+    );
+    expect(getColumnNames(paperScoringPoint)).toEqual(
+      expect.arrayContaining(["public_id"]),
+    );
+    expect(getIndexNames(questionGroup)).toContain(
+      "udx_question_group_public_id",
+    );
+    expect(getIndexNames(paperScoringPoint)).toContain(
+      "udx_paper_scoring_point_public_id",
+    );
+  });
+
+  it("persists paper command idempotency keys without exposing internal IDs", () => {
+    expect(getTableName(paperCommand)).toBe("paper_command");
+    expect(getColumnNames(paperCommand)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "actor_admin_id",
+        "paper_id",
+        "command_kind",
+        "request_hash",
+        "result_public_id",
+        "created_at",
+      ]),
+    );
+    expect(getIndexNames(paperCommand)).toEqual(
+      expect.arrayContaining([
+        "udx_paper_command_public_id",
+        "idx_paper_command_actor_admin_id_command_kind",
+        "idx_paper_command_paper_id",
+      ]),
     );
   });
 });

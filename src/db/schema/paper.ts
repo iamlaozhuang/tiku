@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -287,6 +287,7 @@ export const paper = pgTable(
     source: text("source"),
     duration_minute: integer("duration_minute"),
     total_score: scoreColumn("total_score"),
+    revision: integer("revision").default(1).notNull(),
     published_at: nullableTimestampColumn("published_at"),
     archived_at: nullableTimestampColumn("archived_at"),
     created_by_admin_id: adminIdColumn("created_by_admin_id"),
@@ -331,6 +332,9 @@ export const questionGroup = pgTable(
   "question_group",
   {
     id: idColumn(),
+    public_id: text("public_id")
+      .default(sql`'qgroup_' || replace(gen_random_uuid()::text, '-', '')`)
+      .notNull(),
     paper_id: bigint("paper_id", { mode: "number" })
       .notNull()
       .references(() => paper.id, { onDelete: "cascade" }),
@@ -347,6 +351,7 @@ export const questionGroup = pgTable(
     updated_at: updatedAtColumn(),
   },
   (table) => [
+    uniqueIndex("udx_question_group_public_id").on(table.public_id),
     index("idx_question_group_paper_id").on(table.paper_id),
     index("idx_question_group_paper_section_id").on(table.paper_section_id),
     index("idx_question_group_material_id").on(table.material_id),
@@ -392,6 +397,9 @@ export const paperScoringPoint = pgTable(
   "paper_scoring_point",
   {
     id: idColumn(),
+    public_id: text("public_id")
+      .default(sql`'psp_' || replace(gen_random_uuid()::text, '-', '')`)
+      .notNull(),
     paper_question_id: bigint("paper_question_id", { mode: "number" })
       .notNull()
       .references(() => paperQuestion.id, { onDelete: "cascade" }),
@@ -405,6 +413,7 @@ export const paperScoringPoint = pgTable(
     updated_at: updatedAtColumn(),
   },
   (table) => [
+    uniqueIndex("udx_paper_scoring_point_public_id").on(table.public_id),
     index("idx_paper_scoring_point_paper_question_id").on(
       table.paper_question_id,
     ),
@@ -412,6 +421,31 @@ export const paperScoringPoint = pgTable(
       table.source_scoring_point_id,
     ),
     index("idx_paper_scoring_point_sort_order").on(table.sort_order),
+  ],
+);
+
+export const paperCommand = pgTable(
+  "paper_command",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    actor_admin_id: adminIdColumn("actor_admin_id"),
+    paper_id: bigint("paper_id", { mode: "number" }).references(
+      () => paper.id,
+      { onDelete: "set null" },
+    ),
+    command_kind: text("command_kind").notNull(),
+    request_hash: text("request_hash").notNull(),
+    result_public_id: text("result_public_id"),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_paper_command_public_id").on(table.public_id),
+    index("idx_paper_command_actor_admin_id_command_kind").on(
+      table.actor_admin_id,
+      table.command_kind,
+    ),
+    index("idx_paper_command_paper_id").on(table.paper_id),
   ],
 );
 
@@ -535,6 +569,7 @@ export const paperRelations = relations(paper, ({ many, one }) => ({
     relationName: "paperCreatedByAdmin",
   }),
   paperAssets: many(paperAsset),
+  paperCommands: many(paperCommand),
   paperQuestions: many(paperQuestion),
   paperSections: many(paperSection),
   questionGroups: many(questionGroup),
@@ -542,6 +577,17 @@ export const paperRelations = relations(paper, ({ many, one }) => ({
     fields: [paper.updated_by_admin_id],
     references: [admin.id],
     relationName: "paperUpdatedByAdmin",
+  }),
+}));
+
+export const paperCommandRelations = relations(paperCommand, ({ one }) => ({
+  actorAdmin: one(admin, {
+    fields: [paperCommand.actor_admin_id],
+    references: [admin.id],
+  }),
+  paper: one(paper, {
+    fields: [paperCommand.paper_id],
+    references: [paper.id],
   }),
 }));
 
