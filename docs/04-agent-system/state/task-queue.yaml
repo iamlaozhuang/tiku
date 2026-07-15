@@ -176,7 +176,7 @@ p0RemediationSerialProgram:
   taskStatusById:
     p0-remediation-serial-program-bootstrap-2026-07-14: closed
     p0-remediation-rc-01-identity-session-admin-account-2026-07-14: closed
-    p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: in_progress
+    p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: ready_for_closeout
     p0-remediation-rc-03-authorization-object-scope-2026-07-14: pending
     p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: pending
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: pending
@@ -188,7 +188,7 @@ activeTasks:
   - id: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
     title: P0 RC-02 organization scope quota and employee lifecycle
     phase: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
-    status: in_progress
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 2
     taskKind: implementation

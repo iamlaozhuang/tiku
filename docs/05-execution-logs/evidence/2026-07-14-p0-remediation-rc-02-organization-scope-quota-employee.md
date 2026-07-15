@@ -124,6 +124,7 @@ localFullLoopGate: pass_branch_gates_fresh_master_required_after_merge
 - fresh-master `corepack pnpm@10.15.1 run build`: pass，92 个静态页面生成，move route 存在。
 - fresh-master `git diff --check`: pass；业务提交后工作区无未提交业务改动。
 - 首次 post-merge pre-push readiness 因 `repositoryCheckpoint.lastKnownMasterSha` 仍指向合入前 checkpoint 而按预期 hard block；本次仅交接已验证的 `48a3ea466` checkpoint，随后必须重新运行 pre-commit、module-closeout、serial guard 和 pre-push readiness。
+- checkpoint evidence commit 合入后，第二次 pre-push readiness 发现任务状态仍为 `in_progress`，因此不允许使用已记录 checkpoint 的 ancestor 语义并继续 hard block；状态已校准为 `ready_for_closeout`，未提前标记 `closed`。
 - `origin/master` 与实时远端仍为 `2e529ea3d721af1511d5663bb6bcbaa5b39886fb`；尚未 push，未提前声明远端同步或 cleanup 完成。
 
 localFullLoopGate: pass_fresh_master_gates_ready_for_checkpoint_handoff
