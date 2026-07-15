@@ -54,6 +54,20 @@ export type StudentFlowRuntimeRepositories = {
   examReportRepository: ExamReportRepository;
 };
 
+export class PaperStartConflictError extends Error {
+  constructor() {
+    super("Paper is no longer published.");
+    this.name = "PaperStartConflictError";
+  }
+}
+
+export class PaperSnapshotIntegrityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PaperSnapshotIntegrityError";
+  }
+}
+
 const {
   answerRecord,
   examReport,
@@ -65,9 +79,11 @@ const {
   orgAuth,
   paper,
   paperQuestion,
+  paperScoringPoint,
   paperSection,
   personalAuth,
   practice,
+  questionGroup,
   user,
 } = databaseSchema;
 
@@ -263,32 +279,37 @@ function createPostgresPracticeRepository(
     async createPractice(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
-      const paperId = await getRequiredPaperId(database, input.paperPublicId);
-      const [row] = await database
-        .insert(practice)
-        .values({
-          public_id: input.publicId,
-          user_id: userId,
-          paper_id: paperId,
-          paper_public_id: input.paperPublicId,
-          paper_snapshot: input.paperSnapshot,
-          profession: input.profession,
-          level: input.level,
-          subject: input.subject,
-          practice_status: "in_progress",
-          started_at: input.startedAt,
-          last_answered_at: null,
-          expires_at: input.expiresAt,
-          terminated_at: null,
-          termination_reason: null,
-        })
-        .returning();
+      return database.transaction(async (transaction) => {
+        const paperId = await getRequiredPublishedPaperIdForStart(
+          transaction as StudentFlowRuntimeDatabase,
+          input.paperPublicId,
+        );
+        const [row] = await transaction
+          .insert(practice)
+          .values({
+            public_id: input.publicId,
+            user_id: userId,
+            paper_id: paperId,
+            paper_public_id: input.paperPublicId,
+            paper_snapshot: input.paperSnapshot,
+            profession: input.profession,
+            level: input.level,
+            subject: input.subject,
+            practice_status: "in_progress",
+            started_at: input.startedAt,
+            last_answered_at: null,
+            expires_at: input.expiresAt,
+            terminated_at: null,
+            termination_reason: null,
+          })
+          .returning();
 
-      if (row === undefined) {
-        throw new Error("Practice insert did not return a row.");
-      }
+        if (row === undefined) {
+          throw new Error("Practice insert did not return a row.");
+        }
 
-      return mapPracticeRow(row);
+        return mapPracticeRow(row);
+      });
     },
     async expirePractice(input) {
       await getDatabase()
@@ -629,36 +650,41 @@ function createPostgresMockExamRepository(
     async createMockExam(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
-      const paperId = await getRequiredPaperId(database, input.paperPublicId);
-      const [row] = await database
-        .insert(mockExam)
-        .values({
-          public_id: input.publicId,
-          user_id: userId,
-          paper_id: paperId,
-          paper_public_id: input.paperPublicId,
-          paper_snapshot: input.paperSnapshot,
-          profession: input.profession,
-          level: input.level,
-          subject: input.subject,
-          exam_status: "in_progress",
-          started_at: input.startedAt,
-          submitted_at: null,
-          server_deadline_at: input.serverDeadlineAt,
-          duration_minute: input.durationMinute,
-          terminated_at: null,
-          termination_reason: null,
-          objective_score: null,
-          subjective_score: null,
-          total_score: null,
-        })
-        .returning();
+      return database.transaction(async (transaction) => {
+        const paperId = await getRequiredPublishedPaperIdForStart(
+          transaction as StudentFlowRuntimeDatabase,
+          input.paperPublicId,
+        );
+        const [row] = await transaction
+          .insert(mockExam)
+          .values({
+            public_id: input.publicId,
+            user_id: userId,
+            paper_id: paperId,
+            paper_public_id: input.paperPublicId,
+            paper_snapshot: input.paperSnapshot,
+            profession: input.profession,
+            level: input.level,
+            subject: input.subject,
+            exam_status: "in_progress",
+            started_at: input.startedAt,
+            submitted_at: null,
+            server_deadline_at: input.serverDeadlineAt,
+            duration_minute: input.durationMinute,
+            terminated_at: null,
+            termination_reason: null,
+            objective_score: null,
+            subjective_score: null,
+            total_score: null,
+          })
+          .returning();
 
-      if (row === undefined) {
-        throw new Error("Mock exam insert did not return a row.");
-      }
+        if (row === undefined) {
+          throw new Error("Mock exam insert did not return a row.");
+        }
 
-      return mapMockExamRow(row, 0);
+        return mapMockExamRow(row, 0);
+      });
     },
     async saveMockExamAnswerRecord(input) {
       const database = getDatabase();
@@ -1201,6 +1227,7 @@ async function buildPaperSnapshot(
       profession: paperRow.profession,
       level: paperRow.level,
       subject: paperRow.subject,
+      revision: paperRow.revision,
       paperSections: [],
     };
   }
@@ -1216,6 +1243,28 @@ async function buildPaperSnapshot(
     )
     .orderBy(asc(paperQuestion.sort_order));
   const questionsBySectionId = new Map<number, typeof questionRows>();
+  const questionIds = questionRows.map((row) => row.id);
+  const scoringPointRows =
+    questionIds.length === 0
+      ? []
+      : await database
+          .select()
+          .from(paperScoringPoint)
+          .where(inArray(paperScoringPoint.paper_question_id, questionIds))
+          .orderBy(asc(paperScoringPoint.sort_order));
+  const questionGroupIds = questionRows.flatMap((row) =>
+    row.question_group_id === null ? [] : [row.question_group_id],
+  );
+  const questionGroupRows =
+    questionGroupIds.length === 0
+      ? []
+      : await database
+          .select({ id: questionGroup.id, public_id: questionGroup.public_id })
+          .from(questionGroup)
+          .where(inArray(questionGroup.id, questionGroupIds));
+  const questionGroupPublicIdById = new Map(
+    questionGroupRows.map((row) => [row.id, row.public_id]),
+  );
 
   for (const questionRow of questionRows) {
     const rows = questionsBySectionId.get(questionRow.paper_section_id) ?? [];
@@ -1231,6 +1280,7 @@ async function buildPaperSnapshot(
     profession: paperRow.profession,
     level: paperRow.level,
     subject: paperRow.subject,
+    revision: paperRow.revision,
     durationMinute: paperRow.duration_minute,
     totalScore: paperRow.total_score,
     paperSections: sectionRows.map((sectionRow) => ({
@@ -1239,7 +1289,18 @@ async function buildPaperSnapshot(
       sortOrder: sectionRow.sort_order,
       totalScore: sectionRow.total_score,
       paperQuestions: (questionsBySectionId.get(sectionRow.id) ?? []).map(
-        mapPaperQuestionSnapshot,
+        (questionRow) =>
+          mapPaperQuestionSnapshot(
+            questionRow,
+            scoringPointRows.filter(
+              (scoringPointRow) =>
+                scoringPointRow.paper_question_id === questionRow.id,
+            ),
+            requireQuestionGroupPublicId(
+              questionRow.question_group_id,
+              questionGroupPublicIdById,
+            ),
+          ),
       ),
     })),
   };
@@ -1247,8 +1308,29 @@ async function buildPaperSnapshot(
 
 function mapPaperQuestionSnapshot(
   row: typeof paperQuestion.$inferSelect,
+  scoringPointRows: (typeof paperScoringPoint.$inferSelect)[],
+  questionGroupPublicId: string | null,
 ): Record<string, unknown> {
   const snapshot = asRecord(row.question_snapshot);
+  const questionPublicId = getStringField(snapshot, "questionPublicId");
+  const score = row.score;
+
+  if (questionPublicId === null) {
+    throw new PaperSnapshotIntegrityError(
+      "Paper question snapshot is missing canonical question identity.",
+    );
+  }
+
+  if (
+    score === null ||
+    !Number.isFinite(Number.parseFloat(score)) ||
+    Number.parseFloat(score) <= 0
+  ) {
+    throw new PaperSnapshotIntegrityError(
+      "Paper question snapshot is missing a positive score.",
+    );
+  }
+
   const standardAnswerLabels = Array.isArray(snapshot.standardAnswerLabels)
     ? snapshot.standardAnswerLabels
     : Array.isArray(snapshot.standardAnswer)
@@ -1258,10 +1340,16 @@ function mapPaperQuestionSnapshot(
   return {
     ...snapshot,
     paperQuestionPublicId: row.public_id,
-    questionPublicId:
-      getStringField(snapshot, "questionPublicId") ?? row.public_id,
+    questionPublicId,
     questionType: getStringField(snapshot, "questionType"),
-    score: row.score ?? "0.0",
+    score,
+    questionGroupPublicId,
+    scoringPoints: scoringPointRows.map((scoringPointRow) => ({
+      scoringPointPublicId: scoringPointRow.public_id,
+      description: scoringPointRow.description,
+      score: scoringPointRow.score,
+      sortOrder: scoringPointRow.sort_order,
+    })),
     standardAnswerLabels: standardAnswerLabels.filter(
       (label): label is string => typeof label === "string",
     ),
@@ -1273,6 +1361,25 @@ function mapPaperQuestionSnapshot(
       getStringField(snapshot, "analysis"),
     materialSnapshot: row.material_snapshot,
   };
+}
+
+function requireQuestionGroupPublicId(
+  questionGroupId: number | null,
+  questionGroupPublicIdById: ReadonlyMap<number, string>,
+): string | null {
+  if (questionGroupId === null) {
+    return null;
+  }
+
+  const publicId = questionGroupPublicIdById.get(questionGroupId);
+
+  if (publicId === undefined) {
+    throw new PaperSnapshotIntegrityError(
+      "Paper question group is missing canonical public identity.",
+    );
+  }
+
+  return publicId;
 }
 
 async function listQuestionCounts(
@@ -1344,6 +1451,26 @@ async function getRequiredPaperId(
 
   if (row === undefined) {
     throw new Error("Paper does not exist.");
+  }
+
+  return row.id;
+}
+
+async function getRequiredPublishedPaperIdForStart(
+  database: StudentFlowRuntimeDatabase,
+  publicId: string,
+): Promise<number> {
+  const [row] = await database
+    .select({ id: paper.id })
+    .from(paper)
+    .where(
+      and(eq(paper.public_id, publicId), eq(paper.paper_status, "published")),
+    )
+    .limit(1)
+    .for("share");
+
+  if (row === undefined) {
+    throw new PaperStartConflictError();
   }
 
   return row.id;

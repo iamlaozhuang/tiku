@@ -31,6 +31,7 @@ import type {
   NormalizedPracticeQuestionFavoriteInput,
 } from "../validators/practice";
 import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
+import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
 
 export type PracticeUserContext = {
   userPublicId: string;
@@ -336,8 +337,8 @@ function shouldReplacePracticeSnapshot(
   paper: PracticePaperRow,
 ): boolean {
   return (
-    countPaperSnapshotQuestions(activePractice.paper_snapshot) === 0 &&
-    countPaperSnapshotQuestions(paper.paper_snapshot) > 0
+    !isPracticePaperSnapshotValidForResume(activePractice.paper_snapshot) &&
+    isPracticePaperSnapshotValidForResume(paper.paper_snapshot)
   );
 }
 
@@ -374,7 +375,6 @@ function isOptionQuestion(question: PracticeQuestionSnapshot): boolean {
   return (
     question.questionType === "single_choice" ||
     question.questionType === "multi_choice" ||
-    question.questionType === "multiple_choice" ||
     question.questionType === "true_false"
   );
 }
@@ -390,18 +390,88 @@ function isAutoMatchFillBlankQuestion(
 
 function isObjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
   return (
-    (isOptionQuestion(question) && question.standardAnswerLabels.length > 0) ||
-    (isAutoMatchFillBlankQuestion(question) &&
-      getAutoMatchAnswers(question).length > 0)
+    question.scoringMethod === "auto_match" &&
+    ((isOptionQuestion(question) && question.standardAnswerLabels.length > 0) ||
+      (isAutoMatchFillBlankQuestion(question) &&
+        getAutoMatchAnswers(question).length > 0))
   );
 }
 
 function isSubjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
   return (
-    question.questionType === "short_answer" ||
-    question.questionType === "case_analysis" ||
-    question.questionType === "calculation" ||
-    question.questionType === "subjective"
+    question.scoringMethod === "ai_scoring" &&
+    (question.questionType === "fill_blank" ||
+      question.questionType === "short_answer" ||
+      question.questionType === "case_analysis" ||
+      question.questionType === "calculation")
+  );
+}
+
+function isPracticePaperScoringContractValid(
+  paperSnapshot: Record<string, unknown>,
+): boolean {
+  const paperSections = Array.isArray(paperSnapshot.paperSections)
+    ? paperSnapshot.paperSections
+    : [];
+  const paperQuestionPublicIds = new Set<string>();
+  const questionPublicIds = new Set<string>();
+
+  return paperSections.every((paperSection) => {
+    if (
+      !isRecord(paperSection) ||
+      !Array.isArray(paperSection.paperQuestions)
+    ) {
+      return false;
+    }
+
+    return paperSection.paperQuestions.every((paperQuestion) => {
+      if (!isRecord(paperQuestion)) {
+        return false;
+      }
+
+      const paperQuestionPublicId = getStringField(
+        paperQuestion,
+        "paperQuestionPublicId",
+      );
+      const questionPublicId = getStringField(
+        paperQuestion,
+        "questionPublicId",
+      );
+
+      if (
+        paperQuestionPublicId === null ||
+        questionPublicId === null ||
+        paperQuestionPublicIds.has(paperQuestionPublicId) ||
+        questionPublicIds.has(questionPublicId)
+      ) {
+        return false;
+      }
+
+      paperQuestionPublicIds.add(paperQuestionPublicId);
+      questionPublicIds.add(questionPublicId);
+
+      const questionScore = Number.parseFloat(getScore(paperQuestion));
+
+      if (!Number.isFinite(questionScore) || questionScore <= 0) {
+        return false;
+      }
+
+      return isQuestionScoringContractValid({
+        questionType: getStringField(paperQuestion, "questionType"),
+        scoringMethod: getStringField(paperQuestion, "scoringMethod"),
+        multiChoiceRule: getStringField(paperQuestion, "multiChoiceRule"),
+      });
+    });
+  });
+}
+
+function isPracticePaperSnapshotValidForResume(
+  paperSnapshot: Record<string, unknown>,
+): boolean {
+  return (
+    validatePublishedPaperQuestionCount(
+      countPaperSnapshotQuestions(paperSnapshot),
+    ).success && isPracticePaperScoringContractValid(paperSnapshot)
   );
 }
 
@@ -748,7 +818,7 @@ async function createFreshPractice(
   userContext: PracticeUserContext,
   paper: PracticePaperRow,
   startedAt: Date,
-): Promise<PracticeRow> {
+): Promise<PracticeRow | null> {
   const startKey = `${userContext.userPublicId}\u0000${paper.public_id}`;
   const inFlightPractice = inFlightFreshPracticeByUserPaper.get(startKey);
 
@@ -772,6 +842,11 @@ async function createFreshPractice(
 
   try {
     return await practicePromise;
+  } catch (error) {
+    if (error instanceof Error && error.name === "PaperStartConflictError") {
+      return null;
+    }
+    throw error;
   } finally {
     if (inFlightFreshPracticeByUserPaper.get(startKey) === practicePromise) {
       inFlightFreshPracticeByUserPaper.delete(startKey);
@@ -825,6 +900,13 @@ export function createPracticeService(
         return createPracticePaperQuestionCountInvalidResponse();
       }
 
+      if (!isPracticePaperScoringContractValid(paper.paper_snapshot)) {
+        return createErrorResponse(
+          422306,
+          "Practice paper scoring contract is invalid.",
+        );
+      }
+
       const now = clock.now();
       const scopes = await repository.listEffectiveAuthorizationScopes({
         userPublicId: userContext.userPublicId,
@@ -875,6 +957,13 @@ export function createPracticeService(
             now,
           );
 
+          if (practice === null) {
+            return createErrorResponse(
+              409303,
+              "Practice paper is no longer published.",
+            );
+          }
+
           return createSuccessResponse({
             practice: mapPracticeToApi(practice),
             answerRecords: [],
@@ -904,6 +993,13 @@ export function createPracticeService(
         paper,
         now,
       );
+
+      if (practice === null) {
+        return createErrorResponse(
+          409303,
+          "Practice paper is no longer published.",
+        );
+      }
 
       return createSuccessResponse({
         practice: mapPracticeToApi(practice),
@@ -1184,6 +1280,13 @@ export function createPracticeService(
         },
         now,
       );
+
+      if (freshPractice === null) {
+        return createErrorResponse(
+          409303,
+          "Practice paper is no longer published.",
+        );
+      }
 
       return createSuccessResponse({
         practice: mapPracticeToApi(freshPractice),

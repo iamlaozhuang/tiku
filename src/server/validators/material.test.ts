@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeCreateMaterialInput } from "./material";
+import {
+  normalizeCreateMaterialInput,
+  normalizeUpdateMaterialInput,
+} from "./material";
 
 function createMaterialInput(overrides: Record<string, unknown> = {}) {
   return {
@@ -64,6 +67,25 @@ describe("material validator", () => {
     ).toEqual({
       success: false,
       message: "Invalid material input.",
+    });
+  });
+
+  it("requires a canonical optimistic concurrency timestamp for update", () => {
+    expect(
+      normalizeUpdateMaterialInput(
+        createMaterialInput({ status: "available" }),
+      ),
+    ).toEqual({ success: false, message: "Invalid material input." });
+    expect(
+      normalizeUpdateMaterialInput(
+        createMaterialInput({
+          status: "available",
+          expectedUpdatedAt: "2026-05-19T02:00:00.000Z",
+        }),
+      ),
+    ).toMatchObject({
+      success: true,
+      value: { expectedUpdatedAt: new Date("2026-05-19T02:00:00.000Z") },
     });
   });
 });

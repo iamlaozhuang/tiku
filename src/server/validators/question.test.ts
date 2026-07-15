@@ -375,6 +375,7 @@ describe("question validator", () => {
       knowledgeNodePublicIds: ["knowledge_node_public_1"],
       tagPublicIds: ["tag_public_1", "tag_public_2"],
       status: "available",
+      expectedUpdatedAt: "2026-05-19T04:00:00.000Z",
     });
 
     expect(normalizeCreateQuestionInput(input)).toMatchObject({
@@ -391,6 +392,22 @@ describe("question validator", () => {
         tagPublicIds: ["tag_public_1", "tag_public_2"],
       },
     });
+  });
+
+  it("requires a canonical optimistic concurrency timestamp for update", () => {
+    expect(
+      normalizeUpdateQuestionInput(
+        createObjectiveQuestionInput({ status: "available" }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
+    expect(
+      normalizeUpdateQuestionInput(
+        createObjectiveQuestionInput({
+          status: "available",
+          expectedUpdatedAt: "2026-05-19T04:00:00Z",
+        }),
+      ),
+    ).toEqual({ success: false, message: "Invalid question input." });
   });
 
   it("rejects malformed knowledge_node and tag public identifier arrays", () => {
@@ -444,6 +461,7 @@ describe("question validator", () => {
         createSubjectiveQuestionInput({
           questionType: "fill_blank",
           scoringMethod: "auto_match",
+          scoringPoints: [],
           standardAnswerRichText: "<p>客户动机；消费频率</p>",
           fillBlankAnswers: [
             {

@@ -57,6 +57,7 @@ function createPaperSnapshot(): Record<string, unknown> {
             standardAnswerRichText: "<p>A</p>",
             analysisRichText: "<p>解析</p>",
             score: "1.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
           },
         ],
@@ -81,6 +82,7 @@ function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
             standardAnswerRichText: "<p>A</p>",
             analysisRichText: "<p>解析</p>",
             score: "1.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
           },
           {
@@ -130,6 +132,7 @@ function createQuestionOptionsOnlyPaperSnapshot(): Record<string, unknown> {
             standardAnswerRichText: "<p>A</p>",
             analysisRichText: "<p>analysis</p>",
             score: "5.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
           },
         ],
@@ -154,6 +157,7 @@ function createFillBlankPaperSnapshot(): Record<string, unknown> {
             standardAnswerRichText: "<p>真实购买动机</p>",
             analysisRichText: "<p>先识别真实购买动机。</p>",
             score: "2.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
           },
         ],
@@ -178,6 +182,7 @@ function createFillBlankPerBlankPaperSnapshot(): Record<string, unknown> {
             standardAnswerRichText: "<p>客户动机；消费频率</p>",
             analysisRichText: "<p>逐空核对答案。</p>",
             score: "2.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
             fillBlankAnswers: [
               {
@@ -220,11 +225,13 @@ function createSubjectivePaperSnapshot(
             scoringPoints: [
               {
                 scoringPointPublicId: "scoring_point_public_1",
-                label: "事实核验",
-                maxScore: 5,
+                description: "事实核验",
+                score: "10.0",
+                sortOrder: 1,
               },
             ],
             score: "10.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "ai_scoring",
           },
         ],
@@ -258,6 +265,7 @@ function createPaperSnapshotWithQuestionCount(
           standardAnswerRichText: "<p>A</p>",
           analysisRichText: "<p>analysis</p>",
           score: "1.0",
+          multiChoiceRule: "all_correct_only",
           scoringMethod: "auto_match",
         })),
       },
@@ -527,6 +535,74 @@ describe("practice service", () => {
       expect(sideEffects).toEqual([]);
     },
   );
+
+  it("fails closed before start when a published question has a non-positive score", async () => {
+    const invalidSnapshot = structuredClone(createPaperSnapshot());
+    const paperSections = invalidSnapshot.paperSections as Array<{
+      paperQuestions: Array<Record<string, unknown>>;
+    }>;
+    paperSections[0].paperQuestions[0].score = "0.0";
+    let createCalled = false;
+    const service = createPracticeService(
+      createRepository({
+        async findPublishedPaperByPublicId() {
+          return createPaper({ paper_snapshot: invalidSnapshot });
+        },
+        async createPractice() {
+          createCalled = true;
+
+          return createPractice();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 422306,
+      message: "Practice paper scoring contract is invalid.",
+      data: null,
+    });
+    expect(createCalled).toBe(false);
+  });
+
+  it("fails closed before start when a published question identity is missing", async () => {
+    const invalidSnapshot = structuredClone(createPaperSnapshot());
+    const paperSections = invalidSnapshot.paperSections as Array<{
+      paperQuestions: Array<Record<string, unknown>>;
+    }>;
+    delete paperSections[0].paperQuestions[0].questionPublicId;
+    let createCalled = false;
+    const service = createPracticeService(
+      createRepository({
+        async findPublishedPaperByPublicId() {
+          return createPaper({ paper_snapshot: invalidSnapshot });
+        },
+        async createPractice() {
+          createCalled = true;
+
+          return createPractice();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 422306,
+      message: "Practice paper scoring contract is invalid.",
+      data: null,
+    });
+    expect(createCalled).toBe(false);
+  });
 
   it("resumes an existing active practice and expires stale progress before restarting", async () => {
     const resumedService = createPracticeService(

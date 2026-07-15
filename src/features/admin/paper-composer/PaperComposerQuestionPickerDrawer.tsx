@@ -28,6 +28,7 @@ export type PaperQuestionAddInput = {
     sortOrder: number;
   };
   questionGroup: {
+    publicId: string | null;
     title: string;
     materialPublicId: string;
     sortOrder: number;
@@ -264,6 +265,21 @@ export function PaperComposerQuestionPickerDrawer({
 
     const sectionQuestionCount = existingSection?.paperQuestions.length ?? 0;
     const material = selectedMaterial;
+    const existingGroupPublicId =
+      material === null
+        ? null
+        : (existingSection?.paperQuestions.find(
+            (paperQuestion) =>
+              paperQuestion.materialSnapshot?.materialPublicId ===
+                material.publicId &&
+              paperQuestion.questionGroupPublicId !== null,
+          )?.questionGroupPublicId ?? null);
+    const existingGroup =
+      existingGroupPublicId === null
+        ? null
+        : (paper.questionGroups.find(
+            (questionGroup) => questionGroup.publicId === existingGroupPublicId,
+          ) ?? null);
     setIsSubmitting(true);
     const added = await onAdd({
       questionPublicId: selectedQuestion.publicId,
@@ -274,9 +290,11 @@ export function PaperComposerQuestionPickerDrawer({
         material === null
           ? null
           : {
-              title: material.title,
+              publicId: existingGroup?.publicId ?? null,
+              title: existingGroup?.title ?? material.title,
               materialPublicId: material.publicId,
               sortOrder:
+                existingGroup?.sortOrder ??
                 Math.max(
                   0,
                   ...paper.questionGroups.map((item) => item.sortOrder),

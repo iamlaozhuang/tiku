@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  normalizeAddPaperQuestionInput,
+  normalizePaperCommandInput,
   normalizeUpdatePaperQuestionInput,
   PAPER_QUESTION_COUNT_LIMIT,
   validateDraftPaperQuestionCount,
@@ -11,6 +13,7 @@ describe("paper question composition update validation", () => {
   it("accepts a target paper_section while preserving score and scoring points", () => {
     expect(
       normalizeUpdatePaperQuestionInput({
+        expectedRevision: 3,
         score: "6.0",
         sortOrder: 2,
         scoringPoints: [
@@ -25,6 +28,7 @@ describe("paper question composition update validation", () => {
     ).toEqual({
       success: true,
       value: {
+        expectedRevision: 3,
         score: "6.0",
         sortOrder: 2,
         scoringPoints: [
@@ -42,12 +46,61 @@ describe("paper question composition update validation", () => {
   it("rejects a malformed target paper_section", () => {
     expect(
       normalizeUpdatePaperQuestionInput({
+        expectedRevision: 3,
         score: "6.0",
         sortOrder: 2,
         scoringPoints: [],
         paperSection: { title: "", description: null, sortOrder: 0 },
       }),
     ).toEqual({ success: false, message: "Invalid paper input." });
+  });
+
+  it("requires revision and command identity and distinguishes group create from join", () => {
+    const baseInput = {
+      commandPublicId: "paper-command-public-1",
+      expectedRevision: 2,
+      questionPublicId: "question-public-1",
+      score: "2.0",
+      sortOrder: 1,
+      paperSection: { title: "单选题", description: null, sortOrder: 1 },
+    };
+
+    expect(
+      normalizeAddPaperQuestionInput({
+        ...baseInput,
+        questionGroup: {
+          publicId: "question-group-public-1",
+          title: "材料一",
+          materialPublicId: "material-public-1",
+          sortOrder: 1,
+        },
+      }),
+    ).toMatchObject({
+      success: true,
+      value: {
+        commandPublicId: "paper-command-public-1",
+        expectedRevision: 2,
+        questionGroup: { publicId: "question-group-public-1" },
+      },
+    });
+    expect(
+      normalizeAddPaperQuestionInput({
+        ...baseInput,
+        questionGroup: {
+          publicId: null,
+          title: "材料一",
+          materialPublicId: "material-public-1",
+          sortOrder: 1,
+        },
+      }),
+    ).toMatchObject({
+      success: true,
+      value: { questionGroup: { publicId: null } },
+    });
+    expect(normalizePaperCommandInput({ expectedRevision: 2 })).toEqual({
+      success: false,
+      message: "Invalid paper input.",
+    });
   });
 });
 

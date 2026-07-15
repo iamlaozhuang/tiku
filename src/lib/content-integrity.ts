@@ -1,3 +1,11 @@
+import type {
+  MultiChoiceRule,
+  QuestionType,
+  ScoringMethod,
+} from "@/server/models/paper";
+
+import { getQuestionScoringContractIssues } from "./question-scoring-contract";
+
 export type ContentIntegrityIssue = {
   field: string;
   message: string;
@@ -14,6 +22,7 @@ export type QuestionIntegrityInput = {
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;
+  multiChoiceRule: string;
   scoringMethod: string;
   questionOptions: {
     label: string;
@@ -206,6 +215,18 @@ export function getQuestionIntegrityIssues(
   if (input.subject.trim().length === 0) {
     addIssue("subject", "请选择科目。");
   }
+
+  const scoringContractIssues = getQuestionScoringContractIssues({
+    questionType: input.questionType as QuestionType,
+    scoringMethod: input.scoringMethod as ScoringMethod,
+    multiChoiceRule: input.multiChoiceRule as MultiChoiceRule,
+  });
+  if (scoringContractIssues.includes("scoring_method_mismatch")) {
+    addIssue("scoringMethod", "题型与评分方式不匹配。");
+  }
+  if (scoringContractIssues.includes("multi_choice_rule_mismatch")) {
+    addIssue("multiChoiceRule", "只有多选题可以使用多选评分规则。");
+  }
   if (!hasMeaningfulRichText(input.stemRichText)) {
     addIssue("stemRichText", "请输入有效题干。");
   } else if (input.stemRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH) {
@@ -300,12 +321,26 @@ export function getQuestionIntegrityIssues(
   if (isOptionQuestion && input.scoringPoints.length > 0) {
     addIssue("scoringPoints", "客观题不能提交评分点。");
   }
+  if (
+    input.questionType === "fill_blank" &&
+    input.scoringMethod === "auto_match" &&
+    input.scoringPoints.length > 0
+  ) {
+    addIssue("scoringPoints", "自动匹配填空题不能提交 AI 评分点。");
+  }
 
   if (
     input.questionType !== "fill_blank" &&
     input.fillBlankAnswers.length > 0
   ) {
     addIssue("fillBlankAnswers", "只有填空题可以提交逐空答案。");
+  }
+  if (
+    input.questionType === "fill_blank" &&
+    input.scoringMethod === "ai_scoring" &&
+    input.fillBlankAnswers.length > 0
+  ) {
+    addIssue("fillBlankAnswers", "AI 评分填空题不能提交逐空匹配答案。");
   }
   if (
     input.questionType === "fill_blank" &&

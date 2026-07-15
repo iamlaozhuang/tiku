@@ -1,12 +1,13 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
-import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import {
   admin,
   material,
   mockExam,
   paper,
+  paperCommand,
   paperQuestion,
   paperScoringPoint,
   paperSection,
@@ -46,6 +47,7 @@ import {
 } from "./runtime-database";
 
 export type PaperScoringPointAccessRow = {
+  public_id: string;
   source_scoring_point_id: number | null;
   description: string;
   score: string;
@@ -60,6 +62,7 @@ export type PaperQuestionAccessRow = {
   paper_section_sort_order?: number;
   question_group_id: number | null;
   question_group_sort_order?: number | null;
+  question_group_public_id?: string | null;
   question_snapshot: QuestionSnapshotDto;
   material_snapshot: MaterialSnapshotDto | null;
   score: string | null;
@@ -80,6 +83,7 @@ export type PaperSectionAccessRow = {
 
 export type QuestionGroupAccessRow = {
   id: number;
+  public_id: string;
   paper_section_id: number;
   material_public_id: string;
   material_snapshot: MaterialSnapshotDto;
@@ -100,6 +104,7 @@ export type PaperDraftAccessRow = {
   source: string | null;
   duration_minute: number | null;
   total_score: string | null;
+  revision: number;
   published_at: Date | null;
   archived_at: Date | null;
   paper_sections: PaperSectionAccessRow[];
@@ -127,26 +132,33 @@ export type UpdatePaperQuestionInput = NormalizedUpdatePaperQuestionInput & {
 };
 
 export type RemovePaperQuestionInput = {
+  expectedRevision: number;
   paperPublicId: string;
   paperQuestionPublicId: string;
 };
 
 export type PublishPaperInput = {
+  commandPublicId: string;
+  expectedRevision: number;
   paperPublicId: string;
   sourceQuestionPublicIds: string[];
   materialPublicIds: string[];
 };
 
 export type ArchivePaperInput = {
+  expectedRevision: number;
   paperPublicId: string;
 };
 
 export type DeletePaperInput = {
+  expectedRevision: number;
   paperPublicId: string;
 };
 
 export type CopyPaperInput = {
-  sourcePaper: PaperDraftAccessRow;
+  commandPublicId: string;
+  expectedRevision: number;
+  sourcePaperPublicId: string;
 };
 
 export type PaperDraftRepository = {
@@ -159,15 +171,18 @@ export type PaperDraftRepository = {
   updatePaper(
     input: UpdatePaperInput,
     context?: ContentMutationContext,
-  ): Promise<PaperDraftAccessRow>;
+  ): Promise<PaperDraftAccessRow | null>;
   addQuestionToDraftPaper(
     input: AddPaperQuestionInput,
+    context?: ContentMutationContext,
   ): Promise<PaperQuestionAccessRow | null>;
   updatePaperQuestion(
     input: UpdatePaperQuestionInput,
+    context?: ContentMutationContext,
   ): Promise<PaperQuestionAccessRow | null>;
   removePaperQuestion(
     input: RemovePaperQuestionInput,
+    context?: ContentMutationContext,
   ): Promise<PaperDraftAccessRow | null>;
   publishPaper(
     input: PublishPaperInput,
@@ -219,6 +234,152 @@ export function createPaperQuestionSectionMovePlan(input: {
       };
 }
 
+type PaperCommandClaim =
+  | { kind: "claimed"; id: number }
+  | { kind: "replay"; resultPublicId: string }
+  | { kind: "conflict" };
+
+export class PaperCommandConflictError extends Error {
+  constructor() {
+    super("Paper command conflicts with an existing request.");
+    this.name = "PaperCommandConflictError";
+  }
+}
+
+class PaperMutationConflictError extends Error {
+  constructor() {
+    super("Paper aggregate mutation conflict.");
+    this.name = "PaperMutationConflictError";
+  }
+}
+
+function canonicalizePaperCommandPayload(input: unknown): unknown {
+  if (Array.isArray(input)) {
+    return input.map((item) => canonicalizePaperCommandPayload(item));
+  }
+
+  if (input instanceof Date) {
+    return input.toJSON();
+  }
+
+  if (input !== null && typeof input === "object") {
+    return Object.fromEntries(
+      Object.entries(input)
+        .filter(([, value]) => value !== undefined)
+        .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
+        .map(([key, value]) => [key, canonicalizePaperCommandPayload(value)]),
+    );
+  }
+
+  return input;
+}
+
+export function createPaperCommandRequestHash(input: unknown): string {
+  return createHash("sha256")
+    .update(JSON.stringify(canonicalizePaperCommandPayload(input)))
+    .digest("hex");
+}
+
+async function claimPaperCommand(
+  database: RuntimeDatabase,
+  input: {
+    actorAdminId: number;
+    commandKind: string;
+    commandPublicId: string;
+    paperId?: number | null;
+    requestHash: string;
+  },
+): Promise<PaperCommandClaim> {
+  const [inserted] = await database
+    .insert(paperCommand)
+    .values({
+      actor_admin_id: input.actorAdminId,
+      command_kind: input.commandKind,
+      paper_id: input.paperId ?? null,
+      public_id: input.commandPublicId,
+      request_hash: input.requestHash,
+    })
+    .onConflictDoNothing({ target: paperCommand.public_id })
+    .returning({ id: paperCommand.id });
+
+  if (inserted !== undefined) {
+    return { kind: "claimed", id: inserted.id };
+  }
+
+  const [existing] = await database
+    .select({
+      actor_admin_id: paperCommand.actor_admin_id,
+      command_kind: paperCommand.command_kind,
+      request_hash: paperCommand.request_hash,
+      result_public_id: paperCommand.result_public_id,
+    })
+    .from(paperCommand)
+    .where(eq(paperCommand.public_id, input.commandPublicId))
+    .limit(1);
+
+  return existing !== undefined &&
+    existing.actor_admin_id === input.actorAdminId &&
+    existing.command_kind === input.commandKind &&
+    existing.request_hash === input.requestHash &&
+    existing.result_public_id !== null
+    ? { kind: "replay", resultPublicId: existing.result_public_id }
+    : { kind: "conflict" };
+}
+
+async function completePaperCommand(
+  database: RuntimeDatabase,
+  input: { commandId: number; paperId: number; resultPublicId: string },
+): Promise<void> {
+  await database
+    .update(paperCommand)
+    .set({
+      paper_id: input.paperId,
+      result_public_id: input.resultPublicId,
+    })
+    .where(eq(paperCommand.id, input.commandId));
+}
+
+async function releasePaperCommand(
+  database: RuntimeDatabase,
+  claim: PaperCommandClaim,
+): Promise<void> {
+  if (claim.kind === "claimed") {
+    await database.delete(paperCommand).where(eq(paperCommand.id, claim.id));
+  }
+}
+
+async function advancePaperRevision(
+  database: RuntimeDatabase,
+  input: {
+    actorAdminId: number;
+    expectedRevision: number;
+    paperPublicId: string;
+    requiredStatus: PaperStatus;
+  },
+): Promise<{ id: number; publicId: string; revision: number } | null> {
+  const [row] = await database
+    .update(paper)
+    .set({
+      revision: sql`${paper.revision} + 1`,
+      updated_at: new Date(),
+      updated_by_admin_id: input.actorAdminId,
+    })
+    .where(
+      and(
+        eq(paper.public_id, input.paperPublicId),
+        eq(paper.paper_status, input.requiredStatus),
+        eq(paper.revision, input.expectedRevision),
+      ),
+    )
+    .returning({
+      id: paper.id,
+      publicId: paper.public_id,
+      revision: paper.revision,
+    });
+
+  return row ?? null;
+}
+
 type PaperBaseRow = Omit<
   PaperDraftAccessRow,
   "paper_sections" | "question_groups"
@@ -239,12 +400,6 @@ type SourceQuestionSnapshotRow = {
   scoring_method: ScoringMethod;
   fill_blank_answers?: FillBlankAnswer[];
   material_id: number | null;
-  material_public_id: string | null;
-  material_title: string | null;
-  material_content_rich_text: string | null;
-  material_profession: Profession | null;
-  material_level: number | null;
-  material_subject: Subject | null;
 };
 
 type SourceQuestionLookupInput = {
@@ -287,35 +442,72 @@ export function createPostgresPaperDraftRepository(
     async createPaper(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .insert(paper)
-        .values({
-          created_by_admin_id: actorAdminId,
-          duration_minute: input.durationMinute,
-          level: input.level,
-          name: input.name,
-          paper_type: input.paperType,
-          profession: input.profession,
-          public_id: `paper-${randomUUID()}`,
-          source: input.source,
-          subject: input.subject,
-          total_score: input.totalScore,
-          updated_by_admin_id: actorAdminId,
-          year: input.year,
-        })
-        .returning({ public_id: paper.public_id });
+      const requestHash = createPaperCommandRequestHash(input);
 
-      if (row === undefined) {
-        throw new Error("Paper insert did not return a row.");
-      }
+      return database.transaction(async (transaction) => {
+        const commandClaim = await claimPaperCommand(
+          transaction as RuntimeDatabase,
+          {
+            actorAdminId,
+            commandKind: "create",
+            commandPublicId: input.commandPublicId,
+            requestHash,
+          },
+        );
 
-      const createdPaper = await findPaperByPublicId(database, row.public_id);
+        if (commandClaim.kind === "replay") {
+          const replayedPaper = await findPaperByPublicId(
+            transaction as RuntimeDatabase,
+            commandClaim.resultPublicId,
+          );
 
-      if (createdPaper === null) {
-        throw new Error("Created paper could not be loaded.");
-      }
+          if (replayedPaper !== null) {
+            return replayedPaper;
+          }
+        }
+        if (commandClaim.kind !== "claimed") {
+          throw new PaperCommandConflictError();
+        }
 
-      return createdPaper;
+        const [row] = await transaction
+          .insert(paper)
+          .values({
+            created_by_admin_id: actorAdminId,
+            duration_minute: input.durationMinute,
+            level: input.level,
+            name: input.name,
+            paper_type: input.paperType,
+            profession: input.profession,
+            public_id: `paper-${randomUUID()}`,
+            source: input.source,
+            subject: input.subject,
+            total_score: input.totalScore,
+            updated_by_admin_id: actorAdminId,
+            year: input.year,
+          })
+          .returning({ id: paper.id, public_id: paper.public_id });
+
+        if (row === undefined) {
+          throw new Error("Paper insert did not return a row.");
+        }
+
+        await completePaperCommand(transaction as RuntimeDatabase, {
+          commandId: commandClaim.id,
+          paperId: row.id,
+          resultPublicId: row.public_id,
+        });
+
+        const createdPaper = await findPaperByPublicId(
+          transaction as RuntimeDatabase,
+          row.public_id,
+        );
+
+        if (createdPaper === null) {
+          throw new Error("Created paper could not be loaded.");
+        }
+
+        return createdPaper;
+      });
     },
 
     async findPaperByPublicId(publicId) {
@@ -336,15 +528,22 @@ export function createPostgresPaperDraftRepository(
           source: input.source,
           subject: input.subject,
           total_score: input.totalScore,
+          revision: sql`${paper.revision} + 1`,
           updated_at: new Date(),
           updated_by_admin_id: actorAdminId,
           year: input.year,
         })
-        .where(eq(paper.public_id, input.publicId))
+        .where(
+          and(
+            eq(paper.public_id, input.publicId),
+            eq(paper.paper_status, "draft"),
+            eq(paper.revision, input.expectedRevision),
+          ),
+        )
         .returning({ public_id: paper.public_id });
 
       if (row === undefined) {
-        throw new Error("Updated paper could not be loaded.");
+        return null;
       }
 
       const updatedPaper = await findPaperByPublicId(database, row.public_id);
@@ -356,119 +555,206 @@ export function createPostgresPaperDraftRepository(
       return updatedPaper;
     },
 
-    async addQuestionToDraftPaper(input) {
+    async addQuestionToDraftPaper(input, context) {
       const database = getDatabase();
-      const paperRow = await findPaperBaseByPublicId(
-        database,
-        input.paperPublicId,
-      );
-      const sourceQuestion = await findSourceQuestionByPublicId(database, {
-        publicId: input.questionPublicId,
-        requiredStatus: "available",
-      });
+      const actorAdminId = await resolveActorAdminId(database, context);
+      const requestHash = createPaperCommandRequestHash(input);
 
-      if (
-        paperRow === null ||
-        sourceQuestion === null ||
-        sourceQuestion.status !== "available" ||
-        sourceQuestion.profession !== paperRow.profession ||
-        sourceQuestion.level !== paperRow.level ||
-        sourceQuestion.subject !== paperRow.subject
-      ) {
-        return null;
+      try {
+        return await database.transaction(async (transaction) => {
+          const scopedDatabase = transaction as RuntimeDatabase;
+          const paperRow = await findPaperBaseByPublicId(
+            scopedDatabase,
+            input.paperPublicId,
+          );
+          if (paperRow === null) {
+            return null;
+          }
+
+          const commandClaim = await claimPaperCommand(scopedDatabase, {
+            actorAdminId,
+            commandKind: "add_question",
+            commandPublicId: input.commandPublicId,
+            paperId: paperRow.id,
+            requestHash,
+          });
+          if (commandClaim.kind === "replay") {
+            return findPaperQuestionByPublicId(
+              scopedDatabase,
+              commandClaim.resultPublicId,
+            );
+          }
+          if (commandClaim.kind !== "claimed") {
+            throw new PaperCommandConflictError();
+          }
+
+          const [questionCountRow] = await transaction
+            .select({ value: count() })
+            .from(paperQuestion)
+            .where(eq(paperQuestion.paper_id, paperRow.id));
+          if ((questionCountRow?.value ?? 0) >= 100) {
+            await releasePaperCommand(scopedDatabase, commandClaim);
+            return null;
+          }
+
+          const advancedPaper = await advancePaperRevision(scopedDatabase, {
+            actorAdminId,
+            expectedRevision: input.expectedRevision,
+            paperPublicId: input.paperPublicId,
+            requiredStatus: "draft",
+          });
+          if (advancedPaper === null) {
+            await releasePaperCommand(scopedDatabase, commandClaim);
+            return null;
+          }
+
+          const sourceQuestion = await findSourceQuestionByPublicId(
+            scopedDatabase,
+            {
+              publicId: input.questionPublicId,
+              requiredStatus: "available",
+            },
+          );
+          if (
+            sourceQuestion === null ||
+            sourceQuestion.profession !== paperRow.profession ||
+            sourceQuestion.level !== paperRow.level ||
+            sourceQuestion.subject !== paperRow.subject
+          ) {
+            throw new PaperMutationConflictError();
+          }
+
+          const materialSnapshot =
+            sourceQuestion.material_id === null
+              ? null
+              : await findMaterialSnapshotById(
+                  scopedDatabase,
+                  sourceQuestion.material_id,
+                );
+          if (
+            sourceQuestion.material_id !== null &&
+            materialSnapshot === null
+          ) {
+            throw new PaperMutationConflictError();
+          }
+          if (
+            input.questionGroup !== null &&
+            input.questionGroup.materialPublicId !==
+              materialSnapshot?.materialPublicId
+          ) {
+            throw new PaperMutationConflictError();
+          }
+
+          const questionSnapshot = await buildQuestionSnapshot(
+            scopedDatabase,
+            sourceQuestion,
+          );
+          const paperSectionId = await upsertPaperSection(
+            scopedDatabase,
+            paperRow.id,
+            input.paperSection,
+          );
+          const questionGroupId =
+            input.questionGroup === null
+              ? null
+              : await resolveQuestionGroup(
+                  scopedDatabase,
+                  paperRow.id,
+                  paperSectionId,
+                  input.questionGroup,
+                );
+
+          if (questionGroupId === undefined) {
+            throw new PaperMutationConflictError();
+          }
+
+          const [paperQuestionRow] = await transaction
+            .insert(paperQuestion)
+            .values({
+              material_snapshot: materialSnapshot,
+              paper_id: paperRow.id,
+              paper_section_id: paperSectionId,
+              public_id: `paper-question-${randomUUID()}`,
+              question_group_id: questionGroupId,
+              question_id: sourceQuestion.id,
+              question_snapshot: questionSnapshot,
+              score: input.score,
+              sort_order: input.sortOrder,
+            })
+            .returning({ public_id: paperQuestion.public_id });
+
+          if (paperQuestionRow === undefined) {
+            throw new Error("Paper question insert did not return a row.");
+          }
+
+          const sourceScoringPoints = await transaction
+            .select()
+            .from(scoringPoint)
+            .where(eq(scoringPoint.question_id, sourceQuestion.id))
+            .orderBy(asc(scoringPoint.sort_order));
+
+          await copySourceScoringPoints(
+            scopedDatabase,
+            paperQuestionRow.public_id,
+            sourceScoringPoints.map((sourceScoringPoint) => ({
+              description: sourceScoringPoint.description,
+              score: sourceScoringPoint.score,
+              sortOrder: sourceScoringPoint.sort_order,
+              sourceScoringPointId: sourceScoringPoint.id,
+            })),
+          );
+          await updatePaperSectionTotalScore(scopedDatabase, paperSectionId);
+
+          await completePaperCommand(scopedDatabase, {
+            commandId: commandClaim.id,
+            paperId: advancedPaper.id,
+            resultPublicId: paperQuestionRow.public_id,
+          });
+
+          return requirePaperQuestionByPublicId(
+            scopedDatabase,
+            paperQuestionRow.public_id,
+          );
+        });
+      } catch (error) {
+        if (error instanceof PaperMutationConflictError) {
+          return null;
+        }
+        throw error;
       }
+    },
 
-      const questionSnapshot = await buildQuestionSnapshot(
-        database,
-        sourceQuestion,
-      );
-      const materialSnapshot = buildMaterialSnapshot(sourceQuestion);
+    async updatePaperQuestion(input, context) {
+      const database = getDatabase();
+      const actorAdminId = await resolveActorAdminId(database, context);
 
       return database.transaction(async (transaction) => {
-        const paperSectionId = await upsertPaperSection(
-          transaction as RuntimeDatabase,
-          paperRow.id,
-          input.paperSection,
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const existingPaperQuestion = await findPaperQuestionByPaperPublicIds(
+          scopedDatabase,
+          input.paperPublicId,
+          input.paperQuestionPublicId,
         );
-        const questionGroupId =
-          input.questionGroup === null
-            ? null
-            : await upsertQuestionGroup(
-                transaction as RuntimeDatabase,
-                paperRow.id,
-                paperSectionId,
-                input.questionGroup,
-              );
 
-        if (questionGroupId === undefined) {
+        if (existingPaperQuestion === null) {
           return null;
         }
 
-        const [paperQuestionRow] = await transaction
-          .insert(paperQuestion)
-          .values({
-            material_snapshot: materialSnapshot,
-            paper_id: paperRow.id,
-            paper_section_id: paperSectionId,
-            public_id: `paper-question-${randomUUID()}`,
-            question_group_id: questionGroupId,
-            question_id: sourceQuestion.id,
-            question_snapshot: questionSnapshot,
-            score: input.score,
-            sort_order: input.sortOrder,
-          })
-          .returning({ public_id: paperQuestion.public_id });
-
-        if (paperQuestionRow === undefined) {
-          throw new Error("Paper question insert did not return a row.");
+        const advancedPaper = await advancePaperRevision(scopedDatabase, {
+          actorAdminId,
+          expectedRevision: input.expectedRevision,
+          paperPublicId: input.paperPublicId,
+          requiredStatus: "draft",
+        });
+        if (advancedPaper === null) {
+          return null;
         }
 
-        const sourceScoringPoints = await transaction
-          .select()
-          .from(scoringPoint)
-          .where(eq(scoringPoint.question_id, sourceQuestion.id))
-          .orderBy(asc(scoringPoint.sort_order));
-
-        await copySourceScoringPoints(
-          transaction as RuntimeDatabase,
-          paperQuestionRow.public_id,
-          sourceScoringPoints.map((sourceScoringPoint) => ({
-            description: sourceScoringPoint.description,
-            score: sourceScoringPoint.score,
-            sortOrder: sourceScoringPoint.sort_order,
-            sourceScoringPointId: sourceScoringPoint.id,
-          })),
-        );
-        await updatePaperSectionTotalScore(
-          transaction as RuntimeDatabase,
-          paperSectionId,
-        );
-
-        return findPaperQuestionByPublicId(
-          transaction as RuntimeDatabase,
-          paperQuestionRow.public_id,
-        );
-      });
-    },
-
-    async updatePaperQuestion(input) {
-      const database = getDatabase();
-      const existingPaperQuestion = await findPaperQuestionByPaperPublicIds(
-        database,
-        input.paperPublicId,
-        input.paperQuestionPublicId,
-      );
-
-      if (existingPaperQuestion === null) {
-        return null;
-      }
-
-      return database.transaction(async (transaction) => {
         const targetPaperSectionId =
           input.paperSection === null
             ? existingPaperQuestion.paper_section_id
             : await upsertPaperSection(
-                transaction as RuntimeDatabase,
+                scopedDatabase,
                 existingPaperQuestion.paper_id,
                 input.paperSection,
               );
@@ -511,12 +797,12 @@ export function createPostgresPaperDraftRepository(
           })
           .where(eq(paperQuestion.public_id, input.paperQuestionPublicId));
         await updatePaperSectionTotalScore(
-          transaction as RuntimeDatabase,
+          scopedDatabase,
           existingPaperQuestion.paper_section_id,
         );
         if (targetPaperSectionId !== existingPaperQuestion.paper_section_id) {
           await updatePaperSectionTotalScore(
-            transaction as RuntimeDatabase,
+            scopedDatabase,
             targetPaperSectionId,
           );
         }
@@ -538,41 +824,108 @@ export function createPostgresPaperDraftRepository(
           );
         }
 
-        return findPaperQuestionByPublicId(
-          transaction as RuntimeDatabase,
+        return requirePaperQuestionByPublicId(
+          scopedDatabase,
           input.paperQuestionPublicId,
         );
       });
     },
 
-    async removePaperQuestion(input) {
+    async removePaperQuestion(input, context) {
       const database = getDatabase();
-      const existingPaperQuestion = await findPaperQuestionByPaperPublicIds(
-        database,
-        input.paperPublicId,
-        input.paperQuestionPublicId,
-      );
+      const actorAdminId = await resolveActorAdminId(database, context);
 
-      if (existingPaperQuestion === null) {
-        return null;
-      }
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const existingPaperQuestion = await findPaperQuestionByPaperPublicIds(
+          scopedDatabase,
+          input.paperPublicId,
+          input.paperQuestionPublicId,
+        );
 
-      await database
-        .delete(paperQuestion)
-        .where(eq(paperQuestion.id, existingPaperQuestion.id));
-      await updatePaperSectionTotalScore(
-        database,
-        existingPaperQuestion.paper_section_id,
-      );
+        if (existingPaperQuestion === null) {
+          return null;
+        }
 
-      return findPaperByPublicId(database, input.paperPublicId);
+        const advancedPaper = await advancePaperRevision(scopedDatabase, {
+          actorAdminId,
+          expectedRevision: input.expectedRevision,
+          paperPublicId: input.paperPublicId,
+          requiredStatus: "draft",
+        });
+        if (advancedPaper === null) {
+          return null;
+        }
+
+        await transaction
+          .delete(paperQuestion)
+          .where(eq(paperQuestion.id, existingPaperQuestion.id));
+        await updatePaperSectionTotalScore(
+          scopedDatabase,
+          existingPaperQuestion.paper_section_id,
+        );
+
+        return requirePaperByPublicId(scopedDatabase, input.paperPublicId);
+      });
     },
 
     async publishPaper(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
+      const requestHash = createPaperCommandRequestHash(input);
 
       return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const paperRow = await findPaperBaseByPublicId(
+          scopedDatabase,
+          input.paperPublicId,
+        );
+        if (paperRow === null) {
+          return null;
+        }
+
+        const commandClaim = await claimPaperCommand(scopedDatabase, {
+          actorAdminId,
+          commandKind: "publish",
+          commandPublicId: input.commandPublicId,
+          paperId: paperRow.id,
+          requestHash,
+        });
+        if (commandClaim.kind === "replay") {
+          return findPaperByPublicId(
+            scopedDatabase,
+            commandClaim.resultPublicId,
+          );
+        }
+        if (commandClaim.kind !== "claimed") {
+          throw new PaperCommandConflictError();
+        }
+
+        const publishedAt = new Date();
+        const [row] = await transaction
+          .update(paper)
+          .set({
+            archived_at: null,
+            paper_status: "published",
+            published_at: publishedAt,
+            revision: sql`${paper.revision} + 1`,
+            updated_at: publishedAt,
+            updated_by_admin_id: actorAdminId,
+          })
+          .where(
+            and(
+              eq(paper.public_id, input.paperPublicId),
+              eq(paper.paper_status, "draft"),
+              eq(paper.revision, input.expectedRevision),
+            ),
+          )
+          .returning({ id: paper.id, public_id: paper.public_id });
+
+        if (row === undefined) {
+          await releasePaperCommand(scopedDatabase, commandClaim);
+          return null;
+        }
+
         await transaction
           .update(question)
           .set({
@@ -593,26 +946,13 @@ export function createPostgresPaperDraftRepository(
             .where(inArray(material.public_id, input.materialPublicIds));
         }
 
-        const [row] = await transaction
-          .update(paper)
-          .set({
-            archived_at: null,
-            paper_status: "published",
-            published_at: new Date(),
-            updated_at: new Date(),
-            updated_by_admin_id: actorAdminId,
-          })
-          .where(eq(paper.public_id, input.paperPublicId))
-          .returning({ public_id: paper.public_id });
+        await completePaperCommand(scopedDatabase, {
+          commandId: commandClaim.id,
+          paperId: row.id,
+          resultPublicId: row.public_id,
+        });
 
-        if (row === undefined) {
-          return null;
-        }
-
-        return findPaperByPublicId(
-          transaction as RuntimeDatabase,
-          row.public_id,
-        );
+        return requirePaperByPublicId(scopedDatabase, row.public_id);
       });
     },
 
@@ -627,10 +967,17 @@ export function createPostgresPaperDraftRepository(
           .set({
             archived_at: archivedAt,
             paper_status: "archived",
+            revision: sql`${paper.revision} + 1`,
             updated_at: archivedAt,
             updated_by_admin_id: actorAdminId,
           })
-          .where(eq(paper.public_id, input.paperPublicId))
+          .where(
+            and(
+              eq(paper.public_id, input.paperPublicId),
+              eq(paper.paper_status, "published"),
+              eq(paper.revision, input.expectedRevision),
+            ),
+          )
           .returning({ id: paper.id, public_id: paper.public_id });
 
         if (row === undefined) {
@@ -648,7 +995,7 @@ export function createPostgresPaperDraftRepository(
           archivedAt,
         );
 
-        return findPaperByPublicId(
+        return requirePaperByPublicId(
           transaction as RuntimeDatabase,
           row.public_id,
         );
@@ -657,57 +1004,97 @@ export function createPostgresPaperDraftRepository(
 
     async deletePaper(input) {
       const database = getDatabase();
-      const paperRow = await findPaperBaseByPublicId(
-        database,
-        input.paperPublicId,
-      );
+      return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const paperRow = await findPaperBaseByPublicId(
+          scopedDatabase,
+          input.paperPublicId,
+        );
 
-      if (paperRow === null) {
-        return false;
-      }
+        if (paperRow === null) {
+          return false;
+        }
 
-      const [practiceCount] = await database
-        .select({ value: count() })
-        .from(practice)
-        .where(eq(practice.paper_id, paperRow.id));
-      const [mockExamCount] = await database
-        .select({ value: count() })
-        .from(mockExam)
-        .where(eq(mockExam.paper_id, paperRow.id));
+        const [practiceCount] = await transaction
+          .select({ value: count() })
+          .from(practice)
+          .where(eq(practice.paper_id, paperRow.id));
+        const [mockExamCount] = await transaction
+          .select({ value: count() })
+          .from(mockExam)
+          .where(eq(mockExam.paper_id, paperRow.id));
 
-      if ((practiceCount?.value ?? 0) > 0 || (mockExamCount?.value ?? 0) > 0) {
-        return false;
-      }
+        if (
+          (practiceCount?.value ?? 0) > 0 ||
+          (mockExamCount?.value ?? 0) > 0
+        ) {
+          return false;
+        }
 
-      const [deletedRow] = await database
-        .delete(paper)
-        .where(eq(paper.id, paperRow.id))
-        .returning({ public_id: paper.public_id });
+        const [deletedRow] = await transaction
+          .delete(paper)
+          .where(
+            and(
+              eq(paper.id, paperRow.id),
+              eq(paper.paper_status, "draft"),
+              eq(paper.revision, input.expectedRevision),
+            ),
+          )
+          .returning({ public_id: paper.public_id });
 
-      return deletedRow !== undefined;
+        return deletedRow !== undefined;
+      });
     },
 
     async copyPaper(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
+      const requestHash = createPaperCommandRequestHash(input);
 
       return database.transaction(async (transaction) => {
+        const scopedDatabase = transaction as RuntimeDatabase;
+        const commandClaim = await claimPaperCommand(scopedDatabase, {
+          actorAdminId,
+          commandKind: "copy",
+          commandPublicId: input.commandPublicId,
+          requestHash,
+        });
+        if (commandClaim.kind === "replay") {
+          return findPaperByPublicId(
+            scopedDatabase,
+            commandClaim.resultPublicId,
+          );
+        }
+        if (commandClaim.kind !== "claimed") {
+          throw new PaperCommandConflictError();
+        }
+
+        const sourcePaper = await findCopySourcePaper(
+          scopedDatabase,
+          input.sourcePaperPublicId,
+          input.expectedRevision,
+        );
+        if (sourcePaper === null) {
+          await releasePaperCommand(scopedDatabase, commandClaim);
+          return null;
+        }
+
         const [paperRow] = await transaction
           .insert(paper)
           .values({
             created_by_admin_id: actorAdminId,
-            duration_minute: input.sourcePaper.duration_minute,
-            level: input.sourcePaper.level,
-            name: `${input.sourcePaper.name}（副本）`,
+            duration_minute: sourcePaper.duration_minute,
+            level: sourcePaper.level,
+            name: `${sourcePaper.name}（副本）`,
             paper_status: "draft",
-            paper_type: input.sourcePaper.paper_type,
-            profession: input.sourcePaper.profession,
+            paper_type: sourcePaper.paper_type,
+            profession: sourcePaper.profession,
             public_id: `paper-${randomUUID()}`,
-            source: input.sourcePaper.source,
-            subject: input.sourcePaper.subject,
-            total_score: input.sourcePaper.total_score,
+            source: sourcePaper.source,
+            subject: sourcePaper.subject,
+            total_score: sourcePaper.total_score,
             updated_by_admin_id: actorAdminId,
-            year: input.sourcePaper.year,
+            year: sourcePaper.year,
           })
           .returning({ id: paper.id, public_id: paper.public_id });
 
@@ -717,7 +1104,7 @@ export function createPostgresPaperDraftRepository(
 
         const sectionIdBySourceId = new Map<number, number>();
 
-        for (const sourceSection of input.sourcePaper.paper_sections) {
+        for (const sourceSection of sourcePaper.paper_sections) {
           const [sectionRow] = await transaction
             .insert(paperSection)
             .values({
@@ -731,14 +1118,47 @@ export function createPostgresPaperDraftRepository(
               id: paperSection.id,
             });
 
-          if (sectionRow !== undefined) {
-            sectionIdBySourceId.set(sourceSection.id, sectionRow.id);
+          if (sectionRow === undefined) {
+            throw new Error(
+              "Paper copy section could not be resolved atomically.",
+            );
           }
+
+          sectionIdBySourceId.set(sourceSection.id, sectionRow.id);
+        }
+
+        const sourceQuestionByPublicId = new Map<
+          string,
+          SourceQuestionSnapshotRow
+        >();
+        const sourceQuestionPublicIds = [
+          ...new Set(
+            sourcePaper.paper_sections.flatMap((sourceSection) =>
+              sourceSection.paper_questions.map(
+                (sourcePaperQuestion) =>
+                  sourcePaperQuestion.source_question_public_id,
+              ),
+            ),
+          ),
+        ].sort((left, right) => left.localeCompare(right));
+
+        for (const sourceQuestionPublicId of sourceQuestionPublicIds) {
+          const sourceQuestion = await findSourceQuestionByPublicId(
+            transaction as RuntimeDatabase,
+            { publicId: sourceQuestionPublicId },
+          );
+
+          if (sourceQuestion === null) {
+            throw new Error(
+              "Paper copy source question could not be resolved atomically.",
+            );
+          }
+          sourceQuestionByPublicId.set(sourceQuestionPublicId, sourceQuestion);
         }
 
         const questionGroupIdBySourceId = new Map<number, number>();
 
-        for (const sourceGroup of input.sourcePaper.question_groups) {
+        for (const sourceGroup of sourcePaper.question_groups) {
           const targetSectionId = sectionIdBySourceId.get(
             sourceGroup.paper_section_id,
           );
@@ -746,16 +1166,29 @@ export function createPostgresPaperDraftRepository(
             transaction as RuntimeDatabase,
             sourceGroup.material_public_id,
           );
+          const materialSnapshot =
+            materialId === null
+              ? null
+              : await findMaterialSnapshotById(
+                  transaction as RuntimeDatabase,
+                  materialId,
+                );
 
-          if (targetSectionId === undefined || materialId === null) {
-            continue;
+          if (
+            targetSectionId === undefined ||
+            materialId === null ||
+            materialSnapshot === null
+          ) {
+            throw new Error(
+              "Paper copy group could not be resolved atomically.",
+            );
           }
 
           const [groupRow] = await transaction
             .insert(questionGroup)
             .values({
               material_id: materialId,
-              material_snapshot: sourceGroup.material_snapshot,
+              material_snapshot: materialSnapshot,
               paper_id: paperRow.id,
               paper_section_id: targetSectionId,
               sort_order: sourceGroup.sort_order,
@@ -763,43 +1196,85 @@ export function createPostgresPaperDraftRepository(
             })
             .returning({ id: questionGroup.id });
 
-          if (groupRow !== undefined) {
-            questionGroupIdBySourceId.set(sourceGroup.id, groupRow.id);
+          if (groupRow === undefined) {
+            throw new Error(
+              "Paper copy group could not be resolved atomically.",
+            );
           }
+
+          questionGroupIdBySourceId.set(sourceGroup.id, groupRow.id);
         }
 
-        for (const sourceSection of input.sourcePaper.paper_sections) {
+        for (const sourceSection of sourcePaper.paper_sections) {
           const targetSectionId = sectionIdBySourceId.get(sourceSection.id);
 
           if (targetSectionId === undefined) {
-            continue;
+            throw new Error(
+              "Paper copy section could not be resolved atomically.",
+            );
           }
 
           for (const sourcePaperQuestion of sourceSection.paper_questions) {
-            const sourceQuestion = await findSourceQuestionByPublicId(
-              transaction as RuntimeDatabase,
-              {
-                publicId: sourcePaperQuestion.source_question_public_id,
-              },
+            const sourceQuestion = sourceQuestionByPublicId.get(
+              sourcePaperQuestion.source_question_public_id,
             );
 
-            if (sourceQuestion === null) {
-              return null;
+            if (sourceQuestion === undefined) {
+              throw new Error(
+                "Paper copy source question could not be resolved atomically.",
+              );
+            }
+            const materialSnapshot =
+              sourceQuestion.material_id === null
+                ? null
+                : await findMaterialSnapshotById(
+                    transaction as RuntimeDatabase,
+                    sourceQuestion.material_id,
+                  );
+            if (
+              sourceQuestion.material_id !== null &&
+              materialSnapshot === null
+            ) {
+              throw new Error(
+                "Paper copy source material could not be resolved atomically.",
+              );
+            }
+
+            const sourceQuestionGroup =
+              sourcePaperQuestion.question_group_id === null
+                ? null
+                : (sourcePaper.question_groups.find(
+                    (questionGroupRow) =>
+                      questionGroupRow.id ===
+                      sourcePaperQuestion.question_group_id,
+                  ) ?? null);
+            const targetQuestionGroupId =
+              sourcePaperQuestion.question_group_id === null
+                ? null
+                : questionGroupIdBySourceId.get(
+                    sourcePaperQuestion.question_group_id,
+                  );
+            if (
+              targetQuestionGroupId === undefined ||
+              (sourceQuestionGroup !== null &&
+                materialSnapshot?.materialPublicId !==
+                  sourceQuestionGroup.material_public_id) ||
+              (sourcePaperQuestion.question_group_id !== null &&
+                sourceQuestionGroup === null)
+            ) {
+              throw new Error(
+                "Paper copy group could not be resolved atomically.",
+              );
             }
 
             const [newPaperQuestion] = await transaction
               .insert(paperQuestion)
               .values({
-                material_snapshot: buildMaterialSnapshot(sourceQuestion),
+                material_snapshot: materialSnapshot,
                 paper_id: paperRow.id,
                 paper_section_id: targetSectionId,
                 public_id: `paper-question-${randomUUID()}`,
-                question_group_id:
-                  sourcePaperQuestion.question_group_id === null
-                    ? null
-                    : (questionGroupIdBySourceId.get(
-                        sourcePaperQuestion.question_group_id,
-                      ) ?? null),
+                question_group_id: targetQuestionGroupId,
                 question_id: sourceQuestion.id,
                 question_snapshot: await buildQuestionSnapshot(
                   transaction as RuntimeDatabase,
@@ -831,10 +1306,21 @@ export function createPostgresPaperDraftRepository(
           }
         }
 
-        return findPaperByPublicId(
-          transaction as RuntimeDatabase,
+        await completePaperCommand(scopedDatabase, {
+          commandId: commandClaim.id,
+          paperId: paperRow.id,
+          resultPublicId: paperRow.public_id,
+        });
+
+        const copiedPaper = await findPaperByPublicId(
+          scopedDatabase,
           paperRow.public_id,
         );
+        if (copiedPaper === null) {
+          throw new Error("Paper copy could not be loaded atomically.");
+        }
+
+        return copiedPaper;
       });
     },
   };
@@ -902,6 +1388,62 @@ async function findPaperByPublicId(
   return hydratedPaper ?? null;
 }
 
+async function findCopySourcePaper(
+  database: RuntimeDatabase,
+  publicId: string,
+  expectedRevision: number,
+): Promise<PaperDraftAccessRow | null> {
+  const [row] = await database
+    .select()
+    .from(paper)
+    .where(
+      and(
+        eq(paper.public_id, publicId),
+        eq(paper.revision, expectedRevision),
+        inArray(paper.paper_status, ["published", "archived"]),
+      ),
+    )
+    .limit(1)
+    .for("share");
+
+  if (row === undefined) {
+    return null;
+  }
+
+  const [hydratedPaper] = await hydratePapers(database, [row]);
+
+  return hydratedPaper ?? null;
+}
+
+async function requirePaperByPublicId(
+  database: RuntimeDatabase,
+  publicId: string,
+): Promise<PaperDraftAccessRow> {
+  const paperRow = await findPaperByPublicId(database, publicId);
+
+  if (paperRow === null) {
+    throw new Error("Mutated paper aggregate could not be loaded atomically.");
+  }
+
+  return paperRow;
+}
+
+async function requirePaperQuestionByPublicId(
+  database: RuntimeDatabase,
+  publicId: string,
+): Promise<PaperQuestionAccessRow> {
+  const paperQuestionRow = await findPaperQuestionByPublicId(
+    database,
+    publicId,
+  );
+
+  if (paperQuestionRow === null) {
+    throw new Error("Mutated paper question could not be loaded atomically.");
+  }
+
+  return paperQuestionRow;
+}
+
 async function terminateUnfinishedPracticeForArchivedPaper(
   database: RuntimeDatabase,
   paperId: number,
@@ -966,6 +1508,7 @@ async function hydratePapers(
   const groupRows = await database
     .select({
       id: questionGroup.id,
+      public_id: questionGroup.public_id,
       material_public_id: material.public_id,
       material_snapshot: questionGroup.material_snapshot,
       paper_id: questionGroup.paper_id,
@@ -988,6 +1531,7 @@ async function hydratePapers(
       public_id: paperQuestion.public_id,
       question_group_id: paperQuestion.question_group_id,
       question_group_sort_order: questionGroup.sort_order,
+      question_group_public_id: questionGroup.public_id,
       question_snapshot: paperQuestion.question_snapshot,
       score: paperQuestion.score,
       sort_order: paperQuestion.sort_order,
@@ -1025,6 +1569,7 @@ async function hydratePapers(
     paper_section_sort_order: paperQuestionRow.paper_section_sort_order,
     question_group_id: paperQuestionRow.question_group_id,
     question_group_sort_order: paperQuestionRow.question_group_sort_order,
+    question_group_public_id: paperQuestionRow.question_group_public_id,
     question_snapshot: asQuestionSnapshot(paperQuestionRow.question_snapshot),
     material_snapshot: asNullableMaterialSnapshot(
       paperQuestionRow.material_snapshot,
@@ -1037,6 +1582,7 @@ async function hydratePapers(
           scoringPointRow.paper_question_id === paperQuestionRow.id,
       )
       .map((scoringPointRow) => ({
+        public_id: scoringPointRow.public_id,
         source_scoring_point_id: scoringPointRow.source_scoring_point_id,
         description: scoringPointRow.description,
         score: scoringPointRow.score,
@@ -1065,6 +1611,7 @@ async function hydratePapers(
       .filter((groupRow) => groupRow.paper_id === paperRow.id)
       .map((groupRow) => ({
         id: groupRow.id,
+        public_id: groupRow.public_id,
         paper_section_id: groupRow.paper_section_id,
         material_public_id: groupRow.material_public_id,
         material_snapshot: asMaterialSnapshot(groupRow.material_snapshot),
@@ -1100,17 +1647,11 @@ async function findSourceQuestionByPublicId(
       scoring_method: question.scoring_method,
       fill_blank_answers: question.fill_blank_answers,
       material_id: question.material_id,
-      material_public_id: material.public_id,
-      material_title: material.title,
-      material_content_rich_text: material.content_rich_text,
-      material_profession: material.profession,
-      material_level: material.level,
-      material_subject: material.subject,
     })
     .from(question)
-    .leftJoin(material, eq(material.id, question.material_id))
     .where(and(...conditions))
-    .limit(1);
+    .limit(1)
+    .for("share", { of: question });
 
   return row ?? null;
 }
@@ -1144,30 +1685,6 @@ async function buildQuestionSnapshot(
     multiChoiceRule: sourceQuestion.multi_choice_rule,
     scoringMethod: sourceQuestion.scoring_method,
     fillBlankAnswers: sourceQuestion.fill_blank_answers ?? [],
-  };
-}
-
-function buildMaterialSnapshot(
-  sourceQuestion: SourceQuestionSnapshotRow,
-): MaterialSnapshotDto | null {
-  if (
-    sourceQuestion.material_public_id === null ||
-    sourceQuestion.material_title === null ||
-    sourceQuestion.material_content_rich_text === null ||
-    sourceQuestion.material_profession === null ||
-    sourceQuestion.material_level === null ||
-    sourceQuestion.material_subject === null
-  ) {
-    return null;
-  }
-
-  return {
-    materialPublicId: sourceQuestion.material_public_id,
-    title: sourceQuestion.material_title,
-    contentRichText: sourceQuestion.material_content_rich_text,
-    profession: sourceQuestion.material_profession,
-    level: sourceQuestion.material_level,
-    subject: sourceQuestion.material_subject,
   };
 }
 
@@ -1218,7 +1735,7 @@ async function upsertPaperSection(
   return sectionRow.id;
 }
 
-async function upsertQuestionGroup(
+async function resolveQuestionGroup(
   database: RuntimeDatabase,
   paperId: number,
   paperSectionId: number,
@@ -1230,29 +1747,23 @@ async function upsertQuestionGroup(
     return undefined;
   }
 
-  const [existingGroup] = await database
-    .select({ id: questionGroup.id })
-    .from(questionGroup)
-    .where(
-      and(
-        eq(questionGroup.paper_id, paperId),
-        eq(questionGroup.paper_section_id, paperSectionId),
-        eq(questionGroup.material_id, materialId),
-        eq(questionGroup.sort_order, input.sortOrder),
-      ),
-    )
-    .limit(1);
+  if (input.publicId !== null) {
+    const [existingGroup] = await database
+      .select({ id: questionGroup.id })
+      .from(questionGroup)
+      .where(
+        and(
+          eq(questionGroup.public_id, input.publicId),
+          eq(questionGroup.paper_id, paperId),
+          eq(questionGroup.paper_section_id, paperSectionId),
+          eq(questionGroup.material_id, materialId),
+          eq(questionGroup.sort_order, input.sortOrder),
+          eq(questionGroup.title, input.title),
+        ),
+      )
+      .limit(1);
 
-  if (existingGroup !== undefined) {
-    await database
-      .update(questionGroup)
-      .set({
-        title: input.title,
-        updated_at: new Date(),
-      })
-      .where(eq(questionGroup.id, existingGroup.id));
-
-    return existingGroup.id;
+    return existingGroup?.id;
   }
 
   const materialRow = await findMaterialSnapshotById(database, materialId);
@@ -1284,7 +1795,8 @@ async function findMaterialSnapshotById(
     .select()
     .from(material)
     .where(eq(material.id, materialId))
-    .limit(1);
+    .limit(1)
+    .for("share");
 
   if (row === undefined) {
     return null;
@@ -1439,6 +1951,7 @@ async function hydratePaperQuestionsByPublicId(
     scoring_points: scoringPointRows
       .filter((scoringPointRow) => scoringPointRow.paper_question_id === row.id)
       .map((scoringPointRow) => ({
+        public_id: scoringPointRow.public_id,
         source_scoring_point_id: scoringPointRow.source_scoring_point_id,
         description: scoringPointRow.description,
         score: scoringPointRow.score,

@@ -580,7 +580,11 @@ describe("phase 9 content question material runtime", () => {
       new Request("http://localhost/api/v1/questions/question-public-001", {
         method: "PATCH",
         headers,
-        body: JSON.stringify({ ...questionInput, status: "available" }),
+        body: JSON.stringify({
+          ...questionInput,
+          expectedUpdatedAt: createdAt.toISOString(),
+          status: "available",
+        }),
       }),
       { params: Promise.resolve({ publicId: "question-public-001" }) },
     );

@@ -22,6 +22,7 @@ const paperQuestionDto: PaperQuestionDto = {
   sourceQuestionPublicId: "question_public_123",
   paperSectionSortOrder: 1,
   questionGroupSortOrder: 1,
+  questionGroupPublicId: "question_group_public_123",
   score: "5.0",
   sortOrder: 1,
   questionSnapshot: {
@@ -41,6 +42,7 @@ const paperQuestionDto: PaperQuestionDto = {
   materialSnapshot: materialSnapshotDto,
   scoringPoints: [
     {
+      publicId: "paper_scoring_point_public_123",
       description: "说明单据核对",
       score: "2.5",
       sortOrder: 1,
@@ -62,6 +64,7 @@ const paperDto: PaperDraftDto = {
   source: "phase-3 baseline",
   durationMinute: 90,
   totalScore: "5.0",
+  revision: 1,
   publishedAt: null,
   archivedAt: null,
   questionCount: 1,
@@ -76,6 +79,7 @@ const paperDto: PaperDraftDto = {
   ],
   questionGroups: [
     {
+      publicId: "question_group_public_123",
       title: "入库案例题组",
       materialPublicId: "material_public_123",
       materialSnapshot: materialSnapshotDto,

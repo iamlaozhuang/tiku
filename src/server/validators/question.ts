@@ -53,6 +53,7 @@ export type NormalizedCreateQuestionInput = {
 };
 
 export type NormalizedUpdateQuestionInput = NormalizedCreateQuestionInput & {
+  expectedUpdatedAt: Date;
   status: (typeof questionStatusValues)[number];
 };
 
@@ -162,6 +163,18 @@ function normalizePositiveInteger(value: unknown): number | null {
   }
 
   return value;
+}
+
+function normalizeExpectedUpdatedAt(value: unknown): Date | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const timestamp = new Date(value);
+
+  return Number.isNaN(timestamp.getTime()) || timestamp.toISOString() !== value
+    ? null
+    : timestamp;
 }
 
 function normalizeQueryInteger(value: unknown): number | undefined {
@@ -437,6 +450,7 @@ export function normalizeCreateQuestionInput(
     stemRichText,
     analysisRichText,
     standardAnswerRichText,
+    multiChoiceRule: input.multiChoiceRule,
     scoringMethod: input.scoringMethod,
     questionOptions,
     scoringPoints,
@@ -476,10 +490,14 @@ export function normalizeUpdateQuestionInput(
   input: unknown,
 ): ValidationResult<NormalizedUpdateQuestionInput> {
   const questionInput = normalizeCreateQuestionInput(input);
+  const expectedUpdatedAt = isRecord(input)
+    ? normalizeExpectedUpdatedAt(input.expectedUpdatedAt)
+    : null;
 
   if (
     !questionInput.success ||
     !isRecord(input) ||
+    expectedUpdatedAt === null ||
     !isQuestionStatus(input.status)
   ) {
     return {
@@ -492,6 +510,7 @@ export function normalizeUpdateQuestionInput(
     success: true,
     value: {
       ...questionInput.value,
+      expectedUpdatedAt,
       status: input.status,
     },
   };

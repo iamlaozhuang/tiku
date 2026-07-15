@@ -1677,6 +1677,7 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
           paper_type: paper.paper_type,
           year: paper.year,
           total_score: paper.total_score,
+          revision: paper.revision,
           source: paper.source,
           updated_at: paper.updated_at,
         })
@@ -1710,6 +1711,7 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
           paperType: row.paper_type ?? "mock_paper",
           year: row.year,
           totalScore: row.total_score ?? "0.0",
+          revision: row.revision,
           questionCount: questionCounts.get(row.id) ?? 0,
           questionTypeDistribution: questionTypeDistributions.get(row.id) ?? [],
           mockExamCount: mockExamCounts.get(row.id) ?? 0,

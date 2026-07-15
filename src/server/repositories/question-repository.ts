@@ -121,7 +121,7 @@ export type QuestionRepository = {
   updateQuestion(
     input: UpdateQuestionInput,
     context?: ContentMutationContext,
-  ): Promise<QuestionAccessRow>;
+  ): Promise<QuestionAccessRow | null>;
   disableQuestion(
     publicId: string,
     context?: ContentMutationContext,
@@ -252,7 +252,7 @@ export function createPostgresQuestionRepository(
       );
 
       return database.transaction(async (transaction) => {
-        await transaction
+        const [updatedRow] = await transaction
           .update(question)
           .set({
             analysis_rich_text: input.analysisRichText,
@@ -267,17 +267,31 @@ export function createPostgresQuestionRepository(
             status: input.status,
             stem_rich_text: input.stemRichText,
             subject: input.subject,
-            updated_at: new Date(),
+            updated_at: sql`greatest(
+              clock_timestamp(),
+              ${question.updated_at} + interval '1 millisecond'
+            )`,
             updated_by_admin_id: actorAdminId,
           })
-          .where(eq(question.public_id, input.publicId));
+          .where(
+            and(
+              eq(question.public_id, input.publicId),
+              sql`date_trunc('milliseconds', ${question.updated_at}) = ${input.expectedUpdatedAt}`,
+              eq(question.is_locked, false),
+            ),
+          )
+          .returning({ id: question.id });
+
+        if (updatedRow === undefined) {
+          return null;
+        }
 
         const updatedQuestion = await findQuestionByPublicId(
           transaction as RuntimeDatabase,
           input.publicId,
         );
 
-        if (updatedQuestion === null) {
+        if (updatedQuestion === null || updatedQuestion.id !== updatedRow.id) {
           throw new Error("Updated question could not be loaded.");
         }
 

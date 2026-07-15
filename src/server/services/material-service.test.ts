@@ -88,6 +88,32 @@ function createRepository(
 }
 
 describe("material service", () => {
+  it("returns a stable conflict when the optimistic update loses the race", async () => {
+    const service = createMaterialService(
+      createRepository({
+        async updateMaterial() {
+          return null;
+        },
+      }),
+    );
+
+    await expect(
+      service.updateMaterial("material_public_123", {
+        title: "更新后的材料",
+        contentRichText: "<p>更新内容</p>",
+        profession: "logistics",
+        level: 4,
+        subject: "skill",
+        status: "available",
+        expectedUpdatedAt: createdAt.toISOString(),
+      }),
+    ).resolves.toEqual({
+      code: 409203,
+      message: "Material changed after it was loaded.",
+      data: null,
+    });
+  });
+
   it("lists materials with normalized pagination and filters", async () => {
     const receivedQueries: unknown[] = [];
     const service = createMaterialService(
@@ -132,6 +158,7 @@ describe("material service", () => {
         profession: "logistics",
         subject: "skill",
         status: "available",
+        expectedUpdatedAt: createdAt.toISOString(),
       }),
     ).resolves.toMatchObject({
       code: 0,
@@ -224,6 +251,7 @@ describe("material service", () => {
         level: 4,
         subject: "skill",
         status: "available",
+        expectedUpdatedAt: createdAt.toISOString(),
       }),
     ).resolves.toMatchObject({
       code: 0,
@@ -315,6 +343,7 @@ describe("material service", () => {
         level: 4,
         subject: "skill",
         status: "available",
+        expectedUpdatedAt: createdAt.toISOString(),
       }),
     ).resolves.toEqual({
       code: 409201,

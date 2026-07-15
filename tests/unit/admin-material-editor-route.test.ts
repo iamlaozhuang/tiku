@@ -417,6 +417,16 @@ describe("AdminMaterialEditorPage", () => {
       "/api/v1/materials/material-edit-001",
       expect.objectContaining({ method: "PATCH" }),
     );
+    const patchCall = fetchMock.mock.calls.find(
+      ([url, init]) =>
+        String(url) === "/api/v1/materials/material-edit-001" &&
+        init?.method === "PATCH",
+    );
+    expect(JSON.parse(String(patchCall?.[1]?.body))).toMatchObject({
+      expectedUpdatedAt: editableMaterial.updatedAt,
+      status: "available",
+      title: "编辑后的材料",
+    });
     expect(screen.getByRole("form", { name: "材料表单" })).toHaveAttribute(
       "data-admin-form-dirty-state",
       "clean",

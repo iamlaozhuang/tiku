@@ -8,7 +8,7 @@ Branch: `codex/p0-rc-04-content-paper-aggregate-snapshot`
 
 Worktree: `D:/tiku/.worktrees/p0-rc-04`
 
-Status: `in_progress`
+Status: `implementation_complete_pending_closeout`
 
 ## Recovery Baseline
 
@@ -112,3 +112,11 @@ Status: `in_progress`
 - 不改依赖、package/lockfile、env/secret、外部配置；不创建 PR、不 force push、不部署。
 - 不修改 `D:/tiku-readonly-audit`，不改原始 finding 状态。
 - 不处理 RC-05 及以后根因；知识关系、AI executor、answer/report 和 organization training 仅保持影响映射。
+
+## Implementation Outcome
+
+- F-0050、F-0051、F-0092、F-0093、F-0171 的静态整改边界已实现，finding 均保持独立且为 `confirmed`，未因同簇关系降级或合并。
+- focused regression `24/24` files、`283/283` tests；full unit `385/385` files、`2274/2274` tests；lint、typecheck、format、build、diff 均通过。
+- 两轮自对抗复核均通过；第一轮聚焦根因、事务、并发、幂等和安全，第二轮聚焦跨角色、状态机、API 契约与反向回归。
+- schema/migration 仅完成已批准的源码、静态测试和独立提交；database、runtime、browser/e2e 与 Provider 边界保持未执行。
+- 下一步仅执行 branch guards、可审查提交、ff-only 合入、fresh-master 门禁、普通 push 和隔离资源清理；这些动作全部成功前不领取 RC-05。

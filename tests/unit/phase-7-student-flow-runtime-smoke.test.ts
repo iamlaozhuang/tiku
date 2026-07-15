@@ -23,6 +23,8 @@ const paperSnapshot = {
           questionPublicId: "question-dev-single-choice",
           questionType: "single_choice",
           score: "5.0",
+          multiChoiceRule: "all_correct_only",
+          scoringMethod: "auto_match",
           standardAnswerLabels: ["A"],
           standardAnswerRichText: "A",
         },

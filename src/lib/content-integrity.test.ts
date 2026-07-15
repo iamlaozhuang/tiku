@@ -18,6 +18,7 @@ function createValidQuestionIntegrityInput(
     stemRichText: "Synthetic stem",
     analysisRichText: "Synthetic analysis",
     standardAnswerRichText: "A",
+    multiChoiceRule: "all_correct_only",
     scoringMethod: "auto_match",
     questionOptions: [
       { label: "A", contentRichText: "First answer", isCorrect: true },
@@ -95,6 +96,78 @@ describe("content integrity", () => {
       field: "fillBlankAnswers",
       message:
         "逐空答案必须包含有效答案和正数、0.5 粒度的分值；自动匹配至少需要一空。",
+    });
+  });
+
+  it.each([
+    { questionType: "single_choice", scoringMethod: "ai_scoring" },
+    { questionType: "short_answer", scoringMethod: "auto_match" },
+    { questionType: "case_analysis", scoringMethod: "auto_match" },
+    { questionType: "calculation", scoringMethod: "auto_match" },
+  ])("rejects an inconsistent scoring path: %#", (overrides) => {
+    const issues = getQuestionIntegrityIssues(
+      createValidQuestionIntegrityInput({
+        ...overrides,
+        questionOptions:
+          overrides.questionType === "single_choice"
+            ? createValidQuestionIntegrityInput().questionOptions
+            : [],
+        scoringPoints:
+          overrides.questionType === "single_choice"
+            ? []
+            : [{ description: "评分点", score: "1.0" }],
+      }),
+    );
+
+    expect(issues).toContainEqual({
+      field: "scoringMethod",
+      message: "题型与评分方式不匹配。",
+    });
+  });
+
+  it("rejects partial credit outside multi_choice", () => {
+    expect(
+      getQuestionIntegrityIssues(
+        createValidQuestionIntegrityInput({
+          multiChoiceRule: "partial_credit",
+        }),
+      ),
+    ).toContainEqual({
+      field: "multiChoiceRule",
+      message: "只有多选题可以使用多选评分规则。",
+    });
+  });
+
+  it("rejects mixed fill_blank scoring artifacts", () => {
+    expect(
+      getQuestionIntegrityIssues(
+        createValidQuestionIntegrityInput({
+          questionType: "fill_blank",
+          questionOptions: [],
+          standardAnswerRichText: "答案",
+          fillBlankAnswers: [{ standardAnswers: ["答案"], score: "1.0" }],
+          scoringPoints: [{ description: "不应并存", score: "1.0" }],
+        }),
+      ),
+    ).toContainEqual({
+      field: "scoringPoints",
+      message: "自动匹配填空题不能提交 AI 评分点。",
+    });
+
+    expect(
+      getQuestionIntegrityIssues(
+        createValidQuestionIntegrityInput({
+          questionType: "fill_blank",
+          scoringMethod: "ai_scoring",
+          questionOptions: [],
+          standardAnswerRichText: "答案",
+          fillBlankAnswers: [{ standardAnswers: ["答案"], score: "1.0" }],
+          scoringPoints: [{ description: "评分点", score: "1.0" }],
+        }),
+      ),
+    ).toContainEqual({
+      field: "fillBlankAnswers",
+      message: "AI 评分填空题不能提交逐空匹配答案。",
     });
   });
 });

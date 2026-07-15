@@ -88,6 +88,7 @@ export type AdminPaperOpsSummaryDto = {
   paperType: PaperType;
   year: number | null;
   totalScore: string;
+  revision: number;
   questionCount: number;
   questionTypeDistribution: AdminPaperQuestionTypeDistributionDto[];
   mockExamCount: number;

@@ -29,6 +29,7 @@ const paper: PaperDraftDto = {
   source: null,
   durationMinute: 90,
   totalScore: "10.0",
+  revision: 1,
   publishedAt: null,
   archivedAt: null,
   questionCount: 1,
@@ -44,6 +45,7 @@ const paper: PaperDraftDto = {
           sourceQuestionPublicId: "question_public_1",
           paperSectionSortOrder: 1,
           questionGroupSortOrder: null,
+          questionGroupPublicId: null,
           score: "5.0",
           sortOrder: 1,
           questionSnapshot: {
@@ -315,7 +317,12 @@ describe("paper composer model", () => {
                 profession: "logistics",
               },
               scoringPoints: [
-                { description: "要点", score: "4.0", sortOrder: 1 },
+                {
+                  publicId: "paper_scoring_point_public_1",
+                  description: "要点",
+                  score: "4.0",
+                  sortOrder: 1,
+                },
               ],
               materialSnapshot: {
                 materialPublicId: "material_public_1",
@@ -400,6 +407,84 @@ describe("AdminPaperComposerPage", () => {
     expect(screen.getByText(/已发布，只读查看/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "从题库选题" })).toBeNull();
     expect(screen.queryByRole("button", { name: "编辑题目设置" })).toBeNull();
+  });
+
+  it("reuses the same publish command after a response-loss retry", async () => {
+    localStorage.setItem("tiku.localSessionToken", "test-session");
+    const publishBodies: Record<string, unknown>[] = [];
+    let publishAttempt = 0;
+    const validPaper = { ...paper, totalScore: "5.0" };
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const url = String(input);
+
+      if (url === "/api/v1/sessions") {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              adminPublicId: "admin_public",
+              adminRoles: ["content_admin"],
+            },
+            session: { expiresAt: "2026-07-12T00:00:00.000Z" },
+          },
+        });
+      }
+
+      if (
+        url === `/api/v1/papers/${validPaper.publicId}` &&
+        (init?.method ?? "GET") === "GET"
+      ) {
+        return jsonResponse({
+          code: 0,
+          message: "ok",
+          data: { paper: validPaper },
+        });
+      }
+
+      if (
+        url === `/api/v1/papers/${validPaper.publicId}/publish` &&
+        init?.method === "POST"
+      ) {
+        publishBodies.push(JSON.parse(String(init.body)));
+        publishAttempt += 1;
+        return publishAttempt === 1
+          ? jsonResponse({ code: 503203, message: "unavailable", data: null })
+          : jsonResponse({
+              code: 0,
+              message: "ok",
+              data: {
+                paper: {
+                  ...validPaper,
+                  paperStatus: "published",
+                  revision: 2,
+                  publishedAt: "2026-07-11T01:00:00.000Z",
+                },
+                lockedQuestionPublicIds: ["question_public_1"],
+                lockedMaterialPublicIds: [],
+              },
+            });
+      }
+
+      throw new Error(`Unexpected request: ${url}`);
+    });
+
+    render(<AdminPaperComposerPage paperPublicId={validPaper.publicId} />);
+
+    const publishButton = await screen.findByRole("button", {
+      name: "发布试卷",
+    });
+    fireEvent.click(publishButton);
+    fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
+    await screen.findByText(/发布校验未通过/);
+
+    fireEvent.click(publishButton);
+    fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
+    await screen.findByText(/内容和评分规则现已锁定/);
+
+    expect(publishBodies).toHaveLength(2);
+    expect(publishBodies[1]).toEqual(publishBodies[0]);
   });
 
   it("restores the confirmation trigger after Escape closes the dialog", async () => {

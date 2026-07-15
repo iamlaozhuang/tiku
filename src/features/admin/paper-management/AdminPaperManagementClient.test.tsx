@@ -59,6 +59,7 @@ function createPaper(
     level: 3,
     subject: "theory",
     paperStatus: "draft",
+    revision: 1,
     paperType: "mock_paper",
     year: 2026,
     totalScore: "100.0",

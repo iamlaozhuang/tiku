@@ -62,6 +62,7 @@ function createPaperSnapshot(
             standardAnswerRichText: "<p>A</p>",
             analysisRichText: "<p>解析</p>",
             score: "1.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
           },
           {
@@ -73,7 +74,16 @@ function createPaperSnapshot(
             standardAnswerRichText: "<p>标准答案</p>",
             analysisRichText: "<p>解析</p>",
             score: "5.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "ai_scoring",
+            scoringPoints: [
+              {
+                scoringPointPublicId: "scoring_point_public_456",
+                description: "主观题评分点",
+                score: "5.0",
+                sortOrder: 1,
+              },
+            ],
           },
         ],
       },
@@ -112,6 +122,7 @@ function createQuestionOptionsOnlyPaperSnapshot(): Record<string, unknown> {
             standardAnswerRichText: "<p>A</p>",
             analysisRichText: "<p>analysis</p>",
             score: "5.0",
+            multiChoiceRule: "all_correct_only",
             scoringMethod: "auto_match",
           },
         ],
@@ -147,6 +158,7 @@ function createPaperSnapshotWithQuestionCount(
           standardAnswerRichText: "<p>A</p>",
           analysisRichText: "<p>analysis</p>",
           score: "1.0",
+          multiChoiceRule: "all_correct_only",
           scoringMethod: "auto_match",
         })),
       },
@@ -283,6 +295,110 @@ function createRepository(
 }
 
 describe("mock exam service", () => {
+  it("fails closed before start when the published snapshot scoring contract is invalid", async () => {
+    const invalidSnapshot = structuredClone(createPaperSnapshot());
+    const paperSections = invalidSnapshot.paperSections as Array<{
+      paperQuestions: Array<Record<string, unknown>>;
+    }>;
+    paperSections[0].paperQuestions[1].scoringPoints = [];
+    let createCalled = false;
+    const service = createMockExamService(
+      createRepository({
+        async findPublishedPaperByPublicId() {
+          return createPaper({ paper_snapshot: invalidSnapshot });
+        },
+        async createMockExam(input) {
+          createCalled = true;
+          return createMockExam({ public_id: input.publicId });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 422317,
+      message: "Mock exam paper scoring contract is invalid.",
+      data: null,
+    });
+    expect(createCalled).toBe(false);
+  });
+
+  it.each([
+    [
+      "a question is missing its stable paper identity",
+      (
+        paperSections: Array<{
+          paperQuestions: Array<Record<string, unknown>>;
+        }>,
+      ) => {
+        delete paperSections[0].paperQuestions[0].paperQuestionPublicId;
+      },
+    ],
+    [
+      "an objective question contains a malformed scoring point",
+      (
+        paperSections: Array<{
+          paperQuestions: Array<Record<string, unknown>>;
+        }>,
+      ) => {
+        paperSections[0].paperQuestions[0].scoringPoints = [{}];
+      },
+    ],
+    [
+      "a subjective question contains an extra malformed scoring point",
+      (
+        paperSections: Array<{
+          paperQuestions: Array<Record<string, unknown>>;
+        }>,
+      ) => {
+        const scoringPoints = paperSections[0].paperQuestions[1]
+          .scoringPoints as unknown[];
+        scoringPoints.push({
+          description: "missing stable identity",
+          score: "1.0",
+          sortOrder: 2,
+        });
+      },
+    ],
+  ])("fails closed before start when %s", async (_caseName, mutateSnapshot) => {
+    const invalidSnapshot = structuredClone(createPaperSnapshot());
+    const paperSections = invalidSnapshot.paperSections as Array<{
+      paperQuestions: Array<Record<string, unknown>>;
+    }>;
+    mutateSnapshot(paperSections);
+    let createCalled = false;
+    const service = createMockExamService(
+      createRepository({
+        async findPublishedPaperByPublicId() {
+          return createPaper({ paper_snapshot: invalidSnapshot });
+        },
+        async createMockExam() {
+          createCalled = true;
+
+          return createMockExam();
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 422317,
+      message: "Mock exam paper scoring contract is invalid.",
+      data: null,
+    });
+    expect(createCalled).toBe(false);
+  });
+
   it("starts a new authorized mock_exam with server deadline", async () => {
     const createdInputs: unknown[] = [];
     const service = createMockExamService(

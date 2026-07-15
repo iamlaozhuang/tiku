@@ -14,6 +14,7 @@ export type NormalizedPaperSectionInput = {
 };
 
 export type NormalizedQuestionGroupInput = {
+  publicId: string | null;
   title: string;
   materialPublicId: string;
   sortOrder: number;
@@ -25,7 +26,7 @@ export type NormalizedPaperScoringPointInput = {
   sortOrder: number;
 };
 
-export type NormalizedCreatePaperInput = {
+type NormalizedPaperMetadataInput = {
   name: string;
   profession: (typeof professionValues)[number];
   level: number;
@@ -37,9 +38,17 @@ export type NormalizedCreatePaperInput = {
   totalScore: string | null;
 };
 
-export type NormalizedUpdatePaperInput = NormalizedCreatePaperInput;
+export type NormalizedCreatePaperInput = NormalizedPaperMetadataInput & {
+  commandPublicId: string;
+};
+
+export type NormalizedUpdatePaperInput = NormalizedPaperMetadataInput & {
+  expectedRevision: number;
+};
 
 export type NormalizedAddPaperQuestionInput = {
+  commandPublicId: string;
+  expectedRevision: number;
   questionPublicId: string;
   score: string;
   sortOrder: number;
@@ -48,10 +57,19 @@ export type NormalizedAddPaperQuestionInput = {
 };
 
 export type NormalizedUpdatePaperQuestionInput = {
+  expectedRevision: number;
   paperSection: NormalizedPaperSectionInput | null;
   score: string;
   sortOrder: number;
   scoringPoints: NormalizedPaperScoringPointInput[];
+};
+
+export type NormalizedPaperRevisionInput = {
+  expectedRevision: number;
+};
+
+export type NormalizedPaperCommandInput = NormalizedPaperRevisionInput & {
+  commandPublicId: string;
 };
 
 export type NormalizedPaperListInput = NormalizedPagination & {
@@ -100,6 +118,18 @@ function normalizeRequiredText(value: unknown): string | null {
   const text = value.trim();
 
   return text.length === 0 ? null : text;
+}
+
+function normalizeCommandPublicId(value: unknown): string | null {
+  const publicId = normalizeRequiredText(value);
+
+  return publicId !== null && publicId.length <= 200 ? publicId : null;
+}
+
+function normalizeExpectedRevision(value: unknown): number | null {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
 }
 
 export function validateDraftPaperQuestionCount(
@@ -264,7 +294,7 @@ function normalizeDurationMinute(value: unknown): number | null | undefined {
 
 function normalizePaperMetadata(
   input: unknown,
-): ValidationResult<NormalizedCreatePaperInput> {
+): ValidationResult<NormalizedPaperMetadataInput> {
   if (!isRecord(input)) {
     return {
       success: false,
@@ -347,14 +377,26 @@ function normalizeQuestionGroupInput(
   }
 
   const title = normalizeRequiredText(value.title);
+  const publicId =
+    value.publicId === null || value.publicId === undefined
+      ? null
+      : normalizeRequiredText(value.publicId);
   const materialPublicId = normalizeRequiredText(value.materialPublicId);
   const sortOrder = normalizePositiveInteger(value.sortOrder);
 
-  if (title === null || materialPublicId === null || sortOrder === null) {
+  if (
+    title === null ||
+    (publicId === null &&
+      value.publicId !== null &&
+      value.publicId !== undefined) ||
+    materialPublicId === null ||
+    sortOrder === null
+  ) {
     return undefined;
   }
 
   return {
+    publicId,
     title,
     materialPublicId,
     sortOrder,
@@ -396,13 +438,33 @@ function normalizeScoringPoints(
 export function normalizeCreatePaperInput(
   input: unknown,
 ): ValidationResult<NormalizedCreatePaperInput> {
-  return normalizePaperMetadata(input);
+  const metadata = normalizePaperMetadata(input);
+  const commandPublicId = isRecord(input)
+    ? normalizeCommandPublicId(input.commandPublicId)
+    : null;
+
+  return !metadata.success || commandPublicId === null
+    ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+    : {
+        success: true,
+        value: { ...metadata.value, commandPublicId },
+      };
 }
 
 export function normalizeUpdatePaperInput(
   input: unknown,
 ): ValidationResult<NormalizedUpdatePaperInput> {
-  return normalizePaperMetadata(input);
+  const metadata = normalizePaperMetadata(input);
+  const expectedRevision = isRecord(input)
+    ? normalizeExpectedRevision(input.expectedRevision)
+    : null;
+
+  return !metadata.success || expectedRevision === null
+    ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+    : {
+        success: true,
+        value: { ...metadata.value, expectedRevision },
+      };
 }
 
 export function normalizeAddPaperQuestionInput(
@@ -416,12 +478,16 @@ export function normalizeAddPaperQuestionInput(
   }
 
   const questionPublicId = normalizeRequiredText(input.questionPublicId);
+  const commandPublicId = normalizeCommandPublicId(input.commandPublicId);
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
   const score = normalizeScore(input.score);
   const sortOrder = normalizePositiveInteger(input.sortOrder);
   const paperSection = normalizePaperSectionInput(input.paperSection);
   const questionGroup = normalizeQuestionGroupInput(input.questionGroup);
 
   if (
+    commandPublicId === null ||
+    expectedRevision === null ||
     questionPublicId === null ||
     score === null ||
     sortOrder === null ||
@@ -437,6 +503,8 @@ export function normalizeAddPaperQuestionInput(
   return {
     success: true,
     value: {
+      commandPublicId,
+      expectedRevision,
       questionPublicId,
       score,
       sortOrder,
@@ -457,6 +525,7 @@ export function normalizeUpdatePaperQuestionInput(
   }
 
   const score = normalizeScore(input.score);
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
   const sortOrder = normalizePositiveInteger(input.sortOrder);
   const scoringPoints = normalizeScoringPoints(input.scoringPoints);
   const paperSection =
@@ -465,6 +534,7 @@ export function normalizeUpdatePaperQuestionInput(
       : normalizePaperSectionInput(input.paperSection);
 
   if (
+    expectedRevision === null ||
     score === null ||
     sortOrder === null ||
     scoringPoints === null ||
@@ -479,12 +549,41 @@ export function normalizeUpdatePaperQuestionInput(
   return {
     success: true,
     value: {
+      expectedRevision,
       score,
       sortOrder,
       scoringPoints,
       paperSection,
     },
   };
+}
+
+export function normalizePaperRevisionInput(
+  input: unknown,
+): ValidationResult<NormalizedPaperRevisionInput> {
+  const expectedRevision = isRecord(input)
+    ? normalizeExpectedRevision(input.expectedRevision)
+    : null;
+
+  return expectedRevision === null
+    ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+    : { success: true, value: { expectedRevision } };
+}
+
+export function normalizePaperCommandInput(
+  input: unknown,
+): ValidationResult<NormalizedPaperCommandInput> {
+  const revisionInput = normalizePaperRevisionInput(input);
+  const commandPublicId = isRecord(input)
+    ? normalizeCommandPublicId(input.commandPublicId)
+    : null;
+
+  return !revisionInput.success || commandPublicId === null
+    ? { success: false, message: INVALID_PAPER_INPUT_MESSAGE }
+    : {
+        success: true,
+        value: { ...revisionInput.value, commandPublicId },
+      };
 }
 
 export function normalizePaperListInput(

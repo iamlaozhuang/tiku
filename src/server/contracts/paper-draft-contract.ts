@@ -41,6 +41,7 @@ export type QuestionSnapshotDto = {
 };
 
 export type PaperScoringPointDto = {
+  publicId: string;
   description: string;
   score: string;
   sortOrder: number;
@@ -51,6 +52,7 @@ export type PaperQuestionDto = {
   sourceQuestionPublicId: string;
   paperSectionSortOrder: number;
   questionGroupSortOrder: number | null;
+  questionGroupPublicId: string | null;
   score: string | null;
   sortOrder: number;
   questionSnapshot: QuestionSnapshotDto;
@@ -69,6 +71,7 @@ export type PaperSectionDto = {
 };
 
 export type QuestionGroupDto = {
+  publicId: string;
   title: string;
   materialPublicId: string;
   materialSnapshot: MaterialSnapshotDto;
@@ -87,6 +90,7 @@ export type PaperDraftDto = {
   source: string | null;
   durationMinute: number | null;
   totalScore: string | null;
+  revision: number;
   publishedAt: string | null;
   archivedAt: string | null;
   questionCount: number;
@@ -114,7 +118,9 @@ export type PaperPublishValidationIssueDto = {
     | "empty_paper_section"
     | "scoring_point_total_mismatch"
     | "fill_blank_score_total_mismatch"
-    | "source_reference_unresolved";
+    | "source_reference_unresolved"
+    | "question_scoring_contract_mismatch"
+    | "question_group_inconsistent";
   message: string;
 };
 

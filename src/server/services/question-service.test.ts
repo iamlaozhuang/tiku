@@ -147,6 +147,56 @@ function createRepository(
 }
 
 describe("question service", () => {
+  it("returns a stable conflict when the optimistic update loses the race", async () => {
+    const service = createQuestionService(
+      createRepository({
+        async updateQuestion() {
+          return null;
+        },
+      }),
+    );
+    const input = {
+      questionType: "single_choice",
+      profession: "logistics",
+      level: 4,
+      subject: "theory",
+      stemRichText: "<p>题干</p>",
+      analysisRichText: "<p>解析</p>",
+      standardAnswerRichText: "<p>A</p>",
+      multiChoiceRule: "all_correct_only",
+      scoringMethod: "auto_match",
+      materialPublicId: null,
+      questionOptions: [
+        {
+          label: "A",
+          contentRichText: "<p>正确</p>",
+          isCorrect: true,
+          sortOrder: 1,
+        },
+        {
+          label: "B",
+          contentRichText: "<p>错误</p>",
+          isCorrect: false,
+          sortOrder: 2,
+        },
+      ],
+      scoringPoints: [],
+      fillBlankAnswers: [],
+      knowledgeNodePublicIds: [],
+      tagPublicIds: [],
+      status: "available",
+      expectedUpdatedAt: createdAt.toISOString(),
+    };
+
+    await expect(
+      service.updateQuestion("question_public_123", input),
+    ).resolves.toEqual({
+      code: 409203,
+      message: "Question changed after it was loaded.",
+      data: null,
+    });
+  });
+
   it("lists questions with normalized pagination and question filters", async () => {
     const receivedQueries: unknown[] = [];
     const service = createQuestionService(
@@ -307,6 +357,7 @@ describe("question service", () => {
       service.updateQuestion("question_public_123", {
         ...input,
         status: "available",
+        expectedUpdatedAt: createdAt.toISOString(),
         analysisRichText: "<p>更新解析</p>",
       }),
     ).resolves.toMatchObject({
@@ -601,6 +652,7 @@ describe("question service", () => {
         analysisRichText: "<p>解析</p>",
         standardAnswerRichText: "<p>答案</p>",
         status: "available",
+        expectedUpdatedAt: createdAt.toISOString(),
         multiChoiceRule: "all_correct_only",
         scoringMethod: "ai_scoring",
         materialPublicId: null,

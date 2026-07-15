@@ -66,6 +66,7 @@ function createPaperQuestion(
     paper_section_sort_order: 1,
     question_group_id: null,
     question_group_sort_order: null,
+    question_group_public_id: null,
     question_snapshot: {
       questionPublicId: "question-public-001",
       questionStatus: "available",
@@ -129,6 +130,7 @@ function createPaper(
     created_at: createdAt,
     updated_at: createdAt,
     ...overrides,
+    revision: overrides.revision ?? 1,
   };
 }
 
@@ -228,12 +230,11 @@ function createPaperRepository(): PaperDraftRepository {
     async deletePaper() {
       return true;
     },
-    async copyPaper(input) {
+    async copyPaper() {
       return createPaper({
         public_id: "paper-copy-public-001",
-        name: `${input.sourcePaper.name}（副本）`,
+        name: "专卖理论模拟卷（副本）",
         paper_status: "draft",
-        paper_sections: input.sourcePaper.paper_sections,
       });
     },
   };
@@ -338,7 +339,10 @@ describe("phase 9 paper composition lifecycle runtime", () => {
       new Request("http://localhost/api/v1/papers", {
         method: "POST",
         headers: { authorization: "Bearer admin-session-token" },
-        body: JSON.stringify(paperInput),
+        body: JSON.stringify({
+          ...paperInput,
+          commandPublicId: "paper-command-create-001",
+        }),
       }),
     );
 
@@ -376,7 +380,10 @@ describe("phase 9 paper composition lifecycle runtime", () => {
       new Request("http://localhost/api/v1/papers", {
         method: "POST",
         headers,
-        body: JSON.stringify(paperInput),
+        body: JSON.stringify({
+          ...paperInput,
+          commandPublicId: "paper-command-create-002",
+        }),
       }),
     );
     const addQuestionResponse = await handlers.papers.questions.POST(
@@ -384,6 +391,8 @@ describe("phase 9 paper composition lifecycle runtime", () => {
         method: "POST",
         headers,
         body: JSON.stringify({
+          commandPublicId: "paper-command-add-001",
+          expectedRevision: 1,
           questionPublicId: "question-public-001",
           score: "5.0",
           sortOrder: 1,
@@ -401,6 +410,10 @@ describe("phase 9 paper composition lifecycle runtime", () => {
       new Request("http://localhost/api/v1/papers/paper-public-001/publish", {
         method: "POST",
         headers,
+        body: JSON.stringify({
+          commandPublicId: "paper-command-publish-001",
+          expectedRevision: 1,
+        }),
       }),
       paperContext,
     );
@@ -408,6 +421,7 @@ describe("phase 9 paper composition lifecycle runtime", () => {
       new Request("http://localhost/api/v1/papers/paper-public-001/archive", {
         method: "POST",
         headers,
+        body: JSON.stringify({ expectedRevision: 1 }),
       }),
       paperContext,
     );
@@ -415,6 +429,10 @@ describe("phase 9 paper composition lifecycle runtime", () => {
       new Request("http://localhost/api/v1/papers/paper-public-001/copy", {
         method: "POST",
         headers,
+        body: JSON.stringify({
+          commandPublicId: "paper-command-copy-001",
+          expectedRevision: 1,
+        }),
       }),
       paperContext,
     );

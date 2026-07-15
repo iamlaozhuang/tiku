@@ -9,6 +9,7 @@ import {
   ilike,
   inArray,
   or,
+  sql,
   type SQL,
 } from "drizzle-orm";
 
@@ -89,7 +90,7 @@ export type MaterialRepository = {
   updateMaterial(
     input: UpdateMaterialInput,
     context?: ContentMutationContext,
-  ): Promise<MaterialAccessRow>;
+  ): Promise<MaterialAccessRow | null>;
   disableMaterial(
     publicId: string,
     context?: ContentMutationContext,
@@ -182,14 +183,23 @@ export function createPostgresMaterialRepository(
           status: input.status,
           subject: input.subject,
           title: input.title,
-          updated_at: new Date(),
+          updated_at: sql`greatest(
+            clock_timestamp(),
+            ${material.updated_at} + interval '1 millisecond'
+          )`,
           updated_by_admin_id: actorAdminId,
         })
-        .where(eq(material.public_id, input.publicId))
+        .where(
+          and(
+            eq(material.public_id, input.publicId),
+            sql`date_trunc('milliseconds', ${material.updated_at}) = ${input.expectedUpdatedAt}`,
+            eq(material.is_locked, false),
+          ),
+        )
         .returning();
 
       if (row === undefined) {
-        throw new Error("Updated material could not be loaded.");
+        return null;
       }
 
       return row;

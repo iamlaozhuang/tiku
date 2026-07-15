@@ -254,7 +254,9 @@ activeTasks:
       - src/lib/question-scoring-contract.ts
       - src/lib/question-scoring-contract.test.ts
       - src/server/contracts/paper-draft-contract.ts
+      - src/server/contracts/admin-content-knowledge-ops-contract.ts
       - src/server/mappers/paper-draft-mapper.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
       - src/server/validators/question.ts
       - src/server/validators/question.test.ts
       - src/server/validators/material.ts
@@ -275,8 +277,12 @@ activeTasks:
       - src/server/services/paper-draft-route.test.ts
       - src/server/services/paper-draft-service.ts
       - src/server/services/paper-draft-service.test.ts
+      - src/server/services/paper-composition-lifecycle-runtime.ts
+      - src/server/services/admin-content-knowledge-ops-service.ts
       - src/server/services/mock-exam-service.ts
       - src/server/services/mock-exam-service.test.ts
+      - src/server/services/practice-service.ts
+      - src/server/services/practice-service.test.ts
       - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
       - src/features/admin/question-material-management/AdminQuestionEditorPage.tsx
       - src/features/admin/question-material-management/AdminMaterialEditorPage.tsx
@@ -289,6 +295,12 @@ activeTasks:
       - src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx
       - src/features/admin/paper-management/AdminPaperManagementClient.tsx
       - src/features/admin/paper-management/AdminPaperManagementClient.test.tsx
+      - src/components/admin/PaperManagement/AdminPaperManagement.tsx
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/admin-question-editor-route.test.ts
+      - tests/unit/admin-material-editor-route.test.ts
+      - tests/unit/phase-7-admin-flow-runtime-smoke.test.ts
+      - tests/unit/phase-7-student-flow-runtime-smoke.test.ts
       - tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts
       - tests/unit/phase-9-content-question-material-runtime.test.ts
       - tests/unit/paper-draft-repository-composition-guard.test.ts

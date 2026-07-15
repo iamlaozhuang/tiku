@@ -233,7 +233,11 @@ export function AdminMaterialEditorPage({
           headers: { "content-type": "application/json" },
           body: JSON.stringify(
             isEditMode
-              ? { ...createMaterialInput(values), status: "available" }
+              ? {
+                  ...createMaterialInput(values),
+                  expectedUpdatedAt: material?.updatedAt ?? "",
+                  status: "available",
+                }
               : createMaterialInput(values),
           ),
         },

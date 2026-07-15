@@ -82,6 +82,7 @@ import {
   MAX_QUESTION_RICH_TEXT_LENGTH,
   type ContentIntegrityIssue,
 } from "@/lib/content-integrity";
+import { getDefaultScoringConfiguration } from "@/lib/question-scoring-contract";
 
 import {
   AdminErrorState,
@@ -472,8 +473,16 @@ export function createDefaultMaterialFormValues(): MaterialFormValues {
 export function createQuestionFormValuesFromQuestion(
   question: QuestionDto,
 ): QuestionFormValues {
+  const defaultScoringConfiguration = getDefaultScoringConfiguration(
+    question.questionType,
+  );
+  const scoringMethod =
+    question.questionType === "fill_blank"
+      ? question.scoringMethod
+      : defaultScoringConfiguration.scoringMethod;
+
   return {
-    analysisRichText: stripRichText(question.analysisRichText),
+    analysisRichText: question.analysisRichText,
     fillBlankAnswers: (question.fillBlankAnswers ?? []).map(
       (fillBlankAnswer) => ({
         score: fillBlankAnswer.score,
@@ -485,27 +494,32 @@ export function createQuestionFormValuesFromQuestion(
     ),
     level: String(question.level),
     materialPublicId: question.materialPublicId ?? "",
-    multiChoiceRule: question.multiChoiceRule,
+    multiChoiceRule:
+      question.questionType === "multi_choice"
+        ? question.multiChoiceRule
+        : defaultScoringConfiguration.multiChoiceRule,
     profession: question.profession,
     questionOptions:
       question.questionOptions.length === 0
         ? createDefaultQuestionOptions(question.questionType)
         : question.questionOptions.map((questionOption) => ({
-            contentRichText: stripRichText(questionOption.contentRichText),
+            contentRichText: questionOption.contentRichText,
             isCorrect: questionOption.isCorrect,
             label: questionOption.label,
           })),
     questionType: question.questionType,
-    scoringMethod: question.scoringMethod,
+    scoringMethod,
     scoringPoints:
-      question.scoringPoints.length === 0
-        ? createDefaultScoringPoints()
-        : question.scoringPoints.map((scoringPoint) => ({
-            description: scoringPoint.description,
-            score: scoringPoint.score,
-          })),
-    standardAnswerRichText: stripRichText(question.standardAnswerRichText),
-    stemRichText: stripRichText(question.stemRichText),
+      scoringMethod !== "ai_scoring"
+        ? []
+        : question.scoringPoints.length === 0
+          ? createDefaultScoringPoints()
+          : question.scoringPoints.map((scoringPoint) => ({
+              description: scoringPoint.description,
+              score: scoringPoint.score,
+            })),
+    standardAnswerRichText: question.standardAnswerRichText,
+    stemRichText: question.stemRichText,
     subject: question.subject,
     tagPublicIdsText: formatPublicIdList(question.tagPublicIds),
   };
@@ -515,7 +529,7 @@ export function createMaterialFormValuesFromMaterial(
   material: MaterialDto,
 ): MaterialFormValues {
   return {
-    contentRichText: stripRichText(material.contentRichText),
+    contentRichText: material.contentRichText,
     level: String(material.level),
     profession: material.profession,
     subject: material.subject,
@@ -828,28 +842,32 @@ export function createQuestionInput(
           sortOrder: optionIndex + 1,
         }))
       : [],
-    scoringPoints: isOptionQuestion
-      ? []
-      : getPersistableScoringPoints(values.scoringPoints).map(
-          (scoringPoint, pointIndex) => ({
-            description: scoringPoint.description,
-            score: scoringPoint.score,
-            sortOrder: pointIndex + 1,
-          }),
-        ),
+    scoringPoints:
+      isOptionQuestion || values.scoringMethod !== "ai_scoring"
+        ? []
+        : getPersistableScoringPoints(values.scoringPoints).map(
+            (scoringPoint, pointIndex) => ({
+              description: scoringPoint.description,
+              score: scoringPoint.score,
+              sortOrder: pointIndex + 1,
+            }),
+          ),
     fillBlankAnswers:
-      bindings.fillBlankAnswers ??
-      getPersistableFillBlankAnswers(values.fillBlankAnswers).map(
-        (fillBlankAnswer, blankIndex) => ({
-          blankKey: `blank_${blankIndex + 1}`,
-          standardAnswers: fillBlankAnswer.standardAnswersText
-            .split("|")
-            .map((answer) => answer.trim())
-            .filter((answer) => answer.length > 0),
-          score: fillBlankAnswer.score,
-          sortOrder: blankIndex + 1,
-        }),
-      ),
+      values.questionType !== "fill_blank" ||
+      values.scoringMethod !== "auto_match"
+        ? []
+        : (bindings.fillBlankAnswers ??
+          getPersistableFillBlankAnswers(values.fillBlankAnswers).map(
+            (fillBlankAnswer, blankIndex) => ({
+              blankKey: `blank_${blankIndex + 1}`,
+              standardAnswers: fillBlankAnswer.standardAnswersText
+                .split("|")
+                .map((answer) => answer.trim())
+                .filter((answer) => answer.length > 0),
+              score: fillBlankAnswer.score,
+              sortOrder: blankIndex + 1,
+            }),
+          )),
     knowledgeNodePublicIds: bindings.knowledgeNodePublicIds,
     tagPublicIds: bindings.tagPublicIds,
   };
@@ -894,6 +912,7 @@ function createQuestionInputFromQuestion(
     scoringPoints: question.scoringPoints,
     fillBlankAnswers: question.fillBlankAnswers ?? [],
     knowledgeNodePublicIds,
+    expectedUpdatedAt: question.updatedAt,
     tagPublicIds: question.tagPublicIds,
     status: question.status,
   };
@@ -1382,6 +1401,12 @@ export function AdminQuestionMaterialManagement({
     setContentMutationFeedback(null);
 
     try {
+      const editedQuestion =
+        displayedActiveForm.mode === "edit"
+          ? (questions.find(
+              (question) => question.publicId === displayedActiveForm.publicId,
+            ) ?? null)
+          : null;
       const response = await mutateAdminApi<{ question: QuestionDto }>(
         displayedActiveForm.mode === "create"
           ? "/api/v1/questions"
@@ -1400,6 +1425,7 @@ export function AdminQuestionMaterialManagement({
               ),
               tagPublicIds: parsePublicIdList(values.tagPublicIdsText),
             }),
+            expectedUpdatedAt: editedQuestion?.updatedAt ?? "",
             status: "available",
           };
         })(),
@@ -1460,6 +1486,12 @@ export function AdminQuestionMaterialManagement({
     setContentMutationFeedback(null);
 
     try {
+      const editedMaterial =
+        displayedActiveForm.mode === "edit"
+          ? (materials.find(
+              (material) => material.publicId === displayedActiveForm.publicId,
+            ) ?? null)
+          : null;
       const response = await mutateAdminApi<{ material: MaterialDto }>(
         displayedActiveForm.mode === "create"
           ? "/api/v1/materials"
@@ -1470,6 +1502,7 @@ export function AdminQuestionMaterialManagement({
           ? createMaterialInput(values)
           : {
               ...createMaterialInput(values),
+              expectedUpdatedAt: editedMaterial?.updatedAt ?? "",
               status: "available",
             },
       );
@@ -2390,17 +2423,24 @@ export function AdminQuestionEditorForm({
         event.preventDefault();
         const integrityIssues = getQuestionIntegrityIssues({
           ...formValues,
-          fillBlankAnswers: getPersistableFillBlankAnswers(
-            formValues.fillBlankAnswers,
-          ).map((fillBlankAnswer) => ({
-            score: fillBlankAnswer.score,
-            standardAnswers: fillBlankAnswer.standardAnswersText
-              .split("|")
-              .map((answer) => answer.trim())
-              .filter((answer) => answer.length > 0),
-          })),
+          fillBlankAnswers:
+            formValues.questionType === "fill_blank" &&
+            formValues.scoringMethod === "auto_match"
+              ? getPersistableFillBlankAnswers(formValues.fillBlankAnswers).map(
+                  (fillBlankAnswer) => ({
+                    score: fillBlankAnswer.score,
+                    standardAnswers: fillBlankAnswer.standardAnswersText
+                      .split("|")
+                      .map((answer) => answer.trim())
+                      .filter((answer) => answer.length > 0),
+                  }),
+                )
+              : [],
           level: formValues.level,
-          scoringPoints: getPersistableScoringPoints(formValues.scoringPoints),
+          scoringPoints:
+            formValues.scoringMethod === "ai_scoring"
+              ? getPersistableScoringPoints(formValues.scoringPoints)
+              : [],
         });
         setFormIssues(integrityIssues);
         if (integrityIssues.length > 0) {
@@ -2428,6 +2468,8 @@ export function AdminQuestionEditorForm({
           value={formValues.questionType}
           onChange={(value) => {
             const questionType = value as QuestionType;
+            const scoringConfiguration =
+              getDefaultScoringConfiguration(questionType);
 
             setFormValues({
               ...formValues,
@@ -2438,11 +2480,15 @@ export function AdminQuestionEditorForm({
                     ? createDefaultFillBlankAnswers()
                     : formValues.fillBlankAnswers,
               questionOptions: createDefaultQuestionOptions(questionType),
+              multiChoiceRule: scoringConfiguration.multiChoiceRule,
+              scoringMethod: scoringConfiguration.scoringMethod,
               scoringPoints:
-                !optionQuestionTypes.has(questionType) &&
+                scoringConfiguration.scoringMethod === "ai_scoring" &&
                 formValues.scoringPoints.length === 0
                   ? createDefaultScoringPoints()
-                  : formValues.scoringPoints,
+                  : optionQuestionTypes.has(questionType)
+                    ? []
+                    : formValues.scoringPoints,
               questionType,
               standardAnswerRichText:
                 questionType === "true_false"
@@ -2509,12 +2555,27 @@ export function AdminQuestionEditorForm({
           label="评分方式"
           options={Object.entries(scoringMethodLabels)}
           value={formValues.scoringMethod}
-          onChange={(value) =>
+          onChange={(value) => {
+            const scoringMethod = value as ScoringMethod;
+
             setFormValues({
               ...formValues,
-              scoringMethod: value as ScoringMethod,
-            })
-          }
+              fillBlankAnswers:
+                formValues.questionType === "fill_blank" &&
+                scoringMethod === "auto_match"
+                  ? formValues.fillBlankAnswers.length === 0
+                    ? createDefaultFillBlankAnswers()
+                    : formValues.fillBlankAnswers
+                  : formValues.fillBlankAnswers,
+              scoringMethod,
+              scoringPoints:
+                scoringMethod === "ai_scoring" &&
+                formValues.scoringPoints.length === 0
+                  ? createDefaultScoringPoints()
+                  : formValues.scoringPoints,
+            });
+          }}
+          disabled={formValues.questionType !== "fill_blank"}
         />
         <QuestionFormSelect
           label="多选评分规则"
@@ -2526,6 +2587,7 @@ export function AdminQuestionEditorForm({
               multiChoiceRule: value as MultiChoiceRule,
             })
           }
+          disabled={formValues.questionType !== "multi_choice"}
         />
         <label className="grid gap-2 text-sm font-medium">
           <span className="text-text-secondary">关联材料</span>
@@ -3200,6 +3262,7 @@ function formatBindingOptionNames(
 }
 
 function QuestionFormSelect({
+  disabled = false,
   error = null,
   fieldName,
   label,
@@ -3207,6 +3270,7 @@ function QuestionFormSelect({
   value,
   onChange,
 }: {
+  disabled?: boolean;
   error?: string | null;
   fieldName?: string;
   label: string;
@@ -3227,6 +3291,7 @@ function QuestionFormSelect({
         aria-invalid={error !== null}
         className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-3 py-1 text-sm outline-none focus-visible:ring-3"
         data-field={fieldName}
+        disabled={disabled}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >

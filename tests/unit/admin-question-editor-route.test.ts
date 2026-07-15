@@ -406,6 +406,7 @@ describe("AdminQuestionEditorPage", () => {
     );
     expect(patchCalls).toHaveLength(1);
     expect(JSON.parse(String(patchCalls[0]?.[1]?.body))).toMatchObject({
+      expectedUpdatedAt: editableQuestion.updatedAt,
       status: "available",
       stemRichText: "更新后的待编辑题干",
     });
@@ -603,6 +604,7 @@ describe("AdminQuestionEditorPage", () => {
     );
     expect(patchCalls).toHaveLength(1);
     expect(JSON.parse(String(patchCalls[0]?.[1]?.body))).toMatchObject({
+      expectedUpdatedAt: editableQuestion.updatedAt,
       status: "available",
     });
   });

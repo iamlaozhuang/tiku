@@ -101,6 +101,7 @@ export const adminPaperManagementFixture: AdminPaperManagementFixture = {
         publishedAt: "2026-05-19T08:00:00.000Z",
         archivedAt: null,
         questionCount: 42,
+        revision: 1,
         paperSections: [
           {
             title: "单选题",
@@ -119,6 +120,7 @@ export const adminPaperManagementFixture: AdminPaperManagementFixture = {
         ],
         questionGroups: [
           {
+            publicId: "question-group-marketing-001",
             title: "区域市场材料",
             materialPublicId: "material-marketing-001",
             materialSnapshot: {
@@ -171,6 +173,7 @@ export const adminPaperManagementFixture: AdminPaperManagementFixture = {
         publishedAt: null,
         archivedAt: null,
         questionCount: 8,
+        revision: 1,
         paperSections: [
           {
             title: "技能实务",
@@ -213,6 +216,7 @@ export const adminPaperManagementFixture: AdminPaperManagementFixture = {
         publishedAt: "2026-05-18T03:00:00.000Z",
         archivedAt: "2026-05-19T06:10:00.000Z",
         questionCount: 36,
+        revision: 1,
         paperSections: [
           {
             title: "法规判断",

@@ -52,9 +52,9 @@ type QuestionEditorTarget = {
   paperSection: PaperSectionDto;
 };
 type PendingAction =
-  | { kind: "publish" }
+  | { kind: "publish"; commandPublicId: string }
   | { kind: "archive" }
-  | { kind: "copy" }
+  | { kind: "copy"; commandPublicId: string }
   | { kind: "remove"; paperQuestionPublicId: string };
 
 function stripRichText(value: string) {
@@ -72,6 +72,15 @@ function statusLabel(paper: PaperDraftDto) {
 
 function mutationErrorMessage(action: string) {
   return `${action}失败。当前页面已保留，请刷新数据后重试。`;
+}
+
+function createPaperCommandPublicId(commandKind: string): string {
+  const uniqueSuffix =
+    typeof globalThis.crypto?.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  return `paper-command-${commandKind}-${uniqueSuffix}`;
 }
 
 async function mutatePaperApi<TData>(
@@ -107,6 +116,30 @@ export function AdminPaperComposerPage({
   const [copiedPaperPublicId, setCopiedPaperPublicId] = useState<string | null>(
     null,
   );
+  const paperCommandPublicIdsRef = useRef(new Map<string, string>());
+
+  function getOrCreatePaperCommandPublicId(
+    commandKey: string,
+    commandKind: string,
+  ): string {
+    const existing = paperCommandPublicIdsRef.current.get(commandKey);
+
+    if (existing !== undefined) {
+      return existing;
+    }
+
+    const commandPublicId = createPaperCommandPublicId(commandKind);
+    paperCommandPublicIdsRef.current.set(commandKey, commandPublicId);
+    return commandPublicId;
+  }
+
+  function createLifecycleCommandKey(commandKind: "publish" | "copy") {
+    return `${commandKind}:${paperPublicId}:${paper?.revision ?? 0}`;
+  }
+
+  function releasePaperCommandPublicId(commandKey: string) {
+    paperCommandPublicIdsRef.current.delete(commandKey);
+  }
 
   const loadPaper = useCallback(async () => {
     const response = await fetchAdminApi<{ paper: PaperDraftDto }>(
@@ -156,15 +189,27 @@ export function AdminPaperComposerPage({
 
   async function handleAddQuestion(input: PaperQuestionAddInput) {
     setActionError(null);
+    const expectedRevision = paper?.revision ?? 0;
+    const commandKey = `add_question:${paperPublicId}:${expectedRevision}:${JSON.stringify(
+      input,
+    )}`;
     const response = await mutatePaperApi(
       `/api/v1/papers/${paperPublicId}/questions`,
       "POST",
-      input,
+      {
+        ...input,
+        commandPublicId: getOrCreatePaperCommandPublicId(
+          commandKey,
+          "add-question",
+        ),
+        expectedRevision,
+      },
     );
     if (response.code !== 0) {
       setActionError(mutationErrorMessage("加入题目"));
       return false;
     }
+    releasePaperCommandPublicId(commandKey);
     await loadPaper();
     setActionMessage("题目已加入试卷，并保存当前题目与材料快照。");
     return true;
@@ -176,7 +221,7 @@ export function AdminPaperComposerPage({
     const response = await mutatePaperApi(
       `/api/v1/papers/${paperPublicId}/questions/${editorTarget.paperQuestion.publicId}`,
       "PATCH",
-      input,
+      { ...input, expectedRevision: paper?.revision ?? 0 },
     );
     if (response.code !== 0) {
       setActionError(mutationErrorMessage("保存题目设置"));
@@ -191,6 +236,7 @@ export function AdminPaperComposerPage({
     const response = await mutatePaperApi(
       `/api/v1/papers/${paperPublicId}/questions/${paperQuestionPublicId}`,
       "DELETE",
+      { expectedRevision: paper?.revision ?? 0 },
     );
     if (response.code !== 0) {
       setActionError(mutationErrorMessage("移出题目"));
@@ -213,11 +259,16 @@ export function AdminPaperComposerPage({
         const response = await mutatePaperApi<PaperPublishResultDto>(
           `/api/v1/papers/${paperPublicId}/publish`,
           "POST",
+          {
+            commandPublicId: action.commandPublicId,
+            expectedRevision: paper?.revision ?? 0,
+          },
         );
         if (response.code !== 0 || response.data === null) {
           setActionError("发布校验未通过。请按右侧阻断项逐项处理后重新发布。");
           return;
         }
+        releasePaperCommandPublicId(createLifecycleCommandKey("publish"));
         setPaper(response.data.paper);
         setActionMessage("试卷已发布，内容和评分规则现已锁定。");
         return;
@@ -227,6 +278,7 @@ export function AdminPaperComposerPage({
         const response = await mutatePaperApi<{ paper: PaperDraftDto }>(
           `/api/v1/papers/${paperPublicId}/archive`,
           "POST",
+          { expectedRevision: paper?.revision ?? 0 },
         );
         if (response.code !== 0 || response.data === null) {
           setActionError(mutationErrorMessage("下架试卷"));
@@ -240,11 +292,16 @@ export function AdminPaperComposerPage({
       const response = await mutatePaperApi<PaperCopyResultDto>(
         `/api/v1/papers/${paperPublicId}/copy`,
         "POST",
+        {
+          commandPublicId: action.commandPublicId,
+          expectedRevision: paper?.revision ?? 0,
+        },
       );
       if (response.code !== 0 || response.data === null) {
         setActionError(mutationErrorMessage("复制试卷"));
         return;
       }
+      releasePaperCommandPublicId(createLifecycleCommandKey("copy"));
       setCopiedPaperPublicId(response.data.paper.publicId);
       setActionMessage("已复制为新草稿，可进入新草稿继续组卷。");
     } finally {
@@ -314,7 +371,15 @@ export function AdminPaperComposerPage({
                   disabled={validation.blockers.length > 0}
                   type="button"
                   variant="outline"
-                  onClick={() => setPendingAction({ kind: "publish" })}
+                  onClick={() =>
+                    setPendingAction({
+                      kind: "publish",
+                      commandPublicId: getOrCreatePaperCommandPublicId(
+                        createLifecycleCommandKey("publish"),
+                        "publish",
+                      ),
+                    })
+                  }
                 >
                   <FileCheck2 aria-hidden="true" data-icon="inline-start" />
                   发布试卷
@@ -335,7 +400,15 @@ export function AdminPaperComposerPage({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setPendingAction({ kind: "copy" })}
+                onClick={() =>
+                  setPendingAction({
+                    kind: "copy",
+                    commandPublicId: getOrCreatePaperCommandPublicId(
+                      createLifecycleCommandKey("copy"),
+                      "copy",
+                    ),
+                  })
+                }
               >
                 <Copy aria-hidden="true" data-icon="inline-start" />
                 复制为新草稿

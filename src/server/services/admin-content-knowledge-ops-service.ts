@@ -98,6 +98,7 @@ const samplePapers: AdminPaperOpsListDto["papers"] = [
     level: 3,
     subject: "theory",
     paperStatus: "published",
+    revision: 1,
     paperType: "mock_paper",
     year: 2026,
     totalScore: "100",

@@ -55,6 +55,7 @@ export type QuestionServiceOptions = {
 const INVALID_QUESTION_INPUT_CODE = 422202;
 const QUESTION_NOT_FOUND_CODE = 404202;
 const QUESTION_LOCKED_CODE = 409202;
+const QUESTION_VERSION_CONFLICT_CODE = 409203;
 const QUESTION_RUNTIME_UNAVAILABLE_CODE = 503202;
 
 function createInvalidQuestionInputResponse(): ApiResponse<null> {
@@ -148,6 +149,13 @@ export function createQuestionService(
         },
         options.mutationContext,
       );
+
+      if (updatedQuestion === null) {
+        return createErrorResponse(
+          QUESTION_VERSION_CONFLICT_CODE,
+          "Question changed after it was loaded.",
+        );
+      }
 
       return createSuccessResponse(mapQuestionResultToApi(updatedQuestion));
     },

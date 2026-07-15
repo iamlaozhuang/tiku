@@ -18,17 +18,23 @@ import {
   mapPaperDraftToApi,
   mapPaperQuestionResultToApi,
 } from "../mappers/paper-draft-mapper";
-import type { PaperDraftRepository } from "../repositories/paper-draft-repository";
+import {
+  PaperCommandConflictError,
+  type PaperDraftRepository,
+} from "../repositories/paper-draft-repository";
 import type {
   PaperDraftAccessRow,
   PaperQuestionAccessRow,
   PaperSectionAccessRow,
 } from "../repositories/paper-draft-repository";
 import type { ContentMutationContext } from "../repositories/question-repository";
+import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
 import {
   normalizeAddPaperQuestionInput,
   normalizeCreatePaperInput,
   normalizePaperListInput,
+  normalizePaperCommandInput,
+  normalizePaperRevisionInput,
   normalizeUpdatePaperInput,
   normalizeUpdatePaperQuestionInput,
   validateDraftPaperQuestionCount,
@@ -57,17 +63,24 @@ export type PaperDraftService = {
   removePaperQuestion(
     paperPublicId: string,
     paperQuestionPublicId: string,
+    input: unknown,
   ): Promise<ApiResponse<PaperDraftResultDto | null>>;
   publishPaper(
     publicId: string,
+    input: unknown,
   ): Promise<ApiResponse<PaperPublishResultDto | null>>;
   archivePaper(
     publicId: string,
+    input: unknown,
   ): Promise<ApiResponse<PaperDraftResultDto | null>>;
   deletePaper(
     publicId: string,
+    input: unknown,
   ): Promise<ApiResponse<PaperDeleteResultDto | null>>;
-  copyPaper(publicId: string): Promise<ApiResponse<PaperCopyResultDto | null>>;
+  copyPaper(
+    publicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<PaperCopyResultDto | null>>;
 };
 
 export type PaperDraftServiceOptions = {
@@ -82,6 +95,7 @@ const PAPER_PUBLISH_VALIDATION_CODE = 422204;
 const PAPER_QUESTION_COUNT_VALIDATION_CODE = 422205;
 const PAPER_DELETE_CONFLICT_CODE = 409205;
 const PAPER_COPY_CONFLICT_CODE = 409206;
+const PAPER_COMMAND_CONFLICT_CODE = 409207;
 const PAPER_RUNTIME_UNAVAILABLE_CODE = 503203;
 const PAPER_SECTION_CONTRACT_TERM = "paper_section";
 const QUESTION_GROUP_CONTRACT_TERM = "question_group";
@@ -155,35 +169,51 @@ function createPaperCopyConflictResponse(): ApiResponse<null> {
   );
 }
 
+function createPaperCommandConflictResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_COMMAND_CONFLICT_CODE,
+    "Paper command conflicts with an existing request.",
+  );
+}
+
 function convertScoreToHalfPoints(score: string | null): number | null {
   if (score === null) {
     return null;
   }
 
   const parsedScore = Number(score);
+  const halfPoints = parsedScore * 2;
 
-  if (!Number.isFinite(parsedScore)) {
+  if (
+    !Number.isFinite(parsedScore) ||
+    parsedScore <= 0 ||
+    !Number.isInteger(halfPoints)
+  ) {
     return null;
   }
 
-  return Math.round(parsedScore * 2);
+  return halfPoints;
 }
 
 function isSubjectivePaperQuestion(
   paperQuestion: PaperQuestionAccessRow,
 ): boolean {
   return (
-    paperQuestion.question_snapshot.questionType === "short_answer" ||
-    paperQuestion.question_snapshot.questionType === "case_analysis" ||
-    paperQuestion.question_snapshot.questionType === "calculation" ||
-    paperQuestion.question_snapshot.scoringMethod === "ai_scoring"
+    paperQuestion.question_snapshot.scoringMethod === "ai_scoring" &&
+    (paperQuestion.question_snapshot.questionType === "fill_blank" ||
+      paperQuestion.question_snapshot.questionType === "short_answer" ||
+      paperQuestion.question_snapshot.questionType === "case_analysis" ||
+      paperQuestion.question_snapshot.questionType === "calculation")
   );
 }
 
 function isFillBlankPaperQuestion(
   paperQuestion: PaperQuestionAccessRow,
 ): boolean {
-  return paperQuestion.question_snapshot.questionType === "fill_blank";
+  return (
+    paperQuestion.question_snapshot.questionType === "fill_blank" &&
+    paperQuestion.question_snapshot.scoringMethod === "auto_match"
+  );
 }
 
 function listPaperQuestions(
@@ -248,15 +278,20 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
   const scoringPointMismatch = paperQuestions.some((paperQuestion) => {
     const questionScore = convertScoreToHalfPoints(paperQuestion.score);
 
-    if (questionScore === null || !isSubjectivePaperQuestion(paperQuestion)) {
-      return false;
+    if (!isSubjectivePaperQuestion(paperQuestion)) {
+      return paperQuestion.scoring_points.length > 0;
     }
 
     const scoringPointScores = paperQuestion.scoring_points.map(
-      (scoringPoint) => convertScoreToHalfPoints(scoringPoint.score) ?? 0,
+      (scoringPoint) => convertScoreToHalfPoints(scoringPoint.score),
     );
 
-    return sumHalfPoints(scoringPointScores) !== questionScore;
+    return (
+      questionScore === null ||
+      scoringPointScores.length === 0 ||
+      scoringPointScores.some((score) => score === null) ||
+      sumHalfPoints(scoringPointScores as number[]) !== questionScore
+    );
   });
   const fillBlankScoreMismatch = paperQuestions.some((paperQuestion) => {
     const questionScore = convertScoreToHalfPoints(paperQuestion.score);
@@ -272,12 +307,52 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
       return true;
     }
 
-    const fillBlankScores = fillBlankAnswers.map(
-      (fillBlankAnswer) => convertScoreToHalfPoints(fillBlankAnswer.score) ?? 0,
+    const fillBlankScores = fillBlankAnswers.map((fillBlankAnswer) =>
+      convertScoreToHalfPoints(fillBlankAnswer.score),
     );
 
-    return sumHalfPoints(fillBlankScores) !== questionScore;
+    return (
+      fillBlankScores.some((score) => score === null) ||
+      sumHalfPoints(fillBlankScores as number[]) !== questionScore
+    );
   });
+  const scoringContractMismatch = paperQuestions.some(
+    (paperQuestion) =>
+      !isQuestionScoringContractValid({
+        questionType: paperQuestion.question_snapshot.questionType,
+        scoringMethod: paperQuestion.question_snapshot.scoringMethod,
+        multiChoiceRule: paperQuestion.question_snapshot.multiChoiceRule,
+      }),
+  );
+  const questionGroupByPublicId = new Map(
+    paper.question_groups.map((questionGroup) => [
+      questionGroup.public_id,
+      questionGroup,
+    ]),
+  );
+  const questionGroupMismatch = paper.paper_sections.some((paperSection) =>
+    paperSection.paper_questions.some((paperQuestion) => {
+      if (paperQuestion.question_group_id === null) {
+        return paperQuestion.question_group_public_id != null;
+      }
+
+      const questionGroupPublicId = paperQuestion.question_group_public_id;
+      const materialPublicId =
+        paperQuestion.material_snapshot?.materialPublicId ?? null;
+      const questionGroup =
+        questionGroupPublicId === null || questionGroupPublicId === undefined
+          ? undefined
+          : questionGroupByPublicId.get(questionGroupPublicId);
+
+      return (
+        questionGroup === undefined ||
+        questionGroup.id !== paperQuestion.question_group_id ||
+        questionGroup.paper_section_id !== paperSection.id ||
+        materialPublicId === null ||
+        questionGroup.material_public_id !== materialPublicId
+      );
+    }),
+  );
   const questionScoreTotal = sumHalfPoints(validQuestionScores);
   const issues: PaperPublishValidationIssueDto[] = [
     ...(!publishedQuestionCountValidation.success
@@ -348,6 +423,24 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
           },
         ]
       : []),
+    ...(scoringContractMismatch
+      ? [
+          {
+            code: "question_scoring_contract_mismatch" as const,
+            message:
+              "Question type, scoring method and multi-choice rule must agree.",
+          },
+        ]
+      : []),
+    ...(questionGroupMismatch
+      ? [
+          {
+            code: "question_group_inconsistent" as const,
+            message:
+              "Question group identity, section and material must match every child question.",
+          },
+        ]
+      : []),
   ];
 
   return {
@@ -385,10 +478,18 @@ export function createPaperDraftService(
         return createInvalidPaperInputResponse();
       }
 
-      const paper = await paperRepository.createPaper(
-        paperInput.value,
-        options.mutationContext,
-      );
+      let paper: PaperDraftAccessRow;
+      try {
+        paper = await paperRepository.createPaper(
+          paperInput.value,
+          options.mutationContext,
+        );
+      } catch (error) {
+        if (error instanceof PaperCommandConflictError) {
+          return createPaperCommandConflictResponse();
+        }
+        throw error;
+      }
 
       return createSuccessResponse(mapPaperDraftResultToApi(paper));
     },
@@ -416,7 +517,10 @@ export function createPaperDraftService(
         return createPaperNotFoundResponse();
       }
 
-      if (paper.paper_status !== "draft") {
+      if (
+        paper.paper_status !== "draft" ||
+        paper.revision !== paperInput.value.expectedRevision
+      ) {
         return createNonDraftPaperResponse();
       }
 
@@ -427,6 +531,10 @@ export function createPaperDraftService(
         },
         options.mutationContext,
       );
+
+      if (updatedPaper === null) {
+        return createNonDraftPaperResponse();
+      }
 
       return createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
     },
@@ -444,27 +552,39 @@ export function createPaperDraftService(
         return createPaperNotFoundResponse();
       }
 
-      if (paper.paper_status !== "draft") {
-        return createNonDraftPaperResponse();
-      }
-
-      const draftQuestionCountValidation = validateDraftPaperQuestionCount(
-        listPaperQuestions(paper.paper_sections).length + 1,
-      );
-
-      if (!draftQuestionCountValidation.success) {
-        return createPaperQuestionCountValidationResponse(
-          draftQuestionCountValidation.message,
+      if (
+        paper.paper_status === "draft" &&
+        paper.revision === paperQuestionInput.value.expectedRevision
+      ) {
+        const draftQuestionCountValidation = validateDraftPaperQuestionCount(
+          listPaperQuestions(paper.paper_sections).length + 1,
         );
+
+        if (!draftQuestionCountValidation.success) {
+          return createPaperQuestionCountValidationResponse(
+            draftQuestionCountValidation.message,
+          );
+        }
       }
 
-      const paperQuestion = await paperRepository.addQuestionToDraftPaper({
-        paperPublicId,
-        ...paperQuestionInput.value,
-      });
+      let paperQuestion: PaperQuestionAccessRow | null;
+      try {
+        paperQuestion = await paperRepository.addQuestionToDraftPaper(
+          {
+            paperPublicId,
+            ...paperQuestionInput.value,
+          },
+          options.mutationContext,
+        );
+      } catch (error) {
+        if (error instanceof PaperCommandConflictError) {
+          return createPaperCommandConflictResponse();
+        }
+        throw error;
+      }
 
       if (paperQuestion === null) {
-        return createPaperNotFoundResponse();
+        return createNonDraftPaperResponse();
       }
 
       return createSuccessResponse(mapPaperQuestionResultToApi(paperQuestion));
@@ -483,55 +603,76 @@ export function createPaperDraftService(
         return createPaperNotFoundResponse();
       }
 
-      if (paper.paper_status !== "draft") {
+      if (
+        paper.paper_status !== "draft" ||
+        paper.revision !== paperQuestionInput.value.expectedRevision
+      ) {
         return createNonDraftPaperResponse();
       }
 
-      const paperQuestion = await paperRepository.updatePaperQuestion({
-        paperPublicId,
-        paperQuestionPublicId,
-        ...paperQuestionInput.value,
-      });
+      const paperQuestion = await paperRepository.updatePaperQuestion(
+        {
+          paperPublicId,
+          paperQuestionPublicId,
+          ...paperQuestionInput.value,
+        },
+        options.mutationContext,
+      );
 
       if (paperQuestion === null) {
-        return createPaperNotFoundResponse();
+        return createNonDraftPaperResponse();
       }
 
       return createSuccessResponse(mapPaperQuestionResultToApi(paperQuestion));
     },
 
-    async removePaperQuestion(paperPublicId, paperQuestionPublicId) {
+    async removePaperQuestion(paperPublicId, paperQuestionPublicId, input) {
+      const revisionInput = normalizePaperRevisionInput(input);
+
+      if (!revisionInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+
       const paper = await paperRepository.findPaperByPublicId(paperPublicId);
 
       if (paper === null) {
         return createPaperNotFoundResponse();
       }
 
-      if (paper.paper_status !== "draft") {
+      if (
+        paper.paper_status !== "draft" ||
+        paper.revision !== revisionInput.value.expectedRevision
+      ) {
         return createNonDraftPaperResponse();
       }
 
-      const updatedPaper = await paperRepository.removePaperQuestion({
-        paperPublicId,
-        paperQuestionPublicId,
-      });
+      const updatedPaper = await paperRepository.removePaperQuestion(
+        {
+          paperPublicId,
+          paperQuestionPublicId,
+          expectedRevision: revisionInput.value.expectedRevision,
+        },
+        options.mutationContext,
+      );
 
       if (updatedPaper === null) {
-        return createPaperNotFoundResponse();
+        return createNonDraftPaperResponse();
       }
 
       return createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
     },
 
-    async publishPaper(publicId) {
+    async publishPaper(publicId, input) {
+      const commandInput = normalizePaperCommandInput(input);
+
+      if (!commandInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+
       const paper = await paperRepository.findPaperByPublicId(publicId);
 
       if (paper === null) {
         return createPaperNotFoundResponse();
-      }
-
-      if (paper.paper_status !== "draft") {
-        return createNonDraftPublishResponse();
       }
 
       const publishValidation = validatePaperForPublish(paper);
@@ -540,17 +681,26 @@ export function createPaperDraftService(
         return createPaperPublishValidationResponse();
       }
 
-      const publishedPaper = await paperRepository.publishPaper(
-        {
-          paperPublicId: publicId,
-          sourceQuestionPublicIds: publishValidation.sourceQuestionPublicIds,
-          materialPublicIds: publishValidation.materialPublicIds,
-        },
-        options.mutationContext,
-      );
+      let publishedPaper: PaperDraftAccessRow | null;
+      try {
+        publishedPaper = await paperRepository.publishPaper(
+          {
+            paperPublicId: publicId,
+            ...commandInput.value,
+            sourceQuestionPublicIds: publishValidation.sourceQuestionPublicIds,
+            materialPublicIds: publishValidation.materialPublicIds,
+          },
+          options.mutationContext,
+        );
+      } catch (error) {
+        if (error instanceof PaperCommandConflictError) {
+          return createPaperCommandConflictResponse();
+        }
+        throw error;
+      }
 
       if (publishedPaper === null) {
-        return createPaperPublishValidationResponse();
+        return createNonDraftPublishResponse();
       }
 
       return createSuccessResponse({
@@ -560,44 +710,64 @@ export function createPaperDraftService(
       });
     },
 
-    async archivePaper(publicId) {
+    async archivePaper(publicId, input) {
+      const revisionInput = normalizePaperRevisionInput(input);
+
+      if (!revisionInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+
       const paper = await paperRepository.findPaperByPublicId(publicId);
 
       if (paper === null) {
         return createPaperNotFoundResponse();
       }
 
-      if (paper.paper_status !== "published") {
+      if (
+        paper.paper_status !== "published" ||
+        paper.revision !== revisionInput.value.expectedRevision
+      ) {
         return createNonPublishedArchiveResponse();
       }
 
       const archivedPaper = await paperRepository.archivePaper(
         {
           paperPublicId: publicId,
+          expectedRevision: revisionInput.value.expectedRevision,
         },
         options.mutationContext,
       );
 
       if (archivedPaper === null) {
-        return createPaperDeleteConflictResponse();
+        return createNonPublishedArchiveResponse();
       }
 
       return createSuccessResponse(mapPaperDraftResultToApi(archivedPaper));
     },
 
-    async deletePaper(publicId) {
+    async deletePaper(publicId, input) {
+      const revisionInput = normalizePaperRevisionInput(input);
+
+      if (!revisionInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+
       const paper = await paperRepository.findPaperByPublicId(publicId);
 
       if (paper === null) {
         return createPaperNotFoundResponse();
       }
 
-      if (paper.paper_status !== "draft") {
+      if (
+        paper.paper_status !== "draft" ||
+        paper.revision !== revisionInput.value.expectedRevision
+      ) {
         return createPaperDeleteConflictResponse();
       }
 
       const deleted = await paperRepository.deletePaper({
         paperPublicId: publicId,
+        expectedRevision: revisionInput.value.expectedRevision,
       });
 
       if (!deleted) {
@@ -609,7 +779,13 @@ export function createPaperDraftService(
       });
     },
 
-    async copyPaper(publicId) {
+    async copyPaper(publicId, input) {
+      const commandInput = normalizePaperCommandInput(input);
+
+      if (!commandInput.success) {
+        return createInvalidPaperInputResponse();
+      }
+
       const paper = await paperRepository.findPaperByPublicId(publicId);
 
       if (paper === null) {
@@ -617,29 +793,37 @@ export function createPaperDraftService(
       }
 
       if (
-        paper.paper_status !== "published" &&
-        paper.paper_status !== "archived"
+        (paper.paper_status === "published" ||
+          paper.paper_status === "archived") &&
+        paper.revision === commandInput.value.expectedRevision
       ) {
-        return createPaperCopyConflictResponse();
+        const copiedDraftQuestionCountValidation =
+          validateDraftPaperQuestionCount(
+            listPaperQuestions(paper.paper_sections).length,
+          );
+
+        if (!copiedDraftQuestionCountValidation.success) {
+          return createPaperQuestionCountValidationResponse(
+            copiedDraftQuestionCountValidation.message,
+          );
+        }
       }
 
-      const copiedDraftQuestionCountValidation =
-        validateDraftPaperQuestionCount(
-          listPaperQuestions(paper.paper_sections).length,
+      let copiedPaper: PaperDraftAccessRow | null;
+      try {
+        copiedPaper = await paperRepository.copyPaper(
+          {
+            sourcePaperPublicId: publicId,
+            ...commandInput.value,
+          },
+          options.mutationContext,
         );
-
-      if (!copiedDraftQuestionCountValidation.success) {
-        return createPaperQuestionCountValidationResponse(
-          copiedDraftQuestionCountValidation.message,
-        );
+      } catch (error) {
+        if (error instanceof PaperCommandConflictError) {
+          return createPaperCommandConflictResponse();
+        }
+        throw error;
       }
-
-      const copiedPaper = await paperRepository.copyPaper(
-        {
-          sourcePaper: paper,
-        },
-        options.mutationContext,
-      );
 
       if (copiedPaper === null) {
         return createPaperCopyConflictResponse();

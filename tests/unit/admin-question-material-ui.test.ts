@@ -2564,14 +2564,7 @@ describe("AdminQuestionMaterialManagement", () => {
       scoringMethod: "ai_scoring",
       questionOptions: [],
     });
-    expect(requestBody.fillBlankAnswers).toEqual([
-      {
-        blankKey: "blank_1",
-        standardAnswers: ["客户动机", "购买动机"],
-        score: "1.5",
-        sortOrder: 1,
-      },
-    ]);
+    expect(requestBody.fillBlankAnswers).toEqual([]);
     expect(requestBody.scoringPoints).toEqual([
       {
         description: "识别核心动机",

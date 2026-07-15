@@ -484,7 +484,10 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
           }
 
           const service = createPaperServiceForActor(actorOrError);
-          const response = await service.deletePaper(publicId);
+          const response = await service.deletePaper(
+            publicId,
+            await readRequestJson(request),
+          );
 
           await auditPaperMutation(
             request,
@@ -582,6 +585,7 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
           const response = await service.removePaperQuestion(
             publicId,
             paperQuestionPublicId,
+            await readRequestJson(request),
           );
 
           await auditPaperMutation(
@@ -610,7 +614,10 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
           }
 
           const service = createPaperServiceForActor(actorOrError);
-          const response = await service.publishPaper(publicId);
+          const response = await service.publishPaper(
+            publicId,
+            await readRequestJson(request),
+          );
 
           await auditPaperMutation(
             request,
@@ -638,7 +645,10 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
           }
 
           const service = createPaperServiceForActor(actorOrError);
-          const response = await service.archivePaper(publicId);
+          const response = await service.archivePaper(
+            publicId,
+            await readRequestJson(request),
+          );
 
           await auditPaperMutation(
             request,
@@ -666,7 +676,10 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
           }
 
           const service = createPaperServiceForActor(actorOrError);
-          const response = await service.copyPaper(publicId);
+          const response = await service.copyPaper(
+            publicId,
+            await readRequestJson(request),
+          );
 
           await auditPaperMutation(
             request,

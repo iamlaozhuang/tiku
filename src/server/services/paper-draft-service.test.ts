@@ -6,9 +6,15 @@ import type {
   PaperDraftRepository,
   PaperQuestionAccessRow,
 } from "../repositories/paper-draft-repository";
+import { PaperCommandConflictError } from "../repositories/paper-draft-repository";
 
 const createdAt = new Date("2026-05-19T06:00:00.000Z");
 const updatedAt = new Date("2026-05-19T07:00:00.000Z");
+const paperRevisionInput = { expectedRevision: 1 } as const;
+const paperCommandInput = {
+  commandPublicId: "paper_command_public_test",
+  expectedRevision: 1,
+} as const;
 
 function createPaperQuestion(
   overrides: Partial<PaperQuestionAccessRow> = {},
@@ -21,6 +27,7 @@ function createPaperQuestion(
     paper_section_sort_order: 1,
     question_group_id: 401,
     question_group_sort_order: 1,
+    question_group_public_id: "question_group_public_123",
     question_snapshot: {
       questionPublicId: "question_public_123",
       questionStatus: "available",
@@ -47,12 +54,14 @@ function createPaperQuestion(
     sort_order: 1,
     scoring_points: [
       {
+        public_id: "paper_scoring_point_public_501",
         source_scoring_point_id: 501,
         description: "说明单据核对",
         score: "2.5",
         sort_order: 1,
       },
       {
+        public_id: "paper_scoring_point_public_502",
         source_scoring_point_id: 502,
         description: "说明实物验收",
         score: "2.5",
@@ -81,6 +90,7 @@ function createPaperQuestions(questionCount: number): PaperQuestionAccessRow[] {
       },
       scoring_points: [
         {
+          public_id: `paper_scoring_point_public_${questionNumber}`,
           source_scoring_point_id: 500 + questionNumber,
           description: `评分点 ${questionNumber}`,
           score: "1.0",
@@ -95,6 +105,10 @@ function createFillBlankPaperQuestion(
   overrides: Partial<PaperQuestionAccessRow> = {},
 ): PaperQuestionAccessRow {
   return createPaperQuestion({
+    material_snapshot: null,
+    question_group_id: null,
+    question_group_public_id: null,
+    question_group_sort_order: null,
     question_snapshot: {
       questionPublicId: "question_fill_blank_public_123",
       questionStatus: "available",
@@ -146,6 +160,7 @@ function createPaper(
     source: "phase-3 baseline",
     duration_minute: 90,
     total_score: "5.0",
+    revision: 1,
     published_at: null,
     archived_at: null,
     paper_sections: [
@@ -161,6 +176,7 @@ function createPaper(
     question_groups: [
       {
         id: 401,
+        public_id: "question_group_public_123",
         paper_section_id: 201,
         material_public_id: "material_public_123",
         material_snapshot: {
@@ -269,15 +285,13 @@ function createRepository(
     async deletePaper() {
       return true;
     },
-    async copyPaper(input) {
+    async copyPaper() {
       return createPaper({
         public_id: "paper_public_copy_123",
         name: "物流技能草稿卷（副本）",
         paper_status: "draft",
         published_at: null,
         archived_at: null,
-        paper_sections: input.sourcePaper.paper_sections,
-        question_groups: input.sourcePaper.question_groups,
       });
     },
     ...overrides,
@@ -365,6 +379,7 @@ describe("paper draft service", () => {
   it("creates, reads, and updates draft paper metadata", async () => {
     const service = createPaperDraftService(createRepository());
     const input = {
+      commandPublicId: "paper_command_public_create",
       name: "物流技能草稿卷",
       profession: "logistics",
       level: 4,
@@ -401,6 +416,7 @@ describe("paper draft service", () => {
     await expect(
       service.updatePaper("paper_public_123", {
         ...input,
+        expectedRevision: 1,
         name: "更新后的草稿卷",
       }),
     ).resolves.toMatchObject({
@@ -419,6 +435,8 @@ describe("paper draft service", () => {
 
     await expect(
       service.addQuestionToDraftPaper("paper_public_123", {
+        commandPublicId: "paper_command_public_add",
+        expectedRevision: 1,
         questionPublicId: "question_public_123",
         score: "5.0",
         sortOrder: 1,
@@ -428,6 +446,7 @@ describe("paper draft service", () => {
           sortOrder: 1,
         },
         questionGroup: {
+          publicId: null,
           title: "入库案例题组",
           materialPublicId: "material_public_123",
           sortOrder: 1,
@@ -442,6 +461,7 @@ describe("paper draft service", () => {
           sourceQuestionPublicId: "question_public_123",
           paperSectionSortOrder: 1,
           questionGroupSortOrder: 1,
+          questionGroupPublicId: "question_group_public_123",
           score: "5.0",
           sortOrder: 1,
           questionSnapshot: {
@@ -468,11 +488,13 @@ describe("paper draft service", () => {
           },
           scoringPoints: [
             {
+              publicId: "paper_scoring_point_public_501",
               description: "说明单据核对",
               score: "2.5",
               sortOrder: 1,
             },
             {
+              publicId: "paper_scoring_point_public_502",
               description: "说明实物验收",
               score: "2.5",
               sortOrder: 2,
@@ -515,6 +537,8 @@ describe("paper draft service", () => {
 
     await expect(
       service.addQuestionToDraftPaper("paper_public_123", {
+        commandPublicId: "paper_command_public_add_limit",
+        expectedRevision: 1,
         questionPublicId: "question_public_101",
         score: "1.0",
         sortOrder: 101,
@@ -543,6 +567,7 @@ describe("paper draft service", () => {
         "paper_public_123",
         "paper_question_public_123",
         {
+          expectedRevision: 1,
           score: "6.0",
           sortOrder: 2,
           scoringPoints: [
@@ -579,12 +604,14 @@ describe("paper draft service", () => {
           sortOrder: 2,
         },
       }),
+      undefined,
     );
 
     await expect(
       service.removePaperQuestion(
         "paper_public_123",
         "paper_question_public_123",
+        paperRevisionInput,
       ),
     ).resolves.toMatchObject({
       code: 0,
@@ -612,6 +639,9 @@ describe("paper draft service", () => {
               publicId === "published_paper" ? "published" : "draft",
           });
         },
+        async addQuestionToDraftPaper() {
+          return null;
+        },
       }),
     );
 
@@ -629,6 +659,8 @@ describe("paper draft service", () => {
 
     await expect(
       service.addQuestionToDraftPaper("published_paper", {
+        commandPublicId: "paper_command_public_add_published",
+        expectedRevision: 1,
         questionPublicId: "question_public_123",
         score: "5.0",
         sortOrder: 1,
@@ -668,7 +700,9 @@ describe("paper draft service", () => {
       }),
     );
 
-    await expect(service.publishPaper(draftPaper.public_id)).resolves.toEqual({
+    await expect(
+      service.publishPaper(draftPaper.public_id, paperCommandInput),
+    ).resolves.toEqual({
       code: 0,
       message: "ok",
       data: {
@@ -687,6 +721,7 @@ describe("paper draft service", () => {
           publishedAt: "2026-05-19T08:00:00.000Z",
           archivedAt: null,
           questionCount: 1,
+          revision: 1,
           paperSections: [
             {
               title: "案例分析",
@@ -699,6 +734,7 @@ describe("paper draft service", () => {
                   sourceQuestionPublicId: "question_public_123",
                   paperSectionSortOrder: 1,
                   questionGroupSortOrder: 1,
+                  questionGroupPublicId: "question_group_public_123",
                   score: "5.0",
                   sortOrder: 1,
                   questionSnapshot: {
@@ -725,11 +761,13 @@ describe("paper draft service", () => {
                   },
                   scoringPoints: [
                     {
+                      publicId: "paper_scoring_point_public_501",
                       description: "说明单据核对",
                       score: "2.5",
                       sortOrder: 1,
                     },
                     {
+                      publicId: "paper_scoring_point_public_502",
                       description: "说明实物验收",
                       score: "2.5",
                       sortOrder: 2,
@@ -743,6 +781,7 @@ describe("paper draft service", () => {
           ],
           questionGroups: [
             {
+              publicId: "question_group_public_123",
               title: "入库案例题组",
               materialPublicId: "material_public_123",
               materialSnapshot: {
@@ -766,6 +805,8 @@ describe("paper draft service", () => {
 
     expect(publishedInputs).toEqual([
       {
+        commandPublicId: "paper_command_public_test",
+        expectedRevision: 1,
         paperPublicId: "paper_public_123",
         sourceQuestionPublicIds: ["question_public_123"],
         materialPublicIds: ["material_public_123"],
@@ -806,7 +847,9 @@ describe("paper draft service", () => {
       }),
     );
 
-    await expect(service.publishPaper("paper_public_123")).resolves.toEqual({
+    await expect(
+      service.publishPaper("paper_public_123", paperCommandInput),
+    ).resolves.toEqual({
       code: 422204,
       message: "Paper publish validation failed.",
       data: null,
@@ -814,7 +857,7 @@ describe("paper draft service", () => {
     expect(publishedInputs).toEqual([]);
   });
 
-  it("rejects publishing missing, non-draft, incomplete, and source-lock-invalid papers", async () => {
+  it("rejects publishing missing, non-draft, incomplete, and repository-CAS-conflicted papers", async () => {
     const service = createPaperDraftService(
       createRepository({
         async findPaperByPublicId(publicId) {
@@ -863,6 +906,7 @@ describe("paper draft service", () => {
                       score: "5.0",
                       scoring_points: [
                         {
+                          public_id: "paper_scoring_point_public_invalid",
                           source_scoring_point_id: 501,
                           description: "说明单据核对",
                           score: "2.0",
@@ -907,41 +951,51 @@ describe("paper draft service", () => {
       }),
     );
 
-    await expect(service.publishPaper("missing_paper")).resolves.toEqual({
+    await expect(
+      service.publishPaper("missing_paper", paperCommandInput),
+    ).resolves.toEqual({
       code: 404203,
       message: "Paper does not exist.",
       data: null,
     });
 
-    await expect(service.publishPaper("published_paper")).resolves.toEqual({
+    await expect(
+      service.publishPaper("published_paper", paperCommandInput),
+    ).resolves.toEqual({
       code: 409204,
       message: "Only draft paper can be published.",
       data: null,
     });
 
-    await expect(service.publishPaper("empty_paper")).resolves.toEqual({
-      code: 422204,
-      message: "Paper publish validation failed.",
-      data: null,
-    });
-
-    await expect(service.publishPaper("invalid_score_paper")).resolves.toEqual({
-      code: 422204,
-      message: "Paper publish validation failed.",
-      data: null,
-    });
-
     await expect(
-      service.publishPaper("missing_question_score_paper"),
+      service.publishPaper("empty_paper", paperCommandInput),
     ).resolves.toEqual({
       code: 422204,
       message: "Paper publish validation failed.",
       data: null,
     });
 
-    await expect(service.publishPaper("lock_failure_paper")).resolves.toEqual({
+    await expect(
+      service.publishPaper("invalid_score_paper", paperCommandInput),
+    ).resolves.toEqual({
       code: 422204,
       message: "Paper publish validation failed.",
+      data: null,
+    });
+
+    await expect(
+      service.publishPaper("missing_question_score_paper", paperCommandInput),
+    ).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+
+    await expect(
+      service.publishPaper("lock_failure_paper", paperCommandInput),
+    ).resolves.toEqual({
+      code: 409204,
+      message: "Only draft paper can be published.",
       data: null,
     });
   });
@@ -983,13 +1037,17 @@ describe("paper draft service", () => {
       }),
     );
 
-    await expect(service.publishPaper("fill_blank_mismatch")).resolves.toEqual({
+    await expect(
+      service.publishPaper("fill_blank_mismatch", paperCommandInput),
+    ).resolves.toEqual({
       code: 422204,
       message: "Paper publish validation failed.",
       data: null,
     });
 
-    await expect(service.publishPaper("fill_blank_match")).resolves.toEqual(
+    await expect(
+      service.publishPaper("fill_blank_match", paperCommandInput),
+    ).resolves.toEqual(
       expect.objectContaining({
         code: 0,
       }),
@@ -1042,7 +1100,9 @@ describe("paper draft service", () => {
       }),
     );
 
-    await expect(service.publishPaper("fill_blank_missing")).resolves.toEqual({
+    await expect(
+      service.publishPaper("fill_blank_missing", paperCommandInput),
+    ).resolves.toEqual({
       code: 422204,
       message: "Paper publish validation failed.",
       data: null,
@@ -1077,6 +1137,7 @@ describe("paper draft service", () => {
                       score: "5.0",
                       scoring_points: [
                         {
+                          public_id: "paper_scoring_point_public_synthetic",
                           source_scoring_point_id: 501,
                           description: "Synthetic scoring point",
                           score: "2.5",
@@ -1100,7 +1161,9 @@ describe("paper draft service", () => {
         }),
       );
 
-      await expect(service.publishPaper("paper_public_123")).resolves.toEqual({
+      await expect(
+        service.publishPaper("paper_public_123", paperCommandInput),
+      ).resolves.toEqual({
         code: 422204,
         message: "Paper publish validation failed.",
         data: null,
@@ -1108,6 +1171,123 @@ describe("paper draft service", () => {
       expect(publishedInputs).toEqual([]);
     },
   );
+
+  it.each([
+    [
+      "objective question with scoring points",
+      createPaperQuestion({
+        question_snapshot: {
+          ...createPaperQuestion().question_snapshot,
+          questionType: "single_choice",
+          scoringMethod: "auto_match",
+        },
+      }),
+    ],
+    [
+      "subjective scoring points outside half-point precision",
+      createPaperQuestion({
+        scoring_points: [
+          {
+            public_id: "paper_scoring_point_public_non_half_1",
+            source_scoring_point_id: null,
+            description: "Non-half point one",
+            score: "2.4",
+            sort_order: 1,
+          },
+          {
+            public_id: "paper_scoring_point_public_non_half_2",
+            source_scoring_point_id: null,
+            description: "Non-half point two",
+            score: "2.6",
+            sort_order: 2,
+          },
+        ],
+      }),
+    ],
+    [
+      "fill_blank with an unknown scoring method",
+      createFillBlankPaperQuestion({
+        question_snapshot: {
+          ...createFillBlankPaperQuestion().question_snapshot,
+          scoringMethod: "unknown_scoring_method",
+        } as unknown as PaperQuestionAccessRow["question_snapshot"],
+        score: "5.0",
+        scoring_points: createPaperQuestion().scoring_points,
+      }),
+    ],
+  ])("rejects %s before publish", async (_caseName, paperQuestion) => {
+    const publishedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_sections: [
+              {
+                id: 201,
+                title: "Scoring contract guard",
+                description: null,
+                sort_order: 1,
+                total_score: "5.0",
+                paper_questions: [paperQuestion],
+              },
+            ],
+          });
+        },
+        async publishPaper(input) {
+          publishedInputs.push(input);
+
+          return createPaper({ paper_status: "published" });
+        },
+      }),
+    );
+
+    await expect(
+      service.publishPaper("paper_public_123", paperCommandInput),
+    ).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+    expect(publishedInputs).toEqual([]);
+  });
+
+  it("rejects a question_group whose material disagrees with its child question", async () => {
+    const publishedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            question_groups: [
+              {
+                ...createPaper().question_groups[0],
+                material_public_id: "material_public_conflicting",
+                material_snapshot: {
+                  ...createPaper().question_groups[0].material_snapshot,
+                  materialPublicId: "material_public_conflicting",
+                },
+              },
+            ],
+          });
+        },
+        async publishPaper(input) {
+          publishedInputs.push(input);
+
+          return createPaper({ paper_status: "published" });
+        },
+      }),
+    );
+
+    await expect(
+      service.publishPaper("paper_public_123", paperCommandInput),
+    ).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+    expect(publishedInputs).toEqual([]);
+  });
 
   it("keeps existing paper question snapshots immutable while publishing", async () => {
     const sourcePaperQuestion = createPaperQuestion();
@@ -1136,7 +1316,7 @@ describe("paper draft service", () => {
       }),
     );
 
-    await service.publishPaper("paper_public_123");
+    await service.publishPaper("paper_public_123", paperCommandInput);
 
     expect(sourcePaperQuestion.question_snapshot).toEqual({
       questionPublicId: "question_public_123",
@@ -1179,7 +1359,7 @@ describe("paper draft service", () => {
     );
 
     await expect(
-      service.archivePaper("paper_public_123"),
+      service.archivePaper("paper_public_123", paperRevisionInput),
     ).resolves.toMatchObject({
       code: 0,
       message: "ok",
@@ -1195,6 +1375,7 @@ describe("paper draft service", () => {
     });
     expect(archivedInputs).toEqual([
       {
+        expectedRevision: 1,
         paperPublicId: "paper_public_123",
       },
     ]);
@@ -1225,19 +1406,25 @@ describe("paper draft service", () => {
       }),
     );
 
-    await expect(service.deletePaper("paper_public_123")).resolves.toEqual({
+    await expect(
+      service.deletePaper("paper_public_123", paperRevisionInput),
+    ).resolves.toEqual({
       code: 0,
       message: "ok",
       data: {
         deletedPaperPublicId: "paper_public_123",
       },
     });
-    await expect(service.deletePaper("published_paper")).resolves.toEqual({
+    await expect(
+      service.deletePaper("published_paper", paperRevisionInput),
+    ).resolves.toEqual({
       code: 409205,
       message: "Only unreferenced draft paper can be deleted.",
       data: null,
     });
-    await expect(service.deletePaper("referenced_draft")).resolves.toEqual({
+    await expect(
+      service.deletePaper("referenced_draft", paperRevisionInput),
+    ).resolves.toEqual({
       code: 409205,
       message: "Only unreferenced draft paper can be deleted.",
       data: null,
@@ -1259,12 +1446,11 @@ describe("paper draft service", () => {
           });
         },
         async copyPaper(input) {
-          copiedInputs.push({
-            sourcePaperPublicId: input.sourcePaper.public_id,
-            scoringPoints:
-              input.sourcePaper.paper_sections[0]?.paper_questions[0]
-                ?.scoring_points,
-          });
+          copiedInputs.push(input);
+
+          if (input.sourcePaperPublicId === "draft_paper") {
+            return null;
+          }
 
           return createPaper({
             public_id: "paper_public_copy_123",
@@ -1272,14 +1458,14 @@ describe("paper draft service", () => {
             paper_status: "draft",
             published_at: null,
             archived_at: null,
-            paper_sections: input.sourcePaper.paper_sections,
-            question_groups: input.sourcePaper.question_groups,
           });
         },
       }),
     );
 
-    await expect(service.copyPaper("paper_public_123")).resolves.toMatchObject({
+    await expect(
+      service.copyPaper("paper_public_123", paperCommandInput),
+    ).resolves.toMatchObject({
       code: 0,
       message: "ok",
       data: {
@@ -1313,29 +1499,141 @@ describe("paper draft service", () => {
         },
       },
     });
-    await expect(service.copyPaper("draft_paper")).resolves.toEqual({
+    await expect(
+      service.copyPaper("draft_paper", {
+        ...paperCommandInput,
+        commandPublicId: "paper_command_public_draft_copy",
+      }),
+    ).resolves.toEqual({
       code: 409206,
       message: "Only published or archived paper can be copied.",
       data: null,
     });
     expect(copiedInputs).toEqual([
       {
+        commandPublicId: "paper_command_public_test",
+        expectedRevision: 1,
         sourcePaperPublicId: "paper_public_123",
-        scoringPoints: [
-          {
-            source_scoring_point_id: 501,
-            description: "说明单据核对",
-            score: "2.5",
-            sort_order: 1,
-          },
-          {
-            source_scoring_point_id: 502,
-            description: "说明实物验收",
-            score: "2.5",
-            sort_order: 2,
-          },
-        ],
+      },
+      {
+        commandPublicId: "paper_command_public_draft_copy",
+        expectedRevision: 1,
+        sourcePaperPublicId: "draft_paper",
       },
     ]);
+  });
+
+  it("maps reused command IDs with different payloads to a stable conflict", async () => {
+    const addService = createPaperDraftService(
+      createRepository({
+        async addQuestionToDraftPaper() {
+          throw new PaperCommandConflictError();
+        },
+      }),
+    );
+    await expect(
+      addService.addQuestionToDraftPaper("paper_public_123", {
+        commandPublicId: "paper_command_public_conflict",
+        expectedRevision: 1,
+        questionPublicId: "question_public_123",
+        score: "5.0",
+        sortOrder: 1,
+        paperSection: {
+          title: "案例分析",
+          description: null,
+          sortOrder: 1,
+        },
+        questionGroup: null,
+      }),
+    ).resolves.toMatchObject({ code: 409207, data: null });
+
+    const publishService = createPaperDraftService(
+      createRepository({
+        async publishPaper() {
+          throw new PaperCommandConflictError();
+        },
+      }),
+    );
+    await expect(
+      publishService.publishPaper("paper_public_123", paperCommandInput),
+    ).resolves.toMatchObject({ code: 409207, data: null });
+
+    const copyService = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_status: "archived",
+          });
+        },
+        async copyPaper() {
+          throw new PaperCommandConflictError();
+        },
+      }),
+    );
+    await expect(
+      copyService.copyPaper("paper_public_123", paperCommandInput),
+    ).resolves.toMatchObject({ code: 409207, data: null });
+  });
+
+  it("lets completed command replays cross stale revision and status prechecks after response loss", async () => {
+    const staleAddService = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({ public_id: publicId, revision: 2 });
+        },
+      }),
+    );
+    await expect(
+      staleAddService.addQuestionToDraftPaper("paper_public_123", {
+        commandPublicId: "paper_command_public_replay_add",
+        expectedRevision: 1,
+        questionPublicId: "question_public_123",
+        score: "5.0",
+        sortOrder: 1,
+        paperSection: {
+          title: "案例分析",
+          description: null,
+          sortOrder: 1,
+        },
+        questionGroup: null,
+      }),
+    ).resolves.toMatchObject({ code: 0 });
+
+    const publishedReplayService = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_status: "published",
+            revision: 2,
+          });
+        },
+      }),
+    );
+    await expect(
+      publishedReplayService.publishPaper("paper_public_123", {
+        commandPublicId: "paper_command_public_replay_publish",
+        expectedRevision: 1,
+      }),
+    ).resolves.toMatchObject({ code: 0 });
+
+    const copiedReplayService = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_status: "archived",
+            revision: 2,
+          });
+        },
+      }),
+    );
+    await expect(
+      copiedReplayService.copyPaper("paper_public_123", {
+        commandPublicId: "paper_command_public_replay_copy",
+        expectedRevision: 1,
+      }),
+    ).resolves.toMatchObject({ code: 0 });
   });
 });

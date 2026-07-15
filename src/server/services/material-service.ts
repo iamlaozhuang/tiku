@@ -47,6 +47,7 @@ export type MaterialServiceOptions = {
 const INVALID_MATERIAL_INPUT_CODE = 422201;
 const MATERIAL_NOT_FOUND_CODE = 404201;
 const MATERIAL_LOCKED_CODE = 409201;
+const MATERIAL_VERSION_CONFLICT_CODE = 409203;
 const MATERIAL_RUNTIME_UNAVAILABLE_CODE = 503201;
 
 function createInvalidMaterialInputResponse(): ApiResponse<null> {
@@ -139,6 +140,13 @@ export function createMaterialService(
         },
         options.mutationContext,
       );
+
+      if (updatedMaterial === null) {
+        return createErrorResponse(
+          MATERIAL_VERSION_CONFLICT_CODE,
+          "Material changed after it was loaded.",
+        );
+      }
 
       return createSuccessResponse(mapMaterialResultToApi(updatedMaterial));
     },

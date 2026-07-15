@@ -14,8 +14,13 @@ describe("paper draft repository composition guard", () => {
     expect(repositorySource).toContain(
       "eq(question.status, input.requiredStatus)",
     );
-    expect(repositorySource).toMatch(
-      /findSourceQuestionByPublicId\(\s*transaction as RuntimeDatabase,\s*\{[\s\S]*publicId: sourcePaperQuestion\.source_question_public_id,[\s\S]*\},\s*\)/u,
+    const copySource = repositorySource.slice(
+      repositorySource.indexOf("async copyPaper"),
+      repositorySource.indexOf("function createPaperConditions"),
+    );
+    expect(copySource).toContain("{ publicId: sourceQuestionPublicId }");
+    expect(copySource).not.toMatch(
+      /publicId: sourceQuestionPublicId,\s*requiredStatus/u,
     );
   });
 });

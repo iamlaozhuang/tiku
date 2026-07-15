@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Archive,
   ArrowDownUp,
@@ -373,6 +373,7 @@ function mapPaperDraftToSummary(
     paperType: paper.paperType ?? existingPaper?.paperType ?? "mock_paper",
     year: paper.year,
     totalScore: paper.totalScore ?? existingPaper?.totalScore ?? "0.0",
+    revision: paper.revision,
     questionCount: paper.questionCount,
     questionTypeDistribution:
       "questionTypeDistribution" in paper && paper.questionTypeDistribution
@@ -504,6 +505,15 @@ function createPaperInput(values: PaperFormValues) {
   };
 }
 
+function createPaperCommandPublicId(commandKind: string): string {
+  const uniqueSuffix =
+    typeof globalThis.crypto?.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  return `paper-command-${commandKind}-${uniqueSuffix}`;
+}
+
 function createPaperAssetFormData(values: PaperAssetFormValues) {
   const formData = new FormData();
 
@@ -558,6 +568,7 @@ export function AdminPaperManagement({
   const [pendingPaperAction, setPendingPaperAction] =
     useState<PendingPaperAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const paperCommandPublicIdsRef = useRef(new Map<string, string>());
   const paperQueryString = useMemo(() => {
     const searchParams = new URLSearchParams({
       page: String(query.page),
@@ -591,6 +602,20 @@ export function AdminPaperManagement({
   ]);
   const { loadState, pagination, papers, setPapers } =
     usePaperData(paperQueryString);
+
+  function getOrCreatePaperCommandPublicId(key: string): string {
+    const existing = paperCommandPublicIdsRef.current.get(key);
+
+    if (existing !== undefined) {
+      return existing;
+    }
+
+    const commandPublicId = createPaperCommandPublicId(
+      key.split(":")[0] ?? key,
+    );
+    paperCommandPublicIdsRef.current.set(key, commandPublicId);
+    return commandPublicId;
+  }
 
   useEffect(() => {
     window.history.replaceState(
@@ -678,11 +703,15 @@ export function AdminPaperManagement({
     setActionError(null);
 
     try {
+      const commandKey = "create";
       const response = await mutateAdminApi<{ paper: PaperDraftDto }>(
         "/api/v1/papers",
         sessionToken,
         "POST",
-        createPaperInput(values),
+        {
+          ...createPaperInput(values),
+          commandPublicId: getOrCreatePaperCommandPublicId(commandKey),
+        },
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -691,6 +720,7 @@ export function AdminPaperManagement({
       }
 
       const savedPaper = mapPaperDraftToSummary(response.data.paper);
+      paperCommandPublicIdsRef.current.delete(commandKey);
       setPapers((currentPapers) => upsertByPublicId(currentPapers, savedPaper));
       setActionMessage("草稿已保存，正在进入组卷工作台。");
       setActiveForm(null);
@@ -758,10 +788,16 @@ export function AdminPaperManagement({
     }
 
     setActionError(null);
+    const currentPaper = papers.find((paper) => paper.publicId === publicId);
+    const commandKey = `publish:${publicId}:${currentPaper?.revision ?? 0}`;
     const response = await mutateAdminApi<PaperPublishResultDto>(
       `/api/v1/papers/${publicId}/publish`,
       sessionToken,
       "POST",
+      {
+        commandPublicId: getOrCreatePaperCommandPublicId(commandKey),
+        expectedRevision: currentPaper?.revision ?? 0,
+      },
     );
 
     if (response.code !== 0 || response.data === null) {
@@ -770,6 +806,7 @@ export function AdminPaperManagement({
     }
 
     const publishedPaper = response.data.paper;
+    paperCommandPublicIdsRef.current.delete(commandKey);
     setPapers((currentPapers) =>
       upsertByPublicId(
         currentPapers,
@@ -791,10 +828,12 @@ export function AdminPaperManagement({
     }
 
     setActionError(null);
+    const currentPaper = papers.find((paper) => paper.publicId === publicId);
     const response = await mutateAdminApi<{ paper: PaperDraftDto }>(
       `/api/v1/papers/${publicId}/archive`,
       sessionToken,
       "POST",
+      { expectedRevision: currentPaper?.revision ?? 0 },
     );
 
     if (response.code !== 0 || response.data === null) {
@@ -824,10 +863,16 @@ export function AdminPaperManagement({
     }
 
     setActionError(null);
+    const currentPaper = papers.find((paper) => paper.publicId === publicId);
+    const commandKey = `copy:${publicId}:${currentPaper?.revision ?? 0}`;
     const response = await mutateAdminApi<PaperCopyResultDto>(
       `/api/v1/papers/${publicId}/copy`,
       sessionToken,
       "POST",
+      {
+        commandPublicId: getOrCreatePaperCommandPublicId(commandKey),
+        expectedRevision: currentPaper?.revision ?? 0,
+      },
     );
 
     if (response.code !== 0 || response.data === null) {
@@ -838,6 +883,7 @@ export function AdminPaperManagement({
     const disabledSourceQuestionCount = countDisabledSourceQuestions(
       response.data.paper,
     );
+    paperCommandPublicIdsRef.current.delete(commandKey);
     const copiedPaper = mapPaperDraftToSummary(response.data.paper);
     setPapers((currentPapers) => upsertByPublicId(currentPapers, copiedPaper));
     if (disabledSourceQuestionCount > 0) {

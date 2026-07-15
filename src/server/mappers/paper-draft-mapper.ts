@@ -22,11 +22,13 @@ export function mapPaperQuestionToApi(
     paperSectionSortOrder:
       paperQuestion.paper_section_sort_order ?? paperQuestion.sort_order,
     questionGroupSortOrder: paperQuestion.question_group_sort_order ?? null,
+    questionGroupPublicId: paperQuestion.question_group_public_id ?? null,
     score: paperQuestion.score,
     sortOrder: paperQuestion.sort_order,
     questionSnapshot: paperQuestion.question_snapshot,
     materialSnapshot: paperQuestion.material_snapshot,
     scoringPoints: paperQuestion.scoring_points.map((scoringPoint) => ({
+      publicId: scoringPoint.public_id,
       description: scoringPoint.description,
       score: scoringPoint.score,
       sortOrder: scoringPoint.sort_order,
@@ -64,11 +66,13 @@ export function mapPaperDraftToApi(paper: PaperDraftAccessRow): PaperDraftDto {
     source: paper.source,
     durationMinute: paper.duration_minute,
     totalScore: paper.total_score,
+    revision: paper.revision,
     publishedAt: formatNullableTimestamp(paper.published_at),
     archivedAt: formatNullableTimestamp(paper.archived_at),
     questionCount,
     paperSections,
     questionGroups: paper.question_groups.map((questionGroup) => ({
+      publicId: questionGroup.public_id,
       title: questionGroup.title,
       materialPublicId: questionGroup.material_public_id,
       materialSnapshot: questionGroup.material_snapshot,

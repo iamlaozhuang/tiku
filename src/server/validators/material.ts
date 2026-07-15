@@ -19,6 +19,7 @@ export type NormalizedCreateMaterialInput = {
 };
 
 export type NormalizedUpdateMaterialInput = NormalizedCreateMaterialInput & {
+  expectedUpdatedAt: Date;
   status: (typeof materialStatusValues)[number];
 };
 
@@ -62,6 +63,18 @@ function normalizePositiveInteger(value: unknown): number | null {
   }
 
   return value;
+}
+
+function normalizeExpectedUpdatedAt(value: unknown): Date | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const timestamp = new Date(value);
+
+  return Number.isNaN(timestamp.getTime()) || timestamp.toISOString() !== value
+    ? null
+    : timestamp;
 }
 
 function normalizeQueryInteger(value: unknown): number | undefined {
@@ -163,10 +176,14 @@ export function normalizeUpdateMaterialInput(
   input: unknown,
 ): ValidationResult<NormalizedUpdateMaterialInput> {
   const materialInput = normalizeCreateMaterialInput(input);
+  const expectedUpdatedAt = isRecord(input)
+    ? normalizeExpectedUpdatedAt(input.expectedUpdatedAt)
+    : null;
 
   if (
     !materialInput.success ||
     !isRecord(input) ||
+    expectedUpdatedAt === null ||
     !isMaterialStatus(input.status)
   ) {
     return {
@@ -179,6 +196,7 @@ export function normalizeUpdateMaterialInput(
     success: true,
     value: {
       ...materialInput.value,
+      expectedUpdatedAt,
       status: input.status,
     },
   };

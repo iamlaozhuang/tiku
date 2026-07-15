@@ -240,7 +240,11 @@ export function AdminQuestionEditorPage({
           headers: { "content-type": "application/json" },
           body: JSON.stringify(
             isEditMode
-              ? { ...createQuestionInput(values), status: "available" }
+              ? {
+                  ...createQuestionInput(values),
+                  expectedUpdatedAt: question?.updatedAt ?? "",
+                  status: "available",
+                }
               : createQuestionInput(values),
           ),
         },

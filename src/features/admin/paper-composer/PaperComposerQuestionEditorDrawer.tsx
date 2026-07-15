@@ -234,6 +234,7 @@ export function PaperComposerQuestionEditorDrawer({
                   setScoringPoints((items) => [
                     ...items,
                     {
+                      publicId: crypto.randomUUID(),
                       description: "",
                       score: "0.5",
                       sortOrder: items.length + 1,

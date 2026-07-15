@@ -29,6 +29,7 @@ import {
   type NormalizedMockExamAnswerInput,
 } from "../validators/mock-exam";
 import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
+import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
 
 export type MockExamUserContext = {
   userPublicId: string;
@@ -479,8 +480,8 @@ function shouldReplaceMockExamSnapshot(
   paper: MockExamPaperRow,
 ): boolean {
   return (
-    listMockExamQuestions(activeMockExam.paper_snapshot).length === 0 &&
-    listMockExamQuestions(paper.paper_snapshot).length > 0
+    listValidatedMockExamQuestions(activeMockExam.paper_snapshot) === null &&
+    listValidatedMockExamQuestions(paper.paper_snapshot) !== null
   );
 }
 
@@ -526,14 +527,21 @@ function isAutoMatchFillBlankQuestion(
 
 function isObjectiveQuestion(question: MockExamQuestionSnapshot): boolean {
   return (
-    (isOptionQuestion(question) && question.standardAnswerLabels.length > 0) ||
-    (isAutoMatchFillBlankQuestion(question) &&
-      getAutoMatchAnswers(question).length > 0)
+    question.scoringMethod === "auto_match" &&
+    ((isOptionQuestion(question) && question.standardAnswerLabels.length > 0) ||
+      (isAutoMatchFillBlankQuestion(question) &&
+        getAutoMatchAnswers(question).length > 0))
   );
 }
 
 function isAiScoringQuestion(question: MockExamQuestionSnapshot): boolean {
-  return getStringField(question.snapshot, "scoringMethod") === "ai_scoring";
+  return (
+    question.scoringMethod === "ai_scoring" &&
+    (question.questionType === "fill_blank" ||
+      question.questionType === "short_answer" ||
+      question.questionType === "case_analysis" ||
+      question.questionType === "calculation")
+  );
 }
 
 function isCorrectObjectiveAnswer(
@@ -591,46 +599,141 @@ function listScoringPointInputs(question: MockExamQuestionSnapshot) {
   const scoringPoints = Array.isArray(question.snapshot.scoringPoints)
     ? question.snapshot.scoringPoints
     : [];
-  const normalizedScoringPoints = scoringPoints.flatMap(
-    (scoringPoint, index) => {
-      if (!isRecord(scoringPoint)) {
-        return [];
-      }
+  const normalizedScoringPoints = [];
+  const sortOrders: number[] = [];
 
-      const scoringPointPublicId =
-        getStringField(scoringPoint, "scoringPointPublicId") ??
-        `${question.paperQuestionPublicId}_scoring_point_${index + 1}`;
-      const label =
-        getStringField(scoringPoint, "label") ??
-        getStringField(scoringPoint, "description") ??
-        `scoring_point_${index + 1}`;
-      const maxScoreValue = scoringPoint.score;
-      const maxScore =
-        typeof maxScoreValue === "number"
-          ? maxScoreValue
-          : typeof maxScoreValue === "string"
-            ? Number.parseFloat(maxScoreValue)
-            : 0;
+  for (const scoringPoint of scoringPoints) {
+    if (!isRecord(scoringPoint)) {
+      return null;
+    }
 
-      return [
-        {
-          scoringPointPublicId,
-          label,
-          maxScore: Number.isFinite(maxScore) ? maxScore : 0,
-        },
-      ];
-    },
+    const scoringPointPublicId = getStringField(
+      scoringPoint,
+      "scoringPointPublicId",
+    );
+    const label =
+      getStringField(scoringPoint, "label") ??
+      getStringField(scoringPoint, "description");
+    const sortOrder = scoringPoint.sortOrder;
+    const maxScoreValue = scoringPoint.score;
+    const maxScore =
+      typeof maxScoreValue === "number"
+        ? maxScoreValue
+        : typeof maxScoreValue === "string"
+          ? Number.parseFloat(maxScoreValue)
+          : 0;
+
+    if (
+      scoringPointPublicId === null ||
+      scoringPointPublicId.trim().length === 0 ||
+      label === null ||
+      label.trim().length === 0 ||
+      typeof sortOrder !== "number" ||
+      !Number.isInteger(sortOrder) ||
+      sortOrder <= 0 ||
+      !Number.isFinite(maxScore) ||
+      maxScore <= 0 ||
+      !Number.isInteger(maxScore * 2)
+    ) {
+      return null;
+    }
+
+    normalizedScoringPoints.push({
+      scoringPointPublicId,
+      label,
+      maxScore,
+    });
+    sortOrders.push(sortOrder);
+  }
+
+  const publicIds = normalizedScoringPoints.map(
+    (scoringPoint) => scoringPoint.scoringPointPublicId,
+  );
+  if (
+    new Set(publicIds).size !== publicIds.length ||
+    new Set(sortOrders).size !== sortOrders.length
+  ) {
+    return null;
+  }
+
+  return normalizedScoringPoints;
+}
+
+function requireScoringPointInputs(question: MockExamQuestionSnapshot) {
+  const scoringPoints = listScoringPointInputs(question);
+
+  if (scoringPoints === null) {
+    throw new Error("Mock exam scoring point snapshot is malformed.");
+  }
+
+  return scoringPoints;
+}
+
+function hasValidQuestionScoringContract(
+  question: MockExamQuestionSnapshot,
+): boolean {
+  if (
+    !isQuestionScoringContractValid({
+      questionType: question.questionType,
+      scoringMethod: question.scoringMethod,
+      multiChoiceRule: getStringField(question.snapshot, "multiChoiceRule"),
+    })
+  ) {
+    return false;
+  }
+
+  const questionScore = Number.parseFloat(question.score);
+
+  if (!Number.isFinite(questionScore) || questionScore <= 0) {
+    return false;
+  }
+
+  const scoringPoints = listScoringPointInputs(question);
+
+  if (scoringPoints === null) {
+    return false;
+  }
+
+  if (isObjectiveQuestion(question)) {
+    return scoringPoints.length === 0;
+  }
+
+  if (!isAiScoringQuestion(question)) {
+    return false;
+  }
+
+  const scoringPointTotal = scoringPoints.reduce(
+    (total, scoringPoint) => total + scoringPoint.maxScore,
+    0,
   );
 
-  return normalizedScoringPoints.length > 0
-    ? normalizedScoringPoints
-    : [
-        {
-          scoringPointPublicId: `${question.paperQuestionPublicId}_scoring_point_1`,
-          label: "overall",
-          maxScore: parseScore(question.score),
-        },
-      ];
+  return (
+    scoringPoints.length > 0 &&
+    Math.abs(scoringPointTotal - parseScore(question.score)) < 0.001
+  );
+}
+
+function listValidatedMockExamQuestions(
+  paperSnapshot: Record<string, unknown>,
+): MockExamQuestionSnapshot[] | null {
+  const questions = listMockExamQuestions(paperSnapshot);
+  const questionCountValidation = validatePublishedPaperQuestionCount(
+    countPaperSnapshotQuestions(paperSnapshot),
+  );
+  const paperQuestionPublicIds = questions.map(
+    (question) => question.paperQuestionPublicId,
+  );
+  const questionPublicIds = questions.map(
+    (question) => question.questionPublicId,
+  );
+
+  return !questionCountValidation.success ||
+    questions.length !== countPaperSnapshotQuestions(paperSnapshot) ||
+    new Set(paperQuestionPublicIds).size !== paperQuestionPublicIds.length ||
+    new Set(questionPublicIds).size !== questionPublicIds.length ||
+    questions.some((question) => !hasValidQuestionScoringContract(question))
+    ? null
+    : questions;
 }
 
 function buildAnswerSnapshot(
@@ -699,7 +802,7 @@ function buildAiScoringRuntimeContext(input: {
     ),
     studentAnswer: getStudentAnswer(input.answerRecord.answer_snapshot),
     maxScore: input.question.score,
-    scoringPoints: listScoringPointInputs(input.question),
+    scoringPoints: requireScoringPointInputs(input.question),
   };
 }
 
@@ -931,7 +1034,13 @@ async function submitReadableMockExam(
     userPublicId: userContext.userPublicId,
     mockExamPublicId: mockExam.public_id,
   });
-  const questions = listMockExamQuestions(mockExam.paper_snapshot);
+  const questions = listValidatedMockExamQuestions(mockExam.paper_snapshot);
+  if (questions === null) {
+    return createErrorResponse(
+      422317,
+      "Mock exam paper scoring contract is invalid.",
+    );
+  }
   const answerByPaperQuestion = new Map(
     answerRecords.map((answerRecord) => [
       answerRecord.paper_question_public_id,
@@ -1197,19 +1306,26 @@ async function createFreshMockExam(
   userContext: MockExamUserContext,
   paper: MockExamPaperRow,
   startedAt: Date,
-): Promise<MockExamRow> {
-  return repository.createMockExam({
-    publicId: publicIdFactory.createPublicId("mock_exam"),
-    userPublicId: userContext.userPublicId,
-    paperPublicId: paper.public_id,
-    paperSnapshot: paper.paper_snapshot,
-    profession: paper.profession,
-    level: paper.level,
-    subject: paper.subject,
-    startedAt,
-    serverDeadlineAt: addDurationMinute(startedAt, paper.duration_minute),
-    durationMinute: paper.duration_minute,
-  });
+): Promise<MockExamRow | null> {
+  try {
+    return await repository.createMockExam({
+      publicId: publicIdFactory.createPublicId("mock_exam"),
+      userPublicId: userContext.userPublicId,
+      paperPublicId: paper.public_id,
+      paperSnapshot: paper.paper_snapshot,
+      profession: paper.profession,
+      level: paper.level,
+      subject: paper.subject,
+      startedAt,
+      serverDeadlineAt: addDurationMinute(startedAt, paper.duration_minute),
+      durationMinute: paper.duration_minute,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "PaperStartConflictError") {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export function createMockExamService(
@@ -1241,6 +1357,13 @@ export function createMockExamService(
 
       if (!questionCountValidation.success) {
         return createMockExamPaperQuestionCountInvalidResponse();
+      }
+
+      if (listValidatedMockExamQuestions(paper.paper_snapshot) === null) {
+        return createErrorResponse(
+          422317,
+          "Mock exam paper scoring contract is invalid.",
+        );
       }
 
       const now = clock.now();
@@ -1291,6 +1414,13 @@ export function createMockExamService(
             now,
           );
 
+          if (mockExam === null) {
+            return createErrorResponse(
+              409313,
+              "Mock exam paper is no longer published.",
+            );
+          }
+
           return createSuccessResponse({
             mockExam: mapMockExamToApi(mockExam, now),
           });
@@ -1326,6 +1456,13 @@ export function createMockExamService(
         paper,
         now,
       );
+
+      if (mockExam === null) {
+        return createErrorResponse(
+          409313,
+          "Mock exam paper is no longer published.",
+        );
+      }
 
       return createSuccessResponse({
         mockExam: mapMockExamToApi(mockExam, now),
@@ -1477,7 +1614,13 @@ export function createMockExamService(
         userPublicId: userContext.userPublicId,
         mockExamPublicId: mockExam.public_id,
       });
-      const questions = listMockExamQuestions(mockExam.paper_snapshot);
+      const questions = listValidatedMockExamQuestions(mockExam.paper_snapshot);
+      if (questions === null) {
+        return createErrorResponse(
+          422317,
+          "Mock exam paper scoring contract is invalid.",
+        );
+      }
       const answerByPaperQuestion = new Map(
         answerRecords.map((answerRecord) => [
           answerRecord.paper_question_public_id,
