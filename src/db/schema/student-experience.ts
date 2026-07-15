@@ -265,6 +265,9 @@ export const answerRecord = pgTable(
     uniqueIndex("udx_answer_record_mock_exam_id_client_operation_id")
       .on(table.mock_exam_id, table.client_operation_id)
       .where(sql`${table.client_operation_id} is not null`),
+    uniqueIndex("udx_answer_record_mock_exam_id_paper_question_public_id")
+      .on(table.mock_exam_id, table.paper_question_public_id)
+      .where(sql`${table.mock_exam_id} is not null`),
     index("idx_answer_record_user_id").on(table.user_id),
     index("idx_answer_record_practice_id").on(table.practice_id),
     index("idx_answer_record_mock_exam_id").on(table.mock_exam_id),

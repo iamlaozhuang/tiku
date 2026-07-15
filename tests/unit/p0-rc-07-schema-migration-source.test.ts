@@ -48,6 +48,9 @@ describe("P0 RC-07 answer, deadline and report migration source", () => {
     expect(getIndexNames(answerRecord)).toContain(
       "udx_answer_record_mock_exam_id_client_operation_id",
     );
+    expect(getIndexNames(answerRecord)).toContain(
+      "udx_answer_record_mock_exam_id_paper_question_public_id",
+    );
   });
 
   it("defines one durable deadline owner per mock_exam", () => {
@@ -115,5 +118,41 @@ describe("P0 RC-07 answer, deadline and report migration source", () => {
         ),
       ),
     ).toBe(true);
+  });
+
+  it("keeps the answer single-owner correction additive and chained after the RC-07 base snapshot", () => {
+    const correctionName = readdirSync(resolve(process.cwd(), "drizzle")).find(
+      (name) => name.endsWith("_p0_rc_07_answer_revision_correction.sql"),
+    );
+
+    expect(correctionName).toBe(
+      "20260715223000_p0_rc_07_answer_revision_correction.sql",
+    );
+    const correctionSource = readFileSync(
+      resolve(process.cwd(), "drizzle", correctionName!),
+      "utf8",
+    );
+
+    expect(correctionSource).toContain(
+      'CREATE UNIQUE INDEX "udx_answer_record_mock_exam_id_paper_question_public_id"',
+    );
+    expect(correctionSource.toLowerCase()).not.toMatch(
+      /\b(?:alter table|create table|create type|drop|truncate)\b/iu,
+    );
+
+    const baseSnapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260715153040_snapshot.json"),
+        "utf8",
+      ),
+    ) as { id: string };
+    const correctionSnapshot = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "drizzle/meta/20260715223000_snapshot.json"),
+        "utf8",
+      ),
+    ) as { prevId: string };
+
+    expect(correctionSnapshot.prevId).toBe(baseSnapshot.id);
   });
 });

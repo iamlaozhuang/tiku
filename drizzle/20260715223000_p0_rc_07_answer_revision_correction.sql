@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "udx_answer_record_mock_exam_id_paper_question_public_id" ON "answer_record" USING btree ("mock_exam_id","paper_question_public_id") WHERE "answer_record"."mock_exam_id" is not null;
