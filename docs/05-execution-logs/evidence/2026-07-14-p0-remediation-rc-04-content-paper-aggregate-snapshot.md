@@ -4,7 +4,7 @@ Date: 2026-07-15
 
 Task: `p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14`
 
-Status: `ready_for_branch_closeout`
+Status: `ready_for_closeout`
 
 result: pass
 
@@ -15,6 +15,7 @@ result: pass
 - worktree: `D:/tiku/.worktrees/p0-rc-04`
 - governance checkpoint: `5aeb7331b`
 - approved schema/migration source checkpoint: `813d7641a`
+- implementation checkpoint: `14f8e4c5029118fafe0cb29c83f973676a13b0f9`
 - RC-03 origin sync、worktree cleanup、short branch cleanup：pass。
 - `D:/tiku-readonly-audit`：`a84224fa12ec85b28e6acd945deba2afa28c6c02`，clean/read-only。
 - 审计 baseline 到当前源 baseline 的 RC-04 目标差异已映射；五个 finding 均保持 confirmed，未无依据推翻全审计。
