@@ -182,7 +182,7 @@ p0RemediationSerialProgram:
     p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: closed
     p0-remediation-rc-03-authorization-object-scope-2026-07-14: closed
     p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: closed
-    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: in_progress
+    p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: ready_for_closeout
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: pending
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: pending
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
@@ -191,7 +191,7 @@ activeTasks:
   - id: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
     title: P0 RC-05 knowledge resource RAG and citation
     phase: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-    status: in_progress
+    status: ready_for_closeout
     priority: p0
     sequenceOrder: 5
     taskKind: implementation
@@ -255,28 +255,45 @@ activeTasks:
       - src/rag/retrieval.ts
       - src/rag/retrieval.test.ts
       - src/server/contracts/admin-content-knowledge-ops-contract.ts
+      - src/server/contracts/ai-rag-contract.ts
+      - src/server/contracts/question-contract.ts
       - src/server/models/ai-rag.ts
       - src/server/validators/rag-resource-knowledge.ts
       - src/server/repositories/question-repository.ts
       - src/server/repositories/question-repository.test.ts
       - src/server/repositories/content-knowledge-node-runtime-repository.ts
+      - src/server/repositories/knowledge-recommendation-runtime-repository.ts
+      - src/server/repositories/knowledge-recommendation-runtime-repository.test.ts
       - src/server/repositories/rag-resource-knowledge-runtime-repository.ts
       - src/server/services/content-question-material-runtime.ts
+      - src/server/services/ai-explanation-hint-service.test.ts
+      - src/server/services/ai-scoring-service.test.ts
       - src/server/services/knowledge-recommendation-service.ts
       - src/server/services/knowledge-recommendation-service.test.ts
+      - src/server/services/mistake-book-service.test.ts
       - src/server/services/rag-resource-knowledge-runtime.ts
       - src/server/services/rag-retrieval-service.ts
       - src/server/services/admin-content-knowledge-ops-service.ts
       - src/server/services/owner-preview-qwen-visible-ai-runtime-control.ts
+      - src/server/services/owner-preview-qwen-visible-ai-runtime-control.test.ts
+      - src/server/services/rag-retrieval-service.test.ts
+      - src/server/services/student-flow-runtime.test.ts
+      - src/server/services/student-mistake-book-runtime.test.ts
       - src/server/services/student-flow-runtime.ts
       - src/server/services/student-mistake-book-runtime.ts
       - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/features/admin/resource-knowledge-management/AdminResourceKnowledgeManagement.tsx
       - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/admin-resource-knowledge-ui-layout.test.ts
       - tests/unit/phase-9-content-question-material-runtime.test.ts
       - tests/unit/phase-9-rag-resource-knowledge-runtime.test.ts
       - tests/unit/phase-9-ai-knowledge-model-config-runtime.test.ts
       - tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts
+      - tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts
+      - tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts
       - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - tests/unit/phase-20-ra-04-07-persisted-model-config-runtime-selection.test.ts
       - tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts
       - tests/unit/p0-rc-05-knowledge-resource-rag-citation.test.ts
       - tests/unit/p0-rc-05-schema-migration-source.test.ts
