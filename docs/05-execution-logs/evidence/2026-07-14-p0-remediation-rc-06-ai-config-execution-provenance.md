@@ -48,11 +48,21 @@ analogousImplementationReviewed: true
 
 ## Validation Log
 
-- pending
+- `corepack pnpm exec vitest run src/db/schema/ai-rag.test.ts tests/unit/p0-rc-06-schema-migration-source.test.ts --reporter=dot`：`2/2` files、`37/37` tests passed。
+- `corepack pnpm typecheck`：passed。
+- migration source：`drizzle/20260715200303_p0_rc_06_ai_scoring_task.sql`；Drizzle snapshot `0027` 与 journal entry `27` 已生成。
+- migration source 仅经 schema/static test 验证；未设置真实 `DATABASE_URL`、未连接或读取数据库、未执行 migrate/apply/push/backfill/seed。
 
 ## RED / GREEN
 
-- pending
+- RED：schema export `aiScoringTask` / `aiScoringTaskStatusValues` 不存在；RC-06 migration source 数量为 `0`，`6` 个预期测试失败。
+- GREEN：新增 durable FIFO `ai_scoring_task`、固定 `max_attempt_count=3`、`timeout_second=60`、answer FK、idempotency/FIFO/lease indexes 以及 model/prompt/input/authorization snapshots；`37/37` 通过。
+
+## Migration Source Isolation
+
+- approval：`docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md`，用户再次确认“批准审批请求”。
+- staged scope：schema、schema test、migration SQL、Drizzle snapshot/journal、migration static test 与本 evidence；不夹带 UI、secret adapter、connection adapter 或其他业务实现。
+- compatibility：只新增 enum/table/index/FK/check，不改写或删除现有列与数据；数据库应用及数据兼容运行时验收仍未获批。
 
 ## Review Log
 

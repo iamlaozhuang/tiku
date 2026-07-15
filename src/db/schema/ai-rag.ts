@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
   foreignKey,
   index,
   integer,
@@ -66,6 +67,19 @@ export const aiScoringAttemptStatusValues = [
 export const aiScoringAttemptStatusEnum = pgEnum(
   "ai_scoring_attempt_status",
   aiScoringAttemptStatusValues,
+);
+
+export const aiScoringTaskStatusValues = [
+  "pending",
+  "running",
+  "succeeded",
+  "failed",
+  "cancelled",
+] as const;
+
+export const aiScoringTaskStatusEnum = pgEnum(
+  "ai_scoring_task_status",
+  aiScoringTaskStatusValues,
 );
 
 export const aiGenerationTaskTypeValues = [
@@ -357,6 +371,81 @@ export const aiCallLog = pgTable(
       table.call_status,
     ),
     index("idx_ai_call_log_started_at").on(table.started_at),
+  ],
+);
+
+export const aiScoringTask = pgTable(
+  "ai_scoring_task",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    answer_record_id: bigint("answer_record_id", { mode: "number" }).notNull(),
+    mock_exam_public_id: text("mock_exam_public_id").notNull(),
+    actor_public_id: text("actor_public_id").notNull(),
+    idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    task_status: aiScoringTaskStatusEnum("task_status")
+      .default("pending")
+      .notNull(),
+    attempt_count: integer("attempt_count").default(0).notNull(),
+    max_attempt_count: integer("max_attempt_count").default(3).notNull(),
+    timeout_second: integer("timeout_second").default(60).notNull(),
+    model_config_snapshot: jsonb("model_config_snapshot").notNull(),
+    prompt_template_key: text("prompt_template_key").notNull(),
+    prompt_template_version: integer("prompt_template_version").notNull(),
+    prompt_template_hash: text("prompt_template_hash").notNull(),
+    input_snapshot: jsonb("input_snapshot").notNull(),
+    authorization_snapshot: jsonb("authorization_snapshot").notNull(),
+    rag_snapshot: jsonb("rag_snapshot"),
+    result_snapshot: jsonb("result_snapshot"),
+    ai_call_log_id: bigint("ai_call_log_id", { mode: "number" }),
+    failure_code: text("failure_code"),
+    failure_message_digest: text("failure_message_digest"),
+    scheduled_at: timestampColumn("scheduled_at").defaultNow(),
+    claimed_at: nullableTimestampColumn("claimed_at"),
+    lease_expires_at: nullableTimestampColumn("lease_expires_at"),
+    worker_public_id: text("worker_public_id"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.answer_record_id],
+      foreignColumns: [answerRecordReference.id],
+      name: "fk_ai_scoring_task_answer_record",
+    }).onDelete("restrict"),
+    foreignKey({
+      columns: [table.ai_call_log_id],
+      foreignColumns: [aiCallLog.id],
+      name: "fk_ai_scoring_task_ai_call_log",
+    }).onDelete("set null"),
+    check(
+      "chk_ai_scoring_task_attempt_count",
+      sql`${table.attempt_count} >= 0 and ${table.attempt_count} <= ${table.max_attempt_count}`,
+    ),
+    check(
+      "chk_ai_scoring_task_max_attempt_count",
+      sql`${table.max_attempt_count} = 3`,
+    ),
+    check(
+      "chk_ai_scoring_task_timeout_second",
+      sql`${table.timeout_second} = 60`,
+    ),
+    uniqueIndex("udx_ai_scoring_task_public_id").on(table.public_id),
+    uniqueIndex("udx_ai_scoring_task_answer_record_id_idempotency_key_hash").on(
+      table.answer_record_id,
+      table.idempotency_key_hash,
+    ),
+    index("idx_ai_scoring_task_answer_record_id").on(table.answer_record_id),
+    index("idx_ai_scoring_task_task_status_scheduled_at").on(
+      table.task_status,
+      table.scheduled_at,
+    ),
+    index("idx_ai_scoring_task_lease_expires_at").on(table.lease_expires_at),
+    index("idx_ai_scoring_task_mock_exam_public_id_task_status").on(
+      table.mock_exam_public_id,
+      table.task_status,
+    ),
   ],
 );
 

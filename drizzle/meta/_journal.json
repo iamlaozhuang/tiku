@@ -190,6 +190,13 @@
       "when": 1784137233484,
       "tag": "20260715174033_p0_rc_05_rag_retrieval_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1784145783851,
+      "tag": "20260715200303_p0_rc_06_ai_scoring_task",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,8 @@ import {
   aiFuncTypeValues,
   aiScoringAttempt,
   aiScoringAttemptStatusValues,
+  aiScoringTask,
+  aiScoringTaskStatusValues,
   knowledgeBase,
   knowledgeNode,
   knowledgeNodeResource,
@@ -57,6 +59,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       getTableName(promptTemplate),
       getTableName(aiCallLog),
       getTableName(aiScoringAttempt),
+      getTableName(aiScoringTask),
       getTableName(knowledgeBase),
       getTableName(resource),
       getTableName(knowledgeNode),
@@ -67,6 +70,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       "prompt_template",
       "ai_call_log",
       "ai_scoring_attempt",
+      "ai_scoring_task",
       "knowledge_base",
       "resource",
       "knowledge_node",
@@ -85,6 +89,16 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       "succeeded",
       "failed",
       "timeout",
+      "cancelled",
+    ]);
+  });
+
+  it("registers durable AI scoring task lifecycle values", () => {
+    expect(aiScoringTaskStatusValues).toEqual([
+      "pending",
+      "running",
+      "succeeded",
+      "failed",
       "cancelled",
     ]);
   });
@@ -281,6 +295,66 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "udx_ai_scoring_attempt_answer_record_id_attempt_number",
       ]),
     );
+  });
+
+  it("stores an immutable FIFO AI scoring task separately from attempts", () => {
+    expect(getColumnNames(aiScoringTask)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "answer_record_id",
+        "mock_exam_public_id",
+        "actor_public_id",
+        "idempotency_key_hash",
+        "task_status",
+        "attempt_count",
+        "max_attempt_count",
+        "timeout_second",
+        "model_config_snapshot",
+        "prompt_template_key",
+        "prompt_template_version",
+        "prompt_template_hash",
+        "input_snapshot",
+        "authorization_snapshot",
+        "rag_snapshot",
+        "result_snapshot",
+        "ai_call_log_id",
+        "failure_code",
+        "failure_message_digest",
+        "scheduled_at",
+        "claimed_at",
+        "lease_expires_at",
+        "worker_public_id",
+        "completed_at",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getColumnNames(aiScoringTask)).not.toEqual(
+      expect.arrayContaining([
+        "api_key",
+        "api_key_secret_ref",
+        "raw_prompt",
+        "provider_request_payload",
+        "provider_response_payload",
+      ]),
+    );
+    expect(getIndexNames(aiScoringTask)).toEqual(
+      expect.arrayContaining([
+        "udx_ai_scoring_task_public_id",
+        "udx_ai_scoring_task_answer_record_id_idempotency_key_hash",
+        "idx_ai_scoring_task_answer_record_id",
+        "idx_ai_scoring_task_task_status_scheduled_at",
+        "idx_ai_scoring_task_lease_expires_at",
+        "idx_ai_scoring_task_mock_exam_public_id_task_status",
+      ]),
+    );
+    expect(
+      [
+        ...getIndexNames(aiScoringTask),
+        ...getForeignKeyNames(aiScoringTask),
+      ].every((databaseObjectName) => databaseObjectName.length <= 63),
+    ).toBe(true);
   });
 
   it("stores knowledge base rows by public identifier and profession", () => {
