@@ -121,6 +121,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 localFullLoopGate: pass_branch_gates_fresh_master_required_after_merge
 
+## Fresh Master Closeout
+
+- `codex/p0-rc-04-content-paper-aggregate-snapshot` 已通过 `git merge --ff-only` 合入本地 `master`，closeout checkpoint 为 `9591189fabfd7e0511db10540ec891706d8b8919`。
+- 在 detached fresh-master worktree `D:/tiku/.worktrees/p0-rc-04-fresh-master` 验证该精确 checkpoint；`corepack pnpm@10.15.1 install --frozen-lockfile --offline` 成功，未修改 package/lockfile。
+- fresh-master full unit：`385/385` files、`2274/2274` tests passed，`278.24s`，`--maxWorkers=4`。
+- fresh-master lint、typecheck、format:check、build、`git diff --check` 全部通过；build 生成 92 个静态页面。
+- fresh-master 和 master 均无 tracked/untracked 源码改动；`D:/tiku-readonly-audit` 保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02` 且 clean。
+- `origin/master` 与实时远端仍为 `4d1d011d4a6c1fa63d2f2e547b0e4f9cda42af65`；尚未 push，未提前声明 remote sync 或 cleanup 完成。
+
+localFullLoopGate: pass_fresh_master_gates_ready_for_checkpoint_handoff
+
 ## Approval Boundary
 
 - schema/migration source authoring、generation、static test、isolated commit：approved and complete。
