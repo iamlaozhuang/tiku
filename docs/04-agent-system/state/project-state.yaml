@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
-updatedAt: "2026-07-15T11:38:26-07:00"
+updatedAt: "2026-07-15T11:56:48-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -428,8 +428,8 @@ p0RemediationSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14:
-      taskCommit: pending
-      masterMerge: pending
+      taskCommit: pass
+      masterMerge: pass
       originMasterSync: pending
       worktreeCleanup: pending
       shortBranchCleanup: pending
@@ -460,7 +460,7 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: d8ea27882f98679db8f83992316cd9c6661bee3d
+  lastKnownMasterSha: 5b5319b511e0eb7bc9a1b8e3e4adadf9193bb88c
   lastKnownOriginMasterSha: d8ea27882f98679db8f83992316cd9c6661bee3d
   lastKnownRemoteMasterSha: d8ea27882f98679db8f83992316cd9c6661bee3d
   masterWorktreeClean: true
