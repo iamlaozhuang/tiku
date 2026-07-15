@@ -162,6 +162,13 @@
       "when": 1784098891479,
       "tag": "20260715070131_p0_rc_01_admin_account_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1784106944555,
+      "tag": "20260715092000_p0_rc_02_organization_scope_quota_employee",
+      "breakpoints": true
     }
   ]
 }

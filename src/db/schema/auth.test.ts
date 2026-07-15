@@ -16,6 +16,7 @@ import {
   authVerification,
   authorizationEditionValues,
   employee,
+  employeeOrgAuth,
   orgAuth,
   orgAuthOrganization,
   organization,
@@ -89,7 +90,9 @@ describe("auth schema baseline", () => {
         "updated_at",
       ]),
     );
-    expect(getColumnNames(organization)).toContain("parent_organization_id");
+    expect(getColumnNames(organization)).toEqual(
+      expect.arrayContaining(["parent_organization_id", "revision"]),
+    );
     expect(getColumnNames(employee)).toEqual(
       expect.arrayContaining(["public_id", "user_id", "organization_id"]),
     );
@@ -101,11 +104,13 @@ describe("auth schema baseline", () => {
       getTableName(personalAuth),
       getTableName(orgAuth),
       getTableName(orgAuthOrganization),
+      getTableName(employeeOrgAuth),
     ]).toEqual([
       "redeem_code",
       "personal_auth",
       "org_auth",
       "org_auth_organization",
+      "employee_org_auth",
     ]);
 
     expect(getColumnNames(orgAuth)).toEqual(
@@ -126,6 +131,13 @@ describe("auth schema baseline", () => {
     );
     expect(getIndexNames(orgAuthOrganization)).toContain(
       "udx_org_auth_organization_org_auth_id_organization_id",
+    );
+    expect(getIndexNames(employeeOrgAuth)).toEqual(
+      expect.arrayContaining([
+        "udx_employee_org_auth_employee_id_org_auth_id",
+        "idx_employee_org_auth_employee_id",
+        "idx_employee_org_auth_org_auth_id",
+      ]),
     );
   });
 

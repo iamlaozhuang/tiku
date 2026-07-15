@@ -280,6 +280,7 @@ export const organization = pgTable(
     contact_name: text("contact_name"),
     contact_phone: text("contact_phone"),
     remark: text("remark"),
+    revision: integer("revision").default(1).notNull(),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
   },
@@ -290,6 +291,7 @@ export const organization = pgTable(
     ),
     index("idx_organization_org_tier").on(table.org_tier),
     index("idx_organization_status").on(table.status),
+    check("chk_organization_revision_positive", sql`${table.revision} > 0`),
   ],
 );
 
@@ -462,6 +464,28 @@ export const orgAuthOrganization = pgTable(
   ],
 );
 
+export const employeeOrgAuth = pgTable(
+  "employee_org_auth",
+  {
+    id: idColumn(),
+    employee_id: bigint("employee_id", { mode: "number" })
+      .notNull()
+      .references(() => employee.id, { onDelete: "cascade" }),
+    org_auth_id: bigint("org_auth_id", { mode: "number" })
+      .notNull()
+      .references(() => orgAuth.id, { onDelete: "cascade" }),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_employee_org_auth_employee_id_org_auth_id").on(
+      table.employee_id,
+      table.org_auth_id,
+    ),
+    index("idx_employee_org_auth_employee_id").on(table.employee_id),
+    index("idx_employee_org_auth_org_auth_id").on(table.org_auth_id),
+  ],
+);
+
 export const authUpgrade = pgTable(
   "auth_upgrade",
   {
@@ -605,7 +629,8 @@ export const adminOrganizationRelations = relations(
   }),
 );
 
-export const employeeRelations = relations(employee, ({ one }) => ({
+export const employeeRelations = relations(employee, ({ many, one }) => ({
+  orgAuths: many(employeeOrgAuth),
   organization: one(organization, {
     fields: [employee.organization_id],
     references: [organization.id],
@@ -642,6 +667,7 @@ export const personalAuthRelations = relations(
 
 export const orgAuthRelations = relations(orgAuth, ({ many, one }) => ({
   authUpgrades: many(authUpgrade),
+  employees: many(employeeOrgAuth),
   organizations: many(orgAuthOrganization),
   purchaserOrganization: one(organization, {
     fields: [orgAuth.purchaser_organization_id],
@@ -659,6 +685,20 @@ export const orgAuthOrganizationRelations = relations(
     organization: one(organization, {
       fields: [orgAuthOrganization.organization_id],
       references: [organization.id],
+    }),
+  }),
+);
+
+export const employeeOrgAuthRelations = relations(
+  employeeOrgAuth,
+  ({ one }) => ({
+    employee: one(employee, {
+      fields: [employeeOrgAuth.employee_id],
+      references: [employee.id],
+    }),
+    orgAuth: one(orgAuth, {
+      fields: [employeeOrgAuth.org_auth_id],
+      references: [orgAuth.id],
     }),
   }),
 );
