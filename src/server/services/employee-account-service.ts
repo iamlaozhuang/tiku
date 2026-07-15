@@ -1,6 +1,5 @@
 import { randomInt } from "node:crypto";
 
-import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -8,7 +7,10 @@ import {
 } from "../contracts/api-response";
 import type { EmployeeAccountResultDto } from "../contracts/employee-account-contract";
 import { mapEmployeeAccountToApi } from "../mappers/employee-account-mapper";
-import type { EmployeeAccountRepository } from "../repositories/employee-account-repository";
+import {
+  EmployeeAccountMutationError,
+  type EmployeeAccountRepository,
+} from "../repositories/employee-account-repository";
 import { normalizeCreateEmployeeAccountInput } from "../validators/employee-account";
 
 export type EmployeeAccountService = {
@@ -59,7 +61,6 @@ function generateEmployeeInitialPassword(): string {
 }
 
 export function createEmployeeAccountService(
-  credentialAdapter: UserRegistrationCredentialAdapter,
   employeeAccountRepository: EmployeeAccountRepository,
 ): EmployeeAccountService {
   return {
@@ -97,12 +98,18 @@ export function createEmployeeAccountService(
           );
         }
 
-        const employeeAccount =
-          await employeeAccountRepository.bindExistingUserToOrganization({
-            userPublicId: existingUser.public_id,
-            organizationPublicId:
-              employeeAccountInput.value.organizationPublicId,
-          });
+        let employeeAccount;
+
+        try {
+          employeeAccount =
+            await employeeAccountRepository.bindExistingUserToOrganization({
+              userPublicId: existingUser.public_id,
+              organizationPublicId:
+                employeeAccountInput.value.organizationPublicId,
+            });
+        } catch (error) {
+          return mapEmployeeAccountMutationError(error);
+        }
 
         return createSuccessResponse({
           ...mapEmployeeAccountToApi(employeeAccount),
@@ -116,18 +123,18 @@ export function createEmployeeAccountService(
           : null;
       const initialPassword =
         generatedInitialPassword ?? employeeAccountInput.value.initialPassword;
-      const credential = await credentialAdapter.createPasswordCredential({
-        phone: employeeAccountInput.value.phone,
-        ["password"]: initialPassword,
-      });
+      let employeeAccount;
 
-      const employeeAccount =
-        await employeeAccountRepository.createEmployeeAccount({
-          authUserId: credential.authUserId,
-          phone: employeeAccountInput.value.phone,
-          name: employeeAccountInput.value.name,
-          organizationPublicId: employeeAccountInput.value.organizationPublicId,
-        });
+      try {
+        employeeAccount = await employeeAccountRepository.createEmployeeAccount(
+          {
+            ...employeeAccountInput.value,
+            initialPassword,
+          },
+        );
+      } catch (error) {
+        return mapEmployeeAccountMutationError(error);
+      }
 
       return createSuccessResponse({
         ...mapEmployeeAccountToApi(employeeAccount),
@@ -135,6 +142,36 @@ export function createEmployeeAccountService(
       });
     },
   };
+}
+
+function mapEmployeeAccountMutationError(
+  error: unknown,
+): ApiResponse<EmployeeAccountResultDto | null> {
+  if (!(error instanceof EmployeeAccountMutationError)) {
+    throw error;
+  }
+
+  if (error.reason === "organization_not_found") {
+    return createErrorResponse(
+      ORGANIZATION_NOT_FOUND_CODE,
+      "Organization does not exist.",
+    );
+  }
+
+  if (
+    error.reason === "quota_insufficient" ||
+    error.reason === "no_active_authorization"
+  ) {
+    return createErrorResponse(
+      EMPLOYEE_ORGANIZATION_CONFLICT_CODE,
+      "Organization authorization quota is insufficient.",
+    );
+  }
+
+  return createErrorResponse(
+    EMPLOYEE_ORGANIZATION_CONFLICT_CODE,
+    "Phone already bound to another organization.",
+  );
 }
 
 export function createUnavailableEmployeeAccountService(): EmployeeAccountService {

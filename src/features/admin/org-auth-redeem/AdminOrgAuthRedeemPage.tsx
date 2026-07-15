@@ -164,13 +164,13 @@ type OrgAuthFormState = {
 type OrganizationFormState = {
   contactName: string;
   contactPhone: string;
-  mode: "create" | "update";
+  expectedRevision: number;
+  mode: "create" | "move" | "update";
   name: string;
   orgTier: OrgTier;
   parentOrganizationPublicId: string;
   publicId: string | null;
   remark: string;
-  status: "active" | "disabled";
 };
 
 type AdminRedeemCodeData = RedeemCodeListDto & {
@@ -216,22 +216,23 @@ type OrganizationConfirmationState =
       publicId: string | null;
     }
   | {
+      expectedRevision: number;
+      isCascade: boolean;
       kind: "disableOrganization" | "enableOrganization";
+      publicId: string;
+    }
+  | {
+      input: OrganizationMoveInput;
+      kind: "moveOrganization";
       publicId: string;
     }
   | null;
 
-type EmployeeImportInput =
-  | {
-      employees: {
-        userPublicId: string;
-        organizationPublicId: string;
-      }[];
-    }
-  | {
-      content: string;
-      sourceFormat: "csv" | "tsv";
-    };
+type EmployeeImportInput = {
+  content: string;
+  sourceFormat: "csv" | "tsv";
+  targetOrganizationPublicId: string;
+};
 
 type EmployeeImportPreview = {
   activeOrgAuthCount: number;
@@ -287,11 +288,16 @@ type RedeemCodeConfirmationState = {
 type OrganizationMutationInput = {
   contactName: string | null;
   contactPhone: string | null;
+  expectedRevision?: number;
   name: string;
-  orgTier: OrgTier;
-  parentOrganizationPublicId: string | null;
+  orgTier?: OrgTier;
+  parentOrganizationPublicId?: string | null;
   remark: string | null;
-  status: "active" | "disabled";
+};
+
+type OrganizationMoveInput = {
+  expectedRevision: number;
+  parentOrganizationPublicId: string | null;
 };
 
 type ToastMessage = {
@@ -420,8 +426,6 @@ const employeeImportKnownHeaderNames = new Set([
   "phone",
   "name",
   "initialpassword",
-  "organizationpublicid",
-  "userpublicid",
 ]);
 
 const forbiddenEmployeeImportScopeHeaderLabels = [
@@ -437,6 +441,8 @@ const forbiddenEmployeeImportScopeHeaderLabels = [
     label: "employeeAuthScopePublicId",
     normalizedName: "employeeauthscopepublicid",
   },
+  { label: "organizationPublicId", normalizedName: "organizationpublicid" },
+  { label: "userPublicId", normalizedName: "userpublicid" },
 ] as const;
 
 const defaultOrgAuthFormState: OrgAuthFormState = {
@@ -467,13 +473,13 @@ const defaultRedeemCodeGenerationFormState: RedeemCodeGenerationFormState = {
 const defaultOrganizationFormState: OrganizationFormState = {
   contactName: "",
   contactPhone: "",
+  expectedRevision: 1,
   mode: "create",
   name: "",
   orgTier: "province",
   parentOrganizationPublicId: "",
   publicId: null,
   remark: "",
-  status: "active",
 };
 
 const expectedParentTierByOrgTier = {
@@ -980,45 +986,6 @@ function buildRedeemCodeGenerationInput(
   };
 }
 
-function createTargetedEmployeeAccountImportContent(input: {
-  lines: string[];
-  targetOrganizationPublicId: string;
-}): string {
-  const delimiter = input.lines.some((line) => line.includes("\t"))
-    ? "\t"
-    : ",";
-  const headerCells = input.lines[0]?.split(delimiter) ?? [];
-  const headerIndexByName = new Map(
-    headerCells.map((cell, index) => [
-      normalizeEmployeeImportHeaderCell(cell),
-      index,
-    ]),
-  );
-  const phoneIndex = headerIndexByName.get("phone") ?? 0;
-  const nameIndex = headerIndexByName.get("name") ?? 1;
-  const initialPasswordIndex = headerIndexByName.get("initialpassword");
-  const dataLines = input.lines.slice(1);
-  const nextLines = dataLines.map((line) => {
-    const cells = line.split(delimiter).map((cell) => cell.trim());
-
-    return [
-      cells[phoneIndex] ?? "",
-      cells[nameIndex] ?? "",
-      initialPasswordIndex === undefined
-        ? ""
-        : (cells[initialPasswordIndex] ?? ""),
-      input.targetOrganizationPublicId,
-    ].join(delimiter);
-  });
-
-  return [
-    ["phone", "name", "initialPassword", "organizationPublicId"].join(
-      delimiter,
-    ),
-    ...nextLines,
-  ].join("\n");
-}
-
 function maskRedeemCodeDisplay(codeDisplay: string): string {
   const normalizedCodeDisplay = codeDisplay.trim();
 
@@ -1159,10 +1126,10 @@ function summarizeEmployeeImportTargetAuth(input: {
     };
   }
 
-  const availableQuota = activeTargetOrgAuths.reduce(
-    (total, orgAuth) =>
-      total + Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0),
-    0,
+  const availableQuota = Math.min(
+    ...activeTargetOrgAuths.map((orgAuth) =>
+      Math.max(orgAuth.accountQuota - orgAuth.usedQuota, 0),
+    ),
   );
 
   return {
@@ -1179,7 +1146,10 @@ function summarizeEmployeeImportTargetAuth(input: {
 function buildOrganizationInput(
   formState: OrganizationFormState,
   organizations: AdminOrgAuthData["organizations"],
-): { input: OrganizationMutationInput | null; message: string | null } {
+): {
+  input: OrganizationMoveInput | OrganizationMutationInput | null;
+  message: string | null;
+} {
   const name = formState.name.trim();
   const parentOrganizationPublicId =
     formState.parentOrganizationPublicId.trim() || null;
@@ -1192,8 +1162,25 @@ function buildOrganizationInput(
             organization.publicId === parentOrganizationPublicId,
         ) ?? null);
 
-  if (name.length === 0) {
+  if (formState.mode !== "move" && name.length === 0) {
     return { input: null, message: "请填写企业名称。" };
+  }
+
+  const profileInput = {
+    contactName: normalizeOptionalOrganizationText(formState.contactName),
+    contactPhone: normalizeOptionalOrganizationText(formState.contactPhone),
+    name,
+    remark: normalizeOptionalOrganizationText(formState.remark),
+  };
+
+  if (formState.mode === "update") {
+    return {
+      input: {
+        ...profileInput,
+        expectedRevision: formState.expectedRevision,
+      },
+      message: null,
+    };
   }
 
   if (
@@ -1217,15 +1204,21 @@ function buildOrganizationInput(
     };
   }
 
+  if (formState.mode === "move") {
+    return {
+      input: {
+        expectedRevision: formState.expectedRevision,
+        parentOrganizationPublicId,
+      },
+      message: null,
+    };
+  }
+
   return {
     input: {
-      contactName: normalizeOptionalOrganizationText(formState.contactName),
-      contactPhone: normalizeOptionalOrganizationText(formState.contactPhone),
-      name,
+      ...profileInput,
       orgTier: formState.orgTier,
       parentOrganizationPublicId,
-      remark: normalizeOptionalOrganizationText(formState.remark),
-      status: formState.status,
     },
     message: null,
   };
@@ -1266,27 +1259,6 @@ function buildEmployeeImportInput(
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
     firstLine.includes("phone") && firstLine.includes("name");
-  const legacyRows = lines.map((line) =>
-    line.split(",").map((item) => item.trim()),
-  );
-  const isLegacyPublicIdImport =
-    !hasEmployeeAccountHeader &&
-    legacyRows.every(
-      (row) => row.length === 2 && row.every((item) => item.length > 0),
-    );
-
-  if (isLegacyPublicIdImport) {
-    return {
-      input: {
-        employees: legacyRows.map(([userPublicId, organizationPublicId]) => ({
-          userPublicId: userPublicId ?? "",
-          organizationPublicId: organizationPublicId ?? "",
-        })),
-      },
-      message: null,
-    };
-  }
-
   if (!hasEmployeeAccountHeader) {
     return {
       input: null,
@@ -1297,11 +1269,9 @@ function buildEmployeeImportInput(
 
   return {
     input: {
-      content: createTargetedEmployeeAccountImportContent({
-        lines,
-        targetOrganizationPublicId: targetOrganizationPublicId.trim(),
-      }),
+      content: lines.join("\n"),
       sourceFormat: lines.some((line) => line.includes("\t")) ? "tsv" : "csv",
+      targetOrganizationPublicId: targetOrganizationPublicId.trim(),
     },
     message: null,
   };
@@ -1352,36 +1322,6 @@ function buildEmployeeImportPreview(
   const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
   const hasEmployeeAccountHeader =
     firstLine.includes("phone") && firstLine.includes("name");
-  const legacyRows = lines.map((line) =>
-    line.split(",").map((item) => item.trim()),
-  );
-  const isLegacyPublicIdImport =
-    !hasEmployeeAccountHeader &&
-    legacyRows.every(
-      (row) => row.length === 2 && row.every((item) => item.length > 0),
-    );
-
-  if (isLegacyPublicIdImport) {
-    const legacyTargetAuthSummary = summarizeEmployeeImportTargetAuth({
-      orgAuths,
-      rowCount: lines.length,
-      targetOrganizationPublicId,
-    });
-
-    return {
-      ...legacyTargetAuthSummary,
-      formatLabel: "userPublicId 绑定导入",
-      generatedPasswordRowCount: 0,
-      isReady:
-        lines.length > 0 &&
-        legacyTargetAuthSummary.inheritedAuthorizationCategory ===
-          "active_org_auth_available" &&
-        legacyTargetAuthSummary.quotaImpactCategory === "quota_available",
-      message: `将按公开编号绑定格式解析 ${lines.length} 行员工。`,
-      rowCount: lines.length,
-    };
-  }
-
   const sourceFormat = lines.some((line) => line.includes("\t"))
     ? "TSV"
     : "CSV";
@@ -1436,6 +1376,7 @@ function mapOrganizationResultToListItem(
     orgTier: organization.orgTier,
     parentOrganizationPublicId: organization.parentOrganizationPublicId,
     publicId: organization.publicId,
+    revision: organization.revision,
     status: organization.status,
   };
 }
@@ -2139,6 +2080,7 @@ function OrganizationTreeBranch({
 }
 
 function OrganizationTreeWorkspace({
+  canMoveOrganization,
   data,
   expandedPublicIds,
   isFilteredSearch,
@@ -2154,12 +2096,14 @@ function OrganizationTreeWorkspace({
   onEnable,
   onKeywordChange,
   onLoadMore,
+  onMove,
   onOrgTierChange,
   onResetFilters,
   onSelect,
   onStatusChange,
   onToggleNode,
 }: {
+  canMoveOrganization: boolean;
   data: OrganizationTreeData;
   expandedPublicIds: Set<string>;
   isFilteredSearch: boolean;
@@ -2170,11 +2114,12 @@ function OrganizationTreeWorkspace({
   status: UserStatus | "all";
   onCreateChild: (node: OrganizationTreeQueryNodeDto) => void;
   onCreateRoot: () => void;
-  onDisable: (publicId: string) => void;
+  onDisable: (node: OrganizationTreeQueryNodeDto) => void;
   onEdit: (node: OrganizationTreeQueryNodeDto) => void;
-  onEnable: (publicId: string) => void;
+  onEnable: (node: OrganizationTreeQueryNodeDto) => void;
   onKeywordChange: (value: string) => void;
   onLoadMore: (publicId: string | null) => void;
+  onMove: (node: OrganizationTreeQueryNodeDto) => void;
   onOrgTierChange: (value: OrgTier | "all") => void;
   onResetFilters: () => void;
   onSelect: (publicId: string) => void;
@@ -2445,12 +2390,22 @@ function OrganizationTreeWorkspace({
                   <Pencil className="size-4" aria-hidden="true" />
                   编辑组织
                 </button>
+                {canMoveOrganization ? (
+                  <button
+                    className="border-border bg-background hover:bg-muted inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                    data-testid={`organization-move-${selectedNode.publicId}`}
+                    type="button"
+                    onClick={() => onMove(selectedNode)}
+                  >
+                    移动组织
+                  </button>
+                ) : null}
                 {selectedNode.status === "active" ? (
                   <button
                     className="bg-destructive text-destructive-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
                     data-testid={`organization-disable-${selectedNode.publicId}`}
                     type="button"
-                    onClick={() => onDisable(selectedNode.publicId)}
+                    onClick={() => onDisable(selectedNode)}
                   >
                     <Ban className="size-4" aria-hidden="true" />
                     停用组织
@@ -2460,7 +2415,7 @@ function OrganizationTreeWorkspace({
                     className="bg-primary text-primary-foreground inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-transform active:scale-[0.98]"
                     data-testid={`organization-enable-${selectedNode.publicId}`}
                     type="button"
-                    onClick={() => onEnable(selectedNode.publicId)}
+                    onClick={() => onEnable(selectedNode)}
                   >
                     <CheckCircle2 className="size-4" aria-hidden="true" />
                     启用组织
@@ -3941,16 +3896,19 @@ function OrgAuthConfirmationDialog({
 function OrganizationConfirmationDialog({
   confirmationState,
   onCancel,
+  onCascadeChange,
   onConfirm,
 }: {
   confirmationState: Exclude<OrganizationConfirmationState, null>;
   onCancel: () => void;
+  onCascadeChange: (isCascade: boolean) => void;
   onConfirm: () => void;
 }) {
   const titleByKind = {
     createOrganization: "确认新增企业组织？",
     disableOrganization: "确认停用企业组织？",
     enableOrganization: "确认启用企业组织？",
+    moveOrganization: "确认移动企业组织？",
     updateOrganization: "确认更新企业组织？",
   } satisfies Record<
     Exclude<OrganizationConfirmationState, null>["kind"],
@@ -3975,9 +3933,21 @@ function OrganizationConfirmationDialog({
           </h2>
         </div>
         <p className="text-text-muted text-sm leading-6">
-          组织树写操作只提交企业公开编号、层级、父级公开编号
-          和必要维护字段；后端继续记录脱敏审计日志。
+          {confirmationState.kind === "moveOrganization"
+            ? "移动将按当前组织树重新计算本节点及全部下级的企业授权覆盖和额度；出现重叠、超额或 revision 冲突时整体回滚。"
+            : "资料编辑、组织移动和状态切换分别提交；后端按 revision 校验并记录脱敏审计日志。"}
         </p>
+        {confirmationState.kind === "disableOrganization" ||
+        confirmationState.kind === "enableOrganization" ? (
+          <label className="text-text-secondary flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={confirmationState.isCascade}
+              onChange={(event) => onCascadeChange(event.target.checked)}
+            />
+            同时处理全部下级组织
+          </label>
+        ) : null}
         <div className="flex gap-2">
           <button
             type="button"
@@ -4061,119 +4031,116 @@ function OrganizationTreeActionPanel({
         </div>
 
         <div className="grid gap-3 lg:grid-cols-4">
-          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
-            <span className="text-text-secondary">企业名称</span>
-            <input
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              data-testid="organization-name-input"
-              value={formState.name}
-              onChange={(event) =>
-                updateFormState({ name: event.target.value })
-              }
-            />
-          </label>
+          {formState.mode === "move" ? null : (
+            <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+              <span className="text-text-secondary">企业名称</span>
+              <input
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                data-testid="organization-name-input"
+                value={formState.name}
+                onChange={(event) =>
+                  updateFormState({ name: event.target.value })
+                }
+              />
+            </label>
+          )}
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">企业层级</span>
-            <select
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              data-testid="organization-tier-select"
-              value={formState.orgTier}
-              onChange={(event) =>
-                updateFormState({
-                  orgTier: event.target.value as OrgTier,
-                  parentOrganizationPublicId:
-                    event.target.value === "province"
-                      ? ""
-                      : formState.parentOrganizationPublicId,
-                })
-              }
-            >
-              <option value="province">省</option>
-              <option value="city">地市</option>
-              <option value="district">县区</option>
-              <option value="station">站点</option>
-            </select>
-          </label>
+          {formState.mode === "create" ? (
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              <span className="text-text-secondary">企业层级</span>
+              <select
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                data-testid="organization-tier-select"
+                value={formState.orgTier}
+                onChange={(event) =>
+                  updateFormState({
+                    orgTier: event.target.value as OrgTier,
+                    parentOrganizationPublicId:
+                      event.target.value === "province"
+                        ? ""
+                        : formState.parentOrganizationPublicId,
+                  })
+                }
+              >
+                <option value="province">省</option>
+                <option value="city">地市</option>
+                <option value="district">县区</option>
+                <option value="station">站点</option>
+              </select>
+            </label>
+          ) : null}
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">父级组织</span>
-            <select
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              data-testid="organization-parent-select"
-              disabled={formState.orgTier === "province"}
-              value={formState.parentOrganizationPublicId}
-              onChange={(event) =>
-                updateFormState({
-                  parentOrganizationPublicId: event.target.value,
-                })
-              }
-            >
-              <option value="">无</option>
-              {organizations
-                .filter(
-                  (organization) =>
-                    organization.publicId !== formState.publicId,
-                )
-                .map((organization) => (
-                  <option
-                    key={organization.publicId}
-                    value={organization.publicId}
-                  >
-                    {organization.name} / {orgTierLabels[organization.orgTier]}
-                  </option>
-                ))}
-            </select>
-          </label>
+          {formState.mode === "update" ? null : (
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              <span className="text-text-secondary">父级组织</span>
+              <select
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                data-testid="organization-parent-select"
+                disabled={formState.orgTier === "province"}
+                value={formState.parentOrganizationPublicId}
+                onChange={(event) =>
+                  updateFormState({
+                    parentOrganizationPublicId: event.target.value,
+                  })
+                }
+              >
+                <option value="">无</option>
+                {organizations
+                  .filter(
+                    (organization) =>
+                      organization.publicId !== formState.publicId,
+                  )
+                  .map((organization) => (
+                    <option
+                      key={organization.publicId}
+                      value={organization.publicId}
+                    >
+                      {organization.name} /{" "}
+                      {orgTierLabels[organization.orgTier]}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          )}
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">联系人</span>
-            <input
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              value={formState.contactName}
-              onChange={(event) =>
-                updateFormState({ contactName: event.target.value })
-              }
-            />
-          </label>
+          {formState.mode === "move" ? null : (
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              <span className="text-text-secondary">联系人</span>
+              <input
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                value={formState.contactName}
+                onChange={(event) =>
+                  updateFormState({ contactName: event.target.value })
+                }
+              />
+            </label>
+          )}
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">联系电话</span>
-            <input
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              value={formState.contactPhone}
-              onChange={(event) =>
-                updateFormState({ contactPhone: event.target.value })
-              }
-            />
-          </label>
+          {formState.mode === "move" ? null : (
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              <span className="text-text-secondary">联系电话</span>
+              <input
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                value={formState.contactPhone}
+                onChange={(event) =>
+                  updateFormState({ contactPhone: event.target.value })
+                }
+              />
+            </label>
+          )}
 
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            <span className="text-text-secondary">状态</span>
-            <select
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              value={formState.status}
-              onChange={(event) =>
-                updateFormState({
-                  status: event.target.value as OrganizationFormState["status"],
-                })
-              }
-            >
-              <option value="active">启用</option>
-              <option value="disabled">停用</option>
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-4">
-            <span className="text-text-secondary">备注</span>
-            <input
-              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
-              value={formState.remark}
-              onChange={(event) =>
-                updateFormState({ remark: event.target.value })
-              }
-            />
-          </label>
+          {formState.mode === "move" ? null : (
+            <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-4">
+              <span className="text-text-secondary">备注</span>
+              <input
+                className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+                value={formState.remark}
+                onChange={(event) =>
+                  updateFormState({ remark: event.target.value })
+                }
+              />
+            </label>
+          )}
         </div>
 
         {formValidation.message === null ? null : (
@@ -5096,6 +5063,7 @@ function useOrganizationTreeData(input: {
 }
 
 function useAdminOrgAuthData() {
+  const [canMoveOrganization, setCanMoveOrganization] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminOrgAuthData>({
     employees: [],
@@ -5133,6 +5101,11 @@ function useAdminOrgAuthData() {
           setLoadState("unauthorized");
           return;
         }
+
+        setCanMoveOrganization(
+          sessionResponse.data.user.adminRoles?.includes("super_admin") ===
+            true,
+        );
 
         const [organizationResponse, orgAuthResponse, employeeResponse] =
           await Promise.all([
@@ -5188,7 +5161,13 @@ function useAdminOrgAuthData() {
     };
   }, []);
 
-  return { data, loadState, setData, setLoadState };
+  return {
+    canMoveOrganization,
+    data,
+    loadState,
+    setData,
+    setLoadState,
+  };
 }
 
 function useAdminOrgAuthListData(
@@ -5402,7 +5381,8 @@ function useAdminRedeemCodeData(listQuery: string) {
 }
 
 export function AdminOrgAuthPage() {
-  const { data, loadState, setData, setLoadState } = useAdminOrgAuthData();
+  const { canMoveOrganization, data, loadState, setData, setLoadState } =
+    useAdminOrgAuthData();
   const [orgAuthKeyword, setOrgAuthKeyword] = useState("");
   const [orgAuthStatus, setOrgAuthStatus] = useState<AuthStatus | "all">("all");
   const [orgAuthEdition, setOrgAuthEdition] = useState<
@@ -5753,13 +5733,26 @@ export function AdminOrgAuthPage() {
     setOrganizationFormState({
       contactName: "",
       contactPhone: "",
+      expectedRevision: organization.revision,
       mode: "update",
       name: organization.name,
       orgTier: organization.orgTier,
       parentOrganizationPublicId: organization.parentOrganizationPublicId ?? "",
       publicId: organization.publicId,
       remark: "",
-      status: organization.status,
+    });
+    setIsOrganizationFormOpen(true);
+  }
+
+  function handleMoveOrganization(organization: OrganizationTreeQueryNodeDto) {
+    setOrganizationFormState({
+      ...defaultOrganizationFormState,
+      expectedRevision: organization.revision,
+      mode: "move",
+      name: organization.name,
+      orgTier: organization.orgTier,
+      parentOrganizationPublicId: organization.parentOrganizationPublicId ?? "",
+      publicId: organization.publicId,
     });
     setIsOrganizationFormOpen(true);
   }
@@ -5800,12 +5793,24 @@ export function AdminOrgAuthPage() {
       return;
     }
 
+    if (
+      organizationFormState.mode === "move" &&
+      organizationFormState.publicId !== null
+    ) {
+      setOrganizationConfirmationState({
+        input: organizationDraft.input as OrganizationMoveInput,
+        kind: "moveOrganization",
+        publicId: organizationFormState.publicId,
+      });
+      return;
+    }
+
     setOrganizationConfirmationState({
       kind:
         organizationFormState.mode === "create"
           ? "createOrganization"
           : "updateOrganization",
-      input: organizationDraft.input,
+      input: organizationDraft.input as OrganizationMutationInput,
       publicId: organizationFormState.publicId,
     });
   }
@@ -5823,7 +5828,10 @@ export function AdminOrgAuthPage() {
       const disableResponse = await postAdminApi<DisableOrganizationResultDto>(
         `/api/v1/organizations/${organizationConfirmationState.publicId}/disable`,
         sessionToken,
-        { isCascade: false },
+        {
+          expectedRevision: organizationConfirmationState.expectedRevision,
+          isCascade: organizationConfirmationState.isCascade,
+        },
       );
 
       setOrganizationConfirmationState(null);
@@ -5858,6 +5866,10 @@ export function AdminOrgAuthPage() {
       const enableResponse = await postAdminApi<OrganizationResultDto>(
         `/api/v1/organizations/${organizationConfirmationState.publicId}/enable`,
         sessionToken,
+        {
+          expectedRevision: organizationConfirmationState.expectedRevision,
+          isCascade: organizationConfirmationState.isCascade,
+        },
       );
 
       setOrganizationConfirmationState(null);
@@ -5882,6 +5894,37 @@ export function AdminOrgAuthPage() {
       }));
       setOrganizationTreeRefreshVersion((version) => version + 1);
       setToastMessage({ message: "企业组织已启用。", tone: "success" });
+      return;
+    }
+
+    if (organizationConfirmationState.kind === "moveOrganization") {
+      const moveResponse = await postAdminApi<OrganizationResultDto>(
+        `/api/v1/organizations/${organizationConfirmationState.publicId}/move`,
+        sessionToken,
+        organizationConfirmationState.input,
+      );
+
+      setOrganizationConfirmationState(null);
+
+      if (moveResponse.code !== 0 || moveResponse.data === null) {
+        setToastMessage({ message: moveResponse.message, tone: "error" });
+        return;
+      }
+
+      const movedOrganization = moveResponse.data.organization;
+
+      setData((currentData) => ({
+        ...currentData,
+        organizations: currentData.organizations.map((organization) =>
+          organization.publicId === movedOrganization.publicId
+            ? mapOrganizationResultToListItem(movedOrganization, organization)
+            : organization,
+        ),
+      }));
+      setOrganizationFormState(defaultOrganizationFormState);
+      setIsOrganizationFormOpen(false);
+      setOrganizationTreeRefreshVersion((version) => version + 1);
+      setToastMessage({ message: "企业组织已移动。", tone: "success" });
       return;
     }
 
@@ -6242,6 +6285,7 @@ export function AdminOrgAuthPage() {
       >
         <OrganizationTreeGuidancePanel />
         <OrganizationTreeWorkspace
+          canMoveOrganization={canMoveOrganization}
           data={organizationTree.data}
           expandedPublicIds={organizationTree.expandedPublicIds}
           isFilteredSearch={organizationTree.isFilteredSearch}
@@ -6252,23 +6296,28 @@ export function AdminOrgAuthPage() {
           status={organizationTreeStatus}
           onCreateChild={handleCreateChildOrganization}
           onCreateRoot={handleCreateRootOrganization}
-          onDisable={(publicId) =>
+          onDisable={(organization) =>
             setOrganizationConfirmationState({
+              expectedRevision: organization.revision,
+              isCascade: false,
               kind: "disableOrganization",
-              publicId,
+              publicId: organization.publicId,
             })
           }
           onEdit={handleEditOrganization}
-          onEnable={(publicId) =>
+          onEnable={(organization) =>
             setOrganizationConfirmationState({
+              expectedRevision: organization.revision,
+              isCascade: false,
               kind: "enableOrganization",
-              publicId,
+              publicId: organization.publicId,
             })
           }
           onKeywordChange={setOrganizationTreeKeyword}
           onLoadMore={(publicId) => {
             void organizationTree.onLoadMore(publicId);
           }}
+          onMove={handleMoveOrganization}
           onOrgTierChange={setOrganizationTreeTier}
           onResetFilters={() => {
             setOrganizationTreeKeyword("");
@@ -6739,6 +6788,15 @@ export function AdminOrgAuthPage() {
         <OrganizationConfirmationDialog
           confirmationState={organizationConfirmationState}
           onCancel={() => setOrganizationConfirmationState(null)}
+          onCascadeChange={(isCascade) =>
+            setOrganizationConfirmationState((currentState) =>
+              currentState !== null &&
+              (currentState.kind === "disableOrganization" ||
+                currentState.kind === "enableOrganization")
+                ? { ...currentState, isCascade }
+                : currentState,
+            )
+          }
           onConfirm={() => void handleConfirmOrganizationAction()}
         />
       )}

@@ -58,6 +58,7 @@ import {
   type AdminFlowRuntimeRepositories,
   type AdminAccountMutationRepositoryResult,
   type AdminFlowRuntimeRepositoryOptions,
+  type UserLifecycleMutationRepositoryResult,
 } from "../repositories/admin-flow-runtime-repository";
 import { normalizeAdminAccountCreationInput } from "../validators/admin-account-creation";
 import { normalizeAdminAccountUpdateInput } from "../validators/admin-account-lifecycle";
@@ -107,6 +108,10 @@ const userPasswordResetValidationFailedResponse = createErrorResponse(
 const userLifecycleMutationUnavailableResponse = createErrorResponse(
   503602,
   "Admin user lifecycle runtime is not configured.",
+);
+const userLifecycleQuotaInsufficientResponse = createErrorResponse(
+  409006,
+  "Organization authorization quota is insufficient.",
 );
 const userDetailUnavailableResponse = createErrorResponse(
   503603,
@@ -1166,9 +1171,9 @@ export function createAdminFlowRuntimeRouteHandlers(
     request: Request;
     context: { params: Promise<{ publicId: string }> };
     actionType: "user.disable" | "user.enable";
-    mutate: ((publicId: string) => Promise<boolean>) | undefined;
-    revokeSessions: boolean;
-    terminateActiveFlows: boolean;
+    mutate:
+      | ((publicId: string) => Promise<UserLifecycleMutationRepositoryResult>)
+      | undefined;
     successMetadataSummary: string;
   }): Promise<Response> {
     const actor = await requireAdminActor(input.request);
@@ -1206,25 +1211,8 @@ export function createAdminFlowRuntimeRouteHandlers(
       return createJsonResponse(userLifecycleMutationUnavailableResponse);
     }
 
-    const didMutate = await input.mutate(publicId);
-
-    if (
-      didMutate &&
-      input.revokeSessions &&
-      repositories.userOrgAuthRepository.revokeUserSessions !== undefined
-    ) {
-      await repositories.userOrgAuthRepository.revokeUserSessions(publicId);
-    }
-
-    if (
-      didMutate &&
-      input.terminateActiveFlows &&
-      repositories.userOrgAuthRepository.terminateUserActiveFlows !== undefined
-    ) {
-      await repositories.userOrgAuthRepository.terminateUserActiveFlows(
-        publicId,
-      );
-    }
+    const mutationResult = await input.mutate(publicId);
+    const didMutate = mutationResult === "updated";
 
     await appendUserLifecycleAuditLog({
       repositories,
@@ -1233,8 +1221,15 @@ export function createAdminFlowRuntimeRouteHandlers(
       actionType: input.actionType,
       targetPublicId: publicId,
       resultStatus: didMutate ? "success" : "failed",
-      metadataSummary: input.successMetadataSummary,
+      metadataSummary:
+        mutationResult === "quota_insufficient"
+          ? "redacted user enable quota conflict metadata"
+          : input.successMetadataSummary,
     });
+
+    if (mutationResult === "quota_insufficient") {
+      return createJsonResponse(userLifecycleQuotaInsufficientResponse);
+    }
 
     return createJsonResponse(
       didMutate ? createSuccessResponse(null) : userNotFoundResponse,
@@ -1562,8 +1557,6 @@ export function createAdminFlowRuntimeRouteHandlers(
             context,
             actionType: "user.disable",
             mutate: repositories.userOrgAuthRepository.disableUser,
-            revokeSessions: true,
-            terminateActiveFlows: true,
             successMetadataSummary: "redacted user disable metadata",
           });
         },
@@ -1578,8 +1571,6 @@ export function createAdminFlowRuntimeRouteHandlers(
             context,
             actionType: "user.enable",
             mutate: repositories.userOrgAuthRepository.enableUser,
-            revokeSessions: false,
-            terminateActiveFlows: false,
             successMetadataSummary: "redacted user enable metadata",
           });
         },

@@ -11,6 +11,7 @@ import type {
   MistakeBookStatus,
 } from "../models/student-experience";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
+import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 
 export type MistakeBookAuthorizationScopeRow = {
   profession: Profession;
@@ -88,10 +89,10 @@ export type MistakeBookRuntimeRepositoryOptions = {
 
 const {
   employee,
+  employeeOrgAuth,
   mistakeBook,
   organization,
   orgAuth,
-  orgAuthOrganization,
   personalAuth,
   user,
 } = databaseSchema;
@@ -277,17 +278,11 @@ async function listEffectiveAuthorizationScopes(
       level: orgAuth.level,
       expires_at: orgAuth.expires_at,
     })
-    .from(orgAuth)
-    .innerJoin(
-      orgAuthOrganization,
-      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
-    )
-    .innerJoin(
-      organization,
-      eq(organization.id, orgAuthOrganization.organization_id),
-    )
-    .innerJoin(employee, eq(employee.organization_id, organization.id))
+    .from(employee)
     .innerJoin(user, eq(user.id, employee.user_id))
+    .innerJoin(organization, eq(organization.id, employee.organization_id))
+    .innerJoin(employeeOrgAuth, eq(employeeOrgAuth.employee_id, employee.id))
+    .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
     .where(
       and(
         eq(user.public_id, userPublicId),
@@ -295,6 +290,12 @@ async function listEffectiveAuthorizationScopes(
         eq(user.status, "active"),
         eq(organization.status, "active"),
         eq(orgAuth.status, "active"),
+        createOrgAuthCoversOrganizationCondition({
+          authScopeType: orgAuth.auth_scope_type,
+          orgAuthId: orgAuth.id,
+          organizationId: organization.id,
+          purchaserOrganizationId: orgAuth.purchaser_organization_id,
+        }),
         lte(orgAuth.starts_at, now),
         gt(orgAuth.expires_at, now),
       ),

@@ -222,6 +222,7 @@ export type OrganizationTreeNodeDto = {
   orgTier: OrgTier;
   parentOrganizationPublicId: string | null;
   status: "active" | "disabled";
+  revision: number;
   employeeCount: number;
   authSummary: string | null;
 };

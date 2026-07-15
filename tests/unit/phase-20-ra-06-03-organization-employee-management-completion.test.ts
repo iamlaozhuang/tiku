@@ -18,7 +18,6 @@ import type {
   AdminEmployeeListDto,
   AdminOrgAuthListDto,
   EmployeeListDto,
-  EmployeeImportResultDto,
   EmployeeTransferResultDto,
   EmployeeUnbindResultDto,
   OrganizationListDto,
@@ -28,22 +27,17 @@ import type {
   OrganizationDto,
 } from "@/server/contracts/organization-auth-contract";
 import type { SessionService } from "@/server/services/session-service";
+import type { EmployeeAccountService } from "@/server/services/employee-account-service";
 
 type AdminRole = "super_admin" | "ops_admin" | "content_admin";
 
-type EmployeeImportInput = {
-  employees: {
-    userPublicId: string;
-    organizationPublicId: string;
-  }[];
-};
-
 type ExtendedEnterpriseRepositories =
   AdminOrganizationOrgAuthRuntimeRepositories & {
-    enableOrganization?(publicId: string): Promise<OrganizationDto | null>;
-    importEmployees?(
-      input: EmployeeImportInput,
-    ): Promise<EmployeeImportResultDto | null>;
+    enableOrganization?(input: {
+      expectedRevision: number;
+      isCascade: boolean;
+      publicId: string;
+    }): Promise<OrganizationDto | null>;
     transferEmployee?(input: {
       employeePublicId: string;
       targetOrganizationPublicId: string;
@@ -98,6 +92,7 @@ const organizationListPayload: {
         name: "Hangzhou Test Tobacco",
         orgTier: "city",
         parentOrganizationPublicId: "org-province-001",
+        revision: 1,
         status: "disabled",
         employeeCount: 1,
         authSummary: "monopoly / level 3",
@@ -107,6 +102,7 @@ const organizationListPayload: {
         name: "Target Test Tobacco",
         orgTier: "district",
         parentOrganizationPublicId: "org-city-001",
+        revision: 1,
         status: "active",
         employeeCount: 0,
         authSummary: "monopoly / level 3",
@@ -328,6 +324,7 @@ function createOrganization(
     contactName: null,
     contactPhone: null,
     remark: null,
+    revision: 1,
     createdAt: "2026-05-31T00:00:00.000Z",
     updatedAt: "2026-05-31T00:00:00.000Z",
     ...overrides,
@@ -375,30 +372,12 @@ function createEnterpriseRepositories(input: {
         },
       };
     },
-    async enableOrganization(publicId) {
+    async enableOrganization(enableInput) {
+      const { publicId } = enableInput;
+
       input.mutationInputs.push({ action: "enableOrganization", publicId });
 
       return createOrganization({ publicId, status: "active" });
-    },
-    async importEmployees(importInput) {
-      input.mutationInputs.push({
-        action: "importEmployees",
-        importInput,
-      });
-
-      return {
-        importedEmployees: importInput.employees.map(
-          (employeeInput, index) => ({
-            publicId: `employee-imported-${index + 1}`,
-            userPublicId: employeeInput.userPublicId,
-            phone: `1390000000${index + 2}`,
-            name: `Imported Employee ${index + 1}`,
-            organizationPublicId: employeeInput.organizationPublicId,
-            status: "active",
-          }),
-        ),
-        rejectedRows: [],
-      };
     },
     async unbindEmployee(publicId) {
       const employeePublicId =
@@ -434,6 +413,54 @@ function createEnterpriseRepositories(input: {
       async appendAuditLog(auditLogInput) {
         input.auditInputs.push(auditLogInput);
       },
+    },
+  };
+}
+
+function createImportEmployeeAccountService(
+  mutationInputs: unknown[],
+): EmployeeAccountService {
+  return {
+    async createEmployeeAccount(input) {
+      const employeeInput = input as {
+        initialPassword?: string;
+        name: string;
+        organizationPublicId: string;
+        phone: string;
+      };
+
+      mutationInputs.push({ action: "createEmployeeAccount", employeeInput });
+
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          employeeAccount: {
+            employee: {
+              publicId: "employee-imported-1",
+              userPublicId: "user-public-002",
+              organizationPublicId: employeeInput.organizationPublicId,
+              createdAt: "2026-05-31T00:00:00.000Z",
+              updatedAt: "2026-05-31T00:00:00.000Z",
+            },
+            user: {
+              publicId: "user-public-002",
+              phone: employeeInput.phone,
+              name: employeeInput.name,
+              userType: "employee",
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: "employee-imported-1",
+              organizationPublicId: employeeInput.organizationPublicId,
+            },
+            organization: {
+              publicId: employeeInput.organizationPublicId,
+              name: "Hangzhou Test Tobacco",
+            },
+          },
+          generatedInitialPassword: null,
+        },
+      };
     },
   };
 }
@@ -574,22 +601,16 @@ function mockOrganizationPageFetch() {
           code: 0,
           message: "ok",
           data: {
-            importedEmployees: body.employees.map(
-              (
-                employeeInput: {
-                  userPublicId: string;
-                  organizationPublicId: string;
-                },
-                index: number,
-              ) => ({
-                publicId: `employee-imported-${index + 1}`,
-                userPublicId: employeeInput.userPublicId,
+            importedEmployees: [
+              {
+                publicId: "employee-imported-1",
+                userPublicId: "user-public-002",
                 phone: "13900000002",
                 name: "Imported Employee",
-                organizationPublicId: employeeInput.organizationPublicId,
+                organizationPublicId: body.targetOrganizationPublicId,
                 status: "active",
-              }),
-            ),
+              },
+            ],
             rejectedRows: [],
           },
         });
@@ -734,6 +755,8 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      employeeAccountService:
+        createImportEmployeeAccountService(mutationInputs),
       repositories: createEnterpriseRepositories({
         auditInputs,
         mutationInputs,
@@ -749,6 +772,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       new Request("http://localhost/api/v1/organizations/org-city-001/enable", {
         method: "POST",
         headers,
+        body: JSON.stringify({ expectedRevision: 1, isCascade: false }),
       }),
       { params: Promise.resolve({ publicId: "org-city-001" }) },
     );
@@ -757,12 +781,10 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         method: "POST",
         headers,
         body: JSON.stringify({
-          employees: [
-            {
-              userPublicId: "user-public-002",
-              organizationPublicId: "org-city-001",
-            },
-          ],
+          content:
+            "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
+          sourceFormat: "csv",
+          targetOrganizationPublicId: "org-city-001",
         }),
       }),
     );
@@ -838,16 +860,17 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       },
     });
     expect(mutationInputs).toEqual([
-      { action: "enableOrganization", publicId: "org-city-001" },
       {
-        action: "importEmployees",
-        importInput: {
-          employees: [
-            {
-              userPublicId: "user-public-002",
-              organizationPublicId: "org-city-001",
-            },
-          ],
+        action: "enableOrganization",
+        publicId: "org-city-001",
+      },
+      {
+        action: "createEmployeeAccount",
+        employeeInput: {
+          initialPassword: "abc12345",
+          name: "Imported Employee",
+          organizationPublicId: "org-city-001",
+          phone: "13900000002",
         },
       },
       { action: "unbindEmployee", publicId: "employee-public-001" },
@@ -1028,7 +1051,10 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
     fireEvent.click(screen.getByTestId("ops-organization-view-employees"));
     fireEvent.click(screen.getByRole("button", { name: "批量导入员工" }));
     fireEvent.change(screen.getByTestId("employee-import-textarea"), {
-      target: { value: "user-public-002,org-city-001" },
+      target: {
+        value:
+          "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
+      },
     });
     fireEvent.change(
       screen.getByTestId("employee-import-organization-select"),
@@ -1044,12 +1070,10 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
         "/api/v1/employees/import",
         expect.objectContaining({
           body: JSON.stringify({
-            employees: [
-              {
-                userPublicId: "user-public-002",
-                organizationPublicId: "org-city-001",
-              },
-            ],
+            content:
+              "phone,name,initialPassword\n13900000002,Imported Employee,abc12345",
+            sourceFormat: "csv",
+            targetOrganizationPublicId: "org-city-001",
           }),
           method: "POST",
         }),
@@ -1132,10 +1156,9 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
             contactName: null,
             contactPhone: null,
             name: "Scenario Root Organization",
+            remark: null,
             orgTier: "province",
             parentOrganizationPublicId: null,
-            remark: null,
-            status: "active",
           }),
           method: "POST",
         }),

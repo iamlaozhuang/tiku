@@ -84,7 +84,12 @@ describe("RC-01 admin account lifecycle migration source", () => {
       new Set([previousSnapshot.id, repairedSnapshot.id, generatedSnapshot.id])
         .size,
     ).toBe(3);
-    expect(journal.entries.at(-1)).toEqual(
+    expect(
+      journal.entries.find(
+        (entry) =>
+          entry.tag === "20260715070131_p0_rc_01_admin_account_lifecycle",
+      ),
+    ).toEqual(
       expect.objectContaining({
         idx: 22,
         tag: "20260715070131_p0_rc_01_admin_account_lifecycle",

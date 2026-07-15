@@ -17,6 +17,7 @@ export type OrganizationDto = {
   contactName: string | null;
   contactPhone: string | null;
   remark: string | null;
+  revision: number;
   createdAt: string;
   updatedAt: string;
 };

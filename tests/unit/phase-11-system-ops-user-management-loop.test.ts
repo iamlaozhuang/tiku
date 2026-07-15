@@ -4,8 +4,10 @@ import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flo
 import type { AdminFlowRuntimeRepositories } from "@/server/services/admin-flow-runtime";
 import {
   createAdminOrganizationOrgAuthRuntimeRouteHandlers,
+  type AdminOrganizationOrgAuthRuntimeOptions,
   type AdminOrganizationOrgAuthRuntimeRepositories,
 } from "@/server/services/admin-organization-org-auth-runtime";
+import type { EmployeeAccountService } from "@/server/services/employee-account-service";
 import type { SessionService } from "@/server/services/session-service";
 
 function createAdminSessionService(
@@ -46,6 +48,7 @@ function createAdminSessionService(
 
 function createAdminFlowRepositories(input: {
   auditInputs: unknown[];
+  enableUserResult?: "not_found" | "quota_insufficient" | "updated";
   mutationInputs: unknown[];
 }): AdminFlowRuntimeRepositories {
   return {
@@ -67,11 +70,14 @@ function createAdminFlowRepositories(input: {
       },
       async disableUser(publicId) {
         input.mutationInputs.push({ action: "disableUser", publicId });
-        return publicId === "user-public-001";
+        return publicId === "user-public-001" ? "updated" : "not_found";
       },
       async enableUser(publicId) {
         input.mutationInputs.push({ action: "enableUser", publicId });
-        return publicId === "user-public-001";
+        return (
+          input.enableUserResult ??
+          (publicId === "user-public-001" ? "updated" : "not_found")
+        );
       },
       async revokeUserSessions(publicId) {
         input.mutationInputs.push({ action: "revokeUserSessions", publicId });
@@ -147,21 +153,6 @@ function createEnterpriseRepositories(input: {
         },
       };
     },
-    async createEmployee(employeeInput) {
-      input.employeeMutationInputs.push({
-        action: "createEmployee",
-        employeeInput,
-      });
-
-      return {
-        publicId: "employee-public-001",
-        userPublicId: "user-public-001",
-        phone: "13900000002",
-        name: "Employee User",
-        organizationPublicId: employeeInput.organizationPublicId,
-        status: "active",
-      };
-    },
     async disableEmployee(publicId) {
       input.employeeMutationInputs.push({
         action: "disableEmployee",
@@ -221,7 +212,6 @@ describe("phase 11 system ops user management loop", () => {
     });
     expect(mutationInputs).toEqual([
       { action: "disableUser", publicId: "user-public-001" },
-      { action: "revokeUserSessions", publicId: "user-public-001" },
       { action: "enableUser", publicId: "user-public-001" },
     ]);
     expect(auditInputs).toEqual([
@@ -279,15 +269,87 @@ describe("phase 11 system ops user management loop", () => {
     ]);
   });
 
+  it("returns a redacted quota conflict instead of misreporting employee enable as not found", async () => {
+    const auditInputs: unknown[] = [];
+    const mutationInputs: unknown[] = [];
+    const handlers = createAdminFlowRuntimeRouteHandlers({
+      repositories: createAdminFlowRepositories({
+        auditInputs,
+        enableUserResult: "quota_insufficient",
+        mutationInputs,
+      }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+
+    const response = await handlers.users.enable.POST(
+      new Request("http://localhost/api/v1/users/user-public-001/enable", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+      { params: Promise.resolve({ publicId: "user-public-001" }) },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 409006,
+      message: "Organization authorization quota is insufficient.",
+      data: null,
+    });
+    expect(auditInputs).toEqual([
+      expect.objectContaining({
+        actionType: "user.enable",
+        resultStatus: "failed",
+        metadataSummary: "redacted user enable quota conflict metadata",
+      }),
+    ]);
+  });
+
   it("creates and disables employees with public identifiers and redacted audit metadata", async () => {
     const auditInputs: unknown[] = [];
     const employeeMutationInputs: unknown[] = [];
+    const serviceInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      employeeAccountService: {
+        async createEmployeeAccount(employeeAccountInput) {
+          serviceInputs.push(employeeAccountInput);
+
+          return {
+            code: 0,
+            message: "ok",
+            data: {
+              employeeAccount: {
+                employee: {
+                  publicId: "employee-public-001",
+                  userPublicId: "user-public-001",
+                  organizationPublicId: "organization-public-001",
+                  createdAt: "2026-05-31T08:00:00.000Z",
+                  updatedAt: "2026-05-31T08:00:00.000Z",
+                },
+                user: {
+                  publicId: "user-public-001",
+                  phone: "13900000002",
+                  name: "Employee User",
+                  userType: "employee",
+                  status: "active",
+                  lockedUntilAt: null,
+                  employeePublicId: "employee-public-001",
+                  organizationPublicId: "organization-public-001",
+                },
+                organization: {
+                  publicId: "organization-public-001",
+                  name: "Organization One",
+                },
+              },
+            },
+          };
+        },
+      },
       repositories: createEnterpriseRepositories({
         auditInputs,
         employeeMutationInputs,
       }),
       sessionService: createAdminSessionService("super_admin"),
+    } as AdminOrganizationOrgAuthRuntimeOptions & {
+      employeeAccountService: EmployeeAccountService;
     });
     const headers = { authorization: "Bearer admin-session-token" };
 
@@ -296,8 +358,10 @@ describe("phase 11 system ops user management loop", () => {
         method: "POST",
         headers,
         body: JSON.stringify({
-          userPublicId: "user-public-001",
+          initialPassword: "abc12345",
+          name: "Employee User",
           organizationPublicId: "organization-public-001",
+          phone: "13900000002",
         }),
       }),
     );
@@ -315,11 +379,16 @@ describe("phase 11 system ops user management loop", () => {
     await expect(createResponse.json()).resolves.toMatchObject({
       code: 0,
       data: {
-        employee: {
-          publicId: "employee-public-001",
-          userPublicId: "user-public-001",
-          organizationPublicId: "organization-public-001",
-          status: "active",
+        employeeAccount: {
+          employee: {
+            publicId: "employee-public-001",
+            userPublicId: "user-public-001",
+            organizationPublicId: "organization-public-001",
+          },
+          user: {
+            publicId: "user-public-001",
+            status: "active",
+          },
         },
       },
     });
@@ -329,14 +398,15 @@ describe("phase 11 system ops user management loop", () => {
       data: null,
     });
     expect(employeeMutationInputs).toEqual([
-      {
-        action: "createEmployee",
-        employeeInput: {
-          userPublicId: "user-public-001",
-          organizationPublicId: "organization-public-001",
-        },
-      },
       { action: "disableEmployee", publicId: "employee-public-001" },
+    ]);
+    expect(serviceInputs).toEqual([
+      {
+        initialPassword: "abc12345",
+        name: "Employee User",
+        organizationPublicId: "organization-public-001",
+        phone: "13900000002",
+      },
     ]);
     expect(auditInputs).toEqual([
       expect.objectContaining({
@@ -344,7 +414,7 @@ describe("phase 11 system ops user management loop", () => {
         targetResourceType: "employee",
         targetPublicId: "employee-public-001",
         resultStatus: "success",
-        metadataSummary: "redacted employee create metadata",
+        metadataSummary: "redacted employee account create metadata",
       }),
       expect.objectContaining({
         actionType: "employee.disable",
@@ -355,7 +425,7 @@ describe("phase 11 system ops user management loop", () => {
       }),
     ]);
     expect(
-      JSON.stringify({ auditInputs, employeeMutationInputs }),
+      JSON.stringify({ auditInputs, employeeMutationInputs, serviceInputs }),
     ).not.toContain("admin-session-token");
   });
 });

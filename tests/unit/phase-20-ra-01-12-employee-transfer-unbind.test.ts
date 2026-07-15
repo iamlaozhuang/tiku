@@ -112,14 +112,13 @@ describe("phase 20 RA-01-12 employee transfer unbind", () => {
 
     expect(repositorySource).toContain("export type EmployeeTransferInput");
     expect(transferSource).toContain("targetOrganizationPublicId");
-    expect(transferSource).toContain("lockOrgAuthQuotaScope");
-    expect(transferSource).toContain("countActiveEmployeesByOrganizationIds");
+    expect(transferSource).toContain("lockOrganizationScopeMutation");
+    expect(transferSource).toContain("releaseEmployeeOrgAuthQuota");
+    expect(transferSource).toContain("reserveEmployeeOrgAuthQuota");
+    expect(transferSource).toContain("requireCurrentAuthorization: true");
     expect(transferSource).toContain("employee.organization_id");
     expect(transferSource).toContain("authSession");
     expect(transferSource).toContain("organizationTrainingAnswer");
-    expect(transferSource).toContain(
-      "refreshOrgAuthUsedQuotaByOrganizationIds(transaction, [",
-    );
     expect(transferSource).toContain("employeeRow.organization_id");
     expect(transferSource).toContain("targetOrganizationRow.id");
   });
@@ -156,8 +155,11 @@ describe("phase 20 RA-01-12 employee transfer unbind", () => {
     );
 
     expect(redeemRuntimeSource).toContain('eq(user.user_type, "employee")');
+    expect(redeemRuntimeSource).toContain("employeeOrgAuth");
     expect(studentFlowSource).toContain('eq(user.user_type, "employee")');
+    expect(studentFlowSource).toContain("employeeOrgAuth");
     expect(mistakeBookSource).toContain('eq(user.user_type, "employee")');
+    expect(mistakeBookSource).toContain("employeeOrgAuth");
     expect(studentFlowSource).toContain("examReport.user_id");
   });
 });

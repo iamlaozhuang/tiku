@@ -9,7 +9,6 @@ import {
   isNotNull,
   isNull,
   lte,
-  or,
   sql,
 } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -47,6 +46,7 @@ import type {
 } from "../repositories/session-repository";
 import type { UserRegistrationRepository } from "../repositories/user-registration-repository";
 import { createRuntimeDatabaseForSchema } from "../repositories/runtime-database";
+import { createOrgAuthCoversOrganizationCondition } from "../repositories/organization-scope-query";
 import { createAuthService } from "../services/auth-service";
 import {
   createSessionService,
@@ -108,7 +108,6 @@ const {
   employee,
   organization,
   orgAuth,
-  orgAuthOrganization,
   student,
   user,
 } = authSchema;
@@ -1013,10 +1012,6 @@ async function findOrganizationAdminWorkspaceCapability(input: {
     })
     .from(orgAuth)
     .leftJoin(
-      orgAuthOrganization,
-      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
-    )
-    .leftJoin(
       authUpgrade,
       and(
         eq(authUpgrade.org_auth_id, orgAuth.id),
@@ -1034,10 +1029,12 @@ async function findOrganizationAdminWorkspaceCapability(input: {
         eq(orgAuth.status, "active"),
         lte(orgAuth.starts_at, input.now),
         gt(orgAuth.expires_at, input.now),
-        or(
-          eq(orgAuth.purchaser_organization_id, organization.id),
-          eq(orgAuthOrganization.organization_id, organization.id),
-        ),
+        createOrgAuthCoversOrganizationCondition({
+          authScopeType: orgAuth.auth_scope_type,
+          orgAuthId: orgAuth.id,
+          organizationId: organization.id,
+          purchaserOrganizationId: orgAuth.purchaser_organization_id,
+        }),
       ),
     )
     .orderBy(

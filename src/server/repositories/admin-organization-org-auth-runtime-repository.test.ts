@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildOrganizationAncestorPaths } from "./admin-organization-org-auth-runtime-repository";
 
 const commonFields = {
+  revision: 1,
   status: "active" as const,
 };
 

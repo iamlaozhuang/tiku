@@ -45,7 +45,6 @@ const INVALID_ORG_AUTH_INPUT_CODE = 400005;
 const ORGANIZATION_NOT_FOUND_CODE = 404002;
 const ORG_AUTH_NOT_FOUND_CODE = 404003;
 const ORGANIZATION_DEPTH_EXCEEDED_CODE = 409003;
-const ORGANIZATION_PARENT_CYCLE_CODE = 409004;
 const ORG_AUTH_SCOPE_OVERLAP_CODE = 409005;
 
 async function assertParentDepth(
@@ -117,29 +116,6 @@ export function createOrganizationAuthService(
         );
       }
 
-      if (
-        organizationInput.value.parentOrganizationPublicId !== null &&
-        (await organizationAuthRepository.isOrganizationDescendant({
-          organizationPublicId: publicId,
-          candidateParentOrganizationPublicId:
-            organizationInput.value.parentOrganizationPublicId,
-        }))
-      ) {
-        return createErrorResponse(
-          ORGANIZATION_PARENT_CYCLE_CODE,
-          "Organization parent cannot create a cycle.",
-        );
-      }
-
-      const depthError = await assertParentDepth(
-        organizationAuthRepository,
-        organizationInput.value.parentOrganizationPublicId,
-      );
-
-      if (depthError !== null) {
-        return depthError;
-      }
-
       const organization = await organizationAuthRepository.updateOrganization({
         publicId,
         ...organizationInput.value,
@@ -159,6 +135,7 @@ export function createOrganizationAuthService(
       }
 
       const result = await organizationAuthRepository.disableOrganization({
+        expectedRevision: disableInput.value.expectedRevision,
         publicId,
         isCascade: disableInput.value.isCascade,
       });

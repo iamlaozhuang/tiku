@@ -87,14 +87,6 @@ function createRepositories(input: {
         },
       };
     },
-    async createEmployee(inputPayload) {
-      input.mutationInputs.push({
-        action: "createEmployeeByExistingUser",
-        inputPayload,
-      });
-
-      return null;
-    },
     auditLogRepository: {
       async appendAuditLog(auditLogInput) {
         input.auditInputs.push(auditLogInput);

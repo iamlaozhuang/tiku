@@ -23,12 +23,19 @@ export type EmployeeAccountResult = {
   organization: EmployeeOrganizationAccessRow;
 };
 
-export type CreateEmployeeAccountInput = Omit<
-  NormalizedCreateEmployeeAccountInput,
-  "initialPassword"
-> & {
-  authUserId: string;
-};
+export type CreateEmployeeAccountInput = NormalizedCreateEmployeeAccountInput;
+
+export type EmployeeAccountMutationFailureReason =
+  | "account_conflict"
+  | "no_active_authorization"
+  | "organization_not_found"
+  | "quota_insufficient";
+
+export class EmployeeAccountMutationError extends Error {
+  constructor(readonly reason: EmployeeAccountMutationFailureReason) {
+    super(reason);
+  }
+}
 
 export type BindExistingUserToOrganizationInput = {
   userPublicId: string;

@@ -16,6 +16,7 @@ import type { SessionService } from "@/server/services/session-service";
 type OrganizationMutationRepositories =
   AdminOrganizationOrgAuthRuntimeRepositories & {
     disableOrganization?(input: {
+      expectedRevision: number;
       publicId: string;
       isCascade: boolean;
     }): Promise<DisableOrganizationResultDto | null>;
@@ -62,6 +63,7 @@ function createOrganization(overrides: Partial<OrganizationDto> = {}) {
     contactName: null,
     contactPhone: null,
     remark: null,
+    revision: 1,
     createdAt: "2026-05-31T09:00:00.000Z",
     updatedAt: "2026-05-31T09:00:00.000Z",
     ...overrides,
@@ -148,7 +150,7 @@ describe("phase 20 RA-01-10 organization disable termination", () => {
       new Request(
         "http://localhost/api/v1/organizations/organization-public-001/disable",
         {
-          body: JSON.stringify({ isCascade: true }),
+          body: JSON.stringify({ expectedRevision: 1, isCascade: true }),
           headers: { authorization: "Bearer admin-session-value" },
           method: "POST",
         },
@@ -177,6 +179,7 @@ describe("phase 20 RA-01-10 organization disable termination", () => {
     });
     expect(mutationInputs).toEqual([
       {
+        expectedRevision: 1,
         isCascade: true,
         publicId: "organization-public-001",
       },

@@ -143,8 +143,8 @@ p0RemediationSerialProgram:
   status: in_progress
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
-  currentTaskId: p0-remediation-rc-01-identity-session-admin-account-2026-07-14
-  nextTaskId: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+  currentTaskId: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+  nextTaskId: p0-remediation-rc-03-authorization-object-scope-2026-07-14
   orderedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -158,6 +158,7 @@ p0RemediationSerialProgram:
     - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   completedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
+    - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -174,8 +175,8 @@ p0RemediationSerialProgram:
     status: impact_mapping_only
   taskStatusById:
     p0-remediation-serial-program-bootstrap-2026-07-14: closed
-    p0-remediation-rc-01-identity-session-admin-account-2026-07-14: ready_for_closeout
-    p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: pending
+    p0-remediation-rc-01-identity-session-admin-account-2026-07-14: closed
+    p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: in_progress
     p0-remediation-rc-03-authorization-object-scope-2026-07-14: pending
     p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: pending
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: pending
@@ -184,23 +185,25 @@ p0RemediationSerialProgram:
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
 activeTasks:
-  - id: p0-remediation-rc-01-identity-session-admin-account-2026-07-14
-    title: P0 RC-01 identity session and admin account lifecycle
-    phase: p0-remediation-rc-01-identity-session-admin-account-2026-07-14
-    status: ready_for_closeout
+  - id: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+    title: P0 RC-02 organization scope quota and employee lifecycle
+    phase: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+    status: in_progress
     priority: p0
-    sequenceOrder: 1
+    sequenceOrder: 2
     taskKind: implementation
     moduleRunVersion: 3
-    branch: codex/p0-rc-01-identity-session-admin-account
+    branch: codex/p0-rc-02-organization-scope-quota-employee
     dependsOn:
-      - p0-remediation-serial-program-bootstrap-2026-07-14
+      - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
     approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
-    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-01-schema-migration-approval-request.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-02-schema-migration-approval.md
     executionProfile: R3
     focusedGates:
-      - focused_script
+      - focused_behavior
+      - schema_migration_source
+      - dynamic_scope_consumer_contract
       - scoped_format
       - diff_check
       - guard
@@ -208,66 +211,92 @@ activeTasks:
       - pre_push
       - security_boundary
     buildRequired: true
-    fullRegressionPolicy: required_shared_auth_contract
+    fullRegressionPolicy: required_shared_organization_authorization_contract
     protectedDomains:
-      - identity
+      - organization_tree
+      - organization_scope
+      - employee_lifecycle
+      - org_auth_quota
+      - effective_authorization
       - session
-      - admin_account_lifecycle
-      - credential
+      - organization_training
       - organization_boundary
       - audit_log
       - program_order
       - approval_boundary
       - deployment
     reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
-      - docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-01-schema-migration-approval-request.md
-      - docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-01-drizzle-snapshot-chain-repair-approval-request.md
-      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
+      - docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-02-schema-migration-approval.md
+      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
       - src/db/schema/auth.ts
       - src/db/schema/auth.test.ts
       - src/db/dev-seed.ts
-      - src/db/dev-seed.test.ts
-      - src/server/repositories/session-repository.ts
-      - src/server/auth/session-boundary.ts
-      - src/server/services/session-service.ts
-      - src/server/services/session-service.test.ts
-      - src/server/auth/local-session-runtime.ts
-      - src/server/auth/local-session-runtime.test.ts
+      - src/db/owner-preview-empty-baseline.ts
       - src/server/contracts/admin-user-org-auth-ops-contract.ts
-      - src/server/models/auth.test.ts
-      - src/server/validators/admin-account-creation.ts
-      - src/server/validators/admin-account-creation.test.ts
-      - src/server/validators/admin-account-lifecycle.ts
-      - src/server/validators/admin-account-lifecycle.test.ts
+      - src/server/contracts/employee-account-contract.ts
+      - src/server/contracts/organization-auth-contract.ts
+      - src/server/mappers/organization-auth-mapper.ts
+      - src/server/validators/organization.ts
+      - src/server/validators/organization.test.ts
+      - src/server/validators/employee-account.ts
+      - src/server/validators/employee-account.test.ts
+      - src/server/repositories/organization-scope-query.ts
+      - src/server/repositories/organization-scope-query.test.ts
+      - src/server/repositories/employee-org-auth-quota-repository.ts
+      - src/server/repositories/employee-org-auth-quota-repository.test.ts
+      - src/server/repositories/employee-account-repository.ts
+      - src/server/repositories/organization-auth-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.test.ts
       - src/server/repositories/admin-flow-runtime-repository.ts
       - src/server/repositories/admin-flow-runtime-repository.test.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/server/repositories/student-flow-runtime-repository.ts
+      - src/server/repositories/mistake-book-repository.ts
+      - src/server/repositories/organization-portal-overview-repository.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/server/services/employee-account-service.ts
+      - src/server/services/employee-account-service.test.ts
       - src/server/services/admin-flow-runtime.ts
-      - src/server/services/admin-flow-runtime.test.ts
-      - src/features/admin/admin-ops-management/AdminOpsManagement.tsx
-      - tests/unit/admin-ops-summary-first-ui.test.ts
-      - tests/unit/phase-9-admin-ops-runtime-ui-completion.test.ts
-      - tests/unit/full-chain-scenario-1-admin-account-creation-flow-repair.test.ts
-      - tests/unit/phone-visibility-enforcement.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/services/admin-user-org-auth-ops-service.ts
+      - src/server/services/organization-auth-service.ts
+      - src/server/services/organization-auth-service.test.ts
+      - src/server/services/organization-auth-route.test.ts
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/app/api/v1/organizations/[publicId]/move/route.ts
+      - src/app/api/v1/organizations/`[publicId`]/move/route.ts
+      - tests/unit/p0-rc-02-organization-scope-quota-employee.test.ts
+      - tests/unit/p0-rc-02-schema-migration-source.test.ts
       - tests/unit/p0-rc-01-admin-account-migration-source.test.ts
-      - src/app/api/v1/admin-accounts/[publicId]/route.ts
-      - src/app/api/v1/admin-accounts/[publicId]/disable/route.ts
-      - src/app/api/v1/admin-accounts/[publicId]/enable/route.ts
-      - src/app/api/v1/admin-accounts/[publicId]/reset-password/route.ts
-      - src/app/api/v1/admin-accounts/`[publicId`]/route.ts
-      - src/app/api/v1/admin-accounts/`[publicId`]/disable/route.ts
-      - src/app/api/v1/admin-accounts/`[publicId`]/enable/route.ts
-      - src/app/api/v1/admin-accounts/`[publicId`]/reset-password/route.ts
-      - drizzle/20260715070131_p0_rc_01_admin_account_lifecycle.sql
-      - drizzle/meta/20260710110500_snapshot.json
-      - drizzle/meta/20260715070131_snapshot.json
+      - tests/unit/owner-preview-empty-baseline.test.ts
+      - tests/unit/phase-8-admin-organization-org-auth-runtime.test.ts
+      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - tests/unit/phase-7-student-flow-runtime-smoke.test.ts
+      - tests/unit/phase-20-ra-01-04-employee-import.test.ts
+      - tests/unit/phase-20-ra-01-03-employee-account-runtime.test.ts
+      - tests/unit/phase-20-ra-01-06-user-disable-termination.test.ts
+      - tests/unit/phase-20-ra-01-10-organization-disable-termination.test.ts
+      - tests/unit/phase-20-ra-01-11-org-auth-quota-atomicity.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+      - tests/unit/phase-20-ra-06-02-user-role-detail-alignment.test.ts
+      - tests/unit/phase-20-ra-06-03-organization-employee-management-completion.test.ts
+      - tests/unit/phase-21-authorization-overlap-concurrency-proof.test.ts
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-11-system-ops-organization-management-loop.test.ts
+      - tests/unit/phase-11-system-ops-user-management-loop.test.ts
+      - drizzle/*_p0_rc_02_*.sql
+      - drizzle/meta/*_snapshot.json
       - drizzle/meta/_journal.json
     blockedFiles:
       - AGENTS.md
@@ -305,26 +334,28 @@ activeTasks:
       costCalibrationGate: blocked
     currentExecutionGate:
       status: satisfied
-      reason: approved_snapshot_chain_repair_and_rc_01_branch_validation_complete
-      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-01-drizzle-snapshot-chain-repair-approval-request.md
-      resumeAction: commit_ff_only_merge_fresh_master_gate_push_cleanup_then_claim_rc_02
+      reason: approved_rc_02_schema_migration_source_authoring_test_and_commit_only
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-rc-02-schema-migration-approval.md
+      resumeAction: execute_rc_02_tdd_schema_source_implementation_two_round_review_and_closeout_without_database_apply
     acceptanceStandards:
-      - F-0002 admin login lock state is persisted, atomic across instances and restart-safe at five failures for fifteen minutes.
-      - F-0045 admin lifecycle enforces multiple roles, at most one organization, role-bounded management, disable/enable/reset, session revocation, audit and last-super protection.
-      - F-0130 learner and admin failure transitions cannot lose increments under concurrent requests.
-      - API and UI preserve public identifiers, camelCase, standard envelope, null and empty-list semantics, and never expose credentials, session tokens or internal ids.
+      - F-0005 all employee activation paths atomically reserve every inherited org_auth quota slot and effective access requires a reservation proof.
+      - F-0006 overlap uses effective organization intersection and never auth_scope_type equality.
+      - F-0109 profile edit, super-only move, disable and enable are independent revision-guarded commands that cannot create a cycle or bypass termination.
+      - F-0111 current_and_descendants is evaluated from the current acyclic tree by every authoritative consumer.
+      - F-0113 import accepts one explicit target and cannot directly move or reactivate an existing employee outside the lifecycle command.
+      - API and UI preserve public identifiers, camelCase, standard envelope, null and empty-list semantics, and never expose credentials, sessions or internal ids.
       - Runtime acceptance, migration apply, database mutation, dependencies, Provider calls, PR, force push and deployment remain outside this task.
     validationCommands:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual
-      - npm.cmd run test:unit
-      - npm.cmd run lint
-      - npm.cmd run typecheck
-      - npm.cmd run format:check
-      - npm.cmd run build
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-01-identity-session-admin-account-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-01-identity-session-admin-account-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-01-identity-session-admin-account-2026-07-14 -SkipRemoteAheadCheck
+      - corepack pnpm@10.15.1 run test:unit
+      - corepack pnpm@10.15.1 run lint
+      - corepack pnpm@10.15.1 run typecheck
+      - corepack pnpm@10.15.1 run format:check
+      - corepack pnpm@10.15.1 run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
       localCommit:
@@ -341,8 +372,8 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
-  - id: p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
-    title: P0 RC-02 organization scope quota and employee lifecycle
+  - id: p0-remediation-rc-03-authorization-object-scope-2026-07-14
+    title: P0 RC-03 authorization object scope
     status: pending
 standingAuthorization:
   id: current-user-approved-p0-remediation-serial-goal-2026-07-14

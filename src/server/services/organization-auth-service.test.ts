@@ -24,6 +24,7 @@ function createOrganization(
     contact_name: null,
     contact_phone: "13800000000",
     remark: null,
+    revision: 1,
     depth: 2,
     created_at: createdAt,
     updated_at: createdAt,
@@ -84,9 +85,6 @@ function createRepository(
       return createOrganization({
         public_id: input.publicId,
         name: input.name,
-        org_tier: input.orgTier,
-        parent_organization_public_id: input.parentOrganizationPublicId,
-        status: input.status,
         contact_name: input.contactName,
         contact_phone: input.contactPhone,
         remark: input.remark,
@@ -173,14 +171,8 @@ describe("organization auth service", () => {
     });
   });
 
-  it("rejects circular parent update and disables organization with cascade metadata", async () => {
-    const circularService = createOrganizationAuthService(
-      createRepository({
-        async isOrganizationDescendant() {
-          return true;
-        },
-      }),
-    );
+  it("rejects structural profile updates and disables organization with cascade metadata", async () => {
+    const circularService = createOrganizationAuthService(createRepository());
 
     await expect(
       circularService.updateOrganization("org_parent_123", {
@@ -188,10 +180,11 @@ describe("organization auth service", () => {
         orgTier: "city",
         parentOrganizationPublicId: "org_child_456",
         status: "active",
+        expectedRevision: 1,
       }),
     ).resolves.toEqual({
-      code: 409004,
-      message: "Organization parent cannot create a cycle.",
+      code: 400004,
+      message: "Invalid organization input.",
       data: null,
     });
 
@@ -199,6 +192,7 @@ describe("organization auth service", () => {
 
     await expect(
       service.disableOrganization("org_public_123", {
+        expectedRevision: 1,
         isCascade: true,
       }),
     ).resolves.toMatchObject({

@@ -59,6 +59,7 @@ function createRepositories(): AdminOrganizationOrgAuthRuntimeRepositories {
             name: "测试站点",
             orgTier: "station",
             parentOrganizationPublicId: "organization-public-district",
+            revision: 1,
             status: "active",
             employeeCount: 2,
             childCount: 0,
@@ -99,6 +100,7 @@ function createRepositories(): AdminOrganizationOrgAuthRuntimeRepositories {
             name: "杭州烟草",
             orgTier: "city",
             parentOrganizationPublicId: "organization-public-000",
+            revision: 1,
             status: "active",
             employeeCount: 2,
             authSummary: "monopoly / level 3",
@@ -492,8 +494,8 @@ describe("phase 8 admin organization org auth runtime", () => {
       data: null,
     });
     await expect(createEmployeeResponse.json()).resolves.toEqual({
-      code: 503007,
-      message: "Employee account mutation runtime is not configured.",
+      code: 422601,
+      message: "Employee input is invalid.",
       data: null,
     });
   });

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeCreateOrganizationInput,
   normalizeDisableOrganizationInput,
+  normalizeMoveOrganizationInput,
   normalizeUpdateOrganizationInput,
   validateOrganizationTierParent,
 } from "./organization";
@@ -46,18 +47,14 @@ describe("organization validators", () => {
   it("normalizes update and disable inputs", () => {
     expect(
       normalizeUpdateOrganizationInput({
+        expectedRevision: 3,
         name: " 市局 ",
-        orgTier: "district",
-        parentOrganizationPublicId: null,
-        status: "active",
       }),
     ).toEqual({
       success: true,
       value: {
         name: "市局",
-        orgTier: "district",
-        parentOrganizationPublicId: null,
-        status: "active",
+        expectedRevision: 3,
         contactName: null,
         contactPhone: null,
         remark: null,
@@ -66,13 +63,58 @@ describe("organization validators", () => {
 
     expect(
       normalizeDisableOrganizationInput({
+        expectedRevision: 4,
         isCascade: true,
       }),
     ).toEqual({
       success: true,
       value: {
+        expectedRevision: 4,
         isCascade: true,
       },
+    });
+  });
+
+  it("separates profile, move and status commands with positive revisions", () => {
+    expect(
+      normalizeMoveOrganizationInput({
+        expectedRevision: 5,
+        parentOrganizationPublicId: " org_parent_456 ",
+      }),
+    ).toEqual({
+      success: true,
+      value: {
+        expectedRevision: 5,
+        parentOrganizationPublicId: "org_parent_456",
+      },
+    });
+    expect(
+      normalizeUpdateOrganizationInput({
+        expectedRevision: 1,
+        name: "市局",
+        parentOrganizationPublicId: "org_parent_456",
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid organization input.",
+    });
+    expect(
+      normalizeMoveOrganizationInput({
+        expectedRevision: 1,
+        name: "越权改名",
+        parentOrganizationPublicId: null,
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid organization input.",
+    });
+    expect(normalizeDisableOrganizationInput({ expectedRevision: 0 })).toEqual({
+      success: false,
+      message: "Invalid organization input.",
+    });
+    expect(normalizeMoveOrganizationInput({ expectedRevision: 5 })).toEqual({
+      success: false,
+      message: "Invalid organization input.",
     });
   });
 

@@ -248,6 +248,7 @@ const sampleOrganizations: OrganizationListDto["organizations"] = [
     name: "杭州烟草",
     orgTier: "city",
     parentOrganizationPublicId: "organization-public-000",
+    revision: 1,
     status: "active",
     employeeCount: 42,
     authSummary: "monopoly / level 3",

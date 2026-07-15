@@ -21,6 +21,7 @@ export type OrganizationAccessRow = {
   contact_name: string | null;
   contact_phone: string | null;
   remark: string | null;
+  revision: number;
   depth: number;
   created_at: Date;
   updated_at: Date;
@@ -50,6 +51,7 @@ export type UpdateOrganizationInput = NormalizedUpdateOrganizationInput & {
 };
 
 export type DisableOrganizationInput = {
+  expectedRevision: number;
   publicId: string;
   isCascade: boolean;
 };

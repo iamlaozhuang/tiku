@@ -46,6 +46,8 @@ import type {
 } from "../contracts/admin-user-org-auth-ops-contract";
 import { adminRoleValues, type AdminRole } from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
+import { setEmployeeAccountStatusWithQuota } from "./employee-org-auth-quota-repository";
+import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
@@ -60,6 +62,11 @@ export type AdminFlowRuntimeRepositoryOptions = {
 export type AdminFlowPage<TData> = TData & {
   pagination: ApiPagination;
 };
+
+export type UserLifecycleMutationRepositoryResult =
+  | "not_found"
+  | "quota_insufficient"
+  | "updated";
 
 export type AdminUserOrgAuthRuntimeRepository = {
   listAdminAccounts?(
@@ -91,8 +98,10 @@ export type AdminUserOrgAuthRuntimeRepository = {
     publicId: string,
     input: UserPasswordResetRepositoryInput,
   ): Promise<boolean>;
-  disableUser?(publicId: string): Promise<boolean>;
-  enableUser?(publicId: string): Promise<boolean>;
+  disableUser?(
+    publicId: string,
+  ): Promise<UserLifecycleMutationRepositoryResult>;
+  enableUser?(publicId: string): Promise<UserLifecycleMutationRepositoryResult>;
   revokeUserSessions?(publicId: string): Promise<boolean>;
   terminateUserActiveFlows?(
     publicId: string,
@@ -193,9 +202,9 @@ const {
   authSession,
   authUser,
   employee,
+  employeeOrgAuth,
   mockExam,
   orgAuth,
-  orgAuthOrganization,
   organization,
   paper,
   paperQuestion,
@@ -616,6 +625,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         .select({
           created_at: user.created_at,
           employee_public_id: employee.public_id,
+          internal_employee_id: employee.id,
           internal_organization_id: organization.id,
           internal_user_id: user.id,
           name: user.name,
@@ -669,14 +679,22 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
               })
               .from(orgAuth)
               .innerJoin(
-                orgAuthOrganization,
-                eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+                employeeOrgAuth,
+                and(
+                  eq(employeeOrgAuth.org_auth_id, orgAuth.id),
+                  eq(
+                    employeeOrgAuth.employee_id,
+                    userDetailRow.internal_employee_id!,
+                  ),
+                ),
               )
               .where(
-                eq(
-                  orgAuthOrganization.organization_id,
-                  userDetailRow.internal_organization_id,
-                ),
+                createOrgAuthCoversOrganizationCondition({
+                  authScopeType: orgAuth.auth_scope_type,
+                  orgAuthId: orgAuth.id,
+                  organizationId: userDetailRow.internal_organization_id,
+                  purchaserOrganizationId: orgAuth.purchaser_organization_id,
+                }),
               )
               .orderBy(desc(orgAuth.updated_at));
       const orgAuthIds = organizationAuthRows.map(
@@ -687,15 +705,20 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
           ? []
           : await database
               .select({
-                internal_org_auth_id: orgAuthOrganization.org_auth_id,
+                internal_org_auth_id: orgAuth.id,
                 organization_public_id: organization.public_id,
               })
-              .from(orgAuthOrganization)
+              .from(orgAuth)
               .innerJoin(
                 organization,
-                eq(organization.id, orgAuthOrganization.organization_id),
+                createOrgAuthCoversOrganizationCondition({
+                  authScopeType: orgAuth.auth_scope_type,
+                  orgAuthId: orgAuth.id,
+                  organizationId: organization.id,
+                  purchaserOrganizationId: orgAuth.purchaser_organization_id,
+                }),
               )
-              .where(inArray(orgAuthOrganization.org_auth_id, orgAuthIds));
+              .where(inArray(orgAuth.id, orgAuthIds));
       const purchaserOrganizationIds = [
         ...new Set(
           organizationAuthRows.map(
@@ -1495,21 +1518,11 @@ async function updateUserStatus(
   database: AdminFlowRuntimeDatabase,
   publicId: string,
   status: "active" | "disabled",
-): Promise<boolean> {
-  const rows = await database
-    .update(user)
-    .set({
-      status,
-      disabled_at: status === "disabled" ? new Date() : null,
-      locked_until_at: status === "active" ? null : undefined,
-      updated_at: new Date(),
-    })
-    .where(eq(user.public_id, publicId))
-    .returning({
-      id: user.id,
-    });
-
-  return rows.length > 0;
+): Promise<UserLifecycleMutationRepositoryResult> {
+  return setEmployeeAccountStatusWithQuota(database, {
+    status,
+    userPublicId: publicId,
+  });
 }
 
 async function revokeUserSessions(

@@ -27,6 +27,7 @@ export function mapOrganizationToApi(
     contactName: organization.contact_name,
     contactPhone: organization.contact_phone,
     remark: organization.remark,
+    revision: organization.revision,
     createdAt: organization.created_at.toISOString(),
     updatedAt: organization.updated_at.toISOString(),
   };

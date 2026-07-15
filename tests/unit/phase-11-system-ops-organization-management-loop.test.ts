@@ -18,7 +18,13 @@ type OrganizationMutationRepositories =
       publicId: string,
       input: unknown,
     ): Promise<OrganizationDto | null>;
+    moveOrganization?(input: {
+      expectedRevision: number;
+      parentOrganizationPublicId: string | null;
+      publicId: string;
+    }): Promise<OrganizationDto | null>;
     disableOrganization?(input: {
+      expectedRevision: number;
       publicId: string;
       isCascade: boolean;
     }): Promise<DisableOrganizationResultDto | null>;
@@ -72,6 +78,7 @@ function createOrganization(
     contactName: null,
     contactPhone: null,
     remark: null,
+    revision: 1,
     createdAt: "2026-05-24T07:00:00.000Z",
     updatedAt: "2026-05-24T07:00:00.000Z",
     ...overrides,
@@ -140,6 +147,15 @@ function createRepositories(input: {
         status: "active",
       });
     },
+    async moveOrganization(moveInput) {
+      input.mutationInputs.push({ action: "moveOrganization", moveInput });
+
+      return createOrganization({
+        parentOrganizationPublicId: moveInput.parentOrganizationPublicId,
+        publicId: moveInput.publicId,
+        revision: moveInput.expectedRevision + 1,
+      });
+    },
     async disableOrganization(disableInput) {
       input.mutationInputs.push({
         action: "disableOrganization",
@@ -175,7 +191,68 @@ describe("phase 11 system ops organization management loop", () => {
 
     expect(repositories.createOrganization).toEqual(expect.any(Function));
     expect(repositories.updateOrganization).toEqual(expect.any(Function));
+    expect(repositories.moveOrganization).toEqual(expect.any(Function));
     expect(repositories.disableOrganization).toEqual(expect.any(Function));
+  });
+
+  it("allows organization move only for super_admin and preserves the command boundary", async () => {
+    const deniedMutations: unknown[] = [];
+    const opsHandlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories: createRepositories({
+        auditInputs: [],
+        mutationInputs: deniedMutations,
+      }),
+      sessionService: createAdminSessionService("ops_admin"),
+    });
+    const moveRequest = () =>
+      new Request(
+        "http://localhost/api/v1/organizations/organization-public-001/move",
+        {
+          method: "POST",
+          headers: { authorization: "Bearer admin-session-value" },
+          body: JSON.stringify({
+            expectedRevision: 1,
+            parentOrganizationPublicId: "organization-public-009",
+          }),
+        },
+      );
+    const context = {
+      params: Promise.resolve({ publicId: "organization-public-001" }),
+    };
+    const deniedResponse = await opsHandlers.organizations.move.POST(
+      moveRequest(),
+      context,
+    );
+
+    await expect(deniedResponse.json()).resolves.toMatchObject({
+      code: 403601,
+    });
+    expect(deniedMutations).toEqual([]);
+
+    const allowedMutations: unknown[] = [];
+    const superHandlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
+      repositories: createRepositories({
+        auditInputs: [],
+        mutationInputs: allowedMutations,
+      }),
+      sessionService: createAdminSessionService("super_admin"),
+    });
+    const allowedResponse = await superHandlers.organizations.move.POST(
+      moveRequest(),
+      context,
+    );
+
+    await expect(allowedResponse.json()).resolves.toMatchObject({ code: 0 });
+    expect(allowedMutations).toEqual([
+      {
+        action: "moveOrganization",
+        moveInput: {
+          expectedRevision: 1,
+          parentOrganizationPublicId: "organization-public-009",
+          publicId: "organization-public-001",
+        },
+      },
+    ]);
   });
 
   it("creates and updates organizations with publicId-only responses and redacted audit metadata", async () => {
@@ -208,10 +285,8 @@ describe("phase 11 system ops organization management loop", () => {
           method: "PATCH",
           headers,
           body: JSON.stringify({
+            expectedRevision: 1,
             name: "杭州烟草更新",
-            orgTier: "city",
-            parentOrganizationPublicId: "organization-public-000",
-            status: "active",
           }),
         },
       ),
@@ -280,7 +355,7 @@ describe("phase 11 system ops organization management loop", () => {
         {
           method: "POST",
           headers: { authorization: "Bearer admin-session-value" },
-          body: JSON.stringify({ isCascade: true }),
+          body: JSON.stringify({ expectedRevision: 1, isCascade: true }),
         },
       ),
       { params: Promise.resolve({ publicId: "organization-public-001" }) },
@@ -303,6 +378,7 @@ describe("phase 11 system ops organization management loop", () => {
       {
         action: "disableOrganization",
         disableInput: {
+          expectedRevision: 1,
           publicId: "organization-public-001",
           isCascade: true,
         },

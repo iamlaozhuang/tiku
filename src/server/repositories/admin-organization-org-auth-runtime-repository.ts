@@ -23,12 +23,8 @@ import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
-  EmployeeImportResultDto,
   EmployeeListQuery,
-  EmployeeImportRowInputDto,
-  EmployeeImportRejectedRowDto,
   EmployeeTransferResultDto,
-  EmployeeMutationResultDto,
   EmployeeUnbindResultDto,
   EmployeeListDto,
   OrganizationListDto,
@@ -37,11 +33,11 @@ import type {
   OrganizationTreeQuery,
   OrgAuthListQuery,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
-import type {
-  BindExistingUserToOrganizationInput,
-  CreateEmployeeAccountInput,
-  EmployeeAccountRepository,
+import {
+  EmployeeAccountMutationError,
+  type BindExistingUserToOrganizationInput,
+  type CreateEmployeeAccountInput,
+  type EmployeeAccountRepository,
 } from "./employee-account-repository";
 import type {
   DisableOrganizationResultDto,
@@ -55,9 +51,23 @@ import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import type { NormalizedCreateOrgAuthInput } from "../validators/org-auth";
 import type {
   NormalizedCreateOrganizationInput,
+  NormalizedDisableOrganizationInput,
+  NormalizedMoveOrganizationInput,
   NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
 import { validateOrganizationTierParent } from "../validators/organization";
+import {
+  reconcileCurrentAndDescendantQuotaReservations,
+  lockEmployeeIdentity,
+  releaseEmployeeOrgAuthQuota,
+  reserveEmployeeOrgAuthQuota,
+} from "./employee-org-auth-quota-repository";
+import {
+  createOrgAuthCoversOrganizationCondition,
+  hasCurrentOrgAuthOverlap,
+  lockOrganizationScopeMutation,
+  MAX_ORGANIZATION_TREE_DEPTH,
+} from "./organization-scope-query";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
@@ -93,11 +103,17 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     publicId: string,
     input: NormalizedUpdateOrganizationInput,
   ): Promise<OrganizationDto | null>;
-  disableOrganization?(input: {
-    publicId: string;
-    isCascade: boolean;
-  }): Promise<DisableOrganizationResultDto | null>;
-  enableOrganization?(publicId: string): Promise<OrganizationDto | null>;
+  moveOrganization?(
+    input: NormalizedMoveOrganizationInput & {
+      publicId: string;
+    },
+  ): Promise<OrganizationDto | null>;
+  disableOrganization?(
+    input: NormalizedDisableOrganizationInput & { publicId: string },
+  ): Promise<DisableOrganizationResultDto | null>;
+  enableOrganization?(
+    input: NormalizedDisableOrganizationInput & { publicId: string },
+  ): Promise<OrganizationDto | null>;
   hasOverlappingOrgAuth?(input: NormalizedCreateOrgAuthInput): Promise<boolean>;
   createOrgAuth?(
     input: NormalizedCreateOrgAuthInput,
@@ -106,12 +122,6 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   terminateOrgAuthActiveFlows?(
     publicId: string,
   ): Promise<OrgAuthTerminationResult>;
-  createEmployee?(
-    input: CreateEmployeeInput,
-  ): Promise<EmployeeMutationResultDto["employee"] | null>;
-  importEmployees?(
-    input: EmployeeImportInput,
-  ): Promise<EmployeeImportResultDto | null>;
   disableEmployee?(publicId: string): Promise<boolean>;
   transferEmployee?(
     input: EmployeeTransferInput,
@@ -122,15 +132,6 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   auditLogRepository?: {
     appendAuditLog(input: AppendEmployeeAuditLogInput): Promise<void>;
   };
-};
-
-export type CreateEmployeeInput = {
-  userPublicId: string;
-  organizationPublicId: string;
-};
-
-export type EmployeeImportInput = {
-  employees: EmployeeImportRowInputDto[];
 };
 
 export type EmployeeUnbindInput =
@@ -181,6 +182,7 @@ const {
   authUser,
   authUpgrade,
   employee,
+  employeeOrgAuth,
   mockExam,
   orgAuth,
   orgAuthOrganization,
@@ -202,6 +204,7 @@ type OrganizationMutationRow = {
   contact_name: string | null;
   contact_phone: string | null;
   remark: string | null;
+  revision: number;
   created_at: Date;
   updated_at: Date;
 };
@@ -213,7 +216,24 @@ type OrganizationTreeRow = {
   org_tier: OrganizationDto["orgTier"];
   parent_organization_id: number | null;
   status: OrganizationDto["status"];
+  revision: number;
 };
+
+const ORGANIZATION_TREE_CONFLICT = "ORGANIZATION_TREE_CONFLICT";
+
+class OrganizationTreeConflictError extends Error {
+  constructor() {
+    super(ORGANIZATION_TREE_CONFLICT);
+  }
+}
+
+export class EmployeeOrgAuthQuotaError extends Error {
+  constructor(
+    readonly reason: "no_active_authorization" | "quota_insufficient",
+  ) {
+    super(reason);
+  }
+}
 
 const childOrganizationTierByParentTier = {
   city: "district",
@@ -292,6 +312,7 @@ function selectOrganizationMutationColumns() {
     contact_name: organization.contact_name,
     contact_phone: organization.contact_phone,
     remark: organization.remark,
+    revision: organization.revision,
     created_at: organization.created_at,
     updated_at: organization.updated_at,
   };
@@ -372,6 +393,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           org_tier: organization.org_tier,
           parent_organization_id: organization.parent_organization_id,
           status: organization.status,
+          revision: organization.revision,
         })
         .from(organization)
         .where(and(...conditions))
@@ -402,6 +424,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           parentOrganizationPublicId:
             ancestorPaths.get(row.id)?.at(-1)?.publicId ?? null,
           status: row.status,
+          revision: row.revision,
           employeeCount: employeeCounts.get(row.id) ?? 0,
           childCount: childCounts.get(row.id) ?? 0,
           authSummary: authSummaries.get(row.id) ?? null,
@@ -424,6 +447,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           org_tier: organization.org_tier,
           parent_organization_id: organization.parent_organization_id,
           status: organization.status,
+          revision: organization.revision,
           created_at: organization.created_at,
           updated_at: organization.updated_at,
         })
@@ -462,6 +486,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
               ? null
               : (parentPublicIds.get(row.parent_organization_id) ?? null),
           status: row.status,
+          revision: row.revision,
           employeeCount: employeeCounts.get(row.id) ?? 0,
           authSummary: authSummaries.get(row.id) ?? null,
         })),
@@ -591,12 +616,17 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           org_tier: organization.org_tier,
           parent_organization_id: organization.parent_organization_id,
         })
-        .from(orgAuthOrganization)
+        .from(orgAuth)
         .innerJoin(
           organization,
-          eq(organization.id, orgAuthOrganization.organization_id),
+          createOrgAuthCoversOrganizationCondition({
+            authScopeType: orgAuth.auth_scope_type,
+            orgAuthId: orgAuth.id,
+            organizationId: organization.id,
+            purchaserOrganizationId: orgAuth.purchaser_organization_id,
+          }),
         )
-        .where(eq(orgAuthOrganization.org_auth_id, row.id))
+        .where(eq(orgAuth.id, row.id))
         .orderBy(asc(organization.public_id));
       const coveredOrganizationIds = coveredOrganizationRows.map(
         (organizationRow) => organizationRow.id,
@@ -701,153 +731,326 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
     },
     async createOrganization(input) {
       const database = getDatabase();
-      const parentOrganization = await findParentOrganization(
-        database,
-        input.parentOrganizationPublicId,
+      const organizationRow = await database.transaction(
+        async (transaction) => {
+          const transactionalDatabase =
+            transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+          await lockOrganizationScopeMutation(transactionalDatabase);
+
+          const parentOrganization = await findParentOrganization(
+            transactionalDatabase,
+            input.parentOrganizationPublicId,
+          );
+
+          if (
+            parentOrganization === undefined ||
+            parentOrganization?.status === "disabled"
+          ) {
+            return null;
+          }
+
+          const tierParentValidation = validateOrganizationTierParent({
+            orgTier: input.orgTier,
+            parentOrganization:
+              parentOrganization === null
+                ? null
+                : { orgTier: parentOrganization.org_tier },
+          });
+
+          if (!tierParentValidation.success) {
+            return null;
+          }
+
+          const now = new Date();
+          const [createdOrganization] = await transactionalDatabase
+            .insert(organization)
+            .values({
+              public_id: `organization-${randomUUID()}`,
+              name: input.name,
+              org_tier: input.orgTier,
+              parent_organization_id: parentOrganization?.id ?? null,
+              status: "active",
+              contact_name: input.contactName,
+              contact_phone: input.contactPhone,
+              remark: input.remark,
+              revision: 1,
+              created_at: now,
+              updated_at: now,
+            })
+            .returning(selectOrganizationMutationColumns());
+
+          return createdOrganization ?? null;
+        },
       );
 
-      if (parentOrganization === undefined) {
-        return null;
-      }
-
-      const tierParentValidation = validateOrganizationTierParent({
-        orgTier: input.orgTier,
-        parentOrganization:
-          parentOrganization === null
-            ? null
-            : { orgTier: parentOrganization.org_tier },
-      });
-
-      if (!tierParentValidation.success) {
-        return null;
-      }
-
-      const now = new Date();
-      const [organizationRow] = await database
-        .insert(organization)
-        .values({
-          public_id: `organization-${randomUUID()}`,
-          name: input.name,
-          org_tier: input.orgTier,
-          parent_organization_id: parentOrganization?.id ?? null,
-          status: "active",
-          contact_name: input.contactName,
-          contact_phone: input.contactPhone,
-          remark: input.remark,
-          created_at: now,
-          updated_at: now,
-        })
-        .returning(selectOrganizationMutationColumns());
-
-      return organizationRow === undefined
+      return organizationRow === null
         ? null
         : mapOrganizationMutationRowToDto(database, organizationRow);
     },
     async updateOrganization(publicId, input) {
       const database = getDatabase();
-      const parentOrganization = await findParentOrganization(
-        database,
-        input.parentOrganizationPublicId,
+      const organizationRow = await database.transaction(
+        async (transaction) => {
+          const transactionalDatabase =
+            transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+          await lockOrganizationScopeMutation(transactionalDatabase);
+
+          const [updatedOrganization] = await transactionalDatabase
+            .update(organization)
+            .set({
+              name: input.name,
+              contact_name: input.contactName,
+              contact_phone: input.contactPhone,
+              remark: input.remark,
+              revision: sql`${organization.revision} + 1`,
+              updated_at: new Date(),
+            })
+            .where(
+              and(
+                eq(organization.public_id, publicId),
+                eq(organization.revision, input.expectedRevision),
+              ),
+            )
+            .returning(selectOrganizationMutationColumns());
+
+          return updatedOrganization;
+        },
       );
-
-      if (
-        parentOrganization === undefined ||
-        input.parentOrganizationPublicId === publicId
-      ) {
-        return null;
-      }
-
-      const tierParentValidation = validateOrganizationTierParent({
-        orgTier: input.orgTier,
-        parentOrganization:
-          parentOrganization === null
-            ? null
-            : { orgTier: parentOrganization.org_tier },
-      });
-
-      if (!tierParentValidation.success) {
-        return null;
-      }
-
-      const [organizationRow] = await database
-        .update(organization)
-        .set({
-          name: input.name,
-          org_tier: input.orgTier,
-          parent_organization_id: parentOrganization?.id ?? null,
-          status: input.status,
-          contact_name: input.contactName,
-          contact_phone: input.contactPhone,
-          remark: input.remark,
-          updated_at: new Date(),
-        })
-        .where(eq(organization.public_id, publicId))
-        .returning(selectOrganizationMutationColumns());
 
       return organizationRow === undefined
         ? null
         : mapOrganizationMutationRowToDto(database, organizationRow);
     },
+    async moveOrganization(input) {
+      const database = getDatabase();
+
+      try {
+        const organizationRow = await database.transaction(
+          async (transaction) => {
+            const transactionalDatabase =
+              transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+            await lockOrganizationScopeMutation(transactionalDatabase);
+
+            const [targetOrganization] = await transactionalDatabase
+              .select(selectOrganizationMutationColumns())
+              .from(organization)
+              .where(eq(organization.public_id, input.publicId))
+              .limit(1);
+            const parentOrganization = await findParentOrganization(
+              transactionalDatabase,
+              input.parentOrganizationPublicId,
+            );
+
+            if (
+              targetOrganization === undefined ||
+              targetOrganization.revision !== input.expectedRevision ||
+              parentOrganization === undefined ||
+              parentOrganization?.status === "disabled" ||
+              parentOrganization?.id === targetOrganization.id
+            ) {
+              throw new OrganizationTreeConflictError();
+            }
+
+            const descendantIds = await listOrganizationAndDescendantIds(
+              transactionalDatabase,
+              targetOrganization.id,
+            );
+
+            if (
+              parentOrganization !== null &&
+              descendantIds.includes(parentOrganization.id)
+            ) {
+              throw new OrganizationTreeConflictError();
+            }
+
+            const tierParentValidation = validateOrganizationTierParent({
+              orgTier: targetOrganization.org_tier,
+              parentOrganization:
+                parentOrganization === null
+                  ? null
+                  : { orgTier: parentOrganization.org_tier },
+            });
+
+            if (!tierParentValidation.success) {
+              throw new OrganizationTreeConflictError();
+            }
+
+            const [movedOrganization] = await transactionalDatabase
+              .update(organization)
+              .set({
+                parent_organization_id: parentOrganization?.id ?? null,
+                revision: sql`${organization.revision} + 1`,
+                updated_at: new Date(),
+              })
+              .where(
+                and(
+                  eq(organization.id, targetOrganization.id),
+                  eq(organization.revision, input.expectedRevision),
+                ),
+              )
+              .returning(selectOrganizationMutationColumns());
+
+            if (
+              movedOrganization === undefined ||
+              (await hasCurrentOrgAuthOverlap(
+                transactionalDatabase,
+                descendantIds,
+              )) ||
+              !(await reconcileCurrentAndDescendantQuotaReservations(
+                transactionalDatabase,
+              ))
+            ) {
+              throw new OrganizationTreeConflictError();
+            }
+
+            return movedOrganization;
+          },
+        );
+
+        return mapOrganizationMutationRowToDto(database, organizationRow);
+      } catch (error) {
+        if (error instanceof OrganizationTreeConflictError) {
+          return null;
+        }
+
+        throw error;
+      }
+    },
     async disableOrganization(input) {
       const database = getDatabase();
-      const [rootOrganization] = await database
-        .select({ id: organization.id })
-        .from(organization)
-        .where(eq(organization.public_id, input.publicId))
-        .limit(1);
+      const result = await database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
 
-      if (rootOrganization === undefined) {
-        return null;
-      }
+        await lockOrganizationScopeMutation(transactionalDatabase);
 
-      const organizationIds = input.isCascade
-        ? await listOrganizationAndDescendantIds(database, rootOrganization.id)
-        : [rootOrganization.id];
-      const rows = await database
-        .update(organization)
-        .set({
-          status: "disabled",
-          updated_at: new Date(),
-        })
-        .where(inArray(organization.id, organizationIds))
-        .returning(selectOrganizationMutationColumns());
-      const disabledOrganization = rows.find(
-        (row) => row.id === rootOrganization.id,
-      );
+        const [rootOrganization] = await transactionalDatabase
+          .select({ id: organization.id })
+          .from(organization)
+          .where(
+            and(
+              eq(organization.public_id, input.publicId),
+              eq(organization.revision, input.expectedRevision),
+            ),
+          )
+          .limit(1);
 
-      if (disabledOrganization === undefined) {
-        return null;
-      }
+        if (rootOrganization === undefined) {
+          return null;
+        }
 
-      const activeFlowTermination = await terminateOrganizationActiveFlows(
-        database,
-        organizationIds,
-      );
+        const organizationIds = input.isCascade
+          ? await listOrganizationAndDescendantIds(
+              transactionalDatabase,
+              rootOrganization.id,
+            )
+          : [rootOrganization.id];
+        const rows = await transactionalDatabase
+          .update(organization)
+          .set({
+            status: "disabled",
+            revision: sql`${organization.revision} + 1`,
+            updated_at: new Date(),
+          })
+          .where(inArray(organization.id, organizationIds))
+          .returning(selectOrganizationMutationColumns());
+        const disabledOrganization = rows.find(
+          (row) => row.id === rootOrganization.id,
+        );
 
-      return {
-        organization: await mapOrganizationMutationRowToDto(
-          database,
-          disabledOrganization,
-        ),
-        activeFlowTermination,
-        affectedOrganizationPublicIds: await listOrganizationPublicIdsByIds(
-          database,
-          organizationIds,
-        ),
-      };
+        if (disabledOrganization === undefined) {
+          return null;
+        }
+
+        return {
+          activeFlowTermination: await terminateOrganizationActiveFlows(
+            transactionalDatabase,
+            organizationIds,
+          ),
+          affectedOrganizationPublicIds: await listOrganizationPublicIdsByIds(
+            transactionalDatabase,
+            organizationIds,
+          ),
+          organizationRow: disabledOrganization,
+        };
+      });
+
+      return result === null
+        ? null
+        : {
+            organization: await mapOrganizationMutationRowToDto(
+              database,
+              result.organizationRow,
+            ),
+            activeFlowTermination: result.activeFlowTermination,
+            affectedOrganizationPublicIds: result.affectedOrganizationPublicIds,
+          };
     },
-    async enableOrganization(publicId) {
+    async enableOrganization(input) {
       const database = getDatabase();
-      const [organizationRow] = await database
-        .update(organization)
-        .set({
-          status: "active",
-          updated_at: new Date(),
-        })
-        .where(eq(organization.public_id, publicId))
-        .returning(selectOrganizationMutationColumns());
+      const organizationRow = await database.transaction(
+        async (transaction) => {
+          const transactionalDatabase =
+            transaction as AdminOrganizationOrgAuthRuntimeDatabase;
 
-      return organizationRow === undefined
+          await lockOrganizationScopeMutation(transactionalDatabase);
+
+          const [rootOrganization] = await transactionalDatabase
+            .select({
+              id: organization.id,
+              parent_organization_id: organization.parent_organization_id,
+            })
+            .from(organization)
+            .where(
+              and(
+                eq(organization.public_id, input.publicId),
+                eq(organization.revision, input.expectedRevision),
+              ),
+            )
+            .limit(1);
+
+          if (rootOrganization === undefined) {
+            return null;
+          }
+
+          if (rootOrganization.parent_organization_id !== null) {
+            const [parentOrganization] = await transactionalDatabase
+              .select({ status: organization.status })
+              .from(organization)
+              .where(
+                eq(organization.id, rootOrganization.parent_organization_id),
+              )
+              .limit(1);
+
+            if (parentOrganization?.status !== "active") {
+              return null;
+            }
+          }
+
+          const organizationIds = input.isCascade
+            ? await listOrganizationAndDescendantIds(
+                transactionalDatabase,
+                rootOrganization.id,
+              )
+            : [rootOrganization.id];
+          const rows = await transactionalDatabase
+            .update(organization)
+            .set({
+              status: "active",
+              revision: sql`${organization.revision} + 1`,
+              updated_at: new Date(),
+            })
+            .where(inArray(organization.id, organizationIds))
+            .returning(selectOrganizationMutationColumns());
+
+          return rows.find((row) => row.id === rootOrganization.id) ?? null;
+        },
+      );
+
+      return organizationRow === null
         ? null
         : mapOrganizationMutationRowToDto(database, organizationRow);
     },
@@ -867,6 +1070,9 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
       return database.transaction(async (transaction) => {
         const transactionalDatabase =
           transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+        await lockOrganizationScopeMutation(transactionalDatabase);
+
         const [purchaserOrganization] = await transactionalDatabase
           .select({ id: organization.id, public_id: organization.public_id })
           .from(organization)
@@ -955,12 +1161,28 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           return null;
         }
 
-        await transactionalDatabase.insert(orgAuthOrganization).values(
-          organizationIds.map((organizationId) => ({
-            org_auth_id: orgAuthRow.id,
-            organization_id: organizationId,
-          })),
+        if (input.authScopeType === "specified_nodes") {
+          await transactionalDatabase.insert(orgAuthOrganization).values(
+            organizationIds.map((organizationId) => ({
+              org_auth_id: orgAuthRow.id,
+              organization_id: organizationId,
+            })),
+          );
+        }
+
+        const employeeIds = await listActiveEmployeeIdsByOrganizationIds(
+          transactionalDatabase,
+          organizationIds,
         );
+
+        if (employeeIds.length > 0) {
+          await transactionalDatabase.insert(employeeOrgAuth).values(
+            employeeIds.map((employeeId) => ({
+              employee_id: employeeId,
+              org_auth_id: orgAuthRow.id,
+            })),
+          );
+        }
 
         const organizationPublicIds = await listOrganizationPublicIdsByIds(
           transactionalDatabase,
@@ -1043,8 +1265,9 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         return { practiceCount: 0, mockExamCount: 0 };
       }
 
-      const userIds = await listActiveUserIdsByOrganizationIds(
+      const userIds = await listReservedActiveUserIdsByOrgAuth(
         database,
+        activeFlowScope.orgAuthId,
         activeFlowScope.organizationIds,
       );
 
@@ -1093,302 +1316,257 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         mockExamCount: terminatedMockExams.length,
       };
     },
-    async createEmployee(input) {
-      const database = getDatabase();
-      const [userRow] = await database
-        .select({
-          id: user.id,
-          public_id: user.public_id,
-          phone: user.phone,
-          name: user.name,
-        })
-        .from(user)
-        .where(eq(user.public_id, input.userPublicId))
-        .limit(1);
-      const [organizationRow] = await database
-        .select({
-          id: organization.id,
-          public_id: organization.public_id,
-        })
-        .from(organization)
-        .where(eq(organization.public_id, input.organizationPublicId))
-        .limit(1);
-
-      if (userRow === undefined || organizationRow === undefined) {
-        return null;
-      }
-
-      const [employeeRow] = await database
-        .insert(employee)
-        .values({
-          public_id: `employee-${randomUUID()}`,
-          user_id: userRow.id,
-          organization_id: organizationRow.id,
-        })
-        .returning({
-          public_id: employee.public_id,
-        });
-
-      await database
-        .update(user)
-        .set({
-          user_type: "employee",
-          status: "active",
-          disabled_at: null,
-          updated_at: new Date(),
-        })
-        .where(eq(user.id, userRow.id));
-
-      if (employeeRow === undefined) {
-        return null;
-      }
-
-      return {
-        publicId: employeeRow.public_id,
-        userPublicId: userRow.public_id,
-        phone: maskPhoneForDisplay(userRow.phone),
-        name: userRow.name,
-        organizationPublicId: organizationRow.public_id,
-        status: "active",
-      };
-    },
-    async importEmployees(input) {
-      const database = getDatabase();
-
-      return database.transaction(async (transaction) =>
-        importEmployeesWithDatabase(
-          transaction as AdminOrganizationOrgAuthRuntimeDatabase,
-          input,
-        ),
-      );
-    },
     async disableEmployee(publicId) {
-      const database = getDatabase();
-      const [employeeRow] = await database
-        .select({
-          employee_id: employee.id,
-          user_id: user.id,
-          auth_user_id: user.auth_user_id,
-        })
-        .from(employee)
-        .innerJoin(user, eq(user.id, employee.user_id))
-        .where(eq(employee.public_id, publicId))
-        .limit(1);
-
-      if (employeeRow === undefined) {
-        return false;
-      }
-
-      await database
-        .update(user)
-        .set({
-          status: "disabled",
-          disabled_at: new Date(),
-          updated_at: new Date(),
-        })
-        .where(eq(user.id, employeeRow.user_id));
-      await database
-        .update(employee)
-        .set({
-          updated_at: new Date(),
-        })
-        .where(eq(employee.id, employeeRow.employee_id));
-
-      if (employeeRow.auth_user_id !== null) {
-        await database
-          .delete(authSession)
-          .where(eq(authSession.user_id, employeeRow.auth_user_id));
-      }
-
-      return true;
-    },
-    async transferEmployee(input) {
       const database = getDatabase();
 
       return database.transaction(async (transaction) => {
-        const [employeeRow] = await transaction
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+        await lockOrganizationScopeMutation(transactionalDatabase);
+        await lockEmployeeIdentity(transactionalDatabase, publicId);
+
+        const [employeeRow] = await transactionalDatabase
           .select({
             employee_id: employee.id,
-            employee_public_id: employee.public_id,
-            organization_id: employee.organization_id,
-            organization_public_id: organization.public_id,
             user_id: user.id,
-            user_public_id: user.public_id,
             auth_user_id: user.auth_user_id,
           })
           .from(employee)
           .innerJoin(user, eq(user.id, employee.user_id))
-          .innerJoin(
-            organization,
-            eq(organization.id, employee.organization_id),
+          .where(
+            and(
+              eq(employee.public_id, publicId),
+              eq(user.user_type, "employee"),
+            ),
           )
-          .where(eq(employee.public_id, input.employeePublicId))
           .limit(1);
 
         if (employeeRow === undefined) {
-          return null;
+          return false;
         }
 
-        const [targetOrganizationRow] = await transaction
-          .select({
-            id: organization.id,
-            public_id: organization.public_id,
-            status: organization.status,
-          })
-          .from(organization)
-          .where(eq(organization.public_id, input.targetOrganizationPublicId))
-          .limit(1);
+        await releaseEmployeeOrgAuthQuota(
+          transactionalDatabase,
+          employeeRow.employee_id,
+        );
+        const lifecycleChangedAt = new Date();
 
-        if (
-          targetOrganizationRow === undefined ||
-          targetOrganizationRow.status !== "active"
-        ) {
-          return {
-            employeePublicId: input.employeePublicId,
-            targetOrganizationPublicId: input.targetOrganizationPublicId,
-            status: "target_organization_not_found",
-          };
-        }
-
-        if (targetOrganizationRow.id === employeeRow.organization_id) {
-          return {
-            employeePublicId: input.employeePublicId,
-            targetOrganizationPublicId: input.targetOrganizationPublicId,
-            status: "same_organization",
-          };
-        }
-
-        const now = new Date();
-        const targetOrgAuthRows = await transaction
-          .select({
-            id: orgAuth.id,
-            profession: orgAuth.profession,
-            level: orgAuth.level,
-            account_quota: orgAuth.account_quota,
-          })
-          .from(orgAuth)
-          .innerJoin(
-            orgAuthOrganization,
-            eq(orgAuthOrganization.org_auth_id, orgAuth.id),
-          )
-          .where(
-            and(
-              eq(orgAuthOrganization.organization_id, targetOrganizationRow.id),
-              eq(orgAuth.status, "active"),
-              lt(orgAuth.starts_at, now),
-              gt(orgAuth.expires_at, now),
-            ),
-          );
-
-        if (targetOrgAuthRows.length === 0) {
-          return {
-            employeePublicId: input.employeePublicId,
-            targetOrganizationPublicId: input.targetOrganizationPublicId,
-            status: "quota_insufficient",
-          };
-        }
-
-        let hasTargetQuota = false;
-
-        for (const targetOrgAuthRow of targetOrgAuthRows) {
-          const scopeRows = await transaction
-            .select({ organization_id: orgAuthOrganization.organization_id })
-            .from(orgAuthOrganization)
-            .where(eq(orgAuthOrganization.org_auth_id, targetOrgAuthRow.id));
-          const organizationIds = scopeRows.map((scopeRow) => {
-            return scopeRow.organization_id;
-          });
-
-          await lockOrgAuthQuotaScope(transaction, {
-            level: targetOrgAuthRow.level,
-            organizationIds,
-            profession: targetOrgAuthRow.profession,
-          });
-
-          const usedQuota = await countActiveEmployeesByOrganizationIds(
-            transaction,
-            organizationIds,
-          );
-          const transferAddsQuota = organizationIds.includes(
-            employeeRow.organization_id,
-          )
-            ? 0
-            : 1;
-
-          if (usedQuota + transferAddsQuota <= targetOrgAuthRow.account_quota) {
-            hasTargetQuota = true;
-          }
-        }
-
-        if (!hasTargetQuota) {
-          return {
-            employeePublicId: input.employeePublicId,
-            targetOrganizationPublicId: input.targetOrganizationPublicId,
-            status: "quota_insufficient",
-          };
-        }
-
-        await transaction
-          .update(employee)
-          .set({
-            organization_id: targetOrganizationRow.id,
-            updated_at: now,
-          })
-          .where(eq(employee.id, employeeRow.employee_id));
-        await transaction
+        await transactionalDatabase
           .update(user)
           .set({
-            user_type: "employee",
-            updated_at: now,
+            status: "disabled",
+            disabled_at: lifecycleChangedAt,
+            updated_at: lifecycleChangedAt,
           })
           .where(eq(user.id, employeeRow.user_id));
-        await transaction
-          .update(organizationTrainingAnswer)
-          .set({
-            organization_training_answer_status: "read_only",
-            updated_at: now,
-          })
-          .where(
-            and(
-              eq(
-                organizationTrainingAnswer.employee_id,
-                employeeRow.employee_id,
-              ),
-              eq(
-                organizationTrainingAnswer.organization_id,
-                employeeRow.organization_id,
-              ),
-              eq(
-                organizationTrainingAnswer.organization_training_answer_status,
-                "in_progress",
-              ),
-            ),
-          );
+        await transactionalDatabase
+          .update(employee)
+          .set({ updated_at: lifecycleChangedAt })
+          .where(eq(employee.id, employeeRow.employee_id));
 
         if (employeeRow.auth_user_id !== null) {
-          await transaction
+          await transactionalDatabase
             .delete(authSession)
             .where(eq(authSession.user_id, employeeRow.auth_user_id));
         }
 
-        await refreshOrgAuthUsedQuotaByOrganizationIds(transaction, [
-          employeeRow.organization_id,
-          targetOrganizationRow.id,
-        ]);
+        await transactionalDatabase
+          .update(practice)
+          .set({
+            practice_status: "terminated",
+            terminated_at: lifecycleChangedAt,
+            termination_reason: "account_disabled",
+            updated_at: lifecycleChangedAt,
+          })
+          .where(
+            and(
+              eq(practice.user_id, employeeRow.user_id),
+              eq(practice.practice_status, "in_progress"),
+            ),
+          );
+        await transactionalDatabase
+          .update(mockExam)
+          .set({
+            exam_status: "terminated",
+            terminated_at: lifecycleChangedAt,
+            termination_reason: "account_disabled",
+            updated_at: lifecycleChangedAt,
+          })
+          .where(
+            and(
+              eq(mockExam.user_id, employeeRow.user_id),
+              inArray(mockExam.exam_status, [
+                "in_progress",
+                "scoring",
+                "scoring_partial_failed",
+              ]),
+            ),
+          );
 
-        return {
-          employeePublicId: employeeRow.employee_public_id,
-          userPublicId: employeeRow.user_public_id,
-          previousOrganizationPublicId: employeeRow.organization_public_id,
-          targetOrganizationPublicId: targetOrganizationRow.public_id,
-          quotaRefreshStatus: "refreshed",
-          sessionRevocationStatus:
-            employeeRow.auth_user_id === null ? "not_needed" : "revoked",
-          historicalSnapshotStatus: "preserved",
-          oldOrganizationInProgressTrainingStatus: "blocked",
-          status: "transferred",
-        };
+        return true;
       });
+    },
+    async transferEmployee(input) {
+      const database = getDatabase();
+
+      try {
+        return await database.transaction(async (transaction) => {
+          const transactionalDatabase =
+            transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+          await lockOrganizationScopeMutation(transactionalDatabase);
+          await lockEmployeeIdentity(
+            transactionalDatabase,
+            input.employeePublicId,
+          );
+
+          const [employeeRow] = await transactionalDatabase
+            .select({
+              employee_id: employee.id,
+              employee_public_id: employee.public_id,
+              organization_id: employee.organization_id,
+              organization_public_id: organization.public_id,
+              user_id: user.id,
+              user_public_id: user.public_id,
+              auth_user_id: user.auth_user_id,
+              user_status: user.status,
+            })
+            .from(employee)
+            .innerJoin(user, eq(user.id, employee.user_id))
+            .innerJoin(
+              organization,
+              eq(organization.id, employee.organization_id),
+            )
+            .where(
+              and(
+                eq(employee.public_id, input.employeePublicId),
+                eq(user.user_type, "employee"),
+              ),
+            )
+            .limit(1);
+
+          if (employeeRow === undefined) {
+            return null;
+          }
+
+          const [targetOrganizationRow] = await transactionalDatabase
+            .select({
+              id: organization.id,
+              public_id: organization.public_id,
+              status: organization.status,
+            })
+            .from(organization)
+            .where(eq(organization.public_id, input.targetOrganizationPublicId))
+            .limit(1);
+
+          if (
+            targetOrganizationRow === undefined ||
+            targetOrganizationRow.status !== "active"
+          ) {
+            return {
+              employeePublicId: input.employeePublicId,
+              targetOrganizationPublicId: input.targetOrganizationPublicId,
+              status: "target_organization_not_found" as const,
+            };
+          }
+
+          if (targetOrganizationRow.id === employeeRow.organization_id) {
+            return {
+              employeePublicId: input.employeePublicId,
+              targetOrganizationPublicId: input.targetOrganizationPublicId,
+              status: "same_organization" as const,
+            };
+          }
+
+          const now = new Date();
+
+          await releaseEmployeeOrgAuthQuota(
+            transactionalDatabase,
+            employeeRow.employee_id,
+          );
+          await transactionalDatabase
+            .update(employee)
+            .set({
+              organization_id: targetOrganizationRow.id,
+              updated_at: now,
+            })
+            .where(eq(employee.id, employeeRow.employee_id));
+
+          if (employeeRow.user_status === "active") {
+            const reservationResult = await reserveEmployeeOrgAuthQuota(
+              transactionalDatabase,
+              {
+                employeeId: employeeRow.employee_id,
+                organizationId: targetOrganizationRow.id,
+                requireCurrentAuthorization: true,
+              },
+            );
+
+            if (reservationResult !== "reserved") {
+              throw new EmployeeOrgAuthQuotaError(reservationResult);
+            }
+          }
+
+          await transactionalDatabase
+            .update(user)
+            .set({ user_type: "employee", updated_at: now })
+            .where(eq(user.id, employeeRow.user_id));
+          await transactionalDatabase
+            .update(organizationTrainingAnswer)
+            .set({
+              organization_training_answer_status: "read_only",
+              updated_at: now,
+            })
+            .where(
+              and(
+                eq(
+                  organizationTrainingAnswer.employee_id,
+                  employeeRow.employee_id,
+                ),
+                eq(
+                  organizationTrainingAnswer.organization_id,
+                  employeeRow.organization_id,
+                ),
+                eq(
+                  organizationTrainingAnswer.organization_training_answer_status,
+                  "in_progress",
+                ),
+              ),
+            );
+
+          if (employeeRow.auth_user_id !== null) {
+            await transactionalDatabase
+              .delete(authSession)
+              .where(eq(authSession.user_id, employeeRow.auth_user_id));
+          }
+
+          return {
+            employeePublicId: employeeRow.employee_public_id,
+            userPublicId: employeeRow.user_public_id,
+            previousOrganizationPublicId: employeeRow.organization_public_id,
+            targetOrganizationPublicId: targetOrganizationRow.public_id,
+            quotaRefreshStatus: "refreshed" as const,
+            sessionRevocationStatus:
+              employeeRow.auth_user_id === null
+                ? ("not_needed" as const)
+                : ("revoked" as const),
+            historicalSnapshotStatus: "preserved" as const,
+            oldOrganizationInProgressTrainingStatus: "blocked" as const,
+            status: "transferred" as const,
+          };
+        });
+      } catch (error) {
+        if (error instanceof EmployeeOrgAuthQuotaError) {
+          return {
+            employeePublicId: input.employeePublicId,
+            targetOrganizationPublicId: input.targetOrganizationPublicId,
+            status: "quota_insufficient",
+          };
+        }
+
+        throw error;
+      }
     },
     async unbindEmployee(input) {
       const database = getDatabase();
@@ -1398,13 +1576,22 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         typeof input === "string" ? null : (input.organizationPublicId ?? null);
 
       return database.transaction(async (transaction) => {
-        const conditions = [eq(employee.public_id, employeePublicId)];
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+
+        await lockOrganizationScopeMutation(transactionalDatabase);
+        await lockEmployeeIdentity(transactionalDatabase, employeePublicId);
+
+        const conditions = [
+          eq(employee.public_id, employeePublicId),
+          eq(user.user_type, "employee"),
+        ];
 
         if (organizationPublicId !== null) {
           conditions.push(eq(organization.public_id, organizationPublicId));
         }
 
-        const [employeeRow] = await transaction
+        const [employeeRow] = await transactionalDatabase
           .select({
             employee_id: employee.id,
             employee_public_id: employee.public_id,
@@ -1427,14 +1614,18 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           return null;
         }
 
-        await transaction
+        await releaseEmployeeOrgAuthQuota(
+          transactionalDatabase,
+          employeeRow.employee_id,
+        );
+        await transactionalDatabase
           .update(user)
           .set({
             user_type: "personal",
             updated_at: new Date(),
           })
           .where(eq(user.id, employeeRow.user_id));
-        await transaction
+        await transactionalDatabase
           .update(employee)
           .set({
             updated_at: new Date(),
@@ -1442,14 +1633,33 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           .where(eq(employee.id, employeeRow.employee_id));
 
         if (employeeRow.auth_user_id !== null) {
-          await transaction
+          await transactionalDatabase
             .delete(authSession)
             .where(eq(authSession.user_id, employeeRow.auth_user_id));
         }
 
-        await refreshOrgAuthUsedQuotaByOrganizationIds(transaction, [
-          employeeRow.organization_id,
-        ]);
+        await transactionalDatabase
+          .update(organizationTrainingAnswer)
+          .set({
+            organization_training_answer_status: "read_only",
+            updated_at: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                organizationTrainingAnswer.employee_id,
+                employeeRow.employee_id,
+              ),
+              eq(
+                organizationTrainingAnswer.organization_id,
+                employeeRow.organization_id,
+              ),
+              eq(
+                organizationTrainingAnswer.organization_training_answer_status,
+                "in_progress",
+              ),
+            ),
+          );
 
         return {
           employeePublicId: employeeRow.employee_public_id,
@@ -1475,52 +1685,6 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
             request_ip: input.requestIp,
           });
       },
-    },
-  };
-}
-
-export function createPostgresEmployeeAccountCredentialAdapter(
-  options: AdminOrganizationOrgAuthRuntimeRepositoryOptions = {},
-): UserRegistrationCredentialAdapter {
-  const getDatabase = createLazyDatabaseGetter(
-    options.createDatabase ?? createLocalRuntimeDatabase,
-  );
-
-  return {
-    async createPasswordCredential(input) {
-      const database = getDatabase();
-      const authUserId = `auth-user-${randomUUID()}`;
-      const passwordHash = await hashPassword(input.password);
-      const now = new Date();
-
-      await database.transaction(async (transaction) => {
-        await transaction.insert(authUser).values({
-          created_at: now,
-          email: `phone-${input.phone}@tiku.local`,
-          email_verified: now,
-          id: authUserId,
-          image: null,
-          name: input.phone,
-          updated_at: now,
-        });
-        await transaction.insert(authAccount).values({
-          access_token: null,
-          access_token_expires_at: null,
-          account_id: authUserId,
-          created_at: now,
-          id: `auth-account-${randomUUID()}`,
-          id_token: null,
-          [authAccountCredentialField]: passwordHash,
-          provider_id: CREDENTIAL_PROVIDER_ID,
-          refresh_token: null,
-          refresh_token_expires_at: null,
-          scope: null,
-          updated_at: now,
-          user_id: authUserId,
-        });
-      });
-
-      return { authUserId };
     },
   };
 }
@@ -1561,6 +1725,10 @@ export function createPostgresEmployeeAccountRepository(
       return {
         ...row,
         auth_user_id: row.auth_user_id,
+        employee_public_id:
+          row.user_type === "employee" ? row.employee_public_id : null,
+        organization_public_id:
+          row.user_type === "employee" ? row.organization_public_id : null,
       };
     },
     async findOrganizationByPublicId(publicId) {
@@ -1578,11 +1746,12 @@ export function createPostgresEmployeeAccountRepository(
     },
     async createEmployeeAccount(input) {
       const database = getDatabase();
+      const passwordHash = await hashPassword(input.initialPassword);
 
       return database.transaction(async (transaction) =>
         createEmployeeAccountWithDatabase(
           transaction as AdminOrganizationOrgAuthRuntimeDatabase,
-          input,
+          { ...input, passwordHash },
         ),
       );
     },
@@ -1601,8 +1770,23 @@ export function createPostgresEmployeeAccountRepository(
 
 async function createEmployeeAccountWithDatabase(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
-  input: CreateEmployeeAccountInput,
+  input: CreateEmployeeAccountInput & { passwordHash: string },
 ) {
+  await lockOrganizationScopeMutation(database);
+  await database.execute(
+    sql`select pg_advisory_xact_lock(200112, hashtext(${input.phone})) as employee_identity_lock`,
+  );
+
+  const [existingUser] = await database
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.phone, input.phone))
+    .limit(1);
+
+  if (existingUser !== undefined) {
+    throw new EmployeeAccountMutationError("account_conflict");
+  }
+
   const [organizationRow] = await database
     .select({
       id: organization.id,
@@ -1610,18 +1794,50 @@ async function createEmployeeAccountWithDatabase(
       public_id: organization.public_id,
     })
     .from(organization)
-    .where(eq(organization.public_id, input.organizationPublicId))
+    .where(
+      and(
+        eq(organization.public_id, input.organizationPublicId),
+        eq(organization.status, "active"),
+      ),
+    )
     .limit(1);
 
   if (organizationRow === undefined) {
-    throw new Error("Organization does not exist.");
+    throw new EmployeeAccountMutationError("organization_not_found");
   }
 
   const now = new Date();
+  const authUserId = `auth-user-${randomUUID()}`;
+
+  await database.insert(authUser).values({
+    created_at: now,
+    email: `phone-${input.phone}@tiku.local`,
+    email_verified: now,
+    id: authUserId,
+    image: null,
+    name: input.phone,
+    updated_at: now,
+  });
+  await database.insert(authAccount).values({
+    access_token: null,
+    access_token_expires_at: null,
+    account_id: authUserId,
+    created_at: now,
+    id: `auth-account-${randomUUID()}`,
+    id_token: null,
+    [authAccountCredentialField]: input.passwordHash,
+    provider_id: CREDENTIAL_PROVIDER_ID,
+    refresh_token: null,
+    refresh_token_expires_at: null,
+    scope: null,
+    updated_at: now,
+    user_id: authUserId,
+  });
+
   const [userRow] = await database
     .insert(user)
     .values({
-      auth_user_id: input.authUserId,
+      auth_user_id: authUserId,
       created_at: now,
       disabled_at: null,
       locked_until_at: null,
@@ -1668,6 +1884,15 @@ async function createEmployeeAccountWithDatabase(
     throw new Error("Employee account creation failed.");
   }
 
+  const reservationResult = await reserveEmployeeOrgAuthQuota(database, {
+    employeeId: employeeRow.id,
+    organizationId: organizationRow.id,
+  });
+
+  if (reservationResult !== "reserved") {
+    throw new EmployeeAccountMutationError(reservationResult);
+  }
+
   return {
     employee: {
       id: employeeRow.id,
@@ -1700,6 +1925,11 @@ async function bindEmployeeAccountWithDatabase(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   input: BindExistingUserToOrganizationInput,
 ) {
+  await lockOrganizationScopeMutation(database);
+  await database.execute(
+    sql`select pg_advisory_xact_lock(200112, hashtext(${input.userPublicId})) as employee_identity_lock`,
+  );
+
   const [userRow] = await database
     .select({
       auth_user_id: user.auth_user_id,
@@ -1708,6 +1938,8 @@ async function bindEmployeeAccountWithDatabase(
       name: user.name,
       phone: user.phone,
       public_id: user.public_id,
+      status: user.status,
+      user_type: user.user_type,
     })
     .from(user)
     .where(eq(user.public_id, input.userPublicId))
@@ -1719,7 +1951,12 @@ async function bindEmployeeAccountWithDatabase(
       public_id: organization.public_id,
     })
     .from(organization)
-    .where(eq(organization.public_id, input.organizationPublicId))
+    .where(
+      and(
+        eq(organization.public_id, input.organizationPublicId),
+        eq(organization.status, "active"),
+      ),
+    )
     .limit(1);
 
   if (
@@ -1727,25 +1964,54 @@ async function bindEmployeeAccountWithDatabase(
     userRow.auth_user_id === null ||
     organizationRow === undefined
   ) {
-    throw new Error("Employee account binding failed.");
+    throw new EmployeeAccountMutationError("organization_not_found");
+  }
+
+  const [existingEmployee] = await database
+    .select({ id: employee.id })
+    .from(employee)
+    .where(eq(employee.user_id, userRow.id))
+    .limit(1);
+
+  if (userRow.user_type === "employee" || userRow.status === "disabled") {
+    throw new EmployeeAccountMutationError("account_conflict");
   }
 
   const now = new Date();
-  const [employeeRow] = await database
-    .insert(employee)
-    .values({
-      created_at: now,
-      organization_id: organizationRow.id,
-      public_id: `employee-${randomUUID()}`,
-      updated_at: now,
-      user_id: userRow.id,
-    })
-    .returning({
-      created_at: employee.created_at,
-      id: employee.id,
-      public_id: employee.public_id,
-      updated_at: employee.updated_at,
-    });
+  const [employeeRow] =
+    existingEmployee === undefined
+      ? await database
+          .insert(employee)
+          .values({
+            created_at: now,
+            organization_id: organizationRow.id,
+            public_id: `employee-${randomUUID()}`,
+            updated_at: now,
+            user_id: userRow.id,
+          })
+          .returning({
+            created_at: employee.created_at,
+            id: employee.id,
+            public_id: employee.public_id,
+            updated_at: employee.updated_at,
+          })
+      : await database
+          .update(employee)
+          .set({
+            organization_id: organizationRow.id,
+            updated_at: now,
+          })
+          .where(eq(employee.id, existingEmployee.id))
+          .returning({
+            created_at: employee.created_at,
+            id: employee.id,
+            public_id: employee.public_id,
+            updated_at: employee.updated_at,
+          });
+
+  if (existingEmployee !== undefined) {
+    await releaseEmployeeOrgAuthQuota(database, existingEmployee.id);
+  }
 
   await database
     .update(user)
@@ -1759,6 +2025,15 @@ async function bindEmployeeAccountWithDatabase(
 
   if (employeeRow === undefined) {
     throw new Error("Employee account binding failed.");
+  }
+
+  const reservationResult = await reserveEmployeeOrgAuthQuota(database, {
+    employeeId: employeeRow.id,
+    organizationId: organizationRow.id,
+  });
+
+  if (reservationResult !== "reserved") {
+    throw new EmployeeAccountMutationError(reservationResult);
   }
 
   return {
@@ -1931,20 +2206,28 @@ async function listActiveOrgAuthCountsByOrganization(
   const now = new Date();
   const rows = await database
     .select({
-      organization_id: orgAuthOrganization.organization_id,
+      organization_id: organization.id,
       value: count(),
     })
-    .from(orgAuthOrganization)
-    .innerJoin(orgAuth, eq(orgAuth.id, orgAuthOrganization.org_auth_id))
+    .from(organization)
+    .innerJoin(
+      orgAuth,
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
+    )
     .where(
       and(
-        inArray(orgAuthOrganization.organization_id, organizationIds),
+        inArray(organization.id, organizationIds),
         eq(orgAuth.status, "active"),
         lte(orgAuth.starts_at, now),
         gt(orgAuth.expires_at, now),
       ),
     )
-    .groupBy(orgAuthOrganization.organization_id);
+    .groupBy(organization.id);
 
   return new Map(rows.map((row) => [row.organization_id, row.value]));
 }
@@ -2009,6 +2292,7 @@ async function listOrganizationAncestorPaths(
         name: organization.name,
         org_tier: organization.org_tier,
         parent_organization_id: organization.parent_organization_id,
+        revision: organization.revision,
         status: organization.status,
       })
       .from(organization)
@@ -2096,14 +2380,18 @@ async function findParentOrganization(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   parentOrganizationPublicId: string | null,
 ): Promise<
-  Pick<OrganizationMutationRow, "id" | "org_tier"> | null | undefined
+  Pick<OrganizationMutationRow, "id" | "org_tier" | "status"> | null | undefined
 > {
   if (parentOrganizationPublicId === null) {
     return null;
   }
 
   const [parentOrganization] = await database
-    .select({ id: organization.id, org_tier: organization.org_tier })
+    .select({
+      id: organization.id,
+      org_tier: organization.org_tier,
+      status: organization.status,
+    })
     .from(organization)
     .where(eq(organization.public_id, parentOrganizationPublicId))
     .limit(1);
@@ -2134,6 +2422,7 @@ async function mapOrganizationMutationRowToDto(
     contactName: input.contact_name,
     contactPhone: input.contact_phone,
     remark: input.remark,
+    revision: input.revision,
     createdAt: input.created_at.toISOString(),
     updatedAt: input.updated_at.toISOString(),
   };
@@ -2176,13 +2465,21 @@ async function listOrganizationAuthSummaries(
 
   const rows = await database
     .select({
-      organization_id: orgAuthOrganization.organization_id,
+      organization_id: organization.id,
       profession: orgAuth.profession,
       level: orgAuth.level,
     })
-    .from(orgAuthOrganization)
-    .innerJoin(orgAuth, eq(orgAuth.id, orgAuthOrganization.org_auth_id))
-    .where(inArray(orgAuthOrganization.organization_id, organizationIds))
+    .from(organization)
+    .innerJoin(
+      orgAuth,
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
+    )
+    .where(inArray(organization.id, organizationIds))
     .orderBy(desc(orgAuth.expires_at));
   const summaries = new Map<number, string>();
 
@@ -2208,15 +2505,20 @@ async function listOrgAuthOrganizationPublicIds(
 
   const rows = await database
     .select({
-      org_auth_id: orgAuthOrganization.org_auth_id,
+      org_auth_id: orgAuth.id,
       organization_public_id: organization.public_id,
     })
-    .from(orgAuthOrganization)
+    .from(orgAuth)
     .innerJoin(
       organization,
-      eq(organization.id, orgAuthOrganization.organization_id),
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
     )
-    .where(inArray(orgAuthOrganization.org_auth_id, orgAuthIds))
+    .where(inArray(orgAuth.id, orgAuthIds))
     .orderBy(asc(organization.public_id));
   const publicIds = new Map<number, string[]>();
 
@@ -2240,16 +2542,21 @@ async function listOrgAuthOrganizationSummaries(
 
   const rows = await database
     .select({
-      org_auth_id: orgAuthOrganization.org_auth_id,
+      org_auth_id: orgAuth.id,
       organization_name: organization.name,
       organization_public_id: organization.public_id,
     })
-    .from(orgAuthOrganization)
+    .from(orgAuth)
     .innerJoin(
       organization,
-      eq(organization.id, orgAuthOrganization.organization_id),
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
     )
-    .where(inArray(orgAuthOrganization.org_auth_id, orgAuthIds))
+    .where(inArray(orgAuth.id, orgAuthIds))
     .orderBy(asc(organization.name), asc(organization.public_id));
   const summaries = new Map<number, { names: string[]; publicIds: string[] }>();
 
@@ -2502,18 +2809,24 @@ async function hasOverlappingOrgAuthWithOrganizationIds(
     .select({ value: count() })
     .from(orgAuth)
     .innerJoin(
-      orgAuthOrganization,
-      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+      organization,
+      and(
+        inArray(organization.id, organizationIds),
+        createOrgAuthCoversOrganizationCondition({
+          authScopeType: orgAuth.auth_scope_type,
+          orgAuthId: orgAuth.id,
+          organizationId: organization.id,
+          purchaserOrganizationId: orgAuth.purchaser_organization_id,
+        }),
+      ),
     )
     .where(
       and(
         eq(orgAuth.status, "active"),
-        eq(orgAuth.auth_scope_type, input.authScopeType),
         eq(orgAuth.profession, input.profession),
         eq(orgAuth.level, input.level),
         lt(orgAuth.starts_at, input.expiresAt),
         gt(orgAuth.expires_at, input.startsAt),
-        inArray(orgAuthOrganization.organization_id, organizationIds),
       ),
     );
 
@@ -2526,16 +2839,39 @@ async function listOrganizationAndDescendantIds(
 ): Promise<number[]> {
   let organizationIds = [rootOrganizationId];
   let frontierIds = [rootOrganizationId];
+  const visitedOrganizationIds = new Set(organizationIds);
 
-  for (let depth = 0; depth < 4 && frontierIds.length > 0; depth += 1) {
+  for (
+    let depth = 0;
+    depth < MAX_ORGANIZATION_TREE_DEPTH - 1 && frontierIds.length > 0;
+    depth += 1
+  ) {
     const childRows = await database
       .select({ id: organization.id })
       .from(organization)
       .where(inArray(organization.parent_organization_id, frontierIds));
     const childIds = childRows.map((row) => row.id);
 
+    if (childIds.some((childId) => visitedOrganizationIds.has(childId))) {
+      throw new OrganizationTreeConflictError();
+    }
+
+    childIds.forEach((childId) => visitedOrganizationIds.add(childId));
+
     organizationIds = [...organizationIds, ...childIds];
     frontierIds = childIds;
+  }
+
+  if (frontierIds.length > 0) {
+    const [overflowOrganization] = await database
+      .select({ id: organization.id })
+      .from(organization)
+      .where(inArray(organization.parent_organization_id, frontierIds))
+      .limit(1);
+
+    if (overflowOrganization !== undefined) {
+      throw new OrganizationTreeConflictError();
+    }
   }
 
   return organizationIds;
@@ -2564,44 +2900,28 @@ async function countActiveEmployeesByOrganizationIds(
   return row?.value ?? 0;
 }
 
-async function refreshOrgAuthUsedQuotaByOrganizationIds(
+async function listActiveEmployeeIdsByOrganizationIds(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   organizationIds: number[],
-): Promise<void> {
+): Promise<number[]> {
   if (organizationIds.length === 0) {
-    return;
+    return [];
   }
 
-  const orgAuthRows = await database
-    .select({ org_auth_id: orgAuthOrganization.org_auth_id })
-    .from(orgAuthOrganization)
-    .innerJoin(orgAuth, eq(orgAuth.id, orgAuthOrganization.org_auth_id))
+  const rows = await database
+    .select({ id: employee.id })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
     .where(
       and(
-        inArray(orgAuthOrganization.organization_id, organizationIds),
-        eq(orgAuth.status, "active"),
+        inArray(employee.organization_id, organizationIds),
+        eq(user.user_type, "employee"),
+        eq(user.status, "active"),
       ),
-    );
-  const orgAuthIds = [...new Set(orgAuthRows.map((row) => row.org_auth_id))];
+    )
+    .orderBy(asc(employee.id));
 
-  for (const orgAuthId of orgAuthIds) {
-    const scopeRows = await database
-      .select({ organization_id: orgAuthOrganization.organization_id })
-      .from(orgAuthOrganization)
-      .where(eq(orgAuthOrganization.org_auth_id, orgAuthId));
-    const usedQuota = await countActiveEmployeesByOrganizationIds(
-      database,
-      scopeRows.map((row) => row.organization_id),
-    );
-
-    await database
-      .update(orgAuth)
-      .set({
-        used_quota: usedQuota,
-        updated_at: new Date(),
-      })
-      .where(eq(orgAuth.id, orgAuthId));
-  }
+  return rows.map((row) => row.id);
 }
 
 async function terminateOrganizationActiveFlows(
@@ -2623,6 +2943,7 @@ async function terminateOrganizationActiveFlows(
     .set({
       practice_status: "terminated",
       terminated_at: now,
+      termination_reason: "authorization_invalid",
       updated_at: now,
     })
     .where(
@@ -2637,6 +2958,7 @@ async function terminateOrganizationActiveFlows(
     .set({
       exam_status: "terminated",
       terminated_at: now,
+      termination_reason: "authorization_invalid",
       updated_at: now,
     })
     .where(
@@ -2657,220 +2979,11 @@ async function terminateOrganizationActiveFlows(
   };
 }
 
-async function importEmployeesWithDatabase(
-  database: AdminOrganizationOrgAuthRuntimeDatabase,
-  input: EmployeeImportInput,
-): Promise<EmployeeImportResultDto> {
-  const importRows = input.employees.map((employeeInput, index) => ({
-    ...employeeInput,
-    rowNumber: index + 1,
-  }));
-  const userPublicIds = [
-    ...new Set(importRows.map((employeeInput) => employeeInput.userPublicId)),
-  ];
-  const organizationPublicIds = [
-    ...new Set(
-      importRows.map((employeeInput) => employeeInput.organizationPublicId),
-    ),
-  ];
-  const duplicateUserPublicIds = new Set(
-    userPublicIds.filter(
-      (userPublicId) =>
-        importRows.filter(
-          (employeeInput) => employeeInput.userPublicId === userPublicId,
-        ).length > 1,
-    ),
-  );
-  const userRows = await database
-    .select({
-      id: user.id,
-      public_id: user.public_id,
-      phone: user.phone,
-      name: user.name,
-    })
-    .from(user)
-    .where(inArray(user.public_id, userPublicIds));
-  const organizationRows = await database
-    .select({
-      id: organization.id,
-      public_id: organization.public_id,
-    })
-    .from(organization)
-    .where(inArray(organization.public_id, organizationPublicIds));
-  const userByPublicId = new Map(
-    userRows.map((userRow) => [userRow.public_id, userRow]),
-  );
-  const organizationByPublicId = new Map(
-    organizationRows.map((organizationRow) => [
-      organizationRow.public_id,
-      organizationRow,
-    ]),
-  );
-  const rejectedRows = importRows.flatMap((employeeInput) =>
-    createEmployeeImportRejectedRows({
-      duplicateUserPublicIds,
-      employeeInput,
-      organizationByPublicId,
-      userByPublicId,
-    }),
-  );
-
-  if (rejectedRows.length > 0) {
-    return {
-      importedEmployees: [],
-      rejectedRows,
-    };
-  }
-
-  const userIds = userRows.map((userRow) => userRow.id);
-  const existingEmployeeRows =
-    userIds.length === 0
-      ? []
-      : await database
-          .select({
-            id: employee.id,
-            public_id: employee.public_id,
-            user_id: employee.user_id,
-          })
-          .from(employee)
-          .where(inArray(employee.user_id, userIds));
-  const existingEmployeeByUserId = new Map(
-    existingEmployeeRows.map((employeeRow) => [
-      employeeRow.user_id,
-      employeeRow,
-    ]),
-  );
-  const now = new Date();
-  let importedEmployees: EmployeeImportResultDto["importedEmployees"] = [];
-
-  for (const employeeInput of importRows) {
-    const userRow = userByPublicId.get(employeeInput.userPublicId);
-    const organizationRow = organizationByPublicId.get(
-      employeeInput.organizationPublicId,
-    );
-
-    if (userRow === undefined || organizationRow === undefined) {
-      continue;
-    }
-
-    const existingEmployee = existingEmployeeByUserId.get(userRow.id);
-    const employeePublicId =
-      existingEmployee?.public_id ?? `employee-${randomUUID()}`;
-
-    if (existingEmployee === undefined) {
-      await database.insert(employee).values({
-        public_id: employeePublicId,
-        user_id: userRow.id,
-        organization_id: organizationRow.id,
-        created_at: now,
-        updated_at: now,
-      });
-    } else {
-      await database
-        .update(employee)
-        .set({
-          organization_id: organizationRow.id,
-          updated_at: now,
-        })
-        .where(eq(employee.id, existingEmployee.id));
-    }
-
-    await database
-      .update(user)
-      .set({
-        user_type: "employee",
-        status: "active",
-        disabled_at: null,
-        updated_at: now,
-      })
-      .where(eq(user.id, userRow.id));
-
-    importedEmployees = [
-      ...importedEmployees,
-      {
-        publicId: employeePublicId,
-        userPublicId: userRow.public_id,
-        phone: maskPhoneForDisplay(userRow.phone),
-        name: userRow.name,
-        organizationPublicId: organizationRow.public_id,
-        status: "active",
-      },
-    ];
-  }
-
-  return {
-    importedEmployees,
-    rejectedRows: [],
-  };
-}
-
-function createEmployeeImportRejectedRows(input: {
-  duplicateUserPublicIds: Set<string>;
-  employeeInput: EmployeeImportRowInputDto & { rowNumber: number };
-  organizationByPublicId: Map<
-    string,
-    {
-      id: number;
-      public_id: string;
-    }
-  >;
-  userByPublicId: Map<
-    string,
-    {
-      id: number;
-      public_id: string;
-      phone: string;
-      name: string;
-    }
-  >;
-}): EmployeeImportRejectedRowDto[] {
-  const { employeeInput } = input;
-  const duplicateUserRejectedRow = input.duplicateUserPublicIds.has(
-    employeeInput.userPublicId,
-  )
-    ? [
-        {
-          rowNumber: employeeInput.rowNumber,
-          userPublicId: employeeInput.userPublicId,
-          organizationPublicId: employeeInput.organizationPublicId,
-          reason: "duplicate_user" as const,
-        },
-      ]
-    : [];
-  const userRejectedRow = input.userByPublicId.has(employeeInput.userPublicId)
-    ? []
-    : [
-        {
-          rowNumber: employeeInput.rowNumber,
-          userPublicId: employeeInput.userPublicId,
-          organizationPublicId: employeeInput.organizationPublicId,
-          reason: "user_not_found" as const,
-        },
-      ];
-  const organizationRejectedRow = input.organizationByPublicId.has(
-    employeeInput.organizationPublicId,
-  )
-    ? []
-    : [
-        {
-          rowNumber: employeeInput.rowNumber,
-          userPublicId: employeeInput.userPublicId,
-          organizationPublicId: employeeInput.organizationPublicId,
-          reason: "organization_not_found" as const,
-        },
-      ];
-
-  return [
-    ...duplicateUserRejectedRow,
-    ...userRejectedRow,
-    ...organizationRejectedRow,
-  ];
-}
-
 async function findOrgAuthActiveFlowScope(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   publicId: string,
 ): Promise<{
+  orgAuthId: number;
   organizationIds: number[];
   profession: (typeof orgAuth.$inferSelect)["profession"];
   level: number;
@@ -2878,6 +2991,8 @@ async function findOrgAuthActiveFlowScope(
   const [orgAuthRow] = await database
     .select({
       id: orgAuth.id,
+      auth_scope_type: orgAuth.auth_scope_type,
+      purchaser_organization_id: orgAuth.purchaser_organization_id,
       profession: orgAuth.profession,
       level: orgAuth.level,
     })
@@ -2890,11 +3005,19 @@ async function findOrgAuthActiveFlowScope(
   }
 
   const organizationRows = await database
-    .select({ organization_id: orgAuthOrganization.organization_id })
-    .from(orgAuthOrganization)
-    .where(eq(orgAuthOrganization.org_auth_id, orgAuthRow.id));
+    .select({ organization_id: organization.id })
+    .from(organization)
+    .where(
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuthRow.auth_scope_type,
+        orgAuthId: orgAuthRow.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuthRow.purchaser_organization_id,
+      }),
+    );
 
   return {
+    orgAuthId: orgAuthRow.id,
     organizationIds: organizationRows.map((row) => row.organization_id),
     profession: orgAuthRow.profession,
     level: orgAuthRow.level,
@@ -2917,6 +3040,33 @@ async function listActiveUserIdsByOrganizationIds(
       and(
         inArray(employee.organization_id, organizationIds),
         eq(user.status, "active"),
+        eq(user.user_type, "employee"),
+      ),
+    );
+
+  return rows.map((row) => row.id);
+}
+
+async function listReservedActiveUserIdsByOrgAuth(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  orgAuthId: number,
+  organizationIds: number[],
+): Promise<number[]> {
+  if (organizationIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select({ id: user.id })
+    .from(employeeOrgAuth)
+    .innerJoin(employee, eq(employee.id, employeeOrgAuth.employee_id))
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .where(
+      and(
+        eq(employeeOrgAuth.org_auth_id, orgAuthId),
+        inArray(employee.organization_id, organizationIds),
+        eq(user.status, "active"),
+        eq(user.user_type, "employee"),
       ),
     );
 

@@ -47,7 +47,6 @@ function createAdminSessionService(
 
 function createRepositories(input: {
   auditInputs: unknown[];
-  importInputs?: unknown[];
 }): AdminOrganizationOrgAuthRuntimeRepositories {
   return {
     async listOrganizations(query) {
@@ -91,17 +90,6 @@ function createRepositories(input: {
         input.auditInputs.push(auditLogInput);
       },
     },
-    importEmployees:
-      input.importInputs === undefined
-        ? undefined
-        : async (importInput) => {
-            input.importInputs?.push(importInput);
-
-            return {
-              importedEmployees: [],
-              rejectedRows: [],
-            };
-          },
   };
 }
 
@@ -170,10 +158,11 @@ describe("phase 20 RA-01-04 employee import", () => {
         },
         body: JSON.stringify({
           sourceFormat: "csv",
+          targetOrganizationPublicId: "organization-public-001",
           content: [
-            "phone,name,initialPassword,organizationPublicId",
-            "13900001001,Employee One,abc12345,organization-public-001",
-            "13900001002,Employee Two,def67890,organization-public-001",
+            "phone,name,initialPassword",
+            "13900001001,Employee One,abc12345",
+            "13900001002,Employee Two,def67890",
           ].join("\n"),
         }),
       }),
@@ -251,11 +240,12 @@ describe("phase 20 RA-01-04 employee import", () => {
         headers: { authorization: "Bearer admin-session-token" },
         body: JSON.stringify({
           sourceFormat: "csv",
+          targetOrganizationPublicId: "organization-public-001",
           content: [
-            "phone,name,initialPassword,organizationPublicId",
-            "13900001001,Employee One,abc12345,organization-public-001",
-            "13900001001,Employee Duplicate,abc12345,organization-public-001",
-            "not-phone,Employee Invalid,abc12345,organization-public-001",
+            "phone,name,initialPassword",
+            "13900001001,Employee One,abc12345",
+            "13900001001,Employee Duplicate,abc12345",
+            "not-phone,Employee Invalid,abc12345",
           ].join("\n"),
         }),
       }),
@@ -343,13 +333,14 @@ describe("phase 20 RA-01-04 employee import", () => {
         headers: { authorization: "Bearer admin-session-token" },
         body: JSON.stringify({
           sourceFormat: "csv",
+          targetOrganizationPublicId: "organization-public-001",
           content: [
-            "phone,name,initialPassword,organizationPublicId",
-            "13900001001,Employee One,abc12345,organization-public-001",
-            "13900001002,Employee Two,abc12345,organization-public-001",
-            "13900001003,Employee Three,abc12345,organization-public-001",
-            "13900001004,Employee Four,abc12345,organization-public-001",
-            "13900001005,Employee Five,abc12345,organization-public-001",
+            "phone,name,initialPassword",
+            "13900001001,Employee One,abc12345",
+            "13900001002,Employee Two,abc12345",
+            "13900001003,Employee Three,abc12345",
+            "13900001004,Employee Four,abc12345",
+            "13900001005,Employee Five,abc12345",
           ].join("\n"),
         }),
       }),
@@ -421,6 +412,7 @@ describe("phase 20 RA-01-04 employee import", () => {
         headers: { authorization: "Bearer admin-session-token" },
         body: JSON.stringify({
           sourceFormat: "csv",
+          targetOrganizationPublicId: "organization-public-001",
           content: [
             "phone,name,initialPassword,organizationPublicId,profession,level,edition,orgAuthScopePublicId",
             "13900001001,Employee One,abc12345,organization-public-001,monopoly,3,advanced,scope-public-001",
@@ -460,12 +452,11 @@ describe("phase 20 RA-01-04 employee import", () => {
 
   it("rejects oversized existing employee binding arrays before repository import", async () => {
     const auditInputs: unknown[] = [];
-    const importInputs: unknown[] = [];
     const handlers = createAdminOrganizationOrgAuthRuntimeRouteHandlers({
       employeeAccountService: createEmployeeAccountService({
         serviceInputs: [],
       }),
-      repositories: createRepositories({ auditInputs, importInputs }),
+      repositories: createRepositories({ auditInputs }),
       sessionService: createAdminSessionService("ops_admin"),
     });
     const employees = Array.from({ length: 501 }, (_, index) => ({
@@ -486,7 +477,6 @@ describe("phase 20 RA-01-04 employee import", () => {
       message: "Employee input is invalid.",
       data: null,
     });
-    expect(importInputs).toEqual([]);
     expect(auditInputs).toEqual([
       expect.objectContaining({
         actionType: "employee.import",
@@ -505,11 +495,11 @@ describe("phase 20 RA-01-04 employee import", () => {
       sessionService: createAdminSessionService("ops_admin"),
     });
     const content = [
-      "phone,name,initialPassword,organizationPublicId",
+      "phone,name,initialPassword",
       ...Array.from({ length: 501 }, (_, index) => {
         const suffix = String(index + 1).padStart(4, "0");
 
-        return `1390000${suffix},Employee ${suffix},abc12345,organization-public-001`;
+        return `1390000${suffix},Employee ${suffix},abc12345`;
       }),
     ].join("\n");
 
@@ -519,6 +509,7 @@ describe("phase 20 RA-01-04 employee import", () => {
         headers: { authorization: "Bearer admin-session-token" },
         body: JSON.stringify({
           sourceFormat: "csv",
+          targetOrganizationPublicId: "organization-public-001",
           content,
         }),
       }),

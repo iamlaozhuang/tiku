@@ -659,7 +659,30 @@ function isOwnerPreviewRoleLabel(
 
 function createOwnerPreviewRoleMatchesSql() {
   return `
-WITH active_personal_auth AS (
+WITH RECURSIVE organization_ancestor AS (
+  SELECT
+    o.id AS descendant_organization_id,
+    o.id AS ancestor_organization_id,
+    o.parent_organization_id,
+    ARRAY[o.id]::bigint[] AS visited_organization_ids,
+    0 AS ancestor_depth
+  FROM organization o
+
+  UNION ALL
+
+  SELECT
+    organization_ancestor.descendant_organization_id,
+    parent_organization.id AS ancestor_organization_id,
+    parent_organization.parent_organization_id,
+    organization_ancestor.visited_organization_ids || parent_organization.id,
+    organization_ancestor.ancestor_depth + 1
+  FROM organization_ancestor
+  JOIN organization parent_organization
+    ON parent_organization.id = organization_ancestor.parent_organization_id
+  WHERE organization_ancestor.ancestor_depth < 3
+    AND NOT parent_organization.id = ANY(organization_ancestor.visited_organization_ids)
+),
+active_personal_auth AS (
   SELECT
     pa.id,
     pa.user_id,
@@ -681,6 +704,7 @@ WITH active_personal_auth AS (
 active_org_auth AS (
   SELECT
     oa.id,
+    oa.auth_scope_type,
     oa.purchaser_organization_id,
     CASE
       WHEN oa.edition = 'advanced' OR au.id IS NOT NULL THEN 'advanced'
@@ -729,18 +753,40 @@ role_matches AS (
     u.auth_user_id AS role_principal
   FROM "user" u
   JOIN employee e ON e.user_id = u.id
+  JOIN organization employee_organization
+    ON employee_organization.id = e.organization_id
+   AND employee_organization.status = 'active'
+  JOIN employee_org_auth eoa ON eoa.employee_id = e.id
+  JOIN active_org_auth oa ON oa.id = eoa.org_auth_id
   WHERE u.status = 'active'
     AND u.user_type = 'employee'
     AND u.auth_user_id IS NOT NULL
-    AND EXISTS (
-      SELECT 1
-      FROM active_org_auth oa
-      LEFT JOIN org_auth_organization oao ON oao.org_auth_id = oa.id
-      WHERE oa.effective_edition = 'standard'
-        AND (
-          oa.purchaser_organization_id = e.organization_id
-          OR oao.organization_id = e.organization_id
+    AND oa.effective_edition = 'standard'
+    AND (
+      (
+        oa.auth_scope_type = 'specified_nodes'
+        AND EXISTS (
+          SELECT 1
+          FROM org_auth_organization oao
+          WHERE oao.org_auth_id = oa.id
+            AND oao.organization_id = e.organization_id
         )
+      )
+      OR (
+        oa.auth_scope_type = 'current_and_descendants'
+        AND EXISTS (
+          SELECT 1
+          FROM organization_ancestor
+          WHERE descendant_organization_id = e.organization_id
+            AND ancestor_organization_id = oa.purchaser_organization_id
+            AND EXISTS (
+              SELECT 1
+              FROM organization_ancestor tree_integrity
+              WHERE tree_integrity.descendant_organization_id = e.organization_id
+                AND tree_integrity.parent_organization_id IS NULL
+            )
+        )
+      )
     )
 
   UNION ALL
@@ -750,18 +796,40 @@ role_matches AS (
     u.auth_user_id AS role_principal
   FROM "user" u
   JOIN employee e ON e.user_id = u.id
+  JOIN organization employee_organization
+    ON employee_organization.id = e.organization_id
+   AND employee_organization.status = 'active'
+  JOIN employee_org_auth eoa ON eoa.employee_id = e.id
+  JOIN active_org_auth oa ON oa.id = eoa.org_auth_id
   WHERE u.status = 'active'
     AND u.user_type = 'employee'
     AND u.auth_user_id IS NOT NULL
-    AND EXISTS (
-      SELECT 1
-      FROM active_org_auth oa
-      LEFT JOIN org_auth_organization oao ON oao.org_auth_id = oa.id
-      WHERE oa.effective_edition = 'advanced'
-        AND (
-          oa.purchaser_organization_id = e.organization_id
-          OR oao.organization_id = e.organization_id
+    AND oa.effective_edition = 'advanced'
+    AND (
+      (
+        oa.auth_scope_type = 'specified_nodes'
+        AND EXISTS (
+          SELECT 1
+          FROM org_auth_organization oao
+          WHERE oao.org_auth_id = oa.id
+            AND oao.organization_id = e.organization_id
         )
+      )
+      OR (
+        oa.auth_scope_type = 'current_and_descendants'
+        AND EXISTS (
+          SELECT 1
+          FROM organization_ancestor
+          WHERE descendant_organization_id = e.organization_id
+            AND ancestor_organization_id = oa.purchaser_organization_id
+            AND EXISTS (
+              SELECT 1
+              FROM organization_ancestor tree_integrity
+              WHERE tree_integrity.descendant_organization_id = e.organization_id
+                AND tree_integrity.parent_organization_id IS NULL
+            )
+        )
+      )
     )
 
   UNION ALL
@@ -904,16 +972,60 @@ CREATE TEMP TABLE owner_preview_keep_org_auth (
   id bigint PRIMARY KEY
 ) ON COMMIT DROP;
 
+WITH RECURSIVE organization_ancestor AS (
+  SELECT
+    o.id AS descendant_organization_id,
+    o.id AS ancestor_organization_id,
+    o.parent_organization_id,
+    ARRAY[o.id]::bigint[] AS visited_organization_ids,
+    0 AS ancestor_depth
+  FROM organization o
+
+  UNION ALL
+
+  SELECT
+    organization_ancestor.descendant_organization_id,
+    parent_organization.id AS ancestor_organization_id,
+    parent_organization.parent_organization_id,
+    organization_ancestor.visited_organization_ids || parent_organization.id,
+    organization_ancestor.ancestor_depth + 1
+  FROM organization_ancestor
+  JOIN organization parent_organization
+    ON parent_organization.id = organization_ancestor.parent_organization_id
+  WHERE organization_ancestor.ancestor_depth < 3
+    AND NOT parent_organization.id = ANY(organization_ancestor.visited_organization_ids)
+)
 INSERT INTO owner_preview_keep_org_auth (id)
 SELECT DISTINCT oa.id
 FROM org_auth oa
-LEFT JOIN org_auth_organization oao ON oao.org_auth_id = oa.id
-WHERE oa.purchaser_organization_id IN (
-    SELECT id FROM owner_preview_keep_organization
-  )
-  OR oao.organization_id IN (
-    SELECT id FROM owner_preview_keep_organization
-  )`;
+WHERE EXISTS (
+  SELECT 1
+  FROM owner_preview_keep_organization keep_organization
+  WHERE (
+      oa.auth_scope_type = 'specified_nodes'
+      AND EXISTS (
+        SELECT 1
+        FROM org_auth_organization oao
+        WHERE oao.org_auth_id = oa.id
+          AND oao.organization_id = keep_organization.id
+      )
+    )
+    OR (
+      oa.auth_scope_type = 'current_and_descendants'
+      AND EXISTS (
+        SELECT 1
+        FROM organization_ancestor
+        WHERE descendant_organization_id = keep_organization.id
+          AND ancestor_organization_id = oa.purchaser_organization_id
+          AND EXISTS (
+            SELECT 1
+            FROM organization_ancestor tree_integrity
+            WHERE tree_integrity.descendant_organization_id = keep_organization.id
+              AND tree_integrity.parent_organization_id IS NULL
+          )
+      )
+    )
+)`;
 }
 
 function createPruneIdentitySkeletonSql() {

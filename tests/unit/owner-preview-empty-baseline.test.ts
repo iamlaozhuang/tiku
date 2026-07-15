@@ -5,6 +5,7 @@ import {
   containsForbiddenOwnerPreviewEvidenceText,
   createOwnerPreviewEmptyBaselineDryRunSummary,
   createOwnerPreviewEmptyBaselinePlan,
+  createOwnerPreviewEmptyBaselineSqlAdapter,
   ownerPreviewEmptyBaselineRoleLabels,
   renderOwnerPreviewEmptyBaselineSummary,
   runOwnerPreviewEmptyBaseline,
@@ -160,6 +161,40 @@ describe("owner preview empty baseline reset", () => {
     expect(rendered).toContain("role=personal_standard_student");
     expect(rendered).toContain("tableGroup=learning_flow");
     expect(containsForbiddenOwnerPreviewEvidenceText(rendered)).toBe(false);
+  });
+
+  it("derives organization employee roles from current tree coverage and quota reservations", async () => {
+    const capturedQueries: string[] = [];
+    const executor = {
+      async unsafe(query: string) {
+        capturedQueries.push(query);
+        return [];
+      },
+    };
+    const sql = {
+      ...executor,
+      async begin<T>(callback: (transaction: typeof executor) => Promise<T>) {
+        return callback(executor);
+      },
+    };
+    const adapter = createOwnerPreviewEmptyBaselineSqlAdapter(sql as never);
+
+    await adapter.inspectRoleSet();
+
+    expect(capturedQueries).toHaveLength(1);
+    expect(capturedQueries[0]).toContain("JOIN employee_org_auth eoa");
+    expect(capturedQueries[0]).toContain(
+      "WITH RECURSIVE organization_ancestor",
+    );
+    expect(capturedQueries[0]).toContain(
+      "oa.auth_scope_type = 'specified_nodes'",
+    );
+    expect(capturedQueries[0]).toContain(
+      "oa.auth_scope_type = 'current_and_descendants'",
+    );
+    expect(capturedQueries[0]).toContain(
+      "tree_integrity.parent_organization_id IS NULL",
+    );
   });
 
   it("blocks execution when role validation is missing or ambiguous and reports labels only", async () => {

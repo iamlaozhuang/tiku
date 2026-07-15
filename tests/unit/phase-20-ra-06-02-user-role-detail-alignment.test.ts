@@ -152,11 +152,11 @@ function createAdminFlowRepositories(input: {
     },
     async disableUser(publicId: string) {
       input.mutationInputs.push({ action: "disableUser", publicId });
-      return publicId === "user-public-001";
+      return publicId === "user-public-001" ? "updated" : "not_found";
     },
     async enableUser(publicId: string) {
       input.mutationInputs.push({ action: "enableUser", publicId });
-      return publicId === "user-public-001";
+      return publicId === "user-public-001" ? "updated" : "not_found";
     },
     async revokeUserSessions(publicId: string) {
       input.mutationInputs.push({ action: "revokeUserSessions", publicId });
@@ -448,7 +448,6 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
       { action: "resetUserPassword", publicId: "user-public-001" },
       { action: "revokeUserSessions", publicId: "user-public-001" },
       { action: "disableUser", publicId: "user-public-001" },
-      { action: "revokeUserSessions", publicId: "user-public-001" },
       { action: "enableUser", publicId: "user-public-001" },
     ]);
     expect(auditInputs).toEqual([

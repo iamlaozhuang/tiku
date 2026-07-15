@@ -10,7 +10,6 @@ import {
   type OrganizationTrainingQuestionResultSnapshotValue,
   type OrganizationTrainingQuestionSnapshotValue,
   orgAuth,
-  orgAuthOrganization,
   organization,
   organizationTrainingAnswer,
   organizationTrainingDraft,
@@ -20,6 +19,7 @@ import {
   paperQuestion,
 } from "@/db/schema";
 import { and, asc, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
+import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 
 import type {
   EmployeeOrganizationTrainingAnswerDto,
@@ -2767,12 +2767,16 @@ async function findTrustedPersistenceLineageByPublicIds(
       organization_id: organization.id,
       org_auth_id: orgAuth.id,
     })
-    .from(orgAuthOrganization)
+    .from(orgAuth)
     .innerJoin(
       organization,
-      eq(orgAuthOrganization.organization_id, organization.id),
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: orgAuth.auth_scope_type,
+        orgAuthId: orgAuth.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: orgAuth.purchaser_organization_id,
+      }),
     )
-    .innerJoin(orgAuth, eq(orgAuthOrganization.org_auth_id, orgAuth.id))
     .where(
       and(
         eq(organization.public_id, input.organizationPublicId),

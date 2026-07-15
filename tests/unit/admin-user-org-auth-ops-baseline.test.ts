@@ -77,6 +77,7 @@ const organizationPayload = {
         name: "杭州烟草",
         orgTier: "city",
         parentOrganizationPublicId: "organization-public-000",
+        revision: 1,
         status: "active",
         employeeCount: 42,
         authSummary: "专卖 3级 / 42 / 100",
@@ -86,6 +87,7 @@ const organizationPayload = {
         name: "宁波烟草",
         orgTier: "city",
         parentOrganizationPublicId: "organization-public-000",
+        revision: 1,
         status: "active",
         employeeCount: 100,
         authSummary: "专卖 3级 / 100 / 100",
@@ -104,6 +106,7 @@ const organizationTreePayload = {
         name: "浙江省烟草公司",
         orgTier: "province",
         parentOrganizationPublicId: null,
+        revision: 1,
         status: "active",
         employeeCount: 0,
         authSummary: null,
@@ -113,6 +116,7 @@ const organizationTreePayload = {
         name: "杭州市烟草公司",
         orgTier: "city",
         parentOrganizationPublicId: "org-province-001",
+        revision: 1,
         status: "active",
         employeeCount: 3,
         authSummary: null,
@@ -122,6 +126,7 @@ const organizationTreePayload = {
         name: "西湖区烟草公司",
         orgTier: "district",
         parentOrganizationPublicId: "org-city-001",
+        revision: 1,
         status: "active",
         employeeCount: 2,
         authSummary: null,
@@ -508,7 +513,9 @@ function mockSystemOpsFetch() {
   return fetchMock;
 }
 
-function mockSystemOpsFetchWithOrganizationTree() {
+function mockSystemOpsFetchWithOrganizationTree(
+  options: { includeFullQuotaSibling?: boolean } = {},
+) {
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
       const path = String(url);
@@ -559,6 +566,33 @@ function mockSystemOpsFetchWithOrganizationTree() {
                 createdAt: "2026-05-22T00:00:00.000Z",
                 updatedAt: "2026-05-22T00:00:00.000Z",
               },
+              ...(options.includeFullQuotaSibling === true
+                ? [
+                    {
+                      publicId: "org-auth-import-public-002",
+                      name: "西湖区已满额并行授权",
+                      purchaserOrganizationPublicId: "org-city-001",
+                      purchaserOrganizationName: "杭州市烟草公司",
+                      coveredOrganizationCount: 1,
+                      coveredOrganizationNames: ["西湖区烟草公司"],
+                      authScopeType: "specified_nodes",
+                      profession: "marketing",
+                      level: 3,
+                      edition: "standard",
+                      effectiveEdition: "standard",
+                      upgradeStatus: "none",
+                      accountQuota: 1,
+                      usedQuota: 1,
+                      startsAt: "2026-05-22T00:00:00.000Z",
+                      expiresAt: "2026-08-22T00:00:00.000Z",
+                      status: "active",
+                      cancelledAt: null,
+                      organizationPublicIds: ["org-district-001"],
+                      createdAt: "2026-05-22T00:00:00.000Z",
+                      updatedAt: "2026-05-22T00:00:00.000Z",
+                    },
+                  ]
+                : []),
             ],
           },
         });
@@ -669,6 +703,7 @@ function mockSystemOpsFetchWithOrganizationTree() {
               name: body.name,
               orgTier: body.orgTier,
               parentOrganizationPublicId: body.parentOrganizationPublicId,
+              revision: 1,
               status: "active",
               contactName: body.contactName,
               contactPhone: body.contactPhone,
@@ -690,9 +725,10 @@ function mockSystemOpsFetchWithOrganizationTree() {
             organization: {
               publicId: "org-city-001",
               name: body.name,
-              orgTier: body.orgTier,
-              parentOrganizationPublicId: body.parentOrganizationPublicId,
-              status: body.status,
+              orgTier: "city",
+              parentOrganizationPublicId: "org-province-001",
+              revision: body.expectedRevision + 1,
+              status: "active",
               contactName: body.contactName,
               contactPhone: body.contactPhone,
               remark: body.remark,
@@ -1528,9 +1564,9 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.change(screen.getByTestId("organization-name-input"), {
       target: { value: "Quanzhou Test Tobacco" },
     });
-    fireEvent.change(screen.getByTestId("organization-parent-select"), {
-      target: { value: "org-province-001" },
-    });
+    expect(
+      screen.queryByTestId("organization-parent-select"),
+    ).not.toBeInTheDocument();
     const treeCallsBeforeUpdate = fetchMock.mock.calls.filter(([url]) =>
       String(url).startsWith("/api/v1/organization-tree-nodes?"),
     ).length;
@@ -1549,11 +1585,15 @@ describe("admin user organization authorization ops baseline", () => {
       ([url]) => String(url) === "/api/v1/organizations/org-city-001",
     );
     expect(JSON.parse(String(updateCall?.[1]?.body))).toMatchObject({
+      expectedRevision: 1,
       name: "Quanzhou Test Tobacco",
-      orgTier: "city",
-      parentOrganizationPublicId: "org-province-001",
-      status: "active",
     });
+    expect(JSON.parse(String(updateCall?.[1]?.body))).not.toHaveProperty(
+      "parentOrganizationPublicId",
+    );
+    expect(JSON.parse(String(updateCall?.[1]?.body))).not.toHaveProperty(
+      "status",
+    );
 
     await screen.findByRole("status");
     const refreshedProvinceNode = await screen.findByTestId(
@@ -1573,11 +1613,13 @@ describe("admin user organization authorization ops baseline", () => {
     fireEvent.click(
       await screen.findByTestId("organization-disable-org-city-001"),
     );
+    fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByTestId("organization-confirm-action"));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/organizations/org-city-001/disable",
       expect.objectContaining({
+        body: JSON.stringify({ expectedRevision: 1, isCascade: true }),
         method: "POST",
       }),
     );
@@ -1693,11 +1735,6 @@ describe("admin user organization authorization ops baseline", () => {
       "13900001111,Import One",
       "13900002222,Import Two",
     ].join("\n");
-    const expectedSubmittedContent = [
-      "phone,name,initialPassword,organizationPublicId",
-      "13900001111,Import One,,org-district-001",
-      "13900002222,Import Two,,org-district-001",
-    ].join("\n");
 
     render(createElement(AdminOrgAuthPage));
 
@@ -1748,8 +1785,9 @@ describe("admin user organization authorization ops baseline", () => {
       ([url]) => String(url) === "/api/v1/employees/import",
     );
     expect(JSON.parse(String(importCall?.[1]?.body))).toEqual({
-      content: expectedSubmittedContent,
+      content: employeeImportContent,
       sourceFormat: "csv",
+      targetOrganizationPublicId: "org-district-001",
     });
   });
 
@@ -1833,12 +1871,33 @@ describe("admin user organization authorization ops baseline", () => {
     expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
   });
 
+  it("blocks import when any inherited authorization is full even if another has quota", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetchWithOrganizationTree({ includeFullQuotaSibling: true });
+
+    render(createElement(AdminOrgAuthPage));
+
+    await openEmployeeImportDrawer();
+    fireEvent.change(screen.getByTestId("employee-import-textarea"), {
+      target: { value: "phone,name\n13900010001,Import One" },
+    });
+    fireEvent.change(
+      screen.getByTestId("employee-import-organization-select"),
+      { target: { value: "org-district-001" } },
+    );
+
+    expect(
+      screen.getByTestId("employee-import-quota-impact-category"),
+    ).toHaveTextContent("授权额度不足");
+    expect(screen.getByTestId("employee-import-submit")).toBeDisabled();
+  });
+
   it("blocks employee import templates that contain authorization scope fields", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockSystemOpsFetchWithOrganizationTree();
     const employeeImportContent = [
-      "phone,name,initialPassword,profession,level,edition,orgAuthScopePublicId",
-      "13900001111,Import One,Passw0rd!,monopoly,3,advanced,scope-public-001",
+      "phone,name,initialPassword,organizationPublicId,userPublicId,profession,level,edition,orgAuthScopePublicId",
+      "13900001111,Import One,Passw0rd!,org-district-001,user-public-001,monopoly,3,advanced,scope-public-001",
     ].join("\n");
 
     render(createElement(AdminOrgAuthPage));
@@ -1851,6 +1910,8 @@ describe("admin user organization authorization ops baseline", () => {
 
     const importPreview = screen.getByTestId("employee-import-preview");
     expect(importPreview).toHaveTextContent("profession");
+    expect(importPreview).toHaveTextContent("organizationPublicId");
+    expect(importPreview).toHaveTextContent("userPublicId");
     expect(importPreview).toHaveTextContent("level");
     expect(importPreview).toHaveTextContent("edition");
     expect(importPreview).toHaveTextContent("orgAuthScopePublicId");

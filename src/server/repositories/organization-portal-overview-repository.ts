@@ -1,21 +1,11 @@
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  isNull,
-  lte,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, isNull, lte, sql } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
 import type { OrganizationPortalOverviewDto } from "../contracts/organization-portal-overview-contract";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
+import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 import type {
   OrganizationPortalOverviewRepository,
   OrganizationPortalOverviewRepositoryInput,
@@ -29,14 +19,7 @@ export type OrganizationPortalOverviewRepositoryOptions = {
   createDatabase?: () => OrganizationPortalOverviewRuntimeDatabase;
 };
 
-const {
-  authUpgrade,
-  employee,
-  orgAuth,
-  orgAuthOrganization,
-  organization,
-  user,
-} = databaseSchema;
+const { authUpgrade, employee, orgAuth, organization, user } = databaseSchema;
 
 function createLazyDatabaseGetter(
   createDatabase: () => OrganizationPortalOverviewRuntimeDatabase,
@@ -199,6 +182,7 @@ async function readAuthorizationOverview(
   const [row] = await database
     .select({
       id: orgAuth.id,
+      purchaser_organization_id: orgAuth.purchaser_organization_id,
       name: orgAuth.name,
       auth_scope_type: orgAuth.auth_scope_type,
       source_edition: orgAuth.edition,
@@ -220,10 +204,6 @@ async function readAuthorizationOverview(
     })
     .from(orgAuth)
     .leftJoin(
-      orgAuthOrganization,
-      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
-    )
-    .leftJoin(
       authUpgrade,
       and(
         eq(authUpgrade.org_auth_id, orgAuth.id),
@@ -236,10 +216,12 @@ async function readAuthorizationOverview(
     )
     .where(
       and(
-        or(
-          eq(orgAuth.purchaser_organization_id, input.organizationId),
-          eq(orgAuthOrganization.organization_id, input.organizationId),
-        )!,
+        createOrgAuthCoversOrganizationCondition({
+          authScopeType: orgAuth.auth_scope_type,
+          orgAuthId: orgAuth.id,
+          organizationId: input.organizationId,
+          purchaserOrganizationId: orgAuth.purchaser_organization_id,
+        }),
         authIdentityCondition,
         activeFallbackCondition,
       ),
@@ -262,8 +244,15 @@ async function readAuthorizationOverview(
 
   const [coveredOrganizationCountRow] = await database
     .select({ value: count() })
-    .from(orgAuthOrganization)
-    .where(eq(orgAuthOrganization.org_auth_id, row.id));
+    .from(organization)
+    .where(
+      createOrgAuthCoversOrganizationCondition({
+        authScopeType: row.auth_scope_type,
+        orgAuthId: row.id,
+        organizationId: organization.id,
+        purchaserOrganizationId: row.purchaser_organization_id,
+      }),
+    );
   const organizationCount = Math.max(
     coveredOrganizationCountRow?.value ?? 0,
     1,

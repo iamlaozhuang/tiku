@@ -374,11 +374,6 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
       status: "active",
       usedQuota: 1,
     },
-    orgAuthOrganization: {
-      createdAt: baseIssuedAt,
-      orgAuthPublicId: devSeedPublicIds.orgAuth,
-      organizationPublicId: devSeedPublicIds.organization,
-    },
     paper: {
       durationMinute: 30,
       level: 3,
@@ -867,13 +862,18 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
     );
 
     await sql`
-      insert into org_auth_organization (org_auth_id, organization_id, created_at)
-      values (
-        ${orgAuthId},
-        ${organizationId},
-        ${seedDataset.orgAuthOrganization.createdAt}
-      )
-      on conflict (org_auth_id, organization_id) do nothing
+      delete from org_auth_organization
+      where org_auth_id = ${orgAuthId}
+    `;
+
+    await sql`
+      delete from employee_org_auth
+      where org_auth_id = ${orgAuthId}
+    `;
+    await sql`
+      insert into employee_org_auth (employee_id, org_auth_id, created_at)
+      values (${employeeId}, ${orgAuthId}, ${baseIssuedAt})
+      on conflict (employee_id, org_auth_id) do nothing
     `;
 
     const organizationTrainingVersionId = await getRequiredId(
@@ -1630,7 +1630,7 @@ export async function seedDevDatabase(seedSql: SeedSql): Promise<SeedRow> {
         (select count(*)::int from organization where public_id = ${devSeedPublicIds.organization}) as organization_count,
         (select count(*)::int from employee where public_id = ${devSeedPublicIds.employee}) as employee_count,
         (select count(*)::int from org_auth where public_id = ${devSeedPublicIds.orgAuth}) as org_auth_count,
-        (select count(*)::int from org_auth_organization oao inner join org_auth oa on oao.org_auth_id = oa.id inner join organization o on oao.organization_id = o.id where oa.public_id = ${devSeedPublicIds.orgAuth} and o.public_id = ${devSeedPublicIds.organization}) as org_auth_organization_count,
+        (select count(*)::int from employee_org_auth eoa inner join employee e on eoa.employee_id = e.id inner join org_auth oa on eoa.org_auth_id = oa.id where e.public_id = ${devSeedPublicIds.employee} and oa.public_id = ${devSeedPublicIds.orgAuth}) as employee_org_auth_count,
         (select count(*)::int from organization_training_version where public_id = ${devSeedPublicIds.organizationTrainingVersion}) as organization_training_version_count,
         (select count(*)::int from organization_training_answer where public_id = ${devSeedPublicIds.organizationTrainingAnswer}) as organization_training_answer_count,
         (select count(*)::int from personal_auth where public_id = ${devSeedPublicIds.personalAuth}) as personal_auth_count,

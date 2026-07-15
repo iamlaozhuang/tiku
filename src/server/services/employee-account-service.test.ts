@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { createEmployeeAccountService } from "./employee-account-service";
-import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
 import type {
   EmployeeAccountAccessRow,
   EmployeeAccountRepository,
   EmployeeAccountUserAccessRow,
   EmployeeOrganizationAccessRow,
 } from "../repositories/employee-account-repository";
+import { EmployeeAccountMutationError } from "../repositories/employee-account-repository";
 
 const createdAt = new Date("2026-05-18T12:00:00.000Z");
 
@@ -67,7 +67,7 @@ function createRepository(
     },
     async createEmployeeAccount(input) {
       const user = createUser({
-        auth_user_id: input.authUserId,
+        auth_user_id: "auth_user_123",
         phone: input.phone,
         name: input.name,
         user_type: "employee",
@@ -109,33 +109,10 @@ function createRepository(
   };
 }
 
-function createCredentialAdapter(
-  overrides: Partial<UserRegistrationCredentialAdapter> = {},
-): UserRegistrationCredentialAdapter {
-  return {
-    async createPasswordCredential() {
-      return {
-        authUserId: "auth_user_123",
-      };
-    },
-    ...overrides,
-  };
-}
-
 describe("employee account service", () => {
   it("creates a new employee account when the phone does not exist", async () => {
-    let credentialInputs: unknown[] = [];
     let createInputs: unknown[] = [];
     const service = createEmployeeAccountService(
-      createCredentialAdapter({
-        async createPasswordCredential(input) {
-          credentialInputs = [...credentialInputs, input];
-
-          return {
-            authUserId: "auth_user_123",
-          };
-        },
-      }),
       createRepository({
         async createEmployeeAccount(input) {
           createInputs = [...createInputs, input];
@@ -168,15 +145,9 @@ describe("employee account service", () => {
         },
       },
     });
-    expect(credentialInputs).toEqual([
-      {
-        phone: "13800000000",
-        ["password"]: "abc12345",
-      },
-    ]);
     expect(createInputs).toEqual([
       {
-        authUserId: "auth_user_123",
+        initialPassword: "abc12345",
         phone: "13800000000",
         name: "李四",
         organizationPublicId: "org_public_123",
@@ -185,18 +156,14 @@ describe("employee account service", () => {
   });
 
   it("generates a one-time initial password when a new employee input omits it", async () => {
-    let credentialInputs: { password: string; phone: string }[] = [];
+    let createInputs: { initialPassword: string }[] = [];
     const service = createEmployeeAccountService(
-      createCredentialAdapter({
-        async createPasswordCredential(input) {
-          credentialInputs = [...credentialInputs, input];
-
-          return {
-            authUserId: "auth_user_123",
-          };
+      createRepository({
+        async createEmployeeAccount(input) {
+          createInputs = [...createInputs, input];
+          return createRepository().createEmployeeAccount(input);
         },
       }),
-      createRepository(),
     );
 
     const response = await service.createEmployeeAccount({
@@ -210,25 +177,15 @@ describe("employee account service", () => {
     expect(response.data?.generatedInitialPassword).toMatch(
       /^(?=.*[A-Za-z])(?=.*\d).{8,}$/u,
     );
-    expect(credentialInputs).toHaveLength(1);
-    expect(credentialInputs[0]?.password).toBe(
+    expect(createInputs).toHaveLength(1);
+    expect(createInputs[0]?.initialPassword).toBe(
       response.data?.generatedInitialPassword,
     );
   });
 
   it("binds an existing unbound user without creating new credentials", async () => {
-    let credentialInputs: unknown[] = [];
     let bindInputs: unknown[] = [];
     const service = createEmployeeAccountService(
-      createCredentialAdapter({
-        async createPasswordCredential(input) {
-          credentialInputs = [...credentialInputs, input];
-
-          return {
-            authUserId: "auth_user_should_not_be_used",
-          };
-        },
-      }),
       createRepository({
         async findUserByPhone() {
           return createUser({
@@ -264,7 +221,6 @@ describe("employee account service", () => {
         },
       },
     });
-    expect(credentialInputs).toEqual([]);
     expect(bindInputs).toEqual([
       {
         userPublicId: "user_public_123",
@@ -274,10 +230,7 @@ describe("employee account service", () => {
   });
 
   it("rejects invalid input, missing organization, and users bound to another organization", async () => {
-    const service = createEmployeeAccountService(
-      createCredentialAdapter(),
-      createRepository(),
-    );
+    const service = createEmployeeAccountService(createRepository());
 
     await expect(
       service.createEmployeeAccount({
@@ -293,7 +246,6 @@ describe("employee account service", () => {
     });
 
     const missingOrganizationService = createEmployeeAccountService(
-      createCredentialAdapter(),
       createRepository({
         async findOrganizationByPublicId() {
           return null;
@@ -315,7 +267,6 @@ describe("employee account service", () => {
     });
 
     const conflictService = createEmployeeAccountService(
-      createCredentialAdapter(),
       createRepository({
         async findUserByPhone() {
           return createUser({
@@ -337,6 +288,51 @@ describe("employee account service", () => {
     ).resolves.toEqual({
       code: 409006,
       message: "Phone already bound to another organization.",
+      data: null,
+    });
+  });
+
+  it("returns a redacted quota conflict when the atomic repository reservation fails", async () => {
+    const createQuotaService = createEmployeeAccountService(
+      createRepository({
+        async createEmployeeAccount() {
+          throw new EmployeeAccountMutationError("quota_insufficient");
+        },
+      }),
+    );
+    const bindQuotaService = createEmployeeAccountService(
+      createRepository({
+        async findUserByPhone() {
+          return createUser({
+            employee_public_id: null,
+            organization_public_id: null,
+            user_type: "personal",
+          });
+        },
+        async bindExistingUserToOrganization() {
+          throw new EmployeeAccountMutationError("quota_insufficient");
+        },
+      }),
+    );
+    const input = {
+      phone: "13800000000",
+      name: "李四",
+      initialPassword: "abc12345",
+      organizationPublicId: "org_public_123",
+    };
+
+    await expect(
+      createQuotaService.createEmployeeAccount(input),
+    ).resolves.toEqual({
+      code: 409006,
+      message: "Organization authorization quota is insufficient.",
+      data: null,
+    });
+    await expect(
+      bindQuotaService.createEmployeeAccount(input),
+    ).resolves.toEqual({
+      code: 409006,
+      message: "Organization authorization quota is insufficient.",
       data: null,
     });
   });

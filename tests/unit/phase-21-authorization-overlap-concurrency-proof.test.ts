@@ -18,7 +18,7 @@ function extractBetween(source: string, startText: string, endText: string) {
 }
 
 describe("phase 21 authorization overlap concurrency proof", () => {
-  it("checks every approved org_auth overlap dimension before treating an active authorization as overlapping", () => {
+  it("checks actual organization coverage without treating auth_scope_type as an overlap dimension", () => {
     const repositorySource = readSource(
       "src/server/repositories/admin-organization-org-auth-runtime-repository.ts",
     );
@@ -29,15 +29,16 @@ describe("phase 21 authorization overlap concurrency proof", () => {
     );
 
     expect(overlapSource).toContain('eq(orgAuth.status, "active")');
-    expect(overlapSource).toContain(
+    expect(overlapSource).not.toContain(
       "eq(orgAuth.auth_scope_type, input.authScopeType)",
     );
     expect(overlapSource).toContain("eq(orgAuth.profession, input.profession)");
     expect(overlapSource).toContain("eq(orgAuth.level, input.level)");
     expect(overlapSource).toContain("lt(orgAuth.starts_at, input.expiresAt)");
     expect(overlapSource).toContain("gt(orgAuth.expires_at, input.startsAt)");
+    expect(overlapSource).toContain("createOrgAuthCoversOrganizationCondition");
     expect(overlapSource).toContain(
-      "inArray(orgAuthOrganization.organization_id, organizationIds)",
+      "inArray(organization.id, organizationIds)",
     );
   });
 

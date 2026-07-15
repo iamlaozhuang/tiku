@@ -31,7 +31,6 @@ import type {
 } from "../contracts/organization-auth-contract";
 import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
-  createPostgresEmployeeAccountCredentialAdapter,
   createPostgresEmployeeAccountRepository,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
@@ -50,8 +49,11 @@ import { normalizeCreateOrgAuthPackageInput } from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
   normalizeDisableOrganizationInput,
+  normalizeMoveOrganizationInput,
   normalizeUpdateOrganizationInput,
   type NormalizedCreateOrganizationInput,
+  type NormalizedDisableOrganizationInput,
+  type NormalizedMoveOrganizationInput,
   type NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
 import type { SessionService } from "./session-service";
@@ -106,6 +108,10 @@ const organizationInputInvalidResponse = createErrorResponse(
 const organizationNotFoundResponse = createErrorResponse(
   ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
   "Organization does not exist.",
+);
+const organizationTreeConflictResponse = createErrorResponse(
+  409004,
+  "Organization tree revision or invariant conflict.",
 );
 const orgAuthMutationUnavailableResponse = createErrorResponse(
   503006,
@@ -162,25 +168,26 @@ type OrganizationMutationRepositories =
       publicId: string,
       input: NormalizedUpdateOrganizationInput,
     ): Promise<OrganizationDto | null>;
-    disableOrganization?(input: {
-      publicId: string;
-      isCascade: boolean;
-    }): Promise<DisableOrganizationResultDto | null>;
-    enableOrganization?(publicId: string): Promise<OrganizationDto | null>;
+    moveOrganization?(
+      input: NormalizedMoveOrganizationInput & {
+        publicId: string;
+      },
+    ): Promise<OrganizationDto | null>;
+    disableOrganization?(
+      input: NormalizedDisableOrganizationInput & { publicId: string },
+    ): Promise<DisableOrganizationResultDto | null>;
+    enableOrganization?(
+      input: NormalizedDisableOrganizationInput & { publicId: string },
+    ): Promise<OrganizationDto | null>;
   };
 
-type NormalizedEmployeeImportInput =
-  | {
-      kind: "existing_user_bind";
-      employees: { userPublicId: string; organizationPublicId: string }[];
-    }
-  | {
-      kind: "employee_account";
-      employeeAccounts: (NormalizedCreateEmployeeAccountInput & {
-        rowNumber: number;
-      })[];
-      rejectedRows: EmployeeImportResultDto["rejectedRows"];
-    };
+type NormalizedEmployeeImportInput = {
+  employeeAccounts: (NormalizedCreateEmployeeAccountInput & {
+    rowNumber: number;
+  })[];
+  rejectedRows: EmployeeImportResultDto["rejectedRows"];
+  targetOrganizationPublicId: string;
+};
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -264,6 +271,10 @@ function canManageOrganization(actor: AdminOrganizationOrgAuthActor): boolean {
   );
 }
 
+function canMoveOrganization(actor: AdminOrganizationOrgAuthActor): boolean {
+  return actor.roles.includes("super_admin");
+}
+
 function readRequestIp(request: Request): string | null {
   const forwardedFor = request.headers.get("x-forwarded-for");
 
@@ -280,29 +291,6 @@ async function readRequestJson(request: Request): Promise<unknown> {
   } catch {
     return null;
   }
-}
-
-function normalizeEmployeeCreateInput(
-  input: unknown,
-): { userPublicId: string; organizationPublicId: string } | null {
-  if (typeof input !== "object" || input === null) {
-    return null;
-  }
-
-  const value = input as {
-    userPublicId?: unknown;
-    organizationPublicId?: unknown;
-  };
-
-  return typeof value.userPublicId === "string" &&
-    value.userPublicId.trim().length > 0 &&
-    typeof value.organizationPublicId === "string" &&
-    value.organizationPublicId.trim().length > 0
-    ? {
-        userPublicId: value.userPublicId.trim(),
-        organizationPublicId: value.organizationPublicId.trim(),
-      }
-    : null;
 }
 
 function normalizeEmployeeTransferInput(
@@ -333,43 +321,24 @@ function normalizeEmployeeImportInput(
 
   const value = input as {
     content?: unknown;
-    employees?: unknown;
     sourceFormat?: unknown;
+    targetOrganizationPublicId?: unknown;
   };
 
   if (
     typeof value.content === "string" &&
-    (value.sourceFormat === "csv" || value.sourceFormat === "tsv")
+    (value.sourceFormat === "csv" || value.sourceFormat === "tsv") &&
+    typeof value.targetOrganizationPublicId === "string" &&
+    value.targetOrganizationPublicId.trim().length > 0
   ) {
     return parseEmployeeAccountImportContent({
       content: value.content,
       sourceFormat: value.sourceFormat,
+      targetOrganizationPublicId: value.targetOrganizationPublicId.trim(),
     });
   }
 
-  if (
-    !Array.isArray(value.employees) ||
-    value.employees.length === 0 ||
-    value.employees.length > EMPLOYEE_IMPORT_ROW_LIMIT
-  ) {
-    return null;
-  }
-
-  const employees = value.employees.map((employeeInput) =>
-    normalizeEmployeeCreateInput(employeeInput),
-  );
-
-  if (employees.some((employeeInput) => employeeInput === null)) {
-    return null;
-  }
-
-  return {
-    kind: "existing_user_bind",
-    employees: employees as {
-      userPublicId: string;
-      organizationPublicId: string;
-    }[],
-  };
+  return null;
 }
 
 function parseDelimitedLine(line: string, delimiter: "," | "\t"): string[] {
@@ -417,8 +386,6 @@ const employeeAccountImportHeaderNames = new Set([
   "phone",
   "name",
   "initialpassword",
-  "organizationpublicid",
-  "userpublicid",
 ]);
 
 const forbiddenEmployeeImportScopeHeaderNames = new Set([
@@ -426,6 +393,8 @@ const forbiddenEmployeeImportScopeHeaderNames = new Set([
   "level",
   "edition",
   "orgauthscopepublicid",
+  "organizationpublicid",
+  "userpublicid",
 ]);
 
 function hasForbiddenEmployeeImportScopeHeader(
@@ -457,6 +426,7 @@ function readEmployeeAccountCell(input: {
 function parseEmployeeAccountImportContent(input: {
   content: string;
   sourceFormat: "csv" | "tsv";
+  targetOrganizationPublicId: string;
 }): NormalizedEmployeeImportInput | null {
   const delimiter = input.sourceFormat === "tsv" ? "\t" : ",";
   const parsedRows = input.content
@@ -476,7 +446,6 @@ function parseEmployeeAccountImportContent(input: {
 
   if (hasForbiddenEmployeeImportScopeHeader(firstHeaderNames)) {
     return {
-      kind: "employee_account",
       employeeAccounts: [],
       rejectedRows: [
         {
@@ -486,13 +455,12 @@ function parseEmployeeAccountImportContent(input: {
           reason: "invalid_row",
         },
       ],
+      targetOrganizationPublicId: input.targetOrganizationPublicId,
     };
   }
 
   const hasHeader =
-    firstHeaderNames.has("phone") &&
-    firstHeaderNames.has("name") &&
-    firstHeaderNames.has("organizationpublicid");
+    firstHeaderNames.has("phone") && firstHeaderNames.has("name");
   const headerIndexByName = new Map<string, number>(
     hasHeader
       ? (firstRow?.cells.map((cell, index) => [
@@ -530,12 +498,7 @@ function parseEmployeeAccountImportContent(input: {
             headerIndexByName,
             name: "initialpassword",
           }),
-    organizationPublicId: readEmployeeAccountCell({
-      cells: row.cells,
-      fallbackIndex: 3,
-      headerIndexByName,
-      name: "organizationpublicid",
-    }),
+    organizationPublicId: input.targetOrganizationPublicId,
   }));
   const phoneCounts = new Map<string, number>();
 
@@ -585,9 +548,9 @@ function parseEmployeeAccountImportContent(input: {
   }
 
   return {
-    kind: "employee_account",
     employeeAccounts,
     rejectedRows,
+    targetOrganizationPublicId: input.targetOrganizationPublicId,
   };
 }
 
@@ -647,10 +610,7 @@ function mapEmployeeAccountImportFailureReason(
 
 async function importEmployeeAccounts(input: {
   employeeAccountService: EmployeeAccountService;
-  normalizedInput: Extract<
-    NormalizedEmployeeImportInput,
-    { kind: "employee_account" }
-  >;
+  normalizedInput: NormalizedEmployeeImportInput;
 }): Promise<EmployeeImportResultDto> {
   if (input.normalizedInput.rejectedRows.length > 0) {
     return {
@@ -871,7 +831,6 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   const employeeAccountService =
     options.employeeAccountService ??
     createEmployeeAccountService(
-      createPostgresEmployeeAccountCredentialAdapter(options),
       createPostgresEmployeeAccountRepository(options),
     );
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
@@ -941,6 +900,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     actionType:
       | "organization.create"
       | "organization.update"
+      | "organization.move"
       | "organization.disable"
       | "organization.enable";
     targetPublicId: string | null;
@@ -964,6 +924,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     actionType:
       | "organization.create"
       | "organization.update"
+      | "organization.move"
       | "organization.disable"
       | "organization.enable",
     targetPublicId: string | null,
@@ -974,7 +935,10 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
       return adminSessionRequiredResponse;
     }
 
-    if (!canManageOrganization(actor)) {
+    if (
+      !canManageOrganization(actor) ||
+      (actionType === "organization.move" && !canMoveOrganization(actor))
+    ) {
       await appendOrganizationAuditLog({
         request,
         actor,
@@ -1153,7 +1117,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           return createJsonResponse(
             organization === null
-              ? organizationNotFoundResponse
+              ? organizationTreeConflictResponse
               : createSuccessResponse<OrganizationResultDto>({
                   organization,
                 }),
@@ -1226,10 +1190,67 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           return createJsonResponse(
             organization === null
-              ? organizationNotFoundResponse
+              ? organizationTreeConflictResponse
               : createSuccessResponse<OrganizationResultDto>({
                   organization,
                 }),
+          );
+        },
+      },
+      move: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireOrganizationManager(
+            request,
+            "organization.move",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (organizationMutationRepositories.moveOrganization === undefined) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.move",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted organization move unavailable metadata",
+            });
+
+            return createJsonResponse(organizationMutationUnavailableResponse);
+          }
+
+          const moveInput = normalizeMoveOrganizationInput(
+            await readRequestJson(request),
+          );
+
+          if (!moveInput.success) {
+            return createJsonResponse(organizationInputInvalidResponse);
+          }
+
+          const organization =
+            await organizationMutationRepositories.moveOrganization({
+              ...moveInput.value,
+              publicId,
+            });
+
+          await appendOrganizationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "organization.move",
+            targetPublicId: publicId,
+            resultStatus: organization === null ? "failed" : "success",
+            metadataSummary: "redacted organization move metadata",
+          });
+
+          return createJsonResponse(
+            organization === null
+              ? organizationTreeConflictResponse
+              : createSuccessResponse<OrganizationResultDto>({ organization }),
           );
         },
       },
@@ -1281,6 +1302,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           const result =
             await organizationMutationRepositories.disableOrganization({
+              expectedRevision: disableInput.value.expectedRevision,
               publicId,
               isCascade: disableInput.value.isCascade,
             });
@@ -1296,7 +1318,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           return createJsonResponse(
             result === null
-              ? organizationNotFoundResponse
+              ? organizationTreeConflictResponse
               : createSuccessResponse<DisableOrganizationResultDto>(result),
           );
         },
@@ -1330,8 +1352,19 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(organizationMutationUnavailableResponse);
           }
 
+          const enableInput = normalizeDisableOrganizationInput(
+            await readRequestJson(request),
+          );
+
+          if (!enableInput.success) {
+            return createJsonResponse(organizationInputInvalidResponse);
+          }
+
           const organization =
-            await organizationMutationRepositories.enableOrganization(publicId);
+            await organizationMutationRepositories.enableOrganization({
+              ...enableInput.value,
+              publicId,
+            });
 
           await appendOrganizationAuditLog({
             request,
@@ -1344,7 +1377,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           return createJsonResponse(
             organization === null
-              ? organizationNotFoundResponse
+              ? organizationTreeConflictResponse
               : createSuccessResponse<OrganizationResultDto>({
                   organization,
                 }),
@@ -1628,41 +1661,16 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             >(result);
           }
 
-          if (repositories.createEmployee === undefined) {
-            await appendEmployeeAuditLog({
-              request,
-              actor: actorOrError,
-              actionType: "employee.create",
-              targetPublicId: null,
-              resultStatus: "failed",
-              metadataSummary: "redacted employee create unavailable metadata",
-            });
-
-            return createJsonResponse(employeeMutationUnavailableResponse);
-          }
-
-          const normalizedInput = normalizeEmployeeCreateInput(requestBody);
-
-          if (normalizedInput === null) {
-            return createJsonResponse(employeeInputInvalidResponse);
-          }
-
-          const employee = await repositories.createEmployee(normalizedInput);
-
           await appendEmployeeAuditLog({
             request,
             actor: actorOrError,
             actionType: "employee.create",
-            targetPublicId: employee?.publicId ?? null,
-            resultStatus: employee === null ? "failed" : "success",
-            metadataSummary: "redacted employee create metadata",
+            targetPublicId: null,
+            resultStatus: "failed",
+            metadataSummary: "redacted employee invalid input metadata",
           });
 
-          return createJsonResponse(
-            employee === null
-              ? employeeNotFoundResponse
-              : createSuccessResponse<EmployeeMutationResultDto>({ employee }),
-          );
+          return createJsonResponse(employeeInputInvalidResponse);
         },
       },
       importBatch: {
@@ -1694,61 +1702,22 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(employeeInputInvalidResponse);
           }
 
-          const result =
-            normalizedInput.kind === "employee_account"
-              ? await importEmployeeAccounts({
-                  employeeAccountService,
-                  normalizedInput,
-                })
-              : await (async () => {
-                  const importEmployees = repositories.importEmployees;
-
-                  if (importEmployees === undefined) {
-                    await appendEmployeeAuditLog({
-                      request,
-                      actor: actorOrError,
-                      actionType: "employee.import",
-                      targetPublicId: null,
-                      resultStatus: "failed",
-                      metadataSummary:
-                        "redacted employee import unavailable metadata",
-                    });
-
-                    return null;
-                  }
-
-                  return importEmployees({
-                    employees: normalizedInput.employees,
-                  });
-                })();
-
-          if (
-            result === null &&
-            normalizedInput.kind === "existing_user_bind" &&
-            repositories.importEmployees === undefined
-          ) {
-            return createJsonResponse(employeeMutationUnavailableResponse);
-          }
+          const result = await importEmployeeAccounts({
+            employeeAccountService,
+            normalizedInput,
+          });
 
           await appendEmployeeAuditLog({
             request,
             actor: actorOrError,
             actionType: "employee.import",
             targetPublicId: null,
-            resultStatus:
-              result === null || result.rejectedRows.length > 0
-                ? "failed"
-                : "success",
-            metadataSummary:
-              result === null
-                ? "redacted employee import metadata"
-                : `redacted employee import metadata; imported=${result.importedEmployees.length} rejected=${result.rejectedRows.length}`,
+            resultStatus: result.rejectedRows.length > 0 ? "failed" : "success",
+            metadataSummary: `redacted employee import metadata; imported=${result.importedEmployees.length} rejected=${result.rejectedRows.length}`,
           });
 
           return createJsonResponse(
-            result === null
-              ? employeeNotFoundResponse
-              : createSuccessResponse<EmployeeImportResultDto>(result),
+            createSuccessResponse<EmployeeImportResultDto>(result),
           );
         },
       },

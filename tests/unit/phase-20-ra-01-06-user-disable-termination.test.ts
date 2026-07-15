@@ -62,7 +62,7 @@ function createAdminFlowRepositories(input: {
       async disableUser(publicId) {
         input.mutationInputs.push({ action: "disableUser", publicId });
 
-        return publicId === "user-public-001";
+        return publicId === "user-public-001" ? "updated" : "not_found";
       },
       async revokeUserSessions(publicId) {
         input.mutationInputs.push({ action: "revokeUserSessions", publicId });
@@ -136,8 +136,6 @@ describe("phase 20 RA-01-06 user disable termination", () => {
     });
     expect(mutationInputs).toEqual([
       { action: "disableUser", publicId: "user-public-001" },
-      { action: "revokeUserSessions", publicId: "user-public-001" },
-      { action: "terminateUserActiveFlows", publicId: "user-public-001" },
     ]);
     expect(auditInputs).toEqual([
       expect.objectContaining({

@@ -12,12 +12,20 @@ export type NormalizedCreateOrganizationInput = {
   remark: string | null;
 };
 
-export type NormalizedUpdateOrganizationInput =
-  NormalizedCreateOrganizationInput & {
-    status: OrgStatus;
-  };
+export type NormalizedUpdateOrganizationInput = Pick<
+  NormalizedCreateOrganizationInput,
+  "contactName" | "contactPhone" | "name" | "remark"
+> & {
+  expectedRevision: number;
+};
+
+export type NormalizedMoveOrganizationInput = {
+  expectedRevision: number;
+  parentOrganizationPublicId: string | null;
+};
 
 export type NormalizedDisableOrganizationInput = {
+  expectedRevision: number;
   isCascade: boolean;
 };
 
@@ -70,8 +78,14 @@ function isOrgTier(value: unknown): value is (typeof orgTierValues)[number] {
   );
 }
 
-function isOrgStatus(value: unknown): value is OrgStatus {
-  return value === "active" || value === "disabled";
+function normalizeExpectedRevision(value: unknown): number | null {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
+}
+
+function hasOwnKey(input: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(input, key);
 }
 
 export function normalizeCreateOrganizationInput(
@@ -111,13 +125,28 @@ export function normalizeCreateOrganizationInput(
 export function normalizeUpdateOrganizationInput(
   input: unknown,
 ): ValidationResult<NormalizedUpdateOrganizationInput> {
-  const organizationInput = normalizeCreateOrganizationInput(input);
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
+    };
+  }
 
   if (
-    !organizationInput.success ||
-    !isRecord(input) ||
-    !isOrgStatus(input.status)
+    hasOwnKey(input, "orgTier") ||
+    hasOwnKey(input, "parentOrganizationPublicId") ||
+    hasOwnKey(input, "status")
   ) {
+    return {
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
+    };
+  }
+
+  const name = normalizeRequiredText(input.name);
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
+
+  if (name === null || expectedRevision === null) {
     return {
       success: false,
       message: INVALID_ORGANIZATION_INPUT_MESSAGE,
@@ -127,8 +156,53 @@ export function normalizeUpdateOrganizationInput(
   return {
     success: true,
     value: {
-      ...organizationInput.value,
-      status: input.status,
+      contactName: normalizeNullableText(input.contactName),
+      contactPhone: normalizeNullableText(input.contactPhone),
+      expectedRevision,
+      name,
+      remark: normalizeNullableText(input.remark),
+    },
+  };
+}
+
+export function normalizeMoveOrganizationInput(
+  input: unknown,
+): ValidationResult<NormalizedMoveOrganizationInput> {
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
+    };
+  }
+
+  if (
+    hasOwnKey(input, "orgTier") ||
+    hasOwnKey(input, "status") ||
+    hasOwnKey(input, "name") ||
+    !hasOwnKey(input, "parentOrganizationPublicId")
+  ) {
+    return {
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
+    };
+  }
+
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
+
+  if (expectedRevision === null) {
+    return {
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      expectedRevision,
+      parentOrganizationPublicId: normalizeNullableText(
+        input.parentOrganizationPublicId,
+      ),
     },
   };
 }
@@ -138,16 +212,24 @@ export function normalizeDisableOrganizationInput(
 ): ValidationResult<NormalizedDisableOrganizationInput> {
   if (!isRecord(input)) {
     return {
-      success: true,
-      value: {
-        isCascade: false,
-      },
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
+    };
+  }
+
+  const expectedRevision = normalizeExpectedRevision(input.expectedRevision);
+
+  if (expectedRevision === null) {
+    return {
+      success: false,
+      message: INVALID_ORGANIZATION_INPUT_MESSAGE,
     };
   }
 
   return {
     success: true,
     value: {
+      expectedRevision,
       isCascade: input.isCascade === true,
     },
   };

@@ -17,6 +17,7 @@ import type {
   RedeemCodeForUserInput,
 } from "./redeem-code-authorization-repository";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
+import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 
 type StudentAuthorizationRedeemRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
@@ -35,10 +36,10 @@ export type StudentAuthorizationRedeemRuntimeRepositories = {
 
 const {
   employee,
+  employeeOrgAuth,
   authUpgrade,
   organization,
   orgAuth,
-  orgAuthOrganization,
   personalAuth,
   redeemCode,
   user,
@@ -130,22 +131,26 @@ function createPostgresEffectiveAuthorizationRepository(
           expires_at: orgAuth.expires_at,
           status: orgAuth.status,
         })
-        .from(orgAuth)
-        .innerJoin(
-          orgAuthOrganization,
-          eq(orgAuthOrganization.org_auth_id, orgAuth.id),
-        )
-        .innerJoin(
-          organization,
-          eq(organization.id, orgAuthOrganization.organization_id),
-        )
-        .innerJoin(employee, eq(employee.organization_id, organization.id))
+        .from(employee)
         .innerJoin(user, eq(user.id, employee.user_id))
+        .innerJoin(organization, eq(organization.id, employee.organization_id))
+        .innerJoin(
+          employeeOrgAuth,
+          eq(employeeOrgAuth.employee_id, employee.id),
+        )
+        .innerJoin(orgAuth, eq(orgAuth.id, employeeOrgAuth.org_auth_id))
         .where(
           and(
             eq(user.public_id, userPublicId),
             eq(user.user_type, "employee"),
             eq(user.status, "active"),
+            eq(organization.status, "active"),
+            createOrgAuthCoversOrganizationCondition({
+              authScopeType: orgAuth.auth_scope_type,
+              orgAuthId: orgAuth.id,
+              organizationId: organization.id,
+              purchaserOrganizationId: orgAuth.purchaser_organization_id,
+            }),
           ),
         )
         .orderBy(asc(orgAuth.expires_at));
