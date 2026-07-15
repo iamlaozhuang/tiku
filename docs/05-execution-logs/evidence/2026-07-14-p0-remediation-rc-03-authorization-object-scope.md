@@ -4,7 +4,7 @@ Date: 2026-07-15
 
 Task: `p0-remediation-rc-03-authorization-object-scope-2026-07-14`
 
-Status: `ready_for_closeout`
+Status: `closed`
 
 result: pass
 
@@ -123,6 +123,23 @@ localFullLoopGate: pass_branch_gates_fresh_master_required_after_merge
 - `origin/master` 与实时远端仍为 `4be7cfb8e264dd0a42def6a2e744e2cc108238d9`；尚未 push，未提前声明 remote sync 或 cleanup 完成。
 
 localFullLoopGate: pass_fresh_master_gates_ready_for_checkpoint_handoff
+
+## Remote Sync And Cleanup
+
+- final master checkpoint: `4d1d011d4a6c1fa63d2f2e547b0e4f9cda42af65`
+- `git push origin master`: pass；`origin/master` 与实时 `refs/heads/master` 均为同一 checkpoint。
+- `D:/tiku` 主工作区干净，`master...origin/master` 无 ahead/behind。
+- detached fresh-master worktree 与 `D:/tiku/.worktrees/p0-rc-03` 已从 Git worktree inventory 移除；残留仅为已验证位于 `.worktrees/` 下的 `node_modules`/构建产物，按精确绝对路径清理完成。
+- 已合入短分支 `codex/p0-rc-03-authorization-object-scope` 已删除。
+- `D:/tiku-readonly-audit` 最终仍为 `a84224fa12ec85b28e6acd945deba2afa28c6c02` 且工作区干净。
+
+originMasterSync: pass
+
+worktreeCleanup: pass
+
+shortBranchCleanup: pass
+
+localFullLoopGate: pass_complete
 
 ## Non-Actions
 

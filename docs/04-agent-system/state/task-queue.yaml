@@ -143,8 +143,8 @@ p0RemediationSerialProgram:
   status: in_progress
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
-  currentTaskId: p0-remediation-rc-03-authorization-object-scope-2026-07-14
-  nextTaskId: p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+  currentTaskId: p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+  nextTaskId: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
   orderedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -160,6 +160,7 @@ p0RemediationSerialProgram:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
     - p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+    - p0-remediation-rc-03-authorization-object-scope-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -178,32 +179,37 @@ p0RemediationSerialProgram:
     p0-remediation-serial-program-bootstrap-2026-07-14: closed
     p0-remediation-rc-01-identity-session-admin-account-2026-07-14: closed
     p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14: closed
-    p0-remediation-rc-03-authorization-object-scope-2026-07-14: ready_for_closeout
-    p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: pending
+    p0-remediation-rc-03-authorization-object-scope-2026-07-14: closed
+    p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14: in_progress
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: pending
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: pending
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: pending
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: pending
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
 activeTasks:
-  - id: p0-remediation-rc-03-authorization-object-scope-2026-07-14
-    title: P0 RC-03 authorization object scope
-    phase: p0-remediation-rc-03-authorization-object-scope-2026-07-14
-    status: ready_for_closeout
+  - id: p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+    title: P0 RC-04 content paper aggregate and snapshot
+    phase: p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+    status: in_progress
     priority: p0
-    sequenceOrder: 3
+    sequenceOrder: 4
     taskKind: implementation
     moduleRunVersion: 3
-    branch: codex/p0-rc-03-authorization-object-scope
+    branch: codex/p0-rc-04-content-paper-aggregate-snapshot
     dependsOn:
-      - p0-remediation-rc-02-organization-scope-quota-employee-2026-07-14
+      - p0-remediation-rc-03-authorization-object-scope-2026-07-14
     approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
+    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
     executionProfile: R3
     focusedGates:
       - focused_behavior
-      - authorization_object_scope
+      - rich_text_round_trip
+      - question_scoring_contract
+      - paper_aggregate_transaction
+      - published_snapshot
       - idempotency
+      - schema_migration_source
       - scoped_format
       - diff_check
       - guard
@@ -211,61 +217,87 @@ activeTasks:
       - pre_push
       - security_boundary
     buildRequired: true
-    fullRegressionPolicy: required_shared_effective_authorization_ai_training_contract
+    fullRegressionPolicy: required_shared_content_paper_student_scoring_contract
     protectedDomains:
-      - effective_authorization
-      - personal_ai_generation
-      - organization_ai_generation
-      - organization_training
-      - quota_attribution
-      - rag_scope
-      - question_source
+      - question
+      - material
+      - paper
+      - paper_section
+      - question_group
+      - paper_scoring_point
+      - published_snapshot
+      - practice
+      - mock_exam
       - idempotency
-      - organization_boundary
+      - xss_sanitization
+      - transaction_atomicity
       - audit_log
       - program_order
       - approval_boundary
       - deployment
     reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
+      - docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
       - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
-      - src/server/contracts/effective-authorization-contract.ts
-      - src/server/contracts/personal-ai-generation-request-contract.ts
-      - src/server/contracts/organization-training-contract.ts
-      - src/server/repositories/effective-authorization-repository.ts
-      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
-      - src/server/repositories/personal-ai-generation-request-repository.ts
-      - src/server/repositories/personal-ai-generation-request-repository.test.ts
-      - src/server/repositories/admin-ai-generation-task-persistence-repository.ts
-      - src/server/repositories/admin-ai-generation-task-persistence-repository.test.ts
-      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.ts
-      - src/server/repositories/admin-ai-generation-task-persistence-db-adapter.test.ts
-      - src/server/repositories/organization-training-repository.ts
-      - src/server/repositories/organization-training-repository.test.ts
-      - src/server/services/authorization-object-scope.ts
-      - src/server/services/authorization-object-scope.test.ts
-      - src/server/services/effective-authorization-service.ts
-      - src/server/services/effective-authorization-service.test.ts
-      - src/server/services/personal-ai-generation-request-route.ts
-      - src/server/services/personal-ai-generation-request-route.test.ts
-      - src/server/services/admin-ai-generation-local-contract-route.ts
-      - src/server/services/admin-ai-generation-local-contract-route.test.ts
-      - src/server/services/organization-training-route.ts
-      - src/server/services/organization-training-route.test.ts
-      - src/server/services/organization-training-service.ts
-      - src/server/services/organization-training-service.test.ts
-      - src/server/validators/personal-ai-generation-request.ts
-      - src/server/validators/personal-ai-generation-request.test.ts
-      - src/server/validators/organization-training.ts
-      - src/server/validators/organization-training.test.ts
-      - tests/unit/p0-rc-03-authorization-object-scope.test.ts
+      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
+      - src/db/schema/paper.ts
+      - src/db/schema/paper.test.ts
+      - src/lib/content-integrity.ts
+      - src/lib/content-integrity.test.ts
+      - src/lib/question-scoring-contract.ts
+      - src/lib/question-scoring-contract.test.ts
+      - src/server/contracts/paper-draft-contract.ts
+      - src/server/mappers/paper-draft-mapper.ts
+      - src/server/validators/question.ts
+      - src/server/validators/question.test.ts
+      - src/server/validators/material.ts
+      - src/server/validators/material.test.ts
+      - src/server/validators/paper-draft.ts
+      - src/server/validators/paper-draft.test.ts
+      - src/server/repositories/question-repository.ts
+      - src/server/repositories/question-repository.test.ts
+      - src/server/repositories/material-repository.ts
+      - src/server/repositories/paper-draft-repository.ts
+      - src/server/repositories/paper-draft-repository.test.ts
+      - src/server/repositories/student-flow-runtime-repository.ts
+      - src/server/services/question-service.ts
+      - src/server/services/question-service.test.ts
+      - src/server/services/material-service.ts
+      - src/server/services/material-service.test.ts
+      - src/server/services/paper-draft-route.ts
+      - src/server/services/paper-draft-route.test.ts
+      - src/server/services/paper-draft-service.ts
+      - src/server/services/paper-draft-service.test.ts
+      - src/server/services/mock-exam-service.ts
+      - src/server/services/mock-exam-service.test.ts
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
+      - src/features/admin/question-material-management/AdminQuestionEditorPage.tsx
+      - src/features/admin/question-material-management/AdminMaterialEditorPage.tsx
+      - src/features/admin/question-material-management/AdminQuestionEditorPage.test.tsx
+      - src/features/admin/question-material-management/AdminMaterialEditorPage.test.tsx
+      - src/features/admin/paper-composer/PaperComposerQuestionPickerDrawer.tsx
+      - src/features/admin/paper-composer/PaperComposerQuestionEditorDrawer.tsx
+      - src/features/admin/paper-composer/paper-composer-model.ts
+      - src/features/admin/paper-composer/AdminPaperComposerPage.tsx
+      - src/features/admin/paper-composer/AdminPaperComposerPage.test.tsx
+      - src/features/admin/paper-management/AdminPaperManagementClient.tsx
+      - src/features/admin/paper-management/AdminPaperManagementClient.test.tsx
+      - tests/unit/phase-9-paper-composition-lifecycle-runtime.test.ts
+      - tests/unit/phase-9-content-question-material-runtime.test.ts
+      - tests/unit/paper-draft-repository-composition-guard.test.ts
+      - tests/unit/paper-draft-repository-archive-termination.test.ts
+      - tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts
+      - tests/unit/p0-rc-04-schema-migration-source.test.ts
+      - drizzle/*_p0_rc_04_*.sql
+      - drizzle/meta/*_snapshot.json
+      - drizzle/meta/_journal.json
     blockedFiles:
       - AGENTS.md
       - package.json
@@ -274,8 +306,6 @@ activeTasks:
       - pnpm-workspace.yaml
       - yarn.lock
       - e2e/**
-      - src/db/schema/**
-      - drizzle/**
       - migrations/**
       - seed/**
       - .env*
@@ -290,7 +320,7 @@ activeTasks:
       productRuntimeSourceChange: approved_task_allowlist
       productTestSourceChange: approved_task_allowlist
       dependencyIntroduction: blocked_without_fresh_approval
-      schemaMigration: blocked_not_required
+      schemaMigration: approved_source_authoring_test_and_commit_only
       databaseMutation: blocked_without_fresh_approval
       providerCall: blocked
       runtimeAcceptance: blocked_out_of_program
@@ -300,27 +330,29 @@ activeTasks:
       costCalibrationGate: blocked
     currentExecutionGate:
       status: satisfied
-      reason: current_user_approved_serial_p0_remediation_goal_and_rc_03_requires_no_schema_or_migration
-      approvalRequestPath: null
-      resumeAction: execute_rc_03_tdd_implementation_two_round_review_and_closeout_without_runtime_or_database_actions
+      reason: approved_schema_migration_source_authoring_test_and_commit_only_for_current_p0_goal
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
+      resumeAction: execute_rc_04_tdd_schema_migration_source_implementation_two_round_review_and_closeout_without_database_apply_or_runtime_acceptance
     acceptanceStandards:
-      - F-0011 enterprise training writes revalidate the selected current advanced org_auth against organization, profession and level instead of trusting client capability context.
-      - F-0014 personal, employee and organization-admin AI requests validate the selected authorization public id against the exact requested profession and level without silent source switching.
-      - F-0016 training list, detail, save, submit and readonly result intersect each version lineage with all current employee advanced contexts instead of choosing an arbitrary first context.
-      - cancellation, expiry, organization changes and lineage mismatch fail closed; an idempotency key can only reuse the same owner, authorization and scope.
-      - API responses preserve public identifiers, camelCase, standard envelope, null and empty-list semantics, and never expose candidate authorization sets or internal ids.
-      - Runtime acceptance, schema or migration changes, database mutation, dependencies, Provider calls, PR, force push and deployment remain outside this task.
+      - F-0050 question and material edit round-trips preserve supported rich text, table and managed image markup; stale updates fail with a recoverable conflict and never overwrite newer content.
+      - F-0051 every canonical question_type has one legal scoring path; invalid question_type/scoring_method/multi_choice_rule combinations are rejected by UI, API, publish and learner snapshot consumers.
+      - F-0092 every paper aggregate mutation is revision and status conditional inside one transaction; count, subtotal, publish, archive and learner start invariants survive concurrency and response-loss retries.
+      - F-0093 question_group has a stable public id and an explicit create-or-join command; group material, child question material, paper and paper_section must agree.
+      - F-0171 published learner snapshots copy every paper_scoring_point public id, description, score and sort order; missing, duplicate or mismatched scoring rules fail closed without an overall fallback.
+      - API responses preserve public ids, camelCase, standard envelope, null and empty-list semantics and never expose internal ids, answers before allowed boundaries or command hashes.
+      - Database apply/read/write, fixture/seed, runtime/browser/e2e, dependencies, Provider calls, PR, force push and deployment remain outside this task.
     validationCommands:
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual
+      - corepack pnpm@10.15.1 exec vitest run tests/unit/p0-rc-04-content-paper-aggregate-snapshot.test.ts tests/unit/p0-rc-04-schema-migration-source.test.ts --reporter=dot
       - corepack pnpm@10.15.1 run test:unit
       - corepack pnpm@10.15.1 run lint
       - corepack pnpm@10.15.1 run typecheck
       - corepack pnpm@10.15.1 run format:check
       - corepack pnpm@10.15.1 run build
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-03-authorization-object-scope-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-03-authorization-object-scope-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-03-authorization-object-scope-2026-07-14 -SkipRemoteAheadCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
       localCommit:
@@ -337,8 +369,8 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
-  - id: p0-remediation-rc-04-content-paper-aggregate-snapshot-2026-07-14
-    title: P0 RC-04 content paper aggregate and snapshot
+  - id: p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
+    title: P0 RC-05 knowledge resource RAG and citation
     status: pending
 standingAuthorization:
   id: current-user-approved-p0-remediation-serial-goal-2026-07-14
