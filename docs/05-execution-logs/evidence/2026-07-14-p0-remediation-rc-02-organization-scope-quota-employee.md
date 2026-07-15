@@ -28,6 +28,7 @@ analogousImplementationReviewed: true
 - branch: `codex/p0-rc-02-organization-scope-quota-employee`
 - worktree: `D:/tiku/.worktrees/p0-rc-02`
 - schema commit: `ef3580f76` (`fix(auth): add organization quota reservation schema`)
+- business commit: `48a3ea466` (`fix(auth): enforce organization scope and employee quota`)
 - schema/migration source authoring、测试和提交已有用户明确批准；migration 未 apply，未读取或写入数据库。
 - 依赖清单、lockfile、外部配置均未修改；runtime/browser/e2e/Provider/PR/force/deploy 未执行。
 - `D:/tiku-readonly-audit` 只读，未修改 finding register 或原始审计状态。
@@ -112,6 +113,20 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 ```
 
 localFullLoopGate: pass_branch_gates_fresh_master_required_after_merge
+
+## Fresh Master Closeout
+
+- `codex/p0-rc-02-organization-scope-quota-employee` 已通过 `git merge --ff-only` 合入本地 `master`，合入 checkpoint 为 `48a3ea466d297ec6b93dde7bd1f9ebb20db45302`。
+- fresh-master `corepack pnpm@10.15.1 run test:unit`: pass，`381/381` test files、`2207/2207` tests。
+- fresh-master `corepack pnpm@10.15.1 run lint`: pass。
+- fresh-master `corepack pnpm@10.15.1 run typecheck`: pass。
+- fresh-master `corepack pnpm@10.15.1 run format:check`: pass。
+- fresh-master `corepack pnpm@10.15.1 run build`: pass，92 个静态页面生成，move route 存在。
+- fresh-master `git diff --check`: pass；业务提交后工作区无未提交业务改动。
+- 首次 post-merge pre-push readiness 因 `repositoryCheckpoint.lastKnownMasterSha` 仍指向合入前 checkpoint 而按预期 hard block；本次仅交接已验证的 `48a3ea466` checkpoint，随后必须重新运行 pre-commit、module-closeout、serial guard 和 pre-push readiness。
+- `origin/master` 与实时远端仍为 `2e529ea3d721af1511d5663bb6bcbaa5b39886fb`；尚未 push，未提前声明远端同步或 cleanup 完成。
+
+localFullLoopGate: pass_fresh_master_gates_ready_for_checkpoint_handoff
 
 Cost Calibration Gate remains blocked.
 
