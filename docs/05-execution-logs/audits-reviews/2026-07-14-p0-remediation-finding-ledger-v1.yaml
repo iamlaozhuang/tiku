@@ -918,8 +918,8 @@ findings:
     riskConsequence:
       businessImpact: 学员在试卷目录查看详情、开始练习或开始模拟考试时都会收到完整paper_snapshot，其中含standardAnswerRichText、analysisRichText、questionOptions.isCorrect和fillBlankAnswers；个人AI学习session的创建与恢复响应也直接返回questions，其中含questionOptions.isCorrect、standardAnswerLabels、standardAnswerText和analysis。页面是否暂不渲染不能保护网络响应。模拟考试前端又把整个DTO和待同步原始作答持久化到按paper或mock标识命名、但不含用户或会话范围的localStorage；退出只删除会话标记。学员可在作答前直接读取答案与解析，共用浏览器的后一账号还可能在断网回退时看到前一账号的考试内容和作答，直接破坏练习反馈时序、考试公平与隐私隔离。
       blastRadius: 四类学员的试卷目录、理论/技能练习、全部模拟考试题型、材料和待同步答案，以及个人高级AI私有训练的题目与组卷session；共用终端、离线恢复和开放开发者工具的场景风险最高。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-04 已改变 published snapshot、student flow 与 practice 路径，但当前 pre-answer DTO 仍保留教师态答案/解析/正确标记，personal AI session 仍返回评分事实，mock 缓存仍无用户范围与 logout 清理；定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-07
       name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
@@ -1006,8 +1006,8 @@ findings:
     riskConsequence:
       businessImpact: 前端只用响应中的serverDeadlineAt与当次serverNow计算一次剩余分钟，没有运行时钟或到零自动提交；服务端也没有调度器，只在读取/开始等后续请求时发现deadline并交卷。保持页面打开的考试会永远显示初始剩余时间且不会在到点交卷，关闭页面后若用户不再访问，记录可长期停留in_progress并缺席历史报告，计时和成绩边界均不可依赖。
       blastRadius: 所有有时长的四类学员模拟考试，以及依赖超时交卷开始的评分、报告和记录列表。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-06 已改变 mock submit 与 scoring task 链，但当前 UI 仍只用一次 serverNow 快照且无持续时钟，服务端仍无持久 deadline task owner 或扫描器；定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-07
       name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
@@ -1100,8 +1100,8 @@ findings:
     riskConsequence:
       businessImpact: 切题和答题卡只改变前端索引，必须手动点“保存本题作答”才写服务器；网络失败后队列仅在用户点“重试保存”时发送，没有联网自动重试，且交卷前不冲洗当前答案或队列。服务端保存虽携带savedFromClientAt却不比较版本，任意晚到的旧设备/旧队列请求都无条件覆盖新答案；自动交卷后又统一拒绝保存，没有“仅补服务端缺失题目并触发补评分/更新报告”的合同。用户可静默丢题、被陈旧值覆盖，或永远无法完成需求规定的离线补交。
       blastRadius: 四类学员的所有模拟考试答案、超时交卷、AI评分和历史报告；弱网、多设备与后台标签页场景最易触发。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-06 已改变 mock repository/service 的提交与评分链，但 answer save 仍无 revision/operation id/旧写拒绝，UI 仍无切题自动保存、online flush、submit barrier，终态仍无 missing-only supplement；定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-07
       name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
@@ -1292,8 +1292,8 @@ findings:
         评分service已构造含评分点、原因、总评、改进建议和citation的aiScoringSnapshot，但submit/apply repository更新answer_record时只保存status/isCorrect/score并丢弃该字段，schema也没有承载列。报告随后只从answer_record和paper快照构建简化questionResults：主观标准答案为空、标题读取错误字段而常降级为Question
         n，UI仅显示作答、标准答案和分数，不展示解析、评分点命中/实得分/原因、总评、改进建议、模型、Prompt版本或RAG引用。成绩无法解释和复核，P0报告合同不成立。
       blastRadius: 四类学员所有主观题成绩、完整报告、学习建议输入、RAG引用展示和后续争议追溯。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-06 已新增持久 ai_scoring task/attempt/provenance，但当前 answer_record schema 与写路径仍丢弃 aiScoringSnapshot，exam_report 仍不消费完整评分点、原因、模型、Prompt 与 citation 证据；定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-07
       name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
@@ -1384,8 +1384,8 @@ findings:
     riskConsequence:
       businessImpact: 直接加载mock_exam详情时，页面不根据返回的examStatus初始化isSubmitted或scoring progress，scoring、partial和completed记录只要带题目快照就继续显示可编辑答题页，随后保存/交卷得到409。历史列表又对所有非terminated记录显示“查看报告”；尚未生成report时repository用mock_exam.public_id构造合成行并令examReportPublicId=null，链接回退到row.publicId，报告详情却只接受真实exam_report.public_id，必然404。用户离开提交页后无法从要求的记录入口返回评分中、重试或生成报告。
       blastRadius: 四类学员全部异步或部分失败评分、响应丢失、刷新和跨设备恢复；也影响完成后尚未创建报告的记录。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-06 已改变评分状态来源，但 mock 页面重载仍未完全按持久 examStatus 路由，历史记录仍可能在 report 缺失时把 mock public id 当 report public id；定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-07
       name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
@@ -3079,8 +3079,8 @@ findings:
     riskConsequence:
       businessImpact: 技能卷要求按material/question_group/paper_section一组一页完成多道主观题，但客户端只从paperSections抽取paperQuestions并压平成单题数组，既没有question_group模型也无法在同页维持同材料多子题。更直接的是SubjectiveQuestionPanel无onNextQuestion或完成动作：第一道主观题得到最终分数后只能看到已禁用的评分/重答按钮，无法进入下一题，整份技能练习在正常路径中死锁。
       blastRadius: 所有含一题以上主观题或材料题组的技能练习，直接阻断个人与企业学员完成训练。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-04 已恢复 published snapshot 的 questionGroupPublicId 上游身份，但当前 practice UI 仍把 paper_section 下题目扁平为单题数组，主观最终评分后仍无下一组或完成动作；定向重基线为 baseline_changed，不等于问题消失。
     rootCauseCluster:
       id: RC-07
       name: answer_record、mock_exam、ai_scoring 与 exam_report 状态闭环
