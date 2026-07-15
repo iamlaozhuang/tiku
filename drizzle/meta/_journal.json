@@ -197,6 +197,13 @@
       "when": 1784145783851,
       "tag": "20260715200303_p0_rc_06_ai_scoring_task",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1784149032052,
+      "tag": "20260715205720_p0_rc_06_ai_scoring_task_single_owner",
+      "breakpoints": true
     }
   ]
 }

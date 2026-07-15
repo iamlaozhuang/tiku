@@ -432,6 +432,9 @@ export const aiScoringTask = pgTable(
       sql`${table.timeout_second} = 60`,
     ),
     uniqueIndex("udx_ai_scoring_task_public_id").on(table.public_id),
+    uniqueIndex("udx_ai_scoring_task_answer_record_id").on(
+      table.answer_record_id,
+    ),
     uniqueIndex("udx_ai_scoring_task_answer_record_id_idempotency_key_hash").on(
       table.answer_record_id,
       table.idempotency_key_hash,

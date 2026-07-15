@@ -14,6 +14,17 @@ function readRc06Migration(): string {
   return readFileSync(resolve(drizzleDirectory, migrationNames[0]!), "utf8");
 }
 
+function readRc06SingleOwnerMigration(): string {
+  const drizzleDirectory = resolve(process.cwd(), "drizzle");
+  const migrationNames = readdirSync(drizzleDirectory).filter((name) =>
+    name.endsWith("_p0_rc_06_ai_scoring_task_single_owner.sql"),
+  );
+
+  expect(migrationNames).toHaveLength(1);
+
+  return readFileSync(resolve(drizzleDirectory, migrationNames[0]!), "utf8");
+}
+
 describe("P0 RC-06 durable AI scoring migration source", () => {
   it("creates the task lifecycle and immutable execution snapshots", () => {
     const migration = readRc06Migration();
@@ -64,5 +75,11 @@ describe("P0 RC-06 durable AI scoring migration source", () => {
     expect(taskTableSql).not.toContain("secret_ref");
     expect(taskTableSql).not.toContain("provider_request_payload");
     expect(taskTableSql).not.toContain("provider_response_payload");
+  });
+
+  it("allows only one durable scoring lifecycle per answer_record", () => {
+    expect(readRc06SingleOwnerMigration()).toContain(
+      'CREATE UNIQUE INDEX "udx_ai_scoring_task_answer_record_id"',
+    );
   });
 });

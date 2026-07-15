@@ -342,6 +342,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
     expect(getIndexNames(aiScoringTask)).toEqual(
       expect.arrayContaining([
         "udx_ai_scoring_task_public_id",
+        "udx_ai_scoring_task_answer_record_id",
         "udx_ai_scoring_task_answer_record_id_idempotency_key_hash",
         "idx_ai_scoring_task_answer_record_id",
         "idx_ai_scoring_task_task_status_scheduled_at",

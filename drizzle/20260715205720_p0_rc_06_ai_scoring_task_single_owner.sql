@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "udx_ai_scoring_task_answer_record_id" ON "ai_scoring_task" USING btree ("answer_record_id");
