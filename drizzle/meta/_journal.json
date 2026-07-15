@@ -176,6 +176,20 @@
       "when": 1784123422560,
       "tag": "20260715135022_p0_rc_04_content_paper_aggregate_snapshot",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1784134759535,
+      "tag": "20260715165919_p0_rc_05_knowledge_resource_rag_citation",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1784137233484,
+      "tag": "20260715174033_p0_rc_05_rag_retrieval_indexes",
+      "breakpoints": true
     }
   ]
 }

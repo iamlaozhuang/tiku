@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -10,6 +11,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  vector,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
@@ -30,6 +32,11 @@ const updatedAtColumn = () => timestampColumn("updated_at").defaultNow();
 
 // Avoid importing student-experience here because paper -> ai-rag already owns a schema dependency.
 const answerRecordReference = pgTable("answer_record", {
+  id: bigint("id", { mode: "number" }).primaryKey(),
+});
+
+// Avoid importing paper here because paper -> ai-rag already owns a schema dependency.
+const questionReference = pgTable("question", {
   id: bigint("id", { mode: "number" }).primaryKey(),
 });
 
@@ -164,6 +171,43 @@ export const resourceStatusEnum = pgEnum(
 export const knStatusValues = ["active", "disabled"] as const;
 
 export const knStatusEnum = pgEnum("kn_status", knStatusValues);
+
+export const resourceIndexGenerationStatusValues = [
+  "pending",
+  "indexing",
+  "ready",
+  "failed",
+  "superseded",
+] as const;
+
+export const resourceIndexGenerationStatusEnum = pgEnum(
+  "resource_index_generation_status",
+  resourceIndexGenerationStatusValues,
+);
+
+export const knRecommendationTaskStatusValues = [
+  "pending",
+  "running",
+  "succeeded",
+  "failed",
+  "superseded",
+] as const;
+
+export const knRecommendationTaskStatusEnum = pgEnum(
+  "kn_recommendation_task_status",
+  knRecommendationTaskStatusValues,
+);
+
+export const knRecommendationReviewStatusValues = [
+  "pending",
+  "confirmed",
+  "ignored",
+] as const;
+
+export const knRecommendationReviewStatusEnum = pgEnum(
+  "kn_recommendation_review_status",
+  knRecommendationReviewStatusValues,
+);
 
 export const modelProvider = pgTable(
   "model_provider",
@@ -768,6 +812,10 @@ export const knowledgeBase = pgTable(
   (table) => [
     uniqueIndex("udx_knowledge_base_public_id").on(table.public_id),
     uniqueIndex("udx_knowledge_base_profession").on(table.profession),
+    uniqueIndex("udx_knowledge_base_id_profession").on(
+      table.id,
+      table.profession,
+    ),
     index("idx_knowledge_base_is_enabled").on(table.is_enabled),
   ],
 );
@@ -803,6 +851,16 @@ export const resource = pgTable(
   },
   (table) => [
     uniqueIndex("udx_resource_public_id").on(table.public_id),
+    uniqueIndex("udx_resource_id_knowledge_base_id_profession").on(
+      table.id,
+      table.knowledge_base_id,
+      table.profession,
+    ),
+    foreignKey({
+      columns: [table.knowledge_base_id, table.profession],
+      foreignColumns: [knowledgeBase.id, knowledgeBase.profession],
+      name: "fk_resource_knowledge_base_scope",
+    }).onDelete("restrict"),
     index("idx_resource_knowledge_base_id").on(table.knowledge_base_id),
     index("idx_resource_profession_level_resource_status").on(
       table.profession,
@@ -841,6 +899,25 @@ export const knowledgeNode = pgTable(
   },
   (table) => [
     uniqueIndex("udx_knowledge_node_public_id").on(table.public_id),
+    uniqueIndex("udx_knowledge_node_id_knowledge_base_id_profession").on(
+      table.id,
+      table.knowledge_base_id,
+      table.profession,
+    ),
+    foreignKey({
+      columns: [table.knowledge_base_id, table.profession],
+      foreignColumns: [knowledgeBase.id, knowledgeBase.profession],
+      name: "fk_knowledge_node_knowledge_base_scope",
+    }).onDelete("restrict"),
+    foreignKey({
+      columns: [
+        table.parent_knowledge_node_id,
+        table.knowledge_base_id,
+        table.profession,
+      ],
+      foreignColumns: [table.id, table.knowledge_base_id, table.profession],
+      name: "fk_knowledge_node_parent_scope",
+    }).onDelete("restrict"),
     index("idx_knowledge_node_knowledge_base_id").on(table.knowledge_base_id),
     index("idx_knowledge_node_parent_knowledge_node_id").on(
       table.parent_knowledge_node_id,
@@ -874,5 +951,189 @@ export const knowledgeNodeResource = pgTable(
       table.knowledge_node_id,
     ),
     index("idx_knowledge_node_resource_resource_id").on(table.resource_id),
+  ],
+);
+
+export const resourceIndexGeneration = pgTable(
+  "resource_index_generation",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    request_public_id: text("request_public_id").notNull(),
+    resource_id: bigint("resource_id", { mode: "number" })
+      .notNull()
+      .references(() => resource.id, { onDelete: "restrict" }),
+    source_content_hash: text("source_content_hash").notNull(),
+    generation_status: resourceIndexGenerationStatusEnum("generation_status")
+      .default("pending")
+      .notNull(),
+    embedding_model_config_id: bigint("embedding_model_config_id", {
+      mode: "number",
+    }).references(() => modelConfig.id, { onDelete: "restrict" }),
+    embedding_dimension: integer("embedding_dimension"),
+    chunk_count: integer("chunk_count").default(0).notNull(),
+    is_active: boolean("is_active").default(false).notNull(),
+    failure_message_digest: text("failure_message_digest"),
+    started_at: nullableTimestampColumn("started_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_resource_index_generation_public_id").on(table.public_id),
+    uniqueIndex("udx_resource_index_generation_request_public_id").on(
+      table.request_public_id,
+    ),
+    uniqueIndex("udx_resource_index_generation_id_resource_id").on(
+      table.id,
+      table.resource_id,
+    ),
+    uniqueIndex("udx_resource_index_generation_active_resource")
+      .on(table.resource_id)
+      .where(sql`${table.is_active} = true`),
+    index("idx_resource_index_generation_resource_status").on(
+      table.resource_id,
+      table.generation_status,
+    ),
+    index("idx_resource_index_generation_model_config_id").on(
+      table.embedding_model_config_id,
+    ),
+  ],
+);
+
+export const resourceChunk = pgTable(
+  "resource_chunk",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    resource_index_generation_id: bigint("resource_index_generation_id", {
+      mode: "number",
+    }).notNull(),
+    resource_id: bigint("resource_id", { mode: "number" })
+      .notNull()
+      .references(() => resource.id, { onDelete: "restrict" }),
+    chunk_index: integer("chunk_index").notNull(),
+    heading_path: jsonb("heading_path").notNull(),
+    content: text("content").notNull(),
+    content_hash: text("content_hash").notNull(),
+    keyword_token_list: jsonb("keyword_token_list").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_resource_chunk_public_id").on(table.public_id),
+    uniqueIndex("udx_resource_chunk_generation_chunk_index").on(
+      table.resource_index_generation_id,
+      table.chunk_index,
+    ),
+    foreignKey({
+      columns: [table.resource_index_generation_id, table.resource_id],
+      foreignColumns: [
+        resourceIndexGeneration.id,
+        resourceIndexGeneration.resource_id,
+      ],
+      name: "fk_resource_chunk_generation_resource",
+    }).onDelete("cascade"),
+    index("idx_resource_chunk_resource_id").on(table.resource_id),
+    index("idx_resource_chunk_keyword_token_list").using(
+      "gin",
+      table.keyword_token_list,
+    ),
+    index("idx_resource_chunk_embedding_cosine").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops"),
+    ),
+  ],
+);
+
+export const knRecommendationTask = pgTable(
+  "kn_recommendation_task",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    request_public_id: text("request_public_id").notNull(),
+    question_id: bigint("question_id", { mode: "number" })
+      .notNull()
+      .references(() => questionReference.id, { onDelete: "restrict" }),
+    question_revision_at: timestamp("question_revision_at", {
+      withTimezone: true,
+    }).notNull(),
+    task_status: knRecommendationTaskStatusEnum("task_status")
+      .default("pending")
+      .notNull(),
+    evidence_status: evidenceStatusEnum("evidence_status"),
+    model_config_id: bigint("model_config_id", { mode: "number" }).references(
+      () => modelConfig.id,
+      { onDelete: "restrict" },
+    ),
+    prompt_template_id: bigint("prompt_template_id", {
+      mode: "number",
+    }).references(() => promptTemplate.id, { onDelete: "restrict" }),
+    requested_by_user_public_id: text("requested_by_user_public_id"),
+    failure_code: text("failure_code"),
+    started_at: nullableTimestampColumn("started_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_kn_recommendation_task_public_id").on(table.public_id),
+    uniqueIndex("udx_kn_recommendation_task_request_public_id").on(
+      table.request_public_id,
+    ),
+    uniqueIndex("udx_kn_recommendation_task_question_revision").on(
+      table.question_id,
+      table.question_revision_at,
+    ),
+    index("idx_kn_recommendation_task_status_created_at").on(
+      table.task_status,
+      table.created_at,
+    ),
+    index("idx_kn_recommendation_task_model_config_id").on(
+      table.model_config_id,
+    ),
+  ],
+);
+
+export const knRecommendationCandidate = pgTable(
+  "kn_recommendation_candidate",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    kn_recommendation_task_id: bigint("kn_recommendation_task_id", {
+      mode: "number",
+    })
+      .notNull()
+      .references(() => knRecommendationTask.id, { onDelete: "cascade" }),
+    knowledge_node_id: bigint("knowledge_node_id", { mode: "number" })
+      .notNull()
+      .references(() => knowledgeNode.id, { onDelete: "restrict" }),
+    rank: integer("rank").notNull(),
+    confidence_basis_point: integer("confidence_basis_point").notNull(),
+    reason_summary: text("reason_summary").notNull(),
+    citation_snapshot: jsonb("citation_snapshot").notNull(),
+    review_status: knRecommendationReviewStatusEnum("review_status")
+      .default("pending")
+      .notNull(),
+    reviewed_by_user_public_id: text("reviewed_by_user_public_id"),
+    reviewed_at: nullableTimestampColumn("reviewed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_kn_recommendation_candidate_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_kn_recommendation_candidate_task_node").on(
+      table.kn_recommendation_task_id,
+      table.knowledge_node_id,
+    ),
+    uniqueIndex("udx_kn_recommendation_candidate_task_rank").on(
+      table.kn_recommendation_task_id,
+      table.rank,
+    ),
+    index("idx_kn_recommendation_candidate_review_status").on(
+      table.review_status,
+    ),
   ],
 );
