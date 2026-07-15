@@ -106,6 +106,20 @@ analogousImplementationReviewed: true
 - result success 必须匹配 task、attempt、model config、Prompt key/version、actor、mock、answer 与 success scoring call log；API/日志不暴露 internal id、secret ref、raw Prompt/Provider payload。
 - RC-07 下游保留：mock/answer/report 最终聚合、评分结果证据快照和报告 UI；不因本 RC task source 存在就提前关闭 RC-07 findings。
 
+## Fresh Master Closeout
+
+- `master` 已以 `--ff-only` 合入 RC-06 schema、single-owner correction 与业务实现，验证基线：`f92aa41028ccf2fb8550c91f4e30c8377ed4a740`。
+- fresh detached worktree：`D:\tiku\.worktrees\p0-rc-06-fresh-master`；HEAD 与上述 master 基线一致，worktree clean。
+- `corepack pnpm@10.15.1 install --offline --frozen-lockfile`：pass；741 个 locked packages 全部复用，无 lockfile 变化。
+- fresh full unit：`393/393` files、`2322/2322` tests passed，`287.07s`，`--maxWorkers=4`。
+- fresh serial quality gates：lint zero warnings、typecheck、format check、build pass；build 生成 93 个静态页面并包含 `/ops/ai-governance`。
+- `git diff --check`、P0 serial manual guard、Module Run v2 pre-commit hardening 与 module closeout readiness：pass。
+- 在 detached fresh worktree 执行 pre-push readiness 被 `HARD_BLOCK_DETACHED_HEAD` 正确拒绝；该拒绝不是产品/代码失败，attached master 将在 push 前执行同一门禁。
+- 记录前 master、RC-06 branch、fresh detached worktree 与 audit repository 均 clean；audit HEAD 保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
+- `origin/master` 与实时远端仍为 `f3af180ee9be32ec8d74ef3a297ed4bf2072dc0e`；尚未 push，worktree/short branch 尚未清理。
+
+localFullLoopGate: pass_fresh_master_attached_prepush_origin_sync_and_cleanup_pending
+
 ## Review Log
 
 - Round 1：pass — root cause/diff、secret boundary、task transaction/lease/retry/idempotency、provenance、schema/data compatibility。
@@ -148,4 +162,4 @@ nextModuleRunCandidate: `p0-remediation-rc-07-answer-mock-scoring-report-2026-07
 - [x] 并发、事务、权限、失败、重试、边界输入与两轮对抗复核已覆盖。
 - [x] migration 仅源码/静态测试，未越过 database/runtime approval boundary。
 
-localFullLoopGate: pass_branch_gates_fresh_master_pending
+localFullLoopGate: pass_fresh_master_attached_prepush_origin_sync_and_cleanup_pending
