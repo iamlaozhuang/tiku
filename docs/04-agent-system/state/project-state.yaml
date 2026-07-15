@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: p0-remediation-rc-03-authorization-object-scope-2026-07-14
-updatedAt: "2026-07-15T06:10:26-07:00"
+updatedAt: "2026-07-15T06:23:48-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -414,8 +414,8 @@ p0RemediationSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     p0-remediation-rc-03-authorization-object-scope-2026-07-14:
-      taskCommit: pending
-      masterMerge: pending
+      taskCommit: pass
+      masterMerge: pass
       originMasterSync: pending
       worktreeCleanup: pending
       shortBranchCleanup: pending
@@ -446,7 +446,7 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 4be7cfb8e264dd0a42def6a2e744e2cc108238d9
+  lastKnownMasterSha: 5de8cea85354abd98c7155d0dc2d989ddf62678f
   lastKnownOriginMasterSha: 4be7cfb8e264dd0a42def6a2e744e2cc108238d9
   lastKnownRemoteMasterSha: 4be7cfb8e264dd0a42def6a2e744e2cc108238d9
   masterWorktreeClean: true

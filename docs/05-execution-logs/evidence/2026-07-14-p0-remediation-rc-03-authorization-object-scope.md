@@ -112,6 +112,18 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 localFullLoopGate: pass_branch_gates_fresh_master_required_after_merge
 
+## Fresh Master Closeout
+
+- `codex/p0-rc-03-authorization-object-scope` 已通过 `git merge --ff-only` 合入本地 `master`，业务 checkpoint 为 `5de8cea85354abd98c7155d0dc2d989ddf62678f`。
+- 在 detached fresh-master worktree `D:/tiku/.worktrees/p0-rc-03-fresh-master` 验证该精确 checkpoint。
+- 默认 pnpm 11.9.0 因 lockfile overrides 配置差异按预期拒绝 frozen install；未改 lockfile，切换到任务规定的 `corepack pnpm@10.15.1 install --frozen-lockfile --offline` 后恢复成功。
+- fresh-master `test:unit`: pass，`382/382` test files、`2219/2219` tests，`286.60s`。
+- fresh-master lint、typecheck、format:check、build、`git diff --check` 全部通过；build 生成 92 个静态页面。
+- fresh-master 工作区无 tracked/untracked 源码改动；`package.json`、`pnpm-lock.yaml` 未变化。
+- `origin/master` 与实时远端仍为 `4be7cfb8e264dd0a42def6a2e744e2cc108238d9`；尚未 push，未提前声明 remote sync 或 cleanup 完成。
+
+localFullLoopGate: pass_fresh_master_gates_ready_for_checkpoint_handoff
+
 ## Non-Actions
 
 - 未新增或修改 schema/migration，未执行 database apply/read/write。
