@@ -64,6 +64,7 @@ analogousImplementationReviewed: true
 - `git diff --check` 与 P0 serial manual guard：passed；依赖、lockfile 与 tracked worktree 均无变化。
 - RC-08 branch/worktree 与 audit repository 在 closeout state commit 前保持 clean；audit HEAD 保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
 - `origin/master` 与实时远端仍为 `78da56891d82883de2384438b03c6ab4d4444cfd`；尚未 push，隔离资源尚未清理。
+- fresh/full/quality/两轮复核均通过后，RC-08 已显式转为 `ready_for_closeout`；未在 origin sync 与隔离资源清理前提前标记 closed。
 
 ## Finding Remediation Conclusions
 

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: p0-remediation-rc-08-organization-training-integrity-2026-07-14
-updatedAt: "2026-07-15T22:41:05-07:00"
+updatedAt: "2026-07-15T22:43:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -397,7 +397,7 @@ p0RemediationSerialProgram:
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: closed
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: closed
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: closed
-    p0-remediation-rc-08-organization-training-integrity-2026-07-14: in_progress
+    p0-remediation-rc-08-organization-training-integrity-2026-07-14: ready_for_closeout
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
   closeoutCheckpoints:
     p0-remediation-serial-program-bootstrap-2026-07-14:
@@ -458,7 +458,7 @@ currentTask:
   id: p0-remediation-rc-08-organization-training-integrity-2026-07-14
   title: P0 RC-08 organization training integrity
   phase: p0-remediation-rc-08-organization-training-integrity-2026-07-14
-  status: in_progress
+  status: ready_for_closeout
   priority: p0
   taskKind: implementation
   branch: codex/p0-rc-08-organization-training-integrity
