@@ -50,7 +50,9 @@ describe("organization training publish-version persistence schema", () => {
   it("registers organization training answer lifecycle status values", () => {
     expect(schemaExports.organizationTrainingAnswerStatusValues).toEqual([
       "in_progress",
+      "scoring",
       "submitted",
+      "scoring_failed",
       "read_only",
     ]);
   });

@@ -1,5 +1,6 @@
 import {
   bigint,
+  check,
   foreignKey,
   index,
   integer,
@@ -11,8 +12,13 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
-import { evidenceStatusEnum } from "./ai-rag";
+import {
+  aiCallLog,
+  aiScoringTaskStatusEnum,
+  evidenceStatusEnum,
+} from "./ai-rag";
 import { employee, orgAuth, organization, professionEnum } from "./auth";
 import { subjectEnum } from "./paper";
 
@@ -41,9 +47,22 @@ export const organizationTrainingVersionStatusEnum = pgEnum(
   organizationTrainingVersionStatusValues,
 );
 
+export const organizationTrainingDraftStatusValues = [
+  "draft",
+  "consumed",
+  "discarded",
+] as const;
+
+export const organizationTrainingDraftStatusEnum = pgEnum(
+  "organization_training_draft_status",
+  organizationTrainingDraftStatusValues,
+);
+
 export const organizationTrainingAnswerStatusValues = [
   "in_progress",
+  "scoring",
   "submitted",
+  "scoring_failed",
   "read_only",
 ] as const;
 
@@ -162,6 +181,11 @@ export type OrganizationTrainingQuestionResultSnapshotValue = {
   scoringPointResults: OrganizationTrainingScoringPointResultSnapshotValue[];
 };
 
+export type OrganizationTrainingScoringTaskSnapshotValue = Record<
+  string,
+  unknown
+>;
+
 export type OrganizationTrainingSourceContextFormalUsagePolicyValue = {
   createFormalPaper: false;
   createMockExam: false;
@@ -176,6 +200,10 @@ export const organizationTrainingDraft = pgTable(
   {
     id: idColumn(),
     public_id: text("public_id").notNull(),
+    draft_status: organizationTrainingDraftStatusEnum("draft_status")
+      .default("draft")
+      .notNull(),
+    revision: integer("revision").default(1).notNull(),
     source_task_public_id: text("source_task_public_id"),
     source_version_public_id: text("source_version_public_id"),
     organization_id: bigint("organization_id", { mode: "number" }).notNull(),
@@ -201,6 +229,12 @@ export const organizationTrainingDraft = pgTable(
     question_type_summary: jsonb("question_type_summary")
       .$type<OrganizationTrainingQuestionTypeSummaryValue>()
       .notNull(),
+    question_snapshot: jsonb("question_snapshot")
+      .$type<OrganizationTrainingQuestionSnapshotValue[]>()
+      .default([])
+      .notNull(),
+    last_operation_id: text("last_operation_id"),
+    last_payload_digest: text("last_payload_digest"),
     evidence_status: evidenceStatusEnum("evidence_status")
       .default("none")
       .notNull(),
@@ -217,6 +251,8 @@ export const organizationTrainingDraft = pgTable(
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
     expires_at: nullableTimestampColumn("expires_at"),
+    consumed_at: nullableTimestampColumn("consumed_at"),
+    discarded_at: nullableTimestampColumn("discarded_at"),
   },
   (table) => [
     foreignKey({
@@ -245,6 +281,7 @@ export const organizationTrainingDraft = pgTable(
       table.retention_status,
       table.expires_at,
     ),
+    index("idx_organization_training_draft_status").on(table.draft_status),
     index("idx_organization_training_draft_source_task").on(
       table.source_task_public_id,
     ),
@@ -338,7 +375,12 @@ export const organizationTrainingVersion = pgTable(
   {
     id: idColumn(),
     public_id: text("public_id").notNull(),
+    organization_training_draft_id: bigint("organization_training_draft_id", {
+      mode: "number",
+    }),
     draft_public_id: text("draft_public_id").notNull(),
+    publish_operation_id: text("publish_operation_id"),
+    publish_payload_digest: text("publish_payload_digest"),
     version_number: integer("version_number").notNull(),
     organization_id: bigint("organization_id", { mode: "number" }).notNull(),
     organization_public_id: text("organization_public_id").notNull(),
@@ -382,6 +424,11 @@ export const organizationTrainingVersion = pgTable(
   },
   (table) => [
     foreignKey({
+      columns: [table.organization_training_draft_id],
+      foreignColumns: [organizationTrainingDraft.id],
+      name: "fk_organization_training_version_draft",
+    }).onDelete("restrict"),
+    foreignKey({
       columns: [table.organization_id],
       foreignColumns: [organization.id],
       name: "fk_organization_training_version_organization",
@@ -397,6 +444,9 @@ export const organizationTrainingVersion = pgTable(
     uniqueIndex("udx_organization_training_version_draft_version").on(
       table.draft_public_id,
       table.version_number,
+    ),
+    uniqueIndex("udx_organization_training_version_draft_id").on(
+      table.organization_training_draft_id,
     ),
     index("idx_organization_training_version_organization_id").on(
       table.organization_id,
@@ -445,6 +495,11 @@ export const organizationTrainingAnswer = pgTable(
     )
       .default("in_progress")
       .notNull(),
+    revision: integer("revision").default(1).notNull(),
+    last_operation_id: text("last_operation_id"),
+    last_payload_digest: text("last_payload_digest"),
+    submit_operation_id: text("submit_operation_id"),
+    submit_payload_digest: text("submit_payload_digest"),
     score: scoreColumn("score"),
     total_score: scoreColumn("total_score").notNull(),
     submitted_at: nullableTimestampColumn("submitted_at"),
@@ -496,6 +551,91 @@ export const organizationTrainingAnswer = pgTable(
     index("idx_organization_training_answer_status_submitted_at").on(
       table.organization_training_answer_status,
       table.submitted_at,
+    ),
+  ],
+);
+
+export const organizationTrainingScoringTask = pgTable(
+  "organization_training_scoring_task",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    organization_training_answer_id: bigint("organization_training_answer_id", {
+      mode: "number",
+    }).notNull(),
+    idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    task_status: aiScoringTaskStatusEnum("task_status")
+      .default("pending")
+      .notNull(),
+    attempt_count: integer("attempt_count").default(0).notNull(),
+    max_attempt_count: integer("max_attempt_count").default(3).notNull(),
+    timeout_second: integer("timeout_second").default(60).notNull(),
+    model_config_snapshot: jsonb("model_config_snapshot")
+      .$type<OrganizationTrainingScoringTaskSnapshotValue>()
+      .notNull(),
+    prompt_template_key: text("prompt_template_key").notNull(),
+    prompt_template_version: integer("prompt_template_version").notNull(),
+    prompt_template_hash: text("prompt_template_hash").notNull(),
+    input_snapshot: jsonb("input_snapshot")
+      .$type<OrganizationTrainingScoringTaskSnapshotValue>()
+      .notNull(),
+    authorization_snapshot: jsonb("authorization_snapshot")
+      .$type<OrganizationTrainingScoringTaskSnapshotValue>()
+      .notNull(),
+    rag_snapshot:
+      jsonb(
+        "rag_snapshot",
+      ).$type<OrganizationTrainingScoringTaskSnapshotValue>(),
+    result_snapshot:
+      jsonb(
+        "result_snapshot",
+      ).$type<OrganizationTrainingScoringTaskSnapshotValue>(),
+    ai_call_log_id: bigint("ai_call_log_id", { mode: "number" }),
+    failure_code: text("failure_code"),
+    failure_message_digest: text("failure_message_digest"),
+    scheduled_at: timestampColumn("scheduled_at").defaultNow(),
+    claimed_at: nullableTimestampColumn("claimed_at"),
+    lease_expires_at: nullableTimestampColumn("lease_expires_at"),
+    worker_public_id: text("worker_public_id"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.organization_training_answer_id],
+      foreignColumns: [organizationTrainingAnswer.id],
+      name: "fk_organization_training_scoring_task_answer",
+    }).onDelete("restrict"),
+    foreignKey({
+      columns: [table.ai_call_log_id],
+      foreignColumns: [aiCallLog.id],
+      name: "fk_organization_training_scoring_task_ai_call_log",
+    }).onDelete("set null"),
+    check(
+      "chk_organization_training_scoring_task_attempt_count",
+      sql`${table.attempt_count} >= 0 and ${table.attempt_count} <= ${table.max_attempt_count}`,
+    ),
+    check(
+      "chk_organization_training_scoring_task_max_attempt_count",
+      sql`${table.max_attempt_count} = 3`,
+    ),
+    check(
+      "chk_organization_training_scoring_task_timeout_second",
+      sql`${table.timeout_second} = 60`,
+    ),
+    uniqueIndex("udx_organization_training_scoring_task_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_organization_training_scoring_task_answer_id").on(
+      table.organization_training_answer_id,
+    ),
+    index("idx_organization_training_scoring_task_status_scheduled_at").on(
+      table.task_status,
+      table.scheduled_at,
+    ),
+    index("idx_organization_training_scoring_task_lease_expires_at").on(
+      table.lease_expires_at,
     ),
   ],
 );
