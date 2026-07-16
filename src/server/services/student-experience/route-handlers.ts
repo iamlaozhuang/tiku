@@ -193,6 +193,13 @@ export function createStudentExperienceRouteHandlers(
             context,
           ),
       },
+      supplementAnswers: {
+        POST: (request: Request, context: RouteContext) =>
+          readLegacyFlowRouteHandlers().mockExams.supplementAnswers.POST(
+            request,
+            context,
+          ),
+      },
       collection: {
         POST: (request: Request) =>
           readLegacyFlowRouteHandlers().mockExams.collection.POST(request),

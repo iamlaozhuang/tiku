@@ -373,6 +373,142 @@ describe("StudentPracticePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders one skill question_group page with shared material and exposes next-group then completion actions", () => {
+    const basePractice = studentPracticeFixture.practices[1].practice;
+    const baseFeedback =
+      studentPracticeFixture.practices[1].feedbackByPaperQuestionPublicId[
+        "paper-question-skill-001"
+      ];
+    const createQuestion = (
+      paperQuestionPublicId: string,
+      questionGroupPublicId: string,
+      stemRichText: string,
+      materialPublicId: string,
+      materialTitle: string,
+    ) => ({
+      paperQuestionPublicId,
+      questionPublicId: `question-${paperQuestionPublicId}`,
+      questionType: "short_answer",
+      questionGroupPublicId,
+      questionGroupTitle: `${materialTitle}题组`,
+      stemRichText,
+      score: "10.0",
+      materialSnapshot: {
+        materialPublicId,
+        title: materialTitle,
+        contentRichText: `${materialTitle}正文`,
+      },
+    });
+    const groupedPractice = {
+      ...basePractice,
+      publicId: "practice-skill-grouped",
+      paperPublicId: "paper-skill-grouped",
+      questionCount: 3,
+      paperSnapshot: {
+        ...basePractice.paperSnapshot,
+        name: "技能题组练习",
+        paperSections: [
+          {
+            title: "技能大题一",
+            paperQuestions: [
+              createQuestion(
+                "paper-question-group-1-a",
+                "question-group-public-1",
+                "题组一子题 A",
+                "material-public-1",
+                "材料一",
+              ),
+              createQuestion(
+                "paper-question-group-1-b",
+                "question-group-public-1",
+                "题组一子题 B",
+                "material-public-1",
+                "材料一",
+              ),
+            ],
+          },
+          {
+            title: "技能大题二",
+            paperQuestions: [
+              createQuestion(
+                "paper-question-group-2-a",
+                "question-group-public-2",
+                "题组二子题 A",
+                "material-public-2",
+                "材料二",
+              ),
+            ],
+          },
+        ],
+      },
+    };
+    const createFinalFeedback = (paperQuestionPublicId: string) => ({
+      ...baseFeedback,
+      answerRecordPublicId: `answer-${paperQuestionPublicId}`,
+      score: "8.0",
+      maxScore: "10.0",
+      aiHintStatus: null,
+      aiHintText: null,
+      aiHintImprovementDirections: [],
+      retryRemainingCount: 0,
+    });
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: groupedPractice.paperPublicId,
+        practices: [
+          {
+            practice: groupedPractice,
+            feedbackByPaperQuestionPublicId: {
+              "paper-question-group-1-a": createFinalFeedback(
+                "paper-question-group-1-a",
+              ),
+              "paper-question-group-1-b": createFinalFeedback(
+                "paper-question-group-1-b",
+              ),
+              "paper-question-group-2-a": createFinalFeedback(
+                "paper-question-group-2-a",
+              ),
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByText("第 1 / 2 组")).toBeInTheDocument();
+    expect(screen.getByText("题组一子题 A")).toBeInTheDocument();
+    expect(screen.getByText("题组一子题 B")).toBeInTheDocument();
+    expect(screen.getAllByText("材料一")).toHaveLength(1);
+    expect(screen.getByText("材料一正文")).toBeInTheDocument();
+
+    for (const [index, answerInput] of screen
+      .getAllByLabelText("主观题答案")
+      .entries()) {
+      fireEvent.change(answerInput, {
+        target: { value: `题组一作答 ${index + 1}` },
+      });
+    }
+    for (const submitButton of screen.getAllByRole("button", {
+      name: "提交答案",
+    })) {
+      fireEvent.click(submitButton);
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: "下一组" }));
+
+    expect(screen.getByText("第 2 / 2 组")).toBeInTheDocument();
+    expect(screen.getByText("题组二子题 A")).toBeInTheDocument();
+    expect(screen.queryByText("题组一子题 A")).toBeNull();
+    fireEvent.change(screen.getByLabelText("主观题答案"), {
+      target: { value: "题组二作答" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+    expect(screen.getByRole("link", { name: "完成练习" })).toHaveAttribute(
+      "href",
+      "/home",
+    );
+  });
+
   it("renders governed AI unavailability instead of an indefinite pending state", () => {
     const unavailableFeedback = {
       ...studentPracticeFixture.practices[1].feedbackByPaperQuestionPublicId[
@@ -1236,6 +1372,10 @@ describe("StudentPracticePage", () => {
     expect(
       await screen.findByText("Final score: 10.0 / 10.0"),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "完成练习" })).toHaveAttribute(
+      "href",
+      "/home",
+    );
     expect(answerBodies).toMatchObject([
       {
         paperQuestionPublicId: "paper-question-skill-001",

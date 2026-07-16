@@ -19,6 +19,7 @@ import {
   createPersonalAiLearningSessionQuestionFromPaperSource,
   normalizePersonalAiLearningLabels,
 } from "../validators/personal-ai-generation-learning-session";
+import { projectPersonalAiLearningSessionForLearner } from "@/lib/learner-content-projection";
 
 export function createPersonalAiGenerationLearningSessionService(input: {
   repository: PersonalAiGenerationLearningSessionRepository;
@@ -115,7 +116,7 @@ async function createLearningSession(
   return {
     status: "created",
     blockReason: null,
-    session,
+    session: projectPersonalAiLearningSessionForLearner(session),
   };
 }
 
@@ -172,7 +173,7 @@ async function createLearningSessionFromPaperAssembly(
   return {
     status: "created",
     blockReason: null,
-    session,
+    session: projectPersonalAiLearningSessionForLearner(session),
   };
 }
 
@@ -209,7 +210,7 @@ async function reuseExistingLearningSession(
   return {
     status: "created",
     blockReason: null,
-    session: existingSession,
+    session: projectPersonalAiLearningSessionForLearner(existingSession),
   };
 }
 

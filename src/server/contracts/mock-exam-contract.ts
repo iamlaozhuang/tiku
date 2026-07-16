@@ -33,6 +33,9 @@ export type MockExamAnswerRecordDto = {
   paperQuestionPublicId: string;
   questionPublicId: string;
   answerSnapshot: MockExamAnswerSnapshotDto;
+  answerRevision: number;
+  clientOperationId: string | null;
+  clientSavedAt: string | null;
   answerRecordStatus: AnswerRecordStatus;
   isCorrect: boolean | null;
   score: string | null;
@@ -43,6 +46,7 @@ export type MockExamAnswerRecordDto = {
 
 export type MockExamResultDto = {
   mockExam: MockExamDto;
+  answerRecords: MockExamAnswerRecordDto[];
 };
 
 export type MockExamAnswerRecordResultDto = {
@@ -58,4 +62,12 @@ export type MockExamRetryScoringResultDto = {
   mockExam: MockExamDto;
   retriedCount: number;
   failedCount: number;
+};
+
+export type MockExamSupplementResultDto = {
+  mockExam: MockExamDto;
+  supplementedCount: number;
+  skippedExistingCount: number;
+  examReportPublicId: string | null;
+  reportRevision: number | null;
 };

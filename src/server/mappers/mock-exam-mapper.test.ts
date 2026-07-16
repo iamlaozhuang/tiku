@@ -40,6 +40,8 @@ function createMockExamRow(overrides: Partial<MockExamRow> = {}): MockExamRow {
           paperQuestions: [
             {
               paperQuestionPublicId: "paper_question_public_123",
+              standardAnswerRichText: "<p>A</p>",
+              analysisRichText: "<p>解析</p>",
             },
             {
               paperQuestionPublicId: "paper_question_public_456",
@@ -70,6 +72,9 @@ function createAnswerRecordRow(
       textAnswer: null,
       savedFromClientAt: "2026-05-19T08:20:00.000Z",
     },
+    answer_revision: 3,
+    client_operation_id: "answer_operation_public_3",
+    client_saved_at: serverNow,
     answer_record_status: "saved",
     is_correct: null,
     score: null,
@@ -126,6 +131,9 @@ describe("mock exam mapper", () => {
         textAnswer: null,
         savedFromClientAt: "2026-05-19T08:20:00.000Z",
       },
+      answerRevision: 3,
+      clientOperationId: "answer_operation_public_3",
+      clientSavedAt: "2026-05-19T08:30:00.000Z",
       answerRecordStatus: "saved",
       isCorrect: null,
       score: null,

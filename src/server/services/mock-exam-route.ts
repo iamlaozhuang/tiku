@@ -121,6 +121,33 @@ export function createMockExamRouteHandlers(
         },
       ),
     },
+    supplementAnswers: {
+      POST: createRouteHandlerWithErrorEnvelope(
+        async (
+          request: Request,
+          context: MockExamRouteContext,
+        ): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
+
+          if (!isMockExamUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
+
+          const { publicId } = await context.params;
+
+          return createJsonResponse(
+            await mockExamService.supplementMockExamAnswers(
+              userContext,
+              publicId,
+              await readRequestJson(request),
+            ),
+          );
+        },
+      ),
+    },
     submit: {
       POST: createRouteHandlerWithErrorEnvelope(
         async (

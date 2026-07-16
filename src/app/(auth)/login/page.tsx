@@ -20,7 +20,7 @@ type SessionLoginPayload = {
     session: {
       expiresAt: string;
     };
-    user: PostLoginSessionUser;
+    user: PostLoginSessionUser & { publicId: string };
   } | null;
 };
 
@@ -94,7 +94,7 @@ export default function LoginPage() {
       }
 
       const sessionBoundary = createPostLoginSessionBoundary(payload.data.user);
-      persistCookieBackedSessionMarker();
+      persistCookieBackedSessionMarker(payload.data.user.publicId);
       router.replace(sessionBoundary.redirectPath);
     } catch {
       setLoginState("error");

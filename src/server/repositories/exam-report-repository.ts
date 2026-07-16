@@ -61,12 +61,25 @@ export type ExamReportAnswerSnapshot = {
   savedFromClientAt: string | null;
 };
 
+export type ExamReportAiScoringEvidenceRow = {
+  taskPublicId: string;
+  taskStatus: string;
+  attemptNumber: number;
+  attemptStatus: string | null;
+  modelConfigSnapshot: Record<string, unknown>;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  promptTemplateHash: string;
+  resultSnapshot: Record<string, unknown> | null;
+};
+
 export type ExamReportAnswerRecordRow = {
   public_id: string;
   paper_question_public_id: string;
   question_public_id: string;
   question_snapshot: Record<string, unknown>;
   answer_snapshot: ExamReportAnswerSnapshot;
+  ai_scoring_evidence: ExamReportAiScoringEvidenceRow | null;
   answer_record_status: AnswerRecordStatus;
   is_correct: boolean | null;
   score: string | null;
@@ -110,6 +123,10 @@ export type CreateExamReportInput = {
   generatedAt: Date;
 };
 
+export type RebuildExamReportInput = CreateExamReportInput & {
+  learningSuggestionSnapshot: null;
+};
+
 export type ExamReportRepository = {
   listEffectiveAuthorizationScopes(query: {
     userPublicId: string;
@@ -135,6 +152,7 @@ export type ExamReportRepository = {
     mockExamPublicId: string;
   }): Promise<ExamReportAnswerRecordRow[]>;
   createExamReport(input: CreateExamReportInput): Promise<ExamReportRow>;
+  rebuildExamReport(input: RebuildExamReportInput): Promise<ExamReportRow>;
   updateExamReportLearningSuggestionSnapshot(
     input: UpdateExamReportLearningSuggestionInput,
   ): Promise<void>;

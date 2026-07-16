@@ -6,6 +6,7 @@ import type {
   MockExamAnswerRecordRow,
   MockExamRow,
 } from "../repositories/mock-exam-repository";
+import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
 
 function formatNullableTimestamp(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
@@ -48,7 +49,7 @@ export function mapMockExamToApi(
     durationMinute: mockExam.duration_minute,
     questionCount: getQuestionCount(mockExam.paper_snapshot),
     answeredCount: mockExam.answered_count,
-    paperSnapshot: mockExam.paper_snapshot,
+    paperSnapshot: projectPaperSnapshotForLearner(mockExam.paper_snapshot),
   };
 }
 
@@ -61,6 +62,9 @@ export function mapMockExamAnswerRecordToApi(
     paperQuestionPublicId: answerRecord.paper_question_public_id,
     questionPublicId: answerRecord.question_public_id,
     answerSnapshot: answerRecord.answer_snapshot,
+    answerRevision: answerRecord.answer_revision,
+    clientOperationId: answerRecord.client_operation_id,
+    clientSavedAt: formatNullableTimestamp(answerRecord.client_saved_at),
     answerRecordStatus: answerRecord.answer_record_status,
     isCorrect: answerRecord.is_correct,
     score: answerRecord.score,

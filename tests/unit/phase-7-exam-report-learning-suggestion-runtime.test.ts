@@ -41,6 +41,7 @@ function createAnswerRecord(): ExamReportAnswerRecordRow {
       textAnswer: null,
       savedFromClientAt: null,
     },
+    ai_scoring_evidence: null,
     answer_record_status: "scored",
     is_correct: false,
     score: "0.0",
@@ -104,6 +105,9 @@ function createRepository(): ExamReportRepository {
     },
     async createExamReport() {
       throw new Error("createExamReport should not be called by retry");
+    },
+    async rebuildExamReport() {
+      throw new Error("rebuildExamReport should not be called by retry");
     },
     async updateExamReportLearningSuggestionSnapshot() {},
   };

@@ -269,17 +269,24 @@ function createMockExamRepository(): MockExamRepository {
     },
     async saveMockExamAnswerRecord(input) {
       return {
-        public_id: input.publicId,
-        exam_mode: "mock_exam",
-        paper_question_public_id: input.paperQuestionPublicId,
-        question_public_id: input.questionPublicId,
-        answer_snapshot: input.answerSnapshot,
-        answer_record_status: "saved",
-        is_correct: null,
-        score: null,
-        max_score: "5.0",
-        answered_at: input.answeredAt,
-        submitted_at: null,
+        status: "saved",
+        answerRecord: {
+          public_id: input.publicId,
+          exam_mode: "mock_exam",
+          paper_question_public_id: input.paperQuestionPublicId,
+          question_public_id: input.questionPublicId,
+          question_snapshot: input.questionSnapshot,
+          answer_snapshot: input.answerSnapshot,
+          answer_revision: input.expectedRevision + 1,
+          client_operation_id: input.operationId,
+          client_saved_at: input.answeredAt,
+          answer_record_status: "saved",
+          is_correct: null,
+          score: null,
+          max_score: "5.0",
+          answered_at: input.answeredAt,
+          submitted_at: null,
+        },
       };
     },
     async listMockExamAnswerRecords() {
@@ -294,6 +301,9 @@ function createMockExamRepository(): MockExamRepository {
             textAnswer: null,
             savedFromClientAt: null,
           },
+          answer_revision: 1,
+          client_operation_id: null,
+          client_saved_at: null,
           answer_record_status: "saved",
           is_correct: null,
           score: null,
@@ -302,6 +312,12 @@ function createMockExamRepository(): MockExamRepository {
           submitted_at: null,
         },
       ];
+    },
+    async supplementMissingMockExamAnswers() {
+      return null;
+    },
+    async rebuildExistingExamReport() {
+      return null;
     },
     async submitMockExam(input) {
       return {
@@ -402,6 +418,7 @@ function createExamReportRepository(): ExamReportRepository {
             textAnswer: null,
             savedFromClientAt: null,
           },
+          ai_scoring_evidence: null,
           answer_record_status: "saved",
           is_correct: true,
           score: "5.0",
@@ -412,6 +429,30 @@ function createExamReportRepository(): ExamReportRepository {
       ];
     },
     async createExamReport(input) {
+      return {
+        id: 3001,
+        public_id: input.publicId,
+        exam_report_public_id: input.publicId,
+        mock_exam_public_id: input.mockExamPublicId,
+        paper_public_id: input.paperPublicId,
+        paper_name: input.paperName,
+        profession: input.profession,
+        level: input.level,
+        subject: input.subject,
+        exam_status: input.examStatus,
+        objective_score: input.objectiveScore,
+        subjective_score: input.subjectiveScore,
+        total_score: input.totalScore,
+        duration_second: input.durationSecond,
+        report_snapshot: input.reportSnapshot,
+        learning_suggestion_snapshot: input.learningSuggestionSnapshot,
+        generated_at: input.generatedAt,
+        started_at: new Date("2026-05-21T07:55:00.000Z"),
+        created_at: input.generatedAt,
+        updated_at: input.generatedAt,
+      };
+    },
+    async rebuildExamReport(input) {
       return {
         id: 3001,
         public_id: input.publicId,

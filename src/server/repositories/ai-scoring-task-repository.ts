@@ -4,7 +4,6 @@ import { sql, type SQL } from "drizzle-orm";
 
 import {
   createLazyRuntimeDatabaseGetter,
-  type RuntimeDatabase,
   type RuntimeDatabaseOptions,
 } from "./runtime-database";
 
@@ -416,9 +415,17 @@ export function createPostgresAiScoringTaskRepository(
         scoringStatus: "scored",
         resultSnapshot: input.resultSnapshot,
       };
-      const rows = await executeSql<AiScoringTaskRow>(
-        getDatabase(),
-        sql`
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        await lockAiScoringTaskMockExam(
+          transaction,
+          input.taskPublicId,
+          input.workerPublicId,
+        );
+        const rows = await executeSql<AiScoringTaskRow>(
+          transaction,
+          sql`
           with ai_call_log_link as (
             select
               id,
@@ -505,20 +512,71 @@ export function createPostgresAiScoringTaskRepository(
             from completed_task
             returning id
           ),
+          mock_exam_update as (
+            update mock_exam
+            set
+              exam_status = case
+                when exists (
+                  select 1
+                  from ai_scoring_task remaining_task
+                  where remaining_task.mock_exam_public_id = completed_task.mock_exam_public_id
+                    and remaining_task.id <> completed_task.id
+                    and remaining_task.task_status in (
+                      'pending'::ai_scoring_task_status,
+                      'running'::ai_scoring_task_status
+                    )
+                ) then 'scoring'::exam_status
+                when exists (
+                  select 1
+                  from ai_scoring_task remaining_task
+                  where remaining_task.mock_exam_public_id = completed_task.mock_exam_public_id
+                    and remaining_task.id <> completed_task.id
+                    and remaining_task.task_status in (
+                      'failed'::ai_scoring_task_status,
+                      'cancelled'::ai_scoring_task_status
+                    )
+                ) then 'scoring_partial_failed'::exam_status
+                else 'completed'::exam_status
+              end,
+              subjective_score = (
+                select coalesce(sum(existing_answer.score), 0::numeric)
+                from answer_record existing_answer
+                where existing_answer.mock_exam_id = mock_exam.id
+                  and existing_answer.id <> completed_task.answer_record_id
+                  and existing_answer.is_correct is null
+              ) + ${input.score}::numeric,
+              total_score = coalesce(mock_exam.objective_score, 0::numeric) + (
+                select coalesce(sum(existing_answer.score), 0::numeric)
+                from answer_record existing_answer
+                where existing_answer.mock_exam_id = mock_exam.id
+                  and existing_answer.id <> completed_task.answer_record_id
+                  and existing_answer.is_correct is null
+              ) + ${input.score}::numeric,
+              updated_at = ${input.completedAt.toISOString()}
+            from completed_task
+            where mock_exam.public_id = completed_task.mock_exam_public_id
+              and mock_exam.exam_status in (
+                'scoring'::exam_status,
+                'scoring_partial_failed'::exam_status
+              )
+            returning mock_exam.id
+          ),
           selected_task as (
             select completed_task.*
             from completed_task
             where exists (select 1 from answer_record_update)
               and exists (select 1 from attempt_insert)
+              and exists (select 1 from mock_exam_update)
           )
           ${scoringTaskSelection}
-        `,
-      );
+          `,
+        );
 
-      return requireTaskRow(
-        rows[0],
-        "AI scoring task completion lost its lease.",
-      );
+        return requireTaskRow(
+          rows[0],
+          "AI scoring task completion lost its lease.",
+        );
+      });
     },
 
     async failAiScoringTaskAttempt(input) {
@@ -529,9 +587,17 @@ export function createPostgresAiScoringTaskRepository(
         scoringStatus: "scoring_failed",
         failureCode: input.failureCode,
       };
-      const rows = await executeSql<AiScoringTaskRow>(
-        getDatabase(),
-        sql`
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        await lockAiScoringTaskMockExam(
+          transaction,
+          input.taskPublicId,
+          input.workerPublicId,
+        );
+        const rows = await executeSql<AiScoringTaskRow>(
+          transaction,
+          sql`
           with leased_task as (
             select id, scheduled_at, claimed_at
             from ai_scoring_task
@@ -543,13 +609,29 @@ export function createPostgresAiScoringTaskRepository(
           failed_task as (
             update ai_scoring_task task
             set
-              task_status = 'failed'::ai_scoring_task_status,
+              task_status = case
+                when ${input.retryable}
+                  and task.attempt_count < task.max_attempt_count
+                  then 'pending'::ai_scoring_task_status
+                else 'failed'::ai_scoring_task_status
+              end,
               failure_code = ${input.failureCode},
               failure_message_digest = ${input.failureMessageDigest},
-              scheduled_at = task.scheduled_at,
+              scheduled_at = case
+                when ${input.retryable}
+                  and task.attempt_count < task.max_attempt_count
+                  then ${input.retryAfterAt.toISOString()}::timestamptz
+                else task.scheduled_at
+              end,
+              claimed_at = null,
               lease_expires_at = null,
               worker_public_id = null,
-              completed_at = ${input.failedAt.toISOString()}::timestamptz,
+              completed_at = case
+                when ${input.retryable}
+                  and task.attempt_count < task.max_attempt_count
+                  then null
+                else ${input.failedAt.toISOString()}::timestamptz
+              end,
               updated_at = ${input.failedAt.toISOString()}
             from leased_task
             where task.id = leased_task.id
@@ -558,7 +640,7 @@ export function createPostgresAiScoringTaskRepository(
               leased_task.scheduled_at as attempt_scheduled_at,
               leased_task.claimed_at as attempt_started_at
           ),
-          answer_record_update as (
+          terminal_answer_record_update as (
             update answer_record
             set
               answer_record_status = 'scoring_failed'::answer_record_status,
@@ -607,17 +689,51 @@ export function createPostgresAiScoringTaskRepository(
             from failed_task
             returning id
           ),
+          mock_exam_update as (
+            update mock_exam
+            set
+              exam_status = case
+                when failed_task.task_status = 'pending'::ai_scoring_task_status
+                  or exists (
+                    select 1
+                    from ai_scoring_task remaining_task
+                    where remaining_task.mock_exam_public_id = failed_task.mock_exam_public_id
+                      and remaining_task.id <> failed_task.id
+                      and remaining_task.task_status in (
+                        'pending'::ai_scoring_task_status,
+                        'running'::ai_scoring_task_status
+                      )
+                  ) then 'scoring'::exam_status
+                else 'scoring_partial_failed'::exam_status
+              end,
+              updated_at = ${input.failedAt.toISOString()}
+            from failed_task
+            where mock_exam.public_id = failed_task.mock_exam_public_id
+              and mock_exam.exam_status in (
+                'scoring'::exam_status,
+                'scoring_partial_failed'::exam_status
+              )
+            returning mock_exam.id
+          ),
           selected_task as (
             select failed_task.*
             from failed_task
             where exists (select 1 from attempt_insert)
-              and exists (select 1 from answer_record_update)
+              and exists (select 1 from mock_exam_update)
+              and (
+                failed_task.task_status = 'pending'::ai_scoring_task_status
+                or exists (select 1 from terminal_answer_record_update)
+              )
           )
           ${scoringTaskSelection}
-        `,
-      );
+          `,
+        );
 
-      return requireTaskRow(rows[0], "AI scoring task failure lost its lease.");
+        return requireTaskRow(
+          rows[0],
+          "AI scoring task failure lost its lease.",
+        );
+      });
     },
   };
 }
@@ -676,8 +792,32 @@ function digest(value: string): string {
 }
 
 async function executeSql<TRow extends Record<string, unknown>>(
-  database: RuntimeDatabase,
+  database: unknown,
   query: SQL,
 ): Promise<TRow[]> {
   return (database as unknown as DrizzleSqlExecutor).execute<TRow>(query);
+}
+
+async function lockAiScoringTaskMockExam(
+  database: unknown,
+  taskPublicId: string,
+  workerPublicId: string,
+): Promise<void> {
+  const rows = await executeSql<{ id: number }>(
+    database,
+    sql`
+      select owned_mock_exam.id
+      from mock_exam owned_mock_exam
+      join ai_scoring_task task
+        on task.mock_exam_public_id = owned_mock_exam.public_id
+      where task.public_id = ${taskPublicId}
+        and task.task_status = 'running'::ai_scoring_task_status
+        and task.worker_public_id = ${workerPublicId}
+      for update of owned_mock_exam
+    `,
+  );
+
+  if (rows[0] === undefined) {
+    throw new Error("AI scoring task lost its mock_exam lease boundary.");
+  }
 }

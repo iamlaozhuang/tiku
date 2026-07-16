@@ -33,6 +33,8 @@ function createPracticeRow(overrides: Partial<PracticeRow> = {}): PracticeRow {
           paperQuestions: [
             {
               paperQuestionPublicId: "paper_question_public_123",
+              standardAnswerLabels: ["A"],
+              scoringPoints: [{ description: "评分点" }],
             },
           ],
         },

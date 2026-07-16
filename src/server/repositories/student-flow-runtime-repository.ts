@@ -19,6 +19,7 @@ import type { AuthorizationType } from "../contracts/effective-authorization-con
 import type { AnswerRecordStatus } from "../models/student-experience";
 import type {
   ExamReportAnswerRecordRow,
+  ExamReportAiScoringEvidenceRow,
   ExamReportRepository,
   ExamReportRow,
 } from "./exam-report-repository";
@@ -69,11 +70,13 @@ export class PaperSnapshotIntegrityError extends Error {
 }
 
 const {
+  aiScoringAttempt,
   aiScoringTask,
   answerRecord,
   examReport,
   mistakeBook,
   mockExam,
+  mockExamDeadlineTask,
   employee,
   employeeOrgAuth,
   organization,
@@ -102,6 +105,10 @@ function createLazyDatabaseGetter(
 
 function getNow(options: StudentFlowRuntimeRepositoryOptions): Date {
   return options.now?.() ?? new Date();
+}
+
+function formatRepositoryScore(value: number): string {
+  return value.toFixed(1);
 }
 
 function createLocalRuntimeDatabase(): StudentFlowRuntimeDatabase {
@@ -684,80 +691,202 @@ function createPostgresMockExamRepository(
           throw new Error("Mock exam insert did not return a row.");
         }
 
+        if (
+          input.serverDeadlineAt !== null &&
+          input.deadlineTaskPublicId !== null
+        ) {
+          await transaction.insert(mockExamDeadlineTask).values({
+            public_id: input.deadlineTaskPublicId,
+            mock_exam_id: row.id,
+            task_status: "pending",
+            scheduled_at: input.serverDeadlineAt,
+            attempt_count: 0,
+            max_attempt_count: 5,
+            claimed_at: null,
+            lease_expires_at: null,
+            worker_public_id: null,
+            failure_message_digest: null,
+            completed_at: null,
+          });
+        }
+
         return mapMockExamRow(row, 0);
       });
     },
     async saveMockExamAnswerRecord(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
-      const mockExamLink = await getRequiredMockExamLink(
-        database,
-        input.mockExamPublicId,
-      );
-      const paperQuestionId = await getRequiredPaperQuestionId(
-        database,
-        input.paperQuestionPublicId,
-      );
-      const [existingRow] = await database
-        .select({ public_id: answerRecord.public_id })
-        .from(answerRecord)
-        .where(
-          and(
+      const clientSavedAt =
+        input.answerSnapshot.savedFromClientAt === null
+          ? null
+          : new Date(input.answerSnapshot.savedFromClientAt);
+
+      try {
+        return await database.transaction(async (transaction) => {
+          const mockExamLink = await findWritableMockExamLink(
+            transaction as StudentFlowRuntimeDatabase,
+            userId,
+            input.mockExamPublicId,
+          );
+
+          if (mockExamLink === null) {
+            return { status: "not_writable" as const, answerRecord: null };
+          }
+
+          const paperQuestionId = await getRequiredPaperQuestionId(
+            transaction as StudentFlowRuntimeDatabase,
+            input.paperQuestionPublicId,
+          );
+          const [operationOwner] = await transaction
+            .select()
+            .from(answerRecord)
+            .where(
+              and(
+                eq(answerRecord.mock_exam_id, mockExamLink.id),
+                eq(answerRecord.client_operation_id, input.operationId),
+              ),
+            )
+            .limit(1);
+
+          if (operationOwner !== undefined) {
+            return operationOwner.paper_question_public_id ===
+              input.paperQuestionPublicId
+              ? {
+                  status: "replayed" as const,
+                  answerRecord: mapMockExamAnswerRecordRow(operationOwner),
+                }
+              : {
+                  status: "operation_conflict" as const,
+                  answerRecord: null,
+                };
+          }
+
+          const answerScopeCondition = and(
             eq(answerRecord.user_id, userId),
             eq(answerRecord.mock_exam_id, mockExamLink.id),
             eq(
               answerRecord.paper_question_public_id,
               input.paperQuestionPublicId,
             ),
-          ),
-        )
-        .limit(1);
+          );
+          const [existingRow] = await transaction
+            .select()
+            .from(answerRecord)
+            .where(answerScopeCondition)
+            .limit(1)
+            .for("update");
 
-      if (existingRow !== undefined) {
-        const [row] = await database
-          .update(answerRecord)
-          .set({
-            answer_snapshot: input.answerSnapshot,
-            answer_record_status: input.answerRecordStatus,
-            answered_at: input.answeredAt,
-            updated_at: input.answeredAt,
-          })
-          .where(eq(answerRecord.public_id, existingRow.public_id))
-          .returning();
+          if (existingRow !== undefined) {
+            if (existingRow.client_operation_id === input.operationId) {
+              return {
+                status: "replayed" as const,
+                answerRecord: mapMockExamAnswerRecordRow(existingRow),
+              };
+            }
 
-        if (row !== undefined) {
-          return mapMockExamAnswerRecordRow(row);
+            if (existingRow.answer_revision !== input.expectedRevision) {
+              return {
+                status: "stale" as const,
+                answerRecord: mapMockExamAnswerRecordRow(existingRow),
+              };
+            }
+
+            const [updatedRow] = await transaction
+              .update(answerRecord)
+              .set({
+                answer_snapshot: input.answerSnapshot,
+                answer_revision: input.expectedRevision + 1,
+                client_operation_id: input.operationId,
+                client_saved_at: clientSavedAt,
+                answer_record_status: input.answerRecordStatus,
+                answered_at: input.answeredAt,
+                updated_at: input.answeredAt,
+              })
+              .where(
+                and(
+                  eq(answerRecord.id, existingRow.id),
+                  eq(answerRecord.answer_revision, input.expectedRevision),
+                ),
+              )
+              .returning();
+
+            return updatedRow === undefined
+              ? {
+                  status: "stale" as const,
+                  answerRecord: mapMockExamAnswerRecordRow(existingRow),
+                }
+              : {
+                  status: "saved" as const,
+                  answerRecord: mapMockExamAnswerRecordRow(updatedRow),
+                };
+          }
+
+          if (input.expectedRevision !== 0) {
+            return { status: "stale" as const, answerRecord: null };
+          }
+
+          const [insertedRow] = await transaction
+            .insert(answerRecord)
+            .values({
+              public_id: input.publicId,
+              user_id: userId,
+              exam_mode: "mock_exam",
+              practice_id: null,
+              mock_exam_id: mockExamLink.id,
+              paper_id: mockExamLink.paper_id,
+              paper_question_id: paperQuestionId,
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              question_snapshot: input.questionSnapshot,
+              answer_snapshot: input.answerSnapshot,
+              answer_revision: 1,
+              client_operation_id: input.operationId,
+              client_saved_at: clientSavedAt,
+              answer_record_status: input.answerRecordStatus,
+              is_correct: input.isCorrect,
+              score: input.score,
+              max_score: input.maxScore,
+              answered_at: input.answeredAt,
+              submitted_at: null,
+            })
+            .onConflictDoNothing()
+            .returning();
+
+          if (insertedRow !== undefined) {
+            return {
+              status: "saved" as const,
+              answerRecord: mapMockExamAnswerRecordRow(insertedRow),
+            };
+          }
+
+          const [concurrentRow] = await transaction
+            .select()
+            .from(answerRecord)
+            .where(answerScopeCondition)
+            .limit(1);
+
+          if (concurrentRow === undefined) {
+            return {
+              status: "operation_conflict" as const,
+              answerRecord: null,
+            };
+          }
+
+          return {
+            status:
+              concurrentRow.client_operation_id === input.operationId
+                ? ("replayed" as const)
+                : ("stale" as const),
+            answerRecord: mapMockExamAnswerRecordRow(concurrentRow),
+          };
+        });
+      } catch (error) {
+        if (isAnswerOperationIdConflict(error)) {
+          return { status: "operation_conflict" as const, answerRecord: null };
         }
+
+        throw error;
       }
-
-      const [row] = await database
-        .insert(answerRecord)
-        .values({
-          public_id: input.publicId,
-          user_id: userId,
-          exam_mode: "mock_exam",
-          practice_id: null,
-          mock_exam_id: mockExamLink.id,
-          paper_id: mockExamLink.paper_id,
-          paper_question_id: paperQuestionId,
-          paper_question_public_id: input.paperQuestionPublicId,
-          question_public_id: input.questionPublicId,
-          question_snapshot: input.questionSnapshot,
-          answer_snapshot: input.answerSnapshot,
-          answer_record_status: input.answerRecordStatus,
-          is_correct: input.isCorrect,
-          score: input.score,
-          max_score: input.maxScore,
-          answered_at: input.answeredAt,
-          submitted_at: null,
-        })
-        .returning();
-
-      if (row === undefined) {
-        throw new Error("Mock exam answer insert did not return a row.");
-      }
-
-      return mapMockExamAnswerRecordRow(row);
     },
     async listMockExamAnswerRecords(query) {
       return listMockExamAnswerRecords(
@@ -765,6 +894,306 @@ function createPostgresMockExamRepository(
         query.userPublicId,
         query.mockExamPublicId,
       );
+    },
+    async supplementMissingMockExamAnswers(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) => {
+        const userId = await findUserIdByPublicId(
+          transaction as StudentFlowRuntimeDatabase,
+          input.userPublicId,
+        );
+
+        if (userId === null) {
+          return null;
+        }
+
+        const [ownedMockExam] = await transaction
+          .select()
+          .from(mockExam)
+          .where(
+            and(
+              eq(mockExam.user_id, userId),
+              eq(mockExam.public_id, input.mockExamPublicId),
+              inArray(mockExam.exam_status, [
+                "completed",
+                "scoring",
+                "scoring_partial_failed",
+              ]),
+            ),
+          )
+          .limit(1)
+          .for("update");
+
+        if (ownedMockExam === undefined) {
+          return null;
+        }
+
+        let supplementedCount = 0;
+
+        for (const supplementalAnswer of input.answers) {
+          const paperQuestionId = await getRequiredPaperQuestionId(
+            transaction as StudentFlowRuntimeDatabase,
+            supplementalAnswer.paperQuestionPublicId,
+          );
+          const [insertedAnswer] = await transaction
+            .insert(answerRecord)
+            .values({
+              public_id: supplementalAnswer.publicId,
+              user_id: userId,
+              exam_mode: "mock_exam",
+              practice_id: null,
+              mock_exam_id: ownedMockExam.id,
+              paper_id: ownedMockExam.paper_id,
+              paper_question_id: paperQuestionId,
+              paper_question_public_id:
+                supplementalAnswer.paperQuestionPublicId,
+              question_public_id: supplementalAnswer.questionPublicId,
+              question_snapshot: supplementalAnswer.questionSnapshot,
+              answer_snapshot: supplementalAnswer.answerSnapshot,
+              answer_revision: 1,
+              client_operation_id: supplementalAnswer.operationId,
+              client_saved_at: supplementalAnswer.clientSavedAt,
+              answer_record_status: supplementalAnswer.answerRecordStatus,
+              is_correct: supplementalAnswer.isCorrect,
+              score: supplementalAnswer.score,
+              max_score: supplementalAnswer.maxScore,
+              answered_at: input.supplementedAt,
+              submitted_at: input.supplementedAt,
+              created_at: input.supplementedAt,
+              updated_at: input.supplementedAt,
+            })
+            .onConflictDoNothing()
+            .returning();
+
+          if (insertedAnswer === undefined) {
+            const [existingAnswer] = await transaction
+              .select({
+                paper_question_public_id: answerRecord.paper_question_public_id,
+              })
+              .from(answerRecord)
+              .where(
+                and(
+                  eq(answerRecord.mock_exam_id, ownedMockExam.id),
+                  eq(
+                    answerRecord.paper_question_public_id,
+                    supplementalAnswer.paperQuestionPublicId,
+                  ),
+                ),
+              )
+              .limit(1);
+
+            if (existingAnswer === undefined) {
+              throw new Error(
+                "Supplemental answer operation id conflicts with another question.",
+              );
+            }
+
+            continue;
+          }
+
+          supplementedCount += 1;
+
+          if (supplementalAnswer.aiScoringTask !== null) {
+            const task = supplementalAnswer.aiScoringTask;
+
+            if (
+              task.answerRecordPublicId !== insertedAnswer.public_id ||
+              task.mockExamPublicId !== ownedMockExam.public_id ||
+              task.actorPublicId !== input.userPublicId
+            ) {
+              throw new Error(
+                "Supplemental AI scoring task answer scope is invalid.",
+              );
+            }
+
+            await transaction.insert(aiScoringTask).values({
+              public_id: task.publicId,
+              answer_record_id: insertedAnswer.id,
+              mock_exam_public_id: task.mockExamPublicId,
+              actor_public_id: task.actorPublicId,
+              idempotency_key_hash: task.idempotencyKeyHash,
+              task_status: "pending",
+              attempt_count: 0,
+              max_attempt_count: task.maxAttemptCount,
+              timeout_second: task.timeoutSecond,
+              model_config_snapshot: task.modelConfigSnapshot,
+              prompt_template_key: task.promptTemplateKey,
+              prompt_template_version: task.promptTemplateVersion,
+              prompt_template_hash: task.promptTemplateHash,
+              input_snapshot: task.inputSnapshot,
+              authorization_snapshot: task.authorizationSnapshot,
+              rag_snapshot: task.ragSnapshot,
+              result_snapshot: null,
+              ai_call_log_id: null,
+              failure_code: null,
+              failure_message_digest: null,
+              scheduled_at: task.scheduledAt,
+              claimed_at: null,
+              lease_expires_at: null,
+              worker_public_id: null,
+              completed_at: null,
+              created_at: input.supplementedAt,
+              updated_at: input.supplementedAt,
+            });
+          }
+        }
+
+        const answerRows = await transaction
+          .select()
+          .from(answerRecord)
+          .where(
+            and(
+              eq(answerRecord.user_id, userId),
+              eq(answerRecord.mock_exam_id, ownedMockExam.id),
+            ),
+          )
+          .orderBy(asc(answerRecord.created_at));
+        const objectiveScore = answerRows
+          .filter((row) => row.is_correct !== null)
+          .reduce((total, row) => total + Number(row.score ?? 0), 0);
+        const subjectiveRows = answerRows.filter(
+          (row) => row.is_correct === null,
+        );
+        const hasPendingSubjective = subjectiveRows.some((row) =>
+          ["saved", "submitted"].includes(row.answer_record_status),
+        );
+        const hasFailedSubjective = subjectiveRows.some(
+          (row) => row.answer_record_status === "scoring_failed",
+        );
+        const subjectiveScore =
+          subjectiveRows.length === 0 ||
+          hasPendingSubjective ||
+          hasFailedSubjective
+            ? null
+            : subjectiveRows.reduce(
+                (total, row) => total + Number(row.score ?? 0),
+                0,
+              );
+        const examStatus = hasPendingSubjective
+          ? ("scoring" as const)
+          : hasFailedSubjective
+            ? ("scoring_partial_failed" as const)
+            : ("completed" as const);
+        const [updatedMockExam] = await transaction
+          .update(mockExam)
+          .set({
+            exam_status: examStatus,
+            objective_score: formatRepositoryScore(objectiveScore),
+            subjective_score:
+              subjectiveScore === null
+                ? null
+                : formatRepositoryScore(subjectiveScore),
+            total_score: formatRepositoryScore(
+              objectiveScore + (subjectiveScore ?? 0),
+            ),
+            updated_at: input.supplementedAt,
+          })
+          .where(
+            and(
+              eq(mockExam.id, ownedMockExam.id),
+              inArray(mockExam.exam_status, [
+                "completed",
+                "scoring",
+                "scoring_partial_failed",
+              ]),
+            ),
+          )
+          .returning();
+
+        if (updatedMockExam === undefined) {
+          throw new Error("Terminal mock exam changed during supplementation.");
+        }
+
+        const reportAnswerRecords = await listMockExamAnswerRecords(
+          transaction as StudentFlowRuntimeDatabase,
+          input.userPublicId,
+          input.mockExamPublicId,
+        );
+
+        return {
+          mockExam: mapMockExamRow(updatedMockExam, answerRows.length),
+          answerRecords: reportAnswerRecords,
+          supplementedCount,
+          skippedExistingCount: input.answers.length - supplementedCount,
+        };
+      });
+    },
+    async rebuildExistingExamReport(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+
+      if (userId === null) {
+        return null;
+      }
+
+      const [ownedMockExam] = await database
+        .select({ id: mockExam.id })
+        .from(mockExam)
+        .where(
+          and(
+            eq(mockExam.user_id, userId),
+            eq(mockExam.public_id, input.mockExamPublicId),
+          ),
+        )
+        .limit(1);
+
+      if (ownedMockExam === undefined) {
+        return null;
+      }
+
+      if (!input.hasChanges) {
+        const [existingReport] = await database
+          .select({
+            public_id: examReport.public_id,
+            report_revision: examReport.report_revision,
+          })
+          .from(examReport)
+          .where(
+            and(
+              eq(examReport.user_id, userId),
+              eq(examReport.mock_exam_id, ownedMockExam.id),
+            ),
+          )
+          .limit(1);
+
+        return existingReport === undefined
+          ? null
+          : {
+              publicId: existingReport.public_id,
+              reportRevision: existingReport.report_revision,
+            };
+      }
+
+      const [rebuiltReport] = await database
+        .update(examReport)
+        .set({
+          report_snapshot: input.reportSnapshot,
+          report_revision: sql`${examReport.report_revision} + 1`,
+          exam_status: input.examStatus,
+          objective_score: input.objectiveScore,
+          subjective_score: input.subjectiveScore,
+          total_score: input.totalScore,
+          generated_at: input.rebuiltAt,
+          updated_at: input.rebuiltAt,
+        })
+        .where(
+          and(
+            eq(examReport.user_id, userId),
+            eq(examReport.mock_exam_id, ownedMockExam.id),
+          ),
+        )
+        .returning({
+          public_id: examReport.public_id,
+          report_revision: examReport.report_revision,
+        });
+
+      return rebuiltReport === undefined
+        ? null
+        : {
+            publicId: rebuiltReport.public_id,
+            reportRevision: rebuiltReport.report_revision,
+          };
     },
     async submitMockExam(input) {
       const database = getDatabase();
@@ -790,6 +1219,18 @@ function createPostgresMockExamRepository(
         if (row === undefined) {
           return null;
         }
+
+        await transaction
+          .update(mockExamDeadlineTask)
+          .set({
+            task_status: "completed",
+            lease_expires_at: null,
+            worker_public_id: null,
+            failure_message_digest: null,
+            completed_at: input.submittedAt,
+            updated_at: input.submittedAt,
+          })
+          .where(eq(mockExamDeadlineTask.mock_exam_id, row.id));
 
         await Promise.all(
           input.answerRecordResults.map((answerRecordResult) =>
@@ -1077,23 +1518,49 @@ function createPostgresMockExamRepository(
       });
     },
     async terminateMockExam(input) {
-      const [row] = await getDatabase()
-        .update(mockExam)
-        .set({
-          exam_status: "terminated",
-          terminated_at: input.terminatedAt,
-          termination_reason: input.terminationReason,
-          updated_at: input.terminatedAt,
-        })
-        .where(eq(mockExam.public_id, input.publicId))
-        .returning();
+      const database = getDatabase();
 
-      return row === undefined
-        ? null
-        : mapMockExamRow(
-            row,
-            await countMockExamAnswers(getDatabase(), row.id),
-          );
+      return database.transaction(async (transaction) => {
+        const [row] = await transaction
+          .update(mockExam)
+          .set({
+            exam_status: "terminated",
+            terminated_at: input.terminatedAt,
+            termination_reason: input.terminationReason,
+            updated_at: input.terminatedAt,
+          })
+          .where(
+            and(
+              eq(mockExam.public_id, input.publicId),
+              eq(mockExam.exam_status, "in_progress"),
+            ),
+          )
+          .returning();
+
+        if (row === undefined) {
+          return null;
+        }
+
+        await transaction
+          .update(mockExamDeadlineTask)
+          .set({
+            task_status: "cancelled",
+            lease_expires_at: null,
+            worker_public_id: null,
+            failure_message_digest: null,
+            completed_at: input.terminatedAt,
+            updated_at: input.terminatedAt,
+          })
+          .where(eq(mockExamDeadlineTask.mock_exam_id, row.id));
+
+        return mapMockExamRow(
+          row,
+          await countMockExamAnswers(
+            transaction as StudentFlowRuntimeDatabase,
+            row.id,
+          ),
+        );
+      });
     },
   };
 }
@@ -1272,18 +1739,26 @@ function createPostgresExamReportRepository(
     async createExamReport(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
-      const mockExamLink = await getRequiredMockExamLink(
+      const ownedMockExam = await findOwnedMockExamTableRow(
         database,
+        input.userPublicId,
         input.mockExamPublicId,
       );
-      const paperId = await getRequiredPaperId(database, input.paperPublicId);
+
+      if (
+        ownedMockExam === null ||
+        ownedMockExam.paper_public_id !== input.paperPublicId
+      ) {
+        throw new Error("Exam report mock_exam scope is invalid.");
+      }
+
       const [row] = await database
         .insert(examReport)
         .values({
           public_id: input.publicId,
           user_id: userId,
-          mock_exam_id: mockExamLink.id,
-          paper_id: paperId,
+          mock_exam_id: ownedMockExam.id,
+          paper_id: ownedMockExam.paper_id,
           paper_public_id: input.paperPublicId,
           report_snapshot: input.reportSnapshot,
           exam_status: input.examStatus,
@@ -1297,17 +1772,108 @@ function createPostgresExamReportRepository(
           learning_suggestion_snapshot: input.learningSuggestionSnapshot,
           generated_at: input.generatedAt,
         })
+        .onConflictDoNothing({ target: examReport.mock_exam_id })
         .returning();
 
-      if (row === undefined) {
+      const persistedRow =
+        row ??
+        (
+          await database
+            .select()
+            .from(examReport)
+            .where(
+              and(
+                eq(examReport.user_id, userId),
+                eq(examReport.mock_exam_id, ownedMockExam.id),
+              ),
+            )
+            .limit(1)
+        )[0];
+
+      if (persistedRow === undefined) {
         throw new Error("Exam report insert did not return a row.");
       }
 
       return mapExamReportRow(
-        row,
+        persistedRow,
         input.mockExamPublicId,
         input.paperName,
-        mockExamLink.started_at,
+        ownedMockExam.started_at,
+      );
+    },
+    async rebuildExamReport(input) {
+      const database = getDatabase();
+      const userId = await getRequiredUserId(database, input.userPublicId);
+      const ownedMockExam = await findOwnedMockExamTableRow(
+        database,
+        input.userPublicId,
+        input.mockExamPublicId,
+      );
+
+      if (
+        ownedMockExam === null ||
+        ownedMockExam.paper_public_id !== input.paperPublicId
+      ) {
+        throw new Error("Exam report mock_exam scope is invalid.");
+      }
+
+      const changedReportCondition = or(
+        sql`${examReport.report_snapshot} is distinct from ${JSON.stringify(input.reportSnapshot)}::jsonb`,
+        sql`${examReport.exam_status} is distinct from ${input.examStatus}::exam_status`,
+        sql`${examReport.objective_score} is distinct from ${input.objectiveScore}::numeric`,
+        sql`${examReport.subjective_score} is distinct from ${input.subjectiveScore}::numeric`,
+        sql`${examReport.total_score} is distinct from ${input.totalScore}::numeric`,
+        sql`${examReport.duration_second} is distinct from ${input.durationSecond}`,
+        sql`${examReport.learning_suggestion_snapshot} is not null`,
+      );
+      const [rebuiltRow] = await database
+        .update(examReport)
+        .set({
+          report_snapshot: input.reportSnapshot,
+          report_revision: sql`${examReport.report_revision} + 1`,
+          exam_status: input.examStatus,
+          objective_score: input.objectiveScore,
+          subjective_score: input.subjectiveScore,
+          total_score: input.totalScore,
+          duration_second: input.durationSecond,
+          learning_suggestion_snapshot: null,
+          generated_at: input.generatedAt,
+          updated_at: input.generatedAt,
+        })
+        .where(
+          and(
+            eq(examReport.user_id, userId),
+            eq(examReport.public_id, input.publicId),
+            eq(examReport.mock_exam_id, ownedMockExam.id),
+            changedReportCondition,
+          ),
+        )
+        .returning();
+      const persistedRow =
+        rebuiltRow ??
+        (
+          await database
+            .select()
+            .from(examReport)
+            .where(
+              and(
+                eq(examReport.user_id, userId),
+                eq(examReport.public_id, input.publicId),
+                eq(examReport.mock_exam_id, ownedMockExam.id),
+              ),
+            )
+            .limit(1)
+        )[0];
+
+      if (persistedRow === undefined) {
+        throw new Error("Exam report rebuild lost its owned report.");
+      }
+
+      return mapExamReportRow(
+        persistedRow,
+        input.mockExamPublicId,
+        input.paperName,
+        ownedMockExam.started_at,
       );
     },
     async updateExamReportLearningSuggestionSnapshot(input) {
@@ -1484,11 +2050,23 @@ async function buildPaperSnapshot(
     questionGroupIds.length === 0
       ? []
       : await database
-          .select({ id: questionGroup.id, public_id: questionGroup.public_id })
+          .select({
+            id: questionGroup.id,
+            public_id: questionGroup.public_id,
+            title: questionGroup.title,
+            material_snapshot: questionGroup.material_snapshot,
+          })
           .from(questionGroup)
           .where(inArray(questionGroup.id, questionGroupIds));
-  const questionGroupPublicIdById = new Map(
-    questionGroupRows.map((row) => [row.id, row.public_id]),
+  const questionGroupSnapshotById = new Map(
+    questionGroupRows.map((row) => [
+      row.id,
+      {
+        publicId: row.public_id,
+        title: row.title,
+        materialSnapshot: asRecord(row.material_snapshot),
+      },
+    ]),
   );
 
   for (const questionRow of questionRows) {
@@ -1521,9 +2099,9 @@ async function buildPaperSnapshot(
               (scoringPointRow) =>
                 scoringPointRow.paper_question_id === questionRow.id,
             ),
-            requireQuestionGroupPublicId(
+            requireQuestionGroupSnapshot(
               questionRow.question_group_id,
-              questionGroupPublicIdById,
+              questionGroupSnapshotById,
             ),
           ),
       ),
@@ -1534,7 +2112,11 @@ async function buildPaperSnapshot(
 function mapPaperQuestionSnapshot(
   row: typeof paperQuestion.$inferSelect,
   scoringPointRows: (typeof paperScoringPoint.$inferSelect)[],
-  questionGroupPublicId: string | null,
+  questionGroupSnapshot: {
+    publicId: string;
+    title: string;
+    materialSnapshot: Record<string, unknown>;
+  } | null,
 ): Record<string, unknown> {
   const snapshot = asRecord(row.question_snapshot);
   const questionPublicId = getStringField(snapshot, "questionPublicId");
@@ -1568,7 +2150,8 @@ function mapPaperQuestionSnapshot(
     questionPublicId,
     questionType: getStringField(snapshot, "questionType"),
     score,
-    questionGroupPublicId,
+    questionGroupPublicId: questionGroupSnapshot?.publicId ?? null,
+    questionGroupTitle: questionGroupSnapshot?.title ?? null,
     scoringPoints: scoringPointRows.map((scoringPointRow) => ({
       scoringPointPublicId: scoringPointRow.public_id,
       description: scoringPointRow.description,
@@ -1584,27 +2167,39 @@ function mapPaperQuestionSnapshot(
     analysisRichText:
       getStringField(snapshot, "analysisRichText") ??
       getStringField(snapshot, "analysis"),
-    materialSnapshot: row.material_snapshot,
+    materialSnapshot:
+      questionGroupSnapshot?.materialSnapshot ?? row.material_snapshot,
   };
 }
 
-function requireQuestionGroupPublicId(
+function requireQuestionGroupSnapshot(
   questionGroupId: number | null,
-  questionGroupPublicIdById: ReadonlyMap<number, string>,
-): string | null {
+  questionGroupSnapshotById: ReadonlyMap<
+    number,
+    {
+      publicId: string;
+      title: string;
+      materialSnapshot: Record<string, unknown>;
+    }
+  >,
+): {
+  publicId: string;
+  title: string;
+  materialSnapshot: Record<string, unknown>;
+} | null {
   if (questionGroupId === null) {
     return null;
   }
 
-  const publicId = questionGroupPublicIdById.get(questionGroupId);
+  const snapshot = questionGroupSnapshotById.get(questionGroupId);
 
-  if (publicId === undefined) {
+  if (snapshot === undefined) {
     throw new PaperSnapshotIntegrityError(
       "Paper question group is missing canonical public identity.",
     );
   }
 
-  return publicId;
+  return snapshot;
 }
 
 async function listQuestionCounts(
@@ -1664,23 +2259,6 @@ async function getRequiredUserId(
   return userId;
 }
 
-async function getRequiredPaperId(
-  database: StudentFlowRuntimeDatabase,
-  publicId: string,
-): Promise<number> {
-  const [row] = await database
-    .select({ id: paper.id })
-    .from(paper)
-    .where(eq(paper.public_id, publicId))
-    .limit(1);
-
-  if (row === undefined) {
-    throw new Error("Paper does not exist.");
-  }
-
-  return row.id;
-}
-
 async function getRequiredPublishedPaperIdForStart(
   database: StudentFlowRuntimeDatabase,
   publicId: string,
@@ -1735,10 +2313,39 @@ async function getRequiredPracticeLink(
   return row;
 }
 
-async function getRequiredMockExamLink(
+function isAnswerOperationIdConflict(error: unknown): boolean {
+  let currentError: unknown = error;
+
+  for (let depth = 0; depth < 4; depth += 1) {
+    if (typeof currentError !== "object" || currentError === null) {
+      return false;
+    }
+
+    const errorRecord = currentError as {
+      code?: unknown;
+      constraint?: unknown;
+      cause?: unknown;
+    };
+
+    if (
+      errorRecord.code === "23505" &&
+      errorRecord.constraint ===
+        "udx_answer_record_mock_exam_id_client_operation_id"
+    ) {
+      return true;
+    }
+
+    currentError = errorRecord.cause;
+  }
+
+  return false;
+}
+
+async function findWritableMockExamLink(
   database: StudentFlowRuntimeDatabase,
+  userId: number,
   publicId: string,
-): Promise<{ id: number; paper_id: number; started_at: Date }> {
+): Promise<{ id: number; paper_id: number; started_at: Date } | null> {
   const [row] = await database
     .select({
       id: mockExam.id,
@@ -1746,14 +2353,17 @@ async function getRequiredMockExamLink(
       started_at: mockExam.started_at,
     })
     .from(mockExam)
-    .where(eq(mockExam.public_id, publicId))
-    .limit(1);
+    .where(
+      and(
+        eq(mockExam.user_id, userId),
+        eq(mockExam.public_id, publicId),
+        eq(mockExam.exam_status, "in_progress"),
+      ),
+    )
+    .limit(1)
+    .for("update");
 
-  if (row === undefined) {
-    throw new Error("Mock exam does not exist.");
-  }
-
-  return row;
+  return row ?? null;
 }
 
 async function findOwnedMockExamTableRow(
@@ -1832,8 +2442,65 @@ async function listMockExamAnswerRecords(
     )
     .orderBy(asc(answerRecord.created_at));
 
+  const scoringEvidenceRows =
+    rows.length === 0
+      ? []
+      : await database
+          .select({
+            answer_record_id: aiScoringTask.answer_record_id,
+            task_public_id: aiScoringTask.public_id,
+            task_status: aiScoringTask.task_status,
+            attempt_number: aiScoringTask.attempt_count,
+            attempt_status: aiScoringAttempt.status,
+            model_config_snapshot: aiScoringTask.model_config_snapshot,
+            prompt_template_key: aiScoringTask.prompt_template_key,
+            prompt_template_version: aiScoringTask.prompt_template_version,
+            prompt_template_hash: aiScoringTask.prompt_template_hash,
+            result_snapshot: aiScoringTask.result_snapshot,
+          })
+          .from(aiScoringTask)
+          .leftJoin(
+            aiScoringAttempt,
+            and(
+              eq(
+                aiScoringAttempt.answer_record_id,
+                aiScoringTask.answer_record_id,
+              ),
+              eq(aiScoringAttempt.attempt_number, aiScoringTask.attempt_count),
+            ),
+          )
+          .where(
+            inArray(
+              aiScoringTask.answer_record_id,
+              rows.map((row) => row.id),
+            ),
+          );
+  const scoringEvidenceByAnswerRecordId = new Map<
+    number,
+    ExamReportAiScoringEvidenceRow
+  >(
+    scoringEvidenceRows.map((row) => [
+      row.answer_record_id,
+      {
+        taskPublicId: row.task_public_id,
+        taskStatus: row.task_status,
+        attemptNumber: row.attempt_number,
+        attemptStatus: row.attempt_status,
+        modelConfigSnapshot: asRecord(row.model_config_snapshot),
+        promptTemplateKey: row.prompt_template_key,
+        promptTemplateVersion: row.prompt_template_version,
+        promptTemplateHash: row.prompt_template_hash,
+        resultSnapshot:
+          row.result_snapshot === null ? null : asRecord(row.result_snapshot),
+      },
+    ]),
+  );
+
   return rows.map((row) =>
-    mapMockExamAnswerRecordRow(row),
+    mapMockExamAnswerRecordRow(
+      row,
+      scoringEvidenceByAnswerRecordId.get(row.id) ?? null,
+    ),
   ) as MockExamAnswerRecordRow[] & ExamReportAnswerRecordRow[];
 }
 
@@ -1899,6 +2566,7 @@ function mapMockExamRow(
 
 function mapMockExamAnswerRecordRow(
   row: typeof answerRecord.$inferSelect,
+  aiScoringEvidence: ExamReportAiScoringEvidenceRow | null = null,
 ): MockExamAnswerRecordRow & ExamReportAnswerRecordRow {
   return {
     public_id: row.public_id,
@@ -1907,6 +2575,10 @@ function mapMockExamAnswerRecordRow(
     question_public_id: row.question_public_id,
     question_snapshot: asRecord(row.question_snapshot),
     answer_snapshot: asMockExamAnswerSnapshot(row.answer_snapshot),
+    ai_scoring_evidence: aiScoringEvidence,
+    answer_revision: row.answer_revision,
+    client_operation_id: row.client_operation_id,
+    client_saved_at: row.client_saved_at,
     answer_record_status: row.answer_record_status as AnswerRecordStatus,
     is_correct: row.is_correct,
     score: row.score,

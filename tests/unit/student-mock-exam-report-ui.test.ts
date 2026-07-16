@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -7,7 +8,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   StudentExamReportListPage,
@@ -22,6 +23,11 @@ afterEach(() => {
   localStorage.clear();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+  vi.useRealTimers();
+});
+
+beforeEach(() => {
+  localStorage.setItem("tiku.studentSessionScope", "student-test-scope");
 });
 
 describe("StudentMockExamPage", () => {
@@ -68,6 +74,437 @@ describe("StudentMockExamPage", () => {
     );
     expect(mockExamSurface).not.toHaveAttribute("data-id");
     expect(mockExamSurface).not.toHaveTextContent("1001");
+  });
+
+  it("advances the countdown continuously from the server clock offset", () => {
+    vi.useFakeTimers();
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: "mock-exam-marketing-theory-001",
+        mockExams: studentMockExamFixture.mockExams,
+      }),
+    );
+
+    expect(screen.getByText("剩余 75 分钟")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+
+    expect(screen.getByText("剩余 74 分钟")).toBeInTheDocument();
+  });
+
+  it("routes a persisted completed mock exam to its stable report public id on reload", async () => {
+    const completedMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-runtime-completed",
+      examStatus: "completed" as const,
+      submittedAt: "2026-05-20T01:00:00.000Z",
+    };
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/mock-exams/mock-exam-runtime-completed") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: { mockExam: completedMockExam },
+          }),
+        };
+      }
+
+      if (String(url) === "/api/v1/exam-reports") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              examReport: {
+                ...studentExamReportFixture.examReports[0],
+                publicId: "exam-report-runtime-stable",
+                mockExamPublicId: completedMockExam.publicId,
+              },
+            },
+          }),
+        };
+      }
+
+      throw new Error(`unexpected request: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: completedMockExam.publicId,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("link", { name: "查看考试报告" }),
+    ).toHaveAttribute(
+      "href",
+      "/exam-report?examReportPublicId=exam-report-runtime-stable",
+    );
+    expect(screen.queryByText("第 1 / 3 题")).toBeNull();
+    expect(document.body.textContent).not.toContain(
+      "mock-exam-runtime-completed?",
+    );
+  });
+
+  it("routes a persisted scoring mock exam to progress on reload", async () => {
+    const scoringMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-runtime-scoring",
+      examStatus: "scoring" as const,
+      submittedAt: "2026-05-20T01:00:00.000Z",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: { mockExam: scoringMockExam },
+        }),
+      })),
+    );
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: scoringMockExam.publicId,
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("exam-scoring-progress-surface"),
+    ).toHaveAttribute("data-public-id", scoringMockExam.publicId);
+    expect(screen.queryByText("第 1 / 3 题")).toBeNull();
+    expect(screen.queryByRole("link", { name: "查看考试报告" })).toBeNull();
+  });
+
+  it("renders a persisted terminated mock exam read-only without a report link", async () => {
+    const terminatedMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-runtime-terminated",
+      examStatus: "terminated" as const,
+      submittedAt: null,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: { mockExam: terminatedMockExam },
+        }),
+      })),
+    );
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: terminatedMockExam.publicId,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "模拟考试已终止" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("第 1 / 3 题")).toBeNull();
+    expect(screen.queryByRole("link", { name: "查看考试报告" })).toBeNull();
+  });
+
+  it("refreshes authoritative state at zero and routes the auto-submitted exam", async () => {
+    vi.useFakeTimers();
+    const activeMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-runtime-deadline",
+      serverNow: "2026-05-20T00:15:00.000Z",
+      serverDeadlineAt: "2026-05-20T00:16:00.000Z",
+    };
+    const completedMockExam = {
+      ...activeMockExam,
+      examStatus: "completed" as const,
+      submittedAt: "2026-05-20T00:16:00.000Z",
+    };
+    let mockExamReadCount = 0;
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/mock-exams/mock-exam-runtime-deadline") {
+        mockExamReadCount += 1;
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              mockExam:
+                mockExamReadCount === 1 ? activeMockExam : completedMockExam,
+            },
+          }),
+        };
+      }
+
+      if (String(url) === "/api/v1/exam-reports") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: {
+              examReport: {
+                ...studentExamReportFixture.examReports[0],
+                publicId: "exam-report-runtime-deadline",
+                mockExamPublicId: completedMockExam.publicId,
+              },
+            },
+          }),
+        };
+      }
+
+      throw new Error(`unexpected request: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: activeMockExam.publicId,
+      }),
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByText("剩余 1 分钟")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+
+    expect(screen.getByRole("link", { name: "查看考试报告" })).toHaveAttribute(
+      "href",
+      "/exam-report?examReportPublicId=exam-report-runtime-deadline",
+    );
+    expect(mockExamReadCount).toBe(2);
+  });
+
+  it("autosaves the current answer before navigating to another question", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    const answerRequests: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam },
+            }),
+          };
+        }
+
+        if (String(url).endsWith("/answers")) {
+          answerRequests.push(JSON.parse(String(init?.body)));
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                answerRecord: {
+                  publicId: "answer_record_public_autosave",
+                  answerRevision: 1,
+                },
+              },
+            }),
+          };
+        }
+
+        throw new Error(`unexpected request: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论模考卷 A" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+
+    await waitFor(() => expect(answerRequests).toHaveLength(1));
+    expect(answerRequests[0]).toMatchObject({
+      paperQuestionPublicId: "paper-question-mock-marketing-001",
+      selectedLabels: ["A"],
+      operationId: expect.stringMatching(/^answer_operation_/u),
+      expectedRevision: 0,
+    });
+    expect(screen.getByText("第 2 / 3 题")).toBeInTheDocument();
+  });
+
+  it("autosaves a changed answer with the next server revision", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    const answerRequests: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam },
+            }),
+          };
+        }
+
+        if (String(url).endsWith("/answers")) {
+          answerRequests.push(JSON.parse(String(init?.body)));
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                answerRecord: {
+                  publicId: "answer_record_public_revision",
+                  answerRevision: answerRequests.length,
+                },
+              },
+            }),
+          };
+        }
+
+        throw new Error(`unexpected request: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论模考卷 A" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存本题作答" }));
+    await waitFor(() => expect(answerRequests).toHaveLength(1));
+    fireEvent.click(screen.getByRole("button", { name: "B. 客户需求分析" }));
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+
+    await waitFor(() => expect(answerRequests).toHaveLength(2));
+    expect(answerRequests[1]).toMatchObject({
+      selectedLabels: ["B"],
+      expectedRevision: 1,
+    });
+  });
+
+  it("hydrates persisted answer revisions before editing a resumed mock_exam", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+      answeredCount: 1,
+    };
+    const answerRequests: Record<string, unknown>[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                mockExam,
+                answerRecords: [
+                  {
+                    paperQuestionPublicId: "paper-question-mock-marketing-001",
+                    answerSnapshot: {
+                      selectedLabels: ["A"],
+                      textAnswer: null,
+                    },
+                    answerRevision: 3,
+                  },
+                ],
+              },
+            }),
+          };
+        }
+
+        if (String(url).endsWith("/answers")) {
+          answerRequests.push(JSON.parse(String(init?.body)));
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                answerRecord: {
+                  publicId: "answer_record_public_resumed",
+                  answerRevision: 4,
+                },
+              },
+            }),
+          };
+        }
+
+        throw new Error(`unexpected request: ${String(url)}`);
+      }),
+    );
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论模考卷 A" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText((_content, element) => element?.textContent === "1 / 3"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "B. 客户需求分析" }));
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+
+    await waitFor(() => expect(answerRequests).toHaveLength(1));
+    expect(answerRequests[0]).toMatchObject({
+      selectedLabels: ["B"],
+      expectedRevision: 3,
+    });
   });
 
   it("does not reveal standard answers or analysis before mock exam submit", () => {
@@ -359,6 +796,8 @@ describe("StudentMockExamPage", () => {
             paperQuestionPublicId: "paper-question-mock-marketing-001",
             selectedLabels: ["A"],
             textAnswer: null,
+            operationId: expect.stringMatching(/^answer_operation_/u),
+            expectedRevision: 0,
           });
 
           return {
@@ -378,6 +817,9 @@ describe("StudentMockExamPage", () => {
                     textAnswer: null,
                     savedFromClientAt: "2026-05-23T00:00:00.000Z",
                   },
+                  answerRevision: 1,
+                  clientOperationId: "answer_operation_runtime_001",
+                  clientSavedAt: "2026-05-23T00:00:00.000Z",
                   answerRecordStatus: "saved",
                   isCorrect: null,
                   score: null,
@@ -487,17 +929,16 @@ describe("StudentMockExamPage", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
     const cachedMockExam = localStorage.getItem(
-      "tiku.mockExam.cache.paper-content-published-001",
+      "tiku.mockExam.cache.student-test-scope.paper-content-published-001",
     );
 
-    expect(cachedMockExam).toContain("mock-exam-marketing-theory-001");
-    expect(cachedMockExam).not.toContain("unit-test-session-token");
+    expect(cachedMockExam).toBeNull();
   });
 
   it("recovers a runtime mock exam from local cache when the network load fails", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     localStorage.setItem(
-      "tiku.mockExam.cache.paper-content-published-001",
+      "tiku.mockExam.cache.student-test-scope.paper-content-published-001",
       JSON.stringify({
         cachedAt: "2026-05-23T00:00:00.000Z",
         mockExam: {
@@ -572,6 +1013,8 @@ describe("StudentMockExamPage", () => {
             paperQuestionPublicId: "paper-question-mock-marketing-001",
             selectedLabels: ["A"],
             textAnswer: null,
+            operationId: expect.stringMatching(/^answer_operation_/u),
+            expectedRevision: 0,
           });
 
           return {
@@ -591,6 +1034,9 @@ describe("StudentMockExamPage", () => {
                     textAnswer: null,
                     savedFromClientAt: "2026-05-23T00:00:00.000Z",
                   },
+                  answerRevision: 1,
+                  clientOperationId: "answer_operation_runtime_retry_001",
+                  clientSavedAt: "2026-05-23T00:00:00.000Z",
                   answerRecordStatus: "saved",
                   isCorrect: null,
                   score: null,
@@ -640,24 +1086,204 @@ describe("StudentMockExamPage", () => {
     expect(retrySurface).toHaveTextContent("1 题待重新保存");
 
     const queuedAnswer = localStorage.getItem(
-      "tiku.mockExam.answerQueue.mock-exam-marketing-theory-001",
+      "tiku.mockExam.answerQueue.student-test-scope.mock-exam-marketing-theory-001",
     );
 
     expect(queuedAnswer).toContain("paper-question-mock-marketing-001");
     expect(queuedAnswer).not.toContain("unit-test-session-token");
 
-    fireEvent.click(screen.getByRole("button", { name: "重试保存" }));
+    window.dispatchEvent(new Event("online"));
 
     await waitFor(() =>
       expect(screen.queryByTestId("mock-exam-answer-save-retry")).toBeNull(),
     );
     expect(
       localStorage.getItem(
-        "tiku.mockExam.answerQueue.mock-exam-marketing-theory-001",
+        "tiku.mockExam.answerQueue.student-test-scope.mock-exam-marketing-theory-001",
       ),
     ).toBeNull();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(saveAttemptCount).toBe(2);
+  });
+
+  it("supplements only server-missing answers when online recovery finds an auto-submitted exam", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const activeMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    const completedMockExam = {
+      ...activeMockExam,
+      examStatus: "completed" as const,
+      submittedAt: "2026-05-23T01:00:00.000Z",
+    };
+    let saveAttemptCount = 0;
+    let supplementBody: unknown = null;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const requestUrl = String(url);
+
+        if (requestUrl === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam: activeMockExam },
+            }),
+          };
+        }
+
+        if (requestUrl.endsWith("/answers")) {
+          saveAttemptCount += 1;
+
+          if (saveAttemptCount === 1) {
+            throw new Error("offline");
+          }
+
+          return {
+            ok: false,
+            status: 409,
+            json: async () => ({
+              code: 409311,
+              message: "Mock exam is not in progress.",
+              data: null,
+            }),
+          };
+        }
+
+        if (
+          requestUrl === "/api/v1/mock-exams/mock-exam-marketing-theory-001"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam: completedMockExam },
+            }),
+          };
+        }
+
+        if (requestUrl.endsWith("/answers/supplement")) {
+          supplementBody = JSON.parse(String(init?.body));
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                mockExam: completedMockExam,
+                supplementedCount: 1,
+                skippedExistingCount: 0,
+                examReportPublicId: "exam-report-marketing-theory-001",
+                reportRevision: 2,
+              },
+            }),
+          };
+        }
+
+        throw new Error(`unexpected request: ${requestUrl}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /理论模考卷 A/ }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存本题作答" }));
+    expect(
+      await screen.findByTestId("mock-exam-answer-save-retry"),
+    ).toBeInTheDocument();
+
+    window.dispatchEvent(new Event("online"));
+
+    expect(
+      await screen.findByText("考试已自动交卷，未保存的作答已补充提交"),
+    ).toBeInTheDocument();
+    expect(supplementBody).toEqual({
+      answers: [
+        expect.objectContaining({
+          paperQuestionPublicId: "paper-question-mock-marketing-001",
+          operationId: expect.stringMatching(/^answer_operation_/u),
+          expectedRevision: 0,
+        }),
+      ],
+    });
+    expect(
+      localStorage.getItem(
+        "tiku.mockExam.answerQueue.student-test-scope.mock-exam-marketing-theory-001",
+      ),
+    ).toBeNull();
+  });
+
+  it("blocks submission until every locally queued answer has flushed", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    let answerAttemptCount = 0;
+    let submitAttemptCount = 0;
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      if (String(url) === "/api/v1/mock-exams") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: 0,
+            message: "ok",
+            data: { mockExam },
+          }),
+        };
+      }
+
+      if (String(url).endsWith("/answers")) {
+        answerAttemptCount += 1;
+        throw new Error("offline");
+      }
+
+      if (String(url).endsWith("/submit")) {
+        submitAttemptCount += 1;
+      }
+
+      throw new Error(`unexpected request: ${String(url)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论模考卷 A" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存本题作答" }));
+    expect(
+      await screen.findByTestId("mock-exam-answer-save-retry"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "交卷" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认交卷" }));
+
+    await waitFor(() => expect(answerAttemptCount).toBe(2));
+    expect(submitAttemptCount).toBe(0);
+    expect(screen.getByTestId("mock-exam-answer-save-retry")).toHaveTextContent(
+      "1 题待重新保存",
+    );
   });
 
   it("shows the scoring progress surface after runtime submit returns a scoring mock exam", async () => {
@@ -781,6 +1407,8 @@ describe("StudentMockExamPage", () => {
               paperQuestionPublicId: `paper-question-${questionType}-001`,
               selectedLabels: [],
               textAnswer: `Synthetic ${questionType} answer`,
+              operationId: expect.stringMatching(/^answer_operation_/u),
+              expectedRevision: 0,
             });
 
             return {
@@ -792,6 +1420,7 @@ describe("StudentMockExamPage", () => {
                 data: {
                   answerRecord: {
                     publicId: "answer-record-synthetic",
+                    answerRevision: 1,
                   },
                 },
               }),
@@ -1340,6 +1969,30 @@ describe("StudentExamReportPage", () => {
 });
 
 describe("StudentExamReportListPage", () => {
+  it("never uses a mock exam public id as an exam report public id", () => {
+    render(
+      createElement(StudentExamReportListPage, {
+        examReports: [
+          {
+            ...studentExamReportFixture.examReports[0],
+            publicId: "mock-exam-scoring-list-001",
+            examReportPublicId: null,
+            mockExamPublicId: "mock-exam-scoring-list-001",
+            examStatus: "scoring",
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByRole("link", { name: "查看评分进度" })).toHaveAttribute(
+      "href",
+      "/mock-exam?mockExamPublicId=mock-exam-scoring-list-001",
+    );
+    expect(document.body.innerHTML).not.toContain(
+      "examReportPublicId=mock-exam-scoring-list-001",
+    );
+  });
+
   it("shows total score and exact elapsed time without rounding away seconds", () => {
     render(
       createElement(StudentExamReportListPage, {

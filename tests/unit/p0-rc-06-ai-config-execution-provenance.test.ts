@@ -19,6 +19,12 @@ import type { RuntimeDatabase } from "@/server/repositories/runtime-database";
 import { createDefaultAiScoringTaskPreparer } from "@/server/services/student-flow-runtime";
 
 type CapturedSql = SQL & { queryChunks?: unknown[] };
+type TransactionalSqlExecutor = {
+  execute(query: CapturedSql): Promise<Record<string, unknown>[]>;
+  transaction<T>(
+    callback: (transaction: TransactionalSqlExecutor) => Promise<T>,
+  ): Promise<T>;
+};
 
 function flattenSqlQuery(query: CapturedSql): string {
   return (query.queryChunks ?? [])
@@ -155,20 +161,25 @@ describe("P0 RC-06 governed model execution provenance", () => {
       completed_at: null,
     };
     let executionCount = 0;
+    const database: TransactionalSqlExecutor = {
+      async execute(query: CapturedSql) {
+        capturedQueries.push(query);
+        executionCount += 1;
+
+        if (executionCount === 2) {
+          return [{ recovered_count: 1 }];
+        }
+
+        return [taskRow];
+      },
+      async transaction<T>(
+        callback: (transaction: TransactionalSqlExecutor) => Promise<T>,
+      ): Promise<T> {
+        return callback(database);
+      },
+    };
     const repository = createPostgresAiScoringTaskRepository({
-      createDatabase: () =>
-        ({
-          async execute(query: CapturedSql) {
-            capturedQueries.push(query);
-            executionCount += 1;
-
-            if (executionCount === 2) {
-              return [{ recovered_count: 1 }];
-            }
-
-            return [taskRow];
-          },
-        }) as unknown as RuntimeDatabase,
+      createDatabase: () => database as unknown as RuntimeDatabase,
     });
 
     await repository.enqueueAiScoringTask({
@@ -209,7 +220,8 @@ describe("P0 RC-06 governed model execution provenance", () => {
     const enqueueSql = flattenSqlQuery(capturedQueries[0]!);
     const recoverySql = flattenSqlQuery(capturedQueries[1]!);
     const claimSql = flattenSqlQuery(capturedQueries[2]!);
-    const failureSql = flattenSqlQuery(capturedQueries[3]!);
+    const failureLockSql = flattenSqlQuery(capturedQueries[3]!);
+    const failureSql = flattenSqlQuery(capturedQueries[4]!);
 
     expect(enqueueSql).toContain(
       "on conflict (answer_record_id, idempotency_key_hash) do nothing",
@@ -250,48 +262,55 @@ describe("P0 RC-06 governed model execution provenance", () => {
     expect(failureSql).toContain(
       "task_status = 'failed'::ai_scoring_task_status",
     );
-    expect(failureSql).not.toContain("then 'pending'::ai_scoring_task_status");
+    expect(failureLockSql).toContain("for update of owned_mock_exam");
+    expect(failureSql).toContain("then 'pending'::ai_scoring_task_status");
+    expect(failureSql).toContain("terminal_answer_record_update as");
     expect(recoverySql).not.toContain("then 'pending'::ai_scoring_task_status");
   });
 
   it("updates answer state and appends an attempt in the same completion statement", async () => {
     const capturedQueries: CapturedSql[] = [];
-    const repository = createPostgresAiScoringTaskRepository({
-      createDatabase: () =>
-        ({
-          async execute(query: CapturedSql) {
-            capturedQueries.push(query);
-            return [
-              {
-                public_id: "ai_scoring_task_public_001",
-                answer_record_public_id: "answer_record_public_001",
-                mock_exam_public_id: "mock_exam_public_001",
-                actor_public_id: "user_public_001",
-                idempotency_key_hash: "a".repeat(64),
-                task_status: "succeeded",
-                attempt_count: 1,
-                max_attempt_count: 3,
-                timeout_second: 60,
-                model_config_snapshot: {},
-                prompt_template_key: "ai_scoring_v1",
-                prompt_template_version: 7,
-                prompt_template_hash: "sha256:prompt-v7",
-                input_snapshot: {},
-                authorization_snapshot: {},
-                rag_snapshot: null,
-                result_snapshot: { scoringStatus: "scored" },
-                ai_call_log_public_id: "ai_call_log_public_001",
-                failure_code: null,
-                failure_message_digest: null,
-                scheduled_at: new Date("2026-07-15T20:20:00.000Z"),
-                claimed_at: new Date("2026-07-15T20:20:01.000Z"),
-                lease_expires_at: null,
-                worker_public_id: "worker_public_001",
-                completed_at: new Date("2026-07-15T20:20:02.000Z"),
-              },
-            ];
+    const database: TransactionalSqlExecutor = {
+      async execute(query: CapturedSql) {
+        capturedQueries.push(query);
+        return [
+          {
+            public_id: "ai_scoring_task_public_001",
+            answer_record_public_id: "answer_record_public_001",
+            mock_exam_public_id: "mock_exam_public_001",
+            actor_public_id: "user_public_001",
+            idempotency_key_hash: "a".repeat(64),
+            task_status: "succeeded",
+            attempt_count: 1,
+            max_attempt_count: 3,
+            timeout_second: 60,
+            model_config_snapshot: {},
+            prompt_template_key: "ai_scoring_v1",
+            prompt_template_version: 7,
+            prompt_template_hash: "sha256:prompt-v7",
+            input_snapshot: {},
+            authorization_snapshot: {},
+            rag_snapshot: null,
+            result_snapshot: { scoringStatus: "scored" },
+            ai_call_log_public_id: "ai_call_log_public_001",
+            failure_code: null,
+            failure_message_digest: null,
+            scheduled_at: new Date("2026-07-15T20:20:00.000Z"),
+            claimed_at: new Date("2026-07-15T20:20:01.000Z"),
+            lease_expires_at: null,
+            worker_public_id: "worker_public_001",
+            completed_at: new Date("2026-07-15T20:20:02.000Z"),
           },
-        }) as unknown as RuntimeDatabase,
+        ];
+      },
+      async transaction<T>(
+        callback: (transaction: TransactionalSqlExecutor) => Promise<T>,
+      ): Promise<T> {
+        return callback(database);
+      },
+    };
+    const repository = createPostgresAiScoringTaskRepository({
+      createDatabase: () => database as unknown as RuntimeDatabase,
     });
 
     await repository.completeAiScoringTask({
@@ -303,8 +322,10 @@ describe("P0 RC-06 governed model execution provenance", () => {
       completedAt: new Date("2026-07-15T20:20:02.000Z"),
     });
 
-    const completionSql = flattenSqlQuery(capturedQueries[0]!);
+    const completionLockSql = flattenSqlQuery(capturedQueries[0]!);
+    const completionSql = flattenSqlQuery(capturedQueries[1]!);
 
+    expect(completionLockSql).toContain("for update of owned_mock_exam");
     expect(completionSql).toContain("update ai_scoring_task task");
     expect(completionSql).toContain("update answer_record");
     expect(completionSql).toContain("insert into ai_scoring_attempt");

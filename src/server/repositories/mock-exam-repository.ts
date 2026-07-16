@@ -1,5 +1,7 @@
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
+import type { ExamReportSnapshotDto } from "../contracts/exam-report-contract";
 import type { MockExamAnswerSnapshotDto } from "../contracts/mock-exam-contract";
+import type { ExamReportAiScoringEvidenceRow } from "./exam-report-repository";
 import type { Profession, Subject } from "../models/paper";
 import type {
   AnswerRecordStatus,
@@ -51,6 +53,10 @@ export type MockExamAnswerRecordRow = {
   question_public_id: string;
   question_snapshot?: Record<string, unknown>;
   answer_snapshot: MockExamAnswerSnapshotDto;
+  ai_scoring_evidence?: ExamReportAiScoringEvidenceRow | null;
+  answer_revision: number;
+  client_operation_id: string | null;
+  client_saved_at: Date | null;
   answer_record_status: AnswerRecordStatus;
   is_correct: boolean | null;
   score: string | null;
@@ -61,6 +67,7 @@ export type MockExamAnswerRecordRow = {
 
 export type CreateMockExamInput = {
   publicId: string;
+  deadlineTaskPublicId: string | null;
   userPublicId: string;
   paperPublicId: string;
   paperSnapshot: Record<string, unknown>;
@@ -80,6 +87,8 @@ export type SaveMockExamAnswerInput = {
   questionPublicId: string;
   questionSnapshot: Record<string, unknown>;
   answerSnapshot: MockExamAnswerSnapshotDto;
+  operationId: string;
+  expectedRevision: number;
   answerRecordStatus: AnswerRecordStatus;
   isCorrect: null;
   score: null;
@@ -137,6 +146,43 @@ export type RetryFailedMockExamAiScoringTasksResult = {
   failedCount: number;
 };
 
+export type SaveMockExamAnswerRecordResult = {
+  status:
+    | "saved"
+    | "replayed"
+    | "stale"
+    | "not_writable"
+    | "operation_conflict";
+  answerRecord: MockExamAnswerRecordRow | null;
+};
+
+export type SupplementMissingMockExamAnswerInput = {
+  publicId: string;
+  paperQuestionPublicId: string;
+  questionPublicId: string;
+  questionSnapshot: Record<string, unknown>;
+  answerSnapshot: MockExamAnswerSnapshotDto;
+  operationId: string;
+  clientSavedAt: Date;
+  answerRecordStatus: AnswerRecordStatus;
+  isCorrect: boolean | null;
+  score: string | null;
+  maxScore: string;
+  aiScoringTask: EnqueueAiScoringTaskInput | null;
+};
+
+export type SupplementMissingMockExamAnswersResult = {
+  mockExam: MockExamRow;
+  answerRecords: MockExamAnswerRecordRow[];
+  supplementedCount: number;
+  skippedExistingCount: number;
+};
+
+export type RebuildExistingExamReportResult = {
+  publicId: string;
+  reportRevision: number;
+};
+
 export type MockExamRepository = {
   listEffectiveAuthorizationScopes(query: {
     userPublicId: string;
@@ -156,11 +202,28 @@ export type MockExamRepository = {
   createMockExam(input: CreateMockExamInput): Promise<MockExamRow>;
   saveMockExamAnswerRecord(
     input: SaveMockExamAnswerInput,
-  ): Promise<MockExamAnswerRecordRow>;
+  ): Promise<SaveMockExamAnswerRecordResult>;
   listMockExamAnswerRecords(query: {
     userPublicId: string;
     mockExamPublicId: string;
   }): Promise<MockExamAnswerRecordRow[]>;
+  supplementMissingMockExamAnswers(input: {
+    userPublicId: string;
+    mockExamPublicId: string;
+    supplementedAt: Date;
+    answers: SupplementMissingMockExamAnswerInput[];
+  }): Promise<SupplementMissingMockExamAnswersResult | null>;
+  rebuildExistingExamReport(input: {
+    userPublicId: string;
+    mockExamPublicId: string;
+    hasChanges: boolean;
+    examStatus: ExamStatus;
+    objectiveScore: string | null;
+    subjectiveScore: string | null;
+    totalScore: string | null;
+    reportSnapshot: ExamReportSnapshotDto;
+    rebuiltAt: Date;
+  }): Promise<RebuildExistingExamReportResult | null>;
   submitMockExam(input: SubmitMockExamInput): Promise<MockExamRow | null>;
   applyMockExamScoringResults(
     input: ApplyMockExamScoringResultsInput,

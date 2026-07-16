@@ -19,6 +19,7 @@ function createService(): MockExamService {
         )}`,
         data: {
           mockExam: createMockExamDto("mock_exam_public_123"),
+          answerRecords: [],
         },
       };
     },
@@ -28,6 +29,7 @@ function createService(): MockExamService {
         message: `${receivedUserContext.userPublicId}:${publicId}`,
         data: {
           mockExam: createMockExamDto(publicId),
+          answerRecords: [],
         },
       };
     },
@@ -50,6 +52,9 @@ function createService(): MockExamService {
               textAnswer: null,
               savedFromClientAt: null,
             },
+            answerRevision: 1,
+            clientOperationId: null,
+            clientSavedAt: null,
             answerRecordStatus: "saved",
             isCorrect: null,
             score: null,
@@ -57,6 +62,27 @@ function createService(): MockExamService {
             answeredAt: "2026-05-19T08:00:00.000Z",
             submittedAt: null,
           },
+        },
+      };
+    },
+    async supplementMockExamAnswers(receivedUserContext, publicId, input) {
+      const answerCount =
+        input &&
+        typeof input === "object" &&
+        "answers" in input &&
+        Array.isArray(input.answers)
+          ? input.answers.length
+          : 0;
+
+      return {
+        code: 0,
+        message: `${receivedUserContext.userPublicId}:${publicId}:supplement:${answerCount}`,
+        data: {
+          mockExam: createMockExamDto(publicId, "completed"),
+          supplementedCount: answerCount,
+          skippedExistingCount: 0,
+          examReportPublicId: "exam_report_public_123",
+          reportRevision: 2,
         },
       };
     },
@@ -87,6 +113,7 @@ function createService(): MockExamService {
         message: `${receivedUserContext.userPublicId}:${publicId}:terminate`,
         data: {
           mockExam: createMockExamDto(publicId, "terminated"),
+          answerRecords: [],
         },
       };
     },
@@ -229,6 +256,30 @@ describe("mock exam route handlers", () => {
     await expect(response.json()).resolves.toMatchObject({
       code: 0,
       message: "user_public_123:mock_exam_public_123:paper_question_public_123",
+    });
+  });
+
+  it("passes terminal supplement JSON to the dedicated command", async () => {
+    const { supplementAnswers } = createMockExamRouteHandlers(
+      createService(),
+      async () => userContext,
+    );
+    const response = await supplementAnswers.POST(
+      new Request(
+        "http://localhost/api/v1/mock-exams/mock_exam_public_123/answers/supplement",
+        {
+          method: "POST",
+          body: JSON.stringify({ answers: [{ operationId: "operation_1" }] }),
+        },
+      ),
+      {
+        params: Promise.resolve({ publicId: "mock_exam_public_123" }),
+      },
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      message: "user_public_123:mock_exam_public_123:supplement:1",
     });
   });
 

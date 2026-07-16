@@ -247,21 +247,33 @@ function createRepository(
     },
     async saveMockExamAnswerRecord(input) {
       return {
-        public_id: input.publicId,
-        exam_mode: "mock_exam",
-        paper_question_public_id: input.paperQuestionPublicId,
-        question_public_id: input.questionPublicId,
-        answer_snapshot: input.answerSnapshot,
-        answer_record_status: "saved",
-        is_correct: null,
-        score: null,
-        max_score: input.maxScore,
-        answered_at: input.answeredAt,
-        submitted_at: null,
+        status: "saved",
+        answerRecord: {
+          public_id: input.publicId,
+          exam_mode: "mock_exam",
+          paper_question_public_id: input.paperQuestionPublicId,
+          question_public_id: input.questionPublicId,
+          answer_snapshot: input.answerSnapshot,
+          answer_revision: input.expectedRevision + 1,
+          client_operation_id: input.operationId,
+          client_saved_at: input.answeredAt,
+          answer_record_status: "saved",
+          is_correct: null,
+          score: null,
+          max_score: input.maxScore,
+          answered_at: input.answeredAt,
+          submitted_at: null,
+        },
       };
     },
     async listMockExamAnswerRecords() {
       return [];
+    },
+    async supplementMissingMockExamAnswers() {
+      return null;
+    },
+    async rebuildExistingExamReport() {
+      return null;
     },
     async submitMockExam(input) {
       return createMockExam({
@@ -298,6 +310,341 @@ function createRepository(
 }
 
 describe("mock exam service", () => {
+  it("supplements terminal answers through a missing-only transaction and durable scoring task", async () => {
+    const supplementInputs: unknown[] = [];
+    const rebuildInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            exam_status: "completed",
+            submitted_at: serverDeadlineAt,
+          });
+        },
+        async supplementMissingMockExamAnswers(input) {
+          supplementInputs.push(input);
+
+          return {
+            mockExam: createMockExam({
+              exam_status: "scoring",
+              submitted_at: serverDeadlineAt,
+              objective_score: "1.0",
+              subjective_score: null,
+              total_score: "1.0",
+              answered_count: 2,
+            }),
+            answerRecords: input.answers.map((answer) => ({
+              public_id: answer.publicId,
+              exam_mode: "mock_exam" as const,
+              paper_question_public_id: answer.paperQuestionPublicId,
+              question_public_id: answer.questionPublicId,
+              question_snapshot: answer.questionSnapshot,
+              answer_snapshot: answer.answerSnapshot,
+              answer_revision: 1,
+              client_operation_id: answer.operationId,
+              client_saved_at: answer.clientSavedAt,
+              answer_record_status: answer.answerRecordStatus,
+              is_correct: answer.isCorrect,
+              score: answer.score,
+              max_score: answer.maxScore,
+              answered_at: input.supplementedAt,
+              submitted_at: input.supplementedAt,
+            })),
+            supplementedCount: 2,
+            skippedExistingCount: 0,
+          };
+        },
+        async rebuildExistingExamReport(input) {
+          rebuildInputs.push(input);
+          return {
+            publicId: "exam_report_public_123",
+            reportRevision: 2,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringTaskPreparer: {
+          async prepareTask(context) {
+            return {
+              publicId: "ai_scoring_task_public_123",
+              answerRecordPublicId: context.answerRecordPublicId,
+              mockExamPublicId: context.mockExamPublicId,
+              actorPublicId: context.userPublicId,
+              idempotencyKeyHash: "hash_123",
+              maxAttemptCount: 3,
+              timeoutSecond: 60,
+              modelConfigSnapshot: {},
+              promptTemplateKey: "ai_scoring_v1",
+              promptTemplateVersion: 1,
+              promptTemplateHash: "prompt_hash_123",
+              inputSnapshot: {},
+              authorizationSnapshot: {},
+              ragSnapshot: {},
+              scheduledAt: now,
+            };
+          },
+        },
+      },
+    );
+
+    const response = await service.supplementMockExamAnswers(
+      userContext,
+      "mock_exam_public_existing",
+      {
+        answers: [
+          {
+            paperQuestionPublicId: "paper_question_public_123",
+            selectedLabels: ["A"],
+            textAnswer: null,
+            operationId: "answer_operation_public_123",
+            expectedRevision: 0,
+            savedFromClientAt: "2026-05-19T08:05:00.000Z",
+          },
+          {
+            paperQuestionPublicId: "paper_question_public_456",
+            selectedLabels: [],
+            textAnswer: "主观题离线答案",
+            operationId: "answer_operation_public_456",
+            expectedRevision: 0,
+            savedFromClientAt: "2026-05-19T08:06:00.000Z",
+          },
+        ],
+      },
+    );
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        mockExam: { examStatus: "scoring" },
+        supplementedCount: 2,
+        skippedExistingCount: 0,
+        examReportPublicId: "exam_report_public_123",
+        reportRevision: 2,
+      },
+    });
+    expect(supplementInputs).toHaveLength(1);
+    expect(supplementInputs).toEqual([
+      expect.objectContaining({
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: "mock_exam_public_existing",
+        answers: [
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_123",
+            answerRecordStatus: "scored",
+            isCorrect: true,
+            score: "1.0",
+            aiScoringTask: null,
+          }),
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "submitted",
+            isCorrect: null,
+            score: null,
+            aiScoringTask: expect.objectContaining({
+              publicId: "ai_scoring_task_public_123",
+            }),
+          }),
+        ],
+      }),
+    ]);
+    expect(rebuildInputs).toEqual([
+      expect.objectContaining({ hasChanges: true }),
+    ]);
+  });
+
+  it("keeps a terminal supplement replay report revision stable", async () => {
+    const rebuildInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            exam_status: "completed",
+            submitted_at: serverDeadlineAt,
+          });
+        },
+        async supplementMissingMockExamAnswers() {
+          return {
+            mockExam: createMockExam({
+              exam_status: "completed",
+              submitted_at: serverDeadlineAt,
+              objective_score: "1.0",
+              subjective_score: "0.0",
+              total_score: "1.0",
+              answered_count: 1,
+            }),
+            answerRecords: [],
+            supplementedCount: 0,
+            skippedExistingCount: 1,
+          };
+        },
+        async rebuildExistingExamReport(input) {
+          rebuildInputs.push(input);
+          return {
+            publicId: "exam_report_public_123",
+            reportRevision: 2,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    const response = await service.supplementMockExamAnswers(
+      userContext,
+      "mock_exam_public_existing",
+      {
+        answers: [
+          {
+            paperQuestionPublicId: "paper_question_public_123",
+            selectedLabels: ["A"],
+            textAnswer: null,
+            operationId: "answer_operation_public_123",
+            expectedRevision: 0,
+            savedFromClientAt: "2026-05-19T08:05:00.000Z",
+          },
+        ],
+      },
+    );
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        supplementedCount: 0,
+        skippedExistingCount: 1,
+        examReportPublicId: "exam_report_public_123",
+        reportRevision: 2,
+      },
+    });
+    expect(rebuildInputs).toEqual([
+      expect.objectContaining({ hasChanges: false }),
+    ]);
+  });
+
+  it("rejects post-deadline terminal supplements before persistence", async () => {
+    let supplementCalled = false;
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            exam_status: "completed",
+            submitted_at: serverDeadlineAt,
+          });
+        },
+        async supplementMissingMockExamAnswers() {
+          supplementCalled = true;
+          throw new Error("must not persist");
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    const response = await service.supplementMockExamAnswers(
+      userContext,
+      "mock_exam_public_existing",
+      {
+        answers: [
+          {
+            paperQuestionPublicId: "paper_question_public_123",
+            selectedLabels: ["A"],
+            textAnswer: null,
+            operationId: "answer_operation_public_late",
+            expectedRevision: 0,
+            savedFromClientAt: "2026-05-19T10:00:00.001Z",
+          },
+        ],
+      },
+    );
+
+    expect(response).toEqual({
+      code: 422319,
+      message: "Mock exam supplemental answer was saved after the deadline.",
+      data: null,
+    });
+    expect(supplementCalled).toBe(false);
+  });
+
+  it("rejects terminal supplementation after an early manual submit", async () => {
+    let supplementCalled = false;
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            exam_status: "completed",
+            submitted_at: now,
+          });
+        },
+        async supplementMissingMockExamAnswers() {
+          supplementCalled = true;
+          throw new Error("must not persist");
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.supplementMockExamAnswers(
+        userContext,
+        "mock_exam_public_existing",
+        {
+          answers: [
+            {
+              paperQuestionPublicId: "paper_question_public_123",
+              selectedLabels: ["A"],
+              operationId: "answer_operation_public_early_submit",
+              expectedRevision: 0,
+              savedFromClientAt: "2026-05-19T08:05:00.000Z",
+            },
+          ],
+        },
+      ),
+    ).resolves.toEqual({
+      code: 409317,
+      message: "Mock exam does not allow terminal answer supplementation.",
+      data: null,
+    });
+    expect(supplementCalled).toBe(false);
+  });
+
+  it("replays the authoritative terminal result for duplicate submit requests", async () => {
+    let submitCalled = false;
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            exam_status: "completed",
+            submitted_at: now,
+            answered_count: 1,
+          });
+        },
+        async submitMockExam() {
+          submitCalled = true;
+          return null;
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    const response = await service.submitMockExam(
+      userContext,
+      "mock_exam_public_existing",
+      {},
+    );
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        mockExam: { examStatus: "completed" },
+        unansweredCount: 1,
+      },
+    });
+    expect(submitCalled).toBe(false);
+  });
+
   it("fails closed before start when the published snapshot scoring contract is invalid", async () => {
     const invalidSnapshot = structuredClone(createPaperSnapshot());
     const paperSections = invalidSnapshot.paperSections as Array<{
@@ -440,6 +787,7 @@ describe("mock exam service", () => {
     expect(createdInputs).toEqual([
       expect.objectContaining({
         publicId: "mock_exam_public_1",
+        deadlineTaskPublicId: "mock_exam_deadline_task_public_2",
         userPublicId: "user_public_123",
         paperPublicId: "paper_public_123",
         startedAt: now,
@@ -569,6 +917,61 @@ describe("mock exam service", () => {
     ]);
   });
 
+  it("returns revisioned learner-safe answer state when resuming an active mock_exam", async () => {
+    const service = createMockExamService(
+      createRepository({
+        async findActiveMockExamByPaper() {
+          return createMockExam({ answered_count: 1 });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_resume",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: "2026-05-19T07:59:00.000Z",
+              },
+              answer_revision: 3,
+              client_operation_id: "answer_operation_public_resume",
+              client_saved_at: now,
+              answer_record_status: "saved",
+              is_correct: true,
+              score: "2.0",
+              max_score: "2.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        answerRecords: [
+          {
+            paperQuestionPublicId: "paper_question_public_123",
+            answerRevision: 3,
+            answerSnapshot: { selectedLabels: ["A"] },
+            isCorrect: null,
+            score: null,
+          },
+        ],
+      },
+    });
+  });
+
   it("terminates an active mock_exam with an empty snapshot before creating a fresh mock_exam", async () => {
     const terminatedInputs: unknown[] = [];
     const createdInputs: unknown[] = [];
@@ -688,6 +1091,8 @@ describe("mock exam service", () => {
         {
           paperQuestionPublicId: "paper_question_public_123",
           selectedLabels: ["A"],
+          operationId: "answer_operation_public_terminated",
+          expectedRevision: 0,
         },
       ),
     ).resolves.toEqual({
@@ -705,17 +1110,23 @@ describe("mock exam service", () => {
           answerInputs.push(input);
 
           return {
-            public_id: input.publicId,
-            exam_mode: "mock_exam",
-            paper_question_public_id: input.paperQuestionPublicId,
-            question_public_id: input.questionPublicId,
-            answer_snapshot: input.answerSnapshot,
-            answer_record_status: "saved",
-            is_correct: null,
-            score: null,
-            max_score: input.maxScore,
-            answered_at: input.answeredAt,
-            submitted_at: null,
+            status: "saved",
+            answerRecord: {
+              public_id: input.publicId,
+              exam_mode: "mock_exam",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: input.answerSnapshot,
+              answer_revision: input.expectedRevision + 1,
+              client_operation_id: input.operationId,
+              client_saved_at: input.answeredAt,
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: input.maxScore,
+              answered_at: input.answeredAt,
+              submitted_at: null,
+            },
           };
         },
       }),
@@ -729,6 +1140,8 @@ describe("mock exam service", () => {
       {
         paperQuestionPublicId: "paper_question_public_123",
         selectedLabels: ["B"],
+        operationId: "answer_operation_public_1",
+        expectedRevision: 0,
         savedFromClientAt: "2026-05-19T08:00:00.000Z",
       },
     );
@@ -747,6 +1160,9 @@ describe("mock exam service", () => {
             textAnswer: null,
             savedFromClientAt: "2026-05-19T08:00:00.000Z",
           },
+          answerRevision: 1,
+          clientOperationId: "answer_operation_public_1",
+          clientSavedAt: "2026-05-19T08:00:00.000Z",
           answerRecordStatus: "saved",
           isCorrect: null,
           score: null,
@@ -764,8 +1180,87 @@ describe("mock exam service", () => {
         answerRecordStatus: "saved",
         isCorrect: null,
         score: null,
+        operationId: "answer_operation_public_1",
+        expectedRevision: 0,
       }),
     ]);
+  });
+
+  it("rejects stale answer revisions while returning no teacher facts", async () => {
+    const service = createMockExamService(
+      createRepository({
+        async saveMockExamAnswerRecord(input) {
+          return {
+            status: "stale",
+            answerRecord: {
+              public_id: "answer_record_public_existing",
+              exam_mode: "mock_exam",
+              paper_question_public_id: input.paperQuestionPublicId,
+              question_public_id: input.questionPublicId,
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: "2026-05-19T07:59:00.000Z",
+              },
+              answer_revision: 3,
+              client_operation_id: "answer_operation_public_existing",
+              client_saved_at: now,
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: input.maxScore,
+              answered_at: now,
+              submitted_at: null,
+            },
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.saveMockExamAnswer(userContext, "mock_exam_public_existing", {
+        paperQuestionPublicId: "paper_question_public_123",
+        selectedLabels: ["B"],
+        operationId: "answer_operation_public_stale",
+        expectedRevision: 1,
+        savedFromClientAt: "2026-05-19T08:00:00.000Z",
+      }),
+    ).resolves.toEqual({
+      code: 409316,
+      message: "Mock exam answer revision is stale.",
+      data: null,
+    });
+  });
+
+  it("rejects reuse of an operation id owned by another question", async () => {
+    const service = createMockExamService(
+      createRepository({
+        async saveMockExamAnswerRecord() {
+          return {
+            status: "operation_conflict" as const,
+            answerRecord: null,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.saveMockExamAnswer(userContext, "mock_exam_public_existing", {
+        paperQuestionPublicId: "paper_question_public_123",
+        selectedLabels: ["B"],
+        operationId: "answer_operation_public_conflict",
+        expectedRevision: 0,
+        savedFromClientAt: "2026-05-19T08:00:00.000Z",
+      }),
+    ).resolves.toEqual({
+      code: 409318,
+      message: "Mock exam answer operation id conflicts with another question.",
+      data: null,
+    });
   });
 
   it("submits mock_exam with objective scoring and unanswered count", async () => {
@@ -784,6 +1279,9 @@ describe("mock exam service", () => {
                 textAnswer: null,
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -864,6 +1362,9 @@ describe("mock exam service", () => {
                 textAnswer: null,
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -936,6 +1437,9 @@ describe("mock exam service", () => {
                 textAnswer: "主观题作答",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1015,6 +1519,9 @@ describe("mock exam service", () => {
                 textAnswer: null,
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1032,6 +1539,9 @@ describe("mock exam service", () => {
                 textAnswer: "主观题作答",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1149,6 +1659,9 @@ describe("mock exam service", () => {
                 textAnswer: null,
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1166,6 +1679,9 @@ describe("mock exam service", () => {
                 textAnswer: "queued subjective answer",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1313,6 +1829,9 @@ describe("mock exam service", () => {
                 textAnswer: "durable subjective answer",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1420,6 +1939,9 @@ describe("mock exam service", () => {
                 textAnswer: "subjective answer",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1479,6 +2001,9 @@ describe("mock exam service", () => {
                   textAnswer: null,
                   savedFromClientAt: null,
                 },
+                answer_revision: 1,
+                client_operation_id: null,
+                client_saved_at: null,
                 answer_record_status: "saved",
                 is_correct: null,
                 score: null,
@@ -1496,6 +2021,9 @@ describe("mock exam service", () => {
                   textAnswer: "Synthetic subjective answer.",
                   savedFromClientAt: null,
                 },
+                answer_revision: 1,
+                client_operation_id: null,
+                client_saved_at: null,
                 answer_record_status: "saved",
                 is_correct: null,
                 score: null,
@@ -1587,6 +2115,9 @@ describe("mock exam service", () => {
                 textAnswer: null,
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1652,6 +2183,9 @@ describe("mock exam service", () => {
                 textAnswer: "主观题作答",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "saved",
               is_correct: null,
               score: null,
@@ -1749,6 +2283,9 @@ describe("mock exam service", () => {
                 textAnswer: null,
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "scored",
               is_correct: true,
               score: "1.0",
@@ -1766,6 +2303,9 @@ describe("mock exam service", () => {
                 textAnswer: "重试作答",
                 savedFromClientAt: null,
               },
+              answer_revision: 1,
+              client_operation_id: null,
+              client_saved_at: null,
               answer_record_status: "scoring_failed",
               is_correct: null,
               score: null,

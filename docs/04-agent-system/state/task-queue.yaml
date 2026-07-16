@@ -269,6 +269,7 @@ activeTasks:
       - src/server/contracts/practice-contract.ts
       - src/server/contracts/personal-ai-generation-learning-session-contract.ts
       - src/server/models/student-experience.ts
+      - src/server/models/student-experience.test.ts
       - src/server/validators/mock-exam.ts
       - src/server/validators/mock-exam.test.ts
       - src/server/validators/exam-report.ts
@@ -279,6 +280,8 @@ activeTasks:
       - src/server/mappers/exam-report-mapper.test.ts
       - src/server/mappers/practice-mapper.ts
       - src/server/mappers/practice-mapper.test.ts
+      - src/server/mappers/student-paper-mapper.ts
+      - src/server/mappers/student-paper-mapper.test.ts
       - src/server/repositories/ai-scoring-attempt-repository.ts
       - src/server/repositories/ai-scoring-task-repository.ts
       - src/server/repositories/mock-exam-repository.ts
@@ -290,6 +293,7 @@ activeTasks:
       - src/server/services/ai-scoring-task-runtime.test.ts
       - src/server/services/learner-content-projection.ts
       - src/server/services/learner-content-projection.test.ts
+      - src/lib/learner-content-projection.ts
       - src/server/services/mock-exam-deadline-task-runtime.ts
       - src/server/services/mock-exam-deadline-task-runtime.test.ts
       - src/server/services/mock-exam-service.ts
@@ -315,13 +319,16 @@ activeTasks:
       - src/app/api/v1/exam-reports/**
       - src/app/api/v1/practices/**
       - src/features/student/studentRuntimeApi.ts
+      - src/app/(auth)/login/page.tsx
       - src/features/student/practice/StudentPracticePage.tsx
       - src/features/student/mock-exam/StudentMockExamReportPage.tsx
       - src/features/student/profile/StudentProfileRedeemPage.tsx
       - tests/unit/student-practice-ui.test.ts
       - tests/unit/student-mock-exam-report-ui.test.ts
+      - tests/unit/student-login-ui.test.ts
       - tests/unit/phase-7-student-flow-runtime-smoke.test.ts
       - tests/unit/phase-7-exam-report-learning-suggestion-runtime.test.ts
+      - tests/unit/p0-rc-06-ai-config-execution-provenance.test.ts
       - tests/unit/p0-rc-07-answer-mock-scoring-report.test.ts
       - tests/unit/p0-rc-07-schema-migration-source.test.ts
       - drizzle/*_p0_rc_07_*.sql

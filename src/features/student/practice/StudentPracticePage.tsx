@@ -64,7 +64,9 @@ type PracticePaperQuestion = {
   questionPublicId: string;
   questionType: PracticeQuestionType;
   paperSectionTitle: string;
+  questionGroupPublicId: string | null;
   questionGroupTitle: string | null;
+  materialPublicId: string | null;
   materialTitle: string | null;
   materialRichText: string | null;
   stemRichText: string;
@@ -81,6 +83,18 @@ type PracticeQuestionOption = {
 
 type PracticePaperSection = {
   paperQuestions?: unknown;
+};
+
+type PracticeQuestionPage = {
+  pageKey: string;
+  firstQuestionIndex: number;
+  paperSectionTitle: string;
+  questionGroupPublicId: string | null;
+  questionGroupTitle: string | null;
+  materialPublicId: string | null;
+  materialTitle: string | null;
+  materialRichText: string | null;
+  questions: PracticePaperQuestion[];
 };
 
 const professionLabels: Record<Profession, string> = {
@@ -105,7 +119,9 @@ function isStudentResourceNotFoundResponse(payload: { code: number }): boolean {
 function createPracticeDto(
   practice: Omit<PracticeDto, "questionCount">,
 ): PracticeDto {
-  const questionCount = extractPracticeQuestions(practice.paperSnapshot).length;
+  const questionCount = extractPracticeQuestionPages(
+    practice.paperSnapshot,
+  ).reduce((total, page) => total + page.questions.length, 0);
 
   return {
     ...practice,
@@ -403,6 +419,9 @@ function mapPracticeQuestion(
   const paperSectionTitle =
     getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
+  const materialSnapshot = isRecord(value.materialSnapshot)
+    ? value.materialSnapshot
+    : null;
 
   if (
     paperQuestionPublicId === null ||
@@ -419,9 +438,22 @@ function mapPracticeQuestion(
     questionPublicId,
     questionType,
     paperSectionTitle,
+    questionGroupPublicId: getStringField(value, "questionGroupPublicId"),
     questionGroupTitle: getStringField(value, "questionGroupTitle"),
-    materialTitle: getStringField(value, "materialTitle"),
-    materialRichText: getStringField(value, "materialRichText"),
+    materialPublicId:
+      materialSnapshot === null
+        ? null
+        : getStringField(materialSnapshot, "materialPublicId"),
+    materialTitle:
+      getStringField(value, "materialTitle") ??
+      (materialSnapshot === null
+        ? null
+        : getStringField(materialSnapshot, "title")),
+    materialRichText:
+      getStringField(value, "materialRichText") ??
+      (materialSnapshot === null
+        ? null
+        : getStringField(materialSnapshot, "contentRichText")),
     stemRichText,
     questionOptions: getQuestionOptions(getQuestionOptionSource(value)),
     standardAnswerRichText: getStringField(value, "standardAnswerRichText"),
@@ -430,16 +462,19 @@ function mapPracticeQuestion(
   };
 }
 
-function extractPracticeQuestions(
+function extractPracticeQuestionPages(
   paperSnapshot: Record<string, unknown>,
-): PracticePaperQuestion[] {
+): PracticeQuestionPage[] {
   const paperSections = Array.isArray(paperSnapshot.paperSections)
     ? paperSnapshot.paperSections
     : [];
 
-  return paperSections.flatMap((paperSection): PracticePaperQuestion[] => {
+  const pages: PracticeQuestionPage[] = [];
+  let questionIndex = 0;
+
+  for (const [paperSectionIndex, paperSection] of paperSections.entries()) {
     if (!isRecord(paperSection)) {
-      return [];
+      continue;
     }
 
     const typedPaperSection = paperSection as PracticePaperSection;
@@ -450,14 +485,50 @@ function extractPracticeQuestions(
       ? typedPaperSection.paperQuestions
       : [];
 
-    return paperQuestions
+    const questions = paperQuestions
       .map((paperQuestion) =>
         mapPracticeQuestion(paperQuestion, paperSectionTitle),
       )
       .filter(
         (question): question is PracticePaperQuestion => question !== null,
       );
-  });
+
+    for (const question of questions) {
+      const pageKey =
+        question.questionGroupPublicId === null
+          ? `paper_question:${question.paperQuestionPublicId}`
+          : `question_group:${paperSectionIndex}:${question.questionGroupPublicId}`;
+      const existingPage = pages.find((page) => page.pageKey === pageKey);
+
+      if (existingPage === undefined) {
+        pages.push({
+          pageKey,
+          firstQuestionIndex: questionIndex,
+          paperSectionTitle: question.paperSectionTitle,
+          questionGroupPublicId: question.questionGroupPublicId,
+          questionGroupTitle: question.questionGroupTitle,
+          materialPublicId: question.materialPublicId,
+          materialTitle: question.materialTitle,
+          materialRichText: question.materialRichText,
+          questions: [question],
+        });
+      } else {
+        existingPage.questions.push(question);
+      }
+
+      questionIndex += 1;
+    }
+  }
+
+  return pages;
+}
+
+function extractPracticeQuestions(
+  paperSnapshot: Record<string, unknown>,
+): PracticePaperQuestion[] {
+  return extractPracticeQuestionPages(paperSnapshot).flatMap(
+    (page) => page.questions,
+  );
 }
 
 function getPaperName(practice: PracticeDto): string {
@@ -485,6 +556,19 @@ function hasPracticeResumeProgress(
 
 function includesLabel(selectedLabels: string[], label: string): boolean {
   return selectedLabels.includes(label);
+}
+
+function isPracticeQuestionFeedbackTerminal(
+  question: PracticePaperQuestion,
+  feedback: PracticeAnswerFeedbackDto | null,
+): boolean {
+  if (feedback === null) {
+    return false;
+  }
+
+  return !isSubjectivePracticeQuestion(question.questionType)
+    ? true
+    : feedback.score !== null || feedback.aiHintStatus === "unavailable";
 }
 
 function StudentPracticeStatusMessage({
@@ -661,6 +745,7 @@ function ObjectiveQuestionPanel({
   onRequestAiExplanation,
   onNextQuestion,
   hasNextQuestion,
+  showNavigation,
   isFavoriteSubmitting,
 }: {
   question: PracticePaperQuestion;
@@ -672,6 +757,7 @@ function ObjectiveQuestionPanel({
   onRequestAiExplanation(): void;
   onNextQuestion(): void;
   hasNextQuestion: boolean;
+  showNavigation: boolean;
   isFavoriteSubmitting: boolean;
 }) {
   const hasFeedback = feedback !== null;
@@ -773,14 +859,16 @@ function ObjectiveQuestionPanel({
             feedback={feedback}
             onRequestAiExplanation={onRequestAiExplanation}
           />
-          <button
-            type="button"
-            onClick={onNextQuestion}
-            disabled={!hasNextQuestion}
-            className="border-border text-text-primary flex h-9 w-full items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {hasNextQuestion ? "下一题" : "已到最后一题"}
-          </button>
+          {showNavigation ? (
+            <button
+              type="button"
+              onClick={onNextQuestion}
+              disabled={!hasNextQuestion}
+              className="border-border text-text-primary flex h-9 w-full items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {hasNextQuestion ? "下一题" : "已到最后一题"}
+            </button>
+          ) : null}
         </div>
       )}
     </div>
@@ -796,6 +884,7 @@ function FillBlankQuestionPanel({
   onRequestAiExplanation,
   onNextQuestion,
   hasNextQuestion,
+  showNavigation,
   isFavoriteSubmitting,
 }: {
   textAnswer: string;
@@ -806,6 +895,7 @@ function FillBlankQuestionPanel({
   onRequestAiExplanation(): void;
   onNextQuestion(): void;
   hasNextQuestion: boolean;
+  showNavigation: boolean;
   isFavoriteSubmitting: boolean;
 }) {
   const hasFeedback = feedback !== null;
@@ -878,7 +968,7 @@ function FillBlankQuestionPanel({
             feedback={feedback}
             onRequestAiExplanation={onRequestAiExplanation}
           />
-          {hasNextQuestion ? (
+          {showNavigation && hasNextQuestion ? (
             <button
               type="button"
               onClick={onNextQuestion}
@@ -952,48 +1042,62 @@ function SubjectiveQuestionPanel({
   textAnswer,
   feedback,
   isMaterialOpen,
+  showMaterial,
+  showNavigation,
+  hasNextQuestion,
+  nextActionLabel,
   onToggleMaterial,
   onChangeTextAnswer,
   onSubmitAnswer,
   onRetryWithHint,
   onRequestAiScoring,
+  onNextQuestion,
 }: {
   question: PracticePaperQuestion;
   textAnswer: string;
   feedback: PracticeAnswerFeedbackDto | null;
   isMaterialOpen: boolean;
+  showMaterial: boolean;
+  showNavigation: boolean;
+  hasNextQuestion: boolean;
+  nextActionLabel: string;
   onToggleMaterial(): void;
   onChangeTextAnswer(value: string): void;
   onSubmitAnswer(): void;
   onRetryWithHint(): void;
   onRequestAiScoring(): void;
+  onNextQuestion(): void;
 }) {
   const canRetryWithHint =
     feedback !== null && feedback.retryRemainingCount > 0;
   const hasFinalScore = feedback !== null && feedback.score !== null;
+  const hasTerminalFeedback =
+    hasFinalScore || feedback?.aiHintStatus === "unavailable";
 
   return (
     <div className="space-y-4">
-      <div className="border-border bg-background rounded-xl border p-3">
-        <button
-          type="button"
-          onClick={onToggleMaterial}
-          className="text-text-primary flex w-full items-center justify-between text-left text-sm font-semibold transition-transform active:scale-[0.98]"
-        >
-          <span>{question.materialTitle ?? "材料"}</span>
-          {isMaterialOpen ? (
-            <ChevronDown className="size-4" aria-hidden="true" />
-          ) : (
-            <ChevronRight className="size-4" aria-hidden="true" />
-          )}
-        </button>
-        {isMaterialOpen && question.materialRichText !== null ? (
-          <StudentRichText
-            className="text-text-secondary mt-3 space-y-2 text-sm leading-6"
-            value={question.materialRichText}
-          />
-        ) : null}
-      </div>
+      {showMaterial ? (
+        <div className="border-border bg-background rounded-xl border p-3">
+          <button
+            type="button"
+            onClick={onToggleMaterial}
+            className="text-text-primary flex w-full items-center justify-between text-left text-sm font-semibold transition-transform active:scale-[0.98]"
+          >
+            <span>{question.materialTitle ?? "材料"}</span>
+            {isMaterialOpen ? (
+              <ChevronDown className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronRight className="size-4" aria-hidden="true" />
+            )}
+          </button>
+          {isMaterialOpen && question.materialRichText !== null ? (
+            <StudentRichText
+              className="text-text-secondary mt-3 space-y-2 text-sm leading-6"
+              value={question.materialRichText}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <label className="space-y-2">
         <span className="text-text-primary text-sm font-medium">
@@ -1072,6 +1176,24 @@ function SubjectiveQuestionPanel({
               直接查看评分
             </button>
           </div>
+          {showNavigation && hasTerminalFeedback ? (
+            hasNextQuestion ? (
+              <button
+                type="button"
+                onClick={onNextQuestion}
+                className="border-border text-text-primary flex h-9 w-full items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+              >
+                {nextActionLabel}
+              </button>
+            ) : (
+              <Link
+                href="/home"
+                className="bg-primary text-primary-foreground flex h-9 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+              >
+                完成练习
+              </Link>
+            )
+          ) : null}
         </div>
       )}
     </div>
@@ -1102,10 +1224,16 @@ export function StudentPracticePage({
             practiceFixture.practice.paperPublicId === selectedPaperPublicId,
         ) ?? null);
   const practice = selectedPracticeFixture?.practice ?? null;
-  const questions = useMemo(
+  const questionPages = useMemo(
     () =>
-      practice === null ? [] : extractPracticeQuestions(practice.paperSnapshot),
+      practice === null
+        ? []
+        : extractPracticeQuestionPages(practice.paperSnapshot),
     [practice],
+  );
+  const questions = useMemo(
+    () => questionPages.flatMap((page) => page.questions),
+    [questionPages],
   );
   const initialQuestionIndex =
     practice === null
@@ -1293,46 +1421,68 @@ export function StudentPracticePage({
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex] ?? questions[0];
-  const selectedLabels =
-    selectedLabelsByQuestion[currentQuestion.paperQuestionPublicId] ?? [];
-  const textAnswer =
-    textAnswerByQuestion[currentQuestion.paperQuestionPublicId] ?? "";
-  const feedback =
-    feedbackByQuestion[currentQuestion.paperQuestionPublicId] ?? null;
-  const hasNextQuestion = currentQuestionIndex < questions.length - 1;
+  const currentPageIndex = Math.max(
+    questionPages.findIndex(
+      (page) =>
+        currentQuestionIndex >= page.firstQuestionIndex &&
+        currentQuestionIndex < page.firstQuestionIndex + page.questions.length,
+    ),
+    0,
+  );
+  const currentPage = questionPages[currentPageIndex] ?? questionPages[0];
+  const currentQuestion = currentPage.questions[0] ?? questions[0];
+  const hasNextQuestion = currentPageIndex < questionPages.length - 1;
+  const isQuestionGroupPage = currentPage.questionGroupPublicId !== null;
+  const isCurrentPageComplete = currentPage.questions.every((question) =>
+    isPracticeQuestionFeedbackTerminal(
+      question,
+      feedbackByQuestion[question.paperQuestionPublicId] ?? null,
+    ),
+  );
 
-  function handleToggleLabel(label: string) {
+  function handleToggleLabel(question: PracticePaperQuestion, label: string) {
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
     const nextSelectedLabels =
-      currentQuestion.questionType === "multi_choice"
-        ? includesLabel(selectedLabels, label)
-          ? selectedLabels.filter((selectedLabel) => selectedLabel !== label)
-          : [...selectedLabels, label]
-        : includesLabel(selectedLabels, label)
+      question.questionType === "multi_choice"
+        ? includesLabel(questionSelectedLabels, label)
+          ? questionSelectedLabels.filter(
+              (selectedLabel) => selectedLabel !== label,
+            )
+          : [...questionSelectedLabels, label]
+        : includesLabel(questionSelectedLabels, label)
           ? []
           : [label];
 
     setSelectedLabelsByQuestion({
       ...selectedLabelsByQuestion,
-      [currentQuestion.paperQuestionPublicId]: nextSelectedLabels,
+      [question.paperQuestionPublicId]: nextSelectedLabels,
     });
   }
 
-  function handleChangeTextAnswer(textAnswerValue: string) {
+  function handleChangeTextAnswer(
+    question: PracticePaperQuestion,
+    textAnswerValue: string,
+  ) {
     setTextAnswerByQuestion({
       ...textAnswerByQuestion,
-      [currentQuestion.paperQuestionPublicId]: textAnswerValue,
+      [question.paperQuestionPublicId]: textAnswerValue,
     });
   }
 
-  async function handleSubmitAnswer() {
+  async function handleSubmitAnswer(question: PracticePaperQuestion) {
     if (practice === null) {
       return;
     }
 
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+
     let nextFeedback =
       selectedPracticeFixture?.feedbackByPaperQuestionPublicId[
-        currentQuestion.paperQuestionPublicId
+        question.paperQuestionPublicId
       ] ?? null;
 
     if (isRuntimeMode) {
@@ -1346,16 +1496,14 @@ export function StudentPracticePage({
             {
               method: "POST",
               body: JSON.stringify({
-                paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
-                selectedLabels: isOptionPracticeQuestion(
-                  currentQuestion.questionType,
-                )
-                  ? selectedLabels
+                paperQuestionPublicId: question.paperQuestionPublicId,
+                selectedLabels: isOptionPracticeQuestion(question.questionType)
+                  ? questionSelectedLabels
                   : [],
                 textAnswer:
-                  isFillBlankPracticeQuestion(currentQuestion.questionType) ||
-                  isSubjectivePracticeQuestion(currentQuestion.questionType)
-                    ? textAnswer
+                  isFillBlankPracticeQuestion(question.questionType) ||
+                  isSubjectivePracticeQuestion(question.questionType)
+                    ? questionTextAnswer
                     : null,
                 savedFromClientAt: new Date().toISOString(),
               }),
@@ -1383,23 +1531,29 @@ export function StudentPracticePage({
       return;
     }
 
-    setFeedbackByQuestion({
-      ...feedbackByQuestion,
-      [currentQuestion.paperQuestionPublicId]: nextFeedback,
-    });
+    setFeedbackByQuestion((currentFeedbackByQuestion) => ({
+      ...currentFeedbackByQuestion,
+      [question.paperQuestionPublicId]: nextFeedback,
+    }));
   }
 
-  async function handleFavoriteQuestion() {
-    if (practice === null || feedback === null) {
+  async function handleFavoriteQuestion(question: PracticePaperQuestion) {
+    const questionFeedback =
+      feedbackByQuestion[question.paperQuestionPublicId] ?? null;
+
+    if (practice === null || questionFeedback === null) {
       return;
     }
 
-    setFavoriteSubmittingQuestionPublicId(
-      currentQuestion.paperQuestionPublicId,
-    );
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+
+    setFavoriteSubmittingQuestionPublicId(question.paperQuestionPublicId);
 
     try {
-      let mistakeBookPublicId = `mistake-book-${currentQuestion.paperQuestionPublicId}`;
+      let mistakeBookPublicId = `mistake-book-${question.paperQuestionPublicId}`;
 
       if (isRuntimeMode) {
         const storedSessionValue = getStoredStudentSessionToken();
@@ -1411,16 +1565,12 @@ export function StudentPracticePage({
             {
               method: "POST",
               body: JSON.stringify({
-                paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
-                selectedLabels: isOptionPracticeQuestion(
-                  currentQuestion.questionType,
-                )
-                  ? selectedLabels
+                paperQuestionPublicId: question.paperQuestionPublicId,
+                selectedLabels: isOptionPracticeQuestion(question.questionType)
+                  ? questionSelectedLabels
                   : [],
-                textAnswer: isFillBlankPracticeQuestion(
-                  currentQuestion.questionType,
-                )
-                  ? textAnswer
+                textAnswer: isFillBlankPracticeQuestion(question.questionType)
+                  ? questionTextAnswer
                   : null,
                 savedFromClientAt: new Date().toISOString(),
               }),
@@ -1440,13 +1590,13 @@ export function StudentPracticePage({
         mistakeBookPublicId = favoritePayload.data.mistakeBookPublicId;
       }
 
-      setFeedbackByQuestion({
-        ...feedbackByQuestion,
-        [currentQuestion.paperQuestionPublicId]: {
-          ...feedback,
+      setFeedbackByQuestion((currentFeedbackByQuestion) => ({
+        ...currentFeedbackByQuestion,
+        [question.paperQuestionPublicId]: {
+          ...questionFeedback,
           mistakeBookPublicId,
         },
-      });
+      }));
     } catch {
       setRuntimeState("error");
     } finally {
@@ -1454,10 +1604,18 @@ export function StudentPracticePage({
     }
   }
 
-  async function handleRequestAiExplanation() {
-    if (practice === null || feedback === null || !isRuntimeMode) {
+  async function handleRequestAiExplanation(question: PracticePaperQuestion) {
+    const questionFeedback =
+      feedbackByQuestion[question.paperQuestionPublicId] ?? null;
+
+    if (practice === null || questionFeedback === null || !isRuntimeMode) {
       return;
     }
+
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
 
     const storedSessionValue = getStoredStudentSessionToken();
 
@@ -1469,16 +1627,12 @@ export function StudentPracticePage({
           {
             method: "POST",
             body: JSON.stringify({
-              paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
-              selectedLabels: isOptionPracticeQuestion(
-                currentQuestion.questionType,
-              )
-                ? selectedLabels
+              paperQuestionPublicId: question.paperQuestionPublicId,
+              selectedLabels: isOptionPracticeQuestion(question.questionType)
+                ? questionSelectedLabels
                 : [],
-              textAnswer: isFillBlankPracticeQuestion(
-                currentQuestion.questionType,
-              )
-                ? textAnswer
+              textAnswer: isFillBlankPracticeQuestion(question.questionType)
+                ? questionTextAnswer
                 : null,
               aiExplanationTrigger: "manual_request",
               savedFromClientAt: new Date().toISOString(),
@@ -1496,20 +1650,27 @@ export function StudentPracticePage({
         return;
       }
 
-      setFeedbackByQuestion({
-        ...feedbackByQuestion,
-        [currentQuestion.paperQuestionPublicId]:
-          explanationPayload.data.feedback,
-      });
+      const explanationFeedback = explanationPayload.data.feedback;
+
+      setFeedbackByQuestion((currentFeedbackByQuestion) => ({
+        ...currentFeedbackByQuestion,
+        [question.paperQuestionPublicId]: explanationFeedback,
+      }));
     } catch {
       setRuntimeState("error");
     }
   }
 
-  async function handleRequestAiScoring() {
-    if (practice === null || feedback === null || !isRuntimeMode) {
+  async function handleRequestAiScoring(question: PracticePaperQuestion) {
+    const questionFeedback =
+      feedbackByQuestion[question.paperQuestionPublicId] ?? null;
+
+    if (practice === null || questionFeedback === null || !isRuntimeMode) {
       return;
     }
+
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
 
     const storedSessionValue = getStoredStudentSessionToken();
 
@@ -1521,9 +1682,9 @@ export function StudentPracticePage({
           {
             method: "POST",
             body: JSON.stringify({
-              paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
+              paperQuestionPublicId: question.paperQuestionPublicId,
               selectedLabels: [],
-              textAnswer,
+              textAnswer: questionTextAnswer,
               aiScoringTrigger: "manual_request",
               savedFromClientAt: new Date().toISOString(),
             }),
@@ -1540,25 +1701,30 @@ export function StudentPracticePage({
         return;
       }
 
-      setFeedbackByQuestion({
-        ...feedbackByQuestion,
-        [currentQuestion.paperQuestionPublicId]: scoringPayload.data.feedback,
-      });
+      const scoringFeedback = scoringPayload.data.feedback;
+
+      setFeedbackByQuestion((currentFeedbackByQuestion) => ({
+        ...currentFeedbackByQuestion,
+        [question.paperQuestionPublicId]: scoringFeedback,
+      }));
     } catch {
       setRuntimeState("error");
     }
   }
 
   function handleNextQuestion() {
-    setCurrentQuestionIndex(
-      Math.min(currentQuestionIndex + 1, questions.length - 1),
-    );
+    const nextPage = questionPages[currentPageIndex + 1];
+
+    if (nextPage !== undefined) {
+      setCurrentQuestionIndex(nextPage.firstQuestionIndex);
+      setIsMaterialOpen(true);
+    }
   }
 
-  function handleRetryWithHint() {
+  function handleRetryWithHint(question: PracticePaperQuestion) {
     setFeedbackByQuestion((currentFeedbackByQuestion) => {
       const {
-        [currentQuestion.paperQuestionPublicId]: _removedFeedback,
+        [question.paperQuestionPublicId]: _removedFeedback,
         ...remainingFeedbackByQuestion
       } = currentFeedbackByQuestion;
 
@@ -1639,6 +1805,84 @@ export function StudentPracticePage({
     }
   }
 
+  function renderQuestionPanel(
+    question: PracticePaperQuestion,
+    options: { showMaterial: boolean; showNavigation: boolean },
+  ) {
+    const questionSelectedLabels =
+      selectedLabelsByQuestion[question.paperQuestionPublicId] ?? [];
+    const questionTextAnswer =
+      textAnswerByQuestion[question.paperQuestionPublicId] ?? "";
+    const questionFeedback =
+      feedbackByQuestion[question.paperQuestionPublicId] ?? null;
+
+    if (isOptionPracticeQuestion(question.questionType)) {
+      return (
+        <ObjectiveQuestionPanel
+          question={question}
+          selectedLabels={questionSelectedLabels}
+          feedback={questionFeedback}
+          onToggleLabel={(label) => handleToggleLabel(question, label)}
+          onSubmitAnswer={() => void handleSubmitAnswer(question)}
+          onFavoriteQuestion={() => void handleFavoriteQuestion(question)}
+          onRequestAiExplanation={() =>
+            void handleRequestAiExplanation(question)
+          }
+          onNextQuestion={handleNextQuestion}
+          hasNextQuestion={hasNextQuestion}
+          showNavigation={options.showNavigation}
+          isFavoriteSubmitting={
+            favoriteSubmittingQuestionPublicId ===
+            question.paperQuestionPublicId
+          }
+        />
+      );
+    }
+
+    if (isFillBlankPracticeQuestion(question.questionType)) {
+      return (
+        <FillBlankQuestionPanel
+          textAnswer={questionTextAnswer}
+          feedback={questionFeedback}
+          onChangeTextAnswer={(value) =>
+            handleChangeTextAnswer(question, value)
+          }
+          onSubmitAnswer={() => void handleSubmitAnswer(question)}
+          onFavoriteQuestion={() => void handleFavoriteQuestion(question)}
+          onRequestAiExplanation={() =>
+            void handleRequestAiExplanation(question)
+          }
+          onNextQuestion={handleNextQuestion}
+          hasNextQuestion={hasNextQuestion}
+          showNavigation={options.showNavigation}
+          isFavoriteSubmitting={
+            favoriteSubmittingQuestionPublicId ===
+            question.paperQuestionPublicId
+          }
+        />
+      );
+    }
+
+    return (
+      <SubjectiveQuestionPanel
+        question={question}
+        textAnswer={questionTextAnswer}
+        feedback={questionFeedback}
+        isMaterialOpen={isMaterialOpen}
+        showMaterial={options.showMaterial}
+        showNavigation={options.showNavigation}
+        hasNextQuestion={hasNextQuestion}
+        nextActionLabel={practice?.subject === "skill" ? "下一组" : "下一题"}
+        onToggleMaterial={() => setIsMaterialOpen(!isMaterialOpen)}
+        onChangeTextAnswer={(value) => handleChangeTextAnswer(question, value)}
+        onSubmitAnswer={() => void handleSubmitAnswer(question)}
+        onRetryWithHint={() => handleRetryWithHint(question)}
+        onRequestAiScoring={() => void handleRequestAiScoring(question)}
+        onNextQuestion={handleNextQuestion}
+      />
+    );
+  }
+
   if (isRuntimeMode && isResumeChoiceVisible) {
     return (
       <PracticeResumeChoicePanel
@@ -1683,7 +1927,9 @@ export function StudentPracticePage({
         <div>
           <p className="text-text-secondary text-xs">进度</p>
           <p className="text-text-primary mt-1 text-sm font-semibold">
-            第 {currentQuestionIndex + 1} / {questions.length} 题
+            {practice.subject === "skill"
+              ? `第 ${currentPageIndex + 1} / ${questionPages.length} 组`
+              : `第 ${currentQuestionIndex + 1} / ${questions.length} 题`}
           </p>
         </div>
         <div>
@@ -1700,69 +1946,115 @@ export function StudentPracticePage({
         </div>
       </div>
 
-      <article className="bg-surface ring-border space-y-5 rounded-xl p-4 shadow-sm ring-1">
-        <div className="space-y-2">
-          <div className="text-text-secondary flex items-center gap-2 text-xs">
-            <FileText className="size-3.5" aria-hidden="true" />
-            <span>{currentQuestion.paperSectionTitle}</span>
-            {currentQuestion.questionGroupTitle === null ? null : (
-              <span>{currentQuestion.questionGroupTitle}</span>
-            )}
+      {isQuestionGroupPage ? (
+        <article
+          data-testid={`practice-question-group-${currentPage.questionGroupPublicId}`}
+          data-public-id={currentPage.questionGroupPublicId ?? undefined}
+          className="bg-surface ring-border space-y-5 rounded-xl p-4 shadow-sm ring-1"
+        >
+          <div className="space-y-2">
+            <div className="text-text-secondary flex items-center gap-2 text-xs">
+              <FileText className="size-3.5" aria-hidden="true" />
+              <span>{currentPage.paperSectionTitle}</span>
+            </div>
+            <h2 className="font-heading text-text-primary text-lg font-semibold">
+              {currentPage.questionGroupTitle ?? "材料题组"}
+            </h2>
           </div>
-          <StudentRichText
-            className="font-heading text-text-primary space-y-2 text-lg leading-7 font-semibold"
-            value={currentQuestion.stemRichText}
-          />
-          <p className="text-text-secondary text-sm">
-            本题 {currentQuestion.score} 分
-          </p>
-        </div>
 
-        {isOptionPracticeQuestion(currentQuestion.questionType) ? (
-          <ObjectiveQuestionPanel
-            question={currentQuestion}
-            selectedLabels={selectedLabels}
-            feedback={feedback}
-            onToggleLabel={handleToggleLabel}
-            onSubmitAnswer={() => void handleSubmitAnswer()}
-            onFavoriteQuestion={() => void handleFavoriteQuestion()}
-            onRequestAiExplanation={() => void handleRequestAiExplanation()}
-            onNextQuestion={handleNextQuestion}
-            hasNextQuestion={hasNextQuestion}
-            isFavoriteSubmitting={
-              favoriteSubmittingQuestionPublicId ===
-              currentQuestion.paperQuestionPublicId
-            }
-          />
-        ) : isFillBlankPracticeQuestion(currentQuestion.questionType) ? (
-          <FillBlankQuestionPanel
-            textAnswer={textAnswer}
-            feedback={feedback}
-            onChangeTextAnswer={handleChangeTextAnswer}
-            onSubmitAnswer={() => void handleSubmitAnswer()}
-            onFavoriteQuestion={() => void handleFavoriteQuestion()}
-            onRequestAiExplanation={() => void handleRequestAiExplanation()}
-            onNextQuestion={handleNextQuestion}
-            hasNextQuestion={hasNextQuestion}
-            isFavoriteSubmitting={
-              favoriteSubmittingQuestionPublicId ===
-              currentQuestion.paperQuestionPublicId
-            }
-          />
-        ) : (
-          <SubjectiveQuestionPanel
-            question={currentQuestion}
-            textAnswer={textAnswer}
-            feedback={feedback}
-            isMaterialOpen={isMaterialOpen}
-            onToggleMaterial={() => setIsMaterialOpen(!isMaterialOpen)}
-            onChangeTextAnswer={handleChangeTextAnswer}
-            onSubmitAnswer={() => void handleSubmitAnswer()}
-            onRetryWithHint={handleRetryWithHint}
-            onRequestAiScoring={() => void handleRequestAiScoring()}
-          />
-        )}
-      </article>
+          {currentPage.materialRichText === null ? null : (
+            <div className="border-border bg-background rounded-xl border p-3">
+              <button
+                type="button"
+                onClick={() => setIsMaterialOpen(!isMaterialOpen)}
+                className="text-text-primary flex w-full items-center justify-between text-left text-sm font-semibold transition-transform active:scale-[0.98]"
+              >
+                <span>{currentPage.materialTitle ?? "材料"}</span>
+                {isMaterialOpen ? (
+                  <ChevronDown className="size-4" aria-hidden="true" />
+                ) : (
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                )}
+              </button>
+              {isMaterialOpen ? (
+                <StudentRichText
+                  className="text-text-secondary mt-3 space-y-2 text-sm leading-6"
+                  value={currentPage.materialRichText}
+                />
+              ) : null}
+            </div>
+          )}
+
+          <div className="space-y-6">
+            {currentPage.questions.map((question, questionIndex) => (
+              <section
+                key={question.paperQuestionPublicId}
+                data-public-id={question.paperQuestionPublicId}
+                className="border-border space-y-4 border-t pt-5 first:border-t-0 first:pt-0"
+              >
+                <div className="space-y-2">
+                  <p className="text-brand-primary text-xs font-medium">
+                    子题 {questionIndex + 1} / {currentPage.questions.length}
+                  </p>
+                  <StudentRichText
+                    className="font-heading text-text-primary space-y-2 text-lg leading-7 font-semibold"
+                    value={question.stemRichText}
+                  />
+                  <p className="text-text-secondary text-sm">
+                    本题 {question.score} 分
+                  </p>
+                </div>
+                {renderQuestionPanel(question, {
+                  showMaterial: false,
+                  showNavigation: false,
+                })}
+              </section>
+            ))}
+          </div>
+
+          {isCurrentPageComplete ? (
+            hasNextQuestion ? (
+              <button
+                type="button"
+                onClick={handleNextQuestion}
+                className="bg-primary text-primary-foreground flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+              >
+                下一组
+              </button>
+            ) : (
+              <Link
+                href="/home"
+                className="bg-primary text-primary-foreground flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+              >
+                完成练习
+              </Link>
+            )
+          ) : null}
+        </article>
+      ) : (
+        <article className="bg-surface ring-border space-y-5 rounded-xl p-4 shadow-sm ring-1">
+          <div className="space-y-2">
+            <div className="text-text-secondary flex items-center gap-2 text-xs">
+              <FileText className="size-3.5" aria-hidden="true" />
+              <span>{currentQuestion.paperSectionTitle}</span>
+              {currentQuestion.questionGroupTitle === null ? null : (
+                <span>{currentQuestion.questionGroupTitle}</span>
+              )}
+            </div>
+            <StudentRichText
+              className="font-heading text-text-primary space-y-2 text-lg leading-7 font-semibold"
+              value={currentQuestion.stemRichText}
+            />
+            <p className="text-text-secondary text-sm">
+              本题 {currentQuestion.score} 分
+            </p>
+          </div>
+          {renderQuestionPanel(currentQuestion, {
+            showMaterial: true,
+            showNavigation: true,
+          })}
+        </article>
+      )}
 
       {isRestartConfirmationVisible ? (
         <div

@@ -8,6 +8,7 @@ import type {
   PracticeAnswerRecordRow,
   PracticeRow,
 } from "../repositories/practice-repository";
+import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
 
 function formatNullableTimestamp(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
@@ -113,7 +114,7 @@ export function mapPracticeToApi(
       answerRecords,
     ),
     questionCount: getQuestionCount(practice.paper_snapshot),
-    paperSnapshot: practice.paper_snapshot,
+    paperSnapshot: projectPaperSnapshotForLearner(practice.paper_snapshot),
   };
 }
 

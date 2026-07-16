@@ -548,6 +548,127 @@ function formatSelectedAnswer(
     : answerSnapshot.selectedLabels.join(", ");
 }
 
+function projectStoredAiScoringEvidence(
+  answerRecord: ExamReportAnswerRecordRow | undefined,
+): Record<string, unknown> | null {
+  const evidence = answerRecord?.ai_scoring_evidence;
+  const resultSnapshot = evidence?.resultSnapshot;
+
+  if (
+    evidence === null ||
+    evidence === undefined ||
+    !isRecord(resultSnapshot) ||
+    resultSnapshot.scoringStatus !== "scored"
+  ) {
+    return null;
+  }
+
+  const scoringPoints = Array.isArray(resultSnapshot.scoringPoints)
+    ? resultSnapshot.scoringPoints.flatMap((candidate) => {
+        if (!isRecord(candidate)) {
+          return [];
+        }
+
+        const scoringPointPublicId = getStringField(
+          candidate,
+          "scoringPointPublicId",
+        );
+        const isHit = candidate.isHit;
+        const score = candidate.score;
+
+        if (
+          scoringPointPublicId === null ||
+          typeof isHit !== "boolean" ||
+          (typeof score !== "number" && typeof score !== "string")
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            scoringPointPublicId,
+            isHit,
+            score,
+            reason: getStringField(candidate, "reason"),
+          },
+        ];
+      })
+    : [];
+  const citations = Array.isArray(resultSnapshot.citations)
+    ? resultSnapshot.citations.flatMap((candidate) => {
+        if (!isRecord(candidate)) {
+          return [];
+        }
+
+        const resourcePublicId = getStringField(candidate, "resourcePublicId");
+        const chunkPublicId = getStringField(candidate, "chunkPublicId");
+        const generationPublicId = getStringField(
+          candidate,
+          "generationPublicId",
+        );
+        const chunkIndex = candidate.chunkIndex;
+
+        if (
+          resourcePublicId === null ||
+          chunkPublicId === null ||
+          generationPublicId === null ||
+          typeof chunkIndex !== "number" ||
+          !Number.isInteger(chunkIndex)
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            resourcePublicId,
+            resourceTitle: getStringField(candidate, "resourceTitle"),
+            chunkPublicId,
+            generationPublicId,
+            headingPath: getStringArrayField(candidate, "headingPath"),
+            chunkIndex,
+            textHash: getStringField(candidate, "textHash"),
+          },
+        ];
+      })
+    : [];
+  const modelConfigSnapshot = evidence.modelConfigSnapshot;
+
+  return {
+    taskPublicId: evidence.taskPublicId,
+    taskStatus: evidence.taskStatus,
+    attemptNumber: evidence.attemptNumber,
+    attemptStatus: evidence.attemptStatus,
+    modelConfig: {
+      modelConfigPublicId: getStringField(
+        modelConfigSnapshot,
+        "modelConfigPublicId",
+      ),
+      modelName: getStringField(modelConfigSnapshot, "modelName"),
+      providerDisplayName: getStringField(
+        modelConfigSnapshot,
+        "providerDisplayName",
+      ),
+      configVersion:
+        typeof modelConfigSnapshot.configVersion === "number"
+          ? modelConfigSnapshot.configVersion
+          : null,
+    },
+    promptTemplate: {
+      promptTemplateKey: evidence.promptTemplateKey,
+      version: evidence.promptTemplateVersion,
+      templateHash: evidence.promptTemplateHash,
+    },
+    scoringPoints,
+    overallComment: getStringField(resultSnapshot, "overallComment"),
+    improvementSuggestion: getStringField(
+      resultSnapshot,
+      "improvementSuggestion",
+    ),
+    evidenceStatus: getStringField(resultSnapshot, "evidenceStatus"),
+    citations,
+  };
+}
+
 function buildQuestionResults(
   paperSnapshot: Record<string, unknown>,
   answerRecords: ExamReportAnswerRecordRow[],
@@ -589,12 +710,13 @@ function buildQuestionResults(
           ? formatFillBlankStandardAnswer(fillBlankAnswers)
           : standardAnswerLabels.join(", "),
       fillBlankAnswers,
+      aiScoringEvidence: projectStoredAiScoringEvidence(answerRecord),
       mistakeBookPublicId: null,
     };
   });
 }
 
-function buildReportSnapshot(
+export function buildExamReportSnapshot(
   mockExam: ExamReportMockExamRow,
   answerRecords: ExamReportAnswerRecordRow[],
 ): ExamReportSnapshotDto {
@@ -808,12 +930,6 @@ export function createExamReportService(
         mockExamPublicId: normalizedInput.mockExamPublicId,
       });
 
-      if (existingReport !== null) {
-        return createSuccessResponse({
-          examReport: mapExamReportDetailToApi(existingReport),
-        });
-      }
-
       const mockExam = await repository.findSubmittedMockExamByPublicId({
         userPublicId: userContext.userPublicId,
         mockExamPublicId: normalizedInput.mockExamPublicId,
@@ -848,8 +964,10 @@ export function createExamReportService(
         mockExamPublicId: normalizedInput.mockExamPublicId,
       });
       const generatedAt = clock.now();
-      const report = await repository.createExamReport({
-        publicId: publicIdFactory.createPublicId("exam_report"),
+      const reportInput = {
+        publicId:
+          existingReport?.public_id ??
+          publicIdFactory.createPublicId("exam_report"),
         userPublicId: userContext.userPublicId,
         mockExamPublicId: mockExam.public_id,
         paperPublicId: mockExam.paper_public_id,
@@ -862,10 +980,14 @@ export function createExamReportService(
         subjectiveScore: mockExam.subjective_score,
         totalScore: mockExam.total_score,
         durationSecond: calculateDurationSecond(mockExam),
-        reportSnapshot: buildReportSnapshot(mockExam, answerRecords),
+        reportSnapshot: buildExamReportSnapshot(mockExam, answerRecords),
         learningSuggestionSnapshot: null,
         generatedAt,
-      });
+      } as const;
+      const report =
+        existingReport === null
+          ? await repository.createExamReport(reportInput)
+          : await repository.rebuildExamReport(reportInput);
 
       return createSuccessResponse({
         examReport: mapExamReportDetailToApi(report),
@@ -900,6 +1022,12 @@ export function createExamReportService(
         selectLearningSuggestionAnswerRecord(answerRecords);
 
       const generatedAt = clock.now();
+      const suggestionPrompt = buildLearningSuggestionPrompt(
+        report,
+        selectedAnswerRecord,
+      );
+      const suggestionAnswer =
+        buildLearningSuggestionRawAnswer(selectedAnswerRecord);
       const learningSuggestionResult =
         await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
           {
@@ -907,11 +1035,8 @@ export function createExamReportService(
             answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,
             mockExamPublicId: report.mock_exam_public_id,
             questionPublicId: selectedAnswerRecord?.question_public_id ?? null,
-            rawPrompt: buildLearningSuggestionPrompt(
-              report,
-              selectedAnswerRecord,
-            ),
-            rawAnswer: buildLearningSuggestionRawAnswer(selectedAnswerRecord),
+            rawPrompt: suggestionPrompt,
+            rawAnswer: suggestionAnswer,
             modelConfigSnapshot: learningSuggestionOptions.modelConfigSnapshot,
             promptTemplate: learningSuggestionOptions.promptTemplate,
             startedAt: generatedAt,

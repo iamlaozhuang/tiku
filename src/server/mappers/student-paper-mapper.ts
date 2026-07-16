@@ -7,6 +7,7 @@ import type {
   StudentPaperAuthorizationScopeRow,
   StudentPublishedPaperRow,
 } from "../repositories/student-paper-repository";
+import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
 
 function formatNullableTimestamp(value: Date | null): string | null {
   return value === null ? null : value.toISOString();
@@ -54,6 +55,6 @@ export function mapStudentPaperDetailToApi(
 ): StudentPaperDetailDto {
   return {
     ...mapStudentPaperSummaryToApi(paper),
-    paperSnapshot: paper.paper_snapshot,
+    paperSnapshot: projectPaperSnapshotForLearner(paper.paper_snapshot),
   };
 }

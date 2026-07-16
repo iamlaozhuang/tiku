@@ -23,7 +23,18 @@ const paperSnapshot = {
   durationMinute: 120,
   totalScore: "100.0",
   publishedAt: "2026-05-19T08:00:00.000Z",
-  paperSections: [],
+  paperSections: [
+    {
+      paperQuestions: [
+        {
+          paperQuestionPublicId: "paper_question_public_123",
+          stemRichText: "<p>题干</p>",
+          standardAnswerRichText: "<p>A</p>",
+          analysisRichText: "<p>解析</p>",
+        },
+      ],
+    },
+  ],
 };
 
 function createScopeRow(
@@ -103,7 +114,19 @@ describe("student paper mapper", () => {
       questionCount: 80,
       canPractice: true,
       canMockExam: true,
-      paperSnapshot,
+      paperSnapshot: {
+        ...paperSnapshot,
+        paperSections: [
+          {
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper_question_public_123",
+                stemRichText: "<p>题干</p>",
+              },
+            ],
+          },
+        ],
+      },
     });
     expect(detail).not.toHaveProperty("id");
   });

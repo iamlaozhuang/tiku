@@ -8,6 +8,7 @@ import type {
   MockExamAnswerSnapshotDto,
   MockExamRetryScoringResultDto,
   MockExamResultDto,
+  MockExamSupplementResultDto,
   MockExamSubmitResultDto,
 } from "../contracts/mock-exam-contract";
 import {
@@ -26,9 +27,11 @@ import type { EnqueueAiScoringTaskInput } from "../repositories/ai-scoring-task-
 import {
   normalizeMockExamAnswerInput,
   normalizeStartMockExamInput,
+  normalizeSupplementMockExamAnswersInput,
   normalizeSubmitMockExamInput,
   type NormalizedMockExamAnswerInput,
 } from "../validators/mock-exam";
+import { buildExamReportSnapshot } from "./exam-report-service";
 import { validatePublishedPaperQuestionCount } from "../validators/paper-draft";
 import { isQuestionScoringContractValid } from "../../lib/question-scoring-contract";
 
@@ -41,7 +44,9 @@ export type MockExamClock = {
 };
 
 export type MockExamPublicIdFactory = {
-  createPublicId(prefix: "mock_exam" | "answer_record"): string;
+  createPublicId(
+    prefix: "mock_exam" | "mock_exam_deadline_task" | "answer_record",
+  ): string;
 };
 
 export type MockExamService = {
@@ -58,6 +63,11 @@ export type MockExamService = {
     publicId: string,
     input: unknown,
   ): Promise<ApiResponse<MockExamAnswerRecordResultDto | null>>;
+  supplementMockExamAnswers(
+    userContext: MockExamUserContext,
+    publicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<MockExamSupplementResultDto | null>>;
   submitMockExam(
     userContext: MockExamUserContext,
     publicId: string,
@@ -182,6 +192,7 @@ type MockExamSubjectiveScoringResult = {
 };
 
 const mockExamContractTerm = "mock_exam";
+export const MOCK_EXAM_AUTHORIZATION_TERMINATED_CODE = 403313;
 const serverContractTerm = "server";
 const terminatedContractTerm = "terminated";
 
@@ -1005,7 +1016,7 @@ function createMockExamNotFoundResponse(): ApiResponse<null> {
 
 function createMockExamAuthorizationTerminatedResponse(): ApiResponse<null> {
   return createErrorResponse(
-    403313,
+    MOCK_EXAM_AUTHORIZATION_TERMINATED_CODE,
     "Mock exam authorization is invalid; session terminated.",
   );
 }
@@ -1192,6 +1203,23 @@ async function submitReadableMockExam(
   });
 
   if (submittedMockExam === null) {
+    const replayedMockExam = await repository.findMockExamByPublicId({
+      userPublicId: userContext.userPublicId,
+      publicId: mockExam.public_id,
+    });
+
+    if (
+      replayedMockExam !== null &&
+      ["completed", "scoring", "scoring_partial_failed"].includes(
+        replayedMockExam.exam_status,
+      )
+    ) {
+      return {
+        mockExam: replayedMockExam,
+        unansweredCount,
+      };
+    }
+
     return createMockExamNotFoundResponse();
   }
 
@@ -1358,9 +1386,15 @@ async function createFreshMockExam(
   paper: MockExamPaperRow,
   startedAt: Date,
 ): Promise<MockExamRow | null> {
+  const serverDeadlineAt = addDurationMinute(startedAt, paper.duration_minute);
+
   try {
     return await repository.createMockExam({
       publicId: publicIdFactory.createPublicId("mock_exam"),
+      deadlineTaskPublicId:
+        serverDeadlineAt === null
+          ? null
+          : publicIdFactory.createPublicId("mock_exam_deadline_task"),
       userPublicId: userContext.userPublicId,
       paperPublicId: paper.public_id,
       paperSnapshot: paper.paper_snapshot,
@@ -1368,7 +1402,7 @@ async function createFreshMockExam(
       level: paper.level,
       subject: paper.subject,
       startedAt,
-      serverDeadlineAt: addDurationMinute(startedAt, paper.duration_minute),
+      serverDeadlineAt,
       durationMinute: paper.duration_minute,
     });
   } catch (error) {
@@ -1377,6 +1411,33 @@ async function createFreshMockExam(
     }
     throw error;
   }
+}
+
+async function buildMockExamResult(
+  repository: MockExamRepository,
+  userContext: MockExamUserContext,
+  mockExam: MockExamRow,
+  now: Date,
+): Promise<MockExamResultDto> {
+  const answerRecords = await repository.listMockExamAnswerRecords({
+    userPublicId: userContext.userPublicId,
+    mockExamPublicId: mockExam.public_id,
+  });
+
+  return {
+    mockExam: mapMockExamToApi(mockExam, now),
+    answerRecords: answerRecords.map((answerRecord) => {
+      const mappedAnswerRecord = mapMockExamAnswerRecordToApi(answerRecord);
+
+      return mockExam.exam_status === "in_progress"
+        ? {
+            ...mappedAnswerRecord,
+            isCorrect: null,
+            score: null,
+          }
+        : mappedAnswerRecord;
+    }),
+  };
 }
 
 export function createMockExamService(
@@ -1474,6 +1535,7 @@ export function createMockExamService(
 
           return createSuccessResponse({
             mockExam: mapMockExamToApi(mockExam, now),
+            answerRecords: [],
           });
         }
 
@@ -1490,14 +1552,24 @@ export function createMockExamService(
             return submittedResult;
           }
 
-          return createSuccessResponse({
-            mockExam: mapMockExamToApi(submittedResult.mockExam, now),
-          });
+          return createSuccessResponse(
+            await buildMockExamResult(
+              repository,
+              userContext,
+              submittedResult.mockExam,
+              now,
+            ),
+          );
         }
 
-        return createSuccessResponse({
-          mockExam: mapMockExamToApi(activeMockExam, now),
-        });
+        return createSuccessResponse(
+          await buildMockExamResult(
+            repository,
+            userContext,
+            activeMockExam,
+            now,
+          ),
+        );
       }
 
       const mockExam = await createFreshMockExam(
@@ -1517,6 +1589,7 @@ export function createMockExamService(
 
       return createSuccessResponse({
         mockExam: mapMockExamToApi(mockExam, now),
+        answerRecords: [],
       });
     },
 
@@ -1534,9 +1607,9 @@ export function createMockExamService(
         return mockExam;
       }
 
-      return createSuccessResponse({
-        mockExam: mapMockExamToApi(mockExam, now),
-      });
+      return createSuccessResponse(
+        await buildMockExamResult(repository, userContext, mockExam, now),
+      );
     },
 
     async saveMockExamAnswer(userContext, publicId, input) {
@@ -1571,7 +1644,7 @@ export function createMockExamService(
         return createErrorResponse(422313, "Mock exam question is invalid.");
       }
 
-      const answerRecord = await repository.saveMockExamAnswerRecord({
+      const saveResult = await repository.saveMockExamAnswerRecord({
         publicId: publicIdFactory.createPublicId("answer_record"),
         userPublicId: userContext.userPublicId,
         mockExamPublicId: mockExam.public_id,
@@ -1579,6 +1652,8 @@ export function createMockExamService(
         questionPublicId: question.questionPublicId,
         questionSnapshot: question.snapshot,
         answerSnapshot: buildAnswerSnapshot(normalizedInput),
+        operationId: normalizedInput.operationId,
+        expectedRevision: normalizedInput.expectedRevision,
         answerRecordStatus: "saved",
         isCorrect: null,
         score: null,
@@ -1586,8 +1661,234 @@ export function createMockExamService(
         answeredAt: now,
       });
 
+      if (saveResult.status === "stale") {
+        return createErrorResponse(
+          409316,
+          "Mock exam answer revision is stale.",
+        );
+      }
+
+      if (saveResult.status === "not_writable") {
+        return createErrorResponse(409311, "Mock exam is not in progress.");
+      }
+
+      if (saveResult.status === "operation_conflict") {
+        return createErrorResponse(
+          409318,
+          "Mock exam answer operation id conflicts with another question.",
+        );
+      }
+
+      if (saveResult.answerRecord === null) {
+        throw new Error("Saved mock exam answer record is unavailable.");
+      }
+
       return createSuccessResponse({
-        answerRecord: mapMockExamAnswerRecordToApi(answerRecord),
+        answerRecord: mapMockExamAnswerRecordToApi(saveResult.answerRecord),
+      });
+    },
+
+    async supplementMockExamAnswers(userContext, publicId, input) {
+      const normalizedInput = normalizeSupplementMockExamAnswersInput(input);
+
+      if (normalizedInput === null) {
+        return createErrorResponse(
+          422318,
+          "Mock exam supplemental answer input is invalid.",
+        );
+      }
+
+      const now = clock.now();
+      const mockExam = await getOwnedMockExam(
+        repository,
+        userContext,
+        publicId,
+        now,
+      );
+
+      if (!isMockExamRow(mockExam)) {
+        return mockExam;
+      }
+
+      if (
+        !["completed", "scoring", "scoring_partial_failed"].includes(
+          mockExam.exam_status,
+        ) ||
+        mockExam.server_deadline_at === null ||
+        mockExam.submitted_at === null ||
+        mockExam.submitted_at < mockExam.server_deadline_at
+      ) {
+        return createErrorResponse(
+          409317,
+          "Mock exam does not allow terminal answer supplementation.",
+        );
+      }
+
+      const normalizedAnswersWithTime = normalizedInput.answers.map(
+        (answer) => ({
+          answer,
+          clientSavedAt: new Date(answer.savedFromClientAt!),
+        }),
+      );
+
+      if (
+        normalizedAnswersWithTime.some(
+          ({ clientSavedAt }) =>
+            clientSavedAt < mockExam.started_at ||
+            clientSavedAt > mockExam.server_deadline_at!,
+        )
+      ) {
+        return createErrorResponse(
+          422319,
+          "Mock exam supplemental answer was saved after the deadline.",
+        );
+      }
+
+      const preparedAnswers = [];
+
+      try {
+        for (const { answer, clientSavedAt } of normalizedAnswersWithTime) {
+          const question = findMockExamQuestion(
+            mockExam.paper_snapshot,
+            answer.paperQuestionPublicId,
+          );
+
+          if (question === null) {
+            return createErrorResponse(
+              422313,
+              "Mock exam question is invalid.",
+            );
+          }
+
+          const publicId = publicIdFactory.createPublicId("answer_record");
+          const answerSnapshot = buildAnswerSnapshot(answer);
+          const answerRecord: MockExamAnswerRecordRow = {
+            public_id: publicId,
+            exam_mode: "mock_exam",
+            paper_question_public_id: question.paperQuestionPublicId,
+            question_public_id: question.questionPublicId,
+            question_snapshot: question.snapshot,
+            answer_snapshot: answerSnapshot,
+            answer_revision: 1,
+            client_operation_id: answer.operationId,
+            client_saved_at: clientSavedAt,
+            answer_record_status: "submitted",
+            is_correct: null,
+            score: null,
+            max_score: question.score,
+            answered_at: now,
+            submitted_at: now,
+          };
+
+          if (isAiScoringQuestion(question)) {
+            if (options.aiScoringTaskPreparer === undefined) {
+              return createErrorResponse(
+                503318,
+                "AI scoring configuration is unavailable.",
+              );
+            }
+
+            preparedAnswers.push({
+              publicId,
+              paperQuestionPublicId: question.paperQuestionPublicId,
+              questionPublicId: question.questionPublicId,
+              questionSnapshot: question.snapshot,
+              answerSnapshot,
+              operationId: answer.operationId,
+              clientSavedAt,
+              answerRecordStatus: "submitted" as const,
+              isCorrect: null,
+              score: null,
+              maxScore: question.score,
+              aiScoringTask: await options.aiScoringTaskPreparer.prepareTask(
+                buildAiScoringRuntimeContext({
+                  userContext,
+                  mockExam,
+                  question,
+                  answerRecord,
+                }),
+              ),
+            });
+            continue;
+          }
+
+          const objectiveResult = buildSubmittedAnswerRecordResult(
+            question,
+            answerRecord,
+            now,
+          );
+          preparedAnswers.push({
+            publicId,
+            paperQuestionPublicId: question.paperQuestionPublicId,
+            questionPublicId: question.questionPublicId,
+            questionSnapshot: question.snapshot,
+            answerSnapshot,
+            operationId: answer.operationId,
+            clientSavedAt,
+            answerRecordStatus: objectiveResult.answerRecordStatus,
+            isCorrect: objectiveResult.isCorrect,
+            score: objectiveResult.score,
+            maxScore: question.score,
+            aiScoringTask: null,
+          });
+        }
+      } catch {
+        return createErrorResponse(
+          503318,
+          "AI scoring configuration is unavailable.",
+        );
+      }
+
+      const supplementResult =
+        await repository.supplementMissingMockExamAnswers({
+          userPublicId: userContext.userPublicId,
+          mockExamPublicId: mockExam.public_id,
+          supplementedAt: now,
+          answers: preparedAnswers,
+        });
+
+      if (supplementResult === null) {
+        return createMockExamNotFoundResponse();
+      }
+
+      const rebuiltReport = await repository.rebuildExistingExamReport({
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: supplementResult.mockExam.public_id,
+        hasChanges: supplementResult.supplementedCount > 0,
+        examStatus: supplementResult.mockExam.exam_status,
+        objectiveScore: supplementResult.mockExam.objective_score,
+        subjectiveScore: supplementResult.mockExam.subjective_score,
+        totalScore: supplementResult.mockExam.total_score,
+        reportSnapshot: buildExamReportSnapshot(
+          {
+            public_id: supplementResult.mockExam.public_id,
+            paper_public_id: supplementResult.mockExam.paper_public_id,
+            paper_snapshot: supplementResult.mockExam.paper_snapshot,
+            profession: supplementResult.mockExam.profession,
+            level: supplementResult.mockExam.level,
+            subject: supplementResult.mockExam.subject,
+            exam_status: supplementResult.mockExam.exam_status,
+            started_at: supplementResult.mockExam.started_at,
+            submitted_at: supplementResult.mockExam.submitted_at,
+            objective_score: supplementResult.mockExam.objective_score,
+            subjective_score: supplementResult.mockExam.subjective_score,
+            total_score: supplementResult.mockExam.total_score,
+          },
+          supplementResult.answerRecords.map((answerRecord) => ({
+            ...answerRecord,
+            question_snapshot: answerRecord.question_snapshot ?? {},
+            ai_scoring_evidence: answerRecord.ai_scoring_evidence ?? null,
+          })),
+        ),
+        rebuiltAt: now,
+      });
+
+      return createSuccessResponse({
+        mockExam: mapMockExamToApi(supplementResult.mockExam, now),
+        supplementedCount: supplementResult.supplementedCount,
+        skippedExistingCount: supplementResult.skippedExistingCount,
+        examReportPublicId: rebuiltReport?.publicId ?? null,
+        reportRevision: rebuiltReport?.reportRevision ?? null,
       });
     },
 
@@ -1604,7 +1905,7 @@ export function createMockExamService(
       void normalizedInput;
 
       const now = clock.now();
-      const mockExam = await getWritableMockExam(
+      const mockExam = await getReadableMockExam(
         repository,
         userContext,
         publicId,
@@ -1614,6 +1915,24 @@ export function createMockExamService(
 
       if (!isMockExamRow(mockExam)) {
         return mockExam;
+      }
+
+      if (
+        ["completed", "scoring", "scoring_partial_failed"].includes(
+          mockExam.exam_status,
+        )
+      ) {
+        const questionCount =
+          listValidatedMockExamQuestions(mockExam.paper_snapshot)?.length ?? 0;
+
+        return createSuccessResponse({
+          mockExam: mapMockExamToApi(mockExam, now),
+          unansweredCount: Math.max(0, questionCount - mockExam.answered_count),
+        });
+      }
+
+      if (mockExam.exam_status !== "in_progress") {
+        return createErrorResponse(409311, "Mock exam is not in progress.");
       }
 
       const submittedResult = await submitReadableMockExam(
@@ -1797,9 +2116,14 @@ export function createMockExamService(
         return createMockExamNotFoundResponse();
       }
 
-      return createSuccessResponse({
-        mockExam: mapMockExamToApi(terminatedMockExam, now),
-      });
+      return createSuccessResponse(
+        await buildMockExamResult(
+          repository,
+          userContext,
+          terminatedMockExam,
+          now,
+        ),
+      );
     },
   };
 }
@@ -1819,6 +2143,12 @@ export function createUnavailableMockExamService(): MockExamService {
       );
     },
     async saveMockExamAnswer() {
+      return createErrorResponse(
+        503312,
+        "Mock exam runtime is not configured.",
+      );
+    },
+    async supplementMockExamAnswers() {
       return createErrorResponse(
         503312,
         "Mock exam runtime is not configured.",

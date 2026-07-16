@@ -13,9 +13,13 @@ import {
   RefreshCw,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { projectPaperSnapshotForLearner } from "@/lib/learner-content-projection";
 import {
+  STUDENT_MOCK_EXAM_ANSWER_QUEUE_STORAGE_KEY_PREFIX,
+  STUDENT_MOCK_EXAM_CACHE_STORAGE_KEY_PREFIX,
+  createStudentUserScopedStorageKey,
   fetchStudentApi,
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
@@ -29,10 +33,12 @@ import type {
   ExamReportSnapshotDto,
 } from "@/server/contracts/exam-report-contract";
 import type {
+  MockExamAnswerRecordDto,
   MockExamAnswerRecordResultDto,
   MockExamDto,
   MockExamResultDto,
   MockExamRetryScoringResultDto,
+  MockExamSupplementResultDto,
   MockExamSubmitResultDto,
 } from "@/server/contracts/mock-exam-contract";
 import type { ExamStatus } from "@/server/models/student-experience";
@@ -77,6 +83,8 @@ type MockExamPendingAnswer = {
   paperQuestionPublicId: string;
   selectedLabels: string[];
   textAnswer: string | null;
+  operationId: string;
+  expectedRevision: number;
   savedFromClientAt: string;
   queuedAt: string;
 };
@@ -86,8 +94,6 @@ type MockExamPendingAnswerQueuePayload = {
   answers: Record<string, MockExamPendingAnswer>;
 };
 
-const mockExamCacheStorageKeyPrefix = "tiku.mockExam.cache.";
-const mockExamAnswerQueueStorageKeyPrefix = "tiku.mockExam.answerQueue.";
 const examReportPageSize = 20;
 const emptyExamReportPagination: ApiPagination = {
   page: 1,
@@ -100,13 +106,24 @@ const emptyExamReportPagination: ApiPagination = {
 function createMockExamCacheStorageKey(input: {
   paperPublicId?: string;
   mockExamPublicId: string;
-}): string {
-  return `${mockExamCacheStorageKeyPrefix}${
-    input.paperPublicId ?? input.mockExamPublicId
-  }`;
+}): string | null {
+  try {
+    return createStudentUserScopedStorageKey(
+      STUDENT_MOCK_EXAM_CACHE_STORAGE_KEY_PREFIX,
+      input.paperPublicId ?? input.mockExamPublicId,
+    );
+  } catch {
+    return null;
+  }
 }
 
-function readCachedMockExam(cacheStorageKey: string): MockExamDto | null {
+function readCachedMockExam(
+  cacheStorageKey: string | null,
+): MockExamDto | null {
+  if (cacheStorageKey === null) {
+    return null;
+  }
+
   try {
     const cachedValue = localStorage.getItem(cacheStorageKey);
 
@@ -125,15 +142,22 @@ function readCachedMockExam(cacheStorageKey: string): MockExamDto | null {
 }
 
 function writeCachedMockExam(
-  cacheStorageKey: string,
+  cacheStorageKey: string | null,
   mockExam: MockExamDto,
 ): void {
+  if (cacheStorageKey === null) {
+    return;
+  }
+
   try {
     localStorage.setItem(
       cacheStorageKey,
       JSON.stringify({
         cachedAt: new Date().toISOString(),
-        mockExam,
+        mockExam: {
+          ...mockExam,
+          paperSnapshot: projectPaperSnapshotForLearner(mockExam.paperSnapshot),
+        },
       } satisfies MockExamCachePayload),
     );
   } catch {
@@ -141,8 +165,39 @@ function writeCachedMockExam(
   }
 }
 
-function createMockExamAnswerQueueStorageKey(mockExamPublicId: string): string {
-  return `${mockExamAnswerQueueStorageKeyPrefix}${mockExamPublicId}`;
+function clearMockExamRuntimeStorage(input: {
+  paperPublicId?: string;
+  mockExamPublicId: string;
+}): void {
+  const cacheStorageKey = createMockExamCacheStorageKey(input);
+  const answerQueueStorageKey = createMockExamAnswerQueueStorageKey(
+    input.mockExamPublicId,
+  );
+
+  try {
+    if (cacheStorageKey !== null) {
+      localStorage.removeItem(cacheStorageKey);
+    }
+
+    if (answerQueueStorageKey !== null) {
+      localStorage.removeItem(answerQueueStorageKey);
+    }
+  } catch {
+    // Terminal server state is authoritative even when local cleanup is unavailable.
+  }
+}
+
+function createMockExamAnswerQueueStorageKey(
+  mockExamPublicId: string,
+): string | null {
+  try {
+    return createStudentUserScopedStorageKey(
+      STUDENT_MOCK_EXAM_ANSWER_QUEUE_STORAGE_KEY_PREFIX,
+      mockExamPublicId,
+    );
+  } catch {
+    return null;
+  }
 }
 
 function readPendingMockExamAnswers(
@@ -151,6 +206,11 @@ function readPendingMockExamAnswers(
   try {
     const queueStorageKey =
       createMockExamAnswerQueueStorageKey(mockExamPublicId);
+
+    if (queueStorageKey === null) {
+      return {};
+    }
+
     const queuedValue = localStorage.getItem(queueStorageKey);
 
     if (queuedValue === null) {
@@ -161,7 +221,14 @@ function readPendingMockExamAnswers(
       queuedValue,
     ) as Partial<MockExamPendingAnswerQueuePayload>;
 
-    return parsedValue.answers ?? {};
+    return Object.fromEntries(
+      Object.entries(parsedValue.answers ?? {}).filter(
+        ([, answer]) =>
+          typeof answer.operationId === "string" &&
+          Number.isInteger(answer.expectedRevision) &&
+          answer.expectedRevision >= 0,
+      ),
+    );
   } catch {
     return {};
   }
@@ -173,6 +240,10 @@ function writePendingMockExamAnswers(
 ): void {
   const queueStorageKey = createMockExamAnswerQueueStorageKey(mockExamPublicId);
   const answerEntries = Object.entries(answers);
+
+  if (queueStorageKey === null) {
+    return;
+  }
 
   try {
     if (answerEntries.length === 0) {
@@ -190,6 +261,142 @@ function writePendingMockExamAnswers(
   } catch {
     // Pending answer sync must not make the mock exam page unusable.
   }
+}
+
+async function sendMockExamAnswer(
+  storedSessionValue: string | null,
+  pendingAnswer: MockExamPendingAnswer,
+) {
+  return await fetchStudentApi<MockExamAnswerRecordResultDto>(
+    `/api/v1/mock-exams/${pendingAnswer.mockExamPublicId}/answers`,
+    storedSessionValue,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        paperQuestionPublicId: pendingAnswer.paperQuestionPublicId,
+        selectedLabels: pendingAnswer.selectedLabels,
+        textAnswer: pendingAnswer.textAnswer,
+        operationId: pendingAnswer.operationId,
+        expectedRevision: pendingAnswer.expectedRevision,
+        savedFromClientAt: pendingAnswer.savedFromClientAt,
+      }),
+    },
+  );
+}
+
+async function sendMockExamAnswerSupplement(
+  storedSessionValue: string | null,
+  mockExamPublicId: string,
+  pendingAnswers: MockExamPendingAnswer[],
+) {
+  return await fetchStudentApi<MockExamSupplementResultDto>(
+    `/api/v1/mock-exams/${mockExamPublicId}/answers/supplement`,
+    storedSessionValue,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        answers: pendingAnswers.map((pendingAnswer) => ({
+          paperQuestionPublicId: pendingAnswer.paperQuestionPublicId,
+          selectedLabels: pendingAnswer.selectedLabels,
+          textAnswer: pendingAnswer.textAnswer,
+          operationId: pendingAnswer.operationId,
+          expectedRevision: pendingAnswer.expectedRevision,
+          savedFromClientAt: pendingAnswer.savedFromClientAt,
+        })),
+      }),
+    },
+  );
+}
+
+async function requestRuntimeExamReport(
+  storedSessionValue: string | null,
+  mockExamPublicId: string,
+) {
+  return await fetchStudentApi<ExamReportResultDto>(
+    "/api/v1/exam-reports",
+    storedSessionValue,
+    {
+      method: "POST",
+      body: JSON.stringify({ mockExamPublicId }),
+    },
+  );
+}
+
+function canSupplementTerminalMockExam(mockExam: MockExamDto): boolean {
+  return (
+    ["completed", "scoring", "scoring_partial_failed"].includes(
+      mockExam.examStatus,
+    ) &&
+    mockExam.submittedAt !== null &&
+    mockExam.serverDeadlineAt !== null &&
+    new Date(mockExam.submittedAt).getTime() >=
+      new Date(mockExam.serverDeadlineAt).getTime()
+  );
+}
+
+function getSavedAnswerSelection(
+  pendingAnswer: MockExamPendingAnswer,
+): string[] {
+  return pendingAnswer.selectedLabels.length > 0
+    ? pendingAnswer.selectedLabels
+    : [pendingAnswer.textAnswer ?? ""];
+}
+
+function areAnswerSelectionsEqual(
+  left: string[] | undefined,
+  right: string[],
+): boolean {
+  return (
+    left !== undefined &&
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
+}
+
+function buildResumedMockExamAnswerState(
+  answerRecords: MockExamAnswerRecordDto[],
+  pendingAnswerByQuestion: Record<string, MockExamPendingAnswer>,
+) {
+  const selectedLabelsByQuestion: Record<string, string[]> = {};
+  const textAnswerByQuestion: Record<string, string> = {};
+  const savedAnswerByQuestion: Record<string, string[]> = {};
+  const answerRevisionByQuestion: Record<string, number> = {};
+
+  for (const answerRecord of answerRecords) {
+    const paperQuestionPublicId = answerRecord.paperQuestionPublicId;
+    const savedAnswer =
+      answerRecord.answerSnapshot.selectedLabels.length > 0
+        ? answerRecord.answerSnapshot.selectedLabels
+        : [answerRecord.answerSnapshot.textAnswer ?? ""];
+
+    selectedLabelsByQuestion[paperQuestionPublicId] =
+      answerRecord.answerSnapshot.selectedLabels;
+    textAnswerByQuestion[paperQuestionPublicId] =
+      answerRecord.answerSnapshot.textAnswer ?? "";
+    savedAnswerByQuestion[paperQuestionPublicId] = savedAnswer;
+    answerRevisionByQuestion[paperQuestionPublicId] =
+      answerRecord.answerRevision;
+  }
+
+  for (const pendingAnswer of Object.values(pendingAnswerByQuestion)) {
+    selectedLabelsByQuestion[pendingAnswer.paperQuestionPublicId] =
+      pendingAnswer.selectedLabels;
+    textAnswerByQuestion[pendingAnswer.paperQuestionPublicId] =
+      pendingAnswer.textAnswer ?? "";
+    savedAnswerByQuestion[pendingAnswer.paperQuestionPublicId] =
+      getSavedAnswerSelection(pendingAnswer);
+    answerRevisionByQuestion[pendingAnswer.paperQuestionPublicId] = Math.max(
+      answerRevisionByQuestion[pendingAnswer.paperQuestionPublicId] ?? 0,
+      pendingAnswer.expectedRevision,
+    );
+  }
+
+  return {
+    selectedLabelsByQuestion,
+    textAnswerByQuestion,
+    savedAnswerByQuestion,
+    answerRevisionByQuestion,
+  };
 }
 
 type MockExamQuestionType =
@@ -746,14 +953,16 @@ function getPaperName(mockExam: MockExamDto): string {
   return typeof paperName === "string" ? paperName : "模拟考试";
 }
 
-function getRemainingMinute(mockExam: MockExamDto): number | null {
+function getRemainingMinute(
+  mockExam: MockExamDto,
+  currentServerTimeMillisecond: number,
+): number | null {
   if (mockExam.serverDeadlineAt === null) {
     return null;
   }
 
   const deadlineTime = new Date(mockExam.serverDeadlineAt).getTime();
-  const serverTime = new Date(mockExam.serverNow).getTime();
-  const remainingMillisecond = deadlineTime - serverTime;
+  const remainingMillisecond = deadlineTime - currentServerTimeMillisecond;
 
   return Math.max(Math.ceil(remainingMillisecond / 60000), 0);
 }
@@ -1161,6 +1370,7 @@ function StudentScoringProgressPanel({
   status,
   failedScoringCount,
   completedReportPublicId,
+  didSupplementTerminalAnswers,
   onRefresh,
   onRetryScoring,
 }: {
@@ -1170,6 +1380,7 @@ function StudentScoringProgressPanel({
   status: ScoringProgressStatus | "completed";
   failedScoringCount: number | null;
   completedReportPublicId?: string | null;
+  didSupplementTerminalAnswers?: boolean;
   onRefresh(): void;
   onRetryScoring?(): void;
 }) {
@@ -1198,6 +1409,12 @@ function StudentScoringProgressPanel({
           <Clock3 className="size-5" aria-hidden="true" />
         </div>
       </div>
+
+      {didSupplementTerminalAnswers ? (
+        <div className="border-success/30 bg-success/10 text-text-primary rounded-lg border px-3 py-2 text-sm leading-6">
+          考试已自动交卷，未保存的作答已补充提交
+        </div>
+      ) : null}
 
       <div className="bg-surface ring-border space-y-4 rounded-xl p-4 shadow-sm ring-1">
         <div className="flex items-center gap-2">
@@ -1305,6 +1522,9 @@ export function StudentMockExamPage({
   const [savedAnswerByQuestion, setSavedAnswerByQuestion] = useState(
     emptyAnswerSelections,
   );
+  const [answerRevisionByQuestion, setAnswerRevisionByQuestion] = useState<
+    Record<string, number>
+  >({});
   const [isSubmitConfirmationOpen, setIsSubmitConfirmationOpen] =
     useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -1325,7 +1545,43 @@ export function StudentMockExamPage({
     completedReportPublicId: string | null;
   } | null>(null);
   const [isOfflineRecovered, setIsOfflineRecovered] = useState(false);
+  const [didSupplementTerminalAnswers, setDidSupplementTerminalAnswers] =
+    useState(false);
+  const [serverClock, setServerClock] = useState<{
+    mockExamPublicId: string;
+    currentServerTimeMillisecond: number;
+  } | null>(null);
+  const deadlineRefreshMockExamPublicIdRef = useRef<string | null>(null);
   const pendingAnswerCount = Object.keys(pendingAnswerByQuestion).length;
+  const currentServerTimeMillisecond =
+    mockExam === null
+      ? null
+      : serverClock?.mockExamPublicId === mockExam.publicId
+        ? serverClock.currentServerTimeMillisecond
+        : new Date(mockExam.serverNow).getTime();
+
+  useEffect(() => {
+    if (mockExam === null || mockExam.examStatus !== "in_progress") {
+      return;
+    }
+
+    const baselineServerTimeMillisecond = new Date(
+      mockExam.serverNow,
+    ).getTime();
+    const baselineClientTimeMillisecond = Date.now();
+    const intervalId = window.setInterval(() => {
+      setServerClock({
+        mockExamPublicId: mockExam.publicId,
+        currentServerTimeMillisecond:
+          baselineServerTimeMillisecond +
+          (Date.now() - baselineClientTimeMillisecond),
+      });
+    }, 1_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [mockExam]);
 
   useEffect(() => {
     if (
@@ -1380,16 +1636,87 @@ export function StudentMockExamPage({
           return;
         }
 
+        const loadedMockExam = mockExamPayload.data.mockExam;
+        let examReportPublicId: string | null = null;
+
+        if (loadedMockExam.examStatus === "completed") {
+          const reportPayload = await requestRuntimeExamReport(
+            storedSessionValue,
+            loadedMockExam.publicId,
+          );
+
+          if (!isActive) {
+            return;
+          }
+
+          if (isStudentUnauthorizedResponse(reportPayload)) {
+            setRuntimeState("authorization_expired");
+            return;
+          }
+
+          if (reportPayload.code !== 0 || reportPayload.data === null) {
+            setRuntimeState("error");
+            return;
+          }
+
+          examReportPublicId = reportPayload.data.examReport.publicId;
+        }
+
         setRuntimeMockExams([
           {
-            mockExam: mockExamPayload.data.mockExam,
-            examReportPublicId: "",
+            mockExam: loadedMockExam,
+            examReportPublicId: examReportPublicId ?? "",
           },
         ]);
-        setPendingAnswerByQuestion(
-          readPendingMockExamAnswers(mockExamPayload.data.mockExam.publicId),
-        );
-        writeCachedMockExam(cacheStorageKey, mockExamPayload.data.mockExam);
+
+        if (
+          loadedMockExam.examStatus === "scoring" ||
+          loadedMockExam.examStatus === "scoring_partial_failed"
+        ) {
+          setRuntimeScoringProgress({
+            publicId: loadedMockExam.publicId,
+            paperName: getPaperName(loadedMockExam),
+            mockExamPublicId: loadedMockExam.publicId,
+            status: loadedMockExam.examStatus,
+            failedScoringCount: null,
+            completedReportPublicId: null,
+          });
+          setIsSubmitted(true);
+        } else if (loadedMockExam.examStatus === "completed") {
+          setRuntimeScoringProgress(null);
+          setRuntimeExamReportPublicId(examReportPublicId);
+          setIsSubmitted(true);
+        } else {
+          setRuntimeScoringProgress(null);
+          setIsSubmitted(false);
+        }
+
+        if (loadedMockExam.examStatus === "in_progress") {
+          const pendingAnswers = readPendingMockExamAnswers(
+            loadedMockExam.publicId,
+          );
+          const resumedAnswerState = buildResumedMockExamAnswerState(
+            mockExamPayload.data.answerRecords ?? [],
+            pendingAnswers,
+          );
+
+          setPendingAnswerByQuestion(pendingAnswers);
+          setSelectedLabelsByQuestion(
+            resumedAnswerState.selectedLabelsByQuestion,
+          );
+          setTextAnswerByQuestion(resumedAnswerState.textAnswerByQuestion);
+          setSavedAnswerByQuestion(resumedAnswerState.savedAnswerByQuestion);
+          setAnswerRevisionByQuestion(
+            resumedAnswerState.answerRevisionByQuestion,
+          );
+          writeCachedMockExam(cacheStorageKey, loadedMockExam);
+        } else {
+          setPendingAnswerByQuestion({});
+          clearMockExamRuntimeStorage({
+            paperPublicId,
+            mockExamPublicId: loadedMockExam.publicId,
+          });
+        }
         setIsOfflineRecovered(false);
         setRuntimeState("ready");
       } catch {
@@ -1397,14 +1724,28 @@ export function StudentMockExamPage({
           const cachedMockExam = readCachedMockExam(cacheStorageKey);
 
           if (cachedMockExam !== null) {
+            const pendingAnswers = readPendingMockExamAnswers(
+              cachedMockExam.publicId,
+            );
+            const resumedAnswerState = buildResumedMockExamAnswerState(
+              [],
+              pendingAnswers,
+            );
+
             setRuntimeMockExams([
               {
                 mockExam: cachedMockExam,
                 examReportPublicId: "",
               },
             ]);
-            setPendingAnswerByQuestion(
-              readPendingMockExamAnswers(cachedMockExam.publicId),
+            setPendingAnswerByQuestion(pendingAnswers);
+            setSelectedLabelsByQuestion(
+              resumedAnswerState.selectedLabelsByQuestion,
+            );
+            setTextAnswerByQuestion(resumedAnswerState.textAnswerByQuestion);
+            setSavedAnswerByQuestion(resumedAnswerState.savedAnswerByQuestion);
+            setAnswerRevisionByQuestion(
+              resumedAnswerState.answerRevisionByQuestion,
             );
             setIsOfflineRecovered(true);
             setRuntimeState("ready");
@@ -1422,6 +1763,300 @@ export function StudentMockExamPage({
       isActive = false;
     };
   }, [isRuntimeMode, paperPublicId, selectedRouteMockExamPublicId, state]);
+
+  useEffect(() => {
+    if (
+      !isRuntimeMode ||
+      mockExam === null ||
+      mockExam.examStatus !== "in_progress" ||
+      currentServerTimeMillisecond === null ||
+      mockExam.serverDeadlineAt === null ||
+      currentServerTimeMillisecond <
+        new Date(mockExam.serverDeadlineAt).getTime() ||
+      deadlineRefreshMockExamPublicIdRef.current === mockExam.publicId
+    ) {
+      return;
+    }
+
+    deadlineRefreshMockExamPublicIdRef.current = mockExam.publicId;
+    let isActive = true;
+
+    void (async () => {
+      const storedSessionValue = getStoredStudentSessionToken();
+
+      try {
+        const mockExamPayload = await fetchStudentApi<MockExamResultDto>(
+          `/api/v1/mock-exams/${mockExam.publicId}`,
+          storedSessionValue,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(mockExamPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (mockExamPayload.code !== 0 || mockExamPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        const refreshedMockExam = mockExamPayload.data.mockExam;
+        let examReportPublicId: string | null = null;
+
+        if (refreshedMockExam.examStatus === "completed") {
+          const reportPayload = await requestRuntimeExamReport(
+            storedSessionValue,
+            refreshedMockExam.publicId,
+          );
+
+          if (!isActive) {
+            return;
+          }
+
+          if (isStudentUnauthorizedResponse(reportPayload)) {
+            setRuntimeState("authorization_expired");
+            return;
+          }
+
+          if (reportPayload.code !== 0 || reportPayload.data === null) {
+            setRuntimeState("error");
+            return;
+          }
+
+          examReportPublicId = reportPayload.data.examReport.publicId;
+        }
+
+        setRuntimeMockExams([
+          {
+            mockExam: refreshedMockExam,
+            examReportPublicId: examReportPublicId ?? "",
+          },
+        ]);
+        clearMockExamRuntimeStorage({
+          paperPublicId,
+          mockExamPublicId: refreshedMockExam.publicId,
+        });
+        setPendingAnswerByQuestion({});
+
+        if (
+          refreshedMockExam.examStatus === "scoring" ||
+          refreshedMockExam.examStatus === "scoring_partial_failed"
+        ) {
+          setRuntimeScoringProgress({
+            publicId: refreshedMockExam.publicId,
+            paperName: getPaperName(refreshedMockExam),
+            mockExamPublicId: refreshedMockExam.publicId,
+            status: refreshedMockExam.examStatus,
+            failedScoringCount: null,
+            completedReportPublicId: null,
+          });
+          setIsSubmitted(true);
+          return;
+        }
+
+        if (refreshedMockExam.examStatus === "completed") {
+          setRuntimeScoringProgress(null);
+          setRuntimeExamReportPublicId(examReportPublicId);
+          setIsSubmitted(true);
+        }
+      } catch {
+        if (isActive) {
+          setRuntimeState("error");
+        }
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentServerTimeMillisecond, isRuntimeMode, mockExam, paperPublicId]);
+
+  useEffect(() => {
+    if (!isRuntimeMode) {
+      return;
+    }
+
+    const handleOnline = () => {
+      const storedSessionValue = getStoredStudentSessionToken();
+
+      void (async () => {
+        const remainingPendingAnswers: Record<string, MockExamPendingAnswer> =
+          {};
+        let didReachTerminalState = false;
+
+        for (const pendingAnswer of Object.values(pendingAnswerByQuestion)) {
+          try {
+            const answerPayload = await sendMockExamAnswer(
+              storedSessionValue,
+              pendingAnswer,
+            );
+
+            if (isStudentUnauthorizedResponse(answerPayload)) {
+              setRuntimeState("authorization_expired");
+              return;
+            }
+
+            if (answerPayload.code !== 0 || answerPayload.data === null) {
+              if (answerPayload.code === 409311) {
+                didReachTerminalState = true;
+                break;
+              }
+
+              remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
+                pendingAnswer;
+              continue;
+            }
+
+            const answerRevision =
+              answerPayload.data.answerRecord.answerRevision;
+
+            setSavedAnswerByQuestion((currentSavedAnswers) => ({
+              ...currentSavedAnswers,
+              [pendingAnswer.paperQuestionPublicId]:
+                getSavedAnswerSelection(pendingAnswer),
+            }));
+            setAnswerRevisionByQuestion((currentRevisions) => ({
+              ...currentRevisions,
+              [pendingAnswer.paperQuestionPublicId]: answerRevision,
+            }));
+          } catch {
+            remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
+              pendingAnswer;
+          }
+        }
+
+        if (didReachTerminalState && mockExam !== null) {
+          try {
+            const currentMockExamPayload =
+              await fetchStudentApi<MockExamResultDto>(
+                `/api/v1/mock-exams/${mockExam.publicId}`,
+                storedSessionValue,
+              );
+
+            if (isStudentUnauthorizedResponse(currentMockExamPayload)) {
+              setRuntimeState("authorization_expired");
+              return;
+            }
+
+            if (
+              currentMockExamPayload.code === 0 &&
+              currentMockExamPayload.data !== null &&
+              canSupplementTerminalMockExam(
+                currentMockExamPayload.data.mockExam,
+              )
+            ) {
+              const missingOnlyAnswers = Object.values(
+                pendingAnswerByQuestion,
+              ).filter((pendingAnswer) => pendingAnswer.expectedRevision === 0);
+              const supplementPayload =
+                missingOnlyAnswers.length === 0
+                  ? null
+                  : await sendMockExamAnswerSupplement(
+                      storedSessionValue,
+                      mockExam.publicId,
+                      missingOnlyAnswers,
+                    );
+
+              if (
+                supplementPayload !== null &&
+                isStudentUnauthorizedResponse(supplementPayload)
+              ) {
+                setRuntimeState("authorization_expired");
+                return;
+              }
+
+              if (
+                supplementPayload === null ||
+                (supplementPayload.code === 0 &&
+                  supplementPayload.data !== null)
+              ) {
+                const terminalMockExam =
+                  supplementPayload?.data?.mockExam ??
+                  currentMockExamPayload.data.mockExam;
+                let examReportPublicId =
+                  supplementPayload?.data?.examReportPublicId ?? null;
+
+                if (
+                  terminalMockExam.examStatus === "completed" &&
+                  examReportPublicId === null
+                ) {
+                  const reportPayload = await requestRuntimeExamReport(
+                    storedSessionValue,
+                    terminalMockExam.publicId,
+                  );
+
+                  if (isStudentUnauthorizedResponse(reportPayload)) {
+                    setRuntimeState("authorization_expired");
+                    return;
+                  }
+
+                  if (reportPayload.code !== 0 || reportPayload.data === null) {
+                    setRuntimeState("error");
+                    return;
+                  }
+
+                  examReportPublicId = reportPayload.data.examReport.publicId;
+                }
+
+                setRuntimeMockExams([
+                  {
+                    mockExam: terminalMockExam,
+                    examReportPublicId: examReportPublicId ?? "",
+                  },
+                ]);
+                setRuntimeExamReportPublicId(examReportPublicId);
+                if (
+                  terminalMockExam.examStatus === "scoring" ||
+                  terminalMockExam.examStatus === "scoring_partial_failed"
+                ) {
+                  setRuntimeScoringProgress({
+                    publicId: terminalMockExam.publicId,
+                    paperName: getPaperName(terminalMockExam),
+                    mockExamPublicId: terminalMockExam.publicId,
+                    status: terminalMockExam.examStatus,
+                    failedScoringCount: null,
+                    completedReportPublicId: null,
+                  });
+                } else {
+                  setRuntimeScoringProgress(null);
+                }
+                setIsSubmitted(true);
+                setDidSupplementTerminalAnswers(
+                  (supplementPayload?.data?.supplementedCount ?? 0) > 0,
+                );
+                setPendingAnswerByQuestion({});
+                writePendingMockExamAnswers(mockExam.publicId, {});
+                return;
+              }
+            }
+          } catch {
+            // Keep the durable local queue when authoritative recovery fails.
+          }
+
+          Object.assign(remainingPendingAnswers, pendingAnswerByQuestion);
+        }
+
+        setPendingAnswerByQuestion(remainingPendingAnswers);
+
+        if (mockExam !== null) {
+          writePendingMockExamAnswers(
+            mockExam.publicId,
+            remainingPendingAnswers,
+          );
+        }
+      })();
+    };
+
+    window.addEventListener("online", handleOnline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [isRuntimeMode, mockExam, pendingAnswerByQuestion]);
 
   if (
     isRuntimeMode &&
@@ -1494,6 +2129,24 @@ export function StudentMockExamPage({
     );
   }
 
+  if (mockExam?.examStatus === "terminated") {
+    return (
+      <StudentStatusMessage
+        title="模拟考试已终止"
+        description="本次模拟考试已由服务端终止，作答入口已关闭且不会生成考试报告。"
+        testId="mock-exam-terminated-state"
+        action={
+          <Link
+            href="/exam-report"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            查看模拟考试记录
+          </Link>
+        }
+      />
+    );
+  }
+
   if (mockExam === null || questions.length === 0) {
     return (
       <StudentStatusMessage
@@ -1517,11 +2170,21 @@ export function StudentMockExamPage({
     selectedLabelsByQuestion[currentQuestion.paperQuestionPublicId] ?? [];
   const textAnswer =
     textAnswerByQuestion[currentQuestion.paperQuestionPublicId] ?? "";
-  const isCurrentQuestionSaved =
-    savedAnswerByQuestion[currentQuestion.paperQuestionPublicId] !== undefined;
+  const currentAnswerSelection = isOptionMockExamQuestion(
+    currentQuestion.questionType,
+  )
+    ? selectedLabels
+    : [textAnswer];
+  const isCurrentQuestionSaved = areAnswerSelectionsEqual(
+    savedAnswerByQuestion[currentQuestion.paperQuestionPublicId],
+    currentAnswerSelection,
+  );
   const answeredCount = Object.keys(savedAnswerByQuestion).length;
   const unansweredCount = Math.max(questions.length - answeredCount, 0);
-  const remainingMinute = getRemainingMinute(mockExam);
+  const remainingMinute = getRemainingMinute(
+    mockExam,
+    currentServerTimeMillisecond ?? new Date(mockExam.serverNow).getTime(),
+  );
 
   function handleToggleLabel(label: string) {
     const nextSelectedLabels =
@@ -1559,38 +2222,30 @@ export function StudentMockExamPage({
       textAnswer: isTextMockExamQuestion(question.questionType)
         ? textAnswer
         : null,
+      operationId: `answer_operation_${crypto.randomUUID()}`,
+      expectedRevision:
+        answerRevisionByQuestion[question.paperQuestionPublicId] ?? 0,
       savedFromClientAt: new Date().toISOString(),
       queuedAt: new Date().toISOString(),
     } satisfies MockExamPendingAnswer;
   }
 
-  async function sendMockExamAnswer(
-    storedSessionValue: string | null,
+  function markAnswerSaved(
     pendingAnswer: MockExamPendingAnswer,
+    answerRevision?: number,
   ) {
-    return await fetchStudentApi<MockExamAnswerRecordResultDto>(
-      `/api/v1/mock-exams/${pendingAnswer.mockExamPublicId}/answers`,
-      storedSessionValue,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          paperQuestionPublicId: pendingAnswer.paperQuestionPublicId,
-          selectedLabels: pendingAnswer.selectedLabels,
-          textAnswer: pendingAnswer.textAnswer,
-          savedFromClientAt: pendingAnswer.savedFromClientAt,
-        }),
-      },
-    );
-  }
-
-  function markAnswerSaved(pendingAnswer: MockExamPendingAnswer) {
-    setSavedAnswerByQuestion({
-      ...savedAnswerByQuestion,
+    setSavedAnswerByQuestion((currentSavedAnswers) => ({
+      ...currentSavedAnswers,
       [pendingAnswer.paperQuestionPublicId]:
-        pendingAnswer.selectedLabels.length > 0
-          ? pendingAnswer.selectedLabels
-          : [pendingAnswer.textAnswer ?? ""],
-    });
+        getSavedAnswerSelection(pendingAnswer),
+    }));
+
+    if (answerRevision !== undefined) {
+      setAnswerRevisionByQuestion((currentRevisions) => ({
+        ...currentRevisions,
+        [pendingAnswer.paperQuestionPublicId]: answerRevision,
+      }));
+    }
   }
 
   function queuePendingAnswer(pendingAnswer: MockExamPendingAnswer) {
@@ -1607,19 +2262,36 @@ export function StudentMockExamPage({
     markAnswerSaved(pendingAnswer);
   }
 
-  async function handleSaveAnswer() {
+  function removePendingAnswer(
+    mockExamPublicId: string,
+    paperQuestionPublicId: string,
+  ) {
+    setPendingAnswerByQuestion((currentPendingAnswers) => {
+      if (currentPendingAnswers[paperQuestionPublicId] === undefined) {
+        return currentPendingAnswers;
+      }
+
+      const nextPendingAnswers = { ...currentPendingAnswers };
+      delete nextPendingAnswers[paperQuestionPublicId];
+      writePendingMockExamAnswers(mockExamPublicId, nextPendingAnswers);
+
+      return nextPendingAnswers;
+    });
+  }
+
+  async function handleSaveAnswer(): Promise<boolean> {
     if (mockExam === null) {
-      return;
+      return false;
     }
 
     if (isRuntimeMode) {
       const storedSessionValue = getStoredStudentSessionToken();
+      const pendingAnswer = createPendingAnswer(
+        mockExam.publicId,
+        currentQuestion,
+      );
 
       try {
-        const pendingAnswer = createPendingAnswer(
-          mockExam.publicId,
-          currentQuestion,
-        );
         const answerPayload = await sendMockExamAnswer(
           storedSessionValue,
           pendingAnswer,
@@ -1628,18 +2300,25 @@ export function StudentMockExamPage({
         if (isStudentUnauthorizedResponse(answerPayload)) {
           setIsRetryingPendingAnswers(false);
           setRuntimeState("authorization_expired");
-          return;
+          return false;
         }
 
         if (answerPayload.code !== 0 || answerPayload.data === null) {
           setRuntimeState("error");
-          return;
+          return false;
         }
-      } catch {
-        queuePendingAnswer(
-          createPendingAnswer(mockExam.publicId, currentQuestion),
+        markAnswerSaved(
+          pendingAnswer,
+          answerPayload.data.answerRecord.answerRevision,
         );
-        return;
+        removePendingAnswer(
+          mockExam.publicId,
+          pendingAnswer.paperQuestionPublicId,
+        );
+        return true;
+      } catch {
+        queuePendingAnswer(pendingAnswer);
+        return true;
       }
     }
 
@@ -1651,6 +2330,8 @@ export function StudentMockExamPage({
         ? selectedLabels
         : [textAnswer],
     });
+
+    return true;
   }
 
   async function handleRetryPendingAnswers() {
@@ -1681,6 +2362,10 @@ export function StudentMockExamPage({
             pendingAnswer;
           continue;
         }
+        markAnswerSaved(
+          pendingAnswer,
+          answerPayload.data.answerRecord.answerRevision,
+        );
       } catch {
         remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
           pendingAnswer;
@@ -1692,17 +2377,28 @@ export function StudentMockExamPage({
     setIsRetryingPendingAnswers(false);
   }
 
+  async function handleNavigateToQuestion(questionIndex: number) {
+    const hasCurrentAnswer =
+      selectedLabels.length > 0 || textAnswer.trim().length > 0;
+
+    if (hasCurrentAnswer && !isCurrentQuestionSaved) {
+      const didPersistCurrentAnswer = await handleSaveAnswer();
+
+      if (!didPersistCurrentAnswer) {
+        return;
+      }
+    }
+
+    setCurrentQuestionIndex(questionIndex);
+  }
+
   async function generateRuntimeExamReport(
     storedSessionValue: string | null,
     targetMockExamPublicId: string,
   ): Promise<string | null> {
-    const reportPayload = await fetchStudentApi<ExamReportResultDto>(
-      "/api/v1/exam-reports",
+    const reportPayload = await requestRuntimeExamReport(
       storedSessionValue,
-      {
-        method: "POST",
-        body: JSON.stringify({ mockExamPublicId: targetMockExamPublicId }),
-      },
+      targetMockExamPublicId,
     );
 
     if (isStudentUnauthorizedResponse(reportPayload)) {
@@ -1857,6 +2553,55 @@ export function StudentMockExamPage({
 
     if (isRuntimeMode) {
       const storedSessionValue = getStoredStudentSessionToken();
+      const answersToFlush = { ...pendingAnswerByQuestion };
+      const hasCurrentAnswer =
+        selectedLabels.length > 0 || textAnswer.trim().length > 0;
+
+      if (hasCurrentAnswer && !isCurrentQuestionSaved) {
+        const currentPendingAnswer = createPendingAnswer(
+          mockExam.publicId,
+          currentQuestion,
+        );
+        answersToFlush[currentPendingAnswer.paperQuestionPublicId] =
+          currentPendingAnswer;
+      }
+
+      const remainingPendingAnswers: Record<string, MockExamPendingAnswer> = {};
+
+      for (const pendingAnswer of Object.values(answersToFlush)) {
+        try {
+          const answerPayload = await sendMockExamAnswer(
+            storedSessionValue,
+            pendingAnswer,
+          );
+
+          if (isStudentUnauthorizedResponse(answerPayload)) {
+            setRuntimeState("authorization_expired");
+            return;
+          }
+
+          if (answerPayload.code !== 0 || answerPayload.data === null) {
+            remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
+              pendingAnswer;
+            continue;
+          }
+
+          markAnswerSaved(
+            pendingAnswer,
+            answerPayload.data.answerRecord.answerRevision,
+          );
+        } catch {
+          remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
+            pendingAnswer;
+        }
+      }
+
+      setPendingAnswerByQuestion(remainingPendingAnswers);
+      writePendingMockExamAnswers(mockExam.publicId, remainingPendingAnswers);
+
+      if (Object.keys(remainingPendingAnswers).length > 0) {
+        return;
+      }
 
       try {
         const submitPayload = await fetchStudentApi<MockExamSubmitResultDto>(
@@ -1874,6 +2619,12 @@ export function StudentMockExamPage({
           setRuntimeState("error");
           return;
         }
+
+        clearMockExamRuntimeStorage({
+          paperPublicId,
+          mockExamPublicId: mockExam.publicId,
+        });
+        setPendingAnswerByQuestion({});
 
         if (
           submitPayload.data.mockExam.examStatus === "scoring" ||
@@ -1922,6 +2673,7 @@ export function StudentMockExamPage({
           completedReportPublicId={
             runtimeScoringProgress.completedReportPublicId
           }
+          didSupplementTerminalAnswers={didSupplementTerminalAnswers}
           onRefresh={() => void handleRefreshScoringProgress()}
           onRetryScoring={() => void handleRetryRuntimeScoring()}
         />
@@ -1944,6 +2696,11 @@ export function StudentMockExamPage({
             系统正在生成考试报告，客观题结果和错题入口将在报告中展示。
           </p>
         </div>
+        {didSupplementTerminalAnswers ? (
+          <div className="border-success/30 bg-success/10 text-text-primary rounded-lg border px-3 py-2 text-sm leading-6">
+            考试已自动交卷，未保存的作答已补充提交
+          </div>
+        ) : null}
         <Link
           href={
             submittedExamReportPublicId === ""
@@ -1989,6 +2746,12 @@ export function StudentMockExamPage({
           className="border-border bg-background text-text-secondary rounded-lg border px-3 py-2 text-sm leading-6"
         >
           网络暂不可用，已显示本机保存的考试内容。作答会先保存在本机，联网后请按提示重试保存。
+        </div>
+      ) : null}
+
+      {didSupplementTerminalAnswers ? (
+        <div className="border-success/30 bg-success/10 text-text-primary rounded-lg border px-3 py-2 text-sm leading-6">
+          考试已自动交卷，未保存的作答已补充提交
         </div>
       ) : null}
 
@@ -2090,7 +2853,7 @@ export function StudentMockExamPage({
               <button
                 key={question.paperQuestionPublicId}
                 type="button"
-                onClick={() => setCurrentQuestionIndex(questionIndex)}
+                onClick={() => void handleNavigateToQuestion(questionIndex)}
                 className={`h-10 rounded-lg text-sm font-semibold transition-transform active:scale-[0.98] ${
                   isCurrent
                     ? "bg-primary text-primary-foreground"
@@ -2111,7 +2874,7 @@ export function StudentMockExamPage({
           type="button"
           disabled={currentQuestionIndex === questions.length - 1}
           onClick={() =>
-            setCurrentQuestionIndex(
+            void handleNavigateToQuestion(
               Math.min(currentQuestionIndex + 1, questions.length - 1),
             )
           }
@@ -2834,9 +3597,18 @@ export function StudentExamReportListPage({
                 <p className="text-warning text-sm">
                   已终止考试不生成报告，仅保留后台作答记录。
                 </p>
+              ) : examReport.examReportPublicId === null ? (
+                <Link
+                  href={`/mock-exam?mockExamPublicId=${examReport.mockExamPublicId}`}
+                  className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+                >
+                  {examReport.examStatus === "completed"
+                    ? "生成考试报告"
+                    : "查看评分进度"}
+                </Link>
               ) : (
                 <Link
-                  href={`/exam-report?examReportPublicId=${examReport.examReportPublicId ?? examReport.publicId}`}
+                  href={`/exam-report?examReportPublicId=${examReport.examReportPublicId}`}
                   className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
                 >
                   查看报告

@@ -166,6 +166,7 @@ function createAnswerRecordRow(): ExamReportAnswerRecordRow {
       savedFromClientAt: null,
     },
     answer_record_status: "scored",
+    ai_scoring_evidence: null,
     is_correct: true,
     score: "1.0",
     max_score: "1.0",
@@ -209,6 +210,19 @@ function createRepository(
         learning_suggestion_snapshot: input.learningSuggestionSnapshot,
         generated_at: input.generatedAt,
         duration_second: input.durationSecond,
+      });
+    },
+    async rebuildExamReport(input) {
+      return createExamReportRow({
+        public_id: input.publicId,
+        exam_status: input.examStatus,
+        objective_score: input.objectiveScore,
+        subjective_score: input.subjectiveScore,
+        total_score: input.totalScore,
+        duration_second: input.durationSecond,
+        report_snapshot: input.reportSnapshot,
+        learning_suggestion_snapshot: null,
+        generated_at: input.generatedAt,
       });
     },
     async updateExamReportLearningSuggestionSnapshot() {},
@@ -436,6 +450,266 @@ describe("exam report service", () => {
         learningSuggestionSnapshot: null,
       }),
     ]);
+  });
+
+  it("rebuilds an existing report from current persisted scoring evidence without changing its public id", async () => {
+    const rebuildInputs: unknown[] = [];
+    let createCallCount = 0;
+    const service = createExamReportService(
+      createRepository({
+        async findExamReportByMockExamPublicId() {
+          return createExamReportRow({
+            public_id: "exam_report_public_stable",
+            exam_status: "scoring_partial_failed",
+            total_score: "1.0",
+          });
+        },
+        async findSubmittedMockExamByPublicId() {
+          return createMockExamRow({
+            exam_status: "completed",
+            subjective_score: "4.0",
+            total_score: "5.0",
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              ...createAnswerRecordRow(),
+              ai_scoring_evidence: {
+                taskPublicId: "ai_scoring_task_public_subjective",
+                taskStatus: "succeeded",
+                attemptNumber: 2,
+                attemptStatus: "succeeded",
+                modelConfigSnapshot: {
+                  modelConfigPublicId: "model_config_public_subjective",
+                  modelName: "governed-model",
+                  providerDisplayName: "Governed Provider",
+                },
+                promptTemplateKey: "ai_scoring_v1",
+                promptTemplateVersion: 4,
+                promptTemplateHash: "prompt_hash_subjective",
+                resultSnapshot: {
+                  scoringStatus: "scored",
+                  overallComment: "persisted evidence",
+                },
+              },
+            },
+          ];
+        },
+        async createExamReport(input) {
+          createCallCount += 1;
+          return createExamReportRow({ public_id: input.publicId });
+        },
+        async rebuildExamReport(input) {
+          rebuildInputs.push(input);
+          return createExamReportRow({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            report_snapshot: input.reportSnapshot,
+            learning_suggestion_snapshot: null,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        examReport: {
+          publicId: "exam_report_public_stable",
+          examStatus: "completed",
+          totalScore: "5.0",
+          reportSnapshot: {
+            questionResults: expect.arrayContaining([
+              expect.objectContaining({
+                paperQuestionPublicId: "paper_question_public_123",
+                aiScoringEvidence: expect.objectContaining({
+                  taskPublicId: "ai_scoring_task_public_subjective",
+                  overallComment: "persisted evidence",
+                }),
+              }),
+            ]),
+          },
+        },
+      },
+    });
+    expect(createCallCount).toBe(0);
+    expect(rebuildInputs).toEqual([
+      expect.objectContaining({
+        publicId: "exam_report_public_stable",
+        mockExamPublicId: "mock_exam_public_123",
+        totalScore: "5.0",
+        learningSuggestionSnapshot: null,
+      }),
+    ]);
+  });
+
+  it("projects only immutable redaction-safe scoring evidence into reports", async () => {
+    const subjectivePaperSnapshot = {
+      paperPublicId: "paper_public_123",
+      name: "subjective evidence paper",
+      paperSections: [
+        {
+          paperSectionTitle: "subjective",
+          paperQuestions: [
+            {
+              paperQuestionPublicId: "paper_question_public_subjective",
+              questionPublicId: "question_public_subjective",
+              questionType: "short_answer",
+              scoringMethod: "ai_scoring",
+              standardAnswerRichText: "immutable standard answer",
+              score: "5.0",
+            },
+          ],
+        },
+      ],
+    };
+    const service = createExamReportService(
+      createRepository({
+        async findSubmittedMockExamByPublicId() {
+          return createMockExamRow({
+            paper_snapshot: subjectivePaperSnapshot,
+            objective_score: "0.0",
+            subjective_score: "4.0",
+            total_score: "4.0",
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              ...createAnswerRecordRow(),
+              paper_question_public_id: "paper_question_public_subjective",
+              question_public_id: "question_public_subjective",
+              question_snapshot: {
+                questionType: "short_answer",
+                scoringMethod: "ai_scoring",
+              },
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "student answer",
+                savedFromClientAt: null,
+              },
+              is_correct: null,
+              score: "4.0",
+              max_score: "5.0",
+              ai_scoring_evidence: {
+                taskPublicId: "ai_scoring_task_public_123",
+                taskStatus: "succeeded",
+                attemptNumber: 2,
+                attemptStatus: "succeeded",
+                modelConfigSnapshot: {
+                  modelConfigPublicId: "model_config_public_123",
+                  modelName: "governed-scoring-model",
+                  providerDisplayName: "Governed Provider",
+                  unexpectedModelConfigField: "must-not-leak",
+                },
+                promptTemplateKey: "ai_scoring_v1",
+                promptTemplateVersion: 3,
+                promptTemplateHash: "prompt_hash_123",
+                resultSnapshot: {
+                  scoringStatus: "scored",
+                  scoringPoints: [
+                    {
+                      scoringPointPublicId: "scoring_point_public_123",
+                      isHit: true,
+                      score: 4,
+                      reason: "matched immutable scoring point",
+                    },
+                  ],
+                  overallComment: "evidence-backed overall comment",
+                  improvementSuggestion: "add one missing condition",
+                  evidenceStatus: "sufficient",
+                  citations: [
+                    {
+                      resourcePublicId: "resource_public_123",
+                      resourceTitle: "published resource",
+                      chunkPublicId: "chunk_public_123",
+                      generationPublicId: "generation_public_123",
+                      headingPath: ["chapter", "section"],
+                      chunkIndex: 2,
+                      textHash: "text_hash_123",
+                      chunkText: "must-not-leak",
+                    },
+                  ],
+                  providerRequestPayload: "must-not-leak",
+                  providerResponsePayload: "must-not-leak",
+                  rawPrompt: "must-not-leak",
+                },
+              },
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    const response = await service.generateExamReport(userContext, {
+      mockExamPublicId: "mock_exam_public_123",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        examReport: {
+          reportSnapshot: {
+            questionResults: [
+              {
+                paperQuestionPublicId: "paper_question_public_subjective",
+                aiScoringEvidence: {
+                  taskPublicId: "ai_scoring_task_public_123",
+                  attemptNumber: 2,
+                  modelConfig: {
+                    modelConfigPublicId: "model_config_public_123",
+                    modelName: "governed-scoring-model",
+                    providerDisplayName: "Governed Provider",
+                  },
+                  promptTemplate: {
+                    promptTemplateKey: "ai_scoring_v1",
+                    version: 3,
+                    templateHash: "prompt_hash_123",
+                  },
+                  scoringPoints: [
+                    {
+                      scoringPointPublicId: "scoring_point_public_123",
+                      isHit: true,
+                      score: 4,
+                      reason: "matched immutable scoring point",
+                    },
+                  ],
+                  overallComment: "evidence-backed overall comment",
+                  improvementSuggestion: "add one missing condition",
+                  evidenceStatus: "sufficient",
+                  citations: [
+                    {
+                      resourcePublicId: "resource_public_123",
+                      resourceTitle: "published resource",
+                      chunkPublicId: "chunk_public_123",
+                      generationPublicId: "generation_public_123",
+                      headingPath: ["chapter", "section"],
+                      chunkIndex: 2,
+                      textHash: "text_hash_123",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(serializedResponse).not.toContain("must-not-leak");
+    expect(serializedResponse).not.toContain("providerRequestPayload");
+    expect(serializedResponse).not.toContain("rawPrompt");
   });
 
   it("stores knowledge_node weakness analysis in the immutable report snapshot", async () => {
