@@ -61,6 +61,24 @@ analogousImplementationReviewed: true
 - P0 serial manual guard：领取时 pass，current=global static regression，next 为空。
 - `git diff --check`、Prettier、Module Run pre-commit/module-closeout/pre-push：closeout 前执行。
 
+### Branch closeout command record
+
+- `git diff --check`：pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationGlobalBaseline.ps1`：pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual`：pass。
+- `corepack pnpm@10.15.1 exec prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md docs/05-execution-logs/evidence/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md docs/05-execution-logs/audits-reviews/2026-07-15-p0-remediation-static-baseline-v2.yaml docs/05-execution-logs/audits-reviews/2026-07-15-p0-remediation-p1-p2-impact-map.yaml`：pass；实际从共享 locked `D:\tiku\node_modules` 调用相同 Prettier binary，未修改依赖或 lockfile。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14`：pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14`：本记录提交后重跑。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14 -SkipRemoteAheadCheck`：fresh master closeout 后重跑。
+
+## Recovery Drill
+
+- 从已提交的 freeze commit `f97de89c517f3855d2c31398586a6892ddd2b4aa` 创建 detached worktree `D:\tiku\.worktrees\p0-global-recovery-drill`，不依赖当前对话上下文。
+- 首次尝试 `-Phase recovery` 被 guard 的 ValidateSet 正确拒绝；该脚本只支持 `manual/pre_commit/pre_push`，未修改任何文件。
+- 改用受支持的 `-Phase manual` 后，state/queue 均恢复同一 current task，P0 serial guard pass；全局 baseline script 再次得到 P0=35、P1/P2=143、runtime=21、cluster=8、cycle=0。
+- detached HEAD、worktree clean、两处 current task anchor 均正确；演练 worktree 已安全删除并 prune。
+- 结论：中断后仅依靠 state、queue、plan、evidence、audit、frozen baseline、impact map 与验证脚本可以恢复当前进度。
+
 ## Review Log
 
 - Round 1：pass；逐项数量/身份/证据/alias/降级/重复/依赖/静态与 runtime 边界复核完成。

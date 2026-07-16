@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-updatedAt: "2026-07-15T22:48:13-07:00"
+updatedAt: "2026-07-15T23:03:42-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -399,7 +399,7 @@ p0RemediationSerialProgram:
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: closed
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: closed
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: closed
-    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: in_progress
+    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: ready_for_closeout
   closeoutCheckpoints:
     p0-remediation-serial-program-bootstrap-2026-07-14:
       taskCommit: pass
@@ -456,7 +456,7 @@ p0RemediationSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14:
-      taskCommit: pending
+      taskCommit: pass
       masterMerge: pending
       originMasterSync: pending
       worktreeCleanup: pending
@@ -465,7 +465,7 @@ currentTask:
   id: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   title: P0 global static regression and baseline freeze
   phase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-  status: in_progress
+  status: ready_for_closeout
   priority: p0
   taskKind: static_audit
   branch: codex/p0-global-static-regression-freeze
