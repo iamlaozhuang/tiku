@@ -516,7 +516,7 @@ p1RemediationSerialProgram:
     p1-remediation-program-bootstrap-2026-07-16: closed
     p1-remediation-rc-01-server-session-logout-2026-07-16: closed
     p1-remediation-rc-01-account-phone-identity-2026-07-16: closed
-    p1-remediation-rc-01-registration-unit-of-work-2026-07-16: in_progress
+    p1-remediation-rc-01-registration-unit-of-work-2026-07-16: ready_for_closeout
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -606,7 +606,7 @@ currentTask:
   id: p1-remediation-rc-01-registration-unit-of-work-2026-07-16
   title: P1 RC-01 personal registration unit of work
   phase: p1-remediation-rc-01-registration-unit-of-work-2026-07-16
-  status: in_progress
+  status: ready_for_closeout
   priority: p1
   taskKind: product_remediation
   branch: codex/p1-rc01-registration-unit-of-work
