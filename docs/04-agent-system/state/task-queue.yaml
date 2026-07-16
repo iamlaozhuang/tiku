@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-program-bootstrap-2026-07-16
+  currentTaskId: p1-remediation-rc-01-server-session-logout-2026-07-16
   currentCandidateClusterId: P1-RC-01
   candidateClusterOrder:
     - P1-RC-01
@@ -215,7 +215,9 @@ p1RemediationSerialProgram:
     - P1-GLOBAL-STATIC-REGRESSION-BASELINE-FREEZE
   materializedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
-  completedTaskIds: []
+    - p1-remediation-rc-01-server-session-logout-2026-07-16
+  completedTaskIds:
+    - p1-remediation-program-bootstrap-2026-07-16
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -237,12 +239,139 @@ p1RemediationSerialProgram:
     approved: false
     status: blocked_requires_fresh_user_approval
   taskStatusById:
-    p1-remediation-program-bootstrap-2026-07-16: ready_for_closeout
+    p1-remediation-program-bootstrap-2026-07-16: closed
+    p1-remediation-rc-01-server-session-logout-2026-07-16: in_progress
 activeTasks:
+  - id: p1-remediation-rc-01-server-session-logout-2026-07-16
+    title: P1 RC-01 server session logout completion
+    phase: p1-remediation-rc-01-server-session-logout-2026-07-16
+    status: in_progress
+    priority: p1
+    sequenceOrder: 1
+    taskKind: product_remediation
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-rc01-jit-revalidation
+    worktreePath: D:/tiku/.worktrees/p1-rc01-jit-revalidation
+    dependsOn:
+      - p1-remediation-program-bootstrap-2026-07-16
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-01
+    findingIds:
+      - F-0003
+    authorityPath: learner_and_admin_logout_clients_to_delete_api_v1_sessions
+    businessInvariant: logout_is_complete_only_after_server_session_revocation_and_cookie_expiration_succeed
+    adversarialFailureMode: network_http_or_business_failure_must_not_clear_local_identity_or_claim_logout_success
+    rollbackOrStopCondition: stop_if_server_contract_change_schema_dependency_or_runtime_acceptance_is_required
+    focusedGates:
+      - student_logout_server_request
+      - admin_logout_response_validation
+      - logout_failure_retry_state
+      - local_marker_after_server_success_only
+      - focused_unit_regression
+      - full_static_regression
+      - two_round_adversarial_review
+    buildRequired: true
+    fullRegressionPolicy: focused_logout_tests_then_unit_lint_typecheck_format_build_and_program_guards
+    protectedDomains:
+      - server_session_revocation
+      - http_only_cookie_boundary
+      - learner_employee_session
+      - administrator_session
+      - api_response_contract
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+      - f0013_runtime_hold
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/components/AdminDashboardLayout/AdminDashboardLayout.tsx
+      - tests/unit/student-profile-redeem-ui.test.ts
+      - tests/unit/admin-dashboard-layout-navigation.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: blocked
+      productRuntimeSourceChange: approved_task_allowlist
+      productTestSourceChange: approved_task_allowlist
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: satisfied
+      reason: current_user_approved_p1_remediation_goal_2026_07_16
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      resumeAction: implement_and_verify_only_f0003_within_frozen_scope
+    acceptanceStandards:
+      - Learner logout calls DELETE /api/v1/sessions before clearing the local compatibility marker or authenticated UI state.
+      - Learner and administrator clients require both HTTP success and standard response code zero before presenting logout success.
+      - Network, malformed response, non-2xx and business-error paths retain authenticated UI state, expose a retryable error and do not redirect.
+      - Successful logout clears the local marker exactly after server acknowledgement and administrator flow redirects to /login.
+      - No schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment change occurs.
+    validationCommands:
+      - corepack pnpm@10.15.1 exec vitest run tests/unit/student-profile-redeem-ui.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts --maxWorkers=1
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-01-server-session-logout-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-01-server-session-logout-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-01-server-session-logout-2026-07-16 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-program-bootstrap-2026-07-16
     title: P1 remediation serial Program bootstrap
     phase: p1-remediation-program-bootstrap-2026-07-16
-    status: ready_for_closeout
+    status: closed
     priority: governance
     sequenceOrder: 0
     taskKind: mechanism_hardening

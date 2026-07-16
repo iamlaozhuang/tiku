@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-program-bootstrap-2026-07-16
-updatedAt: "2026-07-16T12:00:00-07:00"
+currentPhase: p1-remediation-rc-01-server-session-logout-2026-07-16
+updatedAt: "2026-07-16T13:00:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -470,7 +470,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-program-bootstrap-2026-07-16
+  currentTaskId: p1-remediation-rc-01-server-session-logout-2026-07-16
   currentCandidateClusterId: P1-RC-01
   candidateClusterOrder:
     - P1-RC-01
@@ -485,7 +485,9 @@ p1RemediationSerialProgram:
     - P1-GLOBAL-STATIC-REGRESSION-BASELINE-FREEZE
   materializedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
-  completedTaskIds: []
+    - p1-remediation-rc-01-server-session-logout-2026-07-16
+  completedTaskIds:
+    - p1-remediation-program-bootstrap-2026-07-16
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -507,9 +509,16 @@ p1RemediationSerialProgram:
     approved: false
     status: blocked_requires_fresh_user_approval
   taskStatusById:
-    p1-remediation-program-bootstrap-2026-07-16: ready_for_closeout
+    p1-remediation-program-bootstrap-2026-07-16: closed
+    p1-remediation-rc-01-server-session-logout-2026-07-16: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    p1-remediation-rc-01-server-session-logout-2026-07-16:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -576,23 +585,23 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-program-bootstrap-2026-07-16
-  title: P1 remediation serial Program bootstrap
-  phase: p1-remediation-program-bootstrap-2026-07-16
-  status: ready_for_closeout
-  priority: governance
-  taskKind: mechanism_hardening
-  branch: codex/p1-remediation-program-bootstrap
+  id: p1-remediation-rc-01-server-session-logout-2026-07-16
+  title: P1 RC-01 server session logout completion
+  phase: p1-remediation-rc-01-server-session-logout-2026-07-16
+  status: in_progress
+  priority: p1
+  taskKind: product_remediation
+  branch: codex/p1-rc01-jit-revalidation
   executionProfile: R3
-  planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-program-bootstrap.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-program-bootstrap.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-program-bootstrap.md
-  nextRequiredTaskId: p1-remediation-rc-01-jit-revalidation
+  planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-01-jit-revalidation.md
+  nextRequiredTaskId: p1-remediation-next-jit-revalidation
   currentExecutionGate:
     status: satisfied
     reason: current_user_approved_p1_remediation_goal_2026_07_16
     approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
-    resumeAction: finish_bootstrap_then_materialize_only_one_jit_revalidated_p1_task
+    resumeAction: implement_and_verify_only_f0003_within_frozen_scope
 standingAuthorization:
   id: current-user-approved-p1-remediation-goal-2026-07-16
   source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
@@ -602,9 +611,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
-  lastKnownOriginMasterSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
-  lastKnownRemoteMasterSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
+  lastKnownMasterSha: c67f940deda9f696c8921b7924f1e8a83e11a31f
+  lastKnownOriginMasterSha: c67f940deda9f696c8921b7924f1e8a83e11a31f
+  lastKnownRemoteMasterSha: c67f940deda9f696c8921b7924f1e8a83e11a31f
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass
