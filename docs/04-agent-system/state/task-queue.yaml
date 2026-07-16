@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-01-registration-unit-of-work-2026-07-16
+  currentTaskId: p1-remediation-rc-01-single-session-concurrency-2026-07-16
   currentCandidateClusterId: P1-RC-01
   candidateClusterOrder:
     - P1-RC-01
@@ -218,10 +218,12 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-01-server-session-logout-2026-07-16
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
     - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
+    - p1-remediation-rc-01-single-session-concurrency-2026-07-16
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
+    - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -246,12 +248,142 @@ p1RemediationSerialProgram:
     p1-remediation-program-bootstrap-2026-07-16: closed
     p1-remediation-rc-01-server-session-logout-2026-07-16: closed
     p1-remediation-rc-01-account-phone-identity-2026-07-16: closed
-    p1-remediation-rc-01-registration-unit-of-work-2026-07-16: ready_for_closeout
+    p1-remediation-rc-01-registration-unit-of-work-2026-07-16: closed
+    p1-remediation-rc-01-single-session-concurrency-2026-07-16: in_progress
 activeTasks:
+  - id: p1-remediation-rc-01-single-session-concurrency-2026-07-16
+    title: P1 RC-01 learner single-session concurrency closure
+    phase: p1-remediation-rc-01-single-session-concurrency-2026-07-16
+    status: in_progress
+    priority: p1
+    sequenceOrder: 4
+    taskKind: product_remediation
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-rc01-single-session-concurrency
+    worktreePath: D:/tiku/.worktrees/p1-rc01-single-session-concurrency
+    dependsOn:
+      - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-01
+    findingIds:
+      - F-0131
+    authorityPath: p0_per_account_transaction_lock_serializes_single_active_session_replacement
+    businessInvariant: concurrent_learner_logins_for_one_auth_user_must_commit_only_one_current_active_session
+    adversarialFailureMode: any_existing_account_learner_login_replacement_path_that_deletes_and_inserts_without_the_same_transaction_lock_can_leave_multiple_valid_sessions
+    rollbackOrStopCondition: stop_if_any_unlocked_existing_account_learner_login_replacement_path_or_runtime_source_schema_migration_dependency_or_database_execution_is_required
+    focusedGates:
+      - p0_static_closure_revalidation
+      - learner_login_replacement_routes_use_single_active_session
+      - admin_issuance_retains_multi_session_contract
+      - advisory_lock_precedes_delete_and_insert
+      - one_transaction_contains_lock_delete_insert
+      - no_product_runtime_source_change
+      - focused_static_regression_guard
+      - full_static_regression
+      - two_round_adversarial_review
+    buildRequired: true
+    fullRegressionPolicy: focused_single_session_guard_then_unit_lint_typecheck_format_build_and_program_guards
+    protectedDomains:
+      - learner_single_session
+      - administrator_multi_session
+      - login_failure_lockout
+      - password_reverification
+      - personal_and_organization_student_identity
+      - p0_identity_session_invariants
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+      - rv0021_runtime_hold
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+      - tests/unit/p1-single-session-concurrency-guard.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: blocked
+      productRuntimeSourceChange: blocked_static_closure_only
+      productTestSourceChange: approved_task_allowlist
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: satisfied
+      reason: current_user_approved_p1_remediation_goal_2026_07_16
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      resumeAction: verify_static_p0_closure_and_add_only_f0131_regression_guard
+    acceptanceStandards:
+      - Every existing-account learner login path selects createSingleActiveSession while administrator login alone may select createSession.
+      - createSingleActiveSession acquires the same auth-user transaction advisory lock before deleting prior sessions and inserting the replacement session inside one database transaction.
+      - The production auth_session insert inventory contains only learner replacement, administrator multi-session and atomic personal-registration initial session writers; the registration writer is a classified safe exception because identity and first session are created together without a pre-existing session generation.
+      - The closure guard fails if lock, delete, insert, transaction ownership or learner/admin routing order regresses.
+      - F-0131 is closed only as statically_closed_by_p0; RV-0021 remains pending and no real PostgreSQL concurrency claim is made.
+      - No product runtime source, schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment change occurs.
+    validationCommands:
+      - corepack pnpm@10.15.1 exec vitest run tests/unit/p1-single-session-concurrency-guard.test.ts src/server/auth/local-session-runtime.test.ts src/server/services/session-service.test.ts --maxWorkers=1
+      - npm.cmd run test:unit -- --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-01-single-session-concurrency-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-01-single-session-concurrency-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-01-single-session-concurrency-2026-07-16 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-rc-01-registration-unit-of-work-2026-07-16
     title: P1 RC-01 personal registration unit of work
     phase: p1-remediation-rc-01-registration-unit-of-work-2026-07-16
-    status: ready_for_closeout
+    status: closed
     priority: p1
     sequenceOrder: 3
     taskKind: product_remediation
