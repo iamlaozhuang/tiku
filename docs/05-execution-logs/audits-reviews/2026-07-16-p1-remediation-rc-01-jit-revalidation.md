@@ -30,4 +30,8 @@ Decision: APPROVE_SCOPE
 
 ## Final Disposition
 
-Pending implementation and fresh two-round review.
+Decision: APPROVE
+
+F-0003 的静态产品整改已通过 RED/GREEN、完整单元、lint、typecheck、format、diff、主线程对抗复核和独立只读二轮复核。首轮独立审查发现的畸形成功 envelope 假成功已补运行时验证与双端回归测试，复审无 blocking finding。
+
+隔离 worktree 的默认 Turbopack build 因 `next` 物理依赖位于 project root 外失败；标准 `npm.cmd run build` 必须在 ff-only 合入后的 fresh `master` 通过，失败即停止 push 和任务关闭。数据库、runtime acceptance、浏览器/E2E、Provider、P2、PR、force push、部署仍在边界外。

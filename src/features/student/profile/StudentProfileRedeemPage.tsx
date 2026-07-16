@@ -36,6 +36,7 @@ import {
 } from "../studentRuntimeApi";
 
 type LoadState = "loading" | "ready" | "unauthorized" | "error";
+type LogoutState = "idle" | "submitting" | "error";
 type RedeemSubmitState = "idle" | "submitting" | "success" | "error";
 
 const REDEEM_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/u;
@@ -86,6 +87,34 @@ async function fetchApi<TData>(
   const response = await fetch(path, request);
 
   return (await response.json()) as ApiResponse<TData | null>;
+}
+
+function isSuccessfulSessionLogoutPayload(payload: unknown): boolean {
+  if (payload === null || typeof payload !== "object") {
+    return false;
+  }
+
+  const responseFields = payload as Record<string, unknown>;
+
+  return (
+    responseFields.code === 0 &&
+    typeof responseFields.message === "string" &&
+    responseFields.data === null
+  );
+}
+
+async function revokeServerSession(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/v1/sessions", {
+      credentials: "same-origin",
+      method: "DELETE",
+    });
+    const payload: unknown = await response.json();
+
+    return response.ok && isSuccessfulSessionLogoutPayload(payload);
+  } catch {
+    return false;
+  }
 }
 
 function formatDate(value: string | null): string {
@@ -195,9 +224,11 @@ function StudentProfileLoading({ label }: { label: string }) {
 
 function ProfileHeader({
   authContext,
+  logoutState,
   onLogout,
 }: {
   authContext: AuthContextDto;
+  logoutState: LogoutState;
   onLogout: () => void;
 }) {
   return (
@@ -215,16 +246,29 @@ function ProfileHeader({
               {authContext.user.phone}
             </p>
           </div>
-          <Button
-            className="w-full active:scale-[0.98] sm:w-auto"
-            onClick={onLogout}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            <LogOut aria-hidden="true" />
-            退出登录
-          </Button>
+          <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
+            <Button
+              aria-busy={logoutState === "submitting"}
+              className="w-full active:scale-[0.98] sm:w-auto"
+              disabled={logoutState === "submitting"}
+              onClick={onLogout}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <LogOut aria-hidden="true" />
+              {logoutState === "submitting" ? "正在退出" : "退出登录"}
+            </Button>
+            {logoutState === "error" ? (
+              <p
+                aria-label="退出失败，当前会话仍保持登录，请重试。"
+                className="text-destructive text-sm leading-5"
+                role="alert"
+              >
+                退出失败，当前会话仍保持登录，请重试。
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>
@@ -782,6 +826,7 @@ function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
 
 export function StudentProfilePage() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [logoutState, setLogoutState] = useState<LogoutState>("idle");
   const [authContext, setAuthContext] = useState<AuthContextDto | null>(null);
   const [authorizations, setAuthorizations] = useState<
     AuthorizationListItemDto[]
@@ -855,13 +900,21 @@ export function StudentProfilePage() {
     };
   }, []);
 
-  function handleLogout() {
+  async function handleLogout() {
+    setLogoutState("submitting");
+
+    if (!(await revokeServerSession())) {
+      setLogoutState("error");
+      return;
+    }
+
     clearStoredStudentSessionToken();
     setAuthContext(null);
     setAuthorizations([]);
     setEffectiveAuthorizations([]);
     setAuthorizationContexts([]);
     setPersonalAuths([]);
+    setLogoutState("idle");
     setLoadState("unauthorized");
   }
 
@@ -901,7 +954,11 @@ export function StudentProfilePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
-      <ProfileHeader authContext={authContext} onLogout={handleLogout} />
+      <ProfileHeader
+        authContext={authContext}
+        logoutState={logoutState}
+        onLogout={handleLogout}
+      />
       <ProfileCurrentAuthorization
         authorizationContexts={authorizationContexts}
         effectiveAuthorizations={effectiveAuthorizations}

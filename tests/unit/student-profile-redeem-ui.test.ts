@@ -215,6 +215,8 @@ function createPersonalAuthPayload(
 function mockProfileFetchWithPayloads(
   input: {
     authorization?: unknown;
+    logout?: unknown;
+    logoutStatus?: number;
     personalAuth?: unknown;
     session?: unknown;
   } = {},
@@ -222,23 +224,38 @@ function mockProfileFetchWithPayloads(
   const nextSessionPayload = input.session ?? sessionPayload;
   const nextAuthorizationPayload = input.authorization ?? authorizationPayload;
   const nextPersonalAuthPayload = input.personalAuth ?? personalAuthPayload;
-  const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-    const path = String(url);
+  const nextLogoutPayload = input.logout ?? {
+    code: 0,
+    message: "ok",
+    data: null,
+  };
+  const fetchMock = vi.fn(
+    async (url: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(url);
 
-    if (path === "/api/v1/sessions") {
-      return createJsonResponse(nextSessionPayload);
-    }
+      if (path === "/api/v1/sessions" && init?.method === "DELETE") {
+        return createJsonResponse(nextLogoutPayload, input.logoutStatus);
+      }
 
-    if (path === "/api/v1/authorizations") {
-      return createJsonResponse(nextAuthorizationPayload);
-    }
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(nextSessionPayload);
+      }
 
-    if (path === "/api/v1/personal-auths") {
-      return createJsonResponse(nextPersonalAuthPayload);
-    }
+      if (path === "/api/v1/authorizations") {
+        return createJsonResponse(nextAuthorizationPayload);
+      }
 
-    return createJsonResponse({ code: 404001, message: "missing", data: null });
-  });
+      if (path === "/api/v1/personal-auths") {
+        return createJsonResponse(nextPersonalAuthPayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    },
+  );
 
   vi.stubGlobal("fetch", fetchMock);
 
@@ -476,8 +493,9 @@ describe("StudentProfilePage", () => {
     expect(screen.getByText("额度归属：个人")).toBeInTheDocument();
   });
 
-  it("moves the profile view to the unauthorized state when logout is used", async () => {
-    mockProfileFetch();
+  it("revokes the server session before moving the profile view to the unauthorized state", async () => {
+    localStorage.setItem("tiku.localSessionToken", "__cookie_backed_session__");
+    const fetchMock = mockProfileFetch();
 
     render(createElement(StudentProfilePage));
 
@@ -490,6 +508,91 @@ describe("StudentProfilePage", () => {
         "href",
         "/login",
       ),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/sessions",
+      expect.objectContaining({
+        credentials: "same-origin",
+        method: "DELETE",
+      }),
+    );
+    expect(localStorage.getItem("tiku.localSessionToken")).toBeNull();
+  });
+
+  it("keeps the learner visibly signed in when server logout is rejected", async () => {
+    localStorage.setItem("tiku.localSessionToken", "__cookie_backed_session__");
+    mockProfileFetchWithPayloads({
+      logout: {
+        code: 503001,
+        message: "Session logout unavailable.",
+        data: null,
+      },
+    });
+
+    render(createElement(StudentProfilePage));
+
+    expect(await screen.findByText("Dev Student")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+
+    expect(
+      await screen.findByRole("alert", {
+        name: "退出失败，当前会话仍保持登录，请重试。",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Dev Student")).toBeInTheDocument();
+    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
+      "__cookie_backed_session__",
+    );
+    expect(screen.queryByRole("link", { name: "前往登录" })).toBeNull();
+    expect(screen.getByRole("button", { name: "退出登录" })).toBeEnabled();
+  });
+
+  it("does not treat a non-success HTTP logout response as a completed logout", async () => {
+    localStorage.setItem("tiku.localSessionToken", "__cookie_backed_session__");
+    mockProfileFetchWithPayloads({
+      logoutStatus: 503,
+    });
+
+    render(createElement(StudentProfilePage));
+
+    expect(await screen.findByText("Dev Student")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+
+    expect(
+      await screen.findByRole("alert", {
+        name: "退出失败，当前会话仍保持登录，请重试。",
+      }),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
+      "__cookie_backed_session__",
+    );
+  });
+
+  it("rejects a malformed successful logout envelope", async () => {
+    localStorage.setItem("tiku.localSessionToken", "__cookie_backed_session__");
+    mockProfileFetchWithPayloads({
+      logout: {
+        code: 0,
+        message: 42,
+        data: null,
+      },
+    });
+
+    render(createElement(StudentProfilePage));
+
+    expect(await screen.findByText("Dev Student")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+
+    expect(
+      await screen.findByRole("alert", {
+        name: "退出失败，当前会话仍保持登录，请重试。",
+      }),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
+      "__cookie_backed_session__",
     );
   });
 });

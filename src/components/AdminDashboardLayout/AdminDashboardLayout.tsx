@@ -129,6 +129,7 @@ type AdminDashboardLayoutStatus =
   | "forbidden"
   | "missing-organization-context"
   | "standard-unavailable";
+type LogoutState = "idle" | "submitting" | "error";
 type AdminDashboardAuthState = {
   status: AdminDashboardLayoutStatus;
   workspace: AdminWorkspace | null;
@@ -424,6 +425,34 @@ async function fetchAdminAuthContext(): Promise<
   return (await response.json()) as ApiResponse<AuthContextDto | null>;
 }
 
+function isSuccessfulSessionLogoutPayload(payload: unknown): boolean {
+  if (payload === null || typeof payload !== "object") {
+    return false;
+  }
+
+  const responseFields = payload as Record<string, unknown>;
+
+  return (
+    responseFields.code === 0 &&
+    typeof responseFields.message === "string" &&
+    responseFields.data === null
+  );
+}
+
+async function revokeServerSession(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/v1/sessions", {
+      credentials: "same-origin",
+      method: "DELETE",
+    });
+    const payload: unknown = await response.json();
+
+    return response.ok && isSuccessfulSessionLogoutPayload(payload);
+  } catch {
+    return false;
+  }
+}
+
 function AdminDashboardStatus({
   accessDecision,
   adminRoles,
@@ -523,6 +552,7 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const workspace = getWorkspaceFromPath(pathname);
   const [retrySerial, setRetrySerial] = useState(0);
+  const [logoutState, setLogoutState] = useState<LogoutState>("idle");
   const [authState, setAuthState] = useState<AdminDashboardAuthState>({
     status: "checking",
     workspace: null,
@@ -646,24 +676,25 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
   }
 
   async function handleLogoutClick() {
-    try {
-      await fetch("/api/v1/sessions", {
-        credentials: "same-origin",
-        method: "DELETE",
-      });
-    } finally {
-      localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
-      setAuthState({
-        status: "unauthorized",
-        workspace,
-        pathname,
-        adminRoles: [],
-        canUseOrganizationAdvancedWorkspace: false,
-        hasOrganizationWorkspaceContext: false,
-        accessDecision: null,
-      });
-      router.replace("/login");
+    setLogoutState("submitting");
+
+    if (!(await revokeServerSession())) {
+      setLogoutState("error");
+      return;
     }
+
+    localStorage.removeItem(SESSION_TOKEN_STORAGE_KEY);
+    setLogoutState("idle");
+    setAuthState({
+      status: "unauthorized",
+      workspace,
+      pathname,
+      adminRoles: [],
+      canUseOrganizationAdvancedWorkspace: false,
+      hasOrganizationWorkspaceContext: false,
+      accessDecision: null,
+    });
+    router.replace("/login");
   }
 
   if (status !== "authorized" && status !== "standard-unavailable") {
@@ -840,14 +871,27 @@ export function AdminDashboardLayout({ children }: { children: ReactNode }) {
         {/* TopBar */}
         <header className="border-border bg-surface sticky top-0 z-30 flex h-14 items-center justify-between border-b px-6 shadow-sm">
           <span className="text-text-muted text-sm">{portalName}</span>
-          <button
-            aria-label="退出登录"
-            className="text-text-secondary hover:bg-muted hover:text-text-primary flex size-9 items-center justify-center rounded-full transition-transform active:scale-[0.98]"
-            type="button"
-            onClick={handleLogoutClick}
-          >
-            <LogOut aria-hidden="true" className="size-4" />
-          </button>
+          <div className="flex items-center gap-3">
+            {logoutState === "error" ? (
+              <p
+                aria-label="退出失败，当前会话仍保持登录，请重试。"
+                className="text-destructive text-sm"
+                role="alert"
+              >
+                退出失败，当前会话仍保持登录，请重试。
+              </p>
+            ) : null}
+            <button
+              aria-busy={logoutState === "submitting"}
+              aria-label="退出登录"
+              className="text-text-secondary hover:bg-muted hover:text-text-primary flex size-9 items-center justify-center rounded-full transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={logoutState === "submitting"}
+              onClick={handleLogoutClick}
+              type="button"
+            >
+              <LogOut aria-hidden="true" className="size-4" />
+            </button>
+          </div>
         </header>
 
         {/* Content */}

@@ -377,6 +377,140 @@ describe("AdminDashboardLayout navigation", () => {
     expect(replaceMock).toHaveBeenCalledWith("/login");
   });
 
+  it("keeps the administrator signed in when logout returns a business error", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "DELETE") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 503001,
+              message: "Session logout unavailable.",
+              data: null,
+            }),
+          };
+        }
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => contentAdminSessionPayload,
+        };
+      }),
+    );
+    pathnameMock = "/content/papers";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "content page"),
+      ),
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "退出登录" }));
+
+    expect(
+      await screen.findByRole("alert", {
+        name: "退出失败，当前会话仍保持登录，请重试。",
+      }),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
+      "unit-test-admin-token",
+    );
+    expect(replaceMock).not.toHaveBeenCalledWith("/login");
+    expect(screen.getByText("content page")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "退出登录" })).toBeEnabled();
+  });
+
+  it("keeps the administrator signed in when the logout request fails", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "DELETE") {
+          throw new Error("network unavailable");
+        }
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => contentAdminSessionPayload,
+        };
+      }),
+    );
+    pathnameMock = "/content/papers";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "content page"),
+      ),
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "退出登录" }));
+
+    expect(
+      await screen.findByRole("alert", {
+        name: "退出失败，当前会话仍保持登录，请重试。",
+      }),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
+      "unit-test-admin-token",
+    );
+    expect(replaceMock).not.toHaveBeenCalledWith("/login");
+  });
+
+  it("rejects a malformed successful logout envelope for administrators", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "DELETE") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+            }),
+          };
+        }
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => contentAdminSessionPayload,
+        };
+      }),
+    );
+    pathnameMock = "/content/papers";
+
+    render(
+      createElement(
+        AdminDashboardLayout,
+        null,
+        createElement("div", null, "content page"),
+      ),
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "退出登录" }));
+
+    expect(
+      await screen.findByRole("alert", {
+        name: "退出失败，当前会话仍保持登录，请重试。",
+      }),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
+      "unit-test-admin-token",
+    );
+    expect(replaceMock).not.toHaveBeenCalledWith("/login");
+  });
+
   it("keeps organization admin navigation fixtures aligned with the dev seed role mapping", () => {
     const seedDataset = buildUnitSeedDataset();
     const orgStandardAdmin = seedDataset.admins.find(

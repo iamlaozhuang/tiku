@@ -85,14 +85,39 @@ Result: pass
 
 ## Validation Results
 
-Result: pending_implementation
+Result: pass
 
-transition 阶段只执行静态复检、范围门禁、格式和 diff 检查；产品 focused/full gates 在实现后写入。
+- RED-1：原行为下新增的 learner 服务端 DELETE、logout 失败保留状态、admin 业务失败测试失败；3 个新断言失败。
+- GREEN-1：learner/admin 仅在 HTTP 与业务成功后清理本地状态；定向测试 24/24，扩展失败矩阵后 26/26 通过。
+- 独立只读审查首轮发现 2xx 畸形 envelope 会被 TypeScript 断言误判成功，结论 `REQUEST_CHANGES`。
+- RED-2：新增 learner 错类型 `message` 与 admin 缺失 `data` 的畸形 envelope 测试，2 个断言按预期失败。
+- GREEN-2：两个客户端现在把 JSON 视为 `unknown`，运行时验证 object、`code === 0`、string `message`、`data === null`；定向测试 28/28 通过。
+- 完整单元回归：400 个测试文件、2392 个测试，`--maxWorkers=1` 全部通过，耗时 735.66 秒。
+- `npm.cmd run lint`：通过。
+- `npm.cmd run typecheck`：通过。
+- `npm.cmd run format:check`：通过。
+- `git diff --check`：通过。
+- 默认 Turbopack build 在隔离 worktree 无法把物理位于仓库主工作树的 `next/package.json` 解析为 project-root 内依赖；这是已知 worktree 环境限制。一次 webpack 诊断触发仓库既有 `node:crypto` baseline 错误，未作为替代通过证据。标准 `npm.cmd run build` 保持为 ff-only 合入后的 fresh-master 强制门禁，失败则停止 push/closeout。
+- 未执行数据库、runtime acceptance、浏览器/E2E、Provider、P2、PR、force push 或部署。
 
 ## Round 1
 
-Result: pending_implementation
+Result: pass
+
+- 学员退出现在先等待 `DELETE /api/v1/sessions`；只有 HTTP 成功且标准 envelope 完整成功才清 marker 和授权状态。
+- 管理后台删除了 `finally` 假成功路径；失败保留当前 workspace、marker 和认证 UI，并显示可重试错误。
+- submitting 状态禁用按钮并提供 `aria-busy`；error 状态使用 token 和 `role=alert`，没有硬编码颜色或主题判断。
+- HTTP、业务、网络和可解析畸形响应反证均不能触发本地注销完成。
 
 ## Round 2
 
-Result: pending_implementation
+Result: pass
+
+- 独立只读审查首轮 blocking 已用第二轮 RED/GREEN 关闭；复审结论 `APPROVE`。
+- 响应运行时验证要求 `code`、`message`、`data` 完整，不再信任静态类型断言。
+- 成功副作用严格位于服务端确认之后；失败路径按钮恢复可用，没有 redirect 或 localStorage 清理。
+- diff 仍只有两个客户端和两个定向测试文件；无 schema、migration、依赖或其他产品域变更。
+
+## Fresh-Master Closeout Gate
+
+标准 Turbopack build 必须在 ff-only 合入后的真实 `master` 依赖布局执行并通过，之后才允许普通 push。该后置门禁不被本 evidence 预先描述为已完成。
