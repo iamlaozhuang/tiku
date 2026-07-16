@@ -4,7 +4,9 @@
 
 任务：`p1-remediation-rc-01-server-session-logout-2026-07-16`
 
-基线：`4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3`
+当前 transition 基线：`c67f940deda9f696c8921b7924f1e8a83e11a31f`
+
+原始 JIT 复检读取基线为 `4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3`。其后的 `c67f940deda9f696c8921b7924f1e8a83e11a31f` 仅修复 pre-push/P1/Module 治理门禁，产品、测试、schema、依赖和审计仓库零变化；transition 重放后将 repository checkpoint 更新到该治理基线，原逐 finding 结论与产品验证证据不变。
 
 ## Reading Evidence
 
@@ -99,6 +101,27 @@ Result: pass
 - `git diff --check`：通过。
 - 默认 Turbopack build 在隔离 worktree 无法把物理位于仓库主工作树的 `next/package.json` 解析为 project-root 内依赖；这是已知 worktree 环境限制。一次 webpack 诊断触发仓库既有 `node:crypto` baseline 错误，未作为替代通过证据。标准 `npm.cmd run build` 保持为 ff-only 合入后的 fresh-master 强制门禁，失败则停止 push/closeout。
 - 未执行数据库、runtime acceptance、浏览器/E2E、Provider、P2、PR、force push 或部署。
+
+### Closeout Command Evidence
+
+Cost Calibration Gate remains blocked。
+
+- `$env:PATH='D:\tiku\node_modules\.bin;' + $env:PATH; corepack pnpm@10.15.1 exec vitest run tests/unit/student-profile-redeem-ui.test.ts tests/unit/admin-dashboard-layout-navigation.test.ts --maxWorkers=1`：在当前 worktree 执行，2 个文件、28 个测试通过；显式 PATH 仅复用主工作树已有依赖，不安装或变更依赖。
+- `npm.cmd run test:unit -- --maxWorkers=1`：400 个文件、2392 个测试通过。
+- `npm.cmd run lint`：通过。
+- `npm.cmd run typecheck`：通过。
+- `npm.cmd run format:check`：通过。
+- `npm.cmd run build`：隔离 worktree 结果受上述依赖物理布局限制；按任务门禁保留到 ff-only 合入后的 fresh `master` 执行，未预先标记通过。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual`：`p1ProgramGuardResult: pass`，P1=125、P2=18、runtime pending=21。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1`：`p0GlobalBaselineResult: pass`，P0=35、impact=143、runtime pending=21、dependency cycle=0。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-01-server-session-logout-2026-07-16`：closeout 状态提交前通过。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-01-server-session-logout-2026-07-16`：首次运行准确暴露本节缺失的精确命令、Cost Gate、线程续跑与下一候选字段；本节补齐后重新执行，`module-closeout readiness passed`。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-01-server-session-logout-2026-07-16 -SkipRemoteAheadCheck`：`pre-push readiness passed`。
+- `git diff --check`：通过。
+
+threadRolloverGate: `continue_current_thread`。当前线程继续串行推进，不创建并行 WIP。
+
+nextModuleRunCandidate: `P1-RC-01 registration consistency JIT revalidation (F-0001/F-0129)`；仅声明下一即时复检候选，不预先物化修复范围。
 
 ## Round 1
 
