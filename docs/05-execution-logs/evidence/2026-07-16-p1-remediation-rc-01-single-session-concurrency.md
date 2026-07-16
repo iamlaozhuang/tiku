@@ -78,6 +78,7 @@ Result: pass
 - 隔离 worktree 的 `npm.cmd run build` 因 Next/Turbopack 无法从 `D:/tiku/.worktrees/.../src/app` 解析物理位于 `D:/tiku/node_modules` 的 `next/package.json` 而失败；这是已知隔离布局限制。ff-only 合入后必须在 fresh `master` 通过标准 build，失败即停止 push/closeout。
 - 产品运行时代码、schema、migration、依赖与 lockfile 均为零 diff。
 - 未执行真实 PostgreSQL 并发、数据库 mutation、runtime/browser acceptance、Provider、P2、PR、force push 或部署；RV-0021 保持 pending。
+- Module closeout 首轮按预期 hard-block 缺失的下一 JIT 候选指针；本次 post-merge evidence-only correction 只补当前 ledger 的 F-0132 handoff，必须在普通 push 前复跑 closeout 并通过。
 
 Cost Calibration Gate remains blocked。
 
@@ -117,3 +118,5 @@ Result: pass
 ff-only 合入后必须在真实 `master` 运行标准 Turbopack build、聚焦回归、lint、typecheck、format、P0/P1/Module 门禁并通过，之后才允许普通 push。该后置门禁未被本 evidence 预先标记为完成。
 
 threadRolloverGate: `continue_current_thread`。保持 WIP=1，不创建并行产品任务。
+
+nextModuleRunCandidate: `P1-RC-01 redeem-code entitlement preview JIT revalidation (F-0132)`；仅声明当前 ledger 的下一即时复检候选，不预先物化范围或授权相关实现。
