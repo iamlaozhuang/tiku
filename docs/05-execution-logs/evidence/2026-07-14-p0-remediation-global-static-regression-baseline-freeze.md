@@ -95,6 +95,8 @@ analogousImplementationReviewed: true
 - 改用受支持的 `-Phase manual` 后，state/queue 均恢复同一 current task，P0 serial guard pass；全局 baseline script 再次得到 P0=35、P1/P2=143、runtime=21、cluster=8、cycle=0。
 - detached HEAD、worktree clean、两处 current task anchor 均正确；演练 worktree 已安全删除并 prune。
 - 结论：中断后仅依靠 state、queue、plan、evidence、audit、frozen baseline、impact map 与验证脚本可以恢复当前进度。
+- 终态补充演练：从 closed-program commit `6d6d9ba31294fe813b587799b6914d23d892794a` 创建 detached `D:\tiku\.worktrees\p0-program-final-recovery`；全局 baseline 返回 `programStatus: closed`，串行 guard 返回 `pass_closed_program`，HEAD/clean 正确。
+- 终态演练 worktree 已在验证路径归属后安全删除并 prune；证明 Program 关闭后仍可仅依赖物化文件恢复最终状态。
 
 ## Review Log
 
