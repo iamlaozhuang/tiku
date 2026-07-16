@@ -142,7 +142,7 @@ describe("P0 RC-07 answer, deadline and report migration source", () => {
 
     const baseSnapshot = JSON.parse(
       readFileSync(
-        resolve(process.cwd(), "drizzle/meta/20260715153040_snapshot.json"),
+        resolve(process.cwd(), "drizzle/meta/20260715220000_snapshot.json"),
         "utf8",
       ),
     ) as { id: string };
