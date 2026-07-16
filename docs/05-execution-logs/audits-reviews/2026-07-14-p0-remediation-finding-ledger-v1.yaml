@@ -2740,8 +2740,8 @@ findings:
     riskConsequence:
       businessImpact: 发布命令没有加载路径中的organization_training_draft，也不核对草稿内容、来源快照、validation/evidence状态或组织授权血缘；只要调用者拥有某组织的高级训练能力，就可以提交任意非空draftPublicId、任意题目快照，并自行把evidenceStatus标为sufficient。数据库version.draft_public_id又没有外键，因此可创建没有真实草稿、没有可信来源和没有可复核依据的已发布训练。员工随后把该请求内容当作不可变正式版本作答，发布、统计和追责基础失真。
       blastRadius: 所有手工、平台paper、组织AI出题和AI组卷训练发布，以及员工可见版本、作答结果、组织统计和审计追责。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-02/03/04/05/06/07 已改变 authorization、paper snapshot、evidence 与 scoring 上游，当前 HEAD 不等于原审计 baseline；publish 仍不读取 canonical draft 且继续信任客户端快照，故重基线后缺口继续成立。
     rootCauseCluster:
       id: RC-08
       name: organization training 草稿、发布、作答与统计完整性
@@ -2822,8 +2822,8 @@ findings:
         发布成功后草稿没有状态转换、revision更新或归档，刷新列表仍同时出现原草稿与已发布版本。重复请求会为同一draftPublicId继续创建version 2、3，而不是返回同一结果或明确要求复制新草稿；两个并发请求又各自先读相同latest
         version number，再争用唯一索引，至少一个以持久化异常失败。响应丢失、双击或重试因此可能产生意外多版本或不可恢复错误，违背“published不可变、修改需复制新草稿”的核心合同。
       blastRadius: 所有企业训练发布、版本历史、员工分配、统计和审计；网络重试或多人并发即可触发。
-    currentRevalidationStatus: root_cause_alias
-    revalidationRationale: 与 F-0121 共享修复原语，但失败路径、角色/数据域或验收义务独立；已确认，不等于重复或已解决。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: 当前 HEAD 已包含上游事务与状态机整改，需按新基线复验；同一 draft 仍无消费状态/revision/idempotency，顺序重放和并发发布缺口继续成立。与 F-0121 的 rootCauseAliasOf 关系保留，不等于重复或已解决。
     rootCauseCluster:
       id: RC-08
       name: organization training 草稿、发布、作答与统计完整性
@@ -3169,8 +3169,8 @@ findings:
     riskConsequence:
       businessImpact: 员工可在submit请求中自行提交answeredQuestionCount、score和totalScore；服务端只检查计数为正且不大于题数、总分等于版本总分、分数位于区间内，不从answerItems重算已答数，也不按题型、选项、标准答案或评分点执行任何评分。直接API可不提交任何答案却自授满分并持久化为正式submitted成绩；相反，官方UI把所有真实答案固定提交为0分。repository为每道结果硬编码score=0，却同时保存客户端总分，形成总成绩与逐题结果自相矛盾；组织统计随后直接消费该分数。企业训练成绩、本人结果和管理决策的核心完整性完全由不可信客户端控制。
       blastRadius: 所有企业高级员工训练成绩、本人结果、组织完成/均分统计、小样本判断和后续任何以训练分数驱动的能力；可被直接API系统性伪造，也会让正常UI成绩恒为0。
-    currentRevalidationStatus: confirmed
-    revalidationRationale: 当前源 HEAD 与审计 baselineCommit 完全相同；原静态反证搜索仍有效，保持 confirmed。
+    currentRevalidationStatus: baseline_changed
+    revalidationRationale: RC-03/06/07 已改变 authorization 与正式 scoring 基线，当前 HEAD 不等于原审计 baseline；organization training submit 仍接受客户端 count/score 且 analytics 消费该值，故重基线后缺口继续成立。
     rootCauseCluster:
       id: RC-08
       name: organization training 草稿、发布、作答与统计完整性
