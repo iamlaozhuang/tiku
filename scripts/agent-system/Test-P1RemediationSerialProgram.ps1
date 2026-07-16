@@ -84,6 +84,26 @@ $expectedCandidateOrder = @(
 $allowedTaskStatuses = @("pending", "in_progress", "ready_for_closeout", "closed")
 $activeTaskStatuses = @("in_progress", "ready_for_closeout")
 $checkpointOrder = @("taskCommit", "masterMerge", "originMasterSync", "worktreeCleanup", "shortBranchCleanup")
+$p1TransitionHotfixTaskId = "p1-prepush-transition-ancestor-gate-hotfix-2026-07-16"
+$p1TransitionHotfixParentTaskId = "p1-remediation-program-bootstrap-2026-07-16"
+$p1TransitionHotfixBaseSha = "4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3"
+$p1TransitionHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-16-p1-prepush-transition-hotfix-authorization.md"
+$p1TransitionHotfixFiles = @(
+    ".husky/pre-push",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $p1TransitionHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-prepush-transition-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-remediation-program-bootstrap.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-program-bootstrap.md"
+)
 $findings = [System.Collections.Generic.List[string]]::new()
 
 function Add-Finding {
@@ -354,15 +374,18 @@ function Invoke-GitInIsolatedRepository {
     foreach ($name in $localEnvironmentNames) {
         $value = [Environment]::GetEnvironmentVariable($name, [EnvironmentVariableTarget]::Process)
         if ($null -ne $value) { $savedEnvironment[$name] = $value }
-        [Environment]::SetEnvironmentVariable($name, $null, [EnvironmentVariableTarget]::Process)
+        Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
     }
     try {
         $output = @(& git --no-optional-locks -C $Root @GitArguments)
         $exitCode = $LASTEXITCODE
     } finally {
         foreach ($name in $localEnvironmentNames) {
-            $value = if ($savedEnvironment.ContainsKey($name)) { $savedEnvironment[$name] } else { $null }
-            [Environment]::SetEnvironmentVariable($name, $value, [EnvironmentVariableTarget]::Process)
+            if ($savedEnvironment.ContainsKey($name)) {
+                [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], [EnvironmentVariableTarget]::Process)
+            } else {
+                Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
+            }
         }
     }
     return [pscustomobject]@{ ExitCode = $exitCode; Output = $output }
@@ -370,7 +393,77 @@ function Invoke-GitInIsolatedRepository {
 
 function ConvertTo-NormalizedPath {
     param([Parameter(Mandatory = $true)][string]$Path)
-    return $Path.Replace("\", "/").TrimStart(".", "/")
+    $normalizedPath = $Path.Replace("\", "/")
+    while ($normalizedPath.StartsWith("./", [System.StringComparison]::Ordinal)) { $normalizedPath = $normalizedPath.Substring(2) }
+    return $normalizedPath.TrimStart("/")
+}
+
+function Test-P1TransitionHotfixFileSet {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
+
+    $actualFiles = @($Files | ForEach-Object { $_.Replace("\", "/").TrimStart("/") } | Sort-Object -Unique)
+    $expectedFiles = @($p1TransitionHotfixFiles | ForEach-Object { $_.Replace("\", "/").TrimStart("/") } | Sort-Object -Unique)
+    return ($actualFiles -join "|") -ceq ($expectedFiles -join "|")
+}
+
+function Test-P1TransitionHotfixAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$CurrentTaskId,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$CurrentTaskBlock,
+        [Parameter(Mandatory = $true)][ValidateSet("pre_commit", "pre_push")][string]$CurrentPhase
+    )
+
+    $findingCountBefore = $script:findings.Count
+    $headSha = ((& git -C $Root rev-parse HEAD) -join "").Trim()
+    $branch = ((& git -C $Root branch --show-current) -join "").Trim()
+    $taskStatus = Get-ScalarValue -Block $CurrentTaskBlock -Key "status"
+    $parentReference = "HEAD"
+
+    if ($CurrentPhase -eq "pre_commit") {
+        if ($headSha -ne $p1TransitionHotfixBaseSha -or $branch -ne "codex/p1-prepush-transition-hotfix") {
+            Add-Finding "P1_PROGRAM_HOTFIX_CONTEXT_INVALID pre_commit"
+        }
+    } else {
+        $headParents = @(((& git -C $Root rev-list --parents -n 1 HEAD) -join "").Trim() -split '\s+')
+        $originMasterSha = ((& git -C $Root rev-parse origin/master) -join "").Trim()
+        if ($headParents.Count -ne 2 -or $headParents[1] -ne $p1TransitionHotfixBaseSha -or $originMasterSha -ne $p1TransitionHotfixBaseSha -or $branch -ne "master") {
+            Add-Finding "P1_PROGRAM_HOTFIX_CONTEXT_INVALID pre_push"
+        } else {
+            $parentReference = $headParents[1]
+        }
+    }
+
+    if ($CurrentTaskId -ne $p1TransitionHotfixParentTaskId -or $taskStatus -ne "ready_for_closeout") {
+        Add-Finding "P1_PROGRAM_HOTFIX_TASK_CONTEXT_INVALID"
+    }
+
+    $materializedAuthorizationPath = ((& git -C $Root ls-tree -r --name-only $parentReference -- $p1TransitionHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "P1_PROGRAM_HOTFIX_PARENT_INSPECTION_FAILED"
+    } elseif ($materializedAuthorizationPath -eq $p1TransitionHotfixAuthorizationPath) {
+        Add-Finding "P1_PROGRAM_HOTFIX_ALREADY_MATERIALIZED"
+    }
+
+    $authorizationFullPath = Resolve-RepositoryPath -Root $Root -Path $p1TransitionHotfixAuthorizationPath
+    $authorizationText = if (Test-Path -LiteralPath $authorizationFullPath -PathType Leaf) { Get-Content -LiteralPath $authorizationFullPath -Raw -Encoding UTF8 } else { "" }
+    foreach ($authorizationPattern in @(
+        '(?im)^Status:\s*approved\s*$',
+        '(?im)^Human approval source:\s*current user message',
+        "(?im)^Task ID:\s*[\x60]?$([regex]::Escape($p1TransitionHotfixTaskId))[\x60]?\s*$",
+        "(?im)^Base:\s*[\x60]?$([regex]::Escape($p1TransitionHotfixBaseSha))[\x60]?\s*$",
+        '(?i)pre-push orchestration',
+        '(?i)P1 guard',
+        '(?i)Module Run guards',
+        '(?i)smoke tests'
+    )) {
+        if ($authorizationText -notmatch $authorizationPattern) {
+            Add-Finding "P1_PROGRAM_HOTFIX_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+
+    if ($script:findings.Count -eq $findingCountBefore) { Write-Output "p1HotfixAuthorization: approved_one_time" }
 }
 
 function Get-GitFileText {
@@ -786,6 +879,10 @@ foreach ($fileToCheck in $filesToCheck) {
 $effectiveScopeControlPaths = if ($SkipExternalIntegrityChecks) { @((ConvertTo-NormalizedPath -Path $ProjectStatePath), (ConvertTo-NormalizedPath -Path $QueuePath)) } else { $scopeControlPaths }
 $scopeControlChanged = @($normalizedFilesToCheck | Where-Object { $_ -in $effectiveScopeControlPaths }).Count -gt 0
 $protectedImplementationChanged = @($normalizedFilesToCheck | Where-Object { $candidatePath = $_; @($protectedImplementationPatterns | Where-Object { Test-PathPattern -Path $candidatePath -Pattern $_ }).Count -gt 0 }).Count -gt 0
+$isP1TransitionHotfixScope = $Phase -in @("pre_commit", "pre_push") -and (Test-P1TransitionHotfixFileSet -Files $filesToCheck)
+if ($isP1TransitionHotfixScope) {
+    Test-P1TransitionHotfixAnchors -Root $RepositoryRoot -CurrentTaskId $stateCurrentTaskId -CurrentTaskBlock $taskBlock -CurrentPhase $Phase
+}
 
 $parentProgram = @()
 $parentTasks = @()
@@ -929,7 +1026,7 @@ if ($taskBlock.Count -gt 0) {
             Add-Finding "P1_PROGRAM_TASK_BRANCH_INVALID $stateCurrentTaskId $taskBranch"
         }
     }
-    if ($Phase -eq "pre_commit" -and -not $SkipGitChecks) {
+    if ($Phase -eq "pre_commit" -and -not $SkipGitChecks -and -not $isP1TransitionHotfixScope) {
         $actualBranch = ((& git -C $RepositoryRoot branch --show-current) -join "").Trim()
         if ($actualBranch -ne $taskBranch) {
             Add-Finding "P1_PROGRAM_TASK_BRANCH_BINDING_MISMATCH $stateCurrentTaskId expected=$taskBranch actual=$actualBranch"
@@ -984,7 +1081,7 @@ if ($taskBlock.Count -gt 0) {
         }
     }
 
-    $allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
+    $allowedFiles = if ($isP1TransitionHotfixScope) { @($p1TransitionHotfixFiles) } else { @(Get-ListValues -Block $taskBlock -Key "allowedFiles") }
     $blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
     if ($isTaskTransition) {
         if (-not $scopeControlChanged) { Add-Finding "P1_PROGRAM_TRANSITION_CONTROL_FILES_MISSING" }
@@ -1293,7 +1390,10 @@ if ($stateStatus -eq "closed") {
 
 if ($findings.Count -gt 0) { throw ($findings -join [Environment]::NewLine) }
 
+$p1TransitionScopeMode = if ($Phase -eq "pre_push" -and $isTaskTransition -and -not $protectedImplementationChanged) { "transition_only" } else { "standard" }
+
 Write-Output "p1ProgramGuardResult: $(if ($stateStatus -eq 'closed') { 'pass_closed_program' } else { 'pass' })"
+Write-Output "p1TransitionScopeMode: $p1TransitionScopeMode"
 Write-Output "programId: $expectedProgramId"
 Write-Output "currentTaskId: $stateCurrentTaskId"
 Write-Output "currentCandidateClusterId: $(Get-ScalarValue -Block $stateProgram -Key 'currentCandidateClusterId')"

@@ -424,11 +424,28 @@ function Assert-PrePushFailsWith {
 }
 
 try {
+    $prePushHookPath = Join-Path $repositoryRoot ".husky\pre-push"
+    $prePushHookText = Get-Content -LiteralPath $prePushHookPath -Raw -Encoding UTF8
+    $pushUpdateCaptureIndex = $prePushHookText.IndexOf('push_updates=$(cat)')
+    $p1GuardIndex = $prePushHookText.IndexOf('Test-P1RemediationSerialProgram.ps1')
+    $moduleGuardIndex = $prePushHookText.IndexOf('Test-ModuleRunV2PrePushReadiness.ps1')
+    if ($pushUpdateCaptureIndex -lt 0 -or $p1GuardIndex -lt 0 -or $moduleGuardIndex -lt 0 -or $pushUpdateCaptureIndex -gt $p1GuardIndex -or $p1GuardIndex -gt $moduleGuardIndex) {
+        throw "Pre-push hook does not preserve stdin and run P1 transition validation before Module Run."
+    }
+    if ($prePushHookText -notmatch 'p1TransitionScopeMode: transition_only' -or $prePushHookText -notmatch '-P1TransitionScopeMode transition_only') {
+        throw "Pre-push hook does not conditionally forward the P1 transition-only scope mode."
+    }
+
     $positiveRoot = Write-CaseFiles -Name "positive" -StateText $baseState -QueueText $baseQueue
     $positiveOutput = Invoke-Guard -Root $positiveRoot -ChangedFiles @("state.yaml", "queue.yaml")
     if (($positiveOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") {
         throw "Positive P1 Program fixture did not report pass.`n$($positiveOutput -join "`n")"
     }
+
+    $dotfileAliasQueue = $baseQueue.Replace("      - audit.md", "      - audit.md`n      - .governance-hook")
+    $dotfileAliasRoot = Write-CaseFiles -Name "dotfile-alias" -StateText $baseState -QueueText $dotfileAliasQueue
+    Set-Content -LiteralPath (Join-Path $dotfileAliasRoot "governance-hook") -Value "alias must not match a dotfile allowlist entry" -Encoding UTF8
+    Assert-FailsWith -Root $dotfileAliasRoot -ChangedFiles @("governance-hook", "evidence.md", "audit.md") -Pattern "P1_PROGRAM_ALLOWED_FILES_VIOLATION governance-hook"
 
     $reorderedList = $candidateList.Replace("    - P1-RC-01`n    - P1-RC-02", "    - P1-RC-02`n    - P1-RC-01")
     $reorderedRoot = Write-CaseFiles -Name "reordered" -StateText $baseState.Replace($candidateList, $reorderedList) -QueueText $baseQueue.Replace($candidateList, $reorderedList)
@@ -577,6 +594,7 @@ try {
     $validUpdateLine = "refs/heads/master $prePushHead refs/heads/master $prePushHead"
     $validPrePushOutput = @(& $guardPath -RepositoryRoot $prePushRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $prePushRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $prePushOriginUrl -PushUpdateLines $validUpdateLine -SkipExternalIntegrityChecks)
     if (($validPrePushOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Positive pre-push contract fixture failed." }
+    if (($validPrePushOutput -join "`n") -notmatch "p1TransitionScopeMode: standard") { throw "Ordinary pre-push fixture did not preserve standard scope mode." }
     $stdinPrePushOutput = @($validUpdateLine | & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $guardPath -RepositoryRoot $prePushRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $prePushRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $prePushOriginUrl -SkipExternalIntegrityChecks)
     if (($stdinPrePushOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Positive redirected-stdin pre-push fixture failed." }
     Assert-PrePushFailsWith -Root $prePushRoot -RemoteName "backup" -RemoteUrl $prePushOriginUrl -UpdateLine $validUpdateLine -Pattern "P1_PROGRAM_PRE_PUSH_REMOTE_INVALID"
@@ -838,6 +856,12 @@ Decision: APPROVE_SCOPE
     $transitionOutput = @(& $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_commit -SkipExternalIntegrityChecks)
     if (($transitionOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Positive task-transition fixture failed." }
     & git -C $transitionRoot commit -m "freeze next task scope" *> $null
+    $transitionHead = ((& git -C $transitionRoot rev-parse HEAD) -join "").Trim()
+    $transitionOrigin = ((& git -C $transitionRoot rev-parse origin/master) -join "").Trim()
+    $transitionOriginUrl = ((& git -C $transitionRoot remote get-url origin) -join "").Trim()
+    $transitionUpdate = "refs/heads/master $transitionHead refs/heads/master $transitionOrigin"
+    $transitionPrePushOutput = @(& $guardPath -RepositoryRoot $transitionRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $transitionRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $transitionOriginUrl -PushUpdateLines $transitionUpdate -SkipExternalIntegrityChecks)
+    if (($transitionPrePushOutput -join "`n") -notmatch "p1TransitionScopeMode: transition_only") { throw "Governance-only task transition did not emit transition-only scope mode." }
     & git -C $transitionRoot push --quiet origin HEAD:master 2>$null
 
     $washedQueue = $transitionQueue.Replace("      - src/**", "      - src/**`n      - src/expanded/**")
@@ -949,6 +973,7 @@ Decision: APPROVE_SCOPE
     $closeoutPushUpdate = "refs/heads/master $closeoutPushHead refs/heads/master $closeoutPushOrigin"
     $closeoutPushOutput = @(& $guardPath -RepositoryRoot $closeoutPushRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $closeoutPushRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $closeoutPushOriginUrl -PushUpdateLines $closeoutPushUpdate -SkipExternalIntegrityChecks)
     if (($closeoutPushOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Same-task closeout pre-push fixture failed." }
+    if (($closeoutPushOutput -join "`n") -notmatch "p1TransitionScopeMode: standard") { throw "Same-task closeout fixture incorrectly emitted transition-only scope mode." }
 
     & git -C $closeoutPushRoot switch --quiet master 2>$null
     & git -C $closeoutPushRoot branch -D codex/bootstrap-fixture *> $null
@@ -1013,7 +1038,11 @@ Decision: APPROVE_SCOPE
         $isolatedAuditOutput = @(& $guardPath -RepositoryRoot $repositoryRoot -Phase manual)
         if (($isolatedAuditOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Cross-repository Git environment isolation fixture failed." }
     } finally {
-        [Environment]::SetEnvironmentVariable("GIT_INDEX_FILE", $originalGitIndexFile, [EnvironmentVariableTarget]::Process)
+        if ($null -ne $originalGitIndexFile) {
+            [Environment]::SetEnvironmentVariable("GIT_INDEX_FILE", $originalGitIndexFile, [EnvironmentVariableTarget]::Process)
+        } else {
+            Remove-Item -LiteralPath "Env:GIT_INDEX_FILE" -ErrorAction SilentlyContinue
+        }
     }
 
     $readOnlyProbeRoot = Join-Path $smokeRoot "read-only-audit-probe"
@@ -1035,7 +1064,7 @@ Decision: APPROVE_SCOPE
     $indexFingerprintAfter = Get-FileFingerprint -Path $probeIndexPath
     if ($indexFingerprintAfter -ne $indexFingerprintBefore) { throw "Read-only audit status changed the disposable repository index." }
 
-    Write-Output "P1 remediation serial program guard smoke passed: 8 positive, 47 negative"
+    Write-Output "P1 remediation serial program guard smoke passed: 8 positive, 48 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

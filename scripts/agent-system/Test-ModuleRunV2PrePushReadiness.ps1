@@ -24,6 +24,10 @@ param(
     [switch]$SkipRemoteAheadCheck,
 
     [Parameter(Mandatory = $false)]
+    [ValidateSet("standard", "transition_only")]
+    [string]$P1TransitionScopeMode = "standard",
+
+    [Parameter(Mandatory = $false)]
     [string]$DocsOnlyBatchId = "",
 
     [Parameter(Mandatory = $false)]
@@ -462,18 +466,36 @@ if (-not $SkipRemoteAheadCheck -and -not [string]::IsNullOrWhiteSpace($currentBr
 
 $masterSha = ((& git rev-parse master) -join "").Trim()
 $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+$headSha = ((& git rev-parse HEAD) -join "").Trim()
 $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
 $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
 $canUseCloseoutShaAncestry = $taskStatus -in @("done", "closed", "ready_for_closeout")
+$isP1TransitionScopeMode = $P1TransitionScopeMode -eq "transition_only"
+$canUseP1TransitionMasterAncestry = $isP1TransitionScopeMode `
+    -and $taskStatus -eq "in_progress" `
+    -and $currentBranch -eq "master" `
+    -and $headSha -eq $masterSha `
+    -and -not [string]::IsNullOrWhiteSpace($originMasterSha) `
+    -and $stateMasterSha -eq $originMasterSha `
+    -and $stateOriginMasterSha -eq $originMasterSha `
+    -and $originMasterSha -ne $masterSha `
+    -and (Test-GitAncestor -AncestorSha $originMasterSha -DescendantSha $masterSha)
 
 Write-Output "master: $masterSha"
 Write-Output "originMaster: $originMasterSha"
 Write-Output "stateMaster: $stateMasterSha"
 Write-Output "stateOriginMaster: $stateOriginMasterSha"
+Write-Output "p1TransitionScopeMode: $P1TransitionScopeMode"
+
+if ($isP1TransitionScopeMode -and -not $canUseP1TransitionMasterAncestry) {
+    Add-Finding "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID"
+}
 
 if ($stateMasterSha -ne $masterSha) {
     if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
         Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR master"
+    } elseif ($canUseP1TransitionMasterAncestry) {
+        Write-Output "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
     } else {
         Add-Finding "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master"
     }

@@ -36,6 +36,27 @@
 )
 
 $ErrorActionPreference = "Stop"
+$p1TransitionHotfixTaskId = "p1-prepush-transition-ancestor-gate-hotfix-2026-07-16"
+$p1TransitionHotfixParentTaskId = "p1-remediation-program-bootstrap-2026-07-16"
+$p1TransitionHotfixBaseSha = "4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3"
+$p1TransitionHotfixBranch = "codex/p1-prepush-transition-hotfix"
+$p1TransitionHotfixAuthorizationPath = "docs/05-execution-logs/acceptance/2026-07-16-p1-prepush-transition-hotfix-authorization.md"
+$p1TransitionHotfixFiles = @(
+    ".husky/pre-push",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    $p1TransitionHotfixAuthorizationPath,
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-prepush-transition-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-remediation-program-bootstrap.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-program-bootstrap.md"
+)
 
 function Write-Section {
     param(
@@ -348,7 +369,8 @@ function ConvertTo-NormalizedPath {
     )
 
     $candidatePath = $Path.Replace("\", "/")
-    return $candidatePath.TrimStart(".", "/")
+    while ($candidatePath.StartsWith("./", [System.StringComparison]::Ordinal)) { $candidatePath = $candidatePath.Substring(2) }
+    return $candidatePath.TrimStart("/")
 }
 
 function Test-PathPattern {
@@ -571,6 +593,85 @@ function Test-MechanicRepairAnchors {
             Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_MISSING_COST_GATE_ANCHOR $mechanicLogFile"
         }
     }
+}
+
+function Test-P1TransitionHotfixFileSet {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Files
+    )
+
+    $actualFiles = @($Files | ForEach-Object { $_.Replace("\", "/").TrimStart("/") } | Sort-Object -Unique)
+    $expectedFiles = @($p1TransitionHotfixFiles | ForEach-Object { $_.Replace("\", "/").TrimStart("/") } | Sort-Object -Unique)
+    return ($actualFiles -join "|") -ceq ($expectedFiles -join "|")
+}
+
+function Get-CurrentTaskStatus {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Lines
+    )
+
+    $insideCurrentTask = $false
+    foreach ($line in $Lines) {
+        if ($line -match "^currentTask:\s*$") {
+            $insideCurrentTask = $true
+            continue
+        }
+        if ($insideCurrentTask -and $line -match "^\S") { break }
+        if ($insideCurrentTask -and $line -match "^\s+status:\s*(.+)\s*$") { return $Matches[1].Trim() }
+    }
+    return ""
+}
+
+function Test-P1TransitionHotfixAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ProjectStateLines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$QueueLines
+    )
+
+    $headSha = ((& git -C $RepositoryRoot rev-parse HEAD) -join "").Trim()
+    $branch = ((& git -C $RepositoryRoot branch --show-current) -join "").Trim()
+    $currentTaskId = Get-CurrentTaskId -Lines $ProjectStateLines
+    $currentTaskStatus = Get-CurrentTaskStatus -Lines $ProjectStateLines
+    $parentTaskBlock = @(Get-TaskBlock -Lines $QueueLines -Id $p1TransitionHotfixParentTaskId)
+    $parentQueueStatus = if ($parentTaskBlock.Count -gt 0) { Get-ScalarValue -Block $parentTaskBlock -Key "status" } else { "" }
+
+    if ($headSha -ne $p1TransitionHotfixBaseSha -or $branch -ne $p1TransitionHotfixBranch -or $currentTaskId -ne $p1TransitionHotfixParentTaskId -or $currentTaskStatus -ne "ready_for_closeout" -or $parentQueueStatus -ne "ready_for_closeout") {
+        Add-Finding "HARD_BLOCK_P1_TRANSITION_HOTFIX_CONTEXT_INVALID"
+    }
+
+    $materializedAuthorizationPath = ((& git -C $RepositoryRoot ls-tree -r --name-only HEAD -- $p1TransitionHotfixAuthorizationPath) -join "").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_P1_TRANSITION_HOTFIX_PARENT_INSPECTION_FAILED"
+    } elseif ($materializedAuthorizationPath -eq $p1TransitionHotfixAuthorizationPath) {
+        Add-Finding "HARD_BLOCK_P1_TRANSITION_HOTFIX_ALREADY_MATERIALIZED"
+    }
+
+    $authorizationFullPath = Resolve-ScanPath -RepositoryRoot $RepositoryRoot -Path $p1TransitionHotfixAuthorizationPath
+    $authorizationText = if (Test-Path -LiteralPath $authorizationFullPath -PathType Leaf) { Get-Content -LiteralPath $authorizationFullPath -Raw } else { "" }
+    foreach ($authorizationPattern in @(
+        '(?im)^Status:\s*approved\s*$',
+        '(?im)^Human approval source:\s*current user message',
+        "(?im)^Task ID:\s*[\x60]?$([regex]::Escape($p1TransitionHotfixTaskId))[\x60]?\s*$",
+        "(?im)^Base:\s*[\x60]?$([regex]::Escape($p1TransitionHotfixBaseSha))[\x60]?\s*$",
+        '(?i)pre-push orchestration',
+        '(?i)P1 guard',
+        '(?i)Module Run guards',
+        '(?i)smoke tests'
+    )) {
+        if ($authorizationText -notmatch $authorizationPattern) {
+            Add-Finding "HARD_BLOCK_P1_TRANSITION_HOTFIX_AUTHORIZATION_INVALID"
+            break
+        }
+    }
+
+    if ($script:findings.Count -eq 0) { Write-Output "p1TransitionHotfixAuthorization: approved_one_time" }
 }
 
 function Test-TextFile {
@@ -849,6 +950,7 @@ $matrixContent = Get-Content -Path $MatrixPath -Raw
 $filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
 $isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
 $isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepairFileSet -Files $filesToScan)
+$isP1TransitionHotfixScope = (-not $isSeedTransactionScope) -and (-not $isMechanicRepairScope) -and (Test-P1TransitionHotfixFileSet -Files $filesToScan)
 $isDocsOnlyBatchScope = -not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)
 $isLowRiskExperienceBatchScope = -not [string]::IsNullOrWhiteSpace($LowRiskExperienceBatchId)
 $taskBlock = @()
@@ -857,7 +959,7 @@ if ($isDocsOnlyBatchScope -and $isLowRiskExperienceBatchScope) {
     throw "Use either DocsOnlyBatchId or LowRiskExperienceBatchId, not both."
 }
 
-if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isP1TransitionHotfixScope -and -not $isDocsOnlyBatchScope -and -not $isLowRiskExperienceBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -917,6 +1019,10 @@ if ($isSeedTransactionScope) {
         "paper_assets/**",
         "docs/01-requirements/stories/**"
     )
+} elseif ($isP1TransitionHotfixScope) {
+    $TaskId = $p1TransitionHotfixTaskId
+    $allowedFiles = @($p1TransitionHotfixFiles)
+    $blockedFiles = @("AGENTS.md", "package.json", "package-lock.json", "pnpm-lock.yaml", "src/**", "tests/**", "e2e/**", "drizzle/**", "migrations/**", ".env*", "D:/tiku-readonly-audit/**")
 } elseif ($isDocsOnlyBatchScope) {
     $TaskId = "docs-only-batch:$DocsOnlyBatchId"
     $allowedFiles = @()
@@ -936,7 +1042,7 @@ if ($isSeedTransactionScope) {
 }
 
 Write-Output "taskId: $TaskId"
-Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
+Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } elseif ($isLowRiskExperienceBatchScope) { "low_risk_experience_batch" } else { "task" })"
 Write-Output "filesToScan: $($filesToScan.Count)"
 
 Write-Section -Title "Module Run v2 Anchors"
@@ -962,10 +1068,11 @@ if ($isLowRiskExperienceBatchScope) {
 }
 
 Write-Section -Title "Requirement SSOT Readiness"
-if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
+if ($isSeedTransactionScope -or $isMechanicRepairScope -or $isP1TransitionHotfixScope -or $isDocsOnlyBatchScope -or $isLowRiskExperienceBatchScope) {
     Write-Output "requirementSsotReadiness: skipped_$(
         if ($isSeedTransactionScope) { "seed_transaction" }
         elseif ($isMechanicRepairScope) { "mechanic_repair" }
+        elseif ($isP1TransitionHotfixScope) { "p1_transition_hotfix" }
         elseif ($isDocsOnlyBatchScope) { "docs_only_batch" }
         else { "low_risk_experience_batch" }
     )"
@@ -987,6 +1094,8 @@ if ($SkipScopeScan) {
         Test-SeedTransactionAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
     } elseif ($isMechanicRepairScope) {
         Test-MechanicRepairAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
+    } elseif ($isP1TransitionHotfixScope) {
+        Test-P1TransitionHotfixAnchors -RepositoryRoot $repositoryRoot -ProjectStateLines $projectStateLines -QueueLines $queueLines
     }
 
     foreach ($changedFile in $filesToScan) {

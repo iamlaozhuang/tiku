@@ -62,3 +62,11 @@ Decision: APPROVE
 Result: pass
 
 No blocking findings. Product remediation remains unstarted; the next JIT revalidation must be a separate WIP=1 Program transition after bootstrap closeout and cleanup.
+
+## 2026-07-16 Independent Pre-Push Hotfix Review Addendum
+
+Result: pass
+
+This addendum preserves the bootstrap `APPROVE` disposition and records a later, separately authorized mechanism repair. The review confirmed that the one-time pre-commit bridge does not mutate the bootstrap task contract or queue allowlist, is fixed to parent `4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3` and the exact 14-file hotfix set, requires a new approval artifact absent from the parent, and becomes unusable after materialization. It cannot authorize product, dependency, schema, database, Provider, runtime, browser, P2, PR, force-push, deployment, or audit-repository changes.
+
+For `in_progress` tasks, no existing SHA rule is broadened: only a successful same-hook P1 `transition_only` proof may activate the new Module Run local-master ancestor path; missing proof, steady-task drift, state/origin mismatch, wrong branch, dirty worktree, non-ancestor history, or added files remain hard-blocked.

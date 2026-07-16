@@ -138,3 +138,20 @@ No token, cookie, password, database URL, plaintext `redeem_code`, private row, 
 - [x] 8 注释：新增脚本没有解释语句本身的垃圾注释。
 - [x] 9 命名：守卫函数、变量、字段和文件名均表达具体职责并遵循项目命名规范。
 - [x] 10 不可变性：未直接修改产品状态对象；Program 状态变化由受守卫的 YAML 投影显式记录。
+
+## 2026-07-16 Independent Pre-Push Hotfix Addendum
+
+This addendum does not reopen or rewrite the bootstrap result. After bootstrap reached `ready_for_closeout`, the first successor transition exposed a pre-push ordering deadlock: P1 accepted the governance-only transition while Module Run evaluated the ancestor checkpoint before receiving that proof. The current user separately approved task `p1-prepush-transition-ancestor-gate-hotfix-2026-07-16`, limited to the pre-push hook, P1/Module guards, their smoke tests, and governance evidence.
+
+The hotfix uses no state/queue allowlist expansion. A one-time Module pre-commit bridge is pinned to parent `4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3`, branch `codex/p1-prepush-transition-hotfix`, the existing bootstrap `ready_for_closeout` projection, an exact 14-file set, and a fresh approval artifact absent from the parent commit. Any extra or missing path falls back to the ordinary task allowlist. After the commit, both the parent-SHA and approval-absence conditions are false, so the bridge cannot be reused.
+
+Fresh focused smoke results before final hotfix commit:
+
+- P1 Program guard smoke: `8 positive, 48 negative`; pass after the independent hotfix added dotfile-alias coverage.
+- Module Run pre-push readiness smoke: pass.
+- Module Run pre-commit hardening smoke: pass, including invalid-approval and extra-product-path hard blocks.
+
+The independent hotfix evidence and review are recorded in:
+
+- `docs/05-execution-logs/evidence/2026-07-16-p1-prepush-transition-hotfix.md`
+- `docs/05-execution-logs/audits-reviews/2026-07-16-p1-prepush-transition-hotfix.md`

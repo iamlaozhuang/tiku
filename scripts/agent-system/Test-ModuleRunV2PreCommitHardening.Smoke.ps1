@@ -43,6 +43,7 @@ function Invoke-ExpectFailure {
 }
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2PreCommitHardening.ps1"
+$p1GuardPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-P1RemediationSerialProgram.ps1"
 
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-commit hardening script: $scriptPath"
@@ -233,6 +234,138 @@ $mechanicScopeOutput = @(
 Assert-Contains -Output $mechanicScopeOutput -Pattern "preCommitScopeMode: mechanic_repair"
 Assert-Contains -Output $mechanicScopeOutput -Pattern "OK_SCOPE scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1"
 Assert-Contains -Output $mechanicScopeOutput -Pattern "OK_SCOPE docs/05-execution-logs/evidence/2026-06-10-module-run-v2-mechanic-unattended-readiness-lines.md"
+
+$hotfixBaseSha = "4806ba0aed4c9e5f85fd65e1a663bda3e73ebce3"
+$hotfixFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-p1-transition-hotfix-" + [guid]::NewGuid().ToString("N"))
+$sourceRepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$hotfixFiles = @(
+    ".husky/pre-push",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.ps1",
+    "scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+    "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1",
+    "docs/05-execution-logs/acceptance/2026-07-16-p1-prepush-transition-hotfix-authorization.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-prepush-transition-hotfix-design.md",
+    "docs/05-execution-logs/task-plans/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-prepush-transition-hotfix.md",
+    "docs/05-execution-logs/evidence/2026-07-16-p1-remediation-program-bootstrap.md",
+    "docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-program-bootstrap.md"
+)
+
+try {
+    & git clone --quiet --no-checkout $sourceRepositoryRoot $hotfixFixtureRoot
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clone P1 transition hotfix fixture repository." }
+    & git -C $hotfixFixtureRoot config core.longpaths true
+    & git -C $hotfixFixtureRoot sparse-checkout init --no-cone
+    $hotfixSparseFiles = @(
+        $hotfixFiles + @(
+            "docs/04-agent-system/state/project-state.yaml",
+            "docs/04-agent-system/state/task-queue.yaml",
+            "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml",
+            "docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md",
+            "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md",
+            "docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-program-bootstrap.md",
+            "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml",
+            "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml",
+            "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml"
+        )
+    )
+    & git -C $hotfixFixtureRoot sparse-checkout set --no-cone -- $hotfixSparseFiles
+    & git -C $hotfixFixtureRoot switch --quiet -C codex/p1-prepush-transition-hotfix $hotfixBaseSha
+    if ($LASTEXITCODE -ne 0) { throw "Failed to check out the pinned P1 transition hotfix base." }
+    & git -C $hotfixFixtureRoot config user.name "P1 Transition Hotfix Smoke"
+    & git -C $hotfixFixtureRoot config user.email "p1-transition-hotfix-smoke@example.invalid"
+    & git -C $hotfixFixtureRoot config core.autocrlf false
+
+    foreach ($hotfixFile in $hotfixFiles) {
+        $hotfixFullPath = Join-Path $hotfixFixtureRoot $hotfixFile
+        $hotfixDirectory = Split-Path -Parent $hotfixFullPath
+        if (-not (Test-Path -LiteralPath $hotfixDirectory)) { New-Item -ItemType Directory -Force -Path $hotfixDirectory | Out-Null }
+        if (Test-Path -LiteralPath $hotfixFullPath) {
+            Add-Content -LiteralPath $hotfixFullPath -Value "P1 transition hotfix smoke change." -Encoding UTF8
+        } else {
+            Set-Content -LiteralPath $hotfixFullPath -Value "P1 transition pre-push hotfix smoke artifact." -Encoding UTF8
+        }
+    }
+    $hotfixAuthorizationPath = Join-Path $hotfixFixtureRoot "docs/05-execution-logs/acceptance/2026-07-16-p1-prepush-transition-hotfix-authorization.md"
+    Set-Content -LiteralPath $hotfixAuthorizationPath -Encoding UTF8 -Value @"
+# P1 Transition Pre-Push Hotfix Authorization
+
+Status: approved
+Human approval source: current user message in the Codex conversation on 2026-07-16.
+Task ID: p1-prepush-transition-ancestor-gate-hotfix-2026-07-16
+Base: $hotfixBaseSha
+Approved scope: pre-push orchestration, P1 guard, Module Run guards, and corresponding smoke tests.
+"@
+    & git -C $hotfixFixtureRoot add -- $hotfixFiles
+    $stagedHotfixFiles = @(& git -C $hotfixFixtureRoot diff --cached --name-only --diff-filter=ACMR | Sort-Object -Unique)
+    if (($stagedHotfixFiles -join "|") -cne (@($hotfixFiles | Sort-Object -Unique) -join "|")) {
+        throw "P1 transition hotfix fixture did not stage the exact file set.`nActual: $($stagedHotfixFiles -join ', ')"
+    }
+
+    Push-Location $hotfixFixtureRoot
+    try {
+        $hotfixOutput = @(& $scriptPath)
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $hotfixOutput -Pattern "preCommitScopeMode: p1_transition_hotfix"
+    Assert-Contains -Output $hotfixOutput -Pattern "p1TransitionHotfixAuthorization: approved_one_time"
+    Assert-Contains -Output $hotfixOutput -Pattern "OK_SCOPE .husky/pre-push"
+
+    $p1HotfixOutput = @(
+        & $p1GuardPath `
+            -RepositoryRoot $hotfixFixtureRoot `
+            -Phase pre_commit `
+            -SkipExternalIntegrityChecks
+    )
+    Assert-Contains -Output $p1HotfixOutput -Pattern "p1HotfixAuthorization: approved_one_time"
+    Assert-Contains -Output $p1HotfixOutput -Pattern "p1ProgramGuardResult: pass"
+
+    & git -C $hotfixFixtureRoot reset --quiet HEAD -- .husky/pre-push
+    $hotfixAliasPath = Join-Path $hotfixFixtureRoot "husky/pre-push"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $hotfixAliasPath) | Out-Null
+    Set-Content -LiteralPath $hotfixAliasPath -Encoding UTF8 -Value "dotfile alias must not enter the one-time bridge"
+    & git -C $hotfixFixtureRoot add --sparse -- $hotfixAliasPath
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_OUT_OF_SCOPE husky/pre-push" -Command {
+        Push-Location $hotfixFixtureRoot
+        try { & $scriptPath } finally { Pop-Location }
+    }
+    & git -C $hotfixFixtureRoot reset --quiet HEAD -- $hotfixAliasPath
+    & git -C $hotfixFixtureRoot add -- .husky/pre-push
+
+    Set-Content -LiteralPath $hotfixAuthorizationPath -Encoding UTF8 -Value "Status: pending"
+    & git -C $hotfixFixtureRoot add -- $hotfixAuthorizationPath
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_HOTFIX_AUTHORIZATION_INVALID" -Command {
+        Push-Location $hotfixFixtureRoot
+        try { & $scriptPath } finally { Pop-Location }
+    }
+
+    Set-Content -LiteralPath $hotfixAuthorizationPath -Encoding UTF8 -Value @"
+# P1 Transition Pre-Push Hotfix Authorization
+
+Status: approved
+Human approval source: current user message in the Codex conversation on 2026-07-16.
+Task ID: p1-prepush-transition-ancestor-gate-hotfix-2026-07-16
+Base: $hotfixBaseSha
+Approved scope: pre-push orchestration, P1 guard, Module Run guards, and corresponding smoke tests.
+"@
+    $hotfixEscapePath = Join-Path $hotfixFixtureRoot "src/out-of-scope.ts"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $hotfixEscapePath) | Out-Null
+    Set-Content -LiteralPath $hotfixEscapePath -Encoding UTF8 -Value "export const outOfScope = true;"
+    & git -C $hotfixFixtureRoot add --sparse -- $hotfixAuthorizationPath $hotfixEscapePath
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BLOCKED_FILE src/out-of-scope.ts" -Command {
+        Push-Location $hotfixFixtureRoot
+        try { & $scriptPath } finally { Pop-Location }
+    }
+} finally {
+    if (Test-Path -LiteralPath $hotfixFixtureRoot) {
+        Remove-Item -LiteralPath $hotfixFixtureRoot -Recurse -Force
+    }
+}
 
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-hardening-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null

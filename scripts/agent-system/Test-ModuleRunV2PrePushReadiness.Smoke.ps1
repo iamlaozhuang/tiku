@@ -139,6 +139,76 @@ if (Test-Path -LiteralPath $baselineFixtureRoot) {
     Remove-Item -LiteralPath $baselineFixtureRoot -Recurse -Force
 }
 
+$transitionTaskId = "p1-transition-ancestor-checkpoint-smoke"
+$transitionFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-p1-transition-pre-push-" + [guid]::NewGuid().ToString("N"))
+$transitionRepositoryRoot = Join-Path -Path $transitionFixtureRoot -ChildPath "repository"
+$transitionRemoteRoot = Join-Path -Path $transitionFixtureRoot -ChildPath "origin.git"
+$transitionProjectStatePath = Join-Path -Path $transitionFixtureRoot -ChildPath "project-state.yaml"
+$transitionQueuePath = Join-Path -Path $transitionFixtureRoot -ChildPath "task-queue.yaml"
+$matrixPath = (Resolve-Path (Join-Path $PSScriptRoot "..\..\docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml")).Path
+$absoluteEvidencePath = (Resolve-Path $existingEvidencePath).Path
+$absoluteAuditPath = (Resolve-Path $existingAuditPath).Path
+
+New-Item -ItemType Directory -Force -Path $transitionRepositoryRoot | Out-Null
+& git -C $transitionRepositoryRoot init -b master *> $null
+& git -C $transitionRepositoryRoot config user.name "P1 Transition Module Smoke"
+& git -C $transitionRepositoryRoot config user.email "p1-transition-module-smoke@example.invalid"
+& git -C $transitionRepositoryRoot config core.autocrlf false
+Set-Content -LiteralPath (Join-Path $transitionRepositoryRoot "checkpoint.txt") -Value "parent checkpoint" -Encoding UTF8
+& git -C $transitionRepositoryRoot add checkpoint.txt
+& git -C $transitionRepositoryRoot commit -m "parent checkpoint" *> $null
+& git init --bare $transitionRemoteRoot *> $null
+& git -C $transitionRepositoryRoot remote add origin $transitionRemoteRoot
+& git -C $transitionRepositoryRoot push --quiet -u origin master 2>$null
+$transitionOriginSha = ((& git -C $transitionRepositoryRoot rev-parse origin/master) -join "").Trim()
+Set-Content -LiteralPath (Join-Path $transitionRepositoryRoot "transition.txt") -Value "governance-only transition" -Encoding UTF8
+& git -C $transitionRepositoryRoot add transition.txt
+& git -C $transitionRepositoryRoot commit -m "freeze successor scope" *> $null
+
+@"
+schemaVersion: 1
+project:
+  name: tiku
+repository:
+  lastKnownMasterSha: $transitionOriginSha
+  lastKnownOriginMasterSha: $transitionOriginSha
+currentTask:
+  id: $transitionTaskId
+  status: in_progress
+"@ | Set-Content -LiteralPath $transitionProjectStatePath -Encoding UTF8
+
+@"
+schemaVersion: 1
+tasks:
+  - id: $transitionTaskId
+    evidencePath: $absoluteEvidencePath
+    auditReviewPath: $absoluteAuditPath
+    status: in_progress
+"@ | Set-Content -LiteralPath $transitionQueuePath -Encoding UTF8
+
+Push-Location $transitionRepositoryRoot
+try {
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master" -Command {
+        & $scriptPath -TaskId $transitionTaskId -ProjectStatePath $transitionProjectStatePath -QueuePath $transitionQueuePath -MatrixPath $matrixPath -EvidencePath $absoluteEvidencePath -AuditReviewPath $absoluteAuditPath -SkipRemoteAheadCheck
+    }
+
+    $transitionAncestorOutput = @(
+        & $scriptPath -TaskId $transitionTaskId -ProjectStatePath $transitionProjectStatePath -QueuePath $transitionQueuePath -MatrixPath $matrixPath -EvidencePath $absoluteEvidencePath -AuditReviewPath $absoluteAuditPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+    )
+    Assert-Contains -Output $transitionAncestorOutput -Pattern "OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR master"
+    Assert-Contains -Output $transitionAncestorOutput -Pattern "pre-push readiness passed"
+
+    (Get-Content -LiteralPath $transitionProjectStatePath -Raw).Replace("lastKnownOriginMasterSha: $transitionOriginSha", "lastKnownOriginMasterSha: not-the-origin-checkpoint") | Set-Content -LiteralPath $transitionProjectStatePath -Encoding UTF8
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_P1_TRANSITION_ANCESTOR_CONTEXT_INVALID" -Command {
+        & $scriptPath -TaskId $transitionTaskId -ProjectStatePath $transitionProjectStatePath -QueuePath $transitionQueuePath -MatrixPath $matrixPath -EvidencePath $absoluteEvidencePath -AuditReviewPath $absoluteAuditPath -SkipRemoteAheadCheck -P1TransitionScopeMode transition_only
+    }
+} finally {
+    Pop-Location
+    if (Test-Path -LiteralPath $transitionFixtureRoot) {
+        Remove-Item -LiteralPath $transitionFixtureRoot -Recurse -Force
+    }
+}
+
 $fixtureTaskId = "module-run-v2-pre-push-post-push-ancestor-smoke"
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "tiku-module-run-v2-pre-push-smoke"
 $fixtureProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
