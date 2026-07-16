@@ -140,7 +140,7 @@ contentAdminPlatformSerialProgram:
       reason: the canonical catalog row failed authentication while its exact referenced 0704 source passed
 p0RemediationSerialProgram:
   programId: p0-remediation-rc-01-to-rc-08-2026-07-14
-  status: in_progress
+  status: closed
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
   currentTaskId: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
@@ -156,6 +156,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
     - p0-remediation-rc-08-organization-training-integrity-2026-07-14
     - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+  lastClosedTaskId: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   completedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -166,6 +167,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
     - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
     - p0-remediation-rc-08-organization-training-integrity-2026-07-14
+    - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -190,12 +192,12 @@ p0RemediationSerialProgram:
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: closed
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: closed
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: closed
-    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: ready_for_closeout
+    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: closed
 activeTasks:
   - id: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
     title: P0 global static regression and baseline freeze
     phase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-    status: ready_for_closeout
+    status: closed
     priority: p0
     sequenceOrder: 9
     taskKind: static_audit

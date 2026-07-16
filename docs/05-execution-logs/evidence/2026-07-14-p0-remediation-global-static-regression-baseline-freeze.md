@@ -1,6 +1,6 @@
 # P0 全局静态回归与基线冻结证据
 
-status: ready_for_branch_closeout
+status: closed
 
 result: pass
 
@@ -78,6 +78,16 @@ analogousImplementationReviewed: true
 - 此时 `origin/master` 与 live remote 仍为 `5a23143c9559558cfdc0e2f5e028a170d60193e1`；push、worktree cleanup、short branch cleanup 明确保留为 pending，不提前宣告闭环。
 - 根工作区与只读审计仓均 clean；审计仓 HEAD 仍为 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
 
+### Terminal closeout projection
+
+- 全局冻结任务最终提交 `2d768c39c499a4381552494bebb063ecfcbbb8ac` 已通过 fresh master 全局 baseline、P0 serial pre-push、Prettier、Module Run closeout/pre-push 门禁。
+- `master`、本地 `origin/master` 与 live remote 均同步到 `2d768c39c499a4381552494bebb063ecfcbbb8ac`；根工作区 clean。
+- `D:\tiku\.worktrees\p0-global-static-regression` 已在验证路径位于 `.worktrees` 后删除并 prune；`codex/p0-global-static-regression-freeze` 已安全删除。
+- 终态投影把 00、RC-01 至 RC-08、09 全部记录为 `closed`，五类 closeout checkpoint 全部为 `pass`；当前无 `in_progress` 或 `ready_for_closeout` P0 task。
+- 只读审计仓继续保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02` / clean；未执行 21 项 runtime validation、P1/P2 整改、PR 或部署。
+- 终态 Round 1：对抗检查 ordered/completed/status/checkpoint 单调性、最终 task 指针和 closed-program 零 WIP；P0 serial guard 返回 `pass_closed_program`。
+- 终态 Round 2：对抗检查产品路径零漂移、master/origin/live 同步事实、已删除隔离资源、审计仓 hash/HEAD/clean 与 runtime/部署边界；全局 baseline script 返回 `programStatus: closed`。
+
 ## Recovery Drill
 
 - 从已提交的 freeze commit `f97de89c517f3855d2c31398586a6892ddd2b4aa` 创建 detached worktree `D:\tiku\.worktrees\p0-global-recovery-drill`，不依赖当前对话上下文。
@@ -104,7 +114,7 @@ analogousImplementationReviewed: true
 - [x] 35 个 P0、143 个 P1/P2、21 个 runtime 项均由机器脚本验证唯一性与边界。
 - [x] 未以全量测试通过替代逐 finding 证据，未把静态整改表述为运行时或业务验收通过。
 
-localFullLoopGate: pass_branch_static_gates_fresh_master_origin_sync_and_cleanup_pending
+localFullLoopGate: pass
 
 Cost Calibration Gate remains blocked.
 

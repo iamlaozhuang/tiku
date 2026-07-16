@@ -161,7 +161,15 @@ Assert-Condition ($workingProductDiff.Count -eq 0) "P0_GLOBAL_PRODUCT_WORKTREE_D
 
 Assert-Condition ($projectStateText -match "currentTaskId:\s*$([regex]::Escape($taskId))") "P0_GLOBAL_PROJECT_STATE_CURRENT_TASK_MISMATCH"
 Assert-Condition ($taskQueueText -match "currentTaskId:\s*$([regex]::Escape($taskId))") "P0_GLOBAL_TASK_QUEUE_CURRENT_TASK_MISMATCH"
-Assert-Condition ([regex]::Matches($taskQueueText, '(?m)^    status:\s*(in_progress|ready_for_closeout)\s*$').Count -eq 1) "P0_GLOBAL_WIP_NOT_ONE"
+$projectProgramClosed = $projectStateText -match '(?ms)^p0RemediationSerialProgram:\s*\r?\n.*?^  status:\s*closed\s*$'
+$queueProgramClosed = $taskQueueText -match '(?ms)^p0RemediationSerialProgram:\s*\r?\n.*?^  status:\s*closed\s*$'
+Assert-Condition ($projectProgramClosed -eq $queueProgramClosed) "P0_GLOBAL_PROGRAM_STATUS_MISMATCH"
+$wipCount = [regex]::Matches($taskQueueText, '(?m)^    status:\s*(in_progress|ready_for_closeout)\s*$').Count
+if ($projectProgramClosed) {
+    Assert-Condition ($wipCount -eq 0) "P0_GLOBAL_CLOSED_PROGRAM_HAS_WIP actual=$wipCount"
+} else {
+    Assert-Condition ($wipCount -eq 1) "P0_GLOBAL_WIP_NOT_ONE actual=$wipCount"
+}
 
 Write-Output "p0GlobalBaselineResult: pass"
 Write-Output "p0FindingCount: 35"
@@ -169,5 +177,6 @@ Write-Output "p1P2ImpactCount: 143"
 Write-Output "runtimePendingCount: 21"
 Write-Output "rootCauseClusterCount: 8"
 Write-Output "dependencyCycleCount: 0"
+Write-Output "programStatus: $(if ($projectProgramClosed) { 'closed' } else { 'in_progress' })"
 Write-Output "auditRepositorySha: $auditHead"
 Write-Output "productStaticBaselineSha: $productStaticBaselineSha"

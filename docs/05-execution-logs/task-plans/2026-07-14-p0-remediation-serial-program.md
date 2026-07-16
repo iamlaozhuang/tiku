@@ -4,7 +4,7 @@ Date: 2026-07-14
 
 Program: `p0-remediation-rc-01-to-rc-08-2026-07-14`
 
-Status: `in_progress`
+Status: `closed`
 
 Baseline source SHA: `7aac83765ca4b650b73b1612013e26a0111775ae`
 
@@ -148,3 +148,10 @@ Program 保持 active；停止当前 RC 并申请精确批准，不跳到后继 
 - `master`、本地 `origin/master`、实时远端 `master` 一致，根工作区 clean，无 Program 短分支/worktree 残留。
 - `D:/tiku-readonly-audit` 未改动。
 - 21 项 runtime validation 仍按其真实状态记录，不把静态整改表述为业务验收通过。
+
+## Completion Evidence
+
+- 00、RC-01 至 RC-08、09 均已独立关闭；所有 closeout checkpoint 为 `pass`。
+- 最后业务静态基线为 `e136ca28acde82282a17c65ccfb828a01e872c0b`；全局冻结任务同步与清理基线为 `2d768c39c499a4381552494bebb063ecfcbbb8ac`。
+- 35 个 P0 均保留独立 `static_remediated` 结论；143 个 P1/P2 仅完成影响映射；21 项 runtime validation 仍为 pending 且需要批准。
+- 全局静态回归、两轮对抗式复核、恢复演练、master/origin/live remote 同步、审计仓完整性与隔离资源清理均有可重复验证入口。

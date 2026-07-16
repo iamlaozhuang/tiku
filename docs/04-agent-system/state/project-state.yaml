@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-updatedAt: "2026-07-15T23:06:59-07:00"
+currentPhase: p0-remediation-program-closed-2026-07-15
+updatedAt: "2026-07-15T23:10:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -349,7 +349,7 @@ contentAdminPlatformSerialProgram:
       reason: current user explicitly authorized serial M1 then M2 before resuming B0
 p0RemediationSerialProgram:
   programId: p0-remediation-rc-01-to-rc-08-2026-07-14
-  status: in_progress
+  status: closed
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
   currentTaskId: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
@@ -365,6 +365,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
     - p0-remediation-rc-08-organization-training-integrity-2026-07-14
     - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+  lastClosedTaskId: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   completedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -375,6 +376,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
     - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
     - p0-remediation-rc-08-organization-training-integrity-2026-07-14
+    - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -399,7 +401,7 @@ p0RemediationSerialProgram:
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: closed
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: closed
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: closed
-    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: ready_for_closeout
+    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: closed
   closeoutCheckpoints:
     p0-remediation-serial-program-bootstrap-2026-07-14:
       taskCommit: pass
@@ -458,14 +460,14 @@ p0RemediationSerialProgram:
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14:
       taskCommit: pass
       masterMerge: pass
-      originMasterSync: pending
-      worktreeCleanup: pending
-      shortBranchCleanup: pending
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
 currentTask:
   id: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
   title: P0 global static regression and baseline freeze
   phase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-  status: ready_for_closeout
+  status: closed
   priority: p0
   taskKind: static_audit
   branch: codex/p0-global-static-regression-freeze
@@ -488,9 +490,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 42bed4a90f16ac887c940e748e2053791cdd3ee5
-  lastKnownOriginMasterSha: 5a23143c9559558cfdc0e2f5e028a170d60193e1
-  lastKnownRemoteMasterSha: 5a23143c9559558cfdc0e2f5e028a170d60193e1
+  lastKnownMasterSha: 2d768c39c499a4381552494bebb063ecfcbbb8ac
+  lastKnownOriginMasterSha: 2d768c39c499a4381552494bebb063ecfcbbb8ac
+  lastKnownRemoteMasterSha: 2d768c39c499a4381552494bebb063ecfcbbb8ac
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass
