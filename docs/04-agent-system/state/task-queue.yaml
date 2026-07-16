@@ -240,12 +240,12 @@ p1RemediationSerialProgram:
     status: blocked_requires_fresh_user_approval
   taskStatusById:
     p1-remediation-program-bootstrap-2026-07-16: closed
-    p1-remediation-rc-01-server-session-logout-2026-07-16: in_progress
+    p1-remediation-rc-01-server-session-logout-2026-07-16: ready_for_closeout
 activeTasks:
   - id: p1-remediation-rc-01-server-session-logout-2026-07-16
     title: P1 RC-01 server session logout completion
     phase: p1-remediation-rc-01-server-session-logout-2026-07-16
-    status: in_progress
+    status: ready_for_closeout
     priority: p1
     sequenceOrder: 1
     taskKind: product_remediation
