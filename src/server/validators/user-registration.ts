@@ -16,10 +16,20 @@ export type UserRegistrationValidationResult =
 
 const PHONE_PATTERN = /^1[3-9]\d{9}$/;
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+const IDEMPOTENCY_KEY_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const INVALID_REGISTRATION_INPUT_MESSAGE = "Invalid registration input.";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+export function normalizeUserRegistrationIdempotencyKey(
+  input: unknown,
+): string | null {
+  const idempotencyKey = typeof input === "string" ? input.trim() : "";
+
+  return IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey) ? idempotencyKey : null;
 }
 
 export function normalizeUserRegistrationInput(

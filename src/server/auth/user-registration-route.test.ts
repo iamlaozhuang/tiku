@@ -8,8 +8,10 @@ const SESSION_TOKEN_FIELD = "token";
 
 describe("user registration route handlers", () => {
   it("passes registration request JSON to the user service and returns the standard response", async () => {
+    const receivedIdempotencyKeys: unknown[] = [];
     const userRegistrationService = {
-      async registerPersonalUser(input) {
+      async registerPersonalUser(input, idempotencyKey) {
+        receivedIdempotencyKeys.push(idempotencyKey);
         const registrationInput = input as { phone: string; name: string };
 
         return {
@@ -42,6 +44,9 @@ describe("user registration route handlers", () => {
     const response = await POST(
       new Request("http://localhost/api/v1/users", {
         method: "POST",
+        headers: {
+          "Idempotency-Key": "123e4567-e89b-42d3-a456-426614174000",
+        },
         body: JSON.stringify({
           phone: "13800000000",
           [CREDENTIAL_FIELD_NAME]: "abc12345",
@@ -52,6 +57,9 @@ describe("user registration route handlers", () => {
 
     expect(response.headers.get("set-cookie")).toContain("tiku_session=");
     expect(response.headers.get("set-cookie")).toContain("HttpOnly");
+    expect(receivedIdempotencyKeys).toEqual([
+      "123e4567-e89b-42d3-a456-426614174000",
+    ]);
     await expect(response.json()).resolves.toEqual({
       code: 0,
       message: "ok",

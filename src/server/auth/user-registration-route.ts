@@ -83,7 +83,10 @@ export function createUserRegistrationRouteHandlers(
     async POST(request: Request): Promise<Response> {
       const input = await readRequestJson(request);
       const registrationResponse =
-        await userRegistrationService.registerPersonalUser(input);
+        await userRegistrationService.registerPersonalUser(
+          input,
+          request.headers.get("Idempotency-Key"),
+        );
       const sessionToken = getRegistrationSessionToken(registrationResponse);
       const clientSafeRegistrationResponse =
         createClientSafeRegistrationResponse(registrationResponse);

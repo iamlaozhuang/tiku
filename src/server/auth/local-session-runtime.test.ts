@@ -3,14 +3,23 @@ import { describe, expect, it } from "vitest";
 import {
   createLocalSessionRuntime,
   createLocalUserRegistrationRuntime,
+  createPostgresUserRegistrationRepository,
   createPostgresSessionUserRepository,
 } from "./local-session-runtime";
 import { SQL } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
-import { admin as adminTable } from "@/db/schema/auth";
+import {
+  admin as adminTable,
+  authAccount as authAccountTable,
+  authSession as authSessionTable,
+  authUser as authUserTable,
+  student as studentTable,
+  user as userTable,
+} from "@/db/schema/auth";
 import type { AdminRole } from "../models/auth";
 import type { AuthUserRepository } from "../repositories/auth-repository";
 import type { SessionUserRepository } from "../repositories/session-repository";
+import { createRegistrationSessionId } from "../repositories/user-registration-repository";
 
 const TEST_PASSWORD_FIELD = "password";
 const TEST_TOKEN_FIELD = "token";
@@ -209,7 +218,386 @@ function createAdminAccountRow(input: {
   };
 }
 
+function createRegistrationDatabase(
+  rowsBySelectCall: unknown[][],
+  failAtInsert?: number,
+) {
+  const committedTables: unknown[] = [];
+  let executeCount = 0;
+  let selectCallCount = 0;
+  let transactionCount = 0;
+
+  const database = {
+    async transaction<T>(
+      callback: (transaction: Record<string, unknown>) => Promise<T>,
+    ): Promise<T> {
+      transactionCount += 1;
+      const stagedTables: unknown[] = [];
+      const transaction = {
+        async execute() {
+          executeCount += 1;
+          return [];
+        },
+        insert(table: unknown) {
+          return {
+            values(row: Record<string, unknown>) {
+              return {
+                async returning() {
+                  stagedTables.push(table);
+
+                  if (stagedTables.length === failAtInsert) {
+                    throw new Error(`synthetic insert failure ${failAtInsert}`);
+                  }
+
+                  if (table === userTable) {
+                    return [
+                      {
+                        auth_user_id: row.auth_user_id,
+                        created_at: row.created_at,
+                        id: 42,
+                        locked_until_at: row.locked_until_at,
+                        login_failed_count: row.login_failed_count,
+                        name: row.name,
+                        phone: row.phone,
+                        public_id: row.public_id,
+                        status: row.status,
+                        user_type: row.user_type,
+                      },
+                    ];
+                  }
+
+                  if (table === authSessionTable) {
+                    return [
+                      {
+                        auth_user_id: row.user_id,
+                        created_at: row.created_at,
+                        expires_at: row.expires_at,
+                        [TEST_TOKEN_FIELD]: row.token,
+                      },
+                    ];
+                  }
+
+                  return [{ id: row.id ?? 1 }];
+                },
+              };
+            },
+          };
+        },
+        select() {
+          const rows = rowsBySelectCall[selectCallCount];
+
+          if (rows === undefined) {
+            throw new Error(`Unexpected select call ${selectCallCount + 1}.`);
+          }
+
+          selectCallCount += 1;
+          return createSelectBuilder(rows);
+        },
+      };
+
+      const result = await callback(transaction);
+      committedTables.push(...stagedTables);
+      return result;
+    },
+  };
+
+  return {
+    database,
+    getCommittedTables: () => [...committedTables],
+    getExecuteCount: () => executeCount,
+    getSelectCallCount: () => selectCallCount,
+    getTransactionCount: () => transactionCount,
+  };
+}
+
+function createRegistrationRepositoryOptions() {
+  return {
+    createAuthAccountId: () => "auth-account-registration-001",
+    createAuthUserId: () => "auth-user-registration-001",
+    createRegistrationSessionId: () => "registration-session-001",
+    createToken: () => "opaque-registration-session-token",
+    createUserPublicId: () => "user-registration-public-001",
+    hashPasswordValue: async () => "stored-registration-password-hash",
+    verifyPasswordHash: async () => true,
+  };
+}
+
+function createRegistrationRecoveryRows(input?: {
+  credentialRows?: unknown[];
+  registeredAt?: Date;
+  sessionRows?: unknown[];
+  studentRows?: unknown[];
+  user?: Record<string, unknown>;
+}) {
+  const registeredAt =
+    input?.registeredAt ?? new Date("2026-05-21T12:00:00.000Z");
+
+  return [
+    input?.sessionRows ?? [
+      {
+        auth_user_id: "auth-user-registration-001",
+        created_at: registeredAt,
+        expires_at: new Date("2026-05-28T12:00:00.000Z"),
+        [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
+      },
+    ],
+    [],
+    [{ id: 42 }],
+    [
+      {
+        auth_user_id: "auth-user-registration-001",
+        created_at: registeredAt,
+        disabled_at: null,
+        id: 42,
+        locked_until_at: null,
+        login_failed_count: 0,
+        name: "新学员",
+        phone: "13900000003",
+        public_id: "user-registration-public-001",
+        status: "active",
+        user_type: "personal",
+        ...input?.user,
+      },
+    ],
+    input?.studentRows ?? [{ id: 7 }],
+    input?.credentialRows ?? [
+      { [TEST_PASSWORD_FIELD]: "stored-registration-password-hash" },
+    ],
+  ];
+}
+
 describe("local session runtime", () => {
+  it("derives the registration session identity from only the high-entropy key", () => {
+    const firstKey = "123e4567-e89b-42d3-a456-426614174000";
+    const secondKey = "123e4567-e89b-42d3-a456-426614174001";
+
+    expect(createRegistrationSessionId(firstKey)).toBe(
+      createRegistrationSessionId(firstKey),
+    );
+    expect(createRegistrationSessionId(firstKey)).not.toBe(
+      createRegistrationSessionId(secondKey),
+    );
+  });
+
+  it("commits credential, user, student, and initial session in one transaction", async () => {
+    const {
+      database,
+      getCommittedTables,
+      getExecuteCount,
+      getTransactionCount,
+    } = createRegistrationDatabase([[], [], []]);
+    const repository = createPostgresUserRegistrationRepository(
+      () => database as never,
+      createRegistrationRepositoryOptions(),
+    );
+
+    await expect(
+      repository.createPersonalRegistration({
+        expiresAt: new Date("2026-05-28T12:00:00.000Z"),
+        idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
+        name: "新学员",
+        phone: "13900000003",
+        [TEST_PASSWORD_FIELD]: "abc12345",
+        registeredAt: new Date("2026-05-21T12:00:00.000Z"),
+      }),
+    ).resolves.toMatchObject({
+      status: "created",
+      session: {
+        [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
+      },
+      user: {
+        auth_user_id: "auth-user-registration-001",
+        public_id: "user-registration-public-001",
+      },
+    });
+    expect(getTransactionCount()).toBe(1);
+    expect(getExecuteCount()).toBe(2);
+    expect(getCommittedTables()).toEqual([
+      authUserTable,
+      authAccountTable,
+      userTable,
+      studentTable,
+      authSessionTable,
+    ]);
+  });
+
+  it.each([1, 2, 3, 4, 5])(
+    "rolls back the complete registration when write %s fails",
+    async (failAtInsert) => {
+      const { database, getCommittedTables, getTransactionCount } =
+        createRegistrationDatabase([[], [], []], failAtInsert);
+      const repository = createPostgresUserRegistrationRepository(
+        () => database as never,
+        createRegistrationRepositoryOptions(),
+      );
+
+      await expect(
+        repository.createPersonalRegistration({
+          expiresAt: new Date("2026-05-28T12:00:00.000Z"),
+          idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
+          name: "新学员",
+          phone: "13900000003",
+          [TEST_PASSWORD_FIELD]: "abc12345",
+          registeredAt: new Date("2026-05-21T12:00:00.000Z"),
+        }),
+      ).rejects.toThrow(`synthetic insert failure ${failAtInsert}`);
+      expect(getTransactionCount()).toBe(1);
+      expect(getCommittedTables()).toEqual([]);
+    },
+  );
+
+  it("recovers only the matching still-active initial session without new writes", async () => {
+    const registeredAt = new Date("2026-05-21T12:00:00.000Z");
+    const verifiedPasswords: unknown[] = [];
+    const { database, getCommittedTables, getSelectCallCount } =
+      createRegistrationDatabase(
+        createRegistrationRecoveryRows({ registeredAt }),
+      );
+    const repository = createPostgresUserRegistrationRepository(
+      () => database as never,
+      {
+        ...createRegistrationRepositoryOptions(),
+        createToken: () => {
+          throw new Error("recovery must not rotate the session token");
+        },
+        async verifyPasswordHash(input) {
+          verifiedPasswords.push(input);
+          return true;
+        },
+      },
+    );
+
+    await expect(
+      repository.createPersonalRegistration({
+        expiresAt: new Date("2026-05-28T12:01:00.000Z"),
+        idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
+        name: "新学员",
+        phone: "13900000003",
+        [TEST_PASSWORD_FIELD]: "abc12345",
+        registeredAt: new Date("2026-05-21T12:01:00.000Z"),
+      }),
+    ).resolves.toMatchObject({
+      status: "recovered",
+      session: {
+        [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
+      },
+    });
+    expect(getSelectCallCount()).toBe(6);
+    expect(getCommittedTables()).toEqual([]);
+    expect(verifiedPasswords).toEqual([
+      {
+        hash: "stored-registration-password-hash",
+        [TEST_PASSWORD_FIELD]: "abc12345",
+      },
+    ]);
+  });
+
+  it.each([
+    {
+      idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
+      label: "same key with a different phone",
+      phone: "13900000004",
+      rows: createRegistrationRecoveryRows()
+        .slice(0, 3)
+        .map((rows, index) => (index === 2 ? [] : rows)),
+    },
+    {
+      idempotencyKey: "123e4567-e89b-42d3-a456-426614174001",
+      label: "different key with the same payload",
+      phone: "13900000003",
+      rows: [[], [], [{ id: 42 }]],
+    },
+  ])(
+    "hard-conflicts $label without writes",
+    async ({ idempotencyKey, phone, rows }) => {
+      const { database, getCommittedTables } = createRegistrationDatabase(rows);
+      const repository = createPostgresUserRegistrationRepository(
+        () => database as never,
+        {
+          ...createRegistrationRepositoryOptions(),
+          createRegistrationSessionId: (key) =>
+            createRegistrationSessionId(key),
+          verifyPasswordHash: async () => {
+            throw new Error("non-matching retry must not verify a password");
+          },
+        },
+      );
+
+      await expect(
+        repository.createPersonalRegistration({
+          expiresAt: new Date("2026-05-28T12:01:00.000Z"),
+          idempotencyKey,
+          name: "新学员",
+          phone,
+          [TEST_PASSWORD_FIELD]: "abc12345",
+          registeredAt: new Date("2026-05-21T12:01:00.000Z"),
+        }),
+      ).resolves.toEqual({ reason: "user", status: "conflict" });
+      expect(getCommittedTables()).toEqual([]);
+    },
+  );
+
+  it.each([
+    {
+      label: "failed-login state",
+      rows: createRegistrationRecoveryRows({
+        user: { login_failed_count: 1 },
+      }),
+    },
+    {
+      label: "active account lock",
+      rows: createRegistrationRecoveryRows({
+        user: { locked_until_at: new Date("2026-05-21T13:00:00.000Z") },
+      }),
+    },
+    {
+      label: "missing deterministic retry session",
+      rows: createRegistrationRecoveryRows({ sessionRows: [] }),
+    },
+    {
+      label: "replacement session",
+      rows: createRegistrationRecoveryRows({
+        sessionRows: [
+          {
+            auth_user_id: "auth-user-registration-001",
+            created_at: new Date("2026-05-21T12:00:01.000Z"),
+            expires_at: new Date("2026-05-28T12:00:00.000Z"),
+            [TEST_TOKEN_FIELD]: "replacement-session-token",
+          },
+        ],
+      }),
+    },
+    {
+      label: "password mismatch",
+      passwordMatches: false,
+      rows: createRegistrationRecoveryRows(),
+    },
+  ])("rejects recovery for $label", async ({ passwordMatches, rows }) => {
+    const { database, getCommittedTables } = createRegistrationDatabase(rows);
+    const repository = createPostgresUserRegistrationRepository(
+      () => database as never,
+      {
+        ...createRegistrationRepositoryOptions(),
+        createToken: () => {
+          throw new Error("rejected recovery must not rotate a session token");
+        },
+        verifyPasswordHash: async () => passwordMatches ?? true,
+      },
+    );
+
+    await expect(
+      repository.createPersonalRegistration({
+        expiresAt: new Date("2026-05-28T12:01:00.000Z"),
+        idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
+        name: "新学员",
+        phone: "13900000003",
+        [TEST_PASSWORD_FIELD]: "abc12345",
+        registeredAt: new Date("2026-05-21T12:01:00.000Z"),
+      }),
+    ).resolves.toEqual({ reason: "user", status: "conflict" });
+    expect(getCommittedTables()).toEqual([]);
+  });
+
   it("persists admin failure transitions through one atomic database update", async () => {
     const updatedTables: unknown[] = [];
     const updatedValues: Record<string, unknown>[] = [];
@@ -485,41 +873,23 @@ describe("local session runtime", () => {
   });
 
   it("creates a personal user registration without exposing credential internals", async () => {
-    const createdCredentials: unknown[] = [];
-    const createdSessions: unknown[] = [];
-    const createdUsers: unknown[] = [];
+    const registrationInputs: unknown[] = [];
     const runtime = createLocalUserRegistrationRuntime({
-      credentialAdapter: {
-        async createPasswordCredential(input) {
-          createdCredentials.push(input);
-
-          return {
-            authUserId: "auth-user-registered-student",
-          };
-        },
-        async createSingleActiveSession(input) {
-          createdSessions.push(input);
-
-          return {
-            [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
-            auth_user_id: input.authUserId,
-            expires_at: input.expiresAt,
-          };
-        },
-      },
       now: () => new Date("2026-05-21T12:00:00.000Z"),
       userRegistrationRepository: {
-        async findAccountPhoneConflict() {
-          return null;
-        },
-        async createPersonalUser(input) {
-          createdUsers.push(input);
+        async createPersonalRegistration(input) {
+          registrationInputs.push(input);
 
           return {
             status: "created",
+            session: {
+              [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
+              auth_user_id: "auth-user-registered-student",
+              expires_at: input.expiresAt,
+            },
             user: {
               id: 99,
-              auth_user_id: input.authUserId,
+              auth_user_id: "auth-user-registered-student",
               public_id: "user-registered-student",
               phone: input.phone,
               name: input.name,
@@ -536,11 +906,14 @@ describe("local session runtime", () => {
       },
     });
 
-    const response = await runtime.registerPersonalUser({
-      phone: "13900000003",
-      [TEST_PASSWORD_FIELD]: "abc12345",
-      name: "新学员",
-    });
+    const response = await runtime.registerPersonalUser(
+      {
+        phone: "13900000003",
+        [TEST_PASSWORD_FIELD]: "abc12345",
+        name: "新学员",
+      },
+      "123e4567-e89b-42d3-a456-426614174000",
+    );
 
     expect(response).toEqual({
       code: 0,
@@ -565,23 +938,14 @@ describe("local session runtime", () => {
         [TEST_TOKEN_FIELD]: "opaque-registration-session-token",
       },
     });
-    expect(createdCredentials).toEqual([
+    expect(registrationInputs).toEqual([
       {
-        phone: "13900000003",
-        [TEST_PASSWORD_FIELD]: "abc12345",
-      },
-    ]);
-    expect(createdUsers).toEqual([
-      {
-        authUserId: "auth-user-registered-student",
-        phone: "13900000003",
-        name: "新学员",
-      },
-    ]);
-    expect(createdSessions).toEqual([
-      {
-        authUserId: "auth-user-registered-student",
         expiresAt: new Date("2026-05-28T12:00:00.000Z"),
+        idempotencyKey: "123e4567-e89b-42d3-a456-426614174000",
+        name: "新学员",
+        [TEST_PASSWORD_FIELD]: "abc12345",
+        phone: "13900000003",
+        registeredAt: new Date("2026-05-21T12:00:00.000Z"),
       },
     ]);
     expect(JSON.stringify(response)).not.toContain("abc12345");

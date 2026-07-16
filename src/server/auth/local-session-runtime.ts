@@ -23,7 +23,6 @@ import type {
   SessionCredentialAdapter,
 } from "./session-boundary";
 import { SessionAccountStateError } from "./session-boundary";
-import type { UserRegistrationSessionCredentialAdapter } from "./user-registration-boundary";
 import { createUserRegistrationRouteHandlers } from "./user-registration-route";
 import {
   createErrorResponse,
@@ -44,11 +43,11 @@ import type {
   SessionLoginUserRow,
   SessionUserRepository,
 } from "../repositories/session-repository";
-import type { UserRegistrationRepository } from "../repositories/user-registration-repository";
 import {
-  findAccountPhoneIdentityConflict,
-  findAccountPhoneIdentityConflictUnderLock,
-} from "../repositories/account-phone-identity-lock";
+  createRegistrationSessionId,
+  type UserRegistrationRepository,
+} from "../repositories/user-registration-repository";
+import { findAccountPhoneIdentityConflictUnderLock } from "../repositories/account-phone-identity-lock";
 import { createRuntimeDatabaseForSchema } from "../repositories/runtime-database";
 import { createOrgAuthCoversOrganizationCondition } from "../repositories/organization-scope-query";
 import { createAuthService } from "../services/auth-service";
@@ -92,13 +91,13 @@ export type LocalUserRegistrationRuntimeOptions = {
   createAuthAccountId?: () => string;
   createAuthUserId?: () => string;
   createDatabase?: () => LocalSessionRuntimeDatabase;
-  createSessionId?: () => string;
+  createRegistrationSessionId?: (idempotencyKey: string) => string;
   createToken?: () => string;
   createUserPublicId?: () => string;
-  credentialAdapter?: UserRegistrationSessionCredentialAdapter;
   hashPasswordValue?: (password: string) => Promise<string>;
   now?: () => Date;
   userRegistrationRepository?: UserRegistrationRepository;
+  verifyPasswordHash?: (input: VerifyPasswordHashInput) => Promise<boolean>;
 };
 
 const {
@@ -479,112 +478,174 @@ function createPostgresSessionCredentialAdapter(
   };
 }
 
-function createPostgresUserRegistrationCredentialAdapter(
+const REGISTRATION_IDEMPOTENCY_LOCK_NAMESPACE = 200129;
+
+async function lockRegistrationAttempt(
+  transaction: Pick<LocalSessionRuntimeTransaction, "execute">,
+  registrationSessionId: string,
+): Promise<void> {
+  await transaction.execute(
+    sql`select pg_advisory_xact_lock(${REGISTRATION_IDEMPOTENCY_LOCK_NAMESPACE}, hashtext(${registrationSessionId})) as registration_idempotency_lock`,
+  );
+}
+
+function mapPersonalRegistrationUser(row: {
+  auth_user_id: string;
+  id: number;
+  locked_until_at: Date | null;
+  name: string;
+  phone: string;
+  public_id: string;
+  status: UserStatus;
+  user_type: UserType;
+}): AuthUserAccessRow {
+  return {
+    admin_public_id: null,
+    admin_roles: [],
+    auth_user_id: row.auth_user_id,
+    employee_public_id: null,
+    id: row.id,
+    locked_until_at: row.locked_until_at,
+    name: row.name,
+    organization_public_id: null,
+    phone: row.phone,
+    public_id: row.public_id,
+    status: row.status,
+    user_type: row.user_type,
+  };
+}
+
+export function createPostgresUserRegistrationRepository(
   getDatabase: () => LocalSessionRuntimeDatabase,
   options: Required<
     Pick<
       LocalUserRegistrationRuntimeOptions,
       | "createAuthAccountId"
       | "createAuthUserId"
-      | "createSessionId"
+      | "createRegistrationSessionId"
       | "createToken"
+      | "createUserPublicId"
       | "hashPasswordValue"
+      | "verifyPasswordHash"
     >
-  >,
-): UserRegistrationSessionCredentialAdapter {
-  return {
-    async createPasswordCredential(input) {
-      const database = getDatabase();
-      const authUserId = options.createAuthUserId();
-      const passwordHash = await options.hashPasswordValue(input.password);
-
-      await database.transaction(async (transaction) => {
-        await transaction.insert(authUser).values({
-          created_at: new Date(),
-          email: `phone-${input.phone}@tiku.local`,
-          email_verified: new Date(),
-          id: authUserId,
-          image: null,
-          name: input.phone,
-          updated_at: new Date(),
-        });
-
-        await transaction.insert(authAccount).values({
-          access_token: null,
-          access_token_expires_at: null,
-          account_id: authUserId,
-          created_at: new Date(),
-          id: options.createAuthAccountId(),
-          id_token: null,
-          [PASSWORD_FIELD]: passwordHash,
-          provider_id: CREDENTIAL_PROVIDER_ID,
-          refresh_token: null,
-          refresh_token_expires_at: null,
-          scope: null,
-          updated_at: new Date(),
-          user_id: authUserId,
-        });
-      });
-
-      return { authUserId };
-    },
-
-    async createSingleActiveSession(input) {
-      const database = getDatabase();
-
-      return database.transaction(async (transaction) => {
-        await transaction
-          .delete(authSession)
-          .where(eq(authSession.user_id, input.authUserId));
-
-        const [row] = await transaction
-          .insert(authSession)
-          .values({
-            expires_at: input.expiresAt,
-            id: options.createSessionId(),
-            ip_address: null,
-            [SESSION_TOKEN_FIELD]: options.createToken(),
-            user_agent: null,
-            user_id: input.authUserId,
-          })
-          .returning({
-            auth_user_id: authSession.user_id,
-            expires_at: authSession.expires_at,
-            [SESSION_TOKEN_FIELD]: authSession.token,
-          });
-
-        if (row === undefined) {
-          throw new Error("Session insert did not return a row.");
-        }
-
-        return row;
-      });
-    },
-  };
-}
-
-function createPostgresUserRegistrationRepository(
-  getDatabase: () => LocalSessionRuntimeDatabase,
-  options: Required<
-    Pick<LocalUserRegistrationRuntimeOptions, "createUserPublicId">
   >,
 ): UserRegistrationRepository {
   return {
-    async findAccountPhoneConflict(phone) {
+    async createPersonalRegistration(input) {
       const database = getDatabase();
-
-      return findAccountPhoneIdentityConflict(database, phone);
-    },
-
-    async createPersonalUser(input) {
-      const database = getDatabase();
+      const registrationSessionId = options.createRegistrationSessionId(
+        input.idempotencyKey,
+      );
 
       return database.transaction(async (transaction) => {
+        await lockRegistrationAttempt(transaction, registrationSessionId);
+
+        const [existingSession] = await transaction
+          .select({
+            auth_user_id: authSession.user_id,
+            created_at: authSession.created_at,
+            expires_at: authSession.expires_at,
+            [SESSION_TOKEN_FIELD]: authSession.token,
+          })
+          .from(authSession)
+          .where(eq(authSession.id, registrationSessionId))
+          .limit(1);
         const accountPhoneConflict =
           await findAccountPhoneIdentityConflictUnderLock(
             transaction,
             input.phone,
           );
+
+        if (existingSession !== undefined) {
+          if (
+            accountPhoneConflict !== "user" ||
+            existingSession.expires_at <= input.registeredAt
+          ) {
+            return {
+              status: "conflict" as const,
+              reason: accountPhoneConflict ?? "user",
+            };
+          }
+
+          const [existingUser] = await transaction
+            .select({
+              auth_user_id: user.auth_user_id,
+              created_at: user.created_at,
+              disabled_at: user.disabled_at,
+              id: user.id,
+              locked_until_at: user.locked_until_at,
+              login_failed_count: user.login_failed_count,
+              name: user.name,
+              phone: user.phone,
+              public_id: user.public_id,
+              status: user.status,
+              user_type: user.user_type,
+            })
+            .from(user)
+            .where(
+              and(
+                eq(user.auth_user_id, existingSession.auth_user_id),
+                eq(user.phone, input.phone),
+              ),
+            )
+            .limit(1);
+
+          if (
+            existingUser === undefined ||
+            existingUser.auth_user_id === null ||
+            existingUser.phone !== input.phone ||
+            existingUser.name !== input.name ||
+            existingUser.user_type !== "personal" ||
+            existingUser.status !== "active" ||
+            existingUser.disabled_at !== null ||
+            existingUser.login_failed_count !== 0 ||
+            (existingUser.locked_until_at !== null &&
+              existingUser.locked_until_at > input.registeredAt) ||
+            existingSession.created_at.getTime() !==
+              existingUser.created_at.getTime()
+          ) {
+            return { status: "conflict" as const, reason: "user" as const };
+          }
+
+          const [studentRow] = await transaction
+            .select({ id: student.id })
+            .from(student)
+            .where(eq(student.user_id, existingUser.id))
+            .limit(1);
+          const [credentialRow] = await transaction
+            .select({
+              [PASSWORD_FIELD]: authAccount.password,
+            })
+            .from(authAccount)
+            .where(
+              and(
+                eq(authAccount.user_id, existingUser.auth_user_id),
+                eq(authAccount.provider_id, CREDENTIAL_PROVIDER_ID),
+              ),
+            )
+            .limit(1);
+
+          if (
+            studentRow === undefined ||
+            credentialRow === undefined ||
+            credentialRow.password === null ||
+            !(await options.verifyPasswordHash({
+              hash: credentialRow.password,
+              [PASSWORD_FIELD]: input.password,
+            }))
+          ) {
+            return { status: "conflict" as const, reason: "user" as const };
+          }
+
+          return {
+            status: "recovered" as const,
+            session: existingSession,
+            user: mapPersonalRegistrationUser({
+              ...existingUser,
+              auth_user_id: existingUser.auth_user_id,
+            }),
+          };
+        }
 
         if (accountPhoneConflict !== null) {
           return {
@@ -593,10 +654,55 @@ function createPostgresUserRegistrationRepository(
           };
         }
 
+        const authUserId = options.createAuthUserId();
+        const passwordHash = await options.hashPasswordValue(input.password);
+        const [authUserRow] = await transaction
+          .insert(authUser)
+          .values({
+            created_at: input.registeredAt,
+            email: `phone-${input.phone}@tiku.local`,
+            email_verified: input.registeredAt,
+            id: authUserId,
+            image: null,
+            name: input.phone,
+            updated_at: input.registeredAt,
+          })
+          .returning({ id: authUser.id });
+
+        if (authUserRow === undefined) {
+          throw new Error("Authentication user insert did not return a row.");
+        }
+
+        const [authAccountRow] = await transaction
+          .insert(authAccount)
+          .values({
+            access_token: null,
+            access_token_expires_at: null,
+            account_id: authUserId,
+            created_at: input.registeredAt,
+            id: options.createAuthAccountId(),
+            id_token: null,
+            [PASSWORD_FIELD]: passwordHash,
+            provider_id: CREDENTIAL_PROVIDER_ID,
+            refresh_token: null,
+            refresh_token_expires_at: null,
+            scope: null,
+            updated_at: input.registeredAt,
+            user_id: authUserId,
+          })
+          .returning({ id: authAccount.id });
+
+        if (authAccountRow === undefined) {
+          throw new Error(
+            "Authentication account insert did not return a row.",
+          );
+        }
+
         const [userRow] = await transaction
           .insert(user)
           .values({
-            auth_user_id: input.authUserId,
+            auth_user_id: authUserId,
+            created_at: input.registeredAt,
             disabled_at: null,
             locked_until_at: null,
             login_failed_count: 0,
@@ -604,6 +710,7 @@ function createPostgresUserRegistrationRepository(
             phone: input.phone,
             public_id: options.createUserPublicId(),
             status: "active",
+            updated_at: input.registeredAt,
             user_type: "personal",
           })
           .returning({
@@ -617,20 +724,52 @@ function createPostgresUserRegistrationRepository(
             user_type: user.user_type,
           });
 
-        if (userRow === undefined) {
-          throw new Error("Personal user insert did not return a row.");
+        if (userRow === undefined || userRow.auth_user_id === null) {
+          throw new Error("Personal user insert did not return a valid row.");
         }
 
-        await transaction.insert(student).values({
-          user_id: userRow.id,
-        });
+        const [studentRow] = await transaction
+          .insert(student)
+          .values({
+            created_at: input.registeredAt,
+            updated_at: input.registeredAt,
+            user_id: userRow.id,
+          })
+          .returning({ id: student.id });
+
+        if (studentRow === undefined) {
+          throw new Error("Student insert did not return a row.");
+        }
+
+        const [sessionRow] = await transaction
+          .insert(authSession)
+          .values({
+            created_at: input.registeredAt,
+            expires_at: input.expiresAt,
+            id: registrationSessionId,
+            ip_address: null,
+            [SESSION_TOKEN_FIELD]: options.createToken(),
+            updated_at: input.registeredAt,
+            user_agent: null,
+            user_id: authUserId,
+          })
+          .returning({
+            auth_user_id: authSession.user_id,
+            created_at: authSession.created_at,
+            expires_at: authSession.expires_at,
+            [SESSION_TOKEN_FIELD]: authSession.token,
+          });
+
+        if (sessionRow === undefined) {
+          throw new Error("Session insert did not return a row.");
+        }
 
         return {
           status: "created" as const,
-          user: mapUserAccountRow({
+          session: sessionRow,
+          user: mapPersonalRegistrationUser({
             ...userRow,
-            employee_public_id: null,
-            organization_public_id: null,
+            auth_user_id: userRow.auth_user_id,
           }),
         };
       });
@@ -765,30 +904,30 @@ function createUserRegistrationRuntimeService(
   const getDatabase = createLazyDatabaseGetter(
     options.createDatabase ?? createLocalRuntimeDatabase,
   );
-  const credentialAdapter =
-    options.credentialAdapter ??
-    createPostgresUserRegistrationCredentialAdapter(getDatabase, {
-      createAuthAccountId:
-        options.createAuthAccountId ?? createDefaultAuthAccountId,
-      createAuthUserId: options.createAuthUserId ?? createDefaultAuthUserId,
-      createSessionId: options.createSessionId ?? createDefaultSessionId,
-      createToken: options.createToken ?? createDefaultToken,
-      hashPasswordValue: options.hashPasswordValue ?? hashPassword,
-    });
   const userRegistrationRepository =
     options.userRegistrationRepository ??
     createPostgresUserRegistrationRepository(getDatabase, {
+      createAuthAccountId:
+        options.createAuthAccountId ?? createDefaultAuthAccountId,
+      createAuthUserId: options.createAuthUserId ?? createDefaultAuthUserId,
+      createRegistrationSessionId:
+        options.createRegistrationSessionId ?? createRegistrationSessionId,
+      createToken: options.createToken ?? createDefaultToken,
       createUserPublicId:
         options.createUserPublicId ?? createDefaultUserPublicId,
+      hashPasswordValue: options.hashPasswordValue ?? hashPassword,
+      verifyPasswordHash:
+        options.verifyPasswordHash ??
+        ((input) =>
+          verifyPassword({
+            hash: input.hash,
+            [PASSWORD_FIELD]: input.password,
+          })),
     });
 
-  return createUserRegistrationService(
-    credentialAdapter,
-    userRegistrationRepository,
-    {
-      now: options.now,
-    },
-  );
+  return createUserRegistrationService(userRegistrationRepository, {
+    now: options.now,
+  });
 }
 
 export function createLocalUserRegistrationRuntime(
@@ -797,9 +936,12 @@ export function createLocalUserRegistrationRuntime(
   const userRegistrationService = createUserRegistrationRuntimeService(options);
 
   return {
-    async registerPersonalUser(input) {
+    async registerPersonalUser(input, idempotencyKey) {
       try {
-        return await userRegistrationService.registerPersonalUser(input);
+        return await userRegistrationService.registerPersonalUser(
+          input,
+          idempotencyKey,
+        );
       } catch (error) {
         if (isRuntimeConfigurationError(error)) {
           return createRuntimeUnavailableResponse();

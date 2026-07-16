@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import Link from "next/link";
 import { UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -49,6 +49,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [registerState, setRegisterState] = useState<RegisterState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const canSubmit =
     PHONE_PATTERN.test(phone.trim()) &&
@@ -67,6 +68,7 @@ export default function RegisterPage() {
 
     setRegisterState("submitting");
     setErrorMessage(null);
+    idempotencyKeyRef.current ??= globalThis.crypto.randomUUID();
 
     try {
       const response = await fetch("/api/v1/users", {
@@ -74,6 +76,7 @@ export default function RegisterPage() {
         credentials: "same-origin",
         headers: {
           "content-type": "application/json",
+          "Idempotency-Key": idempotencyKeyRef.current,
         },
         body: JSON.stringify({
           phone: phone.trim(),
@@ -123,7 +126,10 @@ export default function RegisterPage() {
               name="phone"
               placeholder="请输入手机号"
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
+              onChange={(event) => {
+                idempotencyKeyRef.current = null;
+                setPhone(event.target.value);
+              }}
             />
           </label>
 
@@ -135,7 +141,10 @@ export default function RegisterPage() {
               name="name"
               placeholder="请输入姓名"
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => {
+                idempotencyKeyRef.current = null;
+                setName(event.target.value);
+              }}
             />
           </label>
 
@@ -148,7 +157,10 @@ export default function RegisterPage() {
               placeholder="至少 8 位，包含字母和数字"
               type="password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                idempotencyKeyRef.current = null;
+                setPassword(event.target.value);
+              }}
             />
           </label>
 

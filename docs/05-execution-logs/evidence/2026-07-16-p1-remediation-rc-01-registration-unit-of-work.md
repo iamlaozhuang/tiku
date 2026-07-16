@@ -4,7 +4,9 @@
 
 任务：`p1-remediation-rc-01-registration-unit-of-work-2026-07-16`
 
-transition 基线：`470ddcccf2034d9f63c20c6c0c28039fcd65d464`
+前序 checkpoint：`470ddcccf2034d9f63c20c6c0c28039fcd65d464`
+
+transition commit：`4db1e1e1dc346071d749445d807f65c3e65a7da6`
 
 ## Reading Evidence
 
@@ -51,27 +53,42 @@ Result: pass
 - 前序 F-0001 已提交、ff-only 合入并普通推送；local/tracking/live 均为 `470ddcccf2034d9f63c20c6c0c28039fcd65d464`。
 - 前序 worktree 与短分支已清理。
 - 当前 transition 仅物化 state/queue/plan/evidence/audit，不含产品实现。
+- transition pre-push 明确输出 `p1TransitionScopeMode: transition_only` 与 `OK_PRE_PUSH_P1_TRANSITION_STATE_SHA_ANCESTOR`；因此 repository checkpoint 保持前序 SHA 符合用户批准的 ancestor checkpoint 例外，产品实现不适用该例外。
 - P2、21 项 runtime backlog、F-0013 runtime hold、依赖/schema/数据库/Provider/PR/force push/部署边界保持不变。
 
 ## Validation Results
 
-Result: pending
+Result: pass
 
-等待 RED、GREEN、完整静态回归与 fresh-master build。
+- 初始 RED：7 个聚焦文件中 5 个失败文件、9 个失败测试，分别暴露 service 三段副作用编排、route 未传 key、UI 未复用 key、validator 缺失及单事务守卫失败。
+- 首次实现 GREEN 后独立复核得到 `CHANGES_REQUESTED`：弱 key + key/载荷快速摘要会形成快速密码预言机，并且同 key 不同手机号不能 key 级 hard conflict。新增两个 RED 用例确认 UUIDv4 校验与 key-only session identity 尚未实现；该版本未提交。
+- 修订 GREEN：强制 UUIDv4 key；session id 只摘要 key；同一事务先获取 namespace `200129` 的 key advisory lock，再获取 F-0001 共享手机号锁；恢复通过 Better Auth 慢哈希核对密码，且不轮换 token。
+- 五个写点逐一故障注入均留下空 committed table 集合；同 key 不同手机号、不同 key 同载荷、失败计数、锁定态、密码不匹配、缺失/替换 session 均返回既有 `409001` 语义且无写入。
+- 最终聚焦回归：7 个文件、41 个测试通过。
+- 完整 unit：403 个文件、2418 个测试通过，耗时 823.58 秒。
+- `npm.cmd run lint`、`npm.cmd run typecheck`、`npm.cmd run format:check`、`git diff --check` 均通过。
+- P1 manual guard 通过：`p1TransitionScopeMode: standard`、P1=125、P2=18、runtime=21；P0 global baseline 通过：finding=35、impact=143、runtime=21、cluster=8、cycle=0，审计仓 SHA 仍为 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
+- Module pre-commit 首轮按预期 hard-block 8 处 `password:` 字面敏感赋值；改为项目既有常量计算键后复跑通过，scope 15 个文件全部 `OK_SCOPE`，敏感与术语扫描无 finding。P1 `pre_commit` guard 同步通过且 `p1TransitionScopeMode: standard`。
+- 隔离 worktree 的 `npm.cmd run build` 因 Next/Turbopack 无法从 `D:/tiku/.worktrees/.../src/app` 解析物理位于 `D:/tiku/node_modules` 的 `next/package.json` 而失败；这是隔离布局限制。ff-only 合入后必须在 fresh `master` 通过标准 build，失败即停止 push/closeout。
+- 未执行真实 PostgreSQL 并发、数据库 mutation、runtime/browser acceptance、Provider、P2、PR、force push 或部署。
 
 Cost Calibration Gate remains blocked。
 
 ## Round 1
 
-Result: pending
+Result: pass
 
-等待实现后故障点、重放、锁定绕过与事务边界复核。
+- 第一次独立审查击穿快速摘要与 key 级唯一性，结论 `CHANGES_REQUESTED`；阻断项全部在提交前重构并补 RED/GREEN。
+- 五表 writer 位于一个 `database.transaction`，任一 insert 返回异常均由 transaction rollback；service 只调用一次 `createPersonalRegistration`。
+- key 锁先于 session 查询和手机号锁；同 key 并发被串行，不同 key 同手机号仍由 F-0001 锁串行，hash 冲突最多增加串行化而不会放宽身份唯一性。
+- 普通既有账号没有匹配的 registration session id，锁定、停用或存在登录失败计数的账号在慢哈希前 hard conflict；恢复不会成为普通登录入口。
 
 ## Round 2
 
-Result: pending
+Result: pass
 
-等待独立只读复核。
+- 修订后的独立只读复核结论 `APPROVE`，P1 blocking finding 为 0；复核者确认 UUIDv4、key-only session id、key lock 顺序、慢哈希、普通/锁定账号拒绝及 token 不轮换。
+- non-blocking：第三方 UUIDv4 随机源质量和 header 禁止日志需外部客户端规范约束；fake transaction 未替代真实 PostgreSQL 锁等待；ADR-002 目录整理保留为独立 P2。均未被误述为 runtime 已验收。
 
 ## Closeout Command Evidence
 
@@ -87,6 +104,10 @@ Result: pending
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-01-registration-unit-of-work-2026-07-16`
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-01-registration-unit-of-work-2026-07-16 -SkipRemoteAheadCheck`
 - `git diff --check`
+
+## Fresh-Master Closeout Gate
+
+ff-only 合入后必须在真实 `master` 运行标准 Turbopack build、聚焦回归、lint、typecheck、format、P0/P1/Module 门禁并通过，之后才允许普通 push。该后置门禁未被本 evidence 预先标记为完成。
 
 threadRolloverGate: `continue_current_thread`。保持 WIP=1，不创建并行产品任务。
 

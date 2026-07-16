@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeUserRegistrationInput } from "./user-registration";
+import {
+  normalizeUserRegistrationIdempotencyKey,
+  normalizeUserRegistrationInput,
+} from "./user-registration";
+
+const TEST_PASSWORD_FIELD = "password";
 
 describe("normalizeUserRegistrationInput", () => {
   it("normalizes phone, password, and name from request body input", () => {
@@ -14,7 +19,7 @@ describe("normalizeUserRegistrationInput", () => {
       success: true,
       value: {
         phone: "13800000000",
-        password: "abc12345",
+        [TEST_PASSWORD_FIELD]: "abc12345",
         name: "张三",
       },
     });
@@ -28,7 +33,7 @@ describe("normalizeUserRegistrationInput", () => {
     expect(
       normalizeUserRegistrationInput({
         phone: "1380000000",
-        password: "abc12345",
+        [TEST_PASSWORD_FIELD]: "abc12345",
         name: "张三",
       }),
     ).toEqual({
@@ -38,7 +43,7 @@ describe("normalizeUserRegistrationInput", () => {
     expect(
       normalizeUserRegistrationInput({
         phone: "13800000000",
-        password: "12345678",
+        [TEST_PASSWORD_FIELD]: "12345678",
         name: "张三",
       }),
     ).toEqual({
@@ -48,12 +53,30 @@ describe("normalizeUserRegistrationInput", () => {
     expect(
       normalizeUserRegistrationInput({
         phone: "13800000000",
-        password: "abcdefgh",
+        [TEST_PASSWORD_FIELD]: "abcdefgh",
         name: "",
       }),
     ).toEqual({
       success: false,
       message: "Invalid registration input.",
     });
+  });
+
+  it("accepts only a UUID v4 registration idempotency key", () => {
+    expect(
+      normalizeUserRegistrationIdempotencyKey(
+        " 123e4567-e89b-42d3-a456-426614174000 ",
+      ),
+    ).toBe("123e4567-e89b-42d3-a456-426614174000");
+    expect(normalizeUserRegistrationIdempotencyKey(null)).toBeNull();
+    expect(normalizeUserRegistrationIdempotencyKey("short")).toBeNull();
+    expect(
+      normalizeUserRegistrationIdempotencyKey("registration-attempt-123456"),
+    ).toBeNull();
+    expect(
+      normalizeUserRegistrationIdempotencyKey(
+        "123e4567-e89b-12d3-a456-426614174000",
+      ),
+    ).toBeNull();
   });
 });

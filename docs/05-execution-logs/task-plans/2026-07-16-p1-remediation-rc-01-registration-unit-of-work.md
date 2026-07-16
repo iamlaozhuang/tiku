@@ -39,13 +39,13 @@
 
 仅把 credential 与 user 合并仍会留下“账号已创建但初始 session 失败”；仅捕获异常并删除补偿又会在进程中断和未知提交结果下失效。正确边界是一个数据库事务包含五张表的全部写入，并在 F-0001 已建立的共享手机号锁后完成冲突检查。
 
-原子提交仍不能单独解决“提交成功、HTTP 响应丢失”。本任务要求客户端为一次表单尝试生成并在重试时复用 `Idempotency-Key`；服务端把 key 与规范化注册载荷摘要映射为初始 session 内部 id。只有该内部 id、手机号、个人用户、学员关联和仍有效的初始 session 全部对应时才恢复同一 session。普通重复注册、不同 key、不同载荷、已替换/过期 session、锁定或停用账号继续返回 `409001`，不得把注册接口变成绕过登录失败计数的替代登录入口。
+原子提交仍不能单独解决“提交成功、HTTP 响应丢失”。本任务要求客户端为一次表单尝试用 CSPRNG 生成 UUIDv4 `Idempotency-Key`，并在输入未变的重试中复用。服务端只以 key 摘要映射初始 session 内部 id，先获取 key 级事务 advisory lock，再获取 F-0001 手机号锁；恢复时以已持久化用户属性和 Better Auth 慢哈希校验精确载荷，禁止把密码放进快速摘要。只有内部 id、手机号、姓名、密码凭据、个人用户、学员关联和仍有效的初始 session 全部对应时才恢复同一 session。普通重复注册、不同 key、不同载荷、已替换/过期 session、锁定或停用账号继续返回 `409001`，不得把注册接口变成普通账号的替代登录入口。
 
 ## 实现方案
 
 1. 将 `UserRegistrationRepository` 收敛为单一 `createPersonalRegistration` 工作单元，输入包含规范化注册载荷、idempotency key、注册时间和初始 session 到期时间；返回 `created | recovered | conflict`。
-2. 默认 PostgreSQL repository 在一个 `database.transaction` 内获取共享手机号锁、检查 `admin`/`user`，依次写入 credential、`user`/`student` 与 session；所有时间戳使用同一注册时刻。
-3. 初始 session id 由 `Idempotency-Key` 和规范化载荷的单向摘要派生。相同重试只读回该 session；不得删除或轮换 session，也不得返回另一次登录创建的 session。
+2. 默认 PostgreSQL repository 在一个 `database.transaction` 内先获取 key 级 advisory lock，再获取共享手机号锁、检查 `admin`/`user`，依次写入 credential、`user`/`student` 与 session；所有时间戳使用同一注册时刻。
+3. 初始 session id 只由 UUIDv4 `Idempotency-Key` 的单向摘要派生，确保同 key 不同载荷也命中同一事务锁和同一 session 标识；精确载荷恢复通过持久化用户属性与 Better Auth 慢哈希校验。相同重试只读回该 session；不得删除或轮换 session，也不得返回另一次登录创建的 session。
 4. service 只调用一次工作单元，不再编排 credential、业务用户和 session 三段副作用；现有成功 envelope、`409001` 与 Cookie token 隔离保持不变。
 5. route 从 `Idempotency-Key` header 传入 service；注册页在输入不变的网络/服务失败重试中复用同一 key，任一表单字段变化即生成新 key。
 6. 增加结构守卫与故障注入测试：五个写点任一失败均不形成 fake transaction commit；提交后响应丢失的相同重试恢复同一 session；非匹配重试 hard conflict。
@@ -107,6 +107,7 @@
 - 若恢复路径需要对普通既有账号验证密码而形成免计数登录旁路，停止；不得以关闭响应丢失为由削弱锁定策略。
 - 若 F-0001 writer guard、共享手机号锁或现有 route Cookie 隔离被破坏，停止并回退设计。
 - 若外部客户端无法提供 `Idempotency-Key` 且必须改变兼容策略，先记录冲突并请求用户决策。
+- 第三方客户端必须使用 CSPRNG 生成 UUIDv4 且禁止记录 header；格式校验不能证明随机源质量，该约束保留为后续外部客户端规范与 runtime 验收项。
 
 ## 完成条件
 
