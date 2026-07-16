@@ -1,4 +1,5 @@
 import type { AuthUserAccessRow } from "./auth-repository";
+import type { AccountPhoneIdentityConflict } from "./account-phone-identity-lock";
 
 export type CreatePersonalUserInput = {
   authUserId: string;
@@ -7,8 +8,17 @@ export type CreatePersonalUserInput = {
 };
 
 export type UserRegistrationRepository = {
-  findRegisteredUserByPhone(phone: string): Promise<AuthUserAccessRow | null>;
-  createPersonalUser(
-    input: CreatePersonalUserInput,
-  ): Promise<AuthUserAccessRow>;
+  findAccountPhoneConflict(
+    phone: string,
+  ): Promise<AccountPhoneIdentityConflict | null>;
+  createPersonalUser(input: CreatePersonalUserInput): Promise<
+    | {
+        status: "created";
+        user: AuthUserAccessRow;
+      }
+    | {
+        status: "conflict";
+        reason: AccountPhoneIdentityConflict;
+      }
+  >;
 };

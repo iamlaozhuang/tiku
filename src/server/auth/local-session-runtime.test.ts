@@ -509,25 +509,28 @@ describe("local session runtime", () => {
       },
       now: () => new Date("2026-05-21T12:00:00.000Z"),
       userRegistrationRepository: {
-        async findRegisteredUserByPhone() {
+        async findAccountPhoneConflict() {
           return null;
         },
         async createPersonalUser(input) {
           createdUsers.push(input);
 
           return {
-            id: 99,
-            auth_user_id: input.authUserId,
-            public_id: "user-registered-student",
-            phone: input.phone,
-            name: input.name,
-            user_type: "personal",
-            status: "active",
-            locked_until_at: null,
-            employee_public_id: null,
-            organization_public_id: null,
-            admin_public_id: null,
-            admin_roles: [],
+            status: "created",
+            user: {
+              id: 99,
+              auth_user_id: input.authUserId,
+              public_id: "user-registered-student",
+              phone: input.phone,
+              name: input.name,
+              user_type: "personal",
+              status: "active",
+              locked_until_at: null,
+              employee_public_id: null,
+              organization_public_id: null,
+              admin_public_id: null,
+              admin_roles: [],
+            },
           };
         },
       },

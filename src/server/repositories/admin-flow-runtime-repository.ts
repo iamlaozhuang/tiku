@@ -47,6 +47,7 @@ import type {
 import { adminRoleValues, type AdminRole } from "../models/auth";
 import { maskPhoneForDisplay } from "../mappers/phone-display-mapper";
 import { setEmployeeAccountStatusWithQuota } from "./employee-org-auth-quota-repository";
+import { findAccountPhoneIdentityConflictUnderLock } from "./account-phone-identity-lock";
 import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
@@ -833,32 +834,6 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     },
     async createAdminAccount(input) {
       const database = getDatabase();
-      const [existingAdminRow] = await database
-        .select({ public_id: admin.public_id })
-        .from(admin)
-        .where(eq(admin.phone, input.phone))
-        .limit(1);
-
-      if (existingAdminRow !== undefined) {
-        return {
-          reason: "admin_phone_exists",
-          status: "conflict",
-        };
-      }
-
-      const [existingUserRow] = await database
-        .select({ public_id: user.public_id })
-        .from(user)
-        .where(eq(user.phone, input.phone))
-        .limit(1);
-
-      if (existingUserRow !== undefined) {
-        return {
-          reason: "learner_employee_phone_exists",
-          status: "conflict",
-        };
-      }
-
       const targetOrganizationRow =
         input.organizationPublicId === null
           ? null
@@ -893,65 +868,87 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         ? "ops_admin_scoped_org_admin"
         : "super_admin";
 
-      await database.transaction(async (transaction) => {
-        await transaction.insert(authUser).values({
-          created_at: now,
-          email: `admin-${randomUUID()}@tiku.local`,
-          email_verified: now,
-          id: authUserId,
-          image: null,
-          name: input.name,
-          updated_at: now,
-        });
-        await transaction.insert(authAccount).values({
-          access_token: null,
-          access_token_expires_at: null,
-          account_id: authUserId,
-          created_at: now,
-          id: `auth-account-${randomUUID()}`,
-          id_token: null,
-          [authPasswordColumn]: passwordHash,
-          provider_id: credentialProviderId,
-          refresh_token: null,
-          refresh_token_expires_at: null,
-          scope: null,
-          updated_at: now,
-          user_id: authUserId,
-        });
-        const [createdAdminRow] = await transaction
-          .insert(admin)
-          .values({
-            admin_role: input.adminRole,
-            auth_user_id: authUserId,
+      const accountPhoneConflict = await database.transaction(
+        async (transaction) => {
+          const conflict = await findAccountPhoneIdentityConflictUnderLock(
+            transaction,
+            input.phone,
+          );
+
+          if (conflict !== null) {
+            return conflict;
+          }
+
+          await transaction.insert(authUser).values({
             created_at: now,
+            email: `admin-${randomUUID()}@tiku.local`,
+            email_verified: now,
+            id: authUserId,
+            image: null,
             name: input.name,
-            phone: input.phone,
-            public_id: adminPublicId,
-            status: "active",
             updated_at: now,
-          })
-          .returning({ id: admin.id });
-
-        if (createdAdminRow !== undefined) {
-          await transaction.insert(adminRoleAssignment).values({
-            admin_id: createdAdminRow.id,
-            admin_role: input.adminRole,
-            created_at: now,
           });
-        }
-
-        if (
-          targetOrganizationRow !== null &&
-          targetOrganizationRow !== undefined &&
-          createdAdminRow !== undefined
-        ) {
-          await transaction.insert(adminOrganization).values({
-            admin_id: createdAdminRow.id,
+          await transaction.insert(authAccount).values({
+            access_token: null,
+            access_token_expires_at: null,
+            account_id: authUserId,
             created_at: now,
-            organization_id: targetOrganizationRow.id,
+            id: `auth-account-${randomUUID()}`,
+            id_token: null,
+            [authPasswordColumn]: passwordHash,
+            provider_id: credentialProviderId,
+            refresh_token: null,
+            refresh_token_expires_at: null,
+            scope: null,
+            updated_at: now,
+            user_id: authUserId,
           });
-        }
-      });
+          const [createdAdminRow] = await transaction
+            .insert(admin)
+            .values({
+              admin_role: input.adminRole,
+              auth_user_id: authUserId,
+              created_at: now,
+              name: input.name,
+              phone: input.phone,
+              public_id: adminPublicId,
+              status: "active",
+              updated_at: now,
+            })
+            .returning({ id: admin.id });
+
+          if (createdAdminRow !== undefined) {
+            await transaction.insert(adminRoleAssignment).values({
+              admin_id: createdAdminRow.id,
+              admin_role: input.adminRole,
+              created_at: now,
+            });
+          }
+
+          if (
+            targetOrganizationRow !== null &&
+            targetOrganizationRow !== undefined &&
+            createdAdminRow !== undefined
+          ) {
+            await transaction.insert(adminOrganization).values({
+              admin_id: createdAdminRow.id,
+              created_at: now,
+              organization_id: targetOrganizationRow.id,
+            });
+          }
+          return null;
+        },
+      );
+
+      if (accountPhoneConflict !== null) {
+        return {
+          reason:
+            accountPhoneConflict === "admin"
+              ? "admin_phone_exists"
+              : "learner_employee_phone_exists",
+          status: "conflict",
+        };
+      }
 
       return {
         adminAccount: {

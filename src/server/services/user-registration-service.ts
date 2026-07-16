@@ -47,12 +47,12 @@ export function createUserRegistrationService(
         );
       }
 
-      const existingUser =
-        await userRegistrationRepository.findRegisteredUserByPhone(
+      const accountPhoneConflict =
+        await userRegistrationRepository.findAccountPhoneConflict(
           registrationInput.value.phone,
         );
 
-      if (existingUser !== null) {
+      if (accountPhoneConflict !== null) {
         return createErrorResponse(
           DUPLICATE_PHONE_CODE,
           "Phone already registered.",
@@ -64,12 +64,21 @@ export function createUserRegistrationService(
         [CREDENTIAL_FIELD_NAME]: registrationInput.value.password,
       });
 
-      const registeredUser =
+      const personalUserResult =
         await userRegistrationRepository.createPersonalUser({
           authUserId: credential.authUserId,
           phone: registrationInput.value.phone,
           name: registrationInput.value.name,
         });
+
+      if (personalUserResult.status === "conflict") {
+        return createErrorResponse(
+          DUPLICATE_PHONE_CODE,
+          "Phone already registered.",
+        );
+      }
+
+      const registeredUser = personalUserResult.user;
       const session = await credentialAdapter.createSingleActiveSession({
         authUserId: credential.authUserId,
         expiresAt: addDays(getNow(), STUDENT_SESSION_DURATION_DAY),

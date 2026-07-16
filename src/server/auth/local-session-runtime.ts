@@ -45,6 +45,10 @@ import type {
   SessionUserRepository,
 } from "../repositories/session-repository";
 import type { UserRegistrationRepository } from "../repositories/user-registration-repository";
+import {
+  findAccountPhoneIdentityConflict,
+  findAccountPhoneIdentityConflictUnderLock,
+} from "../repositories/account-phone-identity-lock";
 import { createRuntimeDatabaseForSchema } from "../repositories/runtime-database";
 import { createOrgAuthCoversOrganizationCondition } from "../repositories/organization-scope-query";
 import { createAuthService } from "../services/auth-service";
@@ -566,34 +570,29 @@ function createPostgresUserRegistrationRepository(
   >,
 ): UserRegistrationRepository {
   return {
-    async findRegisteredUserByPhone(phone) {
+    async findAccountPhoneConflict(phone) {
       const database = getDatabase();
-      const [row] = await database
-        .select({
-          auth_user_id: user.auth_user_id,
-          employee_public_id: employee.public_id,
-          id: user.id,
-          locked_until_at: user.locked_until_at,
-          name: user.name,
-          organization_public_id: organization.public_id,
-          phone: user.phone,
-          public_id: user.public_id,
-          status: user.status,
-          user_type: user.user_type,
-        })
-        .from(user)
-        .leftJoin(employee, eq(employee.user_id, user.id))
-        .leftJoin(organization, eq(organization.id, employee.organization_id))
-        .where(and(eq(user.phone, phone), isNotNull(user.auth_user_id)))
-        .limit(1);
 
-      return row === undefined ? null : mapUserAccountRow(row);
+      return findAccountPhoneIdentityConflict(database, phone);
     },
 
     async createPersonalUser(input) {
       const database = getDatabase();
 
       return database.transaction(async (transaction) => {
+        const accountPhoneConflict =
+          await findAccountPhoneIdentityConflictUnderLock(
+            transaction,
+            input.phone,
+          );
+
+        if (accountPhoneConflict !== null) {
+          return {
+            status: "conflict" as const,
+            reason: accountPhoneConflict,
+          };
+        }
+
         const [userRow] = await transaction
           .insert(user)
           .values({
@@ -627,13 +626,12 @@ function createPostgresUserRegistrationRepository(
         });
 
         return {
-          ...mapUserAccountRow({
+          status: "created" as const,
+          user: mapUserAccountRow({
             ...userRow,
             employee_public_id: null,
             organization_public_id: null,
           }),
-          admin_public_id: null,
-          admin_roles: [],
         };
       });
     },

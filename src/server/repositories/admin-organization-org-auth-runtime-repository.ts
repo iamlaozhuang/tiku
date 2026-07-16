@@ -68,6 +68,7 @@ import {
   lockOrganizationScopeMutation,
   MAX_ORGANIZATION_TREE_DEPTH,
 } from "./organization-scope-query";
+import { findAccountPhoneIdentityConflictUnderLock } from "./account-phone-identity-lock";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 
 type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
@@ -1773,17 +1774,12 @@ async function createEmployeeAccountWithDatabase(
   input: CreateEmployeeAccountInput & { passwordHash: string },
 ) {
   await lockOrganizationScopeMutation(database);
-  await database.execute(
-    sql`select pg_advisory_xact_lock(200112, hashtext(${input.phone})) as employee_identity_lock`,
+  const accountPhoneConflict = await findAccountPhoneIdentityConflictUnderLock(
+    database,
+    input.phone,
   );
 
-  const [existingUser] = await database
-    .select({ id: user.id })
-    .from(user)
-    .where(eq(user.phone, input.phone))
-    .limit(1);
-
-  if (existingUser !== undefined) {
+  if (accountPhoneConflict !== null) {
     throw new EmployeeAccountMutationError("account_conflict");
   }
 

@@ -11,21 +11,24 @@ function createRepository(
   overrides: Partial<UserRegistrationRepository> = {},
 ): UserRegistrationRepository {
   return {
-    async findRegisteredUserByPhone() {
+    async findAccountPhoneConflict() {
       return null;
     },
     async createPersonalUser(input) {
       return {
-        id: 42,
-        auth_user_id: input.authUserId,
-        public_id: "user_public_123",
-        phone: input.phone,
-        name: input.name,
-        user_type: "personal",
-        status: "active",
-        locked_until_at: null,
-        employee_public_id: null,
-        organization_public_id: null,
+        status: "created",
+        user: {
+          id: 42,
+          auth_user_id: input.authUserId,
+          public_id: "user_public_123",
+          phone: input.phone,
+          name: input.name,
+          user_type: "personal",
+          status: "active",
+          locked_until_at: null,
+          employee_public_id: null,
+          organization_public_id: null,
+        },
       };
     },
     ...overrides,
@@ -85,19 +88,8 @@ describe("user registration service", () => {
         },
       }),
       createRepository({
-        async findRegisteredUserByPhone() {
-          return {
-            id: 42,
-            auth_user_id: "auth_user_123",
-            public_id: "user_public_123",
-            phone: "13800000000",
-            name: "张三",
-            user_type: "personal",
-            status: "active",
-            locked_until_at: null,
-            employee_public_id: null,
-            organization_public_id: null,
-          };
+        async findAccountPhoneConflict() {
+          return "user";
         },
       }),
     );
@@ -114,6 +106,73 @@ describe("user registration service", () => {
       data: null,
     });
     expect(credentialInputs).toEqual([]);
+  });
+
+  it("rejects an administrator-domain phone before creating credentials", async () => {
+    const credentialInputs: unknown[] = [];
+    const userRegistrationService = createUserRegistrationService(
+      createCredentialAdapter({
+        async createPasswordCredential(input) {
+          credentialInputs.push(input);
+          return { authUserId: "auth_user_123" };
+        },
+      }),
+      createRepository({
+        async findAccountPhoneConflict() {
+          return "admin";
+        },
+      }),
+    );
+
+    await expect(
+      userRegistrationService.registerPersonalUser({
+        phone: "13800000000",
+        [CREDENTIAL_FIELD_NAME]: "abc12345",
+        name: "张三",
+      }),
+    ).resolves.toEqual({
+      code: 409001,
+      message: "Phone already registered.",
+      data: null,
+    });
+    expect(credentialInputs).toEqual([]);
+  });
+
+  it("maps a locked write conflict without creating a session", async () => {
+    const sessionInputs: unknown[] = [];
+    const userRegistrationService = createUserRegistrationService(
+      createCredentialAdapter({
+        async createSingleActiveSession(input) {
+          sessionInputs.push(input);
+          return {
+            [SESSION_TOKEN_FIELD]: "unexpected-session",
+            auth_user_id: input.authUserId,
+            expires_at: input.expiresAt,
+          };
+        },
+      }),
+      createRepository({
+        async createPersonalUser() {
+          return {
+            status: "conflict",
+            reason: "admin",
+          };
+        },
+      }),
+    );
+
+    await expect(
+      userRegistrationService.registerPersonalUser({
+        phone: "13800000000",
+        [CREDENTIAL_FIELD_NAME]: "abc12345",
+        name: "张三",
+      }),
+    ).resolves.toEqual({
+      code: 409001,
+      message: "Phone already registered.",
+      data: null,
+    });
+    expect(sessionInputs).toEqual([]);
   });
 
   it("creates a personal user and returns redeem code next action metadata", async () => {
@@ -144,16 +203,19 @@ describe("user registration service", () => {
           createdUsers = [...createdUsers, input];
 
           return {
-            id: 42,
-            auth_user_id: input.authUserId,
-            public_id: "user_public_123",
-            phone: input.phone,
-            name: input.name,
-            user_type: "personal",
-            status: "active",
-            locked_until_at: null,
-            employee_public_id: null,
-            organization_public_id: null,
+            status: "created",
+            user: {
+              id: 42,
+              auth_user_id: input.authUserId,
+              public_id: "user_public_123",
+              phone: input.phone,
+              name: input.name,
+              user_type: "personal",
+              status: "active",
+              locked_until_at: null,
+              employee_public_id: null,
+              organization_public_id: null,
+            },
           };
         },
       }),

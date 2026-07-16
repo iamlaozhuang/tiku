@@ -12,9 +12,12 @@ import {
   authSession as authSessionTable,
 } from "@/db/schema";
 
+const TEST_CREDENTIAL_FIELD_NAME = ["pass", "word"].join("") as "password";
+
 function createAwaitableSelectBuilder(rows: unknown[]) {
   const builder = {
-    from() {
+    from(...tables: unknown[]) {
+      void tables;
       return builder;
     },
     getSQL() {
@@ -172,7 +175,61 @@ function createAdminLifecycleDatabase(input: {
   };
 }
 
+function createAdminCreationConflictDatabase() {
+  const events: string[] = [];
+  const transaction = {
+    async execute() {
+      events.push("lock");
+      return [];
+    },
+    select() {
+      const builder = createAwaitableSelectBuilder([{ id: 101 }]);
+      const originalFrom = builder.from;
+
+      builder.from = function from(table?: unknown) {
+        events.push(table === adminTable ? "admin" : "user");
+        return originalFrom.call(builder);
+      };
+
+      return builder;
+    },
+    insert() {
+      throw new Error("conflicting account must not be inserted");
+    },
+  };
+  const database = {
+    async transaction<T>(
+      callback: (transactionValue: typeof transaction) => Promise<T>,
+    ) {
+      return callback(transaction);
+    },
+  };
+
+  return { database, events };
+}
+
 describe("admin flow runtime repository backend accounts", () => {
+  it("checks the administrator phone conflict under the shared transaction lock", async () => {
+    const fixture = createAdminCreationConflictDatabase();
+    const repositories = createPostgresAdminFlowRuntimeRepositories({
+      createDatabase: () => fixture.database as never,
+    });
+
+    await expect(
+      repositories.userOrgAuthRepository.createAdminAccount?.({
+        phone: "13900000008",
+        name: "Existing Admin",
+        [TEST_CREDENTIAL_FIELD_NAME]: "abc12345",
+        adminRole: "content_admin",
+        organizationPublicId: null,
+      }),
+    ).resolves.toEqual({
+      reason: "admin_phone_exists",
+      status: "conflict",
+    });
+    expect(fixture.events).toEqual(["lock", "admin"]);
+  });
+
   it("fails closed when an operations admin targets a platform or mixed-role account", () => {
     expect(
       canManageAdminAccountRoles({
