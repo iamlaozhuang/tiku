@@ -1,8 +1,10 @@
 # P0 RC-08 企业训练完整性整改证据
 
-status: implementation_complete_fresh_master_pass_pending_closeout
+status: ready_for_branch_closeout
 
-result: static_remediation_pass_runtime_pending
+result: pass
+
+staticResult: static_remediation_pass_runtime_pending
 
 Business closeout commit: `e136ca28acde82282a17c65ccfb828a01e872c0b`（schema commit `897a1b4e0` 保持独立）。
 
@@ -54,6 +56,21 @@ analogousImplementationReviewed: true
 - P0 serial manual guard：passed，current RC-08、next global static regression/freeze。
 - Module Run v2 pre-commit 首次正确阻断 3 个未登记的新文件；确认均为本 RC 的 operation-id、persistence-conflict 与测试后补入精确 allowlist，重跑 passed；未扩大依赖、数据库或 runtime 权限。
 
+### Branch closeout command record
+
+- `git diff --check`：pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual`：pass。
+- `corepack pnpm@10.15.1 exec vitest run tests/unit/p0-rc-08-organization-training-integrity.test.ts tests/unit/p0-rc-08-schema-migration-source.test.ts --reporter=dot`：pass。
+- `corepack pnpm@10.15.1 exec vitest run src/db/schema/organization-training.test.ts src/server/validators/organization-training.test.ts src/server/mappers/organization-training-mapper.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts src/server/repositories/organization-analytics-repository.test.ts --reporter=dot`：pass。
+- `corepack pnpm@10.15.1 exec vitest run --maxWorkers=4 --reporter=dot`：pass，`400/400` files、`2386/2386` tests。
+- `corepack pnpm@10.15.1 run lint`：pass。
+- `corepack pnpm@10.15.1 run typecheck`：pass。
+- `corepack pnpm@10.15.1 run format:check`：pass。
+- `corepack pnpm@10.15.1 run build`：pass，93 pages。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-08-organization-training-integrity-2026-07-14`：pass。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-08-organization-training-integrity-2026-07-14`：本记录提交后重跑。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-08-organization-training-integrity-2026-07-14 -SkipRemoteAheadCheck`：module closeout 通过后重跑。
+
 ## Fresh Master Closeout
 
 - `master` 已以 `--ff-only` 合入 RC-08 claim、schema 与 business commits；验证基线：`e136ca28acde82282a17c65ccfb828a01e872c0b`。
@@ -89,3 +106,20 @@ analogousImplementationReviewed: true
 
 - 未执行 database apply/read/write/backfill/seed、Provider、secret/env、worker activation、runtime/browser/e2e。
 - 未修改依赖、lockfile、`D:\tiku-readonly-audit`；未创建 PR、force push 或部署。
+
+## 品味合规自检 Checklist
+
+- [x] glossary、snake_case、camelCase、publicId 与 API envelope 保持一致。
+- [x] api → service → repository → model 分层保持；事务权威位于 repository。
+- [x] UI 使用既有 design tokens，未新增硬编码颜色、inline style 或主题判断。
+- [x] 未暴露 numeric id、standard_answer 提前事实、secret、raw Prompt 或 Provider payload。
+- [x] 越权、跨 organization、非法状态、并发、失败、重试、回滚、幂等、null/空集合与异常输入均有对抗覆盖。
+- [x] migration 仅源码与静态测试，未越过 database/runtime approval boundary。
+
+localFullLoopGate: pass_fresh_master_attached_prepush_origin_sync_and_cleanup_pending
+
+Cost Calibration Gate remains blocked.
+
+threadRolloverGate: continue_same_goal
+
+nextModuleRunCandidate: `p0-remediation-global-static-regression-baseline-freeze-2026-07-14`

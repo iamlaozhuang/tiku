@@ -1,8 +1,10 @@
 # P0 RC-08 企业训练完整性对抗式复核
 
-status: complete
+status: pass_branch_closeout_ready
 
 reviewerMode: same_agent_two_distinct_rounds_no_subagent
+
+Verdict: `APPROVE_BRANCH_CLOSEOUT / fresh_master_gate_passed`
 
 ## Round 1
 
@@ -38,3 +40,5 @@ result: passed_after_remediation
 - F-0121、F-0123、F-0145 的静态整改证据成立；F-0123 的 root-cause alias 关系保留，不改写为 duplicate。
 - `RV-0020` 与全局 21 项 runtime validation 仍为 pending；本结论不是数据库/浏览器/Provider 业务验收通过。
 - 无 Subagent；两轮由同一 Agent 以不同 checklist 自对抗完成，未表述为独立审查者。
+
+reviewResult: pass_branch_closeout_ready_fresh_master_passed
