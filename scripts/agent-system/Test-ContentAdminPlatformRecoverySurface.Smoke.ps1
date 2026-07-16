@@ -8,6 +8,68 @@ $currentTaskId = "content-admin-platform-m2-active-state-slimming-2026-07-13"
 $nextTaskId = "content-admin-platform-b0-contract-code-mapping-2026-07-13"
 $terminalTaskId = "content-admin-platform-f5-final-cumulative-audit-2026-07-13"
 $successorTaskId = "p0-remediation-serial-program-bootstrap-2026-07-14"
+$closedStartupTaskBlock = @"
+lastClosedStartupTask:
+  id: p1-p2-remediation-startup-package-v1-2026-07-15
+  title: P1/P2 remediation startup package v1.0
+  phase: p1-p2-remediation-startup-package-v1-2026-07-15
+  status: closed
+  priority: governance
+  taskKind: static_audit_and_planning
+  branch: codex/p1-p2-remediation-startup-package-v1
+  executionProfile: R2
+  planPath: docs/05-execution-logs/task-plans/2026-07-15-p1-p2-remediation-startup-package-v1.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-15-p1-p2-remediation-startup-package-v1.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-startup-package-v1.md
+  nextRequiredTaskId: ""
+  startupPackage:
+    status: closed
+    activityStatePolicy: wip_one_governance_only
+    sourceMasterSha: 0643ad4d6346453f3324d86b6e003c6726c808ef
+    p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
+    originalAuditSourceSha: 7aac83765ca4b650b73b1612013e26a0111775ae
+    auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
+    findingCounts:
+      total: 143
+      p1: 125
+      p2: 18
+    revalidationPolicy:
+      startupLevel: level_1_all_findings_unique
+      deepAdversarialLevel: just_in_time_when_cluster_claimed
+      p2BeforeP1Freeze: impact_mapping_only
+    startupPackagePath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-startup-package-v1.md
+    findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
+    postP0MapPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml
+    clusterPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml
+    p1SerialDraftPath: docs/05-execution-logs/task-plans/2026-07-15-p1-remediation-serial-program.md
+    generatorPath: scripts/agent-system/New-P1P2RemediationStartupArtifacts.ps1
+    guardScriptPath: scripts/agent-system/Test-P1P2RemediationStartupPackage.ps1
+    completion:
+      packageMaterialized: true
+      consistencyCheck: pass
+      twoRoundAdversarialReview: pass
+      productZeroChange: pass
+      auditRepositoryZeroChange: pass
+      detachedRecoveryDrill: pass
+      localCommit: finalized_by_commit_containing_this_state
+      closeoutAuthorization: approved_current_user_2026_07_16
+  implementationBoundary:
+    p1Implementation: blocked_requires_new_goal_and_authorization
+    p2Implementation: blocked_until_p1_frozen_and_new_goal
+    runtimeAcceptance: blocked_requires_separate_goal_and_approval
+    schemaMigration: blocked_requires_new_program_authorization
+    databaseMutation: blocked_requires_fresh_user_approval
+    dependencyIntroduction: blocked_requires_fresh_user_approval
+    providerRuntimeBrowser: blocked_requires_fresh_user_approval
+    prForcePushDeploy: blocked_requires_fresh_user_approval
+    fastForwardMerge: approved_master_only_current_user_2026_07_16
+    push: approved_origin_master_only_current_user_2026_07_16
+    cleanup: approved_after_remote_sync_current_user_2026_07_16
+  currentExecutionGate:
+    status: satisfied_governance_only
+    reason: user_created_goal_for_p1_p2_startup_package_only
+    resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
+"@
 
 function Write-Utf8File {
     param(
@@ -174,6 +236,21 @@ function New-TerminalFixture {
     return $root
 }
 
+function New-P1SuccessorFixture {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $root = New-TerminalFixture -Name $Name -ProgramStatus "closed" -TaskStatus "closed"
+    $statePath = Join-Path $root "state.yaml"
+    $state = Get-Content -LiteralPath $statePath -Raw
+    $state = $state.Replace("currentTask:`n  id: $terminalTaskId`n  status: closed", "p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress`n$closedStartupTaskBlock`ncurrentTask:`n  id: p1-remediation-program-bootstrap-2026-07-16`n  status: in_progress")
+    Set-Content -LiteralPath $statePath -Value $state -Encoding UTF8 -NoNewline
+    $queuePath = Join-Path $root "queue.yaml"
+    $queue = Get-Content -LiteralPath $queuePath -Raw
+    $queue = $queue.Replace("activeTasks:`n  - id: $terminalTaskId`n    status: closed", "p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress`nactiveTasks:`n  - id: p1-remediation-program-bootstrap-2026-07-16`n    status: in_progress")
+    Set-Content -LiteralPath $queuePath -Value $queue -Encoding UTF8 -NoNewline
+    return $root
+}
+
 function Assert-FailsWith {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
@@ -190,7 +267,7 @@ function Assert-FailsWith {
         }
     }
     if (-not $guardFailed) {
-        throw "Negative recovery fixture unexpectedly passed.`n$($output -join "`n")"
+        throw "Negative recovery fixture unexpectedly passed: $Root`n$($output -join "`n")"
     }
 }
 
@@ -236,6 +313,147 @@ try {
         throw "Closed-program successor recovery fixture did not pass.`n$($closedSuccessorOutput -join "`n")"
     }
 
+    $p1SuccessorRoot = New-P1SuccessorFixture -Name "p1-successor"
+    $p1SuccessorOutput = Invoke-Guard -Root $p1SuccessorRoot
+    if (($p1SuccessorOutput -join "`n") -notmatch "recoverySurfaceResult: pass") {
+        throw "P1 successor recovery fixture did not pass.`n$($p1SuccessorOutput -join "`n")"
+    }
+
+    $activeLegacySuccessorRoot = New-Fixture -Name "active-legacy-p1-successor"
+    $activeLegacyStatePath = Join-Path $activeLegacySuccessorRoot "state.yaml"
+    $activeLegacyState = Get-Content -LiteralPath $activeLegacyStatePath -Raw
+    $activeLegacyState = $activeLegacyState.Replace("currentTask:`n  id: $currentTaskId`n  status: in_progress", "p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress`n$closedStartupTaskBlock`ncurrentTask:`n  id: $currentTaskId`n  status: in_progress")
+    Set-Content -LiteralPath $activeLegacyStatePath -Value $activeLegacyState -Encoding UTF8 -NoNewline
+    $activeLegacyQueuePath = Join-Path $activeLegacySuccessorRoot "queue.yaml"
+    $activeLegacyQueue = Get-Content -LiteralPath $activeLegacyQueuePath -Raw
+    $activeLegacyQueue = $activeLegacyQueue.Replace("activeTasks:", "p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress`nactiveTasks:")
+    Set-Content -LiteralPath $activeLegacyQueuePath -Value $activeLegacyQueue -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $activeLegacySuccessorRoot -Pattern "RECOVERY_SURFACE_P1_SUCCESSOR_WHILE_LEGACY_ACTIVE"
+
+    $unpairedSuccessorRoot = New-TerminalFixture -Name "unpaired-p1-successor" -ProgramStatus "closed" -TaskStatus "closed"
+    $unpairedStatePath = Join-Path $unpairedSuccessorRoot "state.yaml"
+    $unpairedState = Get-Content -LiteralPath $unpairedStatePath -Raw
+    $unpairedState = $unpairedState.Replace("currentTask:`n  id: $terminalTaskId`n  status: closed", "p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress`ncurrentTask:`n  id: $terminalTaskId`n  status: closed")
+    Set-Content -LiteralPath $unpairedStatePath -Value $unpairedState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $unpairedSuccessorRoot -Pattern "RECOVERY_SURFACE_P1_SUCCESSOR_PROJECTION_MISMATCH"
+
+    $orphanedStartupRoot = New-TerminalFixture -Name "orphaned-startup-task" -ProgramStatus "closed" -TaskStatus "closed"
+    $orphanedStartupStatePath = Join-Path $orphanedStartupRoot "state.yaml"
+    $orphanedStartupState = Get-Content -LiteralPath $orphanedStartupStatePath -Raw
+    $orphanedStartupState = $orphanedStartupState.Replace("currentTask:", "lastClosedStartupTask:`n  id: p1-p2-remediation-startup-package-v1-2026-07-15`n  status: closed`ncurrentTask:")
+    Set-Content -LiteralPath $orphanedStartupStatePath -Value $orphanedStartupState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $orphanedStartupRoot -Pattern "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_ORPHANED"
+
+    $truncatedStartupRoot = New-P1SuccessorFixture -Name "truncated-startup-task"
+    $truncatedStartupStatePath = Join-Path $truncatedStartupRoot "state.yaml"
+    $truncatedStartupState = (Get-Content -LiteralPath $truncatedStartupStatePath -Raw).Replace($closedStartupTaskBlock, "lastClosedStartupTask:`n  id: p1-p2-remediation-startup-package-v1-2026-07-15`n  status: closed")
+    Set-Content -LiteralPath $truncatedStartupStatePath -Value $truncatedStartupState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $truncatedStartupRoot -Pattern "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_INVALID"
+
+    $missingStartupPackageRoot = New-P1SuccessorFixture -Name "missing-startup-package"
+    $missingStartupPackageStatePath = Join-Path $missingStartupPackageRoot "state.yaml"
+    $missingStartupPackageState = Get-Content -LiteralPath $missingStartupPackageStatePath -Raw
+    $missingStartupPackageState = $missingStartupPackageState -replace '(?ms)^  startupPackage:.*?(?=^  implementationBoundary:)', ''
+    Set-Content -LiteralPath $missingStartupPackageStatePath -Value $missingStartupPackageState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $missingStartupPackageRoot -Pattern "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_INVALID"
+
+    $missingBoundaryRoot = New-P1SuccessorFixture -Name "missing-implementation-boundary"
+    $missingBoundaryStatePath = Join-Path $missingBoundaryRoot "state.yaml"
+    $missingBoundaryState = Get-Content -LiteralPath $missingBoundaryStatePath -Raw
+    $missingBoundaryState = $missingBoundaryState -replace '(?ms)^  implementationBoundary:.*?(?=^  currentExecutionGate:)', ''
+    Set-Content -LiteralPath $missingBoundaryStatePath -Value $missingBoundaryState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $missingBoundaryRoot -Pattern "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_INVALID"
+
+    $tamperedStartupRoot = New-P1SuccessorFixture -Name "tampered-startup-pointer"
+    $tamperedStartupStatePath = Join-Path $tamperedStartupRoot "state.yaml"
+    $tamperedStartupState = (Get-Content -LiteralPath $tamperedStartupStatePath -Raw).Replace("sourceMasterSha: 0643ad4d6346453f3324d86b6e003c6726c808ef", "sourceMasterSha: 0000000000000000000000000000000000000000")
+    Set-Content -LiteralPath $tamperedStartupStatePath -Value $tamperedStartupState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $tamperedStartupRoot -Pattern "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_INVALID"
+
+    $duplicateStateP1Root = New-P1SuccessorFixture -Name "duplicate-state-p1"
+    $duplicateStateP1Path = Join-Path $duplicateStateP1Root "state.yaml"
+    $duplicateStateP1 = (Get-Content -LiteralPath $duplicateStateP1Path -Raw).Replace($closedStartupTaskBlock, "p1RemediationSerialProgram:`n  programId: fake-last-wins`n  status: closed`n$closedStartupTaskBlock")
+    Set-Content -LiteralPath $duplicateStateP1Path -Value $duplicateStateP1 -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $duplicateStateP1Root -Pattern "RECOVERY_SURFACE_DUPLICATE_TOP_LEVEL_KEY project-state p1RemediationSerialProgram"
+
+    $duplicateQueueP1Root = New-P1SuccessorFixture -Name "duplicate-queue-p1"
+    $duplicateQueueP1Path = Join-Path $duplicateQueueP1Root "queue.yaml"
+    $duplicateQueueP1 = (Get-Content -LiteralPath $duplicateQueueP1Path -Raw).Replace("activeTasks:", "p1RemediationSerialProgram:`n  programId: fake-last-wins`n  status: closed`nactiveTasks:")
+    Set-Content -LiteralPath $duplicateQueueP1Path -Value $duplicateQueueP1 -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $duplicateQueueP1Root -Pattern "RECOVERY_SURFACE_DUPLICATE_TOP_LEVEL_KEY task-queue p1RemediationSerialProgram"
+
+    $duplicateStartupRoot = New-P1SuccessorFixture -Name "duplicate-closed-startup"
+    $duplicateStartupStatePath = Join-Path $duplicateStartupRoot "state.yaml"
+    $duplicateStartupState = (Get-Content -LiteralPath $duplicateStartupStatePath -Raw).Replace("currentTask:", "$closedStartupTaskBlock`ncurrentTask:")
+    Set-Content -LiteralPath $duplicateStartupStatePath -Value $duplicateStartupState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $duplicateStartupRoot -Pattern "RECOVERY_SURFACE_DUPLICATE_TOP_LEVEL_KEY project-state lastClosedStartupTask"
+
+    $wrongP1IdRoot = New-P1SuccessorFixture -Name "wrong-p1-program-id"
+    $wrongP1IdStatePath = Join-Path $wrongP1IdRoot "state.yaml"
+    $wrongP1IdState = (Get-Content -LiteralPath $wrongP1IdStatePath -Raw).Replace("programId: p1-remediation-2026-07-16", "programId: p1-remediation-fake")
+    Set-Content -LiteralPath $wrongP1IdStatePath -Value $wrongP1IdState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $wrongP1IdRoot -Pattern "RECOVERY_SURFACE_P1_SUCCESSOR_ID_INVALID"
+
+    $quotedP1Root = New-P1SuccessorFixture -Name "quoted-p1-key"
+    $quotedP1StatePath = Join-Path $quotedP1Root "state.yaml"
+    $quotedP1State = (Get-Content -LiteralPath $quotedP1StatePath -Raw).Replace($closedStartupTaskBlock, "`"p1RemediationSerialProgram`":`n  programId: fake-last-wins`n$closedStartupTaskBlock")
+    Set-Content -LiteralPath $quotedP1StatePath -Value $quotedP1State -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $quotedP1Root -Pattern "RECOVERY_SURFACE_NONCANONICAL_YAML_KEY"
+
+    $quotedStartupRoot = New-P1SuccessorFixture -Name "quoted-startup-key"
+    $quotedStartupStatePath = Join-Path $quotedStartupRoot "state.yaml"
+    $quotedStartupState = (Get-Content -LiteralPath $quotedStartupStatePath -Raw).Replace("currentTask:", "`"lastClosedStartupTask`":`n  id: fake-last-wins`ncurrentTask:")
+    Set-Content -LiteralPath $quotedStartupStatePath -Value $quotedStartupState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $quotedStartupRoot -Pattern "RECOVERY_SURFACE_NONCANONICAL_YAML_KEY"
+
+    $spacedKeyRoot = New-P1SuccessorFixture -Name "space-before-colon"
+    $spacedKeyStatePath = Join-Path $spacedKeyRoot "state.yaml"
+    $spacedKeyState = (Get-Content -LiteralPath $spacedKeyStatePath -Raw).Replace($closedStartupTaskBlock, "p1RemediationSerialProgram :`n  programId: fake-last-wins`n$closedStartupTaskBlock")
+    Set-Content -LiteralPath $spacedKeyStatePath -Value $spacedKeyState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $spacedKeyRoot -Pattern "RECOVERY_SURFACE_NONCANONICAL_YAML_KEY"
+
+    $mergeKeyRoot = New-P1SuccessorFixture -Name "merge-key"
+    $mergeKeyStatePath = Join-Path $mergeKeyRoot "state.yaml"
+    $mergeKeyState = (Get-Content -LiteralPath $mergeKeyStatePath -Raw).TrimEnd("`r", "`n") + "`n<<: *successor`n"
+    Set-Content -LiteralPath $mergeKeyStatePath -Value $mergeKeyState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $mergeKeyRoot -Pattern "RECOVERY_SURFACE_NONCANONICAL_YAML_KEY"
+
+    $duplicateProgramIdRoot = New-P1SuccessorFixture -Name "duplicate-child-program-id"
+    $duplicateProgramIdStatePath = Join-Path $duplicateProgramIdRoot "state.yaml"
+    $duplicateProgramIdState = (Get-Content -LiteralPath $duplicateProgramIdStatePath -Raw).Replace("  programId: p1-remediation-2026-07-16`n  status: in_progress", "  programId: p1-remediation-2026-07-16`n  programId: fake-last-wins`n  status: in_progress")
+    Set-Content -LiteralPath $duplicateProgramIdStatePath -Value $duplicateProgramIdState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $duplicateProgramIdRoot -Pattern "RECOVERY_SURFACE_DUPLICATE_MAPPING_KEY.*programId"
+
+    $duplicateStatusRoot = New-P1SuccessorFixture -Name "duplicate-child-status"
+    $duplicateStatusQueuePath = Join-Path $duplicateStatusRoot "queue.yaml"
+    $duplicateStatusQueue = (Get-Content -LiteralPath $duplicateStatusQueuePath -Raw).Replace("  programId: p1-remediation-2026-07-16`n  status: in_progress`nactiveTasks:", "  programId: p1-remediation-2026-07-16`n  status: in_progress`n  status: closed`nactiveTasks:")
+    Set-Content -LiteralPath $duplicateStatusQueuePath -Value $duplicateStatusQueue -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $duplicateStatusRoot -Pattern "RECOVERY_SURFACE_DUPLICATE_MAPPING_KEY.*status"
+
+    $fourSpaceChildRoot = New-P1SuccessorFixture -Name "four-space-child-duplicate"
+    $fourSpaceChildStatePath = Join-Path $fourSpaceChildRoot "state.yaml"
+    $fourSpaceChildState = (Get-Content -LiteralPath $fourSpaceChildStatePath -Raw).Replace("p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress", "p1RemediationSerialProgram:`n    programId: p1-remediation-2026-07-16`n    programId: fake-last-wins`n    status: in_progress")
+    Set-Content -LiteralPath $fourSpaceChildStatePath -Value $fourSpaceChildState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $fourSpaceChildRoot -Pattern "RECOVERY_SURFACE_DUPLICATE_MAPPING_KEY.*programId"
+
+    $oneSpaceChildRoot = New-P1SuccessorFixture -Name "one-space-child-duplicate"
+    $oneSpaceChildQueuePath = Join-Path $oneSpaceChildRoot "queue.yaml"
+    $oneSpaceChildQueue = (Get-Content -LiteralPath $oneSpaceChildQueuePath -Raw).Replace("p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress", "p1RemediationSerialProgram:`n programId: p1-remediation-2026-07-16`n programId: fake-last-wins`n status: in_progress")
+    Set-Content -LiteralPath $oneSpaceChildQueuePath -Value $oneSpaceChildQueue -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $oneSpaceChildRoot -Pattern "RECOVERY_SURFACE_DUPLICATE_MAPPING_KEY.*programId"
+
+    $commentPoisonRoot = New-P1SuccessorFixture -Name "comment-indent-poison"
+    $commentPoisonStatePath = Join-Path $commentPoisonRoot "state.yaml"
+    $commentPoisonState = (Get-Content -LiteralPath $commentPoisonStatePath -Raw).Replace("p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16", "p1RemediationSerialProgram:`n # ignored YAML comment`n  programId: p1-remediation-2026-07-16`n  programId: fake-last-wins")
+    Set-Content -LiteralPath $commentPoisonStatePath -Value $commentPoisonState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $commentPoisonRoot -Pattern "RECOVERY_SURFACE_DUPLICATE_MAPPING_KEY.*programId"
+
+    $wrappedProgramRoot = New-P1SuccessorFixture -Name "wrapped-p1-program"
+    $wrappedProgramStatePath = Join-Path $wrappedProgramRoot "state.yaml"
+    $wrappedProgramState = (Get-Content -LiteralPath $wrappedProgramStatePath -Raw).Replace("p1RemediationSerialProgram:`n  programId: p1-remediation-2026-07-16`n  status: in_progress", "p1RemediationSerialProgram:`n  wrapper:`n    programId: p1-remediation-2026-07-16`n    status: in_progress")
+    Set-Content -LiteralPath $wrappedProgramStatePath -Value $wrappedProgramState -Encoding UTF8 -NoNewline
+    Assert-FailsWith -Root $wrappedProgramRoot -Pattern "RECOVERY_SURFACE_P1_SUCCESSOR_ID_INVALID"
+
     $extraRoot = New-Fixture -Name "extra-active"
     $extraQueue = Get-Content -LiteralPath (Join-Path $extraRoot "queue.yaml") -Raw
     $extraQueue = $extraQueue.Replace("  - id: $nextTaskId`n    status: pending`nstandingAuthorization:", "  - id: $nextTaskId`n    status: pending`n  - id: unexpected`n    status: pending`nstandingAuthorization:")
@@ -274,7 +492,7 @@ try {
     Set-Content -LiteralPath (Join-Path $authorizationRoot "state.yaml") -Value $authorizationState -Encoding UTF8 -NoNewline
     Assert-FailsWith -Root $authorizationRoot -Pattern "RECOVERY_SURFACE_STANDING_AUTHORIZATION_MISMATCH"
 
-    Write-Output "Content admin platform recovery surface smoke passed: 5 positive, 7 negative"
+    Write-Output "Content admin platform recovery surface smoke passed: 6 positive, 28 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

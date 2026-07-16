@@ -19,6 +19,9 @@ $ErrorActionPreference = "Stop"
 $expectedProgramId = "content-admin-platform-b-to-f-2026-07-13"
 $expectedPolicy = "lean_v3_current_program_only"
 $terminalTaskId = "content-admin-platform-f5-final-cumulative-audit-2026-07-13"
+$expectedP1SuccessorProgramId = "p1-remediation-2026-07-16"
+$expectedClosedStartupTaskId = "p1-p2-remediation-startup-package-v1-2026-07-15"
+$expectedClosedStartupTaskSha256 = "1716f09b643c530a6ab6cef3bb089ac0a6896d9a37861c6f5f04c4274eb24a83"
 $findings = New-Object System.Collections.Generic.List[string]
 
 function Add-Finding {
@@ -34,6 +37,23 @@ function Get-Indent {
         return $Matches[1].Length
     }
     return 0
+}
+
+function Get-DirectChildIndent {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block)
+
+    if ($Block.Count -eq 0) { return -1 }
+    $parentIndent = Get-Indent -Line $Block[0]
+    $childIndents = @(
+        for ($lineIndex = 1; $lineIndex -lt $Block.Count; $lineIndex++) {
+            if (-not [string]::IsNullOrWhiteSpace($Block[$lineIndex]) -and $Block[$lineIndex] -notmatch '^\s*#') {
+                $lineIndent = Get-Indent -Line $Block[$lineIndex]
+                if ($lineIndent -gt $parentIndent) { $lineIndent }
+            }
+        }
+    )
+    if ($childIndents.Count -eq 0) { return -1 }
+    return ($childIndents | Measure-Object -Minimum).Minimum
 }
 
 function Get-TopLevelBlock {
@@ -71,8 +91,9 @@ function Get-SectionBlock {
 
     $start = -1
     $indent = -1
-    for ($index = 0; $index -lt $Block.Count; $index++) {
-        if ($Block[$index] -match "^(\s+)$([regex]::Escape($Key)):\s*$") {
+    $directIndent = Get-DirectChildIndent -Block $Block
+    for ($index = 1; $index -lt $Block.Count; $index++) {
+        if ($directIndent -ge 0 -and (Get-Indent -Line $Block[$index]) -eq $directIndent -and $Block[$index] -match "^(\s+)$([regex]::Escape($Key)):\s*$") {
             $start = $index
             $indent = $Matches[1].Length
             break
@@ -98,8 +119,10 @@ function Get-ScalarValue {
         [Parameter(Mandatory = $true)][string]$Key
     )
 
-    foreach ($line in $Block) {
-        if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.*?)\s*$") {
+    $directIndent = Get-DirectChildIndent -Block $Block
+    for ($lineIndex = 1; $lineIndex -lt $Block.Count; $lineIndex++) {
+        $line = $Block[$lineIndex]
+        if ($directIndent -ge 0 -and (Get-Indent -Line $line) -eq $directIndent -and $line -match "^\s+$([regex]::Escape($Key)):\s*(.*?)\s*$") {
             return $Matches[1].Trim().Trim('"').Trim("'")
         }
     }
@@ -111,12 +134,9 @@ function Get-ListItemBlocks {
 
     $items = New-Object System.Collections.Generic.List[object]
     $starts = New-Object System.Collections.Generic.List[int]
-    $itemIndent = -1
+    $itemIndent = Get-DirectChildIndent -Block $Block
     for ($index = 0; $index -lt $Block.Count; $index++) {
         if ($Block[$index] -match "^(\s*)-\s+id:\s+(\S+)\s*$") {
-            if ($itemIndent -lt 0) {
-                $itemIndent = $Matches[1].Length
-            }
             if ($Matches[1].Length -eq $itemIndent) {
                 $starts.Add($index)
             }
@@ -173,6 +193,18 @@ function Get-FileSha256 {
     }
 }
 
+function Get-LinesSha256 {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes(($Lines -join "`n"))
+        return ([System.BitConverter]::ToString($sha256.ComputeHash($bytes))).Replace("-", "").ToLowerInvariant()
+    } finally {
+        $sha256.Dispose()
+    }
+}
+
 function Test-AllowedTopLevelKeys {
     param(
         [Parameter(Mandatory = $true)][string[]]$Keys,
@@ -193,6 +225,56 @@ function Test-AllowedTopLevelKeys {
     }
 }
 
+function Test-UniqueTopLevelKeys {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Keys,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    foreach ($duplicateKey in @($Keys | Group-Object | Where-Object { $_.Count -gt 1 })) {
+        Add-Finding "RECOVERY_SURFACE_DUPLICATE_TOP_LEVEL_KEY $Label $($duplicateKey.Name)"
+    }
+}
+
+function Test-CanonicalYamlSurfaceSyntax {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    for ($lineIndex = 0; $lineIndex -lt $Lines.Count; $lineIndex++) {
+        $line = $Lines[$lineIndex]
+        if ([string]::IsNullOrWhiteSpace($line) -or $line -match '^\s*#') { continue }
+        if ($line -match "`t" -or $line -match '^\s*(?:-\s+)?<<\s*:' -or $line -match '^\s*(?:-\s+)?(?:"[^"]+"|''[^'']+'')\s*:' -or $line -match '^\s*(?:-\s+)?[A-Za-z][A-Za-z0-9_-]*\s+:') {
+            Add-Finding "RECOVERY_SURFACE_NONCANONICAL_YAML_KEY $Label line=$($lineIndex + 1)"
+            continue
+        }
+        if ((Get-Indent -Line $line) -eq 0 -and $line -notmatch '^[A-Za-z][A-Za-z0-9_-]*:(?:\s.*)?$') {
+            Add-Finding "RECOVERY_SURFACE_NONCANONICAL_TOP_LEVEL $Label line=$($lineIndex + 1)"
+        }
+    }
+}
+
+function Test-DirectMappingKeysUnique {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    if ($Block.Count -eq 0) { return }
+    $directIndent = Get-DirectChildIndent -Block $Block
+    $keys = [System.Collections.Generic.List[string]]::new()
+    if ($Block[0] -match '^\s*-\s+([A-Za-z][A-Za-z0-9_-]*):') { $keys.Add($Matches[1]) }
+    for ($lineIndex = 1; $lineIndex -lt $Block.Count; $lineIndex++) {
+        if ($directIndent -ge 0 -and (Get-Indent -Line $Block[$lineIndex]) -eq $directIndent -and $Block[$lineIndex] -match '^\s*([A-Za-z][A-Za-z0-9_-]*):') {
+            $keys.Add($Matches[1])
+        }
+    }
+    foreach ($duplicateKey in @($keys | Group-Object | Where-Object { $_.Count -gt 1 })) {
+        Add-Finding "RECOVERY_SURFACE_DUPLICATE_MAPPING_KEY $Label $($duplicateKey.Name)"
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = (Get-Location).Path
 }
@@ -208,8 +290,38 @@ foreach ($requiredFile in @($stateFullPath, $queueFullPath)) {
 
 $stateLines = @(Get-Content -LiteralPath $stateFullPath)
 $queueLines = @(Get-Content -LiteralPath $queueFullPath)
+Test-CanonicalYamlSurfaceSyntax -Lines $stateLines -Label "project-state"
+Test-CanonicalYamlSurfaceSyntax -Lines $queueLines -Label "task-queue"
 $stateProgram = @(Get-TopLevelBlock -Lines $stateLines -Key "contentAdminPlatformSerialProgram")
 $queueProgram = @(Get-TopLevelBlock -Lines $queueLines -Key "contentAdminPlatformSerialProgram")
+$stateP1SuccessorProgram = @(Get-TopLevelBlock -Lines $stateLines -Key "p1RemediationSerialProgram")
+$queueP1SuccessorProgram = @(Get-TopLevelBlock -Lines $queueLines -Key "p1RemediationSerialProgram")
+$closedStartupTask = @(Get-TopLevelBlock -Lines $stateLines -Key "lastClosedStartupTask")
+$hasStateP1Successor = $stateP1SuccessorProgram.Count -gt 0
+$hasQueueP1Successor = $queueP1SuccessorProgram.Count -gt 0
+$hasP1Successor = $hasStateP1Successor -and $hasQueueP1Successor
+
+Test-DirectMappingKeysUnique -Block $stateProgram -Label "project-state contentAdminPlatformSerialProgram"
+Test-DirectMappingKeysUnique -Block $queueProgram -Label "task-queue contentAdminPlatformSerialProgram"
+Test-DirectMappingKeysUnique -Block $stateP1SuccessorProgram -Label "project-state p1RemediationSerialProgram"
+Test-DirectMappingKeysUnique -Block $queueP1SuccessorProgram -Label "task-queue p1RemediationSerialProgram"
+
+if ($hasStateP1Successor -ne $hasQueueP1Successor) {
+    Add-Finding "RECOVERY_SURFACE_P1_SUCCESSOR_PROJECTION_MISMATCH"
+}
+if ($hasP1Successor) {
+    if ((Get-ScalarValue -Block $stateProgram -Key "status") -ne "closed" -or (Get-ScalarValue -Block $queueProgram -Key "status") -ne "closed") {
+        Add-Finding "RECOVERY_SURFACE_P1_SUCCESSOR_WHILE_LEGACY_ACTIVE"
+    }
+    if ((Get-ScalarValue -Block $stateP1SuccessorProgram -Key "programId") -ne $expectedP1SuccessorProgramId -or (Get-ScalarValue -Block $queueP1SuccessorProgram -Key "programId") -ne $expectedP1SuccessorProgramId) {
+        Add-Finding "RECOVERY_SURFACE_P1_SUCCESSOR_ID_INVALID"
+    }
+    if ($closedStartupTask.Count -eq 0 -or (Get-ScalarValue -Block $closedStartupTask -Key "id") -ne $expectedClosedStartupTaskId -or (Get-ScalarValue -Block $closedStartupTask -Key "status") -ne "closed" -or (Get-LinesSha256 -Lines $closedStartupTask) -ne $expectedClosedStartupTaskSha256) {
+        Add-Finding "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_INVALID"
+    }
+} elseif ($closedStartupTask.Count -gt 0) {
+    Add-Finding "RECOVERY_SURFACE_CLOSED_STARTUP_TASK_ORPHANED"
+}
 
 $requiredStateKeys = @(
     "schemaVersion",
@@ -222,9 +334,13 @@ $requiredStateKeys = @(
     "repositoryCheckpoint",
     "historyPointers"
 )
-Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $stateLines) -Allowed @(
+$stateTopLevelKeys = @(Get-TopLevelKeys -Lines $stateLines)
+Test-UniqueTopLevelKeys -Keys $stateTopLevelKeys -Label "project-state"
+Test-AllowedTopLevelKeys -Keys $stateTopLevelKeys -Allowed @(
     $requiredStateKeys
     "p0RemediationSerialProgram"
+    $(if ($hasP1Successor) { "p1RemediationSerialProgram" })
+    $(if ($hasP1Successor) { "lastClosedStartupTask" })
 ) -Required $requiredStateKeys -Label "project-state"
 $requiredQueueKeys = @(
     "schemaVersion",
@@ -233,9 +349,12 @@ $requiredQueueKeys = @(
     "standingAuthorization",
     "historyPointers"
 )
-Test-AllowedTopLevelKeys -Keys @(Get-TopLevelKeys -Lines $queueLines) -Allowed @(
+$queueTopLevelKeys = @(Get-TopLevelKeys -Lines $queueLines)
+Test-UniqueTopLevelKeys -Keys $queueTopLevelKeys -Label "task-queue"
+Test-AllowedTopLevelKeys -Keys $queueTopLevelKeys -Allowed @(
     $requiredQueueKeys
     "p0RemediationSerialProgram"
+    $(if ($hasP1Successor) { "p1RemediationSerialProgram" })
 ) -Required $requiredQueueKeys -Label "task-queue"
 
 foreach ($programBlock in @($stateProgram, $queueProgram)) {

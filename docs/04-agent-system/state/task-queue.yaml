@@ -193,7 +193,179 @@ p0RemediationSerialProgram:
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: closed
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: closed
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: closed
+p1RemediationSerialProgram:
+  programId: p1-remediation-2026-07-16
+  status: in_progress
+  activityStatePolicy: wip_one_dynamic_task_materialization
+  baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
+  p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
+  auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
+  currentTaskId: p1-remediation-program-bootstrap-2026-07-16
+  currentCandidateClusterId: P1-RC-01
+  candidateClusterOrder:
+    - P1-RC-01
+    - P1-RC-02
+    - P1-RC-03
+    - P1-RC-04
+    - P1-RC-05
+    - P1-RC-06
+    - P1-RC-07
+    - P1-RC-08
+    - P1-RC-09
+    - P1-GLOBAL-STATIC-REGRESSION-BASELINE-FREEZE
+  materializedTaskIds:
+    - p1-remediation-program-bootstrap-2026-07-16
+  completedTaskIds: []
+  standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+  serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
+  findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
+  postP0MapPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml
+  clusterPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml
+  runtimeBacklogPath: D:/tiku-readonly-audit/runtime/runtime-validation-backlog.yaml
+  guardScriptPath: scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+  findingCounts:
+    p1: 125
+    p2: 18
+  runtimeValidationCount: 21
+  p2Implementation:
+    approved: false
+    status: impact_mapping_only
+  runtimeAcceptance:
+    approved: false
+    status: excluded_from_program
+  deployment:
+    approved: false
+    status: blocked_requires_fresh_user_approval
+  taskStatusById:
+    p1-remediation-program-bootstrap-2026-07-16: in_progress
 activeTasks:
+  - id: p1-remediation-program-bootstrap-2026-07-16
+    title: P1 remediation serial Program bootstrap
+    phase: p1-remediation-program-bootstrap-2026-07-16
+    status: in_progress
+    priority: governance
+    sequenceOrder: 0
+    taskKind: mechanism_hardening
+    moduleRunVersion: 3
+    executionStage: verification_complete
+    branch: codex/p1-remediation-program-bootstrap
+    worktreePath: D:/tiku/.worktrees/p1-remediation-program-bootstrap
+    dependsOn:
+      - p1-p2-remediation-startup-package-v1-2026-07-15
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+    focusedGates:
+      - p1_program_state_machine
+      - wip_one_dynamic_task_materialization
+      - finding_identity_143
+      - p2_runtime_f0013_boundary
+      - changed_file_allowlist
+      - immutable_startup_package
+      - immutable_audit_repository
+      - closeout_authorization
+      - recovery_surface
+      - two_round_adversarial_review
+    buildRequired: false
+    fullRegressionPolicy: governance_guards_plus_frozen_p0_baseline
+    protectedDomains:
+      - p1_finding_identity
+      - p0_frozen_baseline
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+      - f0013_runtime_hold
+      - audit_repository_integrity
+      - approval_boundary
+      - remote_closeout_target
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-program-bootstrap.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-program-bootstrap.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-program-bootstrap.md
+    allowedFiles:
+      - .husky/pre-commit
+      - .husky/pre-push
+      - scripts/agent-system/Test-P1P2RemediationStartupPackage.ps1
+      - scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.ps1
+      - scripts/agent-system/Test-ContentAdminPlatformRecoverySurface.Smoke.ps1
+      - scripts/agent-system/Test-P1RemediationSerialProgram.ps1
+      - scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-program-bootstrap.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-program-bootstrap.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-program-bootstrap.md
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: approved_task_allowlist
+      productRuntimeSourceChange: blocked
+      productTestSourceChange: blocked
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: satisfied
+      reason: current_user_approved_p1_remediation_goal_2026_07_16
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      resumeAction: validate_and_close_bootstrap_before_any_product_task
+    acceptanceStandards:
+      - P1 Program is recoverable from repository state with WIP exactly one and dynamic task materialization.
+      - All 125 P1 and 18 P2 identities remain unique; P2 remains impact-mapping only and F-0013 remains on runtime hold.
+      - Startup artifacts, frozen P0 baseline, 21-item runtime backlog, and read-only audit repository remain intact.
+      - Hooks enforce the P1 guard without removing historical, P0, or Module Run gates.
+      - No product source, test, schema, dependency, database, Provider, browser/runtime, PR, force push, or deployment action occurs.
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1P2RemediationStartupPackage.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-program-bootstrap-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-program-bootstrap-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-program-bootstrap-2026-07-16 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-p2-remediation-startup-package-v1-2026-07-15
     title: P1/P2 remediation startup package v1.0
     phase: p1-p2-remediation-startup-package-v1-2026-07-15
@@ -422,9 +594,9 @@ activeTasks:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
 standingAuthorization:
-  id: current-user-approved-p0-remediation-serial-goal-2026-07-14
-  source: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
-  localCommit: approved
+  id: current-user-approved-p1-remediation-goal-2026-07-16
+  source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+  localCommit: approved_task_scoped
   fastForwardMerge: approved_master_only
   push: approved_origin_master_only
   cleanup: approved_after_remote_sync

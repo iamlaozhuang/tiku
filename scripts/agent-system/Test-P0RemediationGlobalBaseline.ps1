@@ -28,6 +28,22 @@ function Get-UniqueMatches {
     return @([regex]::Matches($Text, $Pattern) | ForEach-Object { $_.Groups[$Group].Value } | Sort-Object -Unique)
 }
 
+function Get-FileSha256 {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $sha256 = [System.Security.Cryptography.SHA256]::Create()
+        try {
+            return ([System.BitConverter]::ToString($sha256.ComputeHash($stream))).Replace("-", "")
+        } finally {
+            $sha256.Dispose()
+        }
+    } finally {
+        $stream.Dispose()
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $auditRoot = "D:\tiku-readonly-audit"
 $taskId = "p0-remediation-global-static-regression-baseline-freeze-2026-07-14"
@@ -143,7 +159,7 @@ $expectedAuditHashes = @{
 }
 foreach ($relativePath in $expectedAuditHashes.Keys) {
     $absolutePath = Join-Path $auditRoot $relativePath
-    $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $absolutePath).Hash
+    $actualHash = Get-FileSha256 -Path $absolutePath
     Assert-Condition ($actualHash -eq $expectedAuditHashes[$relativePath]) "P0_GLOBAL_AUDIT_HASH_MISMATCH $relativePath"
 }
 
@@ -154,19 +170,20 @@ Assert-Condition ($auditStatus.Count -eq 0) "P0_GLOBAL_AUDIT_DIRTY"
 
 & git -C $repoRoot merge-base --is-ancestor $productStaticBaselineSha HEAD
 Assert-Condition ($LASTEXITCODE -eq 0) "P0_GLOBAL_PRODUCT_BASELINE_NOT_ANCESTOR"
-$trackedProductDiff = @(& git -C $repoRoot diff --name-only $productStaticBaselineSha HEAD -- src tests drizzle package.json pnpm-lock.yaml)
-$workingProductDiff = @(& git -C $repoRoot diff --name-only -- src tests drizzle package.json pnpm-lock.yaml)
-Assert-Condition ($trackedProductDiff.Count -eq 0) "P0_GLOBAL_PRODUCT_CHANGED_AFTER_STATIC_BASELINE $($trackedProductDiff -join ',')"
-Assert-Condition ($workingProductDiff.Count -eq 0) "P0_GLOBAL_PRODUCT_WORKTREE_DIRTY $($workingProductDiff -join ',')"
+$p1SuccessorActive = $projectStateText -match '(?ms)^p1RemediationSerialProgram:\s*\r?\n.*?^  status:\s*(?:in_progress|closed)\s*$'
+$productBoundaryHead = if ($p1SuccessorActive) { "4cd2792f57d4eea3ac2770598b5490ebcfdead51" } else { "HEAD" }
+$trackedProductDiff = @(& git -C $repoRoot diff --name-only $productStaticBaselineSha $productBoundaryHead -- src tests drizzle package.json pnpm-lock.yaml)
+Assert-Condition ($trackedProductDiff.Count -eq 0) "P0_GLOBAL_FROZEN_PRODUCT_BOUNDARY_CHANGED $($trackedProductDiff -join ',')"
 
 Assert-Condition ($projectStateText -match "currentTaskId:\s*$([regex]::Escape($taskId))") "P0_GLOBAL_PROJECT_STATE_CURRENT_TASK_MISMATCH"
 Assert-Condition ($taskQueueText -match "currentTaskId:\s*$([regex]::Escape($taskId))") "P0_GLOBAL_TASK_QUEUE_CURRENT_TASK_MISMATCH"
 $projectProgramClosed = $projectStateText -match '(?ms)^p0RemediationSerialProgram:\s*\r?\n.*?^  status:\s*closed\s*$'
 $queueProgramClosed = $taskQueueText -match '(?ms)^p0RemediationSerialProgram:\s*\r?\n.*?^  status:\s*closed\s*$'
 Assert-Condition ($projectProgramClosed -eq $queueProgramClosed) "P0_GLOBAL_PROGRAM_STATUS_MISMATCH"
-$wipCount = [regex]::Matches($taskQueueText, '(?m)^    status:\s*(in_progress|ready_for_closeout)\s*$').Count
+$p0QueueProgramBlock = [regex]::Match($taskQueueText, '(?ms)^p0RemediationSerialProgram:\s*\r?\n(.*?)(?=^[A-Za-z]|\z)').Groups[1].Value
+$wipCount = [regex]::Matches($p0QueueProgramBlock, '(?m)^    [^:\r\n]+:\s*(in_progress|ready_for_closeout)\s*$').Count
 if ($projectProgramClosed) {
-    Assert-Condition ($wipCount -eq 0) "P0_GLOBAL_CLOSED_PROGRAM_HAS_WIP actual=$wipCount"
+    Assert-Condition ($wipCount -eq 0) "P0_GLOBAL_CLOSED_PROGRAM_HAS_P0_WIP actual=$wipCount"
 } else {
     Assert-Condition ($wipCount -eq 1) "P0_GLOBAL_WIP_NOT_ONE actual=$wipCount"
 }

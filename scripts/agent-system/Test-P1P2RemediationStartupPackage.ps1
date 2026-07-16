@@ -1,12 +1,16 @@
 [CmdletBinding()]
 param(
-    [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path,
+    [string]$RepositoryRoot = "",
     [string]$AuditRepositoryRoot = "D:/tiku-readonly-audit",
     [switch]$SkipLiveRemote
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    $RepositoryRoot = (Resolve-Path (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "../..")).Path
+}
 
 $expectedMasterSha = "0643ad4d6346453f3324d86b6e003c6726c808ef"
 $p0ProductBaselineSha = "e136ca28acde82282a17c65ccfb828a01e872c0b"
@@ -44,6 +48,22 @@ function Write-Pass {
     Write-Output "PASS $Message"
 }
 
+function Get-FileSha256 {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $sha256 = [System.Security.Cryptography.SHA256]::Create()
+        try {
+            return ([System.BitConverter]::ToString($sha256.ComputeHash($stream))).Replace("-", "")
+        } finally {
+            $sha256.Dispose()
+        }
+    } finally {
+        $stream.Dispose()
+    }
+}
+
 function Get-FindingIds {
     param([string]$Text)
     return @([regex]::Matches($Text, '(?m)^  - findingId:\s*"?(F-\d{4})"?\s*$') | ForEach-Object { $_.Groups[1].Value })
@@ -76,11 +96,20 @@ $runtimeBacklogText = Get-Content -LiteralPath $runtimeBacklogPath -Raw -Encodin
 $ledgerText = Get-Content -LiteralPath $ledgerPath -Raw -Encoding UTF8
 $mapText = Get-Content -LiteralPath $mapPath -Raw -Encoding UTF8
 $clusterText = Get-Content -LiteralPath $clusterPath -Raw -Encoding UTF8
+$successorMode = $stateText -match "(?m)^p1RemediationSerialProgram:\s*$"
+$successorBaselineSha = "4cd2792f57d4eea3ac2770598b5490ebcfdead51"
 
 $originMasterSha = (& git -C $RepositoryRoot rev-parse origin/master).Trim()
 $currentHeadSha = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
-$allowedRemoteShas = @($expectedMasterSha, $currentHeadSha)
-Assert-True ($originMasterSha -in $allowedRemoteShas) "origin/master drift outside pre-closeout baseline/current package HEAD: $originMasterSha"
+if ($successorMode) {
+    & git -C $RepositoryRoot merge-base --is-ancestor $successorBaselineSha $originMasterSha
+    Assert-True ($LASTEXITCODE -eq 0) "origin/master is not descended from the frozen P1 successor baseline: $originMasterSha"
+    & git -C $RepositoryRoot merge-base --is-ancestor $originMasterSha $currentHeadSha
+    Assert-True ($LASTEXITCODE -eq 0) "current HEAD is not a fast-forward descendant of origin/master: head=$currentHeadSha origin=$originMasterSha"
+} else {
+    $allowedRemoteShas = @($expectedMasterSha, $currentHeadSha)
+    Assert-True ($originMasterSha -in $allowedRemoteShas) "origin/master drift outside pre-closeout baseline/current package HEAD: $originMasterSha"
+}
 if (-not $SkipLiveRemote) {
     $liveLine = (& git -C $RepositoryRoot ls-remote origin refs/heads/master).Trim()
     Assert-True (-not [string]::IsNullOrWhiteSpace($liveLine)) "live remote master missing"
@@ -90,13 +119,19 @@ if (-not $SkipLiveRemote) {
 Write-Pass "origin/live are synchronized at an allowed pre/post-closeout SHA ($originMasterSha)"
 
 $productPaths = @("src", "tests", "drizzle", "e2e", "package.json", "pnpm-lock.yaml", "package-lock.json", "yarn.lock")
-$committedProductDiff = @(& git -C $RepositoryRoot diff --name-only "$p0ProductBaselineSha..HEAD" -- @productPaths | Where-Object { $_ })
-$workingProductDiff = @(& git -C $RepositoryRoot diff --name-only -- @productPaths | Where-Object { $_ })
-$cachedProductDiff = @(& git -C $RepositoryRoot diff --cached --name-only -- @productPaths | Where-Object { $_ })
-Assert-True ($committedProductDiff.Count -eq 0) "committed product drift after P0 business baseline: $($committedProductDiff -join ', ')"
-Assert-True ($workingProductDiff.Count -eq 0) "unstaged product changes exist: $($workingProductDiff -join ', ')"
-Assert-True ($cachedProductDiff.Count -eq 0) "staged product changes exist: $($cachedProductDiff -join ', ')"
-Write-Pass "business source/tests/schema/dependencies remain unchanged"
+if ($successorMode) {
+    $frozenStartupProductDiff = @(& git -C $RepositoryRoot diff --name-only "$p0ProductBaselineSha..$successorBaselineSha" -- @productPaths | Where-Object { $_ })
+    Assert-True ($frozenStartupProductDiff.Count -eq 0) "frozen startup product boundary drifted before successor baseline: $($frozenStartupProductDiff -join ', ')"
+    Write-Pass "frozen startup product-zero-change boundary remains valid; successor task scope is governed separately"
+} else {
+    $committedProductDiff = @(& git -C $RepositoryRoot diff --name-only "$p0ProductBaselineSha..HEAD" -- @productPaths | Where-Object { $_ })
+    $workingProductDiff = @(& git -C $RepositoryRoot diff --name-only -- @productPaths | Where-Object { $_ })
+    $cachedProductDiff = @(& git -C $RepositoryRoot diff --cached --name-only -- @productPaths | Where-Object { $_ })
+    Assert-True ($committedProductDiff.Count -eq 0) "committed product drift after P0 business baseline: $($committedProductDiff -join ', ')"
+    Assert-True ($workingProductDiff.Count -eq 0) "unstaged product changes exist: $($workingProductDiff -join ', ')"
+    Assert-True ($cachedProductDiff.Count -eq 0) "staged product changes exist: $($cachedProductDiff -join ', ')"
+    Write-Pass "business source/tests/schema/dependencies remain unchanged"
+}
 
 $auditHead = (& git -C $AuditRepositoryRoot rev-parse HEAD).Trim()
 $auditStatus = @(& git -C $AuditRepositoryRoot status --short)
@@ -113,7 +148,7 @@ $auditHashes = [ordered]@{
     "catalog/sources/final-completion-audit-ap-fin-001.yaml" = "1A0AFA955676E95CF98E71C5FCB40C4B2CD410EEB4664A00515B29DB00D27AAA"
 }
 foreach ($entry in $auditHashes.GetEnumerator()) {
-    $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $AuditRepositoryRoot $entry.Key)).Hash
+    $actualHash = Get-FileSha256 -Path (Join-Path $AuditRepositoryRoot $entry.Key)
     Assert-True ($actualHash -eq $entry.Value) "audit artifact hash drift: $($entry.Key)"
 }
 Write-Pass "read-only audit HEAD, cleanliness, fsck and six frozen hashes"
@@ -221,25 +256,45 @@ Write-Pass "13 clusters cover all findings, each has a 12-part contract, P1 DAG 
 
 Assert-True ($stateText -notmatch "(?m)^p1P2Remediation(?:Startup)?Program:") "startup task must not bloat the top-level recovery surface"
 Assert-True ($queueText -notmatch "(?m)^p1P2RemediationStartupProgram:") "startup task must remain in activeTasks, not a new top-level queue program"
-Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  id:\s*p1-p2-remediation-startup-package-v1-2026-07-15\s*$") "startup currentTask missing from project state"
-Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  startupPackage:\s*$") "nested startup recovery metadata missing"
-Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  implementationBoundary:\s*\r?\n.*?p1Implementation:\s*blocked_requires_new_goal_and_authorization") "P1/P2 implementation authorization boundary missing"
+if ($successorMode) {
+    Assert-True ($stateText -match "(?ms)^lastClosedStartupTask:\s*\r?\n.*?^  id:\s*p1-p2-remediation-startup-package-v1-2026-07-15\s*$") "closed startup recovery metadata missing from project state"
+    Assert-True ($stateText -match "(?ms)^lastClosedStartupTask:\s*\r?\n.*?^  startupPackage:\s*$") "nested startup recovery metadata missing"
+    Assert-True ($stateText -match "(?ms)^lastClosedStartupTask:\s*\r?\n.*?^  implementationBoundary:\s*\r?\n.*?p1Implementation:\s*blocked_requires_new_goal_and_authorization") "historical P1/P2 authorization boundary missing"
+    $successorTaskId = [regex]::Match($stateText, "(?ms)^p1RemediationSerialProgram:\s*\r?\n(.*?)(?=^[A-Za-z]|\z)").Groups[1].Value | ForEach-Object { [regex]::Match($_, "(?m)^  currentTaskId:\s*(\S+)\s*$").Groups[1].Value }
+    Assert-True (-not [string]::IsNullOrWhiteSpace($successorTaskId)) "P1 successor currentTaskId missing"
+    Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  id:\s*$([regex]::Escape($successorTaskId))\s*$") "P1 successor currentTask missing from project state"
+} else {
+    Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  id:\s*p1-p2-remediation-startup-package-v1-2026-07-15\s*$") "startup currentTask missing from project state"
+    Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  startupPackage:\s*$") "nested startup recovery metadata missing"
+    Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  implementationBoundary:\s*\r?\n.*?p1Implementation:\s*blocked_requires_new_goal_and_authorization") "P1/P2 implementation authorization boundary missing"
+}
 Assert-True ($queueText -match "(?m)^\s+- id:\s+p1-p2-remediation-startup-package-v1-2026-07-15$") "startup task missing from activeTasks"
 $activeSection = [regex]::Match($queueText, "(?ms)^activeTasks:\s*(.*)\z").Groups[1].Value
 $inProgressCount = @([regex]::Matches($activeSection, "(?m)^    status:\s*in_progress\s*$")).Count
-$startupStatusMatch = [regex]::Match($stateText, "(?ms)^currentTask:\s*\r?\n(.*?)(?=^[A-Za-z]|\z)")
-Assert-True $startupStatusMatch.Success "cannot read startup currentTask state"
-$programStatus = [regex]::Match($startupStatusMatch.Groups[1].Value, "(?m)^  status:\s*(\S+)\s*$").Groups[1].Value
-if ($programStatus -eq "in_progress") {
-    Assert-True ($inProgressCount -eq 1) "WIP=1 violated while startup program is active"
-} elseif ($programStatus -in @("closed_local", "closed")) {
-    Assert-True ($inProgressCount -eq 0) "closed startup must have WIP=0"
+if ($successorMode) {
+    Assert-True ($inProgressCount -eq 1) "WIP=1 violated while P1 successor program is active"
 } else {
-    throw "invalid startup program status: $programStatus"
+    $startupStatusMatch = [regex]::Match($stateText, "(?ms)^currentTask:\s*\r?\n(.*?)(?=^[A-Za-z]|\z)")
+    Assert-True $startupStatusMatch.Success "cannot read startup currentTask state"
+    $programStatus = [regex]::Match($startupStatusMatch.Groups[1].Value, "(?m)^  status:\s*(\S+)\s*$").Groups[1].Value
+    if ($programStatus -eq "in_progress") {
+        Assert-True ($inProgressCount -eq 1) "WIP=1 violated while startup program is active"
+    } elseif ($programStatus -in @("closed_local", "closed")) {
+        Assert-True ($inProgressCount -eq 0) "closed startup must have WIP=0"
+    } else {
+        throw "invalid startup program status: $programStatus"
+    }
 }
-Assert-True ($queueText -match "p1Implementation:\s*blocked_requires_new_goal_and_authorization") "P1 implementation must remain blocked"
-Assert-True ($queueText -match "p2Implementation:\s*blocked_until_p1_frozen_and_new_goal") "P2 implementation must remain blocked"
-Write-Pass "state/queue are recoverable, WIP policy holds, P1/P2 implementation remains unauthorized"
+if ($successorMode) {
+    $historicalStartupTaskBlock = [regex]::Match($queueText, "(?ms)^  - id:\s*p1-p2-remediation-startup-package-v1-2026-07-15\s*\r?\n(.*?)(?=^  - id:|^standingAuthorization:|\z)").Groups[1].Value
+    Assert-True ($historicalStartupTaskBlock -match "p1Implementation:\s*blocked_requires_new_goal_and_authorization") "historical P1 implementation boundary changed"
+    Assert-True ($historicalStartupTaskBlock -match "p2Implementation:\s*blocked_until_p1_frozen_and_new_goal") "historical P2 implementation boundary changed"
+    Write-Pass "state/queue are recoverable, WIP=1 holds, and the successor uses a separate authorization surface"
+} else {
+    Assert-True ($queueText -match "p1Implementation:\s*blocked_requires_new_goal_and_authorization") "P1 implementation must remain blocked"
+    Assert-True ($queueText -match "p2Implementation:\s*blocked_until_p1_frozen_and_new_goal") "P2 implementation must remain blocked"
+    Write-Pass "state/queue are recoverable, WIP policy holds, P1/P2 implementation remains unauthorized"
+}
 
 $allowedChangedFiles = @(
     "docs/04-agent-system/state/project-state.yaml",
@@ -257,19 +312,52 @@ $allowedChangedFiles = @(
 $changedFiles = @(& git -C $RepositoryRoot diff --name-only $expectedMasterSha | ForEach-Object { $_.Replace("\", "/") })
 $untrackedFiles = @(& git -C $RepositoryRoot ls-files --others --exclude-standard | ForEach-Object { $_.Replace("\", "/") })
 $allChangedFiles = @($changedFiles + $untrackedFiles | Sort-Object -Unique)
-$unexpectedFiles = @($allChangedFiles | Where-Object { $_ -notin $allowedChangedFiles })
-Assert-True ($unexpectedFiles.Count -eq 0) "unexpected files outside startup allowlist: $($unexpectedFiles -join ', ')"
-Write-Pass "change surface is limited to startup governance artifacts"
-
-$beforeHashes = @{}
-foreach ($path in @($ledgerPath, $mapPath, $clusterPath)) { $beforeHashes[$path] = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash }
-& $generatorPath -RepositoryRoot $RepositoryRoot -AuditRepositoryRoot $AuditRepositoryRoot *> $null
-Assert-True ($LASTEXITCODE -eq 0) "generator rerun failed"
-foreach ($path in @($ledgerPath, $mapPath, $clusterPath)) {
-    $afterHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash
-    Assert-True ($afterHash -eq $beforeHashes[$path]) "generator is not deterministic: $path"
+if ($successorMode) {
+    $immutableStartupFiles = @(
+        "docs/05-execution-logs/task-plans/2026-07-15-p1-p2-remediation-startup-package-v1.md",
+        "docs/05-execution-logs/task-plans/2026-07-15-p1-remediation-serial-program.md",
+        "docs/05-execution-logs/evidence/2026-07-15-p1-p2-remediation-startup-package-v1.md",
+        "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-startup-package-v1.md",
+        "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml",
+        "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml",
+        "docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml",
+        "scripts/agent-system/New-P1P2RemediationStartupArtifacts.ps1"
+    )
+    $successorChangedFiles = @(
+        @(& git -C $RepositoryRoot diff --name-only $successorBaselineSha | ForEach-Object { $_.Replace("\", "/") }) +
+        $untrackedFiles |
+            Sort-Object -Unique
+    )
+    $changedFrozenStartupFiles = @($successorChangedFiles | Where-Object { $_ -in $immutableStartupFiles })
+    Assert-True ($changedFrozenStartupFiles.Count -eq 0) "immutable startup artifacts changed under successor Program: $($changedFrozenStartupFiles -join ', ')"
+    Write-Pass "closed startup artifacts remain immutable under the P1 successor Program"
+} else {
+    $unexpectedFiles = @($allChangedFiles | Where-Object { $_ -notin $allowedChangedFiles })
+    Assert-True ($unexpectedFiles.Count -eq 0) "unexpected files outside startup allowlist: $($unexpectedFiles -join ', ')"
+    Write-Pass "change surface is limited to startup governance artifacts"
 }
-Write-Pass "ledger/map/cluster generation is deterministic"
+
+if ($successorMode) {
+    $frozenStartupHashes = @{
+        $ledgerPath = "47C87F1D47C78853C166B0271F031E88E3BD02C02E3991BAD1DB2C28F231739B"
+        $mapPath = "A6B6207551C31816C0B4308F1CD19318ECF03FD9EB243C762041ECE776A3BF59"
+        $clusterPath = "9EAEC9396FA0F5BFFF5A8DF34B50A4329DB4AB6821F78AC8815985EF8BE085CB"
+    }
+    foreach ($path in $frozenStartupHashes.Keys) {
+        Assert-True ((Get-FileSha256 -Path $path) -eq $frozenStartupHashes[$path]) "frozen startup artifact hash drift: $path"
+    }
+    Write-Pass "ledger/map/cluster hashes remain frozen without executing a writer"
+} else {
+    $beforeHashes = @{}
+    foreach ($path in @($ledgerPath, $mapPath, $clusterPath)) { $beforeHashes[$path] = Get-FileSha256 -Path $path }
+    & pwsh.exe -NoProfile -File $generatorPath -RepositoryRoot $RepositoryRoot -AuditRepositoryRoot $AuditRepositoryRoot *> $null
+    Assert-True ($LASTEXITCODE -eq 0) "generator rerun failed"
+    foreach ($path in @($ledgerPath, $mapPath, $clusterPath)) {
+        $afterHash = Get-FileSha256 -Path $path
+        Assert-True ($afterHash -eq $beforeHashes[$path]) "generator is not deterministic: $path"
+    }
+    Write-Pass "ledger/map/cluster generation is deterministic"
+}
 
 Write-Output "PASS P1/P2 remediation startup package v1.0 validation completed"
 Write-Output "SUMMARY P1=125 P2=18 total=143 impact=96/35/10/2 F-0013=runtime_hold clusters=13 cycle=0"
