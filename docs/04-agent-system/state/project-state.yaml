@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-remediation-rc-01-single-session-concurrency-2026-07-16
-updatedAt: "2026-07-16T11:07:48-07:00"
+currentPhase: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+updatedAt: "2026-07-16T13:30:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -470,8 +470,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-01-single-session-concurrency-2026-07-16
-  currentCandidateClusterId: P1-RC-01
+  currentTaskId: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+  currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -489,11 +489,13 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
     - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
     - p1-remediation-rc-01-single-session-concurrency-2026-07-16
+    - p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
     - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
+    - p1-remediation-rc-01-single-session-concurrency-2026-07-16
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -519,7 +521,8 @@ p1RemediationSerialProgram:
     p1-remediation-rc-01-server-session-logout-2026-07-16: closed
     p1-remediation-rc-01-account-phone-identity-2026-07-16: closed
     p1-remediation-rc-01-registration-unit-of-work-2026-07-16: closed
-    p1-remediation-rc-01-single-session-concurrency-2026-07-16: ready_for_closeout
+    p1-remediation-rc-01-single-session-concurrency-2026-07-16: closed
+    p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16: in_progress
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pass
@@ -546,6 +549,12 @@ p1RemediationSerialProgram:
       worktreeCleanup: pass
       shortBranchCleanup: pass
     p1-remediation-rc-01-single-session-concurrency-2026-07-16:
+      taskCommit: pass
+      masterMerge: pass
+      originMasterSync: pass
+      worktreeCleanup: pass
+      shortBranchCleanup: pass
+    p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16:
       taskCommit: pending
       masterMerge: pending
       originMasterSync: pending
@@ -612,23 +621,23 @@ lastClosedStartupTask:
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 currentTask:
-  id: p1-remediation-rc-01-single-session-concurrency-2026-07-16
-  title: P1 RC-01 learner single-session concurrency closure
-  phase: p1-remediation-rc-01-single-session-concurrency-2026-07-16
-  status: ready_for_closeout
+  id: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+  title: P1 RC-02 redeem entitlement preview and explicit confirmation
+  phase: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+  status: in_progress
   priority: p1
   taskKind: product_remediation
-  branch: codex/p1-rc01-single-session-concurrency
+  branch: codex/p1-rc02-redeem-entitlement-preview
   executionProfile: R3
-  planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
-  evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-01-single-session-concurrency.md
+  planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+  evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
   nextRequiredTaskId: p1-remediation-next-jit-revalidation
   currentExecutionGate:
     status: satisfied
     reason: current_user_approved_p1_remediation_goal_2026_07_16
     approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
-    resumeAction: verify_static_p0_closure_and_add_only_f0131_regression_guard
+    resumeAction: implement_server_preview_explicit_upgrade_target_and_transactional_confirm_revalidation_for_f0132
 standingAuthorization:
   id: current-user-approved-p1-remediation-goal-2026-07-16
   source: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
@@ -638,9 +647,9 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: f237f54a420e2ceeeb9a9379fcf1a106def33e19
-  lastKnownOriginMasterSha: f237f54a420e2ceeeb9a9379fcf1a106def33e19
-  lastKnownRemoteMasterSha: f237f54a420e2ceeeb9a9379fcf1a106def33e19
+  lastKnownMasterSha: 08aee5a3c0ea3285d5063089663203953e4dfa7c
+  lastKnownOriginMasterSha: 08aee5a3c0ea3285d5063089663203953e4dfa7c
+  lastKnownRemoteMasterSha: 08aee5a3c0ea3285d5063089663203953e4dfa7c
   masterWorktreeClean: true
   priorTaskWorktreeCleanup: pass
   priorTaskShortBranchCleanup: pass

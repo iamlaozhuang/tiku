@@ -200,8 +200,8 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-01-single-session-concurrency-2026-07-16
-  currentCandidateClusterId: P1-RC-01
+  currentTaskId: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+  currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
     - P1-RC-02
@@ -219,11 +219,13 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
     - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
     - p1-remediation-rc-01-single-session-concurrency-2026-07-16
+    - p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
     - p1-remediation-rc-01-account-phone-identity-2026-07-16
     - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
+    - p1-remediation-rc-01-single-session-concurrency-2026-07-16
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -249,12 +251,165 @@ p1RemediationSerialProgram:
     p1-remediation-rc-01-server-session-logout-2026-07-16: closed
     p1-remediation-rc-01-account-phone-identity-2026-07-16: closed
     p1-remediation-rc-01-registration-unit-of-work-2026-07-16: closed
-    p1-remediation-rc-01-single-session-concurrency-2026-07-16: ready_for_closeout
+    p1-remediation-rc-01-single-session-concurrency-2026-07-16: closed
+    p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16: in_progress
 activeTasks:
+  - id: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+    title: P1 RC-02 redeem entitlement preview and explicit confirmation
+    phase: p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+    status: in_progress
+    priority: p1
+    sequenceOrder: 5
+    taskKind: product_remediation
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-rc02-redeem-entitlement-preview
+    worktreePath: D:/tiku/.worktrees/p1-rc02-redeem-entitlement-preview
+    dependsOn:
+      - p1-remediation-rc-01-single-session-concurrency-2026-07-16
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-02
+    findingIds:
+      - F-0132
+    authorityPath: server_entitlement_preview_then_transactional_confirm_revalidation
+    businessInvariant: no_redeem_code_is_irreversibly_consumed_before_the_learner_reviews_server_verified_benefit_and_any_required_upgrade_target
+    adversarialFailureMode: client_only_confirmation_or_stale_preview_can_consume_a_different_type_scope_edition_or_upgrade_target_than_the_learner_reviewed
+    rollbackOrStopCondition: stop_if_schema_migration_dependency_database_execution_external_rate_limit_infrastructure_or_unrelated_authorization_read_model_repair_is_required
+    focusedGates:
+      - server_readonly_redeem_code_preview
+      - preview_does_not_echo_plaintext_or_internal_ids
+      - standard_advanced_and_upgrade_semantics
+      - explicit_multiple_upgrade_target_selection
+      - preview_version_stale_snapshot_rejection
+      - transaction_revalidates_code_and_target_before_consume
+      - same_user_retry_is_idempotent_or_explicitly_conflicted
+      - cross_user_consume_does_not_leak_owner
+      - bounded_preview_rate_limit
+      - learner_loading_error_and_confirmation_states
+      - focused_contract_service_repository_ui_regression
+      - full_static_regression
+      - two_round_adversarial_review
+    buildRequired: true
+    fullRegressionPolicy: focused_redeem_preview_contract_service_repository_ui_tests_then_unit_lint_typecheck_format_build_and_program_guards
+    protectedDomains:
+      - personal_standard_activation
+      - personal_advanced_activation
+      - personal_edition_upgrade
+      - personal_and_employee_learner_redeem
+      - effective_authorization_source_edition
+      - redeem_code_plaintext_redaction
+      - atomic_single_consume
+      - p0_authorization_invariants
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+      - rv0021_runtime_hold
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-redeem-entitlement-preview.md
+      - src/app/api/v1/redeem-codes/preview/route.ts
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/server/contracts/authorization-contract.ts
+      - src/server/mappers/authorization-mapper.ts
+      - src/server/models/redeem-code-preview.ts
+      - src/server/repositories/redeem-code-authorization-repository.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/server/services/redeem-code-authorization-service.ts
+      - src/server/services/redeem-code-authorization-service.test.ts
+      - src/server/services/redeem-code-preview-rate-limiter.ts
+      - src/server/services/redeem-code-preview-rate-limiter.test.ts
+      - src/server/services/redeem-code-route.ts
+      - src/server/services/redeem-code-route.test.ts
+      - src/server/services/student-authorization-redeem-runtime.ts
+      - src/server/validators/redeem-code.ts
+      - src/server/validators/redeem-code.test.ts
+      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - tests/unit/phase-21-admin-redeem-code-concurrency.test.ts
+      - tests/unit/student-profile-redeem-ui.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: blocked
+      productRuntimeSourceChange: approved_task_allowlist
+      productTestSourceChange: approved_task_allowlist
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: satisfied
+      reason: current_user_approved_p1_remediation_goal_2026_07_16
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      resumeAction: implement_server_preview_explicit_upgrade_target_and_transactional_confirm_revalidation_for_f0132
+    acceptanceStandards:
+      - POST /api/v1/redeem-codes/preview is read-only and returns server-verified type, profession, level, resulting edition, duration, deadline, previewVersion and zero or more safe upgrade target summaries without echoing plaintext code, hashes or numeric ids.
+      - Standard and advanced activation preview the resulting personal authorization; edition_upgrade rejects an already-effective advanced scope, rejects no-target states and requires explicit selection when multiple active standard targets exist.
+      - Confirmation carries previewVersion and targetAuthorizationPublicId or null; the transaction re-reads and revalidates current code status, deadline, type, scope, candidate set, effective advanced state and selected target before conditional consumption.
+      - A stale preview or invalid target causes no consume or authorization write; same-code concurrency preserves one consume, same-user response-loss retry returns the committed result or an explicit stable conflict, and cross-user retry does not reveal the consuming user.
+      - Preview attempts use a bounded per-user process-local limiter without keying or logging plaintext code; multi-instance enforcement and real database interleaving remain RV-0021 runtime work.
+      - Learner UI renders preview loading, safe error, benefit details, explicit target selection and confirm states for personal learners and employees without changing organization authorization or quota.
+      - F-0132 is closed only at static level after focused and full regression; no schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+    validationCommands:
+      - corepack pnpm@10.15.1 exec vitest run src/server/validators/redeem-code.test.ts src/server/services/redeem-code-preview-rate-limiter.test.ts src/server/services/redeem-code-authorization-service.test.ts src/server/services/redeem-code-route.test.ts tests/unit/phase-8-student-authorization-redeem-runtime.test.ts tests/unit/phase-21-admin-redeem-code-concurrency.test.ts tests/unit/student-profile-redeem-ui.test.ts --maxWorkers=1
+      - npm.cmd run test:unit -- --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-rc-01-single-session-concurrency-2026-07-16
     title: P1 RC-01 learner single-session concurrency closure
     phase: p1-remediation-rc-01-single-session-concurrency-2026-07-16
-    status: ready_for_closeout
+    status: closed
     priority: p1
     sequenceOrder: 4
     taskKind: product_remediation
