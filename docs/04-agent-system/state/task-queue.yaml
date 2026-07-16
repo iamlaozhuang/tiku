@@ -143,8 +143,8 @@ p0RemediationSerialProgram:
   status: in_progress
   activityStatePolicy: wip_one_guarded_serial
   baselineSha: 7aac83765ca4b650b73b1612013e26a0111775ae
-  currentTaskId: p0-remediation-rc-08-organization-training-integrity-2026-07-14
-  nextTaskId: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+  currentTaskId: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+  nextTaskId: ""
   orderedTaskIds:
     - p0-remediation-serial-program-bootstrap-2026-07-14
     - p0-remediation-rc-01-identity-session-admin-account-2026-07-14
@@ -165,6 +165,7 @@ p0RemediationSerialProgram:
     - p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14
     - p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14
     - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
+    - p0-remediation-rc-08-organization-training-integrity-2026-07-14
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
@@ -188,113 +189,65 @@ p0RemediationSerialProgram:
     p0-remediation-rc-05-knowledge-resource-rag-citation-2026-07-14: closed
     p0-remediation-rc-06-ai-config-execution-provenance-2026-07-14: closed
     p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14: closed
-    p0-remediation-rc-08-organization-training-integrity-2026-07-14: ready_for_closeout
-    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: pending
+    p0-remediation-rc-08-organization-training-integrity-2026-07-14: closed
+    p0-remediation-global-static-regression-baseline-freeze-2026-07-14: in_progress
 activeTasks:
-  - id: p0-remediation-rc-08-organization-training-integrity-2026-07-14
-    title: P0 RC-08 organization training integrity
-    phase: p0-remediation-rc-08-organization-training-integrity-2026-07-14
-    status: ready_for_closeout
+  - id: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+    title: P0 global static regression and baseline freeze
+    phase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+    status: in_progress
     priority: p0
-    sequenceOrder: 8
-    taskKind: implementation
+    sequenceOrder: 9
+    taskKind: static_audit
     moduleRunVersion: 3
-    branch: codex/p0-rc-08-organization-training-integrity
+    branch: codex/p0-global-static-regression-freeze
     dependsOn:
-      - p0-remediation-rc-07-answer-mock-scoring-report-2026-07-14
+      - p0-remediation-rc-08-organization-training-integrity-2026-07-14
     approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
     authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
-    freshApprovalSource: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
-    executionProfile: R3
+    executionProfile: R2
     focusedGates:
-      - canonical_server_owned_draft
-      - draft_revision_conditional_save
-      - trusted_evidence_downgrade
-      - atomic_single_publish
-      - publish_idempotency
-      - immutable_version_snapshot
-      - answer_revision_operation_id
-      - server_side_objective_scoring
-      - short_answer_durable_scoring_task
-      - analytics_terminal_fact_only
-      - organization_scope_authorization
-      - transaction_concurrency_rollback
-      - schema_migration_source
+      - p0_finding_unique_35
+      - rc_evidence_lineage
+      - cross_cluster_contract_regression
+      - p1_p2_impact_unique_143
+      - runtime_pending_unique_21
+      - source_audit_integrity
+      - recovery_drill
       - scoped_format
       - diff_check
       - guard
       - module_closeout
       - pre_push
       - security_boundary
-    buildRequired: true
-    fullRegressionPolicy: required_shared_organization_training_authorization_scoring_analytics_contract
+    buildRequired: false
+    fullRegressionPolicy: reuse_rc08_fresh_master_full_regression_plus_docs_static_reconciliation
     protectedDomains:
-      - organization_training_draft
-      - organization_training_version
-      - organization_training_answer
-      - organization_training_scoring_task
-      - organization_scope
-      - authorization
-      - paper_snapshot
-      - organization_ai_result
-      - evidence_status
-      - citation
-      - organization_analytics
-      - ai_scoring
-      - transaction_atomicity
-      - idempotency
-      - audit_log
+      - p0_finding_identity
+      - remediation_evidence_lineage
+      - p1_p2_status_boundary
+      - runtime_acceptance_boundary
+      - audit_repository_integrity
+      - frozen_baseline
+      - recovery_surface
       - program_order
       - approval_boundary
       - deployment
     reviewMode: evidence_two_rounds
-    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
-    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
+    planPath: docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
-      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
-      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-07-answer-mock-scoring-report.md
-      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
-      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-serial-program.md
+      - docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md
+      - docs/05-execution-logs/evidence/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md
+      - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md
       - docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
-      - src/db/schema/organization-training.ts
-      - src/db/schema/organization-training.test.ts
-      - src/db/schema/index.ts
-      - src/server/models/organization-training.ts
-      - src/server/contracts/organization-training-contract.ts
-      - src/server/contracts/organization-training-persistence-contract.ts
-      - src/server/validators/organization-training.ts
-      - src/server/validators/organization-training.test.ts
-      - src/server/mappers/organization-training-mapper.ts
-      - src/server/mappers/organization-training-mapper.test.ts
-      - src/server/repositories/organization-training-repository.ts
-      - src/server/repositories/organization-training-repository.test.ts
-      - src/server/repositories/organization-training-scoring-task-repository.ts
-      - src/server/repositories/organization-training-scoring-task-repository.test.ts
-      - src/server/repositories/organization-analytics-repository.ts
-      - src/server/repositories/organization-analytics-repository.test.ts
-      - src/server/services/organization-training-service.ts
-      - src/server/services/organization-training-service.test.ts
-      - src/server/services/organization-training-route.ts
-      - src/server/services/organization-training-route.test.ts
-      - src/server/services/organization-training-scoring-task-runtime.ts
-      - src/server/services/organization-training-scoring-task-runtime.test.ts
-      - src/app/api/v1/organization-trainings/**
-      - src/features/organization-training-operation.ts
-      - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
-      - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
-      - tests/unit/organization-training-admin-entry-surface.test.ts
-      - tests/unit/organization-training-employee-entry-surface.test.ts
-      - tests/unit/p0-rc-08-operation-id-retry.test.ts
-      - tests/unit/organization-analytics-admin-entry-surface.test.ts
-      - tests/unit/p0-rc-08-organization-training-integrity.test.ts
-      - tests/unit/p0-rc-08-schema-migration-source.test.ts
-      - drizzle/*_p0_rc_08_*.sql
-      - drizzle/meta/*_snapshot.json
-      - drizzle/meta/_journal.json
+      - docs/05-execution-logs/audits-reviews/2026-07-15-p0-remediation-static-baseline-v2.yaml
+      - docs/05-execution-logs/audits-reviews/2026-07-15-p0-remediation-p1-p2-impact-map.yaml
+      - scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
     blockedFiles:
       - AGENTS.md
       - package.json
@@ -302,6 +255,9 @@ activeTasks:
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
       - yarn.lock
+      - src/**
+      - tests/**
+      - drizzle/**
       - e2e/**
       - migrations/**
       - seed/**
@@ -313,12 +269,12 @@ activeTasks:
       - .runtime/**
     capabilities:
       docsStateEvidenceAudit: approved
-      governanceRecoveryScriptChange: blocked_not_required
-      productRuntimeSourceChange: approved_task_allowlist
-      productTestSourceChange: approved_task_allowlist
-      dependencyIntroduction: blocked_without_fresh_approval
-      schemaMigration: approved_source_authoring_test_and_commit_only
-      databaseMutation: blocked_without_fresh_approval
+      governanceRecoveryScriptChange: approved_task_allowlist
+      productRuntimeSourceChange: blocked_not_required
+      productTestSourceChange: blocked_not_required
+      dependencyIntroduction: blocked
+      schemaMigration: blocked_not_required
+      databaseMutation: blocked
       secretEnvironmentAccess: blocked
       providerCall: blocked
       workerRuntimeActivation: blocked
@@ -329,32 +285,26 @@ activeTasks:
       costCalibrationGate: blocked
     currentExecutionGate:
       status: satisfied
-      reason: approved_schema_migration_source_authoring_test_and_commit_only_for_current_p0_goal
-      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-15-p0-remediation-schema-migration-source-approval.md
-      resumeAction: execute_rc_08_tdd_schema_migration_source_implementation_two_round_review_and_closeout_without_database_apply_secret_access_provider_call_worker_activation_or_runtime_acceptance
+      reason: approved_docs_governance_static_regression_and_baseline_freeze_within_current_p0_goal
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
+      resumeAction: reconcile_35_p0_conclusions_remap_p1_p2_impacts_freeze_static_baseline_and_close_program_without_product_or_runtime_changes
     acceptanceStandards:
-      - F-0121 publish consumes only the server-owned draft snapshot at the expected revision and cannot accept client-owned question, evidence, count, score or authorization lineage as published truth.
-      - F-0123 one draft creates at most one immutable version in one transaction; same operation replays the same result and stale, different-operation or concurrent publish attempts return a recoverable conflict.
-      - F-0145 employee save and submit accept only versioned answer items plus revision and operation id; the server validates question and option ownership, computes answered count and objective score, and creates a durable short-answer scoring task without trusting client scores.
-      - Draft/version, answer/scoring-task and scoring-task/answer completion transitions are atomic and rollback on partial failure.
-      - Organization analytics consumes only terminal server-scored submitted answers and excludes scoring, failed, inconsistent or null-score rows.
-      - Cross-organization and wrong-authorization access, illegal states, duplicate/concurrent requests, retries, null/empty/boundary input and API contracts are covered by focused tests.
-      - API responses preserve public ids, camelCase, standard envelope, null and empty-list semantics and never expose internal ids, teacher facts before submit, secrets, raw prompts or Provider payloads.
-      - P1/P2 remain impact mapping only; RV-0020 and all runtime validation remain pending.
-      - Database apply/read/write, real secret/env, fixture/seed, worker activation, runtime/browser/e2e, dependencies, Provider calls, PR, force push and deployment remain outside this task.
+      - All 35 original P0 finding ids appear exactly once in the frozen baseline and retain independent conclusions even when they share a root cause or alias.
+      - Every P0 conclusion is traceable to one RC evidence and audit pair, focused proof, full regression and an explicit runtime boundary.
+      - No P0 is downgraded, deleted, merged away or inferred absent from insufficient static evidence.
+      - All 125 P1 and 18 P2 findings appear exactly once in the impact map without remediation, closure or priority change; F-0013 remains runtime_evidence_required.
+      - All 21 runtime validation ids remain pending and approvalRequired; no static conclusion is described as runtime or business acceptance.
+      - The dependency graph is acyclic in RC-01 through RC-08 order and cross-cluster consumer contracts have no fresh static regression.
+      - Source, origin and live remote SHAs plus audit repository HEAD, cleanliness and key hashes are frozen and recoverable.
+      - Product source, tests, schema, migration, dependencies, database, Provider, browser, worker, PR, force push and deployment remain outside this task.
     validationCommands:
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationGlobalBaseline.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationSerialProgram.ps1 -Phase manual
-      - corepack pnpm@10.15.1 exec vitest run tests/unit/p0-rc-08-organization-training-integrity.test.ts tests/unit/p0-rc-08-schema-migration-source.test.ts --reporter=dot
-      - corepack pnpm@10.15.1 exec vitest run src/db/schema/organization-training.test.ts src/server/validators/organization-training.test.ts src/server/mappers/organization-training-mapper.test.ts src/server/services/organization-training-service.test.ts src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts src/server/repositories/organization-analytics-repository.test.ts --reporter=dot
-      - corepack pnpm@10.15.1 exec vitest run --maxWorkers=4 --reporter=dot
-      - corepack pnpm@10.15.1 run lint
-      - corepack pnpm@10.15.1 run typecheck
-      - corepack pnpm@10.15.1 run format:check
-      - corepack pnpm@10.15.1 run build
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-rc-08-organization-training-integrity-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-rc-08-organization-training-integrity-2026-07-14
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-rc-08-organization-training-integrity-2026-07-14 -SkipRemoteAheadCheck
+      - corepack pnpm@10.15.1 exec prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md docs/05-execution-logs/evidence/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-global-static-regression-baseline-freeze.md docs/05-execution-logs/audits-reviews/2026-07-15-p0-remediation-static-baseline-v2.yaml docs/05-execution-logs/audits-reviews/2026-07-15-p0-remediation-p1-p2-impact-map.yaml
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14 -SkipRemoteAheadCheck
     closeoutPolicy:
       authorizationSource: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
       localCommit:
@@ -371,9 +321,6 @@ activeTasks:
       cleanup:
         deleteShortBranch: true
         approvalSource: current-user-approved-p0-remediation-serial-goal-2026-07-14
-  - id: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-    title: P0 global static regression and baseline freeze
-    status: pending
 standingAuthorization:
   id: current-user-approved-p0-remediation-serial-goal-2026-07-14
   source: docs/05-execution-logs/acceptance/2026-07-14-p0-remediation-serial-standing-authorization.md
