@@ -1,0 +1,514 @@
+schemaVersion: "1.0"
+artifactId: "P1-P2-REMEDIATION-ROOT-CAUSE-CLUSTERS-V1"
+status: "candidate_level_1_only"
+rule: "Membership is provisional until just-in-time deep adversarial revalidation; shared directory or role alone is not a root cause."
+executionPolicy:
+  wipLimit: 1
+  p2ImplementationGate: "p1_static_baseline_frozen"
+  recommendedFirstP1Cluster: "P1-RC-01"
+  firstTaskSelectionRule: "Select confirmed security, authorization, or irreversible-data finding after JIT deep revalidation; do not preserve order without evidence."
+p1DependencyEdges:
+  - ["P1-RC-01", "P1-RC-02"]
+  - ["P1-RC-01", "P1-RC-03"]
+  - ["P1-RC-02", "P1-RC-03"]
+  - ["P1-RC-01", "P1-RC-04"]
+  - ["P1-RC-03", "P1-RC-04"]
+  - ["P1-RC-03", "P1-RC-05"]
+  - ["P1-RC-04", "P1-RC-05"]
+  - ["P1-RC-03", "P1-RC-06"]
+  - ["P1-RC-05", "P1-RC-06"]
+  - ["P1-RC-01", "P1-RC-07"]
+  - ["P1-RC-03", "P1-RC-07"]
+  - ["P1-RC-04", "P1-RC-07"]
+  - ["P1-RC-06", "P1-RC-07"]
+  - ["P1-RC-01", "P1-RC-08"]
+  - ["P1-RC-03", "P1-RC-08"]
+  - ["P1-RC-04", "P1-RC-08"]
+  - ["P1-RC-05", "P1-RC-08"]
+  - ["P1-RC-07", "P1-RC-08"]
+  - ["P1-RC-02", "P1-RC-09"]
+  - ["P1-RC-03", "P1-RC-09"]
+  - ["P1-RC-04", "P1-RC-09"]
+  - ["P1-RC-05", "P1-RC-09"]
+  - ["P1-RC-07", "P1-RC-09"]
+  - ["P1-RC-08", "P1-RC-09"]
+clusters:
+  - clusterId: "P1-RC-01"
+    phase: "P1"
+    name: "identity_session_account_boundary"
+    findingCount: 4
+    coveredFindingIds: ["F-0001", "F-0003", "F-0129", "F-0131"]
+    rootCauseHypothesis: "账号域身份唯一性、服务端 session 撤销和高权限账号生命周期缺少统一权威边界。"
+    counterEvidenceThatWouldRefute: "若当前账号写路径已统一冲突检测、所有登出均撤销服务端 session，且反例测试覆盖九角色，则该假设不足以解释残余 finding。"
+    upstreamDependencies: []
+    blastRadius: "user/session/auth API、登录态消费者与九角色入口。"
+    dataCompatibilityRisk: "历史账号冲突、存量 session 与多端登录可能需要兼容策略。"
+    securityAndAuthorizationRisk: "账号接管、残留 session、跨账号域身份混淆。"
+    minimumVerifiableBoundary: "只处理身份唯一性和 session 生命周期权威路径，不纳入 organization 对象级授权。"
+    approvalBoundary: "源码与产品测试可由未来 P1 Program 授权；数据清理、实际 session 失效或迁移需单独批准。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-02"
+    phase: "P1"
+    name: "organization_employee_quota_lifecycle"
+    findingCount: 7
+    coveredFindingIds:
+      ["F-0108", "F-0114", "F-0115", "F-0116", "F-0117", "F-0132", "F-0143"]
+    rootCauseHypothesis: "organization 拓扑、employee 生命周期和 quota/redeem_code 维护缺少同一事务与租户约束。"
+    counterEvidenceThatWouldRefute: "若所有写路径都显式锁定 organization、原子校验 quota 并处理离职/重复兑换，则需要拆分为更小根因。"
+    upstreamDependencies: ["P1-RC-01"]
+    blastRadius: "organization、employee、quota、redeem_code、组织后台。"
+    dataCompatibilityRisk: "存量 employee 归属、配额账本和组织层级数据。"
+    securityAndAuthorizationRisk: "跨 organization 写入、配额越用、离职账号残留权限。"
+    minimumVerifiableBoundary: "只收敛组织成员与配额生命周期，不实现 edition 对象级范围解释。"
+    approvalBoundary: "schema/migration 源码、数据库 apply/backfill、外部 quota 服务分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-03"
+    phase: "P1"
+    name: "authorization_edition_scope_read_model"
+    findingCount: 9
+    coveredFindingIds:
+      [
+        "F-0004",
+        "F-0009",
+        "F-0015",
+        "F-0088",
+        "F-0112",
+        "F-0119",
+        "F-0140",
+        "F-0141",
+        "F-0142",
+      ]
+    rootCauseHypothesis: "authorization/edition 的有效范围缺少唯一解释器，读写路径对 organization/profession/level 的判断不一致。"
+    counterEvidenceThatWouldRefute: "若 ADR-007 与需求 SSOT 已在所有消费者形成同一 effective scope，则残余问题应下沉到各领域对象权限。"
+    upstreamDependencies: ["P1-RC-01", "P1-RC-02"]
+    blastRadius: "authorization、personal_auth、org_auth、effectiveEdition 与所有受限对象查询。"
+    dataCompatibilityRisk: "历史授权状态、升级/到期语义与旧客户端字段。"
+    securityAndAuthorizationRisk: "越权读取、跨 organization/profession/level 数据泄漏。"
+    minimumVerifiableBoundary: "统一范围解释和对象级守卫，不顺手修复领域生命周期。"
+    approvalBoundary: "必须执行高级版需求读取规则；数据修复、迁移和实际授权变更需单独批准。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-04"
+    phase: "P1"
+    name: "shared_api_query_mutation_contract"
+    findingCount: 30
+    coveredFindingIds:
+      [
+        "F-0007",
+        "F-0010",
+        "F-0017",
+        "F-0018",
+        "F-0019",
+        "F-0020",
+        "F-0021",
+        "F-0022",
+        "F-0030",
+        "F-0031",
+        "F-0034",
+        "F-0038",
+        "F-0046",
+        "F-0049",
+        "F-0052",
+        "F-0054",
+        "F-0070",
+        "F-0071",
+        "F-0078",
+        "F-0083",
+        "F-0095",
+        "F-0105",
+        "F-0106",
+        "F-0107",
+        "F-0110",
+        "F-0118",
+        "F-0128",
+        "F-0144",
+        "F-0153",
+        "F-0170",
+      ]
+    rootCauseHypothesis: "共享 query/mutation 契约未统一处理分页、排序、错误分类、未知结果、幂等和状态查询。"
+    counterEvidenceThatWouldRefute: "若问题仅存在于单一领域 UI 且 API 契约已稳定，则应回归该领域簇，不应以共享层合并。"
+    upstreamDependencies: ["P1-RC-01", "P1-RC-03"]
+    blastRadius: "共享 API client、分页列表、mutation hooks、错误边界和前后端 DTO。"
+    dataCompatibilityRisk: "旧客户端对错误码、null/[]、分页与枚举的假设。"
+    securityAndAuthorizationRisk: "错误降级可能掩盖越权；重复 mutation 可能造成数据破坏。"
+    minimumVerifiableBoundary: "只改可复用契约和最小消费者，不用目录相邻性合并领域问题。"
+    approvalBoundary: "新增依赖、浏览器验证或远程 API 调用需单独批准。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-05"
+    phase: "P1"
+    name: "content_editor_paper_lifecycle"
+    findingCount: 15
+    coveredFindingIds:
+      [
+        "F-0029",
+        "F-0053",
+        "F-0055",
+        "F-0056",
+        "F-0074",
+        "F-0077",
+        "F-0094",
+        "F-0096",
+        "F-0097",
+        "F-0098",
+        "F-0155",
+        "F-0156",
+        "F-0160",
+        "F-0166",
+        "F-0167",
+      ]
+    rootCauseHypothesis: "question/material/paper 的编辑、复制、发布与 snapshot 未围绕不可变版本和合法状态转换建模。"
+    counterEvidenceThatWouldRefute: "若权威写路径已有不可变 snapshot、事务和完整状态守卫，则残余 UI 缺口不能由此根因解释。"
+    upstreamDependencies: ["P1-RC-03", "P1-RC-04"]
+    blastRadius: "内容后台、question、material、paper、paper_section、snapshot。"
+    dataCompatibilityRisk: "已发布内容、历史 paper snapshot 与旧草稿。"
+    securityAndAuthorizationRisk: "跨范围内容访问、发布绕过、不可逆内容丢失。"
+    minimumVerifiableBoundary: "最小闭合内容权威写路径和消费者契约，不纳入 knowledge 索引。"
+    approvalBoundary: "schema/migration 源码及存量内容回填分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-06"
+    phase: "P1"
+    name: "knowledge_resource_index_lifecycle"
+    findingCount: 10
+    coveredFindingIds:
+      [
+        "F-0032",
+        "F-0037",
+        "F-0069",
+        "F-0073",
+        "F-0082",
+        "F-0085",
+        "F-0086",
+        "F-0087",
+        "F-0089",
+        "F-0090",
+      ]
+    rootCauseHypothesis: "resource/knowledge_node/chunk/index generation 缺少单一生命周期、可重建标识和 citation 完整性约束。"
+    counterEvidenceThatWouldRefute: "若索引全由可追溯 snapshot 重建且删除/更新原子传播，RAG 质量问题需另立模型或检索根因。"
+    upstreamDependencies: ["P1-RC-03", "P1-RC-05"]
+    blastRadius: "resource、knowledge_base、knowledge_node、chunk、embedding、RAG、citation。"
+    dataCompatibilityRisk: "旧向量、孤儿 chunk、citation 定位和重建成本。"
+    securityAndAuthorizationRisk: "跨 organization 检索、敏感 resource 泄漏、伪 citation。"
+    minimumVerifiableBoundary: "闭合资源到索引及 citation 的可追溯链，不调整 Provider 或线上向量库。"
+    approvalBoundary: "Provider、数据库、向量重建与 runtime 验证需单独批准。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-07"
+    phase: "P1"
+    name: "ai_task_generation_provenance"
+    findingCount: 18
+    coveredFindingIds:
+      [
+        "F-0025",
+        "F-0035",
+        "F-0036",
+        "F-0039",
+        "F-0091",
+        "F-0103",
+        "F-0104",
+        "F-0148",
+        "F-0149",
+        "F-0151",
+        "F-0152",
+        "F-0154",
+        "F-0158",
+        "F-0159",
+        "F-0168",
+        "F-0169",
+        "F-0175",
+        "F-0178",
+      ]
+    rootCauseHypothesis: "model_config/prompt_template/AI task/result/quota 未保存执行时 provenance 与确定状态机。"
+    counterEvidenceThatWouldRefute: "若每个结果已有不可变配置/Prompt/输入 snapshot 和确定重试语义，则需把残余 finding 拆到 UI 或领域消费端；不得以旧 quick acceptance/MML 残留重开 2026-07-02 已关闭或 superseded 的 20 类问题。"
+    upstreamDependencies: ["P1-RC-01", "P1-RC-03", "P1-RC-04", "P1-RC-06"]
+    blastRadius: "AI 配置、生成任务、ai_call_log、quota、结果详情与内容后台。"
+    dataCompatibilityRisk: "历史任务缺 provenance、旧状态枚举和结果格式。"
+    securityAndAuthorizationRisk: "Prompt/配置越权、quota 绕过、敏感信息泄漏。"
+    minimumVerifiableBoundary: "从 2026-07-02 AI SSOT alignment、goal-completion audit 和 acceptance-baseline normalization 恢复；只处理当前审计 finding 的新鲜锚点，静态验证任务状态/provenance，不调用真实 Provider。"
+    approvalBoundary: "必须执行 AI 基线恢复规则；Provider、secret/env、线上调用和 schema/migration 分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-08"
+    phase: "P1"
+    name: "learner_answer_report_history"
+    findingCount: 22
+    coveredFindingIds:
+      [
+        "F-0008",
+        "F-0013",
+        "F-0026",
+        "F-0027",
+        "F-0063",
+        "F-0065",
+        "F-0067",
+        "F-0079",
+        "F-0126",
+        "F-0135",
+        "F-0137",
+        "F-0150",
+        "F-0157",
+        "F-0161",
+        "F-0162",
+        "F-0163",
+        "F-0164",
+        "F-0172",
+        "F-0173",
+        "F-0174",
+        "F-0176",
+        "F-0177",
+      ]
+    rootCauseHypothesis: "answer_record/practice/mock_exam/ai_scoring/exam_report 未共享不可变提交快照、幂等状态转换和可恢复历史。"
+    counterEvidenceThatWouldRefute: "若提交、评分、报告已由同一事务/事件链保证且跨设备恢复完整，则个别展示问题应拆出。"
+    upstreamDependencies:
+      ["P1-RC-01", "P1-RC-03", "P1-RC-04", "P1-RC-05", "P1-RC-07"]
+    blastRadius: "学员端答题、mock_exam、ai_scoring、exam_report、mistake_book、历史与偏好。"
+    dataCompatibilityRisk: "历史 answer_record、旧报告、评分重试和进行中考试。"
+    securityAndAuthorizationRisk: "跨用户读取、重复提交、评分篡改和报告泄漏。"
+    minimumVerifiableBoundary: "闭合一次提交到报告的权威状态链，不纳入组织聚合统计。"
+    approvalBoundary: "schema/migration、数据回填、真实 AI 评分和浏览器端验收分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P1-RC-09"
+    phase: "P1"
+    name: "organization_training_handoff"
+    findingCount: 10
+    coveredFindingIds:
+      [
+        "F-0012",
+        "F-0028",
+        "F-0033",
+        "F-0099",
+        "F-0122",
+        "F-0124",
+        "F-0125",
+        "F-0127",
+        "F-0146",
+        "F-0147",
+      ]
+    rootCauseHypothesis: "企业训练跨内容发布、employee 提交、评分和统计的状态交接没有可追踪的组织范围快照。"
+    counterEvidenceThatWouldRefute: "若每次交接均保存 organization/authorization/content snapshot 并具备幂等事件，则残余问题需按各消费者拆分。"
+    upstreamDependencies:
+      ["P1-RC-02", "P1-RC-03", "P1-RC-04", "P1-RC-05", "P1-RC-07", "P1-RC-08"]
+    blastRadius: "组织后台、训练分发、员工端、评分、统计和跨角色 handoff。"
+    dataCompatibilityRisk: "存量训练、员工变动、内容版本与历史统计。"
+    securityAndAuthorizationRisk: "跨 organization 训练泄漏、统计越权和错误归因。"
+    minimumVerifiableBoundary: "只闭合跨角色交接与组织范围快照，不重做上游领域能力。"
+    approvalBoundary: "必须执行高级版需求读取规则；数据库、浏览器/runtime 与部署分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P2-RC-01"
+    phase: "P2"
+    name: "query_navigation_async"
+    findingCount: 4
+    coveredFindingIds: ["F-0023", "F-0024", "F-0041", "F-0165"]
+    rootCauseHypothesis: "查询、分页、URL 状态与异步响应缺少统一的可取消请求和权威导航状态。"
+    counterEvidenceThatWouldRefute: "若 API 与路由层已有稳定状态机，则应按页面局部问题处理。"
+    upstreamDependencies: []
+    blastRadius: "列表、筛选、分页、URL 与异步 hooks。"
+    dataCompatibilityRisk: "旧 URL、历史查询参数和缓存键。"
+    securityAndAuthorizationRisk: "低；但过期响应可能展示错误租户数据，必须回归授权守卫。"
+    minimumVerifiableBoundary: "P1 冻结后复检；当前只登记影响，不实现。"
+    approvalBoundary: "P2 Goal 未授权；浏览器验证另行批准。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P2-RC-02"
+    phase: "P2"
+    name: "edit_dirty_data_loss"
+    findingCount: 3
+    coveredFindingIds: ["F-0042", "F-0058", "F-0072"]
+    rootCauseHypothesis: "长表单和破坏性编辑缺少 dirty guard、版本冲突与恢复动作。"
+    counterEvidenceThatWouldRefute: "若服务端已有 optimistic locking 且 UI 完整提示恢复，则需拆分具体页面。"
+    upstreamDependencies: []
+    blastRadius: "编辑器、长表单、离开确认与草稿恢复。"
+    dataCompatibilityRisk: "旧草稿和并发编辑版本。"
+    securityAndAuthorizationRisk: "低；但恢复不得跨用户或 organization。"
+    minimumVerifiableBoundary: "P1 冻结后复检；当前只登记影响，不实现。"
+    approvalBoundary: "P2 Goal、浏览器验证及 schema/migration 分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P2-RC-03"
+    phase: "P2"
+    name: "contract_error_recovery"
+    findingCount: 8
+    coveredFindingIds:
+      [
+        "F-0047",
+        "F-0048",
+        "F-0057",
+        "F-0100",
+        "F-0120",
+        "F-0133",
+        "F-0138",
+        "F-0139",
+      ]
+    rootCauseHypothesis: "错误状态、恢复动作和可解释性在 API、schema、authorization 与 UI 间缺少端到端契约。"
+    counterEvidenceThatWouldRefute: "若底层契约稳定，仅文案或局部交互缺失，则应降为页面级任务而非共享根因。"
+    upstreamDependencies: []
+    blastRadius: "API 错误、恢复动作、schema/authorization 消费者与 UI。"
+    dataCompatibilityRisk: "旧错误码、null/[] 和客户端降级。"
+    securityAndAuthorizationRisk: "错误处理不得吞掉 401/403 或暴露内部信息。"
+    minimumVerifiableBoundary: "P1 冻结后按真实权威路径重分簇，不预设为纯 UI。"
+    approvalBoundary: "P2 Goal 未授权；schema/migration、数据库和浏览器验证分别审批。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"
+  - clusterId: "P2-RC-04"
+    phase: "P2"
+    name: "accessibility"
+    findingCount: 3
+    coveredFindingIds: ["F-0040", "F-0043", "F-0044"]
+    rootCauseHypothesis: "modal focus、reduced-motion、主题对比度等可访问性约束未形成组件级强制基线。"
+    counterEvidenceThatWouldRefute: "若共享组件已通过自动化和人工可访问性门禁，则残余应是单页误用。"
+    upstreamDependencies: []
+    blastRadius: "Design Tokens、Modal/Drawer、动画与主题。"
+    dataCompatibilityRisk: "视觉回归和键盘操作路径。"
+    securityAndAuthorizationRisk: "无直接安全边界，但不得破坏受保护操作的确认与焦点。"
+    minimumVerifiableBoundary: "P1 冻结后复检；当前只登记影响，不实现。"
+    approvalBoundary: "P2 Goal 和浏览器/人工辅助技术验证另行批准。"
+    acceptanceContract:
+      - "正常路径保持业务不变量且响应契约稳定"
+      - "越权与跨 organization 访问被拒绝且不泄漏对象存在性"
+      - "非法状态转换无副作用并返回可解释错误"
+      - "重复请求与并发请求满足幂等或显式冲突契约"
+      - "事务中途失败可回滚且不留下半完成状态"
+      - "重试、回滚和幂等键行为可由测试证明"
+      - "null、空集合、边界值和异常输入遵循统一契约"
+      - "前后端字段、枚举、时间、分页及 null/[] 语义一致"
+      - "API 响应保持 { code, message, data, pagination? }"
+      - "覆盖相关角色、状态机、跨角色依赖与 P0 不变量回归"
+      - "按根因补齐 unit、integration、contract 或 e2e 测试"
+      - "runtime validation ID 仅建立入口，未经批准不执行"

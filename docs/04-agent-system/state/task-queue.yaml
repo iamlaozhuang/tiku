@@ -194,6 +194,104 @@ p0RemediationSerialProgram:
     p0-remediation-rc-08-organization-training-integrity-2026-07-14: closed
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14: closed
 activeTasks:
+  - id: p1-p2-remediation-startup-package-v1-2026-07-15
+    title: P1/P2 remediation startup package v1.0
+    phase: p1-p2-remediation-startup-package-v1-2026-07-15
+    status: closed_local
+    priority: governance
+    sequenceOrder: 0
+    taskKind: static_audit_and_planning
+    moduleRunVersion: 3
+    branch: codex/p1-p2-remediation-startup-package-v1
+    dependsOn:
+      - p0-remediation-global-static-regression-baseline-freeze-2026-07-14
+    approvalSource: current-user-created-p1-p2-startup-package-goal-2026-07-15
+    executionProfile: R2
+    focusedGates:
+      - source_audit_baseline_restore
+      - p1_p2_finding_unique_143
+      - level_1_anchor_revalidation
+      - independent_status_dimensions
+      - candidate_cluster_membership_unique
+      - acceptance_contract_complete
+      - dependency_dag_acyclic
+      - p2_implementation_gate
+      - product_zero_change
+      - audit_repository_integrity
+      - deterministic_generation
+      - recovery_drill
+    buildRequired: false
+    fullRegressionPolicy: reuse_closed_p0_baseline_guards_plus_governance_consistency_only
+    protectedDomains:
+      - original_finding_identity_and_risk
+      - p0_frozen_baseline
+      - p1_p2_status_boundary
+      - runtime_acceptance_boundary
+      - audit_repository_integrity
+      - product_source_zero_change
+      - recovery_surface
+      - approval_boundary
+    reviewMode: evidence_two_rounds_no_subagent
+    planPath: docs/05-execution-logs/task-plans/2026-07-15-p1-p2-remediation-startup-package-v1.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-15-p1-p2-remediation-startup-package-v1.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-startup-package-v1.md
+    p1Implementation: blocked_requires_new_goal_and_authorization
+    p2Implementation: blocked_until_p1_frozen_and_new_goal
+    runtimeAcceptance: blocked_requires_separate_goal_and_approval
+    closeoutPolicy:
+      localCommit: finalized_by_commit_containing_this_task
+      fastForwardMerge: blocked_requires_fresh_user_approval
+      push: blocked_requires_fresh_user_approval
+      cleanup: blocked_until_merge_decision
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-15-p1-p2-remediation-startup-package-v1.md
+      - docs/05-execution-logs/task-plans/2026-07-15-p1-remediation-serial-program.md
+      - docs/05-execution-logs/evidence/2026-07-15-p1-p2-remediation-startup-package-v1.md
+      - docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-startup-package-v1.md
+      - docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
+      - docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-post-p0-revalidation-map-v1.yaml
+      - docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-root-cause-clusters-v1.yaml
+      - scripts/agent-system/New-P1P2RemediationStartupArtifacts.ps1
+      - scripts/agent-system/Test-P1P2RemediationStartupPackage.ps1
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/**
+      - tests/**
+      - drizzle/**
+      - e2e/**
+      - migrations/**
+      - seed/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: approved_task_allowlist
+      productRuntimeSourceChange: blocked
+      productTestSourceChange: blocked
+      dependencyIntroduction: blocked
+      schemaMigration: blocked
+      databaseMutation: blocked
+      providerCall: blocked
+      runtimeAcceptance: blocked
+      fastForwardMerge: blocked_requires_fresh_user_approval
+      push: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      deployment: blocked
+    acceptanceStandards:
+      - All 125 P1 and 18 P2 findings appear exactly once and preserve original identity, risk, evidence, role, use case, capability and runtime linkage.
+      - Level-1 revalidation verifies current anchors and P0 impact without claiming closure; deep adversarial revalidation is just-in-time when a cluster is claimed.
+      - Evidence, disposition and execution statuses remain independent; F-0013 remains runtime_evidence_required and runtime_hold.
+      - Candidate root-cause membership is complete, contracts are present, the P1 DAG is acyclic and P2 implementation remains blocked until P1 freezes.
+      - Product source/tests/schema/dependencies and the read-only audit repository remain unchanged.
+      - State, queue, artifacts, evidence and guard are sufficient for detached recovery without conversation memory.
   - id: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
     title: P0 global static regression and baseline freeze
     phase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
