@@ -507,7 +507,7 @@ p1RemediationSerialProgram:
     approved: false
     status: blocked_requires_fresh_user_approval
   taskStatusById:
-    p1-remediation-program-bootstrap-2026-07-16: in_progress
+    p1-remediation-program-bootstrap-2026-07-16: ready_for_closeout
   closeoutCheckpoints:
     p1-remediation-program-bootstrap-2026-07-16:
       taskCommit: pending
@@ -579,7 +579,7 @@ currentTask:
   id: p1-remediation-program-bootstrap-2026-07-16
   title: P1 remediation serial Program bootstrap
   phase: p1-remediation-program-bootstrap-2026-07-16
-  status: in_progress
+  status: ready_for_closeout
   priority: governance
   taskKind: mechanism_hardening
   branch: codex/p1-remediation-program-bootstrap
