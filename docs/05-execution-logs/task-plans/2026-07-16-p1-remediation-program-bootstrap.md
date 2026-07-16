@@ -151,6 +151,9 @@ Result: `approved_read_only_after_plan`.
 - [x] Execute every hash-dependent guard through Git for Windows `sh` -> Windows PowerShell 5.1 so hook-shell module resolution cannot differ from interactive validation.
 - [x] Poison `GIT_INDEX_FILE` with the product worktree index and prove audit-repository Git checks isolate and restore repository-local environment variables.
 - [x] Probe `git --no-optional-locks status` against a disposable repository and prove its index SHA-256, mtime, and size remain unchanged.
+- [x] Prove the fresh-master SHA gate rejects an `in_progress` task, then allow only an exact same-task `ready_for_closeout` projection with a negative contract-laundering fixture.
+- [x] Distinguish the full pre-push task range from its status-only tip commit; preserve implementation/review gates across the range and reject tip-level contract laundering.
+- [x] Compare normalized state/queue across the full `origin/master..HEAD` range so an intermediate scope mutation cannot be hidden behind a pure closeout tip.
 - [x] Run the startup-package guard, P0 global baseline guard, P0 serial guard, Module Run pre-commit/closeout/pre-push gates, scoped Prettier, and `git diff --check`.
 - [x] Round 1 attacks Program state machine, immutable finding identity, dynamic task decomposition, WIP, authority boundaries, and changed-file scope.
 - [x] Round 2 attacks approval expansion, successor recovery, P0/P2/runtime regression, sensitive evidence, remote closeout, and audit-repository contamination.

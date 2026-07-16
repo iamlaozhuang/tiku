@@ -387,6 +387,42 @@ function Get-GitFileText {
     return $content -join "`n"
 }
 
+function Get-NormalizedCloseoutProjection {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Lines,
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][ValidateSet("state", "queue")][string]$Kind
+    )
+
+    $normalized = [System.Collections.Generic.List[string]]::new()
+    $insideStateCurrentTask = $false
+    $insideQueueTask = $false
+    foreach ($line in $Lines) {
+        if ($Kind -eq "state") {
+            if ($line -match '^currentTask:\s*$') {
+                $insideStateCurrentTask = $true
+            } elseif ($insideStateCurrentTask -and $line -match '^\S') {
+                $insideStateCurrentTask = $false
+            } elseif ($insideStateCurrentTask -and $line -match '^  id:\s+(\S+)\s*$' -and $Matches[1] -ne $TaskId) {
+                $insideStateCurrentTask = $false
+            }
+        } elseif ($line -match '^  - id:\s+(\S+)\s*$') {
+            $insideQueueTask = $Matches[1] -eq $TaskId
+        }
+
+        if ($line -match "^    $([regex]::Escape($TaskId)):\s+(?:in_progress|ready_for_closeout)\s*$") {
+            $normalized.Add("    ${TaskId}: <closeout-status>")
+        } elseif ($Kind -eq "state" -and $insideStateCurrentTask -and $line -match '^  status:\s+(?:in_progress|ready_for_closeout)\s*$') {
+            $normalized.Add("  status: <closeout-status>")
+        } elseif ($Kind -eq "queue" -and $insideQueueTask -and $line -match '^    status:\s+(?:in_progress|ready_for_closeout)\s*$') {
+            $normalized.Add("    status: <closeout-status>")
+        } else {
+            $normalized.Add($line)
+        }
+    }
+    return $normalized -join "`n"
+}
+
 function Test-PathPattern {
     param([Parameter(Mandatory = $true)][string]$Path, [Parameter(Mandatory = $true)][string]$Pattern)
     $normalizedPath = ConvertTo-NormalizedPath -Path $Path
@@ -754,12 +790,17 @@ $protectedImplementationChanged = @($normalizedFilesToCheck | Where-Object { $ca
 $parentProgram = @()
 $parentTasks = @()
 $parentCurrentTaskId = ""
+$parentStateLines = @()
+$parentQueueLines = @()
 $parentReference = if ($Phase -eq "pre_push") { "origin/master" } else { "HEAD" }
 if (-not $SkipGitChecks) {
+    $stateGitPath = ConvertTo-NormalizedPath -Path $ProjectStatePath
     $queueGitPath = ConvertTo-NormalizedPath -Path $QueuePath
-    $parentQueueOutput = @(& git -C $RepositoryRoot show "${parentReference}:$queueGitPath" 2>$null)
-    if ($LASTEXITCODE -eq 0 -and $parentQueueOutput.Count -gt 0) {
-        $parentQueueLines = @($parentQueueOutput)
+    $parentStateText = Get-GitFileText -Root $RepositoryRoot -Reference $parentReference -Path $stateGitPath
+    $parentQueueText = Get-GitFileText -Root $RepositoryRoot -Reference $parentReference -Path $queueGitPath
+    if (-not [string]::IsNullOrWhiteSpace($parentStateText)) { $parentStateLines = @($parentStateText -split "`n") }
+    if (-not [string]::IsNullOrWhiteSpace($parentQueueText)) {
+        $parentQueueLines = @($parentQueueText -split "`n")
         $parentProgram = @(Get-TopLevelBlock -Lines $parentQueueLines -Key $programKey)
         if ($parentProgram.Count -gt 0) {
             $parentCurrentTaskId = Get-ScalarValue -Block $parentProgram -Key "currentTaskId"
@@ -770,11 +811,58 @@ if (-not $SkipGitChecks) {
 $isBootstrapInitialization = $parentProgram.Count -eq 0 -and $stateCurrentTaskId -eq "p1-remediation-program-bootstrap-2026-07-16"
 $isTaskTransition = $parentProgram.Count -gt 0 -and $parentCurrentTaskId -ne $stateCurrentTaskId
 $isSteadyTask = $parentProgram.Count -gt 0 -and $parentCurrentTaskId -eq $stateCurrentTaskId
+$parentStatuses = if ($parentProgram.Count -gt 0) { Get-FlatMapping -Block $parentProgram -Key "taskStatusById" } else { @{} }
+$isSameTaskCloseoutTransition = $isSteadyTask -and $parentStatuses.ContainsKey($stateCurrentTaskId) -and $parentStatuses[$stateCurrentTaskId] -eq "in_progress" -and $stateStatuses[$stateCurrentTaskId] -eq "ready_for_closeout"
 if (-not $SkipGitChecks -and $parentProgram.Count -eq 0 -and -not $isBootstrapInitialization) {
     Add-Finding "P1_PROGRAM_TRANSITION_PARENT_MISSING"
 }
-if ($isSteadyTask -and $scopeControlChanged) {
+if ($isSteadyTask -and $scopeControlChanged -and -not $isSameTaskCloseoutTransition) {
     Add-Finding "P1_PROGRAM_SCOPE_CHANGED_OUTSIDE_TASK_TRANSITION"
+}
+if ($isSameTaskCloseoutTransition) {
+    $closeoutParentStateLines = @($parentStateLines)
+    $closeoutParentQueueLines = @($parentQueueLines)
+    $closeoutFilesToCheck = @($normalizedFilesToCheck)
+    if ($Phase -eq "pre_push" -and -not $SkipGitChecks) {
+        $headParents = @(((& git -C $RepositoryRoot rev-list --parents -n 1 HEAD) -join "").Trim() -split '\s+')
+        if ($LASTEXITCODE -ne 0 -or $headParents.Count -ne 2) {
+            Add-Finding "P1_PROGRAM_CLOSEOUT_TIP_PARENT_INVALID"
+            $closeoutParentStateLines = @()
+            $closeoutParentQueueLines = @()
+            $closeoutFilesToCheck = @()
+        } else {
+            $closeoutParentReference = $headParents[1]
+            $closeoutParentStateText = Get-GitFileText -Root $RepositoryRoot -Reference $closeoutParentReference -Path $stateGitPath
+            $closeoutParentQueueText = Get-GitFileText -Root $RepositoryRoot -Reference $closeoutParentReference -Path $queueGitPath
+            $closeoutParentStateLines = if ([string]::IsNullOrWhiteSpace($closeoutParentStateText)) { @() } else { @($closeoutParentStateText -split "`n") }
+            $closeoutParentQueueLines = if ([string]::IsNullOrWhiteSpace($closeoutParentQueueText)) { @() } else { @($closeoutParentQueueText -split "`n") }
+            $closeoutFilesToCheck = @(& git -C $RepositoryRoot diff --name-only --no-renames --diff-filter=ACMRTD "$closeoutParentReference..HEAD" | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+        }
+    }
+    $closeoutParentProgram = if ($closeoutParentQueueLines.Count -gt 0) { @(Get-TopLevelBlock -Lines $closeoutParentQueueLines -Key $programKey) } else { @() }
+    $closeoutParentStatuses = if ($closeoutParentProgram.Count -gt 0) { Get-FlatMapping -Block $closeoutParentProgram -Key "taskStatusById" } else { @{} }
+    if (-not $closeoutParentStatuses.ContainsKey($stateCurrentTaskId) -or $closeoutParentStatuses[$stateCurrentTaskId] -ne "in_progress") {
+        Add-Finding "P1_PROGRAM_CLOSEOUT_STATUS_DIRECTION_INVALID"
+    }
+    $expectedCloseoutFiles = @($effectiveScopeControlPaths | Sort-Object -Unique)
+    $actualCloseoutFiles = @($closeoutFilesToCheck | Sort-Object -Unique)
+    if (($actualCloseoutFiles -join "|") -ne ($expectedCloseoutFiles -join "|")) {
+        Add-Finding "P1_PROGRAM_CLOSEOUT_FILE_SCOPE_INVALID"
+    }
+    if ($closeoutParentStateLines.Count -eq 0 -or (Get-NormalizedCloseoutProjection -Lines $closeoutParentStateLines -TaskId $stateCurrentTaskId -Kind state) -cne (Get-NormalizedCloseoutProjection -Lines $stateLines -TaskId $stateCurrentTaskId -Kind state)) {
+        Add-Finding "P1_PROGRAM_CLOSEOUT_PROJECTION_CHANGED project-state"
+    }
+    if ($closeoutParentQueueLines.Count -eq 0 -or (Get-NormalizedCloseoutProjection -Lines $closeoutParentQueueLines -TaskId $stateCurrentTaskId -Kind queue) -cne (Get-NormalizedCloseoutProjection -Lines $queueLines -TaskId $stateCurrentTaskId -Kind queue)) {
+        Add-Finding "P1_PROGRAM_CLOSEOUT_PROJECTION_CHANGED task-queue"
+    }
+    if ($Phase -eq "pre_push") {
+        if ($parentStateLines.Count -eq 0 -or (Get-NormalizedCloseoutProjection -Lines $parentStateLines -TaskId $stateCurrentTaskId -Kind state) -cne (Get-NormalizedCloseoutProjection -Lines $stateLines -TaskId $stateCurrentTaskId -Kind state)) {
+            Add-Finding "P1_PROGRAM_CLOSEOUT_RANGE_PROJECTION_CHANGED project-state"
+        }
+        if ($parentQueueLines.Count -eq 0 -or (Get-NormalizedCloseoutProjection -Lines $parentQueueLines -TaskId $stateCurrentTaskId -Kind queue) -cne (Get-NormalizedCloseoutProjection -Lines $queueLines -TaskId $stateCurrentTaskId -Kind queue)) {
+            Add-Finding "P1_PROGRAM_CLOSEOUT_RANGE_PROJECTION_CHANGED task-queue"
+        }
+    }
 }
 if ($Phase -eq "pre_commit" -and -not $SkipGitChecks) {
     $stagedPaths = @(& git -C $RepositoryRoot diff --cached --name-only --no-renames --diff-filter=ACMRTD | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
@@ -989,7 +1077,7 @@ if ($taskBlock.Count -gt 0) {
             if ($transitionHead -ne $transitionOrigin) { Add-Finding "P1_PROGRAM_TRANSITION_REQUIRES_SYNCHRONIZED_PARENT" }
         }
     }
-    if ($scopeControlChanged -and $protectedImplementationChanged -and (-not $isBootstrapInitialization -or $SkipGitChecks)) {
+    if ($scopeControlChanged -and $protectedImplementationChanged -and (-not $isBootstrapInitialization -or $SkipGitChecks) -and -not $isSameTaskCloseoutTransition) {
         Add-Finding "P1_PROGRAM_SCOPE_SELF_MODIFICATION_WITH_IMPLEMENTATION_CHANGE"
     }
     if ($protectedImplementationChanged) {

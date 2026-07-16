@@ -881,6 +881,126 @@ Decision: APPROVE_SCOPE
     }
     if (-not $pendingParentFailed) { throw "Pending parent commit laundering fixture unexpectedly passed." }
 
+    $closeoutRoot = Write-CaseFiles -Name "same-task-closeout" -StateText $baseState -QueueText $baseQueue
+    $closeoutParentQueue = $baseQueue.Replace("worktreePath: bootstrap-worktree-fixture", "worktreePath: $closeoutRoot")
+    Set-Content -LiteralPath (Join-Path $closeoutRoot "queue.yaml") -Value $closeoutParentQueue -Encoding UTF8
+    & git -C $closeoutRoot init -b master *> $null
+    & git -C $closeoutRoot config user.name "P1 Closeout Smoke"
+    & git -C $closeoutRoot config user.email "p1-closeout-smoke@example.invalid"
+    & git -C $closeoutRoot config core.autocrlf false
+    & git -C $closeoutRoot add .
+    & git -C $closeoutRoot commit -m "create active bootstrap task" *> $null
+    & git -C $closeoutRoot switch --quiet -c codex/bootstrap-fixture 2>$null
+    $closeoutState = $baseState.Replace("    $bootstrapTask`: in_progress", "    $bootstrapTask`: ready_for_closeout")
+    $closeoutState = [regex]::Replace($closeoutState, '(?ms)(^currentTask:\r?\n(?:^  .*\r?\n)*?^  status:)\s+in_progress\s*$', '${1} ready_for_closeout')
+    $closeoutQueue = $closeoutParentQueue.Replace("    $bootstrapTask`: in_progress", "    $bootstrapTask`: ready_for_closeout")
+    $closeoutQueue = [regex]::Replace($closeoutQueue, "(?ms)(^  - id:\s+$([regex]::Escape($bootstrapTask))\s*\r?\n(?:^    .*\r?\n)*?^    status:)\s+in_progress\s*$", '${1} ready_for_closeout')
+    Set-Content -LiteralPath (Join-Path $closeoutRoot "state.yaml") -Value $closeoutState -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutRoot "queue.yaml") -Value $closeoutQueue -Encoding UTF8
+    & git -C $closeoutRoot add state.yaml queue.yaml
+    $closeoutOutput = @(& $guardPath -RepositoryRoot $closeoutRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $closeoutRoot -Phase pre_commit -SkipExternalIntegrityChecks)
+    if (($closeoutOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Same-task closeout fixture failed." }
+
+    $launderedCloseoutQueue = $closeoutQueue.Replace("      - audit.md", "      - audit.md`n      - expanded.md")
+    Set-Content -LiteralPath (Join-Path $closeoutRoot "queue.yaml") -Value $launderedCloseoutQueue -Encoding UTF8
+    & git -C $closeoutRoot add queue.yaml
+    $closeoutLaunderingFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $closeoutRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $closeoutRoot -Phase pre_commit -SkipExternalIntegrityChecks
+    } catch {
+        $closeoutLaunderingFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_CLOSEOUT_PROJECTION_CHANGED") { throw }
+    }
+    if (-not $closeoutLaunderingFailed) { throw "Same-task closeout scope laundering fixture unexpectedly passed." }
+
+    $closeoutPushRoot = Write-CaseFiles -Name "same-task-closeout-pre-push" -StateText $baseState -QueueText $baseQueue
+    $closeoutPushRemote = Join-Path $smokeRoot "same-task-closeout-pre-push-origin.git"
+    $closeoutPushParentQueue = $baseQueue.Replace("worktreePath: bootstrap-worktree-fixture", "worktreePath: $closeoutPushRoot").Replace("      - audit.md", "      - audit.md`n      - src/allowed.ts")
+    $closeoutPushParentQueue = [regex]::Replace($closeoutPushParentQueue, '(?m)^      - src/\*\*\r?\n', '')
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "queue.yaml") -Value $closeoutPushParentQueue -Encoding UTF8
+    & git -C $closeoutPushRoot init -b master *> $null
+    & git -C $closeoutPushRoot config user.name "P1 Closeout Pre-push Smoke"
+    & git -C $closeoutPushRoot config user.email "p1-closeout-pre-push-smoke@example.invalid"
+    & git -C $closeoutPushRoot config core.autocrlf false
+    & git -C $closeoutPushRoot add .
+    & git -C $closeoutPushRoot commit -m "materialize active implementation task" *> $null
+    & git init --bare $closeoutPushRemote *> $null
+    & git -C $closeoutPushRoot remote add origin $closeoutPushRemote
+    & git -C $closeoutPushRoot push --quiet -u origin master 2>$null
+    & git -C $closeoutPushRoot switch --quiet -c codex/bootstrap-fixture 2>$null
+    New-Item -ItemType Directory -Path (Join-Path $closeoutPushRoot "src") | Out-Null
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "src/allowed.ts") -Value "export const closeoutProbe = true;" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "evidence.md") -Value "$baseEvidence`nImplementation validation: pass`n" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "audit.md") -Value "$baseAudit`nImplementation review: pass`n" -Encoding UTF8
+    & git -C $closeoutPushRoot add src/allowed.ts evidence.md audit.md
+    & git -C $closeoutPushRoot commit -m "implement allowed task change" *> $null
+    $closeoutPushImplementationHead = ((& git -C $closeoutPushRoot rev-parse HEAD) -join "").Trim()
+    $closeoutPushState = $baseState.Replace("    $bootstrapTask`: in_progress", "    $bootstrapTask`: ready_for_closeout")
+    $closeoutPushState = [regex]::Replace($closeoutPushState, '(?ms)(^currentTask:\r?\n(?:^  .*\r?\n)*?^  status:)\s+in_progress\s*$', '${1} ready_for_closeout')
+    $closeoutPushQueue = $closeoutPushParentQueue.Replace("    $bootstrapTask`: in_progress", "    $bootstrapTask`: ready_for_closeout")
+    $closeoutPushQueue = [regex]::Replace($closeoutPushQueue, "(?ms)(^  - id:\s+$([regex]::Escape($bootstrapTask))\s*\r?\n(?:^    .*\r?\n)*?^    status:)\s+in_progress\s*$", '${1} ready_for_closeout')
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "state.yaml") -Value $closeoutPushState -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "queue.yaml") -Value $closeoutPushQueue -Encoding UTF8
+    & git -C $closeoutPushRoot add state.yaml queue.yaml
+    & git -C $closeoutPushRoot commit -m "mark task ready for closeout" *> $null
+    $closeoutPushHead = ((& git -C $closeoutPushRoot rev-parse HEAD) -join "").Trim()
+    $closeoutPushOrigin = ((& git -C $closeoutPushRoot rev-parse origin/master) -join "").Trim()
+    $closeoutPushOriginUrl = ((& git -C $closeoutPushRoot remote get-url origin) -join "").Trim()
+    $closeoutPushUpdate = "refs/heads/master $closeoutPushHead refs/heads/master $closeoutPushOrigin"
+    $closeoutPushOutput = @(& $guardPath -RepositoryRoot $closeoutPushRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $closeoutPushRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $closeoutPushOriginUrl -PushUpdateLines $closeoutPushUpdate -SkipExternalIntegrityChecks)
+    if (($closeoutPushOutput -join "`n") -notmatch "p1ProgramGuardResult: pass") { throw "Same-task closeout pre-push fixture failed." }
+
+    & git -C $closeoutPushRoot switch --quiet master 2>$null
+    & git -C $closeoutPushRoot branch -D codex/bootstrap-fixture *> $null
+    & git -C $closeoutPushRoot switch --quiet -c codex/bootstrap-fixture $closeoutPushImplementationHead 2>$null
+    $launderedCloseoutPushQueue = $closeoutPushQueue.Replace("      - audit.md", "      - audit.md`n      - expanded.md")
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "state.yaml") -Value $closeoutPushState -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "queue.yaml") -Value $launderedCloseoutPushQueue -Encoding UTF8
+    & git -C $closeoutPushRoot add state.yaml queue.yaml
+    & git -C $closeoutPushRoot commit -m "attempt closeout scope laundering" *> $null
+    $launderedCloseoutPushHead = ((& git -C $closeoutPushRoot rev-parse HEAD) -join "").Trim()
+    $launderedCloseoutPushUpdate = "refs/heads/master $launderedCloseoutPushHead refs/heads/master $closeoutPushOrigin"
+    $closeoutPushLaunderingFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $closeoutPushRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $closeoutPushRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $closeoutPushOriginUrl -PushUpdateLines $launderedCloseoutPushUpdate -SkipExternalIntegrityChecks
+    } catch {
+        $closeoutPushLaunderingFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_CLOSEOUT_PROJECTION_CHANGED") { throw }
+    }
+    if (-not $closeoutPushLaunderingFailed) { throw "Same-task closeout pre-push scope laundering fixture unexpectedly passed." }
+
+    & git -C $closeoutPushRoot switch --quiet master 2>$null
+    & git -C $closeoutPushRoot branch -D codex/bootstrap-fixture *> $null
+    & git -C $closeoutPushRoot switch --quiet -c codex/bootstrap-fixture origin/master 2>$null
+    $intermediateLaunderedState = $baseState.Replace("      taskCommit: pending", "      taskCommit: pass").Replace("standingAuthorization:", "historicalMarker: changed`nstandingAuthorization:")
+    $intermediateLaunderedQueue = $closeoutPushParentQueue.Replace("      - src/allowed.ts", "      - src/allowed.ts`n      - src/expanded.ts").Replace("dependencyIntroduction: blocked_without_fresh_approval", "dependencyIntroduction: blocked_different_reason")
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "state.yaml") -Value $intermediateLaunderedState -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "queue.yaml") -Value $intermediateLaunderedQueue -Encoding UTF8
+    New-Item -ItemType Directory -Path (Join-Path $closeoutPushRoot "src") -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "src/expanded.ts") -Value "export const expandedScope = true;" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "evidence.md") -Value "$baseEvidence`nIntermediate implementation validation: pass`n" -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "audit.md") -Value "$baseAudit`nIntermediate implementation review: pass`n" -Encoding UTF8
+    & git -C $closeoutPushRoot add state.yaml queue.yaml src/expanded.ts evidence.md audit.md
+    & git -C $closeoutPushRoot commit -m "attempt intermediate scope laundering" *> $null
+    $intermediateCloseoutState = $intermediateLaunderedState.Replace("    $bootstrapTask`: in_progress", "    $bootstrapTask`: ready_for_closeout")
+    $intermediateCloseoutState = [regex]::Replace($intermediateCloseoutState, '(?ms)(^currentTask:\r?\n(?:^  .*\r?\n)*?^  status:)\s+in_progress\s*$', '${1} ready_for_closeout')
+    $intermediateCloseoutQueue = $intermediateLaunderedQueue.Replace("    $bootstrapTask`: in_progress", "    $bootstrapTask`: ready_for_closeout")
+    $intermediateCloseoutQueue = [regex]::Replace($intermediateCloseoutQueue, "(?ms)(^  - id:\s+$([regex]::Escape($bootstrapTask))\s*\r?\n(?:^    .*\r?\n)*?^    status:)\s+in_progress\s*$", '${1} ready_for_closeout')
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "state.yaml") -Value $intermediateCloseoutState -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $closeoutPushRoot "queue.yaml") -Value $intermediateCloseoutQueue -Encoding UTF8
+    & git -C $closeoutPushRoot add state.yaml queue.yaml
+    & git -C $closeoutPushRoot commit -m "add pure closeout tip after laundering" *> $null
+    $intermediateCloseoutHead = ((& git -C $closeoutPushRoot rev-parse HEAD) -join "").Trim()
+    $intermediateCloseoutUpdate = "refs/heads/master $intermediateCloseoutHead refs/heads/master $closeoutPushOrigin"
+    $intermediateLaunderingFailed = $false
+    try {
+        & $guardPath -RepositoryRoot $closeoutPushRoot -ProjectStatePath "state.yaml" -QueuePath "queue.yaml" -AuditRepositoryRoot $closeoutPushRoot -Phase pre_push -PushRemoteName origin -PushRemoteUrl $closeoutPushOriginUrl -PushUpdateLines $intermediateCloseoutUpdate -SkipExternalIntegrityChecks
+    } catch {
+        $intermediateLaunderingFailed = $true
+        if ($_.Exception.Message -notmatch "P1_PROGRAM_CLOSEOUT_RANGE_PROJECTION_CHANGED") { throw }
+    }
+    if (-not $intermediateLaunderingFailed) { throw "Intermediate same-task closeout scope laundering fixture unexpectedly passed." }
+
     $originalGitIndexFile = [Environment]::GetEnvironmentVariable("GIT_INDEX_FILE", [EnvironmentVariableTarget]::Process)
     $activeIndexPath = $originalGitIndexFile
     if ($null -eq $activeIndexPath) {
@@ -915,7 +1035,7 @@ Decision: APPROVE_SCOPE
     $indexFingerprintAfter = Get-FileFingerprint -Path $probeIndexPath
     if ($indexFingerprintAfter -ne $indexFingerprintBefore) { throw "Read-only audit status changed the disposable repository index." }
 
-    Write-Output "P1 remediation serial program guard smoke passed: 6 positive, 44 negative"
+    Write-Output "P1 remediation serial program guard smoke passed: 8 positive, 47 negative"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

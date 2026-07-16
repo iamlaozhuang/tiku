@@ -40,20 +40,22 @@ The required requirement indexes, relevant advanced-edition authorization source
 ## TDD Evidence
 
 - RED: before the guard existed, `Test-P1RemediationSerialProgram.Smoke.ps1` exited non-zero because `Test-P1RemediationSerialProgram.ps1` was missing.
-- GREEN: `Test-P1RemediationSerialProgram.Smoke.ps1` exits 0 with `6 positive, 44 negative`.
+- GREEN: `Test-P1RemediationSerialProgram.Smoke.ps1` exits 0 with `8 positive, 47 negative`.
 - Hook RED: the first real commit attempt was blocked because the historical Content Admin recovery guard rejected the legitimate P1 successor keys. A dedicated successor fixture reproduced the same three `TOP_LEVEL_BLOAT` findings.
 - Hook GREEN: `Test-ContentAdminPlatformRecoverySurface.Smoke.ps1` exits 0 with `6 positive, 28 negative`, and the real recovery surface passes.
 - Hook-environment RED: the second real commit attempt showed that Git for Windows `sh` supplies PowerShell 5.1 with a module path where `Get-FileHash` does not autoload, although the same command resolves in the interactive shell.
 - Hook-environment GREEN: all three hash-dependent guards now use a dependency-free .NET SHA-256 helper. The P1 pre-commit, P0 global, and startup-package guards pass when launched by the actual Git `sh` to `powershell.exe` path.
 - Cross-repository RED: the next real commit attempt showed that hook-local `GIT_INDEX_FILE` leaked into `git -C D:/tiku-readonly-audit`, making a clean immutable audit repository appear to have the product worktree index.
 - Cross-repository GREEN: audit HEAD/status checks now clear Git's documented repository-local environment variables only around audit-repository commands, use `git --no-optional-locks`, and restore the process environment in `finally`. One positive smoke fixture poisons `GIT_INDEX_FILE` with the product index; another confirms a disposable repository's index SHA-256, mtime, and size remain unchanged after the status probe.
+- Fresh-master RED: after the bootstrap commit was fast-forwarded locally, Module Run pre-push correctly rejected the task's `in_progress` status because `lastKnownMasterSha` is an ancestor checkpoint rather than the new master tip.
+- Closeout-transition GREEN: the P1 guard now permits only the exact same-task `in_progress` -> `ready_for_closeout` projection in project state and queue. At pre-commit the staged set, and at pre-push the tip commit, must contain exactly those two controls; normalized parent/tip files must otherwise be byte-equivalent. The full `origin/master..HEAD` range must also preserve the complete normalized state/queue projection except for the same status change and still passes task allowlist, blocklist, and fresh evidence/audit review gates. Positive pre-commit/pre-push plus negative tip-level and intermediate-commit contract-laundering fixtures pass.
 - Negative coverage includes candidate reorder, WIP>1, P2/runtime/F-0013 expansion, approval and scope laundering, stale/pending reviews, ledger identity drift, omitted closeout, invalid remote/ref, redirected stdin, staged delete/rename, task transition, parent-commit review laundering, artifact physical-path alias/escape, historical artifact mutation, parent task contract mutation, fake branch/worktree identity, residual branch/worktree, two-step scope laundering, truncated/tampered startup history, duplicate/quoted/merged/noncanonical YAML keys, arbitrary/comment-poisoned indentation, duplicate critical child keys, and wrapper-based scope changes.
 
 ## Round 1 — Root cause and state machine
 
 Result: pass
 
-The main-Agent adversarial pass confirmed exact 125/18/21 identity, canonical candidate order, WIP=1, materialized/completed partition, checkpoint monotonicity, immutable ledger/map/cluster hashes, P2/runtime/F-0013 holds, scope boundaries, actual pre-push remote/ref input, and bootstrap/transition/steady-task state paths. It found and repaired marker-only review acceptance, incomplete task-to-finding boundaries, omitted completed-task coverage, staged deletion/rename gaps, cross-commit scope laundering, and closed-Program recovery-guard incompatibility.
+The main-Agent adversarial pass confirmed exact 125/18/21 identity, canonical candidate order, WIP=1, materialized/completed partition, checkpoint monotonicity, immutable ledger/map/cluster hashes, P2/runtime/F-0013 holds, scope boundaries, actual pre-push remote/ref input, and bootstrap/transition/steady-task/same-task-closeout state paths. It found and repaired marker-only review acceptance, incomplete task-to-finding boundaries, omitted completed-task coverage, staged deletion/rename gaps, cross-commit scope laundering, closeout-status deadlock, and closed-Program recovery-guard incompatibility.
 
 ## Round 2 — Approval and recovery
 
@@ -67,12 +69,13 @@ Result: pass
 
 | Validation                                           | Result | Evidence                                                                              |
 | ---------------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
-| P1 Program smoke                                     | pass   | `6 positive, 44 negative`; exit 0                                                     |
+| P1 Program smoke                                     | pass   | `8 positive, 47 negative`; exit 0                                                     |
 | P1 Program guard, manual/pre-commit                  | pass   | canonical state, scope, review, branch/worktree, artifact, and closeout contracts     |
 | Content Admin recovery smoke                         | pass   | `6 positive, 28 negative`; exit 0                                                     |
 | Content Admin recovery guard                         | pass   | closed legacy history plus exact P1 successor recovery contract                       |
 | Git `sh` hook-shell compatibility                    | pass   | P1 pre-commit, P0 global, and startup guards pass through `sh` -> `powershell.exe`    |
 | Cross-repository Git environment isolation           | pass   | poisoned product `GIT_INDEX_FILE` cannot alter audit HEAD/status interpretation       |
+| Same-task closeout projection                        | pass   | exact pre-commit/pre-push tip passes; task contract laundering is rejected            |
 | P1/P2 startup-package guard                          | pass   | 125 P1 + 18 P2; F-0013 runtime hold; 21 runtime items; frozen hashes                  |
 | P0 global baseline guard                             | pass   | 35 P0, 143 P1/P2 impacts, 21 runtime items; frozen SHA retained                       |
 | P0 serial guard                                      | pass   | closed Program remains valid                                                          |

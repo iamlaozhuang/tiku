@@ -32,7 +32,7 @@ Adversarial checks covered single-writer/WIP=1 enforcement, exact 143-item ident
 
 Result: pass
 
-Independent read-only review covered authorization source integrity, capability expansion, actual origin/master pre-push input, predecessor evidence from the parent commit, immutable historical task contracts/artifacts, repository-contained physical-path uniqueness, successor transition/steady paths, real branch/worktree cleanup, startup/audit immutability, F-0013 hold, P2/runtime exclusions, YAML split interpretation, scope-aware parsing, Git `sh` shell compatibility, cross-repository Git environment isolation, optional-lock suppression, SHA-256 semantic equivalence, resource disposal, and sensitive evidence. Final smoke results are P1 `6 positive, 44 negative` and recovery `6 positive, 28 negative`, both exit 0.
+Independent read-only review covered authorization source integrity, capability expansion, actual origin/master pre-push input, predecessor evidence from the parent commit, immutable historical task contracts/artifacts, repository-contained physical-path uniqueness, successor transition/steady/same-task-closeout paths, pre-push range versus tip semantics, intermediate-commit scope laundering, real branch/worktree cleanup, startup/audit immutability, F-0013 hold, P2/runtime exclusions, YAML split interpretation, scope-aware parsing, Git `sh` shell compatibility, cross-repository Git environment isolation, optional-lock suppression, SHA-256 semantic equivalence, resource disposal, and sensitive evidence. Final smoke results are P1 `8 positive, 47 negative` and recovery `6 positive, 28 negative`, both exit 0.
 
 ## Blocking Findings Resolved
 
@@ -52,6 +52,7 @@ Independent read-only review covered authorization source integrity, capability 
 - Made scalar, section, list, flat-mapping, and list-item readers direct-scope aware so nested wrappers cannot impersonate required fields.
 - Replaced hook-environment-sensitive `Get-FileHash` calls with read-only .NET SHA-256 helpers and nested `finally` disposal; verified the three affected guards through Git `sh` and Windows PowerShell 5.1.
 - Isolated audit-repository Git commands from hook-local `GIT_*` variables, suppressed optional index locks, and restored the process environment in `finally`; poisoned-index and disposable zero-write fixtures prevent regression.
+- Added an exact same-task closeout projection: only the two state/queue files may change in the pre-commit staged set or pre-push tip commit, only `in_progress` -> `ready_for_closeout` is accepted, and normalized full-file comparisons at both tip and complete push range reject concurrent or earlier contract mutation while task scope and fresh-review checks remain active.
 
 ## Final Disposition
 
