@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-currentPhase: p1-p2-remediation-startup-package-v1-closed-local-2026-07-15
-updatedAt: "2026-07-15T23:58:00-07:00"
+currentPhase: p1-p2-remediation-startup-package-v1-closed-integrated-2026-07-16
+updatedAt: "2026-07-16T00:35:00-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -467,7 +467,7 @@ currentTask:
   id: p1-p2-remediation-startup-package-v1-2026-07-15
   title: P1/P2 remediation startup package v1.0
   phase: p1-p2-remediation-startup-package-v1-2026-07-15
-  status: closed_local
+  status: closed
   priority: governance
   taskKind: static_audit_and_planning
   branch: codex/p1-p2-remediation-startup-package-v1
@@ -477,7 +477,7 @@ currentTask:
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-startup-package-v1.md
   nextRequiredTaskId: ""
   startupPackage:
-    status: closed_local
+    status: closed
     activityStatePolicy: wip_one_governance_only
     sourceMasterSha: 0643ad4d6346453f3324d86b6e003c6726c808ef
     p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b

@@ -232,8 +232,8 @@ Assert-True $startupStatusMatch.Success "cannot read startup currentTask state"
 $programStatus = [regex]::Match($startupStatusMatch.Groups[1].Value, "(?m)^  status:\s*(\S+)\s*$").Groups[1].Value
 if ($programStatus -eq "in_progress") {
     Assert-True ($inProgressCount -eq 1) "WIP=1 violated while startup program is active"
-} elseif ($programStatus -eq "closed_local") {
-    Assert-True ($inProgressCount -eq 0) "closed local startup must have WIP=0"
+} elseif ($programStatus -in @("closed_local", "closed")) {
+    Assert-True ($inProgressCount -eq 0) "closed startup must have WIP=0"
 } else {
     throw "invalid startup program status: $programStatus"
 }

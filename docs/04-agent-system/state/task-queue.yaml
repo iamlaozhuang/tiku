@@ -197,7 +197,7 @@ activeTasks:
   - id: p1-p2-remediation-startup-package-v1-2026-07-15
     title: P1/P2 remediation startup package v1.0
     phase: p1-p2-remediation-startup-package-v1-2026-07-15
-    status: closed_local
+    status: closed
     priority: governance
     sequenceOrder: 0
     taskKind: static_audit_and_planning

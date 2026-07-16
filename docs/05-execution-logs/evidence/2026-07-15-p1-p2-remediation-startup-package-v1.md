@@ -107,6 +107,8 @@ Round 2 攻击跨角色、旧基线重开、P2 越界和 runtime 越界：
 
 合入前对抗复核发现 startup guard 将 `origin/master` 固定为合入前 SHA，正常 push 后会误报漂移。guard 已收敛为仅接受“合入前冻结 SHA”或“当前启动包 HEAD”，同时要求 live remote 与本地 `origin/master` 完全一致；产品零漂移和文件 allowlist 门禁保持不变。
 
+任务状态已从非标准 `closed_local` 规范化为 Module Run 支持的 `closed`；关闭任务允许 repository checkpoint 作为当前 master/origin 的已验证祖先，最终同步 SHA 由 closeout handoff 记录。
+
 ## Thread Rollover Decision
 
 - threadRolloverGate: no rollover required；启动包已形成单一可恢复提交。
