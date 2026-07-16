@@ -1,6 +1,6 @@
 # P0 全局静态回归与基线冻结方案
 
-status: in_progress
+status: implementation_complete_pending_closeout
 
 taskId: `p0-remediation-global-static-regression-baseline-freeze-2026-07-14`
 

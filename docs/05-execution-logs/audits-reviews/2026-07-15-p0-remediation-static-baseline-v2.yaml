@@ -1,0 +1,365 @@
+schemaVersion: "1.0.0"
+baselineId: p0-remediation-static-baseline-v2-2026-07-15
+status: frozen_static_remediation_runtime_pending
+capturedAt: "2026-07-15T23:00:40-07:00"
+source:
+  originalAuditBaselineId: baseline-2026-07-14-01
+  originalAuditSourceSha: 7aac83765ca4b650b73b1612013e26a0111775ae
+  productStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
+  programPreFreezeSha: 5a23143c9559558cfdc0e2f5e028a170d60193e1
+  auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
+  auditRepositoryBranch: feat/calibration
+  auditRepositoryExpectedClean: true
+  sourceLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-finding-ledger-v1.yaml
+  sourceStartupPackagePath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-startup-package-v1.md
+auditArtifactSha256:
+  finalSynthesis: C3E3BEFBBD0BA55FB11B75ACD324AF566CBD343A1470495BA6F399328E0307E2
+  globalReconciliation: 748541195D4C6C6725DD8BFC803C9F029FF1D1F911B009E37A6CCBDA3338D16E
+  findingRegister: CDB8CE059566ABEDDA3D4C723E3F048ECFA677697053FB7765D6EF46273752F2
+  runtimeBacklog: 61AC94E58CBF10F7C0A8C729096C2158AAF7567DD4982B1A957B0F57042FBCAA
+  runtimeSequencing: 7988442B3928580A6A84E5189BF192F62457F7375792BA105644A0AF07C1C6F0
+  finalCompletionAudit: 1A0AFA955676E95CF98E71C5FCB40C4B2CD410EEB4664A00515B29DB00D27AAA
+countSummary:
+  originalFindings: 178
+  p0Findings: 35
+  p1Findings: 125
+  p2Findings: 18
+  rootCauseClusters: 8
+  p0StaticRemediated: 35
+  p0RuntimeAccepted: 0
+  runtimeValidationsPending: 21
+  rootCauseAliasesRetained: 5
+  duplicateFindingsRemoved: 0
+  findingsDowngraded: 0
+intakeRevalidationStatusCounts:
+  confirmed: 21
+  baselineChanged: 10
+  rootCauseAlias: 4
+  duplicateCandidate: 0
+  falsePositiveCandidate: 0
+  runtimeEvidenceRequired: 0
+statusPolicy:
+  finalStaticStatus: static_remediated
+  runtimeStatus: pending
+  originalFindingStatusPreservedInReadonlyAudit: true
+  sharedRootCauseDoesNotMergeFindingIdentity: true
+  staticRemediationDoesNotMeanBusinessAcceptance: true
+  p1P2RemediationIncluded: false
+  runtimeAcceptanceIncluded: false
+dependencyGraph:
+  topologicalOrder: [RC-01, RC-02, RC-03, RC-04, RC-05, RC-06, RC-07, RC-08]
+  edges:
+    - [RC-01, RC-02]
+    - [RC-01, RC-03]
+    - [RC-02, RC-03]
+    - [RC-03, RC-04]
+    - [RC-04, RC-05]
+    - [RC-01, RC-06]
+    - [RC-03, RC-06]
+    - [RC-05, RC-06]
+    - [RC-01, RC-07]
+    - [RC-03, RC-07]
+    - [RC-04, RC-07]
+    - [RC-06, RC-07]
+    - [RC-02, RC-08]
+    - [RC-03, RC-08]
+    - [RC-04, RC-08]
+    - [RC-06, RC-08]
+    - [RC-07, RC-08]
+  cycleCount: 0
+clusters:
+  - clusterId: RC-01
+    name: identity_session_admin_account
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-01-identity-session-admin-account.md
+    findingResults:
+      - {
+          findingId: F-0002,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0006, RV-0019],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0045,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0010, RV-0016, RV-0019],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0130,
+          intakeStatus: root_cause_alias,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0021],
+          aliasOf: F-0002,
+        }
+  - clusterId: RC-02
+    name: organization_scope_quota_employee
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-02-organization-scope-quota-employee.md
+    findingResults:
+      - {
+          findingId: F-0005,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0018, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0006,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0018, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0109,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0018],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0111,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0018, RV-0019, RV-0020, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0113,
+          intakeStatus: root_cause_alias,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0018, RV-0021],
+          aliasOf: F-0005,
+        }
+  - clusterId: RC-03
+    name: authorization_object_scope
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-03-authorization-object-scope.md
+    findingResults:
+      - {
+          findingId: F-0011,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0020],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0014,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0016,
+          intakeStatus: root_cause_alias,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0020],
+          aliasOf: F-0011,
+        }
+  - clusterId: RC-04
+    name: content_paper_aggregate_snapshot
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-04-content-paper-aggregate-snapshot.md
+    findingResults:
+      - {
+          findingId: F-0050,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0011],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0051,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0011, RV-0012, RV-0015, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0092,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0015, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0093,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0015, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0171,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0015],
+          aliasOf: null,
+        }
+  - clusterId: RC-05
+    name: knowledge_resource_rag_citation
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-05-knowledge-resource-rag-citation.md
+    findingResults:
+      - {
+          findingId: F-0068,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0013],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0075,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0013],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0076,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0013],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0080,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0014],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0081,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0014],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0084,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0014],
+          aliasOf: null,
+        }
+  - clusterId: RC-06
+    name: ai_config_execution_provenance
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-06-ai-config-execution-provenance.md
+    findingResults:
+      - {
+          findingId: F-0062,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0101,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0017],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0102,
+          intakeStatus: confirmed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0017],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0134,
+          intakeStatus: root_cause_alias,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0021],
+          aliasOf: F-0062,
+        }
+  - clusterId: RC-07
+    name: answer_mock_scoring_report
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-07-answer-mock-scoring-report.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-07-answer-mock-scoring-report.md
+    findingResults:
+      - {
+          findingId: F-0059,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0015, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0060,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0061,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0064,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0066,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0012, RV-0021],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0136,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0021],
+          aliasOf: null,
+        }
+  - clusterId: RC-08
+    name: organization_training_integrity
+    evidencePath: docs/05-execution-logs/evidence/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
+    auditPath: docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-08-organization-training-integrity.md
+    findingResults:
+      - {
+          findingId: F-0121,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0020],
+          aliasOf: null,
+        }
+      - {
+          findingId: F-0123,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0020],
+          aliasOf: F-0121,
+        }
+      - {
+          findingId: F-0145,
+          intakeStatus: baseline_changed,
+          finalStaticStatus: static_remediated,
+          runtimeValidationIds: [RV-0020],
+          aliasOf: null,
+        }
+runtimeBoundary:
+  backlogPath: D:/tiku-readonly-audit/runtime/runtime-validation-backlog.yaml
+  sequencingPath: D:/tiku-readonly-audit/runtime/runtime-acceptance-sequencing-ap-fin-001.yaml
+  status: pending
+  approvalRequiredCount: 21
+  executedByThisProgram: []
+  nextAction: obtain fresh per-stage environment, database, browser, Provider, cost and fault-injection approvals before execution
+resultBoundary:
+  proves: all_35_p0_have_independent_static_remediation_evidence_on_the_new_product_baseline
+  doesNotProve: database_migration_applied_runtime_validation_passed_business_acceptance_release_readiness_or_production_readiness

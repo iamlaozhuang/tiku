@@ -1,8 +1,8 @@
 # P0 全局静态回归与基线冻结证据
 
-status: in_progress
+status: ready_for_branch_closeout
 
-result: pending
+result: pass
 
 ## Reading Evidence
 
@@ -30,21 +30,59 @@ analogousImplementationReviewed: true
 
 ## Static Reconciliation
 
-- 35 个 P0 唯一性、逐项结论：pending。
-- 八个根因簇跨簇回归：pending。
-- 143 个 P1/P2 影响映射：pending。
-- 21 项 runtime validation pending 边界：pending。
+- 35 个 P0：35 次登记、35 个唯一 ID，与只读 finding register 的 P0 集合完全相同；全部保留独立 `static_remediated` 结论，5 个 alias 关系保留，0 duplicate removal、0 downgrade。
+- 领取复验分类：`confirmed=21`、`baseline_changed=10`、`root_cause_alias=4`；F-0123 同时保留 alias 关系但其领取主状态是 `baseline_changed`，因此 alias 关系总数仍为 5。
+- 八个根因簇：`RC-01 → RC-02 → RC-03 → RC-04 → RC-05 → RC-06 → RC-07 → RC-08`；17 条有向边均顺拓扑序，cycle=0。
+- 143 个 P1/P2：`potentiallyCovered=96`、`semanticChange=35`、`revalidateAfterP0=10`、`unrelatedDeferred=2`，全部且仅一次；P1=125、P2=18。
+- F-0013 保留 `runtime_evidence_required`；映射到 RC-07 不等于静态关闭。
+- 21 项 runtime validation：21 个唯一 ID、21 个 `pending`、21 个 `approvalRequired=true`；本 Program 执行数为 0。
+- frozen baseline：`2026-07-15-p0-remediation-static-baseline-v2.yaml`；P1/P2 map：`2026-07-15-p0-remediation-p1-p2-impact-map.yaml`。
+
+## Cross-Cluster Regression
+
+| producer → consumer    | 静态回归结论 | 关键守恒                                                                                                     |
+| ---------------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| RC-01 → RC-02/03/06/07 | pass         | 持久主体、session 撤销、多角色与锁定事实继续作为 organization、authorization、AI、答题入口的前置条件。       |
+| RC-02 → RC-03/08       | pass         | 动态 organization coverage、quota reservation 与 employee lifecycle 继续约束授权选择和训练 lineage。         |
+| RC-03 → RC-04/06/07/08 | pass         | selected authorization 必须精确匹配 owner/organization/profession/level/edition/capability，不静默换源。     |
+| RC-04 → RC-05/07/08    | pass         | immutable paper/question_group/scoring_point snapshot 继续作为 RAG、mock 与 organization training 内容事实。 |
+| RC-05 → RC-06          | pass         | generation/chunk/relation/citation provenance 保持持久、可追溯，弱/无证据不能伪造 sufficient。               |
+| RC-06 → RC-07/08       | pass         | model/prompt/RAG/auth snapshot 与 durable task/attempt 继续作为评分和训练结果 provenance。                   |
+| RC-07 → RC-08          | pass         | revision/operation id、服务端评分、terminal consumer 与恢复语义在企业训练专属 aggregate 中保持同构隔离。     |
+
+- 原审计源到最后业务提交共 273 个 `src/tests/drizzle` 变更文件；最后业务提交 `e136ca28a` 之后到本任务 HEAD 的产品路径变更为 0。
+- RC-08 fresh master full unit `400/400` files、`2386/2386` tests、lint/typecheck/format/build 已通过；本任务再跑跨 RC focused `14/14` files、`80/80` tests passed。
 
 ## Validation Log
 
-- pending。
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-P0RemediationGlobalBaseline.ps1`：pass；P0=35、P1/P2=143、runtime pending=21、cluster=8、cycle=0。
+- 跨 RC focused：`14/14` files、`80/80` tests passed，`--maxWorkers=4`。
+- audit 六文件 SHA-256、audit HEAD/clean、source product baseline ancestry、产品路径零漂移：pass。
+- P0 serial manual guard：领取时 pass，current=global static regression，next 为空。
+- `git diff --check`、Prettier、Module Run pre-commit/module-closeout/pre-push：closeout 前执行。
 
 ## Review Log
 
-- Round 1：pending。
-- Round 2：pending。
+- Round 1：pass；逐项数量/身份/证据/alias/降级/重复/依赖/静态与 runtime 边界复核完成。
+- Round 2：pass；九角色、状态机/交接、P1/P2、runtime、安全隐私、恢复面与反向破坏复核完成。
 
 ## Non-Actions
 
 - 未修改业务源码、schema/migration、依赖、数据库、Provider、secret/env、worker 或 runtime。
 - 未修改 `D:\tiku-readonly-audit`；未创建 PR、force push 或部署。
+
+## 品味合规自检 Checklist
+
+- [x] 本任务只物化 docs/governance/static verification，不改 API、数据库、UI 或产品行为。
+- [x] YAML/Markdown 使用项目术语、kebab-case 文件名和可恢复绝对基线；未新增含糊缩写。
+- [x] 未写入 secret、手机号、credential、Prompt、Provider payload、答案正文或数据库连接。
+- [x] 35 个 P0、143 个 P1/P2、21 个 runtime 项均由机器脚本验证唯一性与边界。
+- [x] 未以全量测试通过替代逐 finding 证据，未把静态整改表述为运行时或业务验收通过。
+
+localFullLoopGate: pass_branch_static_gates_fresh_master_origin_sync_and_cleanup_pending
+
+Cost Calibration Gate remains blocked.
+
+threadRolloverGate: complete_current_goal_after_terminal_closeout
+
+nextModuleRunCandidate: `none_serial_program_complete`
