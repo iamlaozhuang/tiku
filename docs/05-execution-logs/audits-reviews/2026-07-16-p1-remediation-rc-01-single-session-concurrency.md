@@ -22,6 +22,8 @@ Result: pass
 
 结论：F-0131 可静态关闭；应新增 writer inventory、transaction/lock/delete/insert 顺序和 learner/admin 路由守卫。真实 PostgreSQL 锁等待与多实例行为仍属于 RV-0021。
 
+实现阶段首版 3 个 AST 守卫虽通过，但独立审查构造出 table alias/raw SQL、嵌套路径、错误 user id、错误锁键、selector 旁路与注册例外不完整等 6 类假阴性，结论 `CHANGES_REQUESTED`。该版本未提交，随后改为符号别名、直接顶层语句和精确 AST 合同。
+
 ## Round 2
 
 Result: pass
@@ -32,8 +34,10 @@ Result: pass
 
 残余非阻断风险：没有 `auth_session.user_id` 唯一约束或 generation 第二道防线，正确性依赖未来 writer 继续共享同一锁；注册例外依赖 F-0129 工作单元持续成立；不同用户 `hashtext` 碰撞可能增加等待；真实 isolation、跨实例锁等待、连接中断、响应丢失与旧 token 重放只能由 RV-0021 验收。
 
+实现守卫第二轮又被连续击穿随机锁调用实参、creator property alias 与 shorthand destructuring。最终版本逐项固定锁调用的 `transaction`/`input.authUserId`/`getNow()` 实参，盘点 `createSessionService` 内全部 creator 引用并拒绝 destructuring/element access，递归解析常见 table alias。独立最终复核结论 `APPROVE`，P1 blocking 为 0；单文件 5/5、聚焦 3 文件 44/44 均通过。
+
 ## Final Disposition
 
-Decision: pending
+Decision: APPROVE
 
-最终关闭取决于守卫 RED/GREEN、完整回归、两轮审查和 fresh-master closeout 门禁。
+F-0131 的 P0 静态关闭已由高强度 AST 防退化守卫固定，产品运行时代码零变更，两轮对抗复核无剩余 P1 blocking。最终合入仍以完整静态质量门禁、治理守卫和 fresh-master build 全部通过为前提；RV-0021 不得被误述为已完成。
