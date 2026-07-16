@@ -240,9 +240,9 @@ activeTasks:
     runtimeAcceptance: blocked_requires_separate_goal_and_approval
     closeoutPolicy:
       localCommit: finalized_by_commit_containing_this_task
-      fastForwardMerge: blocked_requires_fresh_user_approval
-      push: blocked_requires_fresh_user_approval
-      cleanup: blocked_until_merge_decision
+      fastForwardMerge: approved_master_only_current_user_2026_07_16
+      push: approved_origin_master_only_current_user_2026_07_16
+      cleanup: approved_after_remote_sync_current_user_2026_07_16
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -280,8 +280,8 @@ activeTasks:
       databaseMutation: blocked
       providerCall: blocked
       runtimeAcceptance: blocked
-      fastForwardMerge: blocked_requires_fresh_user_approval
-      push: blocked_requires_fresh_user_approval
+      fastForwardMerge: approved_master_only_current_user_2026_07_16
+      push: approved_origin_master_only_current_user_2026_07_16
       forcePush: blocked
       pr: blocked
       deployment: blocked

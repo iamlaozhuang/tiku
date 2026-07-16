@@ -78,14 +78,16 @@ $mapText = Get-Content -LiteralPath $mapPath -Raw -Encoding UTF8
 $clusterText = Get-Content -LiteralPath $clusterPath -Raw -Encoding UTF8
 
 $originMasterSha = (& git -C $RepositoryRoot rev-parse origin/master).Trim()
-Assert-True ($originMasterSha -eq $expectedMasterSha) "origin/master drift: $originMasterSha"
+$currentHeadSha = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
+$allowedRemoteShas = @($expectedMasterSha, $currentHeadSha)
+Assert-True ($originMasterSha -in $allowedRemoteShas) "origin/master drift outside pre-closeout baseline/current package HEAD: $originMasterSha"
 if (-not $SkipLiveRemote) {
     $liveLine = (& git -C $RepositoryRoot ls-remote origin refs/heads/master).Trim()
     Assert-True (-not [string]::IsNullOrWhiteSpace($liveLine)) "live remote master missing"
     $liveSha = $liveLine.Split("`t")[0]
-    Assert-True ($liveSha -eq $expectedMasterSha) "live remote drift: $liveSha"
+    Assert-True ($liveSha -eq $originMasterSha) "live remote and origin/master disagree: live=$liveSha origin=$originMasterSha"
 }
-Write-Pass "origin/live master baseline is $expectedMasterSha"
+Write-Pass "origin/live are synchronized at an allowed pre/post-closeout SHA ($originMasterSha)"
 
 $productPaths = @("src", "tests", "drizzle", "e2e", "package.json", "pnpm-lock.yaml", "package-lock.json", "yarn.lock")
 $committedProductDiff = @(& git -C $RepositoryRoot diff --name-only "$p0ProductBaselineSha..HEAD" -- @productPaths | Where-Object { $_ })

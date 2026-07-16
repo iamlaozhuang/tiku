@@ -134,18 +134,18 @@ flowchart LR
 
 ## 8. 审批矩阵
 
-| 能力                                       | 当前启动包                   | 未来 P1/P2 Program 建议                     |
-| ------------------------------------------ | ---------------------------- | ------------------------------------------- |
-| governance docs/state/queue/static scripts | 本 Goal 内允许               | 每任务 allowlist                            |
-| 业务源码与产品测试                         | 禁止                         | 需新 Program 明确授权                       |
-| schema/migration 源码                      | 禁止                         | 可考虑 Program 级源码授权；不得继承 P0 授权 |
-| 数据库 apply/backfill/seed                 | 禁止                         | 每项 fresh approval                         |
-| 依赖/package/lockfile                      | 禁止                         | 依赖门禁 + fresh approval + 独立提交        |
-| Provider/secret/env/真实 AI 调用           | 禁止                         | 每项 fresh approval                         |
-| 浏览器/runtime validation                  | 禁止                         | 按 runtime ID 和 sequencing 单独批准        |
-| local commit                               | 启动包可形成单一可审查提交   | 每任务一个提交                              |
-| ff-only merge / push / cleanup             | 本 Goal 未授予 closeout 权限 | 新 Program 可按任务级 closeoutPolicy 授权   |
-| PR/force push/部署                         | 禁止                         | 始终 fresh approval                         |
+| 能力                                       | 当前启动包                             | 未来 P1/P2 Program 建议                     |
+| ------------------------------------------ | -------------------------------------- | ------------------------------------------- |
+| governance docs/state/queue/static scripts | 本 Goal 内允许                         | 每任务 allowlist                            |
+| 业务源码与产品测试                         | 禁止                                   | 需新 Program 明确授权                       |
+| schema/migration 源码                      | 禁止                                   | 可考虑 Program 级源码授权；不得继承 P0 授权 |
+| 数据库 apply/backfill/seed                 | 禁止                                   | 每项 fresh approval                         |
+| 依赖/package/lockfile                      | 禁止                                   | 依赖门禁 + fresh approval + 独立提交        |
+| Provider/secret/env/真实 AI 调用           | 禁止                                   | 每项 fresh approval                         |
+| 浏览器/runtime validation                  | 禁止                                   | 按 runtime ID 和 sequencing 单独批准        |
+| local commit                               | 启动包可形成单一可审查提交             | 每任务一个提交                              |
+| ff-only merge / push / cleanup             | 2026-07-16 获得本启动包 fresh approval | 后续 Program 仍须独立任务级授权             |
+| PR/force push/部署                         | 禁止                                   | 始终 fresh approval                         |
 
 ## 9. 恢复入口
 

@@ -103,7 +103,9 @@ Round 2 攻击跨角色、旧基线重开、P2 越界和 runtime 越界：
 
 ## 审批边界
 
-本 Goal 允许形成 governance-only 本地提交；ff-only 合入 `master`、push 和合入后清理未获 fresh approval。P1/P2 实现、schema/migration、数据库、依赖、Provider、浏览器/runtime、PR、force push 和部署均未授权。
+2026-07-16 用户已 fresh approval：允许本启动包 ff-only 合入 `master`、push `origin/master`，并在远端同步与 master 门禁通过后清理短分支/worktree。该授权不扩展到 P1/P2 实现、schema/migration、数据库、依赖、Provider、浏览器/runtime、PR、force push 或部署。
+
+合入前对抗复核发现 startup guard 将 `origin/master` 固定为合入前 SHA，正常 push 后会误报漂移。guard 已收敛为仅接受“合入前冻结 SHA”或“当前启动包 HEAD”，同时要求 live remote 与本地 `origin/master` 完全一致；产品零漂移和文件 allowlist 门禁保持不变。
 
 ## Thread Rollover Decision
 

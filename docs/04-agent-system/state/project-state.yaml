@@ -506,6 +506,7 @@ currentTask:
       auditRepositoryZeroChange: pass
       detachedRecoveryDrill: pass
       localCommit: finalized_by_commit_containing_this_state
+      closeoutAuthorization: approved_current_user_2026_07_16
   implementationBoundary:
     p1Implementation: blocked_requires_new_goal_and_authorization
     p2Implementation: blocked_until_p1_frozen_and_new_goal
@@ -515,20 +516,20 @@ currentTask:
     dependencyIntroduction: blocked_requires_fresh_user_approval
     providerRuntimeBrowser: blocked_requires_fresh_user_approval
     prForcePushDeploy: blocked_requires_fresh_user_approval
-    fastForwardMerge: blocked_requires_fresh_user_approval
-    push: blocked_requires_fresh_user_approval
-    cleanup: blocked_until_merge_decision
+    fastForwardMerge: approved_master_only_current_user_2026_07_16
+    push: approved_origin_master_only_current_user_2026_07_16
+    cleanup: approved_after_remote_sync_current_user_2026_07_16
   currentExecutionGate:
     status: satisfied_governance_only
     reason: user_created_goal_for_p1_p2_startup_package_only
     resumeAction: finish_143_level_1_revalidation_consistency_and_recovery_without_p1_implementation
 standingAuthorization:
   id: current-user-created-p1-p2-startup-package-goal-2026-07-15
-  source: current_conversation_goal_scope
+  source: current_conversation_goal_scope_plus_closeout_approval_2026_07_16
   localCommit: approved_governance_only
-  fastForwardMerge: blocked_requires_fresh_user_approval
-  push: blocked_requires_fresh_user_approval
-  cleanup: blocked_until_merge_decision
+  fastForwardMerge: approved_master_only_current_user_2026_07_16
+  push: approved_origin_master_only_current_user_2026_07_16
+  cleanup: approved_after_remote_sync_current_user_2026_07_16
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
   lastKnownMasterSha: 0643ad4d6346453f3324d86b6e003c6726c808ef
