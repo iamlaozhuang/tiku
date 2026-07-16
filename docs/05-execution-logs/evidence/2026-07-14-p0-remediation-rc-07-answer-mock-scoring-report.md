@@ -6,7 +6,7 @@ result: pass
 
 Batch range: RC-07 answer/mock/scoring/report root-cause cluster.
 
-Commit: `92fdab912a960ba1936b0fabe9a3220c67f44e68`（latest schema chain checkpoint；business closeout commit pending）。
+Commit: `effbc1a5461a53364b078dd012de7d30c578fa81`（RC-07 business closeout；schema checkpoints 保持独立）。
 
 ## Reading Evidence
 
@@ -117,6 +117,18 @@ analogousImplementationReviewed: true
 - Round 2：pass — 四类学员、跨 organization、UI/API/state handoff、report identity、skill question_group、P1/P2 boundary 与 full regression。
 - 详细记录：`docs/05-execution-logs/audits-reviews/2026-07-14-p0-remediation-rc-07-answer-mock-scoring-report.md`。
 
+## Fresh Master Closeout
+
+- `master` 已以 `--ff-only` 合入 RC-07 三个 schema checkpoint 与业务 closeout，验证基线：`effbc1a5461a53364b078dd012de7d30c578fa81`。
+- fresh detached worktree：`D:\tiku\.worktrees\p0-rc-07-fresh-master`；HEAD 与上述 master 基线一致，worktree clean。
+- `corepack pnpm@10.15.1 install --offline --frozen-lockfile`：pass；741 个 locked packages 全部复用，未修改 package/lockfile。
+- fresh full unit：`397/397` files、`2370/2370` tests passed，`489.48s`，`--maxWorkers=4`。
+- fresh serial quality gates：lint zero warnings、typecheck、format check、build passed；build 生成 93 个静态页面并包含 terminal supplement route。
+- `git diff --check`、P0 serial manual guard、Module Run v2 pre-commit hardening 与 module closeout readiness：pass。
+- detached fresh worktree 的 pre-push readiness 按设计拒绝 `HARD_BLOCK_DETACHED_HEAD`，并识别该 commit 内仍是 pre-merge master checkpoint；当前 attached master closeout 记录已把 checkpoint 更新为 `effbc1a54`，将在 push 前重跑。
+- 记录前 master、RC-07 branch、fresh detached worktree 与 audit repository 均 clean；audit HEAD 保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
+- `origin/master` 与实时远端仍为 `ccaa8f2d0f37e5e3093526a8998ec037ccff380a`；尚未 push，worktree/short branch 尚未清理。
+
 ## P1/P2 Impact Mapping Only
 
 - potentially covered：F-0013、F-0018、F-0020、F-0026、F-0027、F-0034、F-0065、F-0067、F-0079、F-0135、F-0137、F-0142、F-0152、F-0162、F-0164、F-0169、F-0172、F-0175、F-0176。
@@ -139,7 +151,7 @@ analogousImplementationReviewed: true
 - [x] 越权、非法状态、并发、失败、重试、回滚、幂等、null/空集合和异常输入已对抗覆盖。
 - [x] migration 仅源码/静态测试，未越过 database/runtime approval boundary。
 
-localFullLoopGate: pass_branch_gates_fresh_master_pending
+localFullLoopGate: pass_fresh_master_attached_prepush_origin_sync_and_cleanup_pending
 
 L8 remains blocked：database/runtime/Provider/worker activation 与 21 项 runtime acceptance 未授权。
 
