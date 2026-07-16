@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
 currentPhase: p0-remediation-global-static-regression-baseline-freeze-2026-07-14
-updatedAt: "2026-07-15T23:03:42-07:00"
+updatedAt: "2026-07-15T23:06:59-07:00"
 contentAdminPlatformSerialProgram:
   programId: content-admin-platform-b-to-f-2026-07-13
   status: closed
@@ -457,7 +457,7 @@ p0RemediationSerialProgram:
       shortBranchCleanup: pass
     p0-remediation-global-static-regression-baseline-freeze-2026-07-14:
       taskCommit: pass
-      masterMerge: pending
+      masterMerge: pass
       originMasterSync: pending
       worktreeCleanup: pending
       shortBranchCleanup: pending
@@ -488,7 +488,7 @@ standingAuthorization:
   cleanup: approved_after_remote_sync
   deployment: blocked_requires_fresh_user_approval
 repositoryCheckpoint:
-  lastKnownMasterSha: 5a23143c9559558cfdc0e2f5e028a170d60193e1
+  lastKnownMasterSha: 42bed4a90f16ac887c940e748e2053791cdd3ee5
   lastKnownOriginMasterSha: 5a23143c9559558cfdc0e2f5e028a170d60193e1
   lastKnownRemoteMasterSha: 5a23143c9559558cfdc0e2f5e028a170d60193e1
   masterWorktreeClean: true

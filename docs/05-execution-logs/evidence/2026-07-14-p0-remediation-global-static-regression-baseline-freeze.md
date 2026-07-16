@@ -71,6 +71,13 @@ analogousImplementationReviewed: true
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14`：本记录提交后重跑。
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p0-remediation-global-static-regression-baseline-freeze-2026-07-14 -SkipRemoteAheadCheck`：fresh master closeout 后重跑。
 
+### Fresh master candidate gate
+
+- `codex/p0-global-static-regression-freeze` 的 ready commit `42bed4a90f16ac887c940e748e2053791cdd3ee5` 已通过 `--ff-only` 合入本地 `master`；合入时两者指向同一提交。
+- fresh `master` 上全局 baseline script、P0 serial manual guard、`git diff --check`、Prettier 与 Module Run closeout readiness 均通过。
+- 此时 `origin/master` 与 live remote 仍为 `5a23143c9559558cfdc0e2f5e028a170d60193e1`；push、worktree cleanup、short branch cleanup 明确保留为 pending，不提前宣告闭环。
+- 根工作区与只读审计仓均 clean；审计仓 HEAD 仍为 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
+
 ## Recovery Drill
 
 - 从已提交的 freeze commit `f97de89c517f3855d2c31398586a6892ddd2b4aa` 创建 detached worktree `D:\tiku\.worktrees\p0-global-recovery-drill`，不依赖当前对话上下文。
