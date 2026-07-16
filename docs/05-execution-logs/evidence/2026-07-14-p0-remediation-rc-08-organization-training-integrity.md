@@ -1,8 +1,10 @@
 # P0 RC-08 企业训练完整性整改证据
 
-status: implementation_complete_pending_closeout
+status: implementation_complete_fresh_master_pass_pending_closeout
 
 result: static_remediation_pass_runtime_pending
+
+Business closeout commit: `e136ca28acde82282a17c65ccfb828a01e872c0b`（schema commit `897a1b4e0` 保持独立）。
 
 ## Reading Evidence
 
@@ -51,6 +53,17 @@ analogousImplementationReviewed: true
 - `git diff --check`：passed；依赖与 lockfile 未变化；business commit 尚待 pre-commit gate。
 - P0 serial manual guard：passed，current RC-08、next global static regression/freeze。
 - Module Run v2 pre-commit 首次正确阻断 3 个未登记的新文件；确认均为本 RC 的 operation-id、persistence-conflict 与测试后补入精确 allowlist，重跑 passed；未扩大依赖、数据库或 runtime 权限。
+
+## Fresh Master Closeout
+
+- `master` 已以 `--ff-only` 合入 RC-08 claim、schema 与 business commits；验证基线：`e136ca28acde82282a17c65ccfb828a01e872c0b`。
+- master 本地依赖首次 focused gate 因旧 `node_modules` 缺少 Vitest 未执行；随后 `CI=true corepack pnpm@10.15.1 install --offline --frozen-lockfile` 完整复用 741 个 locked packages，未修改 package/lockfile。
+- fresh focused：`9/9` files、`178/178` tests passed。
+- fresh full unit：`400/400` files、`2386/2386` tests passed，`484.73s`，`--maxWorkers=4`。
+- fresh serial quality gates：lint zero warnings、typecheck、format check、build passed；build 生成 `93/93` 个静态页面。
+- `git diff --check` 与 P0 serial manual guard：passed；依赖、lockfile 与 tracked worktree 均无变化。
+- RC-08 branch/worktree 与 audit repository 在 closeout state commit 前保持 clean；audit HEAD 保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
+- `origin/master` 与实时远端仍为 `78da56891d82883de2384438b03c6ab4d4444cfd`；尚未 push，隔离资源尚未清理。
 
 ## Finding Remediation Conclusions
 
