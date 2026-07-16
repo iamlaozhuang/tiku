@@ -126,6 +126,7 @@ analogousImplementationReviewed: true
 - fresh serial quality gates：lint zero warnings、typecheck、format check、build passed；build 生成 93 个静态页面并包含 terminal supplement route。
 - `git diff --check`、P0 serial manual guard、Module Run v2 pre-commit hardening 与 module closeout readiness：pass。
 - detached fresh worktree 的 pre-push readiness 按设计拒绝 `HARD_BLOCK_DETACHED_HEAD`，并识别该 commit 内仍是 pre-merge master checkpoint；当前 attached master closeout 记录已把 checkpoint 更新为 `effbc1a54`，将在 push 前重跑。
+- attached master 首次 pre-push 正确阻断 current task 仍为 `in_progress` 时使用 ancestor checkpoint；已在 fresh/full/quality/closeout 全部通过后将 RC-07 显式转为 `ready_for_closeout`，不提前标记 closed。
 - 记录前 master、RC-07 branch、fresh detached worktree 与 audit repository 均 clean；audit HEAD 保持 `a84224fa12ec85b28e6acd945deba2afa28c6c02`。
 - `origin/master` 与实时远端仍为 `ccaa8f2d0f37e5e3093526a8998ec037ccff380a`；尚未 push，worktree/short branch 尚未清理。
 
