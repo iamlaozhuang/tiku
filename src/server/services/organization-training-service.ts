@@ -1,4 +1,7 @@
+import { createHash } from "node:crypto";
+
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import { isOrganizationTrainingPersistenceConflictError } from "../contracts/organization-training-persistence-contract";
 import {
   createErrorResponse,
   createPaginatedResponse,
@@ -37,6 +40,8 @@ import {
   organizationTrainingAuditLogTargetResourceTypeValues,
   type OrganizationTrainingAuditLogReferenceInput,
   type OrganizationTrainingCopyToNewDraftInput,
+  type OrganizationTrainingDraftQuestionInput,
+  type OrganizationTrainingDraftSaveInput,
   organizationTrainingQuestionTypeValues,
   type OrganizationTrainingPublishInput,
   type OrganizationTrainingPublishQuestionInput,
@@ -54,6 +59,9 @@ import {
 
 export const organizationTrainingManualDraftCreationBlockedMessage =
   "Organization training manual draft creation is blocked.";
+
+export const organizationTrainingDraftSaveBlockedMessage =
+  "Organization training draft save is blocked.";
 
 export const organizationTrainingPublishBlockedMessage =
   "Organization training publish is blocked.";
@@ -153,7 +161,19 @@ export type OrganizationTrainingPublishBlockedReason =
   | "organization_training_capability_required"
   | "organization_scope_denied"
   | "insufficient_evidence"
-  | "weak_evidence_confirmation_required";
+  | "weak_evidence_confirmation_required"
+  | "persistence_conflict";
+
+export type OrganizationTrainingDraftSaveBlockedReason =
+  | "invalid_draft_input"
+  | "advanced_edition_required"
+  | "org_auth_required"
+  | "organization_training_capability_required"
+  | "organization_scope_denied"
+  | "authorization_scope_mismatch"
+  | "draft_not_editable"
+  | "stale_revision"
+  | "persistence_conflict";
 
 export type OrganizationTrainingTakedownBlockedReason =
   | "invalid_takedown_input"
@@ -173,7 +193,8 @@ export type OrganizationTrainingEmployeeAnswerBlockedReason =
   | "answer_deadline_expired"
   | "invalid_answer_input"
   | "already_submitted"
-  | "history_not_visible";
+  | "history_not_visible"
+  | "persistence_conflict";
 
 export type OrganizationTrainingSourceContextBlockedReason =
   | "invalid_source_context_input"
@@ -286,17 +307,41 @@ export type OrganizationTrainingManualDraftWrite = Omit<
   ownerPublicId: string;
   quotaOwnerType: "organization";
   quotaOwnerPublicId: string;
+  draftStatus: "draft";
+  revision: 1;
+  questions: OrganizationTrainingPublishQuestionInput[];
+};
+
+export type OrganizationTrainingDraftSaveWrite = {
+  draftPublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
+  title: string;
+  description: string | null;
+  questionCount: number;
+  totalScore: number;
+  questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+  questions: OrganizationTrainingPublishQuestionInput[];
+  evidenceStatus: "sufficient" | "weak" | "none";
+  validationStatus: "needs_review";
+  savedAt: string;
 };
 
 export type OrganizationTrainingDraftStore = {
   createManualDraft(
     draftWrite: OrganizationTrainingManualDraftWrite,
   ): Promise<OrganizationTrainingDraftDto>;
+  saveDraft(
+    draftWrite: OrganizationTrainingDraftSaveWrite,
+  ): Promise<OrganizationTrainingDraftDto>;
 };
 
 export type OrganizationTrainingPublishedVersionWrite = Omit<
   OrganizationTrainingPublishedVersionDto,
-  "publicId" | "versionNumber"
+  "publicId" | "versionNumber" | "answerDeadlineAt"
 > & {
   contentType: "organization_training_version";
   ownerType: "organization";
@@ -307,6 +352,10 @@ export type OrganizationTrainingPublishedVersionWrite = Omit<
   authorizationPublicId: string;
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
   questionSnapshot: OrganizationTrainingPublishQuestionInput[];
+  answerDeadlineAt: string | null;
+  expectedDraftRevision: number;
+  publishOperationId: string;
+  publishPayloadDigest: string;
 };
 
 export type OrganizationTrainingPersistenceLineage = {
@@ -372,6 +421,9 @@ export type OrganizationTrainingEmployeeAnswerDraftWrite = {
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
   answerStatus: "in_progress";
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
   answeredQuestionCount: number;
   answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
   scoreSummary: null;
@@ -386,13 +438,33 @@ export type OrganizationTrainingEmployeeAnswerSubmissionWrite = {
   employeePublicId: string;
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
-  answerStatus: "submitted";
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
+  answerStatus: "scoring" | "submitted";
   answeredQuestionCount: number;
   answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
   questionResults: EmployeeOrganizationTrainingQuestionResultDto[];
-  scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
+  scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto | null;
+  totalScore: number;
+  scoringTask: OrganizationTrainingScoringTaskWrite | null;
   submittedAt: string;
   formalWritePolicy: OrganizationTrainingFormalWritePolicy;
+};
+
+export type OrganizationTrainingScoringTaskWrite = {
+  publicIdSeed: string;
+  idempotencyKeyHash: string;
+  maxAttemptCount: 3;
+  timeoutSecond: 60;
+  modelConfigSnapshot: Record<string, unknown>;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  promptTemplateHash: string;
+  inputSnapshot: Record<string, unknown>;
+  authorizationSnapshot: Record<string, unknown>;
+  ragSnapshot: Record<string, unknown> | null;
+  scheduledAt: string;
 };
 
 export type OrganizationTrainingEmployeeAnswerStore = {
@@ -461,7 +533,18 @@ export type OrganizationTrainingCreateManualDraftResult =
 
 export type OrganizationTrainingPublishVersionCommand = {
   publishInput: OrganizationTrainingPublishInput;
+  draft: OrganizationTrainingDraftDto;
+  adminContext: OrganizationTrainingAdminContext;
+  authorizationContext: EffectiveAuthorizationContextDto;
   persistenceLineage: OrganizationTrainingPersistenceLineage;
+};
+
+export type OrganizationTrainingSaveDraftCommand = {
+  adminContext: OrganizationTrainingAdminContext;
+  authorizationContext: EffectiveAuthorizationContextDto;
+  draft: OrganizationTrainingDraftDto;
+  draftInput: OrganizationTrainingDraftSaveInput;
+  trustedDraftQuestions?: readonly OrganizationTrainingPublishQuestionInput[];
 };
 
 export type OrganizationTrainingTakeDownVersionCommand = {
@@ -510,20 +593,20 @@ export type OrganizationTrainingEmployeeAnswerLifecycleFlowReadModelInput = {
 
 export type OrganizationTrainingEmployeeAnswerDraftInput = {
   trainingVersionPublicId: string;
-  answeredQuestionCount: number;
+  expectedRevision: number;
+  operationId: string;
   answerItems?: EmployeeOrganizationTrainingAnswerItemDto[];
 };
 
 export type OrganizationTrainingEmployeeAnswerSubmitInput =
-  OrganizationTrainingEmployeeAnswerDraftInput & {
-    scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
-  };
+  OrganizationTrainingEmployeeAnswerDraftInput;
 
 export type OrganizationTrainingSaveEmployeeAnswerDraftCommand = {
   employeeContext: OrganizationTrainingEmployeeContext;
   version: OrganizationTrainingPublishedVersionDto;
   answerInput: OrganizationTrainingEmployeeAnswerDraftInput;
   existingAnswer: EmployeeOrganizationTrainingAnswerDto | null;
+  canonicalQuestions: readonly OrganizationTrainingPublishQuestionInput[];
 };
 
 export type OrganizationTrainingSubmitEmployeeAnswerCommand = {
@@ -531,6 +614,16 @@ export type OrganizationTrainingSubmitEmployeeAnswerCommand = {
   version: OrganizationTrainingPublishedVersionDto;
   answerInput: OrganizationTrainingEmployeeAnswerSubmitInput;
   existingAnswer: EmployeeOrganizationTrainingAnswerDto | null;
+  canonicalQuestions: readonly OrganizationTrainingPublishQuestionInput[];
+  scoringProvenance: OrganizationTrainingScoringProvenance | null;
+};
+
+export type OrganizationTrainingScoringProvenance = {
+  modelConfigSnapshot: Record<string, unknown>;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  promptTemplateHash: string;
+  ragSnapshot: Record<string, unknown> | null;
 };
 
 export type OrganizationTrainingGetEmployeeAnswerReadonlySummaryCommand = {
@@ -548,6 +641,17 @@ export type OrganizationTrainingPublishVersionResult =
       success: false;
       reason: OrganizationTrainingPublishBlockedReason;
       message: typeof organizationTrainingPublishBlockedMessage;
+    };
+
+export type OrganizationTrainingSaveDraftResult =
+  | {
+      success: true;
+      draft: OrganizationTrainingDraftDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingDraftSaveBlockedReason;
+      message: typeof organizationTrainingDraftSaveBlockedMessage;
     };
 
 export type OrganizationTrainingTakeDownVersionResult =
@@ -609,6 +713,9 @@ export type OrganizationTrainingService = {
   createManualDraft(
     command: OrganizationTrainingCreateManualDraftCommand,
   ): Promise<OrganizationTrainingCreateManualDraftResult>;
+  saveDraft(
+    command: OrganizationTrainingSaveDraftCommand,
+  ): Promise<OrganizationTrainingSaveDraftResult>;
   publishVersion(
     command: OrganizationTrainingPublishVersionCommand,
   ): Promise<OrganizationTrainingPublishVersionResult>;
@@ -658,6 +765,16 @@ function createPublishBlockedResult(
     success: false,
     reason,
     message: organizationTrainingPublishBlockedMessage,
+  };
+}
+
+function createDraftSaveBlockedResult(
+  reason: OrganizationTrainingDraftSaveBlockedReason,
+): OrganizationTrainingSaveDraftResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingDraftSaveBlockedMessage,
   };
 }
 
@@ -799,6 +916,7 @@ function buildDraftLifecycleItem(
     subject: draft.subject,
     title: draft.title,
     description: draft.description,
+    revision: draft.revision,
     questionCount: draft.questionCount,
     totalScore: draft.totalScore,
     questionTypeSummary: copyQuestionTypeSummary(draft.questionTypeSummary),
@@ -863,6 +981,10 @@ export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
   const query = normalizeAdminLifecycleQuery(input.query);
   const sourceMetadataMap = buildSourceMetadataMap(input.sourceMetadata);
   const draftItems = input.drafts
+    .filter(
+      (draft) =>
+        draft.draftStatus === undefined || draft.draftStatus === "draft",
+    )
     .filter((draft) =>
       isOrganizationVisibleToAdmin(
         draft.organizationPublicId,
@@ -998,6 +1120,7 @@ export function buildOrganizationTrainingAdminDetailReadModel(
         organizationPublicId: input.draft.organizationPublicId,
         title: input.draft.title,
         description: input.draft.description,
+        revision: input.draft.revision,
         profession: input.draft.profession,
         level: input.draft.level,
         subject: input.draft.subject,
@@ -1029,6 +1152,7 @@ export function buildOrganizationTrainingAdminDetailReadModel(
       organizationPublicId: input.draft.organizationPublicId,
       title: input.draft.title,
       description: input.draft.description,
+      revision: input.draft.revision,
       profession: input.draft.profession,
       level: input.draft.level,
       subject: input.draft.subject,
@@ -1103,6 +1227,301 @@ function createEmptyQuestionTypeSummary(): OrganizationTrainingQuestionTypeSumma
     multiChoice: 0,
     trueFalse: 0,
     shortAnswer: 0,
+  };
+}
+
+export function createCanonicalOrganizationTrainingDraftQuestions(
+  questions: readonly OrganizationTrainingDraftQuestionInput[],
+  trustedQuestions: readonly OrganizationTrainingPublishQuestionInput[] = [],
+): OrganizationTrainingPublishQuestionInput[] {
+  const trustedQuestionsByPublicId = new Map(
+    trustedQuestions.map((question) => [question.publicId, question]),
+  );
+
+  return questions.map((question) => {
+    const trustedQuestion = trustedQuestionsByPublicId.get(question.publicId);
+    const hasUnchangedTrustedContent =
+      trustedQuestion !== undefined &&
+      createPayloadDigest(createDraftQuestionIntegrityPayload(question)) ===
+        createPayloadDigest(
+          createDraftQuestionIntegrityPayload(trustedQuestion),
+        );
+
+    return {
+      ...question,
+      ...(question.paperSectionKey !== undefined &&
+      question.paperSectionTitle !== undefined &&
+      question.paperSectionSortOrder !== undefined &&
+      question.questionSortOrder !== undefined
+        ? {
+            paperSectionKey: question.paperSectionKey,
+            paperSectionTitle: question.paperSectionTitle,
+            paperSectionSortOrder: question.paperSectionSortOrder,
+            questionSortOrder: question.questionSortOrder,
+          }
+        : {}),
+      options: question.options.map((option) => ({ ...option })),
+      evidenceStatus: hasUnchangedTrustedContent
+        ? trustedQuestion.evidenceStatus
+        : "weak",
+      citationCount: hasUnchangedTrustedContent
+        ? trustedQuestion.citationCount
+        : 0,
+    };
+  });
+}
+
+function createDraftQuestionIntegrityPayload(
+  question:
+    | OrganizationTrainingDraftQuestionInput
+    | OrganizationTrainingPublishQuestionInput,
+) {
+  return {
+    publicId: question.publicId,
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    paperSectionKey: question.paperSectionKey ?? null,
+    paperSectionTitle: question.paperSectionTitle ?? null,
+    paperSectionSortOrder: question.paperSectionSortOrder ?? null,
+    questionSortOrder: question.questionSortOrder ?? null,
+    materialTitle: question.materialTitle,
+    materialContent: question.materialContent,
+    stem: question.stem,
+    options: question.options.map((option) => ({
+      publicId: option.publicId,
+      label: option.label,
+      content: option.content,
+    })),
+    score: question.score,
+    standardAnswer: question.standardAnswer,
+    analysisSummary: question.analysisSummary,
+  };
+}
+
+function resolveDraftEvidenceStatus(
+  questions: readonly OrganizationTrainingPublishQuestionInput[],
+): "sufficient" | "weak" | "none" {
+  if (
+    questions.length === 0 ||
+    questions.some((question) => question.evidenceStatus === "none")
+  ) {
+    return "none";
+  }
+
+  return questions.some((question) => question.evidenceStatus === "weak")
+    ? "weak"
+    : "sufficient";
+}
+
+export type OrganizationTrainingAnswerEvaluation = {
+  answeredQuestionCount: number;
+  answerStatus: "in_progress" | "scoring" | "submitted";
+  answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
+  questionResults: EmployeeOrganizationTrainingQuestionResultDto[];
+  scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto | null;
+  objectiveScore: number;
+  totalScore: number;
+  requiresAiScoring: boolean;
+};
+
+function normalizeStandardAnswerTokens(
+  question: OrganizationTrainingPublishQuestionInput,
+): string[] | null {
+  const rawValue = normalizeRequiredText(question.standardAnswer);
+
+  if (rawValue === null) {
+    return null;
+  }
+
+  let tokens: string[];
+
+  try {
+    const parsed = JSON.parse(rawValue) as unknown;
+    tokens = Array.isArray(parsed)
+      ? parsed.filter((value): value is string => typeof value === "string")
+      : [rawValue];
+  } catch {
+    tokens = rawValue.split(/[,，;；|]/u);
+  }
+
+  const normalizedTokens = tokens
+    .map((token) => token.trim().toLocaleLowerCase())
+    .filter((token) => token.length > 0);
+  const optionByReference = new Map<string, string>();
+
+  for (const option of question.options) {
+    optionByReference.set(option.publicId.toLocaleLowerCase(), option.publicId);
+    optionByReference.set(
+      option.label.trim().toLocaleLowerCase(),
+      option.publicId,
+    );
+  }
+
+  if (
+    normalizedTokens.length === 1 &&
+    question.questionType === "multi_choice" &&
+    normalizedTokens[0]!.length > 1
+  ) {
+    const splitLabels = [...normalizedTokens[0]!];
+
+    if (splitLabels.every((label) => optionByReference.has(label))) {
+      normalizedTokens.splice(0, 1, ...splitLabels);
+    }
+  }
+
+  const optionPublicIds = normalizedTokens.map((token) =>
+    optionByReference.get(token),
+  );
+
+  return optionPublicIds.some((publicId) => publicId === undefined)
+    ? null
+    : [...new Set(optionPublicIds as string[])].sort();
+}
+
+function areStringSetsEqual(left: readonly string[], right: readonly string[]) {
+  return (
+    left.length === right.length &&
+    [...left].sort().every((value, index) => value === [...right].sort()[index])
+  );
+}
+
+export function evaluateOrganizationTrainingAnswer(input: {
+  questions: readonly OrganizationTrainingPublishQuestionInput[];
+  answerItems: readonly EmployeeOrganizationTrainingAnswerItemDto[];
+  requireComplete: boolean;
+}): OrganizationTrainingAnswerEvaluation | null {
+  const questionByPublicId = new Map<
+    string,
+    OrganizationTrainingPublishQuestionInput
+  >(input.questions.map((question) => [question.publicId, question]));
+  const answerItemByQuestionPublicId = new Map<
+    string,
+    EmployeeOrganizationTrainingAnswerItemDto
+  >();
+
+  for (const answerItem of input.answerItems) {
+    const question = questionByPublicId.get(answerItem.questionPublicId);
+
+    if (
+      question === undefined ||
+      answerItemByQuestionPublicId.has(answerItem.questionPublicId)
+    ) {
+      return null;
+    }
+
+    const selectedOptionPublicIds: string[] = [
+      ...new Set(answerItem.selectedOptionPublicIds),
+    ];
+    const allowedOptionPublicIds = new Set(
+      question.options.map((option) => option.publicId),
+    );
+    const textAnswer = normalizeOptionalText(answerItem.textAnswer);
+    const isChoiceQuestion = question.questionType !== "short_answer";
+
+    if (
+      selectedOptionPublicIds.some(
+        (optionPublicId) => !allowedOptionPublicIds.has(optionPublicId),
+      ) ||
+      (isChoiceQuestion && textAnswer !== null) ||
+      (!isChoiceQuestion && selectedOptionPublicIds.length > 0) ||
+      ((question.questionType === "single_choice" ||
+        question.questionType === "true_false") &&
+        selectedOptionPublicIds.length > 1)
+    ) {
+      return null;
+    }
+
+    answerItemByQuestionPublicId.set(answerItem.questionPublicId, {
+      questionPublicId: answerItem.questionPublicId,
+      selectedOptionPublicIds,
+      textAnswer,
+    });
+  }
+
+  const answeredQuestionCount = [
+    ...answerItemByQuestionPublicId.entries(),
+  ].filter(([questionPublicId, answerItem]) => {
+    const question = questionByPublicId.get(questionPublicId)!;
+
+    return question.questionType === "short_answer"
+      ? answerItem.textAnswer !== null
+      : answerItem.selectedOptionPublicIds.length > 0;
+  }).length;
+
+  if (
+    input.requireComplete &&
+    (input.questions.length === 0 ||
+      answeredQuestionCount !== input.questions.length ||
+      answerItemByQuestionPublicId.size !== input.questions.length)
+  ) {
+    return null;
+  }
+
+  let objectiveScore = 0;
+  const questionResults: EmployeeOrganizationTrainingQuestionResultDto[] = [];
+
+  for (const question of input.questions) {
+    const answerItem = answerItemByQuestionPublicId.get(question.publicId);
+
+    if (answerItem === undefined) {
+      continue;
+    }
+
+    let score = 0;
+
+    if (question.questionType !== "short_answer") {
+      const standardAnswerOptionPublicIds =
+        normalizeStandardAnswerTokens(question);
+
+      if (standardAnswerOptionPublicIds === null) {
+        return null;
+      }
+
+      score = areStringSetsEqual(
+        answerItem.selectedOptionPublicIds,
+        standardAnswerOptionPublicIds,
+      )
+        ? question.score
+        : 0;
+      objectiveScore += score;
+    }
+
+    questionResults.push({
+      questionPublicId: question.publicId,
+      score,
+      maxScore: question.score,
+      standardAnswer: input.requireComplete ? question.standardAnswer : null,
+      analysis: input.requireComplete ? question.analysisSummary : null,
+      scoringPointResults: [],
+    });
+  }
+
+  const totalScore = input.questions.reduce(
+    (scoreTotal, question) => scoreTotal + question.score,
+    0,
+  );
+  const requiresAiScoring =
+    input.requireComplete &&
+    input.questions.some(
+      (question) => question.questionType === "short_answer",
+    );
+
+  return {
+    answeredQuestionCount,
+    answerStatus: input.requireComplete
+      ? requiresAiScoring
+        ? "scoring"
+        : "submitted"
+      : "in_progress",
+    answerItems: [...answerItemByQuestionPublicId.values()],
+    questionResults,
+    scoreSummary:
+      input.requireComplete && !requiresAiScoring
+        ? { score: objectiveScore, totalScore }
+        : null,
+    objectiveScore,
+    totalScore,
+    requiresAiScoring,
   };
 }
 
@@ -1208,17 +1627,23 @@ function getEmployeeContextBlockedReason(
 }
 
 function getPublishCapabilityBlockedReason(
-  capabilityContext: OrganizationTrainingPublishInput["capabilityContext"],
-): OrganizationTrainingPublishBlockedReason | null {
-  if (capabilityContext.effectiveEdition !== "advanced") {
+  authorizationContext: EffectiveAuthorizationContextDto,
+):
+  | "advanced_edition_required"
+  | "org_auth_required"
+  | "organization_training_capability_required"
+  | null {
+  if (authorizationContext.effectiveEdition !== "advanced") {
     return "advanced_edition_required";
   }
 
-  if (capabilityContext.authorizationSource !== "org_auth") {
+  if (!isAdvancedOrgAuthContext(authorizationContext)) {
     return "org_auth_required";
   }
 
-  if (capabilityContext.canCreateOrganizationTraining !== true) {
+  if (
+    authorizationContext.capabilities.canCreateOrganizationTraining !== true
+  ) {
     return "organization_training_capability_required";
   }
 
@@ -1447,32 +1872,6 @@ function createSourceContextFormalUsagePolicy(): OrganizationTrainingSourceConte
   };
 }
 
-function isScoreSummaryValid(
-  scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto,
-  version: OrganizationTrainingPublishedVersionDto,
-): boolean {
-  return (
-    isNonNegativeInteger(scoreSummary.score) &&
-    isNonNegativeInteger(scoreSummary.totalScore) &&
-    scoreSummary.totalScore === version.totalScore &&
-    scoreSummary.score <= scoreSummary.totalScore
-  );
-}
-
-function normalizeAnsweredQuestionCount(
-  answeredQuestionCount: number,
-  version: OrganizationTrainingPublishedVersionDto,
-): number | null {
-  if (
-    !isPositiveInteger(answeredQuestionCount) ||
-    answeredQuestionCount > version.questionCount
-  ) {
-    return null;
-  }
-
-  return answeredQuestionCount;
-}
-
 function normalizeAnswerItemList(
   answerItems: OrganizationTrainingEmployeeAnswerDraftInput["answerItems"],
   version: OrganizationTrainingPublishedVersionDto,
@@ -1545,7 +1944,10 @@ function isSubmittedAnswer(
 ): boolean {
   return (
     answer !== null &&
-    (answer.answerStatus === "submitted" || answer.answerStatus === "read_only")
+    (answer.answerStatus === "scoring" ||
+      answer.answerStatus === "submitted" ||
+      answer.answerStatus === "scoring_failed" ||
+      answer.answerStatus === "read_only")
   );
 }
 
@@ -1697,35 +2099,26 @@ export function buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel(
   });
 }
 
-function isPublishQuestionsValid(
-  publishInput: OrganizationTrainingPublishInput,
+function areCanonicalDraftQuestionsValid(
+  questions: readonly OrganizationTrainingPublishQuestionInput[],
 ): boolean {
   if (
-    !Array.isArray(publishInput.questions) ||
-    publishInput.questions.length === 0 ||
-    publishInput.questionCount !== publishInput.questions.length
+    !Array.isArray(questions) ||
+    questions.length === 0 ||
+    new Set(questions.map((question) => question.publicId)).size !==
+      questions.length
   ) {
     return false;
   }
 
-  const totalScore = publishInput.questions.reduce(
-    (scoreTotal, question) => scoreTotal + question.score,
-    0,
-  );
-
-  if (publishInput.totalScore !== totalScore) {
-    return false;
-  }
-
-  return publishInput.questions.every(
-    (question) =>
+  return questions.every(
+    (question, index) =>
       normalizeRequiredText(question.publicId) !== null &&
-      isPositiveInteger(question.sequenceNumber) &&
+      question.sequenceNumber === index + 1 &&
       isOrganizationTrainingQuestionType(question.questionType) &&
       normalizeRequiredText(question.stem) !== null &&
-      Array.isArray(question.options) &&
       question.options.every(
-        (option) =>
+        (option: OrganizationTrainingPublishQuestionInput["options"][number]) =>
           normalizeRequiredText(option.publicId) !== null &&
           normalizeRequiredText(option.label) !== null &&
           normalizeRequiredText(option.content) !== null,
@@ -1743,26 +2136,23 @@ function isPublishQuestionsValid(
 }
 
 function hasNoEvidenceQuestion(
-  publishInput: OrganizationTrainingPublishInput,
+  questions: readonly OrganizationTrainingPublishQuestionInput[],
 ): boolean {
-  return publishInput.questions.some(
-    (question) => question.evidenceStatus === "none",
-  );
+  return questions.some((question) => question.evidenceStatus === "none");
 }
 
 function hasUnconfirmedWeakEvidenceQuestion(
   publishInput: OrganizationTrainingPublishInput,
+  questions: readonly OrganizationTrainingPublishQuestionInput[],
 ): boolean {
   return (
     publishInput.weakEvidenceConfirmed !== true &&
-    publishInput.questions.some(
-      (question) => question.evidenceStatus === "weak",
-    )
+    questions.some((question) => question.evidenceStatus === "weak")
   );
 }
 
 function copyPublishQuestionSnapshot(
-  question: OrganizationTrainingPublishInput["questions"][number],
+  question: OrganizationTrainingPublishQuestionInput,
 ): OrganizationTrainingPublishQuestionInput {
   return {
     publicId: question.publicId,
@@ -1793,6 +2183,24 @@ function copyPublishQuestionSnapshot(
     evidenceStatus: question.evidenceStatus,
     citationCount: question.citationCount,
   };
+}
+
+function buildQuestionTypeSummary(
+  questions: readonly OrganizationTrainingPublishQuestionInput[],
+): OrganizationTrainingQuestionTypeSummary {
+  return questions.reduce((summary, question) => {
+    if (question.questionType === "single_choice") {
+      summary.singleChoice += 1;
+    } else if (question.questionType === "multi_choice") {
+      summary.multiChoice += 1;
+    } else if (question.questionType === "true_false") {
+      summary.trueFalse += 1;
+    } else {
+      summary.shortAnswer += 1;
+    }
+
+    return summary;
+  }, createEmptyQuestionTypeSummary());
 }
 
 function isQuestionTypeSummaryValid(
@@ -1846,32 +2254,31 @@ function normalizeOptionalIsoTimestamp(value: string | null): string | null {
 
 function normalizePublishMetadata(
   publishInput: OrganizationTrainingPublishInput,
+  draft: OrganizationTrainingDraftDto,
 ): NormalizedPublishMetadata | null {
   const draftPublicId = normalizeRequiredText(publishInput.draftPublicId);
   const organizationPublicId = normalizeRequiredText(
-    publishInput.organizationPublicId,
+    draft.organizationPublicId,
   );
   const authorizationPublicId = normalizeRequiredText(
-    publishInput.authorizationPublicId,
+    draft.authorizationPublicId,
   );
-  const title = normalizeRequiredText(publishInput.title);
+  const title = normalizeRequiredText(draft.title);
   const publishScopeOrganizationPublicIds = normalizePublicIdList(
     publishInput.publishScopeOrganizationPublicIds,
   );
+  const questions = draft.questions ?? [];
 
   if (
     draftPublicId === null ||
+    draftPublicId !== draft.publicId ||
     organizationPublicId === null ||
     authorizationPublicId === null ||
     title === null ||
-    !isValidLevel(publishInput.level) ||
-    !isSubject(publishInput.subject) ||
+    !isValidLevel(draft.level) ||
+    !isSubject(draft.subject) ||
     publishScopeOrganizationPublicIds.length === 0 ||
-    !isPublishQuestionsValid(publishInput) ||
-    !isQuestionTypeSummaryValid(
-      publishInput.questionTypeSummary,
-      publishInput.questionCount,
-    )
+    !areCanonicalDraftQuestionsValid(questions)
   ) {
     return null;
   }
@@ -1880,16 +2287,20 @@ function normalizePublishMetadata(
     draftPublicId,
     organizationPublicId,
     authorizationPublicId,
-    profession: publishInput.profession,
-    level: publishInput.level,
-    subject: publishInput.subject,
+    profession: draft.profession,
+    level: draft.level,
+    subject: draft.subject,
     title,
-    description: normalizeOptionalText(publishInput.description),
+    description: normalizeOptionalText(draft.description),
     answerDeadlineAt: normalizeOptionalIsoTimestamp(
       publishInput.answerDeadlineAt,
     ),
     publishScopeOrganizationPublicIds,
   };
+}
+
+function createPayloadDigest(value: unknown): string {
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
 function copyPublishedVersion(
@@ -2201,6 +2612,9 @@ export function createOrganizationTrainingService(
       const createdAt = clock.now().toISOString();
       const draftWrite: OrganizationTrainingManualDraftWrite = {
         contentType: "organization_training_draft",
+        draftStatus: "draft",
+        revision: 1,
+        questions: [],
         ownerType: "organization",
         ownerPublicId: organizationPublicId,
         quotaOwnerType: "organization",
@@ -2233,9 +2647,109 @@ export function createOrganizationTrainingService(
       };
     },
 
+    async saveDraft(command) {
+      const draftPublicId = normalizeRequiredText(
+        command.draftInput.draftPublicId,
+      );
+      const operationId = normalizeRequiredText(command.draftInput.operationId);
+      const title = normalizeRequiredText(command.draftInput.title);
+
+      if (
+        draftPublicId === null ||
+        operationId === null ||
+        title === null ||
+        draftPublicId !== command.draft.publicId ||
+        !isPositiveInteger(command.draftInput.expectedRevision)
+      ) {
+        return createDraftSaveBlockedResult("invalid_draft_input");
+      }
+
+      const capabilityBlockedReason = getPublishCapabilityBlockedReason(
+        command.authorizationContext,
+      );
+
+      if (capabilityBlockedReason !== null) {
+        return createDraftSaveBlockedResult(capabilityBlockedReason);
+      }
+
+      if (
+        !isOrganizationVisibleToAdmin(
+          command.draft.organizationPublicId,
+          command.adminContext,
+        ) ||
+        !isOrganizationOwnedByAuthorization(
+          command.draft.organizationPublicId,
+          command.authorizationContext,
+        )
+      ) {
+        return createDraftSaveBlockedResult("organization_scope_denied");
+      }
+
+      if (
+        command.authorizationContext.authorizationPublicId !==
+          command.draft.authorizationPublicId ||
+        command.authorizationContext.profession !== command.draft.profession ||
+        command.authorizationContext.level !== command.draft.level
+      ) {
+        return createDraftSaveBlockedResult("authorization_scope_mismatch");
+      }
+
+      if (command.draft.draftStatus !== "draft") {
+        return createDraftSaveBlockedResult("draft_not_editable");
+      }
+
+      const questions = createCanonicalOrganizationTrainingDraftQuestions(
+        command.draftInput.questions,
+        command.trustedDraftQuestions,
+      );
+      const questionTypeSummary = buildQuestionTypeSummary(questions);
+      const totalScore = questions.reduce(
+        (scoreTotal, question) => scoreTotal + question.score,
+        0,
+      );
+      const savedAt = clock.now().toISOString();
+
+      try {
+        const draft = await trainingStore.saveDraft({
+          draftPublicId,
+          organizationPublicId: command.draft.organizationPublicId,
+          authorizationPublicId: command.draft.authorizationPublicId,
+          expectedRevision: command.draftInput.expectedRevision,
+          operationId,
+          payloadDigest: createPayloadDigest({
+            draftPublicId,
+            expectedRevision: command.draftInput.expectedRevision,
+            title,
+            description: command.draftInput.description,
+            questions,
+          }),
+          title,
+          description: normalizeOptionalText(command.draftInput.description),
+          questionCount: questions.length,
+          totalScore,
+          questionTypeSummary,
+          questions,
+          evidenceStatus: resolveDraftEvidenceStatus(questions),
+          validationStatus: "needs_review",
+          savedAt,
+        });
+
+        return { success: true, draft };
+      } catch (error) {
+        if (isOrganizationTrainingPersistenceConflictError(error)) {
+          return createDraftSaveBlockedResult("persistence_conflict");
+        }
+
+        throw error;
+      }
+    },
+
     async publishVersion(command) {
       const publishInput = command.publishInput;
-      const normalizedMetadata = normalizePublishMetadata(publishInput);
+      const normalizedMetadata = normalizePublishMetadata(
+        publishInput,
+        command.draft,
+      );
       const normalizedPersistenceLineage = normalizePersistenceLineage(
         command.persistenceLineage,
       );
@@ -2248,7 +2762,7 @@ export function createOrganizationTrainingService(
       }
 
       const capabilityBlockedReason = getPublishCapabilityBlockedReason(
-        publishInput.capabilityContext,
+        command.authorizationContext,
       );
 
       if (capabilityBlockedReason !== null) {
@@ -2256,6 +2770,16 @@ export function createOrganizationTrainingService(
       }
 
       if (
+        !isOrganizationVisibleToAdmin(
+          normalizedMetadata.organizationPublicId,
+          command.adminContext,
+        ) ||
+        !isOrganizationOwnedByAuthorization(
+          normalizedMetadata.organizationPublicId,
+          command.authorizationContext,
+        ) ||
+        command.authorizationContext.authorizationPublicId !==
+          normalizedMetadata.authorizationPublicId ||
         !normalizedMetadata.publishScopeOrganizationPublicIds.includes(
           normalizedMetadata.organizationPublicId,
         )
@@ -2263,11 +2787,13 @@ export function createOrganizationTrainingService(
         return createPublishBlockedResult("organization_scope_denied");
       }
 
-      if (hasNoEvidenceQuestion(publishInput)) {
+      const questions = command.draft.questions ?? [];
+
+      if (hasNoEvidenceQuestion(questions)) {
         return createPublishBlockedResult("insufficient_evidence");
       }
 
-      if (hasUnconfirmedWeakEvidenceQuestion(publishInput)) {
+      if (hasUnconfirmedWeakEvidenceQuestion(publishInput, questions)) {
         return createPublishBlockedResult(
           "weak_evidence_confirmation_required",
         );
@@ -2297,26 +2823,40 @@ export function createOrganizationTrainingService(
           title: normalizedMetadata.title,
           description: normalizedMetadata.description,
           answerDeadlineAt: normalizedMetadata.answerDeadlineAt,
-          questionCount: publishInput.questionCount,
-          totalScore: publishInput.totalScore,
-          questionTypeSummary: copyQuestionTypeSummary(
-            publishInput.questionTypeSummary,
-          ),
+          questionCount: questions.length,
+          totalScore: command.draft.totalScore,
+          questionTypeSummary: buildQuestionTypeSummary(questions),
           status: "published",
           publishedAt,
           takenDownAt: null,
           takedownReason: null,
-          questionSnapshot: publishInput.questions.map(
-            copyPublishQuestionSnapshot,
-          ),
+          questionSnapshot: questions.map(copyPublishQuestionSnapshot),
+          expectedDraftRevision: publishInput.expectedRevision,
+          publishOperationId: publishInput.operationId,
+          publishPayloadDigest: createPayloadDigest({
+            draftPublicId: publishInput.draftPublicId,
+            expectedRevision: publishInput.expectedRevision,
+            answerDeadlineAt: normalizedMetadata.answerDeadlineAt,
+            publishScopeOrganizationPublicIds:
+              normalizedMetadata.publishScopeOrganizationPublicIds,
+            weakEvidenceConfirmed: publishInput.weakEvidenceConfirmed,
+          }),
           organizationId: normalizedPersistenceLineage.organizationId,
           orgAuthId: normalizedPersistenceLineage.orgAuthId,
         };
 
-      return {
-        success: true,
-        version: await trainingStore.publishVersion(versionWrite),
-      };
+      try {
+        return {
+          success: true,
+          version: await trainingStore.publishVersion(versionWrite),
+        };
+      } catch (error) {
+        if (isOrganizationTrainingPersistenceConflictError(error)) {
+          return createPublishBlockedResult("persistence_conflict");
+        }
+
+        throw error;
+      }
     },
 
     async takeDownVersion(command) {
@@ -2515,12 +3055,14 @@ export function createOrganizationTrainingService(
         command.version,
         clock.now(),
       );
-
       if (notAnswerableReason !== null) {
         return createEmployeeAnswerBlockedResult(notAnswerableReason);
       }
 
-      if (isSubmittedAnswer(command.existingAnswer)) {
+      if (
+        command.existingAnswer !== null &&
+        command.existingAnswer.answerStatus !== "in_progress"
+      ) {
         return createEmployeeAnswerBlockedResult("already_submitted");
       }
 
@@ -2528,28 +3070,36 @@ export function createOrganizationTrainingService(
         command.answerInput.trainingVersionPublicId,
         command.version,
       );
-      const answeredQuestionCount = normalizeAnsweredQuestionCount(
-        command.answerInput.answeredQuestionCount,
-        command.version,
-      );
       const answerItems = normalizeAnswerItemList(
         command.answerInput.answerItems,
         command.version,
       );
+      const operationId = normalizeRequiredText(
+        command.answerInput.operationId,
+      );
+      const evaluation =
+        answerItems === null
+          ? null
+          : evaluateOrganizationTrainingAnswer({
+              questions: command.canonicalQuestions,
+              answerItems,
+              requireComplete: false,
+            });
 
       if (
         trainingVersionPublicId === null ||
-        answeredQuestionCount === null ||
-        answerItems === null
+        operationId === null ||
+        !isNonNegativeInteger(command.answerInput.expectedRevision) ||
+        evaluation === null ||
+        command.canonicalQuestions.length !== command.version.questionCount
       ) {
         return createEmployeeAnswerBlockedResult("invalid_answer_input");
       }
 
       const savedAt = clock.now().toISOString();
 
-      return {
-        success: true,
-        answer: await trainingStore.saveEmployeeAnswerDraft({
+      try {
+        const answer = await trainingStore.saveEmployeeAnswerDraft({
           contentType: "organization_training_answer_draft",
           trainingVersionPublicId,
           employeePublicId: normalizedEmployeeContext.employeePublicId,
@@ -2560,14 +3110,29 @@ export function createOrganizationTrainingService(
             savedAt,
           ),
           answerStatus: "in_progress",
-          answeredQuestionCount,
-          answerItems,
+          expectedRevision: command.answerInput.expectedRevision,
+          operationId,
+          payloadDigest: createPayloadDigest({
+            trainingVersionPublicId,
+            expectedRevision: command.answerInput.expectedRevision,
+            answerItems: evaluation.answerItems,
+          }),
+          answeredQuestionCount: evaluation.answeredQuestionCount,
+          answerItems: evaluation.answerItems,
           scoreSummary: null,
           savedAt,
           submittedAt: null,
           formalWritePolicy: createFormalWritePolicy(),
-        }),
-      };
+        });
+
+        return { success: true, answer };
+      } catch (error) {
+        if (isOrganizationTrainingPersistenceConflictError(error)) {
+          return createEmployeeAnswerBlockedResult("persistence_conflict");
+        }
+
+        throw error;
+      }
     },
 
     async submitEmployeeAnswer(command) {
@@ -2595,42 +3160,114 @@ export function createOrganizationTrainingService(
         command.version,
         clock.now(),
       );
+      const isTerminalAnswerReplayCandidate =
+        command.existingAnswer !== null &&
+        command.existingAnswer.answerStatus !== "in_progress";
 
-      if (notAnswerableReason !== null) {
+      if (notAnswerableReason !== null && !isTerminalAnswerReplayCandidate) {
         return createEmployeeAnswerBlockedResult(notAnswerableReason);
-      }
-
-      if (isSubmittedAnswer(command.existingAnswer)) {
-        return createEmployeeAnswerBlockedResult("already_submitted");
       }
 
       const trainingVersionPublicId = normalizeAnswerTrainingVersionPublicId(
         command.answerInput.trainingVersionPublicId,
         command.version,
       );
-      const answeredQuestionCount = normalizeAnsweredQuestionCount(
-        command.answerInput.answeredQuestionCount,
-        command.version,
-      );
       const answerItems = normalizeAnswerItemList(
         command.answerInput.answerItems,
         command.version,
       );
+      const operationId = normalizeRequiredText(
+        command.answerInput.operationId,
+      );
+      const evaluation =
+        answerItems === null
+          ? null
+          : evaluateOrganizationTrainingAnswer({
+              questions: command.canonicalQuestions,
+              answerItems,
+              requireComplete: true,
+            });
 
       if (
         trainingVersionPublicId === null ||
-        answeredQuestionCount === null ||
-        answerItems === null ||
-        !isScoreSummaryValid(command.answerInput.scoreSummary, command.version)
+        operationId === null ||
+        !isNonNegativeInteger(command.answerInput.expectedRevision) ||
+        evaluation === null ||
+        evaluation.totalScore !== command.version.totalScore ||
+        (evaluation.requiresAiScoring &&
+          command.scoringProvenance === null &&
+          !isTerminalAnswerReplayCandidate)
       ) {
         return createEmployeeAnswerBlockedResult("invalid_answer_input");
       }
 
       const submittedAt = clock.now().toISOString();
+      const payloadDigest = createPayloadDigest({
+        trainingVersionPublicId,
+        expectedRevision: command.answerInput.expectedRevision,
+        answerItems: evaluation.answerItems,
+      });
+      const scoringTask =
+        evaluation.requiresAiScoring && command.scoringProvenance !== null
+          ? {
+              publicIdSeed: `${trainingVersionPublicId}:${normalizedEmployeeContext.employeePublicId}`,
+              idempotencyKeyHash: createPayloadDigest({
+                trainingVersionPublicId,
+                employeePublicId: normalizedEmployeeContext.employeePublicId,
+                operationId,
+              }),
+              maxAttemptCount: 3 as const,
+              timeoutSecond: 60 as const,
+              modelConfigSnapshot: {
+                ...command.scoringProvenance.modelConfigSnapshot,
+              },
+              promptTemplateKey: command.scoringProvenance.promptTemplateKey,
+              promptTemplateVersion:
+                command.scoringProvenance.promptTemplateVersion,
+              promptTemplateHash: command.scoringProvenance.promptTemplateHash,
+              inputSnapshot: {
+                trainingVersionPublicId,
+                employeePublicId: normalizedEmployeeContext.employeePublicId,
+                objectiveScore: evaluation.objectiveScore,
+                totalScore: evaluation.totalScore,
+                questionResults: evaluation.questionResults.map((result) => ({
+                  ...result,
+                  scoringPointResults: result.scoringPointResults.map(
+                    (scoringPointResult) => ({ ...scoringPointResult }),
+                  ),
+                })),
+                shortAnswerQuestionPublicIds: command.canonicalQuestions
+                  .filter(
+                    (question) => question.questionType === "short_answer",
+                  )
+                  .map((question) => question.publicId),
+                shortAnswerItems: evaluation.answerItems.filter((answerItem) =>
+                  command.canonicalQuestions.some(
+                    (question) =>
+                      question.publicId === answerItem.questionPublicId &&
+                      question.questionType === "short_answer",
+                  ),
+                ),
+              },
+              authorizationSnapshot: {
+                authorizationSource:
+                  normalizedEmployeeContext.authorizationContext
+                    .authorizationSource,
+                authorizationPublicId:
+                  normalizedEmployeeContext.authorizationContext
+                    .authorizationPublicId,
+                organizationPublicId:
+                  normalizedEmployeeContext.currentOrganizationPublicId,
+                profession: command.version.profession,
+                level: command.version.level,
+              },
+              ragSnapshot: command.scoringProvenance.ragSnapshot,
+              scheduledAt: submittedAt,
+            }
+          : null;
 
-      return {
-        success: true,
-        answer: await trainingStore.submitEmployeeAnswer({
+      try {
+        const answer = await trainingStore.submitEmployeeAnswer({
           contentType: "organization_training_answer_record",
           trainingVersionPublicId,
           employeePublicId: normalizedEmployeeContext.employeePublicId,
@@ -2640,18 +3277,28 @@ export function createOrganizationTrainingService(
             normalizedEmployeeContext,
             submittedAt,
           ),
-          answerStatus: "submitted",
-          answeredQuestionCount,
-          answerItems,
-          questionResults: [],
-          scoreSummary: {
-            score: command.answerInput.scoreSummary.score,
-            totalScore: command.answerInput.scoreSummary.totalScore,
-          },
+          expectedRevision: command.answerInput.expectedRevision,
+          operationId,
+          payloadDigest,
+          answerStatus: evaluation.requiresAiScoring ? "scoring" : "submitted",
+          answeredQuestionCount: evaluation.answeredQuestionCount,
+          answerItems: evaluation.answerItems,
+          questionResults: evaluation.questionResults,
+          scoreSummary: evaluation.scoreSummary,
+          totalScore: evaluation.totalScore,
+          scoringTask,
           submittedAt,
           formalWritePolicy: createFormalWritePolicy(),
-        }),
-      };
+        });
+
+        return { success: true, answer };
+      } catch (error) {
+        if (isOrganizationTrainingPersistenceConflictError(error)) {
+          return createEmployeeAnswerBlockedResult("persistence_conflict");
+        }
+
+        throw error;
+      }
     },
 
     async getEmployeeAnswerReadonlySummary(command) {

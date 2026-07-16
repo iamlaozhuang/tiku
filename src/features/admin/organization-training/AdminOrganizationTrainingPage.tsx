@@ -35,7 +35,12 @@ import type {
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "@/server/contracts/organization-training-contract";
-import type { OrganizationTrainingPublishInput } from "@/server/models/organization-training";
+import type {
+  OrganizationTrainingDraftQuestionInput,
+  OrganizationTrainingDraftSaveInput,
+  OrganizationTrainingPublishInput,
+} from "@/server/models/organization-training";
+import type { EvidenceStatus } from "@/server/models/ai-rag";
 import type { Profession, Subject } from "@/server/models/paper";
 
 import {
@@ -63,6 +68,10 @@ import {
   createOrganizationTrainingCapabilityContext,
   resolveOrganizationWorkspacePageAccess,
 } from "../organization-workspace/admin-organization-workspace-access";
+import {
+  resolvePendingOrganizationTrainingOperationId,
+  type PendingOrganizationTrainingOperation,
+} from "../../organization-training-operation";
 
 type AdminOrganizationTrainingLoadState =
   | "loading"
@@ -93,8 +102,9 @@ type CopyFormValues = {
 };
 
 type PublishQuestionFormValue = {
+  publicId: string;
   sequenceNumber: number;
-  questionType: OrganizationTrainingPublishInput["questions"][number]["questionType"];
+  questionType: OrganizationTrainingDraftQuestionInput["questionType"];
   paperSectionKey: string | null;
   paperSectionTitle: string | null;
   paperSectionSortOrder: number | null;
@@ -103,13 +113,14 @@ type PublishQuestionFormValue = {
   materialContent: string;
   stem: string;
   options: {
+    publicId: string;
     label: string;
     content: string;
   }[];
   score: string;
   standardAnswer: string;
   analysisSummary: string;
-  evidenceStatus: OrganizationTrainingPublishInput["questions"][number]["evidenceStatus"];
+  evidenceStatus: EvidenceStatus;
   citationCount: string;
 };
 
@@ -239,9 +250,10 @@ async function mutateAdminOrganizationTrainingApi<TData>(
   path: string,
   sessionToken: string | null,
   body: unknown,
+  method: "PATCH" | "POST" = "POST",
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
-    method: "POST",
+    method,
     credentials: "same-origin",
     headers: {
       ...createAdminAuthHeaders(sessionToken),
@@ -307,6 +319,7 @@ function createLifecycleItemFromDraft(
     subject: draft.subject,
     title: draft.title,
     description: draft.description,
+    revision: draft.revision,
     questionCount: draft.questionCount,
     totalScore: draft.totalScore,
     questionTypeSummary: draft.questionTypeSummary,
@@ -505,6 +518,7 @@ function createDefaultPublishQuestionFormValue(
   score: number,
 ): PublishQuestionFormValue {
   return {
+    publicId: createQuestionPublicId(sequenceNumber),
     sequenceNumber,
     questionType: "single_choice",
     paperSectionKey: null,
@@ -515,8 +529,16 @@ function createDefaultPublishQuestionFormValue(
     materialContent: "",
     stem: "",
     options: [
-      { label: "A", content: "" },
-      { label: "B", content: "" },
+      {
+        publicId: createQuestionOptionPublicId(sequenceNumber, "A"),
+        label: "A",
+        content: "",
+      },
+      {
+        publicId: createQuestionOptionPublicId(sequenceNumber, "B"),
+        label: "B",
+        content: "",
+      },
     ],
     score: String(Math.max(1, score)),
     standardAnswer: "",
@@ -556,6 +578,7 @@ function createPublishQuestionFormValueFromDetail(
   > | null = null,
 ): PublishQuestionFormValue {
   return {
+    publicId: question.publicId,
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
     paperSectionKey: paperSectionMetadata?.paperSectionKey ?? null,
@@ -566,6 +589,7 @@ function createPublishQuestionFormValueFromDetail(
     materialContent: question.materialContent ?? "",
     stem: question.stem,
     options: question.options.map((option) => ({
+      publicId: option.publicId,
       label: option.label,
       content: option.content,
     })),
@@ -644,7 +668,7 @@ function createQuestionOptionPublicId(sequenceNumber: number, label: string) {
 
 function normalizePublishQuestionFormValue(
   question: PublishQuestionFormValue,
-): OrganizationTrainingPublishInput["questions"][number] | null {
+): OrganizationTrainingDraftQuestionInput | null {
   const stem = question.stem.trim();
   const score = normalizePositiveIntegerInput(question.score);
   const citationCount = normalizeNonNegativeIntegerInput(
@@ -657,6 +681,7 @@ function normalizePublishQuestionFormValue(
       ? []
       : question.options
           .map((option) => ({
+            publicId: option.publicId,
             label: option.label.trim(),
             content: option.content.trim(),
           }))
@@ -676,7 +701,7 @@ function normalizePublishQuestionFormValue(
   }
 
   return {
-    publicId: createQuestionPublicId(question.sequenceNumber),
+    publicId: question.publicId,
     sequenceNumber: question.sequenceNumber,
     questionType: question.questionType,
     ...(question.paperSectionKey !== null &&
@@ -694,24 +719,19 @@ function normalizePublishQuestionFormValue(
     materialContent: normalizeOptionalPreviewText(question.materialContent),
     stem,
     options: options.map((option) => ({
-      publicId: createQuestionOptionPublicId(
-        question.sequenceNumber,
-        option.label,
-      ),
+      publicId: option.publicId,
       label: option.label,
       content: option.content,
     })),
     score,
     standardAnswer,
     analysisSummary,
-    evidenceStatus: question.evidenceStatus,
-    citationCount,
   };
 }
 
 function normalizePublishQuestionFormValues(
   questions: PublishQuestionFormValue[],
-): OrganizationTrainingPublishInput["questions"] | null {
+): OrganizationTrainingDraftQuestionInput[] | null {
   const normalizedQuestions = questions.map(normalizePublishQuestionFormValue);
 
   if (
@@ -721,37 +741,7 @@ function normalizePublishQuestionFormValues(
     return null;
   }
 
-  return normalizedQuestions as OrganizationTrainingPublishInput["questions"];
-}
-
-function createQuestionTypeSummaryFromQuestions(
-  questions: OrganizationTrainingPublishInput["questions"],
-): OrganizationTrainingPublishInput["questionTypeSummary"] {
-  return questions.reduce<
-    OrganizationTrainingPublishInput["questionTypeSummary"]
-  >(
-    (summary, question) => {
-      if (question.questionType === "single_choice") {
-        return { ...summary, singleChoice: summary.singleChoice + 1 };
-      }
-
-      if (question.questionType === "multi_choice") {
-        return { ...summary, multiChoice: summary.multiChoice + 1 };
-      }
-
-      if (question.questionType === "true_false") {
-        return { ...summary, trueFalse: summary.trueFalse + 1 };
-      }
-
-      return { ...summary, shortAnswer: summary.shortAnswer + 1 };
-    },
-    {
-      singleChoice: 0,
-      multiChoice: 0,
-      trueFalse: 0,
-      shortAnswer: 0,
-    },
-  );
+  return normalizedQuestions as OrganizationTrainingDraftQuestionInput[];
 }
 
 function hasNoEvidenceQuestion(questions: PublishQuestionFormValue[]): boolean {
@@ -762,6 +752,27 @@ function hasWeakEvidenceQuestion(
   questions: PublishQuestionFormValue[],
 ): boolean {
   return questions.some((question) => question.evidenceStatus === "weak");
+}
+
+function createQuestionEvidenceIntegritySignature(
+  question: PublishQuestionFormValue,
+): string {
+  return JSON.stringify({
+    publicId: question.publicId,
+    sequenceNumber: question.sequenceNumber,
+    questionType: question.questionType,
+    paperSectionKey: question.paperSectionKey,
+    paperSectionTitle: question.paperSectionTitle,
+    paperSectionSortOrder: question.paperSectionSortOrder,
+    questionSortOrder: question.questionSortOrder,
+    materialTitle: question.materialTitle,
+    materialContent: question.materialContent,
+    stem: question.stem,
+    options: question.options,
+    score: question.score,
+    standardAnswer: question.standardAnswer,
+    analysisSummary: question.analysisSummary,
+  });
 }
 
 function resolvePublishBlockMessage(values: PublishFormValues): string | null {
@@ -820,53 +831,51 @@ function createCopyToDraftInput(
   };
 }
 
-function createPublishTrainingInput({
-  capabilitySummary,
+function createDraftSaveTrainingInput({
   draft,
+  operationId,
   values,
 }: {
-  capabilitySummary: AdminWorkspaceCapabilitySummary;
   draft: OrganizationTrainingAdminLifecycleItemDto;
+  operationId: string;
   values: PublishFormValues;
-}): OrganizationTrainingPublishInput | null {
+}): OrganizationTrainingDraftSaveInput | null {
   const questions = normalizePublishQuestionFormValues(values.questions);
 
-  if (
-    draft.authorizationPublicId === undefined ||
-    draft.profession === undefined ||
-    draft.level === undefined ||
-    draft.subject === undefined ||
-    questions === null ||
-    questions.length === 0
-  ) {
+  if (questions === null || questions.length === 0) {
     return null;
   }
 
-  const totalScore = questions.reduce(
-    (scoreTotal, question) => scoreTotal + question.score,
-    0,
-  );
-
   return {
     draftPublicId: draft.publicId,
-    organizationPublicId: draft.organizationPublicId,
-    authorizationPublicId: draft.authorizationPublicId,
-    profession: draft.profession,
-    level: draft.level,
-    subject: draft.subject,
+    expectedRevision: draft.revision ?? 1,
+    operationId,
     title: draft.title,
     description: draft.description ?? null,
-    answerDeadlineAt: values.answerDeadlineAt.trim() || null,
     questions,
+  };
+}
+
+function createPublishTrainingInput({
+  draft,
+  expectedRevision,
+  operationId,
+  values,
+}: {
+  draft: OrganizationTrainingAdminLifecycleItemDto;
+  expectedRevision: number;
+  operationId: string;
+  values: PublishFormValues;
+}): OrganizationTrainingPublishInput {
+  return {
+    draftPublicId: draft.publicId,
+    expectedRevision,
+    operationId,
+    answerDeadlineAt: values.answerDeadlineAt.trim() || null,
     publishScopeOrganizationPublicIds: normalizePublishScope(
       values.publishScopeOrganizationPublicIds,
       draft.organizationPublicId,
     ),
-    capabilityContext:
-      createOrganizationTrainingCapabilityContext(capabilitySummary),
-    questionCount: questions.length,
-    totalScore,
-    questionTypeSummary: createQuestionTypeSummaryFromQuestions(questions),
     weakEvidenceConfirmed: values.weakEvidenceConfirmed,
   };
 }
@@ -929,6 +938,9 @@ export function AdminOrganizationTrainingPage() {
     useState<OrganizationTrainingAdminLifecycleItemDto | null>(null);
   const [feedback, setFeedback] = useState<AdminFeedback | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const pendingMutationOperationsRef = useRef(
+    new Map<string, PendingOrganizationTrainingOperation>(),
+  );
 
   function showTrainingError(message: string) {
     setFeedback({
@@ -1378,16 +1390,58 @@ export function AdminOrganizationTrainingPage() {
         return;
       }
 
-      const publishInput = createPublishTrainingInput({
-        capabilitySummary,
+      const mutationSignature = JSON.stringify({
+        draftPublicId: selectedPublishDraft.publicId,
+        expectedRevision: selectedPublishDraft.revision ?? 1,
+        values,
+      });
+      const draftSaveOperationKey = `${selectedPublishDraft.publicId}:draft_save`;
+      const draftSaveOperationId =
+        resolvePendingOrganizationTrainingOperationId(
+          pendingMutationOperationsRef.current,
+          draftSaveOperationKey,
+          mutationSignature,
+        );
+
+      const draftSaveInput = createDraftSaveTrainingInput({
         draft: selectedPublishDraft,
+        operationId: draftSaveOperationId,
         values,
       });
 
-      if (publishInput === null) {
+      if (draftSaveInput === null) {
         showTrainingError("企业训练发布内容不完整");
         return;
       }
+
+      const draftSaveResponse = await mutateAdminOrganizationTrainingApi<{
+        draft: OrganizationTrainingDraftDto;
+      }>(
+        createAdminTrainingDetailPath(selectedPublishDraft.publicId),
+        sessionToken,
+        draftSaveInput,
+        "PATCH",
+      );
+
+      if (draftSaveResponse.code !== 0 || draftSaveResponse.data === null) {
+        showTrainingError("企业训练草稿保存失败，请刷新后重试");
+        return;
+      }
+
+      const savedDraft = draftSaveResponse.data.draft;
+      const publishOperationKey = `${selectedPublishDraft.publicId}:publish`;
+      const publishOperationId = resolvePendingOrganizationTrainingOperationId(
+        pendingMutationOperationsRef.current,
+        publishOperationKey,
+        mutationSignature,
+      );
+      const publishInput = createPublishTrainingInput({
+        draft: selectedPublishDraft,
+        expectedRevision:
+          savedDraft.revision ?? draftSaveInput.expectedRevision + 1,
+        operationId: publishOperationId,
+        values,
+      });
 
       const response = await mutateAdminOrganizationTrainingApi<{
         version: OrganizationTrainingPublishedVersionDto;
@@ -1412,6 +1466,8 @@ export function AdminOrganizationTrainingPage() {
         ),
       );
       setSelectedPublishDraft(null);
+      pendingMutationOperationsRef.current.delete(draftSaveOperationKey);
+      pendingMutationOperationsRef.current.delete(publishOperationKey);
       showTrainingSuccess("企业训练已发布");
     } catch {
       showTrainingError("企业训练发布失败");
@@ -2575,11 +2631,34 @@ function PublishTrainingForm({
     index: number,
     updater: (question: PublishQuestionFormValue) => PublishQuestionFormValue,
   ) {
+    let didInvalidateEvidence = false;
+    const questions = values.questions.map((question, questionIndex) => {
+      if (questionIndex !== index) {
+        return question;
+      }
+
+      const updatedQuestion = updater(question);
+      if (
+        createQuestionEvidenceIntegritySignature(question) ===
+        createQuestionEvidenceIntegritySignature(updatedQuestion)
+      ) {
+        return updatedQuestion;
+      }
+
+      didInvalidateEvidence = true;
+      return {
+        ...updatedQuestion,
+        evidenceStatus: "weak" as const,
+        citationCount: "0",
+      };
+    });
+
     onChange({
       ...values,
-      questions: values.questions.map((question, questionIndex) =>
-        questionIndex === index ? updater(question) : question,
-      ),
+      questions,
+      weakEvidenceConfirmed: didInvalidateEvidence
+        ? false
+        : values.weakEvidenceConfirmed,
     });
   }
 
@@ -2767,25 +2846,15 @@ function PublishQuestionPreviewEditor({
             }))
           }
         />
-        <label className="grid gap-2 text-sm font-medium">
+        <div className="grid gap-2 text-sm font-medium">
           <span className="text-text-secondary">{questionLabel}依据状态</span>
-          <select
+          <p
             aria-label={`${questionLabel}依据状态`}
-            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3"
-            value={question.evidenceStatus}
-            onChange={(event) =>
-              onChange(questionIndex, (currentQuestion) => ({
-                ...currentQuestion,
-                evidenceStatus: event.target
-                  .value as PublishQuestionFormValue["evidenceStatus"],
-              }))
-            }
+            className="border-input bg-muted text-text-secondary min-h-9 rounded-lg border px-2.5 py-2 text-sm"
           >
-            <option value="none">缺少依据</option>
-            <option value="weak">依据较弱</option>
-            <option value="sufficient">依据充分</option>
-          </select>
-        </label>
+            {resolveEvidenceStatusLabel(question.evidenceStatus)}
+          </p>
+        </div>
       </div>
       {question.questionType === "short_answer" ? null : (
         <div className="grid gap-3 md:grid-cols-2">

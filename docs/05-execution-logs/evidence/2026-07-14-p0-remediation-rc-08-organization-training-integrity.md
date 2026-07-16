@@ -1,8 +1,8 @@
 # P0 RC-08 企业训练完整性整改证据
 
-status: in_progress
+status: implementation_complete_pending_closeout
 
-result: pending
+result: static_remediation_pass_runtime_pending
 
 ## Reading Evidence
 
@@ -34,7 +34,7 @@ analogousImplementationReviewed: true
 
 - RED：`p0-rc-08-schema-migration-source.test.ts` 初跑 `5/5` 失败，稳定证明 canonical draft status/revision/snapshot、单 draft 单 version、answer operation/revision、non-terminal scoring 状态、durable scoring task 与 migration chain 均不存在。
 - Schema GREEN：新增 additive schema 与 `20260715231500_p0_rc_08_organization_training_integrity.sql`、snapshot、journal；RC-01/02/04/05/06/07/08 migration chain 加 organization training schema 测试 `8/8` files、`40/40` tests passed，typecheck passed。
-- Business GREEN：pending。
+- Business GREEN：canonical draft/save/publish/answer/scoring/analytics 边界完成；最终 focused `11/11` files、`198/198` tests passed。
 
 ## Validation Log
 
@@ -42,19 +42,28 @@ analogousImplementationReviewed: true
 - source generation：为 Drizzle Kit 注入不可达的合成占位连接串后执行 `drizzle-kit generate --name p0_rc_08_organization_training_integrity`；该命令只比较 schema snapshot 并生成 source，未连接数据库、未 apply/migrate/backfill/seed，证据不记录连接串内容。
 - schema focused：`vitest run tests/unit/p0-rc-08-schema-migration-source.test.ts src/db/schema/organization-training.test.ts` passed，`19/19`。
 - migration chain + typecheck：passed，`40/40` tests；`tsc --noEmit` passed。
+- 首轮全量分片暴露 5 个旧契约断言（draft mapper 新字段、员工请求旧 count/score、管理端 evidence 可编辑及 publish 旧大载荷），均只按新的服务端权威契约修正；对应定向测试分别通过。
+- Round 1 对抗复核发现并修复：客户端编辑后 evidence 未同步降级；scoring completion 未绑定 canonical 逐题基线；过期 lease worker 仍可能回写。新增 RED 后，canonical question result input、租约时限、objective fact 防篡改和 terminal answer 条件更新均通过。
+- Round 2 对抗复核发现并修复：draft save、consumed publish、terminal submit 的 service 预检查会阻断同 operation 响应丢失重放。修复后 stale-looking retry 进入事务幂等权威，同 operation 返回原结果、异 operation 仍冲突。
+- 最终 focused：`11/11` files、`198/198` tests passed。
+- 最终 full unit 使用四个互斥 shard、相同测试集合、`--maxWorkers=4`：`100/535`、`100/513`、`100/672`、`100/666`，合计 `400/400` files、`2386/2386` tests passed。
+- `lint`：passed，0 warnings；`typecheck`：passed；`format:check`：passed；`next build`：passed，93/93 static pages generated。
+- `git diff --check`：passed；依赖与 lockfile 未变化；business commit 尚待 pre-commit gate。
+- P0 serial manual guard：passed，current RC-08、next global static regression/freeze。
+- Module Run v2 pre-commit 首次正确阻断 3 个未登记的新文件；确认均为本 RC 的 operation-id、persistence-conflict 与测试后补入精确 allowlist，重跑 passed；未扩大依赖、数据库或 runtime 权限。
 
 ## Finding Remediation Conclusions
 
-| finding | task-entry status                              | branch static conclusion | runtime boundary |
-| ------- | ---------------------------------------------- | ------------------------ | ---------------- |
-| F-0121  | baseline_changed                               | pending                  | RV-0020 pending  |
-| F-0123  | baseline_changed（保留 root cause alias 关系） | pending                  | RV-0020 pending  |
-| F-0145  | baseline_changed                               | pending                  | RV-0020 pending  |
+| finding | task-entry status                              | branch static conclusion                                                                                                                | runtime boundary |
+| ------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| F-0121  | baseline_changed                               | static_remediated：publish 仅消费 server canonical draft；客户端不能声明 evidence/count/score/authorization truth                       | RV-0020 pending  |
+| F-0123  | baseline_changed（保留 root cause alias 关系） | static_remediated：单 draft 单 version、事务 consume、同 operation replay、异 operation/revision/concurrency conflict                   | RV-0020 pending  |
+| F-0145  | baseline_changed                               | static_remediated：answerItems 为唯一输入；服务端计数/客观评分，short_answer durable scoring，analytics 仅消费 submitted terminal score | RV-0020 pending  |
 
 ## Review Log
 
-- Round 1：in_progress。
-- Round 2：pending。
+- Round 1：passed；根因、权威写路径、事务、revision、evidence、scoring lease 与数据兼容已复核，三个复核发现均已修复并回归。
+- Round 2：passed；跨角色状态、API/枚举、响应丢失重放、analytics、隐私、P1/P2 影响与反向破坏已复核，无未解决 P0 静态回归。
 
 ## P1/P2 Impact Mapping Only
 

@@ -9,7 +9,7 @@ import {
   ClipboardList,
   LoaderCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   COOKIE_BACKED_SESSION_MARKER,
@@ -24,6 +24,10 @@ import type {
   OrganizationTrainingQuestionSnapshotDto,
   OrganizationTrainingPublishedVersionDto,
 } from "@/server/contracts/organization-training-contract";
+import {
+  resolvePendingOrganizationTrainingOperationId,
+  type PendingOrganizationTrainingOperation,
+} from "@/features/organization-training-operation";
 
 type StudentOrganizationTrainingLoadState =
   | "loading"
@@ -143,8 +147,12 @@ function isReadonlyTraining(
 ): boolean {
   return (
     version.employeeAnswerStatus === "submitted" ||
+    version.employeeAnswerStatus === "scoring" ||
+    version.employeeAnswerStatus === "scoring_failed" ||
     version.employeeAnswerStatus === "read_only" ||
     answer?.answerStatus === "submitted" ||
+    answer?.answerStatus === "scoring" ||
+    answer?.answerStatus === "scoring_failed" ||
     answer?.answerStatus === "read_only"
   );
 }
@@ -274,24 +282,14 @@ function createAnswerItems(
 function createAnswerRequestBody(
   version: OrganizationTrainingPublishedVersionDto,
   values: AnswerFormValues,
+  expectedRevision: number,
+  operationId: string,
 ) {
   return {
     trainingVersionPublicId: version.publicId,
-    answeredQuestionCount: countAnsweredQuestions(version, values),
+    expectedRevision,
+    operationId,
     answerItems: createAnswerItems(version, values),
-  };
-}
-
-function createSubmitRequestBody(
-  version: OrganizationTrainingPublishedVersionDto,
-  values: AnswerFormValues,
-) {
-  return {
-    ...createAnswerRequestBody(version, values),
-    scoreSummary: {
-      score: 0,
-      totalScore: version.totalScore,
-    },
   };
 }
 
@@ -356,6 +354,9 @@ export function StudentOrganizationTrainingPage() {
     useState<string | null>(null);
   const [answerStateByVersionPublicId, setAnswerStateByVersionPublicId] =
     useState<Record<string, AnswerUiState>>({});
+  const pendingAnswerOperationsRef = useRef(
+    new Map<string, PendingOrganizationTrainingOperation>(),
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -516,11 +517,7 @@ export function StudentOrganizationTrainingPage() {
 
         return {
           ...version,
-          employeeAnswerStatus:
-            answer.answerStatus === "submitted" ||
-            answer.answerStatus === "read_only"
-              ? answer.answerStatus
-              : "in_progress",
+          employeeAnswerStatus: answer.answerStatus,
           submittedScoreSummary:
             answer.scoreSummary ?? version.submittedScoreSummary,
         };
@@ -572,6 +569,18 @@ export function StudentOrganizationTrainingPage() {
       return;
     }
 
+    const expectedRevision = currentState.answer?.revision ?? 0;
+    const operationKey = `${trainingVersionPublicId}:draft_save`;
+    const operationSignature = JSON.stringify({
+      expectedRevision,
+      answerItems: createAnswerItems(version, currentState.values),
+    });
+    const operationId = resolvePendingOrganizationTrainingOperationId(
+      pendingAnswerOperationsRef.current,
+      operationKey,
+      operationSignature,
+    );
+
     updateAnswerState(trainingVersionPublicId, (state) => ({
       ...state,
       feedback: null,
@@ -588,7 +597,12 @@ export function StudentOrganizationTrainingPage() {
             "content-type": "application/json",
           },
           body: JSON.stringify(
-            createAnswerRequestBody(version, currentState.values),
+            createAnswerRequestBody(
+              version,
+              currentState.values,
+              expectedRevision,
+              operationId,
+            ),
           ),
         },
       );
@@ -618,6 +632,7 @@ export function StudentOrganizationTrainingPage() {
         answer: savedAnswer,
         feedback: { kind: "success", text: "草稿已保存" },
       }));
+      pendingAnswerOperationsRef.current.delete(operationKey);
     } catch {
       updateAnswerState(trainingVersionPublicId, (state) => ({
         ...state,
@@ -647,6 +662,18 @@ export function StudentOrganizationTrainingPage() {
       return;
     }
 
+    const expectedRevision = currentState.answer?.revision ?? 0;
+    const operationKey = `${trainingVersionPublicId}:submit`;
+    const operationSignature = JSON.stringify({
+      expectedRevision,
+      answerItems: createAnswerItems(version, currentState.values),
+    });
+    const operationId = resolvePendingOrganizationTrainingOperationId(
+      pendingAnswerOperationsRef.current,
+      operationKey,
+      operationSignature,
+    );
+
     updateAnswerState(trainingVersionPublicId, (state) => ({
       ...state,
       feedback: null,
@@ -663,7 +690,12 @@ export function StudentOrganizationTrainingPage() {
             "content-type": "application/json",
           },
           body: JSON.stringify(
-            createSubmitRequestBody(version, currentState.values),
+            createAnswerRequestBody(
+              version,
+              currentState.values,
+              expectedRevision,
+              operationId,
+            ),
           ),
         },
       );
@@ -693,6 +725,7 @@ export function StudentOrganizationTrainingPage() {
         answer: submittedAnswer,
         feedback: { kind: "success", text: "提交成功" },
       }));
+      pendingAnswerOperationsRef.current.delete(operationKey);
     } catch {
       updateAnswerState(trainingVersionPublicId, (state) => ({
         ...state,

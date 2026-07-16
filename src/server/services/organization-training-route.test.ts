@@ -93,6 +93,9 @@ const runtimeRepositoryMock = vi.hoisted(() => ({
     async (): Promise<OrganizationTrainingPublishedVersionDto | null> =>
       createEmployeeVisibleVersion(),
   ),
+  findCanonicalQuestionsByVersion: vi.fn(
+    async () => createManualDraftDto().questions ?? [],
+  ),
   findAdminPublishedVersionDetailByPublicId: vi.fn(
     async (): Promise<OrganizationTrainingAdminPublishedVersionDetailDto | null> =>
       createAdminDetailVersion(),
@@ -261,55 +264,10 @@ function createPublishInput(
 ): OrganizationTrainingPublishInput {
   return {
     draftPublicId: publishPathPublicId,
-    organizationPublicId: "organization_route_public_401",
-    authorizationPublicId: "org_auth_route_public_401",
-    profession: "logistics",
-    level: 4,
-    subject: "theory",
-    title: "Route publish training",
-    description: "Route publish description",
+    expectedRevision: 1,
+    operationId: "publish_route_operation_401",
     answerDeadlineAt: null,
-    questions: [
-      {
-        publicId: "training_question_route_public_401",
-        sequenceNumber: 1,
-        questionType: "single_choice",
-        materialTitle: "Route material",
-        materialContent: "Route material body",
-        stem: "Which route option is compliant?",
-        options: [
-          {
-            publicId: "training_question_route_option_a",
-            label: "A",
-            content: "Compliant option",
-          },
-          {
-            publicId: "training_question_route_option_b",
-            label: "B",
-            content: "Distractor option",
-          },
-        ],
-        score: 5,
-        standardAnswer: "A",
-        analysisSummary: "Choose the compliant answer.",
-        evidenceStatus: "sufficient",
-        citationCount: 1,
-      },
-    ],
     publishScopeOrganizationPublicIds: ["organization_route_public_401"],
-    capabilityContext: {
-      effectiveEdition: "advanced",
-      authorizationSource: "org_auth",
-      canCreateOrganizationTraining: true,
-    },
-    questionCount: 1,
-    totalScore: 5,
-    questionTypeSummary: {
-      singleChoice: 1,
-      multiChoice: 0,
-      trueFalse: 0,
-      shortAnswer: 0,
-    },
     weakEvidenceConfirmed: false,
     ...overrides,
   };
@@ -349,6 +307,8 @@ function createManualDraftDto(
 ): OrganizationTrainingDraftDto {
   return {
     publicId: "organization_training_draft_route_401",
+    draftStatus: "draft",
+    revision: 1,
     sourceTaskPublicId: null,
     organizationPublicId: "organization_route_public_401",
     authorizationSource: "org_auth",
@@ -366,6 +326,33 @@ function createManualDraftDto(
       trueFalse: 0,
       shortAnswer: 0,
     },
+    questions: [
+      {
+        publicId: "training_question_route_public_401",
+        sequenceNumber: 1,
+        questionType: "single_choice",
+        materialTitle: "Route material",
+        materialContent: "Route material body",
+        stem: "Which route option is compliant?",
+        options: [
+          {
+            publicId: "training_question_route_option_a",
+            label: "A",
+            content: "Compliant option",
+          },
+          {
+            publicId: "training_question_route_option_b",
+            label: "B",
+            content: "Distractor option",
+          },
+        ],
+        score: 5,
+        standardAnswer: "A",
+        analysisSummary: "Choose the compliant answer.",
+        evidenceStatus: "sufficient",
+        citationCount: 1,
+      },
+    ],
     evidenceStatus: "none",
     validationStatus: "needs_review",
     retentionStatus: "active",
@@ -1243,7 +1230,7 @@ describe("organization training draft source-context route handlers", () => {
       null,
     );
     runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValueOnce([
-      createManualDraftDto(),
+      createManualDraftDto({ questions: [] }),
     ]);
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
@@ -1531,6 +1518,7 @@ describe("organization training draft source-context route handlers", () => {
     runtimeRepositoryMock.listAdminLifecycleDrafts.mockResolvedValueOnce([
       createManualDraftDto({
         sourceTaskPublicId: "admin_ai_generation_task_org_paper_route_401",
+        questions: [],
         questionCount: 1,
         totalScore: 5,
         questionTypeSummary: {
@@ -2052,7 +2040,6 @@ describe("organization training publish route handlers", () => {
         pathPublicId: publishPathPublicId,
         publishInput: expect.objectContaining({
           draftPublicId: publishPathPublicId,
-          organizationPublicId: "organization_route_public_401",
         }),
       },
     ]);
@@ -2285,6 +2272,9 @@ describe("organization training publish route handlers", () => {
       publishInput: OrganizationTrainingPublishInput;
     }[] = [];
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2316,7 +2306,7 @@ describe("organization training publish route handlers", () => {
         version: createPublishedVersion(),
       },
     });
-    expect(publishService.commands).toEqual([
+    expect(publishService.commands).toMatchObject([
       {
         publishInput: expect.objectContaining({
           draftPublicId: publishPathPublicId,
@@ -2389,6 +2379,9 @@ describe("organization training publish route handlers", () => {
   it("blocks client-supplied lineage when trusted lineage is unavailable", async () => {
     const publishService = createPublishService();
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2444,6 +2437,9 @@ describe("organization training publish route handlers", () => {
     const publishService = createPublishService();
     const lookupInputs: unknown[] = [];
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2477,7 +2473,7 @@ describe("organization training publish route handlers", () => {
         organizationPublicId: "organization_route_public_401",
       },
     ]);
-    expect(publishService.commands).toEqual([
+    expect(publishService.commands).toMatchObject([
       {
         publishInput: expect.objectContaining({
           draftPublicId: publishPathPublicId,
@@ -2491,6 +2487,9 @@ describe("organization training publish route handlers", () => {
     const publishService = createPublishService();
     const lookupInputs: unknown[] = [];
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return {
           ...trustedAdminContext,
@@ -2522,6 +2521,9 @@ describe("organization training publish route handlers", () => {
     const publishService = createPublishService();
     const lookupInputs: unknown[] = [];
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2555,6 +2557,9 @@ describe("organization training publish route handlers", () => {
   it("returns an invalid input envelope for malformed publish payloads", async () => {
     const publishService = createPublishService();
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2585,6 +2590,9 @@ describe("organization training publish route handlers", () => {
       message: organizationTrainingPublishBlockedMessage,
     });
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2618,6 +2626,9 @@ describe("organization training publish route handlers", () => {
       },
     };
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async listAdminLifecycleDrafts() {
+        return [createManualDraftDto()];
+      },
       async resolveOrganizationAdminContext() {
         return trustedAdminContext;
       },
@@ -2883,7 +2894,15 @@ describe("organization training employee answer route handlers", () => {
       createEmployeeAnswerDraftSaveRequest(
         {
           trainingVersionPublicId: takeDownPathPublicId,
-          answeredQuestionCount: 1,
+          expectedRevision: 0,
+          operationId: "answer_draft_route_operation_401",
+          answerItems: [
+            {
+              questionPublicId: "training_question_route_public_401",
+              selectedOptionPublicIds: ["training_question_route_option_a"],
+              textAnswer: null,
+            },
+          ],
         },
         {
           headers: {
@@ -2947,11 +2966,15 @@ describe("organization training employee answer route handlers", () => {
       createEmployeeAnswerSubmitRequest(
         {
           trainingVersionPublicId: takeDownPathPublicId,
-          answeredQuestionCount: 1,
-          scoreSummary: {
-            score: 4,
-            totalScore: 5,
-          },
+          expectedRevision: 0,
+          operationId: "answer_submit_route_operation_401",
+          answerItems: [
+            {
+              questionPublicId: "training_question_route_public_401",
+              selectedOptionPublicIds: ["training_question_route_option_a"],
+              textAnswer: null,
+            },
+          ],
         },
         {
           headers: {
@@ -2985,7 +3008,7 @@ describe("organization training employee answer route handlers", () => {
         organizationPublicId: "organization_route_public_401",
         answeredQuestionCount: 1,
         scoreSummary: {
-          score: 4,
+          score: 5,
           totalScore: 5,
         },
       }),

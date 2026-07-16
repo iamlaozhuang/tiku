@@ -7,8 +7,12 @@ import type {
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
-import type { OrganizationTrainingPublishInput } from "../models/organization-training";
-import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
+import type {
+  OrganizationTrainingCapabilityContext,
+  OrganizationTrainingPublishInput,
+  OrganizationTrainingPublishQuestionInput,
+} from "../models/organization-training";
+import { OrganizationTrainingPersistenceConflictError } from "../contracts/organization-training-persistence-contract";
 import {
   buildOrganizationTrainingAdminDetailReadModel,
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
@@ -19,6 +23,7 @@ import {
   createOrganizationTrainingService,
   type OrganizationTrainingAdminDetailReadModelInput,
   type OrganizationTrainingStore,
+  type OrganizationTrainingService,
   type OrganizationTrainingManualDraftWrite,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingEmployeeAnswerDraftWrite,
@@ -93,6 +98,31 @@ function createDraftStore() {
         retentionStatus: draftWrite.retentionStatus,
         createdAt: draftWrite.createdAt,
         expiresAt: draftWrite.expiresAt,
+      };
+    },
+    async saveDraft(draftWrite) {
+      return {
+        publicId: draftWrite.draftPublicId,
+        draftStatus: "draft",
+        revision: draftWrite.expectedRevision + 1,
+        sourceTaskPublicId: null,
+        organizationPublicId: draftWrite.organizationPublicId,
+        authorizationSource: "org_auth",
+        authorizationPublicId: draftWrite.authorizationPublicId,
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: draftWrite.title,
+        description: draftWrite.description,
+        questionCount: draftWrite.questionCount,
+        totalScore: draftWrite.totalScore,
+        questionTypeSummary: draftWrite.questionTypeSummary,
+        questions: draftWrite.questions,
+        evidenceStatus: draftWrite.evidenceStatus,
+        validationStatus: draftWrite.validationStatus,
+        retentionStatus: "active",
+        createdAt: fixedNow.toISOString(),
+        expiresAt: null,
       };
     },
     async publishVersion(versionWrite) {
@@ -205,24 +235,47 @@ function createDraftStore() {
       };
     },
     async submitEmployeeAnswer(answerSubmissionWrite) {
-      submittedAnswers = [...submittedAnswers, answerSubmissionWrite];
+      const existingSubmission = submittedAnswers.find(
+        (submission) =>
+          submission.trainingVersionPublicId ===
+            answerSubmissionWrite.trainingVersionPublicId &&
+          submission.employeePublicId ===
+            answerSubmissionWrite.employeePublicId,
+      );
+      if (
+        existingSubmission !== undefined &&
+        (existingSubmission.operationId !== answerSubmissionWrite.operationId ||
+          existingSubmission.payloadDigest !==
+            answerSubmissionWrite.payloadDigest)
+      ) {
+        throw new OrganizationTrainingPersistenceConflictError(
+          "answer_submit_conflict",
+        );
+      }
+      const authoritativeSubmission =
+        existingSubmission ?? answerSubmissionWrite;
+
+      if (existingSubmission === undefined) {
+        submittedAnswers = [...submittedAnswers, answerSubmissionWrite];
+      }
 
       return {
         publicId: "training_answer_record_public_123",
-        trainingVersionPublicId: answerSubmissionWrite.trainingVersionPublicId,
-        employeePublicId: answerSubmissionWrite.employeePublicId,
-        organizationPublicId: answerSubmissionWrite.organizationPublicId,
+        trainingVersionPublicId:
+          authoritativeSubmission.trainingVersionPublicId,
+        employeePublicId: authoritativeSubmission.employeePublicId,
+        organizationPublicId: authoritativeSubmission.organizationPublicId,
         answerOrganizationSnapshot: {
           organizationPublicIds: [
-            ...answerSubmissionWrite.answerOrganizationSnapshot
+            ...authoritativeSubmission.answerOrganizationSnapshot
               .organizationPublicIds,
           ],
           capturedAt:
-            answerSubmissionWrite.answerOrganizationSnapshot.capturedAt,
+            authoritativeSubmission.answerOrganizationSnapshot.capturedAt,
         },
-        answerStatus: answerSubmissionWrite.answerStatus,
-        scoreSummary: answerSubmissionWrite.scoreSummary,
-        submittedAt: answerSubmissionWrite.submittedAt,
+        answerStatus: authoritativeSubmission.answerStatus,
+        scoreSummary: authoritativeSubmission.scoreSummary,
+        submittedAt: authoritativeSubmission.submittedAt,
         resultSummaryVisible: false,
       };
     },
@@ -251,9 +304,101 @@ function createServiceFixture() {
     getSavedAnswerDrafts,
     getSubmittedAnswers,
   } = createDraftStore();
-  const service = createOrganizationTrainingService(draftStore, {
+  const baseService = createOrganizationTrainingService(draftStore, {
     now: () => fixedNow,
   });
+  const service = {
+    ...baseService,
+    async publishVersion(command: {
+      publishInput: LegacyOrganizationTrainingPublishInput;
+      persistenceLineage: OrganizationTrainingPersistenceLineage;
+    }) {
+      const publishInput = command.publishInput;
+      const capabilityContext = publishInput.capabilityContext;
+      const authorizationContext = createAdvancedOrgAuthContext({
+        effectiveEdition: capabilityContext.effectiveEdition,
+        authorizationSource: capabilityContext.authorizationSource,
+        authorizationPublicId: publishInput.authorizationPublicId,
+        ownerPublicId: publishInput.organizationPublicId,
+        organizationPublicId: publishInput.organizationPublicId,
+        quotaOwnerPublicId: publishInput.organizationPublicId,
+        capabilities: {
+          ...createAdvancedOrgAuthContext().capabilities,
+          canCreateOrganizationTraining:
+            capabilityContext.canCreateOrganizationTraining,
+        },
+      });
+
+      return baseService.publishVersion({
+        publishInput,
+        draft: {
+          publicId: publishInput.draftPublicId,
+          draftStatus: "draft",
+          revision: publishInput.expectedRevision,
+          sourceTaskPublicId: null,
+          organizationPublicId: publishInput.organizationPublicId,
+          authorizationSource: "org_auth",
+          authorizationPublicId: publishInput.authorizationPublicId,
+          profession: publishInput.profession,
+          level: publishInput.level,
+          subject: publishInput.subject,
+          title: publishInput.title,
+          description: publishInput.description,
+          questionCount: publishInput.questions.length,
+          totalScore: publishInput.questions.reduce(
+            (total, question) => total + question.score,
+            0,
+          ),
+          questionTypeSummary: publishInput.questionTypeSummary,
+          questions: publishInput.questions,
+          evidenceStatus: "weak",
+          validationStatus: "needs_review",
+          retentionStatus: "active",
+          createdAt: fixedNow.toISOString(),
+          expiresAt: null,
+        },
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: [publishInput.organizationPublicId],
+        },
+        authorizationContext,
+        persistenceLineage: command.persistenceLineage,
+      });
+    },
+    async saveEmployeeAnswerDraft(command: LegacyEmployeeAnswerCommand) {
+      return baseService.saveEmployeeAnswerDraft({
+        employeeContext: command.employeeContext,
+        version: command.version,
+        answerInput: {
+          trainingVersionPublicId: command.answerInput.trainingVersionPublicId,
+          expectedRevision: command.existingAnswer?.revision ?? 0,
+          operationId: "answer_draft_operation_123",
+          answerItems: createLegacyAnswerItems(
+            command.answerInput.answeredQuestionCount,
+          ),
+        },
+        existingAnswer: command.existingAnswer,
+        canonicalQuestions: createLegacyCanonicalQuestions(),
+      });
+    },
+    async submitEmployeeAnswer(command: LegacyEmployeeAnswerCommand) {
+      return baseService.submitEmployeeAnswer({
+        employeeContext: command.employeeContext,
+        version: command.version,
+        answerInput: {
+          trainingVersionPublicId: command.answerInput.trainingVersionPublicId,
+          expectedRevision: command.existingAnswer?.revision ?? 0,
+          operationId: "answer_submit_operation_123",
+          answerItems: createLegacyAnswerItems(
+            command.answerInput.answeredQuestionCount,
+          ),
+        },
+        existingAnswer: command.existingAnswer,
+        canonicalQuestions: createLegacyCanonicalQuestions(),
+        scoringProvenance: null,
+      });
+    },
+  };
 
   return {
     service,
@@ -267,61 +412,154 @@ function createServiceFixture() {
   };
 }
 
+type LegacyOrganizationTrainingPublishInput =
+  OrganizationTrainingPublishInput & {
+    organizationPublicId: string;
+    authorizationPublicId: string;
+    profession: "monopoly" | "marketing" | "logistics";
+    level: number;
+    subject: "theory" | "skill";
+    title: string;
+    description: string | null;
+    questions: OrganizationTrainingPublishQuestionInput[];
+    capabilityContext: OrganizationTrainingCapabilityContext;
+    questionCount: number;
+    totalScore: number;
+    questionTypeSummary: {
+      singleChoice: number;
+      multiChoice: number;
+      trueFalse: number;
+      shortAnswer: number;
+    };
+  };
+
+type LegacyEmployeeAnswerCommand = {
+  employeeContext: Parameters<
+    OrganizationTrainingService["saveEmployeeAnswerDraft"]
+  >[0]["employeeContext"];
+  version: OrganizationTrainingPublishedVersionDto;
+  answerInput: {
+    trainingVersionPublicId: string;
+    answeredQuestionCount: number;
+    scoreSummary?: { score: number; totalScore: number };
+  };
+  existingAnswer: EmployeeOrganizationTrainingAnswerDto | null;
+};
+
+function createLegacyCanonicalQuestions(): OrganizationTrainingPublishQuestionInput[] {
+  return [
+    {
+      publicId: "training_question_public_123",
+      sequenceNumber: 1,
+      questionType: "single_choice",
+      materialTitle: null,
+      materialContent: null,
+      stem: "Question one",
+      options: [
+        { publicId: "training_option_a", label: "A", content: "Correct" },
+        { publicId: "training_option_b", label: "B", content: "Wrong" },
+      ],
+      score: 2,
+      standardAnswer: "A",
+      analysisSummary: "Question one analysis",
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+    },
+    {
+      publicId: "training_question_public_456",
+      sequenceNumber: 2,
+      questionType: "true_false",
+      materialTitle: null,
+      materialContent: null,
+      stem: "Question two",
+      options: [
+        { publicId: "training_option_true", label: "A", content: "True" },
+        { publicId: "training_option_false", label: "B", content: "False" },
+      ],
+      score: 3,
+      standardAnswer: "B",
+      analysisSummary: "Question two analysis",
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+    },
+  ];
+}
+
+function createLegacyAnswerItems(
+  answeredQuestionCount: number,
+): EmployeeOrganizationTrainingAnswerDto["answerItems"] {
+  return [
+    {
+      questionPublicId: "training_question_public_123",
+      selectedOptionPublicIds: ["training_option_a"],
+      textAnswer: null,
+    },
+    {
+      questionPublicId: "training_question_public_456",
+      selectedOptionPublicIds: ["training_option_false"],
+      textAnswer: null,
+    },
+  ].slice(0, answeredQuestionCount);
+}
+
 function createPublishInput(
-  overrides: Partial<OrganizationTrainingPublishInput> = {},
-): OrganizationTrainingPublishInput {
-  const normalizedInput = normalizeOrganizationTrainingPublishInput({
-    draftPublicId: " training_draft_public_123 ",
-    organizationPublicId: " organization_public_123 ",
-    authorizationPublicId: " org_auth_public_123 ",
+  overrides: Partial<LegacyOrganizationTrainingPublishInput> = {},
+): LegacyOrganizationTrainingPublishInput {
+  return {
+    draftPublicId: "training_draft_public_123",
+    expectedRevision: 1,
+    operationId: "publish_operation_123",
+    organizationPublicId: "organization_public_123",
+    authorizationPublicId: "org_auth_public_123",
     profession: "monopoly",
     level: 3,
     subject: "theory",
-    title: " Safety training ",
-    description: "",
+    title: "Safety training",
+    description: null,
+    answerDeadlineAt: null,
     questions: [
       {
-        publicId: " training_question_public_123 ",
+        publicId: "training_question_public_123",
         sequenceNumber: 1,
         questionType: "single_choice",
-        materialTitle: " Safety material ",
-        materialContent: " Safety material body ",
-        stem: " Which option is compliant? ",
+        materialTitle: "Safety material",
+        materialContent: "Safety material body",
+        stem: "Which option is compliant?",
         options: [
           {
-            publicId: " training_question_option_a ",
-            label: " A ",
-            content: " compliant option ",
+            publicId: "training_question_option_a",
+            label: "A",
+            content: "compliant option",
           },
           {
-            publicId: " training_question_option_b ",
-            label: " B ",
-            content: " distractor option ",
+            publicId: "training_question_option_b",
+            label: "B",
+            content: "distractor option",
           },
         ],
         score: 2,
-        standardAnswer: " A ",
-        analysisSummary: " choice rationale ",
+        standardAnswer: "A",
+        analysisSummary: "choice rationale",
         evidenceStatus: "sufficient",
         citationCount: 1,
       },
       {
-        publicId: " training_question_public_456 ",
+        publicId: "training_question_public_456",
         sequenceNumber: 2,
         questionType: "short_answer",
         materialTitle: null,
         materialContent: null,
-        stem: " Describe the handling rule. ",
+        stem: "Describe the handling rule.",
         options: [],
         score: 3,
-        standardAnswer: " expected answer ",
-        analysisSummary: " scoring rationale ",
+        standardAnswer: "expected answer",
+        analysisSummary: "scoring rationale",
         evidenceStatus: "weak",
         citationCount: 0,
       },
     ],
     publishScopeOrganizationPublicIds: [
-      " organization_public_123 ",
+      "organization_public_123",
       "organization_branch_public_456",
     ],
     capabilityContext: {
@@ -329,15 +567,15 @@ function createPublishInput(
       authorizationSource: "org_auth",
       canCreateOrganizationTraining: true,
     },
+    questionCount: 2,
+    totalScore: 5,
+    questionTypeSummary: {
+      singleChoice: 1,
+      multiChoice: 0,
+      trueFalse: 0,
+      shortAnswer: 1,
+    },
     weakEvidenceConfirmed: true,
-  });
-
-  if (!normalizedInput.success) {
-    throw new Error("Expected normalized organization training publish input.");
-  }
-
-  return {
-    ...normalizedInput.value,
     ...overrides,
   };
 }
@@ -606,6 +844,9 @@ describe("organization training service", () => {
     expect(getCreatedDrafts()).toEqual([
       {
         contentType: "organization_training_draft",
+        draftStatus: "draft",
+        revision: 1,
+        questions: [],
         ownerType: "organization",
         ownerPublicId: "organization_public_123",
         quotaOwnerType: "organization",
@@ -1564,6 +1805,10 @@ describe("organization training service", () => {
         takenDownAt: null,
         takedownReason: null,
         questionSnapshot: publishInput.questions,
+        expectedDraftRevision: 1,
+        publishOperationId: "publish_operation_123",
+        publishPayloadDigest:
+          "9cac3dd50b53e4a61a23490c5fede9f31c3c727d1b6dd1aeb84e71e921f114a9",
         organizationId: 501,
         orgAuthId: 601,
       },
@@ -2754,7 +2999,17 @@ describe("organization training service", () => {
         },
         answerStatus: "in_progress",
         answeredQuestionCount: 1,
-        answerItems: [],
+        expectedRevision: 0,
+        operationId: "answer_draft_operation_123",
+        payloadDigest:
+          "4c16d3328a0b387a6742ca532d0c83515970a7391ae3dd3e75cc7d1ae69fa6e8",
+        answerItems: [
+          {
+            questionPublicId: "training_question_public_123",
+            selectedOptionPublicIds: ["training_option_a"],
+            textAnswer: null,
+          },
+        ],
         scoreSummary: null,
         savedAt: fixedNow.toISOString(),
         submittedAt: null,
@@ -2801,7 +3056,7 @@ describe("organization training service", () => {
         trainingVersionPublicId: "training_version_public_123",
         answeredQuestionCount: 2,
         scoreSummary: {
-          score: 4,
+          score: 5,
           totalScore: 5,
         },
       },
@@ -2863,14 +3118,14 @@ describe("organization training service", () => {
         },
         answerStatus: "submitted",
         scoreSummary: {
-          score: 4,
+          score: 5,
           totalScore: 5,
         },
         submittedAt: fixedNow.toISOString(),
         resultSummaryVisible: false,
       },
     });
-    expect(getSubmittedAnswers()).toEqual([
+    expect(getSubmittedAnswers()).toMatchObject([
       {
         contentType: "organization_training_answer_record",
         trainingVersionPublicId: "training_version_public_123",
@@ -2885,10 +3140,10 @@ describe("organization training service", () => {
         },
         answerStatus: "submitted",
         answeredQuestionCount: 2,
-        answerItems: [],
-        questionResults: [],
+        answerItems: expect.any(Array),
+        questionResults: expect.any(Array),
         scoreSummary: {
-          score: 4,
+          score: 5,
           totalScore: 5,
         },
         submittedAt: fixedNow.toISOString(),
@@ -2924,11 +3179,8 @@ describe("organization training service", () => {
       existingAnswer: createSubmittedEmployeeAnswer(),
     });
 
-    expect(duplicateResult).toEqual({
-      success: false,
-      reason: "already_submitted",
-      message: "Organization training employee answer is blocked.",
-    });
+    expect(duplicateResult).toEqual(result);
+    expect(getSubmittedAnswers()).toHaveLength(1);
   });
 
   it("keeps taken-down training limited to own read-only historical summary", async () => {

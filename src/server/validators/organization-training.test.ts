@@ -27,7 +27,9 @@ describe("organization training contract and validator scaffold", () => {
   it("keeps employee answer statuses aligned with the organization training plan", () => {
     expect(organizationTrainingAnswerStatusValues).toEqual([
       "in_progress",
+      "scoring",
       "submitted",
+      "scoring_failed",
       "read_only",
     ]);
   });
@@ -155,6 +157,9 @@ describe("organization training contract and validator scaffold", () => {
         weakEvidenceConfirmed: true,
       }),
     ).toEqual({
+      success: false,
+      message: "Invalid organization training publish input.",
+      /* legacy client-owned publish facts are intentionally rejected
       success: true,
       value: {
         draftPublicId: "training_draft_public_123",
@@ -276,6 +281,7 @@ describe("organization training contract and validator scaffold", () => {
         },
         weakEvidenceConfirmed: true,
       },
+      */
     });
 
     expect(
@@ -382,27 +388,7 @@ describe("organization training contract and validator scaffold", () => {
       structuredPublishInput,
     );
 
-    expect(normalizedResult).toEqual({
-      success: true,
-      value: expect.objectContaining({
-        questions: [
-          expect.objectContaining({
-            publicId: "question_one_public_123",
-            paperSectionKey: "single_choice",
-            paperSectionTitle: "单选题部分",
-            paperSectionSortOrder: 1,
-            questionSortOrder: 1,
-          }),
-          expect.objectContaining({
-            publicId: "question_two_public_123",
-            paperSectionKey: "short_answer",
-            paperSectionTitle: "简答题部分",
-            paperSectionSortOrder: 2,
-            questionSortOrder: 1,
-          }),
-        ],
-      }),
-    });
+    expect(normalizedResult.success).toBe(false);
 
     expect(
       normalizeOrganizationTrainingPublishInput({
@@ -826,7 +812,8 @@ describe("organization training contract and validator scaffold", () => {
     expect(
       normalizeOrganizationTrainingEmployeeAnswerDraftInput({
         trainingVersionPublicId: " training_version_public_123 ",
-        answeredQuestionCount: 2,
+        expectedRevision: 0,
+        operationId: " answer_draft_operation_123 ",
         answerItems: [
           {
             questionPublicId: " training_question_public_123 ",
@@ -844,7 +831,8 @@ describe("organization training contract and validator scaffold", () => {
       success: true,
       value: {
         trainingVersionPublicId: "training_version_public_123",
-        answeredQuestionCount: 2,
+        expectedRevision: 0,
+        operationId: "answer_draft_operation_123",
         answerItems: [
           {
             questionPublicId: "training_question_public_123",
@@ -863,11 +851,8 @@ describe("organization training contract and validator scaffold", () => {
     expect(
       normalizeOrganizationTrainingEmployeeAnswerSubmitInput({
         trainingVersionPublicId: " training_version_public_123 ",
-        answeredQuestionCount: 2,
-        scoreSummary: {
-          score: 4,
-          totalScore: 5,
-        },
+        expectedRevision: 1,
+        operationId: " answer_submit_operation_123 ",
         answerItems: [
           {
             questionPublicId: " training_question_public_123 ",
@@ -880,7 +865,8 @@ describe("organization training contract and validator scaffold", () => {
       success: true,
       value: {
         trainingVersionPublicId: "training_version_public_123",
-        answeredQuestionCount: 2,
+        expectedRevision: 1,
+        operationId: "answer_submit_operation_123",
         answerItems: [
           {
             questionPublicId: "training_question_public_123",
@@ -888,10 +874,6 @@ describe("organization training contract and validator scaffold", () => {
             textAnswer: null,
           },
         ],
-        scoreSummary: {
-          score: 4,
-          totalScore: 5,
-        },
       },
     });
 

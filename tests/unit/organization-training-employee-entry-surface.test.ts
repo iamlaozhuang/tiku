@@ -766,7 +766,8 @@ describe("StudentOrganizationTrainingPage", () => {
       ),
     ).toMatchObject({
       trainingVersionPublicId: "organization-training-version-ui-001",
-      answeredQuestionCount: 2,
+      expectedRevision: expect.any(Number),
+      operationId: expect.any(String),
       answerItems: [
         {
           questionPublicId: "organization-training-question-ui-001",
@@ -798,7 +799,8 @@ describe("StudentOrganizationTrainingPage", () => {
       ),
     ).toMatchObject({
       trainingVersionPublicId: "organization-training-version-ui-001",
-      answeredQuestionCount: 2,
+      expectedRevision: expect.any(Number),
+      operationId: expect.any(String),
       answerItems: [
         {
           questionPublicId: "organization-training-question-ui-001",
@@ -811,10 +813,6 @@ describe("StudentOrganizationTrainingPage", () => {
           textAnswer: "记录客户诉求和服务改进动作。",
         },
       ],
-      scoreSummary: {
-        score: 0,
-        totalScore: 10,
-      },
     });
 
     fireEvent.click(

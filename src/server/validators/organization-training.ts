@@ -1,18 +1,16 @@
 import { evidenceStatusValues } from "../models/ai-rag";
 import { professionValues } from "../models/auth";
-import type {
-  EmployeeOrganizationTrainingAnswerItemDto,
-  EmployeeOrganizationTrainingScoreSummaryDto,
-} from "../contracts/organization-training-contract";
+import type { EmployeeOrganizationTrainingAnswerItemDto } from "../contracts/organization-training-contract";
 import {
   type OrganizationTrainingAuditLogReferenceInput,
   type OrganizationTrainingAuditLogTargetResourceType,
   type OrganizationTrainingCapabilityContext,
   type OrganizationTrainingCopyToNewDraftInput,
+  type OrganizationTrainingDraftQuestionInput,
+  type OrganizationTrainingDraftSaveInput,
   type OrganizationTrainingPublishInput,
   type OrganizationTrainingPublishQuestionInput,
   type OrganizationTrainingQuestionType,
-  type OrganizationTrainingQuestionTypeSummary,
   type OrganizationTrainingSourceContextType,
   type OrganizationTrainingTakedownInput,
   organizationTrainingAuditLogTargetResourceTypeValues,
@@ -23,6 +21,9 @@ import { subjectValues } from "../models/paper";
 
 export const invalidOrganizationTrainingPublishInputMessage =
   "Invalid organization training publish input.";
+
+export const invalidOrganizationTrainingDraftSaveInputMessage =
+  "Invalid organization training draft save input.";
 
 export const invalidOrganizationTrainingTakedownInputMessage =
   "Invalid organization training takedown input.";
@@ -47,14 +48,13 @@ export const invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage =
 
 export type OrganizationTrainingEmployeeAnswerDraftRouteInput = {
   trainingVersionPublicId: string;
-  answeredQuestionCount: number;
+  expectedRevision: number;
+  operationId: string;
   answerItems: EmployeeOrganizationTrainingAnswerItemDto[];
 };
 
 export type OrganizationTrainingEmployeeAnswerSubmitRouteInput =
-  OrganizationTrainingEmployeeAnswerDraftRouteInput & {
-    scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
-  };
+  OrganizationTrainingEmployeeAnswerDraftRouteInput;
 
 export type OrganizationTrainingManualDraftRouteInput = {
   organizationPublicId: string;
@@ -103,6 +103,16 @@ export type OrganizationTrainingPublishValidationResult =
   | {
       success: false;
       message: typeof invalidOrganizationTrainingPublishInputMessage;
+    };
+
+export type OrganizationTrainingDraftSaveValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingDraftSaveInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingDraftSaveInputMessage;
     };
 
 export type OrganizationTrainingManualDraftValidationResult =
@@ -187,16 +197,6 @@ export type OrganizationTrainingEmployeeAnswerSubmitValidationResult =
 
 type JsonRecord = Record<string, unknown>;
 
-const organizationTrainingQuestionTypeSummaryKeyByType: Record<
-  OrganizationTrainingQuestionType,
-  keyof OrganizationTrainingQuestionTypeSummary
-> = {
-  single_choice: "singleChoice",
-  multi_choice: "multiChoice",
-  true_false: "trueFalse",
-  short_answer: "shortAnswer",
-};
-
 const forbiddenEmployeeAnswerPayloadKeys = [
   "answerBody",
   "answers",
@@ -206,6 +206,33 @@ const forbiddenEmployeeAnswerPayloadKeys = [
   "rawPrompt",
   "standardAnswer",
   "analysis",
+  "answeredQuestionCount",
+  "score",
+  "totalScore",
+  "scoreSummary",
+  "questionResults",
+] as const;
+
+const forbiddenPublishPayloadKeys = [
+  "organizationPublicId",
+  "authorizationPublicId",
+  "profession",
+  "level",
+  "subject",
+  "title",
+  "description",
+  "questions",
+  "capabilityContext",
+  "questionCount",
+  "totalScore",
+  "questionTypeSummary",
+  "evidenceStatus",
+  "citationCount",
+] as const;
+
+const forbiddenDraftQuestionPayloadKeys = [
+  "evidenceStatus",
+  "citationCount",
 ] as const;
 
 const forbiddenSourceMetadataPayloadKeys = [
@@ -292,6 +319,18 @@ function hasForbiddenEmployeeAnswerPayload(value: JsonRecord): boolean {
 
 function hasForbiddenSourceMetadataPayload(value: JsonRecord): boolean {
   return forbiddenSourceMetadataPayloadKeys.some((payloadKey) =>
+    Object.hasOwn(value, payloadKey),
+  );
+}
+
+function hasForbiddenPublishPayload(value: JsonRecord): boolean {
+  return forbiddenPublishPayloadKeys.some((payloadKey) =>
+    Object.hasOwn(value, payloadKey),
+  );
+}
+
+function hasForbiddenDraftQuestionPayload(value: JsonRecord): boolean {
+  return forbiddenDraftQuestionPayloadKeys.some((payloadKey) =>
     Object.hasOwn(value, payloadKey),
   );
 }
@@ -517,29 +556,6 @@ function normalizeCapabilityContext(
   };
 }
 
-function createEmptyQuestionTypeSummary(): OrganizationTrainingQuestionTypeSummary {
-  return {
-    singleChoice: 0,
-    multiChoice: 0,
-    trueFalse: 0,
-    shortAnswer: 0,
-  };
-}
-
-function buildQuestionTypeSummary(
-  questions: OrganizationTrainingPublishQuestionInput[],
-): OrganizationTrainingQuestionTypeSummary {
-  return questions.reduce((summary, question) => {
-    const summaryKey =
-      organizationTrainingQuestionTypeSummaryKeyByType[question.questionType];
-
-    return {
-      ...summary,
-      [summaryKey]: summary[summaryKey] + 1,
-    };
-  }, createEmptyQuestionTypeSummary());
-}
-
 function normalizePublishQuestion(
   value: unknown,
   index: number,
@@ -629,122 +645,10 @@ function normalizePublishQuestion(
   };
 }
 
-function normalizePublishQuestions(
-  value: unknown,
-): OrganizationTrainingPublishQuestionInput[] | null {
-  if (!Array.isArray(value) || value.length === 0) {
-    return null;
-  }
-
-  const normalizedQuestions = value.map((item, index) =>
-    normalizePublishQuestion(item, index),
-  );
-
-  if (normalizedQuestions.some((question) => question === null)) {
-    return null;
-  }
-
-  const questions =
-    normalizedQuestions as OrganizationTrainingPublishQuestionInput[];
-  const publicIds = new Set(questions.map((question) => question.publicId));
-  const structuredQuestionCount = questions.filter(
-    (question) => question.paperSectionKey !== undefined,
-  ).length;
-
-  if (publicIds.size !== questions.length) {
-    return null;
-  }
-
-  if (structuredQuestionCount === 0) {
-    return questions;
-  }
-
-  if (structuredQuestionCount !== questions.length) {
-    return null;
-  }
-
-  const sectionByKey = new Map<
-    string,
-    {
-      title: string;
-      questionType: OrganizationTrainingQuestionType;
-      sortOrder: number;
-      questionSortOrders: number[];
-    }
-  >();
-  const sectionKeyBySortOrder = new Map<number, string>();
-
-  for (const question of questions) {
-    const sectionKey = question.paperSectionKey;
-    const sectionTitle = question.paperSectionTitle;
-    const sectionSortOrder = question.paperSectionSortOrder;
-    const questionSortOrder = question.questionSortOrder;
-
-    if (
-      sectionKey === undefined ||
-      sectionTitle === undefined ||
-      sectionSortOrder === undefined ||
-      questionSortOrder === undefined
-    ) {
-      return null;
-    }
-
-    const existingSectionKey = sectionKeyBySortOrder.get(sectionSortOrder);
-
-    if (existingSectionKey !== undefined && existingSectionKey !== sectionKey) {
-      return null;
-    }
-
-    sectionKeyBySortOrder.set(sectionSortOrder, sectionKey);
-    const existingSection = sectionByKey.get(sectionKey);
-
-    if (existingSection === undefined) {
-      sectionByKey.set(sectionKey, {
-        title: sectionTitle,
-        questionType: question.questionType,
-        sortOrder: sectionSortOrder,
-        questionSortOrders: [questionSortOrder],
-      });
-      continue;
-    }
-
-    if (
-      existingSection.title !== sectionTitle ||
-      existingSection.questionType !== question.questionType ||
-      existingSection.sortOrder !== sectionSortOrder
-    ) {
-      return null;
-    }
-
-    existingSection.questionSortOrders.push(questionSortOrder);
-  }
-
-  const sectionSortOrders = [...sectionByKey.values()]
-    .map((section) => section.sortOrder)
-    .sort((left, right) => left - right);
-
-  if (
-    sectionSortOrders.some((sortOrder, index) => sortOrder !== index + 1) ||
-    [...sectionByKey.values()].some((section) => {
-      const questionSortOrders = [...section.questionSortOrders].sort(
-        (left, right) => left - right,
-      );
-
-      return questionSortOrders.some(
-        (sortOrder, index) => sortOrder !== index + 1,
-      );
-    })
-  ) {
-    return null;
-  }
-
-  return questions;
-}
-
 export function normalizeOrganizationTrainingPublishInput(
   input: unknown,
 ): OrganizationTrainingPublishValidationResult {
-  if (!isRecord(input)) {
+  if (!isRecord(input) || hasForbiddenPublishPayload(input)) {
     return {
       success: false,
       message: invalidOrganizationTrainingPublishInputMessage,
@@ -752,37 +656,22 @@ export function normalizeOrganizationTrainingPublishInput(
   }
 
   const draftPublicId = normalizeRequiredText(input.draftPublicId);
-  const organizationPublicId = normalizeRequiredText(
-    input.organizationPublicId,
-  );
-  const authorizationPublicId = normalizeRequiredText(
-    input.authorizationPublicId,
-  );
-  const level = normalizePositiveInteger(input.level);
-  const title = normalizeRequiredText(input.title);
-  const description = normalizeOptionalText(input.description);
+  const expectedRevision = normalizePositiveInteger(input.expectedRevision);
+  const operationId = normalizeRequiredText(input.operationId);
   const answerDeadlineAt = normalizeOptionalIsoTimestamp(
     input.answerDeadlineAt,
   );
-  const questions = normalizePublishQuestions(input.questions);
   const publishScopeOrganizationPublicIds = normalizePublicIdList(
     input.publishScopeOrganizationPublicIds,
   );
-  const capabilityContext = normalizeCapabilityContext(input.capabilityContext);
   const weakEvidenceConfirmed = input.weakEvidenceConfirmed === true;
 
   if (
     draftPublicId === null ||
-    organizationPublicId === null ||
-    authorizationPublicId === null ||
-    !isProfession(input.profession) ||
-    level === null ||
-    !isSubject(input.subject) ||
-    title === null ||
+    expectedRevision === null ||
+    operationId === null ||
     answerDeadlineAt === undefined ||
-    questions === null ||
-    publishScopeOrganizationPublicIds === null ||
-    capabilityContext === null
+    publishScopeOrganizationPublicIds === null
   ) {
     return {
       success: false,
@@ -790,30 +679,126 @@ export function normalizeOrganizationTrainingPublishInput(
     };
   }
 
-  const totalScore = questions.reduce(
-    (scoreTotal, question) => scoreTotal + question.score,
-    0,
+  return {
+    success: true,
+    value: {
+      draftPublicId,
+      expectedRevision,
+      operationId,
+      answerDeadlineAt,
+      publishScopeOrganizationPublicIds,
+      weakEvidenceConfirmed,
+    },
+  };
+}
+
+function normalizeDraftQuestion(
+  value: unknown,
+  index: number,
+): OrganizationTrainingDraftQuestionInput | null {
+  if (!isRecord(value) || hasForbiddenDraftQuestionPayload(value)) {
+    return null;
+  }
+
+  const normalizedQuestion = normalizePublishQuestion(
+    {
+      ...value,
+      evidenceStatus: "weak",
+      citationCount: 0,
+    },
+    index,
   );
+
+  if (normalizedQuestion === null) {
+    return null;
+  }
+
+  return {
+    publicId: normalizedQuestion.publicId,
+    sequenceNumber: normalizedQuestion.sequenceNumber,
+    questionType: normalizedQuestion.questionType,
+    ...(normalizedQuestion.paperSectionKey !== undefined &&
+    normalizedQuestion.paperSectionTitle !== undefined &&
+    normalizedQuestion.paperSectionSortOrder !== undefined &&
+    normalizedQuestion.questionSortOrder !== undefined
+      ? {
+          paperSectionKey: normalizedQuestion.paperSectionKey,
+          paperSectionTitle: normalizedQuestion.paperSectionTitle,
+          paperSectionSortOrder: normalizedQuestion.paperSectionSortOrder,
+          questionSortOrder: normalizedQuestion.questionSortOrder,
+        }
+      : {}),
+    materialTitle: normalizedQuestion.materialTitle,
+    materialContent: normalizedQuestion.materialContent,
+    stem: normalizedQuestion.stem,
+    options: normalizedQuestion.options,
+    score: normalizedQuestion.score,
+    standardAnswer: normalizedQuestion.standardAnswer,
+    analysisSummary: normalizedQuestion.analysisSummary,
+  };
+}
+
+function normalizeDraftQuestions(
+  value: unknown,
+): OrganizationTrainingDraftQuestionInput[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const questions = value.map(normalizeDraftQuestion);
+
+  if (questions.some((question) => question === null)) {
+    return null;
+  }
+
+  const normalizedQuestions =
+    questions as OrganizationTrainingDraftQuestionInput[];
+
+  return new Set(normalizedQuestions.map((question) => question.publicId))
+    .size === normalizedQuestions.length
+    ? normalizedQuestions
+    : null;
+}
+
+export function normalizeOrganizationTrainingDraftSaveInput(
+  input: unknown,
+): OrganizationTrainingDraftSaveValidationResult {
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingDraftSaveInputMessage,
+    };
+  }
+
+  const draftPublicId = normalizeRequiredText(input.draftPublicId);
+  const expectedRevision = normalizePositiveInteger(input.expectedRevision);
+  const operationId = normalizeRequiredText(input.operationId);
+  const title = normalizeRequiredText(input.title);
+  const description = normalizeOptionalText(input.description);
+  const questions = normalizeDraftQuestions(input.questions);
+
+  if (
+    draftPublicId === null ||
+    expectedRevision === null ||
+    operationId === null ||
+    title === null ||
+    questions === null
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingDraftSaveInputMessage,
+    };
+  }
 
   return {
     success: true,
     value: {
       draftPublicId,
-      organizationPublicId,
-      authorizationPublicId,
-      profession: input.profession,
-      level,
-      subject: input.subject,
+      expectedRevision,
+      operationId,
       title,
       description,
-      answerDeadlineAt,
       questions,
-      publishScopeOrganizationPublicIds,
-      capabilityContext,
-      questionCount: questions.length,
-      totalScore,
-      questionTypeSummary: buildQuestionTypeSummary(questions),
-      weakEvidenceConfirmed,
     },
   };
 }
@@ -913,14 +898,14 @@ export function normalizeOrganizationTrainingEmployeeAnswerDraftInput(
   const trainingVersionPublicId = normalizeRequiredText(
     input.trainingVersionPublicId,
   );
-  const answeredQuestionCount = normalizePositiveInteger(
-    input.answeredQuestionCount,
-  );
+  const expectedRevision = normalizeNonNegativeInteger(input.expectedRevision);
+  const operationId = normalizeRequiredText(input.operationId);
   const answerItems = normalizeAnswerItems(input.answerItems);
 
   if (
     trainingVersionPublicId === null ||
-    answeredQuestionCount === null ||
+    expectedRevision === null ||
+    operationId === null ||
     answerItems === null
   ) {
     return {
@@ -933,7 +918,8 @@ export function normalizeOrganizationTrainingEmployeeAnswerDraftInput(
     success: true,
     value: {
       trainingVersionPublicId,
-      answeredQuestionCount,
+      expectedRevision,
+      operationId,
       answerItems,
     },
   };
@@ -945,21 +931,7 @@ export function normalizeOrganizationTrainingEmployeeAnswerSubmitInput(
   const draftInput =
     normalizeOrganizationTrainingEmployeeAnswerDraftInput(input);
 
-  if (
-    !draftInput.success ||
-    !isRecord(input) ||
-    !isRecord(input.scoreSummary)
-  ) {
-    return {
-      success: false,
-      message: invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
-    };
-  }
-
-  const score = normalizeNonNegativeInteger(input.scoreSummary.score);
-  const totalScore = normalizeNonNegativeInteger(input.scoreSummary.totalScore);
-
-  if (score === null || totalScore === null) {
+  if (!draftInput.success) {
     return {
       success: false,
       message: invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
@@ -968,13 +940,7 @@ export function normalizeOrganizationTrainingEmployeeAnswerSubmitInput(
 
   return {
     success: true,
-    value: {
-      ...draftInput.value,
-      scoreSummary: {
-        score,
-        totalScore,
-      },
-    },
+    value: draftInput.value,
   };
 }
 

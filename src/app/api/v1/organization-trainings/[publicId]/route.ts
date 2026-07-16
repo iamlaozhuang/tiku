@@ -4,3 +4,4 @@ const organizationTrainingRouteHandlers =
   createOrganizationTrainingRuntimeRouteHandlers();
 
 export const GET = organizationTrainingRouteHandlers.adminDetail.GET;
+export const PATCH = organizationTrainingRouteHandlers.adminDetail.PATCH;

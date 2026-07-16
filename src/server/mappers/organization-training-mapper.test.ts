@@ -151,6 +151,8 @@ describe("organization training mapper", () => {
       subject: "theory",
       title: "Safety training draft",
       description: null,
+      draftStatus: "draft",
+      revision: 1,
       questionCount: 2,
       totalScore: 5,
       questionTypeSummary: {
@@ -161,6 +163,7 @@ describe("organization training mapper", () => {
       },
       evidenceStatus: "none",
       validationStatus: "needs_review",
+      questions: [],
       retentionStatus: "active",
       createdAt: "2026-06-15T19:20:13.000Z",
       expiresAt: null,

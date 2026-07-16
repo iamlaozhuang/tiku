@@ -4,6 +4,7 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type { AdminWorkspaceCapabilitySummary } from "../contracts/admin-workspace-role-guard-contract";
+import { createAdminAiAuditLogListQuery } from "../contracts/admin-ai-audit-log-ops-contract";
 import type {
   EffectiveAuthorizationContextDto,
   EffectiveAuthorizationListDto,
@@ -24,6 +25,7 @@ import { getRequestAuthorization } from "../auth/session-cookie";
 import type {
   OrganizationTrainingCopyToNewDraftInput,
   OrganizationTrainingPublishInput,
+  OrganizationTrainingPublishQuestionInput,
   OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
@@ -32,16 +34,22 @@ import {
   type OrganizationTrainingRepository,
 } from "../repositories/organization-training-repository";
 import { createPostgresAdminAiGenerationResultPersistenceRepository } from "../repositories/admin-ai-generation-result-persistence-db-adapter";
+import {
+  createPostgresAdminAiAuditLogRuntimeRepositories,
+  type AdminAiAuditLogRuntimeRepositories,
+} from "../repositories/admin-ai-audit-log-runtime-repository";
 import { createPostgresStudentAuthorizationRedeemRuntimeRepositories } from "../repositories/student-authorization-redeem-runtime-repository";
 import {
   invalidOrganizationTrainingEmployeeAnswerDraftInputMessage,
   invalidOrganizationTrainingEmployeeAnswerSubmitInputMessage,
   invalidOrganizationTrainingCopyToNewDraftInputMessage,
+  invalidOrganizationTrainingDraftSaveInputMessage,
   invalidOrganizationTrainingManualDraftInputMessage,
   invalidOrganizationTrainingPublishInputMessage,
   invalidOrganizationTrainingSourceContextInputMessage,
   invalidOrganizationTrainingTakedownInputMessage,
   normalizeOrganizationTrainingCopyToNewDraftRouteInput,
+  normalizeOrganizationTrainingDraftSaveInput,
   normalizeOrganizationTrainingEmployeeAnswerDraftInput,
   normalizeOrganizationTrainingEmployeeAnswerSubmitInput,
   normalizeOrganizationTrainingManualDraftInput,
@@ -56,6 +64,7 @@ import {
   buildOrganizationTrainingAdminDetailReadModel,
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
   createOrganizationTrainingService,
+  organizationTrainingDraftSaveBlockedMessage,
   organizationTrainingEmployeeAnswerBlockedMessage,
   organizationTrainingCopyToNewDraftBlockedMessage,
   organizationTrainingManualDraftCreationBlockedMessage,
@@ -72,6 +81,7 @@ import {
   type OrganizationTrainingAdminLifecycleStatusFilter,
   type OrganizationTrainingEmployeeContext,
   type OrganizationTrainingPersistenceLineage,
+  type OrganizationTrainingScoringProvenance,
   type OrganizationTrainingService,
   type OrganizationTrainingStore,
 } from "./organization-training-service";
@@ -93,6 +103,7 @@ export type OrganizationTrainingPersistenceLineageResolverInput = {
   request: Request;
   pathPublicId: string;
   publishInput: OrganizationTrainingPublishInput;
+  draft: OrganizationTrainingDraftDto;
   adminContext: OrganizationTrainingAdminContext;
 };
 
@@ -150,6 +161,8 @@ export type OrganizationTrainingRouteOptions = {
   resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
   resolvePublishedVersion?: OrganizationTrainingPublishedVersionResolver;
+  resolveCanonicalQuestions?: OrganizationTrainingCanonicalQuestionsResolver;
+  resolveScoringProvenance?: OrganizationTrainingScoringProvenanceResolver;
   resolveSourceVersion?: OrganizationTrainingSourceVersionResolver;
   resolveVersionOrganizationPublicId?: OrganizationTrainingVersionOrganizationPublicIdResolver;
   resolveVersionQuestionTypeSummary?: OrganizationTrainingVersionQuestionTypeSummaryResolver;
@@ -193,6 +206,8 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   | "resolveEmployeeContext"
   | "resolveOrganizationAdminContext"
   | "resolvePublishedVersion"
+  | "resolveCanonicalQuestions"
+  | "resolveScoringProvenance"
   | "resolveSourceVersion"
   | "resolveVersionOrganizationPublicId"
   | "resolveVersionQuestionTypeSummary"
@@ -200,6 +215,10 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   adminAiGenerationResultRepository?: Pick<
     AdminAiGenerationResultPersistenceRepository,
     "findDraftResultByTaskPublicId"
+  >;
+  scoringCatalogRepository?: Pick<
+    AdminAiAuditLogRuntimeRepositories,
+    "listModelConfigs" | "listPromptTemplates"
   >;
   effectiveAuthorizationService?: Pick<
     EffectiveAuthorizationService,
@@ -266,6 +285,18 @@ export type OrganizationTrainingPublishedVersionResolverInput = {
 export type OrganizationTrainingPublishedVersionResolver = (
   input: OrganizationTrainingPublishedVersionResolverInput,
 ) => Promise<OrganizationTrainingPublishedVersionDto | null>;
+
+export type OrganizationTrainingCanonicalQuestionsResolver = (input: {
+  request: Request;
+  trainingVersionPublicId: string;
+  employeeContext: OrganizationTrainingEmployeeContext;
+}) => Promise<OrganizationTrainingPublishQuestionInput[]>;
+
+export type OrganizationTrainingScoringProvenanceResolver = (input: {
+  request: Request;
+  trainingVersionPublicId: string;
+  employeeContext: OrganizationTrainingEmployeeContext;
+}) => Promise<OrganizationTrainingScoringProvenance | null>;
 
 export type OrganizationTrainingAdminDetailVersionResolverInput = {
   request: Request;
@@ -338,6 +369,7 @@ type OrganizationTrainingRouteService = Pick<
     Pick<
       OrganizationTrainingService,
       | "createManualDraft"
+      | "saveDraft"
       | "copyVersionToNewDraft"
       | "attachSourceContext"
       | "listEmployeeVisibleVersions"
@@ -381,6 +413,11 @@ const sourceContextLineageUnavailableCode = 403090;
 const sourceContextBlockedCode = 409091;
 const adminDetailAdminContextUnavailableCode = 403092;
 const adminDetailUnavailableCode = 404093;
+const invalidDraftSaveInputCode = 400094;
+const draftSavePublicIdMismatchCode = 400095;
+const draftSaveAdminContextUnavailableCode = 403096;
+const draftSaveAuthorizationUnavailableCode = 403097;
+const draftSaveBlockedCode = 409098;
 
 const draftPublicIdMismatchMessage =
   "Organization training publish path public id must match request body.";
@@ -444,6 +481,15 @@ const adminDetailAdminContextUnavailableMessage =
 
 const adminDetailUnavailableMessage =
   "Organization training detail is unavailable.";
+
+const draftSavePublicIdMismatchMessage =
+  "Organization training draft-save path public id must match request body.";
+
+const draftSaveAdminContextUnavailableMessage =
+  "Organization training draft-save organization-admin actor context is unavailable.";
+
+const draftSaveAuthorizationUnavailableMessage =
+  "Organization training draft-save authorization context is unavailable.";
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -530,6 +576,16 @@ async function defaultListEmployeeVisibleVersions(): Promise<
 }
 
 async function defaultResolvePublishedVersion(): Promise<null> {
+  return null;
+}
+
+async function defaultResolveCanonicalQuestions(): Promise<
+  OrganizationTrainingPublishQuestionInput[]
+> {
+  return [];
+}
+
+async function defaultResolveScoringProvenance(): Promise<null> {
   return null;
 }
 
@@ -626,6 +682,14 @@ async function defaultManualDraftServiceResult() {
     success: false as const,
     reason: "invalid_manual_draft_input" as const,
     message: organizationTrainingManualDraftCreationBlockedMessage,
+  };
+}
+
+async function defaultDraftSaveServiceResult() {
+  return {
+    success: false as const,
+    reason: "invalid_draft_input" as const,
+    message: organizationTrainingDraftSaveBlockedMessage,
   };
 }
 
@@ -980,6 +1044,7 @@ function createRuntimeOrganizationTrainingStore(
   repository: Pick<
     OrganizationTrainingStore,
     | "createManualDraft"
+    | "saveDraft"
     | "publishVersion"
     | "takeDownVersion"
     | "copyVersionToNewDraft"
@@ -990,6 +1055,7 @@ function createRuntimeOrganizationTrainingStore(
 ): OrganizationTrainingStore {
   return {
     createManualDraft: repository.createManualDraft,
+    saveDraft: repository.saveDraft,
     publishVersion: repository.publishVersion,
     takeDownVersion: repository.takeDownVersion,
     copyVersionToNewDraft: repository.copyVersionToNewDraft,
@@ -1151,6 +1217,81 @@ function normalizeAdminDraftDetailSnapshot(
   return Array.isArray(value) ? { questions: value } : value;
 }
 
+function createTrustedDraftQuestions(
+  snapshot: OrganizationTrainingAdminDraftDetailSnapshotDto,
+): OrganizationTrainingPublishQuestionInput[] {
+  const createQuestion = (
+    question: OrganizationTrainingAdminQuestionDetailDto,
+    paperSection:
+      | {
+          key: string;
+          title: string;
+          sortOrder: number;
+          questionSortOrder: number;
+        }
+      | undefined,
+    sequenceNumber: number,
+  ): OrganizationTrainingPublishQuestionInput | null => {
+    const standardAnswer = question.answerAndAnalysis.standardAnswer;
+    const analysisSummary = question.answerAndAnalysis.analysis;
+
+    if (standardAnswer === null || analysisSummary === null) {
+      return null;
+    }
+
+    return {
+      publicId: question.publicId,
+      sequenceNumber,
+      questionType: question.questionType,
+      ...(paperSection === undefined
+        ? {}
+        : {
+            paperSectionKey: paperSection.key,
+            paperSectionTitle: paperSection.title,
+            paperSectionSortOrder: paperSection.sortOrder,
+            questionSortOrder: paperSection.questionSortOrder,
+          }),
+      materialTitle: question.materialTitle,
+      materialContent: question.materialContent,
+      stem: question.stem,
+      options: question.options.map((option) => ({ ...option })),
+      score: question.score,
+      standardAnswer,
+      analysisSummary,
+      evidenceStatus: question.evidenceSummary.evidenceStatus,
+      citationCount: question.evidenceSummary.citationCount,
+    };
+  };
+  const structuredQuestions = snapshot.paperSections?.flatMap(
+    (paperSection, paperSectionIndex) =>
+      paperSection.questions.map((question, questionIndex) => ({
+        question,
+        paperSection: {
+          key: paperSection.sectionKey,
+          title: paperSection.title,
+          sortOrder: paperSectionIndex + 1,
+          questionSortOrder: questionIndex + 1,
+        },
+      })),
+  );
+  const questionSources =
+    structuredQuestions !== undefined && structuredQuestions.length > 0
+      ? structuredQuestions
+      : snapshot.questions.map((question) => ({
+          question,
+          paperSection: undefined,
+        }));
+
+  return questionSources.flatMap((source, index) => {
+    const question = createQuestion(
+      source.question,
+      source.paperSection,
+      index + 1,
+    );
+    return question === null ? [] : [question];
+  });
+}
+
 function createRepositoryBackedAdminDraftDetailQuestionsResolver(
   repository: Pick<
     AdminAiGenerationResultPersistenceRepository,
@@ -1158,6 +1299,30 @@ function createRepositoryBackedAdminDraftDetailQuestionsResolver(
   >,
 ): OrganizationTrainingAdminDraftDetailQuestionsResolver {
   return async ({ draft, sourceMetadata }) => {
+    if ((draft.questions ?? []).length > 0) {
+      return {
+        questions: (draft.questions ?? []).map((question) => ({
+          publicId: question.publicId,
+          sequenceNumber: question.sequenceNumber,
+          questionType: question.questionType,
+          materialTitle: question.materialTitle,
+          materialContent: question.materialContent,
+          stem: question.stem,
+          options: question.options.map((option) => ({ ...option })),
+          score: question.score,
+          evidenceSummary: {
+            evidenceStatus: question.evidenceStatus,
+            citationCount: question.citationCount,
+          },
+          answerAndAnalysis: {
+            visibility: "collapsed_by_default" as const,
+            standardAnswer: question.standardAnswer,
+            analysis: question.analysisSummary,
+          },
+        })),
+      };
+    }
+
     if (
       draft.sourceTaskPublicId === null ||
       sourceMetadata?.sourceType !== "organization_ai_result"
@@ -1230,10 +1395,94 @@ function createRepositoryBackedEmployeeAnswerResolver(
     });
 }
 
+function createRepositoryBackedCanonicalQuestionsResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "findCanonicalQuestionsByVersion"
+  >,
+): OrganizationTrainingCanonicalQuestionsResolver {
+  return async ({ trainingVersionPublicId }) =>
+    repository.findCanonicalQuestionsByVersion({
+      trainingVersionPublicId,
+    });
+}
+
+function createCatalogBackedScoringProvenanceResolver(
+  repository: Pick<
+    AdminAiAuditLogRuntimeRepositories,
+    "listModelConfigs" | "listPromptTemplates"
+  >,
+): OrganizationTrainingScoringProvenanceResolver {
+  return async () => {
+    if (repository.listPromptTemplates === undefined) {
+      return null;
+    }
+
+    const query = createAdminAiAuditLogListQuery({
+      aiFuncType: "ai_scoring",
+      pageSize: 50,
+    });
+    const [modelConfigPage, promptTemplatePage] = await Promise.all([
+      repository.listModelConfigs(query),
+      repository.listPromptTemplates(query),
+    ]);
+    const modelConfig = modelConfigPage.modelConfigs
+      .filter(
+        (candidate) =>
+          candidate.aiFuncType === "ai_scoring" &&
+          candidate.isEnabled &&
+          candidate.status === "enabled" &&
+          candidate.secretStatus === "configured",
+      )
+      .sort((left, right) => left.fallbackPriority - right.fallbackPriority)[0];
+    const promptTemplate = promptTemplatePage.promptTemplates
+      .filter(
+        (candidate) =>
+          candidate.aiFuncType === "ai_scoring" &&
+          candidate.isActive &&
+          candidate.status === "active",
+      )
+      .sort((left, right) => right.version - left.version)[0];
+
+    if (modelConfig === undefined || promptTemplate === undefined) {
+      return null;
+    }
+
+    return {
+      modelConfigSnapshot: {
+        providerPublicId: modelConfig.providerPublicId,
+        providerKey: modelConfig.providerKey,
+        providerDisplayName: modelConfig.providerDisplayName,
+        modelConfigPublicId: modelConfig.publicId,
+        aiFuncType: "scoring",
+        modelName: modelConfig.modelName,
+        displayName: modelConfig.displayName,
+        configVersion: modelConfig.configVersion,
+        timeoutSecond: modelConfig.timeoutSecond,
+        maxRetryCount: modelConfig.maxRetryCount,
+        fallbackModelConfigPublicId: modelConfig.fallbackModelConfigPublicId,
+        promptTemplateKey: promptTemplate.promptTemplateKey,
+        promptTemplateVersion: promptTemplate.version,
+      },
+      promptTemplateKey: promptTemplate.promptTemplateKey,
+      promptTemplateVersion: promptTemplate.version,
+      promptTemplateHash: promptTemplate.bodyDigest,
+      ragSnapshot: null,
+    };
+  };
+}
+
 function createInvalidPublishInputResponse(): ApiResponse<null> {
   return createErrorResponse(
     invalidPublishInputCode,
     invalidOrganizationTrainingPublishInputMessage,
+  );
+}
+
+function createInvalidDraftSaveInputResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    invalidDraftSaveInputCode,
+    invalidOrganizationTrainingDraftSaveInputMessage,
   );
 }
 
@@ -1283,6 +1532,13 @@ function createDraftPublicIdMismatchResponse(): ApiResponse<null> {
   return createErrorResponse(
     draftPublicIdMismatchCode,
     draftPublicIdMismatchMessage,
+  );
+}
+
+function createDraftSavePublicIdMismatchResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    draftSavePublicIdMismatchCode,
+    draftSavePublicIdMismatchMessage,
   );
 }
 
@@ -1426,10 +1682,31 @@ function createAdminDetailUnavailableResponse(): ApiResponse<null> {
   );
 }
 
+function createDraftSaveAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    draftSaveAdminContextUnavailableCode,
+    draftSaveAdminContextUnavailableMessage,
+  );
+}
+
+function createDraftSaveAuthorizationUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    draftSaveAuthorizationUnavailableCode,
+    draftSaveAuthorizationUnavailableMessage,
+  );
+}
+
 function createPublishBlockedResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishBlockedCode,
     organizationTrainingPublishBlockedMessage,
+  );
+}
+
+function createDraftSaveBlockedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    draftSaveBlockedCode,
+    organizationTrainingDraftSaveBlockedMessage,
   );
 }
 
@@ -1500,12 +1777,12 @@ function normalizePersistenceLineage(
 export function createOrganizationTrainingPersistenceLineageResolver(
   lookupTrustedPersistenceLineage: OrganizationTrainingTrustedPersistenceLineageLookup,
 ): OrganizationTrainingPersistenceLineageResolver {
-  return async ({ adminContext, publishInput }) => {
+  return async ({ adminContext, draft }) => {
     const organizationPublicId = normalizeRequiredText(
-      publishInput.organizationPublicId,
+      draft.organizationPublicId,
     );
     const authorizationPublicId = normalizeRequiredText(
-      publishInput.authorizationPublicId,
+      draft.authorizationPublicId,
     );
 
     if (organizationPublicId === null || authorizationPublicId === null) {
@@ -1535,6 +1812,8 @@ export function createOrganizationTrainingRouteHandlers(
   const createManualDraftService =
     organizationTrainingService.createManualDraft ??
     defaultManualDraftServiceResult;
+  const saveDraftService =
+    organizationTrainingService.saveDraft ?? defaultDraftSaveServiceResult;
   const copyVersionToNewDraftService =
     organizationTrainingService.copyVersionToNewDraft ??
     defaultCopyToNewDraftServiceResult;
@@ -1581,6 +1860,10 @@ export function createOrganizationTrainingRouteHandlers(
     defaultResolveVersionOrganizationPublicId;
   const resolvePublishedVersion =
     options.resolvePublishedVersion ?? defaultResolvePublishedVersion;
+  const resolveCanonicalQuestions =
+    options.resolveCanonicalQuestions ?? defaultResolveCanonicalQuestions;
+  const resolveScoringProvenance =
+    options.resolveScoringProvenance ?? defaultResolveScoringProvenance;
   const resolveAdminDetailVersion =
     options.resolveAdminDetailVersion ?? defaultResolveAdminDetailVersion;
   const resolveAdminDraftDetailQuestions =
@@ -1667,6 +1950,102 @@ export function createOrganizationTrainingRouteHandlers(
             draftQuestions: draftDetailSnapshot.questions,
             draftPaperSections: draftDetailSnapshot.paperSections,
             sourceMetadata: sourceMetadata ?? null,
+          }),
+        );
+      },
+      async PATCH(
+        request: Request,
+        context: OrganizationTrainingPublishRouteContext,
+      ): Promise<Response> {
+        const input = normalizeOrganizationTrainingDraftSaveInput(
+          await readRequestJson(request),
+        );
+
+        if (!input.success) {
+          return createJsonResponse(createInvalidDraftSaveInputResponse());
+        }
+
+        const pathPublicId = await resolvePathPublicId(context);
+
+        if (input.value.draftPublicId !== pathPublicId) {
+          return createJsonResponse(createDraftSavePublicIdMismatchResponse());
+        }
+
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createDraftSaveAdminContextUnavailableResponse(),
+          );
+        }
+
+        const drafts = await listAdminLifecycleDrafts({
+          request,
+          adminContext,
+        });
+        const draft =
+          drafts.find((candidate) => candidate.publicId === pathPublicId) ??
+          null;
+
+        if (draft === null) {
+          return createJsonResponse(createAdminDetailUnavailableResponse());
+        }
+
+        const authorizationContext =
+          await resolveOrganizationTrainingAdminAuthorizationContext({
+            adminContext,
+            authorizationPublicId: draft.authorizationPublicId,
+            organizationPublicId: draft.organizationPublicId,
+            profession: draft.profession,
+            level: draft.level,
+            capabilityContext: {
+              effectiveEdition: "advanced",
+              authorizationSource: "org_auth",
+              canCreateOrganizationTraining: true,
+            },
+            resolveAuthorizationContext:
+              resolveOrganizationAuthorizationContext,
+          });
+
+        if (authorizationContext === null) {
+          return createJsonResponse(
+            createDraftSaveAuthorizationUnavailableResponse(),
+          );
+        }
+
+        const [sourceMetadata] = await listAdminLifecycleSourceMetadata({
+          request,
+          adminContext,
+          draftPublicIds: [draft.publicId],
+        });
+        const trustedDraftSnapshot = normalizeAdminDraftDetailSnapshot(
+          await resolveAdminDraftDetailQuestions({
+            request,
+            draft,
+            sourceMetadata: sourceMetadata ?? null,
+            adminContext,
+          }),
+        );
+
+        const result = await saveDraftService({
+          adminContext,
+          authorizationContext,
+          draft,
+          draftInput: input.value,
+          trustedDraftQuestions:
+            createTrustedDraftQuestions(trustedDraftSnapshot),
+        });
+
+        if (!result.success) {
+          return createJsonResponse(createDraftSaveBlockedResponse());
+        }
+
+        return createJsonResponse(
+          createSuccessResponse({
+            draft: result.draft,
           }),
         );
       },
@@ -1877,14 +2256,30 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        const drafts = await listAdminLifecycleDrafts({
+          request,
+          adminContext,
+        });
+        const draft =
+          drafts.find((candidate) => candidate.publicId === pathPublicId) ??
+          null;
+
+        if (draft === null) {
+          return createJsonResponse(createAdminDetailUnavailableResponse());
+        }
+
         const authorizationContext =
           await resolveOrganizationTrainingAdminAuthorizationContext({
             adminContext,
-            authorizationPublicId: input.value.authorizationPublicId,
-            organizationPublicId: input.value.organizationPublicId,
-            profession: input.value.profession,
-            level: input.value.level,
-            capabilityContext: input.value.capabilityContext,
+            authorizationPublicId: draft.authorizationPublicId,
+            organizationPublicId: draft.organizationPublicId,
+            profession: draft.profession,
+            level: draft.level,
+            capabilityContext: {
+              effectiveEdition: "advanced",
+              authorizationSource: "org_auth",
+              canCreateOrganizationTraining: true,
+            },
             resolveAuthorizationContext:
               resolveOrganizationAuthorizationContext,
           });
@@ -1897,6 +2292,7 @@ export function createOrganizationTrainingRouteHandlers(
           request,
           pathPublicId,
           publishInput: input.value,
+          draft,
           adminContext,
         });
 
@@ -1906,6 +2302,9 @@ export function createOrganizationTrainingRouteHandlers(
 
         const result = await organizationTrainingService.publishVersion({
           publishInput: input.value,
+          draft,
+          adminContext,
+          authorizationContext,
           persistenceLineage,
         });
 
@@ -2245,6 +2644,11 @@ export function createOrganizationTrainingRouteHandlers(
             trainingVersionPublicId: input.value.trainingVersionPublicId,
             employeeContext,
           }),
+          canonicalQuestions: await resolveCanonicalQuestions({
+            request,
+            trainingVersionPublicId: input.value.trainingVersionPublicId,
+            employeeContext,
+          }),
         });
 
         if (!result.success) {
@@ -2312,6 +2716,15 @@ export function createOrganizationTrainingRouteHandlers(
           );
         }
 
+        const canonicalQuestions = await resolveCanonicalQuestions({
+          request,
+          trainingVersionPublicId: input.value.trainingVersionPublicId,
+          employeeContext,
+        });
+        const requiresAiScoring = canonicalQuestions.some(
+          (question) => question.questionType === "short_answer",
+        );
+
         const result = await submitEmployeeAnswerService({
           employeeContext,
           version,
@@ -2321,6 +2734,14 @@ export function createOrganizationTrainingRouteHandlers(
             trainingVersionPublicId: input.value.trainingVersionPublicId,
             employeeContext,
           }),
+          canonicalQuestions,
+          scoringProvenance: requiresAiScoring
+            ? await resolveScoringProvenance({
+                request,
+                trainingVersionPublicId: input.value.trainingVersionPublicId,
+                employeeContext,
+              })
+            : null,
         });
 
         if (!result.success) {
@@ -2402,6 +2823,9 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const adminAiGenerationResultRepository =
     options.adminAiGenerationResultRepository ??
     createPostgresAdminAiGenerationResultPersistenceRepository();
+  const scoringCatalogRepository =
+    options.scoringCatalogRepository ??
+    createPostgresAdminAiAuditLogRuntimeRepositories();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
   const effectiveAuthorizationService =
     options.effectiveAuthorizationService ??
@@ -2462,6 +2886,12 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const resolveEmployeeAnswer =
     options.resolveEmployeeAnswer ??
     createRepositoryBackedEmployeeAnswerResolver(repository);
+  const resolveCanonicalQuestions =
+    options.resolveCanonicalQuestions ??
+    createRepositoryBackedCanonicalQuestionsResolver(repository);
+  const resolveScoringProvenance =
+    options.resolveScoringProvenance ??
+    createCatalogBackedScoringProvenanceResolver(scoringCatalogRepository);
 
   return createOrganizationTrainingRouteHandlers(
     createOrganizationTrainingService(
@@ -2482,6 +2912,8 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
       resolveSourceVersion,
       resolveVersionQuestionTypeSummary,
       resolveEmployeeAnswer,
+      resolveCanonicalQuestions,
+      resolveScoringProvenance,
       lookupTrustedPersistenceLineage:
         repository.lookupTrustedPersistenceLineage,
     },

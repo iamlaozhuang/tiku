@@ -265,6 +265,7 @@ activeTasks:
       - src/db/schema/index.ts
       - src/server/models/organization-training.ts
       - src/server/contracts/organization-training-contract.ts
+      - src/server/contracts/organization-training-persistence-contract.ts
       - src/server/validators/organization-training.ts
       - src/server/validators/organization-training.test.ts
       - src/server/mappers/organization-training-mapper.ts
@@ -282,10 +283,12 @@ activeTasks:
       - src/server/services/organization-training-scoring-task-runtime.ts
       - src/server/services/organization-training-scoring-task-runtime.test.ts
       - src/app/api/v1/organization-trainings/**
+      - src/features/organization-training-operation.ts
       - src/features/admin/organization-training/AdminOrganizationTrainingPage.tsx
       - src/features/student/organization-training/StudentOrganizationTrainingPage.tsx
       - tests/unit/organization-training-admin-entry-surface.test.ts
       - tests/unit/organization-training-employee-entry-surface.test.ts
+      - tests/unit/p0-rc-08-operation-id-retry.test.ts
       - tests/unit/organization-analytics-admin-entry-surface.test.ts
       - tests/unit/p0-rc-08-organization-training-integrity.test.ts
       - tests/unit/p0-rc-08-schema-migration-source.test.ts

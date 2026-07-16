@@ -19,6 +19,8 @@ import { professionValues, type Profession } from "../models/auth";
 import {
   organizationTrainingVersionStatusValues,
   type OrganizationTrainingAnswerStatus,
+  type OrganizationTrainingDraftStatus,
+  type OrganizationTrainingPublishQuestionInput,
   type OrganizationTrainingQuestionTypeSummary,
   type OrganizationTrainingRetentionStatus,
   type OrganizationTrainingSourceContextType,
@@ -30,7 +32,10 @@ import { subjectValues, type Subject } from "../models/paper";
 export type OrganizationTrainingVersionRow = {
   id?: number;
   public_id: string;
+  organization_training_draft_id?: number | null;
   draft_public_id: string;
+  publish_operation_id?: string | null;
+  publish_payload_digest?: string | null;
   version_number: number;
   organization_id: number;
   organization_public_id: string;
@@ -70,6 +75,11 @@ export type OrganizationTrainingAnswerRow = {
   organization_id: number;
   organization_public_id: string;
   organization_training_answer_status: OrganizationTrainingAnswerStatus;
+  revision?: number;
+  last_operation_id?: string | null;
+  last_payload_digest?: string | null;
+  submit_operation_id?: string | null;
+  submit_payload_digest?: string | null;
   score: number | string | null;
   total_score: number | string;
   submitted_at: Date | null;
@@ -83,6 +93,8 @@ export type OrganizationTrainingAnswerRow = {
 export type OrganizationTrainingDraftRow = {
   id?: number;
   public_id: string;
+  draft_status?: OrganizationTrainingDraftStatus;
+  revision?: number;
   source_task_public_id: string | null;
   source_version_public_id: string | null;
   organization_id: number;
@@ -102,12 +114,17 @@ export type OrganizationTrainingDraftRow = {
   question_count: number;
   total_score: number | string;
   question_type_summary: OrganizationTrainingQuestionTypeSummary;
+  question_snapshot?: OrganizationTrainingQuestionSnapshotValue[];
+  last_operation_id?: string | null;
+  last_payload_digest?: string | null;
   evidence_status: "sufficient" | "weak" | "none";
   validation_status: OrganizationTrainingValidationStatus;
   retention_status: OrganizationTrainingRetentionStatus;
   created_at: Date;
   updated_at: Date;
   expires_at: Date | null;
+  consumed_at?: Date | null;
+  discarded_at?: Date | null;
 };
 
 export type OrganizationTrainingSourceContextRow = {
@@ -147,6 +164,8 @@ export function mapOrganizationTrainingDraftRowToDto(
 ): OrganizationTrainingDraftDto {
   return {
     publicId: row.public_id,
+    draftStatus: row.draft_status ?? "draft",
+    revision: row.revision ?? 1,
     sourceTaskPublicId: row.source_task_public_id,
     organizationPublicId: row.organization_public_id,
     authorizationSource: row.authorization_source,
@@ -159,6 +178,7 @@ export function mapOrganizationTrainingDraftRowToDto(
     questionCount: row.question_count,
     totalScore: normalizeTotalScore(row.total_score),
     questionTypeSummary: copyQuestionTypeSummary(row.question_type_summary),
+    questions: copyCanonicalQuestionSnapshots(row.question_snapshot),
     evidenceStatus: row.evidence_status,
     validationStatus: row.validation_status,
     retentionStatus: row.retention_status,
@@ -211,6 +231,42 @@ export function mapOrganizationTrainingVersionRowToDto(
   };
 }
 
+function copyCanonicalQuestionSnapshots(
+  snapshots: OrganizationTrainingQuestionSnapshotValue[] | null | undefined,
+): OrganizationTrainingPublishQuestionInput[] {
+  if (!Array.isArray(snapshots)) {
+    return [];
+  }
+
+  return snapshots.map((snapshot) => ({
+    publicId: snapshot.publicId,
+    sequenceNumber: snapshot.sequenceNumber,
+    questionType: snapshot.questionType,
+    ...(snapshot.paperSectionKey !== undefined &&
+    snapshot.paperSectionTitle !== undefined &&
+    snapshot.paperSectionSortOrder !== undefined &&
+    snapshot.questionSortOrder !== undefined
+      ? {
+          paperSectionKey: snapshot.paperSectionKey,
+          paperSectionTitle: snapshot.paperSectionTitle,
+          paperSectionSortOrder: snapshot.paperSectionSortOrder,
+          questionSortOrder: snapshot.questionSortOrder,
+        }
+      : {}),
+    materialTitle: snapshot.materialTitle,
+    materialContent: snapshot.materialContent,
+    stem: snapshot.stem,
+    options: Array.isArray(snapshot.options)
+      ? snapshot.options.map((option) => ({ ...option }))
+      : [],
+    score: snapshot.score,
+    standardAnswer: snapshot.standardAnswer,
+    analysisSummary: snapshot.analysisSummary,
+    evidenceStatus: snapshot.evidenceStatus,
+    citationCount: snapshot.citationCount,
+  }));
+}
+
 export function tryMapOrganizationTrainingVersionRowToDto(
   candidate: unknown,
 ): OrganizationTrainingPublishedVersionDto | null {
@@ -240,6 +296,7 @@ export function mapOrganizationTrainingAnswerRowToDto(
 
   return {
     publicId: row.public_id,
+    revision: row.revision ?? 1,
     trainingVersionPublicId: row.organization_training_version_public_id,
     employeePublicId: row.employee_public_id,
     organizationPublicId: row.organization_public_id,

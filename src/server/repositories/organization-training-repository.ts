@@ -15,6 +15,7 @@ import {
   organization,
   organizationTrainingAnswer,
   organizationTrainingDraft,
+  organizationTrainingScoringTask,
   organizationTrainingSourceContext,
   organizationTrainingVersion,
   paper,
@@ -50,10 +51,12 @@ import type {
   OrganizationTrainingVersionListReadResult,
 } from "../contracts/organization-training-contract";
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import { OrganizationTrainingPersistenceConflictError } from "../contracts/organization-training-persistence-contract";
 import { organizationTrainingQuestionTypeValues } from "../models/organization-training";
 import type {
   OrganizationTrainingEmployeeAnswerDraftWrite,
   OrganizationTrainingEmployeeAnswerSubmissionWrite,
+  OrganizationTrainingDraftSaveWrite,
   OrganizationTrainingManualDraftWrite,
   OrganizationTrainingPublishedVersionPersistenceWrite,
   OrganizationTrainingSourceContextWrite,
@@ -90,6 +93,9 @@ export type OrganizationTrainingPublishedVersionPersistenceInput =
 
 export type OrganizationTrainingManualDraftPersistenceInput =
   OrganizationTrainingManualDraftWrite;
+
+export type OrganizationTrainingDraftSavePersistenceInput =
+  OrganizationTrainingDraftSaveWrite;
 
 export type OrganizationTrainingVersionCopyToNewDraftPersistenceInput =
   OrganizationTrainingVersionCopyToNewDraftWrite;
@@ -255,6 +261,9 @@ export type OrganizationTrainingEmployeeAnswerDraftUpsertInput = {
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingAnswerOrganizationSnapshotValue;
   answerStatus: "in_progress";
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
   score: null;
   totalScore: number;
   answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
@@ -272,12 +281,16 @@ export type OrganizationTrainingEmployeeAnswerSubmissionUpsertInput = {
   organizationId: number;
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingAnswerOrganizationSnapshotValue;
-  answerStatus: "submitted";
-  score: number;
+  answerStatus: "scoring" | "submitted";
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
+  score: number | null;
   totalScore: number;
   answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
   questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   submittedAt: string;
+  scoringTask: OrganizationTrainingEmployeeAnswerSubmissionWrite["scoringTask"];
 };
 
 type NormalizedOrganizationTrainingEmployeeAnswerDraftInput = {
@@ -286,6 +299,9 @@ type NormalizedOrganizationTrainingEmployeeAnswerDraftInput = {
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
   answerStatus: "in_progress";
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
   score: null;
   answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
   questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
@@ -298,12 +314,16 @@ type NormalizedOrganizationTrainingEmployeeAnswerSubmissionInput = {
   employeePublicId: string;
   organizationPublicId: string;
   answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
-  answerStatus: "submitted";
-  score: number;
+  answerStatus: "scoring" | "submitted";
+  expectedRevision: number;
+  operationId: string;
+  payloadDigest: string;
+  score: number | null;
   totalScore: number;
   answerItemSnapshot: OrganizationTrainingAnswerItemSnapshotValue[];
   questionResultSnapshot: OrganizationTrainingQuestionResultSnapshotValue[];
   submittedAt: string;
+  scoringTask: OrganizationTrainingEmployeeAnswerSubmissionWrite["scoringTask"];
 };
 
 export type OrganizationTrainingVersionGateway = {
@@ -370,6 +390,18 @@ export type OrganizationTrainingVersionGateway = {
   updateVersionTakedown(
     input: OrganizationTrainingVersionTakedownInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
+  saveCanonicalDraftTransaction?(
+    input: OrganizationTrainingDraftSavePersistenceInput,
+  ): Promise<OrganizationTrainingDraftRow | null>;
+  publishCanonicalDraftTransaction?(
+    input: OrganizationTrainingVersionInsertInput,
+  ): Promise<OrganizationTrainingVersionRow | null>;
+  saveEmployeeAnswerDraftTransaction?(
+    input: OrganizationTrainingEmployeeAnswerDraftUpsertInput,
+  ): Promise<OrganizationTrainingAnswerRow | null>;
+  submitEmployeeAnswerTransaction?(
+    input: OrganizationTrainingEmployeeAnswerSubmissionUpsertInput,
+  ): Promise<OrganizationTrainingAnswerRow | null>;
 };
 
 export type OrganizationTrainingRepository = {
@@ -403,6 +435,9 @@ export type OrganizationTrainingRepository = {
   findPublishedVersionByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingPublishedVersionDto | null>;
+  findCanonicalQuestionsByVersion(
+    input: OrganizationTrainingVersionLookupInput,
+  ): Promise<OrganizationTrainingQuestionSnapshotValue[]>;
   findAdminPublishedVersionDetailByPublicId(
     input: OrganizationTrainingVersionLookupInput,
   ): Promise<OrganizationTrainingAdminPublishedVersionDetailDto | null>;
@@ -426,6 +461,9 @@ export type OrganizationTrainingRepository = {
   ): Promise<OrganizationTrainingPublishedVersionDto>;
   createManualDraft(
     input: OrganizationTrainingManualDraftPersistenceInput,
+  ): Promise<OrganizationTrainingDraftDto>;
+  saveDraft(
+    input: OrganizationTrainingDraftSavePersistenceInput,
   ): Promise<OrganizationTrainingDraftDto>;
   copyVersionToNewDraft(
     input: OrganizationTrainingVersionCopyToNewDraftPersistenceInput,
@@ -454,7 +492,11 @@ export type OrganizationTrainingRepositoryOptions = {
 const organizationTrainingVersionSelection = {
   id: organizationTrainingVersion.id,
   public_id: organizationTrainingVersion.public_id,
+  organization_training_draft_id:
+    organizationTrainingVersion.organization_training_draft_id,
   draft_public_id: organizationTrainingVersion.draft_public_id,
+  publish_operation_id: organizationTrainingVersion.publish_operation_id,
+  publish_payload_digest: organizationTrainingVersion.publish_payload_digest,
   version_number: organizationTrainingVersion.version_number,
   organization_id: organizationTrainingVersion.organization_id,
   organization_public_id: organizationTrainingVersion.organization_public_id,
@@ -497,6 +539,11 @@ const organizationTrainingAnswerSelection = {
   organization_public_id: organizationTrainingAnswer.organization_public_id,
   organization_training_answer_status:
     organizationTrainingAnswer.organization_training_answer_status,
+  revision: organizationTrainingAnswer.revision,
+  last_operation_id: organizationTrainingAnswer.last_operation_id,
+  last_payload_digest: organizationTrainingAnswer.last_payload_digest,
+  submit_operation_id: organizationTrainingAnswer.submit_operation_id,
+  submit_payload_digest: organizationTrainingAnswer.submit_payload_digest,
   score: organizationTrainingAnswer.score,
   total_score: organizationTrainingAnswer.total_score,
   submitted_at: organizationTrainingAnswer.submitted_at,
@@ -511,6 +558,8 @@ const organizationTrainingAnswerSelection = {
 const organizationTrainingDraftSelection = {
   id: organizationTrainingDraft.id,
   public_id: organizationTrainingDraft.public_id,
+  draft_status: organizationTrainingDraft.draft_status,
+  revision: organizationTrainingDraft.revision,
   source_task_public_id: organizationTrainingDraft.source_task_public_id,
   source_version_public_id: organizationTrainingDraft.source_version_public_id,
   organization_id: organizationTrainingDraft.organization_id,
@@ -530,12 +579,17 @@ const organizationTrainingDraftSelection = {
   question_count: organizationTrainingDraft.question_count,
   total_score: organizationTrainingDraft.total_score,
   question_type_summary: organizationTrainingDraft.question_type_summary,
+  question_snapshot: organizationTrainingDraft.question_snapshot,
+  last_operation_id: organizationTrainingDraft.last_operation_id,
+  last_payload_digest: organizationTrainingDraft.last_payload_digest,
   evidence_status: organizationTrainingDraft.evidence_status,
   validation_status: organizationTrainingDraft.validation_status,
   retention_status: organizationTrainingDraft.retention_status,
   created_at: organizationTrainingDraft.created_at,
   updated_at: organizationTrainingDraft.updated_at,
   expires_at: organizationTrainingDraft.expires_at,
+  consumed_at: organizationTrainingDraft.consumed_at,
+  discarded_at: organizationTrainingDraft.discarded_at,
 };
 
 const organizationTrainingSourceContextSelection = {
@@ -807,6 +861,23 @@ export function createOrganizationTrainingRepository(
       return version ?? null;
     },
 
+    async findCanonicalQuestionsByVersion(input) {
+      const normalizedInput = normalizeVersionLookupInput(input);
+
+      if (normalizedInput === null) {
+        return [];
+      }
+
+      const row = await gateway.findPublishedVersionByPublicId(normalizedInput);
+
+      return row === null || !Array.isArray(row.question_snapshot)
+        ? []
+        : row.question_snapshot.map((question) => ({
+            ...question,
+            options: question.options.map((option) => ({ ...option })),
+          }));
+    },
+
     async findAdminPublishedVersionDetailByPublicId(input) {
       const normalizedInput = normalizeVersionLookupInput(input);
 
@@ -871,18 +942,23 @@ export function createOrganizationTrainingRepository(
     },
 
     async publishVersion(input) {
-      const latestVersionNumber =
-        await gateway.findLatestVersionNumberByDraftPublicId(
-          input.draftPublicId,
+      if (gateway.publishCanonicalDraftTransaction === undefined) {
+        throw new Error(
+          "organization training canonical publish transaction unavailable.",
         );
+      }
+
       const insertInput = createVersionInsertInput(input, {
         publicId: createVersionPublicId(),
-        versionNumber: resolveNextVersionNumber(latestVersionNumber),
+        versionNumber: 1,
       });
-      const insertedRow = await gateway.insertPublishedVersion(insertInput);
+      const insertedRow =
+        await gateway.publishCanonicalDraftTransaction(insertInput);
 
       if (insertedRow === null) {
-        throw new Error("organization training version persistence failed.");
+        throw new OrganizationTrainingPersistenceConflictError(
+          "publish_conflict",
+        );
       }
 
       return mapOrganizationTrainingVersionRowToDto(insertedRow);
@@ -902,6 +978,24 @@ export function createOrganizationTrainingRepository(
 
       if (row === null) {
         throw new Error("organization training draft persistence failed.");
+      }
+
+      return mapOrganizationTrainingDraftRowToDto(row);
+    },
+
+    async saveDraft(input) {
+      if (gateway.saveCanonicalDraftTransaction === undefined) {
+        throw new Error(
+          "organization training canonical draft transaction unavailable.",
+        );
+      }
+
+      const row = await gateway.saveCanonicalDraftTransaction(input);
+
+      if (row === null) {
+        throw new OrganizationTrainingPersistenceConflictError(
+          "draft_save_conflict",
+        );
       }
 
       return mapOrganizationTrainingDraftRowToDto(row);
@@ -974,11 +1068,18 @@ export function createOrganizationTrainingRepository(
         );
       }
 
-      const row = await gateway.upsertEmployeeAnswerDraft(draftUpsertInput);
+      if (gateway.saveEmployeeAnswerDraftTransaction === undefined) {
+        throw new Error(
+          "organization training answer draft transaction unavailable.",
+        );
+      }
+
+      const row =
+        await gateway.saveEmployeeAnswerDraftTransaction(draftUpsertInput);
 
       if (row === null) {
-        throw new Error(
-          "organization training employee answer persistence failed.",
+        throw new OrganizationTrainingPersistenceConflictError(
+          "answer_draft_conflict",
         );
       }
 
@@ -998,13 +1099,19 @@ export function createOrganizationTrainingRepository(
         );
       }
 
-      const row = await gateway.upsertEmployeeAnswerSubmission(
+      if (gateway.submitEmployeeAnswerTransaction === undefined) {
+        throw new Error(
+          "organization training answer submit transaction unavailable.",
+        );
+      }
+
+      const row = await gateway.submitEmployeeAnswerTransaction(
         submissionUpsertInput,
       );
 
       if (row === null) {
-        throw new Error(
-          "organization training employee answer persistence failed.",
+        throw new OrganizationTrainingPersistenceConflictError(
+          "answer_submit_conflict",
         );
       }
 
@@ -1120,12 +1227,427 @@ export function createPostgresOrganizationTrainingRepository(
     async listAdminLifecycleSourceMetadata(input) {
       return listAdminLifecycleSourceMetadata(getDatabase(), input);
     },
+    async saveCanonicalDraftTransaction(input) {
+      return getDatabase().transaction(async (transaction) => {
+        // SQL invariant: lock the canonical aggregate for update before revision checks.
+        const [draft] = await transaction
+          .select(organizationTrainingDraftSelection)
+          .from(organizationTrainingDraft)
+          .where(
+            and(
+              eq(organizationTrainingDraft.public_id, input.draftPublicId),
+              eq(
+                organizationTrainingDraft.organization_public_id,
+                input.organizationPublicId,
+              ),
+              eq(
+                organizationTrainingDraft.authorization_public_id,
+                input.authorizationPublicId,
+              ),
+            ),
+          )
+          .limit(1)
+          .for("update");
+
+        if (draft === undefined) {
+          return null;
+        }
+
+        if (
+          draft.last_operation_id === input.operationId &&
+          draft.last_payload_digest === input.payloadDigest
+        ) {
+          return draft as OrganizationTrainingDraftRow;
+        }
+
+        if (
+          draft.draft_status !== "draft" ||
+          draft.revision !== input.expectedRevision
+        ) {
+          return null;
+        }
+
+        const [updated] = await transaction
+          .update(organizationTrainingDraft)
+          .set({
+            revision: input.expectedRevision + 1,
+            last_operation_id: input.operationId,
+            last_payload_digest: input.payloadDigest,
+            title: input.title,
+            description: input.description,
+            question_count: input.questionCount,
+            total_score: String(input.totalScore),
+            question_type_summary: input.questionTypeSummary,
+            question_snapshot: input.questions,
+            evidence_status: input.evidenceStatus,
+            validation_status: input.validationStatus,
+            updated_at: new Date(input.savedAt),
+          })
+          .where(
+            and(
+              eq(organizationTrainingDraft.id, draft.id),
+              eq(organizationTrainingDraft.draft_status, "draft"),
+              eq(organizationTrainingDraft.revision, input.expectedRevision),
+            ),
+          )
+          .returning(organizationTrainingDraftSelection);
+
+        return (updated as OrganizationTrainingDraftRow | undefined) ?? null;
+      });
+    },
+    async publishCanonicalDraftTransaction(input) {
+      return getDatabase().transaction(async (transaction) => {
+        // SQL invariant: canonical publish owns one draft row for update.
+        const [draft] = await transaction
+          .select(organizationTrainingDraftSelection)
+          .from(organizationTrainingDraft)
+          .where(
+            and(
+              eq(organizationTrainingDraft.public_id, input.draftPublicId),
+              eq(
+                organizationTrainingDraft.organization_public_id,
+                input.organizationPublicId,
+              ),
+              eq(
+                organizationTrainingDraft.authorization_public_id,
+                input.authorizationPublicId,
+              ),
+            ),
+          )
+          .limit(1)
+          .for("update");
+
+        if (draft === undefined) {
+          return null;
+        }
+
+        if (draft.draft_status === "consumed") {
+          const [existingVersion] = await transaction
+            .select(organizationTrainingVersionSelection)
+            .from(organizationTrainingVersion)
+            .where(
+              and(
+                eq(
+                  organizationTrainingVersion.organization_training_draft_id,
+                  draft.id,
+                ),
+                eq(
+                  organizationTrainingVersion.publish_operation_id,
+                  input.publishOperationId,
+                ),
+                eq(
+                  organizationTrainingVersion.publish_payload_digest,
+                  input.publishPayloadDigest,
+                ),
+              ),
+            )
+            .limit(1);
+
+          return (
+            (existingVersion as OrganizationTrainingVersionRow | undefined) ??
+            null
+          );
+        }
+
+        if (
+          draft.draft_status !== "draft" ||
+          draft.revision !== input.expectedDraftRevision ||
+          !Array.isArray(draft.question_snapshot) ||
+          draft.question_snapshot.length === 0
+        ) {
+          return null;
+        }
+
+        const publishedAt = new Date(input.publishedAt);
+        const [version] = await transaction
+          .insert(organizationTrainingVersion)
+          .values({
+            public_id: input.publicId,
+            organization_training_draft_id: draft.id,
+            draft_public_id: draft.public_id,
+            publish_operation_id: input.publishOperationId,
+            publish_payload_digest: input.publishPayloadDigest,
+            version_number: 1,
+            organization_id: draft.organization_id,
+            organization_public_id: draft.organization_public_id,
+            org_auth_id: draft.org_auth_id,
+            authorization_source: draft.authorization_source,
+            authorization_public_id: draft.authorization_public_id,
+            owner_type: draft.owner_type,
+            owner_public_id: draft.owner_public_id,
+            quota_owner_type: draft.quota_owner_type,
+            quota_owner_public_id: draft.quota_owner_public_id,
+            publish_scope_snapshot: input.publishScopeSnapshot,
+            profession: draft.profession,
+            level: draft.level,
+            subject: draft.subject,
+            title: draft.title,
+            description: draft.description,
+            question_count: draft.question_count,
+            total_score: String(draft.total_score),
+            question_type_summary: draft.question_type_summary,
+            question_snapshot: draft.question_snapshot,
+            version_status: "published",
+            published_at: publishedAt,
+            answer_deadline_at:
+              input.answerDeadlineAt == null
+                ? null
+                : new Date(input.answerDeadlineAt),
+            taken_down_at: null,
+            takedown_reason: null,
+            created_at: publishedAt,
+            updated_at: publishedAt,
+          })
+          .returning(organizationTrainingVersionSelection);
+
+        if (version === undefined) {
+          return null;
+        }
+
+        const [consumedDraft] = await transaction
+          .update(organizationTrainingDraft)
+          .set({
+            draft_status: "consumed",
+            consumed_at: publishedAt,
+            updated_at: publishedAt,
+          })
+          .where(
+            and(
+              eq(organizationTrainingDraft.id, draft.id),
+              eq(organizationTrainingDraft.draft_status, "draft"),
+              eq(
+                organizationTrainingDraft.revision,
+                input.expectedDraftRevision,
+              ),
+            ),
+          )
+          .returning({ id: organizationTrainingDraft.id });
+
+        if (consumedDraft === undefined) {
+          throw new Error("organization training draft consume conflict.");
+        }
+
+        return version as OrganizationTrainingVersionRow;
+      });
+    },
+    async saveEmployeeAnswerDraftTransaction(input) {
+      return getDatabase().transaction(async (transaction) => {
+        await transaction.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended(${`${input.organizationTrainingVersionId}:${input.employeeId}`}, 0))`,
+        );
+        const [existing] = await transaction
+          .select(organizationTrainingAnswerSelection)
+          .from(organizationTrainingAnswer)
+          .where(
+            and(
+              eq(
+                organizationTrainingAnswer.organization_training_version_id,
+                input.organizationTrainingVersionId,
+              ),
+              eq(organizationTrainingAnswer.employee_id, input.employeeId),
+            ),
+          )
+          .limit(1)
+          .for("update");
+
+        if (
+          existing?.last_operation_id === input.operationId &&
+          existing.last_payload_digest === input.payloadDigest
+        ) {
+          return existing as OrganizationTrainingAnswerRow;
+        }
+
+        if (
+          (existing === undefined && input.expectedRevision !== 0) ||
+          (existing !== undefined &&
+            (existing.organization_training_answer_status !== "in_progress" ||
+              existing.revision !== input.expectedRevision))
+        ) {
+          return null;
+        }
+
+        if (existing === undefined) {
+          const [created] = await transaction
+            .insert(organizationTrainingAnswer)
+            .values({
+              public_id: input.publicId,
+              organization_training_version_id:
+                input.organizationTrainingVersionId,
+              organization_training_version_public_id:
+                input.trainingVersionPublicId,
+              employee_id: input.employeeId,
+              employee_public_id: input.employeePublicId,
+              organization_id: input.organizationId,
+              organization_public_id: input.organizationPublicId,
+              organization_training_answer_status: "in_progress",
+              revision: 1,
+              last_operation_id: input.operationId,
+              last_payload_digest: input.payloadDigest,
+              score: null,
+              total_score: String(input.totalScore),
+              submitted_at: null,
+              answer_organization_snapshot: input.answerOrganizationSnapshot,
+              answer_item_snapshot: input.answerItemSnapshot,
+              question_result_snapshot: input.questionResultSnapshot,
+              created_at: new Date(input.savedAt),
+              updated_at: new Date(input.savedAt),
+            })
+            .returning(organizationTrainingAnswerSelection);
+
+          return (created as OrganizationTrainingAnswerRow | undefined) ?? null;
+        }
+
+        const [updated] = await transaction
+          .update(organizationTrainingAnswer)
+          .set({
+            revision: input.expectedRevision + 1,
+            last_operation_id: input.operationId,
+            last_payload_digest: input.payloadDigest,
+            answer_organization_snapshot: input.answerOrganizationSnapshot,
+            answer_item_snapshot: input.answerItemSnapshot,
+            question_result_snapshot: input.questionResultSnapshot,
+            updated_at: new Date(input.savedAt),
+          })
+          .where(
+            and(
+              eq(organizationTrainingAnswer.id, existing.id),
+              eq(
+                organizationTrainingAnswer.organization_training_answer_status,
+                "in_progress",
+              ),
+              eq(organizationTrainingAnswer.revision, input.expectedRevision),
+            ),
+          )
+          .returning(organizationTrainingAnswerSelection);
+
+        return (updated as OrganizationTrainingAnswerRow | undefined) ?? null;
+      });
+    },
+    async submitEmployeeAnswerTransaction(input) {
+      return getDatabase().transaction(async (transaction) => {
+        await transaction.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended(${`${input.organizationTrainingVersionId}:${input.employeeId}`}, 0))`,
+        );
+        const [existing] = await transaction
+          .select(organizationTrainingAnswerSelection)
+          .from(organizationTrainingAnswer)
+          .where(
+            and(
+              eq(
+                organizationTrainingAnswer.organization_training_version_id,
+                input.organizationTrainingVersionId,
+              ),
+              eq(organizationTrainingAnswer.employee_id, input.employeeId),
+            ),
+          )
+          .limit(1)
+          .for("update");
+
+        if (
+          existing?.submit_operation_id === input.operationId &&
+          existing.submit_payload_digest === input.payloadDigest
+        ) {
+          return existing as OrganizationTrainingAnswerRow;
+        }
+
+        if (
+          (existing === undefined && input.expectedRevision !== 0) ||
+          (existing !== undefined &&
+            (existing.organization_training_answer_status !== "in_progress" ||
+              existing.revision !== input.expectedRevision))
+        ) {
+          return null;
+        }
+
+        const submittedAt = new Date(input.submittedAt);
+        const answerValues = {
+          organization_training_answer_status: input.answerStatus,
+          revision: input.expectedRevision + 1,
+          last_operation_id: input.operationId,
+          last_payload_digest: input.payloadDigest,
+          submit_operation_id: input.operationId,
+          submit_payload_digest: input.payloadDigest,
+          score: input.score === null ? null : String(input.score),
+          total_score: String(input.totalScore),
+          submitted_at: submittedAt,
+          answer_organization_snapshot: input.answerOrganizationSnapshot,
+          answer_item_snapshot: input.answerItemSnapshot,
+          question_result_snapshot: input.questionResultSnapshot,
+          updated_at: submittedAt,
+        } as const;
+        const [answer] =
+          existing === undefined
+            ? await transaction
+                .insert(organizationTrainingAnswer)
+                .values({
+                  public_id: input.publicId,
+                  organization_training_version_id:
+                    input.organizationTrainingVersionId,
+                  organization_training_version_public_id:
+                    input.trainingVersionPublicId,
+                  employee_id: input.employeeId,
+                  employee_public_id: input.employeePublicId,
+                  organization_id: input.organizationId,
+                  organization_public_id: input.organizationPublicId,
+                  ...answerValues,
+                  created_at: submittedAt,
+                })
+                .returning(organizationTrainingAnswerSelection)
+            : await transaction
+                .update(organizationTrainingAnswer)
+                .set(answerValues)
+                .where(
+                  and(
+                    eq(organizationTrainingAnswer.id, existing.id),
+                    eq(
+                      organizationTrainingAnswer.organization_training_answer_status,
+                      "in_progress",
+                    ),
+                    eq(
+                      organizationTrainingAnswer.revision,
+                      input.expectedRevision,
+                    ),
+                  ),
+                )
+                .returning(organizationTrainingAnswerSelection);
+
+        if (answer === undefined) {
+          return null;
+        }
+
+        if (input.answerStatus === "scoring" && input.scoringTask !== null) {
+          await transaction.insert(organizationTrainingScoringTask).values({
+            public_id: `organization_training_scoring_task_${randomUUID()}`,
+            organization_training_answer_id: answer.id,
+            idempotency_key_hash: input.scoringTask.idempotencyKeyHash,
+            task_status: "pending",
+            attempt_count: 0,
+            max_attempt_count: input.scoringTask.maxAttemptCount,
+            timeout_second: input.scoringTask.timeoutSecond,
+            model_config_snapshot: input.scoringTask.modelConfigSnapshot,
+            prompt_template_key: input.scoringTask.promptTemplateKey,
+            prompt_template_version: input.scoringTask.promptTemplateVersion,
+            prompt_template_hash: input.scoringTask.promptTemplateHash,
+            input_snapshot: input.scoringTask.inputSnapshot,
+            authorization_snapshot: input.scoringTask.authorizationSnapshot,
+            rag_snapshot: input.scoringTask.ragSnapshot,
+            scheduled_at: new Date(input.scoringTask.scheduledAt),
+            created_at: submittedAt,
+            updated_at: submittedAt,
+          });
+        }
+
+        return answer as OrganizationTrainingAnswerRow;
+      });
+    },
     async insertManualDraft(input) {
       const createdAt = new Date(input.createdAt);
       const [row] = await getDatabase()
         .insert(organizationTrainingDraft)
         .values({
           public_id: input.publicId,
+          draft_status: input.draftStatus,
+          revision: input.revision,
           source_task_public_id: input.sourceTaskPublicId,
           source_version_public_id: input.sourceVersionPublicId,
           organization_id: input.organizationId,
@@ -1145,6 +1667,7 @@ export function createPostgresOrganizationTrainingRepository(
           question_count: input.questionCount,
           total_score: String(input.totalScore),
           question_type_summary: input.questionTypeSummary,
+          question_snapshot: input.questions,
           evidence_status: input.evidenceStatus,
           validation_status: input.validationStatus,
           retention_status: input.retentionStatus,
@@ -2140,6 +2663,9 @@ async function createCopyDraftInsertInput(
   return createDraftInsertInput(
     {
       contentType: input.contentType,
+      draftStatus: "draft",
+      revision: 1,
+      questions: [],
       ownerType: input.ownerType,
       ownerPublicId: input.ownerPublicId,
       quotaOwnerType: input.quotaOwnerType,
@@ -2440,6 +2966,9 @@ async function createEmployeeAnswerDraftUpsertInput(
       lineage,
     ),
     answerStatus: normalizedInput.answerStatus,
+    expectedRevision: normalizedInput.expectedRevision,
+    operationId: normalizedInput.operationId,
+    payloadDigest: normalizedInput.payloadDigest,
     score: normalizedInput.score,
     answerItemSnapshot: normalizedInput.answerItemSnapshot,
     questionResultSnapshot: normalizedInput.questionResultSnapshot,
@@ -2488,17 +3017,18 @@ async function createEmployeeAnswerSubmissionUpsertInput(
       lineage,
     ),
     answerStatus: normalizedInput.answerStatus,
+    expectedRevision: normalizedInput.expectedRevision,
+    operationId: normalizedInput.operationId,
+    payloadDigest: normalizedInput.payloadDigest,
     score: normalizedInput.score,
     totalScore: normalizedInput.totalScore,
     answerItemSnapshot: normalizedInput.answerItemSnapshot,
-    questionResultSnapshot: createQuestionResultSnapshot(
-      normalizedInput.answerItemSnapshot,
-      lineage.questionSnapshot,
-    ),
+    questionResultSnapshot: normalizedInput.questionResultSnapshot,
     submittedAt: normalizedInput.submittedAt,
     organizationTrainingVersionId: lineage.organizationTrainingVersionId,
     employeeId: lineage.employeeId,
     organizationId: lineage.organizationId,
+    scoringTask: normalizedInput.scoringTask,
   };
 }
 
@@ -2517,6 +3047,8 @@ function normalizeEmployeeAnswerDraftPersistenceInput(
   );
   const answerItemSnapshot = normalizeAnswerItemSnapshot(input.answerItems);
   const savedAt = normalizeRequiredText(input.savedAt);
+  const operationId = normalizeRequiredText(input.operationId);
+  const payloadDigest = normalizeRequiredText(input.payloadDigest);
 
   if (
     input.contentType !== "organization_training_answer_draft" ||
@@ -2529,6 +3061,9 @@ function normalizeEmployeeAnswerDraftPersistenceInput(
     organizationPublicId === null ||
     answerOrganizationSnapshot === null ||
     answerItemSnapshot === null ||
+    !isNonNegativeInteger(input.expectedRevision) ||
+    operationId === null ||
+    payloadDigest === null ||
     savedAt === null
   ) {
     return null;
@@ -2540,6 +3075,9 @@ function normalizeEmployeeAnswerDraftPersistenceInput(
     organizationPublicId,
     answerOrganizationSnapshot,
     answerStatus: input.answerStatus,
+    expectedRevision: input.expectedRevision,
+    operationId,
+    payloadDigest,
     score: null,
     answerItemSnapshot,
     questionResultSnapshot: [],
@@ -2562,22 +3100,37 @@ function normalizeEmployeeAnswerSubmissionPersistenceInput(
     input.answerOrganizationSnapshot,
   );
   const answerItemSnapshot = normalizeAnswerItemSnapshot(input.answerItems);
+  const questionResultSnapshot = normalizeQuestionResultSnapshot(
+    input.questionResults,
+  );
   const submittedAt = normalizeRequiredText(input.submittedAt);
-  const score = normalizeNonNegativeScore(input.scoreSummary.score);
-  const totalScore = normalizeNonNegativeScore(input.scoreSummary.totalScore);
+  const operationId = normalizeRequiredText(input.operationId);
+  const payloadDigest = normalizeRequiredText(input.payloadDigest);
+  const score =
+    input.scoreSummary === null
+      ? null
+      : normalizeNonNegativeScore(input.scoreSummary.score);
+  const totalScore = normalizeNonNegativeScore(input.totalScore);
 
   if (
     input.contentType !== "organization_training_answer_record" ||
-    input.answerStatus !== "submitted" ||
+    (input.answerStatus !== "submitted" && input.answerStatus !== "scoring") ||
     isFormalWritePolicyBlocked(input.formalWritePolicy) ||
     trainingVersionPublicId === null ||
     employeePublicId === null ||
     organizationPublicId === null ||
     answerOrganizationSnapshot === null ||
     answerItemSnapshot === null ||
+    questionResultSnapshot === null ||
+    !isNonNegativeInteger(input.expectedRevision) ||
+    operationId === null ||
+    payloadDigest === null ||
     submittedAt === null ||
-    score === null ||
-    totalScore === null
+    totalScore === null ||
+    (input.answerStatus === "submitted" && score === null) ||
+    (input.answerStatus === "scoring" &&
+      (input.scoreSummary !== null || input.scoringTask === null)) ||
+    (input.answerStatus === "submitted" && input.scoringTask !== null)
   ) {
     return null;
   }
@@ -2588,11 +3141,15 @@ function normalizeEmployeeAnswerSubmissionPersistenceInput(
     organizationPublicId,
     answerOrganizationSnapshot,
     answerStatus: input.answerStatus,
+    expectedRevision: input.expectedRevision,
+    operationId,
+    payloadDigest,
     score,
     totalScore,
     answerItemSnapshot,
-    questionResultSnapshot: [],
+    questionResultSnapshot,
     submittedAt,
+    scoringTask: input.scoringTask,
   };
 }
 
@@ -2635,24 +3192,45 @@ function normalizeAnswerItemSnapshot(
   return normalizedAnswerItems as OrganizationTrainingAnswerItemSnapshotValue[];
 }
 
-function createQuestionResultSnapshot(
-  answerItems: readonly OrganizationTrainingAnswerItemSnapshotValue[],
-  questionSnapshot: readonly OrganizationTrainingQuestionSnapshotValue[],
-): OrganizationTrainingQuestionResultSnapshotValue[] {
-  const answeredQuestionPublicIds = new Set(
-    answerItems.map((answerItem) => answerItem.questionPublicId),
-  );
+function normalizeQuestionResultSnapshot(
+  questionResults: OrganizationTrainingEmployeeAnswerSubmissionPersistenceInput["questionResults"],
+): OrganizationTrainingQuestionResultSnapshotValue[] | null {
+  if (!Array.isArray(questionResults)) {
+    return null;
+  }
 
-  return questionSnapshot
-    .filter((question) => answeredQuestionPublicIds.has(question.publicId))
-    .map((question) => ({
-      questionPublicId: question.publicId,
-      score: 0,
-      maxScore: question.score,
-      standardAnswer: question.standardAnswer,
-      analysis: question.analysisSummary,
-      scoringPointResults: [],
-    }));
+  const normalized = questionResults.map((questionResult) => {
+    const questionPublicId = normalizeRequiredText(
+      questionResult.questionPublicId,
+    );
+    const score = normalizeNonNegativeScore(questionResult.score);
+    const maxScore = normalizeNonNegativeScore(questionResult.maxScore);
+
+    if (
+      questionPublicId === null ||
+      score === null ||
+      maxScore === null ||
+      score > maxScore ||
+      !Array.isArray(questionResult.scoringPointResults)
+    ) {
+      return null;
+    }
+
+    return {
+      questionPublicId,
+      score,
+      maxScore,
+      standardAnswer: normalizeOptionalText(questionResult.standardAnswer),
+      analysis: normalizeOptionalText(questionResult.analysis),
+      scoringPointResults: questionResult.scoringPointResults.map(
+        (scoringPointResult) => ({ ...scoringPointResult }),
+      ),
+    };
+  });
+
+  return normalized.some((questionResult) => questionResult === null)
+    ? null
+    : (normalized as OrganizationTrainingQuestionResultSnapshotValue[]);
 }
 
 function normalizeEmployeeAnswerPersistenceLineage(
@@ -2713,6 +3291,10 @@ function normalizeOrganizationTrainingScopeSnapshot(
 
 function normalizeNonNegativeScore(score: number): number | null {
   return Number.isFinite(score) && score >= 0 ? score : null;
+}
+
+function isNonNegativeInteger(value: number): boolean {
+  return Number.isInteger(value) && value >= 0;
 }
 
 function createAnswerOrganizationSnapshot(
@@ -3462,18 +4044,6 @@ async function findEmployeeAnswerPersistenceLineageByPublicIds(
     totalScore: Number(row.total_score),
     questionSnapshot: row.question_snapshot,
   };
-}
-
-function resolveNextVersionNumber(latestVersionNumber: number | null): number {
-  if (
-    latestVersionNumber === null ||
-    !Number.isInteger(latestVersionNumber) ||
-    latestVersionNumber < 1
-  ) {
-    return 1;
-  }
-
-  return latestVersionNumber + 1;
 }
 
 function createDefaultVersionPublicId(): string {

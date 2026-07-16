@@ -1721,8 +1721,8 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(publishForm.getByLabelText("第 1 题解析")).toHaveValue(
       "synthetic AI analysis",
     );
-    expect(publishForm.getByLabelText("第 1 题依据状态")).toHaveValue(
-      "sufficient",
+    expect(publishForm.getByLabelText("第 1 题依据状态")).toHaveTextContent(
+      "依据充分",
     );
     expect(JSON.stringify(fetchMock.mock.calls)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput/u,
@@ -1871,6 +1871,24 @@ describe("AdminOrganizationTrainingPage", () => {
 
         if (
           path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001" &&
+          method === "PATCH"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              draft: {
+                ...persistedAiDraft,
+                publicId: "organization-training-draft-ai-paper-ui-001",
+                revision: 2,
+              },
+            },
+          });
+        }
+
+        if (
+          path ===
             "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001/publish" &&
           method === "POST"
         ) {
@@ -1947,8 +1965,8 @@ describe("AdminOrganizationTrainingPage", () => {
     expect(
       readJsonRequestBody(
         fetchMock,
-        "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001/publish",
-        "POST",
+        "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001",
+        "PATCH",
       ),
     ).toMatchObject({
       questions: [
@@ -1959,6 +1977,21 @@ describe("AdminOrganizationTrainingPage", () => {
           questionSortOrder: 1,
         },
       ],
+    });
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/organization-trainings/organization-training-draft-ai-paper-ui-001/publish",
+        "POST",
+      ),
+    ).toMatchObject({
+      draftPublicId: "organization-training-draft-ai-paper-ui-001",
+      expectedRevision: 2,
+      operationId: expect.any(String),
+      publishScopeOrganizationPublicIds: [
+        persistedAiDraft.organizationPublicId,
+      ],
+      weakEvidenceConfirmed: false,
     });
     expect(JSON.stringify(fetchMock.mock.calls)).not.toMatch(
       /providerPayload|rawPrompt|rawOutput/u,
@@ -2002,6 +2035,23 @@ describe("AdminOrganizationTrainingPage", () => {
               redactionStatus: "metadata_only",
               integrityStatus: "complete",
               warningCode: null,
+            },
+          });
+        }
+
+        if (
+          path ===
+            "/api/v1/organization-trainings/organization-training-draft-ai-ui-001" &&
+          method === "PATCH"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              draft: {
+                ...persistedAiDraft,
+                revision: 2,
+              },
             },
           });
         }
@@ -2096,22 +2146,6 @@ describe("AdminOrganizationTrainingPage", () => {
 
     fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "当前草稿缺少必要内容或依据，暂不能发布",
-    );
-    expect(
-      fetchMock.mock.calls.some(
-        ([requestUrl, requestInit]) =>
-          String(requestUrl) ===
-            "/api/v1/organization-trainings/organization-training-draft-ai-ui-001/publish" &&
-          requestInit?.method === "POST",
-      ),
-    ).toBe(false);
-
-    fireEvent.change(publishForm.getByLabelText("第 1 题依据状态"), {
-      target: { value: "weak" },
-    });
-    fireEvent.click(publishForm.getByRole("button", { name: "发布训练" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent(
       "资料依据较弱，发布前需要确认适用范围和员工可见内容",
     );
     expect(
@@ -2148,28 +2182,21 @@ describe("AdminOrganizationTrainingPage", () => {
     );
     expect(publishBody).toMatchObject({
       draftPublicId: "organization-training-draft-ai-ui-001",
-      organizationPublicId: "organization-admin-scope-001",
-      authorizationPublicId: "org-auth-admin-scope-001",
-      profession: "marketing",
-      level: 3,
-      subject: "theory",
-      title: "AI 生成训练草稿",
-      questionCount: 1,
-      totalScore: 5,
+      expectedRevision: 2,
+      operationId: expect.any(String),
       answerDeadlineAt: "2026-07-08T12:00:00.000Z",
-      questionTypeSummary: {
-        singleChoice: 1,
-        multiChoice: 0,
-        trueFalse: 0,
-        shortAnswer: 0,
-      },
       publishScopeOrganizationPublicIds: ["organization-admin-scope-001"],
-      capabilityContext: {
-        effectiveEdition: "advanced",
-        authorizationSource: "org_auth",
-        canCreateOrganizationTraining: true,
-      },
       weakEvidenceConfirmed: true,
+    });
+    const draftSaveBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/organization-trainings/organization-training-draft-ai-ui-001",
+      "PATCH",
+    );
+    expect(draftSaveBody).toMatchObject({
+      draftPublicId: "organization-training-draft-ai-ui-001",
+      expectedRevision: 1,
+      operationId: expect.any(String),
       questions: [
         {
           sequenceNumber: 1,
@@ -2188,11 +2215,12 @@ describe("AdminOrganizationTrainingPage", () => {
           score: 5,
           standardAnswer: "A",
           analysisSummary: "synthetic reviewed analysis",
-          evidenceStatus: "weak",
-          citationCount: 1,
         },
       ],
     });
+    expect(publishBody).not.toHaveProperty("questions");
+    expect(JSON.stringify(draftSaveBody)).not.toContain("evidenceStatus");
+    expect(JSON.stringify(draftSaveBody)).not.toContain("citationCount");
     expect(JSON.stringify(publishBody)).not.toContain("rawPrompt");
     expect(JSON.stringify(publishBody)).not.toContain("providerPayload");
   });

@@ -316,6 +316,9 @@ function createVersionWrite(
     status: "published",
     publishedAt: "2026-06-15T19:20:13.000Z",
     answerDeadlineAt: null,
+    expectedDraftRevision: 1,
+    publishOperationId: "publish_operation_123",
+    publishPayloadDigest: "publish_digest_123",
     takenDownAt: null,
     takedownReason: null,
     ...overrides,
@@ -327,6 +330,9 @@ function createManualDraftWrite(
 ): OrganizationTrainingManualDraftWrite {
   return {
     contentType: "organization_training_draft",
+    draftStatus: "draft",
+    revision: 1,
+    questions: [],
     ownerType: "organization",
     ownerPublicId: "organization_public_123",
     quotaOwnerType: "organization",
@@ -469,6 +475,9 @@ function createEmployeeAnswerDraftWrite(
       capturedAt: "2026-06-16T09:00:00.000Z",
     },
     answerStatus: "in_progress",
+    expectedRevision: 0,
+    operationId: "answer_draft_operation_123",
+    payloadDigest: "answer_draft_digest_123",
     answeredQuestionCount: 1,
     answerItems: [
       {
@@ -504,6 +513,9 @@ function createEmployeeAnswerSubmissionWrite(
       capturedAt: "2026-06-16T09:05:00.000Z",
     },
     answerStatus: "submitted",
+    expectedRevision: 0,
+    operationId: "answer_submit_operation_123",
+    payloadDigest: "answer_submit_digest_123",
     answeredQuestionCount: 2,
     answerItems: [
       {
@@ -522,6 +534,8 @@ function createEmployeeAnswerSubmissionWrite(
       totalScore: 5,
     },
     questionResults: [],
+    totalScore: 5,
+    scoringTask: null,
     submittedAt: "2026-06-16T09:05:00.000Z",
     formalWritePolicy: {
       createPractice: false,
@@ -884,10 +898,13 @@ function createGateway(
     listPaperQuestionSnapshotsForTrainingDrafts,
     findEmployeeAnswerByVersionPublicId,
     insertPublishedVersion,
+    publishCanonicalDraftTransaction: insertPublishedVersion,
     insertManualDraft,
     insertSourceContexts,
     upsertEmployeeAnswerDraft,
+    saveEmployeeAnswerDraftTransaction: upsertEmployeeAnswerDraft,
     upsertEmployeeAnswerSubmission,
+    submitEmployeeAnswerTransaction: upsertEmployeeAnswerSubmission,
     updateVersionTakedown,
   } as unknown as OrganizationTrainingVersionGateway;
 
@@ -1065,6 +1082,9 @@ describe("organization training repository", () => {
     });
     expect(insertManualDraft).toHaveBeenCalledWith({
       contentType: "organization_training_draft",
+      draftStatus: "draft",
+      revision: 1,
+      questions: [],
       publicId: "training_draft_public_999",
       sourceTaskPublicId: null,
       sourceVersionPublicId: null,
@@ -1098,6 +1118,8 @@ describe("organization training repository", () => {
     });
     expect(result).toEqual({
       publicId: "training_draft_public_999",
+      draftStatus: "draft",
+      revision: 1,
       sourceTaskPublicId: null,
       organizationPublicId: "organization_public_123",
       authorizationSource: "org_auth",
@@ -1115,6 +1137,7 @@ describe("organization training repository", () => {
         trueFalse: 0,
         shortAnswer: 0,
       },
+      questions: [],
       evidenceStatus: "none",
       validationStatus: "needs_review",
       retentionStatus: "active",
@@ -1333,14 +1356,12 @@ describe("organization training repository", () => {
       orgAuthId: 601,
     });
 
-    expect(findLatestVersionNumberByDraftPublicId).toHaveBeenCalledWith(
-      "training_draft_public_123",
-    );
+    expect(findLatestVersionNumberByDraftPublicId).not.toHaveBeenCalled();
     expect(insertPublishedVersion).toHaveBeenCalledWith(
       expect.objectContaining({
         publicId: "training_version_public_999",
         draftPublicId: "training_draft_public_123",
-        versionNumber: 3,
+        versionNumber: 1,
         organizationId: 501,
         orgAuthId: 601,
         authorizationSource: "org_auth",
@@ -1354,7 +1375,7 @@ describe("organization training repository", () => {
     expect(result).toMatchObject({
       publicId: "training_version_public_999",
       draftPublicId: "training_draft_public_123",
-      versionNumber: 3,
+      versionNumber: 1,
       organizationPublicId: "organization_public_123",
       status: "published",
     });
@@ -1625,6 +1646,9 @@ describe("organization training repository", () => {
       trainingVersionPublicId: "training_version_public_123",
       employeeId: 701,
       employeePublicId: "employee_public_123",
+      expectedRevision: 0,
+      operationId: "answer_draft_operation_123",
+      payloadDigest: "answer_draft_digest_123",
       organizationId: 501,
       organizationPublicId: "organization_public_123",
       answerOrganizationSnapshot: {
@@ -1648,6 +1672,7 @@ describe("organization training repository", () => {
     });
     expect(result).toEqual({
       publicId: "training_answer_public_999",
+      revision: 1,
       trainingVersionPublicId: "training_version_public_123",
       employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",
@@ -1720,6 +1745,9 @@ describe("organization training repository", () => {
       trainingVersionPublicId: "training_version_public_123",
       employeeId: 701,
       employeePublicId: "employee_public_123",
+      expectedRevision: 0,
+      operationId: "answer_submit_operation_123",
+      payloadDigest: "answer_submit_digest_123",
       organizationId: 501,
       organizationPublicId: "organization_public_123",
       answerOrganizationSnapshot: {
@@ -1742,28 +1770,13 @@ describe("organization training repository", () => {
           textAnswer: "written response",
         },
       ],
-      questionResultSnapshot: [
-        {
-          questionPublicId: "training_question_public_123",
-          score: 0,
-          maxScore: 2,
-          standardAnswer: "A",
-          analysis: "choice rationale",
-          scoringPointResults: [],
-        },
-        {
-          questionPublicId: "training_question_public_456",
-          score: 0,
-          maxScore: 3,
-          standardAnswer: "expected answer",
-          analysis: "scoring rationale",
-          scoringPointResults: [],
-        },
-      ],
+      questionResultSnapshot: [],
+      scoringTask: null,
       submittedAt: "2026-06-16T09:05:00.000Z",
     });
     expect(result).toEqual({
       publicId: "training_answer_public_999",
+      revision: 1,
       trainingVersionPublicId: "training_version_public_123",
       employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",
@@ -1790,24 +1803,7 @@ describe("organization training repository", () => {
           textAnswer: "written response",
         },
       ],
-      questionResults: [
-        {
-          questionPublicId: "training_question_public_123",
-          score: 0,
-          maxScore: 2,
-          standardAnswer: "A",
-          analysis: "choice rationale",
-          scoringPointResults: [],
-        },
-        {
-          questionPublicId: "training_question_public_456",
-          score: 0,
-          maxScore: 3,
-          standardAnswer: "expected answer",
-          analysis: "scoring rationale",
-          scoringPointResults: [],
-        },
-      ],
+      questionResults: [],
     });
 
     const serializedSubmissionInput = JSON.stringify(
@@ -1891,6 +1887,7 @@ describe("organization training repository", () => {
     );
     expect(answer).toEqual({
       publicId: "training_answer_public_123",
+      revision: 1,
       trainingVersionPublicId: "training_version_public_123",
       employeePublicId: "employee_public_123",
       organizationPublicId: "organization_public_123",

@@ -1,6 +1,4 @@
-import type { Profession } from "./auth";
 import type { EvidenceStatus } from "./ai-rag";
-import type { Subject } from "./paper";
 
 export const organizationTrainingQuestionTypeValues = [
   "single_choice",
@@ -31,9 +29,17 @@ export const organizationTrainingVersionStatusValues = [
   "taken_down",
 ] as const;
 
+export const organizationTrainingDraftStatusValues = [
+  "draft",
+  "consumed",
+  "discarded",
+] as const;
+
 export const organizationTrainingAnswerStatusValues = [
   "in_progress",
+  "scoring",
   "submitted",
+  "scoring_failed",
   "read_only",
 ] as const;
 
@@ -77,6 +83,9 @@ export type OrganizationTrainingRetentionStatus =
 
 export type OrganizationTrainingVersionStatus =
   (typeof organizationTrainingVersionStatusValues)[number];
+
+export type OrganizationTrainingDraftStatus =
+  (typeof organizationTrainingDraftStatusValues)[number];
 
 export type OrganizationTrainingAnswerStatus =
   (typeof organizationTrainingAnswerStatusValues)[number];
@@ -139,22 +148,26 @@ export type OrganizationTrainingPublishQuestionInput = {
   citationCount: number;
 };
 
-export type OrganizationTrainingPublishInput = {
+export type OrganizationTrainingDraftQuestionInput = Omit<
+  OrganizationTrainingPublishQuestionInput,
+  "evidenceStatus" | "citationCount"
+>;
+
+export type OrganizationTrainingDraftSaveInput = {
   draftPublicId: string;
-  organizationPublicId: string;
-  authorizationPublicId: string;
-  profession: Profession;
-  level: number;
-  subject: Subject;
+  expectedRevision: number;
+  operationId: string;
   title: string;
   description: string | null;
+  questions: OrganizationTrainingDraftQuestionInput[];
+};
+
+export type OrganizationTrainingPublishInput = {
+  draftPublicId: string;
+  expectedRevision: number;
+  operationId: string;
   answerDeadlineAt: string | null;
-  questions: OrganizationTrainingPublishQuestionInput[];
   publishScopeOrganizationPublicIds: string[];
-  capabilityContext: OrganizationTrainingCapabilityContext;
-  questionCount: number;
-  totalScore: number;
-  questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
   weakEvidenceConfirmed: boolean;
 };
 

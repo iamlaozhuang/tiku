@@ -3,6 +3,8 @@ import type { Profession } from "../models/auth";
 import type {
   OrganizationTrainingAnswerStatus,
   OrganizationTrainingAuditLogTargetResourceType,
+  OrganizationTrainingDraftStatus,
+  OrganizationTrainingPublishQuestionInput,
   OrganizationTrainingQuestionType,
   OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingRetentionStatus,
@@ -14,6 +16,8 @@ import type { Subject } from "../models/paper";
 
 export type OrganizationTrainingDraftDto = {
   publicId: string;
+  draftStatus?: OrganizationTrainingDraftStatus;
+  revision?: number;
   sourceTaskPublicId: string | null;
   organizationPublicId: string;
   authorizationSource: "org_auth";
@@ -26,6 +30,7 @@ export type OrganizationTrainingDraftDto = {
   questionCount: number;
   totalScore: number;
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+  questions?: OrganizationTrainingPublishQuestionInput[];
   evidenceStatus: EvidenceStatus;
   validationStatus: OrganizationTrainingValidationStatus;
   retentionStatus: OrganizationTrainingRetentionStatus;
@@ -122,6 +127,7 @@ export type EmployeeOrganizationTrainingScoreSummaryDto = {
 
 export type EmployeeOrganizationTrainingAnswerDto = {
   publicId: string;
+  revision?: number;
   trainingVersionPublicId: string;
   employeePublicId: string;
   organizationPublicId: string;
@@ -201,6 +207,7 @@ export type OrganizationTrainingAdminLifecycleItemDto = {
   subject?: Subject;
   title: string;
   description?: string | null;
+  revision?: number;
   questionCount?: number;
   totalScore?: number;
   questionTypeSummary?: OrganizationTrainingQuestionTypeSummary;
@@ -268,6 +275,7 @@ export type OrganizationTrainingAdminAvailableDetailDto = {
   organizationPublicId: string;
   title: string;
   description: string | null;
+  revision?: number;
   profession: Profession;
   level: number;
   subject: Subject;
@@ -288,6 +296,7 @@ export type OrganizationTrainingAdminUnavailableDetailDto = {
   organizationPublicId: string;
   title: string;
   description: string | null;
+  revision?: number;
   profession: Profession;
   level: number;
   subject: Subject;
