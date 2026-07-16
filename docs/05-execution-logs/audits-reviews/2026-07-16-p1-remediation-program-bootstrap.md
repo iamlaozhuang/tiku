@@ -53,6 +53,7 @@ Independent read-only review covered authorization source integrity, capability 
 - Replaced hook-environment-sensitive `Get-FileHash` calls with read-only .NET SHA-256 helpers and nested `finally` disposal; verified the three affected guards through Git `sh` and Windows PowerShell 5.1.
 - Isolated audit-repository Git commands from hook-local `GIT_*` variables, suppressed optional index locks, and restored the process environment in `finally`; poisoned-index and disposable zero-write fixtures prevent regression.
 - Added an exact same-task closeout projection: only the two state/queue files may change in the pre-commit staged set or pre-push tip commit, only `in_progress` -> `ready_for_closeout` is accepted, and normalized full-file comparisons at both tip and complete push range reject concurrent or earlier contract mutation while task scope and fresh-review checks remain active.
+- Aligned the historical startup guard's WIP count with the P1 Program active-status set and replaced the tail-greedy scan with bounded direct task-item parsing; boundary fixtures reject contamination from later top-level statuses.
 
 ## Final Disposition
 

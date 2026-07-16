@@ -84,6 +84,28 @@ function Assert-SetEqual {
     Assert-True (($expectedSorted -join ",") -eq ($actualSorted -join ",")) "$Label set mismatch"
 }
 
+function Get-ActiveTaskIds {
+    param([Parameter(Mandatory = $true)][string]$Text)
+
+    $sectionMatch = [regex]::Match($Text, '(?ms)^activeTasks:[^\r\n]*\r?\n(.*?)(?=^[A-Za-z][A-Za-z0-9_-]*:[^\r\n]*\r?$|\z)')
+    if (-not $sectionMatch.Success) { return @() }
+    $activeIds = [System.Collections.Generic.List[string]]::new()
+    $taskBlocks = @([regex]::Matches($sectionMatch.Groups[1].Value, '(?ms)^  - id:\s*(\S+)\s*\r?\n(.*?)(?=^  - id:|\z)'))
+    foreach ($taskBlock in $taskBlocks) {
+        $statusMatches = @([regex]::Matches($taskBlock.Groups[2].Value, '(?m)^    status:\s*(\S+)\s*$'))
+        Assert-True ($statusMatches.Count -eq 1) "active task must contain exactly one direct status: $($taskBlock.Groups[1].Value)"
+        if ($statusMatches[0].Groups[1].Value -in @("in_progress", "ready_for_closeout")) {
+            $activeIds.Add($taskBlock.Groups[1].Value)
+        }
+    }
+    return $activeIds.ToArray()
+}
+
+$activeTaskParserBoundaryFixture = "activeTasks:`n  - id: current-task`n    status: ready_for_closeout`nmetadata:`n  nested:`n    status: in_progress`n"
+Assert-True (((Get-ActiveTaskIds -Text $activeTaskParserBoundaryFixture) -join ",") -eq "current-task") "activeTasks parser included a later top-level section"
+$activeTaskParserMissingFixture = "activeTasks:`n  - id: closed-task`n    status: closed`nmetadata:`n  nested:`n    status: in_progress`n"
+Assert-True (@(Get-ActiveTaskIds -Text $activeTaskParserMissingFixture).Count -eq 0) "later top-level status masked missing active task"
+
 foreach ($path in $requiredFiles) {
     Assert-True (Test-Path -LiteralPath $path) "required recovery artifact missing: $path"
 }
@@ -269,18 +291,19 @@ if ($successorMode) {
     Assert-True ($stateText -match "(?ms)^currentTask:\s*\r?\n.*?^  implementationBoundary:\s*\r?\n.*?p1Implementation:\s*blocked_requires_new_goal_and_authorization") "P1/P2 implementation authorization boundary missing"
 }
 Assert-True ($queueText -match "(?m)^\s+- id:\s+p1-p2-remediation-startup-package-v1-2026-07-15$") "startup task missing from activeTasks"
-$activeSection = [regex]::Match($queueText, "(?ms)^activeTasks:\s*(.*)\z").Groups[1].Value
-$inProgressCount = @([regex]::Matches($activeSection, "(?m)^    status:\s*in_progress\s*$")).Count
+$activeTaskIds = @(Get-ActiveTaskIds -Text $queueText)
+$activeTaskCount = $activeTaskIds.Count
 if ($successorMode) {
-    Assert-True ($inProgressCount -eq 1) "WIP=1 violated while P1 successor program is active"
+    Assert-True ($activeTaskCount -eq 1) "WIP=1 violated while P1 successor program is active"
+    Assert-True ($activeTaskIds[0] -eq $successorTaskId) "P1 successor currentTaskId is not the single active task"
 } else {
     $startupStatusMatch = [regex]::Match($stateText, "(?ms)^currentTask:\s*\r?\n(.*?)(?=^[A-Za-z]|\z)")
     Assert-True $startupStatusMatch.Success "cannot read startup currentTask state"
     $programStatus = [regex]::Match($startupStatusMatch.Groups[1].Value, "(?m)^  status:\s*(\S+)\s*$").Groups[1].Value
     if ($programStatus -eq "in_progress") {
-        Assert-True ($inProgressCount -eq 1) "WIP=1 violated while startup program is active"
+        Assert-True ($activeTaskCount -eq 1) "WIP=1 violated while startup program is active"
     } elseif ($programStatus -in @("closed_local", "closed")) {
-        Assert-True ($inProgressCount -eq 0) "closed startup must have WIP=0"
+        Assert-True ($activeTaskCount -eq 0) "closed startup must have WIP=0"
     } else {
         throw "invalid startup program status: $programStatus"
     }
