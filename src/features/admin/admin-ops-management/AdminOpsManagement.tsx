@@ -10,7 +10,7 @@ import {
   UserPlus,
   UserX,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,7 @@ import type {
   OrganizationListDto,
   AdminUserDetailDto,
   AdminUserListDto,
+  AdminUserPasswordResetResultDto,
   UserPhoneRevealDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -131,7 +132,8 @@ type AdminAccountEditState = {
   publicId: string;
 };
 
-type AdminAccountOneTimePasswordState = {
+type OneTimePasswordState = {
+  accountType: "admin_account" | "user";
   oneTimePasswordPlainText: string;
   publicId: string;
 };
@@ -600,7 +602,9 @@ export function AdminOpsManagement() {
   });
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState>(null);
-  const [resetPasswordInput, setResetPasswordInput] = useState("");
+  const confirmationRequestSequenceRef = useRef(0);
+  const isConfirmingActionRef = useRef(false);
+  const [isConfirmingAction, setIsConfirmingAction] = useState(false);
   const [adminAccountForm, setAdminAccountForm] =
     useState<AdminAccountCreationFormState>({
       adminRole: "ops_admin",
@@ -614,8 +618,8 @@ export function AdminOpsManagement() {
     useState(false);
   const [adminAccountEditState, setAdminAccountEditState] =
     useState<AdminAccountEditState | null>(null);
-  const [adminAccountOneTimePassword, setAdminAccountOneTimePassword] =
-    useState<AdminAccountOneTimePasswordState | null>(null);
+  const [oneTimePassword, setOneTimePassword] =
+    useState<OneTimePasswordState | null>(null);
   const [isSavingAdminAccount, setIsSavingAdminAccount] = useState(false);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [selectedUserDetail, setSelectedUserDetail] =
@@ -915,6 +919,19 @@ export function AdminOpsManagement() {
     );
   }
 
+  function handleOpenPasswordResetConfirmation(
+    kind: "resetPassword" | "resetAdminAccountPassword",
+    publicId: string,
+    userName: string,
+  ) {
+    if (isConfirmingActionRef.current) {
+      return;
+    }
+
+    setOneTimePassword(null);
+    setConfirmationState({ kind, publicId, userName });
+  }
+
   async function handleConfirmAction() {
     const sessionToken = getStoredSessionToken();
 
@@ -923,6 +940,15 @@ export function AdminOpsManagement() {
       setLoadState("unauthorized");
       return;
     }
+
+    if (isConfirmingActionRef.current) {
+      return;
+    }
+
+    const requestSequence = confirmationRequestSequenceRef.current + 1;
+    confirmationRequestSequenceRef.current = requestSequence;
+    isConfirmingActionRef.current = true;
+    setIsConfirmingAction(true);
 
     if (
       confirmationState.kind === "disableUser" ||
@@ -936,13 +962,36 @@ export function AdminOpsManagement() {
         : isEnableUser
           ? "enable"
           : "reset-password";
-      const userActionResponse = await postAdminApi<null>(
-        `/api/v1/users/${confirmationState.publicId}/${actionPath}`,
-        sessionToken,
-        confirmationState.kind === "resetPassword"
-          ? { newPassword: resetPasswordInput }
-          : undefined,
-      );
+      let userActionResponse: ApiResponse<AdminUserPasswordResetResultDto | null>;
+
+      try {
+        userActionResponse =
+          await postAdminApi<AdminUserPasswordResetResultDto | null>(
+            `/api/v1/users/${confirmationState.publicId}/${actionPath}`,
+            sessionToken,
+          );
+      } catch {
+        if (confirmationRequestSequenceRef.current === requestSequence) {
+          setConfirmationState(null);
+          setToastMessage({
+            message:
+              confirmationState.kind === "resetPassword"
+                ? "用户密码重置暂时失败，请重试"
+                : "用户操作暂时失败，请重试",
+            tone: "error",
+          });
+        }
+        return;
+      } finally {
+        if (confirmationRequestSequenceRef.current === requestSequence) {
+          isConfirmingActionRef.current = false;
+          setIsConfirmingAction(false);
+        }
+      }
+
+      if (confirmationRequestSequenceRef.current !== requestSequence) {
+        return;
+      }
 
       setConfirmationState(null);
 
@@ -961,15 +1010,35 @@ export function AdminOpsManagement() {
         );
       }
 
+      if (confirmationState.kind === "resetPassword") {
+        const resetResult = userActionResponse.data;
+
+        if (
+          resetResult === null ||
+          resetResult.oneTimePasswordPlainText === null
+        ) {
+          setToastMessage({
+            message: "密码已重置，但一次性密码不可用",
+            tone: "error",
+          });
+          return;
+        }
+
+        setOneTimePassword({
+          accountType: "user",
+          oneTimePasswordPlainText: resetResult.oneTimePasswordPlainText,
+          publicId: resetResult.userPublicId,
+        });
+      }
+
       setToastMessage({
         message: isDisableUser
           ? "用户已停用，会话已撤销"
           : isEnableUser
             ? "用户已启用"
-            : "密码已重置，未返回明文密码",
+            : "密码已重置，会话已撤销",
         tone: "success",
       });
-      setResetPasswordInput("");
       return;
     }
 
@@ -996,11 +1065,22 @@ export function AdminOpsManagement() {
         sessionToken,
       );
     } catch {
-      setConfirmationState(null);
-      setToastMessage({
-        message: "后台账号操作暂时失败，请重试",
-        tone: "error",
-      });
+      if (confirmationRequestSequenceRef.current === requestSequence) {
+        setConfirmationState(null);
+        setToastMessage({
+          message: "后台账号操作暂时失败，请重试",
+          tone: "error",
+        });
+      }
+      return;
+    } finally {
+      if (confirmationRequestSequenceRef.current === requestSequence) {
+        isConfirmingActionRef.current = false;
+        setIsConfirmingAction(false);
+      }
+    }
+
+    if (confirmationRequestSequenceRef.current !== requestSequence) {
       return;
     }
 
@@ -1017,7 +1097,8 @@ export function AdminOpsManagement() {
     if (isResetAdminAccountPassword) {
       const resetResult =
         adminActionResponse.data as AdminAccountPasswordResetResultDto;
-      setAdminAccountOneTimePassword({
+      setOneTimePassword({
+        accountType: "admin_account",
         oneTimePasswordPlainText: resetResult.oneTimePasswordPlainText,
         publicId: resetResult.adminAccountPublicId,
       });
@@ -1348,11 +1429,11 @@ export function AdminOpsManagement() {
             users={data.users}
             onPageChange={handlePageChange}
             onResetPassword={(publicId, userName) =>
-              setConfirmationState({
-                kind: "resetPassword",
+              handleOpenPasswordResetConfirmation(
+                "resetPassword",
                 publicId,
                 userName,
-              })
+              )
             }
             onViewDetail={(publicId) => void handleViewUserDetail(publicId)}
           />
@@ -1523,11 +1604,11 @@ export function AdminOpsManagement() {
                   })
                 }
                 onResetPassword={(publicId, userName) =>
-                  setConfirmationState({
-                    kind: "resetAdminAccountPassword",
+                  handleOpenPasswordResetConfirmation(
+                    "resetAdminAccountPassword",
                     publicId,
                     userName,
-                  })
+                  )
                 }
               />
               <AdminPagination
@@ -1592,12 +1673,11 @@ export function AdminOpsManagement() {
           setConfirmationState({ kind: "enableUser", publicId, userName })
         }
         onResetPassword={(publicId, userName) => {
-          setResetPasswordInput("");
-          setConfirmationState({
-            kind: "resetPassword",
+          handleOpenPasswordResetConfirmation(
+            "resetPassword",
             publicId,
             userName,
-          });
+          );
         }}
         onRevealPhone={(publicId) => void handleRevealUserPhone(publicId)}
       />
@@ -1605,16 +1685,23 @@ export function AdminOpsManagement() {
       {confirmationState === null ? null : (
         <AdminOpsConfirmationDialog
           confirmationState={confirmationState}
-          resetPasswordInput={resetPasswordInput}
-          onCancel={() => setConfirmationState(null)}
+          isConfirming={isConfirmingAction}
+          onCancel={() => {
+            if (!isConfirmingActionRef.current) {
+              setConfirmationState(null);
+            }
+          }}
           onConfirm={() => void handleConfirmAction()}
-          onResetPasswordInputChange={setResetPasswordInput}
         />
       )}
 
-      {adminAccountOneTimePassword === null ? null : (
+      {oneTimePassword === null ? null : (
         <section
-          aria-label="后台账号一次性密码"
+          aria-label={
+            oneTimePassword.accountType === "admin_account"
+              ? "后台账号一次性密码"
+              : "用户一次性密码"
+          }
           className="border-warning/40 bg-warning/10 rounded-md border p-4"
           role="region"
         >
@@ -1623,12 +1710,12 @@ export function AdminOpsManagement() {
             仅本次显示，请通过安全渠道分发；关闭后不能再次查看。
           </p>
           <code className="bg-surface text-text-primary mt-3 block rounded-md px-3 py-2 text-sm">
-            {adminAccountOneTimePassword.oneTimePasswordPlainText}
+            {oneTimePassword.oneTimePasswordPlainText}
           </code>
           <Button
             className="mt-3"
             variant="outline"
-            onClick={() => setAdminAccountOneTimePassword(null)}
+            onClick={() => setOneTimePassword(null)}
           >
             我已安全保存
           </Button>
@@ -2398,16 +2485,14 @@ function AdminUserDetailPanel({
 
 function AdminOpsConfirmationDialog({
   confirmationState,
-  resetPasswordInput,
+  isConfirming,
   onCancel,
   onConfirm,
-  onResetPasswordInputChange,
 }: {
   confirmationState: Exclude<ConfirmationState, null>;
-  resetPasswordInput: string;
+  isConfirming: boolean;
   onCancel: () => void;
   onConfirm: () => void;
-  onResetPasswordInputChange: (value: string) => void;
 }) {
   const isUserResetPassword = confirmationState.kind === "resetPassword";
   const isAdminResetPassword =
@@ -2417,9 +2502,6 @@ function AdminOpsConfirmationDialog({
     confirmationState.kind === "disableUser" ||
     confirmationState.kind === "disableAdminAccount";
   const isAdminAccountAction = confirmationState.kind.includes("AdminAccount");
-  const canConfirm =
-    !isUserResetPassword ||
-    /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(resetPasswordInput.trim());
   const title = isResetPassword
     ? `确认重置${confirmationState.userName}的密码？`
     : isDisable
@@ -2434,6 +2516,7 @@ function AdminOpsConfirmationDialog({
   return (
     <div
       aria-modal="true"
+      aria-busy={isConfirming}
       className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
       role="alertdialog"
     >
@@ -2449,31 +2532,20 @@ function AdminOpsConfirmationDialog({
           {isResetPassword
             ? isAdminResetPassword
               ? "系统将生成只显示一次的临时密码，并撤销该后台账号全部活跃 session。"
-              : "新密码提交后不会在响应中返回明文。"
+              : "系统将生成只显示一次的临时密码，并撤销该用户全部活跃 session。"
             : isDisable
               ? `停用后将撤销该${isAdminAccountAction ? "后台账号" : "用户"}现有会话。`
               : "启用用户只恢复账号状态，不创建新授权。"}
         </p>
-        {isUserResetPassword ? (
-          <Input
-            aria-label="reset-password-new-password"
-            autoComplete="new-password"
-            onChange={(event) =>
-              onResetPasswordInputChange(event.currentTarget.value)
-            }
-            type="password"
-            value={resetPasswordInput}
-          />
-        ) : null}
         <div className="flex gap-2">
           <Button
-            disabled={!canConfirm}
+            disabled={isConfirming}
             variant={isDisable ? "destructive" : "default"}
             onClick={onConfirm}
           >
-            {confirmLabel}
+            {isConfirming ? "处理中" : confirmLabel}
           </Button>
-          <Button variant="outline" onClick={onCancel}>
+          <Button disabled={isConfirming} variant="outline" onClick={onCancel}>
             取消
           </Button>
         </div>

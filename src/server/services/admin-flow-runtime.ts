@@ -33,6 +33,7 @@ import {
   type AdminAccountMutationResultDto,
   type AdminAccountPasswordResetResultDto,
   type AdminUserDetailDto,
+  type AdminUserPasswordResetResultDto,
   type AdminUserSummaryDto,
   type OrganizationAdminAccountCreationRole,
   ADMIN_AUTH_OPERATION_ERROR_CODES,
@@ -62,14 +63,13 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import { normalizeAdminAccountCreationInput } from "../validators/admin-account-creation";
 import { normalizeAdminAccountUpdateInput } from "../validators/admin-account-lifecycle";
-import { normalizeUserPasswordResetInput } from "../validators/user-password-reset";
 import type { SessionService } from "./session-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminFlowRuntimeRepositories };
 
 export type AdminFlowRuntimeOptions = AdminFlowRuntimeRepositoryOptions & {
-  createOneTimeAdminPassword?: () => string;
+  createOneTimePassword?: () => string;
   repositories?: AdminFlowRuntimeRepositories;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
@@ -100,10 +100,6 @@ const userNotFoundResponse = createErrorResponse(
 const userPasswordResetUnavailableResponse = createErrorResponse(
   503601,
   "Admin user password reset runtime is not configured.",
-);
-const userPasswordResetValidationFailedResponse = createErrorResponse(
-  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
-  "Invalid password reset input.",
 );
 const userLifecycleMutationUnavailableResponse = createErrorResponse(
   503602,
@@ -615,7 +611,7 @@ function createAdminAccountMutationConflictResponse(
   };
 }
 
-function createDefaultOneTimeAdminPassword(): string {
+function createDefaultOneTimePassword(): string {
   return `${randomBytes(12).toString("base64url")}A1`;
 }
 
@@ -698,8 +694,8 @@ export function createAdminFlowRuntimeRouteHandlers(
   const repositories =
     options.repositories ?? createPostgresAdminFlowRuntimeRepositories(options);
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
-  const createOneTimeAdminPassword =
-    options.createOneTimeAdminPassword ?? createDefaultOneTimeAdminPassword;
+  const createOneTimePassword =
+    options.createOneTimePassword ?? createDefaultOneTimePassword;
 
   async function requireAdminActor(request: Request) {
     return resolveAdminActor(request, sessionService);
@@ -1129,7 +1125,7 @@ export function createAdminFlowRuntimeRouteHandlers(
       });
     }
 
-    const oneTimePasswordPlainText = createOneTimeAdminPassword();
+    const oneTimePasswordPlainText = createOneTimePassword();
     const result =
       await repositories.userOrgAuthRepository.resetAdminAccountPassword({
         actor: {
@@ -1469,7 +1465,9 @@ export function createAdminFlowRuntimeRouteHandlers(
           const { publicId } = await context.params;
 
           if (actor === null) {
-            return createJsonResponse(adminSessionRequiredResponse);
+            return createJsonResponse(adminSessionRequiredResponse, {
+              headers: NO_STORE_HEADERS,
+            });
           }
 
           if (!canResetUserPassword(actor)) {
@@ -1485,14 +1483,20 @@ export function createAdminFlowRuntimeRouteHandlers(
               requestIp: readRequestIp(request),
             });
 
-            return createJsonResponse(adminUserPermissionDeniedResponse);
+            return createJsonResponse(adminUserPermissionDeniedResponse, {
+              headers: NO_STORE_HEADERS,
+            });
           }
 
-          const resetInput = normalizeUserPasswordResetInput(
-            await readJsonBody(request),
-          );
+          const resetUserPassword =
+            repositories.userOrgAuthRepository.resetUserPassword;
+          const revokeUserSessions =
+            repositories.userOrgAuthRepository.revokeUserSessions;
 
-          if (!resetInput.success) {
+          if (
+            resetUserPassword === undefined ||
+            revokeUserSessions === undefined
+          ) {
             await repositories.auditLogRepository.appendAuditLog({
               actorPublicId: actor.publicId,
               actorRole: actor.roles[0],
@@ -1501,28 +1505,22 @@ export function createAdminFlowRuntimeRouteHandlers(
               targetPublicId: publicId,
               resultStatus: "failed",
               metadataSummary:
-                "redacted user credential reset validation metadata",
+                "redacted user credential reset unavailable metadata",
               requestIp: readRequestIp(request),
             });
 
-            return createJsonResponse(
-              userPasswordResetValidationFailedResponse,
-            );
+            return createJsonResponse(userPasswordResetUnavailableResponse, {
+              headers: NO_STORE_HEADERS,
+            });
           }
 
-          const didReset =
-            (await repositories.userOrgAuthRepository.resetUserPassword?.(
-              publicId,
-              resetInput.value,
-            )) ?? false;
+          const oneTimePasswordPlainText = createOneTimePassword();
+          const didReset = await resetUserPassword(publicId, {
+            newPassword: oneTimePasswordPlainText,
+          });
 
-          if (
-            didReset &&
-            repositories.userOrgAuthRepository.revokeUserSessions !== undefined
-          ) {
-            await repositories.userOrgAuthRepository.revokeUserSessions(
-              publicId,
-            );
+          if (didReset) {
+            await revokeUserSessions(publicId);
           }
 
           await repositories.auditLogRepository.appendAuditLog({
@@ -1536,14 +1534,25 @@ export function createAdminFlowRuntimeRouteHandlers(
             requestIp: readRequestIp(request),
           });
 
-          if (
-            repositories.userOrgAuthRepository.resetUserPassword === undefined
-          ) {
-            return createJsonResponse(userPasswordResetUnavailableResponse);
+          if (!didReset) {
+            return createJsonResponse(userNotFoundResponse, {
+              headers: NO_STORE_HEADERS,
+            });
           }
 
-          return createJsonResponse(
-            didReset ? createSuccessResponse(null) : userNotFoundResponse,
+          return createJsonResponse<AdminUserPasswordResetResultDto>(
+            createSuccessResponse({
+              userPublicId: publicId,
+              oneTimePasswordPlainText,
+              distributionWindow: {
+                visibleOnce: true,
+                expiresAt: null,
+                redactionNotice:
+                  "The one-time password is returned once and must not be logged.",
+                sessionRevocation: "revoked_active_sessions",
+              },
+            }),
+            { headers: NO_STORE_HEADERS },
           );
         },
       },

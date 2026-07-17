@@ -260,6 +260,7 @@ describe("phase 11 auth session account hardening", () => {
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminFlowRuntimeRouteHandlers({
+      createOneTimePassword: () => "HardeningGeneratedA123",
       repositories: createRepositories({
         auditInputs,
         mutationInputs,
@@ -271,7 +272,7 @@ describe("phase 11 auth session account hardening", () => {
       new Request(
         "http://localhost/api/v1/users/user-public-001/reset-password",
         {
-          body: JSON.stringify({ newPassword: "ResetPass2026" }),
+          body: JSON.stringify({ newPassword: "OperatorChosenPass2026" }),
           headers: { "content-type": "application/json" },
           method: "POST",
         },
@@ -279,10 +280,21 @@ describe("phase 11 auth session account hardening", () => {
       { params: Promise.resolve({ publicId: "user-public-001" }) },
     );
 
+    expect(response.headers.get("cache-control")).toBe("no-store");
     await expect(response.json()).resolves.toEqual({
       code: 0,
       message: "ok",
-      data: null,
+      data: {
+        userPublicId: "user-public-001",
+        oneTimePasswordPlainText: "HardeningGeneratedA123",
+        distributionWindow: {
+          visibleOnce: true,
+          expiresAt: null,
+          redactionNotice:
+            "The one-time password is returned once and must not be logged.",
+          sessionRevocation: "revoked_active_sessions",
+        },
+      },
     });
     expect(mutationInputs).toEqual([
       { action: "resetUserPassword", publicId: "user-public-001" },
@@ -303,5 +315,7 @@ describe("phase 11 auth session account hardening", () => {
     expect(JSON.stringify(auditInputs)).not.toContain("passwordHash");
     expect(JSON.stringify(auditInputs)).not.toContain("temporaryPassword");
     expect(JSON.stringify(auditInputs)).not.toContain("plainText");
+    expect(JSON.stringify(auditInputs)).not.toContain("HardeningGeneratedA123");
+    expect(JSON.stringify(auditInputs)).not.toContain("OperatorChosenPass2026");
   });
 });

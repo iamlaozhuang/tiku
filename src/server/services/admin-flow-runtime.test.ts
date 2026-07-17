@@ -492,7 +492,7 @@ describe("createAdminFlowRuntimeRouteHandlers", () => {
       };
     };
     const handlers = createAdminFlowRuntimeRouteHandlers({
-      createOneTimeAdminPassword: () => "TemporaryA123456",
+      createOneTimePassword: () => "TemporaryA123456",
       repositories,
       sessionService: {
         async getCurrentSession() {

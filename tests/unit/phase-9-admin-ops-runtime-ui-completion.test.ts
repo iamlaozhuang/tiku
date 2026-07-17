@@ -97,6 +97,10 @@ function createAdminOpsRepositories() {
         resetInputs.push(publicId);
         return publicId === "user-public-001";
       },
+      async revokeUserSessions(publicId) {
+        resetInputs.push(`revoke:${publicId}`);
+        return publicId === "user-public-001";
+      },
     },
     contentKnowledgeRepository: {
       async listQuestions() {
@@ -153,6 +157,7 @@ function mockAdminOpsFetch() {
   localStorage.setItem("tiku.localSessionToken", "admin-session-token");
 
   const fetchMock = vi.spyOn(globalThis, "fetch");
+  let userPasswordResetCount = 0;
 
   return fetchMock.mockImplementation(async (input, init) => {
     const url =
@@ -183,7 +188,22 @@ function mockAdminOpsFetch() {
     }
 
     if (url.startsWith("/api/v1/users/user-public-001/reset-password")) {
-      return Response.json(createOkPayload(null));
+      userPasswordResetCount += 1;
+      return Response.json(
+        createOkPayload({
+          userPublicId: "user-public-001",
+          oneTimePasswordPlainText:
+            userPasswordResetCount === 1
+              ? "UserTemporaryA123456"
+              : "UserLatestA123456",
+          distributionWindow: {
+            visibleOnce: true,
+            expiresAt: null,
+            redactionNotice: "shown once",
+            sessionRevocation: "revoked_active_sessions",
+          },
+        }),
+      );
     }
 
     if (url.startsWith("/api/v1/users/user-public-001/reveal-phone")) {
@@ -689,10 +709,11 @@ function mockOpsAdminOrganizationAdminCreationFetch() {
 }
 
 describe("phase 9 admin ops runtime ui completion", () => {
-  it("protects user reset password with admin role, publicId, audit log, and redacted response", async () => {
+  it("protects server-generated user password distribution with admin role, publicId, and redacted audit", async () => {
     const { auditInputs, repositories, resetInputs } =
       createAdminOpsRepositories();
     const handlers = createAdminFlowRuntimeRouteHandlers({
+      createOneTimePassword: () => "RuntimeGeneratedA123",
       repositories,
       sessionService: createAdminSessionService("super_admin"),
     }) as ReturnType<typeof createAdminFlowRuntimeRouteHandlers> & {
@@ -710,7 +731,7 @@ describe("phase 9 admin ops runtime ui completion", () => {
       new Request(
         "http://localhost/api/v1/users/user-public-001/reset-password",
         {
-          body: JSON.stringify({ newPassword: "ResetPass2026" }),
+          body: JSON.stringify({ newPassword: "OperatorChosenPass2026" }),
           method: "POST",
           headers: {
             authorization: "Bearer admin-session-token",
@@ -723,12 +744,23 @@ describe("phase 9 admin ops runtime ui completion", () => {
     );
     const payload = await response.json();
 
+    expect(response.headers.get("cache-control")).toBe("no-store");
     expect(payload).toEqual({
       code: 0,
       message: "ok",
-      data: null,
+      data: {
+        userPublicId: "user-public-001",
+        oneTimePasswordPlainText: "RuntimeGeneratedA123",
+        distributionWindow: {
+          visibleOnce: true,
+          expiresAt: null,
+          redactionNotice:
+            "The one-time password is returned once and must not be logged.",
+          sessionRevocation: "revoked_active_sessions",
+        },
+      },
     });
-    expect(resetInputs).toEqual(["user-public-001"]);
+    expect(resetInputs).toEqual(["user-public-001", "revoke:user-public-001"]);
     expect(auditInputs).toEqual([
       expect.objectContaining({
         actorPublicId: "admin-public-001",
@@ -741,7 +773,10 @@ describe("phase 9 admin ops runtime ui completion", () => {
         requestIp: "203.0.113.10",
       }),
     ]);
-    expect(JSON.stringify(payload)).not.toContain("password");
+    expect(JSON.stringify({ auditInputs, resetInputs })).not.toContain(
+      "RuntimeGeneratedA123",
+    );
+    expect(JSON.stringify(payload)).not.toContain("OperatorChosenPass2026");
     expect(JSON.stringify(payload)).not.toContain("admin-session-token");
   });
 
@@ -856,13 +891,56 @@ describe("phase 9 admin ops runtime ui completion", () => {
       "确认重置学员甲的密码？",
     );
     expect(screen.getByRole("alertdialog")).not.toHaveTextContent("业务标识");
-    fireEvent.change(screen.getByLabelText("reset-password-new-password"), {
-      target: { value: "ResetPass2026" },
-    });
+    expect(
+      screen.queryByLabelText("reset-password-new-password"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "系统将生成只显示一次的临时密码，并撤销该用户全部活跃 session。",
+    );
     fireEvent.click(screen.getByRole("button", { name: "确认重置" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "密码已重置，未返回明文密码",
+      "密码已重置，会话已撤销",
     );
+    const userPasswordRegion = await screen.findByRole("region", {
+      name: "用户一次性密码",
+    });
+    expect(
+      within(userPasswordRegion).getByText("UserTemporaryA123456"),
+    ).toBeVisible();
+    const resetRequest = fetchMock.mock.calls.find(
+      ([input, init]) =>
+        String(input).endsWith("/users/user-public-001/reset-password") &&
+        init?.method === "POST",
+    );
+    expect(resetRequest?.[1]?.body).toBeUndefined();
+
+    fireEvent.click(
+      within(userRow).getByRole("button", { name: "重置学员甲密码" }),
+    );
+    expect(
+      screen.queryByRole("region", { name: "用户一次性密码" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "确认重置" }));
+    const latestUserPasswordRegion = await screen.findByRole("region", {
+      name: "用户一次性密码",
+    });
+    expect(
+      within(latestUserPasswordRegion).getByText("UserLatestA123456"),
+    ).toBeVisible();
+    expect(
+      within(latestUserPasswordRegion).queryByText("UserTemporaryA123456"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("region", { name: "用户一次性密码" }),
+    ).toHaveLength(1);
+    fireEvent.click(
+      within(latestUserPasswordRegion).getByRole("button", {
+        name: "我已安全保存",
+      }),
+    );
+    expect(
+      screen.queryByRole("region", { name: "用户一次性密码" }),
+    ).not.toBeInTheDocument();
 
     expect(
       screen.queryByRole("link", { name: "打开卡密生成" }),
@@ -895,6 +973,117 @@ describe("phase 9 admin ops runtime ui completion", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("ABCDEFG2")).not.toBeInTheDocument();
     expect(screen.queryByText("admin-session-token")).toBeNull();
+  });
+
+  it("serializes user password reset confirmation and blocks duplicate requests while pending", async () => {
+    const fetchMock = mockAdminOpsFetch();
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+    const baseFetchImplementation = fetchMock.getMockImplementation();
+    let resolveResetResponse: ((response: Response) => void) | undefined;
+    const resetResponsePromise = new Promise<Response>((resolve) => {
+      resolveResetResponse = resolve;
+    });
+
+    fetchMock.mockImplementation(async (input, init) => {
+      if (
+        String(input).endsWith("/users/user-public-001/reset-password") &&
+        init?.method === "POST"
+      ) {
+        return resetResponsePromise;
+      }
+
+      if (baseFetchImplementation === undefined) {
+        throw new Error("missing base fetch implementation");
+      }
+
+      return baseFetchImplementation(input, init);
+    });
+
+    const userRow = screen.getByRole("row", {
+      name: /学员甲 \/ 139\*\*\*\*0002/,
+    });
+    fireEvent.click(
+      within(userRow).getByRole("button", { name: "重置学员甲密码" }),
+    );
+    const confirmButton = screen.getByRole("button", { name: "确认重置" });
+    fireEvent.click(confirmButton);
+    fireEvent.click(confirmButton);
+
+    expect(screen.getByRole("button", { name: "处理中" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "取消" })).toBeDisabled();
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.filter(
+          ([input, init]) =>
+            String(input).endsWith("/users/user-public-001/reset-password") &&
+            init?.method === "POST",
+        ),
+      ).toHaveLength(1);
+    });
+
+    resolveResetResponse?.(
+      Response.json(
+        createOkPayload({
+          userPublicId: "user-public-001",
+          oneTimePasswordPlainText: "SerializedUserA123456",
+          distributionWindow: {
+            visibleOnce: true,
+            expiresAt: null,
+            redactionNotice: "shown once",
+            sessionRevocation: "revoked_active_sessions",
+          },
+        }),
+      ),
+    );
+
+    expect(
+      within(
+        await screen.findByRole("region", { name: "用户一次性密码" }),
+      ).getByText("SerializedUserA123456"),
+    ).toBeVisible();
+  });
+
+  it("closes the reset confirmation with a safe error after a network failure", async () => {
+    const fetchMock = mockAdminOpsFetch();
+
+    render(createElement(AdminOpsManagement));
+
+    await screen.findByRole("heading", { level: 1, name: "用户管理" });
+    const baseFetchImplementation = fetchMock.getMockImplementation();
+
+    fetchMock.mockImplementation(async (input, init) => {
+      if (
+        String(input).endsWith("/users/user-public-001/reset-password") &&
+        init?.method === "POST"
+      ) {
+        throw new Error("simulated network failure");
+      }
+
+      if (baseFetchImplementation === undefined) {
+        throw new Error("missing base fetch implementation");
+      }
+
+      return baseFetchImplementation(input, init);
+    });
+
+    const userRow = screen.getByRole("row", {
+      name: /学员甲 \/ 139\*\*\*\*0002/,
+    });
+    fireEvent.click(
+      within(userRow).getByRole("button", { name: "重置学员甲密码" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认重置" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "用户密码重置暂时失败，请重试",
+    );
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "用户一次性密码" }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps normal phone displays masked and requires an explicit audited reveal", async () => {

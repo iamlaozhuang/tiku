@@ -402,6 +402,7 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
       mutationInputs,
     });
     const opsHandlers = createAdminFlowRuntimeRouteHandlers({
+      createOneTimePassword: () => "OpsGeneratedA123",
       repositories,
       sessionService: createAdminSessionService("ops_admin"),
     });
@@ -414,7 +415,7 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
       new Request(
         "http://localhost/api/v1/users/user-public-001/reset-password",
         {
-          body: JSON.stringify({ newPassword: "ResetPass2026" }),
+          body: JSON.stringify({ newPassword: "OperatorChosenPass2026" }),
           method: "POST",
           headers: {
             ...headers,
@@ -439,7 +440,20 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
       { params: Promise.resolve({ publicId: "user-public-001" }) },
     );
 
-    await expect(resetResponse.json()).resolves.toEqual(createOkPayload(null));
+    expect(resetResponse.headers.get("cache-control")).toBe("no-store");
+    await expect(resetResponse.json()).resolves.toEqual(
+      createOkPayload({
+        userPublicId: "user-public-001",
+        oneTimePasswordPlainText: "OpsGeneratedA123",
+        distributionWindow: {
+          visibleOnce: true,
+          expiresAt: null,
+          redactionNotice:
+            "The one-time password is returned once and must not be logged.",
+          sessionRevocation: "revoked_active_sessions",
+        },
+      }),
+    );
     await expect(disableResponse.json()).resolves.toEqual(
       createOkPayload(null),
     );
@@ -476,6 +490,8 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     expect(JSON.stringify({ auditInputs, mutationInputs })).not.toContain(
       "admin-session-token",
     );
+    expect(JSON.stringify(auditInputs)).not.toContain("OpsGeneratedA123");
+    expect(JSON.stringify(auditInputs)).not.toContain("OperatorChosenPass2026");
 
     const deniedHandlers = createAdminFlowRuntimeRouteHandlers({
       repositories: createAdminFlowRepositories({
