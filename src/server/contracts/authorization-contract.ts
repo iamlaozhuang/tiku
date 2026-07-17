@@ -1,12 +1,9 @@
-import type { AuthStatus, Profession, RedeemCodeStatus } from "../models/auth";
-
-export type RedeemCodeDto = {
-  publicId: string;
-  codeDisplay: string;
-  profession: Profession;
-  level: number;
-  status: RedeemCodeStatus;
-};
+import type {
+  AuthStatus,
+  AuthorizationEdition,
+  Profession,
+  RedeemCodeType,
+} from "../models/auth";
 
 export type PersonalAuthDto = {
   publicId: string;
@@ -19,8 +16,25 @@ export type PersonalAuthDto = {
 };
 
 export type RedeemCodeRedemptionDto = {
-  redeemCode: RedeemCodeDto;
   personalAuth: PersonalAuthDto;
+};
+
+export type RedeemCodeUpgradeTargetDto = {
+  personalAuthPublicId: string;
+  sourceEdition: "standard";
+  startsAt: string;
+  expiresAt: string;
+};
+
+export type RedeemCodePreviewDto = {
+  redeemCodeType: RedeemCodeType;
+  profession: Profession;
+  level: number;
+  resultEdition: AuthorizationEdition;
+  durationDay: number;
+  redeemDeadlineAt: string;
+  previewVersion: string;
+  upgradeTargets: RedeemCodeUpgradeTargetDto[];
 };
 
 export type PersonalAuthListDto = {

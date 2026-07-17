@@ -160,7 +160,6 @@ function createRedeemCodeRow(
   return {
     id: 301,
     public_id: "redeem-code-public-1",
-    code_display: generatedCodePlaceholder,
     profession: "monopoly",
     level: 3,
     redeem_code_type: "personal_standard_activation",
@@ -169,6 +168,7 @@ function createRedeemCodeRow(
     status: "unused",
     used_by_user_id: null,
     used_at: null,
+    updated_at: new Date("2026-05-24T06:00:00.000Z"),
     ...overrides,
   };
 }
@@ -212,21 +212,31 @@ function createStudentHandlers() {
       },
     },
     redeemCodeAuthorizationRepository: {
-      async findRedeemCodeByCode(code) {
-        expect(code).toBe(generatedCodePlaceholder);
-
-        return createRedeemCodeRow();
-      },
-      async redeemCodeForUser(input) {
+      async previewRedeemCodeForUser(input) {
         expect(input).toMatchObject({
           code: generatedCodePlaceholder,
-          redeemCodeId: 301,
           userPublicId: "student-user-public-001",
-          redeemedAt: now,
-          durationDay: 365,
+          previewedAt: now,
         });
 
-        return createPersonalAuthRow();
+        return {
+          redeemCode: createRedeemCodeRow(),
+          activePersonalAuths: [],
+          activeUpgradedPersonalAuthPublicIds: [],
+        };
+      },
+      async confirmRedeemCodeForUser(input) {
+        expect(input).toMatchObject({
+          code: generatedCodePlaceholder,
+          userPublicId: "student-user-public-001",
+          confirmedAt: now,
+          targetPersonalAuthPublicId: null,
+        });
+
+        return {
+          status: "redeemed" as const,
+          personalAuth: createPersonalAuthRow(),
+        };
       },
       async listPersonalAuthsByUserPublicId(): Promise<
         PersonalAuthAccessRow[]
@@ -424,9 +434,8 @@ describe("phase 11 redeem_code batch management loop", () => {
 
   it("redeems a generated uppercase code into personal_auth for the student runtime", async () => {
     const handlers = createStudentHandlers();
-
-    const response = await handlers.redeemCodes.redeem.POST(
-      new Request("http://localhost/api/v1/redeem-codes/redeem", {
+    const previewResponse = await handlers.redeemCodes.preview.POST(
+      new Request("http://localhost/api/v1/redeem-codes/preview", {
         method: "POST",
         headers: {
           authorization: "Bearer student-session-token",
@@ -436,18 +445,28 @@ describe("phase 11 redeem_code batch management loop", () => {
         }),
       }),
     );
+    const previewPayload = (await readJson(previewResponse)) as {
+      data: { previewVersion: string };
+    };
+
+    const response = await handlers.redeemCodes.redeem.POST(
+      new Request("http://localhost/api/v1/redeem-codes/redeem", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer student-session-token",
+        },
+        body: JSON.stringify({
+          code: generatedCodePlaceholder.toLowerCase(),
+          previewVersion: previewPayload.data.previewVersion,
+          targetPersonalAuthPublicId: null,
+        }),
+      }),
+    );
 
     await expect(readJson(response)).resolves.toEqual({
       code: 0,
       message: "ok",
       data: {
-        redeemCode: {
-          publicId: "redeem-code-public-1",
-          codeDisplay: generatedCodePlaceholder,
-          profession: "monopoly",
-          level: 3,
-          status: "used",
-        },
         personalAuth: {
           publicId: "personal-auth-public-001",
           redeemCodePublicId: "redeem-code-public-1",

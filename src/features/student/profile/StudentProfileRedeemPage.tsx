@@ -11,7 +11,7 @@ import {
   Ticket,
   UserRound,
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
   PersonalAuthDto,
   PersonalAuthListDto,
+  RedeemCodePreviewDto,
   RedeemCodeRedemptionDto,
 } from "@/server/contracts/authorization-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -29,7 +30,7 @@ import type {
   EffectiveAuthorizationListDto,
 } from "@/server/contracts/effective-authorization-contract";
 import type { EditionAwareAuthorizationContextDto } from "@/server/contracts/edition-aware-authorization-contract";
-import type { Profession } from "@/server/models/auth";
+import type { Profession, RedeemCodeType } from "@/server/models/auth";
 import {
   clearStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
@@ -37,7 +38,18 @@ import {
 
 type LoadState = "loading" | "ready" | "unauthorized" | "error";
 type LogoutState = "idle" | "submitting" | "error";
-type RedeemSubmitState = "idle" | "submitting" | "success" | "error";
+type RedeemSubmitState =
+  | "idle"
+  | "previewing"
+  | "ready"
+  | "redeeming"
+  | "success"
+  | "error";
+
+type RedeemCodeReadyPreview = {
+  inputSnapshot: string;
+  data: RedeemCodePreviewDto;
+};
 
 const REDEEM_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/u;
 
@@ -56,6 +68,12 @@ const editionLabels = {
   advanced: "高级版",
   standard: "标准版",
 } satisfies Record<string, string>;
+
+const redeemCodeTypeLabels = {
+  edition_upgrade: "版本升级卡",
+  personal_advanced_activation: "高级版激活卡",
+  personal_standard_activation: "标准版激活卡",
+} satisfies Record<RedeemCodeType, string>;
 
 const upgradeStatusLabels = {
   active: "升级生效",
@@ -128,6 +146,27 @@ function formatScopeLabel(input: {
   return `${professionLabels[input.profession]} ${input.level}级`;
 }
 
+function formatPreviewScopeLabel(input: {
+  profession: Profession;
+  level: number;
+}): string {
+  const levelLabel =
+    (
+      { 1: "一级", 2: "二级", 3: "三级", 4: "四级", 5: "五级" } as Record<
+        number,
+        string
+      >
+    )[input.level] ?? `${input.level}级`;
+
+  return `${professionLabels[input.profession]} · ${levelLabel}`;
+}
+
+function formatChineseDate(value: string): string {
+  const date = new Date(value);
+
+  return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`;
+}
+
 function formatQuotaOwnerLabel(
   quotaOwnerType: EditionAwareAuthorizationContextDto["quotaOwnerType"],
 ): string {
@@ -164,6 +203,14 @@ function mapRedeemFailureMessage(
     return "兑换码不存在";
   }
 
+  if (payload.code === 409005) {
+    return "权益预览已变化，请重新预览";
+  }
+
+  if (payload.code === 409006 || payload.code === 409007) {
+    return "暂时无法确认该卡密权益，请重新预览";
+  }
+
   if (payload.code === 409002 || statusHint === 409) {
     return "该兑换码已被使用";
   }
@@ -176,7 +223,15 @@ function mapRedeemFailureMessage(
     return "兑换服务暂不可用，请稍后重试";
   }
 
+  if (payload.code === 429001 || statusHint === 429) {
+    return "预览请求过于频繁，请稍后重试";
+  }
+
   return "兑换失败，请稍后重试";
+}
+
+function shouldInvalidateRedeemPreview(code: number): boolean {
+  return [404001, 409002, 409005, 409006, 410001].includes(code);
 }
 
 function StudentSurfaceStatus({
@@ -984,21 +1039,34 @@ export function StudentRedeemCodePage() {
   const [personalAuths, setPersonalAuths] = useState<PersonalAuthDto[]>([]);
   const [isEmployee, setIsEmployee] = useState(false);
   const [redeemCode, setRedeemCode] = useState("");
-  const [reviewedRedeemCode, setReviewedRedeemCode] = useState<string | null>(
-    null,
-  );
+  const [readyPreview, setReadyPreview] =
+    useState<RedeemCodeReadyPreview | null>(null);
+  const [targetPersonalAuthPublicId, setTargetPersonalAuthPublicId] = useState<
+    string | null
+  >(null);
   const [submitState, setSubmitState] = useState<RedeemSubmitState>("idle");
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const previewRequestSequence = useRef(0);
+  const previewAbortController = useRef<AbortController | null>(null);
 
   const normalizedRedeemCode = useMemo(
     () => normalizeRedeemCodeInput(redeemCode),
     [redeemCode],
   );
+  const isConfirmationReady =
+    readyPreview !== null &&
+    readyPreview.inputSnapshot === normalizedRedeemCode;
+  const isBusy = submitState === "previewing" || submitState === "redeeming";
+  const hasEligibleUpgradeTarget =
+    readyPreview?.data.redeemCodeType !== "edition_upgrade" ||
+    readyPreview.data.upgradeTargets.some(
+      (target) => target.personalAuthPublicId === targetPersonalAuthPublicId,
+    );
   const canSubmit =
     REDEEM_CODE_PATTERN.test(normalizedRedeemCode) &&
-    submitState !== "submitting" &&
-    loadState === "ready";
-  const isConfirmationReady = reviewedRedeemCode === normalizedRedeemCode;
+    !isBusy &&
+    loadState === "ready" &&
+    (!isConfirmationReady || hasEligibleUpgradeTarget);
 
   useEffect(() => {
     let isActive = true;
@@ -1046,6 +1114,7 @@ export function StudentRedeemCodePage() {
 
     return () => {
       isActive = false;
+      previewAbortController.current?.abort();
     };
   }, []);
 
@@ -1059,13 +1128,11 @@ export function StudentRedeemCodePage() {
     }
 
     if (!isConfirmationReady) {
-      setReviewedRedeemCode(normalizedRedeemCode);
-      setSubmitState("idle");
-      setFeedbackMessage(null);
+      await handlePreviewRedeemCode(normalizedRedeemCode);
       return;
     }
 
-    setSubmitState("submitting");
+    setSubmitState("redeeming");
     setFeedbackMessage(null);
 
     try {
@@ -1075,12 +1142,23 @@ export function StudentRedeemCodePage() {
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ code: normalizedRedeemCode }),
+        body: JSON.stringify({
+          code: readyPreview.inputSnapshot,
+          previewVersion: readyPreview.data.previewVersion,
+          targetPersonalAuthPublicId:
+            readyPreview.data.redeemCodeType === "edition_upgrade"
+              ? targetPersonalAuthPublicId
+              : null,
+        }),
       });
       const payload =
         (await response.json()) as ApiResponse<RedeemCodeRedemptionDto | null>;
 
       if (!response.ok || payload.code !== 0 || payload.data === null) {
+        if (shouldInvalidateRedeemPreview(payload.code)) {
+          setReadyPreview(null);
+          setTargetPersonalAuthPublicId(null);
+        }
         setSubmitState("error");
         setFeedbackMessage(mapRedeemFailureMessage(payload, response.status));
         return;
@@ -1096,13 +1174,80 @@ export function StudentRedeemCodePage() {
         ),
       ]);
       setRedeemCode("");
-      setReviewedRedeemCode(null);
+      setReadyPreview(null);
+      setTargetPersonalAuthPublicId(null);
       setSubmitState("success");
       setFeedbackMessage("兑换成功");
     } catch {
       setSubmitState("error");
       setFeedbackMessage("兑换服务暂不可用，请稍后重试");
     }
+  }
+
+  async function handlePreviewRedeemCode(inputSnapshot: string) {
+    previewAbortController.current?.abort();
+    const requestSequence = previewRequestSequence.current + 1;
+    const abortController = new AbortController();
+    previewRequestSequence.current = requestSequence;
+    previewAbortController.current = abortController;
+    setReadyPreview(null);
+    setTargetPersonalAuthPublicId(null);
+    setSubmitState("previewing");
+    setFeedbackMessage(null);
+
+    try {
+      const response = await fetch("/api/v1/redeem-codes/preview", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ code: inputSnapshot }),
+        signal: abortController.signal,
+      });
+      const payload =
+        (await response.json()) as ApiResponse<RedeemCodePreviewDto | null>;
+
+      if (
+        abortController.signal.aborted ||
+        previewRequestSequence.current !== requestSequence
+      ) {
+        return;
+      }
+
+      if (!response.ok || payload.code !== 0 || payload.data === null) {
+        setSubmitState("error");
+        setFeedbackMessage(mapRedeemFailureMessage(payload, response.status));
+        return;
+      }
+
+      setReadyPreview({ inputSnapshot, data: payload.data });
+      setSubmitState("ready");
+    } catch (error) {
+      if (
+        abortController.signal.aborted ||
+        previewRequestSequence.current !== requestSequence
+      ) {
+        return;
+      }
+
+      setSubmitState("error");
+      setFeedbackMessage(
+        error instanceof Error && error.name === "AbortError"
+          ? null
+          : "兑换服务暂不可用，请稍后重试",
+      );
+    }
+  }
+
+  function handleRedeemCodeChange(value: string) {
+    previewAbortController.current?.abort();
+    previewRequestSequence.current += 1;
+    setRedeemCode(normalizeRedeemCodeInput(value));
+    setReadyPreview(null);
+    setTargetPersonalAuthPublicId(null);
+    setSubmitState("idle");
+    setFeedbackMessage(null);
   }
 
   if (loadState === "loading") {
@@ -1135,7 +1280,8 @@ export function StudentRedeemCodePage() {
     );
   }
 
-  const isSubmitting = submitState === "submitting";
+  const isPreviewing = submitState === "previewing";
+  const isRedeeming = submitState === "redeeming";
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
@@ -1166,27 +1312,73 @@ export function StudentRedeemCodePage() {
             <Input
               aria-invalid={submitState === "error"}
               autoComplete="off"
+              disabled={isRedeeming}
               inputMode="text"
               maxLength={10}
               placeholder="例如 ABCD2345"
               value={redeemCode}
-              onChange={(event) => {
-                setRedeemCode(normalizeRedeemCodeInput(event.target.value));
-                setReviewedRedeemCode(null);
-              }}
+              onChange={(event) => handleRedeemCodeChange(event.target.value)}
             />
           </label>
 
-          {isConfirmationReady ? (
+          {isConfirmationReady && readyPreview !== null ? (
             <section
-              className="border-border bg-background space-y-2 rounded-lg border p-3 text-sm"
+              className="border-border bg-background space-y-3 rounded-lg border p-3 text-sm"
               data-testid="redeem-code-confirmation"
             >
-              <p className="text-text-primary font-medium">确认兑换</p>
-              <p className="text-text-secondary leading-6">
-                本次将兑换卡密 {normalizedRedeemCode}
-                ，系统会校验卡密状态并开通对应专业、等级和版本授权。升级卡如存在多个可升级目标，需按页面提示显式选择目标授权后再继续。
-              </p>
+              <div className="space-y-1">
+                <p className="text-brand-primary text-sm font-medium">
+                  卡种：{redeemCodeTypeLabels[readyPreview.data.redeemCodeType]}
+                </p>
+                <h2 className="text-text-primary font-medium">
+                  {editionLabels[readyPreview.data.resultEdition]}个人授权
+                </h2>
+                <p className="text-text-secondary leading-6">
+                  {formatPreviewScopeLabel(readyPreview.data)}
+                  <span aria-hidden="true"> · </span>
+                  {readyPreview.data.redeemCodeType === "edition_upgrade"
+                    ? "升级后沿用所选授权有效期"
+                    : `${readyPreview.data.durationDay} 天`}
+                </p>
+                <p className="text-text-secondary leading-6">
+                  兑换截止：
+                  {formatChineseDate(readyPreview.data.redeemDeadlineAt)}
+                </p>
+              </div>
+
+              {readyPreview.data.redeemCodeType === "edition_upgrade" ? (
+                <fieldset className="space-y-2" disabled={isRedeeming}>
+                  <legend className="text-text-primary font-medium">
+                    选择要升级的标准版授权
+                  </legend>
+                  {readyPreview.data.upgradeTargets.map((target) => (
+                    <label
+                      className="border-border flex cursor-pointer items-start gap-2 rounded-lg border p-3"
+                      key={target.personalAuthPublicId}
+                    >
+                      <input
+                        checked={
+                          targetPersonalAuthPublicId ===
+                          target.personalAuthPublicId
+                        }
+                        className="mt-1"
+                        name="target-personal-auth"
+                        onChange={() =>
+                          setTargetPersonalAuthPublicId(
+                            target.personalAuthPublicId,
+                          )
+                        }
+                        type="radio"
+                        value={target.personalAuthPublicId}
+                      />
+                      <span className="text-text-secondary leading-6">
+                        {formatPreviewScopeLabel(readyPreview.data)}，有效期至
+                        {formatChineseDate(target.expiresAt)}
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : null}
             </section>
           ) : null}
 
@@ -1207,11 +1399,13 @@ export function StudentRedeemCodePage() {
             type="submit"
           >
             <KeyRound aria-hidden="true" />
-            {isSubmitting
-              ? "兑换中"
-              : isConfirmationReady
-                ? "确认兑换"
-                : "预览权益"}
+            {isPreviewing
+              ? "预览中"
+              : isRedeeming
+                ? "兑换中"
+                : isConfirmationReady
+                  ? "确认兑换"
+                  : "预览权益"}
           </Button>
         </form>
       </section>

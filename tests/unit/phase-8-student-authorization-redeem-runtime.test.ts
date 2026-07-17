@@ -8,9 +8,9 @@ import type {
   EffectivePersonalAuthRow,
 } from "@/server/repositories/effective-authorization-repository";
 import type {
+  ConfirmRedeemCodeForUserInput,
   PersonalAuthAccessRow,
   RedeemCodeAuthorizationRow,
-  RedeemCodeForUserInput,
 } from "@/server/repositories/redeem-code-authorization-repository";
 
 const now = new Date("2026-05-22T04:00:00.000Z");
@@ -109,7 +109,6 @@ function createRedeemCode(
   return {
     id: 301,
     public_id: "redeem_code_public_123",
-    code_display: "ABCDEFG2",
     profession: "monopoly",
     level: 3,
     redeem_code_type: "personal_standard_activation",
@@ -118,6 +117,7 @@ function createRedeemCode(
     status: "unused",
     used_by_user_id: null,
     used_at: null,
+    updated_at: new Date("2026-05-22T03:00:00.000Z"),
     ...overrides,
   };
 }
@@ -127,7 +127,7 @@ function createHandlers(
   options: {
     redeemCode?: RedeemCodeAuthorizationRow;
     personalAuth?: PersonalAuthAccessRow;
-    onRedeemCodeForUser?: (input: RedeemCodeForUserInput) => void;
+    onConfirmRedeemCode?: (input: ConfirmRedeemCodeForUserInput) => void;
   } = {},
 ) {
   return createStudentAuthorizationRedeemRuntimeRouteHandlers({
@@ -156,27 +156,31 @@ function createHandlers(
       },
     },
     redeemCodeAuthorizationRepository: {
-      async findRedeemCodeByCode(code) {
-        expect(code).toBe("ABCDEFG2");
-
-        return options.redeemCode ?? createRedeemCode();
-      },
-      async redeemCodeForUser(input) {
+      async previewRedeemCodeForUser(input) {
         expect(input).toMatchObject({
           code: "ABCDEFG2",
-          redeemCodeId: 301,
           userPublicId: "user_public_student_123",
-          redeemedAt: now,
-          redeemCodeType:
-            options.redeemCode?.redeem_code_type ??
-            "personal_standard_activation",
-          profession: options.redeemCode?.profession ?? "monopoly",
-          level: options.redeemCode?.level ?? 3,
-          durationDay: 365,
+          previewedAt: now,
         });
-        options.onRedeemCodeForUser?.(input);
 
-        return options.personalAuth ?? createPersonalAuth();
+        return {
+          redeemCode: options.redeemCode ?? createRedeemCode(),
+          activePersonalAuths: [],
+          activeUpgradedPersonalAuthPublicIds: [],
+        };
+      },
+      async confirmRedeemCodeForUser(input) {
+        expect(input).toMatchObject({
+          code: "ABCDEFG2",
+          userPublicId: "user_public_student_123",
+          confirmedAt: now,
+        });
+        options.onConfirmRedeemCode?.(input);
+
+        return {
+          status: "redeemed" as const,
+          personalAuth: options.personalAuth ?? createPersonalAuth(),
+        };
       },
       async listPersonalAuthsByUserPublicId(userPublicId) {
         expect(userPublicId).toBe("user_public_student_123");
@@ -356,10 +360,10 @@ describe("phase 8 student authorization redeem runtime", () => {
       effectiveAuthorizationRepository:
         upgradedEffectiveAuthorizationRepository,
       redeemCodeAuthorizationRepository: {
-        async findRedeemCodeByCode() {
+        async previewRedeemCodeForUser() {
           throw new Error("redeem should not be called by authorization list");
         },
-        async redeemCodeForUser() {
+        async confirmRedeemCodeForUser() {
           throw new Error("redeem should not be called by authorization list");
         },
         async listPersonalAuthsByUserPublicId() {
@@ -453,14 +457,39 @@ describe("phase 8 student authorization redeem runtime", () => {
     });
   });
 
-  it("redeems an unused code for the authenticated student", async () => {
+  it("previews and confirms an unused code without returning its plaintext", async () => {
     const handlers = createHandlers();
+    const previewResponse = await handlers.redeemCodes.preview.POST(
+      new Request("http://localhost/api/v1/redeem-codes/preview", {
+        method: "POST",
+        headers: createRequestAuthHeaders(),
+        body: JSON.stringify({ code: "abcdefg2" }),
+      }),
+    );
+    const previewPayload = (await readJson(previewResponse)) as {
+      data: { previewVersion: string };
+    };
+
+    expect(previewPayload).toMatchObject({
+      code: 0,
+      data: {
+        redeemCodeType: "personal_standard_activation",
+        profession: "monopoly",
+        level: 3,
+        resultEdition: "standard",
+        durationDay: 365,
+        upgradeTargets: [],
+      },
+    });
+
     const response = await handlers.redeemCodes.redeem.POST(
       new Request("http://localhost/api/v1/redeem-codes/redeem", {
         method: "POST",
         headers: createRequestAuthHeaders(),
         body: JSON.stringify({
           code: "abcdefg2",
+          previewVersion: previewPayload.data.previewVersion,
+          targetPersonalAuthPublicId: null,
         }),
       }),
     );
@@ -469,13 +498,6 @@ describe("phase 8 student authorization redeem runtime", () => {
       code: 0,
       message: "ok",
       data: {
-        redeemCode: {
-          publicId: "redeem_code_public_123",
-          codeDisplay: "ABCDEFG2",
-          profession: "monopoly",
-          level: 3,
-          status: "used",
-        },
         personalAuth: {
           publicId: "personal_auth_public_123",
           redeemCodePublicId: "redeem_code_public_123",
@@ -487,62 +509,44 @@ describe("phase 8 student authorization redeem runtime", () => {
         },
       },
     });
+    expect(JSON.stringify(previewPayload)).not.toContain("ABCDEFG2");
   });
 
-  it("passes advanced activation redeem code type and scope to the repository", async () => {
-    let observedInput: RedeemCodeForUserInput | null = null;
+  it("derives advanced activation facts on the server preview", async () => {
     const handlers = createHandlers(createStudentSession(), {
       redeemCode: createRedeemCode({
         redeem_code_type: "personal_advanced_activation",
       }),
-      onRedeemCodeForUser(input) {
-        observedInput = input;
-      },
     });
 
-    const response = await handlers.redeemCodes.redeem.POST(
-      new Request("http://localhost/api/v1/redeem-codes/redeem", {
+    const response = await handlers.redeemCodes.preview.POST(
+      new Request("http://localhost/api/v1/redeem-codes/preview", {
         method: "POST",
         headers: createRequestAuthHeaders(),
-        body: JSON.stringify({
-          code: "abcdefg2",
-        }),
+        body: JSON.stringify({ code: "abcdefg2" }),
       }),
     );
 
     await expect(readJson(response)).resolves.toMatchObject({
       code: 0,
       data: {
-        redeemCode: {
-          publicId: "redeem_code_public_123",
-          status: "used",
-        },
-        personalAuth: {
-          publicId: "personal_auth_public_123",
-          profession: "monopoly",
-          level: 3,
-          status: "active",
-        },
+        redeemCodeType: "personal_advanced_activation",
+        resultEdition: "advanced",
+        profession: "monopoly",
+        level: 3,
       },
-    });
-    expect(observedInput).toMatchObject({
-      redeemCodeType: "personal_advanced_activation",
-      profession: "monopoly",
-      level: 3,
     });
   });
 
-  it("passes edition upgrade redeem code type and returns the existing personal authorization", async () => {
-    let observedInput: RedeemCodeForUserInput | null = null;
+  it("passes only the preview binding and explicit personal target to confirmation", async () => {
+    let observedInput: ConfirmRedeemCodeForUserInput | null = null;
+    const previewVersion = `sha256:${"1".repeat(64)}`;
     const handlers = createHandlers(createStudentSession(), {
-      redeemCode: createRedeemCode({
-        redeem_code_type: "edition_upgrade",
-      }),
       personalAuth: createPersonalAuth({
         public_id: "personal_auth_public_existing",
         redeem_code_public_id: "redeem_code_public_standard",
       }),
-      onRedeemCodeForUser(input) {
+      onConfirmRedeemCode(input) {
         observedInput = input;
       },
     });
@@ -553,6 +557,8 @@ describe("phase 8 student authorization redeem runtime", () => {
         headers: createRequestAuthHeaders(),
         body: JSON.stringify({
           code: "abcdefg2",
+          previewVersion,
+          targetPersonalAuthPublicId: "personal_auth_public_existing",
         }),
       }),
     );
@@ -560,10 +566,6 @@ describe("phase 8 student authorization redeem runtime", () => {
     await expect(readJson(response)).resolves.toMatchObject({
       code: 0,
       data: {
-        redeemCode: {
-          publicId: "redeem_code_public_123",
-          status: "used",
-        },
         personalAuth: {
           publicId: "personal_auth_public_existing",
           redeemCodePublicId: "redeem_code_public_standard",
@@ -574,9 +576,8 @@ describe("phase 8 student authorization redeem runtime", () => {
       },
     });
     expect(observedInput).toMatchObject({
-      redeemCodeType: "edition_upgrade",
-      profession: "monopoly",
-      level: 3,
+      previewVersion,
+      targetPersonalAuthPublicId: "personal_auth_public_existing",
     });
   });
 

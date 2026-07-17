@@ -32,4 +32,10 @@ transition 阶段只允许五份治理文件。产品实现开始前必须先通
 
 ## Final Disposition
 
-Decision: pending
+Decision: APPROVE
+
+最终实现已形成 server preview → 显式目标选择 → transaction revalidation → conditional consume 的最小闭环。preview 为只读且安全 DTO 不回显卡密明文、hash 或 numeric id；内容版本覆盖当前用户、卡密与完整候选事实，但不被当作授权凭证。confirm 在同事务内按 user → code → candidate 顺序加锁，在消费前重建版本并拒绝 stale、错误目标、无目标、已高级、过期和已使用状态；同用户已提交结果可恢复，跨用户不泄露归属。
+
+独立事务审查与独立 UI/安全/测试审查最终均为 `APPROVE`，P1 blocking 为 0。UI 复核提出的兑换中目标漂移、终态错误保留旧预览、卡种语义不明确三项阻断均以 RED/GREEN 修复；最终聚焦 8 文件 51/51、完整 unit 405 文件 2435/2435、lint、typecheck、format 与 diff check 通过。
+
+本结论仅批准 F-0132 静态关闭候选，不等同生产 runtime 验收。隔离 worktree 的 Turbopack 根目录限制必须由 ff-only 合入后的 fresh-master build 替代；该 build、P0/P1/Module closeout/pre-push 门禁任一失败都必须停止 push。F-0140、跨实例限流、真实 PostgreSQL 交错、连接中断与响应丢失继续保留给后续 finding 与 RV-0021。

@@ -2,27 +2,39 @@ import { describe, expect, it } from "vitest";
 
 import {
   createPersonalAuthRouteHandlers,
+  createRedeemCodePreviewRouteHandlers,
   createRedeemCodeRouteHandlers,
 } from "./redeem-code-route";
 import type { RedeemCodeAuthorizationService } from "./redeem-code-authorization-service";
 
 function createService(): RedeemCodeAuthorizationService {
   return {
-    async redeemCode(input, userContext) {
+    async previewRedeemCode(input) {
       const redeemCodeInput = input as { code: string };
+
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          redeemCodeType: "personal_advanced_activation" as const,
+          profession: "monopoly" as const,
+          level: 3,
+          resultEdition: "advanced" as const,
+          durationDay: 365,
+          redeemDeadlineAt: "2026-06-18T04:00:00.000Z",
+          previewVersion: `sha256:${redeemCodeInput.code.length.toString().padStart(64, "0")}`,
+          upgradeTargets: [],
+        },
+      };
+    },
+    async redeemCode(input, userContext) {
+      void input;
       const userPublicId = userContext.userPublicId;
 
       return {
         code: 0,
         message: "ok",
         data: {
-          redeemCode: {
-            publicId: "redeem_code_public_123",
-            codeDisplay: redeemCodeInput.code.toUpperCase(),
-            profession: "monopoly",
-            level: 3,
-            status: "used",
-          },
           personalAuth: {
             publicId: `${userPublicId}_personal_auth_123`,
             redeemCodePublicId: "redeem_code_public_123",
@@ -79,13 +91,6 @@ describe("redeem code route handlers", () => {
       code: 0,
       message: "ok",
       data: {
-        redeemCode: {
-          publicId: "redeem_code_public_123",
-          codeDisplay: "ABCD2345",
-          profession: "monopoly",
-          level: 3,
-          status: "used",
-        },
         personalAuth: {
           publicId: "user_public_123_personal_auth_123",
           redeemCodePublicId: "redeem_code_public_123",
@@ -97,6 +102,30 @@ describe("redeem code route handlers", () => {
         },
       },
     });
+  });
+
+  it("passes preview JSON and user context without exposing plaintext", async () => {
+    const { POST } = createRedeemCodePreviewRouteHandlers(
+      createService(),
+      async () => ({ userPublicId: "user_public_123" }),
+    );
+
+    const response = await POST(
+      new Request("http://localhost/api/v1/redeem-codes/preview", {
+        method: "POST",
+        body: JSON.stringify({ code: "abcd2345" }),
+      }),
+    );
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: {
+        redeemCodeType: "personal_advanced_activation",
+        upgradeTargets: [],
+      },
+    });
+    expect(JSON.stringify(payload)).not.toContain("abcd2345");
   });
 
   it("returns standard unauthorized response when user context is missing", async () => {

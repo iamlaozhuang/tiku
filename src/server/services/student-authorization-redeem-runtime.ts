@@ -13,6 +13,7 @@ import {
 import { createEffectiveAuthorizationService } from "./effective-authorization-service";
 import {
   createPersonalAuthRouteHandlers,
+  createRedeemCodePreviewRouteHandlers,
   createRedeemCodeRouteHandlers,
   type AuthorizationUserResolver,
 } from "./redeem-code-route";
@@ -79,6 +80,10 @@ export function createStudentAuthorizationRedeemRuntimeRouteHandlers(
   const resolveUserContext =
     createStudentAuthorizationRedeemUserResolver(sessionService);
   const clock = options.now === undefined ? undefined : { now: options.now };
+  const redeemCodeAuthorizationService = createRedeemCodeAuthorizationService(
+    repositories.redeemCodeAuthorizationRepository,
+    clock,
+  );
 
   return createRouteHandlersWithErrorEnvelope({
     authorizations: createEffectiveAuthorizationRouteHandlers(
@@ -89,18 +94,16 @@ export function createStudentAuthorizationRedeemRuntimeRouteHandlers(
       resolveUserContext,
     ),
     personalAuths: createPersonalAuthRouteHandlers(
-      createRedeemCodeAuthorizationService(
-        repositories.redeemCodeAuthorizationRepository,
-        clock,
-      ),
+      redeemCodeAuthorizationService,
       resolveUserContext,
     ),
     redeemCodes: {
+      preview: createRedeemCodePreviewRouteHandlers(
+        redeemCodeAuthorizationService,
+        resolveUserContext,
+      ),
       redeem: createRedeemCodeRouteHandlers(
-        createRedeemCodeAuthorizationService(
-          repositories.redeemCodeAuthorizationRepository,
-          clock,
-        ),
+        redeemCodeAuthorizationService,
         resolveUserContext,
       ),
     },

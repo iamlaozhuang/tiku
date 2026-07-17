@@ -100,6 +100,22 @@ const personalAuthPayload = {
   },
 };
 
+const redeemCodePreviewPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    redeemCodeType: "personal_advanced_activation",
+    profession: "monopoly",
+    level: 3,
+    resultEdition: "advanced",
+    durationDay: 365,
+    redeemDeadlineAt: "2026-08-22T00:00:00.000Z",
+    previewVersion:
+      "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    upgradeTargets: [],
+  },
+};
+
 type TestSessionUser = {
   adminPublicId: string | null;
   adminRoles: string[];
@@ -607,7 +623,7 @@ describe("StudentRedeemCodePage", () => {
 
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (url: RequestInfo | URL) => {
+      vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
         const path = String(url);
 
         if (path === "/api/v1/sessions") {
@@ -616,6 +632,11 @@ describe("StudentRedeemCodePage", () => {
 
         if (path === "/api/v1/personal-auths") {
           return createJsonResponse(personalAuthPayload);
+        }
+
+        if (path === "/api/v1/redeem-codes/preview") {
+          expect(init?.body).toBe(JSON.stringify({ code: "ABCD2345" }));
+          return createJsonResponse(redeemCodePreviewPayload);
         }
 
         return createJsonResponse({
@@ -640,12 +661,19 @@ describe("StudentRedeemCodePage", () => {
 
     expect(redeemForm).not.toBeNull();
     expect(redeemForm).toHaveTextContent("不会改变企业授权");
+
+    fireEvent.change(screen.getByLabelText("兑换码"), {
+      target: { value: "ABCD2345" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+    expect(
+      await screen.findByRole("heading", { name: "高级版个人授权" }),
+    ).toBeInTheDocument();
   });
 
-  it("shows empty authorization state and keeps the submit button disabled until the code shape is valid", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (url: RequestInfo | URL) => {
+  it("loads a server entitlement preview before enabling irreversible confirmation", async () => {
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
         const path = String(url);
 
         if (path === "/api/v1/sessions") {
@@ -660,13 +688,27 @@ describe("StudentRedeemCodePage", () => {
           });
         }
 
+        if (path === "/api/v1/redeem-codes/preview") {
+          expect(init).toMatchObject({
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({ code: "ABCD2345" }),
+          });
+
+          return createJsonResponse(redeemCodePreviewPayload);
+        }
+
         return createJsonResponse({
           code: 404001,
           message: "missing",
           data: null,
         });
-      }),
+      },
     );
+
+    vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(StudentRedeemCodePage));
 
@@ -683,12 +725,225 @@ describe("StudentRedeemCodePage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
 
+    expect(
+      await screen.findByRole("heading", { name: "高级版个人授权" }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
-      "ABCD2345",
+      "高级版激活卡",
     );
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "专卖 · 三级",
+    );
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "365 天",
+    );
+    expect(
+      screen.getByTestId("redeem-code-confirmation"),
+    ).not.toHaveTextContent("ABCD2345");
     expect(
       screen.getByRole("button", { name: "确认兑换" }),
     ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/v1/redeem-codes/redeem",
+      expect.anything(),
+    );
+  });
+
+  it("ignores a late preview after the input has changed", async () => {
+    let resolveFirstPreview!: (
+      response: ReturnType<typeof createJsonResponse>,
+    ) => void;
+    const firstPreview = new Promise<ReturnType<typeof createJsonResponse>>(
+      (resolve) => {
+        resolveFirstPreview = resolve;
+      },
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(sessionPayload);
+        }
+
+        if (path === "/api/v1/personal-auths") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: { personalAuths: [] },
+          });
+        }
+
+        if (path === "/api/v1/redeem-codes/preview") {
+          const requestBody = JSON.parse(String(init?.body)) as {
+            code: string;
+          };
+
+          if (requestBody.code === "ABCD2345") {
+            return firstPreview;
+          }
+
+          return createJsonResponse({
+            ...redeemCodePreviewPayload,
+            data: {
+              ...redeemCodePreviewPayload.data,
+              redeemCodeType: "personal_standard_activation",
+              resultEdition: "standard",
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentRedeemCodePage));
+    await screen.findByRole("heading", { name: "个人授权" });
+
+    fireEvent.change(screen.getByLabelText("兑换码"), {
+      target: { value: "ABCD2345" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+    fireEvent.change(screen.getByLabelText("兑换码"), {
+      target: { value: "BCDE3456" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+
+    expect(
+      await screen.findByRole("heading", { name: "标准版个人授权" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "标准版激活卡",
+    );
+
+    resolveFirstPreview(createJsonResponse(redeemCodePreviewPayload));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "标准版个人授权" }),
+      ).toBeInTheDocument(),
+    );
+    expect(
+      screen.queryByRole("heading", { name: "高级版个人授权" }),
+    ).toBeNull();
+  });
+
+  it("requires an explicit upgrade target when the server preview returns multiple candidates", async () => {
+    const selectedTargetPublicId = "personal-auth-public-002";
+    let resolveRedeem!: (
+      response: ReturnType<typeof createJsonResponse>,
+    ) => void;
+    const pendingRedeem = new Promise<ReturnType<typeof createJsonResponse>>(
+      (resolve) => {
+        resolveRedeem = resolve;
+      },
+    );
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/sessions") {
+          return createJsonResponse(sessionPayload);
+        }
+
+        if (path === "/api/v1/personal-auths") {
+          return createJsonResponse(personalAuthPayload);
+        }
+
+        if (path === "/api/v1/redeem-codes/preview") {
+          return createJsonResponse({
+            ...redeemCodePreviewPayload,
+            data: {
+              ...redeemCodePreviewPayload.data,
+              redeemCodeType: "edition_upgrade",
+              upgradeTargets: [
+                {
+                  personalAuthPublicId: "personal-auth-public-001",
+                  sourceEdition: "standard",
+                  startsAt: "2026-05-22T00:00:00.000Z",
+                  expiresAt: "2026-08-22T00:00:00.000Z",
+                },
+                {
+                  personalAuthPublicId: selectedTargetPublicId,
+                  sourceEdition: "standard",
+                  startsAt: "2026-06-22T00:00:00.000Z",
+                  expiresAt: "2026-09-22T00:00:00.000Z",
+                },
+              ],
+            },
+          });
+        }
+
+        if (path === "/api/v1/redeem-codes/redeem") {
+          expect(init?.body).toBe(
+            JSON.stringify({
+              code: "ABCD2345",
+              previewVersion: redeemCodePreviewPayload.data.previewVersion,
+              targetPersonalAuthPublicId: selectedTargetPublicId,
+            }),
+          );
+
+          return pendingRedeem;
+        }
+
+        return createJsonResponse({
+          code: 404001,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentRedeemCodePage));
+    await screen.findByRole("heading", { name: "个人授权" });
+
+    fireEvent.change(screen.getByLabelText("兑换码"), {
+      target: { value: "ABCD2345" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+
+    expect(
+      await screen.findByRole("group", { name: "选择要升级的标准版授权" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "升级后沿用所选授权有效期",
+    );
+    expect(screen.getByTestId("redeem-code-confirmation")).toHaveTextContent(
+      "版本升级卡",
+    );
+    expect(
+      screen.getByTestId("redeem-code-confirmation"),
+    ).not.toHaveTextContent("365 天");
+    expect(screen.getByRole("button", { name: "确认兑换" })).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: /2026年9月22日/u,
+      }),
+    );
+    expect(screen.getByRole("button", { name: "确认兑换" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "确认兑换" }));
+    expect(screen.getByLabelText("兑换码")).toBeDisabled();
+    for (const radio of screen.getAllByRole("radio")) {
+      expect(radio).toBeDisabled();
+    }
+    resolveRedeem(
+      createJsonResponse({
+        code: 409005,
+        message: "Redeem code preview is stale.",
+        data: null,
+      }),
+    );
+    expect(await screen.findByText("权益预览已变化，请重新预览")).toBeVisible();
+    expect(screen.queryByTestId("redeem-code-confirmation")).toBeNull();
+    expect(screen.getByRole("button", { name: "预览权益" })).toBeEnabled();
   });
 
   it("submits redeem code with the cookie-backed session and shows contract-safe failure feedback", async () => {
@@ -705,13 +960,28 @@ describe("StudentRedeemCodePage", () => {
           return createJsonResponse(personalAuthPayload);
         }
 
+        if (path === "/api/v1/redeem-codes/preview") {
+          return createJsonResponse({
+            ...redeemCodePreviewPayload,
+            data: {
+              ...redeemCodePreviewPayload.data,
+              redeemCodeType: "personal_standard_activation",
+              resultEdition: "standard",
+            },
+          });
+        }
+
         if (path === "/api/v1/redeem-codes/redeem") {
           expect(init).toMatchObject({
             method: "POST",
             headers: {
               "content-type": "application/json",
             },
-            body: JSON.stringify({ code: "ABCD2345" }),
+            body: JSON.stringify({
+              code: "ABCD2345",
+              previewVersion: redeemCodePreviewPayload.data.previewVersion,
+              targetPersonalAuthPublicId: null,
+            }),
           });
 
           return createJsonResponse(
@@ -739,11 +1009,15 @@ describe("StudentRedeemCodePage", () => {
       target: { value: "abcd-2345" },
     });
     fireEvent.click(screen.getByRole("button", { name: "预览权益" }));
+    await screen.findByRole("button", { name: "确认兑换" });
     fireEvent.click(screen.getByRole("button", { name: "确认兑换" }));
+    expect(screen.getByLabelText("兑换码")).toBeDisabled();
 
     await waitFor(() =>
       expect(screen.getByText("该兑换码已被使用")).toBeInTheDocument(),
     );
+    expect(screen.queryByTestId("redeem-code-confirmation")).toBeNull();
+    expect(screen.getByRole("button", { name: "预览权益" })).toBeEnabled();
     expect(screen.queryByText("兑换成功")).toBeNull();
     expect(document.body.textContent).not.toContain("code_hash");
   });

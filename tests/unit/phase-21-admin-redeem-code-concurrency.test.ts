@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
@@ -202,5 +203,53 @@ describe("phase 21 admin redeem_code generation concurrency proof", () => {
       data: null,
     });
     expect(auditInputs).toEqual([]);
+  });
+});
+
+describe("student redeem_code confirmation transaction guard", () => {
+  it("locks user before code and validates preview before consuming", () => {
+    const source = readFileSync(
+      "src/server/repositories/student-authorization-redeem-runtime-repository.ts",
+      "utf8",
+    );
+    const confirmationStart = source.indexOf(
+      "async function confirmRedeemCodeForUser",
+    );
+    const confirmationSource = source.slice(confirmationStart);
+    const userLock = confirmationSource.indexOf(
+      "findActiveUserIdByPublicIdForUpdate",
+    );
+    const codeLock = confirmationSource.indexOf(
+      "findRedeemCodeByHashForUpdate",
+    );
+    const previewEvaluation = confirmationSource.indexOf(
+      "evaluateRedeemCodePreview",
+    );
+    const versionComparison = confirmationSource.indexOf(
+      "preview.data.previewVersion !== input.previewVersion",
+    );
+    const consume = confirmationSource.indexOf(
+      "consumeUnusedRedeemCodeForUser",
+    );
+
+    expect(confirmationStart).toBeGreaterThan(-1);
+    expect(userLock).toBeGreaterThan(-1);
+    expect(codeLock).toBeGreaterThan(userLock);
+    expect(previewEvaluation).toBeGreaterThan(codeLock);
+    expect(versionComparison).toBeGreaterThan(previewEvaluation);
+    expect(consume).toBeGreaterThan(versionComparison);
+    expect(confirmationSource).toContain("recoverCommittedRedeemCodeOutcome");
+    expect(confirmationSource).toContain('.for("update")');
+  });
+
+  it("keeps transaction facts authoritative outside the service", () => {
+    const serviceSource = readFileSync(
+      "src/server/services/redeem-code-authorization-service.ts",
+      "utf8",
+    );
+
+    expect(serviceSource).not.toContain("findRedeemCodeByCode");
+    expect(serviceSource).not.toContain("redeemCodeId:");
+    expect(serviceSource).toContain("confirmRedeemCodeForUser");
   });
 });

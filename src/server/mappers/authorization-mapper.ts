@@ -1,25 +1,8 @@
 import type {
   PersonalAuthDto,
   PersonalAuthListDto,
-  RedeemCodeDto,
-  RedeemCodeRedemptionDto,
 } from "../contracts/authorization-contract";
-import type {
-  PersonalAuthAccessRow,
-  RedeemCodeAuthorizationRow,
-} from "../repositories/redeem-code-authorization-repository";
-
-export function mapRedeemCodeToApi(
-  redeemCode: RedeemCodeAuthorizationRow,
-): RedeemCodeDto {
-  return {
-    publicId: redeemCode.public_id,
-    codeDisplay: redeemCode.code_display,
-    profession: redeemCode.profession,
-    level: redeemCode.level,
-    status: redeemCode.status,
-  };
-}
+import type { PersonalAuthAccessRow } from "../repositories/redeem-code-authorization-repository";
 
 export function mapPersonalAuthToApi(
   personalAuth: PersonalAuthAccessRow,
@@ -32,19 +15,6 @@ export function mapPersonalAuthToApi(
     startsAt: personalAuth.starts_at.toISOString(),
     expiresAt: personalAuth.expires_at.toISOString(),
     status: personalAuth.status,
-  };
-}
-
-export function mapRedeemCodeRedemptionToApi(
-  redeemCode: RedeemCodeAuthorizationRow,
-  personalAuth: PersonalAuthAccessRow,
-): RedeemCodeRedemptionDto {
-  return {
-    redeemCode: mapRedeemCodeToApi({
-      ...redeemCode,
-      status: "used",
-    }),
-    personalAuth: mapPersonalAuthToApi(personalAuth),
   };
 }
 

@@ -5,6 +5,7 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
 import type { AuthorizationEdition } from "../models/auth";
+import { evaluateRedeemCodePreview } from "../models/redeem-code-preview";
 import type {
   EffectiveAuthUpgradeRow,
   EffectiveAuthorizationRepository,
@@ -12,9 +13,13 @@ import type {
   EffectivePersonalAuthRow,
 } from "./effective-authorization-repository";
 import type {
+  ConfirmRedeemCodeForUserInput,
+  ConfirmRedeemCodeForUserResult,
   PersonalAuthAccessRow,
+  PersonalAuthPreviewRow,
   RedeemCodeAuthorizationRepository,
-  RedeemCodeForUserInput,
+  RedeemCodeAuthorizationRow,
+  RedeemCodePreviewFacts,
 } from "./redeem-code-authorization-repository";
 import { createRuntimeDatabaseForSchema } from "./runtime-database";
 import { createOrgAuthCoversOrganizationCondition } from "./organization-scope-query";
@@ -197,30 +202,38 @@ function createPostgresRedeemCodeAuthorizationRepository(
   createAuthUpgradePublicId: () => string,
 ): RedeemCodeAuthorizationRepository {
   return {
-    async findRedeemCodeByCode(code) {
-      const [row] = await getDatabase()
-        .select({
-          id: redeemCode.id,
-          public_id: redeemCode.public_id,
-          code_display: redeemCode.code_display,
-          profession: redeemCode.profession,
-          level: redeemCode.level,
-          redeem_code_type: redeemCode.redeem_code_type,
-          duration_day: redeemCode.duration_day,
-          redeem_deadline_at: redeemCode.redeem_deadline_at,
-          status: redeemCode.status,
-          used_by_user_id: redeemCode.used_by_user_id,
-          used_at: redeemCode.used_at,
-        })
-        .from(redeemCode)
-        .where(eq(redeemCode.code_hash, createRedeemCodeHash(code)))
-        .limit(1);
+    async previewRedeemCodeForUser(input) {
+      return getDatabase().transaction(async (transaction) => {
+        const userId = await findActiveUserIdByPublicId(
+          transaction,
+          input.userPublicId,
+        );
 
-      return row ?? null;
+        if (userId === null) {
+          return null;
+        }
+
+        const redeemCodeRow = await findRedeemCodeByHash(
+          transaction,
+          input.code,
+        );
+
+        if (redeemCodeRow === null) {
+          return null;
+        }
+
+        return loadRedeemCodePreviewFacts(
+          transaction,
+          userId,
+          redeemCodeRow,
+          input.previewedAt,
+          false,
+        );
+      });
     },
 
-    async redeemCodeForUser(input) {
-      return redeemCodeForUser(
+    async confirmRedeemCodeForUser(input) {
+      return confirmRedeemCodeForUser(
         getDatabase(),
         input,
         createPersonalAuthPublicId,
@@ -234,41 +247,114 @@ function createPostgresRedeemCodeAuthorizationRepository(
   };
 }
 
-async function redeemCodeForUser(
+async function confirmRedeemCodeForUser(
   database: StudentAuthorizationRedeemRuntimeDatabase,
-  input: RedeemCodeForUserInput,
+  input: ConfirmRedeemCodeForUserInput,
   createPersonalAuthPublicId: () => string,
   createAuthUpgradePublicId: () => string,
-): Promise<PersonalAuthAccessRow | null> {
+): Promise<ConfirmRedeemCodeForUserResult> {
   return database.transaction(async (transaction) => {
-    const userId = await findActiveUserIdByPublicId(
+    const userId = await findActiveUserIdByPublicIdForUpdate(
       transaction,
       input.userPublicId,
     );
 
     if (userId === null) {
-      return null;
+      return { status: "not_found" };
     }
 
-    if (input.redeemCodeType === "edition_upgrade") {
-      const targetPersonalAuth = await findEditionUpgradeTargetPersonalAuth(
-        transaction,
-        userId,
-        input,
+    const redeemCodeRow = await findRedeemCodeByHashForUpdate(
+      transaction,
+      input.code,
+    );
+
+    if (redeemCodeRow === null) {
+      return { status: "not_found" };
+    }
+
+    if (
+      redeemCodeRow.status === "used" ||
+      redeemCodeRow.used_by_user_id !== null ||
+      redeemCodeRow.used_at !== null
+    ) {
+      if (
+        redeemCodeRow.status === "used" &&
+        redeemCodeRow.used_by_user_id === userId &&
+        redeemCodeRow.used_at !== null
+      ) {
+        const recoveredPersonalAuth = await recoverCommittedRedeemCodeOutcome(
+          transaction,
+          userId,
+          redeemCodeRow,
+        );
+
+        return recoveredPersonalAuth === null
+          ? { status: "inconsistent" }
+          : { status: "replayed", personalAuth: recoveredPersonalAuth };
+      }
+
+      return {
+        status:
+          redeemCodeRow.status === "used" &&
+          redeemCodeRow.used_by_user_id !== null &&
+          redeemCodeRow.used_at !== null
+            ? "used"
+            : "inconsistent",
+      };
+    }
+
+    if (
+      redeemCodeRow.status === "expired" ||
+      redeemCodeRow.redeem_deadline_at < input.confirmedAt
+    ) {
+      return { status: "expired" };
+    }
+
+    const previewFacts = await loadRedeemCodePreviewFacts(
+      transaction,
+      userId,
+      redeemCodeRow,
+      input.confirmedAt,
+      true,
+    );
+    const preview = evaluateRedeemCodePreview({
+      ...previewFacts,
+      userPublicId: input.userPublicId,
+      checkedAt: input.confirmedAt,
+    });
+
+    if (preview.status === "unavailable") {
+      return { status: mapPreviewUnavailableReason(preview.reason) };
+    }
+
+    if (preview.data.previewVersion !== input.previewVersion) {
+      return { status: "stale" };
+    }
+
+    if (redeemCodeRow.redeem_code_type === "edition_upgrade") {
+      const targetPersonalAuth = previewFacts.activePersonalAuths.find(
+        (personalAuth) =>
+          personalAuth.public_id === input.targetPersonalAuthPublicId &&
+          personalAuth.edition === "standard",
+      );
+      const isEligibleTarget = preview.data.upgradeTargets.some(
+        (target) =>
+          target.personalAuthPublicId === input.targetPersonalAuthPublicId,
       );
 
-      if (targetPersonalAuth === null) {
-        return null;
+      if (targetPersonalAuth === undefined || !isEligibleTarget) {
+        return { status: "invalid_target" };
       }
 
       const redeemedCode = await consumeUnusedRedeemCodeForUser(
         transaction,
         userId,
-        input,
+        redeemCodeRow.id,
+        input.confirmedAt,
       );
 
       if (redeemedCode === null) {
-        return null;
+        return { status: "used" };
       }
 
       const [row] = await transaction
@@ -278,8 +364,8 @@ async function redeemCodeForUser(
           personal_auth_id: targetPersonalAuth.id,
           target_edition: "advanced",
           source_type: "redeem_code",
-          redeem_code_id: input.redeemCodeId,
-          starts_at: input.redeemedAt,
+          redeem_code_id: redeemCodeRow.id,
+          starts_at: input.confirmedAt,
           expires_at: targetPersonalAuth.expires_at,
           status: "active",
         })
@@ -292,29 +378,28 @@ async function redeemCodeForUser(
       }
 
       return {
-        id: targetPersonalAuth.id,
-        public_id: targetPersonalAuth.public_id,
-        redeem_code_public_id: targetPersonalAuth.redeem_code_public_id,
-        profession: targetPersonalAuth.profession,
-        level: targetPersonalAuth.level,
-        starts_at: targetPersonalAuth.starts_at,
-        expires_at: targetPersonalAuth.expires_at,
-        status: targetPersonalAuth.status,
+        status: "redeemed",
+        personalAuth: toPersonalAuthAccessRow(targetPersonalAuth),
       };
+    }
+
+    if (input.targetPersonalAuthPublicId !== null) {
+      return { status: "invalid_target" };
     }
 
     const redeemedCode = await consumeUnusedRedeemCodeForUser(
       transaction,
       userId,
-      input,
+      redeemCodeRow.id,
+      input.confirmedAt,
     );
 
     if (redeemedCode === null) {
-      return null;
+      return { status: "used" };
     }
 
     const edition: AuthorizationEdition =
-      input.redeemCodeType === "personal_advanced_activation"
+      redeemCodeRow.redeem_code_type === "personal_advanced_activation"
         ? "advanced"
         : "standard";
 
@@ -323,12 +408,12 @@ async function redeemCodeForUser(
       .values({
         public_id: createPersonalAuthPublicId(),
         user_id: userId,
-        redeem_code_id: input.redeemCodeId,
+        redeem_code_id: redeemCodeRow.id,
         edition,
         profession: redeemedCode.profession,
         level: redeemedCode.level,
-        starts_at: input.redeemedAt,
-        expires_at: addDays(input.redeemedAt, input.durationDay),
+        starts_at: input.confirmedAt,
+        expires_at: addDays(input.confirmedAt, redeemCodeRow.duration_day),
         status: "active",
       })
       .returning({
@@ -346,8 +431,11 @@ async function redeemCodeForUser(
     }
 
     return {
-      ...row,
-      redeem_code_public_id: redeemedCode.public_id,
+      status: "redeemed",
+      personalAuth: {
+        ...row,
+        redeem_code_public_id: redeemedCode.public_id,
+      },
     };
   });
 }
@@ -355,10 +443,11 @@ async function redeemCodeForUser(
 async function consumeUnusedRedeemCodeForUser(
   database: StudentAuthorizationRedeemRuntimeDatabase,
   userId: number,
-  input: RedeemCodeForUserInput,
+  redeemCodeId: number,
+  redeemedAt: Date,
 ): Promise<{
   public_id: string;
-  profession: RedeemCodeForUserInput["profession"];
+  profession: RedeemCodeAuthorizationRow["profession"];
   level: number;
 } | null> {
   const [redeemedCode] = await database
@@ -366,12 +455,12 @@ async function consumeUnusedRedeemCodeForUser(
     .set({
       status: "used",
       used_by_user_id: userId,
-      used_at: input.redeemedAt,
-      updated_at: input.redeemedAt,
+      used_at: redeemedAt,
+      updated_at: redeemedAt,
     })
     .where(
       and(
-        eq(redeemCode.id, input.redeemCodeId),
+        eq(redeemCode.id, redeemCodeId),
         eq(redeemCode.status, "unused"),
         isNull(redeemCode.used_by_user_id),
         isNull(redeemCode.used_at),
@@ -390,16 +479,22 @@ async function consumeUnusedRedeemCodeForUser(
   return redeemedCode;
 }
 
-type PersonalAuthUpgradeTargetRow = PersonalAuthAccessRow & {
-  edition: AuthorizationEdition;
-};
-
-async function findEditionUpgradeTargetPersonalAuth(
+async function loadRedeemCodePreviewFacts(
   database: StudentAuthorizationRedeemRuntimeDatabase,
   userId: number,
-  input: RedeemCodeForUserInput,
-): Promise<PersonalAuthUpgradeTargetRow | null> {
-  const activePersonalAuths = await database
+  redeemCodeRow: RedeemCodeAuthorizationRow,
+  checkedAt: Date,
+  lockForUpdate: boolean,
+): Promise<RedeemCodePreviewFacts> {
+  if (redeemCodeRow.redeem_code_type !== "edition_upgrade") {
+    return {
+      redeemCode: redeemCodeRow,
+      activePersonalAuths: [],
+      activeUpgradedPersonalAuthPublicIds: [],
+    };
+  }
+
+  const personalAuthQuery = database
     .select({
       id: personalAuth.id,
       public_id: personalAuth.public_id,
@@ -410,72 +505,204 @@ async function findEditionUpgradeTargetPersonalAuth(
       starts_at: personalAuth.starts_at,
       expires_at: personalAuth.expires_at,
       status: personalAuth.status,
+      updated_at: personalAuth.updated_at,
     })
     .from(personalAuth)
     .innerJoin(redeemCode, eq(redeemCode.id, personalAuth.redeem_code_id))
     .where(
       and(
         eq(personalAuth.user_id, userId),
-        eq(personalAuth.profession, input.profession),
-        eq(personalAuth.level, input.level),
+        eq(personalAuth.profession, redeemCodeRow.profession),
+        eq(personalAuth.level, redeemCodeRow.level),
         eq(personalAuth.status, "active"),
-        lte(personalAuth.starts_at, input.redeemedAt),
-        gte(personalAuth.expires_at, input.redeemedAt),
+        lte(personalAuth.starts_at, checkedAt),
+        gte(personalAuth.expires_at, checkedAt),
       ),
+    )
+    .orderBy(asc(personalAuth.public_id));
+  const activePersonalAuths = lockForUpdate
+    ? await personalAuthQuery.for("update")
+    : await personalAuthQuery;
+  const activeUpgradedPersonalAuthPublicIds =
+    await listActiveUpgradedPersonalAuthPublicIds(
+      database,
+      activePersonalAuths,
+      checkedAt,
+      lockForUpdate,
     );
 
-  if (activePersonalAuths.some((row) => row.edition === "advanced")) {
-    return null;
-  }
-
-  const standardPersonalAuths = activePersonalAuths.filter(
-    (row) => row.edition === "standard",
-  );
-
-  if (standardPersonalAuths.length !== 1) {
-    return null;
-  }
-
-  const hasActiveUpgrade = await hasActiveAdvancedUpgradeForPersonalAuths(
-    database,
-    standardPersonalAuths.map((row) => row.id),
-    input.redeemedAt,
-  );
-
-  if (hasActiveUpgrade) {
-    return null;
-  }
-
-  return standardPersonalAuths[0];
+  return {
+    redeemCode: redeemCodeRow,
+    activePersonalAuths: activePersonalAuths satisfies PersonalAuthPreviewRow[],
+    activeUpgradedPersonalAuthPublicIds,
+  };
 }
 
-async function hasActiveAdvancedUpgradeForPersonalAuths(
+async function listActiveUpgradedPersonalAuthPublicIds(
   database: StudentAuthorizationRedeemRuntimeDatabase,
-  personalAuthIds: number[],
+  activePersonalAuths: PersonalAuthPreviewRow[],
   checkedAt: Date,
-): Promise<boolean> {
-  if (personalAuthIds.length === 0) {
-    return false;
+  lockForUpdate: boolean,
+): Promise<string[]> {
+  if (activePersonalAuths.length === 0) {
+    return [];
   }
 
-  const rows = await database
+  const upgradeQuery = database
     .select({
-      id: authUpgrade.id,
+      personal_auth_id: authUpgrade.personal_auth_id,
     })
     .from(authUpgrade)
     .where(
       and(
-        inArray(authUpgrade.personal_auth_id, personalAuthIds),
+        inArray(
+          authUpgrade.personal_auth_id,
+          activePersonalAuths.map((row) => row.id),
+        ),
         eq(authUpgrade.target_edition, "advanced"),
         eq(authUpgrade.status, "active"),
         isNull(authUpgrade.revoked_at),
         lte(authUpgrade.starts_at, checkedAt),
         gte(authUpgrade.expires_at, checkedAt),
       ),
+    );
+  const upgradeRows = lockForUpdate
+    ? await upgradeQuery.for("update")
+    : await upgradeQuery;
+  const upgradedIds = new Set(
+    upgradeRows.flatMap((row) =>
+      row.personal_auth_id === null ? [] : [row.personal_auth_id],
+    ),
+  );
+
+  return activePersonalAuths
+    .filter((row) => upgradedIds.has(row.id))
+    .map((row) => row.public_id)
+    .sort();
+}
+
+async function findRedeemCodeByHash(
+  database: StudentAuthorizationRedeemRuntimeDatabase,
+  code: string,
+): Promise<RedeemCodeAuthorizationRow | null> {
+  return executeRedeemCodeQuery(database, code, false);
+}
+
+async function findRedeemCodeByHashForUpdate(
+  database: StudentAuthorizationRedeemRuntimeDatabase,
+  code: string,
+): Promise<RedeemCodeAuthorizationRow | null> {
+  return executeRedeemCodeQuery(database, code, true);
+}
+
+async function executeRedeemCodeQuery(
+  database: StudentAuthorizationRedeemRuntimeDatabase,
+  code: string,
+  lockForUpdate: boolean,
+): Promise<RedeemCodeAuthorizationRow | null> {
+  const query = database
+    .select({
+      id: redeemCode.id,
+      public_id: redeemCode.public_id,
+      profession: redeemCode.profession,
+      level: redeemCode.level,
+      redeem_code_type: redeemCode.redeem_code_type,
+      duration_day: redeemCode.duration_day,
+      redeem_deadline_at: redeemCode.redeem_deadline_at,
+      status: redeemCode.status,
+      used_by_user_id: redeemCode.used_by_user_id,
+      used_at: redeemCode.used_at,
+      updated_at: redeemCode.updated_at,
+    })
+    .from(redeemCode)
+    .where(eq(redeemCode.code_hash, createRedeemCodeHash(code)))
+    .limit(1);
+  const rows = lockForUpdate ? await query.for("update") : await query;
+
+  return rows[0] ?? null;
+}
+
+async function recoverCommittedRedeemCodeOutcome(
+  database: StudentAuthorizationRedeemRuntimeDatabase,
+  userId: number,
+  redeemCodeRow: RedeemCodeAuthorizationRow,
+): Promise<PersonalAuthAccessRow | null> {
+  if (redeemCodeRow.redeem_code_type !== "edition_upgrade") {
+    const [row] = await database
+      .select({
+        id: personalAuth.id,
+        public_id: personalAuth.public_id,
+        redeem_code_public_id: redeemCode.public_id,
+        profession: personalAuth.profession,
+        level: personalAuth.level,
+        starts_at: personalAuth.starts_at,
+        expires_at: personalAuth.expires_at,
+        status: personalAuth.status,
+      })
+      .from(personalAuth)
+      .innerJoin(redeemCode, eq(redeemCode.id, personalAuth.redeem_code_id))
+      .where(
+        and(
+          eq(personalAuth.user_id, userId),
+          eq(personalAuth.redeem_code_id, redeemCodeRow.id),
+        ),
+      )
+      .limit(1);
+
+    return row ?? null;
+  }
+
+  const [row] = await database
+    .select({
+      id: personalAuth.id,
+      public_id: personalAuth.public_id,
+      redeem_code_public_id: redeemCode.public_id,
+      profession: personalAuth.profession,
+      level: personalAuth.level,
+      starts_at: personalAuth.starts_at,
+      expires_at: personalAuth.expires_at,
+      status: personalAuth.status,
+    })
+    .from(authUpgrade)
+    .innerJoin(personalAuth, eq(personalAuth.id, authUpgrade.personal_auth_id))
+    .innerJoin(redeemCode, eq(redeemCode.id, personalAuth.redeem_code_id))
+    .where(
+      and(
+        eq(authUpgrade.redeem_code_id, redeemCodeRow.id),
+        eq(authUpgrade.source_type, "redeem_code"),
+        eq(authUpgrade.target_edition, "advanced"),
+        eq(personalAuth.user_id, userId),
+      ),
     )
     .limit(1);
 
-  return rows.length > 0;
+  return row ?? null;
+}
+
+function mapPreviewUnavailableReason(
+  reason:
+    | "already_advanced"
+    | "expired"
+    | "inconsistent"
+    | "no_target"
+    | "used",
+): Exclude<ConfirmRedeemCodeForUserResult["status"], "redeemed" | "replayed"> {
+  return reason;
+}
+
+function toPersonalAuthAccessRow(
+  personalAuthRow: PersonalAuthPreviewRow,
+): PersonalAuthAccessRow {
+  return {
+    id: personalAuthRow.id,
+    public_id: personalAuthRow.public_id,
+    redeem_code_public_id: personalAuthRow.redeem_code_public_id,
+    profession: personalAuthRow.profession,
+    level: personalAuthRow.level,
+    starts_at: personalAuthRow.starts_at,
+    expires_at: personalAuthRow.expires_at,
+    status: personalAuthRow.status,
+  };
 }
 
 async function listPersonalAuthsByUserPublicId(
@@ -510,6 +737,20 @@ async function findActiveUserIdByPublicId(
     .select({ id: user.id })
     .from(user)
     .where(and(eq(user.public_id, userPublicId), eq(user.status, "active")))
+    .limit(1);
+
+  return row?.id ?? null;
+}
+
+async function findActiveUserIdByPublicIdForUpdate(
+  database: StudentAuthorizationRedeemRuntimeDatabase,
+  userPublicId: string,
+): Promise<number | null> {
+  const [row] = await database
+    .select({ id: user.id })
+    .from(user)
+    .where(and(eq(user.public_id, userPublicId), eq(user.status, "active")))
+    .for("update")
     .limit(1);
 
   return row?.id ?? null;

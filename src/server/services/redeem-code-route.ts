@@ -72,6 +72,33 @@ export function createRedeemCodeRouteHandlers(
   });
 }
 
+export function createRedeemCodePreviewRouteHandlers(
+  authorizationService: RedeemCodeAuthorizationService,
+  resolveUserContext: AuthorizationUserResolver,
+) {
+  return createRouteHandlersWithErrorEnvelope({
+    POST: createRouteHandlerWithErrorEnvelope(
+      async (request: Request): Promise<Response> => {
+        const userContext = await resolveRequiredUserContext(
+          request,
+          resolveUserContext,
+        );
+
+        if (!isAuthorizationUserContext(userContext)) {
+          return createJsonResponse(userContext);
+        }
+
+        return createJsonResponse(
+          await authorizationService.previewRedeemCode(
+            await readRequestJson(request),
+            userContext,
+          ),
+        );
+      },
+    ),
+  });
+}
+
 export function createPersonalAuthRouteHandlers(
   authorizationService: RedeemCodeAuthorizationService,
   resolveUserContext: AuthorizationUserResolver,

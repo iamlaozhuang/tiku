@@ -27,7 +27,7 @@
 
 1. preview 只读，不消费卡密；URL、日志与响应均不回显明文或哈希。
 2. preview 由服务端解释三类 `redeem_code_type`；升级卡还要计算当前用户的有效标准版候选和已高级状态。
-3. confirm 携带不可伪造为其他业务语义的 `previewVersion` 以及显式目标；事务重新读取当前事实并拒绝漂移。
+3. confirm 携带绑定当前权益事实的 `previewVersion` 内容摘要以及显式目标；该摘要不是授权凭证，事务仍须重新读取当前事实并拒绝漂移。
 4. 真正消费仍以条件更新和唯一约束收敛；同一用户在响应丢失后重试应恢复已提交结果，其他用户只能得到不泄露归属的冲突。
 
 当前实现不满足上述第 1 至第 3 项：`StudentRedeemCodePage` 首次点击只设置 `reviewedRedeemCode`，没有 preview 请求；确认区只回显明文和泛化说明；API 只有 `/redeem`，合同没有类型、版本、期限、候选目标或预览版本。P0 F-0004 已收敛消费时的三类型写语义和同码条件更新，但不能替代消费前知情确认。因此 F-0132 仍为 confirmed，需要产品源码修复。
@@ -62,6 +62,15 @@
 ### Round 2
 
 transition-only 守卫通过后，允许独立只读 Subagent 复核完整 diff 与测试，重点寻找：只在事务外重验、previewVersion 未覆盖候选集合、目标 public id 越权、同用户 replay 被误判为他人、限流 key 包含明文、UI 编辑输入后仍可确认、错误状态泄漏内部事实。Subagent 不得写文件、执行 DB/runtime/browser、读取 secret 或修改审计仓库。
+
+## 实现收敛结果
+
+- preview 与 confirm 复用同一 service/有界按用户限流器；preview 为只读事务，响应不含卡密明文、hash、numeric id 或消费用户信息。
+- `previewVersion` 覆盖用户 public id、卡密 public id/状态/类型/范围/期限/更新时间、结果版本及排序后的完整候选事实；confirm 在单事务内按 user → code → candidate 顺序加锁并在 consume 前重建和比较快照。
+- 激活卡拒绝非空目标；升级卡强制显式选择候选，即使只有一个；stale、错误目标、无目标、已高级、过期或已用均在消费前退出。
+- 同用户已提交结果可由持久化授权事实恢复；跨用户只返回通用已使用冲突。F-0140 与真实数据库/多实例交错继续由后续 finding 与 RV-0021 承担。
+- learner UI 使用 preview loading/error/ready/redeeming 状态机、输入快照、AbortController 与请求序号；终态领域错误使预览失效，兑换中锁定输入及目标单选，个人学员与员工共享同一服务端流程。
+- 两项独立只读对抗审查最终均为 `APPROVE`，无剩余 P1 blocking；隔离 worktree 的 Turbopack 根目录限制不作为 build 通过证据，必须在 ff-only 合入后的真实 `master` 重新执行标准 build。
 
 ## 允许文件
 
