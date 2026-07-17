@@ -200,7 +200,7 @@ p1RemediationSerialProgram:
   baselineSha: 4cd2792f57d4eea3ac2770598b5490ebcfdead51
   p0ProductStaticBaselineSha: e136ca28acde82282a17c65ccfb828a01e872c0b
   auditRepositorySha: a84224fa12ec85b28e6acd945deba2afa28c6c02
-  currentTaskId: p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
+  currentTaskId: p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
   currentCandidateClusterId: P1-RC-02
   candidateClusterOrder:
     - P1-RC-01
@@ -221,6 +221,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-01-single-session-concurrency-2026-07-16
     - p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
     - p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
+    - p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
   completedTaskIds:
     - p1-remediation-program-bootstrap-2026-07-16
     - p1-remediation-rc-01-server-session-logout-2026-07-16
@@ -228,6 +229,7 @@ p1RemediationSerialProgram:
     - p1-remediation-rc-01-registration-unit-of-work-2026-07-16
     - p1-remediation-rc-01-single-session-concurrency-2026-07-16
     - p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16
+    - p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
   standingAuthorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
   serialPlanPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-serial-program.md
   findingLedgerPath: docs/05-execution-logs/audits-reviews/2026-07-15-p1-p2-remediation-finding-ledger-v1.yaml
@@ -255,12 +257,152 @@ p1RemediationSerialProgram:
     p1-remediation-rc-01-registration-unit-of-work-2026-07-16: closed
     p1-remediation-rc-01-single-session-concurrency-2026-07-16: closed
     p1-remediation-rc-02-redeem-entitlement-preview-2026-07-16: closed
-    p1-remediation-rc-02-user-password-reset-distribution-2026-07-16: ready_for_closeout
+    p1-remediation-rc-02-user-password-reset-distribution-2026-07-16: closed
+    p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16: in_progress
 activeTasks:
+  - id: p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
+    title: P1 RC-02 employee unbind membership lifecycle
+    phase: p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
+    status: in_progress
+    priority: p1
+    sequenceOrder: 7
+    taskKind: product_remediation
+    moduleRunVersion: 3
+    executionStage: scope_frozen
+    branch: codex/p1-rc02-employee-unbind-lifecycle
+    worktreePath: D:/tiku/.worktrees/p1-rc02-employee-unbind-lifecycle
+    dependsOn:
+      - p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
+    approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+    authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+    executionProfile: R3
+    candidateRootCauseCluster: P1-RC-02
+    findingIds:
+      - F-0114
+    authorityPath: user_type_current_membership_boundary_with_serialized_unbind_training_writes
+    businessInvariant: an_unbound_user_must_have_no_current_employee_membership_projection_or_writable_old_organization_training_and_must_remain_rebindable_without_losing_history
+    adversarialFailureMode: retained_employee_identity_rows_are_misread_as_current_membership_or_a_racing_training_write_reopens_in_progress_state_after_unbind
+    rollbackOrStopCondition: stop_if_schema_migration_membership_history_table_database_runtime_or_other_finding_repair_is_required
+    focusedGates:
+      - current_membership_reads_require_employee_user_type
+      - organization_portal_summary_matches_current_roster
+      - session_and_ops_detail_hide_stale_current_binding
+      - retained_employee_identity_supports_controlled_rebind
+      - unbind_releases_quota_revokes_session_and_marks_in_progress_training_read_only
+      - training_draft_and_submit_writes_serialize_with_employee_unbind
+      - submitted_history_and_personal_authorization_preserved
+      - operations_or_super_admin_write_boundary_preserved
+      - focused_repository_service_and_static_regression
+      - full_static_regression
+      - two_round_adversarial_review
+    buildRequired: true
+    fullRegressionPolicy: focused_employee_membership_session_portal_ops_training_tests_then_unit_lint_typecheck_format_build_and_program_guards
+    protectedDomains:
+      - employee_current_membership_and_historical_identity
+      - organization_scope_and_quota
+      - employee_session_revocation
+      - organization_training_answer_lifecycle
+      - personal_authorization_and_historical_records
+      - organization_portal_and_operations_read_models
+      - p0_authorization_invariants
+      - p2_implementation_boundary
+      - runtime_acceptance_boundary
+      - rv0018_to_rv0021_runtime_hold
+    reviewMode: evidence_two_rounds_with_independent_second_review
+    planPath: docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-unbind-lifecycle.md
+    evidencePath: docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-unbind-lifecycle.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-unbind-lifecycle.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-07-16-p1-remediation-rc-02-employee-unbind-lifecycle.md
+      - docs/05-execution-logs/evidence/2026-07-16-p1-remediation-rc-02-employee-unbind-lifecycle.md
+      - docs/05-execution-logs/audits-reviews/2026-07-16-p1-remediation-rc-02-employee-unbind-lifecycle.md
+      - src/server/auth/local-session-runtime.ts
+      - src/server/auth/local-session-runtime.test.ts
+      - src/server/repositories/admin-flow-runtime-repository.ts
+      - src/server/repositories/admin-flow-runtime-repository.test.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/repositories/organization-portal-overview-repository.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/services/employee-account-service.test.ts
+      - src/server/services/organization-portal-overview-route.test.ts
+      - tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts
+    blockedFiles:
+      - AGENTS.md
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - yarn.lock
+      - src/db/schema/**
+      - drizzle/**
+      - migrations/**
+      - seed/**
+      - e2e/**
+      - .env*
+      - D:/tiku-readonly-audit/**
+    capabilities:
+      docsStateEvidenceAudit: approved
+      governanceRecoveryScriptChange: blocked
+      productRuntimeSourceChange: approved_task_allowlist
+      productTestSourceChange: approved_task_allowlist
+      dependencyIntroduction: blocked_without_fresh_approval
+      schemaMigration: blocked_without_fresh_approval
+      databaseMutation: blocked_without_fresh_user_approval
+      providerCall: blocked_without_fresh_approval
+      runtimeAcceptance: blocked_out_of_program
+      browserRuntimeValidation: blocked_out_of_program
+      p2Implementation: blocked_out_of_program
+      stagingProdDeploy: blocked_requires_fresh_user_approval
+      forcePush: blocked
+      pr: blocked
+      costCalibrationGate: blocked
+    currentExecutionGate:
+      status: satisfied
+      reason: current_user_approved_p1_remediation_goal_2026_07_16
+      approvalRequestPath: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      resumeAction: align_current_employee_membership_reads_and_serialize_training_writes_with_unbind_for_f0114
+    acceptanceStandards:
+      - Current employee membership projections require user_type employee; retained historical employee identity cannot appear as a current organization binding in session, operations detail or organization portal counts.
+      - Unbind remains one transaction that releases org_auth quota, changes the user to personal, revokes active sessions and makes old-organization in_progress training read_only while preserving submitted history and personal authorization.
+      - Re-entry reuses the retained employee identity under lock, rebinds the target organization and reserves current quota without creating a duplicate employee row.
+      - Employee training draft and submit persistence serialize with the same employee identity lock and recheck current membership so a racing write cannot reopen old-organization in_progress state after unbind.
+      - F-0114 is closed only at static level after focused and full regression; RV-0018 through RV-0021 remain pending and no schema, migration, dependency, database, Provider, browser/runtime, P2, PR, force push or deployment action occurs.
+    validationCommands:
+      - corepack pnpm@10.15.1 exec vitest run tests/unit/phase-20-ra-01-12-employee-transfer-unbind.test.ts src/server/services/employee-account-service.test.ts src/server/auth/local-session-runtime.test.ts src/server/services/organization-portal-overview-route.test.ts src/server/repositories/organization-training-repository.test.ts src/server/repositories/admin-flow-runtime-repository.test.ts --maxWorkers=1
+      - npm.cmd run test:unit -- --maxWorkers=1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run format:check
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P1RemediationSerialProgram.ps1 -Phase manual
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-P0RemediationGlobalBaseline.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1 -TaskId p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1 -TaskId p1-remediation-rc-02-employee-unbind-lifecycle-2026-07-16 -SkipRemoteAheadCheck
+      - git diff --check
+    closeoutPolicy:
+      authorizationSource: docs/05-execution-logs/acceptance/2026-07-16-p1-remediation-program-authorization.md
+      localCommit:
+        approved: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
+      cleanup:
+        deleteShortBranch: true
+        approvalSource: current-user-approved-p1-remediation-goal-2026-07-16
   - id: p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
     title: P1 RC-02 user password reset one-time distribution
     phase: p1-remediation-rc-02-user-password-reset-distribution-2026-07-16
-    status: ready_for_closeout
+    status: closed
     priority: p1
     sequenceOrder: 6
     taskKind: product_remediation
